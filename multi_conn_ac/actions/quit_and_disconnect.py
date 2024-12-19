@@ -1,7 +1,7 @@
-from .actions import *
+from .baseclasses import *
 
 
-class ConnectOrOpen(Action):
+class QuitAndDisconnect(ConnectionManager):
 
     def execute_action(self, conn_headers: list[ConnHeader]) -> None:
         pass

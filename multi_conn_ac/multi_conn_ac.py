@@ -1,10 +1,9 @@
 from conn_header import *
-from port import Port
+from multi_conn_ac import Port
 from actions import *
 import asyncio
 import aiohttp
-from typing import Callable, Any
-from types import MethodType
+from typing import Callable, Any,  Self
 
 
 class MultiConn:
@@ -22,6 +21,7 @@ class MultiConn:
         # load actions
         self.connect: Connect = Connect(self)
         self.disconnect: Disconnect = Disconnect(self)
+        self.run: RunCommand = RunCommand(self)
 
 
     @property
@@ -42,7 +42,7 @@ class MultiConn:
                 if conn_header.status == status}
 
     def __getattribute__(self, attribute):
-        if attribute in ["core", "archicad"]:
+        if attribute in []:
             return MultiConnProxy(self, [attribute])
         else:
             return super().__getattribute__(attribute)
@@ -89,12 +89,12 @@ class MultiConnProxy:
         self.parent: MultiConn = parent
         self._attr_path: list[str] = attribute
 
-    def __getattr__(self, item):
+    def __getattr__(self, item) -> Self:
         """Capture further attribute accesses and extend the path."""
         self._attr_path.append(item)
         return self
 
-    def __call__(self, *args, **kwargs):
+    def __call__(self, *args, **kwargs) -> dict[Port, Any]:
         """When the chain ends with a callable, trigger `run_on_all_active`."""
         return self._run_on_all_active(self._attr_path, *args, **kwargs)
 

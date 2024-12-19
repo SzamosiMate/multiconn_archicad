@@ -1,7 +1,7 @@
-from .actions import *
+from .baseclasses import *
 
 
-class Refresh(Action):
+class ConnectOrOpen(ConnectionManager):
 
     def execute_action(self, conn_headers: list[ConnHeader]) -> None:
         pass

@@ -1,7 +1,7 @@
-from .actions import *
+from .baseclasses import *
 
 
-class Disconnect(Action):
+class Disconnect(ConnectionManager):
 
     def execute_action(self, conn_headers: list[ConnHeader]) -> None:
         for conn_header in conn_headers:

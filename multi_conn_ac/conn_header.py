@@ -2,7 +2,7 @@ from core_commands import  CoreCommands
 from basic_types import ArchiCadID, APIResponseError, ProductInfo, create_object_or_error_from_response
 import asyncio
 from enum import Enum
-from port import Port
+from multi_conn_ac import Port
 from archicad_connection import ArchiCADConnection
 from typing import Self
 

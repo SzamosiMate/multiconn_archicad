@@ -1,7 +1,7 @@
 import json
 from typing import Any
 import aiohttp
-from  port import Port
+from multi_conn_ac import Port
 import asyncio
 import functools
 
@@ -12,8 +12,7 @@ def sync_or_async(func):
             if asyncio.get_event_loop().is_running():
                 return func(*args, **kwargs)
         except RuntimeError:
-            pass
-        return asyncio.run(func(*args, **kwargs))
+            return asyncio.run(func(*args, **kwargs))
     return wrapper
 
 class CoreCommands:
