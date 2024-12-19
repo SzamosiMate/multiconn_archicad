@@ -1,4 +1,4 @@
-from .actions import Action
+from .baseclasses import ConnectionManager
 from .connect import Connect
 from .connect_or_open import ConnectOrOpen
 from .disconnect import Disconnect
@@ -7,7 +7,7 @@ from .refresh import Refresh
 from .run_command import RunCommand
 
 __all__: tuple[str, ...]  = (
-    'Action',
+    'ConnectionManager',
     'Connect',
     'ConnectOrOpen',
     'Disconnect',

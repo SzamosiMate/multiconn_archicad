@@ -1,6 +1,12 @@
 from dataclasses import dataclass
 from typing import Self, Protocol, TypeVar, Type
 
+class Port(int):
+    def __new__(cls, value):
+        if not (19723 <= value <= 19744):
+            raise ValueError(f"Port value must be between 19723 and 19744, got {value}.")
+        return int.__new__(cls, value)
+
 class FromAPIResponse(Protocol):
     @classmethod
     def from_api_response(cls, response: dict) -> Self:
@@ -58,3 +64,6 @@ async def create_object_or_error_from_response(result: dict, class_to_create: Ty
         return class_to_create.from_api_response(result)
     else:
         return APIResponseError.from_api_response(result)
+
+
+

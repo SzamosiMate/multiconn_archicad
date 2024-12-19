@@ -1,6 +1,7 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
-from port import Port
+from multi_conn_ac import Port
+
 if TYPE_CHECKING:
     from conn_header import ProductInfo
 
