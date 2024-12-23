@@ -1,10 +1,10 @@
-from core_commands import  CoreCommands
-from basic_types import ArchiCadID, APIResponseError, ProductInfo, create_object_or_error_from_response
 import asyncio
 from enum import Enum
-from multi_conn_ac import Port
-from archicad_connection import ArchiCADConnection
 from typing import Self
+
+from multi_conn_ac.core_commands import  CoreCommands
+from multi_conn_ac.basic_types import ArchiCadID, APIResponseError, ProductInfo, Port, create_object_or_error_from_response
+from multi_conn_ac.archicad_connection import ArchiCADConnection
 
 class Status(Enum):
     PENDING: str = 'pending'

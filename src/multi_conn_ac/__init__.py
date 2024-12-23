@@ -1,6 +1,8 @@
-from .multi_conn_ac import MultiConn
+from .multi_conn import MultiConn
 from .conn_header import ConnHeader
 from .basic_types import ArchiCadID, APIResponseError, FromAPIResponse, ProductInfo, Port
+from .archicad_connection import ArchiCADConnection
+from .core_commands import CoreCommands
 
 __all__: tuple[str, ...]  = (
     'MultiConn',
@@ -9,5 +11,7 @@ __all__: tuple[str, ...]  = (
     'APIResponseError',
     'FromAPIResponse',
     'ProductInfo',
-    'Port'
+    'Port',
+    'ArchiCADConnection',
+    'CoreCommands'
 )

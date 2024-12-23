@@ -1,9 +1,10 @@
 import json
 from typing import Any
 import aiohttp
-from multi_conn_ac import Port
 import asyncio
 import functools
+
+from multi_conn_ac.basic_types import Port
 
 def sync_or_async(func):
     @functools.wraps(func)

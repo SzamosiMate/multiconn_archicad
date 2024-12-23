@@ -1,10 +1,11 @@
+from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Callable
-from multi_conn_ac.conn_header import *
 
 if TYPE_CHECKING:
-    from multi_conn_ac.multi_conn_ac import MultiConn
-    from multi_conn_ac import Port
+    from multi_conn_ac.multi_conn import MultiConn
+    from multi_conn_ac.conn_header import ConnHeader
+    from multi_conn_ac.basic_types import Port
 
 
 class ConnectionManager(ABC):

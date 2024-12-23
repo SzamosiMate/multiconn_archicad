@@ -1,14 +1,13 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
-from multi_conn_ac import Port
-
-if TYPE_CHECKING:
-    from conn_header import ProductInfo
-
-
 from archicad.versioning import _Versioning
 from archicad.connection import create_request
 from archicad.releases import Commands, Types, Utilities
+
+from multi_conn_ac.basic_types import Port
+
+if TYPE_CHECKING:
+    from conn_header import ProductInfo
 
 
 class ArchiCADConnection:
