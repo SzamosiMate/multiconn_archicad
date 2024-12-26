@@ -9,4 +9,7 @@ if TYPE_CHECKING:
 class QuitAndDisconnect(ConnectionManager):
 
     def execute_action(self, conn_headers: list[ConnHeader]) -> None:
-        pass
+        for conn_header in conn_headers:
+            conn_header.core.post_tapir_command("QuitArchicad")
+            self.multi_conn.open_port_headers.pop(conn_header.port)
+            conn_header.unassign()

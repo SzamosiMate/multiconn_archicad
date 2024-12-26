@@ -18,9 +18,15 @@ def connect_and_run_core_command():
         print(conn_header.core.post_tapir_command("GetAddOnVersion"))
 
 
+def quit_all():
+    conn = MultiConn()
+    conn.quit.all()
+
+
 if __name__ == "__main__":
     connect_and_run_ac_command()
     connect_and_run_core_command()
+    quit_all()
 
 
 

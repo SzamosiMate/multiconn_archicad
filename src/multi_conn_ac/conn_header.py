@@ -44,6 +44,10 @@ class ConnHeader:
         self.archicad.disconnect()
         self.status = Status.PENDING
 
+    def unassign(self) -> None:
+        self.archicad.disconnect()
+        self.status = Status.UNASSIGNED
+
     async def get_product_info(self) -> ProductInfo | APIResponseError:
         result = await self.core.post_command(command="API.GetProductInfo")
         return await create_object_or_error_from_response(result, ProductInfo)

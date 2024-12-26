@@ -3,27 +3,23 @@ import aiohttp
 
 from multi_conn_ac.conn_header import ConnHeader, Status
 from multi_conn_ac.basic_types import Port, APIResponseError
-from multi_conn_ac.archicad_connection import ArchiCADConnection
-from multi_conn_ac.core_commands import CoreCommands
-from multi_conn_ac.actions import Connect, Disconnect
+from multi_conn_ac.actions import Connect, Disconnect, Refresh, QuitAndDisconnect
 
 
 class MultiConn:
     _base_url: str = "http://127.0.0.1"
-    _port_range: range = range(19723, 19744)
+    _port_range: list[Port] = [Port(port) for port in range(19723, 19744)]
 
     def __init__(self):
         self.open_port_headers: dict[Port, ConnHeader] = {}
-        self.refresh()
-
-        # load command namespaces for IDE typehints. Replaced at runtime.
-        self.core = CoreCommands()
-        self.archicad = ArchiCADConnection()
 
         # load actions
         self.connect: Connect = Connect(self)
         self.disconnect: Disconnect = Disconnect(self)
+        self.quit: QuitAndDisconnect = QuitAndDisconnect(self)
+        self.refresh: Refresh = Refresh(self)
 
+        self.refresh.all_ports()
 
     @property
     def pending(self) -> dict[Port, ConnHeader]:
@@ -37,17 +33,26 @@ class MultiConn:
     def failed(self) -> dict[Port, ConnHeader]:
         return self.get_all_port_headers_with_status(Status.FAILED)
 
+    @property
+    def open_ports(self) -> list[Port]:
+        return list(self.open_port_headers.keys())
+
+    @property
+    def closed_ports(self) -> list[Port]:
+        return [port for port in self._port_range if port not in self.open_port_headers.keys()]
+
+    @property
+    def all_ports(self) -> list[Port]:
+        return self._port_range
+
     def get_all_port_headers_with_status(self, status: Status) -> dict[Port, ConnHeader]:
         return {conn_header.port: conn_header
                 for conn_header in self.open_port_headers.values()
                 if conn_header.status == status}
 
-    def refresh(self) -> None:
-        asyncio.run(self.scan_ports())
-
-    async def scan_ports(self) -> None:
+    async def scan_ports(self, ports: list[Port]) -> None:
         async with aiohttp.ClientSession() as session:
-            tasks = [self.check_port(session, Port(port)) for port in self._port_range]
+            tasks = [self.check_port(session, port) for port in ports]
             await asyncio.gather(*tasks)
 
     async def check_port(self, session: aiohttp.ClientSession, port: Port) -> None:
