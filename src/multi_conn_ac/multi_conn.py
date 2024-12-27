@@ -1,6 +1,8 @@
 import asyncio
 import aiohttp
 
+from multi_conn_ac.core_commands import CoreCommands
+from multi_conn_ac.archicad_connection import ArchiCADConnection
 from multi_conn_ac.conn_header import ConnHeader, Status
 from multi_conn_ac.basic_types import Port, APIResponseError
 from multi_conn_ac.actions import Connect, Disconnect, Refresh, QuitAndDisconnect
@@ -12,6 +14,11 @@ class MultiConn:
 
     def __init__(self):
         self.open_port_headers: dict[Port, ConnHeader] = {}
+        self._primary: ConnHeader | None = None
+
+        # command namespaces of new_value
+        self.core: CoreCommands | type(CoreCommands) = CoreCommands
+        self.archicad: ArchiCADConnection | type(ArchiCADConnection) = ArchiCADConnection
 
         # load actions
         self.connect: Connect = Connect(self)
@@ -20,6 +27,8 @@ class MultiConn:
         self.refresh: Refresh = Refresh(self)
 
         self.refresh.all_ports()
+        self.set_primary()
+
 
     @property
     def pending(self) -> dict[Port, ConnHeader]:
@@ -79,4 +88,50 @@ class MultiConn:
     async def close_if_open(self, port: Port) -> None:
         if port in self.open_port_headers.keys():
             self.open_port_headers.pop(port)
+            if self._primary.port == port:
+                self.set_primary()
 
+    @property
+    def primary(self) -> ConnHeader | None:
+        return self._primary
+
+    @primary.setter
+    def primary(self, new_value: Port | ConnHeader) -> None:
+        self.set_primary(new_value)
+
+    def set_primary(self, new_value: None | Port | ConnHeader = None) -> None:
+        if isinstance(new_value, Port):
+            self._set_primary_from_port(new_value)
+        elif isinstance(new_value, ConnHeader):
+            self._set_primary_from_header(new_value)
+        else:
+            self._set_primary_from_none()
+
+    def _set_primary_from_port(self, port: Port) -> None:
+        if port in self.open_port_headers.keys():
+            self._set_primary_namespaces(port)
+        else:
+            raise KeyError(f"Failed to set primary. Port {port} is closed.")
+
+    def _set_primary_from_header(self, header: ConnHeader) -> None:
+        if header in self.open_port_headers.values():
+            self._set_primary_namespaces(header.port)
+        else:
+            raise KeyError(f"Failed to set primary. There is no open port with header: {header}")
+
+    def _set_primary_from_none(self) -> None:
+        for port in self._port_range:
+            if port in self.open_port_headers.keys():
+                self._set_primary_namespaces(port)
+                return
+        self._clear_primary_namespaces()
+
+    def _set_primary_namespaces(self, port: Port) -> None:
+        self._primary = self.open_port_headers[port]
+        self.core = self._primary.core
+        self.archicad = self._primary.archicad
+
+    def _clear_primary_namespaces(self) -> None:
+        self._primary = None
+        self.core = CoreCommands
+        self.archicad = ArchiCADConnection

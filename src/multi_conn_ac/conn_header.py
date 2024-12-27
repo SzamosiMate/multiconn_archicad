@@ -17,8 +17,8 @@ class ConnHeader:
     def __init__(self, port: Port, initialize: bool = True):
         self.port: Port = port
         self.status: Status = Status.PENDING
-        self.core = CoreCommands(self.port)
-        self.archicad = ArchiCADConnection(self.port)
+        self.core: CoreCommands = CoreCommands(self.port)
+        self.archicad: ArchiCADConnection = ArchiCADConnection(self.port)
 
         if initialize:
             self.ProductInfo: ProductInfo | APIResponseError = asyncio.run(self.get_product_info())

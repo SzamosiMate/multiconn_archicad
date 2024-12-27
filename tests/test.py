@@ -22,11 +22,22 @@ def quit_all():
     conn = MultiConn()
     conn.quit.all()
 
+def cycle_primary():
+    conn = MultiConn()
+    for port in conn.open_port_headers.keys():
+        conn.primary = port
+        print(conn.core.post_tapir_command("GetProjectInfo"))
+
+    for header in conn.open_port_headers.values():
+        conn.primary = header
+        print(conn.core.post_tapir_command("GetProjectInfo"))
+
 
 if __name__ == "__main__":
     connect_and_run_ac_command()
     connect_and_run_core_command()
-    quit_all()
+ #  quit_all()
+    cycle_primary()
 
 
 
