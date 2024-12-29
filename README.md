@@ -1,6 +1,6 @@
 # MultiConnAC
 
-[![Latest Release](https://img.shields.io/github/v/release/SzamosiMate/MultiConnAC?cacheSeconds=60)](https://github.com/SzamosiMate/MultiConnAC/releases/latest) 
+[![Latest Release](https://img.shields.io/github/v/release/SzamosiMate/MultiConnAC)](https://github.com/SzamosiMate/MultiConnAC/releases/latest) 
 ![License](https://img.shields.io/github/license/SzamosiMate/MultiConnAC) 
 ![Issues](https://img.shields.io/github/issues/SzamosiMate/MultiConnAC) 
 ![Forks](https://img.shields.io/github/forks/SzamosiMate/MultiConnAC) 
@@ -32,7 +32,7 @@ The package depends on the [Tapir Archicad Add-On](https://github.com/ENZYME-APD
 **Disclaimer:** The connection object is functional but in the early stages of development. It is currently untested, and its interfaces may change in future updates.
 
 ### Actions - managing the connection
-Actions allow you to manage the state of the connection object. You can connect to or disconnect from Archicad instances, quit instances, or refresh ports. All actions can have multiple types of inputs. For each type of input you have to call the corresponding method of the action. To connect to all avalible ArchiCAD instances, you have to call the .all() methed on .connect ( e.g. 'conn.connect.all()'). The aim of this method is to provide better autocompletion.
+Actions allow you to manage the state of the connection object. You can connect to or disconnect from Archicad instances, quit instances, or refresh ports. All actions can have multiple types of inputs. For each type of input you have to call the corresponding method of the action. To connect to all avalible ArchiCAD instances, you have to call the .all() methed on .connect ( e.g. `conn.connect.all()`). The aim of this method is to provide better autocompletion.
 
 #### Example: Connection Management
 ```python 
@@ -56,11 +56,11 @@ conn.quit.from_headers(conn.open_port_headers[Port(19735)])
 
 #### Single Archicad Instance
 
-To run commands on one chosen ArchiCAD instance the 'MultiConn' object has a connection called 'primary'. Calling a command directly from the MultiConn object will send it to the 'primary' instance. The 'primary' connection can be changed by assigning any valid 'Port', or 'ConnHeader' object to 'MultiConn.primary'.
+To run commands on one chosen ArchiCAD instance the `MultiConn` object has a connection called `primary`. Calling a command directly from the MultiConn object will send it to the `primary` instance. The `primary` connection can be changed by assigning any valid `Port`, or `ConnHeader` object to `MultiConn.primary`.
 
 #### Example: Running Commands on a Single Archicad Instance
 ```python
-from multiconnac import MultiConn, Port
+from multi_conn_ac import MultiConn, Port
 
 # After instantiation the primary connection will be the instance with the lowest port number (probably 19723)
 conn = MultiConn()
@@ -74,7 +74,7 @@ print(conn.core.post_tapir_command("GetProjectInfo"))
 
 #### Multiple Archicad Instances
 
-The MultiConn object stores references to 'ConnHeaders' for all open ports (ports, with a running ArchiCAD instance). The references are stored in a dictionary at '.open_port_headers'. This dictionary maps each port to its corresponding connection. Each ConnHeader object has it's own command objects for each used command namespace. The MultiConn objects has properties to access 3 subsets of open ports based on the status of the ConnHeaders: 
+The MultiConn object stores references to `ConnHeaders` for all open ports (ports, with a running ArchiCAD instance). The references are stored in a dictionary at `.open_port_headers`. This dictionary maps each port to its corresponding connection. Each `ConnHeader` object has it's own command objects for each used command namespace. The MultiConn objects has properties to access 3 subsets of open ports based on the status of the `ConnHeaders`: 
 
 - **`active`**: Successfully connected instances.
 - **`failed`**: Instances where the connection attempt failed.
@@ -83,7 +83,7 @@ The MultiConn object stores references to 'ConnHeaders' for all open ports (port
 #### Example: Running Commands on Multiple Archicad Instances
 
 ```python
-from multiconnac import MultiConn
+from multi_conn_ac import MultiConn
 
 conn = MultiConn()
 conn.connect.all()
