@@ -1,5 +1,6 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
+from multi_conn_ac.core_commands import sync_or_async
 import asyncio
 
 if TYPE_CHECKING:
@@ -12,20 +13,25 @@ class Refresh:
     def __init__(self, multi_conn):
         self.multi_conn: MultiConn = multi_conn
 
-    def from_ports(self, *args: Port) -> None:
-        self.execute_action([*args])
+    @sync_or_async
+    async def from_ports(self, *args: Port) -> None:
+        await self.execute_action([*args])
 
-    def from_headers(self, *args: ConnHeader) -> None:
-        self.execute_action([port for port, header in self.multi_conn.open_port_headers.items() if header in args])
+    @sync_or_async
+    async def from_headers(self, *args: ConnHeader) -> None:
+        await self.execute_action([port for port, header in self.multi_conn.open_port_headers.items() if header in args])
 
-    def all_ports(self) -> None:
-        self.execute_action(self.multi_conn.all_ports)
+    @sync_or_async
+    async def all_ports(self) -> None:
+        await self.execute_action(self.multi_conn.all_ports)
 
-    def open_ports(self) -> None:
-        self.execute_action(self.multi_conn.open_ports)
+    @sync_or_async
+    async def open_ports(self) -> None:
+        await self.execute_action(self.multi_conn.open_ports)
 
-    def closed_ports(self) -> None:
-        self.execute_action(self.multi_conn.closed_ports)
+    @sync_or_async
+    async def closed_ports(self) -> None:
+        await self.execute_action(self.multi_conn.closed_ports)
 
-    def execute_action(self, ports: list[Port]) -> None:
-        asyncio.run(self.multi_conn.scan_ports(ports))
+    async def execute_action(self, ports: list[Port]) -> None:
+        await self.multi_conn.scan_ports(ports)

@@ -13,7 +13,8 @@ def sync_or_async(func):
             if asyncio.get_event_loop().is_running():
                 return func(*args, **kwargs)
         except RuntimeError:
-            return asyncio.run(func(*args, **kwargs))
+            pass
+        return asyncio.run(func(*args, **kwargs))
     return wrapper
 
 class CoreCommands:
