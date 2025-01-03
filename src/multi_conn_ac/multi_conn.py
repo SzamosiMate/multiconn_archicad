@@ -67,7 +67,7 @@ class MultiConn:
     async def check_port(self, session: aiohttp.ClientSession, port: Port) -> None:
         url = f"{self._base_url}:{port}"
         try:
-            async with session.get(url, timeout=aiohttp.ClientTimeout(total=1)) as response:
+            async with session.get(url, timeout=aiohttp.ClientTimeout(total=0.2)) as response:
                 if response.status == 200:
                     await self.create_or_refresh_connection(port)
                 else:
@@ -127,7 +127,8 @@ class MultiConn:
         self._clear_primary_namespaces()
 
     def _set_primary_namespaces(self, port: Port) -> None:
-        self._primary = self.open_port_headers[port]
+        self._primary = ConnHeader(port)
+        self._primary.connect()
         self.core = self._primary.core
         self.archicad = self._primary.archicad
 
