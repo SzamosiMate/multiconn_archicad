@@ -29,7 +29,7 @@ The package depends on the [Tapir Archicad Add-On](https://github.com/ENZYME-APD
 
 ## Usage
 
-**Disclaimer:** The connection object is functional but in the early stages of development. It is currently untested, and its interfaces may change in future updates.
+**Disclaimer:** The connection object is functional but in the early stages of development. It is not thoroughly tested, and its interfaces may change in future updates.
 
 ### Actions - managing the connection
 Actions allow you to manage the state of the connection object. You can connect to or disconnect from Archicad instances, quit instances, or refresh ports. All actions can have multiple types of inputs. For each type of input you have to call the corresponding method of the action. To connect to all avalible ArchiCAD instances, you have to call the .all() methed on .connect ( e.g. `conn.connect.all()`). The aim of this method is to provide better autocompletion.
@@ -98,6 +98,26 @@ elements = {
     port: conn_header.archicad.commands.GetAllElements()
     for port, conn_header in conn.active.items()
 }
+```
+
+### Namespaces
+
+The aim of the module is to incorporate all solutions that let users automate ArchiCAD from python. The different soultions are separated into namespaces, accessed from properties of the connection object. One of the planned features is letting users supply a list of namespaces they want to use when createing the connections. At the moment there are only two namespaces:
+
+- **`archicad`**: The official ArchiCAD python wrapper
+- **`core`**: A simple JSON based module that lets the users post official and tapir commands based on Tapir's ["aclib"](https://github.com/ENZYME-APD/tapir-archicad-automation/tree/main/archicad-addon/Examples/aclib)
+
+#### Example: Using two namespaces together
+```python
+def run(conn: MultiConn | ConnHeader) -> dict[str, Any]:
+    elements = conn.archicad.commands.GetAllElements()
+    command_parameters = {
+        "elements": [element.to_dict() for element in elements],
+        "highlightedColors": [[50, 255, 100, 100] for _ in range(len(elements))],
+        "wireframe3D": True,
+        "nonHighlightedColor": [0, 0, 255, 128],
+    }
+    return conn.core.post_tapir_command('HighlightElements', command_parameters)
 ```
 
 ## Contributing
