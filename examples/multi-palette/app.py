@@ -1,34 +1,52 @@
 from nicegui import native, ui, app
 from pathlib import Path
 
-from logic.local_file_picker import LocalFilePicker
 from logic.archi_cad import AppState
+from functions.highlight_elements import HighlightElements
 
 app.add_static_files("/assets", "assets")
 app_state = AppState()
 
-function = HighlightElements
+function = HighlightElements()
 
+async def choose_file():
+    files = await app.native.main_window.create_file_dialog(allow_multiple=True)
+    for file in files:
+        ui.notify(file)
 
-async def pick_file() -> None:
-    result = await LocalFilePicker("~", multiple=True)
-    ui.notify(f"You chose {result}")
-
-async def refresh_options(single_select: ui.radio) -> None:
+async def refresh_options() -> None:
     await app_state.refresh()
-    single_select.options = app_state.instance_ids
-    single_select.update()
+    single_select.refresh()
     multi_select.refresh()
 
+
 @ui.refreshable
-async def multi_select() -> None:
+def multi_select() -> None:
     with ui.scroll_area().classes("h-200"):
-        print(app_state.instance_ids.items())
-        for port, project_name in app_state.instance_ids.items():
-            ui.checkbox(project_name, on_change=lambda e, i=port: app_state.connect_or_disconnect(i, e.value)).props("dense")
+        if app_state.first_port:
+            for port, project_name in app_state.instance_ids.items():
+                ui.checkbox(project_name, on_change=lambda e, i=port: app_state.connect_or_disconnect(i, e.value)).props("dense")
+        else:
+            no_archicad()
+
+@ui.refreshable
+def single_select() -> None:
+    with ui.scroll_area().classes("h-200"):
+        if app_state.first_port:
+            ui.radio(
+                app_state.instance_ids, value=app_state.first_port
+            ).bind_value_to(app_state.conn, target_name="primary")
+        else:
+            no_archicad()
+
+def no_archicad() -> None:
+    ui.label(
+        "Found no running ArchiCAD to connect to. Please start Archicad and hit Refresh"
+    )
+
 
 @ui.page("/")
-async def index():
+def index():
     ui.colors(
         primary="#28323C", secondary="blue-grey-1", positive="#53B689", accent="#111B1E"
     )
@@ -46,16 +64,15 @@ async def index():
         ):
             single = ui.tab("Single")
             multi = ui.tab("Multiple")
-        with ui.tab_panels(tabs, value=single).classes("p-0 gap-0"):
+        with ui.tab_panels(tabs, value=single).bind_value(app_state, target_name='run_mode').classes("p-0 gap-0"):
             with ui.tab_panel(single).classes("p-0"):
-                with ui.scroll_area().classes("h-200"):
-                    single_select = ui.radio(app_state.instance_ids, value=app_state.first_port).bind_value_to(app_state.conn, target_name='primary')
+                single_select()
             with ui.tab_panel(multi).classes("p-0"):
-                await multi_select()
-        ui.button("Refresh", icon="refresh", on_click=lambda: refresh_options(single_select))
-    ui.button("Chose File", on_click=pick_file, icon="folder").classes("w-full")
+                multi_select()
+        ui.button("Refresh", icon="refresh", on_click=lambda: refresh_options())
+    ui.button("Chose File", on_click=choose_file, icon="folder").classes("w-full")
     ui.button("Set Parameters", on_click=lambda: ui.notify("This does nothing!")).classes("w-full")
-    ui.button("Run", on_click=lambda: ui.notify("This does nothing!")).classes("w-full")
+    ui.button("Run", on_click=app_state.run).classes("w-full")
 
 
 ui.run(reload=False, native=True, window_size=(300, 600), port=native.find_open_port())

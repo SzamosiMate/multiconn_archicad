@@ -41,7 +41,7 @@ async def run_function_on_all_active_async(
     conn: MultiConn, fn: Callable[[ArchiCADConnection, Any], Any], *args, **kwargs
 ) -> dict:
     tasks = {
-        port: call_function(fn, conn_header.archicad, *args, **kwargs)
+        port: call_function(fn, conn_header.standard, *args, **kwargs)
         for port, conn_header in conn.active.items()
     }
     results = await asyncio.gather(*tasks.values())

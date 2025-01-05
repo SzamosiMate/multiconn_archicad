@@ -6,14 +6,14 @@ def connect_and_run_ac_command():
 
     elements = {}
     for port, conn_header in conn.active.items():
-        elements.update({port: conn_header.archicad.commands.GetAllElements()})
+        elements.update({port: conn_header.standard.commands.GetAllElements()})
         print(elements)
 
 def connect_and_run_ac_command_oneliner():
     conn = MultiConn()
     conn.connect.all()
 
-    elements = {port: conn_header.archicad.commands.GetAllElements() for port, conn_header in conn.active.items()}
+    elements = {port: conn_header.standard.commands.GetAllElements() for port, conn_header in conn.active.items()}
 
     print(elements)
 
@@ -26,7 +26,7 @@ def connect_and_run_core_command():
 
 def quit_port():
     conn = MultiConn()
-    conn.quit.from_headers(conn.open_port_headers[Port(19735)])
+    conn.quit.from_headers(conn.open_port_headers[Port(19723)])
 
 def quit_and_refresh():
     conn = MultiConn()
@@ -39,17 +39,17 @@ def cycle_primary():
     for port in conn.open_port_headers.keys():
         conn.primary = port
         print(conn.core.post_tapir_command("GetProjectInfo"))
-        print(conn.archicad.commands.IsAlive())
+        print(conn.standard.commands.IsAlive())
 
     for header in conn.open_port_headers.values():
         conn.primary = header
         print(conn.core.post_tapir_command("GetProjectInfo"))
-        print(conn.archicad.commands.IsAlive())
+        print(conn.standard.commands.IsAlive())
 
 
 if __name__ == "__main__":
     connect_and_run_ac_command()
     connect_and_run_core_command()
-    quit_port()
+ #   quit_port()
     cycle_primary()
-    quit_and_refresh()
+#    quit_and_refresh()

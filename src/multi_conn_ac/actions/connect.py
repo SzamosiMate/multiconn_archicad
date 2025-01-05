@@ -10,7 +10,7 @@ class Connect(ConnectionManager):
 
     def execute_action(self, conn_headers: list[ConnHeader]) -> None:
         for conn_header in conn_headers:
-            print(f'connecting {conn_header.ProductInfo}')
+            print(f'connecting {conn_header.product_info}')
             conn_header.connect()
 
     def failed(self) -> None:
