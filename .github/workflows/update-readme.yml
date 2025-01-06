@@ -1,6 +1,8 @@
 name: Update README with Release Version
 
 on:
+
+  workflow_dispatch:
   release:
     types: [published]
 
