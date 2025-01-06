@@ -4,13 +4,11 @@ from archicad.versioning import _Versioning
 from archicad.connection import create_request
 from archicad.releases import Commands, Types, Utilities
 
-from multi_conn_ac.basic_types import Port
-
 if TYPE_CHECKING:
-    from conn_header import ProductInfo
+    from multi_conn_ac.basic_types import ProductInfo, Port
 
 
-class ArchiCADConnection:
+class StandardConnection:
     types = Types
     commands = Commands
     utilities = Utilities

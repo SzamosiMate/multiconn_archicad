@@ -1,28 +1,17 @@
 import json
 from typing import Any
 import aiohttp
-import asyncio
-import functools
 
 from multi_conn_ac.basic_types import Port
+from multi_conn_ac.async_utils import sync_or_async
 
-def sync_or_async(func):
-    @functools.wraps(func)
-    def wrapper(*args, **kwargs):
-        try:
-            if asyncio.get_event_loop().is_running():
-                return func(*args, **kwargs)
-        except RuntimeError:
-            pass
-        return asyncio.run(func(*args, **kwargs))
-    return wrapper
 
 class CoreCommands:
 
     _BASE_URL: str = "http://127.0.0.1"
 
-    def __init__(self, port: Port = 19723):
-        self.port = port
+    def __init__(self, port: Port):
+        self.port: Port = port
 
     @sync_or_async
     async def post_command(self, command: str, parameters: dict | None = None) -> dict[str, Any]:

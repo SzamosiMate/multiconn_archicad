@@ -8,12 +8,12 @@
 
 ## About
 
-**MultiConnAC** is a Python-based connection object for Archicad’s JSON API and its Python wrapper. It is designed to manage multiple open instances of Archicad simultaneously, making it easier to execute commands across multiple instances.
+**MultiConnAC** is a Python-based connection object for ArchiCAD’s JSON API and its Python wrapper. It is designed to manage multiple open instances of Archicad simultaneously, making it easier to execute commands across multiple instances.
 
 ## Features
 
 - **Multi-instance Support**: Connect to one, multiple, or all open instances of Archicad.
-- **Seamless Integration**: Utilizes Archicad's official Python package.
+- **Seamless Integration**: Utilizes ArchiCAD's official Python package.
 - **Tapir Add-On Support**: Run commands from the Tapir Archicad Add-On.
 - **Efficient I/O Operations**: Handles connection management using concurrent or asynchronous code.
 
@@ -32,7 +32,7 @@ The package depends on the [Tapir Archicad Add-On](https://github.com/ENZYME-APD
 **Disclaimer:** The connection object is functional but in the early stages of development. It is not thoroughly tested, and its interfaces may change in future updates.
 
 ### Actions - managing the connection
-Actions allow you to manage the state of the connection object. You can connect to or disconnect from Archicad instances, quit instances, or refresh ports. All actions can have multiple types of inputs. For each type of input you have to call the corresponding method of the action. To connect to all avalible ArchiCAD instances, you have to call the .all() methed on .connect ( e.g. `conn.connect.all()`). The aim of this method is to provide better autocompletion.
+Actions allow you to manage the state of the connection object. You can connect to or disconnect from Archicad instances, quit instances, or refresh ports. All actions can have multiple types of inputs. For each type of input you have to call the corresponding method of the action. To connect to all available ArchiCAD instances, you have to call the .all() method on .connect ( e.g. `conn.connect.all()`). The aim of this method is to provide better autocompletion.
 
 #### Example: Connection Management
 ```python 
@@ -74,7 +74,7 @@ print(conn.core.post_tapir_command("GetProjectInfo"))
 
 #### Multiple Archicad Instances
 
-The MultiConn object stores references to `ConnHeaders` for all open ports (ports, with a running ArchiCAD instance). The references are stored in a dictionary at `.open_port_headers`. This dictionary maps each port to its corresponding connection. Each `ConnHeader` object has it's own command objects for each used command namespace. The MultiConn objects has properties to access 3 subsets of open ports based on the status of the `ConnHeaders`: 
+The MultiConn object stores references to `ConnHeaders` for all open ports (ports, with a running ArchiCAD instance). The references are stored in a dictionary at `.open_port_headers`. This dictionary maps each port to its corresponding connection. Each `ConnHeader` object has its own command objects for each used command namespace. The MultiConn objects has properties to access 3 subsets of open ports based on the status of the `ConnHeaders`: 
 
 - **`active`**: Successfully connected instances.
 - **`failed`**: Instances where the connection attempt failed.
@@ -91,26 +91,26 @@ conn.connect.all()
 # Explicit loop to gather elements from all active connections
 elements = {}
 for port, conn_header in conn.active.items():
-    elements[port] = conn_header.archicad.commands.GetAllElements()
+    elements[port] = conn_header.standard.commands.GetAllElements()
 
 # Using dictionary comprehension
 elements = {
-    port: conn_header.archicad.commands.GetAllElements()
+    port: conn_header.standard.commands.GetAllElements()
     for port, conn_header in conn.active.items()
 }
 ```
 
 ### Namespaces
 
-The aim of the module is to incorporate all solutions that let users automate ArchiCAD from python. The different soultions are separated into namespaces, accessed from properties of the connection object. One of the planned features is letting users supply a list of namespaces they want to use when createing the connections. At the moment there are only two namespaces:
+The aim of the module is to incorporate all solutions that let users automate ArchiCAD from python. The different solutions are separated into namespaces, accessed from properties of the connection object. One of the planned features is letting users supply a list of namespaces they want to use when creating the connections. At the moment there are only two namespaces:
 
-- **`archicad`**: The official ArchiCAD python wrapper
+- **`standard`**: The official ArchiCAD python wrapper
 - **`core`**: A simple JSON based module that lets the users post official and tapir commands based on Tapir's ["aclib"](https://github.com/ENZYME-APD/tapir-archicad-automation/tree/main/archicad-addon/Examples/aclib)
 
 #### Example: Using two namespaces together
 ```python
 def run(conn: MultiConn | ConnHeader) -> dict[str, Any]:
-    elements = conn.archicad.commands.GetAllElements()
+    elements = conn.standard.commands.GetAllElements()
     command_parameters = {
         "elements": [element.to_dict() for element in elements],
         "highlightedColors": [[50, 255, 100, 100] for _ in range(len(elements))],
@@ -127,3 +127,4 @@ Contributions are welcome! Feel free to submit issues, feature requests, or pull
 ## License
 
 This project is licensed under the MIT License. See the LICENSE file for details.
+

@@ -10,7 +10,7 @@ if TYPE_CHECKING:
 
 
 class Refresh:
-    def __init__(self, multi_conn):
+    def __init__(self, multi_conn: MultiConn) -> None:
         self.multi_conn: MultiConn = multi_conn
 
     @sync_or_async
@@ -35,3 +35,4 @@ class Refresh:
 
     async def execute_action(self, ports: list[Port]) -> None:
         await self.multi_conn.scan_ports(ports)
+        self.multi_conn.open_port_headers = dict(sorted(self.multi_conn.open_port_headers.items()))
