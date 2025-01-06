@@ -1,0 +1,29 @@
+name: Update README with Release Version
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  update-readme:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Extract Release Version
+        id: extract_version
+        run: echo "::set-output name=version::${GITHUB_REF#refs/tags/}"
+
+      - name: Update README.md with New Version
+        run: |
+          sed -i "s/multi_conn_ac-[0-9.]*-py3-none-any\.whl/multi_conn_ac-${{ steps.extract_version.outputs.version }}-py3-none-any\.whl/" README.md
+
+      - name: Commit and Push Changes
+        run: |
+          git config --local user.name "github-actions[bot]"
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git add README.md
+          git commit -m "Update README.md with version ${{ steps.extract_version.outputs.version }}"
+          git push
