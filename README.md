@@ -22,7 +22,7 @@
 You can install the latest version of the package from the following link using `pip`:
 
 ```bash
-pip install https://github.com/SzamosiMate/MultiConnAC/releases/latest/download/multi_conn_ac-0.1.1-py3-none-any.whl
+pip install https://github.com/SzamosiMate/MultiConnAC/releases/latest/download/multi_conn_ac-refs/heads/main-py3-none-any.whl
 ```
 
 The package depends on the [Tapir Archicad Add-On](https://github.com/ENZYME-APD/tapir-archicad-automation?tab=readme-ov-file). It is recommended to install the latest version of Tapir to access all features. While some functionality may work without the add-on, all tests have been conducted with it installed.
