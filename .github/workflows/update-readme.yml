@@ -12,12 +12,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0  # Ensure full history is fetched for branch operations
+          fetch-depth: 0  # Fetch full history to allow branch operations
 
       - name: Switch to Default Branch
         run: |
-          # Identify the default branch
+          # Determine the default branch dynamically
           DEFAULT_BRANCH=$(git remote show origin | grep "HEAD branch" | cut -d' ' -f5)
+          git fetch origin $DEFAULT_BRANCH
           git checkout $DEFAULT_BRANCH
 
       - name: Extract Release Version
