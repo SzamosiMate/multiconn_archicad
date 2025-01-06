@@ -12,7 +12,12 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
         with:
-          ref: main  # Replace 'main' with the default branch of your repository if different
+          fetch-depth: 0  # Ensure full history is fetched for branch operations
+          ref: main       # Replace 'main' with the default branch of your repository
+
+      - name: Create a local branch
+        run: |
+          git checkout -B main  # Replace 'main' with your default branch name
 
       - name: Extract Release Version
         id: extract_version
@@ -28,4 +33,5 @@ jobs:
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git add README.md
           git commit -m "Update README.md with version ${{ steps.extract_version.outputs.version }}"
-          git push origin HEAD:main  # Push changes to the main branch
+          git push origin main  # Push changes to the main branch
+
