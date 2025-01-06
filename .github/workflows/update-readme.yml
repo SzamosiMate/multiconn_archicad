@@ -29,7 +29,8 @@ jobs:
 
       - name: Update README.md with New Version
         run: |
-          sed -i "s/multi_conn_ac-[0-9.]*-py3-none-any\.whl/multi_conn_ac-${{ env.version }}-py3-none-any\.whl/" README.md
+          sed -i "s|multi_conn_ac-[0-9.]*-py3-none-any\.whl|multi_conn_ac-refs/heads/main-py3-none-any\.whl|" README.md
+
 
       - name: Commit and Push Changes
         run: |
