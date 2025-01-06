@@ -13,7 +13,7 @@ class StandardConnection:
     commands = Commands
     utilities = Utilities
 
-    def __init__(self, port: Port = Port(19723)):
+    def __init__(self, port: Port):
         self._request = create_request(int(port))
 
     def connect(self, product_info: ProductInfo) -> None:
