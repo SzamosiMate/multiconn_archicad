@@ -4,18 +4,16 @@ from archicad.versioning import _Versioning
 from archicad.connection import create_request
 from archicad.releases import Commands, Types, Utilities
 
-from multi_conn_ac.basic_types import Port
-
 if TYPE_CHECKING:
-    from conn_header import ProductInfo
+    from multi_conn_ac.basic_types import ProductInfo, Port
 
 
-class ArchiCADConnection:
+class StandardConnection:
     types = Types
     commands = Commands
     utilities = Utilities
 
-    def __init__(self, port: Port = Port(19723)):
+    def __init__(self, port: Port):
         self._request = create_request(int(port))
 
     def connect(self, product_info: ProductInfo) -> None:

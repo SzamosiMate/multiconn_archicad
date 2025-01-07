@@ -1,11 +1,11 @@
-from multi_conn_ac import ArchiCADConnection, MultiConn
+from multi_conn_ac import StandardConnection, MultiConn
 from time import sleep
 import asyncio
 from inspect import iscoroutinefunction
 from typing import Callable, Any
 
 
-def add_str_to_id(conn: ArchiCADConnection, str_to_add: str) -> str:
+def add_str_to_id(conn: StandardConnection, str_to_add: str) -> str:
     elements = conn.commands.GetAllElements()
     property_user_id = [
         conn.types.PropertyUserId(type="BuiltIn", nonLocalizedName="General_ElementID")
@@ -38,7 +38,7 @@ async def call_function(func, *args, **kwargs):
 
 
 async def run_function_on_all_active_async(
-    conn: MultiConn, fn: Callable[[ArchiCADConnection, Any], Any], *args, **kwargs
+    conn: MultiConn, fn: Callable[[StandardConnection, Any], Any], *args, **kwargs
 ) -> dict:
     tasks = {
         port: call_function(fn, conn_header.standard, *args, **kwargs)

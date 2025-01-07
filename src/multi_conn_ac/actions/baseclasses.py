@@ -9,7 +9,7 @@ if TYPE_CHECKING:
 
 
 class ConnectionManager(ABC):
-    def __init__(self, multi_conn):
+    def __init__(self, multi_conn: MultiConn):
         self.multi_conn: MultiConn = multi_conn
 
     def from_ports(self, *args: Port) -> None:
@@ -22,30 +22,36 @@ class ConnectionManager(ABC):
     def all(self) -> None:
         self.execute_action(list(self.multi_conn.open_port_headers.values()))
 
-    @abstractmethod
+
     def execute_action(self, conn_headers: list[ConnHeader]) -> None:
         ...
 
 class CommandRunner(ABC):
-    def __init__(self, multi_conn):
+    def __init__(self, multi_conn: MultiConn) -> None:
         self.multi_conn: MultiConn = multi_conn
 
-    def active[T, **P](self, command: Callable[[P], T], *args: dict[Port, P.args],
+    def active[T, **P](self, command: Callable[P, T], *args: dict[Port, P.args],
                        **kwargs: dict[Port, P.kwargs]) -> dict[Port, T]:
         return self.execute_command(self.multi_conn.active, command, *args, **kwargs)
 
-    def pending[T, **P](self, command: Callable[[P], T], *args: dict[Port, P.args],
+    def pending[T, **P](self, command: Callable[P, T], *args: dict[Port, P.args],
                        **kwargs: dict[Port, P.kwargs]) -> dict[Port, T]:
         return self.execute_command(self.multi_conn.pending, command, *args, **kwargs)
 
-    def failed[T, **P](self, command: Callable[[P], T], *args: dict[Port, P.args],
+    def failed[T, **P](self, command: Callable[P, T], *args: dict[Port, P.args],
                        **kwargs: dict[Port, P.kwargs]) -> dict[Port, T]:
         return self.execute_command(self.multi_conn.failed, command, *args, **kwargs)
 
-    def open[T, **P](self, command: Callable[[P], T], *args: dict[Port, P.args],
+    def open[T, **P](self, command: Callable[P, T], *args: dict[Port, P.args],
                        **kwargs: dict[Port, P.kwargs]) -> dict[Port, T]:
         return self.execute_command(self.multi_conn.open_port_headers, command, *args, **kwargs)
 
-    def execute_command[T, **P](self, conn_headers: dict[Port, ConnHeader], command: Callable[[P], T],
-                                *args: dict[Port, P.args], **kwargs:  dict[Port, P.kwargs]) -> dict[Port, T]:
+    @abstractmethod
+    def execute_command[T, **P](
+        self,
+        conn_headers: dict[Port, ConnHeader],
+        command: Callable[P, T],
+        *args: dict[Port, P.args],
+        **kwargs: dict[Port, P.kwargs],
+    ) -> dict[Port, T]:
         ...

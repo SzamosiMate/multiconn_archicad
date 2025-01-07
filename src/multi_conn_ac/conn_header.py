@@ -2,10 +2,9 @@ import asyncio
 from enum import Enum
 from typing import Self
 
-from multi_conn_ac.core_commands import  CoreCommands, sync_or_async
+from multi_conn_ac.core_commands import  CoreCommands
 from multi_conn_ac.basic_types import ArchiCadID, APIResponseError, ProductInfo, Port, create_object_or_error_from_response
 from multi_conn_ac.archicad_connection import ArchiCADConnection
-from multi_conn_ac.async_utils import run_or_add_to_loop
 
 class Status(Enum):
     PENDING: str = 'pending'
@@ -19,34 +18,34 @@ class ConnHeader:
         self.port: Port = port
         self.status: Status = Status.PENDING
         self.core: CoreCommands = CoreCommands(self.port)
-        self.standard: ArchiCADConnection = ArchiCADConnection(self.port)
+        self.archicad: ArchiCADConnection = ArchiCADConnection(self.port)
 
         if initialize:
-            self.product_info: ProductInfo | APIResponseError = run_or_add_to_loop(self.get_product_info)
-            self.archicad_id: ArchiCadID | APIResponseError = run_or_add_to_loop(self.get_archicad_id)
+            self.ProductInfo: ProductInfo | APIResponseError = asyncio.run(self.get_product_info())
+            self.ArchiCadID: ArchiCadID | APIResponseError = asyncio.run(self.get_archicad_id())
 
     @classmethod
     async def async_init(cls, port: Port) -> Self:
         instance = cls(port, initialize=False)
-        instance.product_info = await instance.get_product_info()
-        instance.archicad_id = await instance.get_archicad_id()
+        instance.ProductInfo = await instance.get_product_info()
+        instance.ArchiCadID = await instance.get_archicad_id()
         return instance
 
     def connect(self) -> None:
-        if isinstance(self.product_info, APIResponseError):
-            self.product_info = run_or_add_to_loop(self.get_product_info)
-        if isinstance(self.product_info, ProductInfo):
-            self.standard.connect(self.product_info)
+        if isinstance(self.ProductInfo, APIResponseError):
+            self.ProductInfo = asyncio.run(self.get_product_info())
+        if isinstance(self.ProductInfo, ProductInfo):
+            self.archicad.connect(self.ProductInfo)
             self.status = Status.ACTIVE
         else:
             self.status = Status.FAILED
 
     def disconnect(self) -> None:
-        self.standard.disconnect()
+        self.archicad.disconnect()
         self.status = Status.PENDING
 
     def unassign(self) -> None:
-        self.standard.disconnect()
+        self.archicad.disconnect()
         self.status = Status.UNASSIGNED
 
     async def get_product_info(self) -> ProductInfo | APIResponseError:

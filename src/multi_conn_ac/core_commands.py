@@ -10,8 +10,8 @@ class CoreCommands:
 
     _BASE_URL: str = "http://127.0.0.1"
 
-    def __init__(self, port: Port = 19723):
-        self.port = port
+    def __init__(self, port: Port):
+        self.port: Port = port
 
     @sync_or_async
     async def post_command(self, command: str, parameters: dict | None = None) -> dict[str, Any]:

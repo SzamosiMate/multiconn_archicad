@@ -13,5 +13,5 @@ __all__: tuple[str, ...]  = (
     'ProductInfo',
     'Port',
     'ArchiCADConnection',
-    'CoreCommands',
+    'CoreCommands'
 )

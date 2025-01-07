@@ -10,7 +10,7 @@ if TYPE_CHECKING:
 
 
 class Refresh:
-    def __init__(self, multi_conn):
+    def __init__(self, multi_conn: MultiConn) -> None:
         self.multi_conn: MultiConn = multi_conn
 
     @sync_or_async
