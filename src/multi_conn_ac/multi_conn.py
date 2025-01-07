@@ -1,10 +1,11 @@
 import asyncio
 import aiohttp
 
+from multi_conn_ac.async_utils import sync_or_async
 from multi_conn_ac.core_commands import CoreCommands
-from multi_conn_ac.archicad_connection import ArchiCADConnection
+from multi_conn_ac.standard_connection import StandardConnection
 from multi_conn_ac.conn_header import ConnHeader, Status
-from multi_conn_ac.basic_types import Port, APIResponseError
+from multi_conn_ac.basic_types import Port, APIResponseError, ProductInfo, ArchiCadID
 from multi_conn_ac.actions import Connect, Disconnect, Refresh, QuitAndDisconnect
 
 
@@ -12,13 +13,13 @@ class MultiConn:
     _base_url: str = "http://127.0.0.1"
     _port_range: list[Port] = [Port(port) for port in range(19723, 19744)]
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.open_port_headers: dict[Port, ConnHeader] = {}
         self._primary: ConnHeader | None = None
 
         # command namespaces of new_value
-        self.core: CoreCommands | type(CoreCommands) = CoreCommands
-        self.archicad: ArchiCADConnection | type(ArchiCADConnection) = ArchiCADConnection
+        self.core: CoreCommands | type[CoreCommands] = CoreCommands
+        self.standard: StandardConnection | type[StandardConnection] = StandardConnection
 
         # load actions
         self.connect: Connect = Connect(self)
@@ -27,7 +28,7 @@ class MultiConn:
         self.refresh: Refresh = Refresh(self)
 
         self.refresh.all_ports()
-        self.set_primary()
+        self._set_primary()
 
 
     @property
@@ -67,7 +68,7 @@ class MultiConn:
     async def check_port(self, session: aiohttp.ClientSession, port: Port) -> None:
         url = f"{self._base_url}:{port}"
         try:
-            async with session.get(url, timeout=aiohttp.ClientTimeout(total=1)) as response:
+            async with session.get(url, timeout=aiohttp.ClientTimeout(total=0.2)) as response:
                 if response.status == 200:
                     await self.create_or_refresh_connection(port)
                 else:
@@ -80,16 +81,20 @@ class MultiConn:
         if port not in self.open_port_headers.keys():
             self.open_port_headers[port] = await ConnHeader.async_init(port)
         else:
-            if isinstance(self.open_port_headers[port].ProductInfo, APIResponseError):
-                await self.open_port_headers[port].get_product_info()
-            if isinstance(self.open_port_headers[port].ArchiCadID, APIResponseError):
-                await self.open_port_headers[port].get_archicad_id()
+            product_info = await self.open_port_headers[port].get_product_info()
+            archicad_id = await self.open_port_headers[port].get_archicad_id()
+            if (isinstance(self.open_port_headers[port].product_info, APIResponseError)
+                    or isinstance(product_info, ProductInfo)) :
+                self.open_port_headers[port].product_info = product_info
+            if isinstance(self.open_port_headers[port].archicad_id, APIResponseError)\
+                    or isinstance(archicad_id, ArchiCadID):
+                self.open_port_headers[port].archicad_id = archicad_id
 
     async def close_if_open(self, port: Port) -> None:
         if port in self.open_port_headers.keys():
             self.open_port_headers.pop(port)
-            if self._primary.port == port:
-                self.set_primary()
+            if self._primary and self._primary.port == port:
+                await self._set_primary()
 
     @property
     def primary(self) -> ConnHeader | None:
@@ -97,41 +102,43 @@ class MultiConn:
 
     @primary.setter
     def primary(self, new_value: Port | ConnHeader) -> None:
-        self.set_primary(new_value)
+        self._set_primary(new_value)
 
-    def set_primary(self, new_value: None | Port | ConnHeader = None) -> None:
+    @sync_or_async
+    async def _set_primary(self, new_value: None | Port | ConnHeader = None) -> None:
         if isinstance(new_value, Port):
-            self._set_primary_from_port(new_value)
+            await self._set_primary_from_port(new_value)
         elif isinstance(new_value, ConnHeader):
-            self._set_primary_from_header(new_value)
+            await self._set_primary_from_header(new_value)
         else:
-            self._set_primary_from_none()
+            await self._set_primary_from_none()
 
-    def _set_primary_from_port(self, port: Port) -> None:
+    async def _set_primary_from_port(self, port: Port) -> None:
         if port in self.open_port_headers.keys():
-            self._set_primary_namespaces(port)
+            await self._set_primary_namespaces(port)
         else:
             raise KeyError(f"Failed to set primary. Port {port} is closed.")
 
-    def _set_primary_from_header(self, header: ConnHeader) -> None:
+    async def _set_primary_from_header(self, header: ConnHeader) -> None:
         if header in self.open_port_headers.values():
-            self._set_primary_namespaces(header.port)
+            await self._set_primary_namespaces(header.port)
         else:
             raise KeyError(f"Failed to set primary. There is no open port with header: {header}")
 
-    def _set_primary_from_none(self) -> None:
+    async def _set_primary_from_none(self) -> None:
         for port in self._port_range:
             if port in self.open_port_headers.keys():
-                self._set_primary_namespaces(port)
+                await self._set_primary_namespaces(port)
                 return
-        self._clear_primary_namespaces()
+        await self._clear_primary_namespaces()
 
-    def _set_primary_namespaces(self, port: Port) -> None:
-        self._primary = self.open_port_headers[port]
+    async def _set_primary_namespaces(self, port: Port) -> None:
+        self._primary = await ConnHeader.async_init(port)
+        self._primary.connect()
         self.core = self._primary.core
-        self.archicad = self._primary.archicad
+        self.standard = self._primary.standard
 
-    def _clear_primary_namespaces(self) -> None:
+    async def _clear_primary_namespaces(self) -> None:
         self._primary = None
         self.core = CoreCommands
-        self.archicad = ArchiCADConnection
+        self.standard = StandardConnection
