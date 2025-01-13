@@ -1,11 +1,6 @@
-from functions.highlight_elements import HighlightElements
-from multi_conn_ac import MultiConn, Port, ConnHeader, ArchiCadID, APIResponseError
-from typing import Protocol, Any
-
-class IFunction(Protocol):
-    @staticmethod
-    def run(conn: MultiConn | ConnHeader) -> dict[str, Any]:
-        ...
+from multi_conn_ac import MultiConn, Port, ArchiCadID, APIResponseError
+from typing import Any
+from .load_script import ScriptRunner
 
 
 class AppState:
@@ -13,7 +8,7 @@ class AppState:
         self.conn: MultiConn = MultiConn()
         self.instance_ids: dict[Port, str] = self.get_instance_id()
         self.first_port: Port | None = self.get_first_port()
-        self.script: IFunction | None = HighlightElements()
+        self.script: ScriptRunner | None = None
         self.run_mode: str = 'Single'
 
     def get_instance_id(self) -> dict[Port, str]:

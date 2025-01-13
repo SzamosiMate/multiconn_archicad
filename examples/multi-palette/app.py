@@ -2,17 +2,12 @@ from nicegui import native, ui, app
 from pathlib import Path
 
 from logic.archi_cad import AppState
-from functions.highlight_elements import HighlightElements
+from logic.load_script import select_script
 
 app.add_static_files("/assets", "assets")
 app_state = AppState()
 
-function = HighlightElements()
 
-async def choose_file():
-    files = await app.native.main_window.create_file_dialog(allow_multiple=True)
-    for file in files:
-        ui.notify(file)
 
 async def refresh_options() -> None:
     await app_state.refresh()
@@ -70,7 +65,7 @@ def index():
             with ui.tab_panel(multi).classes("p-0"):
                 multi_select()
         ui.button("Refresh", icon="refresh", on_click=lambda: refresh_options())
-    ui.button("Chose File", on_click=choose_file, icon="folder").classes("w-full")
+    ui.button("Chose File", on_click=lambda: select_script(app_state), icon="folder").classes("w-full")
     ui.button("Set Parameters", on_click=lambda: ui.notify("This does nothing!")).classes("w-full")
     ui.button("Run", on_click=app_state.run).classes("w-full")
 
