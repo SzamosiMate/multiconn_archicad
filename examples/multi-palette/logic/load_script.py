@@ -50,7 +50,8 @@ class ScriptLoader:
         return dialog
 
     def select_script(self, script: ScriptRunner) -> None:
-        self.app_state.script= script
+        self.app_state.script= script()
+        self.dialog.close()
 
 
     def get_scripts_runners_from_files(self, file_paths: tuple[str]) -> list[ScriptRunner]:
