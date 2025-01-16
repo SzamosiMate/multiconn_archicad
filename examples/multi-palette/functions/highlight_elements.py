@@ -1,6 +1,7 @@
 from typing import Any
 from random import randrange
 from nicegui import ui
+import re
 
 from multi_conn_ac import ConnHeader
 
@@ -29,17 +30,17 @@ class HighlightWithRandomColor:
 
 class HighlightWithChosenColor:
     """
-    This script highlights elements with a **chosen colour**. It does not do anything *particularly useful.*
+    This script highlights elements with a **chosen color**. It does not do anything *particularly useful.*
     It is still just a demonstration script.
     """
     def __init__(self):
-        self.highlightedColors: list[int] = [0, 0, 0, 0]
+        self.highlightedColor: list[int] = [0, 0, 0, 0]
 
     def run(self, conn: ConnHeader) -> dict[str, Any]:
         elements = conn.standard.commands.GetAllElements()
         command_parameters = {
             "elements": [element.to_dict() for element in elements],
-            "highlightedColors": [self.highlightedColors for _ in range(len(elements))],
+            "highlightedColors": [self.highlightedColor for _ in range(len(elements))],
             "wireframe3D": True,
             "nonHighlightedColor": [0, 0, 255, 128],
         }
@@ -47,10 +48,27 @@ class HighlightWithChosenColor:
         return response
 
     def set_parameters(self) -> None:
-        ui.color_picker(value=True, on_pick=lambda e:self.set_colour(e.color))
+        color_input = (ui.color_input(
+            label="Pick highlight color",
+            value="#000000",
+            on_change=lambda e: self.set_color(e.value)
+        ))
+        color_input.picker.q_color.props('format-model=rgba')
 
-    def set_colour(self, colour) -> None:
-        print(colour)
-        print(type(colour))
+    def set_color(self, color) -> None:
+        self.highlightedColor = self.convert_color(color)
+
+    def convert_color(self, rgba_str: str) -> list[int]:
+        match = re.match(r"rgba\((\d+),\s*(\d+),\s*(\d+),\s*([\d.]+)\)", rgba_str)
+        if match:
+            return [
+                int(match.group(1)),
+                int(match.group(2)),
+                int(match.group(3)),
+                int(float(match.group(4))*255),
+            ]
+        else:
+            raise ValueError(f"Invalid rgba string: {rgba_str}")
+
 
 

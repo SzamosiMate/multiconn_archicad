@@ -48,7 +48,9 @@ def no_archicad() -> None:
 
 def set_parameters() -> None:
     with ui.dialog(value=True) as dialog, ui.card().classes('w-[550px] h-[400px] m-0'):
-        app_state.script.set_parameters()
+        with ui.card_section().classes('h-full p-0'):
+            app_state.script.set_parameters()
+        ui.button("Close", on_click=dialog.close).classes('w-full')
 
 
 def set_global_context() -> None:
@@ -70,8 +72,7 @@ def index():
     set_global_context()
     with ui.card(align_items="stretch").classes("w-full h-full").tight():
         with (
-            ui.tabs()
-            .classes("w-full")
+            ui.tabs().classes("w-full")
             .props("active-bg-color=primary active-color=white dense") as tabs
         ):
             single = ui.tab("Single")
@@ -85,7 +86,7 @@ def index():
     ui.button("Chose File", on_click=lambda: select_script(app_state), icon="folder").classes("w-full")
     (ui.button("Set Parameters", on_click=set_parameters).classes("w-full")
         .bind_enabled_from(app_state, 'parameters'))
-    ui.button("Run", on_click=app_state.run).classes("w-full")
+    ui.button("Run", on_click=app_state.run).classes("w-full").bind_enabled_from(app_state, 'script')
 
 ui.run(reload=False, native=True, title="Multi-palette", window_size=(300, 600), port=native.find_open_port())
 

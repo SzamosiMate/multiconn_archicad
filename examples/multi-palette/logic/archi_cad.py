@@ -1,6 +1,9 @@
+from __future__ import annotations
 from multi_conn_ac import MultiConn, Port, ArchiCadID, APIResponseError
-from typing import Any
-from .load_script import Runnable
+from typing import Any, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .load_script import Runnable, Settable
 
 
 class AppState:
@@ -8,7 +11,7 @@ class AppState:
         self.conn: MultiConn = MultiConn()
         self.instance_ids: dict[Port, str] = self.get_instance_id()
         self.first_port: Port | None = self.get_first_port()
-        self.script: Runnable | None = None
+        self.script: Runnable | Settable | None = None
         self.parameters: bool = False
         self.run_mode: str = 'Single'
 
