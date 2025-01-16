@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from typing import Self, Protocol, TypeVar, Type
+from multi_conn_ac.platform_utils import is_using_mac
 
 class Port(int):
     def __new__(cls, value):
@@ -45,6 +46,15 @@ class ArchiCadID:
                        projectLocation=addon_command_response['projectLocation'],
                        projectPath=addon_command_response['projectPath'],
                        projectName=addon_command_response['projectName'])
+
+@dataclass
+class ArchicadLocation:
+    archicadLocation: str
+
+    @classmethod
+    def from_api_response(cls, response: dict) -> Self:
+        location = response["result"]["archicadLocation"]
+        return cls(f"{location}/Contents/MacOS/ARCHICAD" if is_using_mac() else location)
 
 @dataclass
 class APIResponseError:

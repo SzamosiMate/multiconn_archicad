@@ -8,24 +8,6 @@ if TYPE_CHECKING:
     from multi_conn_ac.basic_types import Port
 
 
-class ConnectionManager(ABC):
-    def __init__(self, multi_conn: MultiConn):
-        self.multi_conn: MultiConn = multi_conn
-
-    def from_ports(self, *args: Port) -> None:
-        self.execute_action(
-            [self.multi_conn.open_port_headers[port] for port in args if port in self.multi_conn.open_port_headers.keys()])
-
-    def from_headers(self, *args: ConnHeader) -> None:
-        self.execute_action([*args])
-
-    def all(self) -> None:
-        self.execute_action(list(self.multi_conn.open_port_headers.values()))
-
-
-    def execute_action(self, conn_headers: list[ConnHeader]) -> None:
-        ...
-
 class CommandRunner(ABC):
     def __init__(self, multi_conn: MultiConn) -> None:
         self.multi_conn: MultiConn = multi_conn
