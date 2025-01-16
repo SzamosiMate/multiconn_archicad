@@ -1,7 +1,7 @@
 from nicegui import native, ui, app
 from pathlib import Path
 
-from logic.archi_cad import AppState
+from logic.controller import AppState
 from logic.load_script import select_script
 
 app.add_static_files("/assets", "assets")

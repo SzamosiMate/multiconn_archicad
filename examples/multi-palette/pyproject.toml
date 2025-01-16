@@ -13,3 +13,8 @@ dependencies = [
 
 [tool.uv.sources]
 multi-conn-ac = { url = "https://github.com/SzamosiMate/MultiConnAC/releases/download/v0.1.0-alpha/multi_conn_ac-0.1.0-py3-none-any.whl" }
+
+[dependency-groups]
+dev = [
+    "pyinstaller>=6.11.1",
+]

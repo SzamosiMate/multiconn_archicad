@@ -7,7 +7,7 @@ from typing import Type, Protocol, Any, runtime_checkable, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from multi_conn_ac import ConnHeader
-    from .archi_cad import AppState
+    from .controller import AppState
     from types import ModuleType
 
 @runtime_checkable
