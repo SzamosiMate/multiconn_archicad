@@ -23,7 +23,7 @@ class ProjectHandler(ABC):
         ...
 
 
-class FindArchiCAD(ProjectHandler):
+class FindArchicad(ProjectHandler):
 
     def execute_action(self, header_to_check: ConnHeader) -> Port | None:
         if header_to_check.is_fully_initialized():
@@ -33,18 +33,26 @@ class FindArchiCAD(ProjectHandler):
 
 class OpenProject(ProjectHandler):
 
-    def execute_action(self, header_to_check: ConnHeader, timeout: int = 0) -> Port | None:
-        if not header_to_check.is_fully_initialized():
-            raise NotFullyInitializedError(f"Cannot open project from partially initializer header {header_to_check}")
-        port = self.find_archicad.from_header(header_to_check)
-        if port:
-            raise ProjectAlreadyOpenError(f"Project is already open at port: {port}")
+    def __init__(self, multi_conn: MultiConn):
+        super().__init__(multi_conn)
+        self.process: subprocess.Popen | None = None
+
+    def execute_action(self, header: ConnHeader, timeout: int = 0) -> Port | None:
+        self.check_input(header)
+        self.open_project(header)
         pass
 
-    def open_project(self, conn_header: ConnHeader) -> subprocess.Popen:
-        return subprocess.Popen(
+    def open_project(self, conn_header: ConnHeader) -> None:
+        self.process = subprocess.Popen(
             f"{escape_spaces_in_path(conn_header.archicad_location.archicadLocation)} "
             f"{escape_spaces_in_path(conn_header.archicad_id.projectLocation)}",
             start_new_session=True,
             shell=is_using_mac(),
         )
+
+    def check_input(self, header_to_check: ConnHeader) -> None:
+        if not header_to_check.is_fully_initialized():
+            raise NotFullyInitializedError(f"Cannot open project from partially initializer header {header_to_check}")
+        port = self.multi_conn.find_archicad.from_header(header_to_check)
+        if port:
+            raise ProjectAlreadyOpenError(f"Project is already open at port: {port}")

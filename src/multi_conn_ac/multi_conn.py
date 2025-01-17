@@ -6,7 +6,7 @@ from multi_conn_ac.core_commands import CoreCommands
 from multi_conn_ac.standard_connection import StandardConnection
 from multi_conn_ac.conn_header import ConnHeader, Status
 from multi_conn_ac.basic_types import Port, APIResponseError, ProductInfo, ArchiCadID
-from multi_conn_ac.actions import Connect, Disconnect, Refresh, QuitAndDisconnect
+from multi_conn_ac.actions import Connect, Disconnect, Refresh, QuitAndDisconnect, FindArchicad, OpenProject
 
 
 class MultiConn:
@@ -26,6 +26,8 @@ class MultiConn:
         self.disconnect: Disconnect = Disconnect(self)
         self.quit: QuitAndDisconnect = QuitAndDisconnect(self)
         self.refresh: Refresh = Refresh(self)
+        self.find_archicad: FindArchicad = FindArchicad(self)
+        self.open_project: OpenProject = OpenProject(self)
 
         self.refresh.all_ports()
         self._set_primary()

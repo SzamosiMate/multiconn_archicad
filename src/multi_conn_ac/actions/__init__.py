@@ -1,11 +1,14 @@
-from .connection_manager import Connect, QuitAndDisconnect, Disconnect, ConnectionManager
-from .project_handler import ConnectOrOpen
+from .connection_manager import Connect, QuitAndDisconnect, Disconnect
+from .project_handler import FindArchicad, OpenProject
 from .refresh import Refresh
 
 __all__: tuple[str, ...]  = (
     'Connect',
-    'ConnectOrOpen',
+    'Disconnect',
+    'QuitAndDisconnect',
     'Refresh',
+    'FindArchicad',
+    'OpenProject'
 )
 
 
