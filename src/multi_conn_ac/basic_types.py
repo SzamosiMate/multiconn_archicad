@@ -53,7 +53,7 @@ class ArchicadLocation:
 
     @classmethod
     def from_api_response(cls, response: dict) -> Self:
-        location = response["result"]["archicadLocation"]
+        location = response['result']['addOnCommandResponse']["archicadLocation"]
         return cls(f"{location}/Contents/MacOS/ARCHICAD" if is_using_mac() else location)
 
 @dataclass

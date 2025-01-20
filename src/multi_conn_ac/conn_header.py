@@ -6,6 +6,7 @@ from multi_conn_ac.core_commands import  CoreCommands
 from multi_conn_ac.basic_types import ArchiCadID, APIResponseError, ProductInfo, Port, create_object_or_error_from_response, \
     ArchicadLocation
 from multi_conn_ac.standard_connection import StandardConnection
+from multi_conn_ac.async_utils import run_in_sync_or_async_context
 
 class Status(Enum):
     PENDING = 'pending'
@@ -22,9 +23,9 @@ class ConnHeader:
         self.standard: StandardConnection = StandardConnection(self.port)
 
         if initialize:
-            self.product_info: ProductInfo | APIResponseError = asyncio.run(self.get_product_info())
-            self.archicad_id: ArchiCadID | APIResponseError = asyncio.run(self.get_archicad_id())
-            self.archicad_location: ArchicadLocation | APIResponseError = asyncio.run(self.get_archicad_location())
+            self.product_info: ProductInfo | APIResponseError = run_in_sync_or_async_context(self.get_product_info)
+            self.archicad_id: ArchiCadID | APIResponseError = run_in_sync_or_async_context(self.get_archicad_id)
+            self.archicad_location: ArchicadLocation | APIResponseError = run_in_sync_or_async_context(self.get_archicad_location)
 
     @classmethod
     async def async_init(cls, port: Port) -> Self:

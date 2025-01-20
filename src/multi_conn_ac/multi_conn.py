@@ -1,7 +1,7 @@
 import asyncio
 import aiohttp
 
-from multi_conn_ac.async_utils import sync_or_async
+from multi_conn_ac.async_utils import callable_from_sync_or_async_context
 from multi_conn_ac.core_commands import CoreCommands
 from multi_conn_ac.standard_connection import StandardConnection
 from multi_conn_ac.conn_header import ConnHeader, Status
@@ -54,7 +54,7 @@ class MultiConn:
         return [port for port in self._port_range if port not in self.open_port_headers.keys()]
 
     @property
-    def all_ports(self) -> list[Port]:
+    def port_range(self) -> list[Port]:
         return self._port_range
 
     def get_all_port_headers_with_status(self, status: Status) -> dict[Port, ConnHeader]:
@@ -106,7 +106,7 @@ class MultiConn:
     def primary(self, new_value: Port | ConnHeader) -> None:
         self._set_primary(new_value)
 
-    @sync_or_async
+    @callable_from_sync_or_async_context
     async def _set_primary(self, new_value: None | Port | ConnHeader = None) -> None:
         if isinstance(new_value, Port):
             await self._set_primary_from_port(new_value)
