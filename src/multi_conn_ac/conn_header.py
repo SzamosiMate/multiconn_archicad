@@ -1,4 +1,3 @@
-import asyncio
 from enum import Enum
 from typing import Self, Any
 
@@ -17,7 +16,7 @@ class Status(Enum):
 class ConnHeader:
 
     def __init__(self, port: Port, initialize: bool = True):
-        self.port: Port = port
+        self.port: Port | None = port
         self.status: Status = Status.PENDING
         self.core: CoreCommands = CoreCommands(self.port)
         self.standard: StandardConnection = StandardConnection(self.port)
@@ -49,6 +48,7 @@ class ConnHeader:
     def unassign(self) -> None:
         self.standard.disconnect()
         self.status = Status.UNASSIGNED
+        self.port = None
 
     def is_fully_initialized(self) -> bool:
         return self.is_product_info_initialized() and self.is_id_and_location_initialized()

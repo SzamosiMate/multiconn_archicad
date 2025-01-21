@@ -1,5 +1,6 @@
 from __future__ import annotations
 from abc import ABC
+from importlib.metadata import pass_none
 from typing import TYPE_CHECKING, Callable
 import subprocess
 import time
@@ -30,7 +31,10 @@ class FindArchicad(ProjectHandler):
     def execute_action(self, header_to_check: ConnHeader, **kwargs) -> Port | None:
         if header_to_check.is_fully_initialized():
             for port, header in self.multi_conn.open_port_headers.items():
-                return port if header == header_to_check else None
+                if header == header_to_check:
+                    return port
+        return None
+
 
 
 class OpenProject(ProjectHandler):
