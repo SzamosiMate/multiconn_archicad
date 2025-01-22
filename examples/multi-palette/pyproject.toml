@@ -1,0 +1,20 @@
+[project]
+name = "multi-palette"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "multi-conn-ac",
+    "nicegui>=2.9.0",
+    "pywebview>=5.3.2",
+    "pywin32>=308",
+]
+
+[tool.uv.sources]
+multi-conn-ac = { url = "https://github.com/SzamosiMate/MultiConnAC/releases/download/v0.1.0-alpha/multi_conn_ac-0.1.0-py3-none-any.whl" }
+
+[dependency-groups]
+dev = [
+    "pyinstaller>=6.11.1",
+]
