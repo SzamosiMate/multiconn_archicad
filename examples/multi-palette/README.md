@@ -10,13 +10,13 @@
 # Installation
 1. Download and unzip the Windows distribution (will provide link later) or clone the repo
 2. Download and install the Tapir add-on: [Tapir Archicad Add-On](https://github.com/ENZYME-APD/tapir-archicad-automation?tab=readme-ov-file)
-3. Start the Multi-Palette executeable or `main.py` from the repository.
+3. Start the Multi-Palette executable or `main.py` from the repository.
 
 # How to create scripts for the palette?
 Each script has to be defined as a class, that adheres to a certain template. 
 
 ### How to make your script runnable?
-There is one mandatory thing - the script's calss must implement the `Runnable` protocol. This means, each script must have a methos called "run" with the same parameters, and return types. This method will be called when you click "run" on the UI. The UI supplies the necessary `ConnHeader` and handles looping.  You may provide a docstring to the class. It will appear on the scrip tselection dialog with **markdown formatting**.
+There is one mandatory thing - the script's class must implement the `Runnable` protocol. This means, each script must have a methods called "run" with the same parameters, and return types. This method will be called when you click "run" on the UI. The UI supplies the necessary `ConnHeader` and handles looping.  You may provide a docstring to the class. It will appear on the script selection dialog with **Markdown formatting**.
 
 ```python
 @runtime_checkable
@@ -30,11 +30,15 @@ class Runnable(Protocol):
 
 ### Setting Parameters via the UI
 The "Set Parameters" button will remain disabled until you select a script that implements the `Settable` protocol. When you click the "set Parameters" button the appearing dialog will run the "set_parameters" method of your class. 
-When clicked, the "Set Parameters" button opens a dialog that calls the `set_parameters` method of your class.  
-This method can include NiceGUI widgets to set instance parameters, which can then be used in your script.  
+When clicked, the "Set Parameters" button opens a dialog that calls the `set_parameters` method of your class. This method can include NiceGUI widgets to set instance parameters, which can then be used in your script.
+To create input widgets with complex logic the app injects a reference to the MultiConn object to the .multi_conn parameter of every script.
 
 **Example Implementation:**
 ```python
+import re
+from nicegui import ui
+
+class HighlightWithChosenColor:
     def set_parameters(self) -> None:
         color_input = (ui.color_input(
             label="Pick highlight color",

@@ -1,9 +1,10 @@
-from typing import Any
+from typing import Any, Self
 from random import randrange
 from nicegui import ui
 import re
 
-from multi_conn_ac import ConnHeader
+from multi_conn_ac import ConnHeader, MultiConn
+
 
 class HighlightWithRandomColor:
     """
@@ -11,6 +12,7 @@ class HighlightWithRandomColor:
     It colors all elements with a random color.
     """
     def __init__(self):
+        self.multi_conn: MultiConn | None = None
         self.highlightedColors: list[int] = [210, 40, 10, 100]
 
     def run(self, conn: ConnHeader) -> dict[str, Any]:
@@ -34,6 +36,7 @@ class HighlightWithChosenColor:
     It is still just a demonstration script.
     """
     def __init__(self):
+        self.multi_conn: MultiConn | None = None
         self.highlightedColor: list[int] = [0, 0, 0, 0]
 
     def run(self, conn: ConnHeader) -> dict[str, Any]:

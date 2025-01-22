@@ -12,9 +12,6 @@ if TYPE_CHECKING:
 
 @runtime_checkable
 class Runnable(Protocol):
-    """
-    Runnable is a class template to create scripts that the GUI can run.
-    """
     def run(self, conn: ConnHeader) -> dict[str, Any]:
         ...
 
@@ -53,6 +50,7 @@ class ScriptLoader:
     def set_selected_script(self) -> None:
         script = self.scripts_runners[self.script_index]
         self.app_state.script = script()
+        self.app_state.script.multi_conn = self.app_state.conn
         self.app_state.parameters = issubclass(script, Settable)
         self.dialog.close()
 
