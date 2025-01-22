@@ -86,6 +86,8 @@ class OpenProject(ProjectHandler):
             time.sleep(1)
             if not line:
                 break
+            self.process.stdout.close()
+            self.process.stderr.close()
             return line.strip()
 
     def find_archicad_port(self):

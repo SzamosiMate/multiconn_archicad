@@ -36,3 +36,5 @@ class Refresh:
     async def execute_action(self, ports: list[Port]) -> None:
         await self.multi_conn.scan_ports(ports)
         self.multi_conn.open_port_headers = dict(sorted(self.multi_conn.open_port_headers.items()))
+        print(f"Refreshing - Open ports: {len(self.multi_conn.open_port_headers)} db,"
+              f" closed ports: {len(self.multi_conn.closed_ports)}")

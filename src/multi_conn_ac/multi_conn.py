@@ -77,7 +77,7 @@ class MultiConn:
                     await self.close_if_open(port)
         except (aiohttp.ClientError, asyncio.TimeoutError):
             await self.close_if_open(port)
-            print(f"Port {port} is raises exception")
+
 
     async def create_or_refresh_connection(self, port: Port) -> None:
         if port not in self.open_port_headers.keys():
