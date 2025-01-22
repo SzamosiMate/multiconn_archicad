@@ -8,7 +8,8 @@
 - Utilize **Tapir commands** alongside Graphisoft's standard Python wrapper.  
 
 # Installation
-1. Download and unzip the Windows distribution (will provide link later) or clone the repo
+1. Download and unzip the [Windows distribution](https://github.com/SzamosiMate/MultiConnAC/releases/latest/download/Multi-palette-win.zip
+) or clone the repo
 2. Download and install the Tapir add-on: [Tapir Archicad Add-On](https://github.com/ENZYME-APD/tapir-archicad-automation?tab=readme-ov-file)
 3. Start the Multi-Palette executable or `main.py` from the repository.
 
