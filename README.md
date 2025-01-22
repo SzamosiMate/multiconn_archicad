@@ -12,7 +12,7 @@
 
 ## Features
 
-- **Multi-instance Support**: Connect to one, multiple, or all open instances of Archicad.
+- **Multi-connection Support**: Connect to one, multiple, or all open instances of Archicad.
 - **Seamless Integration**: Utilizes ArchiCAD's official Python package.
 - **Tapir Add-On Support**: Run commands from the Tapir Archicad Add-On.
 - **Efficient I/O Operations**: Handles connection management using concurrent or asynchronous code.
