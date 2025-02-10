@@ -19,8 +19,8 @@ def add_str_to_id(conn: StandardConnection, str_to_add: str) -> str:
     ]
     for element_id in ids_of_elements:
         element_id.value = element_id.value + str_to_add
-        sleep(1)
-        print(element_id.value)
+        # sleep(1)
+        # print(element_id.value)
     element_property_values = [
         conn.types.ElementPropertyValue(
             element.elementId, property_id[0].propertyId, e_id
@@ -31,6 +31,7 @@ def add_str_to_id(conn: StandardConnection, str_to_add: str) -> str:
 
 
 async def call_function(func, *args, **kwargs):
+    print(func)
     if iscoroutinefunction(func):
         return await func(*args, **kwargs)
     else:
@@ -40,6 +41,8 @@ async def call_function(func, *args, **kwargs):
 async def run_function_on_all_active_async(
     conn: MultiConn, fn: Callable[[StandardConnection, Any], Any], *args, **kwargs
 ) -> dict:
+    for header in conn.open_port_headers.values():
+        print(header)
     tasks = {
         port: call_function(fn, conn_header.standard, *args, **kwargs)
         for port, conn_header in conn.active.items()
@@ -51,6 +54,7 @@ async def run_function_on_all_active_async(
 def run_function_on_all_active():
     conn = MultiConn()
     conn.connect.all()
+
 
     # Run the asyncio event loop
     result = asyncio.run(run_function_on_all_active_async(conn, add_str_to_id, "?"))

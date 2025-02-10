@@ -13,6 +13,13 @@ class CoreCommands:
     def __init__(self, port: Port):
         self.port: Port = port
 
+    def __repr__(self) -> str:
+        attrs = ", ".join(f"{k}={v!r}" for k, v in vars(self).items())
+        return f"{self.__class__.__name__}({attrs})"
+
+    def __str__(self) -> str:
+        return self.__repr__()
+
     @callable_from_sync_or_async_context
     async def post_command(self, command: str, parameters: dict | None = None) -> dict[str, Any]:
         if parameters is None:

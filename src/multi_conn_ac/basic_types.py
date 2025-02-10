@@ -1,6 +1,10 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Self, Protocol, TypeVar, Type
-from multi_conn_ac.platform_utils import is_using_mac
+import re
+from urllib.parse import unquote
+from abc import ABC, abstractmethod
+
+from multi_conn_ac.platform_utils import is_using_mac, escape_colons_and_slashes
 
 class Port(int):
     def __new__(cls, value):
@@ -27,25 +31,94 @@ class ProductInfo:
 
 
 @dataclass
-class ArchiCadID:
-    isUntitled: bool
-    isTeamwork: bool
-    projectLocation: str | None = None
-    projectPath: str | None = None
-    projectName: str = 'Untitled'
+class TeamworkCredentials:
+    username: str
+    password: str = field(repr=False)
+
+
+class ArchiCadID(ABC):
+    _ID_type_registry: dict[str, Type[Self]] = {}
+
+    @classmethod
+    def register_subclass(cls, subclass: Type[Self]) -> Type[Self]:
+        cls._ID_type_registry[subclass.__name__] = subclass
+        return subclass
 
     @classmethod
     def from_api_response(cls, response: dict) -> Self:
         addon_command_response = response['result']['addOnCommandResponse']
         if addon_command_response['isUntitled']:
-            return cls(isUntitled=addon_command_response['isUntitled'],
-                       isTeamwork=addon_command_response['isTeamwork'])
+            return cls._ID_type_registry['UntitledProjectID']()
+        elif not addon_command_response['isTeamwork']:
+            return cls._ID_type_registry['SoloProjectID'](
+                projectPath=addon_command_response['projectPath'],
+                projectName=addon_command_response['projectName']
+            )
         else:
-            return cls(isUntitled=addon_command_response['isUntitled'],
-                       isTeamwork=addon_command_response['isTeamwork'],
-                       projectLocation=addon_command_response['projectLocation'],
-                       projectPath=addon_command_response['projectPath'],
-                       projectName=addon_command_response['projectName'])
+            return cls._ID_type_registry['TeamworkProjectID'].from_project_location(
+                project_location=addon_command_response['projectLocation'],
+                project_name=addon_command_response['projectName']
+            )
+
+    @abstractmethod
+    def get_project_location(self, _: TeamworkCredentials | None = None) -> str | None:
+        ...
+
+
+@ArchiCadID.register_subclass
+@dataclass
+class UntitledProjectID(ArchiCadID):
+    projectName: str = 'Untitled'
+
+    def get_project_location(self, _: TeamworkCredentials | None = None) -> None:
+        return None
+
+
+@ArchiCadID.register_subclass
+@dataclass
+class SoloProjectID(ArchiCadID):
+    projectPath: str
+    projectName: str
+
+    def get_project_location(self, _: TeamworkCredentials | None = None) -> str:
+        return self.projectPath
+
+
+@ArchiCadID.register_subclass
+@dataclass
+class TeamworkProjectID(ArchiCadID):
+    projectPath: str
+    serverAddress: str
+    teamworkCredentials: TeamworkCredentials
+    projectName: str
+
+    def get_project_location(self, teamwork_credentials: TeamworkCredentials | None= None) -> str:
+        teamwork_credentials = teamwork_credentials if teamwork_credentials else self.teamworkCredentials
+        return (f"teamwork://{teamwork_credentials.username}:{teamwork_credentials.password}@"
+                f"{escape_colons_and_slashes(self.serverAddress)}/{escape_colons_and_slashes(self.projectPath)}")
+
+    @classmethod
+    def from_project_location(cls, project_location: str, project_name: str) -> Self:
+        match = cls.match_project_location(project_location)
+        return cls(serverAddress=match.group("serverAddress"),
+                   projectPath=match.group("projectPath"),
+                   teamworkCredentials=TeamworkCredentials(
+                   username=match.group("username"),
+                   password=match.group("password")),
+                   projectName=project_name)
+
+    @staticmethod
+    def match_project_location(project_location: str) -> re.Match:
+        project_location = unquote(unquote(project_location))
+        pattern = re.compile(
+            r"teamwork://(?P<username>[^:]+):(?P<password>[^@]+)@(?P<serverAddress>https?://[^/]+)/(?P<projectPath>.*)?"
+        )
+        match = pattern.match(project_location)
+        if not match:
+            raise ValueError(f"Could not recognize projectLocation format:/n"
+                             f"({project_location})/n Please, contact developer")
+        return match
+
 
 @dataclass
 class ArchicadLocation:
@@ -67,9 +140,7 @@ class APIResponseError:
                    message=response['error']['message'])
 
 
-T = TypeVar('T', bound='FromAPIResponse')
-
-async def create_object_or_error_from_response(result: dict, class_to_create: Type[T]) -> T | APIResponseError:
+async def create_object_or_error_from_response[T](result: dict, class_to_create: Type[T]) -> T | APIResponseError:
     if result["succeeded"]:
         return class_to_create.from_api_response(result)
     else:

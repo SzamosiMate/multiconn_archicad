@@ -5,7 +5,7 @@ from multi_conn_ac.async_utils import callable_from_sync_or_async_context
 from multi_conn_ac.core_commands import CoreCommands
 from multi_conn_ac.standard_connection import StandardConnection
 from multi_conn_ac.conn_header import ConnHeader, Status
-from multi_conn_ac.basic_types import Port, APIResponseError, ProductInfo, ArchiCadID
+from multi_conn_ac.basic_types import Port, APIResponseError, ProductInfo, ArchiCadID, ArchicadLocation
 from multi_conn_ac.actions import Connect, Disconnect, Refresh, QuitAndDisconnect, FindArchicad, OpenProject
 
 
@@ -57,6 +57,13 @@ class MultiConn:
     def port_range(self) -> list[Port]:
         return self._port_range
 
+    def __repr__(self) -> str:
+        attrs = ", ".join(f"{k}={v!r}" for k, v in vars(self).items())
+        return f"{self.__class__.__name__}({attrs})"
+
+    def __str__(self) -> str:
+        return self.__repr__()
+
     def get_all_port_headers_with_status(self, status: Status) -> dict[Port, ConnHeader]:
         return {conn_header.port: conn_header
                 for conn_header in self.open_port_headers.values()
@@ -85,12 +92,16 @@ class MultiConn:
         else:
             product_info = await self.open_port_headers[port].get_product_info()
             archicad_id = await self.open_port_headers[port].get_archicad_id()
+            archicad_location = await self.open_port_headers[port].get_archicad_location()
             if (isinstance(self.open_port_headers[port].product_info, APIResponseError)
                     or isinstance(product_info, ProductInfo)) :
                 self.open_port_headers[port].product_info = product_info
-            if isinstance(self.open_port_headers[port].archicad_id, APIResponseError)\
-                    or isinstance(archicad_id, ArchiCadID):
+            if (isinstance(self.open_port_headers[port].archicad_id, APIResponseError)
+                    or isinstance(archicad_id, ArchiCadID)):
                 self.open_port_headers[port].archicad_id = archicad_id
+            if (isinstance(self.open_port_headers[port].archicad_location, APIResponseError)
+                    or isinstance(archicad_location, ArchicadLocation)):
+                self.open_port_headers[port].archicad_location = archicad_location
 
     async def close_if_open(self, port: Port) -> None:
         if port in self.open_port_headers.keys():

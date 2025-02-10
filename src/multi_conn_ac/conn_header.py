@@ -13,6 +13,13 @@ class Status(Enum):
     FAILED=  'failed'
     UNASSIGNED = 'unassigned'
 
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}.{self.name}"
+
+    def __str__(self) -> str:
+        return self.__repr__()
+
+
 class ConnHeader:
 
     def __init__(self, port: Port, initialize: bool = True):
@@ -25,6 +32,22 @@ class ConnHeader:
             self.product_info: ProductInfo | APIResponseError = run_in_sync_or_async_context(self.get_product_info)
             self.archicad_id: ArchiCadID | APIResponseError = run_in_sync_or_async_context(self.get_archicad_id)
             self.archicad_location: ArchicadLocation | APIResponseError = run_in_sync_or_async_context(self.get_archicad_location)
+
+    def __eq__(self, other: Any) -> bool:
+        if isinstance(other, ConnHeader):
+            if self.is_fully_initialized() and other.is_fully_initialized():
+                if (self.product_info == other.product_info and
+                    self.archicad_id == other.archicad_id and
+                    self.archicad_location == other.archicad_location):
+                    return True
+        return False
+
+    def __repr__(self) -> str:
+        attrs = ", ".join(f"{k}={v!r}" for k, v in vars(self).items())
+        return f"{self.__class__.__name__}({attrs})"
+
+    def __str__(self) -> str:
+        return self.__repr__()
 
     @classmethod
     async def async_init(cls, port: Port) -> Self:
@@ -58,15 +81,6 @@ class ConnHeader:
 
     def is_id_and_location_initialized(self) -> bool:
         return isinstance(self.archicad_id, ArchiCadID) and isinstance(self.archicad_location, ArchicadLocation)
-
-    def __eq__(self, other: Any) -> bool:
-        if isinstance(other, ConnHeader):
-            if self.is_fully_initialized() and other.is_fully_initialized():
-                if (self.product_info == other.product_info and
-                    self.archicad_id == other.archicad_id and
-                    self.archicad_location == other.archicad_location):
-                    return True
-        return False
 
     async def get_product_info(self) -> ProductInfo | APIResponseError:
         result = await self.core.post_command(command="API.GetProductInfo")
