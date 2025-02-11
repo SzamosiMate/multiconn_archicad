@@ -88,7 +88,7 @@ class OpenProject(ProjectHandler):
                 break
             self.process.stdout.close()
             self.process.stderr.close()
-            return line.strip()
+        return str(line.strip())
 
     def find_archicad_port(self):
         psutil_process = psutil.Process(self.process.pid)

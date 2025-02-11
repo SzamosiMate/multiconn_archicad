@@ -4,7 +4,7 @@ import re
 from urllib.parse import unquote
 from abc import ABC, abstractmethod
 
-from multi_conn_ac.platform_utils import is_using_mac, escape_colons_and_slashes
+from multi_conn_ac.platform_utils import is_using_mac, double_quote, single_quote
 
 class Port(int):
     def __new__(cls, value):
@@ -33,11 +33,12 @@ class ProductInfo:
 @dataclass
 class TeamworkCredentials:
     username: str
-    password: str = field(repr=False)
+    password: str# = field(repr=False)
 
 
 class ArchiCadID(ABC):
     _ID_type_registry: dict[str, Type[Self]] = {}
+    projectName: str = "Untitled"
 
     @classmethod
     def register_subclass(cls, subclass: Type[Self]) -> Type[Self]:
@@ -94,8 +95,8 @@ class TeamworkProjectID(ArchiCadID):
 
     def get_project_location(self, teamwork_credentials: TeamworkCredentials | None= None) -> str:
         teamwork_credentials = teamwork_credentials if teamwork_credentials else self.teamworkCredentials
-        return (f"teamwork://{teamwork_credentials.username}:{teamwork_credentials.password}@"
-                f"{escape_colons_and_slashes(self.serverAddress)}/{escape_colons_and_slashes(self.projectPath)}")
+        return (f"teamwork://{single_quote(teamwork_credentials.username)}:{single_quote(teamwork_credentials.password)}@"
+                f"{double_quote(self.serverAddress)}/{double_quote(self.projectPath)}")
 
     @classmethod
     def from_project_location(cls, project_location: str, project_name: str) -> Self:

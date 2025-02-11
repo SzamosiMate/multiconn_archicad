@@ -1,7 +1,17 @@
 import platform
+from urllib.parse import quote
 
-def escape_colons_and_slashes(url: str) -> str:
-    return url.replace(":", "%253A").replace("/", "%252F")
+def double_quote(url: str) -> str:
+    url = quote(url, safe="")
+    url = quote(url, safe="")
+    url = url.replace(".", "%2E")
+    return url
+
+def single_quote(url: str) -> str:
+    url = quote(url, safe="")
+    url = url.replace(".", "%2E")
+    return url
+        #url.replace(":", "%253A").replace("/", "%252F")
 
 def escape_spaces_in_path(path):
     if is_using_windows():
