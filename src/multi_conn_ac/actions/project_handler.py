@@ -42,21 +42,17 @@ class OpenProject(ProjectHandler):
         self.process: subprocess.Popen | None = None
 
     def with_teamwork_credentials(self, header: ConnHeader,
-                                  teamwork_credentials: TeamworkCredentials,
-                                  dialog_handler: Callable[[subprocess.Popen], None] | None = None) -> Port | None:
-        return self.execute_action(header, teamwork_credentials, dialog_handler)
+                                  teamwork_credentials: TeamworkCredentials) -> Port | None:
+        return self.execute_action(header, teamwork_credentials)
 
     def execute_action(self, header: ConnHeader,
-                       teamwork_credentials: TeamworkCredentials | None = None,
-                       dialog_handler: Callable[[subprocess.Popen], None] | None = None) -> Port | None:
+                       teamwork_credentials: TeamworkCredentials | None = None) -> Port | None:
         self.check_input(header)
         self.open_project(header, teamwork_credentials)
         print("project open")
-        if dialog_handler:
-            dialog_handler(self.process)
+        self.multi_conn.dialog_handler.start(self.process)
         print(self.monitor_stdout())
-        if dialog_handler:
-            dialog_handler(self.process)
+        self.multi_conn.dialog_handler.start(self.process)
         port = Port(self.find_archicad_port())
         self.multi_conn.open_port_headers.update({port: ConnHeader(port)})
         return port

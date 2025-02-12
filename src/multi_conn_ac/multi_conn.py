@@ -7,15 +7,17 @@ from multi_conn_ac.standard_connection import StandardConnection
 from multi_conn_ac.conn_header import ConnHeader, Status
 from multi_conn_ac.basic_types import Port, APIResponseError, ProductInfo, ArchiCadID, ArchicadLocation
 from multi_conn_ac.actions import Connect, Disconnect, Refresh, QuitAndDisconnect, FindArchicad, OpenProject
+from multi_conn_ac.dialog_handlers import DialogHandlerBase, EmptyDialogHandler
 
 
 class MultiConn:
     _base_url: str = "http://127.0.0.1"
     _port_range: list[Port] = [Port(port) for port in range(19723, 19744)]
 
-    def __init__(self) -> None:
+    def __init__(self, dialog_handler: DialogHandlerBase = EmptyDialogHandler()) -> None:
         self.open_port_headers: dict[Port, ConnHeader] = {}
         self._primary: ConnHeader | None = None
+        self.dialog_handler: DialogHandlerBase = dialog_handler
 
         # command namespaces of new_value
         self.core: CoreCommands | type[CoreCommands] = CoreCommands
@@ -56,6 +58,14 @@ class MultiConn:
     @property
     def port_range(self) -> list[Port]:
         return self._port_range
+
+    @property
+    def primary(self) -> ConnHeader | None:
+        return self._primary
+
+    @primary.setter
+    def primary(self, new_value: Port | ConnHeader) -> None:
+        self._set_primary(new_value)
 
     def __repr__(self) -> str:
         attrs = ", ".join(f"{k}={v!r}" for k, v in vars(self).items())
@@ -108,14 +118,6 @@ class MultiConn:
             self.open_port_headers.pop(port)
             if self._primary and self._primary.port == port:
                 await self._set_primary()
-
-    @property
-    def primary(self) -> ConnHeader | None:
-        return self._primary
-
-    @primary.setter
-    def primary(self, new_value: Port | ConnHeader) -> None:
-        self._set_primary(new_value)
 
     @callable_from_sync_or_async_context
     async def _set_primary(self, new_value: None | Port | ConnHeader = None) -> None:

@@ -7,8 +7,7 @@ import re
 import time
 from typing import Callable
 
-from multi_conn_ac.dialog_handlers.dialog_handler_base import DialogHandlerBase
-from multi_conn_ac.dialog_handlers.exceptions import UnhandledDialogError
+from .dialog_handler_base import DialogHandlerBase, UnhandledDialogError
 
 
 class WinDialogHandler(DialogHandlerBase):
@@ -17,7 +16,7 @@ class WinDialogHandler(DialogHandlerBase):
         self.process: subprocess.Popen | None = None
         self.dialog_handlers: dict[str, Callable[[UIAWrapper],None]] = handler_factory
 
-    def start_handling_dialogs(self, process: subprocess.Popen) -> None:
+    def start(self, process: subprocess.Popen) -> None:
         self._get_app_from_pid(process)
         self._wait_and_handle_dialogs()
 

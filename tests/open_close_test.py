@@ -1,6 +1,6 @@
 
-from multi_conn_ac import MultiConn, ArchiCadID
-from dialog_handlers import start_handling_dialogs
+from multi_conn_ac import MultiConn
+from multi_conn_ac.dialog_handlers.win_dialog_handler import start_handling_dialogs
 from multi_conn_ac.basic_types import TeamworkCredentials
 
 m_conn = MultiConn()
