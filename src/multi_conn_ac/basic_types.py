@@ -1,5 +1,5 @@
-from dataclasses import dataclass, field
-from typing import Self, Protocol, TypeVar, Type
+from dataclasses import dataclass, field, asdict
+from typing import Self, Protocol, Type, Any
 import re
 from urllib.parse import unquote
 from abc import ABC, abstractmethod
@@ -29,11 +29,28 @@ class ProductInfo:
                     response["result"]["buildNumber"],
                     response["result"]["languageCode"])
 
+    def to_dict(self) -> dict[str, str]:
+        return asdict(self)
+
+    @classmethod
+    def from_dict(cls, data: dict) -> Self:
+        return cls(**data)
+
 
 @dataclass
 class TeamworkCredentials:
     username: str
-    password: str# = field(repr=False)
+    password: str = field(repr=False)
+
+    def to_dict(self) -> dict[str, str]:
+        return {
+            'username': self.username,
+            'password': {'*' for _ in self.password}
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict) -> Self:
+        return cls(**data)
 
 
 class ArchiCadID(ABC):
@@ -60,6 +77,13 @@ class ArchiCadID(ABC):
                 project_location=addon_command_response['projectLocation'],
                 project_name=addon_command_response['projectName']
             )
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+    @classmethod
+    def from_dict(cls, data: dict) -> Self:
+        return cls(**data)
 
     @abstractmethod
     def get_project_location(self, _: TeamworkCredentials | None = None) -> str | None:
@@ -120,6 +144,9 @@ class TeamworkProjectID(ArchiCadID):
                              f"({project_location})/n Please, contact developer")
         return match
 
+    def to_dict(self) -> dict[str, str]:
+        return asdict(self) | {"teamworkCredentials": self.teamworkCredentials.to_dict()}
+
 
 @dataclass
 class ArchicadLocation:
@@ -130,6 +157,12 @@ class ArchicadLocation:
         location = response['result']['addOnCommandResponse']["archicadLocation"]
         return cls(f"{location}/Contents/MacOS/ARCHICAD" if is_using_mac() else location)
 
+    def to_dict(self) -> dict[str, str]:
+        return asdict(self)
+
+    @classmethod
+    def from_dict(cls, data: dict) -> Self:
+        return cls(**data)
 @dataclass
 class APIResponseError:
     code: int
@@ -139,6 +172,13 @@ class APIResponseError:
     def from_api_response(cls, response: dict) -> Self:
         return cls(code=response['error']['code'],
                    message=response['error']['message'])
+
+    def to_dict(self) -> dict[str, str]:
+        return asdict(self)
+
+    @classmethod
+    def from_dict(cls, data: dict) -> Self:
+        return cls(**data)
 
 
 async def create_object_or_error_from_response[T](result: dict, class_to_create: Type[T]) -> T | APIResponseError:
