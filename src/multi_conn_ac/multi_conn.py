@@ -1,7 +1,7 @@
 import asyncio
 import aiohttp
 
-from multi_conn_ac.async_utils import callable_from_sync_or_async_context
+from multi_conn_ac.utilities.async_utils import callable_from_sync_or_async_context
 from multi_conn_ac.core_commands import CoreCommands
 from multi_conn_ac.standard_connection import StandardConnection
 from multi_conn_ac.conn_header import ConnHeader, Status
