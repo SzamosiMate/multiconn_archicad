@@ -15,18 +15,12 @@ if TYPE_CHECKING:
     from multi_conn_ac.multi_conn import MultiConn
 
 
-class ProjectHandler(ABC):
+class FindArchicad:
     def __init__(self, multi_conn: MultiConn):
         self.multi_conn: MultiConn = multi_conn
 
     def from_header(self, header: ConnHeader, **kwargs) -> Port | None:
         return self._execute_action(header, **kwargs)
-
-    def _execute_action(self, conn_header: ConnHeader, **kwargs) -> Port | None:
-        ...
-
-
-class FindArchicad(ProjectHandler):
 
     def _execute_action(self, conn_header: ConnHeader, **kwargs) -> Port | None:
         if conn_header.is_fully_initialized():
@@ -36,11 +30,13 @@ class FindArchicad(ProjectHandler):
         return None
 
 
-class OpenProject(ProjectHandler):
-
+class OpenProject:
     def __init__(self, multi_conn: MultiConn):
-        super().__init__(multi_conn)
+        self.multi_conn: MultiConn = multi_conn
         self.process: subprocess.Popen
+
+    def from_header(self, header: ConnHeader, **kwargs) -> Port | None:
+        return self._execute_action(header, **kwargs)
 
     def with_teamwork_credentials(self, conn_header: ConnHeader,
                                   teamwork_credentials: TeamworkCredentials) -> Port | None:

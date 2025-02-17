@@ -1,7 +1,7 @@
 import asyncio
 import functools
 from asyncio import Task
-from typing import Callable, Coroutine, Any
+from typing import Callable, Coroutine, Any, Awaitable
 import threading
 
 _loop: asyncio.AbstractEventLoop = asyncio.new_event_loop()
@@ -31,5 +31,5 @@ def run_in_sync_or_async_context[T, **P](function: Callable[P, Coroutine[Any, An
     try:
         asyncio.get_running_loop().is_running()
         return run_async(function(*args, **kwargs))
-    except RuntimeError as e:
+    except RuntimeError as _:
         return asyncio.run(function(*args, **kwargs))

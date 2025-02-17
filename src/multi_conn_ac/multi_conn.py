@@ -1,5 +1,6 @@
 import asyncio
 import aiohttp
+from typing import cast, Awaitable
 
 from multi_conn_ac.utilities.async_utils import callable_from_sync_or_async_context
 from multi_conn_ac.core_commands import CoreCommands
@@ -77,7 +78,7 @@ class MultiConn:
     def get_all_port_headers_with_status(self, status: Status) -> dict[Port, ConnHeader]:
         return {conn_header.port: conn_header
                 for conn_header in self.open_port_headers.values()
-                if conn_header.status == status}
+                if conn_header.status == status and conn_header.port}
 
     async def scan_ports(self, ports: list[Port]) -> None:
         async with aiohttp.ClientSession() as session:
@@ -117,7 +118,7 @@ class MultiConn:
         if port in self.open_port_headers.keys():
             self.open_port_headers.pop(port)
             if self._primary and self._primary.port == port:
-                await self._set_primary()
+                await cast(Awaitable[None], self._set_primary())
 
     @callable_from_sync_or_async_context
     async def _set_primary(self, new_value: None | Port | ConnHeader = None) -> None:
@@ -135,7 +136,7 @@ class MultiConn:
             raise KeyError(f"Failed to set primary. Port {port} is closed.")
 
     async def _set_primary_from_header(self, header: ConnHeader) -> None:
-        if header in self.open_port_headers.values():
+        if header in self.open_port_headers.values() and header.port:
             await self._set_primary_namespaces(header.port)
         else:
             raise KeyError(f"Failed to set primary. There is no open port with header: {header}")
