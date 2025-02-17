@@ -1,10 +1,10 @@
 from dataclasses import dataclass, field, asdict
-from typing import Self, Protocol, Type, Any
+from typing import Self, Protocol, Type, Any, TypeVar
 import re
 from urllib.parse import unquote
 from abc import ABC, abstractmethod
 
-from multi_conn_ac.platform_utils import is_using_mac, double_quote, single_quote
+from multi_conn_ac.utilities.platform_utils import is_using_mac, double_quote, single_quote
 
 class Port(int):
     def __new__(cls, value):
@@ -181,11 +181,11 @@ class APIResponseError:
         return cls(**data)
 
 
-async def create_object_or_error_from_response[T](result: dict, class_to_create: Type[T]) -> T | APIResponseError:
+T = TypeVar('T', bound=FromAPIResponse)
+
+async def create_object_or_error_from_response(result: dict, class_to_create: Type[T]) -> T | APIResponseError:
     if result["succeeded"]:
         return class_to_create.from_api_response(result)
     else:
         return APIResponseError.from_api_response(result)
-
-
 
