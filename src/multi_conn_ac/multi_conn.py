@@ -1,21 +1,23 @@
 import asyncio
 import aiohttp
 
-from multi_conn_ac.async_utils import sync_or_async
+from multi_conn_ac.utilities.async_utils import callable_from_sync_or_async_context
 from multi_conn_ac.core_commands import CoreCommands
 from multi_conn_ac.standard_connection import StandardConnection
 from multi_conn_ac.conn_header import ConnHeader, Status
-from multi_conn_ac.basic_types import Port, APIResponseError, ProductInfo, ArchiCadID
-from multi_conn_ac.actions import Connect, Disconnect, Refresh, QuitAndDisconnect
+from multi_conn_ac.basic_types import Port, APIResponseError, ProductInfo, ArchiCadID, ArchicadLocation
+from multi_conn_ac.actions import Connect, Disconnect, Refresh, QuitAndDisconnect, FindArchicad, OpenProject
+from multi_conn_ac.dialog_handlers import DialogHandlerBase, EmptyDialogHandler
 
 
 class MultiConn:
     _base_url: str = "http://127.0.0.1"
     _port_range: list[Port] = [Port(port) for port in range(19723, 19744)]
 
-    def __init__(self) -> None:
+    def __init__(self, dialog_handler: DialogHandlerBase = EmptyDialogHandler()) -> None:
         self.open_port_headers: dict[Port, ConnHeader] = {}
         self._primary: ConnHeader | None = None
+        self.dialog_handler: DialogHandlerBase = dialog_handler
 
         # command namespaces of new_value
         self.core: CoreCommands | type[CoreCommands] = CoreCommands
@@ -26,6 +28,8 @@ class MultiConn:
         self.disconnect: Disconnect = Disconnect(self)
         self.quit: QuitAndDisconnect = QuitAndDisconnect(self)
         self.refresh: Refresh = Refresh(self)
+        self.find_archicad: FindArchicad = FindArchicad(self)
+        self.open_project: OpenProject = OpenProject(self)
 
         self.refresh.all_ports()
         self._set_primary()
@@ -52,8 +56,23 @@ class MultiConn:
         return [port for port in self._port_range if port not in self.open_port_headers.keys()]
 
     @property
-    def all_ports(self) -> list[Port]:
+    def port_range(self) -> list[Port]:
         return self._port_range
+
+    @property
+    def primary(self) -> ConnHeader | None:
+        return self._primary
+
+    @primary.setter
+    def primary(self, new_value: Port | ConnHeader) -> None:
+        self._set_primary(new_value)
+
+    def __repr__(self) -> str:
+        attrs = ", ".join(f"{k}={v!r}" for k, v in vars(self).items())
+        return f"{self.__class__.__name__}({attrs})"
+
+    def __str__(self) -> str:
+        return self.__repr__()
 
     def get_all_port_headers_with_status(self, status: Status) -> dict[Port, ConnHeader]:
         return {conn_header.port: conn_header
@@ -75,7 +94,7 @@ class MultiConn:
                     await self.close_if_open(port)
         except (aiohttp.ClientError, asyncio.TimeoutError):
             await self.close_if_open(port)
-            print(f"Port {port} is raises exception")
+
 
     async def create_or_refresh_connection(self, port: Port) -> None:
         if port not in self.open_port_headers.keys():
@@ -83,12 +102,16 @@ class MultiConn:
         else:
             product_info = await self.open_port_headers[port].get_product_info()
             archicad_id = await self.open_port_headers[port].get_archicad_id()
+            archicad_location = await self.open_port_headers[port].get_archicad_location()
             if (isinstance(self.open_port_headers[port].product_info, APIResponseError)
                     or isinstance(product_info, ProductInfo)) :
                 self.open_port_headers[port].product_info = product_info
-            if isinstance(self.open_port_headers[port].archicad_id, APIResponseError)\
-                    or isinstance(archicad_id, ArchiCadID):
+            if (isinstance(self.open_port_headers[port].archicad_id, APIResponseError)
+                    or isinstance(archicad_id, ArchiCadID)):
                 self.open_port_headers[port].archicad_id = archicad_id
+            if (isinstance(self.open_port_headers[port].archicad_location, APIResponseError)
+                    or isinstance(archicad_location, ArchicadLocation)):
+                self.open_port_headers[port].archicad_location = archicad_location
 
     async def close_if_open(self, port: Port) -> None:
         if port in self.open_port_headers.keys():
@@ -96,15 +119,7 @@ class MultiConn:
             if self._primary and self._primary.port == port:
                 await self._set_primary()
 
-    @property
-    def primary(self) -> ConnHeader | None:
-        return self._primary
-
-    @primary.setter
-    def primary(self, new_value: Port | ConnHeader) -> None:
-        self._set_primary(new_value)
-
-    @sync_or_async
+    @callable_from_sync_or_async_context
     async def _set_primary(self, new_value: None | Port | ConnHeader = None) -> None:
         if isinstance(new_value, Port):
             await self._set_primary_from_port(new_value)

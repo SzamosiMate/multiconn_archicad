@@ -3,7 +3,7 @@ from typing import Any
 import aiohttp
 
 from multi_conn_ac.basic_types import Port
-from multi_conn_ac.async_utils import sync_or_async
+from multi_conn_ac.utilities.async_utils import callable_from_sync_or_async_context
 
 
 class CoreCommands:
@@ -13,7 +13,14 @@ class CoreCommands:
     def __init__(self, port: Port):
         self.port: Port = port
 
-    @sync_or_async
+    def __repr__(self) -> str:
+        attrs = ", ".join(f"{k}={v!r}" for k, v in vars(self).items())
+        return f"{self.__class__.__name__}({attrs})"
+
+    def __str__(self) -> str:
+        return self.__repr__()
+
+    @callable_from_sync_or_async_context
     async def post_command(self, command: str, parameters: dict | None = None) -> dict[str, Any]:
         if parameters is None:
             parameters = {}
@@ -25,7 +32,7 @@ class CoreCommands:
                 result = await response.text()
                 return json.loads(result)
 
-    @sync_or_async
+    @callable_from_sync_or_async_context
     async def post_tapir_command(self, command: str, parameters: dict | None = None) -> dict[str, Any]:
         if parameters is None:
             parameters = {}

@@ -1,6 +1,6 @@
 [project]
 name = "multi_conn_ac"
-version = "0.1.1"
+version = "0.1.4"
 description = "MultiConnAC is a connection object for ArchiCAD’s JSON API and its Python wrapper, designed to manage multiple open instances of ArchiCAD simultaneously."
 readme = "README.md"
 authors = [
@@ -10,6 +10,12 @@ requires-python = ">=3.12"
 dependencies = [
     "aiohttp>=3.11.11",
     "archicad>=28.3000",
+    "psutil>=6.1.1",
+]
+
+[project.optional-dependencies]
+dialog-handlers = [
+    "pywinauto>=0.6.9",
 ]
 
 [build-system]
