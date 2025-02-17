@@ -3,7 +3,7 @@ from typing import Any
 import aiohttp
 
 from multi_conn_ac.basic_types import Port
-from multi_conn_ac.async_utils import callable_from_sync_or_async_context
+from multi_conn_ac.utilities.async_utils import callable_from_sync_or_async_context
 
 
 class CoreCommands:

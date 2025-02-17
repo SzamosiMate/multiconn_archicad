@@ -1,11 +1,11 @@
 from enum import Enum
-from typing import Self, Any
+from typing import Self, Any, Protocol, TypeGuard
 
 from multi_conn_ac.core_commands import  CoreCommands
 from multi_conn_ac.basic_types import ArchiCadID, APIResponseError, ProductInfo, Port, create_object_or_error_from_response, \
     ArchicadLocation
 from multi_conn_ac.standard_connection import StandardConnection
-from multi_conn_ac.async_utils import run_in_sync_or_async_context
+from multi_conn_ac.utilities.async_utils import run_in_sync_or_async_context
 
 class Status(Enum):
     PENDING = 'pending'
@@ -109,3 +109,4 @@ class ConnHeader:
     async def get_archicad_location(self) -> ArchicadLocation | APIResponseError:
         result = await self.core.post_tapir_command(command='GetArchicadLocation')
         return await create_object_or_error_from_response(result, ArchicadLocation)
+

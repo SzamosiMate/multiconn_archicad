@@ -1,5 +1,5 @@
 from __future__ import annotations
-from abc import ABC
+from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -23,6 +23,7 @@ class ConnectionManager(ABC):
         return self.execute_action(list(self.multi_conn.open_port_headers.values()))
 
 
+    @abstractmethod
     def execute_action(self, conn_headers: list[ConnHeader]) -> list[ConnHeader]:
         ...
 
