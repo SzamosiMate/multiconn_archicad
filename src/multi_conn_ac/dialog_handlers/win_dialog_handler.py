@@ -6,7 +6,6 @@ import subprocess
 import re
 import time
 from typing import Callable
-import threading
 
 from .dialog_handler_base import DialogHandlerBase, UnhandledDialogError
 
@@ -16,13 +15,8 @@ class WinDialogHandler(DialogHandlerBase):
         self.application: Application
         self.process: subprocess.Popen
         self.dialog_handlers: dict[str, Callable[[UIAWrapper],None]] = handler_factory
-        self.stop_event: threading.Event = threading.Event()
 
-    def start(self, process: subprocess.Popen, stop_event: threading.Event | None = None) -> None:
-        if stop_event:
-            self.stop_event = stop_event
-        else:
-            self.stop_event = threading.Event()
+    def start(self, process: subprocess.Popen) -> None:
         self._get_app_from_pid(process)
         self._wait_and_handle_dialogs()
 
@@ -35,13 +29,11 @@ class WinDialogHandler(DialogHandlerBase):
 
     def _wait_and_handle_dialogs(self) -> None:
         top_window = self._wait_for_project()
-        if not self.stop_event.is_set():
-            if not self._handle_dialogs(top_window):
-                raise UnhandledDialogError("Unable to handle dialogs")
+        if not self._handle_dialogs(top_window):
+            raise UnhandledDialogError("Unable to handle dialogs")
 
     def _wait_for_project(self) -> WindowSpecification:
-        project_window = self.application.top_window()
-        while not self.stop_event.is_set():
+        while True:
             time.sleep(1)
             try:
                 project_window = self.application.top_window()
@@ -53,7 +45,9 @@ class WinDialogHandler(DialogHandlerBase):
                     print("Project window loaded.")
                     break
             except Exception as e:
-                print(e)
+                # catching a private exception : _ctypes.COMError: (-2147220991, 'An event was unable to invoke any of
+                # the subscribers', (None, None, None, 0, None))
+                print(f"Cauth exception: {e}. Trying again.")
         time.sleep(1)
         project_window.set_focus()
         print('setting focus')

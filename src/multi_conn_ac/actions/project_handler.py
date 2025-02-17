@@ -6,7 +6,6 @@ import time
 import psutil
 
 from multi_conn_ac.errors import NotFullyInitializedError, ProjectAlreadyOpenError
-from multi_conn_ac.utilities.background_task_runner import BackgroundTaskRunner
 from multi_conn_ac.utilities.platform_utils import escape_spaces_in_path, is_using_mac
 from multi_conn_ac.basic_types import Port, TeamworkCredentials
 from multi_conn_ac.conn_header import ConnHeader
@@ -63,7 +62,6 @@ class OpenProject(ProjectHandler):
 
     def _open_project(self, conn_header: ConnHeader, teamwork_credentials: TeamworkCredentials | None = None) -> None:
         self._start_process(conn_header, teamwork_credentials)
-        self._monitor_process_while_handling_dialogs_background()
         self.multi_conn.dialog_handler.start(self.process)
 
     def _start_process(self, conn_header: ConnHeader, teamwork_credentials: TeamworkCredentials | None = None) -> None:
@@ -73,30 +71,8 @@ class OpenProject(ProjectHandler):
             f"{escape_spaces_in_path(conn_header.archicad_id.get_project_location(teamwork_credentials))}",
             start_new_session=True,
             shell=is_using_mac(),
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
             text=True
         )
-
-    def _monitor_process_while_handling_dialogs_background(self):
-        background_runner = BackgroundTaskRunner(self.multi_conn.dialog_handler.start)
-        background_runner.start(process=self.process)
-        stdout = self._monitor_stdout()
-        background_runner.stop()
-        print(f"The process has started, stdout: {stdout}")
-
-    def _monitor_stdout(self) -> str:
-        assert self.process.stdout is not None
-        assert self.process.stderr is not None
-        print("Monitoring stdout...")
-        while True:
-            line = self.process.stdout.readline()
-            time.sleep(1)
-            if not line:
-                break
-            self.process.stdout.close()
-            self.process.stderr.close()
-        return str(line.strip())
 
     def _find_archicad_port(self):
         psutil_process = psutil.Process(self.process.pid)
