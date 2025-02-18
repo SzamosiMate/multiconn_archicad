@@ -31,5 +31,8 @@ dev = [
 [[tool.mypy.overrides]]
 module = ["archicad.versioning",
           "archicad.connection",
-          "archicad.releases" ]
+          "archicad.releases",
+          "pywinauto",
+          "pywinauto.controls.uiawrapper",
+          "psutil"]
 follow_untyped_imports = true

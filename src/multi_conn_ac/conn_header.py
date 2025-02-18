@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Self, Any, Protocol, TypeGuard
+from typing import Self, Any, Awaitable, cast
 
 from multi_conn_ac.core_commands import  CoreCommands
 from multi_conn_ac.basic_types import ArchiCadID, APIResponseError, ProductInfo, Port, create_object_or_error_from_response, \
@@ -100,14 +100,14 @@ class ConnHeader:
         return isinstance(self.archicad_id, ArchiCadID) and isinstance(self.archicad_location, ArchicadLocation)
 
     async def get_product_info(self) -> ProductInfo | APIResponseError:
-        result = await self.core.post_command(command="API.GetProductInfo")
+        result = await cast(Awaitable[dict[str, Any]], self.core.post_command(command="API.GetProductInfo"))
         return await create_object_or_error_from_response(result, ProductInfo)
 
     async def get_archicad_id(self) -> ArchiCadID | APIResponseError:
-        result = await self.core.post_tapir_command(command='GetProjectInfo')
+        result = await cast(Awaitable[dict[str, Any]], self.core.post_tapir_command(command='GetProjectInfo'))
         return await create_object_or_error_from_response(result, ArchiCadID)
 
     async def get_archicad_location(self) -> ArchicadLocation | APIResponseError:
-        result = await self.core.post_tapir_command(command='GetArchicadLocation')
+        result = await cast(Awaitable[dict[str, Any]], self.core.post_tapir_command(command='GetArchicadLocation'))
         return await create_object_or_error_from_response(result, ArchicadLocation)
 

@@ -1,5 +1,5 @@
 import json
-from typing import Any
+from typing import Any, Awaitable, cast
 import aiohttp
 
 from multi_conn_ac.basic_types import Port
@@ -36,11 +36,11 @@ class CoreCommands:
     async def post_tapir_command(self, command: str, parameters: dict | None = None) -> dict[str, Any]:
         if parameters is None:
             parameters = {}
-        return await self.post_command(
+        return await cast(Awaitable[dict[str, Any]], self.post_command(
                 command="API.ExecuteAddOnCommand",
                 parameters={"addOnCommandId": {
                                 "commandNamespace": 'TapirCommand',
                                 "commandName": command},
-                            'addOnCommandParameters': parameters})
+                            'addOnCommandParameters': parameters}))
 
 
