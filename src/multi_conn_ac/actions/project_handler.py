@@ -7,7 +7,7 @@ import psutil
 
 from multi_conn_ac.errors import NotFullyInitializedError, ProjectAlreadyOpenError
 from multi_conn_ac.utilities.platform_utils import escape_spaces_in_path, is_using_mac
-from multi_conn_ac.basic_types import Port, TeamworkCredentials
+from multi_conn_ac.basic_types import Port, TeamworkCredentials, TeamworkProjectID
 from multi_conn_ac.conn_header import ConnHeader
 
 if TYPE_CHECKING:
@@ -47,14 +47,20 @@ class OpenProject(ProjectHandler):
 
     def _execute_action(self, conn_header: ConnHeader,
                         teamwork_credentials: TeamworkCredentials | None = None) -> Port | None:
-        self._check_input(conn_header)
+        self._check_input(conn_header, teamwork_credentials)
         self._open_project(conn_header, teamwork_credentials)
         port = Port(self._find_archicad_port())
         self.multi_conn.open_port_headers.update({port: ConnHeader(port)})
         return port
 
-    def _check_input(self, header_to_check: ConnHeader) -> None:
-        if not header_to_check.is_fully_initialized():
+    def _check_input(self, header_to_check: ConnHeader, teamwork_credentials: TeamworkCredentials | None = None) -> None:
+        if header_to_check.is_fully_initialized():
+            if isinstance(header_to_check.archicad_id, TeamworkProjectID):
+                if teamwork_credentials:
+                    assert teamwork_credentials.password, "You must supply a valid password!"
+                else:
+                    assert header_to_check.archicad_id.teamworkCredentials.password, "You must supply a valid password!"
+        else:
             raise NotFullyInitializedError(f"Cannot open project from partially initializer header {header_to_check}")
         port = self.multi_conn.find_archicad.from_header(header_to_check)
         if port:
