@@ -33,6 +33,23 @@ class ConnHeader:
             self.archicad_id: ArchiCadID | APIResponseError = run_in_sync_or_async_context(self.get_archicad_id)
             self.archicad_location: ArchicadLocation | APIResponseError = run_in_sync_or_async_context(self.get_archicad_location)
 
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            'port': self.port,
+            'productInfo': self.product_info.to_dict(),
+            'archicadId': self.archicad_id.to_dict(),
+            'archicadLocation': self.archicad_location.to_dict()
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> Self:
+        instance = cls(initialize=False, port=Port(data['port']))
+        instance.status = Status.UNASSIGNED
+        instance.product_info = ProductInfo.from_dict(data['productInfo'])
+        instance.archicad_id = ArchiCadID.from_dict(data['archicadId'])
+        instance.archicad_location = ArchicadLocation.from_dict(data['archicadLocation'])
+        return instance
+
     def __eq__(self, other: Any) -> bool:
         if isinstance(other, ConnHeader):
             if self.is_fully_initialized() and other.is_fully_initialized():
