@@ -45,8 +45,8 @@ class TeamworkCredentials:
     password: str | None
 
     def __repr__(self) -> str:
-        attrs = vars(self)
-        attrs['password'] = {'*' for _ in self.password} if self.password else None
+        attrs = vars(self).copy()
+        attrs['password'] = '*' * len(self.password) if self.password else None
         attrs = ", ".join(f"{k}={v!r}" for k, v in attrs.items())
         return f"{self.__class__.__name__}({attrs})"
 
@@ -98,7 +98,7 @@ class ArchiCadID(ABC):
             try:
                 return id_type.from_dict(data)
             except (KeyError , AttributeError , TypeError):
-                print("error!")
+                pass
         raise AttributeError(f"can not instantiate ArchiCadID from {data}")
 
 
@@ -147,6 +147,14 @@ class TeamworkProjectID(ArchiCadID):
     serverAddress: str
     teamworkCredentials: TeamworkCredentials
     projectName: str
+
+    def __eq__(self, other: Any) -> bool:
+        if isinstance(other, TeamworkProjectID):
+            if (self.projectPath == other.projectPath and
+                self.serverAddress == other.serverAddress and
+                self.projectName == other.projectName):
+                return True
+        return False
 
     def get_project_location(self, teamwork_credentials: TeamworkCredentials | None= None) -> str:
         teamwork_credentials = teamwork_credentials if teamwork_credentials else self.teamworkCredentials
