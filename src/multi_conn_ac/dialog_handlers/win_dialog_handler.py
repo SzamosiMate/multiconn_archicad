@@ -11,17 +11,17 @@ from .dialog_handler_base import DialogHandlerBase, UnhandledDialogError
 
 
 class WinDialogHandler(DialogHandlerBase):
-    def __init__(self, handler_factory: dict[str, Callable[[UIAWrapper],None]]):
+    def __init__(self, handler_factory: dict[str, Callable[[UIAWrapper], None]]):
         self.application: Application
         self.process: subprocess.Popen
-        self.dialog_handlers: dict[str, Callable[[UIAWrapper],None]] = handler_factory
+        self.dialog_handlers: dict[str, Callable[[UIAWrapper], None]] = handler_factory
 
     def start(self, process: subprocess.Popen) -> None:
         self._get_app_from_pid(process)
         self._wait_and_handle_dialogs()
 
     def _get_app_from_pid(self, process: subprocess.Popen) -> None:
-        self.application = Application(backend='uia').connect(process=process.pid)
+        self.application = Application(backend="uia").connect(process=process.pid)
 
     # used for testing
     def _get_app_from_title(self, title: str) -> None:
@@ -37,7 +37,7 @@ class WinDialogHandler(DialogHandlerBase):
             time.sleep(1)
             try:
                 project_window = self.application.top_window()
-                if 'Archicad' in project_window.window_text():
+                if "Archicad" in project_window.window_text():
                     with contextlib.redirect_stdout(io.StringIO()):
                         # Sometimes _is_project_window_ready returns True even when the window is not ready.
                         # .print_control_identifiers() more reliably fails in these cases.
@@ -50,7 +50,7 @@ class WinDialogHandler(DialogHandlerBase):
                 print(f"Cauth exception: {e}. Trying again.")
         time.sleep(1)
         project_window.set_focus()
-        print('setting focus')
+        print("setting focus")
         return project_window
 
     def _handle_dialogs(self, project_window: WindowSpecification) -> bool:
@@ -71,7 +71,7 @@ class WinDialogHandler(DialogHandlerBase):
 
     def _is_project_window_ready(self, project_window: WindowSpecification) -> bool:
         try:
-            project_window.wait('exists enabled visible ready active', timeout=1)
+            project_window.wait("exists enabled visible ready active", timeout=1)
             return True
         except timings.TimeoutError:
             return False
@@ -86,9 +86,8 @@ class WinDialogHandler(DialogHandlerBase):
             return True
         return False
 
-    def _match_handler(self, title:str) -> str | None:
+    def _match_handler(self, title: str) -> str | None:
         for pattern in self.dialog_handlers.keys():
             if re.fullmatch(pattern, title):
                 return pattern
         return None
-

@@ -11,6 +11,7 @@ dependencies = [
     "aiohttp>=3.11.11",
     "archicad>=28.3000",
     "psutil>=6.1.1",
+    "pywinauto>=0.6.9",
 ]
 
 [project.optional-dependencies]
@@ -25,6 +26,7 @@ build-backend = "hatchling.build"
 [dependency-groups]
 dev = [
     "mypy>=1.14.0",
+    "pytest>=8.3.4",
     "ruff>=0.8.4",
 ]
 
@@ -36,3 +38,12 @@ module = ["archicad.versioning",
           "pywinauto.controls.uiawrapper",
           "psutil"]
 follow_untyped_imports = true
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.format]
+indent-style = "space"
+quote-style = "double"
+line-ending = "lf"
+docstring-code-format = true

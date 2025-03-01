@@ -1,17 +1,24 @@
 from enum import Enum
-from typing import Self, Any, Awaitable, cast
+from typing import Self, Any, Awaitable, cast, TypeGuard
 
-from multi_conn_ac.core_commands import  CoreCommands
-from multi_conn_ac.basic_types import ArchiCadID, APIResponseError, ProductInfo, Port, create_object_or_error_from_response, \
-    ArchicadLocation
+from multi_conn_ac.core_commands import CoreCommands
+from multi_conn_ac.basic_types import (
+    ArchiCadID,
+    APIResponseError,
+    ProductInfo,
+    Port,
+    create_object_or_error_from_response,
+    ArchicadLocation,
+)
 from multi_conn_ac.standard_connection import StandardConnection
 from multi_conn_ac.utilities.async_utils import run_in_sync_or_async_context
 
+
 class Status(Enum):
-    PENDING = 'pending'
-    ACTIVE = 'active'
-    FAILED=  'failed'
-    UNASSIGNED = 'unassigned'
+    PENDING = "pending"
+    ACTIVE = "active"
+    FAILED = "failed"
+    UNASSIGNED = "unassigned"
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}.{self.name}"
@@ -21,7 +28,6 @@ class Status(Enum):
 
 
 class ConnHeader:
-
     def __init__(self, port: Port, initialize: bool = True):
         self.port: Port | None = port
         self.status: Status = Status.PENDING
@@ -31,31 +37,35 @@ class ConnHeader:
         if initialize:
             self.product_info: ProductInfo | APIResponseError = run_in_sync_or_async_context(self.get_product_info)
             self.archicad_id: ArchiCadID | APIResponseError = run_in_sync_or_async_context(self.get_archicad_id)
-            self.archicad_location: ArchicadLocation | APIResponseError = run_in_sync_or_async_context(self.get_archicad_location)
+            self.archicad_location: ArchicadLocation | APIResponseError = run_in_sync_or_async_context(
+                self.get_archicad_location
+            )
 
     def to_dict(self) -> dict[str, Any]:
         return {
-            'port': self.port,
-            'productInfo': self.product_info.to_dict(),
-            'archicadId': self.archicad_id.to_dict(),
-            'archicadLocation': self.archicad_location.to_dict()
+            "port": self.port,
+            "productInfo": self.product_info.to_dict(),
+            "archicadId": self.archicad_id.to_dict(),
+            "archicadLocation": self.archicad_location.to_dict(),
         }
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> Self:
-        instance = cls(initialize=False, port=Port(data['port']))
+        instance = cls(initialize=False, port=Port(data["port"]))
         instance.status = Status.UNASSIGNED
-        instance.product_info = ProductInfo.from_dict(data['productInfo'])
-        instance.archicad_id = ArchiCadID.from_dict(data['archicadId'])
-        instance.archicad_location = ArchicadLocation.from_dict(data['archicadLocation'])
+        instance.product_info = ProductInfo.from_dict(data["productInfo"])
+        instance.archicad_id = ArchiCadID.from_dict(data["archicadId"])
+        instance.archicad_location = ArchicadLocation.from_dict(data["archicadLocation"])
         return instance
 
     def __eq__(self, other: Any) -> bool:
         if isinstance(other, ConnHeader):
             if self.is_fully_initialized() and other.is_fully_initialized():
-                if (self.product_info == other.product_info and
-                    self.archicad_id == other.archicad_id and
-                    self.archicad_location == other.archicad_location):
+                if (
+                    self.product_info == other.product_info
+                    and self.archicad_id == other.archicad_id
+                    and self.archicad_location == other.archicad_location
+                ):
                     return True
         return False
 
@@ -104,10 +114,9 @@ class ConnHeader:
         return await create_object_or_error_from_response(result, ProductInfo)
 
     async def get_archicad_id(self) -> ArchiCadID | APIResponseError:
-        result = await cast(Awaitable[dict[str, Any]], self.core.post_tapir_command(command='GetProjectInfo'))
+        result = await cast(Awaitable[dict[str, Any]], self.core.post_tapir_command(command="GetProjectInfo"))
         return await create_object_or_error_from_response(result, ArchiCadID)
 
     async def get_archicad_location(self) -> ArchicadLocation | APIResponseError:
-        result = await cast(Awaitable[dict[str, Any]], self.core.post_tapir_command(command='GetArchicadLocation'))
+        result = await cast(Awaitable[dict[str, Any]], self.core.post_tapir_command(command="GetArchicadLocation"))
         return await create_object_or_error_from_response(result, ArchicadLocation)
-

@@ -1,13 +1,10 @@
 from abc import ABC, abstractmethod
 import subprocess
-import threading
 
 
 class DialogHandlerBase(ABC):
-
     @abstractmethod
-    def start(self, process: subprocess.Popen) -> None:
-        ...
+    def start(self, process: subprocess.Popen) -> None: ...
 
 
 class UnhandledDialogError(Exception):
@@ -15,6 +12,5 @@ class UnhandledDialogError(Exception):
 
 
 class EmptyDialogHandler(DialogHandlerBase):
-
     def start(self, process: subprocess.Popen) -> None:
         pass

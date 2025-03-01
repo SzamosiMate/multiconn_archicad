@@ -1,5 +1,4 @@
 from __future__ import annotations
-from abc import ABC
 from typing import TYPE_CHECKING
 import subprocess
 import time
@@ -37,19 +36,23 @@ class OpenProject:
     def from_header(self, header: ConnHeader, **kwargs) -> Port | None:
         return self._execute_action(header, **kwargs)
 
-    def with_teamwork_credentials(self, conn_header: ConnHeader,
-                                  teamwork_credentials: TeamworkCredentials) -> Port | None:
+    def with_teamwork_credentials(
+        self, conn_header: ConnHeader, teamwork_credentials: TeamworkCredentials
+    ) -> Port | None:
         return self._execute_action(conn_header, teamwork_credentials)
 
-    def _execute_action(self, conn_header: ConnHeader,
-                        teamwork_credentials: TeamworkCredentials | None = None) -> Port | None:
+    def _execute_action(
+        self, conn_header: ConnHeader, teamwork_credentials: TeamworkCredentials | None = None
+    ) -> Port | None:
         self._check_input(conn_header, teamwork_credentials)
         self._open_project(conn_header, teamwork_credentials)
         port = Port(self._find_archicad_port())
         self.multi_conn.open_port_headers.update({port: ConnHeader(port)})
         return port
 
-    def _check_input(self, header_to_check: ConnHeader, teamwork_credentials: TeamworkCredentials | None = None) -> None:
+    def _check_input(
+        self, header_to_check: ConnHeader, teamwork_credentials: TeamworkCredentials | None = None
+    ) -> None:
         if header_to_check.is_fully_initialized():
             if isinstance(header_to_check.archicad_id, TeamworkProjectID):
                 if teamwork_credentials:
@@ -73,7 +76,7 @@ class OpenProject:
             f"{escape_spaces_in_path(conn_header.archicad_id.get_project_location(teamwork_credentials))}",
             start_new_session=True,
             shell=is_using_mac(),
-            text=True
+            text=True,
         )
 
     def _find_archicad_port(self):
@@ -83,7 +86,7 @@ class OpenProject:
             connections = psutil_process.net_connections(kind="inet")
             for conn in connections:
                 if conn.status == psutil.CONN_LISTEN:
-                    if  conn.laddr.port in self.multi_conn.port_range:
+                    if conn.laddr.port in self.multi_conn.port_range:
                         print(f"Detected Archicad listening on port {conn.laddr.port}")
                         return conn.laddr.port
             time.sleep(1)

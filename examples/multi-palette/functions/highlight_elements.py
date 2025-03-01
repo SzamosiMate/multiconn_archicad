@@ -1,4 +1,4 @@
-from typing import Any, Self
+from typing import Any
 from random import randrange
 from nicegui import ui
 import re

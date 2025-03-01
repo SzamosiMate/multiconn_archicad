@@ -39,5 +39,5 @@ __all__: tuple[str, ...] = (
     "TeamworkProjectID",
     "SoloProjectID",
     "UntitledProjectID",
-    "ArchicadLocation"
+    "ArchicadLocation",
 )

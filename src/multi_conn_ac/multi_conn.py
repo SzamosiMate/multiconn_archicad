@@ -35,7 +35,6 @@ class MultiConn:
         self.refresh.all_ports()
         self._set_primary()
 
-
     @property
     def pending(self) -> dict[Port, ConnHeader]:
         return self.get_all_port_headers_with_status(Status.PENDING)
@@ -76,9 +75,11 @@ class MultiConn:
         return self.__repr__()
 
     def get_all_port_headers_with_status(self, status: Status) -> dict[Port, ConnHeader]:
-        return {conn_header.port: conn_header
-                for conn_header in self.open_port_headers.values()
-                if conn_header.status == status and conn_header.port}
+        return {
+            conn_header.port: conn_header
+            for conn_header in self.open_port_headers.values()
+            if conn_header.status == status and conn_header.port
+        }
 
     async def scan_ports(self, ports: list[Port]) -> None:
         async with aiohttp.ClientSession() as session:
@@ -96,7 +97,6 @@ class MultiConn:
         except (aiohttp.ClientError, asyncio.TimeoutError):
             await self.close_if_open(port)
 
-
     async def create_or_refresh_connection(self, port: Port) -> None:
         if port not in self.open_port_headers.keys():
             self.open_port_headers[port] = await ConnHeader.async_init(port)
@@ -104,14 +104,17 @@ class MultiConn:
             product_info = await self.open_port_headers[port].get_product_info()
             archicad_id = await self.open_port_headers[port].get_archicad_id()
             archicad_location = await self.open_port_headers[port].get_archicad_location()
-            if (isinstance(self.open_port_headers[port].product_info, APIResponseError)
-                    or isinstance(product_info, ProductInfo)) :
+            if isinstance(self.open_port_headers[port].product_info, APIResponseError) or isinstance(
+                product_info, ProductInfo
+            ):
                 self.open_port_headers[port].product_info = product_info
-            if (isinstance(self.open_port_headers[port].archicad_id, APIResponseError)
-                    or isinstance(archicad_id, ArchiCadID)):
+            if isinstance(self.open_port_headers[port].archicad_id, APIResponseError) or isinstance(
+                archicad_id, ArchiCadID
+            ):
                 self.open_port_headers[port].archicad_id = archicad_id
-            if (isinstance(self.open_port_headers[port].archicad_location, APIResponseError)
-                    or isinstance(archicad_location, ArchicadLocation)):
+            if isinstance(self.open_port_headers[port].archicad_location, APIResponseError) or isinstance(
+                archicad_location, ArchicadLocation
+            ):
                 self.open_port_headers[port].archicad_location = archicad_location
 
     async def close_if_open(self, port: Port) -> None:

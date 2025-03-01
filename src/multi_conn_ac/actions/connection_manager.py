@@ -14,7 +14,12 @@ class ConnectionManager(ABC):
 
     def from_ports(self, *args: Port) -> list[ConnHeader]:
         return self.execute_action(
-            [self.multi_conn.open_port_headers[port] for port in args if port in self.multi_conn.open_port_headers.keys()])
+            [
+                self.multi_conn.open_port_headers[port]
+                for port in args
+                if port in self.multi_conn.open_port_headers.keys()
+            ]
+        )
 
     def from_headers(self, *args: ConnHeader) -> list[ConnHeader]:
         return self.execute_action([*args])
@@ -22,17 +27,14 @@ class ConnectionManager(ABC):
     def all(self) -> list[ConnHeader]:
         return self.execute_action(list(self.multi_conn.open_port_headers.values()))
 
-
     @abstractmethod
-    def execute_action(self, conn_headers: list[ConnHeader]) -> list[ConnHeader]:
-        ...
+    def execute_action(self, conn_headers: list[ConnHeader]) -> list[ConnHeader]: ...
 
 
 class Connect(ConnectionManager):
-
     def execute_action(self, conn_headers: list[ConnHeader]) -> list[ConnHeader]:
         for conn_header in conn_headers:
-            print(f'connecting {conn_header.product_info}')
+            print(f"connecting {conn_header.product_info}")
             conn_header.connect()
         return conn_headers
 
@@ -41,7 +43,6 @@ class Connect(ConnectionManager):
 
 
 class Disconnect(ConnectionManager):
-
     def execute_action(self, conn_headers: list[ConnHeader]) -> list[ConnHeader]:
         for conn_header in conn_headers:
             conn_header.disconnect()
@@ -49,7 +50,6 @@ class Disconnect(ConnectionManager):
 
 
 class QuitAndDisconnect(ConnectionManager):
-
     def execute_action(self, conn_headers: list[ConnHeader]) -> list[ConnHeader]:
         for conn_header in conn_headers:
             if conn_header.port:
@@ -57,4 +57,3 @@ class QuitAndDisconnect(ConnectionManager):
                 self.multi_conn.open_port_headers.pop(conn_header.port)
             conn_header.unassign()
         return conn_headers
-
