@@ -1,4 +1,4 @@
-from multiconn_archicad import StandardConnection, MultiConn
+from multiconn_archicad import StandardConnection, MultiConn, ConnHeader
 import asyncio
 from inspect import iscoroutinefunction
 from typing import Callable, Any
@@ -38,12 +38,12 @@ async def call_function(func, *args, **kwargs):
 
 
 async def run_function_on_all_active_async(
-    conn: MultiConn, fn: Callable[[StandardConnection, Any], Any], *args, **kwargs
+    conn: MultiConn, fn: Callable[[ConnHeader, Any], Any], *args, **kwargs
 ) -> dict:
     for header in conn.open_port_headers.values():
         print(header)
     tasks = {
-        port: call_function(fn, conn_header.standard, *args, **kwargs)
+        port: call_function(fn, conn_header, *args, **kwargs)
         for port, conn_header in conn.active.items()
     }
     results = await asyncio.gather(*tasks.values())

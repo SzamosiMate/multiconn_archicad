@@ -1,5 +1,5 @@
 
-from multiconn_archicad import MultiConn, Port
+from multiconn_archicad import MultiConn, Port, WinDialogHandler, win_int_handler_factory
 
 def connect_and_run_ac_command():
     conn = MultiConn()
@@ -47,10 +47,18 @@ def cycle_primary():
         print(conn.core.post_tapir_command("GetProjectInfo"))
         print(conn.standard.commands.IsAlive())
 
+def print_test():
+    dialog_handler = WinDialogHandler(win_int_handler_factory)
+    conn = MultiConn(dialog_handler)
+
+    print(conn)
+    print(conn.primary)
+
 
 if __name__ == "__main__":
-    connect_and_run_ac_command()
-    connect_and_run_core_command()
- #   quit_port()
-    cycle_primary()
-#    quit_and_refresh()
+    # connect_and_run_ac_command()
+    # connect_and_run_core_command()
+    # quit_port()
+    # cycle_primary()
+    # quit_and_refresh()
+    print_test()

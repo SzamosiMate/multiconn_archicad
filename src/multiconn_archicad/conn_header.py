@@ -1,5 +1,6 @@
 from enum import Enum
 from typing import Self, Any, Awaitable, cast
+from pprint import pformat
 
 from multiconn_archicad.core_commands import CoreCommands
 from multiconn_archicad.basic_types import (
@@ -70,11 +71,12 @@ class ConnHeader:
         return False
 
     def __repr__(self) -> str:
-        attrs = ", ".join(f"{k}={v!r}" for k, v in vars(self).items())
+        attrs = {name: getattr(self, name) for name in ["port", "status", "product_info", "archicad_id", "archicad_location"]}
         return f"{self.__class__.__name__}({attrs})"
 
     def __str__(self) -> str:
-        return self.__repr__()
+        attrs = {name: getattr(self, name) for name in ["port", "status", "product_info", "archicad_id", "archicad_location"]}
+        return f"{self.__class__.__name__}(\n{pformat(attrs, width=200, indent=4)})"
 
     @classmethod
     async def async_init(cls, port: Port) -> Self:

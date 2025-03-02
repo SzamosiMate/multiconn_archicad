@@ -1,6 +1,7 @@
 import asyncio
 import aiohttp
 from typing import cast, Awaitable
+from pprint import pformat
 
 from multiconn_archicad.utilities.async_utils import callable_from_sync_or_async_context
 from multiconn_archicad.core_commands import CoreCommands
@@ -68,11 +69,12 @@ class MultiConn:
         self._set_primary(new_value)
 
     def __repr__(self) -> str:
-        attrs = ", ".join(f"{k}={v!r}" for k, v in vars(self).items())
+        attrs = {name: getattr(self, name) for name in ["pending", "active", "failed", "primary", "dialog_handler"]}
         return f"{self.__class__.__name__}({attrs})"
 
     def __str__(self) -> str:
-        return self.__repr__()
+        attrs = {name: getattr(self, name) for name in ["pending", "active", "failed", "primary", "dialog_handler"]}
+        return f"{self.__class__.__name__}(\n{pformat(attrs, indent=4)})"
 
     def get_all_port_headers_with_status(self, status: Status) -> dict[Port, ConnHeader]:
         return {

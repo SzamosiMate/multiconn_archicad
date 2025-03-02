@@ -19,11 +19,10 @@ class StandardConnection:
         self._request: Request = create_request(int(port))
 
     def __repr__(self) -> str:
-        attrs = ", ".join(f"{k}={v!r}" for k, v in vars(self).items())
-        return f"{self.__class__.__name__}({attrs})"
+        return f"{self.__class__.__name__}(_request={self._request.full_url})"
 
     def __str__(self) -> str:
-        return f"{self.__class__.__name__}(port={self._request.full_url})"
+        return f"{self.__class__.__name__}(_request={self._request.full_url})"
 
     def connect(self, product_info: ProductInfo) -> None:
         v = _Versioning(product_info.version, product_info.build, self._request)
