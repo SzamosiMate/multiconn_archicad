@@ -2,13 +2,13 @@
 
 ## 
 
-**MultiConnAC** is a Python-based connection object for ArchiCAD’s JSON API and its Python wrapper. It is designed to manage multiple open instances of Archicad simultaneously, making it easier to execute commands across multiple instances.
+**MultiConn ArchiCAD** is a Python-based connection object for ArchiCAD’s JSON API and its Python wrapper. It is designed to manage multiple open instances of Archicad simultaneously, making it easier to execute commands across multiple instances.
 
-[![Latest Release](https://img.shields.io/github/v/release/SzamosiMate/MultiConnAC)](https://github.com/SzamosiMate/MultiConnAC/releases/latest) 
-![License](https://img.shields.io/github/license/SzamosiMate/MultiConnAC) 
-![Issues](https://img.shields.io/github/issues/SzamosiMate/MultiConnAC) 
-![Forks](https://img.shields.io/github/forks/SzamosiMate/MultiConnAC) 
-![Stars](https://img.shields.io/github/stars/SzamosiMate/MultiConnAC)
+[![Latest Release](https://img.shields.io/github/v/release/SzamosiMate/multiconn_archicad)](https://github.com/SzamosiMate/multiconn_archicad/releases/latest) 
+![License](https://img.shields.io/github/license/SzamosiMate/multiconn_archicad) 
+![Issues](https://img.shields.io/github/issues/SzamosiMate/multiconn_archicad) 
+![Forks](https://img.shields.io/github/forks/SzamosiMate/multiconn_archicad) 
+![Stars](https://img.shields.io/github/stars/SzamosiMate/multiconn_archicad)
 
 ## Features
 
@@ -22,7 +22,7 @@
 You can install the latest version of the package from the following link using `pip`:
 
 ```bash
-pip install https://github.com/SzamosiMate/MultiConnAC/releases/latest/download/multi_conn_ac-0.1.2-py3-none-any.whl
+pip install https://github.com/SzamosiMate/multiconn_archicad/releases/latest/download/multiconn_archicad-0.1.2-py3-none-any.whl
 ```
 
 The package depends on the [Tapir Archicad Add-On](https://github.com/ENZYME-APD/tapir-archicad-automation?tab=readme-ov-file). It is recommended to install the latest version of Tapir to access all features. While some functionality may work without the add-on, all tests have been conducted with it installed.
@@ -36,7 +36,7 @@ Actions allow you to manage the state of the connection object. You can connect 
 
 #### Example: Connection Management
 ```python 
-from multi_conn_ac import MultiConn, Port
+from multiconn_archicad import MultiConn, Port
 
 conn = MultiConn()
 
@@ -60,7 +60,7 @@ To run commands on one chosen ArchiCAD instance the `MultiConn` object has a con
 
 #### Example: Running Commands on a Single Archicad Instance
 ```python
-from multi_conn_ac import MultiConn, Port
+from multiconn_archicad import MultiConn, Port
 
 # After instantiation the primary connection will be the instance with the lowest port number (probably 19723)
 conn = MultiConn()
@@ -83,7 +83,7 @@ The MultiConn object stores references to `ConnHeaders` for all open ports (port
 #### Example: Running Commands on Multiple Archicad Instances
 
 ```python
-from multi_conn_ac import MultiConn
+from multiconn_archicad import MultiConn
 
 conn = MultiConn()
 conn.connect.all()
@@ -122,7 +122,7 @@ def run(conn: MultiConn | ConnHeader) -> dict[str, Any]:
 
 ## Contributing
 
-Contributions are welcome! Feel free to submit issues, feature requests, or pull requests to help improve MultiConnAC.
+Contributions are welcome! Feel free to submit issues, feature requests, or pull requests to help improve MultiConn ArchiCAD.
 
 ## License
 

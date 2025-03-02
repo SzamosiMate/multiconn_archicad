@@ -39,7 +39,7 @@ cmd = [
     '--name', 'Multi-palette', # name of your app
     '--windowed', # prevent console appearing, only use with ui.run(native=True, ...)
     '--add-data', r'.venv\lib\site-packages\archicad:archicad',
-    '--add-data', r'.venv\lib\site-packages\multi_conn_ac:multi_conn_ac',
+    '--add-data', r'.venv\lib\site-packages\multiconn_archicad:multiconn_archicad',
     '--add-data', 'logic;logic',
     '--add-data', 'assets:assets',
     '--add-data', 'assets:.'

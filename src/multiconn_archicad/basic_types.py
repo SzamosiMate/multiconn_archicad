@@ -4,7 +4,7 @@ import re
 from urllib.parse import unquote
 from abc import ABC, abstractmethod
 
-from multi_conn_ac.utilities.platform_utils import is_using_mac, double_quote, single_quote
+from multiconn_archicad.utilities.platform_utils import is_using_mac, double_quote, single_quote
 
 JsonType = Union[str, int, float, bool, None, list["JsonType"], dict[str, "JsonType"]]
 
@@ -92,7 +92,7 @@ class TeamworkCredentials(BaseModel):
 
 
 class ArchiCadID(ABC):
-    _ID_type_registry: dict[str, Type[Self]] = {}
+    _ID_type_registry: ClassVar[dict[str, Type[Self]]] = {}
     projectName: str = "Untitled"
 
     @classmethod

@@ -2,13 +2,13 @@ import asyncio
 import aiohttp
 from typing import cast, Awaitable
 
-from multi_conn_ac.utilities.async_utils import callable_from_sync_or_async_context
-from multi_conn_ac.core_commands import CoreCommands
-from multi_conn_ac.standard_connection import StandardConnection
-from multi_conn_ac.conn_header import ConnHeader, Status
-from multi_conn_ac.basic_types import Port, APIResponseError, ProductInfo, ArchiCadID, ArchicadLocation
-from multi_conn_ac.actions import Connect, Disconnect, Refresh, QuitAndDisconnect, FindArchicad, OpenProject
-from multi_conn_ac.dialog_handlers import DialogHandlerBase, EmptyDialogHandler
+from multiconn_archicad.utilities.async_utils import callable_from_sync_or_async_context
+from multiconn_archicad.core_commands import CoreCommands
+from multiconn_archicad.standard_connection import StandardConnection
+from multiconn_archicad.conn_header import ConnHeader, Status
+from multiconn_archicad.basic_types import Port, APIResponseError, ProductInfo, ArchiCadID, ArchicadLocation
+from multiconn_archicad.actions import Connect, Disconnect, Refresh, QuitAndDisconnect, FindArchicad, OpenProject
+from multiconn_archicad.dialog_handlers import DialogHandlerBase, EmptyDialogHandler
 
 
 class MultiConn:

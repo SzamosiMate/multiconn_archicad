@@ -1,5 +1,5 @@
 from __future__ import annotations
-from multi_conn_ac import MultiConn, Port, ArchiCadID, APIResponseError
+from multiconn_archicad import MultiConn, Port, ArchiCadID, APIResponseError
 from typing import Any, TYPE_CHECKING
 
 if TYPE_CHECKING:

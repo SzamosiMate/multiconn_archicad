@@ -4,13 +4,13 @@ import subprocess
 import time
 import psutil
 
-from multi_conn_ac.errors import NotFullyInitializedError, ProjectAlreadyOpenError
-from multi_conn_ac.utilities.platform_utils import escape_spaces_in_path, is_using_mac
-from multi_conn_ac.basic_types import Port, TeamworkCredentials, TeamworkProjectID
-from multi_conn_ac.conn_header import ConnHeader
+from multiconn_archicad.errors import NotFullyInitializedError, ProjectAlreadyOpenError
+from multiconn_archicad.utilities.platform_utils import escape_spaces_in_path, is_using_mac
+from multiconn_archicad.basic_types import Port, TeamworkCredentials, TeamworkProjectID
+from multiconn_archicad.conn_header import ConnHeader
 
 if TYPE_CHECKING:
-    from multi_conn_ac.multi_conn import MultiConn
+    from multiconn_archicad.multi_conn import MultiConn
 
 
 class FindArchicad:

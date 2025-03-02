@@ -1,9 +1,8 @@
 import pytest
 from unittest.mock import patch, MagicMock
 from dataclasses import dataclass, asdict
-from urllib.parse import quote
 
-from multi_conn_ac import ArchiCadID, UntitledProjectID, TeamworkCredentials, SoloProjectID, ProductInfo, Port, TeamworkProjectID, APIResponseError, ArchicadLocation
+from multiconn_archicad import ArchiCadID, UntitledProjectID, TeamworkCredentials, SoloProjectID, ProductInfo, Port, TeamworkProjectID, APIResponseError, ArchicadLocation
 
 
 # Setup for common fixtures
@@ -235,14 +234,14 @@ def test_teamwork_project_id_eq_different_type(teamwork_project_id):
 
 
 def test_teamwork_project_id_get_project_location(teamwork_project_id):
-    with patch('multi_conn_ac.basic_types.single_quote') as mock_single_quote, \
-            patch('multi_conn_ac.basic_types.double_quote') as mock_double_quote:
+    with patch('multiconn_archicad.basic_types.single_quote') as mock_single_quote, \
+            patch('multiconn_archicad.basic_types.double_quote') as mock_double_quote:
         mock_single_quote.side_effect = lambda s: f"single_quoted_{s}"
         mock_double_quote.side_effect = lambda s: f"double_quoted_{s}"
 
         expected_location = (
-            f"teamwork://single_quoted_user:single_quoted_secret@"
-            f"double_quoted_https://teamwork.example.com/double_quoted_projects/myproject"
+            "teamwork://single_quoted_user:single_quoted_secret@"
+            "double_quoted_https://teamwork.example.com/double_quoted_projects/myproject"
         )
         assert teamwork_project_id.get_project_location() == expected_location
 
@@ -250,14 +249,14 @@ def test_teamwork_project_id_get_project_location(teamwork_project_id):
 def test_teamwork_project_id_get_project_location_with_provided_credentials(teamwork_project_id):
     new_credentials = TeamworkCredentials(username="new_user", password="new_secret")
 
-    with patch('multi_conn_ac.basic_types.single_quote') as mock_single_quote, \
-            patch('multi_conn_ac.basic_types.double_quote') as mock_double_quote:
+    with patch('multiconn_archicad.basic_types.single_quote') as mock_single_quote, \
+            patch('multiconn_archicad.basic_types.double_quote') as mock_double_quote:
         mock_single_quote.side_effect = lambda s: f"single_quoted_{s}"
         mock_double_quote.side_effect = lambda s: f"double_quoted_{s}"
 
         expected_location = (
-            f"teamwork://single_quoted_new_user:single_quoted_new_secret@"
-            f"double_quoted_https://teamwork.example.com/double_quoted_projects/myproject"
+            "teamwork://single_quoted_new_user:single_quoted_new_secret@"
+            "double_quoted_https://teamwork.example.com/double_quoted_projects/myproject"
         )
         assert teamwork_project_id.get_project_location(new_credentials) == expected_location
 
@@ -276,7 +275,7 @@ def test_teamwork_project_id_get_project_location_without_password():
 
 
 def test_teamwork_project_id_from_project_location():
-    with patch('multi_conn_ac.basic_types.TeamworkProjectID.match_project_location') as mock_match_project_location:
+    with patch('multiconn_archicad.basic_types.TeamworkProjectID.match_project_location') as mock_match_project_location:
         mock_match = MagicMock()
         mock_match.group.side_effect = lambda key: {
             "serverAddress": "https://teamwork.example.com",
@@ -348,7 +347,7 @@ def test_teamwork_project_id_from_dict():
     (False, "")
 ])
 def test_archicad_location_from_api_response(is_mac, expected_suffix):
-    with patch('multi_conn_ac.basic_types.is_using_mac', return_value=is_mac):
+    with patch('multiconn_archicad.basic_types.is_using_mac', return_value=is_mac):
         api_response = {
             "result": {
                 "addOnCommandResponse": {
@@ -457,7 +456,7 @@ def test_archicad_id_from_api_response_solo(reset_archicad_id_registry):
 
 
 def test_archicad_id_from_api_response_teamwork(reset_archicad_id_registry):
-    with patch('multi_conn_ac.basic_types.TeamworkProjectID.from_project_location') as mock_from_project_location:
+    with patch('multiconn_archicad.basic_types.TeamworkProjectID.from_project_location') as mock_from_project_location:
         mock_project_id = MagicMock(spec=TeamworkProjectID)
         mock_from_project_location.return_value = mock_project_id
 

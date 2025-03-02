@@ -1,7 +1,7 @@
 
-from multi_conn_ac import MultiConn
-from multi_conn_ac.dialog_handlers.win_dialog_handler import start_handling_dialogs
-from multi_conn_ac.basic_types import TeamworkCredentials
+from multiconn_archicad import MultiConn
+from multiconn_archicad.dialog_handlers.win_dialog_handler import start_handling_dialogs
+from multiconn_archicad.basic_types import TeamworkCredentials
 
 m_conn = MultiConn()
 m_conn.connect.all()

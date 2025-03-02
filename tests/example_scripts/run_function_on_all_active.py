@@ -1,4 +1,4 @@
-from multi_conn_ac import StandardConnection, MultiConn
+from multiconn_archicad import StandardConnection, MultiConn
 import asyncio
 from inspect import iscoroutinefunction
 from typing import Callable, Any

@@ -3,9 +3,9 @@ from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from multi_conn_ac.conn_header import ConnHeader
-    from multi_conn_ac.multi_conn import MultiConn
-    from multi_conn_ac.basic_types import Port
+    from multiconn_archicad.conn_header import ConnHeader
+    from multiconn_archicad.multi_conn import MultiConn
+    from multiconn_archicad.basic_types import Port
 
 
 class ConnectionManager(ABC):

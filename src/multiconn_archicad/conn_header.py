@@ -1,8 +1,8 @@
 from enum import Enum
-from typing import Self, Any, Awaitable, cast, TypeGuard
+from typing import Self, Any, Awaitable, cast
 
-from multi_conn_ac.core_commands import CoreCommands
-from multi_conn_ac.basic_types import (
+from multiconn_archicad.core_commands import CoreCommands
+from multiconn_archicad.basic_types import (
     ArchiCadID,
     APIResponseError,
     ProductInfo,
@@ -10,8 +10,8 @@ from multi_conn_ac.basic_types import (
     create_object_or_error_from_response,
     ArchicadLocation,
 )
-from multi_conn_ac.standard_connection import StandardConnection
-from multi_conn_ac.utilities.async_utils import run_in_sync_or_async_context
+from multiconn_archicad.standard_connection import StandardConnection
+from multiconn_archicad.utilities.async_utils import run_in_sync_or_async_context
 
 
 class Status(Enum):

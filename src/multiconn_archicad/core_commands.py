@@ -2,8 +2,8 @@ import json
 from typing import Any, Awaitable, cast
 import aiohttp
 
-from multi_conn_ac.basic_types import Port
-from multi_conn_ac.utilities.async_utils import callable_from_sync_or_async_context
+from multiconn_archicad.basic_types import Port
+from multiconn_archicad.utilities.async_utils import callable_from_sync_or_async_context
 
 
 class CoreCommands:

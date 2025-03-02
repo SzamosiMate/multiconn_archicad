@@ -5,7 +5,7 @@
 
 <img img align="right" width="235" src="https://github.com/user-attachments/assets/b3b584ad-31d7-4a60-bf61-f7fce373b1a4" alt="MultiPalette UI" />
 
-**MultiPalette** is a simple graphical interface designed to help users select and run their Python scripts. It serves as a replacement for Archicad's built-in Python palette, offering several improvements. This application was developed as an example and test case for the **MultiConnAC** Python package.
+**MultiPalette** is a simple graphical interface designed to help users select and run their Python scripts. It serves as a replacement for Archicad's built-in Python palette, offering several improvements. This application was developed as an example and test case for the **MultiConn ArchiCAD** Python package.
         
 # Features
 - Run your scripts on a **single** Archicad instance **or multiple** instances simultaneously.  
@@ -13,7 +13,7 @@
 - Utilize **Tapir commands** alongside Graphisoft's standard Python wrapper.  
 
 # Installation
-1. Download and unzip the [Windows distribution](https://github.com/SzamosiMate/MultiConnAC/releases/latest/download/Multi-palette-win.zip
+1. Download and unzip the [Windows distribution](https://github.com/SzamosiMate/multiconn_archicad/releases/latest/download/Multi-palette-win.zip
 ) or clone the repo
 2. Download and install the Tapir add-on: [Tapir Archicad Add-On](https://github.com/ENZYME-APD/tapir-archicad-automation?tab=readme-ov-file)
 3. Start the Multi-Palette executable or `main.py` from the repository.

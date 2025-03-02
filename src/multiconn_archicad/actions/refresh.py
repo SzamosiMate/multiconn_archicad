@@ -1,11 +1,11 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
-from multi_conn_ac.core_commands import callable_from_sync_or_async_context
+from multiconn_archicad.core_commands import callable_from_sync_or_async_context
 
 if TYPE_CHECKING:
-    from multi_conn_ac.conn_header import ConnHeader
-    from multi_conn_ac.multi_conn import MultiConn
-    from multi_conn_ac.basic_types import Port
+    from multiconn_archicad.conn_header import ConnHeader
+    from multiconn_archicad.multi_conn import MultiConn
+    from multiconn_archicad.basic_types import Port
 
 
 class Refresh:

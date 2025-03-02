@@ -460,13 +460,13 @@ wheels = [
 [[package]]
 name = "multi-conn-ac"
 version = "0.1.0"
-source = { url = "https://github.com/SzamosiMate/MultiConnAC/releases/download/v0.1.0-alpha/multi_conn_ac-0.1.0-py3-none-any.whl" }
+source = { url = "https://github.com/SzamosiMate/multiconn_archicad/releases/download/v0.1.0-alpha/multiconn_archicad-0.1.0-py3-none-any.whl" }
 dependencies = [
     { name = "aiohttp" },
     { name = "archicad" },
 ]
 wheels = [
-    { url = "https://github.com/SzamosiMate/MultiConnAC/releases/download/v0.1.0-alpha/multi_conn_ac-0.1.0-py3-none-any.whl", hash = "sha256:d69e9d4fae1478c5508c8c9f252ac591b82f83bfb534ef5ccee953a38c674cc1" },
+    { url = "https://github.com/SzamosiMate/multiconn_archicad/releases/download/v0.1.0-alpha/multiconn_archicad-0.1.0-py3-none-any.whl", hash = "sha256:d69e9d4fae1478c5508c8c9f252ac591b82f83bfb534ef5ccee953a38c674cc1" },
 ]
 
 [package.metadata]
@@ -493,7 +493,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "multi-conn-ac", url = "https://github.com/SzamosiMate/MultiConnAC/releases/download/v0.1.0-alpha/multi_conn_ac-0.1.0-py3-none-any.whl" },
+    { name = "multi-conn-ac", url = "https://github.com/SzamosiMate/multiconn_archicad/releases/download/v0.1.0-alpha/multiconn_archicad-0.1.0-py3-none-any.whl" },
     { name = "nicegui", specifier = ">=2.9.0" },
     { name = "pywebview", specifier = ">=5.3.2" },
     { name = "pywin32", specifier = ">=308" },

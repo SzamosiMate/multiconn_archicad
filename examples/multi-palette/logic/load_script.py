@@ -6,7 +6,7 @@ from nicegui import ui, app
 from typing import Type, Protocol, Any, runtime_checkable, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from multi_conn_ac import ConnHeader
+    from multiconn_archicad import ConnHeader
     from .controller import AppState
     from types import ModuleType
 

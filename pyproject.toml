@@ -1,7 +1,7 @@
 [project]
-name = "multi_conn_ac"
+name = "multiconn_archicad"
 version = "0.1.7"
-description = "MultiConnAC is a connection object for ArchiCAD’s JSON API and its Python wrapper, designed to manage multiple open instances of ArchiCAD simultaneously."
+description = "MultiConn ArchiCAD is a connection object for ArchiCAD’s JSON API and its Python wrapper, designed to manage multiple open instances of ArchiCAD simultaneously."
 readme = "README.md"
 authors = [
     { name = "SzamosiMate", email = "szamimate@yahoo.com" }

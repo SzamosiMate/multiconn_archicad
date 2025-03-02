@@ -3,7 +3,7 @@ from random import randrange
 from nicegui import ui
 import re
 
-from multi_conn_ac import ConnHeader, MultiConn
+from multiconn_archicad import ConnHeader, MultiConn
 
 
 class HighlightWithRandomColor:

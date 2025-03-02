@@ -29,6 +29,6 @@ yarl==1.18.3
 
 
 psutil~=6.1.1
-multi_conn_ac~=0.1.1
+multiconn_archicad~=0.1.1
 asgiref~=3.8.1
 pywinauto~=0.6.9
