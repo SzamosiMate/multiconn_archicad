@@ -2,7 +2,7 @@
 
 ## 
 
-**MultiConn ArchiCAD** is a Python-based connection object for ArchiCAD’s JSON API and its Python wrapper. It is designed to manage multiple open instances of Archicad simultaneously, making it easier to execute commands across multiple instances.
+**MultiConn ArchiCAD** is a Python-based connection object for ArchiCAD's JSON API and its Python wrapper. It is designed to manage multiple open instances of Archicad simultaneously, making it easier to execute commands across multiple instances.
 
 [![Latest Release](https://img.shields.io/github/v/release/SzamosiMate/multiconn_archicad)](https://github.com/SzamosiMate/multiconn_archicad/releases/latest) 
 ![License](https://img.shields.io/github/license/SzamosiMate/multiconn_archicad) 
@@ -16,13 +16,14 @@
 - **Seamless Integration**: Utilizes ArchiCAD's official Python package.
 - **Tapir Add-On Support**: Run commands from the Tapir Archicad Add-On.
 - **Efficient I/O Operations**: Handles connection management using concurrent or asynchronous code.
+- **Project Management**: Find and open ArchiCAD projects programmatically.
 
 ## Installation
 
 You can install the latest version of the package from the following link using `pip`:
 
 ```bash
-pip install https://github.com/SzamosiMate/multiconn_archicad/releases/latest/download/multiconn_archicad-0.1.2-py3-none-any.whl
+pip install https://github.com/SzamosiMate/multiconn_archicad/releases/latest/download/multiconn_archicad-0.2.0-py3-none-any.whl
 ```
 
 The package depends on the [Tapir Archicad Add-On](https://github.com/ENZYME-APD/tapir-archicad-automation?tab=readme-ov-file). It is recommended to install the latest version of Tapir to access all features. While some functionality may work without the add-on, all tests have been conducted with it installed.
@@ -52,6 +53,110 @@ conn.refresh.closed_ports()
 # close, and remove from the dict of open port headers the archicad instance specified by ConnHeader
 conn.quit.from_headers(conn.open_port_headers[Port(19735)])
 ```
+
+### Project Management
+
+The MultiConn object provides actions to find and open ArchiCAD projects programmatically.
+
+#### Finding ArchiCAD Instances
+
+You can use the `find_archicad` action to locate a specific ArchiCAD instance from a `ConnHeader`.
+
+```python
+from multiconn_archicad import MultiConn, ConnHeader
+
+conn = MultiConn()
+conn_header = ConnHeader(Port(19723))
+
+# Find the port for a specific connection header
+port = conn.find_archicad.from_header(conn_header)
+if port:
+    print(f"Found ArchiCAD instance at port: {port}")
+```
+
+#### Opening Projects
+
+The `open_project` action allows you to programmatically open ArchiCAD projects.
+
+```python
+from multiconn_archicad import MultiConn, ConnHeader, TeamworkCredentials
+
+conn = MultiConn()
+
+# Open a project using a connection header
+conn_header = ConnHeader.from_dict(saved_header_data)
+port = conn.open_project.from_header(conn_header)
+
+# For teamwork projects, you can provide credentials
+credentials = TeamworkCredentials("username", "password")
+port = conn.open_project.with_teamwork_credentials(conn_header, credentials)
+```
+
+### Dialog Handling
+
+MultiConn can automatically handle most dialog windows that appear when opening ArchiCAD projects. This is particularly useful for batch operations and automation scripts.
+
+```python
+from multiconn_archicad import MultiConn, WinDialogHandler, win_int_handler_factory
+
+# Create a MultiConn instance with a dialog handler
+conn = MultiConn(dialog_handler=WinDialogHandler(win_int_handler_factory))
+
+# Dialog windows will be automatically handled when opening projects
+conn.open_project.from_header(conn_header)
+```
+
+The current implementation includes:
+- `EmptyDialogHandler`: Does nothing (default)
+- `WinDialogHandler`: Waits for ArchiCAD to start, and monitors appearing dialogs. If dialog appears, searches for appropriate handler in win_int_handler factory. Only works on windows.
+- `win_int_handler_factory`: Provides dialog handleing logic on a dialog by dialog basis for the INT language version. It is an example you should customize for your specific project needs. Even if you end up not modifying it, you should definitely know what it does for what dialog.
+
+### Serialization
+
+The MultiConn package allows you to save and load connection configurations, making it easier to work with specific projects across multiple sessions.
+
+#### Saving Connection Headers
+
+```python
+from multiconn_archicad import MultiConn, Port
+
+conn = MultiConn()
+conn.connect.all()
+
+# Get a connection header
+conn_header = conn.open_port_headers[Port(19723)]
+
+# Convert to dictionary for serialization
+header_dict = conn_header.to_dict()
+
+# Save to file using your preferred method
+import json
+with open('conn_header.json', 'w') as f:
+    json.dump(header_dict, f)
+```
+
+#### Loading Connection Headers
+
+```python
+from multiconn_archicad import ConnHeader, TeamworkCredentials
+
+# Load from file
+import json
+with open('conn_header.json', 'r') as f:
+    header_dict = json.load(f)
+
+# Create a header from the dictionary
+conn_header = ConnHeader.from_dict(header_dict)
+
+# For teamwork projects, you need to provide credentials
+if isinstance(conn_header.archicad_id, TeamworkProjectID):
+    credentials = TeamworkCredentials("username", "password")
+    # Use the credentials when opening the project
+    port = conn.open_project.with_teamwork_credentials(conn_header, credentials)
+```
+
+Note: Passwords are not stored in serialized connection headers for security reasons. You must provide them when loading teamwork projects.
+
 ### Running Commands
 
 #### Single Archicad Instance
@@ -127,4 +232,3 @@ Contributions are welcome! Feel free to submit issues, feature requests, or pull
 ## License
 
 This project is licensed under the MIT License. See the LICENSE file for details.
-
