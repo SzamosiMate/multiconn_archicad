@@ -7,7 +7,8 @@ import re
 import time
 from typing import Callable
 
-from .dialog_handler_base import DialogHandlerBase, UnhandledDialogError
+from multiconn_archicad.dialog_handlers.win_int_handler_factory import win_int_handler_factory
+from multiconn_archicad.dialog_handlers.dialog_handler_base import DialogHandlerBase, UnhandledDialogError
 
 
 class WinDialogHandler(DialogHandlerBase):
@@ -91,3 +92,8 @@ class WinDialogHandler(DialogHandlerBase):
             if re.fullmatch(pattern, title):
                 return pattern
         return None
+
+if __name__ == "__main__":
+    dialog_handler = WinDialogHandler(win_int_handler_factory)
+    dialog_handler._get_app_from_title(".*Archicad.*")
+    dialog_handler._wait_and_handle_dialogs()
