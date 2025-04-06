@@ -7,6 +7,8 @@ if TYPE_CHECKING:
     from multiconn_archicad.multi_conn import MultiConn
     from multiconn_archicad.basic_types import Port
 
+import logging
+log = logging.getLogger(__name__)
 
 class ConnectionManager(ABC):
     def __init__(self, multi_conn: MultiConn):
@@ -34,7 +36,7 @@ class ConnectionManager(ABC):
 class Connect(ConnectionManager):
     def execute_action(self, conn_headers: list[ConnHeader]) -> list[ConnHeader]:
         for conn_header in conn_headers:
-            print(f"connecting {conn_header.product_info}")
+            log.info(f"Connecting to project {conn_header.product_info} at port {conn_header.port}")
             conn_header.connect()
         return conn_headers
 

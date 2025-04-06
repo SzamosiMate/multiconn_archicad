@@ -12,6 +12,8 @@ from multiconn_archicad.conn_header import ConnHeader
 if TYPE_CHECKING:
     from multiconn_archicad.multi_conn import MultiConn
 
+import logging
+log = logging.getLogger(__name__)
 
 class FindArchicad:
     def __init__(self, multi_conn: MultiConn):
@@ -70,7 +72,7 @@ class OpenProject:
         self.multi_conn.dialog_handler.start(self.process)
 
     def _start_process(self, conn_header: ConnHeader, teamwork_credentials: TeamworkCredentials | None = None) -> None:
-        print(f"opening project: {conn_header.archicad_id.projectName}")
+        log.info(f"opening project: {conn_header.archicad_id.projectName}")
         self.process = subprocess.Popen(
             f"{escape_spaces_in_path(conn_header.archicad_location.archicadLocation)} "
             f"{escape_spaces_in_path(conn_header.archicad_id.get_project_location(teamwork_credentials))}",
@@ -87,6 +89,6 @@ class OpenProject:
             for conn in connections:
                 if conn.status == psutil.CONN_LISTEN:
                     if conn.laddr.port in self.multi_conn.port_range:
-                        print(f"Detected Archicad listening on port {conn.laddr.port}")
+                        log.info(f"Detected Archicad listening on port {conn.laddr.port}")
                         return conn.laddr.port
             time.sleep(1)

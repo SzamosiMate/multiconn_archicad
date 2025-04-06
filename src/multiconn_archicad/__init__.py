@@ -21,6 +21,8 @@ from .dialog_handlers import (
     UnhandledDialogError,
 )
 
+import logging
+
 __all__: tuple[str, ...] = (
     "MultiConn",
     "ConnHeader",
@@ -41,3 +43,6 @@ __all__: tuple[str, ...] = (
     "UntitledProjectID",
     "ArchicadLocation",
 )
+
+log = logging.getLogger(__name__)
+log.addHandler(logging.NullHandler())

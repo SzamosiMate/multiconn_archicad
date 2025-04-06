@@ -56,9 +56,9 @@ def print_test():
 
 
 if __name__ == "__main__":
-    # connect_and_run_ac_command()
-    # connect_and_run_core_command()
+    connect_and_run_ac_command()
+    connect_and_run_core_command()
     # quit_port()
-    # cycle_primary()
+    cycle_primary()
     # quit_and_refresh()
     print_test()

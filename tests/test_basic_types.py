@@ -350,9 +350,8 @@ def test_archicad_location_from_api_response(is_mac, expected_suffix):
     with patch('multiconn_archicad.basic_types.is_using_mac', return_value=is_mac):
         api_response = {
             "result": {
-                "addOnCommandResponse": {
-                    "archicadLocation": "/Applications/ARCHICAD"
-                }
+                "archicadLocation": "/Applications/ARCHICAD"
+
             }
         }
         location = ArchicadLocation.from_api_response(api_response)
@@ -428,10 +427,8 @@ def test_archicad_id_register_subclass(reset_archicad_id_registry):
 def test_archicad_id_from_api_response_untitled(reset_archicad_id_registry):
     api_response = {
         "result": {
-            "addOnCommandResponse": {
-                "isUntitled": True,
-                "isTeamwork": False
-            }
+            "isUntitled": True,
+            "isTeamwork": False
         }
     }
     project_id = ArchiCadID.from_api_response(api_response)
@@ -441,12 +438,10 @@ def test_archicad_id_from_api_response_untitled(reset_archicad_id_registry):
 def test_archicad_id_from_api_response_solo(reset_archicad_id_registry):
     api_response = {
         "result": {
-            "addOnCommandResponse": {
-                "isUntitled": False,
-                "isTeamwork": False,
-                "projectPath": "/path/to/project",
-                "projectName": "MySoloProject"
-            }
+            "isUntitled": False,
+            "isTeamwork": False,
+            "projectPath": "/path/to/project",
+            "projectName": "MySoloProject"
         }
     }
     project_id = ArchiCadID.from_api_response(api_response)
@@ -462,12 +457,10 @@ def test_archicad_id_from_api_response_teamwork(reset_archicad_id_registry):
 
         api_response = {
             "result": {
-                "addOnCommandResponse": {
-                    "isUntitled": False,
-                    "isTeamwork": True,
-                    "projectLocation": "teamwork://user:pass@server/project",
-                    "projectName": "MyTeamworkProject"
-                }
+                "isUntitled": False,
+                "isTeamwork": True,
+                "projectLocation": "teamwork://user:pass@server/project",
+                "projectName": "MyTeamworkProject"
             }
         }
         project_id = ArchiCadID.from_api_response(api_response)

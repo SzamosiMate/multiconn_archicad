@@ -56,7 +56,7 @@ class ArchicadLocation(BaseModel):
 
     @classmethod
     def from_api_response(cls, response: dict) -> Self:
-        location = response["result"]["addOnCommandResponse"]["archicadLocation"]
+        location = response["result"]["archicadLocation"]
         return cls(f"{location}/Contents/MacOS/ARCHICAD" if is_using_mac() else location)
 
 
@@ -102,18 +102,18 @@ class ArchiCadID(ABC):
 
     @classmethod
     def from_api_response(cls, response: dict) -> Self:
-        addon_command_response = response["result"]["addOnCommandResponse"]
-        if addon_command_response["isUntitled"]:
+        result = response["result"]
+        if result["isUntitled"]:
             return cls._ID_type_registry["UntitledProjectID"]()
-        elif not addon_command_response["isTeamwork"]:
+        elif not result["isTeamwork"]:
             return cls._ID_type_registry["SoloProjectID"](
-                projectPath=addon_command_response["projectPath"],
-                projectName=addon_command_response["projectName"],
+                projectPath=result["projectPath"],
+                projectName=result["projectName"],
             )
         else:
             return cls._ID_type_registry["TeamworkProjectID"].from_project_location(
-                project_location=addon_command_response["projectLocation"],
-                project_name=addon_command_response["projectName"],
+                project_location=result["projectLocation"],
+                project_name=result["projectName"],
             )
 
     @abstractmethod
