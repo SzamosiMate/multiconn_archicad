@@ -47,6 +47,7 @@ class Connect(ConnectionManager):
 class Disconnect(ConnectionManager):
     def execute_action(self, conn_headers: list[ConnHeader]) -> list[ConnHeader]:
         for conn_header in conn_headers:
+            log.info(f"Disconnecting from project {conn_header.product_info} at port {conn_header.port}")
             conn_header.disconnect()
         return conn_headers
 
@@ -55,6 +56,7 @@ class QuitAndDisconnect(ConnectionManager):
     def execute_action(self, conn_headers: list[ConnHeader]) -> list[ConnHeader]:
         for conn_header in conn_headers:
             if conn_header.port:
+                log.info(f"Sending Quit command to Archicad on port {conn_header.port} and unassigning header.")
                 conn_header.core.post_tapir_command("QuitArchicad")
                 self.multi_conn.open_port_headers.pop(conn_header.port)
             conn_header.unassign()

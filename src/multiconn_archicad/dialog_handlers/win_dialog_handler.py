@@ -21,6 +21,7 @@ class WinDialogHandler(DialogHandlerBase):
         self.retries: int = retries
 
     def start(self, process: subprocess.Popen) -> None:
+        log.info(f"Starting {self.__class__.__name__} for process {process.pid}.")
         self._get_app_from_pid(process)
         self._wait_and_handle_dialogs()
 

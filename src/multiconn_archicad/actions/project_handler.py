@@ -57,6 +57,10 @@ class OpenProject:
         self._open_project(project_params)
         port = Port(self._find_archicad_port())
         self.multi_conn.open_port_headers.update({port: ConnHeader(port)})
+        log.info(
+            f"Successfully opened project '{project_params.conn_header.archicad_id.projectName}' "
+            f"on port {port} (Process PID: {self.process.pid})"
+        )
         return port
 
     def _check_input(self, project_params: ProjectOpenParams) -> None:
@@ -96,6 +100,6 @@ class OpenProject:
             for conn in connections:
                 if conn.status == psutil.CONN_LISTEN:
                     if conn.laddr.port in self.multi_conn.port_range:
-                        log.info(f"Detected Archicad listening on port {conn.laddr.port}")
+                        log.debug(f"Detected Archicad listening on port {conn.laddr.port}")
                         return conn.laddr.port
             time.sleep(1)
