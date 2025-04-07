@@ -112,13 +112,13 @@ class ConnHeader:
         return isinstance(self.archicad_id, ArchiCadID) and isinstance(self.archicad_location, ArchicadLocation)
 
     async def get_product_info(self) -> ProductInfo | APIResponseError:
-        result = await cast(Awaitable[dict[str, Any]], self.core.post_command(command="API.GetProductInfo"))
+        result = await cast(Awaitable[dict[str, Any]], self.core.post_command(command="API.GetProductInfo", timeout=0.2))
         return await create_object_or_error_from_response(result, ProductInfo)
 
     async def get_archicad_id(self) -> ArchiCadID | APIResponseError:
-        result = await cast(Awaitable[dict[str, Any]], self.core.post_tapir_command(command="GetProjectInfo"))
+        result = await cast(Awaitable[dict[str, Any]], self.core.post_tapir_command(command="GetProjectInfo", timeout=0.2))
         return await create_object_or_error_from_response(result, ArchiCadID)
 
     async def get_archicad_location(self) -> ArchicadLocation | APIResponseError:
-        result = await cast(Awaitable[dict[str, Any]], self.core.post_tapir_command(command="GetArchicadLocation"))
+        result = await cast(Awaitable[dict[str, Any]], self.core.post_tapir_command(command="GetArchicadLocation", timeout=0.2))
         return await create_object_or_error_from_response(result, ArchicadLocation)

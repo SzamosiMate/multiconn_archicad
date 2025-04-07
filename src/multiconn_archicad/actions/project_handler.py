@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING
 import subprocess
 import time
 import psutil
+from dataclasses import dataclass
 
 from multiconn_archicad.errors import NotFullyInitializedError, ProjectAlreadyOpenError
 from multiconn_archicad.utilities.platform_utils import escape_spaces_in_path, is_using_mac
@@ -19,15 +20,21 @@ class FindArchicad:
     def __init__(self, multi_conn: MultiConn):
         self.multi_conn: MultiConn = multi_conn
 
-    def from_header(self, header: ConnHeader, **kwargs) -> Port | None:
-        return self._execute_action(header, **kwargs)
+    def from_header(self, header: ConnHeader) -> Port | None:
+        return self._execute_action(header)
 
-    def _execute_action(self, conn_header: ConnHeader, **kwargs) -> Port | None:
+    def _execute_action(self, conn_header: ConnHeader) -> Port | None:
         if conn_header.is_fully_initialized():
             for port, header in self.multi_conn.open_port_headers.items():
                 if header == conn_header:
                     return port
         return None
+
+@dataclass
+class ProjectOpenParams:
+    conn_header: ConnHeader
+    teamwork_credentials: TeamworkCredentials | None
+    demo: bool
 
 
 class OpenProject:
@@ -35,47 +42,47 @@ class OpenProject:
         self.multi_conn: MultiConn = multi_conn
         self.process: subprocess.Popen
 
-    def from_header(self, header: ConnHeader, **kwargs) -> Port | None:
-        return self._execute_action(header, **kwargs)
+    def from_header(self, conn_header: ConnHeader, demo: bool = False) -> Port | None:
+        project_params = ProjectOpenParams(conn_header, None, demo)
+        return self._execute_action(project_params)
 
     def with_teamwork_credentials(
-        self, conn_header: ConnHeader, teamwork_credentials: TeamworkCredentials
+        self, conn_header: ConnHeader, teamwork_credentials: TeamworkCredentials, demo: bool = False
     ) -> Port | None:
-        return self._execute_action(conn_header, teamwork_credentials)
+        project_params = ProjectOpenParams(conn_header, teamwork_credentials, demo)
+        return self._execute_action(project_params)
 
-    def _execute_action(
-        self, conn_header: ConnHeader, teamwork_credentials: TeamworkCredentials | None = None
-    ) -> Port | None:
-        self._check_input(conn_header, teamwork_credentials)
-        self._open_project(conn_header, teamwork_credentials)
+    def _execute_action(self, project_params: ProjectOpenParams) -> Port | None:
+        self._check_input(project_params)
+        self._open_project(project_params)
         port = Port(self._find_archicad_port())
         self.multi_conn.open_port_headers.update({port: ConnHeader(port)})
         return port
 
-    def _check_input(
-        self, header_to_check: ConnHeader, teamwork_credentials: TeamworkCredentials | None = None
-    ) -> None:
-        if header_to_check.is_fully_initialized():
-            if isinstance(header_to_check.archicad_id, TeamworkProjectID):
-                if teamwork_credentials:
-                    assert teamwork_credentials.password, "You must supply a valid password!"
+    def _check_input(self, project_params: ProjectOpenParams) -> None:
+        if project_params.conn_header.is_fully_initialized():
+            if isinstance(project_params.conn_header.archicad_id, TeamworkProjectID):
+                if project_params.teamwork_credentials:
+                    assert project_params.teamwork_credentials.password, "You must supply a valid password!"
                 else:
-                    assert header_to_check.archicad_id.teamworkCredentials.password, "You must supply a valid password!"
+                    assert project_params.conn_header.archicad_id.teamworkCredentials.password, "You must supply a valid password!"
         else:
-            raise NotFullyInitializedError(f"Cannot open project from partially initializer header {header_to_check}")
-        port = self.multi_conn.find_archicad.from_header(header_to_check)
+            raise NotFullyInitializedError(f"Cannot open project from partially initializer header {project_params.conn_header}")
+        port = self.multi_conn.find_archicad.from_header(project_params.conn_header)
         if port:
             raise ProjectAlreadyOpenError(f"Project is already open at port: {port}")
 
-    def _open_project(self, conn_header: ConnHeader, teamwork_credentials: TeamworkCredentials | None = None) -> None:
-        self._start_process(conn_header, teamwork_credentials)
+    def _open_project(self, project_params: ProjectOpenParams) -> None:
+        self._start_process(project_params)
         self.multi_conn.dialog_handler.start(self.process)
 
-    def _start_process(self, conn_header: ConnHeader, teamwork_credentials: TeamworkCredentials | None = None) -> None:
-        log.info(f"opening project: {conn_header.archicad_id.projectName}")
+    def _start_process(self, project_params: ProjectOpenParams) -> None:
+        log.info(f"opening project: {project_params.conn_header.archicad_id.projectName}")
+        demo_flag = " -demo" if project_params.demo else ""
         self.process = subprocess.Popen(
-            f"{escape_spaces_in_path(conn_header.archicad_location.archicadLocation)} "
-            f"{escape_spaces_in_path(conn_header.archicad_id.get_project_location(teamwork_credentials))}",
+            f"{escape_spaces_in_path(project_params.conn_header.archicad_location.archicadLocation)} "
+            f"{escape_spaces_in_path(project_params.conn_header.archicad_id.get_project_location(project_params.teamwork_credentials))}"
+            + demo_flag,
             start_new_session=True,
             shell=is_using_mac(),
             text=True,
