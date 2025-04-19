@@ -14,7 +14,7 @@
 
 - **Multi-connection Support**: Connect to one, multiple, or all open instances of Archicad.
 - **Seamless Integration**: Utilizes ArchiCAD's official Python package.
-- **Tapir Add-On Support**: Run commands from the Tapir Archicad Add-On.
+- **Tapir Add-On Integration**: Run commands using the Tapir Archicad Add-On framework
 - **Efficient I/O Operations**: Handles connection management using concurrent or asynchronous code.
 - **Project Management**: Find and open ArchiCAD projects programmatically.
 
@@ -26,7 +26,15 @@ You can install the latest version of the package from the following link using 
 pip install https://github.com/SzamosiMate/multiconn_archicad/releases/latest/download/multiconn_archicad-0.2.0-py3-none-any.whl
 ```
 
-The package depends on the [Tapir Archicad Add-On](https://github.com/ENZYME-APD/tapir-archicad-automation?tab=readme-ov-file). It is recommended to install the latest version of Tapir to access all features. While some functionality may work without the add-on, all tests have been conducted with it installed.
+**Prerequisites: Tapir Add-On is Required**
+
+This package **critically depends** on the [Tapir Archicad Add-On](https://github.com/ENZYME-APD/tapir-archicad-automation?tab=readme-ov-file). You **must** install the Tapir Add-On in your Archicad application for full functionality.
+
+**Specifically, the Tapir Add-On is required for:**
+*   All commands executed via the `core.post_tapir_command()` method.
+*   Internal commands used by `multiconn_archicad` to identify running Archicad instances and projects (`GetProjectInfo`, `GetArchicadLocation`).
+
+**Without the Tapir Add-On installed, key functionalities like discovering Archicad instances, identifying projects, and running any Tapir-specific commands will fail.** Please install the latest version of Tapir before using this package.
 
 ## Usage
 
@@ -210,7 +218,7 @@ elements = {
 The aim of the module is to incorporate all solutions that let users automate ArchiCAD from python. The different solutions are separated into namespaces, accessed from properties of the connection object. One of the planned features is letting users supply a list of namespaces they want to use when creating the connections. At the moment there are only two namespaces:
 
 - **`standard`**: The official ArchiCAD python wrapper
-- **`core`**: A simple JSON based module that lets the users post official and tapir commands based on Tapir's ["aclib"](https://github.com/ENZYME-APD/tapir-archicad-automation/tree/main/archicad-addon/Examples/aclib)
+- **`core`**: A simple JSON-based module that lets users post official Archicad JSON commands and Tapir-specific commands via `core.post_command()` and `core.post_tapir_command()` respectively. **Important:** The `core.post_tapir_command()` method, and internal functions relying on it (like project identification), **absolutely require** the Tapir Add-On to be installed in Archicad. These commands will **fail** if Tapir is not present. This namespace is inspired by Tapir's ["aclib"](https://github.com/ENZYME-APD/tapir-archicad-automation/tree/main/archicad-addon/Examples/aclib).
 
 #### Example: Using two namespaces together
 ```python

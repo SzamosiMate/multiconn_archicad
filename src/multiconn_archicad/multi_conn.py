@@ -11,6 +11,8 @@ from multiconn_archicad.basic_types import Port, APIResponseError, ProductInfo, 
 from multiconn_archicad.actions import Connect, Disconnect, Refresh, QuitAndDisconnect, FindArchicad, OpenProject
 from multiconn_archicad.dialog_handlers import DialogHandlerBase, EmptyDialogHandler
 
+import logging
+log = logging.getLogger(__name__)
 
 class MultiConn:
     _base_url: str = "http://127.0.0.1"
@@ -93,6 +95,7 @@ class MultiConn:
         try:
             async with session.get(url, timeout=aiohttp.ClientTimeout(total=0.2)) as response:
                 if response.status == 200:
+                    log.debug(f"Detected active Archicad API on port {port}. Creating/refreshing header.")
                     await self.create_or_refresh_connection(port)
                 else:
                     await self.close_if_open(port)
@@ -121,6 +124,7 @@ class MultiConn:
 
     async def close_if_open(self, port: Port) -> None:
         if port in self.open_port_headers.keys():
+            log.info(f"Removing connection header for inactive/unresponsive port {port}.")
             self.open_port_headers.pop(port)
             if self._primary and self._primary.port == port:
                 await cast(Awaitable[None], self._set_primary())
@@ -155,11 +159,13 @@ class MultiConn:
 
     async def _set_primary_namespaces(self, port: Port) -> None:
         self._primary = await ConnHeader.async_init(port)
+        log.info(f"Primary connection set to Archicad instance on port {port}")
         self._primary.connect()
         self.core = self._primary.core
         self.standard = self._primary.standard
 
     async def _clear_primary_namespaces(self) -> None:
         self._primary = None
+        log.info("Primary connection cleared")
         self.core = CoreCommands
         self.standard = StandardConnection

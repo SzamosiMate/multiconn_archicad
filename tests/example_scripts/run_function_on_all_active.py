@@ -1,16 +1,17 @@
-from multiconn_archicad import StandardConnection, MultiConn, ConnHeader
+from multiconn_archicad import MultiConn, ConnHeader
 import asyncio
 from inspect import iscoroutinefunction
 from typing import Callable, Any
 
 
-def add_str_to_id(conn: StandardConnection, str_to_add: str) -> str:
-    elements = conn.commands.GetAllElements()
+def add_str_to_id(header: ConnHeader, str_to_add: str) -> str:
+    std = header.standard
+    elements = std.commands.GetAllElements()
     property_user_id = [
-        conn.types.PropertyUserId(type="BuiltIn", nonLocalizedName="General_ElementID")
+        std.types.PropertyUserId(type="BuiltIn", nonLocalizedName="General_ElementID")
     ]
-    property_id = conn.commands.GetPropertyIds(property_user_id)
-    id_wrappers_of_elements = conn.commands.GetPropertyValuesOfElements(
+    property_id = std.commands.GetPropertyIds(property_user_id)
+    id_wrappers_of_elements = std.commands.GetPropertyValuesOfElements(
         elements, property_id
     )
     ids_of_elements = [
@@ -21,12 +22,12 @@ def add_str_to_id(conn: StandardConnection, str_to_add: str) -> str:
         # sleep(1)
         # print(element_id.value)
     element_property_values = [
-        conn.types.ElementPropertyValue(
+        std.types.ElementPropertyValue(
             element.elementId, property_id[0].propertyId, e_id
         )
         for element, e_id in zip(elements, ids_of_elements)
     ]
-    return conn.commands.SetPropertyValuesOfElements(element_property_values)
+    return std.commands.SetPropertyValuesOfElements(element_property_values)
 
 
 async def call_function(func, *args, **kwargs):

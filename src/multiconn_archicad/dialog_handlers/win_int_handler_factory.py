@@ -55,10 +55,21 @@ def handle_project_recovery(dialog: UIAWrapper) -> None:
 win_int_handler_factory.update({"Archicad Project Recovery": handle_project_recovery})
 
 
-def handle_project_is_in_use(dialog: UIAWrapper) -> None:
+def handle_information_dialogs(dialog: UIAWrapper) -> None:
+    #handle "This project is in use by..." information dialog
     for child in dialog.children():
         if "Open with Exclusive Access" in child.texts():
             child.click()
 
+    #handle "Your license does not allow you to access a BIMcloud" information dialog
+    has_text = False
+    for child in dialog.children():
+        if "Your license does not allow you to access a BIMcloud."  in child.texts():
+            has_text = True
+    if has_text:
+        for child in dialog.children():
+            if "Continue" in child.texts():
+                child.click()
 
-win_int_handler_factory.update({"Information": handle_project_is_in_use})
+
+win_int_handler_factory.update({"Information": handle_information_dialogs})

@@ -4,6 +4,7 @@ import re
 from urllib.parse import unquote
 from abc import ABC, abstractmethod
 
+from multiconn_archicad.errors import APIErrorBase
 from multiconn_archicad.utilities.platform_utils import is_using_mac, double_quote, single_quote
 
 JsonType = Union[str, int, float, bool, None, list["JsonType"], dict[str, "JsonType"]]
@@ -44,9 +45,9 @@ class ProductInfo(BaseModel):
     @classmethod
     def from_api_response(cls, response: dict) -> Self:
         return cls(
-            response["result"]["version"],
-            response["result"]["buildNumber"],
-            response["result"]["languageCode"],
+            response["version"],
+            response["buildNumber"],
+            response["languageCode"],
         )
 
 
@@ -56,7 +57,7 @@ class ArchicadLocation(BaseModel):
 
     @classmethod
     def from_api_response(cls, response: dict) -> Self:
-        location = response["result"]["addOnCommandResponse"]["archicadLocation"]
+        location = response["archicadLocation"]
         return cls(f"{location}/Contents/MacOS/ARCHICAD" if is_using_mac() else location)
 
 
@@ -66,10 +67,17 @@ class APIResponseError(BaseModel):
     message: str
 
     @classmethod
+    def from_exception(cls, response: APIErrorBase) -> Self:
+        return cls(
+            code=response.code,
+            message=response.message,
+        )
+
+    @classmethod
     def from_api_response(cls, response: dict) -> Self:
         return cls(
-            code=response["error"]["code"],
-            message=response["error"]["message"],
+            code=response["code"],
+            message=response["message"],
         )
 
 
@@ -102,18 +110,17 @@ class ArchiCadID(ABC):
 
     @classmethod
     def from_api_response(cls, response: dict) -> Self:
-        addon_command_response = response["result"]["addOnCommandResponse"]
-        if addon_command_response["isUntitled"]:
+        if response["isUntitled"]:
             return cls._ID_type_registry["UntitledProjectID"]()
-        elif not addon_command_response["isTeamwork"]:
+        elif not response["isTeamwork"]:
             return cls._ID_type_registry["SoloProjectID"](
-                projectPath=addon_command_response["projectPath"],
-                projectName=addon_command_response["projectName"],
+                projectPath=response["projectPath"],
+                projectName=response["projectName"],
             )
         else:
             return cls._ID_type_registry["TeamworkProjectID"].from_project_location(
-                project_location=addon_command_response["projectLocation"],
-                project_name=addon_command_response["projectName"],
+                project_location=response["projectLocation"],
+                project_name=response["projectName"],
             )
 
     @abstractmethod
