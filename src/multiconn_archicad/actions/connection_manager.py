@@ -2,6 +2,8 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
 
+from multiconn_archicad.errors import RequestError, ArchicadAPIError
+
 if TYPE_CHECKING:
     from multiconn_archicad.conn_header import ConnHeader
     from multiconn_archicad.multi_conn import MultiConn
@@ -36,7 +38,8 @@ class ConnectionManager(ABC):
 class Connect(ConnectionManager):
     def execute_action(self, conn_headers: list[ConnHeader]) -> list[ConnHeader]:
         for conn_header in conn_headers:
-            log.info(f"Connecting to project {conn_header.product_info} at port {conn_header.port}")
+            project_name = conn_header.archicad_id.projectName if conn_header.is_id_initialized() else "Unknown"
+            log.info(f"Connecting to project {project_name} at port {conn_header.port}")
             conn_header.connect()
         return conn_headers
 
@@ -47,7 +50,8 @@ class Connect(ConnectionManager):
 class Disconnect(ConnectionManager):
     def execute_action(self, conn_headers: list[ConnHeader]) -> list[ConnHeader]:
         for conn_header in conn_headers:
-            log.info(f"Disconnecting from project {conn_header.product_info} at port {conn_header.port}")
+            project_name = conn_header.archicad_id.projectName if conn_header.is_id_initialized() else "Unknown"
+            log.info(f"Disconnecting from project {project_name} at port {conn_header.port}")
             conn_header.disconnect()
         return conn_headers
 
@@ -57,7 +61,11 @@ class QuitAndDisconnect(ConnectionManager):
         for conn_header in conn_headers:
             if conn_header.port:
                 log.info(f"Sending Quit command to Archicad on port {conn_header.port} and unassigning header.")
-                conn_header.core.post_tapir_command("QuitArchicad")
+                try:
+                    conn_header.core.post_tapir_command("QuitArchicad")
+                except (RequestError, ArchicadAPIError) as e:
+                    log.error(f"Failed to quit archicad: error: {e}")
+                    raise
                 self.multi_conn.open_port_headers.pop(conn_header.port)
             conn_header.unassign()
         return conn_headers

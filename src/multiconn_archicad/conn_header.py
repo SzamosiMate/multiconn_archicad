@@ -8,9 +8,9 @@ from multiconn_archicad.basic_types import (
     APIResponseError,
     ProductInfo,
     Port,
-    create_object_or_error_from_response,
     ArchicadLocation,
 )
+from multiconn_archicad.errors import RequestError, ArchicadAPIError
 from multiconn_archicad.standard_connection import StandardConnection
 from multiconn_archicad.utilities.async_utils import run_in_sync_or_async_context
 
@@ -103,22 +103,36 @@ class ConnHeader:
         self.port = None
 
     def is_fully_initialized(self) -> bool:
-        return self.is_product_info_initialized() and self.is_id_and_location_initialized()
+        return (self.is_product_info_initialized()
+                and self.is_id_initialized()
+                and self.is_location_initialized())
 
     def is_product_info_initialized(self) -> bool:
         return isinstance(self.product_info, ProductInfo)
 
-    def is_id_and_location_initialized(self) -> bool:
-        return isinstance(self.archicad_id, ArchiCadID) and isinstance(self.archicad_location, ArchicadLocation)
+    def is_id_initialized(self) -> bool:
+        return isinstance(self.archicad_id, ArchiCadID)
+
+    def is_location_initialized(self) -> bool:
+        return isinstance(self.archicad_location, ArchicadLocation)
 
     async def get_product_info(self) -> ProductInfo | APIResponseError:
-        result = await cast(Awaitable[dict[str, Any]], self.core.post_command(command="API.GetProductInfo", timeout=0.2))
-        return await create_object_or_error_from_response(result, ProductInfo)
+        try:
+            result = await cast(Awaitable[dict[str, Any]], self.core.post_command(command="API.GetProductInfo", timeout=0.2))
+            return ProductInfo.from_api_response(result)
+        except (RequestError, ArchicadAPIError) as e:
+            return APIResponseError.from_exception(e)
 
     async def get_archicad_id(self) -> ArchiCadID | APIResponseError:
-        result = await cast(Awaitable[dict[str, Any]], self.core.post_tapir_command(command="GetProjectInfo", timeout=0.2))
-        return await create_object_or_error_from_response(result, ArchiCadID)
+        try:
+            result = await cast(Awaitable[dict[str, Any]], self.core.post_tapir_command(command="GetProjectInfo", timeout=0.2))
+            return ArchiCadID.from_api_response(result)
+        except (RequestError, ArchicadAPIError) as e:
+            return APIResponseError.from_exception(e)
 
     async def get_archicad_location(self) -> ArchicadLocation | APIResponseError:
-        result = await cast(Awaitable[dict[str, Any]], self.core.post_tapir_command(command="GetArchicadLocation", timeout=0.2))
-        return await create_object_or_error_from_response(result, ArchicadLocation)
+        try:
+            result = await cast(Awaitable[dict[str, Any]], self.core.post_tapir_command(command="GetArchicadLocation", timeout=0.2))
+            return ArchicadLocation.from_api_response(result)
+        except (RequestError, ArchicadAPIError) as e:
+            return APIResponseError.from_exception(e)

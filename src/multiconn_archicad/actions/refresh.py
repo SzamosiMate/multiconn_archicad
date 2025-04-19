@@ -40,6 +40,6 @@ class Refresh:
         await self.multi_conn.scan_ports(ports)
         self.multi_conn.open_port_headers = dict(sorted(self.multi_conn.open_port_headers.items()))
         log.info(
-            f"Refreshing - Open ports: {len(self.multi_conn.open_port_headers)} db,"
-            f" closed ports: {len(self.multi_conn.closed_ports)}"
+            f"Refreshing - Open ports: {len(self.multi_conn.open_port_headers)},"
+            f" Closed ports: {len(self.multi_conn.closed_ports)}"
         )

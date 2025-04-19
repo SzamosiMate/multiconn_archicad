@@ -4,6 +4,14 @@ import aiohttp
 import asyncio
 
 from multiconn_archicad.basic_types import Port
+from multiconn_archicad.errors import (
+    CommandTimeoutError,
+    APIConnectionError,
+    InvalidResponseFormatError,
+    RequestError,
+    StandardAPIError,
+    TapirCommandError,
+)
 from multiconn_archicad.utilities.async_utils import callable_from_sync_or_async_context
 
 import logging
@@ -29,15 +37,19 @@ class CoreCommands:
         if parameters is None:
             parameters = {}
         payload = {"command": command, "parameters": parameters}
-        timeout = timeout
 
-        log.debug("command: " + command + "parameters:\n" + json.dumps(parameters, indent=4))
+        log.debug(f"command: {command} parameters:\n {json.dumps(parameters, indent=4)}")
 
-        result = await self._try_command(self._post_with_aiohttp, payload, timeout)
+        response = await self._try_command(self._post_with_aiohttp, payload, timeout)
 
-        log.debug("result:\n" + json.dumps(result, indent=4))
-
-        return result
+        if response.get("succeeded"):
+            response = response.get("result", {})
+            log.debug(f"response: {json.dumps(response, indent=4)}")
+        else:
+            log.warning(f"response: {response}")
+            raise StandardAPIError(message=response.get("error", {}).get("message", "no message"),
+                                   code=response.get("error", {}).get("code", None))
+        return response
 
 
     @callable_from_sync_or_async_context
@@ -60,13 +72,11 @@ class CoreCommands:
             ),
         )
 
-        if response.get("succeeded"):
-            response["result"] = response.get("result", {}).get("addOnCommandResponse", {})
-
-            if not response["result"].get("success", True):
-                response = self._construct_failed_execution_response(code=response["result"]["error"]["code"],
-                                                                     message=response["result"]["error"]["message"])
-
+        response = response.get("addOnCommandResponse", {})
+        if not response.get("success", True):
+            log.warning(f"response: {response}")
+            raise TapirCommandError(message=response["result"].get("error", {}).get("message", "no message"),
+                                    code=response["result"].get("error", {}).get("code", None))
         return response
 
     async def _post_with_aiohttp(self, payload: dict, timeout: float | int | None) -> dict[str, Any]:
@@ -81,29 +91,20 @@ class CoreCommands:
         command_name = payload.get("command")
         try:
             return await function(payload, timeout)
-        except asyncio.TimeoutError:
+        except asyncio.TimeoutError as e:
             message = f"Command '{command_name}' to {self.url} timed out after {timeout} seconds."
             log.warning(message)
-            return self._construct_failed_execution_response(code=408, message=message)
+            raise CommandTimeoutError(message) from e
         except aiohttp.ClientResponseError as e:
             message = f"HTTP error for command '{command_name}' to {self.url}: {e.status} {e.message}"
             log.error(message)
-            return self._construct_failed_execution_response(code=e.status, message=message)
-        except json.JSONDecodeError:
+            raise APIConnectionError(message) from e
+        except json.JSONDecodeError as e:
             message = "Failed to decode JSON response."
             log.error(message)
-            return self._construct_failed_execution_response(code=500, message=message)
+            raise InvalidResponseFormatError(message) from e
         except Exception as e:
             message = f"Unexpected error during post_command '{command_name}': {type(e).__name__} - {e}"
-            log.error(message)
-            return self._construct_failed_execution_response(code=500, message=message)
+            log.exception(message)
+            raise RequestError(message) from e
 
-    @staticmethod
-    def _construct_failed_execution_response(code: int, message: str) -> dict[str, Any]:
-        return {
-            "succeeded": False,
-            "error": {
-                "code": code,
-                "message": message
-            }
-        }
