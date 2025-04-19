@@ -30,7 +30,7 @@ The package depends on the [Tapir Archicad Add-On](https://github.com/ENZYME-APD
 
 ## Usage
 
-**Disclaimer:** The connection object is functional but in the early stages of development. It is not thoroughly tested, and its interfaces may change in future updates.
+⚠️**Disclaimer:** MultiConn ArchiCAD is functional and ready for use, but still in active development. While it hasn’t been extensively tested and its interfaces may change in future updates, it's perfectly suitable for quick scripts and one-off automation tasks. If you're building something more long-term or critical, consider pinning the version you’re using and keeping an eye out for future changes.
 
 ### Actions - managing the connection
 Actions allow you to manage the state of the connection object. You can connect to or disconnect from Archicad instances, quit instances, or refresh ports. All actions can have multiple types of inputs. For each type of input you have to call the corresponding method of the action. To connect to all available ArchiCAD instances, you have to call the .all() method on .connect ( e.g. `conn.connect.all()`). The aim of this method is to provide better autocompletion.
