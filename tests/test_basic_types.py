@@ -63,11 +63,9 @@ def test_invalid_port_too_high():
 
 def test_product_info_from_api_response():
     api_response = {
-        "result": {
             "version": 26,
             "buildNumber": 3001,
             "languageCode": "en"
-        }
     }
     product_info = ProductInfo.from_api_response(api_response)
     assert product_info.version == 26
@@ -349,10 +347,7 @@ def test_teamwork_project_id_from_dict():
 def test_archicad_location_from_api_response(is_mac, expected_suffix):
     with patch('multiconn_archicad.basic_types.is_using_mac', return_value=is_mac):
         api_response = {
-            "result": {
                 "archicadLocation": "/Applications/ARCHICAD"
-
-            }
         }
         location = ArchicadLocation.from_api_response(api_response)
 
@@ -375,10 +370,8 @@ def test_archicad_location_from_dict():
 
 def test_api_response_error_from_api_response():
     api_response = {
-        "error": {
             "code": 404,
             "message": "Resource not found"
-        }
     }
     error = APIResponseError.from_api_response(api_response)
     assert error.code == 404
@@ -426,10 +419,8 @@ def test_archicad_id_register_subclass(reset_archicad_id_registry):
 
 def test_archicad_id_from_api_response_untitled(reset_archicad_id_registry):
     api_response = {
-        "result": {
             "isUntitled": True,
             "isTeamwork": False
-        }
     }
     project_id = ArchiCadID.from_api_response(api_response)
     assert isinstance(project_id, UntitledProjectID)
@@ -437,12 +428,10 @@ def test_archicad_id_from_api_response_untitled(reset_archicad_id_registry):
 
 def test_archicad_id_from_api_response_solo(reset_archicad_id_registry):
     api_response = {
-        "result": {
             "isUntitled": False,
             "isTeamwork": False,
             "projectPath": "/path/to/project",
             "projectName": "MySoloProject"
-        }
     }
     project_id = ArchiCadID.from_api_response(api_response)
     assert isinstance(project_id, SoloProjectID)
@@ -456,12 +445,10 @@ def test_archicad_id_from_api_response_teamwork(reset_archicad_id_registry):
         mock_from_project_location.return_value = mock_project_id
 
         api_response = {
-            "result": {
                 "isUntitled": False,
                 "isTeamwork": True,
                 "projectLocation": "teamwork://user:pass@server/project",
                 "projectName": "MyTeamworkProject"
-            }
         }
         project_id = ArchiCadID.from_api_response(api_response)
 
