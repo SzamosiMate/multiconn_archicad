@@ -1,15 +1,6 @@
 # Base Exception
 class MulticonnArchicadError(Exception):
     """Base class for all custom exceptions in the multiconn_archicad package."""
-    pass
-
-# --- Errors that happen during communication with the API ---
-
-class APIErrorBase(MulticonnArchicadError):
-    """
-    Base class for errors during API communication or reported by the API.
-    Catch this exception for unified handling of all API-related issues.
-    """
     def __init__(self, message: str, code: int | None = None):
         super().__init__(message)
         self.code = code
@@ -23,6 +14,14 @@ class APIErrorBase(MulticonnArchicadError):
 
     def to_dict(self) -> dict[str, str]:
         return {"code": str(self.code), "message": self.message}
+
+# --- Errors that happen during communication with the API ---
+
+class APIErrorBase(MulticonnArchicadError):
+    """
+    Base class for errors during API communication or reported by the API.
+    Catch this exception for unified handling of all API-related issues.
+    """
 
 class RequestError(APIErrorBase):
     """Raised for errors originating from Network/HTTP/Parsing"""
