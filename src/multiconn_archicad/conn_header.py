@@ -30,10 +30,10 @@ class Status(Enum):
 
 class ConnHeader:
     def __init__(self, port: Port, initialize: bool = True):
-        self.port: Port | None = port
+        self._port: Port | None = port
         self.status: Status = Status.PENDING
-        self.core: CoreCommands = CoreCommands(self.port)
-        self.standard: StandardConnection = StandardConnection(self.port)
+        self.core: CoreCommands = CoreCommands(port)
+        self.standard: StandardConnection = StandardConnection(port)
 
         if initialize:
             self.product_info: ProductInfo | APIResponseError = run_in_sync_or_async_context(self.get_product_info)
@@ -41,6 +41,17 @@ class ConnHeader:
             self.archicad_location: ArchicadLocation | APIResponseError = run_in_sync_or_async_context(
                 self.get_archicad_location
             )
+
+    @property
+    def port(self) -> Port:
+        return self._port
+
+    @port.setter
+    def port(self, port: Port) -> None:
+        self._port = port
+        self.core.port = port
+        self.standard = port
+
 
     def to_dict(self) -> dict[str, Any]:
         return {
