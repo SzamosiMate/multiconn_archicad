@@ -49,8 +49,10 @@ class ConnHeader:
     @port.setter
     def port(self, port: Port) -> None:
         self._port = port
-        self.core.port = port
-        self.standard = port
+        self.core = CoreCommands(port)
+        self.standard = StandardConnection(port)
+        if self.status == Status.ACTIVE:
+            self.standard.connect(self.product_info)
 
 
     def to_dict(self) -> dict[str, Any]:
