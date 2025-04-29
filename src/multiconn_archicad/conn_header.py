@@ -31,9 +31,9 @@ class Status(Enum):
 class ConnHeader:
     def __init__(self, port: Port, initialize: bool = True):
         self._port: Port | None = port
-        self.status: Status = Status.PENDING
-        self.core: CoreCommands = CoreCommands(port)
-        self.standard: StandardConnection = StandardConnection(port)
+        self._status: Status = Status.PENDING
+        self.core: CoreCommands  | type[CoreCommands]= CoreCommands(port)
+        self.standard: StandardConnection  | type[StandardConnection]= StandardConnection(port)
 
         if initialize:
             self.product_info: ProductInfo | APIResponseError = run_in_sync_or_async_context(self.get_product_info)
@@ -43,17 +43,23 @@ class ConnHeader:
             )
 
     @property
+    def status(self) -> Status:
+        return self._status
+
+    @property
     def port(self) -> Port:
         return self._port
 
     @port.setter
-    def port(self, port: Port) -> None:
+    def port(self, port: Port | None) -> None:
         self._port = port
-        self.core = CoreCommands(port)
-        self.standard = StandardConnection(port)
-        if self.status == Status.ACTIVE:
-            self.standard.connect(self.product_info)
-
+        if port:
+            self.core = CoreCommands(port)
+            self.standard = StandardConnection(port)
+            if self.status == Status.ACTIVE:
+                self.standard.connect(self.product_info)
+        else:
+            self.unassign()
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -66,7 +72,7 @@ class ConnHeader:
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> Self:
         instance = cls(initialize=False, port=Port(data["port"]))
-        instance.status = Status.UNASSIGNED
+        instance._status = Status.UNASSIGNED
         instance.product_info = ProductInfo.from_dict(data["productInfo"])
         instance.archicad_id = ArchiCadID.from_dict(data["archicadId"])
         instance.archicad_location = ArchicadLocation.from_dict(data["archicadLocation"])
@@ -84,11 +90,11 @@ class ConnHeader:
         return False
 
     def __repr__(self) -> str:
-        attrs = {name: getattr(self, name) for name in ["port", "status", "product_info", "archicad_id", "archicad_location"]}
+        attrs = {name: getattr(self, name) for name in ["port", "_status", "product_info", "archicad_id", "archicad_location"]}
         return f"{self.__class__.__name__}({attrs})"
 
     def __str__(self) -> str:
-        attrs = {name: getattr(self, name) for name in ["port", "status", "product_info", "archicad_id", "archicad_location"]}
+        attrs = {name: getattr(self, name) for name in ["port", "_status", "product_info", "archicad_id", "archicad_location"]}
         return f"{self.__class__.__name__}(\n{pformat(attrs, width=200, indent=4)})"
 
     @classmethod
@@ -102,18 +108,19 @@ class ConnHeader:
     def connect(self) -> None:
         if self.is_product_info_initialized():
             self.standard.connect(self.product_info)
-            self.status = Status.ACTIVE
+            self._status = Status.ACTIVE
         else:
-            self.status = Status.FAILED
+            self._status = Status.FAILED
 
     def disconnect(self) -> None:
         self.standard.disconnect()
-        self.status = Status.PENDING
+        self._status = Status.PENDING
 
     def unassign(self) -> None:
-        self.standard.disconnect()
-        self.status = Status.UNASSIGNED
-        self.port = None
+        self._status = Status.UNASSIGNED
+        self._port = None
+        self.core = CoreCommands
+        self.standard = StandardConnection
 
     def is_fully_initialized(self) -> bool:
         return (self.is_product_info_initialized()
