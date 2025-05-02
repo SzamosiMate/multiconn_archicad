@@ -40,6 +40,7 @@ class APIConnectionError(RequestError):
 
     pass
 
+
 class HeaderUnassignedError(RequestError, AttributeError):
     """Raised when a command is called on an unassigned ConnHeader"""
 

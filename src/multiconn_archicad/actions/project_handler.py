@@ -6,7 +6,12 @@ import psutil
 import os
 from dataclasses import dataclass
 
-from multiconn_archicad.errors import NotFullyInitializedError, ProjectAlreadyOpenError, ProjectNotFoundError, StandardAPIError
+from multiconn_archicad.errors import (
+    NotFullyInitializedError,
+    ProjectAlreadyOpenError,
+    ProjectNotFoundError,
+    StandardAPIError,
+)
 from multiconn_archicad.utilities.platform_utils import escape_spaces_in_path, is_using_mac
 from multiconn_archicad.utilities.exception_logging import auto_decorate_methods, log_exceptions
 from multiconn_archicad.basic_types import Port, TeamworkCredentials, TeamworkProjectID, SoloProjectID
@@ -47,12 +52,12 @@ class SwitchProject:
     def __init__(self, multi_conn: MultiConn):
         self.multi_conn: MultiConn = multi_conn
 
-    def from_header(self, original_port: Port, new_header: ConnHeader) ->  ConnHeader:
+    def from_header(self, original_port: Port, new_header: ConnHeader) -> ConnHeader:
         if not isinstance(new_header.archicad_id, SoloProjectID):
             raise ProjectNotFoundError("Can only open solo projects in an open Archicad window")
         return self._execute_action(original_port, os.fspath(new_header.archicad_id))
 
-    def from_path(self, original_port: Port, new_path: str | os.PathLike[str]) ->  ConnHeader:
+    def from_path(self, original_port: Port, new_path: str | os.PathLike[str]) -> ConnHeader:
         return self._execute_action(original_port, os.fspath(new_path))
 
     def _execute_action(self, original_port: Port, new_path: str) -> ConnHeader:
@@ -70,6 +75,7 @@ class SwitchProject:
         for port, header in self.multi_conn.open_port_headers.items():
             if isinstance(header.archicad_id, SoloProjectID) and header.archicad_id.projectPath == new_path:
                 return port
+        return None
 
     @staticmethod
     def _wait_until_alive(header: ConnHeader) -> bool:

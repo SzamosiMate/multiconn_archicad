@@ -4,11 +4,14 @@ import traceback
 import types
 from typing import Callable, Type, Protocol
 
+
 class FunctionLike[**P, T](Protocol):
     __module__: str
     __code__: types.CodeType
     __name__: str
+
     def __call__(*args: P.args, **kwargs: P.kwargs) -> T: ...
+
 
 def log_exceptions[**P, T](func: FunctionLike[P, T]) -> Callable[P, T]:
     @functools.wraps(func)
@@ -21,7 +24,9 @@ def log_exceptions[**P, T](func: FunctionLike[P, T]) -> Callable[P, T]:
             if tb and tb[-1].name == func.__name__ and tb[-1].filename == func.__code__.co_filename:
                 logger.exception(str(e))
             raise
+
     return wrapper
+
 
 def auto_decorate_methods[T](decorator: Callable[[Callable], Callable]) -> Callable[[Type[T]], Type[T]]:
     def class_decorator(cls: Type[T]) -> Type[T]:
@@ -31,5 +36,5 @@ def auto_decorate_methods[T](decorator: Callable[[Callable], Callable]) -> Calla
                 if not attr_name.startswith("__"):
                     setattr(cls, attr_name, decorator(attr_value))
         return cls
-    return class_decorator
 
+    return class_decorator
