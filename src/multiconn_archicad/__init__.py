@@ -20,6 +20,20 @@ from .dialog_handlers import (
     win_int_handler_factory,
     UnhandledDialogError,
 )
+from .errors import (
+    MulticonnArchicadError,
+    APIErrorBase,
+    RequestError,
+    APIConnectionError,
+    CommandTimeoutError,
+    InvalidResponseFormatError,
+    ArchicadAPIError,
+    StandardAPIError,
+    TapirCommandError,
+    ProjectAlreadyOpenError,
+    ProjectNotFoundError,
+    NotFullyInitializedError,
+)
 
 import logging
 
@@ -42,6 +56,18 @@ __all__: tuple[str, ...] = (
     "SoloProjectID",
     "UntitledProjectID",
     "ArchicadLocation",
+    "MulticonnArchicadError",
+    "APIErrorBase",
+    "RequestError",
+    "ArchicadAPIError",
+    "APIConnectionError",
+    "CommandTimeoutError",
+    "InvalidResponseFormatError",
+    "StandardAPIError",
+    "TapirCommandError",
+    "ProjectAlreadyOpenError",
+    "ProjectNotFoundError",
+    "NotFullyInitializedError",
 )
 
 log = logging.getLogger(__name__)

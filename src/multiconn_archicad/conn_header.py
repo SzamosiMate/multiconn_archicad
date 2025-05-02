@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Self, Any, Awaitable, cast
+from typing import Self, Any, Awaitable, cast, TypeGuard
 from pprint import pformat
 
 from multiconn_archicad.core_commands import CoreCommands
@@ -10,7 +10,7 @@ from multiconn_archicad.basic_types import (
     Port,
     ArchicadLocation,
 )
-from multiconn_archicad.errors import RequestError, ArchicadAPIError
+from multiconn_archicad.errors import RequestError, ArchicadAPIError, HeaderUnassignedError
 from multiconn_archicad.standard_connection import StandardConnection
 from multiconn_archicad.utilities.async_utils import run_in_sync_or_async_context
 
@@ -30,10 +30,10 @@ class Status(Enum):
 
 class ConnHeader:
     def __init__(self, port: Port, initialize: bool = True):
-        self.port: Port | None = port
-        self.status: Status = Status.PENDING
-        self.core: CoreCommands = CoreCommands(self.port)
-        self.standard: StandardConnection = StandardConnection(self.port)
+        self._port: Port | None = port
+        self._status: Status = Status.PENDING
+        self._core: CoreCommands | None = CoreCommands(port)
+        self._standard: StandardConnection | None = StandardConnection(port)
 
         if initialize:
             self.product_info: ProductInfo | APIResponseError = run_in_sync_or_async_context(self.get_product_info)
@@ -41,6 +41,42 @@ class ConnHeader:
             self.archicad_location: ArchicadLocation | APIResponseError = run_in_sync_or_async_context(
                 self.get_archicad_location
             )
+
+    @property
+    def status(self) -> Status:
+        return self._status
+
+    @property
+    def port(self) -> Port | None:
+        return self._port
+
+    @port.setter
+    def port(self, port: Port | None) -> None:
+        self._port = port
+        if port:
+            self._core = CoreCommands(port)
+            self._standard = StandardConnection(port)
+            match self.status:
+                case Status.ACTIVE:
+                    self.connect()
+                case Status.UNASSIGNED:
+                    self._status = Status.PENDING
+                case Status.FAILED:
+                    self._status = Status.PENDING
+        else:
+            self.unassign()
+
+    @property
+    def core(self) -> CoreCommands:
+        if self._core is None:
+            raise HeaderUnassignedError("CoreCommands is not initialized.")
+        return self._core
+
+    @property
+    def standard(self) -> StandardConnection:
+        if self._standard is None:
+            raise HeaderUnassignedError("StandardConnection is not initialized.")
+        return self._standard
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -53,7 +89,7 @@ class ConnHeader:
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> Self:
         instance = cls(initialize=False, port=Port(data["port"]))
-        instance.status = Status.UNASSIGNED
+        instance._status = Status.UNASSIGNED
         instance.product_info = ProductInfo.from_dict(data["productInfo"])
         instance.archicad_id = ArchiCadID.from_dict(data["archicadId"])
         instance.archicad_location = ArchicadLocation.from_dict(data["archicadLocation"])
@@ -61,7 +97,7 @@ class ConnHeader:
 
     def __eq__(self, other: Any) -> bool:
         if isinstance(other, ConnHeader):
-            if self.is_fully_initialized() and other.is_fully_initialized():
+            if is_header_fully_initialized(self) and is_header_fully_initialized(other):
                 if (
                     self.product_info == other.product_info
                     and self.archicad_id == other.archicad_id
@@ -71,11 +107,17 @@ class ConnHeader:
         return False
 
     def __repr__(self) -> str:
-        attrs = {name: getattr(self, name) for name in ["port", "status", "product_info", "archicad_id", "archicad_location"]}
+        attrs = {
+            name: getattr(self, name)
+            for name in ["port", "_status", "product_info", "archicad_id", "archicad_location"]
+        }
         return f"{self.__class__.__name__}({attrs})"
 
     def __str__(self) -> str:
-        attrs = {name: getattr(self, name) for name in ["port", "status", "product_info", "archicad_id", "archicad_location"]}
+        attrs = {
+            name: getattr(self, name)
+            for name in ["port", "_status", "product_info", "archicad_id", "archicad_location"]
+        }
         return f"{self.__class__.__name__}(\n{pformat(attrs, width=200, indent=4)})"
 
     @classmethod
@@ -87,52 +129,75 @@ class ConnHeader:
         return instance
 
     def connect(self) -> None:
-        if self.is_product_info_initialized():
+        if is_product_info_initialized(self.product_info):
             self.standard.connect(self.product_info)
-            self.status = Status.ACTIVE
+            self._status = Status.ACTIVE
         else:
-            self.status = Status.FAILED
+            self._status = Status.FAILED
 
     def disconnect(self) -> None:
         self.standard.disconnect()
-        self.status = Status.PENDING
+        self._status = Status.PENDING
 
     def unassign(self) -> None:
-        self.standard.disconnect()
-        self.status = Status.UNASSIGNED
-        self.port = None
-
-    def is_fully_initialized(self) -> bool:
-        return (self.is_product_info_initialized()
-                and self.is_id_initialized()
-                and self.is_location_initialized())
-
-    def is_product_info_initialized(self) -> bool:
-        return isinstance(self.product_info, ProductInfo)
-
-    def is_id_initialized(self) -> bool:
-        return isinstance(self.archicad_id, ArchiCadID)
-
-    def is_location_initialized(self) -> bool:
-        return isinstance(self.archicad_location, ArchicadLocation)
+        self._status = Status.UNASSIGNED
+        self._port = None
+        self._core = None
+        self._standard = None
 
     async def get_product_info(self) -> ProductInfo | APIResponseError:
         try:
-            result = await cast(Awaitable[dict[str, Any]], self.core.post_command(command="API.GetProductInfo", timeout=0.2))
+            result = await cast(
+                Awaitable[dict[str, Any]], self.core.post_command(command="API.GetProductInfo", timeout=0.2)
+            )
             return ProductInfo.from_api_response(result)
         except (RequestError, ArchicadAPIError) as e:
             return APIResponseError.from_exception(e)
 
     async def get_archicad_id(self) -> ArchiCadID | APIResponseError:
         try:
-            result = await cast(Awaitable[dict[str, Any]], self.core.post_tapir_command(command="GetProjectInfo", timeout=0.2))
+            result = await cast(
+                Awaitable[dict[str, Any]], self.core.post_tapir_command(command="GetProjectInfo", timeout=0.2)
+            )
             return ArchiCadID.from_api_response(result)
         except (RequestError, ArchicadAPIError) as e:
             return APIResponseError.from_exception(e)
 
     async def get_archicad_location(self) -> ArchicadLocation | APIResponseError:
         try:
-            result = await cast(Awaitable[dict[str, Any]], self.core.post_tapir_command(command="GetArchicadLocation", timeout=0.2))
+            result = await cast(
+                Awaitable[dict[str, Any]], self.core.post_tapir_command(command="GetArchicadLocation", timeout=0.2)
+            )
             return ArchicadLocation.from_api_response(result)
         except (RequestError, ArchicadAPIError) as e:
             return APIResponseError.from_exception(e)
+
+
+class ValidatedHeader(ConnHeader):
+    port: Port | None
+    status: Status
+    core: CoreCommands
+    standard: StandardConnection
+    product_info: ProductInfo
+    archicad_id: ArchiCadID
+    archicad_location: ArchicadLocation
+
+
+def is_header_fully_initialized(header: ConnHeader) -> TypeGuard[ValidatedHeader]:
+    return (
+        isinstance(header.product_info, ProductInfo)
+        and isinstance(header.archicad_id, ArchiCadID)
+        and isinstance(header.archicad_location, ArchicadLocation)
+    )
+
+
+def is_product_info_initialized(product_info: ProductInfo | APIResponseError) -> TypeGuard[ProductInfo]:
+    return isinstance(product_info, ProductInfo)
+
+
+def is_id_initialized(archicad_id: ArchiCadID | APIResponseError) -> TypeGuard[ArchiCadID]:
+    return isinstance(archicad_id, ArchiCadID)
+
+
+def is_location_initialized(archicad_location: ArchicadLocation | APIResponseError) -> TypeGuard[ArchicadLocation]:
+    return isinstance(archicad_location, ArchicadLocation)

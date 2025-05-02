@@ -8,7 +8,9 @@ if TYPE_CHECKING:
     from multiconn_archicad.basic_types import Port
 
 import logging
+
 log = logging.getLogger(__name__)
+
 
 class Refresh:
     def __init__(self, multi_conn: MultiConn) -> None:

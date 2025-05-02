@@ -3,6 +3,7 @@ from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
 
 from multiconn_archicad.errors import RequestError, ArchicadAPIError
+from multiconn_archicad.conn_header import is_id_initialized
 
 if TYPE_CHECKING:
     from multiconn_archicad.conn_header import ConnHeader
@@ -10,7 +11,9 @@ if TYPE_CHECKING:
     from multiconn_archicad.basic_types import Port
 
 import logging
+
 log = logging.getLogger(__name__)
+
 
 class ConnectionManager(ABC):
     def __init__(self, multi_conn: MultiConn):
@@ -38,7 +41,9 @@ class ConnectionManager(ABC):
 class Connect(ConnectionManager):
     def execute_action(self, conn_headers: list[ConnHeader]) -> list[ConnHeader]:
         for conn_header in conn_headers:
-            project_name = conn_header.archicad_id.projectName if conn_header.is_id_initialized() else "Unknown"
+            project_name = (
+                conn_header.archicad_id.projectName if is_id_initialized(conn_header.archicad_id) else "Unknown"
+            )
             log.info(f"Connecting to project {project_name} at port {conn_header.port}")
             conn_header.connect()
         return conn_headers
@@ -50,7 +55,9 @@ class Connect(ConnectionManager):
 class Disconnect(ConnectionManager):
     def execute_action(self, conn_headers: list[ConnHeader]) -> list[ConnHeader]:
         for conn_header in conn_headers:
-            project_name = conn_header.archicad_id.projectName if conn_header.is_id_initialized() else "Unknown"
+            project_name = (
+                conn_header.archicad_id.projectName if is_id_initialized(conn_header.archicad_id) else "Unknown"
+            )
             log.info(f"Disconnecting from project {project_name} at port {conn_header.port}")
             conn_header.disconnect()
         return conn_headers

@@ -11,7 +11,9 @@ from multiconn_archicad.dialog_handlers.win_int_handler_factory import win_int_h
 from multiconn_archicad.dialog_handlers.dialog_handler_base import DialogHandlerBase, UnhandledDialogError
 
 import logging
+
 log = logging.getLogger(__name__)
+
 
 class WinDialogHandler(DialogHandlerBase):
     def __init__(self, handler_factory: dict[str, Callable[[UIAWrapper], None]], retries: int = 2):
@@ -47,7 +49,9 @@ class WinDialogHandler(DialogHandlerBase):
             time.sleep(1)
             try:
                 project_window = self.application.top_window()
-                if "Archicad" in project_window.window_text(): #catches either the archicad window or Archicad Project Recovery
+                if (
+                    "Archicad" in project_window.window_text()
+                ):  # catches either the archicad window or Archicad Project Recovery
                     with contextlib.redirect_stdout(io.StringIO()):
                         # Sometimes _is_project_window_ready returns True even when the window is not ready.
                         # .print_control_identifiers() more reliably fails in these cases.
@@ -103,6 +107,7 @@ class WinDialogHandler(DialogHandlerBase):
             if re.fullmatch(pattern, title):
                 return pattern
         return None
+
 
 if __name__ == "__main__":
     dialog_handler = WinDialogHandler(win_int_handler_factory)

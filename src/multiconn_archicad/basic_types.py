@@ -1,5 +1,5 @@
 from dataclasses import dataclass, asdict
-from typing import Self, Protocol, Type, Any, TypeVar, Union, ClassVar
+from typing import Self, Protocol, Type, Any, TypeVar, Union, ClassVar, cast
 import re
 from urllib.parse import unquote
 from abc import ABC, abstractmethod
@@ -63,7 +63,7 @@ class ArchicadLocation(BaseModel):
 
 @dataclass
 class APIResponseError(BaseModel):
-    code: int
+    code: int | None
     message: str
 
     @classmethod
@@ -109,16 +109,18 @@ class ArchiCadID(ABC):
         return subclass
 
     @classmethod
-    def from_api_response(cls, response: dict) -> Self:
+    def from_api_response(cls, response: dict) -> "ArchiCadID":
         if response["isUntitled"]:
             return cls._ID_type_registry["UntitledProjectID"]()
         elif not response["isTeamwork"]:
-            return cls._ID_type_registry["SoloProjectID"](
+            solo_project_id_cls = cast(Type[SoloProjectID], cls._ID_type_registry["SoloProjectID"])
+            return solo_project_id_cls(
                 projectPath=response["projectPath"],
                 projectName=response["projectName"],
             )
         else:
-            return cls._ID_type_registry["TeamworkProjectID"].from_project_location(
+            teamwork_project_id_cls = cast(Type[TeamworkProjectID], cls._ID_type_registry["TeamworkProjectID"])
+            return teamwork_project_id_cls.from_project_location(
                 project_location=response["projectLocation"],
                 project_name=response["projectName"],
             )
