@@ -1,3 +1,4 @@
+import time
 
 from multiconn_archicad import MultiConn, Port, WinDialogHandler, win_int_handler_factory
 import logging
@@ -31,11 +32,14 @@ def connect_and_run_core_command():
 
 def quit_port():
     conn = MultiConn()
-    conn.quit.from_headers(conn.open_port_headers[Port(19724)])
+    conn.quit.from_headers(conn.open_port_headers[Port(19723)])
+    time.sleep(1)
+
 
 def quit_and_refresh():
+
     conn = MultiConn()
-    conn.quit.from_headers(conn.open_port_headers[Port(19724)])
+    conn.quit.from_headers(conn.open_port_headers[Port(19725)])
     conn.refresh.all_ports()
 
 
@@ -62,7 +66,7 @@ def print_test():
 if __name__ == "__main__":
     connect_and_run_ac_command()
     connect_and_run_core_command()
-    # quit_port()
+    quit_port()
     cycle_primary()
-    # quit_and_refresh()
+    quit_and_refresh()
     print_test()

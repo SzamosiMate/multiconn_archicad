@@ -15,7 +15,9 @@ from multiconn_archicad.errors import (
 from multiconn_archicad.utilities.async_utils import callable_from_sync_or_async_context
 
 import logging
+
 log = logging.getLogger(__name__)
+
 
 class CoreCommands:
     _BASE_URL: str = "http://127.0.0.1"
@@ -31,9 +33,10 @@ class CoreCommands:
     def __str__(self) -> str:
         return self.__repr__()
 
-
     @callable_from_sync_or_async_context
-    async def post_command(self, command: str, parameters: dict | None = None, timeout: float | int | None = None) -> dict[str, Any]:
+    async def post_command(
+        self, command: str, parameters: dict | None = None, timeout: float | int | None = None
+    ) -> dict[str, Any]:
         if parameters is None:
             parameters = {}
         payload = {"command": command, "parameters": parameters}
@@ -47,13 +50,16 @@ class CoreCommands:
             log.debug(f"response: {json.dumps(response, indent=4)}")
         else:
             log.warning(f"response: {response}")
-            raise StandardAPIError(message=response.get("error", {}).get("message", "no message"),
-                                   code=response.get("error", {}).get("code", None))
+            raise StandardAPIError(
+                message=response.get("error", {}).get("message", "no message"),
+                code=response.get("error", {}).get("code", None),
+            )
         return response
 
-
     @callable_from_sync_or_async_context
-    async def post_tapir_command(self, command: str, parameters: dict | None = None, timeout: float | int | None = None) -> dict[str, Any]:
+    async def post_tapir_command(
+        self, command: str, parameters: dict | None = None, timeout: float | int | None = None
+    ) -> dict[str, Any]:
         if parameters is None:
             parameters = {}
 
@@ -75,8 +81,10 @@ class CoreCommands:
         response = response.get("addOnCommandResponse", {})
         if not response.get("success", True):
             log.warning(f"response: {response}")
-            raise TapirCommandError(message=response["result"].get("error", {}).get("message", "no message"),
-                                    code=response["result"].get("error", {}).get("code", None))
+            raise TapirCommandError(
+                message=response["result"].get("error", {}).get("message", "no message"),
+                code=response["result"].get("error", {}).get("code", None),
+            )
         return response
 
     async def _post_with_aiohttp(self, payload: dict, timeout: float | int | None) -> dict[str, Any]:
@@ -86,8 +94,9 @@ class CoreCommands:
                 result = await response.text()
                 return json.loads(result)
 
-    async def _try_command(self, function: Callable[...,Coroutine[Any, Any, dict[str, Any]]],
-                           payload: dict, timeout: float | int | None) -> dict[str, Any]:
+    async def _try_command(
+        self, function: Callable[..., Coroutine[Any, Any, dict[str, Any]]], payload: dict, timeout: float | int | None
+    ) -> dict[str, Any]:
         command_name = payload.get("command")
         try:
             return await function(payload, timeout)
@@ -107,4 +116,3 @@ class CoreCommands:
             message = f"Unexpected error during post_command '{command_name}': {type(e).__name__} - {e}"
             log.exception(message)
             raise RequestError(message) from e
-

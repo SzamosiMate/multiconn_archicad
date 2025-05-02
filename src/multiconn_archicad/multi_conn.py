@@ -12,7 +12,9 @@ from multiconn_archicad.actions import Connect, Disconnect, Refresh, QuitAndDisc
 from multiconn_archicad.dialog_handlers import DialogHandlerBase, EmptyDialogHandler
 
 import logging
+
 log = logging.getLogger(__name__)
+
 
 class MultiConn:
     _base_url: str = "http://127.0.0.1"
