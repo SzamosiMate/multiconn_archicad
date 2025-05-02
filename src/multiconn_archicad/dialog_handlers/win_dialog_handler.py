@@ -70,7 +70,7 @@ class WinDialogHandler(DialogHandlerBase):
     def _handle_dialogs(self, project_window: WindowSpecification) -> bool:
         if self._is_project_window_ready(project_window):
             # The project window is the ArchiCAD window, and there are no blocking dialogs
-            if re.fullmatch(r".*Archicad \d{2}", project_window.window_text()):
+            if re.fullmatch(r".*Archicad \d{2}( DEMO)?", project_window.window_text()):
                 return True
             # There is a ready window, but it is NOT the ArchiCAD window
             else:

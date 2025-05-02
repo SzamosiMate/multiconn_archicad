@@ -159,6 +159,9 @@ class SoloProjectID(BaseModel, ArchiCadID):
     def get_project_location(self, _: TeamworkCredentials | None = None) -> str:
         return self.projectPath
 
+    def __fspath__(self) -> str:
+        return self.projectPath
+
 
 @ArchiCadID.register_subclass
 @dataclass

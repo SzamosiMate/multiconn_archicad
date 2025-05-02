@@ -1,7 +1,7 @@
-import time
 
-from multiconn_archicad import MultiConn, Port, WinDialogHandler, win_int_handler_factory
+from multiconn_archicad import MultiConn, WinDialogHandler, win_int_handler_factory, ConnHeader
 import logging
+import random
 
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
@@ -30,18 +30,24 @@ def connect_and_run_core_command():
     for conn_header in conn.active.values():
         log.debug(conn_header.core.post_tapir_command("GetAddOnVersion"))
 
-def quit_port():
-    conn = MultiConn()
-    conn.quit.from_headers(conn.open_port_headers[Port(19723)])
-    time.sleep(1)
+def quit_and_reopen_project():
+    conn = MultiConn(WinDialogHandler(win_int_handler_factory))
+    random_header = random.choice(list(conn.open_port_headers.values()))
+    conn.quit.from_headers(random_header)
+    port = conn.open_project.from_header(random_header, demo=True)
+    assert conn.open_port_headers[port] == random_header
+    log.info(f"quit anr reopened project: {random_header.archicad_id.projectName}")
 
-
-def quit_and_refresh():
-
-    conn = MultiConn()
-    conn.quit.from_headers(conn.open_port_headers[Port(19725)])
-    conn.refresh.all_ports()
-
+def switch_random_port():
+    conn = MultiConn(WinDialogHandler(win_int_handler_factory))
+    random_header: ConnHeader = random.choice(list(conn.open_port_headers.values()))
+    conn.quit.from_headers(random_header)
+    random_port = random.choice(list(conn.open_port_headers.keys()))
+    original_header = conn.open_port_headers[random_port]
+    conn.switch_project.from_header(original_port=random_port, new_header=random_header)
+    assert conn.open_port_headers[random_port] == random_header
+    log.info(f"project switched to: {random_header.archicad_id.projectName}")
+    conn.open_project.from_header(original_header, demo=True)
 
 def cycle_primary():
     conn = MultiConn()
@@ -62,11 +68,10 @@ def print_test():
     print(conn)
     print(conn.primary)
 
-
 if __name__ == "__main__":
     connect_and_run_ac_command()
     connect_and_run_core_command()
-    quit_port()
+    quit_and_reopen_project()
     cycle_primary()
-    quit_and_refresh()
+    switch_random_port()
     print_test()

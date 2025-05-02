@@ -1,5 +1,5 @@
 from .connection_manager import Connect, QuitAndDisconnect, Disconnect
-from .project_handler import FindArchicad, OpenProject
+from .project_handler import FindArchicad, OpenProject, SwitchProject
 from .refresh import Refresh
 
 __all__: tuple[str, ...] = (
@@ -9,4 +9,5 @@ __all__: tuple[str, ...] = (
     "Refresh",
     "FindArchicad",
     "OpenProject",
+    "SwitchProject",
 )

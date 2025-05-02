@@ -3,11 +3,18 @@ from typing import TYPE_CHECKING
 import subprocess
 import time
 import psutil
+import os
 from dataclasses import dataclass
 
-from multiconn_archicad.errors import NotFullyInitializedError, ProjectAlreadyOpenError
+from multiconn_archicad.errors import (
+    NotFullyInitializedError,
+    ProjectAlreadyOpenError,
+    ProjectNotFoundError,
+    StandardAPIError,
+)
 from multiconn_archicad.utilities.platform_utils import escape_spaces_in_path, is_using_mac
-from multiconn_archicad.basic_types import Port, TeamworkCredentials, TeamworkProjectID
+from multiconn_archicad.utilities.exception_logging import auto_decorate_methods, log_exceptions
+from multiconn_archicad.basic_types import Port, TeamworkCredentials, TeamworkProjectID, SoloProjectID
 from multiconn_archicad.conn_header import ConnHeader, is_header_fully_initialized, ValidatedHeader
 
 if TYPE_CHECKING:
@@ -40,6 +47,47 @@ class ProjectParams:
     demo: bool
 
 
+@auto_decorate_methods(log_exceptions)
+class SwitchProject:
+    def __init__(self, multi_conn: MultiConn):
+        self.multi_conn: MultiConn = multi_conn
+
+    def from_header(self, original_port: Port, new_header: ConnHeader) -> ConnHeader:
+        if not isinstance(new_header.archicad_id, SoloProjectID):
+            raise ProjectNotFoundError("Can only open solo projects in an open Archicad window")
+        return self._execute_action(original_port, os.fspath(new_header.archicad_id))
+
+    def from_path(self, original_port: Port, new_path: str | os.PathLike[str]) -> ConnHeader:
+        return self._execute_action(original_port, os.fspath(new_path))
+
+    def _execute_action(self, original_port: Port, new_path: str) -> ConnHeader:
+        if original_port not in self.multi_conn.open_ports:
+            raise ProjectNotFoundError(f"No open project an port: {original_port}")
+        if duplicate_port := self._find_duplicate_path(new_path):
+            raise ProjectAlreadyOpenError(f"Project is already open at port: {duplicate_port}")
+        original_header = self.multi_conn.open_port_headers[original_port]
+        original_header.core.post_tapir_command("OpenProject", {"projectFilePath": new_path})
+        self._wait_until_alive(original_header)
+        self.multi_conn.open_port_headers[original_port] = ConnHeader(original_port)
+        return self.multi_conn.open_port_headers[original_port]
+
+    def _find_duplicate_path(self, new_path: str) -> Port | None:
+        for port, header in self.multi_conn.open_port_headers.items():
+            if isinstance(header.archicad_id, SoloProjectID) and header.archicad_id.projectPath == new_path:
+                return port
+        return None
+
+    @staticmethod
+    def _wait_until_alive(header: ConnHeader) -> bool:
+        while True:
+            time.sleep(0.5)
+            try:
+                return header.core.post_command("API.IsAlive").get("isAlive")
+            except StandardAPIError:
+                pass
+
+
+@auto_decorate_methods(log_exceptions)
 class OpenProject:
     def __init__(self, multi_conn: MultiConn):
         self.multi_conn: MultiConn = multi_conn
