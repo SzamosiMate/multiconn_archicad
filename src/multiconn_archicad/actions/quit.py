@@ -63,6 +63,8 @@ class QuitAndDisconnect:
     def _execute_action(self, conn_headers: list[ConnHeader], force_after: None | float = None) -> list[ConnHeader]:
         processed_headers = []
         for conn_header in conn_headers:
+            if conn_header.port is None:
+                continue
             log.info(f"Sending Quit command to Archicad on port {conn_header.port} and unassigning header.")
             quit_successful = False
             try:

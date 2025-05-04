@@ -82,7 +82,7 @@ class SwitchProject:
         while True:
             time.sleep(0.5)
             try:
-                return header.core.post_command("API.IsAlive").get("isAlive")
+                return header.core.post_command("API.IsAlive").get("isAlive", False)
             except StandardAPIError:
                 pass
 

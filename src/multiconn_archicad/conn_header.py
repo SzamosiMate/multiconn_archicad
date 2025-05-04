@@ -174,10 +174,6 @@ class ConnHeader:
 
 
 class ValidatedHeader(ConnHeader):
-    port: Port | None
-    status: Status
-    core: CoreCommands
-    standard: StandardConnection
     product_info: ProductInfo
     archicad_id: ArchiCadID
     archicad_location: ArchicadLocation
