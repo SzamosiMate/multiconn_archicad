@@ -2,10 +2,21 @@ import pytest
 from unittest.mock import patch, MagicMock
 from dataclasses import dataclass, asdict
 
-from multiconn_archicad import ArchiCadID, UntitledProjectID, TeamworkCredentials, SoloProjectID, ProductInfo, Port, TeamworkProjectID, APIResponseError, ArchicadLocation
+from multiconn_archicad import (
+    ArchiCadID,
+    UntitledProjectID,
+    TeamworkCredentials,
+    SoloProjectID,
+    ProductInfo,
+    Port,
+    TeamworkProjectID,
+    APIResponseError,
+    ArchicadLocation,
+)
 
 
 # Setup for common fixtures
+
 
 @pytest.fixture
 def reset_archicad_id_registry():
@@ -14,7 +25,7 @@ def reset_archicad_id_registry():
     ArchiCadID._ID_type_registry = {
         "UntitledProjectID": UntitledProjectID,
         "SoloProjectID": SoloProjectID,
-        "TeamworkProjectID": TeamworkProjectID
+        "TeamworkProjectID": TeamworkProjectID,
     }
     yield
     ArchiCadID._ID_type_registry = original_registry
@@ -33,11 +44,12 @@ def teamwork_project_id(teamwork_credentials):
         projectPath="projects/myproject",
         serverAddress="https://teamwork.example.com",
         teamworkCredentials=teamwork_credentials,
-        projectName="MyTeamworkProject"
+        projectName="MyTeamworkProject",
     )
 
 
 # Tests for Port class
+
 
 def test_valid_port():
     valid_port = 19730
@@ -61,12 +73,9 @@ def test_invalid_port_too_high():
 
 # Tests for ProductInfo class
 
+
 def test_product_info_from_api_response():
-    api_response = {
-            "version": 26,
-            "buildNumber": 3001,
-            "languageCode": "en"
-    }
+    api_response = {"version": 26, "buildNumber": 3001, "languageCode": "en"}
     product_info = ProductInfo.from_api_response(api_response)
     assert product_info.version == 26
     assert product_info.build == 3001
@@ -88,6 +97,7 @@ def test_product_info_from_dict():
 
 
 # Tests for TeamworkCredentials class
+
 
 def test_teamwork_credentials_repr_with_password():
     credentials = TeamworkCredentials(username="user", password="secret")
@@ -119,6 +129,7 @@ def test_teamwork_credentials_from_dict():
 
 # Tests for UntitledProjectID class
 
+
 def test_untitled_project_id_default_project_name():
     project_id = UntitledProjectID()
     assert project_id.projectName == "Untitled"
@@ -142,6 +153,7 @@ def test_untitled_project_id_from_dict():
 
 
 # Tests for SoloProjectID class
+
 
 def test_solo_project_id_constructor():
     project_id = SoloProjectID(projectPath="C:\\python\\tests\\TestProject03.pla", projectName="MyProject")
@@ -169,12 +181,13 @@ def test_solo_project_id_from_dict():
 
 # Tests for TeamworkProjectID class
 
+
 def test_teamwork_project_id_constructor(teamwork_credentials):
     project_id = TeamworkProjectID(
         projectPath="projects/myproject",
         serverAddress="https://teamwork.example.com",
         teamworkCredentials=teamwork_credentials,
-        projectName="MyTeamworkProject"
+        projectName="MyTeamworkProject",
     )
     assert project_id.projectPath == "projects/myproject"
     assert project_id.serverAddress == "https://teamwork.example.com"
@@ -187,28 +200,31 @@ def test_teamwork_project_id_eq_same_project(teamwork_credentials):
         projectPath="projects/myproject",
         serverAddress="https://teamwork.example.com",
         teamworkCredentials=teamwork_credentials,
-        projectName="MyTeamworkProject"
+        projectName="MyTeamworkProject",
     )
     project_id2 = TeamworkProjectID(
         projectPath="projects/myproject",
         serverAddress="https://teamwork.example.com",
         teamworkCredentials=TeamworkCredentials(username="different", password="different"),
-        projectName="MyTeamworkProject"
+        projectName="MyTeamworkProject",
     )
     assert project_id1 == project_id2
 
 
-@pytest.mark.parametrize("different_attr, different_value", [
-    ("projectPath", "projects/different"),
-    ("serverAddress", "https://different.example.com"),
-    ("projectName", "DifferentName")
-])
+@pytest.mark.parametrize(
+    "different_attr, different_value",
+    [
+        ("projectPath", "projects/different"),
+        ("serverAddress", "https://different.example.com"),
+        ("projectName", "DifferentName"),
+    ],
+)
 def test_teamwork_project_id_eq_different_project(teamwork_credentials, different_attr, different_value):
     project_id1 = TeamworkProjectID(
         projectPath="projects/myproject",
         serverAddress="https://teamwork.example.com",
         teamworkCredentials=teamwork_credentials,
-        projectName="MyTeamworkProject"
+        projectName="MyTeamworkProject",
     )
 
     # Create a dictionary with the base values
@@ -216,7 +232,7 @@ def test_teamwork_project_id_eq_different_project(teamwork_credentials, differen
         "projectPath": "projects/myproject",
         "serverAddress": "https://teamwork.example.com",
         "teamworkCredentials": teamwork_credentials,
-        "projectName": "MyTeamworkProject"
+        "projectName": "MyTeamworkProject",
     }
     # Update the attribute that should be different
     project_id2_args[different_attr] = different_value
@@ -232,8 +248,10 @@ def test_teamwork_project_id_eq_different_type(teamwork_project_id):
 
 
 def test_teamwork_project_id_get_project_location(teamwork_project_id):
-    with patch('multiconn_archicad.basic_types.single_quote') as mock_single_quote, \
-            patch('multiconn_archicad.basic_types.double_quote') as mock_double_quote:
+    with (
+        patch("multiconn_archicad.basic_types.single_quote") as mock_single_quote,
+        patch("multiconn_archicad.basic_types.double_quote") as mock_double_quote,
+    ):
         mock_single_quote.side_effect = lambda s: f"single_quoted_{s}"
         mock_double_quote.side_effect = lambda s: f"double_quoted_{s}"
 
@@ -247,8 +265,10 @@ def test_teamwork_project_id_get_project_location(teamwork_project_id):
 def test_teamwork_project_id_get_project_location_with_provided_credentials(teamwork_project_id):
     new_credentials = TeamworkCredentials(username="new_user", password="new_secret")
 
-    with patch('multiconn_archicad.basic_types.single_quote') as mock_single_quote, \
-            patch('multiconn_archicad.basic_types.double_quote') as mock_double_quote:
+    with (
+        patch("multiconn_archicad.basic_types.single_quote") as mock_single_quote,
+        patch("multiconn_archicad.basic_types.double_quote") as mock_double_quote,
+    ):
         mock_single_quote.side_effect = lambda s: f"single_quoted_{s}"
         mock_double_quote.side_effect = lambda s: f"double_quoted_{s}"
 
@@ -265,7 +285,7 @@ def test_teamwork_project_id_get_project_location_without_password():
         projectPath="projects/myproject",
         serverAddress="https://teamwork.example.com",
         teamworkCredentials=credentials_without_password,
-        projectName="MyTeamworkProject"
+        projectName="MyTeamworkProject",
     )
 
     with pytest.raises(ValueError, match="Missing password in teamwork credentials"):
@@ -273,19 +293,21 @@ def test_teamwork_project_id_get_project_location_without_password():
 
 
 def test_teamwork_project_id_from_project_location():
-    with patch('multiconn_archicad.basic_types.TeamworkProjectID.match_project_location') as mock_match_project_location:
+    with patch(
+        "multiconn_archicad.basic_types.TeamworkProjectID.match_project_location"
+    ) as mock_match_project_location:
         mock_match = MagicMock()
         mock_match.group.side_effect = lambda key: {
             "serverAddress": "https://teamwork.example.com",
             "projectPath": "projects/myproject",
             "username": "user",
-            "password": "secret"
+            "password": "secret",
         }[key]
         mock_match_project_location.return_value = mock_match
 
         project_id = TeamworkProjectID.from_project_location(
             project_location="teamwork://user:secret@https://teamwork.example.com/projects/myproject",
-            project_name="MyTeamworkProject"
+            project_name="MyTeamworkProject",
         )
 
         assert project_id.serverAddress == "https://teamwork.example.com"
@@ -317,7 +339,7 @@ def test_teamwork_project_id_to_dict(teamwork_project_id):
         "projectPath": "projects/myproject",
         "serverAddress": "https://teamwork.example.com",
         "teamworkCredentials": {"username": "user", "password": None},
-        "projectName": "MyTeamworkProject"
+        "projectName": "MyTeamworkProject",
     }
     assert teamwork_project_id.to_dict() == expected_dict
 
@@ -327,7 +349,7 @@ def test_teamwork_project_id_from_dict():
         "projectPath": "projects/myproject",
         "serverAddress": "https://teamwork.example.com",
         "teamworkCredentials": {"username": "user", "password": "secret"},
-        "projectName": "MyTeamworkProject"
+        "projectName": "MyTeamworkProject",
     }
     project_id = TeamworkProjectID.from_dict(data_dict)
 
@@ -340,15 +362,11 @@ def test_teamwork_project_id_from_dict():
 
 # Tests for ArchicadLocation class
 
-@pytest.mark.parametrize("is_mac,expected_suffix", [
-    (True, "/Contents/MacOS/ARCHICAD"),
-    (False, "")
-])
+
+@pytest.mark.parametrize("is_mac,expected_suffix", [(True, "/Contents/MacOS/ARCHICAD"), (False, "")])
 def test_archicad_location_from_api_response(is_mac, expected_suffix):
-    with patch('multiconn_archicad.basic_types.is_using_mac', return_value=is_mac):
-        api_response = {
-                "archicadLocation": "/Applications/ARCHICAD"
-        }
+    with patch("multiconn_archicad.basic_types.is_using_mac", return_value=is_mac):
+        api_response = {"archicadLocation": "/Applications/ARCHICAD"}
         location = ArchicadLocation.from_api_response(api_response)
 
         assert location.archicadLocation == f"/Applications/ARCHICAD{expected_suffix}"
@@ -368,11 +386,9 @@ def test_archicad_location_from_dict():
 
 # Tests for APIResponseError class
 
+
 def test_api_response_error_from_api_response():
-    api_response = {
-            "code": 404,
-            "message": "Resource not found"
-    }
+    api_response = {"code": 404, "message": "Resource not found"}
     error = APIResponseError.from_api_response(api_response)
     assert error.code == 404
     assert error.message == "Resource not found"
@@ -392,6 +408,7 @@ def test_api_response_error_from_dict():
 
 
 # Tests for ArchiCadID class
+
 
 def test_archicad_id_register_subclass(reset_archicad_id_registry):
     # Define a new subclass
@@ -418,20 +435,17 @@ def test_archicad_id_register_subclass(reset_archicad_id_registry):
 
 
 def test_archicad_id_from_api_response_untitled(reset_archicad_id_registry):
-    api_response = {
-            "isUntitled": True,
-            "isTeamwork": False
-    }
+    api_response = {"isUntitled": True, "isTeamwork": False}
     project_id = ArchiCadID.from_api_response(api_response)
     assert isinstance(project_id, UntitledProjectID)
 
 
 def test_archicad_id_from_api_response_solo(reset_archicad_id_registry):
     api_response = {
-            "isUntitled": False,
-            "isTeamwork": False,
-            "projectPath": "/path/to/project",
-            "projectName": "MySoloProject"
+        "isUntitled": False,
+        "isTeamwork": False,
+        "projectPath": "/path/to/project",
+        "projectName": "MySoloProject",
     }
     project_id = ArchiCadID.from_api_response(api_response)
     assert isinstance(project_id, SoloProjectID)
@@ -440,21 +454,20 @@ def test_archicad_id_from_api_response_solo(reset_archicad_id_registry):
 
 
 def test_archicad_id_from_api_response_teamwork(reset_archicad_id_registry):
-    with patch('multiconn_archicad.basic_types.TeamworkProjectID.from_project_location') as mock_from_project_location:
+    with patch("multiconn_archicad.basic_types.TeamworkProjectID.from_project_location") as mock_from_project_location:
         mock_project_id = MagicMock(spec=TeamworkProjectID)
         mock_from_project_location.return_value = mock_project_id
 
         api_response = {
-                "isUntitled": False,
-                "isTeamwork": True,
-                "projectLocation": "teamwork://user:pass@server/project",
-                "projectName": "MyTeamworkProject"
+            "isUntitled": False,
+            "isTeamwork": True,
+            "projectLocation": "teamwork://user:pass@server/project",
+            "projectName": "MyTeamworkProject",
         }
         project_id = ArchiCadID.from_api_response(api_response)
 
         mock_from_project_location.assert_called_once_with(
-            project_location="teamwork://user:pass@server/project",
-            project_name="MyTeamworkProject"
+            project_location="teamwork://user:pass@server/project", project_name="MyTeamworkProject"
         )
         assert project_id == mock_project_id
 
@@ -479,7 +492,7 @@ def test_archicad_id_from_dict_teamwork(reset_archicad_id_registry):
         "projectPath": "projects/myproject",
         "serverAddress": "https://teamwork.example.com",
         "teamworkCredentials": {"username": "user", "password": "secret"},
-        "projectName": "MyTeamworkProject"
+        "projectName": "MyTeamworkProject",
     }
     project_id = ArchiCadID.from_dict(data_dict)
     assert isinstance(project_id, TeamworkProjectID)

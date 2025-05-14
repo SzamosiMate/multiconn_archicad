@@ -1,10 +1,10 @@
-
 from multiconn_archicad import MultiConn, WinDialogHandler, win_int_handler_factory, ConnHeader
 import logging
 import random
 
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
+
 
 def connect_and_run_ac_command():
     conn = MultiConn()
@@ -15,6 +15,7 @@ def connect_and_run_ac_command():
         elements.update({port: conn_header.standard.commands.GetAllElements()})
         log.debug(elements)
 
+
 def connect_and_run_ac_command_oneliner():
     conn = MultiConn()
     conn.connect.all()
@@ -23,12 +24,14 @@ def connect_and_run_ac_command_oneliner():
 
     log.debug(elements)
 
+
 def connect_and_run_core_command():
     conn = MultiConn()
     conn.connect.all()
 
     for conn_header in conn.active.values():
         log.debug(conn_header.core.post_tapir_command("GetAddOnVersion"))
+
 
 def quit_and_reopen_project():
     conn = MultiConn(WinDialogHandler(win_int_handler_factory))
@@ -37,6 +40,7 @@ def quit_and_reopen_project():
     port = conn.open_project.from_header(random_header, demo=True)
     assert conn.open_port_headers[port] == random_header
     log.info(f"quit anr reopened project: {random_header.archicad_id.projectName}")
+
 
 def switch_random_port():
     conn = MultiConn(WinDialogHandler(win_int_handler_factory))
@@ -48,6 +52,7 @@ def switch_random_port():
     assert conn.open_port_headers[random_port] == random_header
     log.info(f"project switched to: {random_header.archicad_id.projectName}")
     conn.open_project.from_header(original_header, demo=True)
+
 
 def cycle_primary():
     conn = MultiConn()
@@ -61,12 +66,14 @@ def cycle_primary():
         log.debug(conn.core.post_tapir_command("GetProjectInfo"))
         log.debug(conn.primary.standard.commands.IsAlive())
 
+
 def print_test():
     dialog_handler = WinDialogHandler(win_int_handler_factory)
     conn = MultiConn(dialog_handler)
 
     print(conn)
     print(conn.primary)
+
 
 if __name__ == "__main__":
     connect_and_run_ac_command()
