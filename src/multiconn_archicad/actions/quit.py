@@ -11,11 +11,13 @@ if TYPE_CHECKING:
     from multiconn_archicad.basic_types import Port
 
 import logging
+
 log = logging.getLogger(__name__)
+
 
 def _find_process_using_port(port: int) -> int | None:
     """Find the PID of the process using the specified port."""
-    for conn in psutil.net_connections(kind='inet'):
+    for conn in psutil.net_connections(kind="inet"):
         if conn.laddr.port == port and conn.status == psutil.CONN_LISTEN:
             return conn.pid
     return None
@@ -48,7 +50,8 @@ class QuitAndDisconnect:
                 self.multi_conn.open_port_headers[port]
                 for port in args
                 if port in self.multi_conn.open_port_headers.keys()
-            ], force_after
+            ],
+            force_after,
         )
 
     def from_headers(self, *args: ConnHeader, force_after: None | float = None) -> list[ConnHeader]:
@@ -83,5 +86,3 @@ class QuitAndDisconnect:
                 self.multi_conn.open_port_headers.pop(conn_header.port)
                 conn_header.unassign()
         return processed_headers
-
-

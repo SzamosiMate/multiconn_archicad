@@ -3,7 +3,7 @@ import aiohttp
 from typing import cast, Awaitable
 from pprint import pformat
 
-from multiconn_archicad.utilities.async_utils import callable_from_sync_or_async_context
+from multiconn_archicad.utilities.async_utils import run_sync
 from multiconn_archicad.core_commands import CoreCommands
 from multiconn_archicad.standard_connection import StandardConnection
 from multiconn_archicad.conn_header import ConnHeader, Status
@@ -47,7 +47,7 @@ class MultiConn:
         self.switch_project: SwitchProject = SwitchProject(self)
 
         self.refresh.all_ports()
-        self._set_primary()
+        run_sync(self._set_primary())
 
     @property
     def pending(self) -> dict[Port, ConnHeader]:
@@ -79,7 +79,7 @@ class MultiConn:
 
     @primary.setter
     def primary(self, new_value: Port | ConnHeader) -> None:
-        self._set_primary(new_value)
+        run_sync(self._set_primary(new_value))
 
     def __repr__(self) -> str:
         attrs = {name: getattr(self, name) for name in ["pending", "active", "failed", "primary", "dialog_handler"]}
@@ -140,7 +140,6 @@ class MultiConn:
             if self._primary and self._primary.port == port:
                 await cast(Awaitable[None], self._set_primary())
 
-    @callable_from_sync_or_async_context
     async def _set_primary(self, new_value: None | Port | ConnHeader = None) -> None:
         if isinstance(new_value, Port):
             await self._set_primary_from_port(new_value)

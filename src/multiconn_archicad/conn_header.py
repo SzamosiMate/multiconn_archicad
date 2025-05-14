@@ -1,5 +1,6 @@
+import asyncio
 from enum import Enum
-from typing import Self, Any, Awaitable, cast, TypeGuard
+from typing import Self, Any, TypeGuard, Coroutine
 from pprint import pformat
 
 from multiconn_archicad.core_commands import CoreCommands
@@ -12,7 +13,7 @@ from multiconn_archicad.basic_types import (
 )
 from multiconn_archicad.errors import RequestError, ArchicadAPIError, HeaderUnassignedError
 from multiconn_archicad.standard_connection import StandardConnection
-from multiconn_archicad.utilities.async_utils import run_in_sync_or_async_context
+from multiconn_archicad.utilities.async_utils import run_sync
 
 
 class Status(Enum):
@@ -36,11 +37,9 @@ class ConnHeader:
         self._standard: StandardConnection | None = StandardConnection(port)
 
         if initialize:
-            self.product_info: ProductInfo | APIResponseError = run_in_sync_or_async_context(self.get_product_info)
-            self.archicad_id: ArchiCadID | APIResponseError = run_in_sync_or_async_context(self.get_archicad_id)
-            self.archicad_location: ArchicadLocation | APIResponseError = run_in_sync_or_async_context(
-                self.get_archicad_location
-            )
+            self.product_info: ProductInfo | APIResponseError = run_sync(self.get_product_info())
+            self.archicad_id: ArchiCadID | APIResponseError = run_sync(self.get_archicad_id())
+            self.archicad_location: ArchicadLocation | APIResponseError = run_sync(self.get_archicad_location())
 
     @property
     def status(self) -> Status:
@@ -123,9 +122,15 @@ class ConnHeader:
     @classmethod
     async def async_init(cls, port: Port) -> Self:
         instance = cls(port, initialize=False)
-        instance.product_info = await instance.get_product_info()
-        instance.archicad_id = await instance.get_archicad_id()
-        instance.archicad_location = await instance.get_archicad_location()
+
+        async def _set(attr: str, coro: Coroutine) -> None:
+            setattr(instance, attr, await coro)
+
+        await asyncio.gather(
+            _set("product_info", instance.get_product_info()),
+            _set("archicad_id", instance.get_archicad_id()),
+            _set("archicad_location", instance.get_archicad_location()),
+        )
         return instance
 
     def connect(self) -> None:
@@ -147,27 +152,21 @@ class ConnHeader:
 
     async def get_product_info(self) -> ProductInfo | APIResponseError:
         try:
-            result = await cast(
-                Awaitable[dict[str, Any]], self.core.post_command(command="API.GetProductInfo", timeout=0.2)
-            )
+            result = await self.core.post_command_async(command="API.GetProductInfo", timeout=0.2)
             return ProductInfo.from_api_response(result)
         except (RequestError, ArchicadAPIError) as e:
             return APIResponseError.from_exception(e)
 
     async def get_archicad_id(self) -> ArchiCadID | APIResponseError:
         try:
-            result = await cast(
-                Awaitable[dict[str, Any]], self.core.post_tapir_command(command="GetProjectInfo", timeout=0.2)
-            )
+            result = await self.core.post_tapir_command_async(command="GetProjectInfo", timeout=0.2)
             return ArchiCadID.from_api_response(result)
         except (RequestError, ArchicadAPIError) as e:
             return APIResponseError.from_exception(e)
 
     async def get_archicad_location(self) -> ArchicadLocation | APIResponseError:
         try:
-            result = await cast(
-                Awaitable[dict[str, Any]], self.core.post_tapir_command(command="GetArchicadLocation", timeout=0.2)
-            )
+            result = await self.core.post_tapir_command_async(command="GetArchicadLocation", timeout=0.2)
             return ArchicadLocation.from_api_response(result)
         except (RequestError, ArchicadAPIError) as e:
             return APIResponseError.from_exception(e)

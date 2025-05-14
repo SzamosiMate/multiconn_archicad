@@ -13,7 +13,7 @@ class AppState:
         self.first_port: Port | None = self.get_first_port()
         self.script: Runnable | Settable | None = None
         self.parameters: bool = False
-        self.run_mode: str = 'Single'
+        self.run_mode: str = "Single"
 
     def get_instance_id(self) -> dict[Port, str]:
         instance_ids = {}
@@ -32,12 +32,12 @@ class AppState:
         return port
 
     def connect_or_disconnect(self, port: Port, do_connect: bool) -> None:
-        print(f'setting port {port} to {do_connect}')
+        print(f"setting port {port} to {do_connect}")
         if do_connect:
             self.conn.connect.from_ports(port)
         else:
             self.conn.disconnect.from_ports(port)
-        print(f'setting port {port} to {self.conn.open_port_headers[port].status}')
+        print(f"setting port {port} to {self.conn.open_port_headers[port].status}")
 
     async def refresh(self) -> None:
         await self.conn.refresh.all_ports()
@@ -45,13 +45,13 @@ class AppState:
         self.first_port = self.get_first_port()
 
     def run(self) -> dict[Port, dict[str, Any]]:
-        if self.run_mode == 'Single':
+        if self.run_mode == "Single":
             return self.run_single()
-        elif self.run_mode == 'Multiple':
+        elif self.run_mode == "Multiple":
             return self.run_multiple()
 
     def run_single(self) -> dict[Port, dict[str, Any]]:
-        return {self.conn.primary.port : self.script.run(self.conn.primary)}
+        return {self.conn.primary.port: self.script.run(self.conn.primary)}
 
     def run_multiple(self) -> dict[Port, dict[str, Any]]:
         return {port: self.script.run(header) for port, header in self.conn.active.items()}
