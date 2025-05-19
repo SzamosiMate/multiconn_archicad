@@ -18,6 +18,7 @@ from multiconn_archicad.actions import (
     SwitchProject,
 )
 from multiconn_archicad.dialog_handlers import DialogHandlerBase, EmptyDialogHandler
+from multiconn_archicad.errors import NoPrimaryConnection
 
 import logging
 
@@ -75,7 +76,10 @@ class MultiConn:
 
     @property
     def primary(self) -> ConnHeader | None:
-        return self._primary
+        if self._primary:
+            return self._primary
+        else:
+            raise NoPrimaryConnection("There is no primary connection set")
 
     @primary.setter
     def primary(self, new_value: Port | ConnHeader) -> None:
@@ -139,6 +143,10 @@ class MultiConn:
             self.open_port_headers.pop(port)
             if self._primary and self._primary.port == port:
                 await cast(Awaitable[None], self._set_primary())
+
+    def refresh_primary(self) -> None:
+        if not self._primary or (self._primary not in self.open_port_headers):
+            run_sync(self._set_primary_from_none())
 
     async def _set_primary(self, new_value: None | Port | ConnHeader = None) -> None:
         if isinstance(new_value, Port):

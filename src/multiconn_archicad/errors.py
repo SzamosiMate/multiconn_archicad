@@ -96,3 +96,6 @@ class NotFullyInitializedError(MulticonnArchicadError):
     """Raised when an operation is attempted on an object not fully initialized."""
 
     pass
+
+class NoPrimaryConnection(MulticonnArchicadError):
+    """Raised when trying to access the primary connection when it is not set"""
