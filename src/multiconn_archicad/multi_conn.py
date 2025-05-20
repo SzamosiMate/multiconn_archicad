@@ -1,7 +1,7 @@
 import asyncio
 import aiohttp
-from typing import cast, Awaitable
 from pprint import pformat
+import argparse
 
 from multiconn_archicad.utilities.async_utils import run_sync
 from multiconn_archicad.core_commands import CoreCommands
@@ -22,13 +22,17 @@ from multiconn_archicad.dialog_handlers import DialogHandlerBase, EmptyDialogHan
 import logging
 
 log = logging.getLogger(__name__)
-
+parser = argparse.ArgumentParser()
+parser.add_argument("--host", dest="host", type=str, default="http://127.0.0.1")
+parser.add_argument("--port", dest="port", type=int, default=None)
+args = parser.parse_args()
+args.port = Port(args.port) if args.port else None
 
 class MultiConn:
-    _base_url: str = "http://127.0.0.1"
     _port_range: list[Port] = [Port(port) for port in range(19723, 19744)]
 
-    def __init__(self, dialog_handler: DialogHandlerBase = EmptyDialogHandler()) -> None:
+    def __init__(self, dialog_handler: DialogHandlerBase = EmptyDialogHandler(), port: Port | None = args.port, host: str = args.host) -> None:
+        self._base_url: str = host
         self.open_port_headers: dict[Port, ConnHeader] = {}
         self._primary: ConnHeader | None = None
         self.dialog_handler: DialogHandlerBase = dialog_handler
@@ -47,7 +51,7 @@ class MultiConn:
         self.switch_project: SwitchProject = SwitchProject(self)
 
         self.refresh.all_ports()
-        run_sync(self._set_primary())
+        run_sync(self._set_primary(port))
 
     @property
     def pending(self) -> dict[Port, ConnHeader]:
@@ -138,7 +142,7 @@ class MultiConn:
             log.info(f"Removing connection header for inactive/unresponsive port {port}.")
             self.open_port_headers.pop(port)
             if self._primary and self._primary.port == port:
-                await cast(Awaitable[None], self._set_primary())
+                await self._set_primary()
 
     async def _set_primary(self, new_value: None | Port | ConnHeader = None) -> None:
         if isinstance(new_value, Port):
