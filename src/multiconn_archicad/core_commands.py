@@ -4,6 +4,7 @@ from typing import Any, Callable, Coroutine, TYPE_CHECKING
 import aiohttp
 import asyncio
 import logging
+import argparse
 
 from multiconn_archicad.errors import (
     CommandTimeoutError,
@@ -14,21 +15,22 @@ from multiconn_archicad.errors import (
     TapirCommandError,
 )
 from multiconn_archicad.utilities.async_utils import run_sync
+from multiconn_archicad.basic_types import Port
 
 if TYPE_CHECKING:
-    from multiconn_archicad.basic_types import Port
     from multiconn_archicad.literal_commands import AddonCommandType, TapirCommandType
 
-
 log = logging.getLogger(__name__)
+parser = argparse.ArgumentParser()
+parser.add_argument("--host", dest="host", type=str, default="http://127.0.0.1")
+parser.add_argument("--port", dest="port", type=int, default=19723)
+args = parser.parse_args()
 
 
 class CoreCommands:
-    _BASE_URL: str = "http://127.0.0.1"
-
-    def __init__(self, port: Port):
+    def __init__(self, port: Port = Port(args.port), host: str = args.host):
         self.port: Port = port
-        self.url: str = f"{self._BASE_URL:}:{self.port}"
+        self.url: str = f"{host}:{self.port}"
 
     def __repr__(self) -> str:
         attrs = ", ".join(f"{k}={v!r}" for k, v in vars(self).items())

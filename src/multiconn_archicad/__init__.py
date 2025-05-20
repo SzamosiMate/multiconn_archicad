@@ -1,5 +1,12 @@
 from .multi_conn import MultiConn
-from .conn_header import ConnHeader
+from .conn_header import (
+    ConnHeader,
+    ValidatedHeader,
+    is_header_fully_initialized,
+    is_id_initialized,
+    is_location_initialized,
+    is_product_info_initialized,
+)
 from .basic_types import (
     ArchiCadID,
     TeamworkProjectID,
@@ -68,6 +75,11 @@ __all__: tuple[str, ...] = (
     "ProjectAlreadyOpenError",
     "ProjectNotFoundError",
     "NotFullyInitializedError",
+    "ValidatedHeader",
+    "is_location_initialized",
+    "is_product_info_initialized",
+    "is_id_initialized",
+    "is_header_fully_initialized",
 )
 
 log = logging.getLogger(__name__)
