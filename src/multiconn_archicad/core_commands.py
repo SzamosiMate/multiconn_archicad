@@ -20,6 +20,7 @@ from multiconn_archicad.basic_types import Port
 if TYPE_CHECKING:
     from multiconn_archicad.literal_commands import AddonCommandType, TapirCommandType
 
+
 log = logging.getLogger(__name__)
 parser = argparse.ArgumentParser()
 parser.add_argument("--host", dest="host", type=str, default="http://127.0.0.1")
