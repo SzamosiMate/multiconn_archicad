@@ -17,7 +17,7 @@ from multiconn_archicad.actions import (
     SwitchProject,
 )
 from multiconn_archicad.dialog_handlers import DialogHandlerBase, EmptyDialogHandler
-from multiconn_archicad.utilities.cli_pharser import get_cli_args_once
+from multiconn_archicad.utilities.cli_parser import get_cli_args_once
 
 import logging
 

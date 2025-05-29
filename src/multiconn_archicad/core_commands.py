@@ -15,7 +15,7 @@ from multiconn_archicad.errors import (
 )
 from multiconn_archicad.utilities.async_utils import run_sync
 from multiconn_archicad.basic_types import Port
-from multiconn_archicad.utilities.cli_pharser import get_cli_args_once
+from multiconn_archicad.utilities.cli_parser import get_cli_args_once
 
 if TYPE_CHECKING:
     from multiconn_archicad.literal_commands import AddonCommandType, TapirCommandType
