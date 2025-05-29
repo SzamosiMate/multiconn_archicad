@@ -1,7 +1,6 @@
 import asyncio
 import aiohttp
 from pprint import pformat
-import argparse
 
 from multiconn_archicad.utilities.async_utils import run_sync
 from multiconn_archicad.core_commands import CoreCommands
@@ -18,21 +17,19 @@ from multiconn_archicad.actions import (
     SwitchProject,
 )
 from multiconn_archicad.dialog_handlers import DialogHandlerBase, EmptyDialogHandler
+from multiconn_archicad.utilities.cli_pharser import get_cli_args_once
 
 import logging
 
 log = logging.getLogger(__name__)
-parser = argparse.ArgumentParser()
-parser.add_argument("--host", dest="host", type=str, default="http://127.0.0.1")
-parser.add_argument("--port", dest="port", type=int, default=None)
-args = parser.parse_args()
-args.port = Port(args.port) if args.port else None
+
 
 class MultiConn:
     _port_range: list[Port] = [Port(port) for port in range(19723, 19744)]
 
-    def __init__(self, dialog_handler: DialogHandlerBase = EmptyDialogHandler(), port: Port | None = args.port, host: str = args.host) -> None:
-        self._base_url: str = host
+    def __init__(self, dialog_handler: DialogHandlerBase = EmptyDialogHandler(), port: Port | None = None, host: str = "http://127.0.0.1") -> None:
+        cli_args = get_cli_args_once()
+        self._base_url: str = cli_args.host if cli_args.host else host
         self.open_port_headers: dict[Port, ConnHeader] = {}
         self._primary: ConnHeader | None = None
         self.dialog_handler: DialogHandlerBase = dialog_handler
@@ -51,6 +48,7 @@ class MultiConn:
         self.switch_project: SwitchProject = SwitchProject(self)
 
         self.refresh.all_ports()
+        port = Port(cli_args.port) if cli_args.port else port
         run_sync(self._set_primary(port))
 
     @property
