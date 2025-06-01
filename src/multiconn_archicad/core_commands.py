@@ -1,9 +1,10 @@
+from __future__ import annotations
 import json
-from typing import Any, Callable, Coroutine
+from typing import Any, Callable, Coroutine, TYPE_CHECKING
 import aiohttp
 import asyncio
+import logging
 
-from multiconn_archicad.basic_types import Port
 from multiconn_archicad.errors import (
     CommandTimeoutError,
     APIConnectionError,
@@ -13,18 +14,21 @@ from multiconn_archicad.errors import (
     TapirCommandError,
 )
 from multiconn_archicad.utilities.async_utils import run_sync
+from multiconn_archicad.basic_types import Port
+from multiconn_archicad.utilities.cli_parser import get_cli_args_once
 
-import logging
+if TYPE_CHECKING:
+    from multiconn_archicad.literal_commands import AddonCommandType, TapirCommandType
+
 
 log = logging.getLogger(__name__)
 
 
 class CoreCommands:
-    _BASE_URL: str = "http://127.0.0.1"
-
-    def __init__(self, port: Port):
-        self.port: Port = port
-        self.url: str = f"{self._BASE_URL:}:{self.port}"
+    def __init__(self, port: Port = Port(19723), host: str = "http://127.0.0.1"):
+        cli_args = get_cli_args_once()
+        self.port: Port = Port(cli_args.port) if cli_args.port else port
+        self.url: str = f"{cli_args.host if cli_args.host else host}:{self.port}"
 
     def __repr__(self) -> str:
         attrs = ", ".join(f"{k}={v!r}" for k, v in vars(self).items())
@@ -34,25 +38,25 @@ class CoreCommands:
         return self.__repr__()
 
     def post_command(
-        self, command: str, parameters: dict | None = None, timeout: float | None = None
+        self, command: AddonCommandType, parameters: dict | None = None, timeout: float | None = None
     ) -> dict[str, Any]:
         """Posts a standard Archicad JSON command synchronously."""
         return run_sync(self._async_post_command_logic(command, parameters or {}, timeout))
 
     def post_tapir_command(
-        self, command: str, parameters: dict | None = None, timeout: float | None = None
+        self, command: TapirCommandType, parameters: dict | None = None, timeout: float | None = None
     ) -> dict[str, Any]:
         """Posts a Tapir Add-On command synchronously."""
         return run_sync(self._async_post_tapir_command_logic(command, parameters or {}, timeout))
 
     async def post_command_async(
-        self, command: str, parameters: dict | None = None, timeout: float | None = None
+        self, command: AddonCommandType, parameters: dict | None = None, timeout: float | None = None
     ) -> dict[str, Any]:
         """Posts a standard Archicad JSON command asynchronously."""
         return await self._async_post_command_logic(command, parameters or {}, timeout)
 
     async def post_tapir_command_async(
-        self, command: str, parameters: dict | None = None, timeout: float | None = None
+        self, command: TapirCommandType, parameters: dict | None = None, timeout: float | None = None
     ) -> dict[str, Any]:
         """Posts a Tapir Add-On command asynchronously."""
         return await self._async_post_tapir_command_logic(command, parameters or {}, timeout)
