@@ -2,16 +2,29 @@ from typing import Optional, Container, TypedDict, NotRequired, Callable, Any
 from copy import deepcopy
 import tkinter as tk
 from tkinter import messagebox
-import importlib.util
+import importlib
+import importlib.metadata
 import subprocess
 import sys
 
-if not importlib.util.find_spec("multiconn_archicad"):
-    subprocess.check_call([sys.executable, "-m", "pip", "install",
-    "https://github.com/SzamosiMate/multiconn_archicad/releases/latest/download/multiconn_archicad-0.3.1-py3-none-any.whl"])
-    importlib.invalidate_caches()
+MODULE_NAME = "multiconn_archicad"
+REQUIRED_VERSION = "0.3.1"
 
-from multiconn_archicad import MultiConn, ConnHeader, CoreCommands, TeamworkProjectID
+def get_installed_version(module_name: str) -> str | None:
+    try:
+        return importlib.metadata.version(module_name)
+    except importlib.metadata.PackageNotFoundError:
+        return None
+
+installed_version = get_installed_version(MODULE_NAME)
+
+if installed_version != REQUIRED_VERSION:
+    print(f"Installing/updating {MODULE_NAME} to version {REQUIRED_VERSION} (found: {installed_version})...")
+    subprocess.check_call([
+        sys.executable, "-m", "pip", "install", "--upgrade",
+        f"https://github.com/SzamosiMate/multiconn_archicad/releases/latest/download/multiconn_archicad-{REQUIRED_VERSION}-py3-none-any.whl"
+    ])
+    importlib.invalidate_caches()
 
 VIEW_NAVITEM_TYPES = [
     "StoryItem",
@@ -224,6 +237,7 @@ class UnusedViewCleaner:
             navigator_tree = self.core.post_command(
                 command="API.GetNavigatorItemTree", parameters=navigator_tree_id
             )
+            print(navigator_tree)
             get_unique_navigator_items_from_tree(
                 current_branch=navigator_tree["navigatorTree"]["rootItem"].get("children", {}),
                 guid_navitem_map=guid_navitem_map,
