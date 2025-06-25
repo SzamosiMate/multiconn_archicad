@@ -8,7 +8,14 @@ from typing import Any, Dict, List
 COMMAND_DEFS_URL = "https://raw.githubusercontent.com/ENZYME-APD/tapir-archicad-automation/main/docs/archicad-addon/command_definitions.js"
 COMMON_SCHEMA_URL = "https://raw.githubusercontent.com/ENZYME-APD/tapir-archicad-automation/main/docs/archicad-addon/common_schema_definitions.js"
 
-COMMON_SCHEMA_OUTPUT = pathlib.Path("tapir_master_schema.json")
+MASTER_SCHEMA_OUTPUT = pathlib.Path("tapir_master_schema.json")
+
+BASE_MODEL_NAMES = pathlib.Path("base_model_names.json")
+COMMAND_MODELS_NAMES = pathlib.Path("command_model_names.json")
+
+def apply_fixes(content: str) -> str:
+    content = content.replace('"type": "double"', '"type": "number"')
+    return content
 
 
 def fetch_file_content(url: str) -> str:
@@ -17,7 +24,7 @@ def fetch_file_content(url: str) -> str:
     try:
         with urllib.request.urlopen(url) as response:
             if response.status == 200:
-                return response.read().decode('utf-8')
+                return apply_fixes(response.read().decode('utf-8'))
             else:
                 raise ConnectionError(f"Failed to fetch file: HTTP {response.status}")
     except Exception as e:
@@ -51,18 +58,41 @@ def fix_refs_recursive(data: Any) -> Any:
     if isinstance(data, dict):
         if "$ref" in data and isinstance(data["$ref"], str):
             ref_path = data["$ref"]
+            # Check if the path is a root reference but is NOT already pointing to $defs
             if ref_path.startswith("#/") and not ref_path.startswith("#/$defs/"):
                 # Correct the path
                 def_name = ref_path.split("/")[-1]
                 data["$ref"] = f"#/$defs/{def_name}"
 
+        # Continue recursion for all values in the dictionary
         return {key: fix_refs_recursive(value) for key, value in data.items()}
 
     elif isinstance(data, list):
+        # Continue recursion for all items in the list
         return [fix_refs_recursive(item) for item in data]
 
     else:
+        # Return primitives (str, int, bool, etc.) as is
         return data
+
+def get_command_defs(commands_list: List[Dict[str, Any]]) -> Dict[str, Any]:
+    command_defs: Dict[str, Any] = {}
+    for command_group in commands_list:
+        group_name = command_group.get('group', 'UnknownGroup')
+        for command in command_group.get("commands", []):
+            command_name = command.get("name")
+            if not command_name:
+                print(f"Warning: Skipping command with no name in group '{group_name}'.")
+                continue
+
+            if command.get("inputScheme"):
+                def_name = f"{command_name}Parameters"
+                command_defs[def_name] = command["inputScheme"]
+
+            if command.get("outputScheme") and command["outputScheme"].get("type") == "object":
+                def_name = f"{command_name}Result"
+                command_defs[def_name] = command["outputScheme"]
+    return command_defs
 
 
 def create_master_schema():
@@ -78,26 +108,10 @@ def create_master_schema():
     print("Parsing JavaScript variable assignments...")
     common_defs: Dict[str, Any] = parse_js_variable(common_schema_js, "gSchemaDefinitions")
     commands_list: List[Dict[str, Any]] = parse_js_variable(command_defs_js, "gCommands")
-
-    command_defs: Dict[str, Any] = {}
-    for command_group in commands_list:
-        group_name = command_group.get('group', 'UnknownGroup')
-        for command in command_group.get("commands", []):
-            command_name = command.get("name")
-            if not command_name:
-                print(f"Warning: Skipping command with no name in group '{group_name}'.")
-                continue
-            if command.get("inputScheme"):
-                def_name = f"{command_name}Parameters"
-                command_defs[def_name] = command["inputScheme"]
-            if command.get("outputScheme") and command["outputScheme"].get("type") == "object":
-                def_name = f"{command_name}Result"
-                command_defs[def_name] = command["outputScheme"]
-
-    print(f"Parsed {len(common_defs)} common definitions and {len(command_defs)} command-specific definitions.")
+    command_defs = get_command_defs(commands_list)
 
     master_defs = common_defs.copy()
-    master_defs.update(command_defs)
+    master_defs.update(common_defs)
     print(f"Total unique definitions after merge: {len(master_defs)}")
 
     master_schema = {
@@ -107,11 +121,20 @@ def create_master_schema():
         "$defs": master_defs
     }
 
-    # Recursively fix all '$ref' paths
     master_schema = fix_refs_recursive(master_schema)
 
     with open(MASTER_SCHEMA_OUTPUT, "w", encoding="utf-8") as f:
         json.dump(master_schema, f, indent=2)
+
+    base_model_names = list(common_defs.keys())
+    command_model_names = list(command_defs.keys())
+
+    # Write the lists to temporary files for the next step in the pipeline.
+    with open("_base_model_names.json", "w") as f:
+        json.dump(base_model_names, f)
+
+    with open("_command_model_names.json", "w") as f:
+        json.dump(command_model_names, f)
 
     print(f"✅ Successfully generated master schema at: {MASTER_SCHEMA_OUTPUT}")
 
