@@ -4,8 +4,8 @@ from pathlib import Path
 
 # --- Configuration ---
 INPUT_FILE = Path("../temp_models/typed_dicts.py")
-BASE_TYPED_DICTS_OUTPUT = Path("../../src/multiconn_archicad/core/base_typed_dicts.py")
-COMMAND_TYPED_DICTS_OUTPUT = Path("../../src/multiconn_archicad/core/command_typed_dicts.py")
+BASE_TYPED_DICTS_OUTPUT = Path("../../src/multiconn_archicad/dicts/types.py")
+COMMAND_TYPED_DICTS_OUTPUT = Path("../../src/multiconn_archicad/dicts/commands.py")
 BASE_NAMES_FILE = Path("../schema/_base_model_names.json")
 COMMAND_NAMES_FILE = Path("../schema/_command_model_names.json")
 
