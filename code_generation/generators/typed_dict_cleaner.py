@@ -1,0 +1,137 @@
+import re
+from pathlib import Path
+
+# --- Configuration ---
+INPUT_TYPED_DICTS_PATH = Path("../temp_models/input_typed_dicts.py")
+FINAL_TYPED_DICTS_PATH = Path("../temp_models/typed_dicts.py") # Overwrite the original
+
+### Main Cleaning Pipeline ###
+
+def main():
+    """
+    Performs a final, surgical cleaning of the generated TypedDict models.
+    This script addresses known artifacts from the datamodel-codegen process
+    to produce a clean, valid, and usable TypedDict models file for static analysis.
+    """
+    print(f"--- Starting definitive cleaning of {INPUT_TYPED_DICTS_PATH} ---")
+
+    try:
+        content = INPUT_TYPED_DICTS_PATH.read_text(encoding="utf-8")
+    except FileNotFoundError:
+        print(f"Error: {INPUT_TYPED_DICTS_PATH} not found. Please generate it first.")
+        return
+
+    # The order of these operations is critical for success.
+
+    print("Step 1: Correcting known type mapping errors (e.g., Any -> float)...")
+    content = fix_known_type_errors(content)
+
+    print("Step 2: Removing known incomplete duplicate TypedDicts...")
+    content = remove_specific_duplicates(content)
+
+    print("Step 3: Consolidating suffixed TypedDicts (e.g., 'Hole1' -> 'Hole')...")
+    content = promote_suffixed_classes(content)
+
+    print("Step 4: Assembling and formatting the final file...")
+    content = assemble_final_file(content)
+
+    FINAL_TYPED_DICTS_PATH.write_text(content, encoding="utf-8")
+    print(f"✅ Successfully created final, clean TypedDict models at: {FINAL_TYPED_DICTS_PATH}")
+
+
+### Cleaning Logic Functions (in execution order) ###
+
+def fix_known_type_errors(content: str) -> str:
+    """Corrects specific, known type mapping errors from the generator."""
+    if "rotation: Any" in content:
+        content = content.replace("rotation: Any", "rotation: float")
+        print("    - Fixed 'rotation: Any' to 'rotation: float'.")
+    return content
+
+
+def remove_specific_duplicates(content: str) -> str:
+    """
+    Removes specific, known-to-be-incomplete TypedDict definitions that
+    the generator creates before creating the correct, suffixed version.
+    This version uses more robust regex.
+    """
+    # FIX: This regex is now more robust. It finds the class definition
+    # and removes the entire block until the next double newline.
+    duplicate_doc_rev_pattern = re.compile(
+        r"class DocumentRevision\(TypedDict\):\n    revisionId: DocumentRevisionId\n",
+        re.MULTILINE
+    )
+    if duplicate_doc_rev_pattern.search(content):
+        content = duplicate_doc_rev_pattern.sub("", content)
+        print("    - Removed incomplete 'DocumentRevision' TypedDict.")
+
+    # FIX: This regex is also more robust. It finds the less-useful 'Hole'
+    # definition (with 'polygonOutline') and removes its entire block.
+    # We will later promote 'Hole1' (with 'polygonCoordinates') to 'Hole'.
+    original_hole_pattern = re.compile(
+        r"class Hole\(TypedDict\):\s*\n    polygonOutline:.*\n(?:    .*\n)*",
+        re.MULTILINE
+    )
+    if original_hole_pattern.search(content):
+        content = original_hole_pattern.sub("", content)
+        print("    - Removed 'Hole' TypedDict with 'polygonOutline'.")
+
+    return content.strip()
+
+
+def promote_suffixed_classes(content: str) -> str:
+    """
+    Finds all TypedDict definitions ending with '1' and renames all occurrences
+    of those specific class names to their base name.
+    """
+    suffixed_class_pattern = re.compile(r"class\s+(\w+1)\s*\((?:TypedDict)?\):")
+    suffixed_class_names = sorted(list(set(suffixed_class_pattern.findall(content))), key=len, reverse=True)
+
+    if not suffixed_class_names:
+        print("    - No suffixed TypedDicts found to consolidate.")
+        return content
+
+    print(f"    - Found suffixed TypedDicts to consolidate: {', '.join(suffixed_class_names)}")
+
+    for suffixed_name in suffixed_class_names:
+        base_name = suffixed_name[:-1]
+        print(f"    - Renaming all instances of '{suffixed_name}' to '{base_name}'...")
+        content = re.sub(r'\b' + re.escape(suffixed_name) + r'\b', base_name, content)
+
+    return content
+
+
+def assemble_final_file(content: str) -> str:
+    """Adds a standard header, imports, and performs final formatting."""
+    # Remove the placeholder `TapirMasterModels = Any` which isn't needed.
+    content = content.replace("TapirMasterModels = Any", "")
+
+    # FIX: Filter out ALL old import lines from the body content.
+    body_lines = [
+        line for line in content.splitlines()
+        if line.strip()
+        and not line.strip().startswith(("#", "from __future__", "from typing"))
+    ]
+
+    # Define a single, clean header.
+    header = [
+        "from __future__ import annotations",
+        "",
+        "from typing import Any, List, Literal, TypedDict, Union",
+        "",
+        "from typing_extensions import NotRequired",
+        "",
+        "### This file is automatically generated and surgically cleaned. Do not edit directly. ###",
+    ]
+
+    final_content = "\n".join(header + [""] + body_lines)
+
+    # Standardize spacing between definitions for readability.
+    final_content = re.sub(r'\n(class |[A-Z]\w+\s*=)', r'\n\n\n\1', final_content)
+    final_content = final_content.replace('\n\n\n\n', '\n\n\n')
+
+    return final_content.strip() + "\n"
+
+
+if __name__ == "__main__":
+    main()

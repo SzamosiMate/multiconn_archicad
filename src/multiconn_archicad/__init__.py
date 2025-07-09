@@ -20,7 +20,7 @@ from .basic_types import (
     FromAPIResponse,
 )
 from .standard_connection import StandardConnection
-from .core_commands import CoreCommands
+from multiconn_archicad.core.core_commands import CoreCommands
 from .dialog_handlers import (
     DialogHandlerBase,
     WinDialogHandler,

@@ -2,9 +2,9 @@ import re
 from pathlib import Path
 
 # Path to the newly generated (imperfect) models from datamodel-codegen
-INPUT_MODELS_PATH = Path("input_base_models.py")
+INPUT_MODELS_PATH = Path("../temp_models/input_base_models.py")
 # Final, clean output path
-FINAL_MODELS_PATH = Path("base_models.py")
+FINAL_MODELS_PATH = Path("../temp_models/base_models.py")
 
 
 ### Main Cleaning Pipeline ###
@@ -126,12 +126,29 @@ def remove_specific_duplicates(content: str) -> str:
 
 
 def promote_suffixed_classes(content: str) -> str:
-    """Finds all classes ending with '1' and renames them to their base name."""
-    suffixed_class_pattern = re.compile(r"\b(\w+)1\b")
-    base_names = sorted(list(set(suffixed_class_pattern.findall(content))), key=len, reverse=True)
+    """
+    Finds all class definitions ending with '1' (e.g., "class Hole1(BaseModel):")
+    and renames all occurrences of those specific class names to their base name,
+    leaving other identifiers like 'dimension1' untouched.
+    """
+    # 1. Find only the names of CLASSES that are defined with a '1' suffix.
+    #    The regex looks for "class ClassName1(" to be very specific.
+    suffixed_class_pattern = re.compile(r"class\s+(\w+1)\s*\(")
+    suffixed_class_names = sorted(list(set(suffixed_class_pattern.findall(content))), key=len, reverse=True)
 
-    for base_name in base_names:
-        content = re.sub(r'\b' + re.escape(base_name) + r'1\b', base_name, content)
+    if not suffixed_class_names:
+        return content
+
+    print(f"    - Found suffixed classes to consolidate: {', '.join(suffixed_class_names)}")
+
+    # 2. For each of these specific class names, perform a global replacement.
+    #    This is safe because we are only targeting names we know are classes.
+    for suffixed_name in suffixed_class_names:
+        base_name = suffixed_name[:-1]  # Remove the trailing '1'
+        print(f"    - Renaming all instances of '{suffixed_name}' to '{base_name}'...")
+        # Use word boundaries (\b) to ensure we replace the whole word only.
+        # This replaces `Hole1` but not a hypothetical `MyHole1Variable`.
+        content = re.sub(r'\b' + re.escape(suffixed_name) + r'\b', base_name, content)
 
     return content
 

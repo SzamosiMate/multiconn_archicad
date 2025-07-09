@@ -1,9 +1,9 @@
 from datamodel_code_generator import DataModelType, InputFileType, generate, LiteralType
 import pathlib
 
-base_input_file = pathlib.Path("tapir_master_schema.json")
-base_output = pathlib.Path("input_base_models.py")
-dict_output = pathlib.Path("typed_dicts.py")
+base_input_file = pathlib.Path("../schema/tapir_master_schema.json")
+base_output = pathlib.Path("../temp_models/input_base_models.py")
+dict_output = pathlib.Path("../temp_models/input_typed_dicts.py")
 
 
 generate(

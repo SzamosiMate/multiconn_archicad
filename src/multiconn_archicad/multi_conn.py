@@ -3,7 +3,7 @@ import aiohttp
 from pprint import pformat
 
 from multiconn_archicad.utilities.async_utils import run_sync
-from multiconn_archicad.core_commands import CoreCommands
+from multiconn_archicad.core.core_commands import CoreCommands
 from multiconn_archicad.standard_connection import StandardConnection
 from multiconn_archicad.conn_header import ConnHeader, Status
 from multiconn_archicad.basic_types import Port, APIResponseError, ProductInfo, ArchiCadID, ArchicadLocation
