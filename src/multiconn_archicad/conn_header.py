@@ -3,7 +3,7 @@ from enum import Enum
 from typing import Self, Any, TypeGuard, Coroutine
 from pprint import pformat
 
-from multiconn_archicad.core_commands import CoreCommands
+from multiconn_archicad.core.core_commands import CoreCommands
 from multiconn_archicad.basic_types import (
     ArchiCadID,
     APIResponseError,
