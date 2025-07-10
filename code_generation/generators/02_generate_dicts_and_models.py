@@ -11,7 +11,7 @@ generate(
     input_file_type=InputFileType.JsonSchema,
     output=base_output,
     output_model_type=DataModelType.PydanticV2BaseModel,
-    enum_field_as_literal=LiteralType.All,
+    enum_field_as_literal=LiteralType.One,
     use_union_operator=True,
     use_double_quotes=True,
     collapse_root_models=True
@@ -25,5 +25,5 @@ generate(
     enum_field_as_literal=LiteralType.All,
     use_union_operator=True,
     use_double_quotes=True,
-    collapse_root_models=True
+    collapse_root_models=False
 )
