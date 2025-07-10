@@ -7,39 +7,45 @@ from typing_extensions import NotRequired
 
 from .types import (
     Attribute,
-    AttributeIdArrayItem,
-    BoundingBox3DOrError,
+    AttributeIds,
+    AttributePropertyValues,
+    AttributeType,
+    BoundingBoxes3D,
     BuildingMaterialDataArrayItem,
-    ClassificationSystemIdArrayItem,
+    ClassificationSystemIds,
     ColumnsDatum,
     Comment,
     CompositeDataArrayItem,
     Conflict,
     ConnectedElement,
-    DatabaseIdArrayItem,
+    Databases,
     DetailsOfElement,
     DocumentRevision,
-    ElementClassification,
-    ElementClassificationOrError,
-    ElementIdArrayItem,
-    ElementPropertyValue,
+    ElementClassifications,
+    ElementClassificationsOrErrors,
+    ElementFilter,
+    ElementPropertyValues,
+    ElementType,
+    Elements,
     ElementsWithDetail,
     ElementsWithGDLParameter,
     ElementsWithMoveVector,
-    ErrorItem,
-    FailedExecutionResult,
+    ExecutionResult,
+    ExecutionResults,
     FavoritesFromElement,
     Field,
     GDLParameterList,
-    Hotlink,
+    Hotlinks,
     Issue,
+    IssueCommentStatus,
+    IssueElementType,
     IssueId,
-    IssueIdArrayItem,
+    Issues,
     LayerDataArrayItem,
     Library,
     MeshesDatum,
     ModelViewOption,
-    NavigatorItemIdArrayItem,
+    NavigatorItemIds,
     NavigatorItemIdsWithViewSetting,
     ObjectsDatum,
     PolylinesDatum,
@@ -50,19 +56,19 @@ from .types import (
     PropertyGroup,
     PropertyGroupId,
     PropertyId,
-    PropertyIdArrayItem,
-    PropertyIdOrError,
-    PropertyValuesOrError,
+    PropertyIdOrErrorArray,
+    PropertyIds,
+    PropertyValuesOrErrorArray,
     RevisionChange,
     RevisionChangesOfEntities,
     RevisionIssue,
     SlabsDatum,
     Story,
     Subelement,
-    SuccessfulExecutionResult,
     SurveyPoint,
-    ViewSettings,
-    ViewTransformations,
+    ViewSettingsOrError,
+    ViewTransformationsOrError,
+    WindowType,
     ZonesDatum,
 )
 
@@ -70,7 +76,7 @@ from .types import (
 class AddCommentToIssueParameters(TypedDict):
     issueId: IssueId
     author: NotRequired[str]
-    status: NotRequired[Literal["Error", "Warning", "Info", "Unknown"]]
+    status: NotRequired[IssueCommentStatus]
     text: str
 
 
@@ -79,27 +85,23 @@ class ApplyFavoritesToElementDefaultsParameters(TypedDict):
 
 
 class ApplyFavoritesToElementDefaultsResult(TypedDict):
-    executionResults: List[SuccessfulExecutionResult | FailedExecutionResult]
+    executionResults: ExecutionResults
 
 
 class AttachElementsToIssueParameters(TypedDict):
     issueId: IssueId
-    elements: List[ElementIdArrayItem]
-    type: Literal["Creation", "Highlight", "Deletion", "Modification"]
+    elements: Elements
+    type: IssueElementType
 
 
 class ChangeSelectionOfElementsParameters(TypedDict):
-    addElementsToSelection: NotRequired[List[ElementIdArrayItem]]
-    removeElementsFromSelection: NotRequired[List[ElementIdArrayItem]]
+    addElementsToSelection: NotRequired[Elements]
+    removeElementsFromSelection: NotRequired[Elements]
 
 
 class ChangeSelectionOfElementsResult(TypedDict):
-    executionResultsOfAddToSelection: List[
-        SuccessfulExecutionResult | FailedExecutionResult
-    ]
-    executionResultsOfRemoveFromSelection: List[
-        SuccessfulExecutionResult | FailedExecutionResult
-    ]
+    executionResultsOfAddToSelection: ExecutionResults
+    executionResultsOfRemoveFromSelection: ExecutionResults
 
 
 class CreateBuildingMaterialsParameters(TypedDict):
@@ -108,7 +110,7 @@ class CreateBuildingMaterialsParameters(TypedDict):
 
 
 class CreateBuildingMaterialsResult(TypedDict):
-    attributeIds: List[AttributeIdArrayItem]
+    attributeIds: AttributeIds
 
 
 class CreateColumnsParameters(TypedDict):
@@ -116,7 +118,7 @@ class CreateColumnsParameters(TypedDict):
 
 
 class CreateColumnsResult(TypedDict):
-    elements: List[ElementIdArrayItem]
+    elements: Elements
 
 
 class CreateCompositesParameters(TypedDict):
@@ -125,7 +127,7 @@ class CreateCompositesParameters(TypedDict):
 
 
 class CreateCompositesResult(TypedDict):
-    attributeIds: List[AttributeIdArrayItem]
+    attributeIds: AttributeIds
 
 
 class CreateFavoritesFromElementsParameters(TypedDict):
@@ -133,7 +135,7 @@ class CreateFavoritesFromElementsParameters(TypedDict):
 
 
 class CreateFavoritesFromElementsResult(TypedDict):
-    executionResults: List[SuccessfulExecutionResult | FailedExecutionResult]
+    executionResults: ExecutionResults
 
 
 class CreateIssueParameters(TypedDict):
@@ -152,7 +154,7 @@ class CreateLayersParameters(TypedDict):
 
 
 class CreateLayersResult(TypedDict):
-    attributeIds: List[AttributeIdArrayItem]
+    attributeIds: AttributeIds
 
 
 class CreateMeshesParameters(TypedDict):
@@ -160,7 +162,7 @@ class CreateMeshesParameters(TypedDict):
 
 
 class CreateMeshesResult(TypedDict):
-    elements: List[ElementIdArrayItem]
+    elements: Elements
 
 
 class CreateObjectsParameters(TypedDict):
@@ -168,7 +170,7 @@ class CreateObjectsParameters(TypedDict):
 
 
 class CreateObjectsResult(TypedDict):
-    elements: List[ElementIdArrayItem]
+    elements: Elements
 
 
 class CreatePolylinesParameters(TypedDict):
@@ -176,7 +178,7 @@ class CreatePolylinesParameters(TypedDict):
 
 
 class CreatePolylinesResult(TypedDict):
-    elements: List[ElementIdArrayItem]
+    elements: Elements
 
 
 class CreatePropertyDefinitionsParameters(TypedDict):
@@ -184,7 +186,7 @@ class CreatePropertyDefinitionsParameters(TypedDict):
 
 
 class CreatePropertyDefinitionsResult(TypedDict):
-    propertyIds: List[PropertyIdOrError | ErrorItem]
+    propertyIds: PropertyIdOrErrorArray
 
 
 class CreatePropertyGroupsParameters(TypedDict):
@@ -200,7 +202,7 @@ class CreateSlabsParameters(TypedDict):
 
 
 class CreateSlabsResult(TypedDict):
-    elements: List[ElementIdArrayItem]
+    elements: Elements
 
 
 class CreateZonesParameters(TypedDict):
@@ -208,7 +210,7 @@ class CreateZonesParameters(TypedDict):
 
 
 class CreateZonesResult(TypedDict):
-    elements: List[ElementIdArrayItem]
+    elements: Elements
 
 
 class DeleteIssueParameters(TypedDict):
@@ -221,7 +223,7 @@ class DeletePropertyDefinitionsParameters(TypedDict):
 
 
 class DeletePropertyDefinitionsResult(TypedDict):
-    executionResults: List[SuccessfulExecutionResult | FailedExecutionResult]
+    executionResults: ExecutionResults
 
 
 class DeletePropertyGroupsParameters(TypedDict):
@@ -229,45 +231,28 @@ class DeletePropertyGroupsParameters(TypedDict):
 
 
 class DeletePropertyGroupsResult(TypedDict):
-    executionResults: List[SuccessfulExecutionResult | FailedExecutionResult]
+    executionResults: ExecutionResults
 
 
 class DetachElementsFromIssueParameters(TypedDict):
     issueId: IssueId
-    elements: List[ElementIdArrayItem]
+    elements: Elements
 
 
 class ExportIssuesToBCFParameters(TypedDict):
-    issues: NotRequired[List[IssueIdArrayItem]]
+    issues: NotRequired[Issues]
     exportPath: str
     useExternalId: bool
     alignBySurveyPoint: bool
 
 
 class FilterElementsParameters(TypedDict):
-    elements: List[ElementIdArrayItem]
-    filters: NotRequired[
-        List[
-            Literal[
-                "IsEditable",
-                "IsVisibleByLayer",
-                "IsVisibleByRenovation",
-                "IsVisibleByStructureDisplay",
-                "IsVisibleIn3D",
-                "OnActualFloor",
-                "OnActualLayout",
-                "InMyWorkspace",
-                "IsIndependent",
-                "InCroppedView",
-                "HasAccessRight",
-                "IsOverriddenByRenovation",
-            ]
-        ]
-    ]
+    elements: Elements
+    filters: NotRequired[List[ElementFilter]]
 
 
 class FilterElementsResult(TypedDict):
-    elements: List[ElementIdArrayItem]
+    elements: Elements
 
 
 class GenerateDocumentationParameters(TypedDict):
@@ -275,11 +260,11 @@ class GenerateDocumentationParameters(TypedDict):
 
 
 class Get3DBoundingBoxesParameters(TypedDict):
-    elements: List[ElementIdArrayItem]
+    elements: Elements
 
 
 class Get3DBoundingBoxesResult(TypedDict):
-    boundingBoxes3D: List[BoundingBox3DOrError | ErrorItem]
+    boundingBoxes3D: BoundingBoxes3D
 
 
 class GetAddOnVersionResult(TypedDict):
@@ -287,32 +272,13 @@ class GetAddOnVersionResult(TypedDict):
 
 
 class GetAllElementsParameters(TypedDict):
-    filters: NotRequired[
-        List[
-            Literal[
-                "IsEditable",
-                "IsVisibleByLayer",
-                "IsVisibleByRenovation",
-                "IsVisibleByStructureDisplay",
-                "IsVisibleIn3D",
-                "OnActualFloor",
-                "OnActualLayout",
-                "InMyWorkspace",
-                "IsIndependent",
-                "InCroppedView",
-                "HasAccessRight",
-                "IsOverriddenByRenovation",
-            ]
-        ]
-    ]
-    databases: NotRequired[List[DatabaseIdArrayItem]]
+    filters: NotRequired[List[ElementFilter]]
+    databases: NotRequired[Databases]
 
 
 class GetAllElementsResult(TypedDict):
-    elements: List[ElementIdArrayItem]
-    executionResultForDatabases: NotRequired[
-        List[SuccessfulExecutionResult | FailedExecutionResult]
-    ]
+    elements: Elements
+    executionResultForDatabases: NotRequired[ExecutionResults]
 
 
 class GetAllPropertiesResult(TypedDict):
@@ -324,20 +290,7 @@ class GetArchicadLocationResult(TypedDict):
 
 
 class GetAttributesByTypeParameters(TypedDict):
-    attributeType: Literal[
-        "Layer",
-        "Line",
-        "Fill",
-        "Composite",
-        "Surface",
-        "LayerCombination",
-        "ZoneCategory",
-        "Profile",
-        "PenTable",
-        "MEPSystem",
-        "OperationProfile",
-        "BuildingMaterial",
-    ]
+    attributeType: AttributeType
 
 
 class GetAttributesByTypeResult(TypedDict):
@@ -345,7 +298,7 @@ class GetAttributesByTypeResult(TypedDict):
 
 
 class GetBuildingMaterialPhysicalPropertiesParameters(TypedDict):
-    attributeIds: List[AttributeIdArrayItem]
+    attributeIds: AttributeIds
 
 
 class GetBuildingMaterialPhysicalPropertiesResult(TypedDict):
@@ -353,12 +306,12 @@ class GetBuildingMaterialPhysicalPropertiesResult(TypedDict):
 
 
 class GetClassificationsOfElementsParameters(TypedDict):
-    elements: List[ElementIdArrayItem]
-    classificationSystemIds: List[ClassificationSystemIdArrayItem]
+    elements: Elements
+    classificationSystemIds: ClassificationSystemIds
 
 
 class GetClassificationsOfElementsResult(TypedDict):
-    elementClassifications: List[ElementClassificationOrError | ErrorItem]
+    elementClassifications: ElementClassificationsOrErrors
 
 
 class GetCommentsFromIssueParameters(TypedDict):
@@ -370,82 +323,8 @@ class GetCommentsFromIssueResult(TypedDict):
 
 
 class GetConnectedElementsParameters(TypedDict):
-    elements: List[ElementIdArrayItem]
-    connectedElementType: Literal[
-        "Wall",
-        "Column",
-        "Beam",
-        "Window",
-        "Door",
-        "Object",
-        "Lamp",
-        "Slab",
-        "Roof",
-        "Mesh",
-        "Dimension",
-        "RadialDimension",
-        "LevelDimension",
-        "AngleDimension",
-        "Text",
-        "Label",
-        "Zone",
-        "Hatch",
-        "Line",
-        "PolyLine",
-        "Arc",
-        "Circle",
-        "Spline",
-        "Hotspot",
-        "CutPlane",
-        "Camera",
-        "CamSet",
-        "Group",
-        "SectElem",
-        "Drawing",
-        "Picture",
-        "Detail",
-        "Elevation",
-        "InteriorElevation",
-        "Worksheet",
-        "Hotlink",
-        "CurtainWall",
-        "CurtainWallSegment",
-        "CurtainWallFrame",
-        "CurtainWallPanel",
-        "CurtainWallJunction",
-        "CurtainWallAccessory",
-        "Shell",
-        "Skylight",
-        "Morph",
-        "ChangeMarker",
-        "Stair",
-        "Riser",
-        "Tread",
-        "StairStructure",
-        "Railing",
-        "RailingToprail",
-        "RailingHandrail",
-        "RailingRail",
-        "RailingPost",
-        "RailingInnerPost",
-        "RailingBaluster",
-        "RailingPanel",
-        "RailingSegment",
-        "RailingNode",
-        "RailingBalusterSet",
-        "RailingPattern",
-        "RailingToprailEnd",
-        "RailingHandrailEnd",
-        "RailingRailEnd",
-        "RailingToprailConnection",
-        "RailingHandrailConnection",
-        "RailingRailConnection",
-        "RailingEndFinish",
-        "BeamSegment",
-        "ColumnSegment",
-        "Opening",
-        "Unknown",
-    ]
+    elements: Elements
+    connectedElementType: ElementType
 
 
 class GetConnectedElementsResult(TypedDict):
@@ -453,49 +332,27 @@ class GetConnectedElementsResult(TypedDict):
 
 
 class GetCurrentRevisionChangesOfLayoutsParameters(TypedDict):
-    layoutDatabaseIds: List[DatabaseIdArrayItem]
+    layoutDatabaseIds: Databases
 
 
 class GetCurrentRevisionChangesOfLayoutsResult(TypedDict):
-    currentRevisionChangesOfLayouts: RevisionChangesOfEntities | ErrorItem
+    currentRevisionChangesOfLayouts: RevisionChangesOfEntities
 
 
 class GetCurrentWindowTypeResult(TypedDict):
-    currentWindowType: Literal[
-        "FloorPlan",
-        "Section",
-        "Details",
-        "3DModel",
-        "Layout",
-        "Drawing",
-        "CustomText",
-        "CustomDraw",
-        "MasterLayout",
-        "Elevation",
-        "InteriorElevation",
-        "Worksheet",
-        "Report",
-        "3DDocument",
-        "External3D",
-        "Movie3D",
-        "MovieRendering",
-        "Rendering",
-        "ModelCompare",
-        "Interactive Schedule",
-        "Unknown",
-    ]
+    currentWindowType: WindowType
 
 
 class GetDatabaseIdFromNavigatorItemIdParameters(TypedDict):
-    navigatorItemIds: List[NavigatorItemIdArrayItem]
+    navigatorItemIds: NavigatorItemIds
 
 
 class GetDatabaseIdFromNavigatorItemIdResult(TypedDict):
-    databases: List[DatabaseIdArrayItem]
+    databases: Databases
 
 
 class GetDetailsOfElementsParameters(TypedDict):
-    elements: List[ElementIdArrayItem]
+    elements: Elements
 
 
 class GetDetailsOfElementsResult(TypedDict):
@@ -508,119 +365,26 @@ class GetDocumentRevisionsResult(TypedDict):
 
 class GetElementsAttachedToIssueParameters(TypedDict):
     issueId: IssueId
-    type: Literal["Creation", "Highlight", "Deletion", "Modification"]
+    type: IssueElementType
 
 
 class GetElementsAttachedToIssueResult(TypedDict):
-    elements: List[ElementIdArrayItem]
+    elements: Elements
 
 
 class GetElementsByTypeParameters(TypedDict):
-    elementType: Literal[
-        "Wall",
-        "Column",
-        "Beam",
-        "Window",
-        "Door",
-        "Object",
-        "Lamp",
-        "Slab",
-        "Roof",
-        "Mesh",
-        "Dimension",
-        "RadialDimension",
-        "LevelDimension",
-        "AngleDimension",
-        "Text",
-        "Label",
-        "Zone",
-        "Hatch",
-        "Line",
-        "PolyLine",
-        "Arc",
-        "Circle",
-        "Spline",
-        "Hotspot",
-        "CutPlane",
-        "Camera",
-        "CamSet",
-        "Group",
-        "SectElem",
-        "Drawing",
-        "Picture",
-        "Detail",
-        "Elevation",
-        "InteriorElevation",
-        "Worksheet",
-        "Hotlink",
-        "CurtainWall",
-        "CurtainWallSegment",
-        "CurtainWallFrame",
-        "CurtainWallPanel",
-        "CurtainWallJunction",
-        "CurtainWallAccessory",
-        "Shell",
-        "Skylight",
-        "Morph",
-        "ChangeMarker",
-        "Stair",
-        "Riser",
-        "Tread",
-        "StairStructure",
-        "Railing",
-        "RailingToprail",
-        "RailingHandrail",
-        "RailingRail",
-        "RailingPost",
-        "RailingInnerPost",
-        "RailingBaluster",
-        "RailingPanel",
-        "RailingSegment",
-        "RailingNode",
-        "RailingBalusterSet",
-        "RailingPattern",
-        "RailingToprailEnd",
-        "RailingHandrailEnd",
-        "RailingRailEnd",
-        "RailingToprailConnection",
-        "RailingHandrailConnection",
-        "RailingRailConnection",
-        "RailingEndFinish",
-        "BeamSegment",
-        "ColumnSegment",
-        "Opening",
-        "Unknown",
-    ]
-    filters: NotRequired[
-        List[
-            Literal[
-                "IsEditable",
-                "IsVisibleByLayer",
-                "IsVisibleByRenovation",
-                "IsVisibleByStructureDisplay",
-                "IsVisibleIn3D",
-                "OnActualFloor",
-                "OnActualLayout",
-                "InMyWorkspace",
-                "IsIndependent",
-                "InCroppedView",
-                "HasAccessRight",
-                "IsOverriddenByRenovation",
-            ]
-        ]
-    ]
-    databases: NotRequired[List[DatabaseIdArrayItem]]
+    elementType: ElementType
+    filters: NotRequired[List[ElementFilter]]
+    databases: NotRequired[Databases]
 
 
 class GetElementsByTypeResult(TypedDict):
-    elements: List[ElementIdArrayItem]
-    executionResultForDatabases: NotRequired[
-        List[SuccessfulExecutionResult | FailedExecutionResult]
-    ]
+    elements: Elements
+    executionResultForDatabases: NotRequired[ExecutionResults]
 
 
 class GetGDLParametersOfElementsParameters(TypedDict):
-    elements: List[ElementIdArrayItem]
+    elements: Elements
 
 
 class GetGDLParametersOfElementsResult(TypedDict):
@@ -633,7 +397,7 @@ class GetGeoLocationResult(TypedDict):
 
 
 class GetHotlinksResult(TypedDict):
-    hotlinks: List[Hotlink]
+    hotlinks: Hotlinks
 
 
 class GetIssuesResult(TypedDict):
@@ -661,29 +425,29 @@ class GetProjectInfoResult(TypedDict):
 
 
 class GetPropertyValuesOfAttributesParameters(TypedDict):
-    attributeIds: List[AttributeIdArrayItem]
-    properties: List[PropertyIdArrayItem]
+    attributeIds: AttributeIds
+    properties: PropertyIds
 
 
 class GetPropertyValuesOfAttributesResult(TypedDict):
-    propertyValuesForAttributes: List[PropertyValuesOrError | ErrorItem]
+    propertyValuesForAttributes: PropertyValuesOrErrorArray
 
 
 class GetPropertyValuesOfElementsParameters(TypedDict):
-    elements: List[ElementIdArrayItem]
-    properties: List[PropertyIdArrayItem]
+    elements: Elements
+    properties: PropertyIds
 
 
 class GetPropertyValuesOfElementsResult(TypedDict):
-    propertyValuesForElements: List[PropertyValuesOrError | ErrorItem]
+    propertyValuesForElements: PropertyValuesOrErrorArray
 
 
 class GetRevisionChangesOfElementsParameters(TypedDict):
-    elements: List[ElementIdArrayItem]
+    elements: Elements
 
 
 class GetRevisionChangesOfElementsResult(TypedDict):
-    revisionChangesOfElements: RevisionChangesOfEntities | ErrorItem
+    revisionChangesOfElements: RevisionChangesOfEntities
 
 
 class GetRevisionChangesResult(TypedDict):
@@ -695,7 +459,7 @@ class GetRevisionIssuesResult(TypedDict):
 
 
 class GetSelectedElementsResult(TypedDict):
-    elements: List[ElementIdArrayItem]
+    elements: Elements
 
 
 class GetStoriesResult(TypedDict):
@@ -707,7 +471,7 @@ class GetStoriesResult(TypedDict):
 
 
 class GetSubelementsOfHierarchicalElementsParameters(TypedDict):
-    elements: List[ElementIdArrayItem]
+    elements: Elements
 
 
 class GetSubelementsOfHierarchicalElementsResult(TypedDict):
@@ -715,23 +479,23 @@ class GetSubelementsOfHierarchicalElementsResult(TypedDict):
 
 
 class GetView2DTransformationsParameters(TypedDict):
-    databases: NotRequired[List[DatabaseIdArrayItem]]
+    databases: NotRequired[Databases]
 
 
 class GetView2DTransformationsResult(TypedDict):
-    transformations: List[ViewTransformations | ErrorItem]
+    transformations: List[ViewTransformationsOrError]
 
 
 class GetViewSettingsParameters(TypedDict):
-    navigatorItemIds: List[NavigatorItemIdArrayItem]
+    navigatorItemIds: NavigatorItemIds
 
 
 class GetViewSettingsResult(TypedDict):
-    viewSettings: List[ViewSettings | ErrorItem]
+    viewSettings: List[ViewSettingsOrError]
 
 
 class HighlightElementsParameters(TypedDict):
-    elements: List[ElementIdArrayItem]
+    elements: Elements
     highlightedColors: List[List[int]]
     wireframe3D: NotRequired[bool]
     nonHighlightedColor: NotRequired[List[int]]
@@ -747,7 +511,7 @@ class MoveElementsParameters(TypedDict):
 
 
 class MoveElementsResult(TypedDict):
-    executionResults: List[SuccessfulExecutionResult | FailedExecutionResult]
+    executionResults: ExecutionResults
 
 
 class OpenProjectParameters(TypedDict):
@@ -760,24 +524,24 @@ class PublishPublisherSetParameters(TypedDict):
 
 
 class ReleaseElementsParameters(TypedDict):
-    elements: List[ElementIdArrayItem]
+    elements: Elements
 
 
 class ReserveElementsParameters(TypedDict):
-    elements: List[ElementIdArrayItem]
+    elements: Elements
 
 
 class ReserveElementsResult(TypedDict):
-    executionResult: SuccessfulExecutionResult | FailedExecutionResult
+    executionResult: ExecutionResult
     conflicts: NotRequired[List[Conflict]]
 
 
 class SetClassificationsOfElementsParameters(TypedDict):
-    elementClassifications: List[ElementClassification]
+    elementClassifications: ElementClassifications
 
 
 class SetClassificationsOfElementsResult(TypedDict):
-    executionResults: List[SuccessfulExecutionResult | FailedExecutionResult]
+    executionResults: ExecutionResults
 
 
 class SetDetailsOfElementsParameters(TypedDict):
@@ -785,7 +549,7 @@ class SetDetailsOfElementsParameters(TypedDict):
 
 
 class SetDetailsOfElementsResult(TypedDict):
-    executionResults: List[SuccessfulExecutionResult | FailedExecutionResult]
+    executionResults: ExecutionResults
 
 
 class SetGDLParametersOfElementsParameters(TypedDict):
@@ -793,7 +557,7 @@ class SetGDLParametersOfElementsParameters(TypedDict):
 
 
 class SetGDLParametersOfElementsResult(TypedDict):
-    executionResults: List[SuccessfulExecutionResult | FailedExecutionResult]
+    executionResults: ExecutionResults
 
 
 class SetProjectInfoFieldParameters(TypedDict):
@@ -802,19 +566,19 @@ class SetProjectInfoFieldParameters(TypedDict):
 
 
 class SetPropertyValuesOfAttributesParameters(TypedDict):
-    attributePropertyValues: Any
+    attributePropertyValues: AttributePropertyValues
 
 
 class SetPropertyValuesOfAttributesResult(TypedDict):
-    executionResults: List[SuccessfulExecutionResult | FailedExecutionResult]
+    executionResults: ExecutionResults
 
 
 class SetPropertyValuesOfElementsParameters(TypedDict):
-    elementPropertyValues: List[ElementPropertyValue]
+    elementPropertyValues: ElementPropertyValues
 
 
 class SetPropertyValuesOfElementsResult(TypedDict):
-    executionResults: List[SuccessfulExecutionResult | FailedExecutionResult]
+    executionResults: ExecutionResults
 
 
 class SetStoriesParameters(TypedDict):
@@ -826,8 +590,8 @@ class SetViewSettingsParameters(TypedDict):
 
 
 class SetViewSettingsResult(TypedDict):
-    executionResults: List[SuccessfulExecutionResult | FailedExecutionResult]
+    executionResults: ExecutionResults
 
 
 class UpdateDrawingsParameters(TypedDict):
-    elements: List[ElementIdArrayItem]
+    elements: Elements

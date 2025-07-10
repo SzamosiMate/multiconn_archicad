@@ -111,7 +111,7 @@ def main():
     # DEFINITIVE FIX: Only add the import block if there are imports to add.
     if needed_imports:
         # Create a nicely formatted, multi-line import statement
-        import_block = "from .base_typed_dicts import (\n    " + ",\n    ".join(needed_imports) + ",\n)"
+        import_block = "from .types import (\n    " + ",\n    ".join(needed_imports) + ",\n)"
         file_parts.append(import_block)
 
     file_parts.extend(sorted(command_blocks))
