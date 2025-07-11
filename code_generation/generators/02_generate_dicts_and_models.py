@@ -1,15 +1,10 @@
 from datamodel_code_generator import DataModelType, InputFileType, generate, LiteralType
-import pathlib
-
-base_input_file = pathlib.Path("../schema/tapir_master_schema.json")
-base_output = pathlib.Path("../temp_models/input_base_models.py")
-dict_output = pathlib.Path("../temp_models/input_typed_dicts.py")
-
+from paths import paths
 
 generate(
-    base_input_file,
+    paths.MASTER_SCHEMA_OUTPUT,
     input_file_type=InputFileType.JsonSchema,
-    output=base_output,
+    output=paths.RAW_PYDANTIC_MODELS,
     output_model_type=DataModelType.PydanticV2BaseModel,
     enum_field_as_literal=LiteralType.One,
     use_union_operator=True,
@@ -18,9 +13,9 @@ generate(
 )
 
 generate(
-    base_input_file,
+    paths.MASTER_SCHEMA_OUTPUT,
     input_file_type=InputFileType.JsonSchema,
-    output=dict_output,
+    output=paths.RAW_TYPED_DICTS,
     output_model_type=DataModelType.TypingTypedDict,
     enum_field_as_literal=LiteralType.All,
     use_union_operator=True,

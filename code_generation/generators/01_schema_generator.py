@@ -3,19 +3,7 @@ import re
 import pathlib
 import urllib.request
 from typing import Any, Dict, List
-
-# --- Configuration ---
-COMMAND_DEFS_URL = "https://raw.githubusercontent.com/ENZYME-APD/tapir-archicad-automation/main/docs/archicad-addon/command_definitions.js"
-COMMON_SCHEMA_URL = "https://raw.githubusercontent.com/ENZYME-APD/tapir-archicad-automation/main/docs/archicad-addon/common_schema_definitions.js"
-
-MASTER_SCHEMA_OUTPUT = pathlib.Path("../schema/tapir_master_schema.json")
-
-# Outputs for model name lists (used by other scripts)
-BASE_MODEL_NAMES_OUTPUT = pathlib.Path("../schema/_base_model_names.json")
-COMMAND_MODELS_NAMES_OUTPUT = pathlib.Path("../schema/_command_model_names.json")
-
-# Output for the generated literal commands file
-LITERAL_COMMANDS_OUTPUT = pathlib.Path("../../src/multiconn_archicad/core/literal_commands.py")
+from paths import paths
 
 def unwrap_single_property_objects(data: Any) -> Any:
     """
@@ -258,8 +246,8 @@ def main():
     necessary schema and helper files for the project.
     """
     print("--- Starting Master Schema and Literals Generation ---")
-    common_schema_js = fetch_file_content(COMMON_SCHEMA_URL)
-    command_defs_js = fetch_file_content(COMMAND_DEFS_URL)
+    common_schema_js = fetch_file_content(paths.COMMON_SCHEMA_URL)
+    command_defs_js = fetch_file_content(paths.COMMAND_DEFS_URL)
 
     print("Parsing JavaScript variable assignments...")
     common_defs: Dict[str, Any] = parse_js_variable(common_schema_js, "gSchemaDefinitions")
@@ -281,20 +269,20 @@ def main():
         "$defs": fix_refs_recursive(master_defs),
     }
 
-    with open(MASTER_SCHEMA_OUTPUT, "w", encoding="utf-8") as f:
+    with open(paths.MASTER_SCHEMA_OUTPUT, "w", encoding="utf-8") as f:
         json.dump(master_schema, f, indent=2)
-    print(f"✅ Successfully generated master schema at: {MASTER_SCHEMA_OUTPUT}")
+    print(f"✅ Successfully generated master schema at: {paths.MASTER_SCHEMA_OUTPUT}")
 
-    with open(BASE_MODEL_NAMES_OUTPUT, "w") as f:
+    with open(paths.BASE_MODEL_NAMES_OUTPUT, "w") as f:
         json.dump(list(common_defs.keys()), f)
-    with open(COMMAND_MODELS_NAMES_OUTPUT, "w") as f:
+    with open(paths.COMMAND_MODELS_NAMES_OUTPUT, "w") as f:
         json.dump(list(command_defs.keys()), f)
     print(f"✅ Successfully generated base and command model name lists.")
 
     # --- Generate literal_commands.py ---
     tapir_command_names = get_tapir_command_names(commands_list)
-    generate_literal_commands_file(tapir_command_names, LITERAL_COMMANDS_OUTPUT)
-    print(f"✅ Successfully generated literal commands at: {LITERAL_COMMANDS_OUTPUT}")
+    generate_literal_commands_file(tapir_command_names, paths.FINAL_LITERAL_COMMANDS)
+    print(f"✅ Successfully generated literal commands at: {paths.FINAL_LITERAL_COMMANDS}")
 
 
 if __name__ == "__main__":

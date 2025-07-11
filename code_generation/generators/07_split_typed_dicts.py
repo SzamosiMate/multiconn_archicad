@@ -1,14 +1,6 @@
 import json
 import re
-from pathlib import Path
-from collections import defaultdict
-
-# --- Configuration ---
-INPUT_FILE = Path("../temp_models/typed_dicts.py")
-BASE_TYPED_DICTS_OUTPUT = Path("../../src/multiconn_archicad/dicts/types.py")
-COMMAND_TYPED_DICTS_OUTPUT = Path("../../src/multiconn_archicad/dicts/commands.py")
-BASE_NAMES_FILE = Path("../schema/_base_model_names.json")
-COMMAND_NAMES_FILE = Path("../schema/_command_model_names.json")
+from paths import paths
 
 
 def get_definition_name(block: str) -> str | None:
@@ -81,15 +73,15 @@ def main():
 
     # 1. Load model name sets
     try:
-        BASE_NAMES_FILE.parent.mkdir(parents=True, exist_ok=True)
-        if not BASE_NAMES_FILE.exists():
-            with open(BASE_NAMES_FILE, 'w', encoding='utf-8') as f: json.dump([], f)
-        if not COMMAND_NAMES_FILE.exists():
-            with open(COMMAND_NAMES_FILE, 'w', encoding='utf-8') as f: json.dump([], f)
+        paths.BASE_MODEL_NAMES_OUTPUT.parent.mkdir(parents=True, exist_ok=True)
+        if not paths.BASE_MODEL_NAMES_OUTPUT.exists():
+            with open(paths.BASE_MODEL_NAMES_OUTPUT, 'w', encoding='utf-8') as f: json.dump([], f)
+        if not paths.COMMAND_MODELS_NAMES_OUTPUT.exists():
+            with open(paths.COMMAND_MODELS_NAMES_OUTPUT, 'w', encoding='utf-8') as f: json.dump([], f)
 
-        with open(BASE_NAMES_FILE, "r", encoding="utf-8") as f:
+        with open(paths.BASE_MODEL_NAMES_OUTPUT, "r", encoding="utf-8") as f:
             base_names = set(json.load(f))
-        with open(COMMAND_NAMES_FILE, "r", encoding="utf-8") as f:
+        with open(paths.COMMAND_MODELS_NAMES_OUTPUT, "r", encoding="utf-8") as f:
             command_names = set(json.load(f))
     except (FileNotFoundError, json.JSONDecodeError) as e:
         print(f"Warning: Could not load name list files. Defaulting to base. ({e})")
@@ -98,9 +90,9 @@ def main():
 
     # 2. Read and parse the input file, preserving the block order
     try:
-        content = INPUT_FILE.read_text("utf-8")
+        content = paths.CLEANED_TYPED_DICTS.read_text("utf-8")
     except FileNotFoundError:
-        print(f"Error: {INPUT_FILE} not found.")
+        print(f"Error: {paths.CLEANED_TYPED_DICTS} not found.")
         return
 
     definitions_in_order = [
@@ -133,8 +125,8 @@ def main():
     print("\nProcessing base models...")
     base_file_content = "\n".join(get_header_lines()) + "\n\n\n" + "\n\n\n".join(base_blocks)
     final_base_content = remove_unused_imports(base_file_content)
-    BASE_TYPED_DICTS_OUTPUT.write_text(final_base_content + "\n", "utf-8")
-    print(f"✅ Successfully wrote {len(base_blocks)} definitions to {BASE_TYPED_DICTS_OUTPUT}")
+    paths.FINAL_TYPED_DICT_TYPES.write_text(final_base_content + "\n", "utf-8")
+    print(f"✅ Successfully wrote {len(base_blocks)} definitions to {paths.FINAL_TYPED_DICT_TYPES}")
 
     # --- Generate Command Models File (`commands.py`) ---
     print("\nProcessing command models...")
@@ -160,8 +152,8 @@ def main():
 
     final_command_content = "\n\n\n".join(file_parts)
     final_command_content_cleaned = remove_unused_imports(final_command_content)
-    COMMAND_TYPED_DICTS_OUTPUT.write_text(final_command_content_cleaned + "\n", "utf-8")
-    print(f"✅ Successfully wrote {len(command_blocks)} definitions to {COMMAND_TYPED_DICTS_OUTPUT}")
+    paths.FINAL_TYPED_DICT_COMMANDS.write_text(final_command_content_cleaned + "\n", "utf-8")
+    print(f"✅ Successfully wrote {len(command_blocks)} definitions to {paths.FINAL_TYPED_DICT_COMMANDS}")
 
 
 if __name__ == "__main__":
