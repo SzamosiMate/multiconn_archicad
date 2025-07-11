@@ -1,11 +1,5 @@
 import re
-from pathlib import Path
-
-# --- Configuration ---
-INPUT_TYPED_DICTS_PATH = Path("../temp_models/input_typed_dicts.py")
-FINAL_TYPED_DICTS_PATH = Path("../temp_models/typed_dicts.py")
-
-### Main Cleaning Pipeline ###
+from paths import paths
 
 def main():
     """
@@ -13,12 +7,12 @@ def main():
     This script addresses known artifacts from the datamodel-codegen process
     to produce a clean, valid, and usable TypedDict models file for static analysis.
     """
-    print(f"--- Starting definitive cleaning of {INPUT_TYPED_DICTS_PATH} ---")
+    print(f"--- Starting definitive cleaning of {paths.RAW_TYPED_DICTS} ---")
 
     try:
-        content = INPUT_TYPED_DICTS_PATH.read_text(encoding="utf-8")
+        content = paths.RAW_TYPED_DICTS.read_text(encoding="utf-8")
     except FileNotFoundError:
-        print(f"Error: {INPUT_TYPED_DICTS_PATH} not found. Please generate it first.")
+        print(f"Error: {paths.RAW_TYPED_DICTS} not found. Please generate it first.")
         return
 
     # The order of these operations is critical for success.
@@ -39,8 +33,8 @@ def main():
     print("Step 5: Assembling and formatting the final file...")
     content = assemble_final_file(content)
 
-    FINAL_TYPED_DICTS_PATH.write_text(content, encoding="utf-8")
-    print(f"✅ Successfully created final, clean TypedDict models at: {FINAL_TYPED_DICTS_PATH}")
+    paths.CLEANED_TYPED_DICTS.write_text(content, encoding="utf-8")
+    print(f"✅ Successfully created final, clean TypedDict models at: {paths.CLEANED_TYPED_DICTS}")
 
 
 ### Cleaning Logic Functions (in execution order) ###

@@ -1,14 +1,5 @@
 import re
-from pathlib import Path
-
-# Path to the newly generated (imperfect) models from datamodel-codegen
-INPUT_MODELS_PATH = Path("../temp_models/input_base_models.py")
-# Final, clean output path
-FINAL_MODELS_PATH = Path("../temp_models/base_models.py")
-
-
-### Main Cleaning Pipeline ###
-
+from paths import paths
 
 def main():
     """
@@ -16,12 +7,12 @@ def main():
     This script is simplified to handle only the remaining artifacts from the
     improved datamodel-codegen process.
     """
-    print(f"--- Starting SIMPLIFIED cleaning of {INPUT_MODELS_PATH} ---")
+    print(f"--- Starting SIMPLIFIED cleaning of {paths.RAW_PYDANTIC_MODELS} ---")
 
     try:
-        content = INPUT_MODELS_PATH.read_text(encoding="utf-8")
+        content = paths.RAW_PYDANTIC_MODELS.read_text(encoding="utf-8")
     except FileNotFoundError:
-        print(f"Error: {INPUT_MODELS_PATH} not found. Please generate it first.")
+        print(f"Error: {paths.RAW_PYDANTIC_MODELS} not found. Please generate it first.")
         return
 
     # The order of these operations is critical.
@@ -48,8 +39,8 @@ def main():
     print("Step 5: Assembling and formatting the final file...")
     content = assemble_final_file(content)
 
-    FINAL_MODELS_PATH.write_text(content, encoding="utf-8")
-    print(f"✅ Successfully created final, clean models at: {FINAL_MODELS_PATH}")
+    paths.CLEANED_PYDANTIC_MODELS.write_text(content, encoding="utf-8")
+    print(f"✅ Successfully created final, clean models at: {paths.CLEANED_PYDANTIC_MODELS}")
 
 
 ### Cleaning Logic Functions (in execution order) ###
