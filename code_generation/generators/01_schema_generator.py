@@ -17,6 +17,75 @@ COMMAND_MODELS_NAMES_OUTPUT = pathlib.Path("../schema/_command_model_names.json"
 # Output for the generated literal commands file
 LITERAL_COMMANDS_OUTPUT = pathlib.Path("../../src/multiconn_archicad/core/literal_commands.py")
 
+def unwrap_single_property_objects(data: Any) -> Any:
+    """
+    Recursively finds objects that are just wrappers (e.g., {"propertyGroup": {...}})
+    and replaces them with their inner content.
+    """
+    if isinstance(data, dict):
+        # The pattern: an object with "properties" that has exactly one key.
+        if "properties" in data and isinstance(data["properties"], dict) and len(data["properties"]) == 1:
+            # Get the single key and its value (the inner schema)
+            wrapper_key = list(data["properties"].keys())[0]
+            inner_schema = data["properties"][wrapper_key]
+
+            # Heuristic: If the wrapper key's name is very similar to the object's intended name,
+            # it's likely a wrapper we should remove.
+            # Example: "propertyGroup" inside a definition for "PropertyGroup".
+            # This is a good candidate for unwrapping.
+            if isinstance(inner_schema, dict) and "description" in inner_schema:
+                print(f"    - Unwrapping wrapper object with key '{wrapper_key}'...")
+                return unwrap_single_property_objects(inner_schema) # Return the inner part
+
+        # Recurse for all other cases
+        return {key: unwrap_single_property_objects(value) for key, value in data.items()}
+    elif isinstance(data, list):
+        return [unwrap_single_property_objects(item) for item in data]
+    else:
+        return data
+
+def flatten_or_error_types(definitions: dict) -> dict:
+    """
+    Finds definitions like 'XxxOrError' that use a 'oneOf' with a wrapper object
+    and flattens them into a direct union, which generates cleaner code.
+    """
+    print("Flattening '...OrError' wrapper types in schema...")
+    for name, definition in definitions.items():
+        # Heuristic: The names consistently end with 'OrError' or 'OrErrorItem'
+        if not (name.endswith("OrError") or name.endswith("OrErrorItem")):
+            continue
+
+        # Pattern: A 'oneOf' key with a list of exactly two items
+        if not isinstance(definition.get("oneOf"), list) or len(definition["oneOf"]) != 2:
+            continue
+
+        item1, item2 = definition["oneOf"]
+
+        # Pattern: The second item is a reference to ErrorItem
+        is_error_ref = (
+            isinstance(item2, dict) and isinstance(item2.get("$ref"), str) and item2["$ref"].endswith("/ErrorItem")
+        )
+
+        # Pattern: The first item is a wrapper object with a single property
+        is_wrapper = (
+            isinstance(item1, dict) and isinstance(item1.get("properties"), dict) and len(item1["properties"]) == 1
+        )
+
+        if is_wrapper and is_error_ref:
+            print(f"    - Found and flattening '{name}'...")
+
+            # Extract the inner reference from the wrapper
+            wrapper_key = list(item1["properties"].keys())[0]
+            inner_ref = item1["properties"][wrapper_key]
+
+            # Create the new, direct 'oneOf' list
+            new_one_of = [inner_ref, item2]
+
+            # Replace the old 'oneOf' and remove the unnecessary 'type: object'
+            definition["oneOf"] = new_one_of
+            definition.pop("type", None)
+
+    return definitions
 
 def apply_fixes(content: str) -> str:
     content = content.replace('"type": "double"', '"type": "number"')
@@ -200,6 +269,10 @@ def main():
     command_defs = get_command_defs(commands_list)
     master_defs = {**common_defs, **command_defs}
     print(f"Total unique definitions for master schema: {len(master_defs)}")
+
+    # Apply structural fixes to the schema dictionary before it's written or used.
+    master_defs = flatten_or_error_types(master_defs)
+    master_defs = unwrap_single_property_objects(master_defs)
 
     master_schema = {
         "$schema": "http://json-schema.org/draft-07/schema#",

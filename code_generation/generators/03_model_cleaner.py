@@ -9,13 +9,14 @@ FINAL_MODELS_PATH = Path("../temp_models/base_models.py")
 
 ### Main Cleaning Pipeline ###
 
+
 def main():
     """
     Performs a final, surgical cleaning of the generated Pydantic models.
-    This script addresses all known artifacts from the datamodel-codegen process
-    to produce a clean, valid, and highly usable models file.
+    This script is simplified to handle only the remaining artifacts from the
+    improved datamodel-codegen process.
     """
-    print(f"--- Starting DEFINITIVE cleaning of {INPUT_MODELS_PATH} ---")
+    print(f"--- Starting SIMPLIFIED cleaning of {INPUT_MODELS_PATH} ---")
 
     try:
         content = INPUT_MODELS_PATH.read_text(encoding="utf-8")
@@ -23,24 +24,25 @@ def main():
         print(f"Error: {INPUT_MODELS_PATH} not found. Please generate it first.")
         return
 
-    # The order of these operations is critical for success.
+    # The order of these operations is critical.
 
-    # Step 1: Convert RootModels wrapping a Literal into a simple TypeAlias.
-    print("Step 1: Converting RootModel[Literal[...]] to TypeAlias...")
-    content = convert_root_model_literals_to_type_alias(content)
+    # Step 1: Replace Pydantic's `constr` with standard `str` for simplicity.
+    print("Step 1: Replacing 'constr' with 'str'...")
+    content = replace_constr_with_str(content)
 
-    # Step 2: Convert RootModels wrapping a Union (A | B) into a simple TypeAlias.
-    # This regex is now more specific and will NOT affect RootModel[List[...]].
-    print("Step 2: Converting RootModel[Union[...]] to TypeAlias...")
-    content = convert_root_model_unions_to_type_alias(content)
-
-    # Step 3: Remove known incomplete or duplicate class definitions.
-    print("Step 3: Removing known incomplete duplicate classes...")
+    # Step 2: Remove known incomplete or duplicate class definitions.
+    # This is still needed for cases like DocumentRevision vs DocumentRevision1.
+    print("Step 2: Removing known incomplete duplicate classes...")
     content = remove_specific_duplicates(content)
 
-    # Step 4: Promote "...1" suffixed classes to their base name.
-    print("Step 4: Consolidating suffixed classes (e.g., 'Hole1' -> 'Hole')...")
+    # Step 3: Promote suffixed classes (e.g., 'Hole1' -> 'Hole').
+    # This is still needed to merge generator artifacts.
+    print("Step 3: Consolidating suffixed classes (e.g., 'Hole1' -> 'Hole')...")
     content = promote_suffixed_classes(content)
+
+    # Step 4: Reorder forward-referencing models like `Hotlink`.
+    print("Step 4: Reordering self-referencing models...")
+    content = fix_forward_reference_models(content)
 
     # Step 5: Assemble the final file with a clean header and formatting.
     print("Step 5: Assembling and formatting the final file...")
@@ -52,131 +54,122 @@ def main():
 
 ### Cleaning Logic Functions (in execution order) ###
 
-def convert_root_model_literals_to_type_alias(content: str) -> str:
-    """Converts `class MyType(RootModel[Literal[...]]): ...` to `MyType = Literal[...]`"""
-    pattern = re.compile(
-        r"class\s+(\w+)\s*\(\s*RootModel\[\s*(Literal\[.+?\])\s*\]\s*\)\s*:\s*\n(?:    .+?\n)+",
-        re.DOTALL
-    )
 
-    def replacement(match):
-        class_name, type_hint = match.groups()
-        return f"{class_name} = {type_hint.strip()}"
-
-    return pattern.sub(replacement, content)
-
-
-def convert_root_model_unions_to_type_alias(content: str) -> str:
-    """
-    Converts `class MyType(RootModel[A | B]): ...` to `MyType = A | B`.
-    """
-    pattern = re.compile(
-        (
-            r"class\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*\("  # 1. Capture the class name (group 1)
-            r"\s*RootModel\["
-            r"([^\]]*)"                              # 2. Capture the union types (group 2)
-            r"\]\s*\)\s*:"
-            r"\s+root\s*:\s*"
-            # This non-capturing group precisely matches the root type, with or without parentheses.
-            r"(?:"
-                r"\(\s*\2\s*\)"                      # Case A: Matches ( TypeA | TypeB ) with internal whitespace
-                r"|"                                 # OR
-                r"\2"                                # Case B: Matches TypeA | TypeB without parentheses
-            r")"
-            # THE CRUCIAL FIX: This is a positive lookahead.
-            # It ensures the match ends here and is followed by a newline or
-            # the end of the file, but it DOES NOT CONSUME the newline.
-            r"(?=\s*\n|\s*$)"
-        ),
-        re.DOTALL, # No re.VERBOSE here, as we use Python string concatenation for comments
-    )
-
-    def replacer(match: re.Match) -> str:
-        """
-        This function is called for each match found by re.sub.
-        It constructs the replacement string.
-        """
-        class_name = match.group(1)
-        union_types_with_whitespace = match.group(2)
-
-        # Clean up the captured types string for consistent output
-        types = [t.strip() for t in union_types_with_whitespace.split('|')]
-        cleaned_union_types = " | ".join(type for type in types if type)  # filter out empty strings
-
-        return f"{class_name} = {cleaned_union_types}"
-
-    return pattern.sub(replacer, content)
+def replace_constr_with_str(content: str) -> str:
+    """Replaces all instances of `constr(...)` with `str`."""
+    # This regex finds `constr` followed by parentheses and replaces it.
+    content = re.sub(r"constr\(.*?\)", "str", content)
+    print("    - All 'constr' types replaced with 'str'.")
+    return content
 
 
 def remove_specific_duplicates(content: str) -> str:
     """Removes known, less-complete class definitions before renaming."""
+    # This pattern is still needed as the generator creates a less-complete
+    # 'DocumentRevision' before creating the correct 'DocumentRevision1'.
     duplicate_doc_rev_pattern = re.compile(
-        r"class DocumentRevision\(BaseModel\):\n(?:    .+\n)+?    revisionId: DocumentRevisionId\n",
-        re.MULTILINE
+        r"class DocumentRevision\(BaseModel\):\s*\n(?:    .+\n)+?    revisionId: DocumentRevisionId\s*\n", re.MULTILINE
     )
-    content = duplicate_doc_rev_pattern.sub("", content)
+    content, count = duplicate_doc_rev_pattern.subn("", content)
+    if count > 0:
+        print("    - Removed incomplete 'DocumentRevision' class.")
 
+    # This pattern is still needed to remove the 'Hole' that uses 'polygonOutline'
+    # so we can promote the 'Hole1' that correctly uses 'polygonCoordinates'.
     original_hole_pattern = re.compile(
-        r"class Hole\(BaseModel\):\n    polygonOutline: List\[Field2DCoordinate\].+\n(?:    .+\n)+",
-        re.MULTILINE
+        r"class Hole\(BaseModel\):\s*\n    polygonOutline: .+\n(?:    .+\n)*", re.MULTILINE
     )
-    content = original_hole_pattern.sub("", content)
+    content, count = original_hole_pattern.subn("", content)
+    if count > 0:
+        print("    - Removed 'Hole' class with incorrect 'polygonOutline' field.")
 
     return content
 
 
 def promote_suffixed_classes(content: str) -> str:
     """
-    Finds all class definitions ending with '1' (e.g., "class Hole1(BaseModel):")
-    and renames all occurrences of those specific class names to their base name,
-    leaving other identifiers like 'dimension1' untouched.
+    Finds class definitions ending with any number (e.g., "Hole1", "Story1")
+    and renames all occurrences of those names to their base name.
     """
-    # 1. Find only the names of CLASSES that are defined with a '1' suffix.
-    #    The regex looks for "class ClassName1(" to be very specific.
-    suffixed_class_pattern = re.compile(r"class\s+(\w+1)\s*\(")
+    # This regex finds class names ending in one or more digits.
+    suffixed_class_pattern = re.compile(r"class\s+(\w+\d+)\s*\(")
     suffixed_class_names = sorted(list(set(suffixed_class_pattern.findall(content))), key=len, reverse=True)
 
     if not suffixed_class_names:
+        print("    - No suffixed classes found to consolidate.")
         return content
 
     print(f"    - Found suffixed classes to consolidate: {', '.join(suffixed_class_names)}")
 
-    # 2. For each of these specific class names, perform a global replacement.
-    #    This is safe because we are only targeting names we know are classes.
     for suffixed_name in suffixed_class_names:
-        base_name = suffixed_name[:-1]  # Remove the trailing '1'
+        # Remove any trailing digits from the name.
+        base_name = re.sub(r"\d+$", "", suffixed_name)
         print(f"    - Renaming all instances of '{suffixed_name}' to '{base_name}'...")
         # Use word boundaries (\b) to ensure we replace the whole word only.
-        # This replaces `Hole1` but not a hypothetical `MyHole1Variable`.
-        content = re.sub(r'\b' + re.escape(suffixed_name) + r'\b', base_name, content)
+        content = re.sub(r"\b" + re.escape(suffixed_name) + r"\b", base_name, content)
 
+    return content
+
+
+def fix_forward_reference_models(content: str) -> str:
+    """
+    Finds models that self-reference in a list (e.g., Hotlink) and ensures
+    the model is defined before its update_forward_refs() call if it exists.
+    This also handles reordering for clarity if no forward ref is used.
+    """
+
+    hotlink_model_pattern = re.compile(r"(class Hotlink\(BaseModel\):\s*\n(?:(?:    .*\n)+))", re.MULTILINE)
+    hotlink_match = hotlink_model_pattern.search(content)
+
+    if hotlink_match:
+        hotlink_model_block = hotlink_match.group(1)
+        # In case there's an `update_forward_refs` call, remove it
+        content = re.sub(r"Hotlink\.update_forward_refs\(.*\)\s*\n", "", content)
+        # Ensure the model definition appears before its use in GetHotlinksResult
+        get_hotlinks_result_pattern = re.compile(
+            r"(class GetHotlinksResult\(BaseModel\):[\s\S]*?hotlinks: List\[Hotlink\].*)"
+        )
+        get_hotlinks_match = get_hotlinks_result_pattern.search(content)
+        if get_hotlinks_match:
+            print("    - Moving 'Hotlink' model definition to ensure correct order.")
+            # Remove the original hotlink model block
+            content = hotlink_model_pattern.sub("", content)
+            # Insert it before the class that uses it
+            content = get_hotlinks_result_pattern.sub(
+                f"{hotlink_model_block}\n\n{get_hotlinks_match.group(1)}", content, count=1
+            )
     return content
 
 
 def assemble_final_file(content: str) -> str:
     """Adds a standard header, imports, and performs final formatting."""
+    # Remove the placeholder `TapirMasterModels` which isn't needed.
     master_model_pattern = re.compile(r"class TapirMasterModels\(RootModel\[Any\]\):(?:\n.+)+")
     content = master_model_pattern.sub("", content)
 
+    # Define the new, correct header.
     header = [
         "from __future__ import annotations",
         "from typing import Any, List, Literal, Union, TypeAlias",
         "from uuid import UUID",
+        "from enum import Enum",
         "",
         "from pydantic import BaseModel, ConfigDict, Field, RootModel",
         "",
-        "### This file is automatically generated and surgically cleaned. Do not edit directly. ###"
+        "### This file is automatically generated and surgically cleaned. Do not edit directly. ###",
     ]
 
+    # Get the body, filtering out all old import lines.
     body_lines = [
-        line for line in content.splitlines()
-        if line.strip() and not line.startswith(("from ", "# generated"))
+        line for line in content.splitlines() if line.strip() and not line.startswith(("from ", "# generated"))
     ]
 
     final_content = "\n".join(header + [""] + body_lines)
 
-    final_content = re.sub(r'\n(class |[A-Z]\w+\s*=)', r'\n\n\n\1', final_content)
-    final_content = final_content.replace('\n\n\n\n', '\n\n')
+    # Standardize spacing between definitions for readability.
+    final_content = re.sub(r"\n(class |[A-Z]\w+\s*=)", r"\n\n\n\1", final_content)
+    # Clean up any excessive newlines from the regex substitutions.
+    final_content = final_content.replace("\n\n\n\n", "\n\n\n")
 
     return final_content.strip() + "\n"
 

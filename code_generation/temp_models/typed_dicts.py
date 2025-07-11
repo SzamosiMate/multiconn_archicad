@@ -257,31 +257,19 @@ class PropertyValue(TypedDict):
     value: str
 
 
-class PropertyValueOrErrorItem(TypedDict):
-    propertyValue: PropertyValue
-
-
-PropertyValueOrErrorItem = PropertyValueOrErrorItem | ErrorItem
+PropertyValueOrErrorItem = PropertyValue | ErrorItem
 
 
 PropertyValues = List[PropertyValueOrErrorItem]
 
 
-class PropertyValuesOrError(TypedDict):
-    propertyValues: PropertyValues
-
-
-PropertyValuesOrError = PropertyValuesOrError | ErrorItem
+PropertyValuesOrError = PropertyValues | ErrorItem
 
 
 PropertyValuesOrErrorArray = List[PropertyValuesOrError]
 
 
-class PropertyIdOrError(TypedDict):
-    propertyId: PropertyId
-
-
-PropertyIdOrError = PropertyIdOrError | ErrorItem
+PropertyIdOrError = PropertyId | ErrorItem
 
 
 PropertyIdOrErrorArray = List[PropertyIdOrError]
@@ -475,21 +463,13 @@ class ClassificationId(TypedDict):
     classificationItemId: NotRequired[ClassificationItemId]
 
 
-class ClassificationIdOrError(TypedDict):
-    classificationId: ClassificationId
-
-
-ClassificationIdOrError = ClassificationIdOrError | ErrorItem
+ClassificationIdOrError = ClassificationId | ErrorItem
 
 
 ClassificationIdsOrErrors = List[ClassificationIdOrError]
 
 
-class ElementClassificationOrError(TypedDict):
-    classificationIds: ClassificationIdsOrErrors
-
-
-ElementClassificationOrError = ElementClassificationOrError | ErrorItem
+ElementClassificationOrError = ClassificationIdsOrErrors | ErrorItem
 
 
 ElementClassificationsOrErrors = List[ElementClassificationOrError]
@@ -504,11 +484,7 @@ class BoundingBox3D(TypedDict):
     zMax: float
 
 
-class BoundingBox3DOrError(TypedDict):
-    boundingBox3D: BoundingBox3D
-
-
-BoundingBox3DOrError = BoundingBox3DOrError | ErrorItem
+BoundingBox3DOrError = BoundingBox3D | ErrorItem
 
 
 BoundingBoxes3D = List[BoundingBox3DOrError]
@@ -729,12 +705,10 @@ class RevisionChangesOfEntities(TypedDict):
 RevisionChangesOfEntities = RevisionChangesOfEntities | ErrorItem
 
 
-class GetAddOnVersionResult(TypedDict):
-    version: str
+GetAddOnVersionResult = str
 
 
-class GetArchicadLocationResult(TypedDict):
-    archicadLocation: str
+GetArchicadLocationResult = str
 
 
 class GetCurrentWindowTypeResult(TypedDict):
@@ -749,14 +723,13 @@ class GetProjectInfoResult(TypedDict):
     projectName: NotRequired[str]
 
 
-class Field(TypedDict):
+class GetProjectInfoFieldsResultItem(TypedDict):
     projectInfoId: NotRequired[str]
     projectInfoName: NotRequired[str]
     projectInfoValue: NotRequired[str]
 
 
-class GetProjectInfoFieldsResult(TypedDict):
-    fields: List[Field]
+GetProjectInfoFieldsResult = List[GetProjectInfoFieldsResultItem]
 
 
 class SetProjectInfoFieldParameters(TypedDict):
@@ -780,18 +753,16 @@ class GetStoriesResult(TypedDict):
     stories: List[Story]
 
 
-class Story(TypedDict):
+class SetStoriesParameter(TypedDict):
     dispOnSections: bool
     level: float
     name: str
 
 
-class SetStoriesParameters(TypedDict):
-    stories: List[Story]
+SetStoriesParameters = List[SetStoriesParameter]
 
 
-class OpenProjectParameters(TypedDict):
-    projectFilePath: str
+OpenProjectParameters = str
 
 
 class ProjectLocation(TypedDict):
@@ -870,41 +841,30 @@ class SetGDLParametersOfElementsResult(TypedDict):
     executionResults: ExecutionResults
 
 
-class GetClassificationsOfElementsResult(TypedDict):
-    elementClassifications: ElementClassificationsOrErrors
+GetClassificationsOfElementsResult = ElementClassificationsOrErrors
 
 
 class SetClassificationsOfElementsResult(TypedDict):
     executionResults: ExecutionResults
 
 
-class Coordinates(TypedDict):
+class CreateColumnsParameter(TypedDict):
     x: float
     y: float
     z: float
 
 
-class ColumnsDatum(TypedDict):
-    coordinates: Coordinates
+CreateColumnsParameters = List[CreateColumnsParameter]
 
 
-class CreateColumnsParameters(TypedDict):
-    columnsData: List[ColumnsDatum]
-
-
-class SlabsDatum(TypedDict):
+class CreateSlabsParameter(TypedDict):
     level: float
     polygonCoordinates: List[Field2DCoordinate]
     polygonArcs: NotRequired[List[PolyArc]]
     holes: NotRequired[List[Hole]]
 
 
-class CreateSlabsParameters(TypedDict):
-    slabsData: List[SlabsDatum]
-
-
-class Geometry(TypedDict):
-    referencePosition: Field2DCoordinate
+CreateSlabsParameters = List[CreateSlabsParameter]
 
 
 class Geometry(TypedDict):
@@ -913,36 +873,30 @@ class Geometry(TypedDict):
     holes: NotRequired[List[Hole]]
 
 
-class PolylinesDatum(TypedDict):
+class CreatePolylinesParameter(TypedDict):
     floorInd: NotRequired[float]
     coordinates: List[Field2DCoordinate]
     arcs: NotRequired[List[PolyArc]]
 
 
-class CreatePolylinesParameters(TypedDict):
-    polylinesData: List[PolylinesDatum]
+CreatePolylinesParameters = List[CreatePolylinesParameter]
 
 
-class ObjectsDatum(TypedDict):
+class CreateObjectsParameter(TypedDict):
     libraryPartName: str
     coordinates: Field3DCoordinate
     dimensions: Field3DDimensions
 
 
-class CreateObjectsParameters(TypedDict):
-    objectsData: List[ObjectsDatum]
+CreateObjectsParameters = List[CreateObjectsParameter]
 
 
-class Hole4(TypedDict):
+class Hole(TypedDict):
     polygonCoordinates: List[Field3DCoordinate]
     polygonArcs: NotRequired[List[PolyArc]]
 
 
-class Subline(TypedDict):
-    coordinates: List[Field3DCoordinate]
-
-
-class MeshesDatum(TypedDict):
+class CreateMeshesParameter(TypedDict):
     floorIndex: NotRequired[int]
     level: NotRequired[float]
     skirtType: NotRequired[
@@ -951,16 +905,14 @@ class MeshesDatum(TypedDict):
     skirtLevel: NotRequired[float]
     polygonCoordinates: List[Field3DCoordinate]
     polygonArcs: NotRequired[List[PolyArc]]
-    holes: NotRequired[List[Hole4]]
-    sublines: NotRequired[List[Subline]]
+    holes: NotRequired[List[Hole]]
+    sublines: NotRequired[List[List[Field3DCoordinate]]]
 
 
-class CreateMeshesParameters(TypedDict):
-    meshesData: List[MeshesDatum]
+CreateMeshesParameters = List[CreateMeshesParameter]
 
 
-class ApplyFavoritesToElementDefaultsParameters(TypedDict):
-    favorites: List[str]
+ApplyFavoritesToElementDefaultsParameters = List[str]
 
 
 class ApplyFavoritesToElementDefaultsResult(TypedDict):
@@ -971,20 +923,17 @@ class CreateFavoritesFromElementsResult(TypedDict):
     executionResults: ExecutionResults
 
 
-class GetAllPropertiesResult(TypedDict):
-    properties: List[PropertyDetails]
+GetAllPropertiesResult = List[PropertyDetails]
 
 
-class GetPropertyValuesOfElementsResult(TypedDict):
-    propertyValuesForElements: PropertyValuesOrErrorArray
+GetPropertyValuesOfElementsResult = PropertyValuesOrErrorArray
 
 
 class SetPropertyValuesOfElementsResult(TypedDict):
     executionResults: ExecutionResults
 
 
-class GetPropertyValuesOfAttributesResult(TypedDict):
-    propertyValuesForAttributes: PropertyValuesOrErrorArray
+GetPropertyValuesOfAttributesResult = PropertyValuesOrErrorArray
 
 
 class SetPropertyValuesOfAttributesResult(TypedDict):
@@ -996,38 +945,35 @@ class PropertyGroup(TypedDict):
     description: NotRequired[str]
 
 
-class PropertyGroup(TypedDict):
+class CreatePropertyGroupsParameter(TypedDict):
     propertyGroup: PropertyGroup
 
 
-class CreatePropertyGroupsParameters(TypedDict):
-    propertyGroups: List[PropertyGroup]
+CreatePropertyGroupsParameters = List[CreatePropertyGroupsParameter]
 
 
-class PropertyGroupId(TypedDict):
+class CreatePropertyGroupsResultItem(TypedDict):
     propertyGroupId: PropertyGroupId
 
 
-class CreatePropertyGroupsResult(TypedDict):
-    propertyGroupIds: List[PropertyGroupId]
+CreatePropertyGroupsResult = List[CreatePropertyGroupsResultItem]
 
 
-class DeletePropertyGroupsParameters(TypedDict):
-    propertyGroupIds: List[PropertyGroupId]
+class DeletePropertyGroupsParameter(TypedDict):
+    propertyGroupId: PropertyGroupId
+
+
+DeletePropertyGroupsParameters = List[DeletePropertyGroupsParameter]
 
 
 class DeletePropertyGroupsResult(TypedDict):
     executionResults: ExecutionResults
 
 
-class EnumValue(TypedDict):
+class PossibleEnumValue(TypedDict):
     enumValueId: NotRequired[EnumValueId]
     displayValue: str
     nonLocalizedValue: NotRequired[str]
-
-
-class PossibleEnumValue(TypedDict):
-    enumValue: EnumValue
 
 
 class Group(TypedDict):
@@ -1039,12 +985,11 @@ class CreatePropertyDefinitionsResult(TypedDict):
     propertyIds: PropertyIdOrErrorArray
 
 
-class PropertyId(TypedDict):
+class DeletePropertyDefinitionsParameter(TypedDict):
     propertyId: PropertyId
 
 
-class DeletePropertyDefinitionsParameters(TypedDict):
-    propertyIds: List[PropertyId]
+DeletePropertyDefinitionsParameters = List[DeletePropertyDefinitionsParameter]
 
 
 class DeletePropertyDefinitionsResult(TypedDict):
@@ -1089,7 +1034,7 @@ class CreateBuildingMaterialsParameters(TypedDict):
     overwriteExisting: NotRequired[bool]
 
 
-class Properties(TypedDict):
+class GetBuildingMaterialPhysicalPropertiesResultItem(TypedDict):
     thermalConductivity: NotRequired[float]
     density: NotRequired[float]
     heatCapacity: NotRequired[float]
@@ -1097,15 +1042,12 @@ class Properties(TypedDict):
     embodiedCarbon: NotRequired[float]
 
 
-class Property(TypedDict):
-    properties: NotRequired[Properties]
+GetBuildingMaterialPhysicalPropertiesResult = List[
+    GetBuildingMaterialPhysicalPropertiesResultItem
+]
 
 
-class GetBuildingMaterialPhysicalPropertiesResult(TypedDict):
-    properties: List[Property]
-
-
-class Library(TypedDict):
+class GetLibrariesResultItem(TypedDict):
     name: str
     path: str
     type: str
@@ -1115,8 +1057,7 @@ class Library(TypedDict):
     urlWebLibrary: NotRequired[str]
 
 
-class GetLibrariesResult(TypedDict):
-    libraries: List[Library]
+GetLibrariesResult = List[GetLibrariesResultItem]
 
 
 class User(TypedDict):
@@ -1184,7 +1125,7 @@ class GetCommentsFromIssueParameters(TypedDict):
     issueId: IssueId
 
 
-class Comment(TypedDict):
+class GetCommentsFromIssueResultItem(TypedDict):
     guid: Guid
     author: str
     text: str
@@ -1192,8 +1133,7 @@ class Comment(TypedDict):
     creaTime: int
 
 
-class GetCommentsFromIssueResult(TypedDict):
-    comments: List[Comment]
+GetCommentsFromIssueResult = List[GetCommentsFromIssueResultItem]
 
 
 class GetElementsAttachedToIssueParameters(TypedDict):
@@ -1233,8 +1173,7 @@ class GetRevisionChangesOfElementsResult(TypedDict):
     revisionChangesOfElements: RevisionChangesOfEntities
 
 
-class GenerateDocumentationParameters(TypedDict):
-    destinationFolder: str
+GenerateDocumentationParameters = str
 
 
 AttributePropertyValues = Any
@@ -1248,8 +1187,7 @@ class AttributeId(TypedDict):
     guid: Guid
 
 
-class GDLParameterList(TypedDict):
-    parameters: List[GDLParameterDetails]
+GDLParameterList = List[GDLParameterDetails]
 
 
 class ElementPropertyValue(TypedDict):
@@ -1345,53 +1283,48 @@ class ZoneDetails(TypedDict):
     zCoordinate: float
 
 
-class ElementsWithDetail(TypedDict):
+class SetDetailsOfElementsParameter(TypedDict):
     elementId: ElementId
     details: Details
 
 
-class SetDetailsOfElementsParameters(TypedDict):
-    elementsWithDetails: List[ElementsWithDetail]
+SetDetailsOfElementsParameters = List[SetDetailsOfElementsParameter]
 
 
-class ElementsWithMoveVector(TypedDict):
+class MoveElementsParameter(TypedDict):
     elementId: ElementId
     moveVector: MoveVector
     copy_: NotRequired[bool]
 
 
-class MoveElementsParameters(TypedDict):
-    elementsWithMoveVectors: List[ElementsWithMoveVector]
+MoveElementsParameters = List[MoveElementsParameter]
 
 
-class GetGDLParametersOfElementsResult(TypedDict):
-    gdlParametersOfElements: List[GDLParameterList]
+GetGDLParametersOfElementsResult = List[GDLParameterList]
 
 
-class ElementsWithGDLParameter(TypedDict):
+class SetGDLParametersOfElementsParameter(TypedDict):
     elementId: ElementId
     gdlParameters: GDLParameterList
 
 
-class SetGDLParametersOfElementsParameters(TypedDict):
-    elementsWithGDLParameters: List[ElementsWithGDLParameter]
+SetGDLParametersOfElementsParameters = List[SetGDLParametersOfElementsParameter]
 
 
 class SetClassificationsOfElementsParameters(TypedDict):
     elementClassifications: ElementClassifications
 
 
-class ZonesDatum(TypedDict):
+class CreateZonesParameter(TypedDict):
     floorIndex: NotRequired[float]
     name: str
     numberStr: str
     categoryAttributeId: NotRequired[AttributeId]
     stampPosition: NotRequired[Field2DCoordinate]
-    geometry: Geometry | Geometry
+    geometry: Field2DCoordinate | Geometry
 
 
-class CreateZonesParameters(TypedDict):
-    zonesData: List[ZonesDatum]
+CreateZonesParameters = List[CreateZonesParameter]
 
 
 class FavoritesFromElement(TypedDict):
@@ -1422,22 +1355,20 @@ class PropertyDefinition(TypedDict):
     group: Group
 
 
-class PropertyDefinition(TypedDict):
+class CreatePropertyDefinitionsParameter(TypedDict):
     propertyDefinition: PropertyDefinition
 
 
-class CreatePropertyDefinitionsParameters(TypedDict):
-    propertyDefinitions: List[PropertyDefinition]
+CreatePropertyDefinitionsParameters = List[CreatePropertyDefinitionsParameter]
 
 
-class Attribute(TypedDict):
+class GetAttributesByTypeResultItem(TypedDict):
     attributeId: AttributeId
     index: float
     name: str
 
 
-class GetAttributesByTypeResult(TypedDict):
-    attributes: List[Attribute]
+GetAttributesByTypeResult = List[GetAttributesByTypeResultItem]
 
 
 class Conflict(TypedDict):
@@ -1450,7 +1381,7 @@ class ReserveElementsResult(TypedDict):
     conflicts: NotRequired[List[Conflict]]
 
 
-class Issue(TypedDict):
+class GetIssuesResultItem(TypedDict):
     issueId: IssueId
     name: str
     parentIssueId: IssueId
@@ -1461,8 +1392,7 @@ class Issue(TypedDict):
     isTagTextElemVisible: bool
 
 
-class GetIssuesResult(TypedDict):
-    issues: List[Issue]
+GetIssuesResult = List[GetIssuesResultItem]
 
 
 class ElementIdArrayItem(TypedDict):
@@ -1762,12 +1692,12 @@ class GetRevisionChangesOfElementsParameters(TypedDict):
     elements: Elements
 
 
-Hotlinks = List[Hotlink]
-
-
 class Hotlink(TypedDict):
     location: str
     children: NotRequired[Hotlinks]
+
+
+Hotlinks = List[Hotlink]
 
 
 class GetHotlinksResult(TypedDict):

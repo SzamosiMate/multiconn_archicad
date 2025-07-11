@@ -1,6 +1,7 @@
 import json
 import re
 from pathlib import Path
+from collections import defaultdict
 
 # --- Configuration ---
 INPUT_FILE = Path("../temp_models/typed_dicts.py")
@@ -29,95 +30,137 @@ def get_header_lines() -> list[str]:
     ]
 
 
-def find_dependencies(source_blocks: list[str], available_definitions: set[str]) -> list[str]:
+def find_cross_file_dependencies(block: str, available_base_definitions: set[str]) -> set[str]:
     """
-    Scans source code blocks for type annotations and returns a sorted list
-    of dependencies that are present in the available_definitions set.
+    Scans a single source code block and returns a set of dependencies
+    that are present in the available_base_definitions set.
     """
-    source_content = "\n".join(source_blocks)
+    pattern = re.compile(r"[:\[\|\(\s=]\s*([A-Z]\w*)")
+    used_identifiers = set(pattern.findall(block))
+    return used_identifiers.intersection(available_base_definitions)
 
-    # DEFINITIVE FIX: This regex is much more precise. It looks for capitalized words
-    # that are used as type annotations (after a colon) or within generics (like List[...]).
-    # It specifically ignores words that are part of another word (e.g., won't find 'Error' in 'ErrorItem').
-    # It finds:
-    #   : SomeType
-    #   [SomeType]
-    #   | SomeType
-    #   (SomeType
-    pattern = re.compile(r"[:\[\|\(]\s*([A-Z]\w+)")
 
-    used_identifiers = set(pattern.findall(source_content))
+def remove_unused_imports(content: str) -> str:
+    """
+    Removes unused typing imports from the header of the file content.
+    """
+    lines = content.split('\n')
+    typing_imports_line_index = -1
+    for i, line in enumerate(lines):
+        if "from typing import" in line:
+            typing_imports_line_index = i
+            break
 
-    # The needed imports are the intersection of identifiers found and base models available.
-    return sorted(list(used_identifiers.intersection(available_definitions)))
+    if typing_imports_line_index == -1:
+        return content
+
+    body_content = "\n".join(lines[typing_imports_line_index + 1:])
+
+    used_imports = []
+    if re.search(r"\bAny\b", body_content): used_imports.append("Any")
+    if re.search(r"\bList\b", body_content): used_imports.append("List")
+    if re.search(r"\bLiteral\b", body_content): used_imports.append("Literal")
+    if re.search(r"\bTypedDict\b", body_content): used_imports.append("TypedDict")
+    if re.search(r"\bUnion\b", body_content): used_imports.append("Union")
+
+    if used_imports:
+        lines[typing_imports_line_index] = f"from typing import {', '.join(sorted(used_imports))}"
+    else:
+        # If no typing imports are used, remove the line
+        del lines[typing_imports_line_index]
+
+    return "\n".join(lines)
 
 
 def main():
     """
     Splits a single TypedDicts file into base and command files,
-    generating explicit, non-greedy imports to satisfy linters like ruff.
+    PRESERVING the original definition order.
     """
-    print("--- Starting TypedDict Splitting Process (with Precise Imports) ---")
+    print("--- Starting TypedDict Splitting Process (Preserving Original Order) ---")
 
     # 1. Load model name sets
     try:
+        BASE_NAMES_FILE.parent.mkdir(parents=True, exist_ok=True)
+        if not BASE_NAMES_FILE.exists():
+            with open(BASE_NAMES_FILE, 'w', encoding='utf-8') as f: json.dump([], f)
+        if not COMMAND_NAMES_FILE.exists():
+            with open(COMMAND_NAMES_FILE, 'w', encoding='utf-8') as f: json.dump([], f)
+
         with open(BASE_NAMES_FILE, "r", encoding="utf-8") as f:
             base_names = set(json.load(f))
         with open(COMMAND_NAMES_FILE, "r", encoding="utf-8") as f:
             command_names = set(json.load(f))
-    except FileNotFoundError as e:
-        print(f"Error: Could not find name list file. ({e})")
-        return
+    except (FileNotFoundError, json.JSONDecodeError) as e:
+        print(f"Warning: Could not load name list files. Defaulting to base. ({e})")
+        base_names = set()
+        command_names = set()
 
-    # 2. Read and parse the input file
+    # 2. Read and parse the input file, preserving the block order
     try:
         content = INPUT_FILE.read_text("utf-8")
     except FileNotFoundError:
         print(f"Error: {INPUT_FILE} not found.")
         return
 
-    definitions_raw = re.split(r"\n\n\n", content)
-    definitions = [
-        block.strip() for block in definitions_raw if block.strip() and not block.strip().startswith(("from ", "###"))
+    definitions_in_order = [
+        block.strip() for block in re.split(r"\n\n\n", content)
+        if block.strip() and not block.strip().startswith(("from ", "###"))
     ]
 
-    # 3. Sort definitions into base and command lists
+    if not definitions_in_order:
+        print("Error: No definitions found in the input file.")
+        return
+
+    all_definition_names = {get_definition_name(b) for b in definitions_in_order if get_definition_name(b)}
+    if not base_names and not command_names:
+        base_names = all_definition_names
+
+    # 3. Categorize definitions into two lists, maintaining their original relative order
     base_blocks = []
     command_blocks = []
-    for block in definitions:
+    for block in definitions_in_order:
         name = get_definition_name(block)
         if name in command_names:
             command_blocks.append(block)
-        else:
+        else: # Default to base
             base_blocks.append(block)
 
-    print(f"Sorted TypedDicts: {len(base_blocks)} base | {len(command_blocks)} command")
+    print(f"Found {len(definitions_in_order)} total definitions.")
+    print(f"Categorized into: {len(base_blocks)} base | {len(command_blocks)} command")
 
-    # --- Generate Base Models File ---
-    base_file_content = "\n".join(get_header_lines()) + "\n\n\n" + "\n\n\n".join(sorted(base_blocks))
-    BASE_TYPED_DICTS_OUTPUT.write_text(base_file_content + "\n", "utf-8")
+    # --- Generate Base Models File (`types.py`) ---
+    print("\nProcessing base models...")
+    base_file_content = "\n".join(get_header_lines()) + "\n\n\n" + "\n\n\n".join(base_blocks)
+    final_base_content = remove_unused_imports(base_file_content)
+    BASE_TYPED_DICTS_OUTPUT.write_text(final_base_content + "\n", "utf-8")
     print(f"✅ Successfully wrote {len(base_blocks)} definitions to {BASE_TYPED_DICTS_OUTPUT}")
 
-    # --- Generate Command Models File ---
-    # 4. Find all dependencies needed by the command models from the base models
+    # --- Generate Command Models File (`commands.py`) ---
+    print("\nProcessing command models...")
     base_model_names_in_file = {get_definition_name(b) for b in base_blocks if get_definition_name(b)}
-    needed_imports = find_dependencies(command_blocks, base_model_names_in_file)
+
+    needed_imports = set()
+    for block in command_blocks:
+        needed_imports.update(find_cross_file_dependencies(block, base_model_names_in_file))
+
     print(f"Found {len(needed_imports)} base models required by command models.")
 
-    # 5. Assemble the final command models file
-    header = get_header_lines()
-    file_parts = ["\n".join(header)]
+    # Assemble the final file content
+    header_content = "\n".join(get_header_lines())
+    file_parts = [header_content]
 
-    # DEFINITIVE FIX: Only add the import block if there are imports to add.
     if needed_imports:
-        # Create a nicely formatted, multi-line import statement
-        import_block = "from .types import (\n    " + ",\n    ".join(needed_imports) + ",\n)"
+        sorted_imports = sorted(list(needed_imports))
+        import_block = "from .types import (\n    " + ",\n    ".join(sorted_imports) + ",\n)"
         file_parts.append(import_block)
 
-    file_parts.extend(sorted(command_blocks))
+    # Add the command blocks, which are already in the correct relative order
+    file_parts.extend(command_blocks)
 
     final_command_content = "\n\n\n".join(file_parts)
-    COMMAND_TYPED_DICTS_OUTPUT.write_text(final_command_content + "\n", "utf-8")
+    final_command_content_cleaned = remove_unused_imports(final_command_content)
+    COMMAND_TYPED_DICTS_OUTPUT.write_text(final_command_content_cleaned + "\n", "utf-8")
     print(f"✅ Successfully wrote {len(command_blocks)} definitions to {COMMAND_TYPED_DICTS_OUTPUT}")
 
 
