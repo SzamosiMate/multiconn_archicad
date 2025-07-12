@@ -30,7 +30,9 @@ include = [
 
 [dependency-groups]
 dev = [
-    "datamodel-code-generator[pydantic-v2]>=0.31.2",
+    "datamodel-code-generator>=0.31.2",
+    "hypothesis>=6.135.27",
+    "hypothesis-jsonschema>=0.23.1",
     "mypy>=1.14.0",
     "pytest>=8.3.4",
     "ruff>=0.8.4",

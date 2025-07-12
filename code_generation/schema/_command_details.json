@@ -1,0 +1,476 @@
+[
+    {
+        "name": "AddCommentToIssue",
+        "group": "Issue Management Commands",
+        "description": "Adds a new comment to the specified issue.",
+        "version": "1.0.6"
+    },
+    {
+        "name": "ApplyFavoritesToElementDefaults",
+        "group": "Favorites Commands",
+        "description": "Apply the given favorites to element defaults.",
+        "version": "1.1.2"
+    },
+    {
+        "name": "AttachElementsToIssue",
+        "group": "Issue Management Commands",
+        "description": "Attaches elements to the specified issue.",
+        "version": "1.0.6"
+    },
+    {
+        "name": "ChangeSelectionOfElements",
+        "group": "Element Commands",
+        "description": "Adds/removes a number of elements to/from the current selection.",
+        "version": "1.0.7"
+    },
+    {
+        "name": "CreateBuildingMaterials",
+        "group": "Attribute Commands",
+        "description": "Creates Building Material attributes based on the given parameters.",
+        "version": "1.0.1"
+    },
+    {
+        "name": "CreateColumns",
+        "group": "Element Commands",
+        "description": "Creates Column elements based on the given parameters.",
+        "version": "1.0.3"
+    },
+    {
+        "name": "CreateComposites",
+        "group": "Attribute Commands",
+        "description": "Creates Composite attributes based on the given parameters.",
+        "version": "1.0.2"
+    },
+    {
+        "name": "CreateFavoritesFromElements",
+        "group": "Favorites Commands",
+        "description": "Create favorites from the given elements.",
+        "version": "1.1.2"
+    },
+    {
+        "name": "CreateIssue",
+        "group": "Issue Management Commands",
+        "description": "Creates a new issue.",
+        "version": "1.0.2"
+    },
+    {
+        "name": "CreateLayers",
+        "group": "Attribute Commands",
+        "description": "Creates Layer attributes based on the given parameters.",
+        "version": "1.0.3"
+    },
+    {
+        "name": "CreateMeshes",
+        "group": "Element Commands",
+        "description": "Creates Mesh elements based on the given parameters.",
+        "version": "1.1.9"
+    },
+    {
+        "name": "CreateObjects",
+        "group": "Element Commands",
+        "description": "Creates Object elements based on the given parameters.",
+        "version": "1.0.3"
+    },
+    {
+        "name": "CreatePolylines",
+        "group": "Element Commands",
+        "description": "Creates Polyline elements based on the given parameters.",
+        "version": "1.1.5"
+    },
+    {
+        "name": "CreatePropertyDefinitions",
+        "group": "Property Commands",
+        "description": "Creates Custom Property Definitions based on the given parameters.",
+        "version": "1.0.9"
+    },
+    {
+        "name": "CreatePropertyGroups",
+        "group": "Property Commands",
+        "description": "Creates Property Groups based on the given parameters.",
+        "version": "1.0.7"
+    },
+    {
+        "name": "CreateSlabs",
+        "group": "Element Commands",
+        "description": "Creates Slab elements based on the given parameters.",
+        "version": "1.0.3"
+    },
+    {
+        "name": "CreateZones",
+        "group": "Element Commands",
+        "description": "Creates Zone elements based on the given parameters.",
+        "version": "1.1.8"
+    },
+    {
+        "name": "DeleteIssue",
+        "group": "Issue Management Commands",
+        "description": "Deletes the specified issue.",
+        "version": "1.0.2"
+    },
+    {
+        "name": "DeletePropertyDefinitions",
+        "group": "Property Commands",
+        "description": "Deletes the given Custom Property Definitions.",
+        "version": "1.0.9"
+    },
+    {
+        "name": "DeletePropertyGroups",
+        "group": "Property Commands",
+        "description": "Deletes the given Custom Property Groups.",
+        "version": "1.0.9"
+    },
+    {
+        "name": "DetachElementsFromIssue",
+        "group": "Issue Management Commands",
+        "description": "Detaches elements from the specified issue.",
+        "version": "1.0.6"
+    },
+    {
+        "name": "ExportIssuesToBCF",
+        "group": "Issue Management Commands",
+        "description": "Exports specified issues to a BCF file.",
+        "version": "1.0.6"
+    },
+    {
+        "name": "FilterElements",
+        "group": "Element Commands",
+        "description": "Tests an elements by the given criterias.",
+        "version": "1.0.7"
+    },
+    {
+        "name": "GenerateDocumentation",
+        "group": "Developer Commands",
+        "description": "Generates files for the documentation. Used by Tapir developers only.",
+        "version": "1.0.7"
+    },
+    {
+        "name": "Get3DBoundingBoxes",
+        "group": "Element Commands",
+        "description": "Get the 3D bounding box of elements. The bounding box is calculated from the global origin in the 3D view. The output is the array of the bounding boxes respective to the input array of elements.",
+        "version": "1.1.2"
+    },
+    {
+        "name": "GetAddOnVersion",
+        "group": "Application Commands",
+        "description": "Retrieves the version of the Tapir Additional JSON Commands Add-On.",
+        "version": "0.1.0"
+    },
+    {
+        "name": "GetAllElements",
+        "group": "Element Commands",
+        "description": "Returns the identifier of all elements on the plan. Use the optional filter parameter for filtering.",
+        "version": "1.0.7"
+    },
+    {
+        "name": "GetAllProperties",
+        "group": "Property Commands",
+        "description": "Returns all user defined and built-in properties.",
+        "version": "1.1.3"
+    },
+    {
+        "name": "GetArchicadLocation",
+        "group": "Application Commands",
+        "description": "Retrieves the location of the currently running Archicad executable.",
+        "version": "0.1.0"
+    },
+    {
+        "name": "GetAttributesByType",
+        "group": "Attribute Commands",
+        "description": "Returns the details of every attribute of the given type.",
+        "version": "1.1.3"
+    },
+    {
+        "name": "GetBuildingMaterialPhysicalProperties",
+        "group": "Attribute Commands",
+        "description": "Retrieves the physical properties of the given Building Materials.",
+        "version": "0.1.3"
+    },
+    {
+        "name": "GetClassificationsOfElements",
+        "group": "Element Commands",
+        "description": "Returns the classification of the given elements in the given classification systems. It works for subelements of hierarchal elements also.",
+        "version": "1.0.7"
+    },
+    {
+        "name": "GetCommentsFromIssue",
+        "group": "Issue Management Commands",
+        "description": "Retrieves comments information from the specified issue.",
+        "version": "1.0.6"
+    },
+    {
+        "name": "GetConnectedElements",
+        "group": "Element Commands",
+        "description": "Gets connected elements of the given elements.",
+        "version": "1.1.4"
+    },
+    {
+        "name": "GetCurrentRevisionChangesOfLayouts",
+        "group": "Revision Management Commands",
+        "description": "Retrieves all changes belong to the last revision of the given layouts.",
+        "version": "1.1.9"
+    },
+    {
+        "name": "GetCurrentWindowType",
+        "group": "Application Commands",
+        "description": "Returns the type of the current (active) window.",
+        "version": "1.0.7"
+    },
+    {
+        "name": "GetDatabaseIdFromNavigatorItemId",
+        "group": "Navigator Commands",
+        "description": "Gets the ID of the database associated with the supplied navigator item id",
+        "version": "1.1.4"
+    },
+    {
+        "name": "GetDetailsOfElements",
+        "group": "Element Commands",
+        "description": "Gets the details of the given elements (geometry parameters etc).",
+        "version": "1.0.7"
+    },
+    {
+        "name": "GetDocumentRevisions",
+        "group": "Revision Management Commands",
+        "description": "Retrieves all document revisions.",
+        "version": "1.1.9"
+    },
+    {
+        "name": "GetElementsAttachedToIssue",
+        "group": "Issue Management Commands",
+        "description": "Retrieves attached elements of the specified issue, filtered by attachment type.",
+        "version": "1.0.6"
+    },
+    {
+        "name": "GetElementsByType",
+        "group": "Element Commands",
+        "description": "Returns the identifier of every element of the given type on the plan. It works for any type. Use the optional filter parameter for filtering.",
+        "version": "1.0.7"
+    },
+    {
+        "name": "GetGDLParametersOfElements",
+        "group": "Element Commands",
+        "description": "Gets all the GDL parameters (name, type, value) of the given elements.",
+        "version": "1.0.8"
+    },
+    {
+        "name": "GetGeoLocation",
+        "group": "Project Commands",
+        "description": "Gets the project location details.",
+        "version": "1.1.6"
+    },
+    {
+        "name": "GetHotlinks",
+        "group": "Project Commands",
+        "description": "Gets the file system locations (path) of the hotlink modules. The hotlinks can have tree hierarchy in the project.",
+        "version": "0.1.0"
+    },
+    {
+        "name": "GetIssues",
+        "group": "Issue Management Commands",
+        "description": "Retrieves information about existing issues.",
+        "version": "1.0.2"
+    },
+    {
+        "name": "GetLibraries",
+        "group": "Library Commands",
+        "description": "Gets the list of loaded libraries.",
+        "version": "1.0.1"
+    },
+    {
+        "name": "GetModelViewOptions",
+        "group": "Navigator Commands",
+        "description": "Gets all model view options",
+        "version": "1.1.4"
+    },
+    {
+        "name": "GetProjectInfo",
+        "group": "Project Commands",
+        "description": "Retrieves information about the currently loaded project.",
+        "version": "0.1.0"
+    },
+    {
+        "name": "GetProjectInfoFields",
+        "group": "Project Commands",
+        "description": "Retrieves the names and values of all project info fields.",
+        "version": "0.1.2"
+    },
+    {
+        "name": "GetPropertyValuesOfAttributes",
+        "group": "Property Commands",
+        "description": "Returns the property values of the attributes for the given property.",
+        "version": "1.1.8"
+    },
+    {
+        "name": "GetPropertyValuesOfElements",
+        "group": "Property Commands",
+        "description": "Returns the property values of the elements for the given property. It works for subelements of hierarchal elements also.",
+        "version": "1.0.6"
+    },
+    {
+        "name": "GetRevisionChanges",
+        "group": "Revision Management Commands",
+        "description": "Retrieves all changes.",
+        "version": "1.1.9"
+    },
+    {
+        "name": "GetRevisionChangesOfElements",
+        "group": "Revision Management Commands",
+        "description": "Retrieves the changes belong to the given elements.",
+        "version": "1.1.9"
+    },
+    {
+        "name": "GetRevisionIssues",
+        "group": "Revision Management Commands",
+        "description": "Retrieves all issues.",
+        "version": "1.1.9"
+    },
+    {
+        "name": "GetSelectedElements",
+        "group": "Element Commands",
+        "description": "Gets the list of the currently selected elements.",
+        "version": "0.1.0"
+    },
+    {
+        "name": "GetStories",
+        "group": "Project Commands",
+        "description": "Retrieves information about the story sructure of the currently loaded project.",
+        "version": "1.1.5"
+    },
+    {
+        "name": "GetSubelementsOfHierarchicalElements",
+        "group": "Element Commands",
+        "description": "Gets the subelements of the given hierarchical elements.",
+        "version": "1.0.6"
+    },
+    {
+        "name": "GetView2DTransformations",
+        "group": "Navigator Commands",
+        "description": "Get zoom and rotation of 2D views",
+        "version": "1.1.7"
+    },
+    {
+        "name": "GetViewSettings",
+        "group": "Navigator Commands",
+        "description": "Gets the view settings of navigator items",
+        "version": "1.1.4"
+    },
+    {
+        "name": "HighlightElements",
+        "group": "Element Commands",
+        "description": "Highlights the elements given in the elements array. In case of empty elements array removes all previously set highlights.",
+        "version": "1.0.3"
+    },
+    {
+        "name": "ImportIssuesFromBCF",
+        "group": "Issue Management Commands",
+        "description": "Imports issues from the specified BCF file.",
+        "version": "1.0.6"
+    },
+    {
+        "name": "MoveElements",
+        "group": "Element Commands",
+        "description": "Moves elements with a given vector.",
+        "version": "1.0.2"
+    },
+    {
+        "name": "OpenProject",
+        "group": "Project Commands",
+        "description": "Opens the given project.",
+        "version": "1.0.7"
+    },
+    {
+        "name": "PublishPublisherSet",
+        "group": "Navigator Commands",
+        "description": "Performs a publish operation on the currently opened project. Only the given publisher set will be published.",
+        "version": "0.1.0"
+    },
+    {
+        "name": "QuitArchicad",
+        "group": "Application Commands",
+        "description": "Performs a quit operation on the currently running Archicad instance.",
+        "version": "0.1.0"
+    },
+    {
+        "name": "ReleaseElements",
+        "group": "Teamwork Commands",
+        "description": "Releases elements in Teamwork mode.",
+        "version": "1.1.4"
+    },
+    {
+        "name": "ReloadLibraries",
+        "group": "Library Commands",
+        "description": "Executes the reload libraries command.",
+        "version": "1.0.0"
+    },
+    {
+        "name": "ReserveElements",
+        "group": "Teamwork Commands",
+        "description": "Reserves elements in Teamwork mode.",
+        "version": "1.1.4"
+    },
+    {
+        "name": "SetClassificationsOfElements",
+        "group": "Element Commands",
+        "description": "Sets the classifications of elements. In order to set the classification of an element to unclassified, omit the classificationItemId field. It works for subelements of hierarchal elements also.",
+        "version": "1.0.7"
+    },
+    {
+        "name": "SetDetailsOfElements",
+        "group": "Element Commands",
+        "description": "Sets the details of the given elements (floor, layer, order etc).",
+        "version": "1.0.7"
+    },
+    {
+        "name": "SetGDLParametersOfElements",
+        "group": "Element Commands",
+        "description": "Sets the given GDL parameters of the given elements.",
+        "version": "1.0.8"
+    },
+    {
+        "name": "SetProjectInfoField",
+        "group": "Project Commands",
+        "description": "Sets the value of a project info field.",
+        "version": "0.1.2"
+    },
+    {
+        "name": "SetPropertyValuesOfAttributes",
+        "group": "Property Commands",
+        "description": "Sets the property values of attributes.",
+        "version": "1.1.8"
+    },
+    {
+        "name": "SetPropertyValuesOfElements",
+        "group": "Property Commands",
+        "description": "Sets the property values of elements. It works for subelements of hierarchal elements also.",
+        "version": "1.0.6"
+    },
+    {
+        "name": "SetStories",
+        "group": "Project Commands",
+        "description": "Sets the story sructure of the currently loaded project.",
+        "version": "1.1.5"
+    },
+    {
+        "name": "SetViewSettings",
+        "group": "Navigator Commands",
+        "description": "Sets the view settings of navigator items",
+        "version": "1.1.4"
+    },
+    {
+        "name": "TeamworkReceive",
+        "group": "Teamwork Commands",
+        "description": "Performs a receive operation on the currently opened Teamwork project.",
+        "version": "0.1.0"
+    },
+    {
+        "name": "TeamworkSend",
+        "group": "Teamwork Commands",
+        "description": "Performs a send operation on the currently opened Teamwork project.",
+        "version": "0.1.0"
+    },
+    {
+        "name": "UpdateDrawings",
+        "group": "Navigator Commands",
+        "description": "Performs a drawing update on the given elements.",
+        "version": "1.1.4"
+    }
+]
