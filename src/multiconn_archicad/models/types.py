@@ -334,6 +334,29 @@ class PropertyValue(BaseModel):
     value: str
 
 
+class PropertyValueOrErrorItem(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    propertyValue: PropertyValue
+
+
+class PropertyValuesOrError(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    propertyValues: List[PropertyValueOrErrorItem | ErrorItem] = Field(
+        ..., description="A list of property values."
+    )
+
+
+class PropertyIdOrError(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    propertyId: PropertyId
+
+
 class PropertyType(Enum):
     number = "number"
     integer = "integer"
@@ -614,6 +637,22 @@ class ClassificationId(BaseModel):
     )
 
 
+class ClassificationIdOrError(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    classificationId: ClassificationId
+
+
+class ElementClassificationOrError(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    classificationIds: List[ClassificationIdOrError | ErrorItem] = Field(
+        ..., description="A list of element classification identifiers or errors."
+    )
+
+
 class BoundingBox3D(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
@@ -624,6 +663,13 @@ class BoundingBox3D(BaseModel):
     xMax: float = Field(..., description="The maximum X value of the bounding box.")
     yMax: float = Field(..., description="The maximum Y value of the bounding box.")
     zMax: float = Field(..., description="The maximum Z value of the bounding box.")
+
+
+class BoundingBox3DOrError(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    boundingBox3D: BoundingBox3D
 
 
 class LibPartUnId(BaseModel):
@@ -991,7 +1037,7 @@ class RevisionChangesOfEntities(BaseModel):
     revisionChanges: List[RevisionChange]
 
 
-class GetProjectInfoFieldsResultItem(BaseModel):
+class FieldModel(BaseModel):
     projectInfoId: str | None = Field(
         None, description="The id of the project info field."
     )
@@ -1016,7 +1062,7 @@ class Story(BaseModel):
     name: str = Field(..., description="The name of the story.")
 
 
-class SetStoriesParameter(BaseModel):
+class Story(BaseModel):
     model_config = ConfigDict(
         extra="allow",
     )
@@ -1121,7 +1167,7 @@ class MoveVector(BaseModel):
     z: float = Field(..., description="Z value of the vector.")
 
 
-class CreateColumnsParameter(BaseModel):
+class Coordinates(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
@@ -1130,7 +1176,14 @@ class CreateColumnsParameter(BaseModel):
     z: float = Field(..., description="Z value of the coordinate.")
 
 
-class CreateSlabsParameter(BaseModel):
+class ColumnsDatum(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    coordinates: Coordinates = Field(..., description="3D coordinate.")
+
+
+class SlabsDatum(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
@@ -1150,6 +1203,15 @@ class Geometry(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
+    referencePosition: Field2DCoordinate = Field(
+        ..., description="Reference point to automatically find zone."
+    )
+
+
+class Geometry(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
     polygonCoordinates: List[Field2DCoordinate] = Field(
         ..., description="The 2D coordinates of the edge of the zone.", min_length=3
     )
@@ -1159,7 +1221,7 @@ class Geometry(BaseModel):
     holes: List[Hole] | None = Field(None, description="Array of parameters of holes.")
 
 
-class CreatePolylinesParameter(BaseModel):
+class PolylinesDatum(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
@@ -1173,7 +1235,7 @@ class CreatePolylinesParameter(BaseModel):
     arcs: List[PolyArc] | None = Field(None, description="The arcs of the polyline.")
 
 
-class CreateObjectsParameter(BaseModel):
+class ObjectsDatum(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
@@ -1202,7 +1264,16 @@ class Hole(BaseModel):
     )
 
 
-class CreateMeshesParameter(BaseModel):
+class Subline(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    coordinates: List[Field3DCoordinate] = Field(
+        ..., description="The 3D coordinates of the leveling subline of the mesh."
+    )
+
+
+class MeshesDatum(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
@@ -1223,7 +1294,7 @@ class CreateMeshesParameter(BaseModel):
         None, description="Polygon outline arcs of the mesh."
     )
     holes: List[Hole] | None = Field(None, description="Array of parameters of holes.")
-    sublines: List[List[Field3DCoordinate]] | None = Field(
+    sublines: List[Subline] | None = Field(
         None,
         description="The leveling sublines inside the polygon of the mesh.",
         min_length=1,
@@ -1238,34 +1309,36 @@ class PropertyGroup(BaseModel):
     description: str | None = None
 
 
-class CreatePropertyGroupsParameter(BaseModel):
+class PropertyGroup(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
     propertyGroup: PropertyGroup
 
 
-class CreatePropertyGroupsResultItem(BaseModel):
+class PropertyGroupId(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
     propertyGroupId: PropertyGroupId
 
 
-class DeletePropertyGroupsParameter(BaseModel):
-    model_config = ConfigDict(
-        extra="forbid",
-    )
-    propertyGroupId: PropertyGroupId
-
-
-class PossibleEnumValue(BaseModel):
+class EnumValue(BaseModel):
     enumValueId: DisplayValueEnumId | NonLocalizedValueEnumId | None = Field(
         None, description="The identifier of a property enumeration value."
     )
     displayValue: str = Field(..., description="Displayed value of the enumeration.")
     nonLocalizedValue: str | None = Field(
         None, description="Nonlocalized value of the enumeration if there is one."
+    )
+
+
+class PossibleEnumValue(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    enumValue: EnumValue = Field(
+        ..., description="The description of an enumeration value."
     )
 
 
@@ -1277,7 +1350,7 @@ class Group(BaseModel):
     name: str | None = None
 
 
-class DeletePropertyDefinitionsParameter(BaseModel):
+class PropertyId(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
@@ -1316,7 +1389,7 @@ class BuildingMaterialDataArrayItem(BaseModel):
     embodiedCarbon: float | None = Field(None, description="Embodied Carbon.")
 
 
-class GetBuildingMaterialPhysicalPropertiesResultItem(BaseModel):
+class Properties(BaseModel):
     thermalConductivity: float | None = Field(None, description="Thermal Conductivity.")
     density: float | None = Field(None, description="Density.")
     heatCapacity: float | None = Field(None, description="Heat Capacity.")
@@ -1324,7 +1397,11 @@ class GetBuildingMaterialPhysicalPropertiesResultItem(BaseModel):
     embodiedCarbon: float | None = Field(None, description="Embodied Carbon.")
 
 
-class GetLibrariesResultItem(BaseModel):
+class Property(BaseModel):
+    properties: Properties | None = Field(None, description="Physical properties.")
+
+
+class Library(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
@@ -1364,7 +1441,7 @@ class NavigatorItemIdsWithViewSetting(BaseModel):
     viewSettings: ViewSettings
 
 
-class GetCommentsFromIssueResultItem(BaseModel):
+class Comment(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
@@ -1392,6 +1469,12 @@ class AttributeId(BaseModel):
     guid: UUID = Field(
         ...,
         description="A Globally Unique Identifier (or Universally Unique Identifier) in its string representation as defined in RFC 4122.",
+    )
+
+
+class GDLParameterList(BaseModel):
+    parameters: List[GDLParameterDetails] = Field(
+        ..., description="The list of GDL parameters."
     )
 
 
@@ -1521,7 +1604,7 @@ class ZoneDetails(BaseModel):
     zCoordinate: float
 
 
-class SetDetailsOfElementsParameter(BaseModel):
+class ElementsWithDetail(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
@@ -1529,7 +1612,7 @@ class SetDetailsOfElementsParameter(BaseModel):
     details: Details = Field(..., description="Details of an element.")
 
 
-class MoveElementsParameter(BaseModel):
+class ElementsWithMoveVector(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
@@ -1542,17 +1625,15 @@ class MoveElementsParameter(BaseModel):
     )
 
 
-class SetGDLParametersOfElementsParameter(BaseModel):
+class ElementsWithGDLParameter(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
     elementId: ElementId
-    gdlParameters: List[GDLParameterDetails] = Field(
-        ..., description="The list of GDL parameters."
-    )
+    gdlParameters: GDLParameterList
 
 
-class CreateZonesParameter(BaseModel):
+class ZonesDatum(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
@@ -1565,7 +1646,7 @@ class CreateZonesParameter(BaseModel):
     stampPosition: Field2DCoordinate | None = Field(
         None, description="Position of the origin of the zone stamp."
     )
-    geometry: Field2DCoordinate | Geometry
+    geometry: Geometry | Geometry
 
 
 class FavoritesFromElement(BaseModel):
@@ -1599,14 +1680,14 @@ class PropertyDefinition(BaseModel):
     )
 
 
-class CreatePropertyDefinitionsParameter(BaseModel):
+class PropertyDefinition(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
     propertyDefinition: PropertyDefinition
 
 
-class GetAttributesByTypeResultItem(BaseModel):
+class Attribute(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
@@ -1623,7 +1704,7 @@ class Conflict(BaseModel):
     user: User
 
 
-class GetIssuesResultItem(BaseModel):
+class Issue(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )

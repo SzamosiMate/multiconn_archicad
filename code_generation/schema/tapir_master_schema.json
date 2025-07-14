@@ -117,11 +117,20 @@
       ]
     },
     "GDLParameterList": {
-      "type": "array",
+      "type": "object",
       "description": "The list of GDL parameters.",
-      "items": {
-        "$ref": "#/$defs/GDLParameterDetails"
-      }
+      "properties": {
+        "parameters": {
+          "type": "array",
+          "description": "The list of GDL parameters.",
+          "items": {
+            "$ref": "#/$defs/GDLParameterDetails"
+          }
+        }
+      },
+      "required": [
+        "parameters"
+      ]
     },
     "GDLParameterDetails": {
       "type": "object",
@@ -640,10 +649,20 @@
       ]
     },
     "PropertyValueOrErrorItem": {
+      "type": "object",
       "description": "A property value or an error",
       "oneOf": [
         {
-          "$ref": "#/$defs/PropertyValue"
+          "title": "propertyValue",
+          "properties": {
+            "propertyValue": {
+              "$ref": "#/$defs/PropertyValue"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "propertyValue"
+          ]
         },
         {
           "title": "error",
@@ -659,10 +678,20 @@
       }
     },
     "PropertyValuesOrError": {
+      "type": "object",
       "description": "A list of property values or an error.",
       "oneOf": [
         {
-          "$ref": "#/$defs/PropertyValues"
+          "title": "propertyValues",
+          "properties": {
+            "propertyValues": {
+              "$ref": "#/$defs/PropertyValues"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "propertyValues"
+          ]
         },
         {
           "title": "error",
@@ -678,10 +707,19 @@
       }
     },
     "PropertyIdOrError": {
+      "type": "object",
       "description": "A propertyId or an error.",
       "oneOf": [
         {
-          "$ref": "#/$defs/PropertyId"
+          "properties": {
+            "propertyId": {
+              "$ref": "#/$defs/PropertyId"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "propertyId"
+          ]
         },
         {
           "$ref": "#/$defs/ErrorItem"
@@ -1554,10 +1592,20 @@
       ]
     },
     "ClassificationIdOrError": {
+      "type": "object",
       "description": "A classification identifier or an error.",
       "oneOf": [
         {
-          "$ref": "#/$defs/ClassificationId"
+          "title": "classificationId",
+          "properties": {
+            "classificationId": {
+              "$ref": "#/$defs/ClassificationId"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "classificationId"
+          ]
         },
         {
           "title": "error",
@@ -1573,10 +1621,20 @@
       }
     },
     "ElementClassificationOrError": {
+      "type": "object",
       "description": "Element classification identifiers or errors.",
       "oneOf": [
         {
-          "$ref": "#/$defs/ClassificationIdsOrErrors"
+          "title": "classificationIds",
+          "properties": {
+            "classificationIds": {
+              "$ref": "#/$defs/ClassificationIdsOrErrors"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "classificationIds"
+          ]
         },
         {
           "title": "error",
@@ -1655,10 +1713,20 @@
       ]
     },
     "BoundingBox3DOrError": {
+      "type": "object",
       "description": "A 3D bounding box or an error.",
       "oneOf": [
         {
-          "$ref": "#/$defs/BoundingBox3D"
+          "title": "boundingBox3D",
+          "properties": {
+            "boundingBox3D": {
+              "$ref": "#/$defs/BoundingBox3D"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "boundingBox3D"
+          ]
         },
         {
           "title": "error",
@@ -2759,14 +2827,32 @@
       ]
     },
     "GetAddOnVersionResult": {
-      "type": "string",
-      "description": "Version number in the form of \"1.1.1\".",
-      "minLength": 1
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "string",
+          "description": "Version number in the form of \"1.1.1\".",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "version"
+      ]
     },
     "GetArchicadLocationResult": {
-      "type": "string",
-      "description": "The location of the Archicad executable in the filesystem.",
-      "minLength": 1
+      "type": "object",
+      "properties": {
+        "archicadLocation": {
+          "type": "string",
+          "description": "The location of the Archicad executable in the filesystem.",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "archicadLocation"
+      ]
     },
     "GetCurrentWindowTypeResult": {
       "type": "object",
@@ -2814,25 +2900,34 @@
       ]
     },
     "GetProjectInfoFieldsResult": {
-      "type": "array",
-      "description": "A list of project info fields.",
-      "items": {
-        "type": "object",
-        "properties": {
-          "projectInfoId": {
-            "type": "string",
-            "description": "The id of the project info field."
-          },
-          "projectInfoName": {
-            "type": "string",
-            "description": "The name of the project info field visible on UI."
-          },
-          "projectInfoValue": {
-            "type": "string",
-            "description": "The value of the project info field."
+      "type": "object",
+      "properties": {
+        "fields": {
+          "type": "array",
+          "description": "A list of project info fields.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "projectInfoId": {
+                "type": "string",
+                "description": "The id of the project info field."
+              },
+              "projectInfoName": {
+                "type": "string",
+                "description": "The name of the project info field visible on UI."
+              },
+              "projectInfoValue": {
+                "type": "string",
+                "description": "The value of the project info field."
+              }
+            }
           }
         }
-      }
+      },
+      "additionalProperties": false,
+      "required": [
+        "fields"
+      ]
     },
     "SetProjectInfoFieldParameters": {
       "type": "object",
@@ -2921,31 +3016,40 @@
       ]
     },
     "SetStoriesParameters": {
-      "type": "array",
-      "description": "A list of project stories.",
-      "items": {
-        "type": "object",
-        "properties": {
-          "dispOnSections": {
-            "type": "boolean",
-            "description": "Story level lines should appear on sections and elevations."
-          },
-          "level": {
-            "type": "number",
-            "description": "The story level."
-          },
-          "name": {
-            "type": "string",
-            "description": "The name of the story."
+      "type": "object",
+      "properties": {
+        "stories": {
+          "type": "array",
+          "description": "A list of project stories.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "dispOnSections": {
+                "type": "boolean",
+                "description": "Story level lines should appear on sections and elevations."
+              },
+              "level": {
+                "type": "number",
+                "description": "The story level."
+              },
+              "name": {
+                "type": "string",
+                "description": "The name of the story."
+              }
+            },
+            "additionalProperties": true,
+            "required": [
+              "dispOnSections",
+              "level",
+              "name"
+            ]
           }
-        },
-        "additionalProperties": true,
-        "required": [
-          "dispOnSections",
-          "level",
-          "name"
-        ]
-      }
+        }
+      },
+      "additionalProperties": true,
+      "required": [
+        "stories"
+      ]
     },
     "GetHotlinksResult": {
       "type": "object",
@@ -2960,8 +3064,17 @@
       ]
     },
     "OpenProjectParameters": {
-      "type": "string",
-      "description": "The target project file to open."
+      "type": "object",
+      "properties": {
+        "projectFilePath": {
+          "type": "string",
+          "description": "The target project file to open."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "projectFilePath"
+      ]
     },
     "GetGeoLocationResult": {
       "type": "object",
@@ -3270,74 +3383,83 @@
       ]
     },
     "SetDetailsOfElementsParameters": {
-      "type": "array",
-      "description": "The elements with parameters.",
-      "items": {
-        "type": "object",
-        "properties": {
-          "elementId": {
-            "$ref": "#/$defs/ElementId"
-          },
-          "details": {
+      "type": "object",
+      "properties": {
+        "elementsWithDetails": {
+          "type": "array",
+          "description": "The elements with parameters.",
+          "items": {
             "type": "object",
-            "description": "Details of an element.",
             "properties": {
-              "floorIndex": {
-                "type": "number"
+              "elementId": {
+                "$ref": "#/$defs/ElementId"
               },
-              "layerIndex": {
-                "type": "number"
-              },
-              "drawIndex": {
-                "type": "number"
-              },
-              "typeSpecificDetails": {
+              "details": {
                 "type": "object",
-                "oneOf": [
-                  {
-                    "title": "WallDetails",
-                    "properties": {
-                      "begCoordinate": {
-                        "$ref": "#/$defs/2DCoordinate"
-                      },
-                      "endCoordinate": {
-                        "$ref": "#/$defs/2DCoordinate"
-                      },
-                      "height": {
-                        "type": "number",
-                        "description": "height relative to bottom"
-                      },
-                      "bottomOffset": {
-                        "type": "number",
-                        "description": "base level of the wall relative to the floor level"
-                      },
-                      "offset": {
-                        "type": "number",
-                        "description": "wall's base line's offset from ref. line"
-                      },
-                      "begThickness": {
-                        "type": "number",
-                        "description": "Thickness at the beginning in case of trapezoid wall"
-                      },
-                      "endThickness": {
-                        "type": "number",
-                        "description": "Thickness at the end in case of trapezoid wall"
+                "description": "Details of an element.",
+                "properties": {
+                  "floorIndex": {
+                    "type": "number"
+                  },
+                  "layerIndex": {
+                    "type": "number"
+                  },
+                  "drawIndex": {
+                    "type": "number"
+                  },
+                  "typeSpecificDetails": {
+                    "type": "object",
+                    "oneOf": [
+                      {
+                        "title": "WallDetails",
+                        "properties": {
+                          "begCoordinate": {
+                            "$ref": "#/$defs/2DCoordinate"
+                          },
+                          "endCoordinate": {
+                            "$ref": "#/$defs/2DCoordinate"
+                          },
+                          "height": {
+                            "type": "number",
+                            "description": "height relative to bottom"
+                          },
+                          "bottomOffset": {
+                            "type": "number",
+                            "description": "base level of the wall relative to the floor level"
+                          },
+                          "offset": {
+                            "type": "number",
+                            "description": "wall's base line's offset from ref. line"
+                          },
+                          "begThickness": {
+                            "type": "number",
+                            "description": "Thickness at the beginning in case of trapezoid wall"
+                          },
+                          "endThickness": {
+                            "type": "number",
+                            "description": "Thickness at the end in case of trapezoid wall"
+                          }
+                        },
+                        "required": []
                       }
-                    },
-                    "required": []
+                    ]
                   }
-                ]
+                },
+                "required": []
               }
             },
-            "required": []
+            "additionalProperties": false,
+            "required": [
+              "elementId",
+              "details"
+            ]
           }
-        },
-        "additionalProperties": false,
-        "required": [
-          "elementId",
-          "details"
-        ]
-      }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elementsWithDetails"
+      ]
     },
     "SetDetailsOfElementsResult": {
       "type": "object",
@@ -3566,49 +3688,58 @@
       ]
     },
     "MoveElementsParameters": {
-      "type": "array",
-      "description": "The elements with move vector pairs.",
-      "items": {
-        "type": "object",
-        "properties": {
-          "elementId": {
-            "$ref": "#/$defs/ElementId"
-          },
-          "moveVector": {
+      "type": "object",
+      "properties": {
+        "elementsWithMoveVectors": {
+          "type": "array",
+          "description": "The elements with move vector pairs.",
+          "items": {
             "type": "object",
-            "description": "Move vector of a 3D point.",
             "properties": {
-              "x": {
-                "type": "number",
-                "description": "X value of the vector."
+              "elementId": {
+                "$ref": "#/$defs/ElementId"
               },
-              "y": {
-                "type": "number",
-                "description": "Y value of the vector."
+              "moveVector": {
+                "type": "object",
+                "description": "Move vector of a 3D point.",
+                "properties": {
+                  "x": {
+                    "type": "number",
+                    "description": "X value of the vector."
+                  },
+                  "y": {
+                    "type": "number",
+                    "description": "Y value of the vector."
+                  },
+                  "z": {
+                    "type": "number",
+                    "description": "Z value of the vector."
+                  }
+                },
+                "additionalProperties": false,
+                "required": [
+                  "x",
+                  "y",
+                  "z"
+                ]
               },
-              "z": {
-                "type": "number",
-                "description": "Z value of the vector."
+              "copy": {
+                "type": "boolean",
+                "description": "Optional parameter. If true, then a copy of the element will be moved. By default it's false."
               }
             },
             "additionalProperties": false,
             "required": [
-              "x",
-              "y",
-              "z"
+              "elementId",
+              "moveVector"
             ]
-          },
-          "copy": {
-            "type": "boolean",
-            "description": "Optional parameter. If true, then a copy of the element will be moved. By default it's false."
           }
-        },
-        "additionalProperties": false,
-        "required": [
-          "elementId",
-          "moveVector"
-        ]
-      }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elementsWithMoveVectors"
+      ]
     },
     "MoveElementsResult": {
       "type": "object",
@@ -3635,31 +3766,49 @@
       ]
     },
     "GetGDLParametersOfElementsResult": {
-      "type": "array",
-      "description": "The GDL parameters of elements.",
-      "items": {
-        "$ref": "#/$defs/GDLParameterList"
-      }
-    },
-    "SetGDLParametersOfElementsParameters": {
-      "type": "array",
-      "description": "The elements with GDL parameters dictionary pairs.",
-      "items": {
-        "type": "object",
-        "properties": {
-          "elementId": {
-            "$ref": "#/$defs/ElementId"
-          },
-          "gdlParameters": {
+      "type": "object",
+      "properties": {
+        "gdlParametersOfElements": {
+          "type": "array",
+          "description": "The GDL parameters of elements.",
+          "items": {
             "$ref": "#/$defs/GDLParameterList"
           }
-        },
-        "additionalProperties": false,
-        "required": [
-          "elementId",
-          "gdlParameters"
-        ]
-      }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "gdlParametersOfElements"
+      ]
+    },
+    "SetGDLParametersOfElementsParameters": {
+      "type": "object",
+      "properties": {
+        "elementsWithGDLParameters": {
+          "type": "array",
+          "description": "The elements with GDL parameters dictionary pairs.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "elementId": {
+                "$ref": "#/$defs/ElementId"
+              },
+              "gdlParameters": {
+                "$ref": "#/$defs/GDLParameterList"
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "elementId",
+              "gdlParameters"
+            ]
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elementsWithGDLParameters"
+      ]
     },
     "SetGDLParametersOfElementsResult": {
       "type": "object",
@@ -3690,8 +3839,17 @@
       ]
     },
     "GetClassificationsOfElementsResult": {
-      "$ref": "#/$defs/ElementClassificationsOrErrors",
-      "description": "The list of element classification item identifiers. Order of the ids are the same as in the input. Non-existing elements or non-existing classification systems are represented by error objects."
+      "type": "object",
+      "properties": {
+        "elementClassifications": {
+          "$ref": "#/$defs/ElementClassificationsOrErrors",
+          "description": "The list of element classification item identifiers. Order of the ids are the same as in the input. Non-existing elements or non-existing classification systems are represented by error objects."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elementClassifications"
+      ]
     },
     "SetClassificationsOfElementsParameters": {
       "type": "object",
@@ -3718,32 +3876,51 @@
       ]
     },
     "CreateColumnsParameters": {
-      "type": "array",
-      "description": "Array of data to create Columns.",
-      "items": {
-        "type": "object",
-        "description": "3D coordinate.",
-        "properties": {
-          "x": {
-            "type": "number",
-            "description": "X value of the coordinate."
-          },
-          "y": {
-            "type": "number",
-            "description": "Y value of the coordinate."
-          },
-          "z": {
-            "type": "number",
-            "description": "Z value of the coordinate."
+      "type": "object",
+      "properties": {
+        "columnsData": {
+          "type": "array",
+          "description": "Array of data to create Columns.",
+          "items": {
+            "type": "object",
+            "description": "The parameters of the new Column.",
+            "properties": {
+              "coordinates": {
+                "type": "object",
+                "description": "3D coordinate.",
+                "properties": {
+                  "x": {
+                    "type": "number",
+                    "description": "X value of the coordinate."
+                  },
+                  "y": {
+                    "type": "number",
+                    "description": "Y value of the coordinate."
+                  },
+                  "z": {
+                    "type": "number",
+                    "description": "Z value of the coordinate."
+                  }
+                },
+                "additionalProperties": false,
+                "required": [
+                  "x",
+                  "y",
+                  "z"
+                ]
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "coordinates"
+            ]
           }
-        },
-        "additionalProperties": false,
-        "required": [
-          "x",
-          "y",
-          "z"
-        ]
-      }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "columnsData"
+      ]
     },
     "CreateColumnsResult": {
       "type": "object",
@@ -3758,67 +3935,76 @@
       ]
     },
     "CreateSlabsParameters": {
-      "type": "array",
-      "description": "Array of data to create Slabs.",
-      "items": {
-        "type": "object",
-        "description": "The parameters of the new Slab.",
-        "properties": {
-          "level": {
-            "type": "number",
-            "description": "The Z coordinate value of the reference line of the slab."
-          },
-          "polygonCoordinates": {
-            "type": "array",
-            "description": "The 2D coordinates of the edge of the slab.",
-            "items": {
-              "$ref": "#/$defs/2DCoordinate"
-            },
-            "minItems": 3
-          },
-          "polygonArcs": {
-            "type": "array",
-            "description": "Polygon outline arcs of the slab.",
-            "items": {
-              "$ref": "#/$defs/PolyArc"
-            }
-          },
-          "holes": {
-            "type": "array",
-            "description": "Array of parameters of holes.",
-            "items": {
-              "type": "object",
-              "description": "The parameters of the hole.",
-              "properties": {
-                "polygonCoordinates": {
-                  "type": "array",
-                  "description": "The 2D coordinates of the edge of the hole.",
-                  "items": {
-                    "$ref": "#/$defs/2DCoordinate"
-                  },
-                  "minItems": 3
+      "type": "object",
+      "properties": {
+        "slabsData": {
+          "type": "array",
+          "description": "Array of data to create Slabs.",
+          "items": {
+            "type": "object",
+            "description": "The parameters of the new Slab.",
+            "properties": {
+              "level": {
+                "type": "number",
+                "description": "The Z coordinate value of the reference line of the slab."
+              },
+              "polygonCoordinates": {
+                "type": "array",
+                "description": "The 2D coordinates of the edge of the slab.",
+                "items": {
+                  "$ref": "#/$defs/2DCoordinate"
                 },
-                "polygonArcs": {
-                  "type": "array",
-                  "description": "Polygon outline arcs of the hole.",
-                  "items": {
-                    "$ref": "#/$defs/PolyArc"
-                  }
+                "minItems": 3
+              },
+              "polygonArcs": {
+                "type": "array",
+                "description": "Polygon outline arcs of the slab.",
+                "items": {
+                  "$ref": "#/$defs/PolyArc"
                 }
               },
-              "additionalProperties": false,
-              "required": [
-                "polygonCoordinates"
-              ]
-            }
+              "holes": {
+                "type": "array",
+                "description": "Array of parameters of holes.",
+                "items": {
+                  "type": "object",
+                  "description": "The parameters of the hole.",
+                  "properties": {
+                    "polygonCoordinates": {
+                      "type": "array",
+                      "description": "The 2D coordinates of the edge of the hole.",
+                      "items": {
+                        "$ref": "#/$defs/2DCoordinate"
+                      },
+                      "minItems": 3
+                    },
+                    "polygonArcs": {
+                      "type": "array",
+                      "description": "Polygon outline arcs of the hole.",
+                      "items": {
+                        "$ref": "#/$defs/PolyArc"
+                      }
+                    }
+                  },
+                  "additionalProperties": false,
+                  "required": [
+                    "polygonCoordinates"
+                  ]
+                }
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "level",
+              "polygonCoordinates"
+            ]
           }
-        },
-        "additionalProperties": false,
-        "required": [
-          "level",
-          "polygonCoordinates"
-        ]
-      }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "slabsData"
+      ]
     },
     "CreateSlabsResult": {
       "type": "object",
@@ -3833,102 +4019,121 @@
       ]
     },
     "CreateZonesParameters": {
-      "type": "array",
-      "description": "Array of data to create Zones.",
-      "items": {
-        "type": "object",
-        "description": "The parameters of the new Zone.",
-        "properties": {
-          "floorIndex": {
-            "type": "number"
-          },
-          "name": {
-            "type": "string",
-            "description": "Name of the zone."
-          },
-          "numberStr": {
-            "type": "string",
-            "description": "Zone number."
-          },
-          "categoryAttributeId": {
-            "$ref": "#/$defs/AttributeId",
-            "description": "The identifier of the zone category attribute."
-          },
-          "stampPosition": {
-            "$ref": "#/$defs/2DCoordinate",
-            "description": "Position of the origin of the zone stamp."
-          },
-          "geometry": {
+      "type": "object",
+      "properties": {
+        "zonesData": {
+          "type": "array",
+          "description": "Array of data to create Zones.",
+          "items": {
             "type": "object",
-            "oneOf": [
-              {
-                "$ref": "#/$defs/2DCoordinate",
-                "description": "Reference point to automatically find zone."
+            "description": "The parameters of the new Zone.",
+            "properties": {
+              "floorIndex": {
+                "type": "number"
               },
-              {
+              "name": {
+                "type": "string",
+                "description": "Name of the zone."
+              },
+              "numberStr": {
+                "type": "string",
+                "description": "Zone number."
+              },
+              "categoryAttributeId": {
+                "$ref": "#/$defs/AttributeId",
+                "description": "The identifier of the zone category attribute."
+              },
+              "stampPosition": {
+                "$ref": "#/$defs/2DCoordinate",
+                "description": "Position of the origin of the zone stamp."
+              },
+              "geometry": {
                 "type": "object",
-                "description": "Manual zone placement.",
-                "properties": {
-                  "polygonCoordinates": {
-                    "type": "array",
-                    "description": "The 2D coordinates of the edge of the zone.",
-                    "items": {
-                      "$ref": "#/$defs/2DCoordinate"
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "description": "Automatic zone placement.",
+                    "properties": {
+                      "referencePosition": {
+                        "$ref": "#/$defs/2DCoordinate",
+                        "description": "Reference point to automatically find zone."
+                      }
                     },
-                    "minItems": 3
+                    "additionalProperties": false,
+                    "required": [
+                      "referencePosition"
+                    ]
                   },
-                  "polygonArcs": {
-                    "type": "array",
-                    "description": "Polygon outline arcs of the zone.",
-                    "items": {
-                      "$ref": "#/$defs/PolyArc"
-                    }
-                  },
-                  "holes": {
-                    "type": "array",
-                    "description": "Array of parameters of holes.",
-                    "items": {
-                      "type": "object",
-                      "description": "The parameters of the hole.",
-                      "properties": {
-                        "polygonCoordinates": {
-                          "type": "array",
-                          "description": "The 2D coordinates of the edge of the hole.",
-                          "items": {
-                            "$ref": "#/$defs/2DCoordinate"
-                          },
-                          "minItems": 3
+                  {
+                    "type": "object",
+                    "description": "Manual zone placement.",
+                    "properties": {
+                      "polygonCoordinates": {
+                        "type": "array",
+                        "description": "The 2D coordinates of the edge of the zone.",
+                        "items": {
+                          "$ref": "#/$defs/2DCoordinate"
                         },
-                        "polygonArcs": {
-                          "type": "array",
-                          "description": "Polygon outline arcs of the hole.",
-                          "items": {
-                            "$ref": "#/$defs/PolyArc"
-                          }
+                        "minItems": 3
+                      },
+                      "polygonArcs": {
+                        "type": "array",
+                        "description": "Polygon outline arcs of the zone.",
+                        "items": {
+                          "$ref": "#/$defs/PolyArc"
                         }
                       },
-                      "additionalProperties": false,
-                      "required": [
-                        "polygonCoordinates"
-                      ]
-                    }
+                      "holes": {
+                        "type": "array",
+                        "description": "Array of parameters of holes.",
+                        "items": {
+                          "type": "object",
+                          "description": "The parameters of the hole.",
+                          "properties": {
+                            "polygonCoordinates": {
+                              "type": "array",
+                              "description": "The 2D coordinates of the edge of the hole.",
+                              "items": {
+                                "$ref": "#/$defs/2DCoordinate"
+                              },
+                              "minItems": 3
+                            },
+                            "polygonArcs": {
+                              "type": "array",
+                              "description": "Polygon outline arcs of the hole.",
+                              "items": {
+                                "$ref": "#/$defs/PolyArc"
+                              }
+                            }
+                          },
+                          "additionalProperties": false,
+                          "required": [
+                            "polygonCoordinates"
+                          ]
+                        }
+                      }
+                    },
+                    "additionalProperties": false,
+                    "required": [
+                      "polygonCoordinates"
+                    ]
                   }
-                },
-                "additionalProperties": false,
-                "required": [
-                  "polygonCoordinates"
                 ]
               }
+            },
+            "additionalProperties": false,
+            "required": [
+              "name",
+              "numberStr",
+              "geometry"
             ]
           }
-        },
-        "additionalProperties": false,
-        "required": [
-          "name",
-          "numberStr",
-          "geometry"
-        ]
-      }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "zonesData"
+      ]
     },
     "CreateZonesResult": {
       "type": "object",
@@ -3943,37 +4148,46 @@
       ]
     },
     "CreatePolylinesParameters": {
-      "type": "array",
-      "description": "Array of data to create Polylines.",
-      "items": {
-        "type": "object",
-        "description": "The parameters of the new Polyline.",
-        "properties": {
-          "floorInd": {
-            "type": "number",
-            "description": "The identifier of the floor. Optinal parameter, by default the current floor is used."
-          },
-          "coordinates": {
-            "type": "array",
-            "description": "The 2D coordinates of the polyline.",
-            "items": {
-              "$ref": "#/$defs/2DCoordinate"
+      "type": "object",
+      "properties": {
+        "polylinesData": {
+          "type": "array",
+          "description": "Array of data to create Polylines.",
+          "items": {
+            "type": "object",
+            "description": "The parameters of the new Polyline.",
+            "properties": {
+              "floorInd": {
+                "type": "number",
+                "description": "The identifier of the floor. Optinal parameter, by default the current floor is used."
+              },
+              "coordinates": {
+                "type": "array",
+                "description": "The 2D coordinates of the polyline.",
+                "items": {
+                  "$ref": "#/$defs/2DCoordinate"
+                },
+                "minItems": 2
+              },
+              "arcs": {
+                "type": "array",
+                "description": "The arcs of the polyline.",
+                "items": {
+                  "$ref": "#/$defs/PolyArc"
+                }
+              }
             },
-            "minItems": 2
-          },
-          "arcs": {
-            "type": "array",
-            "description": "The arcs of the polyline.",
-            "items": {
-              "$ref": "#/$defs/PolyArc"
-            }
+            "additionalProperties": false,
+            "required": [
+              "coordinates"
+            ]
           }
-        },
-        "additionalProperties": false,
-        "required": [
-          "coordinates"
-        ]
-      }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "polylinesData"
+      ]
     },
     "CreatePolylinesResult": {
       "type": "object",
@@ -3988,30 +4202,39 @@
       ]
     },
     "CreateObjectsParameters": {
-      "type": "array",
-      "description": "Array of data to create Objects.",
-      "items": {
-        "type": "object",
-        "description": "The parameters of the new Object.",
-        "properties": {
-          "libraryPartName": {
-            "type": "string",
-            "description": "The name of the library part to use."
-          },
-          "coordinates": {
-            "$ref": "#/$defs/3DCoordinate"
-          },
-          "dimensions": {
-            "$ref": "#/$defs/3DDimensions"
+      "type": "object",
+      "properties": {
+        "objectsData": {
+          "type": "array",
+          "description": "Array of data to create Objects.",
+          "items": {
+            "type": "object",
+            "description": "The parameters of the new Object.",
+            "properties": {
+              "libraryPartName": {
+                "type": "string",
+                "description": "The name of the library part to use."
+              },
+              "coordinates": {
+                "$ref": "#/$defs/3DCoordinate"
+              },
+              "dimensions": {
+                "$ref": "#/$defs/3DDimensions"
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "libraryPartName",
+              "coordinates",
+              "dimensions"
+            ]
           }
-        },
-        "additionalProperties": false,
-        "required": [
-          "libraryPartName",
-          "coordinates",
-          "dimensions"
-        ]
-      }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "objectsData"
+      ]
     },
     "CreateObjectsResult": {
       "type": "object",
@@ -4026,94 +4249,112 @@
       ]
     },
     "CreateMeshesParameters": {
-      "type": "array",
-      "description": "Array of data to create Meshes.",
-      "items": {
-        "type": "object",
-        "description": "The parameters of the new Mesh.",
-        "properties": {
-          "floorIndex": {
-            "type": "integer"
-          },
-          "level": {
-            "type": "number",
-            "description": "The Z reference level of coordinates."
-          },
-          "skirtType": {
-            "type": "string",
-            "description": "The type of the skirt structure.",
-            "enum": [
-              "SurfaceOnlyWithoutSkirt",
-              "WithSkirt",
-              "SolidBodyWithSkirt"
-            ]
-          },
-          "skirtLevel": {
-            "type": "number",
-            "description": "The height of the skirt."
-          },
-          "polygonCoordinates": {
-            "type": "array",
-            "description": "The 3D coordinates of the outline polygon of the mesh.",
-            "items": {
-              "$ref": "#/$defs/3DCoordinate"
-            },
-            "minItems": 3
-          },
-          "polygonArcs": {
-            "type": "array",
-            "description": "Polygon outline arcs of the mesh.",
-            "items": {
-              "$ref": "#/$defs/PolyArc"
-            }
-          },
-          "holes": {
-            "type": "array",
-            "description": "Array of parameters of holes.",
-            "items": {
-              "type": "object",
-              "description": "The parameters of the hole.",
-              "properties": {
-                "polygonCoordinates": {
-                  "type": "array",
-                  "description": "The 3D coordinates of the polygon of the hole.",
-                  "items": {
-                    "$ref": "#/$defs/3DCoordinate"
-                  },
-                  "minItems": 3
+      "type": "object",
+      "properties": {
+        "meshesData": {
+          "type": "array",
+          "description": "Array of data to create Meshes.",
+          "items": {
+            "type": "object",
+            "description": "The parameters of the new Mesh.",
+            "properties": {
+              "floorIndex": {
+                "type": "integer"
+              },
+              "level": {
+                "type": "number",
+                "description": "The Z reference level of coordinates."
+              },
+              "skirtType": {
+                "type": "string",
+                "description": "The type of the skirt structure.",
+                "enum": [
+                  "SurfaceOnlyWithoutSkirt",
+                  "WithSkirt",
+                  "SolidBodyWithSkirt"
+                ]
+              },
+              "skirtLevel": {
+                "type": "number",
+                "description": "The height of the skirt."
+              },
+              "polygonCoordinates": {
+                "type": "array",
+                "description": "The 3D coordinates of the outline polygon of the mesh.",
+                "items": {
+                  "$ref": "#/$defs/3DCoordinate"
                 },
-                "polygonArcs": {
-                  "type": "array",
-                  "description": "Polygon outline arcs of the hole.",
-                  "items": {
-                    "$ref": "#/$defs/PolyArc"
-                  }
+                "minItems": 3
+              },
+              "polygonArcs": {
+                "type": "array",
+                "description": "Polygon outline arcs of the mesh.",
+                "items": {
+                  "$ref": "#/$defs/PolyArc"
                 }
               },
-              "additionalProperties": false,
-              "required": [
-                "polygonCoordinates"
-              ]
-            }
-          },
-          "sublines": {
-            "type": "array",
-            "description": "The leveling sublines inside the polygon of the mesh.",
-            "items": {
-              "type": "array",
-              "description": "The 3D coordinates of the leveling subline of the mesh.",
-              "items": {
-                "$ref": "#/$defs/3DCoordinate"
+              "holes": {
+                "type": "array",
+                "description": "Array of parameters of holes.",
+                "items": {
+                  "type": "object",
+                  "description": "The parameters of the hole.",
+                  "properties": {
+                    "polygonCoordinates": {
+                      "type": "array",
+                      "description": "The 3D coordinates of the polygon of the hole.",
+                      "items": {
+                        "$ref": "#/$defs/3DCoordinate"
+                      },
+                      "minItems": 3
+                    },
+                    "polygonArcs": {
+                      "type": "array",
+                      "description": "Polygon outline arcs of the hole.",
+                      "items": {
+                        "$ref": "#/$defs/PolyArc"
+                      }
+                    }
+                  },
+                  "additionalProperties": false,
+                  "required": [
+                    "polygonCoordinates"
+                  ]
+                }
+              },
+              "sublines": {
+                "type": "array",
+                "description": "The leveling sublines inside the polygon of the mesh.",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "coordinates": {
+                      "type": "array",
+                      "description": "The 3D coordinates of the leveling subline of the mesh.",
+                      "items": {
+                        "$ref": "#/$defs/3DCoordinate"
+                      }
+                    }
+                  },
+                  "additionalProperties": false,
+                  "required": [
+                    "coordinates"
+                  ]
+                },
+                "minItems": 1
               }
             },
-            "minItems": 1
+            "additionalProperties": false,
+            "required": [
+              "polygonCoordinates"
+            ]
           }
-        },
-        "additionalProperties": false,
-        "required": [
-          "polygonCoordinates"
-        ]
-      }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "meshesData"
+      ]
     },
     "CreateMeshesResult": {
       "type": "object",
@@ -4128,12 +4369,21 @@
       ]
     },
     "ApplyFavoritesToElementDefaultsParameters": {
-      "type": "array",
-      "description": "The favorites to apply.",
-      "items": {
-        "type": "string",
-        "description": "The name of a favorite."
-      }
+      "type": "object",
+      "properties": {
+        "favorites": {
+          "type": "array",
+          "description": "The favorites to apply.",
+          "items": {
+            "type": "string",
+            "description": "The name of a favorite."
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "favorites"
+      ]
     },
     "ApplyFavoritesToElementDefaultsResult": {
       "type": "object",
@@ -4189,11 +4439,20 @@
       ]
     },
     "GetAllPropertiesResult": {
-      "type": "array",
-      "description": "A list of property identifiers.",
-      "items": {
-        "$ref": "#/$defs/PropertyDetails"
-      }
+      "type": "object",
+      "properties": {
+        "properties": {
+          "type": "array",
+          "description": "A list of property identifiers.",
+          "items": {
+            "$ref": "#/$defs/PropertyDetails"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "properties"
+      ]
     },
     "GetPropertyValuesOfElementsParameters": {
       "type": "object",
@@ -4212,8 +4471,17 @@
       ]
     },
     "GetPropertyValuesOfElementsResult": {
-      "$ref": "#/$defs/PropertyValuesOrErrorArray",
-      "description": "List of property value lists. The order of the outer list is that of the given elements. The order of the inner lists are that of the given properties."
+      "type": "object",
+      "properties": {
+        "propertyValuesForElements": {
+          "$ref": "#/$defs/PropertyValuesOrErrorArray",
+          "description": "List of property value lists. The order of the outer list is that of the given elements. The order of the inner lists are that of the given properties."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "propertyValuesForElements"
+      ]
     },
     "SetPropertyValuesOfElementsParameters": {
       "type": "object",
@@ -4256,8 +4524,17 @@
       ]
     },
     "GetPropertyValuesOfAttributesResult": {
-      "$ref": "#/$defs/PropertyValuesOrErrorArray",
-      "description": "List of property value lists. The order of the outer list is that of the given attributes. The order of the inner lists are that of the given properties."
+      "type": "object",
+      "properties": {
+        "propertyValuesForAttributes": {
+          "$ref": "#/$defs/PropertyValuesOrErrorArray",
+          "description": "List of property value lists. The order of the outer list is that of the given attributes. The order of the inner lists are that of the given properties."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "propertyValuesForAttributes"
+      ]
     },
     "SetPropertyValuesOfAttributesParameters": {
       "type": "object",
@@ -4284,64 +4561,91 @@
       ]
     },
     "CreatePropertyGroupsParameters": {
-      "type": "array",
-      "description": "The parameters of the new property groups.",
-      "items": {
-        "type": "object",
-        "properties": {
-          "propertyGroup": {
+      "type": "object",
+      "properties": {
+        "propertyGroups": {
+          "type": "array",
+          "description": "The parameters of the new property groups.",
+          "items": {
             "type": "object",
             "properties": {
-              "name": {
-                "type": "string"
-              },
-              "description": {
-                "type": "string"
+              "propertyGroup": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": false,
+                "required": [
+                  "name"
+                ]
               }
             },
             "additionalProperties": false,
             "required": [
-              "name"
+              "propertyGroup"
             ]
           }
-        },
-        "additionalProperties": false,
-        "required": [
-          "propertyGroup"
-        ]
-      }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "propertyGroups"
+      ]
     },
     "CreatePropertyGroupsResult": {
-      "type": "array",
-      "description": "The identifiers of the created property groups.",
-      "items": {
-        "type": "object",
-        "properties": {
-          "propertyGroupId": {
-            "$ref": "#/$defs/PropertyGroupId"
+      "type": "object",
+      "properties": {
+        "propertyGroupIds": {
+          "type": "array",
+          "description": "The identifiers of the created property groups.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "propertyGroupId": {
+                "$ref": "#/$defs/PropertyGroupId"
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "propertyGroupId"
+            ]
           }
-        },
-        "additionalProperties": false,
-        "required": [
-          "propertyGroupId"
-        ]
-      }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "propertyGroupIds"
+      ]
     },
     "DeletePropertyGroupsParameters": {
-      "type": "array",
-      "description": "The identifiers of property groups to delete.",
-      "items": {
-        "type": "object",
-        "properties": {
-          "propertyGroupId": {
-            "$ref": "#/$defs/PropertyGroupId"
+      "type": "object",
+      "properties": {
+        "propertyGroupIds": {
+          "type": "array",
+          "description": "The identifiers of property groups to delete.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "propertyGroupId": {
+                "$ref": "#/$defs/PropertyGroupId"
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "propertyGroupId"
+            ]
           }
-        },
-        "additionalProperties": false,
-        "required": [
-          "propertyGroupId"
-        ]
-      }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "propertyGroupIds"
+      ]
     },
     "DeletePropertyGroupsResult": {
       "type": "object",
@@ -4356,91 +4660,109 @@
       ]
     },
     "CreatePropertyDefinitionsParameters": {
-      "type": "array",
-      "description": "The parameters of the new properties.",
-      "items": {
-        "type": "object",
-        "properties": {
-          "propertyDefinition": {
+      "type": "object",
+      "properties": {
+        "propertyDefinitions": {
+          "type": "array",
+          "description": "The parameters of the new properties.",
+          "items": {
             "type": "object",
             "properties": {
-              "name": {
-                "type": "string"
-              },
-              "description": {
-                "type": "string"
-              },
-              "type": {
-                "$ref": "#/$defs/PropertyType"
-              },
-              "isEditable": {
-                "type": "boolean"
-              },
-              "defaultValue": {
-                "$ref": "#/$defs/PropertyDefaultValue"
-              },
-              "possibleEnumValues": {
-                "type": "array",
-                "description": "The possible enum values of the property when the property type is enumeration.",
-                "items": {
-                  "type": "object",
-                  "description": "The description of an enumeration value.",
-                  "properties": {
-                    "enumValueId": {
-                      "$ref": "#/$defs/EnumValueId"
-                    },
-                    "displayValue": {
-                      "type": "string",
-                      "description": "Displayed value of the enumeration."
-                    },
-                    "nonLocalizedValue": {
-                      "type": "string",
-                      "description": "Nonlocalized value of the enumeration if there is one."
-                    }
-                  },
-                  "required": [
-                    "displayValue"
-                  ]
-                }
-              },
-              "availability": {
-                "type": "array",
-                "description": "The identifiers of classification items the new property is available for.",
-                "items": {
-                  "$ref": "#/$defs/ClassificationItemIdArrayItem"
-                }
-              },
-              "group": {
+              "propertyDefinition": {
                 "type": "object",
-                "description": "The property group defined by name or id. If both fields exists the id will be used.",
                 "properties": {
-                  "propertyGroupId": {
-                    "$ref": "#/$defs/PropertyGroupId"
-                  },
                   "name": {
                     "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "type": {
+                    "$ref": "#/$defs/PropertyType"
+                  },
+                  "isEditable": {
+                    "type": "boolean"
+                  },
+                  "defaultValue": {
+                    "$ref": "#/$defs/PropertyDefaultValue"
+                  },
+                  "possibleEnumValues": {
+                    "type": "array",
+                    "description": "The possible enum values of the property when the property type is enumeration.",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "enumValue": {
+                          "type": "object",
+                          "description": "The description of an enumeration value.",
+                          "properties": {
+                            "enumValueId": {
+                              "$ref": "#/$defs/EnumValueId"
+                            },
+                            "displayValue": {
+                              "type": "string",
+                              "description": "Displayed value of the enumeration."
+                            },
+                            "nonLocalizedValue": {
+                              "type": "string",
+                              "description": "Nonlocalized value of the enumeration if there is one."
+                            }
+                          },
+                          "required": [
+                            "displayValue"
+                          ]
+                        }
+                      },
+                      "additionalProperties": false,
+                      "required": [
+                        "enumValue"
+                      ]
+                    }
+                  },
+                  "availability": {
+                    "type": "array",
+                    "description": "The identifiers of classification items the new property is available for.",
+                    "items": {
+                      "$ref": "#/$defs/ClassificationItemIdArrayItem"
+                    }
+                  },
+                  "group": {
+                    "type": "object",
+                    "description": "The property group defined by name or id. If both fields exists the id will be used.",
+                    "properties": {
+                      "propertyGroupId": {
+                        "$ref": "#/$defs/PropertyGroupId"
+                      },
+                      "name": {
+                        "type": "string"
+                      }
+                    },
+                    "additionalProperties": false,
+                    "required": []
                   }
                 },
                 "additionalProperties": false,
-                "required": []
+                "required": [
+                  "name",
+                  "description",
+                  "type",
+                  "isEditable",
+                  "availability",
+                  "group"
+                ]
               }
             },
             "additionalProperties": false,
             "required": [
-              "name",
-              "description",
-              "type",
-              "isEditable",
-              "availability",
-              "group"
+              "propertyDefinition"
             ]
           }
-        },
-        "additionalProperties": false,
-        "required": [
-          "propertyDefinition"
-        ]
-      }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "propertyDefinitions"
+      ]
     },
     "CreatePropertyDefinitionsResult": {
       "type": "object",
@@ -4455,20 +4777,29 @@
       ]
     },
     "DeletePropertyDefinitionsParameters": {
-      "type": "array",
-      "description": "The identifiers of properties to delete.",
-      "items": {
-        "type": "object",
-        "properties": {
-          "propertyId": {
-            "$ref": "#/$defs/PropertyId"
+      "type": "object",
+      "properties": {
+        "propertyIds": {
+          "type": "array",
+          "description": "The identifiers of properties to delete.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "propertyId": {
+                "$ref": "#/$defs/PropertyId"
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "propertyId"
+            ]
           }
-        },
-        "additionalProperties": false,
-        "required": [
-          "propertyId"
-        ]
-      }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "propertyIds"
+      ]
     },
     "DeletePropertyDefinitionsResult": {
       "type": "object",
@@ -4495,30 +4826,39 @@
       ]
     },
     "GetAttributesByTypeResult": {
-      "type": "array",
-      "description": "Details of attributes.",
-      "items": {
-        "type": "object",
-        "properties": {
-          "attributeId": {
-            "$ref": "#/$defs/AttributeId"
-          },
-          "index": {
-            "type": "number",
-            "description": "Index of the attribute."
-          },
-          "name": {
-            "type": "string",
-            "description": "Name of the attribute."
+      "type": "object",
+      "properties": {
+        "attributes": {
+          "type": "array",
+          "description": "Details of attributes.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "attributeId": {
+                "$ref": "#/$defs/AttributeId"
+              },
+              "index": {
+                "type": "number",
+                "description": "Index of the attribute."
+              },
+              "name": {
+                "type": "string",
+                "description": "Name of the attribute."
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "attributeId",
+              "index",
+              "name"
+            ]
           }
-        },
-        "additionalProperties": false,
-        "required": [
-          "attributeId",
-          "index",
-          "name"
-        ]
-      }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "attributes"
+      ]
     },
     "CreateLayersParameters": {
       "type": "object",
@@ -4790,78 +5130,101 @@
       ]
     },
     "GetBuildingMaterialPhysicalPropertiesResult": {
-      "type": "array",
-      "description": "Physical properties list.",
-      "items": {
-        "type": "object",
-        "description": "Physical properties.",
+      "type": "object",
+      "properties": {
         "properties": {
-          "thermalConductivity": {
-            "type": "number",
-            "description": "Thermal Conductivity."
-          },
-          "density": {
-            "type": "number",
-            "description": "Density."
-          },
-          "heatCapacity": {
-            "type": "number",
-            "description": "Heat Capacity."
-          },
-          "embodiedEnergy": {
-            "type": "number",
-            "description": "Embodied Energy."
-          },
-          "embodiedCarbon": {
-            "type": "number",
-            "description": "Embodied Carbon."
+          "type": "array",
+          "description": "Physical properties list.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "properties": {
+                "type": "object",
+                "description": "Physical properties.",
+                "properties": {
+                  "thermalConductivity": {
+                    "type": "number",
+                    "description": "Thermal Conductivity."
+                  },
+                  "density": {
+                    "type": "number",
+                    "description": "Density."
+                  },
+                  "heatCapacity": {
+                    "type": "number",
+                    "description": "Heat Capacity."
+                  },
+                  "embodiedEnergy": {
+                    "type": "number",
+                    "description": "Embodied Energy."
+                  },
+                  "embodiedCarbon": {
+                    "type": "number",
+                    "description": "Embodied Carbon."
+                  }
+                }
+              }
+            }
           }
         }
-      }
+      },
+      "additionalProperties": false,
+      "required": [
+        "properties"
+      ]
     },
     "GetLibrariesResult": {
-      "type": "array",
-      "description": "A list of project libraries.",
-      "items": {
-        "type": "object",
-        "description": "Library",
-        "properties": {
-          "name": {
-            "type": "string",
-            "description": "Library name."
-          },
-          "path": {
-            "type": "string",
-            "description": "A filesystem path to library location."
-          },
-          "type": {
-            "type": "string",
-            "description": "Library type."
-          },
-          "available": {
-            "type": "boolean",
-            "description": "Is library not missing."
-          },
-          "readOnly": {
-            "type": "boolean",
-            "description": "Is library not writable."
-          },
-          "twServerUrl": {
-            "type": "string",
-            "description": "URL address of the TeamWork server hosting the library."
-          },
-          "urlWebLibrary": {
-            "type": "string",
-            "description": "URL of the downloaded Internet library."
+      "type": "object",
+      "properties": {
+        "libraries": {
+          "type": "array",
+          "description": "A list of project libraries.",
+          "items": {
+            "type": "object",
+            "description": "Library",
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Library name."
+              },
+              "path": {
+                "type": "string",
+                "description": "A filesystem path to library location."
+              },
+              "type": {
+                "type": "string",
+                "description": "Library type."
+              },
+              "available": {
+                "type": "boolean",
+                "description": "Is library not missing."
+              },
+              "readOnly": {
+                "type": "boolean",
+                "description": "Is library not writable."
+              },
+              "twServerUrl": {
+                "type": "string",
+                "description": "URL address of the TeamWork server hosting the library."
+              },
+              "urlWebLibrary": {
+                "type": "string",
+                "description": "URL of the downloaded Internet library."
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "name",
+              "type",
+              "path"
+            ]
           }
-        },
-        "additionalProperties": false,
-        "required": [
-          "name",
-          "type",
-          "path"
-        ]
-      }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "libraries"
+      ]
     },
     "ReserveElementsParameters": {
       "type": "object",
@@ -5152,53 +5515,62 @@
       ]
     },
     "GetIssuesResult": {
-      "type": "array",
-      "description": "A list of existing issues.",
-      "items": {
-        "type": "object",
-        "properties": {
-          "issueId": {
-            "$ref": "#/$defs/IssueId"
-          },
-          "name": {
-            "type": "string",
-            "description": "Issue name"
-          },
-          "parentIssueId": {
-            "$ref": "#/$defs/IssueId"
-          },
-          "creaTime": {
-            "type": "integer",
-            "description": "Issue creation time"
-          },
-          "modiTime": {
-            "type": "integer",
-            "description": "Issue modification time"
-          },
-          "tagText": {
-            "type": "string",
-            "description": "Issue tag text - labels"
-          },
-          "tagTextElementId": {
-            "$ref": "#/$defs/ElementId"
-          },
-          "isTagTextElemVisible": {
-            "type": "boolean",
-            "description": "The visibility of the attached tag text element"
+      "type": "object",
+      "properties": {
+        "issues": {
+          "type": "array",
+          "description": "A list of existing issues.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "issueId": {
+                "$ref": "#/$defs/IssueId"
+              },
+              "name": {
+                "type": "string",
+                "description": "Issue name"
+              },
+              "parentIssueId": {
+                "$ref": "#/$defs/IssueId"
+              },
+              "creaTime": {
+                "type": "integer",
+                "description": "Issue creation time"
+              },
+              "modiTime": {
+                "type": "integer",
+                "description": "Issue modification time"
+              },
+              "tagText": {
+                "type": "string",
+                "description": "Issue tag text - labels"
+              },
+              "tagTextElementId": {
+                "$ref": "#/$defs/ElementId"
+              },
+              "isTagTextElemVisible": {
+                "type": "boolean",
+                "description": "The visibility of the attached tag text element"
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "issueId",
+              "name",
+              "parentIssueId",
+              "creaTime",
+              "modiTime",
+              "tagText",
+              "tagTextElementId",
+              "isTagTextElemVisible"
+            ]
           }
-        },
-        "additionalProperties": false,
-        "required": [
-          "issueId",
-          "name",
-          "parentIssueId",
-          "creaTime",
-          "modiTime",
-          "tagText",
-          "tagTextElementId",
-          "isTagTextElemVisible"
-        ]
-      }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "issues"
+      ]
     },
     "AddCommentToIssueParameters": {
       "type": "object",
@@ -5237,40 +5609,49 @@
       ]
     },
     "GetCommentsFromIssueResult": {
-      "type": "array",
-      "description": "A list of existing comments.",
-      "items": {
-        "type": "object",
-        "properties": {
-          "guid": {
-            "$ref": "#/$defs/Guid",
-            "description": "Comment identifier"
-          },
-          "author": {
-            "type": "string",
-            "description": "Comment author"
-          },
-          "text": {
-            "type": "string",
-            "description": "Comment text"
-          },
-          "status": {
-            "$ref": "#/$defs/IssueCommentStatus"
-          },
-          "creaTime": {
-            "type": "integer",
-            "description": "Comment creation time"
+      "type": "object",
+      "properties": {
+        "comments": {
+          "type": "array",
+          "description": "A list of existing comments.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "guid": {
+                "$ref": "#/$defs/Guid",
+                "description": "Comment identifier"
+              },
+              "author": {
+                "type": "string",
+                "description": "Comment author"
+              },
+              "text": {
+                "type": "string",
+                "description": "Comment text"
+              },
+              "status": {
+                "$ref": "#/$defs/IssueCommentStatus"
+              },
+              "creaTime": {
+                "type": "integer",
+                "description": "Comment creation time"
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "guid",
+              "author",
+              "text",
+              "status",
+              "creaTime"
+            ]
           }
-        },
-        "additionalProperties": false,
-        "required": [
-          "guid",
-          "author",
-          "text",
-          "status",
-          "creaTime"
-        ]
-      }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "comments"
+      ]
     },
     "AttachElementsToIssueParameters": {
       "type": "object",
@@ -5475,9 +5856,18 @@
       ]
     },
     "GenerateDocumentationParameters": {
-      "type": "string",
-      "description": "Destination folder for the generated documentation files.",
-      "minLength": 1
+      "type": "object",
+      "properties": {
+        "destinationFolder": {
+          "type": "string",
+          "description": "Destination folder for the generated documentation files.",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "destinationFolder"
+      ]
     }
   }
 }

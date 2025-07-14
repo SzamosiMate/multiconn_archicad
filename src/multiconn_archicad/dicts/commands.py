@@ -6,27 +6,19 @@ from typing_extensions import NotRequired
 
 
 from .types import (
+    Attribute,
     AttributeIds,
     AttributePropertyValues,
     AttributeType,
     BoundingBoxes3D,
     BuildingMaterialDataArrayItem,
     ClassificationSystemIds,
+    ColumnsDatum,
+    Comment,
     CompositeDataArrayItem,
     Conflict,
     ConnectedElement,
-    CreateColumnsParameter,
-    CreateMeshesParameter,
-    CreateObjectsParameter,
-    CreatePolylinesParameter,
-    CreatePropertyDefinitionsParameter,
-    CreatePropertyGroupsParameter,
-    CreatePropertyGroupsResultItem,
-    CreateSlabsParameter,
-    CreateZonesParameter,
     Databases,
-    DeletePropertyDefinitionsParameter,
-    DeletePropertyGroupsParameter,
     DetailsOfElement,
     DocumentRevision,
     ElementClassifications,
@@ -35,50 +27,58 @@ from .types import (
     ElementPropertyValues,
     ElementType,
     Elements,
+    ElementsWithDetail,
+    ElementsWithGDLParameter,
+    ElementsWithMoveVector,
     ExecutionResult,
     ExecutionResults,
     FavoritesFromElement,
+    Field,
     GDLParameterList,
-    GetAttributesByTypeResultItem,
-    GetBuildingMaterialPhysicalPropertiesResultItem,
-    GetCommentsFromIssueResultItem,
-    GetIssuesResultItem,
-    GetLibrariesResultItem,
-    GetProjectInfoFieldsResultItem,
     Hotlinks,
+    Issue,
     IssueCommentStatus,
     IssueElementType,
     IssueId,
     Issues,
     LayerDataArrayItem,
+    Library,
+    MeshesDatum,
     ModelViewOption,
-    MoveElementsParameter,
     NavigatorItemIds,
     NavigatorItemIdsWithViewSetting,
+    ObjectsDatum,
+    PolylinesDatum,
     ProjectLocation,
+    Property,
+    PropertyDefinition,
     PropertyDetails,
+    PropertyGroup,
+    PropertyGroupId,
+    PropertyId,
     PropertyIdOrErrorArray,
     PropertyIds,
     PropertyValuesOrErrorArray,
     RevisionChange,
     RevisionChangesOfEntities,
     RevisionIssue,
-    SetDetailsOfElementsParameter,
-    SetGDLParametersOfElementsParameter,
-    SetStoriesParameter,
+    SlabsDatum,
     Story,
     Subelement,
     SurveyPoint,
     ViewSettingsOrError,
     ViewTransformationsOrError,
     WindowType,
+    ZonesDatum,
 )
 
 
-GetAddOnVersionResult = str
+class GetAddOnVersionResult(TypedDict):
+    version: str
 
 
-GetArchicadLocationResult = str
+class GetArchicadLocationResult(TypedDict):
+    archicadLocation: str
 
 
 class GetCurrentWindowTypeResult(TypedDict):
@@ -93,7 +93,8 @@ class GetProjectInfoResult(TypedDict):
     projectName: NotRequired[str]
 
 
-GetProjectInfoFieldsResult = List[GetProjectInfoFieldsResultItem]
+class GetProjectInfoFieldsResult(TypedDict):
+    fields: List[Field]
 
 
 class SetProjectInfoFieldParameters(TypedDict):
@@ -109,10 +110,12 @@ class GetStoriesResult(TypedDict):
     stories: List[Story]
 
 
-SetStoriesParameters = List[SetStoriesParameter]
+class SetStoriesParameters(TypedDict):
+    stories: List[Story]
 
 
-OpenProjectParameters = str
+class OpenProjectParameters(TypedDict):
+    projectFilePath: str
 
 
 class GetGeoLocationResult(TypedDict):
@@ -141,29 +144,36 @@ class SetGDLParametersOfElementsResult(TypedDict):
     executionResults: ExecutionResults
 
 
-GetClassificationsOfElementsResult = ElementClassificationsOrErrors
+class GetClassificationsOfElementsResult(TypedDict):
+    elementClassifications: ElementClassificationsOrErrors
 
 
 class SetClassificationsOfElementsResult(TypedDict):
     executionResults: ExecutionResults
 
 
-CreateColumnsParameters = List[CreateColumnsParameter]
+class CreateColumnsParameters(TypedDict):
+    columnsData: List[ColumnsDatum]
 
 
-CreateSlabsParameters = List[CreateSlabsParameter]
+class CreateSlabsParameters(TypedDict):
+    slabsData: List[SlabsDatum]
 
 
-CreatePolylinesParameters = List[CreatePolylinesParameter]
+class CreatePolylinesParameters(TypedDict):
+    polylinesData: List[PolylinesDatum]
 
 
-CreateObjectsParameters = List[CreateObjectsParameter]
+class CreateObjectsParameters(TypedDict):
+    objectsData: List[ObjectsDatum]
 
 
-CreateMeshesParameters = List[CreateMeshesParameter]
+class CreateMeshesParameters(TypedDict):
+    meshesData: List[MeshesDatum]
 
 
-ApplyFavoritesToElementDefaultsParameters = List[str]
+class ApplyFavoritesToElementDefaultsParameters(TypedDict):
+    favorites: List[str]
 
 
 class ApplyFavoritesToElementDefaultsResult(TypedDict):
@@ -174,30 +184,36 @@ class CreateFavoritesFromElementsResult(TypedDict):
     executionResults: ExecutionResults
 
 
-GetAllPropertiesResult = List[PropertyDetails]
+class GetAllPropertiesResult(TypedDict):
+    properties: List[PropertyDetails]
 
 
-GetPropertyValuesOfElementsResult = PropertyValuesOrErrorArray
+class GetPropertyValuesOfElementsResult(TypedDict):
+    propertyValuesForElements: PropertyValuesOrErrorArray
 
 
 class SetPropertyValuesOfElementsResult(TypedDict):
     executionResults: ExecutionResults
 
 
-GetPropertyValuesOfAttributesResult = PropertyValuesOrErrorArray
+class GetPropertyValuesOfAttributesResult(TypedDict):
+    propertyValuesForAttributes: PropertyValuesOrErrorArray
 
 
 class SetPropertyValuesOfAttributesResult(TypedDict):
     executionResults: ExecutionResults
 
 
-CreatePropertyGroupsParameters = List[CreatePropertyGroupsParameter]
+class CreatePropertyGroupsParameters(TypedDict):
+    propertyGroups: List[PropertyGroup]
 
 
-CreatePropertyGroupsResult = List[CreatePropertyGroupsResultItem]
+class CreatePropertyGroupsResult(TypedDict):
+    propertyGroupIds: List[PropertyGroupId]
 
 
-DeletePropertyGroupsParameters = List[DeletePropertyGroupsParameter]
+class DeletePropertyGroupsParameters(TypedDict):
+    propertyGroupIds: List[PropertyGroupId]
 
 
 class DeletePropertyGroupsResult(TypedDict):
@@ -208,7 +224,8 @@ class CreatePropertyDefinitionsResult(TypedDict):
     propertyIds: PropertyIdOrErrorArray
 
 
-DeletePropertyDefinitionsParameters = List[DeletePropertyDefinitionsParameter]
+class DeletePropertyDefinitionsParameters(TypedDict):
+    propertyIds: List[PropertyId]
 
 
 class DeletePropertyDefinitionsResult(TypedDict):
@@ -229,12 +246,12 @@ class CreateBuildingMaterialsParameters(TypedDict):
     overwriteExisting: NotRequired[bool]
 
 
-GetBuildingMaterialPhysicalPropertiesResult = List[
-    GetBuildingMaterialPhysicalPropertiesResultItem
-]
+class GetBuildingMaterialPhysicalPropertiesResult(TypedDict):
+    properties: List[Property]
 
 
-GetLibrariesResult = List[GetLibrariesResultItem]
+class GetLibrariesResult(TypedDict):
+    libraries: List[Library]
 
 
 class PublishPublisherSetParameters(TypedDict):
@@ -288,7 +305,8 @@ class GetCommentsFromIssueParameters(TypedDict):
     issueId: IssueId
 
 
-GetCommentsFromIssueResult = List[GetCommentsFromIssueResultItem]
+class GetCommentsFromIssueResult(TypedDict):
+    comments: List[Comment]
 
 
 class GetElementsAttachedToIssueParameters(TypedDict):
@@ -328,26 +346,32 @@ class GetRevisionChangesOfElementsResult(TypedDict):
     revisionChangesOfElements: RevisionChangesOfEntities
 
 
-GenerateDocumentationParameters = str
+class GenerateDocumentationParameters(TypedDict):
+    destinationFolder: str
 
 
-SetDetailsOfElementsParameters = List[SetDetailsOfElementsParameter]
+class SetDetailsOfElementsParameters(TypedDict):
+    elementsWithDetails: List[ElementsWithDetail]
 
 
-MoveElementsParameters = List[MoveElementsParameter]
+class MoveElementsParameters(TypedDict):
+    elementsWithMoveVectors: List[ElementsWithMoveVector]
 
 
-GetGDLParametersOfElementsResult = List[GDLParameterList]
+class GetGDLParametersOfElementsResult(TypedDict):
+    gdlParametersOfElements: List[GDLParameterList]
 
 
-SetGDLParametersOfElementsParameters = List[SetGDLParametersOfElementsParameter]
+class SetGDLParametersOfElementsParameters(TypedDict):
+    elementsWithGDLParameters: List[ElementsWithGDLParameter]
 
 
 class SetClassificationsOfElementsParameters(TypedDict):
     elementClassifications: ElementClassifications
 
 
-CreateZonesParameters = List[CreateZonesParameter]
+class CreateZonesParameters(TypedDict):
+    zonesData: List[ZonesDatum]
 
 
 class CreateFavoritesFromElementsParameters(TypedDict):
@@ -362,10 +386,12 @@ class SetPropertyValuesOfAttributesParameters(TypedDict):
     attributePropertyValues: AttributePropertyValues
 
 
-CreatePropertyDefinitionsParameters = List[CreatePropertyDefinitionsParameter]
+class CreatePropertyDefinitionsParameters(TypedDict):
+    propertyDefinitions: List[PropertyDefinition]
 
 
-GetAttributesByTypeResult = List[GetAttributesByTypeResultItem]
+class GetAttributesByTypeResult(TypedDict):
+    attributes: List[Attribute]
 
 
 class ReserveElementsResult(TypedDict):
@@ -373,7 +399,8 @@ class ReserveElementsResult(TypedDict):
     conflicts: NotRequired[List[Conflict]]
 
 
-GetIssuesResult = List[GetIssuesResultItem]
+class GetIssuesResult(TypedDict):
+    issues: List[Issue]
 
 
 class GetElementsByTypeParameters(TypedDict):

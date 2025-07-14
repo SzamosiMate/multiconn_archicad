@@ -8,65 +8,62 @@ from pydantic import BaseModel, ConfigDict, Field, RootModel
 
 
 from .types import (
+    Attribute,
     AttributeIdArrayItem,
     AttributeType,
-    BoundingBox3D,
+    BoundingBox3DOrError,
     BuildingMaterialDataArrayItem,
-    ClassificationId,
     ClassificationSystemIdArrayItem,
+    ColumnsDatum,
+    Comment,
     CompositeDataArrayItem,
     Conflict,
     ConnectedElement,
-    CreateColumnsParameter,
-    CreateMeshesParameter,
-    CreateObjectsParameter,
-    CreatePolylinesParameter,
-    CreatePropertyDefinitionsParameter,
-    CreatePropertyGroupsParameter,
-    CreatePropertyGroupsResultItem,
-    CreateSlabsParameter,
-    CreateZonesParameter,
     DatabaseIdArrayItem,
-    DeletePropertyDefinitionsParameter,
-    DeletePropertyGroupsParameter,
     DetailsOfElement,
     DocumentRevision,
     ElementClassification,
+    ElementClassificationOrError,
     ElementFilter,
     ElementIdArrayItem,
     ElementPropertyValue,
     ElementType,
+    ElementsWithDetail,
+    ElementsWithGDLParameter,
+    ElementsWithMoveVector,
     ErrorItem,
     FailedExecutionResult,
     FavoritesFromElement,
-    GDLParameterDetails,
-    GetAttributesByTypeResultItem,
-    GetBuildingMaterialPhysicalPropertiesResultItem,
-    GetCommentsFromIssueResultItem,
-    GetIssuesResultItem,
-    GetLibrariesResultItem,
-    GetProjectInfoFieldsResultItem,
+    FieldModel,
+    GDLParameterList,
     Hotlink,
+    Issue,
     IssueCommentStatus,
     IssueElementType,
     IssueId,
     IssueIdArrayItem,
     LayerDataArrayItem,
+    Library,
+    MeshesDatum,
     ModelViewOption,
-    MoveElementsParameter,
     NavigatorItemIdArrayItem,
     NavigatorItemIdsWithViewSetting,
+    ObjectsDatum,
+    PolylinesDatum,
     ProjectLocation,
+    Property,
+    PropertyDefinition,
     PropertyDetails,
+    PropertyGroup,
+    PropertyGroupId,
     PropertyId,
     PropertyIdArrayItem,
-    PropertyValue,
+    PropertyIdOrError,
+    PropertyValuesOrError,
     RevisionChange,
     RevisionChangesOfEntities,
     RevisionIssue,
-    SetDetailsOfElementsParameter,
-    SetGDLParametersOfElementsParameter,
-    SetStoriesParameter,
+    SlabsDatum,
     Story,
     Subelement,
     SuccessfulExecutionResult,
@@ -74,17 +71,24 @@ from .types import (
     ViewSettings,
     ViewTransformations,
     WindowType,
+    ZonesDatum,
 )
 
 
-class GetAddOnVersionResult(RootModel[str]):
-    root: str = Field(
+class GetAddOnVersionResult(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    version: str = Field(
         ..., description='Version number in the form of "1.1.1".'
     )
 
 
-class GetArchicadLocationResult(RootModel[str]):
-    root: str = Field(
+class GetArchicadLocationResult(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    archicadLocation: str = Field(
         ..., description="The location of the Archicad executable in the filesystem."
     )
 
@@ -117,10 +121,11 @@ class GetProjectInfoResult(BaseModel):
     )
 
 
-class GetProjectInfoFieldsResult(RootModel[List[GetProjectInfoFieldsResultItem]]):
-    root: List[GetProjectInfoFieldsResultItem] = Field(
-        ..., description="A list of project info fields."
+class GetProjectInfoFieldsResult(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
     )
+    fields: List[FieldModel] = Field(..., description="A list of project info fields.")
 
 
 class SetProjectInfoFieldParameters(BaseModel):
@@ -151,14 +156,18 @@ class GetStoriesResult(BaseModel):
     stories: List[Story] = Field(..., description="A list of project stories.")
 
 
-class SetStoriesParameters(RootModel[List[SetStoriesParameter]]):
-    root: List[SetStoriesParameter] = Field(
-        ..., description="A list of project stories."
+class SetStoriesParameters(BaseModel):
+    model_config = ConfigDict(
+        extra="allow",
     )
+    stories: List[Story] = Field(..., description="A list of project stories.")
 
 
-class OpenProjectParameters(RootModel[str]):
-    root: str = Field(..., description="The target project file to open.")
+class OpenProjectParameters(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    projectFilePath: str = Field(..., description="The target project file to open.")
 
 
 class GetGeoLocationResult(BaseModel):
@@ -194,7 +203,7 @@ class Get3DBoundingBoxesResult(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    boundingBoxes3D: List[BoundingBox3D | ErrorItem] = Field(
+    boundingBoxes3D: List[BoundingBox3DOrError | ErrorItem] = Field(
         ..., description="A list of 3D bounding boxes."
     )
 
@@ -217,10 +226,11 @@ class SetGDLParametersOfElementsResult(BaseModel):
     )
 
 
-class GetClassificationsOfElementsResult(
-    RootModel[List[ErrorItem | List[ClassificationId | ErrorItem]]]
-):
-    root: List[ErrorItem | List[ClassificationId | ErrorItem]] = Field(
+class GetClassificationsOfElementsResult(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    elementClassifications: List[ElementClassificationOrError | ErrorItem] = Field(
         ...,
         description="The list of element classification item identifiers. Order of the ids are the same as in the input. Non-existing elements or non-existing classification systems are represented by error objects.",
     )
@@ -235,38 +245,56 @@ class SetClassificationsOfElementsResult(BaseModel):
     )
 
 
-class CreateColumnsParameters(RootModel[List[CreateColumnsParameter]]):
-    root: List[CreateColumnsParameter] = Field(
+class CreateColumnsParameters(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    columnsData: List[ColumnsDatum] = Field(
         ..., description="Array of data to create Columns."
     )
 
 
-class CreateSlabsParameters(RootModel[List[CreateSlabsParameter]]):
-    root: List[CreateSlabsParameter] = Field(
+class CreateSlabsParameters(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    slabsData: List[SlabsDatum] = Field(
         ..., description="Array of data to create Slabs."
     )
 
 
-class CreatePolylinesParameters(RootModel[List[CreatePolylinesParameter]]):
-    root: List[CreatePolylinesParameter] = Field(
+class CreatePolylinesParameters(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    polylinesData: List[PolylinesDatum] = Field(
         ..., description="Array of data to create Polylines."
     )
 
 
-class CreateObjectsParameters(RootModel[List[CreateObjectsParameter]]):
-    root: List[CreateObjectsParameter] = Field(
+class CreateObjectsParameters(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    objectsData: List[ObjectsDatum] = Field(
         ..., description="Array of data to create Objects."
     )
 
 
-class CreateMeshesParameters(RootModel[List[CreateMeshesParameter]]):
-    root: List[CreateMeshesParameter] = Field(
+class CreateMeshesParameters(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    meshesData: List[MeshesDatum] = Field(
         ..., description="Array of data to create Meshes."
     )
 
 
-class ApplyFavoritesToElementDefaultsParameters(RootModel[List[str]]):
-    root: List[str] = Field(..., description="The favorites to apply.")
+class ApplyFavoritesToElementDefaultsParameters(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    favorites: List[str] = Field(..., description="The favorites to apply.")
 
 
 class ApplyFavoritesToElementDefaultsResult(BaseModel):
@@ -287,16 +315,20 @@ class CreateFavoritesFromElementsResult(BaseModel):
     )
 
 
-class GetAllPropertiesResult(RootModel[List[PropertyDetails]]):
-    root: List[PropertyDetails] = Field(
+class GetAllPropertiesResult(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    properties: List[PropertyDetails] = Field(
         ..., description="A list of property identifiers."
     )
 
 
-class GetPropertyValuesOfElementsResult(
-    RootModel[List[ErrorItem | List[PropertyValue | ErrorItem]]]
-):
-    root: List[ErrorItem | List[PropertyValue | ErrorItem]] = Field(
+class GetPropertyValuesOfElementsResult(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    propertyValuesForElements: List[PropertyValuesOrError | ErrorItem] = Field(
         ...,
         description="List of property value lists. The order of the outer list is that of the given elements. The order of the inner lists are that of the given properties.",
     )
@@ -311,10 +343,11 @@ class SetPropertyValuesOfElementsResult(BaseModel):
     )
 
 
-class GetPropertyValuesOfAttributesResult(
-    RootModel[List[ErrorItem | List[PropertyValue | ErrorItem]]]
-):
-    root: List[ErrorItem | List[PropertyValue | ErrorItem]] = Field(
+class GetPropertyValuesOfAttributesResult(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    propertyValuesForAttributes: List[PropertyValuesOrError | ErrorItem] = Field(
         ...,
         description="List of property value lists. The order of the outer list is that of the given attributes. The order of the inner lists are that of the given properties.",
     )
@@ -329,20 +362,29 @@ class SetPropertyValuesOfAttributesResult(BaseModel):
     )
 
 
-class CreatePropertyGroupsParameters(RootModel[List[CreatePropertyGroupsParameter]]):
-    root: List[CreatePropertyGroupsParameter] = Field(
+class CreatePropertyGroupsParameters(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    propertyGroups: List[PropertyGroup] = Field(
         ..., description="The parameters of the new property groups."
     )
 
 
-class CreatePropertyGroupsResult(RootModel[List[CreatePropertyGroupsResultItem]]):
-    root: List[CreatePropertyGroupsResultItem] = Field(
+class CreatePropertyGroupsResult(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    propertyGroupIds: List[PropertyGroupId] = Field(
         ..., description="The identifiers of the created property groups."
     )
 
 
-class DeletePropertyGroupsParameters(RootModel[List[DeletePropertyGroupsParameter]]):
-    root: List[DeletePropertyGroupsParameter] = Field(
+class DeletePropertyGroupsParameters(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    propertyGroupIds: List[PropertyGroupId] = Field(
         ..., description="The identifiers of property groups to delete."
     )
 
@@ -360,15 +402,16 @@ class CreatePropertyDefinitionsResult(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    propertyIds: List[PropertyId | ErrorItem] = Field(
+    propertyIds: List[PropertyIdOrError | ErrorItem] = Field(
         ..., description="A list of property identifiers."
     )
 
 
-class DeletePropertyDefinitionsParameters(
-    RootModel[List[DeletePropertyDefinitionsParameter]]
-):
-    root: List[DeletePropertyDefinitionsParameter] = Field(
+class DeletePropertyDefinitionsParameters(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    propertyIds: List[PropertyId] = Field(
         ..., description="The identifiers of properties to delete."
     )
 
@@ -415,18 +458,18 @@ class CreateBuildingMaterialsParameters(BaseModel):
     )
 
 
-class GetBuildingMaterialPhysicalPropertiesResult(
-    RootModel[List[GetBuildingMaterialPhysicalPropertiesResultItem]]
-):
-    root: List[GetBuildingMaterialPhysicalPropertiesResultItem] = Field(
-        ..., description="Physical properties list."
+class GetBuildingMaterialPhysicalPropertiesResult(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
     )
+    properties: List[Property] = Field(..., description="Physical properties list.")
 
 
-class GetLibrariesResult(RootModel[List[GetLibrariesResultItem]]):
-    root: List[GetLibrariesResultItem] = Field(
-        ..., description="A list of project libraries."
+class GetLibrariesResult(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
     )
+    libraries: List[Library] = Field(..., description="A list of project libraries.")
 
 
 class PublishPublisherSetParameters(BaseModel):
@@ -523,10 +566,11 @@ class GetCommentsFromIssueParameters(BaseModel):
     issueId: IssueId
 
 
-class GetCommentsFromIssueResult(RootModel[List[GetCommentsFromIssueResultItem]]):
-    root: List[GetCommentsFromIssueResultItem] = Field(
-        ..., description="A list of existing comments."
+class GetCommentsFromIssueResult(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
     )
+    comments: List[Comment] = Field(..., description="A list of existing comments.")
 
 
 class GetElementsAttachedToIssueParameters(BaseModel):
@@ -605,34 +649,47 @@ class GetRevisionChangesOfElementsResult(BaseModel):
     revisionChangesOfElements: RevisionChangesOfEntities | ErrorItem
 
 
-class GenerateDocumentationParameters(RootModel[str]):
-    root: str = Field(
+class GenerateDocumentationParameters(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    destinationFolder: str = Field(
         ..., description="Destination folder for the generated documentation files."
     )
 
 
-class SetDetailsOfElementsParameters(RootModel[List[SetDetailsOfElementsParameter]]):
-    root: List[SetDetailsOfElementsParameter] = Field(
+class SetDetailsOfElementsParameters(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    elementsWithDetails: List[ElementsWithDetail] = Field(
         ..., description="The elements with parameters."
     )
 
 
-class MoveElementsParameters(RootModel[List[MoveElementsParameter]]):
-    root: List[MoveElementsParameter] = Field(
+class MoveElementsParameters(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    elementsWithMoveVectors: List[ElementsWithMoveVector] = Field(
         ..., description="The elements with move vector pairs."
     )
 
 
-class GetGDLParametersOfElementsResult(RootModel[List[List[GDLParameterDetails]]]):
-    root: List[List[GDLParameterDetails]] = Field(
+class GetGDLParametersOfElementsResult(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    gdlParametersOfElements: List[GDLParameterList] = Field(
         ..., description="The GDL parameters of elements."
     )
 
 
-class SetGDLParametersOfElementsParameters(
-    RootModel[List[SetGDLParametersOfElementsParameter]]
-):
-    root: List[SetGDLParametersOfElementsParameter] = Field(
+class SetGDLParametersOfElementsParameters(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    elementsWithGDLParameters: List[ElementsWithGDLParameter] = Field(
         ..., description="The elements with GDL parameters dictionary pairs."
     )
 
@@ -646,8 +703,11 @@ class SetClassificationsOfElementsParameters(BaseModel):
     )
 
 
-class CreateZonesParameters(RootModel[List[CreateZonesParameter]]):
-    root: List[CreateZonesParameter] = Field(
+class CreateZonesParameters(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    zonesData: List[ZonesDatum] = Field(
         ..., description="Array of data to create Zones."
     )
 
@@ -675,18 +735,20 @@ class SetPropertyValuesOfAttributesParameters(BaseModel):
     attributePropertyValues: Any
 
 
-class CreatePropertyDefinitionsParameters(
-    RootModel[List[CreatePropertyDefinitionsParameter]]
-):
-    root: List[CreatePropertyDefinitionsParameter] = Field(
+class CreatePropertyDefinitionsParameters(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    propertyDefinitions: List[PropertyDefinition] = Field(
         ..., description="The parameters of the new properties."
     )
 
 
-class GetAttributesByTypeResult(RootModel[List[GetAttributesByTypeResultItem]]):
-    root: List[GetAttributesByTypeResultItem] = Field(
-        ..., description="Details of attributes."
+class GetAttributesByTypeResult(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
     )
+    attributes: List[Attribute] = Field(..., description="Details of attributes.")
 
 
 class ReserveElementsResult(BaseModel):
@@ -699,10 +761,11 @@ class ReserveElementsResult(BaseModel):
     conflicts: List[Conflict] | None = None
 
 
-class GetIssuesResult(RootModel[List[GetIssuesResultItem]]):
-    root: List[GetIssuesResultItem] = Field(
-        ..., description="A list of existing issues."
+class GetIssuesResult(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
     )
+    issues: List[Issue] = Field(..., description="A list of existing issues.")
 
 
 class GetElementsByTypeParameters(BaseModel):
