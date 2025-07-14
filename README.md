@@ -23,7 +23,7 @@
 You can install the latest version of the package from the following link using `pip`:
 
 ```bash
-pip install https://github.com/SzamosiMate/multiconn_archicad/releases/latest/download/multiconn_archicad-0.3.2-py3-none-any.whl
+pip install https://github.com/SzamosiMate/multiconn_archicad/releases/latest/download/multiconn_archicad-0.3.3-py3-none-any.whl
 ```
 
 **Prerequisites: Tapir Add-On is Required**
