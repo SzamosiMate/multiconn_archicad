@@ -1309,15 +1309,17 @@ class PropertyGroup(BaseModel):
     description: str | None = None
 
 
-class PropertyGroup(BaseModel):
+class PropertyGroupWrapper(BaseModel):
     model_config = ConfigDict(
+        title='PropertyGroup',
         extra="forbid",
     )
     propertyGroup: PropertyGroup
 
 
-class PropertyGroupId(BaseModel):
+class PropertyGroupIdWrapper(BaseModel):
     model_config = ConfigDict(
+        title='PropertyGroupId',
         extra="forbid",
     )
     propertyGroupId: PropertyGroupId
@@ -1350,8 +1352,9 @@ class Group(BaseModel):
     name: str | None = None
 
 
-class PropertyId(BaseModel):
+class PropertyIdWrapper(BaseModel):
     model_config = ConfigDict(
+        title='PropertyId',
         extra="forbid",
     )
     propertyId: PropertyId
@@ -1680,8 +1683,9 @@ class PropertyDefinition(BaseModel):
     )
 
 
-class PropertyDefinition(BaseModel):
+class PropertyDefinitionWrapper(BaseModel):
     model_config = ConfigDict(
+        title='PropertyDefinition',
         extra="forbid",
     )
     propertyDefinition: PropertyDefinition

@@ -8,6 +8,7 @@ from code_generation.paths import paths
 KNOWN_XFAILURES = {
     "GetRevisionIssuesResult": "Upstream schema has inconsistent DocumentRevision definition",
     "SetPropertyValuesOfAttributesParameters": "Upstream schema is missing AttributePropertyValues definition",
+    "CreateZonesParameters": "Upstream schema has inconsistent Geometry definition",
 }
 
 SCHEMAS_TO_PATCH = {"GetHotlinksResult", "GetDetailsOfElementsResult"}

@@ -1600,8 +1600,9 @@ class PropertyGroup(BaseModel):
     description: str | None = None
 
 
-class PropertyGroup(BaseModel):
+class PropertyGroupWrapper(BaseModel):
     model_config = ConfigDict(
+        title='PropertyGroup',
         extra="forbid",
     )
     propertyGroup: PropertyGroup
@@ -1611,13 +1612,14 @@ class CreatePropertyGroupsParameters(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    propertyGroups: List[PropertyGroup] = Field(
+    propertyGroups: List[PropertyGroupWrapper] = Field(
         ..., description="The parameters of the new property groups."
     )
 
 
-class PropertyGroupId(BaseModel):
+class PropertyGroupIdWrapper(BaseModel):
     model_config = ConfigDict(
+        title='PropertyGroupId',
         extra="forbid",
     )
     propertyGroupId: PropertyGroupId
@@ -1627,7 +1629,7 @@ class CreatePropertyGroupsResult(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    propertyGroupIds: List[PropertyGroupId] = Field(
+    propertyGroupIds: List[PropertyGroupIdWrapper] = Field(
         ..., description="The identifiers of the created property groups."
     )
 
@@ -1636,7 +1638,7 @@ class DeletePropertyGroupsParameters(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    propertyGroupIds: List[PropertyGroupId] = Field(
+    propertyGroupIds: List[PropertyGroupIdWrapper] = Field(
         ..., description="The identifiers of property groups to delete."
     )
 
@@ -1686,8 +1688,9 @@ class CreatePropertyDefinitionsResult(BaseModel):
     )
 
 
-class PropertyId(BaseModel):
+class PropertyIdWrapper(BaseModel):
     model_config = ConfigDict(
+        title='PropertyId',
         extra="forbid",
     )
     propertyId: PropertyId
@@ -1697,7 +1700,7 @@ class DeletePropertyDefinitionsParameters(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    propertyIds: List[PropertyId] = Field(
+    propertyIds: List[PropertyIdWrapper] = Field(
         ..., description="The identifiers of properties to delete."
     )
 
@@ -2344,8 +2347,9 @@ class PropertyDefinition(BaseModel):
     )
 
 
-class PropertyDefinition(BaseModel):
+class PropertyDefinitionWrapper(BaseModel):
     model_config = ConfigDict(
+        title='PropertyDefinition',
         extra="forbid",
     )
     propertyDefinition: PropertyDefinition
@@ -2355,7 +2359,7 @@ class CreatePropertyDefinitionsParameters(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    propertyDefinitions: List[PropertyDefinition] = Field(
+    propertyDefinitions: List[PropertyDefinitionWrapper] = Field(
         ..., description="The parameters of the new properties."
     )
 

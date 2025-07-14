@@ -52,13 +52,13 @@ from .types import (
     PolylinesDatum,
     ProjectLocation,
     Property,
-    PropertyDefinition,
+    PropertyDefinitionWrapper,
     PropertyDetails,
-    PropertyGroup,
-    PropertyGroupId,
-    PropertyId,
+    PropertyGroupIdWrapper,
+    PropertyGroupWrapper,
     PropertyIdArrayItem,
     PropertyIdOrError,
+    PropertyIdWrapper,
     PropertyValuesOrError,
     RevisionChange,
     RevisionChangesOfEntities,
@@ -366,7 +366,7 @@ class CreatePropertyGroupsParameters(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    propertyGroups: List[PropertyGroup] = Field(
+    propertyGroups: List[PropertyGroupWrapper] = Field(
         ..., description="The parameters of the new property groups."
     )
 
@@ -375,7 +375,7 @@ class CreatePropertyGroupsResult(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    propertyGroupIds: List[PropertyGroupId] = Field(
+    propertyGroupIds: List[PropertyGroupIdWrapper] = Field(
         ..., description="The identifiers of the created property groups."
     )
 
@@ -384,7 +384,7 @@ class DeletePropertyGroupsParameters(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    propertyGroupIds: List[PropertyGroupId] = Field(
+    propertyGroupIds: List[PropertyGroupIdWrapper] = Field(
         ..., description="The identifiers of property groups to delete."
     )
 
@@ -411,7 +411,7 @@ class DeletePropertyDefinitionsParameters(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    propertyIds: List[PropertyId] = Field(
+    propertyIds: List[PropertyIdWrapper] = Field(
         ..., description="The identifiers of properties to delete."
     )
 
@@ -739,7 +739,7 @@ class CreatePropertyDefinitionsParameters(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    propertyDefinitions: List[PropertyDefinition] = Field(
+    propertyDefinitions: List[PropertyDefinitionWrapper] = Field(
         ..., description="The parameters of the new properties."
     )
 

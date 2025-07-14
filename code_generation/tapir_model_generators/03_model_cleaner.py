@@ -15,28 +15,22 @@ def main():
         print(f"Error: {paths.RAW_PYDANTIC_MODELS} not found. Please generate it first.")
         return
 
-    # The order of these operations is critical.
-
-    # Step 1: Replace Pydantic's `constr` with standard `str` for simplicity.
     print("Step 1: Replacing 'constr' with 'str'...")
     content = replace_constr_with_str(content)
 
-    # Step 2: Remove known incomplete or duplicate class definitions.
-    # This is still needed for cases like DocumentRevision vs DocumentRevision1.
     print("Step 2: Removing known incomplete duplicate classes...")
     content = remove_specific_duplicates(content)
 
-    # Step 3: Promote suffixed classes (e.g., 'Hole1' -> 'Hole').
-    # This is still needed to merge generator artifacts.
-    print("Step 3: Consolidating suffixed classes (e.g., 'Hole1' -> 'Hole')...")
+    print("Step 3: Resolving wrapper model name collisions...")
+    content = fix_wrapper_models_and_alias(content)
+
+    print("Step 4: Consolidating suffixed classes (e.g., 'Hole1' -> 'Hole')...")
     content = promote_suffixed_classes(content)
 
-    # Step 4: Reorder forward-referencing models like `Hotlink`.
-    print("Step 4: Reordering self-referencing models...")
+    print("Step 5: Reordering self-referencing models...")
     content = fix_forward_reference_models(content)
 
-    # Step 5: Assemble the final file with a clean header and formatting.
-    print("Step 5: Assembling and formatting the final file...")
+    print("Step 6: Assembling and formatting the final file...")
     content = assemble_final_file(content)
 
     paths.CLEANED_PYDANTIC_MODELS.write_text(content, encoding="utf-8")
@@ -48,7 +42,6 @@ def main():
 
 def replace_constr_with_str(content: str) -> str:
     """Replaces all instances of `constr(...)` with `str`."""
-    # This regex finds `constr` followed by parentheses and replaces it.
     content = re.sub(r"constr\(.*?\)", "str", content)
     print("    - All 'constr' types replaced with 'str'.")
     return content
@@ -73,6 +66,105 @@ def remove_specific_duplicates(content: str) -> str:
     content, count = original_hole_pattern.subn("", content)
     if count > 0:
         print("    - Removed 'Hole' class with incorrect 'polygonOutline' field.")
+
+    return content
+
+
+def fix_wrapper_models_and_alias(content: str) -> str:
+    """
+    Identifies classes that wrap another class (e.g., `class A: a: A1`),
+    renames them to avoid collisions (e.g., `A` -> `AWrapper`, `A1` -> `A`),
+    and adds a `title` to the wrapper's `ConfigDict` to ensure the
+    generated schema title remains the original name.
+    """
+    print("    - Searching for wrapper/data class pairs...")
+    blocks = re.split(r"\n\n\n", content)
+    wrappers = {}  # Maps original wrapper name to its info
+    all_class_names = {m.group(1) for m in re.finditer(r"class\s+(\w+)\(BaseModel\):", content)}
+
+    for block in blocks:
+        class_name_match = re.search(r"class\s+(\w+)\(BaseModel\):", block)
+        if not class_name_match:
+            continue
+        class_name = class_name_match.group(1)
+
+        # A wrapper class has exactly one attribute (field).
+        field_lines = [line for line in block.split("\n") if re.match(r"^\s{4}\w+\s*:", line)]
+        if len(field_lines) != 1:
+            continue
+
+        # Extract field name and its type.
+        field_match = re.match(r"^\s{4}(\w+)\s*:\s*([\w\d]+)", field_lines[0])
+        if not field_match:
+            continue
+
+        field_name, field_type = field_match.groups()
+
+        # The field's type must be another known class.
+        if field_type not in all_class_names:
+            continue
+
+        # Heuristic for wrapper pattern:
+        # 1. The field name is the camelCase version of the type's base name.
+        # 2. The wrapper's base name is the same as the type's base name.
+        type_base_name = re.sub(r"\d*$", "", field_type)
+        class_base_name = re.sub(r"\d*$", "", class_name)
+        expected_field_name = f"{type_base_name[0].lower()}{type_base_name[1:]}"
+
+        if field_name == expected_field_name and type_base_name == class_base_name:
+            wrappers[class_name] = {
+                "data_name": field_type,
+                "base_name": type_base_name,
+            }
+
+    if not wrappers:
+        print("    - No wrapper model patterns found to fix.")
+        return content
+
+    print(f"    - Found {len(wrappers)} wrapper pattern(s) to resolve.")
+
+    # Phase 1: Rename all original wrapper classes to NewNameWrapper.
+    # This must be done first to free up the base name.
+    # Sort by length descending to prevent partial replacements (e.g., `Class` in `ClassDetail`).
+    sorted_wrapper_names = sorted(wrappers.keys(), key=len, reverse=True)
+    for wrapper_name in sorted_wrapper_names:
+        info = wrappers[wrapper_name]
+        new_wrapper_name = f"{info['base_name']}Wrapper"
+        print(f"      - Renaming wrapper '{wrapper_name}' -> '{new_wrapper_name}'")
+        content = re.sub(r"\b" + re.escape(wrapper_name) + r"\b", new_wrapper_name, content)
+        info["new_wrapper_name"] = new_wrapper_name  # Store for phase 3
+
+    # Phase 2: Rename all data classes to the clean base name.
+    data_renames = {
+        info["data_name"]: info["base_name"] for info in wrappers.values() if info["data_name"] != info["base_name"]
+    }
+    sorted_data_names = sorted(data_renames.keys(), key=len, reverse=True)
+    for data_name in sorted_data_names:
+        base_name = data_renames[data_name]
+        print(f"      - Renaming data class '{data_name}' -> '{base_name}'")
+        content = re.sub(r"\b" + re.escape(data_name) + r"\b", base_name, content)
+
+    # Phase 3: Add `title` alias to the new wrapper class's ConfigDict.
+    for wrapper_name in sorted_wrapper_names:
+        info = wrappers[wrapper_name]
+        base_name = info["base_name"]
+        new_wrapper_name = info["new_wrapper_name"]
+
+        # Regex to find the start of the ConfigDict for the renamed wrapper.
+        config_pattern = re.compile(
+            r"(class\s+" + re.escape(new_wrapper_name) + r"\(BaseModel\):\s*\n"
+            r"\s*model_config\s*=\s*ConfigDict\()"
+        )
+
+        # The replacement string injects the title.
+        replacement = r"\1\n        title='" + base_name + "',"
+
+        # Perform the substitution.
+        content, count = config_pattern.subn(replacement, content, count=1)
+        if count > 0:
+            print(f"      - Aliasing '{new_wrapper_name}' with `title='{base_name}'`.")
+        else:
+            print(f"    - WARNING: Could not find ConfigDict for '{new_wrapper_name}' to add title alias.")
 
     return content
 
