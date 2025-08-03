@@ -221,10 +221,6 @@ class DeletePropertyGroupsResult(TypedDict):
     executionResults: ExecutionResults
 
 
-class CreatePropertyDefinitionsParameters(TypedDict):
-    propertyDefinitions: List[PropertyDefinitionArrayItem]
-
-
 class CreatePropertyDefinitionsResult(TypedDict):
     propertyIds: PropertyIdOrErrorArray
 
@@ -389,6 +385,10 @@ class SetPropertyValuesOfElementsParameters(TypedDict):
 
 class SetPropertyValuesOfAttributesParameters(TypedDict):
     attributePropertyValues: AttributePropertyValues
+
+
+class CreatePropertyDefinitionsParameters(TypedDict):
+    propertyDefinitions: List[PropertyDefinitionArrayItem]
 
 
 class GetAttributesByTypeResult(TypedDict):

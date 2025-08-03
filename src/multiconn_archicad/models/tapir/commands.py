@@ -8,16 +8,37 @@ from pydantic import BaseModel, ConfigDict, Field
 
 
 from .types import (
+    Attribute,
+    AttributeIdArrayItem,
+    AttributePropertyValue,
     AttributeType,
     BoundingBox3DArrayItem,
     BuildingMaterialDataArrayItem,
+    ClassificationSystemIdArrayItem,
     ColumnsDatum,
     Comment,
+    CompositeDataArrayItem,
+    Conflict,
+    ConnectedElement,
+    DatabaseIdArrayItem,
+    DetailsOfElement,
     DocumentRevision,
+    ElementClassification,
     ElementClassificationItemArray,
+    ElementFilter,
+    ElementIdArrayItem,
+    ElementPropertyValue,
+    ElementType,
+    ElementsWithDetail,
+    ElementsWithGDLParameter,
+    ElementsWithMoveVector,
     ErrorItem,
     FailedExecutionResult,
+    FavoritesFromElement,
     FieldModel,
+    GDLParameterList,
+    Hotlink,
+    Issue,
     IssueCommentStatus,
     IssueElementType,
     IssueId,
@@ -26,6 +47,7 @@ from .types import (
     Library,
     MeshesDatum,
     ModelViewOption,
+    NavigatorItemIdArrayItem,
     NavigatorItemIdsWithViewSetting,
     ObjectsDatum,
     PolylinesDatum,
@@ -43,11 +65,13 @@ from .types import (
     SlabsDatum,
     StoryParameters,
     StorySettings,
+    Subelement,
     SuccessfulExecutionResult,
     SurveyPoint,
     ViewSettings,
     ViewTransformations,
     WindowType,
+    ZonesDatum,
 )
 
 
@@ -380,15 +404,6 @@ class DeletePropertyGroupsResult(BaseModel):
     )
 
 
-class CreatePropertyDefinitionsParameters(BaseModel):
-    model_config = ConfigDict(
-        extra="forbid",
-    )
-    propertyDefinitions: List[PropertyDefinitionArrayItem] = Field(
-        ..., description="The parameters of the new properties."
-    )
-
-
 class CreatePropertyDefinitionsResult(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
@@ -647,3 +662,501 @@ class GenerateDocumentationParameters(BaseModel):
     destinationFolder: str = Field(
         ..., description="Destination folder for the generated documentation files."
     )
+
+
+class SetDetailsOfElementsParameters(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    elementsWithDetails: List[ElementsWithDetail] = Field(
+        ..., description="The elements with parameters."
+    )
+
+
+class MoveElementsParameters(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    elementsWithMoveVectors: List[ElementsWithMoveVector] = Field(
+        ..., description="The elements with move vector pairs."
+    )
+
+
+class GetGDLParametersOfElementsResult(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    gdlParametersOfElements: List[GDLParameterList] = Field(
+        ..., description="The GDL parameters of elements."
+    )
+
+
+class SetGDLParametersOfElementsParameters(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    elementsWithGDLParameters: List[ElementsWithGDLParameter] = Field(
+        ..., description="The elements with GDL parameters dictionary pairs."
+    )
+
+
+class SetClassificationsOfElementsParameters(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    elementClassifications: List[ElementClassification] = Field(
+        ..., description="A list of element classification identifiers."
+    )
+
+
+class CreateZonesParameters(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    zonesData: List[ZonesDatum] = Field(
+        ..., description="Array of data to create Zones."
+    )
+
+
+class CreateFavoritesFromElementsParameters(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    favoritesFromElements: List[FavoritesFromElement]
+
+
+class SetPropertyValuesOfElementsParameters(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    elementPropertyValues: List[ElementPropertyValue] = Field(
+        ..., description="A list of element property values."
+    )
+
+
+class SetPropertyValuesOfAttributesParameters(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    attributePropertyValues: List[AttributePropertyValue] = Field(
+        ..., description="A list of attribute property values."
+    )
+
+
+class CreatePropertyDefinitionsParameters(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    propertyDefinitions: List[PropertyDefinitionArrayItem] = Field(
+        ..., description="The parameters of the new properties."
+    )
+
+
+class GetAttributesByTypeResult(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    attributes: List[Attribute] = Field(..., description="Details of attributes.")
+
+
+class ReserveElementsResult(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    executionResult: SuccessfulExecutionResult | FailedExecutionResult = Field(
+        ..., description="The result of the execution."
+    )
+    conflicts: List[Conflict] | None = None
+
+
+class GetIssuesResult(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    issues: List[Issue] = Field(..., description="A list of existing issues.")
+
+
+class GetElementsByTypeParameters(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    elementType: ElementType
+    filters: List[ElementFilter] | None = Field(None, min_length=1)
+    databases: List[DatabaseIdArrayItem] | None = Field(
+        None, description="A list of Archicad databases."
+    )
+
+
+class GetAllElementsParameters(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    filters: List[ElementFilter] | None = Field(None, min_length=1)
+    databases: List[DatabaseIdArrayItem] | None = Field(
+        None, description="A list of Archicad databases."
+    )
+
+
+class GetDetailsOfElementsResult(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    detailsOfElements: List[DetailsOfElement]
+
+
+class CreateCompositesParameters(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    compositeDataArray: List[CompositeDataArrayItem] = Field(
+        ..., description="Array of data to create Composites."
+    )
+    overwriteExisting: bool | None = Field(
+        None,
+        description="Overwrite the Composite if exists with the same name. The default is false.",
+    )
+
+
+class GetDatabaseIdFromNavigatorItemIdParameters(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    navigatorItemIds: List[NavigatorItemIdArrayItem] = Field(
+        ..., description="A list of navigator item identifiers."
+    )
+
+
+class GetDatabaseIdFromNavigatorItemIdResult(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    databases: List[DatabaseIdArrayItem] = Field(
+        ..., description="A list of Archicad databases."
+    )
+
+
+class GetViewSettingsParameters(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    navigatorItemIds: List[NavigatorItemIdArrayItem] = Field(
+        ..., description="A list of navigator item identifiers."
+    )
+
+
+class GetView2DTransformationsParameters(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    databases: List[DatabaseIdArrayItem] | None = Field(
+        None, description="A list of Archicad databases."
+    )
+
+
+class GetCurrentRevisionChangesOfLayoutsParameters(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    layoutDatabaseIds: List[DatabaseIdArrayItem] = Field(
+        ..., description="A list of Archicad databases."
+    )
+
+
+class GetSelectedElementsResult(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    elements: List[ElementIdArrayItem] = Field(..., description="A list of elements.")
+
+
+class GetElementsByTypeResult(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    elements: List[ElementIdArrayItem] = Field(..., description="A list of elements.")
+    executionResultForDatabases: (
+        List[SuccessfulExecutionResult | FailedExecutionResult] | None
+    ) = Field(None, description="A list of execution results.")
+
+
+class GetAllElementsResult(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    elements: List[ElementIdArrayItem] = Field(..., description="A list of elements.")
+    executionResultForDatabases: (
+        List[SuccessfulExecutionResult | FailedExecutionResult] | None
+    ) = Field(None, description="A list of execution results.")
+
+
+class ChangeSelectionOfElementsParameters(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    addElementsToSelection: List[ElementIdArrayItem] | None = Field(
+        None, description="A list of elements."
+    )
+    removeElementsFromSelection: List[ElementIdArrayItem] | None = Field(
+        None, description="A list of elements."
+    )
+
+
+class FilterElementsParameters(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    elements: List[ElementIdArrayItem] = Field(..., description="A list of elements.")
+    filters: List[ElementFilter] | None = Field(None, min_length=1)
+
+
+class FilterElementsResult(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    elements: List[ElementIdArrayItem] = Field(..., description="A list of elements.")
+
+
+class GetDetailsOfElementsParameters(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    elements: List[ElementIdArrayItem] = Field(..., description="A list of elements.")
+
+
+class Get3DBoundingBoxesParameters(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    elements: List[ElementIdArrayItem] = Field(..., description="A list of elements.")
+
+
+class GetSubelementsOfHierarchicalElementsParameters(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    elements: List[ElementIdArrayItem] = Field(..., description="A list of elements.")
+
+
+class GetSubelementsOfHierarchicalElementsResult(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    subelements: List[Subelement]
+
+
+class GetConnectedElementsParameters(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    elements: List[ElementIdArrayItem] = Field(..., description="A list of elements.")
+    connectedElementType: ElementType
+
+
+class GetConnectedElementsResult(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    connectedElements: List[ConnectedElement]
+
+
+class HighlightElementsParameters(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    elements: List[ElementIdArrayItem] = Field(..., description="A list of elements.")
+    highlightedColors: List[List[int]] = Field(
+        ..., description="A list of colors to highlight elements."
+    )
+    wireframe3D: bool | None = Field(
+        None,
+        description="Optional parameter. Switch non highlighted elements in the 3D window to wireframe.",
+    )
+    nonHighlightedColor: List[int] | None = Field(
+        None,
+        description="Optional parameter. Color of the non highlighted elements as an [r, g, b, a] array. Each component must be in the 0-255 range.",
+        max_length=4,
+        min_length=4,
+    )
+
+
+class DeleteElementsParameters(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    elements: List[ElementIdArrayItem] = Field(..., description="A list of elements.")
+
+
+class GetGDLParametersOfElementsParameters(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    elements: List[ElementIdArrayItem] = Field(..., description="A list of elements.")
+
+
+class GetClassificationsOfElementsParameters(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    elements: List[ElementIdArrayItem] = Field(..., description="A list of elements.")
+    classificationSystemIds: List[ClassificationSystemIdArrayItem] = Field(
+        ..., description="A list of classification system identifiers."
+    )
+
+
+class CreateColumnsResult(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    elements: List[ElementIdArrayItem] = Field(..., description="A list of elements.")
+
+
+class CreateSlabsResult(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    elements: List[ElementIdArrayItem] = Field(..., description="A list of elements.")
+
+
+class CreateZonesResult(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    elements: List[ElementIdArrayItem] = Field(..., description="A list of elements.")
+
+
+class CreatePolylinesResult(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    elements: List[ElementIdArrayItem] = Field(..., description="A list of elements.")
+
+
+class CreateObjectsResult(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    elements: List[ElementIdArrayItem] = Field(..., description="A list of elements.")
+
+
+class CreateMeshesResult(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    elements: List[ElementIdArrayItem] = Field(..., description="A list of elements.")
+
+
+class GetPropertyValuesOfElementsParameters(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    elements: List[ElementIdArrayItem] = Field(..., description="A list of elements.")
+    properties: List[PropertyIdArrayItem] = Field(
+        ..., description="A list of property identifiers."
+    )
+
+
+class GetPropertyValuesOfAttributesParameters(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    attributeIds: List[AttributeIdArrayItem] = Field(
+        ..., description="A list of attributes."
+    )
+    properties: List[PropertyIdArrayItem] = Field(
+        ..., description="A list of property identifiers."
+    )
+
+
+class CreateLayersResult(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    attributeIds: List[AttributeIdArrayItem] = Field(
+        ..., description="A list of attributes."
+    )
+
+
+class CreateBuildingMaterialsResult(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    attributeIds: List[AttributeIdArrayItem] = Field(
+        ..., description="A list of attributes."
+    )
+
+
+class CreateCompositesResult(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    attributeIds: List[AttributeIdArrayItem] = Field(
+        ..., description="A list of attributes."
+    )
+
+
+class GetBuildingMaterialPhysicalPropertiesParameters(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    attributeIds: List[AttributeIdArrayItem] = Field(
+        ..., description="A list of attributes."
+    )
+
+
+class ReserveElementsParameters(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    elements: List[ElementIdArrayItem] = Field(..., description="A list of elements.")
+
+
+class ReleaseElementsParameters(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    elements: List[ElementIdArrayItem] = Field(..., description="A list of elements.")
+
+
+class UpdateDrawingsParameters(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    elements: List[ElementIdArrayItem] = Field(..., description="A list of elements.")
+
+
+class AttachElementsToIssueParameters(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    issueId: IssueId
+    elements: List[ElementIdArrayItem] = Field(..., description="A list of elements.")
+    type: IssueElementType
+
+
+class DetachElementsFromIssueParameters(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    issueId: IssueId
+    elements: List[ElementIdArrayItem] = Field(..., description="A list of elements.")
+
+
+class GetElementsAttachedToIssueResult(BaseModel):
+    model_config = ConfigDict(
+        extra="allow",
+    )
+    elements: List[ElementIdArrayItem] = Field(..., description="A list of elements.")
+
+
+class GetRevisionChangesOfElementsParameters(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    elements: List[ElementIdArrayItem] = Field(..., description="A list of elements.")
+
+
+class GetHotlinksResult(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    hotlinks: List[Hotlink] = Field(..., description="A list of hotlink nodes.")

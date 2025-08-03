@@ -822,11 +822,19 @@ class PropertyGroupArrayItem(TypedDict):
     propertyGroup: PropertyGroup
 
 
-PropertyDefinition = Any
+class EnumValue(TypedDict):
+    enumValueId: NotRequired[EnumValueId]
+    displayValue: str
+    nonLocalizedValue: NotRequired[str]
 
 
-class PropertyDefinitionArrayItem(TypedDict):
-    propertyDefinition: PropertyDefinition
+class PossibleEnumValue(TypedDict):
+    enumValue: EnumValue
+
+
+class Group(TypedDict):
+    propertyGroupId: NotRequired[PropertyGroupId]
+    name: NotRequired[str]
 
 
 class GetAddOnVersionResult(TypedDict):
@@ -1060,10 +1068,6 @@ class DeletePropertyGroupsParameters(TypedDict):
 
 class DeletePropertyGroupsResult(TypedDict):
     executionResults: ExecutionResults
-
-
-class CreatePropertyDefinitionsParameters(TypedDict):
-    propertyDefinitions: List[PropertyDefinitionArrayItem]
 
 
 class CreatePropertyDefinitionsResult(TypedDict):
@@ -1382,6 +1386,21 @@ class ZoneDetails(TypedDict):
     zCoordinate: float
 
 
+class PropertyDefinition(TypedDict):
+    name: str
+    description: str
+    type: PropertyDataType
+    isEditable: bool
+    defaultValue: NotRequired[PropertyDefaultValue]
+    possibleEnumValues: NotRequired[List[PossibleEnumValue]]
+    availability: List[ClassificationItemIdArrayItem]
+    group: Group
+
+
+class PropertyDefinitionArrayItem(TypedDict):
+    propertyDefinition: PropertyDefinition
+
+
 class ElementsWithDetail(TypedDict):
     elementId: ElementId
     details: Details
@@ -1446,6 +1465,10 @@ class SetPropertyValuesOfElementsParameters(TypedDict):
 
 class SetPropertyValuesOfAttributesParameters(TypedDict):
     attributePropertyValues: AttributePropertyValues
+
+
+class CreatePropertyDefinitionsParameters(TypedDict):
+    propertyDefinitions: List[PropertyDefinitionArrayItem]
 
 
 class Attribute(TypedDict):

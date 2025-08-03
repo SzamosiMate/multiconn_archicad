@@ -820,11 +820,19 @@ class PropertyGroupArrayItem(TypedDict):
     propertyGroup: PropertyGroup
 
 
-PropertyDefinition = Any
+class EnumValue(TypedDict):
+    enumValueId: NotRequired[EnumValueId]
+    displayValue: str
+    nonLocalizedValue: NotRequired[str]
 
 
-class PropertyDefinitionArrayItem(TypedDict):
-    propertyDefinition: PropertyDefinition
+class PossibleEnumValue(TypedDict):
+    enumValue: EnumValue
+
+
+class Group(TypedDict):
+    propertyGroupId: NotRequired[PropertyGroupId]
+    name: NotRequired[str]
 
 
 class Field(TypedDict):
@@ -1097,6 +1105,21 @@ class ZoneDetails(TypedDict):
     polygonArcs: NotRequired[List[PolyArc]]
     holes: NotRequired[Holes2D]
     zCoordinate: float
+
+
+class PropertyDefinition(TypedDict):
+    name: str
+    description: str
+    type: PropertyDataType
+    isEditable: bool
+    defaultValue: NotRequired[PropertyDefaultValue]
+    possibleEnumValues: NotRequired[List[PossibleEnumValue]]
+    availability: List[ClassificationItemIdArrayItem]
+    group: Group
+
+
+class PropertyDefinitionArrayItem(TypedDict):
+    propertyDefinition: PropertyDefinition
 
 
 class ElementsWithDetail(TypedDict):
