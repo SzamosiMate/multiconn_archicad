@@ -95,6 +95,7 @@ TapirCommandType = Literal[
     "CreatePropertyGroups",
     "CreateSlabs",
     "CreateZones",
+    "DeleteElements",
     "DeleteIssue",
     "DeletePropertyDefinitions",
     "DeletePropertyGroups",

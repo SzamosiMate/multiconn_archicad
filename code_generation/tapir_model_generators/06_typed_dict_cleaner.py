@@ -17,20 +17,10 @@ def main():
 
     # The order of these operations is critical for success.
 
-    print("Step 1: Correcting known type mapping errors (e.g., Any -> float)...")
-    content = fix_known_type_errors(content)
-
-    print("Step 2: Removing known incomplete duplicate TypedDicts...")
-    content = remove_specific_duplicates(content)
-
-    print("Step 3: Consolidating suffixed TypedDicts (e.g., 'Hole4' -> 'Hole')...")
-    content = promote_suffixed_classes(content)
-
-    # <--- NEW STEP: Fix ordering of forward-referencing TypeAliases like 'Hotlinks'.
-    print("Step 4: Reordering forward-referencing TypeAliases...")
+    print("Step 1: Reordering forward-referencing TypeAliases...")
     content = fix_forward_reference_aliases(content)
 
-    print("Step 5: Assembling and formatting the final file...")
+    print("Step 2: Assembling and formatting the final file...")
     content = assemble_final_file(content)
 
     paths.CLEANED_TYPED_DICTS.write_text(content, encoding="utf-8")
@@ -39,68 +29,13 @@ def main():
 
 ### Cleaning Logic Functions (in execution order) ###
 
-def fix_known_type_errors(content: str) -> str:
-    """Corrects specific, known type mapping errors from the generator."""
-    if "rotation: Any" in content:
-        content = content.replace("rotation: Any", "rotation: float")
-        print("    - Fixed 'rotation: Any' to 'rotation: float'.")
-    return content
-
-
-def remove_specific_duplicates(content: str) -> str:
-    """
-    Removes specific, known-to-be-incomplete TypedDict definitions that
-    the generator creates before creating the correct, suffixed version.
-    """
-    duplicate_doc_rev_pattern = re.compile(
-        r"class DocumentRevision\(TypedDict\):\n    revisionId: DocumentRevisionId\n",
-        re.MULTILINE
-    )
-    if duplicate_doc_rev_pattern.search(content):
-        content = duplicate_doc_rev_pattern.sub("", content)
-        print("    - Removed incomplete 'DocumentRevision' TypedDict.")
-
-    original_hole_pattern = re.compile(
-        r"class Hole\(TypedDict\):\s*\n    polygonOutline:.*\n(?:    .*\n)*",
-        re.MULTILINE
-    )
-    if original_hole_pattern.search(content):
-        content = original_hole_pattern.sub("", content)
-        print("    - Removed 'Hole' TypedDict with 'polygonOutline'.")
-
-    return content.strip()
-
-
-def promote_suffixed_classes(content: str) -> str:
-    """
-    Finds all TypedDict definitions ending with numbers and renames all occurrences
-    of those specific class names to their base name (e.g., Hole4 -> Hole).
-    """
-    # <--- CHANGE: Regex now finds one or more digits (\d+) instead of just '1'.
-    suffixed_class_pattern = re.compile(r"class\s+(\w+\d+)\s*\((?:TypedDict)?\):")
-    suffixed_class_names = sorted(list(set(suffixed_class_pattern.findall(content))), key=len, reverse=True)
-
-    if not suffixed_class_names:
-        print("    - No suffixed TypedDicts found to consolidate.")
-        return content
-
-    print(f"    - Found suffixed TypedDicts to consolidate: {', '.join(suffixed_class_names)}")
-
-    for suffixed_name in suffixed_class_names:
-        # <--- CHANGE: Logic now correctly removes any trailing digits.
-        base_name = re.sub(r'\d+$', '', suffixed_name)
-        print(f"    - Renaming all instances of '{suffixed_name}' to '{base_name}'...")
-        content = re.sub(r'\b' + re.escape(suffixed_name) + r'\b', base_name, content)
-
-    return content
-
 
 def fix_forward_reference_aliases(content: str) -> str:
     """
     Finds patterns like `Alias = List[Class]` defined before `class Class(TypedDict)`
-    and swaps them to ensure correct definition order.
+    and swaps them to ensure correct definition order for static analysis.
     """
-    # <--- NEW FUNCTION: This regex finds the problematic alias and class definition blocks.
+    # This regex finds the problematic alias and class definition blocks.
     # It uses a backreference `(?P=class_name)` to ensure it matches the correct class.
     pattern = re.compile(
         r"^(?P<alias_block>(?P<alias_name>\w+)\s*=\s*List\[(?P<class_name>\w+)\])\n+(?P<class_block>class\s+(?P=class_name)\(TypedDict\):(?:\n(?:    .*))+)",
@@ -134,7 +69,7 @@ def assemble_final_file(content: str) -> str:
     header = [
         "from __future__ import annotations",
         "",
-        "from typing import Any, List, Literal, TypedDict, Union",
+        "from typing import Any, List, Literal, TypedDict",
         "",
         "from typing_extensions import NotRequired",
         "",

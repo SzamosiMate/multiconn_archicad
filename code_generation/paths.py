@@ -18,8 +18,8 @@ class PipelinePaths:
 
     # --- Final Output Directories ---
     # These are derived from the base directories.
-    FINAL_MODELS_DIR = FINAL_SRC_DIR / "models"
-    FINAL_DICTS_DIR = FINAL_SRC_DIR / "dicts"
+    FINAL_MODELS_DIR = FINAL_SRC_DIR / "models" / "tapir"
+    FINAL_DICTS_DIR = FINAL_SRC_DIR / "dicts" / "tapir"
     FINAL_CORE_DIR = FINAL_SRC_DIR / "core"
 
     # --- Schema & Name List Outputs (Intermediate) ---

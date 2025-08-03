@@ -102,6 +102,12 @@
         "version": "1.1.8"
     },
     {
+        "name": "DeleteElements",
+        "group": "Element Commands",
+        "description": "Deletes elements.",
+        "version": "1.2.1"
+    },
+    {
         "name": "DeleteIssue",
         "group": "Issue Management Commands",
         "description": "Deletes the specified issue.",

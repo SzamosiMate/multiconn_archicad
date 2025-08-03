@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, List, Literal, TypedDict, Union
+from typing import Any, List, Literal, TypedDict
 
 from typing_extensions import NotRequired
 
@@ -41,18 +41,18 @@ class PolyArc(TypedDict):
     arcAngle: float
 
 
-class Field2DCoordinate(TypedDict):
+class Coordinate2D(TypedDict):
     x: float
     y: float
 
 
-class Field3DCoordinate(TypedDict):
+class Coordinate3D(TypedDict):
     x: float
     y: float
     z: float
 
 
-class Field3DDimensions(TypedDict):
+class Dimensions3D(TypedDict):
     x: float
     y: float
     z: float
@@ -217,11 +217,15 @@ IssueElementType = Literal["Creation", "Highlight", "Deletion", "Modification"]
 IssueCommentStatus = Literal["Error", "Warning", "Info", "Unknown"]
 
 
-class PropertyId(TypedDict):
+class PropertyGroupId(TypedDict):
     guid: Guid
 
 
-class PropertyGroupId(TypedDict):
+class PropertyGroupIdArrayItem(TypedDict):
+    propertyGroupId: PropertyGroupId
+
+
+class PropertyId(TypedDict):
     guid: Guid
 
 
@@ -257,37 +261,33 @@ class PropertyValue(TypedDict):
     value: str
 
 
-class PropertyValueOrErrorItem(TypedDict):
+class PropertyValueArrayItem(TypedDict):
     propertyValue: PropertyValue
 
 
-PropertyValueOrErrorItem = PropertyValueOrErrorItem | ErrorItem
+PropertyValueOrErrorItem = PropertyValueArrayItem | ErrorItem
 
 
 PropertyValues = List[PropertyValueOrErrorItem]
 
 
-class PropertyValuesOrError(TypedDict):
+class PropertyValuesArrayItem(TypedDict):
     propertyValues: PropertyValues
 
 
-PropertyValuesOrError = PropertyValuesOrError | ErrorItem
+PropertyValuesOrError = PropertyValuesArrayItem | ErrorItem
 
 
 PropertyValuesOrErrorArray = List[PropertyValuesOrError]
 
 
-class PropertyIdOrError(TypedDict):
-    propertyId: PropertyId
-
-
-PropertyIdOrError = PropertyIdOrError | ErrorItem
+PropertyIdOrError = PropertyIdArrayItem | ErrorItem
 
 
 PropertyIdOrErrorArray = List[PropertyIdOrError]
 
 
-PropertyType = Literal[
+PropertyDataType = Literal[
     "number",
     "integer",
     "string",
@@ -322,20 +322,20 @@ class NonLocalizedValueEnumId(TypedDict):
 EnumValueId = DisplayValueEnumId | NonLocalizedValueEnumId
 
 
-class EnumValueId(TypedDict):
+class EnumValueIdArrayItem(TypedDict):
     enumValueId: EnumValueId
 
 
-EnumValueIds = List[EnumValueId]
+EnumValueIds = List[EnumValueIdArrayItem]
 
 
 class UserUndefinedPropertyValue(TypedDict):
-    type: PropertyType
+    type: PropertyDataType
     status: Literal["userUndefined"]
 
 
 class NotAvailablePropertyValue(TypedDict):
-    type: PropertyType
+    type: PropertyDataType
     status: Literal["notAvailable"]
 
 
@@ -475,21 +475,21 @@ class ClassificationId(TypedDict):
     classificationItemId: NotRequired[ClassificationItemId]
 
 
-class ClassificationIdOrError(TypedDict):
+class ClassificationIdArrayItem(TypedDict):
     classificationId: ClassificationId
 
 
-ClassificationIdOrError = ClassificationIdOrError | ErrorItem
+ClassificationIdOrError = ClassificationIdArrayItem | ErrorItem
 
 
 ClassificationIdsOrErrors = List[ClassificationIdOrError]
 
 
-class ElementClassificationOrError(TypedDict):
+class ElementClassificationItemArray(TypedDict):
     classificationIds: ClassificationIdsOrErrors
 
 
-ElementClassificationOrError = ElementClassificationOrError | ErrorItem
+ElementClassificationOrError = ElementClassificationItemArray | ErrorItem
 
 
 ElementClassificationsOrErrors = List[ElementClassificationOrError]
@@ -504,11 +504,11 @@ class BoundingBox3D(TypedDict):
     zMax: float
 
 
-class BoundingBox3DOrError(TypedDict):
+class BoundingBox3DArrayItem(TypedDict):
     boundingBox3D: BoundingBox3D
 
 
-BoundingBox3DOrError = BoundingBox3DOrError | ErrorItem
+BoundingBox3DOrError = BoundingBox3DArrayItem | ErrorItem
 
 
 BoundingBoxes3D = List[BoundingBox3DOrError]
@@ -558,10 +558,26 @@ class ViewTransformations(TypedDict):
 ViewTransformationsOrError = ViewTransformations | ErrorItem
 
 
+class Hole2D(TypedDict):
+    polygonCoordinates: List[Coordinate2D]
+    polygonArcs: NotRequired[List[PolyArc]]
+
+
+Holes2D = List[Hole2D]
+
+
+class Hole3D(TypedDict):
+    polygonCoordinates: List[Coordinate3D]
+    polygonArcs: NotRequired[List[PolyArc]]
+
+
+Holes3D = List[Hole3D]
+
+
 class WallDetails(TypedDict):
     geometryType: Literal["Straight", "Trapezoid", "Polygonal"]
-    begCoordinate: Field2DCoordinate
-    endCoordinate: Field2DCoordinate
+    begCoordinate: Coordinate2D
+    endCoordinate: Coordinate2D
     zCoordinate: float
     height: float
     bottomOffset: float
@@ -569,13 +585,13 @@ class WallDetails(TypedDict):
     arcAngle: NotRequired[float]
     begThickness: NotRequired[float]
     endThickness: NotRequired[float]
-    polygonOutline: NotRequired[List[Field2DCoordinate]]
+    polygonOutline: NotRequired[List[Coordinate2D]]
     polygonArcs: NotRequired[List[PolyArc]]
 
 
 class BeamDetails(TypedDict):
-    begCoordinate: Field2DCoordinate
-    endCoordinate: Field2DCoordinate
+    begCoordinate: Coordinate2D
+    endCoordinate: Coordinate2D
     zCoordinate: float
     level: float
     offset: float
@@ -589,27 +605,28 @@ class SlabDetails(TypedDict):
     level: float
     offsetFromTop: float
     zCoordinate: float
-    polygonOutline: List[Field2DCoordinate]
+    polygonOutline: List[Coordinate2D]
     polygonArcs: NotRequired[List[PolyArc]]
-    holes: List[Hole]
+    holes: Holes2D
 
 
 class ColumnDetails(TypedDict):
-    origin: Field2DCoordinate
+    origin: Coordinate2D
     zCoordinate: float
     height: float
     bottomOffset: float
 
 
+class ObjectDetails(TypedDict):
+    origin: Coordinate3D
+    dimensions: Coordinate3D
+    angle: float
+
+
 class PolylineDetails(TypedDict):
-    coordinates: List[Field2DCoordinate]
+    coordinates: List[Coordinate2D]
     arcs: NotRequired[List[PolyArc]]
     zCoordinate: float
-
-
-class Hole(TypedDict):
-    polygonCoordinates: List[Field2DCoordinate]
-    polygonArcs: NotRequired[List[PolyArc]]
 
 
 class CurtainWallDetails(TypedDict):
@@ -618,12 +635,12 @@ class CurtainWallDetails(TypedDict):
 
 
 class CurtainWallSegmentDetails(TypedDict):
-    begCoordinate: Field3DCoordinate
-    endCoordinate: Field3DCoordinate
-    extrusionVector: Field3DCoordinate
-    gridOrigin: Field3DCoordinate
+    begCoordinate: Coordinate3D
+    endCoordinate: Coordinate3D
+    extrusionVector: Coordinate3D
+    gridOrigin: Coordinate3D
     gridAngle: float
-    arcOrigin: NotRequired[Field3DCoordinate]
+    arcOrigin: NotRequired[Coordinate3D]
     isNegativeArc: NotRequired[bool]
 
 
@@ -640,14 +657,31 @@ class FrameContour(TypedDict):
 
 
 class CurtainWallFrameDetails(TypedDict):
-    begCoordinate: Field3DCoordinate
-    endCoordinate: Field3DCoordinate
-    orientationVector: Field3DCoordinate
+    begCoordinate: Coordinate3D
+    endCoordinate: Coordinate3D
+    orientationVector: Coordinate3D
     panelConnectionHole: PanelConnectionHole
     frameContour: FrameContour
     segmentIndex: float
     className: str
     type: Literal["Deleted", "Division", "Corner", "Boundary", "Custom"]
+
+
+MeshSkirtType = Literal["SurfaceOnlyWithoutSkirt", "WithSkirt", "SolidBodyWithSkirt"]
+
+
+class Subline(TypedDict):
+    coordinates: List[Coordinate3D]
+
+
+class MeshDetails(TypedDict):
+    level: float
+    skirtType: MeshSkirtType
+    skirtLevel: float
+    polygonCoordinates: List[Coordinate3D]
+    polygonArcs: NotRequired[List[PolyArc]]
+    holes: NotRequired[Holes3D]
+    sublines: NotRequired[List[Subline]]
 
 
 class NotYetSupportedElementTypeDetails(TypedDict):
@@ -670,6 +704,13 @@ class RevisionCustomSchemeDatum(TypedDict):
 RevisionCustomSchemeData = List[RevisionCustomSchemeDatum]
 
 
+class DocumentRevisionReference(TypedDict):
+    revisionId: DocumentRevisionId
+
+
+DocumentRevisionReferences = List[DocumentRevisionReference]
+
+
 class RevisionIssue(TypedDict):
     revisionIssueId: RevisionIssueId
     id: str
@@ -680,7 +721,7 @@ class RevisionIssue(TypedDict):
     createNewRevisionInAllIncludedLayouts: bool
     markersVisibleSinceIndex: NotRequired[int]
     isIssued: bool
-    documentRevisions: NotRequired[List[DocumentRevision]]
+    documentRevisions: NotRequired[DocumentRevisionReferences]
     customSchemeData: NotRequired[RevisionCustomSchemeData]
 
 
@@ -722,11 +763,70 @@ class DocumentRevision(TypedDict):
     layoutInfo: LayoutInfo
 
 
-class RevisionChangesOfEntities(TypedDict):
-    revisionChanges: List[RevisionChange]
+class RevisionChangesArrayItem(TypedDict):
+    revisionChanges: NotRequired[List[RevisionChange]]
 
 
-RevisionChangesOfEntities = RevisionChangesOfEntities | ErrorItem
+RevisionChangesOfEntities = RevisionChangesArrayItem | ErrorItem
+
+
+class StoryParameters(TypedDict):
+    index: int
+    floorId: int
+    dispOnSections: bool
+    level: float
+    name: str
+
+
+StoriesParameters = List[StoryParameters]
+
+
+class StorySettings(TypedDict):
+    dispOnSections: bool
+    level: float
+    name: str
+
+
+StoriesSettings = List[StorySettings]
+
+
+class AutomaticZoneGeometry(TypedDict):
+    referencePosition: Coordinate2D
+
+
+class ManualZoneGeometry(TypedDict):
+    polygonCoordinates: List[Coordinate2D]
+    polygonArcs: NotRequired[List[PolyArc]]
+    holes: NotRequired[Holes2D]
+
+
+class WallSettings(TypedDict):
+    begCoordinate: NotRequired[Coordinate2D]
+    endCoordinate: NotRequired[Coordinate2D]
+    height: NotRequired[float]
+    bottomOffset: NotRequired[float]
+    offset: NotRequired[float]
+    begThickness: NotRequired[float]
+    endThickness: NotRequired[float]
+
+
+TypeSpecificSettings = WallSettings
+
+
+class PropertyGroup(TypedDict):
+    name: str
+    description: NotRequired[str]
+
+
+class PropertyGroupArrayItem(TypedDict):
+    propertyGroup: PropertyGroup
+
+
+PropertyDefinition = Any
+
+
+class PropertyDefinitionArrayItem(TypedDict):
+    propertyDefinition: PropertyDefinition
 
 
 class GetAddOnVersionResult(TypedDict):
@@ -764,30 +864,16 @@ class SetProjectInfoFieldParameters(TypedDict):
     projectInfoValue: str
 
 
-class Story(TypedDict):
-    index: int
-    floorId: int
-    dispOnSections: bool
-    level: float
-    name: str
-
-
 class GetStoriesResult(TypedDict):
     firstStory: int
     lastStory: int
     actStory: int
     skipNullFloor: bool
-    stories: List[Story]
-
-
-class Story(TypedDict):
-    dispOnSections: bool
-    level: float
-    name: str
+    stories: StoriesParameters
 
 
 class SetStoriesParameters(TypedDict):
-    stories: List[Story]
+    stories: StoriesSettings
 
 
 class OpenProjectParameters(TypedDict):
@@ -831,21 +917,11 @@ class ChangeSelectionOfElementsResult(TypedDict):
     executionResultsOfRemoveFromSelection: ExecutionResults
 
 
-class TypeSpecificDetails(TypedDict):
-    begCoordinate: NotRequired[Field2DCoordinate]
-    endCoordinate: NotRequired[Field2DCoordinate]
-    height: NotRequired[float]
-    bottomOffset: NotRequired[float]
-    offset: NotRequired[float]
-    begThickness: NotRequired[float]
-    endThickness: NotRequired[float]
-
-
 class Details(TypedDict):
     floorIndex: NotRequired[float]
     layerIndex: NotRequired[float]
     drawIndex: NotRequired[float]
-    typeSpecificDetails: NotRequired[TypeSpecificDetails]
+    typeSpecificDetails: NotRequired[TypeSpecificSettings]
 
 
 class SetDetailsOfElementsResult(TypedDict):
@@ -894,28 +970,18 @@ class CreateColumnsParameters(TypedDict):
 
 class SlabsDatum(TypedDict):
     level: float
-    polygonCoordinates: List[Field2DCoordinate]
+    polygonCoordinates: List[Coordinate2D]
     polygonArcs: NotRequired[List[PolyArc]]
-    holes: NotRequired[List[Hole]]
+    holes: NotRequired[Holes2D]
 
 
 class CreateSlabsParameters(TypedDict):
     slabsData: List[SlabsDatum]
 
 
-class Geometry(TypedDict):
-    referencePosition: Field2DCoordinate
-
-
-class Geometry(TypedDict):
-    polygonCoordinates: List[Field2DCoordinate]
-    polygonArcs: NotRequired[List[PolyArc]]
-    holes: NotRequired[List[Hole]]
-
-
 class PolylinesDatum(TypedDict):
     floorInd: NotRequired[float]
-    coordinates: List[Field2DCoordinate]
+    coordinates: List[Coordinate2D]
     arcs: NotRequired[List[PolyArc]]
 
 
@@ -925,33 +991,22 @@ class CreatePolylinesParameters(TypedDict):
 
 class ObjectsDatum(TypedDict):
     libraryPartName: str
-    coordinates: Field3DCoordinate
-    dimensions: Field3DDimensions
+    coordinates: Coordinate3D
+    dimensions: NotRequired[Dimensions3D]
 
 
 class CreateObjectsParameters(TypedDict):
     objectsData: List[ObjectsDatum]
 
 
-class Hole(TypedDict):
-    polygonCoordinates: List[Field3DCoordinate]
-    polygonArcs: NotRequired[List[PolyArc]]
-
-
-class Subline(TypedDict):
-    coordinates: List[Field3DCoordinate]
-
-
 class MeshesDatum(TypedDict):
     floorIndex: NotRequired[int]
     level: NotRequired[float]
-    skirtType: NotRequired[
-        Literal["SurfaceOnlyWithoutSkirt", "WithSkirt", "SolidBodyWithSkirt"]
-    ]
+    skirtType: NotRequired[MeshSkirtType]
     skirtLevel: NotRequired[float]
-    polygonCoordinates: List[Field3DCoordinate]
+    polygonCoordinates: List[Coordinate3D]
     polygonArcs: NotRequired[List[PolyArc]]
-    holes: NotRequired[List[Hole]]
+    holes: NotRequired[Holes3D]
     sublines: NotRequired[List[Subline]]
 
 
@@ -991,60 +1046,32 @@ class SetPropertyValuesOfAttributesResult(TypedDict):
     executionResults: ExecutionResults
 
 
-class PropertyGroup(TypedDict):
-    name: str
-    description: NotRequired[str]
-
-
-class PropertyGroup(TypedDict):
-    propertyGroup: PropertyGroup
-
-
 class CreatePropertyGroupsParameters(TypedDict):
-    propertyGroups: List[PropertyGroup]
-
-
-class PropertyGroupId(TypedDict):
-    propertyGroupId: PropertyGroupId
+    propertyGroups: List[PropertyGroupArrayItem]
 
 
 class CreatePropertyGroupsResult(TypedDict):
-    propertyGroupIds: List[PropertyGroupId]
+    propertyGroupIds: List[PropertyGroupIdArrayItem]
 
 
 class DeletePropertyGroupsParameters(TypedDict):
-    propertyGroupIds: List[PropertyGroupId]
+    propertyGroupIds: List[PropertyGroupIdArrayItem]
 
 
 class DeletePropertyGroupsResult(TypedDict):
     executionResults: ExecutionResults
 
 
-class EnumValue(TypedDict):
-    enumValueId: NotRequired[EnumValueId]
-    displayValue: str
-    nonLocalizedValue: NotRequired[str]
-
-
-class PossibleEnumValue(TypedDict):
-    enumValue: EnumValue
-
-
-class Group(TypedDict):
-    propertyGroupId: NotRequired[PropertyGroupId]
-    name: NotRequired[str]
+class CreatePropertyDefinitionsParameters(TypedDict):
+    propertyDefinitions: List[PropertyDefinitionArrayItem]
 
 
 class CreatePropertyDefinitionsResult(TypedDict):
     propertyIds: PropertyIdOrErrorArray
 
 
-class PropertyId(TypedDict):
-    propertyId: PropertyId
-
-
 class DeletePropertyDefinitionsParameters(TypedDict):
-    propertyIds: List[PropertyId]
+    propertyIds: List[PropertyIdArrayItem]
 
 
 class DeletePropertyDefinitionsResult(TypedDict):
@@ -1237,9 +1264,6 @@ class GenerateDocumentationParameters(TypedDict):
     destinationFolder: str
 
 
-AttributePropertyValues = Any
-
-
 class ElementId(TypedDict):
     guid: Guid
 
@@ -1248,8 +1272,11 @@ class AttributeId(TypedDict):
     guid: Guid
 
 
+GDLParameterArray = List[GDLParameterDetails]
+
+
 class GDLParameterList(TypedDict):
-    parameters: List[GDLParameterDetails]
+    parameters: GDLParameterArray
 
 
 class ElementPropertyValue(TypedDict):
@@ -1259,6 +1286,15 @@ class ElementPropertyValue(TypedDict):
 
 
 ElementPropertyValues = List[ElementPropertyValue]
+
+
+class AttributePropertyValue(TypedDict):
+    attributeId: AttributeId
+    propertyId: PropertyId
+    propertyValue: PropertyValue
+
+
+AttributePropertyValues = List[AttributePropertyValue]
 
 
 NormalOrUserUndefinedPropertyValue = (
@@ -1317,31 +1353,32 @@ class LinkData(TypedDict):
 
 
 class DetailWorksheetDetails(TypedDict):
-    basePoint: Field2DCoordinate
+    basePoint: Coordinate2D
     angle: float
     markerId: ElementId
     detailName: str
     detailIdStr: str
     isHorizontalMarker: bool
     isWindowOpened: bool
-    clipPolygon: List[Field2DCoordinate]
+    clipPolygon: List[Coordinate2D]
     linkData: LinkData
 
 
 class LibPartBasedElementDetails(TypedDict):
     libPart: LibPartDetails
     ownerElementId: NotRequired[ElementId]
+    ownerElementType: NotRequired[ElementType]
 
 
 class ZoneDetails(TypedDict):
     name: str
     numberStr: str
     categoryAttributeId: AttributeId
-    stampPosition: Field2DCoordinate
+    stampPosition: Coordinate2D
     isManual: bool
-    polygonCoordinates: List[Field2DCoordinate]
+    polygonCoordinates: List[Coordinate2D]
     polygonArcs: NotRequired[List[PolyArc]]
-    holes: NotRequired[List[Hole]]
+    holes: NotRequired[Holes2D]
     zCoordinate: float
 
 
@@ -1370,7 +1407,7 @@ class GetGDLParametersOfElementsResult(TypedDict):
 
 class ElementsWithGDLParameter(TypedDict):
     elementId: ElementId
-    gdlParameters: GDLParameterList
+    gdlParameters: GDLParameterArray
 
 
 class SetGDLParametersOfElementsParameters(TypedDict):
@@ -1386,8 +1423,8 @@ class ZonesDatum(TypedDict):
     name: str
     numberStr: str
     categoryAttributeId: NotRequired[AttributeId]
-    stampPosition: NotRequired[Field2DCoordinate]
-    geometry: Geometry | Geometry
+    stampPosition: NotRequired[Coordinate2D]
+    geometry: AutomaticZoneGeometry | ManualZoneGeometry
 
 
 class CreateZonesParameters(TypedDict):
@@ -1409,25 +1446,6 @@ class SetPropertyValuesOfElementsParameters(TypedDict):
 
 class SetPropertyValuesOfAttributesParameters(TypedDict):
     attributePropertyValues: AttributePropertyValues
-
-
-class PropertyDefinition(TypedDict):
-    name: str
-    description: str
-    type: PropertyType
-    isEditable: bool
-    defaultValue: NotRequired[PropertyDefaultValue]
-    possibleEnumValues: NotRequired[List[PossibleEnumValue]]
-    availability: List[ClassificationItemIdArrayItem]
-    group: Group
-
-
-class PropertyDefinition(TypedDict):
-    propertyDefinition: PropertyDefinition
-
-
-class CreatePropertyDefinitionsParameters(TypedDict):
-    propertyDefinitions: List[PropertyDefinition]
 
 
 class Attribute(TypedDict):
@@ -1480,7 +1498,7 @@ Databases = List[DatabaseIdArrayItem]
 
 
 class CurtainWallPanelDetails(TypedDict):
-    polygonCoordinates: List[Field3DCoordinate]
+    polygonCoordinates: List[Coordinate3D]
     isHidden: bool
     segmentIndex: float
     className: str
@@ -1500,6 +1518,7 @@ TypeSpecificDetails = (
     | CurtainWallSegmentDetails
     | CurtainWallPanelDetails
     | CurtainWallFrameDetails
+    | MeshDetails
     | NotYetSupportedElementTypeDetails
 )
 
@@ -1670,6 +1689,10 @@ class HighlightElementsParameters(TypedDict):
     highlightedColors: List[List[int]]
     wireframe3D: NotRequired[bool]
     nonHighlightedColor: NotRequired[List[int]]
+
+
+class DeleteElementsParameters(TypedDict):
+    elements: Elements
 
 
 class GetGDLParametersOfElementsParameters(TypedDict):
