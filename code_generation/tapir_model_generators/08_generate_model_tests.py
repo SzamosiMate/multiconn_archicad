@@ -63,8 +63,8 @@ import json
 from hypothesis import given, settings
 from hypothesis_jsonschema import from_schema
 
-from multiconn_archicad.models.types import *
-from multiconn_archicad.models.commands import *
+from multiconn_archicad.models.tapir.types import *
+from multiconn_archicad.models.tapir.commands import *
 """
 
     test_functions = []
