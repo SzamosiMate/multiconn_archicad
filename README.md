@@ -23,7 +23,7 @@
 You can install the latest version of the package from the following link using `pip`:
 
 ```bash
-pip install https://github.com/SzamosiMate/multiconn_archicad/releases/latest/download/multiconn_archicad-0.3.3-py3-none-any.whl
+pip install https://github.com/SzamosiMate/multiconn_archicad/releases/download/v0.3.3/multiconn_archicad-0.3.3-py3-none-any.whl
 ```
 
 **Prerequisites: Tapir Add-On is Required**
@@ -38,7 +38,7 @@ This package **critically depends** on the [Tapir Archicad Add-On](https://githu
 
 ## Usage
 
-⚠️**Disclaimer:** MultiConn ArchiCAD is functional and ready for use, but still in active development. While it hasn’t been extensively tested and its interfaces may change in future updates, it's perfectly suitable for quick scripts and one-off automation tasks. If you're building something more long-term or critical, consider pinning the version you’re using and keeping an eye out for future changes.
+⚠️**Disclaimer:** MultiConn ArchiCAD is functional, stable in practice, and ready for use — it has been successfully used in several recent projects. That said, the library is still under active development: its interfaces may evolve in future releases, and it hasn’t yet undergone extensive formal testing. It’s well-suited for quick scripts and one-off automation tasks. If you’re building something long-term or mission-critical, we recommend pinning the version you’re using and keeping an eye on future updates.
 
 ### Actions - managing the connection
 Actions allow you to manage the state of the connection object. You can connect to or disconnect from Archicad instances, quit instances, or refresh ports. All actions can have multiple types of inputs. For each type of input you have to call the corresponding method of the action. To connect to all available ArchiCAD instances, you have to call the .all() method on .connect ( e.g. `conn.connect.all()`). The aim of this method is to provide better autocompletion.
