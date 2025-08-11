@@ -1,0 +1,76 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "description": "Returns the identifier of every element in the current plan.",
+  "definitions": {
+    "command_parameters": {
+      "type": "object",
+      "properties": {
+      },
+      "additionalProperties": false
+    },
+    "response_parameters": {
+      "type": "object",
+      "properties": {
+        "elements": {
+          "$ref": "APITypes.json#/definitions/Elements"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elements"
+      ]
+    },
+    "examples": [
+      {
+        "command_example": {
+          "command": "API.GetAllElements"
+        },
+        "response_example": {
+          "succeeded": true,
+          "result": {
+            "elements": [
+              {
+                "elementId": {
+                  "guid": "0F7943AC-48FA-C74E-8ACE-D1CB0DB0DBB7"
+                }
+              },
+              {
+                "elementId": {
+                  "guid": "63BA003E-4F4D-AA4A-8FBC-57379F2CDB98"
+                }
+              },
+              {
+                "elementId": {
+                  "guid": "6C7F82AF-A362-4CFD-AF06-3CA1668D92F1"
+                }
+              },
+              {
+                "elementId": {
+                  "guid": "65237B0F-73C3-4DB3-9E94-3E1931F84AA0"
+                }
+              },
+              {
+                "elementId": {
+                  "guid": "5885E8F5-F67D-4CB9-987A-14EC733C8C27"
+                }
+              },
+              {
+                "elementId": {
+                  "guid": "6D21CBD5-EB75-4FC8-B20D-D4BB0470D827"
+                }
+              },
+              {
+                "elementId": {
+                  "guid": "23CCB727-2A40-4441-8789-0F7B9423A8FB"
+                }
+              }
+            ]
+          }
+        }
+      }
+    ],
+    "see_also": [
+      "Element Information"
+    ]
+  }
+}

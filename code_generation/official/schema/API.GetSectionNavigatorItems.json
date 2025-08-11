@@ -1,0 +1,87 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "description": "Returns the details of the section navigator items identified by their Ids.",
+  "definitions": {
+    "command_parameters": {
+      "type": "object",
+      "properties": {
+        "navigatorItemIds": {
+          "$ref": "APINavigatorTypes.json#/definitions/NavigatorItemIds"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "navigatorItemIds"
+      ]
+    },
+    "response_parameters": {
+      "type": "object",
+      "properties": {
+        "navigatorItems": {
+          "$ref": "APINavigatorTypes.json#/definitions/SectionNavigatorItems"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "navigatorItems"
+      ]
+    },
+    "examples": [
+      {
+        "command_example": {
+          "command": "API.GetSectionNavigatorItems",
+          "parameters": {
+            "navigatorItemIds": [
+              {
+                "navigatorItemId": {
+                  "guid": "527B0307-1EB3-482F-9B2B-74CF1D1D6278"
+                }
+              },
+              {
+                "navigatorItemId": {
+                  "guid": "F4C337DB-9CB4-4274-8E89-129F825E31CE"
+                }
+              },
+              {
+                "navigatorItemId": {
+                  "guid": "BAD00BAD-0000-0000-0000-000000000000"
+                }
+              }
+            ]
+          }
+        },
+        "response_example": {
+          "succeeded": true,
+          "result": {
+            "navigatorItems": [
+              {
+                "sectionNavigatorItem": {
+                  "navigatorItemId": {
+                    "guid": "527B0307-1EB3-482F-9B2B-74CF1D1D6278"
+                  },
+                  "prefix": "S-01",
+                  "name": "Building Section"
+                }
+              },
+              {
+                "sectionNavigatorItem": {
+                  "navigatorItemId": {
+                    "guid": "F4C337DB-9CB4-4274-8E89-129F825E31CE"
+                  },
+                  "prefix": "S-02",
+                  "name": "Building Section"
+                }
+              },
+              {
+                "error": {
+                  "code": 7400,
+                  "message": "Navigator item not found (navigator item guid: \"BAD00BAD-0000-0000-0000-000000000000\")"
+                }
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

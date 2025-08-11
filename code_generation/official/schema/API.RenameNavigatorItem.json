@@ -1,0 +1,92 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "description": "Renames an existing navigator item by specifying either the name or the ID, or both.",
+  "definitions": {
+    "command_parameters": {
+      "oneOf": [
+        {
+          "title": "navigatorItemId and newName",
+          "type": "object",
+          "properties": {
+            "navigatorItemId": {
+              "$ref": "APINavigatorTypes.json#/definitions/NavigatorItemId"
+            },
+            "newName": {
+              "description": "New name of the navigator item.",
+              "type": "string"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "navigatorItemId",
+            "newName"
+          ]
+        },
+        {
+          "title": "navigatorItemId and newId",
+          "type": "object",
+          "properties": {
+            "navigatorItemId": {
+              "$ref": "APINavigatorTypes.json#/definitions/NavigatorItemId"
+            },
+            "newId": {
+              "description": "New ID of the navigator item.",
+              "type": "string"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "navigatorItemId",
+            "newId"
+          ]
+        },
+        {
+          "title": "navigatorItemId, newName and newId",
+          "type": "object",
+          "properties": {
+            "navigatorItemId": {
+              "$ref": "APINavigatorTypes.json#/definitions/NavigatorItemId"
+            },
+            "newName": {
+              "description": "New name of the navigator item.",
+              "type": "string"
+            },
+            "newId": {
+              "description": "New ID of the navigator item.",
+              "type": "string"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "navigatorItemId",
+            "newName",
+            "newId"
+          ]
+        }
+      ]
+    },
+    "response_parameters": {
+      "type": "object",
+      "properties": {
+      },
+      "additionalProperties": false
+    },
+    "examples": [
+      {
+        "command_example": {
+          "command": "API.RenameNavigatorItem",
+          "parameters": {
+            "navigatorItemId": {
+              "guid": "301B64C3-0CFD-4019-B8A0-AB4A058B0DEB"
+            },
+            "newName": "MyNewName",
+            "newId": "MyNewId"
+          }
+        },
+        "response_example": {
+          "succeeded": true
+        }
+      }
+    ]
+  }
+}

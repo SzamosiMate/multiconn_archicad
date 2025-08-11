@@ -1,0 +1,93 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "definitions": {
+    "ClassificationItemAvailability": {
+      "type": "object",
+      "description": "Contains the ids of property definitions available for the given classification item.",
+      "properties": {
+        "classificationItemId": {
+          "$ref": "APIClassificationTypes.json#/definitions/ClassificationItemId"
+        },
+        "availableProperties": {
+          "$ref": "APIPropertyTypes.json#/definitions/PropertyIds"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "classificationItemId",
+        "availableProperties"
+      ]
+    },
+    "ClassificationItemAvailabilityOrError": {
+      "type": "object",
+      "description": "Contains the ids of property definitions available for the given classification item or error.",
+      "oneOf": [
+        {
+          "title": "classificationItemAvailability",
+          "properties": {
+            "classificationItemAvailability": {
+              "$ref": "#/definitions/ClassificationItemAvailability"
+            }
+          },
+          "additionalProperties": false,
+          "required": [ "classificationItemAvailability" ]
+        },
+        {
+          "title": "error",
+          "$ref": "APITypes.json#/definitions/ErrorItem"
+        }
+      ]
+    },
+    "ClassificationItemAvailabilityList": {
+      "type": "array",
+      "description": "A list of classification item avalabilities.",
+      "items": {
+        "$ref": "#/definitions/ClassificationItemAvailabilityOrError"
+      }
+    },
+    "PropertyDefinitionAvailability": {
+      "type": "object",
+      "description": "Contains the ids of classification items the given property definiton is available for.",
+      "properties": {
+        "propertyId": {
+          "$ref": "APIPropertyTypes.json#/definitions/PropertyId"
+        },
+        "availableClassifications": {
+          "$ref": "APIClassificationTypes.json#/definitions/ClassificationItemIds"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "propertyId",
+        "availableClassifications"
+      ]
+    },
+    "PropertyDefinitionAvailabilityOrError": {
+      "type": "object",
+      "description": "Contains the ids of classification items the given property definiton is available for or error.",
+      "oneOf": [
+        {
+          "title": "propertyAvailability",
+          "properties": {
+            "propertyDefinitionAvailability": {
+              "$ref": "#/definitions/PropertyDefinitionAvailability"
+            }
+          },
+          "additionalProperties": false,
+          "required": [ "propertyDefinitionAvailability" ]
+        },
+        {
+          "title": "error",
+          "$ref": "APITypes.json#/definitions/ErrorItem"
+        }
+      ]
+    },
+    "PropertyDefinitionAvailabilityList": {
+      "type": "array",
+      "description": "A list of classification item avalabilities.",
+      "items": {
+        "$ref": "#/definitions/PropertyDefinitionAvailabilityOrError"
+      }
+    }
+  }
+}

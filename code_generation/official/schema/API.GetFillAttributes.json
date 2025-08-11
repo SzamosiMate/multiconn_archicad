@@ -1,0 +1,102 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "description": "Returns the detailed fill attributes identified by their GUIDs.",
+  "definitions": {
+    "command_parameters": {
+      "type": "object",
+      "properties": {
+        "attributeIds": {
+          "$ref": "APIAttributeTypes.json#/definitions/AttributeIds"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "attributeIds"
+      ]
+    },
+    "response_parameters": {
+      "type": "object",
+      "properties": {
+        "attributes": {
+          "$ref": "APIAttributeTypes.json#/definitions/FillAttributes"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "attributes"
+      ]
+    },
+    "examples": [
+      {
+        "command_example": {
+          "command": "API.GetFillAttributes",
+          "parameters": {
+            "attributeIds": [
+              {
+                "attributeId": {
+                  "guid": "87E1F859-C78F-4188-94DC-5FF4616F7B75"
+                }
+              },
+              {
+                "attributeId": {
+                  "guid": "DE881F49-41D1-4252-A6A4-FFD9590BEB82"
+                }
+              },
+              {
+                "attributeId": {
+                  "guid": "11111BAD-0000-0000-0000-BAD111111111"
+                }
+              },
+              {
+                "attributeId": {
+                  "guid": "F10F261B-1A5E-443B-9C03-3B023E67F319"
+                }
+              }
+            ]
+          }
+        },
+        "response_example": {
+          "succeeded": true,
+          "result": {
+            "attributes": [
+              {
+                "fillAttribute": {
+                  "attributeId": {
+                    "guid": "87E1F859-C78F-4188-94DC-5FF4616F7B75"
+                  },
+                  "name": "Common Brick",
+                  "subType": "Vector",
+                  "pattern": 9819010546270478865,
+                  "appearanceType": "ScaleIndependent"
+                }
+              },
+              {
+                "fillAttribute": {
+                  "attributeId": {
+                    "guid": "DE881F49-41D1-4252-A6A4-FFD9590BEB82"
+                  },
+                  "name": "75 %",
+                  "subType": "Solid",
+                  "pattern": 15958467311497108855,
+                  "appearanceType": "ScaleWithPlan"
+                }
+              },
+              {
+                "error": {
+                  "code": 6100,
+                  "message": "Attribute is missing"
+                }
+              },
+              {
+                "error": {
+                  "code": 6103,
+                  "message": "Attribute specified by guid has wrong type (GUID: F10F261B-1A5E-443B-9C03-3B023E67F319)"
+                }
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,76 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "description": "Returns the details of classification systems identified by their GUIDs.",
+  "definitions": {
+    "command_parameters": {
+      "type": "object",
+      "properties": {
+        "classificationSystemIds": {
+          "$ref": "APIClassificationTypes.json#/definitions/ClassificationSystemIds"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "classificationSystemIds"
+      ]
+    },
+    "response_parameters": {
+      "type": "object",
+      "properties": {
+        "classificationSystems": {
+          "$ref": "APIClassificationTypes.json#/definitions/ClassificationSystemsOrErrors"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "classificationSystems"
+      ]
+    },
+    "examples": [
+      {
+        "command_example": {
+          "command": "API.GetClassificationSystems",
+          "parameters": {
+            "classificationSystemIds": [
+              {
+                "classificationSystemId": {
+                  "guid": "632C30E5-2B82-4A75-BFAD-D52FEBCE9A4A"
+                }
+              },
+              {
+                "classificationSystemId": {
+                  "guid": "11111111-2222-3333-4444-555555555555"
+                }
+              }
+            ]
+          }
+        },
+        "response_example": {
+          "succeeded": true,
+          "result": {
+            "classificationSystems": [
+              {
+                "classificationSystem": {
+                  "classificationSystemId": {
+                    "guid": "632C30E5-2B82-4A75-BFAD-D52FEBCE9A4A"
+                  },
+                  "name": "Archicad Classification",
+                  "description": "",
+                  "source": "www.graphisoft.com",
+                  "version": "v 2.0",
+                  "date": "2019-03-15"
+                }
+              },
+              {
+                "error": {
+                  "code": 6201,
+                  "message": "Classification system not found (system guid: \"11111111-2222-3333-4444-555555555555\")"
+                }
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

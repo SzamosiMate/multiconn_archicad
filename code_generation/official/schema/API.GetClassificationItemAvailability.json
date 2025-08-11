@@ -1,0 +1,88 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "description": "Returns the ids of property definitions available for a given classification item.",
+  "definitions": {
+    "command_parameters": {
+      "type": "object",
+      "properties": {
+        "classificationItemIds": {
+          "$ref": "APIClassificationTypes.json#/definitions/ClassificationItemIds"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "classificationItemIds"
+      ]
+    },
+    "response_parameters": {
+      "type": "object",
+      "properties": {
+        "classificationItemAvailabilityList": {
+          "$ref": "APIClassificationAndPropertyAvailabilityTypes.json#/definitions/ClassificationItemAvailabilityList"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "classificationItemAvailabilityList"
+      ]
+    },
+    "examples": [
+      {
+        "command_example": {
+          "command": "API.GetClassificationItemAvailability",
+          "parameters": {
+            "classificationItemIds": [
+              {
+                "classificationItemId": {
+                  "guid": "0EE23E04-F4FC-4DAA-AE52-01A3B0503050"
+                }
+              },
+              {
+                "classificationItemId": {
+                  "guid": "11111111-2222-3333-4444-555555555555"
+                }
+              }
+            ]
+          }
+        },
+        "response_example": {
+          "succeeded": true,
+          "result": {
+            "classificationItemAvailabilityList": [
+              {
+                "classificationItemAvailability": {
+                  "classificationItemId": {
+                    "guid": "0EE23E04-F4FC-4DAA-AE52-01A3B0503050"
+                  },
+                  "availableProperties": [
+                    {
+                      "propertyId": {
+                        "guid": "F6F67733-1DC1-442A-8CF4-ACD2DF7E62C6"
+                      }
+                    },
+                    {
+                      "propertyId": {
+                        "guid": "9CC16F4D-9754-B744-B3F8-20BA074A3B2D"
+                      }
+                    },
+                    {
+                      "propertyId": {
+                        "guid": "6F4A46AC-AE91-47E6-BF4A-9F9AB01A4986"
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "error": {
+                  "code": 6200,
+                  "message": "Classification item not found (item guid: \"11111111-2222-3333-4444-555555555555\")"
+                }
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

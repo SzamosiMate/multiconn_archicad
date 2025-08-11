@@ -1,0 +1,87 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "description" : "Creates a new layout.",
+  "definitions": {
+    "command_parameters": {
+      "type": "object",
+      "properties": {
+        "layoutName": {
+          "type": "string",
+          "description": "The name of the layout.",
+          "minLength": 1
+        },
+        "layoutParameters": {
+          "$ref": "APITypes.json#/definitions/LayoutParameters"
+        },
+        "masterNavigatorItemId": {
+          "$ref": "APINavigatorTypes.json#/definitions/NavigatorItemId"
+        },
+        "parentNavigatorItemId": {
+          "$ref": "APINavigatorTypes.json#/definitions/NavigatorItemId"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "layoutName",
+        "layoutParameters",
+        "masterNavigatorItemId",
+        "parentNavigatorItemId"
+      ]
+    },
+    "response_parameters": {
+      "type": "object",
+      "properties": {
+        "createdNavigatorItemId": {
+          "description": "The ID of the new layout navigator item in the layout book.",
+          "$ref": "APINavigatorTypes.json#/definitions/NavigatorItemId"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "createdNavigatorItemId"
+      ]
+    },
+    "examples": [
+      {
+        "command_example" : {
+          "command": "API.CreateLayout",
+          "parameters": {
+            "layoutName": "Luke",
+            "masterNavigatorItemId": {
+              "guid": "592BECD1-1C86-4637-8FD1-6ED44D4C6251"
+            },
+            "parentNavigatorItemId": {
+              "guid": "ECD23F92-5D0B-4E20-AC21-1700403E565E"
+            },
+           "layoutParameters": {
+            "horizontalSize": 600,
+            "verticalSize": 400,
+            "leftMargin": 10,
+            "topMargin": 10,
+            "rightMargin": 10,
+            "bottomMargin": 10,
+            "customLayoutNumber": "",
+            "customLayoutNumbering": false,
+            "doNotIncludeInNumbering": false,
+            "displayMasterLayoutBelow": false,
+            "layoutPageNumber": 1,
+            "actPageIndex": 1,
+            "currentRevisionId": "",
+            "currentFinalRevisionId": "",
+            "hasIssuedRevision": false,
+            "hasActualRevision": false
+            }
+          }
+        },
+        "response_example": {
+          "succeeded": true,
+          "result": {
+            "createdNavigatorItemId": {
+              "guid": "E3FFE769-431C-4F6B-A12E-A0FBFE321573"
+            }
+          }
+        }
+      }
+    ]
+  }
+}

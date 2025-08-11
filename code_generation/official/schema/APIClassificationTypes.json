@@ -1,0 +1,341 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "definitions": {
+    "ClassificationSystemId": {
+      "type": "object",
+      "description": "The identifier of a classification system.",
+      "properties": {
+        "guid": {
+          "$ref": "APITypes.json#/definitions/Guid"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "guid"
+      ]
+    },
+    "ClassificationSystemIdArrayItem": {
+      "type": "object",
+      "properties": {
+        "classificationSystemId": {
+          "$ref": "#/definitions/ClassificationSystemId"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "classificationSystemId"
+      ]
+    },
+    "ClassificationSystemIds": {
+      "type": "array",
+      "description": "A list of classification system identifiers.",
+      "items": {
+        "$ref": "#/definitions/ClassificationSystemIdArrayItem"
+      }
+    },
+    "ClassificationItemId": {
+      "type": "object",
+      "description": "The identifier of a classification item.",
+      "properties": {
+        "guid": {
+          "$ref": "APITypes.json#/definitions/Guid"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "guid"
+      ]
+    },
+    "ClassificationItemIdArrayItem": {
+      "type": "object",
+      "properties": {
+        "classificationItemId": {
+          "$ref": "#/definitions/ClassificationItemId"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "classificationItemId"
+      ]
+    },
+    "ClassificationItemIds": {
+      "type": "array",
+      "description": "A list of classification item identifiers.",
+      "items": {
+        "$ref": "#/definitions/ClassificationItemIdArrayItem"
+      }
+    },
+    "ClassificationId": {
+      "type": "object",
+      "description": "The element classification identifier.",
+      "properties": {
+        "classificationSystemId": {
+          "$ref": "#/definitions/ClassificationSystemId"
+        },
+        "classificationItemId": {
+          "$ref": "#/definitions/ClassificationItemId",
+          "description": "The element's classification in the given system. If no value is specified here, the element is Unclassified in this system."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "classificationSystemId"
+      ]
+    },
+    "ClassificationIdOrError": {
+      "type": "object",
+      "description": "A classification identifier or an error.",
+      "oneOf": [
+        {
+          "title": "classificationId",
+          "properties": {
+            "classificationId": {
+              "$ref": "#/definitions/ClassificationId"
+            }
+          },
+          "additionalProperties": false,
+          "required": [ "classificationId" ]
+        },
+        {
+          "title": "error",
+          "$ref": "APITypes.json#/definitions/ErrorItem"
+        }
+      ]
+    },
+    "ClassificationIdsOrErrors": {
+      "type": "array",
+      "description": "A list of element classification identifiers or errors.",
+      "items": {
+        "$ref": "#/definitions/ClassificationIdOrError"
+      }
+    },
+    "ElementClassification": {
+      "type": "object",
+      "description": "The classification of an element.",
+      "properties": {
+        "elementId": {
+          "$ref": "APITypes.json#/definitions/ElementId"
+        },
+        "classificationId": {
+          "$ref": "#/definitions/ClassificationId"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elementId",
+        "classificationId"
+      ]
+    },
+    "ElementClassifications": {
+      "type": "array",
+      "description": "A list of element classification identifiers.",
+      "items": {
+        "$ref": "#/definitions/ElementClassification"
+      }
+    },
+    "ElementClassificationOrError": {
+      "type": "object",
+      "description": "Element classification identifiers or errors.",
+      "oneOf": [
+        {
+          "title": "classificationIds",
+          "properties": {
+            "classificationIds": {
+              "$ref": "#/definitions/ClassificationIdsOrErrors"
+            }
+          },
+          "additionalProperties": false,
+          "required": [ "classificationIds" ]
+        },
+        {
+          "title": "error",
+          "$ref": "APITypes.json#/definitions/ErrorItem"
+        }
+      ]
+    },
+    "ElementClassificationsOrErrors": {
+      "type": "array",
+      "description": "A list of element classification identifiers or errors.",
+      "items": {
+        "$ref": "#/definitions/ElementClassificationOrError"
+      }
+    },
+    "ClassificationItemArrayItem": {
+      "type": "object",
+      "properties": {
+        "classificationItem": {
+          "$ref": "#/definitions/ClassificationItemInTree"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "classificationItem"
+      ]
+    },
+    "ClassificationItems": {
+      "type": "array",
+      "description": "A list of classification items.",
+      "items": {
+        "$ref": "#/definitions/ClassificationItemArrayItem"
+      }
+    },
+    "ClassificationItemsOrErrors": {
+      "type": "array",
+      "description": "A list of classification items or errors.",
+      "items": {
+        "$ref": "#/definitions/ClassificationItemOrError"
+      }
+    },
+    "ClassificationItemDetails": {
+      "type": "object",
+      "description": "The details of a classification item.",
+      "properties": {
+        "classificationItemId": {
+          "$ref": "#/definitions/ClassificationItemId"
+        },
+        "id": {
+          "type": "string",
+          "description": "The unique identifier of the classification item as specified by the user."
+        },
+        "name": {
+          "type": "string",
+          "description": "The display name of the classification item."
+        },
+        "description": {
+          "type": "string",
+          "description": "The description of the classification item."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "classificationItemId",
+        "id",
+        "name",
+        "description"
+      ]
+    },
+    "ClassificationItemInTree": {
+      "type": "object",
+      "description": "The details of a classification item.",
+      "properties": {
+        "classificationItemId": {
+          "$ref": "#/definitions/ClassificationItemId"
+        },
+        "id": {
+          "type": "string",
+          "description": "The unique identifier of the classification item as specified by the user."
+        },
+        "name": {
+          "type": "string",
+          "description": "The display name of the classification item."
+        },
+        "description": {
+          "type": "string",
+          "description": "The description of the classification item."
+        },
+        "children": {
+          "$ref": "#/definitions/ClassificationItems"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "classificationItemId",
+        "id",
+        "name",
+        "description"
+      ]
+    },
+    "ClassificationItemOrError": {
+      "type": "object",
+      "description": "A classification item or an error.",
+      "oneOf": [
+        {
+          "title": "classificationItem",
+          "properties": {
+            "classificationItem": {
+              "$ref": "#/definitions/ClassificationItemDetails"
+            }
+          },
+          "additionalProperties": false,
+          "required": [ "classificationItem" ]
+        },
+        {
+          "title": "error",
+          "$ref": "APITypes.json#/definitions/ErrorItem"
+        }
+      ]
+    },
+    "ClassificationSystem": {
+      "type": "object",
+      "description": "The details of a classification system.",
+      "properties": {
+        "classificationSystemId": {
+          "$ref": "#/definitions/ClassificationSystemId"
+        },
+        "name": {
+          "type": "string",
+          "description": "The display name of the classification system."
+        },
+        "description": {
+          "type": "string",
+          "description": "The description of the classification system."
+        },
+        "source": {
+          "type": "string",
+          "description": "The source of the classification system (e.g. URL to a classification system standard)."
+        },
+        "version": {
+          "type": "string",
+          "description": "The version of the classification system."
+        },
+        "date": {
+          "$ref": "APITypes.json#/definitions/Date",
+          "description": "The release date of the classification system's current version."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "classificationSystemId",
+        "name",
+        "description",
+        "source",
+        "version",
+        "date"
+      ]
+    },
+    "ClassificationSystems": {
+      "type": "array",
+      "description": "A list of classification systems.",
+      "items": {
+        "$ref": "#/definitions/ClassificationSystem"
+      }
+    },
+    "ClassificationSystemOrError": {
+      "type": "object",
+      "description": "Contains a classification system or error.",
+      "oneOf": [
+        {
+          "title": "classificationSystem",
+          "properties": {
+            "classificationSystem": {
+              "$ref": "#/definitions/ClassificationSystem"
+            }
+          },
+          "additionalProperties": false,
+          "required": [ "classificationSystem" ]
+        },
+        {
+          "title": "error",
+          "$ref": "APITypes.json#/definitions/ErrorItem"
+        }
+      ]
+    },
+    "ClassificationSystemsOrErrors": {
+      "type": "array",
+      "description": "A list of classification systems or errors.",
+      "items": {
+        "$ref": "#/definitions/ClassificationSystemOrError"
+      }
+    }
+  }
+}

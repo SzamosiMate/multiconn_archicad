@@ -1,5 +1,5 @@
 from datamodel_code_generator import DataModelType, InputFileType, generate, LiteralType
-from code_generation.paths import paths
+from code_generation.tapir.paths import paths
 
 generate(
     paths.MASTER_SCHEMA_OUTPUT,

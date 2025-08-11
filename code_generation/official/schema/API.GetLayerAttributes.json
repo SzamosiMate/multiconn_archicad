@@ -1,0 +1,110 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "description": "Returns the detailed layer attributes identified by their GUIDs.",
+  "definitions": {
+    "command_parameters": {
+      "type": "object",
+      "properties": {
+        "attributeIds": {
+          "$ref": "APIAttributeTypes.json#/definitions/AttributeIds"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "attributeIds"
+      ]
+    },
+    "response_parameters": {
+      "type": "object",
+      "properties": {
+        "attributes": {
+          "$ref": "APIAttributeTypes.json#/definitions/LayerAttributes"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "attributes"
+      ]
+    },
+    "examples": [
+      {
+        "command_example": {
+          "command": "API.GetLayerAttributes",
+          "parameters": {
+            "attributeIds": [
+              {
+                "attributeId": {
+                  "guid": "4D22523E-C844-4209-A123-3608C8964DE4"
+                }
+              },
+              {
+                "attributeId": {
+                  "guid": "F9FE11C7-D8E4-499D-98CA-CA9165B64FF7"
+                }
+              },
+              {
+                "attributeId": {
+                  "guid": "3186B2F6-813B-4DB7-BE94-8755BAC13B34"
+                }
+              },
+              {
+                "attributeId": {
+                  "guid": "00000000-1111-2222-3333-000000000000"
+                }
+              }
+            ]
+          }
+        },
+        "response_example": {
+          "succeeded": true,
+          "result": {
+            "attributes": [
+              {
+                "layerAttribute": {
+                  "attributeId": {
+                    "guid": "4D22523E-C844-4209-A123-3608C8964DE4"
+                  },
+                  "name": "Archicad Layer",
+                  "intersectionGroupNr": 1,
+                  "isLocked": false,
+                  "isHidden": false,
+                  "isWireframe": false
+                }
+              },
+              {
+                "layerAttribute": {
+                  "attributeId": {
+                    "guid": "F9FE11C7-D8E4-499D-98CA-CA9165B64FF7"
+                  },
+                  "name": "- Hidden",
+                  "intersectionGroupNr": 1,
+                  "isLocked": false,
+                  "isHidden": true,
+                  "isWireframe": false
+                }
+              },
+              {
+                "layerAttribute": {
+                  "attributeId": {
+                    "guid": "3186B2F6-813B-4DB7-BE94-8755BAC13B34"
+                  },
+                  "name": "2D Drafting - General",
+                  "intersectionGroupNr": 1,
+                  "isLocked": false,
+                  "isHidden": false,
+                  "isWireframe": false
+                }
+              },
+              {
+                "error": {
+                  "code": 6100,
+                  "message": "Attribute is missing"
+                }
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

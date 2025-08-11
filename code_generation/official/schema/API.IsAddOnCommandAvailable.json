@@ -1,0 +1,50 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "description": "Checks if the command is available or not.",
+  "definitions": {
+    "command_parameters": {
+      "type": "object",
+      "properties": {
+        "addOnCommandId" : {
+          "$ref": "APIAddOnTypes.json#/definitions/AddOnCommandId"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "addOnCommandId"
+      ]
+    },
+    "response_parameters": {
+      "type": "object",
+      "properties": {
+        "available": {
+          "type": "boolean",
+          "description": "Returns true if the command is available."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "available"
+      ]
+    },
+    "examples": [
+      {
+        "command_example": {
+          "command": "API.IsAddOnCommandAvailable",
+          "parameters": {
+            "addOnCommandId": {
+              "commandNamespace": "MyAddOnCommandNamespace",
+              "commandName": "MyAddOnCommandName"
+            }
+          }
+        },
+        "response_example": {
+          "succeeded": true,
+          "result": {
+            "available": true
+          }
+        }
+      }
+    ]
+  }
+}

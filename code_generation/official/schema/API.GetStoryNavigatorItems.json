@@ -1,0 +1,91 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "description": "Returns the details of the story navigator items identified by their Ids.",
+  "definitions": {
+    "command_parameters": {
+      "type": "object",
+      "properties": {
+        "navigatorItemIds": {
+          "$ref": "APINavigatorTypes.json#/definitions/NavigatorItemIds"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "navigatorItemIds"
+      ]
+    },
+    "response_parameters": {
+      "type": "object",
+      "properties": {
+        "navigatorItems": {
+          "$ref": "APINavigatorTypes.json#/definitions/StoryNavigatorItems"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "navigatorItems"
+      ]
+    },
+    "examples": [
+      {
+        "command_example": {
+          "command": "API.GetStoryNavigatorItems",
+          "parameters": {
+            "navigatorItemIds": [
+              {
+                "navigatorItemId": {
+                  "guid": "CE10BBFC-AE97-4B76-B509-0D79691DAA75"
+                }
+              },
+              {
+                "navigatorItemId": {
+                  "guid": "E439C0C5-650C-4F04-B9A8-67D6A0FF1394"
+                }
+              },
+              {
+                "navigatorItemId": {
+                  "guid": "BAD00BAD-0000-0000-0000-000000000000"
+                }
+              }
+            ]
+          }
+        },
+        "response_example": {
+          "succeeded": true,
+          "result": {
+            "navigatorItems": [
+              {
+                "storyNavigatorItem": {
+                  "navigatorItemId": {
+                    "guid": "CE10BBFC-AE97-4B76-B509-0D79691DAA75"
+                  },
+                  "prefix": "2.",
+                  "name": "Story",
+                  "floorNumber": 2,
+                  "floorLevel": 6
+                }
+              },
+              {
+                "storyNavigatorItem": {
+                  "navigatorItemId": {
+                    "guid": "E439C0C5-650C-4F04-B9A8-67D6A0FF1394"
+                  },
+                  "prefix": "0.",
+                  "name": "Ground Floor",
+                  "floorNumber": 0,
+                  "floorLevel": 0
+                }
+              },
+              {
+                "error": {
+                  "code": 7400,
+                  "message": "Navigator item not found (navigator item guid: \"BAD00BAD-0000-0000-0000-000000000000\")"
+                }
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,695 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "definitions": {
+    "Error": {
+      "type": "object",
+      "description": "The details of an error.",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "description": "The code of the error."
+        },
+        "message": {
+          "type": "string",
+          "description": "The error message."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "code",
+        "message"
+      ]
+    },
+    "ErrorItem": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "$ref": "#/definitions/Error"
+        }
+      },
+      "additionalProperties": false,
+      "required": [ "error" ]
+    },
+    "SuccessfulExecutionResult": {
+      "type": "object",
+      "description": "The result of a successful execution.",
+      "properties": {
+        "success": {
+          "type": "boolean",
+          "enum": [ true ]
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "success"
+      ]
+    },
+    "FailedExecutionResult": {
+      "type": "object",
+      "description": "The result of a failed execution.",
+      "properties": {
+        "success": {
+          "type": "boolean",
+          "enum": [ false ]
+        },
+        "error": {
+          "$ref": "#/definitions/Error",
+          "description": "The details of an execution failure."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "success",
+        "error"
+      ]
+    },
+    "ExecutionResult": {
+      "type": "object",
+      "description": "The result of the execution.",
+      "oneOf": [
+        {
+          "$ref": "#/definitions/SuccessfulExecutionResult"
+        },
+        {
+          "$ref": "#/definitions/FailedExecutionResult"
+        }
+      ]
+    },
+    "ExecutionResults": {
+      "type": "array",
+      "description": "A list of execution results.",
+      "items": {
+        "$ref": "#/definitions/ExecutionResult"
+      }
+    },
+    "Guid": {
+      "type": "string",
+      "description": "A Globally Unique Identifier (or Universally Unique Identifier) in its string representation as defined in RFC 4122.",
+      "format": "uuid",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+    },
+    "Date": {
+      "type": "string",
+      "description": "A date in its string representation as defined in ISO 8601: YYYY-MM-DD.",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+    },
+    "ElementId": {
+      "type": "object",
+      "description": "The identifier of an element.",
+      "properties": {
+        "guid": {
+          "$ref": "#/definitions/Guid"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "guid"
+      ]
+    },
+    "ElementIdArrayItem": {
+      "type": "object",
+      "properties": {
+        "elementId": {
+          "$ref": "#/definitions/ElementId"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elementId"
+      ]
+    },
+    "Elements": {
+      "type": "array",
+      "description": "A list of elements.",
+      "items": {
+        "$ref": "#/definitions/ElementIdArrayItem"
+      }
+    },
+    "ElementType": {
+      "type": "string",
+      "description": "The type of an element.",
+      "enum": [
+        "Wall",
+        "Column",
+        "Beam",
+        "Window",
+        "Door",
+        "Object",
+        "Lamp",
+        "Slab",
+        "Roof",
+        "Mesh",
+        "Zone",
+        "CurtainWall",
+        "Shell",
+        "Skylight",
+        "Morph",
+        "Stair",
+        "Railing",
+        "Opening"
+      ]
+    },
+    "ElementTypes": {
+      "type": "array",
+      "description": "A list of element types.",
+      "items": {
+        "$ref": "#/definitions/ElementType"
+      }
+    },
+    "TypeOfElement": {
+      "type": "object",
+      "description": "An element id and its corresponding element type.",
+      "properties": {
+        "elementId": {
+          "$ref": "#/definitions/ElementId"
+        },
+        "elementType": {
+          "$ref": "#/definitions/ElementType"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elementId",
+        "elementType"
+      ]
+    },
+    "TypeOfElementOrError": {
+      "type": "object",
+      "description": "The type of an element or an error.",
+      "oneOf": [
+        {
+          "title": "typeOfElement",
+          "properties": {
+            "typeOfElement": {
+              "$ref": "#/definitions/TypeOfElement"
+            }
+          },
+          "additionalProperties": false,
+          "required": [ "typeOfElement" ]
+        },
+        {
+          "title": "error",
+          "$ref": "#/definitions/ErrorItem"
+        }
+      ]
+    },
+    "TypeOfElementOrErrorList": {
+      "type": "array",
+      "description": "A list of element types or errors.",
+      "items": {
+        "$ref": "#/definitions/TypeOfElementOrError"
+      }
+    },
+    "ElementsWrapper": {
+      "type": "object",
+      "description": "A wrapper for a list of elements.",
+      "properties": {
+        "elements": {
+          "$ref": "#/definitions/Elements"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elements"
+      ]
+    },
+    "ElementsOrError": {
+      "type": "object",
+      "description": "A list of elements or an error.",
+      "oneOf": [
+        {
+          "$ref": "#/definitions/ElementsWrapper"
+        },
+        {
+          "$ref": "#/definitions/ErrorItem"
+        }
+      ]
+    },
+    "ElementsOrErrorArray": {
+      "type": "array",
+      "description": "A list of ElementsOrError items.",
+      "items": {
+        "$ref": "#/definitions/ElementsOrError"
+      }
+    },
+    "Image": {
+      "type": "object",
+      "description": "An image encoded as a Base64 string.",
+      "properties": {
+        "content": {
+          "type": "string",
+          "description": "The image content as a string ."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "content"
+      ]
+    },
+    "ImageOrError": {
+      "type": "object",
+      "description": "An image or an error.",
+      "oneOf": [
+        {
+          "title": "image",
+          "properties": {
+            "image": {
+              "$ref": "#/definitions/Image"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "image"
+          ]
+        },
+        {
+          "title": "error",
+          "$ref": "#/definitions/ErrorItem"
+        }
+      ]
+    },
+    "Images": {
+      "type": "array",
+      "description": "A list of images and potential errors.",
+      "items": {
+        "$ref": "#/definitions/ImageOrError"
+      }
+    },
+    "FolderParameters": {
+      "type": "object",
+      "description": "The parameters of a folder.",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The name of the folder."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "name"
+      ]
+    },
+    "BoundingBox2D": {
+      "type": "object",
+      "description": "The 2D bounding box of an element.",
+      "properties": {
+        "xMin": {
+          "type": "number",
+          "description": "The minimum X value of the bounding box."
+        },
+        "yMin": {
+          "type": "number",
+          "description": "The minimum Y value of the bounding box."
+        },
+        "xMax": {
+          "type": "number",
+          "description": "The maximum X value of the bounding box."
+        },
+        "yMax": {
+          "type": "number",
+          "description": "The maximum Y value of the bounding box."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "xMin",
+        "yMin",
+        "xMax",
+        "yMax"
+      ]
+    },
+    "BoundingBox2DOrError": {
+      "type": "object",
+      "description": "A 2D bounding box or an error.",
+      "oneOf": [
+        {
+          "title": "boundingBox2D",
+          "properties": {
+            "boundingBox2D": {
+              "$ref": "#/definitions/BoundingBox2D"
+            }
+          },
+          "additionalProperties": false,
+          "required": [ "boundingBox2D" ]
+        },
+        {
+          "title": "error",
+          "$ref": "#/definitions/ErrorItem"
+        }
+      ]
+    },
+    "BoundingBoxes2D": {
+      "type": "array",
+      "description": "A list of 2D bounding boxes.",
+      "items": {
+        "$ref": "#/definitions/BoundingBox2DOrError"
+      }
+    },
+    "BoundingBox3D": {
+      "type": "object",
+      "description": "A 3D bounding box of an element.",
+      "properties": {
+        "xMin": {
+          "type": "number",
+          "description": "The minimum X value of the bounding box."
+        },
+        "yMin": {
+          "type": "number",
+          "description": "The minimum Y value of the bounding box."
+        },
+        "zMin": {
+          "type": "number",
+          "description": "The minimum Z value of the bounding box."
+        },
+        "xMax": {
+          "type": "number",
+          "description": "The maximum X value of the bounding box."
+        },
+        "yMax": {
+          "type": "number",
+          "description": "The maximum Y value of the bounding box."
+        },
+        "zMax": {
+          "type": "number",
+          "description": "The maximum Z value of the bounding box."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "xMin",
+        "yMin",
+        "zMin",
+        "xMax",
+        "yMax",
+        "zMax"
+      ]
+    },
+    "BoundingBox3DOrError": {
+      "type": "object",
+      "description": "A 3D bounding box or an error.",
+      "oneOf": [
+        {
+          "title": "boundingBox3D",
+          "properties": {
+            "boundingBox3D": {
+              "$ref": "#/definitions/BoundingBox3D"
+            }
+          },
+          "additionalProperties": false,
+          "required": [ "boundingBox3D" ]
+        },
+        {
+          "title": "error",
+          "$ref": "#/definitions/ErrorItem"
+        }
+      ]
+    },
+    "BoundingBoxes3D": {
+      "type": "array",
+      "description": "A list of 3D bounding boxes.",
+      "items": {
+        "$ref": "#/definitions/BoundingBox3DOrError"
+      }
+    },
+    "RGBColor": {
+      "type": "object",
+      "description": "A color model represented via its red, green and blue components.",
+      "properties": {
+        "red": {
+          "type": "number",
+          "description": "The red component of the color model.",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "green": {
+          "type": "number",
+          "description": "The green component of the color model.",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "blue": {
+          "type": "number",
+          "description": "The blue component of the color model.",
+          "minimum": 0,
+          "maximum": 1
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "red",
+        "green",
+        "blue"
+      ]
+    },
+    "NumberingStyle": {
+      "type": "string",
+      "description": "A supported numbering style.",
+      "enum": [
+        "Undefined",
+        "abc",
+        "ABC",
+        "1",
+        "01",
+        "001",
+        "0001",
+        "noID"
+      ]
+    },
+    "Subset": {
+      "type": "object",
+      "description": "A set of options used to assign IDs to the layouts contained in the subset.",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The name for the layout subset.",
+          "minLength": 1
+        },
+        "includeToIDSequence": {
+          "type": "boolean",
+          "description": "Defines whether this subset is included in automatic ID assignment or not."
+        },
+        "customNumbering": {
+          "type": "boolean",
+          "description": "Defines whether the IDs are generated automatically or a custom numbering is used."
+        },
+        "continueNumbering": {
+          "type": "boolean",
+          "description": "Defines whether to continue using the ID assignment of the upper levels or not. If 'true', layouts within this subset are going to be assigned IDs as if they were not within this subset, but part of the level above. In this case you only use the Subset as a logical grouping which has no effect on IDs."
+        },
+        "useUpperPrefix": {
+          "type": "boolean",
+          "description": "Defines whether to use the prefix and ID of the upper levels or not. If 'true', layouts in this subset will be assigned IDs based on the previous layout in the layout book structure."
+        },
+        "addOwnPrefix": {
+          "type": "boolean",
+          "description": "Defines whether to add own prefix to the subset or not."
+        },
+        "customNumber": {
+          "type": "string",
+          "description": "The custom subset ID."
+        },
+        "autoNumber": {
+          "type": "string",
+          "description": "The automatic subset ID."
+        },
+        "numberingStyle": {
+          "$ref": "#/definitions/NumberingStyle",
+          "description": "The style of the ID formatting."
+        },
+        "startAt": {
+          "type": "integer",
+          "description": "The starting value of the numbering."
+        },
+        "ownPrefix": {
+          "type": "string",
+          "description": "The custom prefix for the subset."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "includeToIDSequence",
+        "customNumbering",
+        "continueNumbering",
+        "useUpperPrefix",
+        "addOwnPrefix",
+        "customNumber",
+        "autoNumber",
+        "numberingStyle",
+        "startAt",
+        "ownPrefix"
+      ]
+    },
+    "LayoutParameters": {
+      "type": "object",
+      "description": "The parameters of the layout.",
+      "properties": {
+        "horizontalSize": {
+          "type": "number",
+          "description": "The horizontal size of the layout in millimeters."
+        },
+        "verticalSize": {
+          "type": "number",
+          "description": "The vertical size of the layout in millimeters."
+        },
+        "leftMargin": {
+          "type": "number",
+          "description": "The layout margin from the left side of the paper."
+        },
+        "topMargin": {
+          "type": "number",
+          "description": "The layout margin from the top side of the paper."
+        },
+        "rightMargin": {
+          "type": "number",
+          "description": "The layout margin from the right side of the paper."
+        },
+        "bottomMargin": {
+          "type": "number",
+          "description": "The layout margin from the bottom side of the paper."
+        },
+        "customLayoutNumber": {
+          "type": "string",
+          "description": "The custom ID."
+        },
+        "customLayoutNumbering": {
+          "type": "boolean",
+          "description": "Defines whether a unique ID is used for the current layout or not."
+        },
+        "doNotIncludeInNumbering": {
+          "type": "boolean",
+          "description": "Defines whether this layout is included in automatic ID assignment or not."
+        },
+        "displayMasterLayoutBelow": {
+          "type": "boolean",
+          "description": "Defines whether to display the master layout above or below the layout."
+        },
+        "layoutPageNumber": {
+          "type": "integer",
+          "description": "The page number of layout when this layout contains multi-page drawings."
+        },
+        "actPageIndex": {
+          "type": "integer",
+          "description": "The actual index of layout inside the multi-page layout."
+        },
+        "currentRevisionId": {
+          "type": "string",
+          "description": "The ID of the current document revision of the layout."
+        },
+        "currentFinalRevisionId": {
+          "type": "string",
+          "description": "The ID with optional suffix of the current document revision of the layout."
+        },
+        "hasIssuedRevision": {
+          "type": "boolean",
+          "description": "Defines whether one or more issued document revisions have already been created for the layout or not."
+        },
+        "hasActualRevision": {
+          "type": "boolean",
+          "description": "Defines whether an open document revision exists for the layout or not."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "horizontalSize",
+        "verticalSize",
+        "leftMargin",
+        "topMargin",
+        "rightMargin",
+        "bottomMargin",
+        "customLayoutNumber",
+        "customLayoutNumbering",
+        "doNotIncludeInNumbering",
+        "displayMasterLayoutBelow",
+        "layoutPageNumber",
+        "actPageIndex",
+        "currentRevisionId",
+        "currentFinalRevisionId",
+        "hasIssuedRevision",
+        "hasActualRevision"
+      ]
+    },
+    "ComponentId": {
+      "type": "object",
+      "description": "The identifier of a component.",
+      "properties": {
+        "guid": {
+          "$ref": "#/definitions/Guid"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "guid"
+      ]
+    },
+    "ElementComponentId": {
+      "type": "object",
+      "description": "The identifier of an element's component.",
+      "properties": {
+        "elementId": {
+          "$ref": "#/definitions/ElementId"
+        },
+        "componentId": {
+          "$ref": "#/definitions/ComponentId"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elementId",
+        "componentId"
+      ]
+    },
+    "ElementComponentIdArrayItem": {
+      "type": "object",
+      "description": "An item of a component array.",
+      "properties": {
+        "elementComponentId": {
+          "$ref": "#/definitions/ElementComponentId"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elementComponentId"
+      ]
+    },
+    "ElementComponents": {
+      "type": "array",
+      "description": "List of components of elements.",
+      "items": {
+        "$ref": "#/definitions/ElementComponentIdArrayItem"
+      }
+    },
+    "ElementComponentsWrapper": {
+      "type": "object",
+      "description": "List of components.",
+      "properties": {
+        "elementComponents": {
+          "$ref": "#/definitions/ElementComponents"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elementComponents"
+      ]
+    },
+    "ElementComponentsOrError": {
+      "type": "object",
+      "description": "List of components or error.",
+      "oneOf": [
+        {
+          "$ref": "#/definitions/ElementComponentsWrapper"
+        },
+        {
+          "$ref": "#/definitions/ErrorItem"
+        }
+      ]
+    },
+    "ElementComponentsOrErrorArray": {
+      "type": "array",
+      "description": "Array of component list or error.",
+      "items": {
+        "$ref": "#/definitions/ElementComponentsOrError"
+      }
+    }
+  }
+}

@@ -1,0 +1,130 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "description": "Returns the detailed folder structure for the attributes of a given type. If the path is not given, the root folder will be returned",
+  "definitions": {
+    "command_parameters": {
+      "type": "object",
+      "properties": {
+        "attributeType": {
+          "$ref": "APIAttributeTypes.json#/definitions/AttributeType"
+        },
+        "path": {
+          "$ref": "APIAttributeTypes.json#/definitions/AttributeFolderPath"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "attributeType"
+      ]
+    },
+    "response_parameters": {
+      "type": "object",
+      "properties": {
+        "attributeFolder": {
+          "$ref": "APIAttributeTypes.json#/definitions/AttributeFolderStructure"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "attributeFolder"
+      ]
+    },
+    "examples": [
+      {
+        "command_example": {
+          "command": "API.GetAttributeFolderStructure",
+          "parameters": {
+            "attributeType": "Profile"
+          }
+        },
+        "response_example": {
+          "succeeded": true,
+          "result": {
+            "attributeFolder": {
+              "attributeFolderId": {
+                "guid": "15A17856-5C24-4F2D-8AF0-34407335063A"
+              },
+              "name": "Profiles",
+              "attributes": [
+                {
+                  "attribute": {
+                    "attributeId": {
+                      "guid": "63F5F9DD-29F9-7A46-AD8F-4E414B5ADBC8"
+                    },
+                    "name": "Profile1"
+                  }
+                }
+              ],
+              "subfolders": [
+                {
+                  "attributeFolder": {
+                    "attributeFolderId": {
+                      "guid": "0B6FF803-8C9A-4F56-9C3E-BD4094172332"
+                    },
+                    "name": "A",
+                    "attributes": [
+                      {
+                        "attribute": {
+                          "attributeId": {
+                            "guid": "4C92EA88-150A-4579-9765-253130AFF985"
+                          },
+                          "name": "Profile4"
+                        }
+                      }
+                    ],
+                    "subfolders": [
+                      {
+                        "attributeFolder": {
+                          "attributeFolderId": {
+                            "guid": "4DE0E99C-AC1F-4DC0-8AE2-4C2050733E0C"
+                          },
+                          "name": "A1",
+                          "attributes": [
+                            {
+                              "attribute": {
+                                "attributeId": {
+                                  "guid": "903A5C38-5057-AA47-873D-517AD752B778"
+                                },
+                                "name": "Profile3"
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "attributeFolder": {
+                          "attributeFolderId": {
+                            "guid": "E8A5C5FD-B2E2-4D2B-9F95-E6486E82F79A"
+                          },
+                          "name": "A2",
+                          "attributes": [
+                            {
+                              "attribute": {
+                                "attributeId": {
+                                  "guid": "983E2742-3DD6-F34E-A25B-DB79D96F6153"
+                                },
+                                "name": "Profile2"
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                },
+                {
+                  "attributeFolder": {
+                    "attributeFolderId": {
+                      "guid": "55188E0F-A670-477F-BE4E-00F5D50C0000"
+                    },
+                    "name": "B"
+                  }
+                }
+              ]
+            }
+          }
+        }
+      }
+    ]
+  }
+}

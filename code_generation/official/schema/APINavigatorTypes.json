@@ -1,0 +1,673 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "definitions": {
+    "NavigatorItemId": {
+      "type": "object",
+      "description": "The identifier of a navigator item.",
+      "properties": {
+        "guid": {
+          "$ref": "APITypes.json#/definitions/Guid"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "guid"
+      ]
+    },
+    "NavigatorItemIds": {
+      "type": "array",
+      "description": "A list of navigator item identifiers.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "navigatorItemId": {
+            "$ref": "#/definitions/NavigatorItemId"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "navigatorItemId"
+        ]
+      }
+    },
+    "NavigatorItemType": {
+      "type": "string",
+      "description": "The type of a navigator item. The 'UndefinedItem' type is used when the actual type of the navigator item cannot be retrieved from Archicad.",
+      "enum": [
+        "UndefinedItem",
+        "ProjectMapRootItem",
+        "StoryItem",
+        "SectionItem",
+        "ElevationItem",
+        "InteriorElevationItem",
+        "WorksheetItem",
+        "DetailItem",
+        "DocumentFrom3DItem",
+        "Perspective3DItem",
+        "Axonometry3DItem",
+        "CameraSetItem",
+        "CameraItem",
+        "ScheduleItem",
+        "ProjectIndexItem",
+        "TextListItem",
+        "GraphicListItem",
+        "InfoItem",
+        "HelpItem",
+        "FolderItem",
+        "LayoutBookRootItem",
+        "SubsetItem",
+        "LayoutItem",
+        "DrawingItem",
+        "MasterFolderItem",
+        "MasterLayoutItem"
+      ]
+    },
+    "NavigatorItemMapType": {
+      "type": "string",
+      "description": "The type of the navigator item tree.",
+      "enum": [
+        "ProjectMap",
+        "ViewMap",
+        "MyViewMap",
+        "LayoutBook"
+      ]
+    },
+    "NavigatorItemArrayItem": {
+      "type": "object",
+      "properties": {
+        "navigatorItem": {
+          "$ref": "#/definitions/NavigatorItem"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "navigatorItem"
+      ]
+    },
+    "NavigatorItems": {
+      "type": "array",
+      "description": "A list of navigator items.",
+      "items": {
+        "$ref": "#/definitions/NavigatorItemArrayItem"
+      }
+    },
+    "NavigatorItem": {
+      "type": "object",
+      "description": "The details of a navigator item.",
+      "properties": {
+        "navigatorItemId": {
+          "$ref": "#/definitions/NavigatorItemId"
+        },
+        "prefix": {
+          "type": "string",
+          "description": "The prefix of the navigator item's name."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the navigator item."
+        },
+        "type": {
+          "$ref": "#/definitions/NavigatorItemType",
+          "description": "The type of the navigator item."
+        },
+        "sourceNavigatorItemId": {
+          "$ref": "#/definitions/NavigatorItemId",
+          "description": "The source of the navigator item. For example, a navigator item in the ViewMap can be the source of a DrawingItem."
+        },
+        "children": {
+          "$ref": "#/definitions/NavigatorItems",
+          "description": "The children of the navigator item if it has any."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "navigatorItemId",
+        "prefix",
+        "name",
+        "type"
+      ]
+    },
+    "PublisherSetId": {
+      "type": "object",
+      "description": "The identifier of a publisher set.",
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "The type of the navigator item tree.",
+          "enum": [
+            "PublisherSets"
+          ]
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the publisher set."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "name"
+      ]
+    },
+    "OtherNavigatorTreeId": {
+      "type": "object",
+      "description": "The identifier of a navigator item tree.",
+      "properties": {
+        "type": {
+          "$ref": "#/definitions/NavigatorItemMapType"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "type"
+      ]
+    },
+    "NavigatorTreeId": {
+      "type": "object",
+      "description": "The identifier of a navigator item tree.",
+      "oneOf": [
+        {
+          "$ref": "#/definitions/PublisherSetId"
+        },
+        {
+          "$ref": "#/definitions/OtherNavigatorTreeId"
+        }
+      ]
+    },
+    "NavigatorTree": {
+      "type": "object",
+      "description": "A tree of navigator items.",
+      "properties": {
+        "rootItem": {
+          "$ref": "#/definitions/NavigatorItem"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "rootItem"
+      ]
+    },
+    "GeneralNavigatorItemData": {
+      "type": "object",
+      "description": "The common data of a navigator item.",
+      "properties": {
+        "navigatorItemId": {
+          "$ref": "#/definitions/NavigatorItemId"
+        },
+        "prefix": {
+          "type": "string",
+          "description": "The prefix of the navigator item's name."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the navigator item."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "navigatorItemId",
+        "prefix",
+        "name"
+      ]
+    },
+    "NavigatorItemIdAndType": {
+      "type": "object",
+      "description": "Consists of a navigator item type and an identifier.",
+      "properties": {
+        "navigatorItemType": {
+          "$ref": "#/definitions/NavigatorItemType"
+        },
+        "navigatorItemId": {
+          "$ref": "#/definitions/NavigatorItemId"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "navigatorItemType",
+        "navigatorItemId"
+      ]
+    },
+    "NavigatorItemIdAndTypeOrError": {
+      "type": "object",
+      "description": "Contains a pair of navigator item type and identifier or an error.",
+      "oneOf": [
+        {
+          "title": "NavigatorItemIdAndType",
+          "properties": {
+            "navigatorItemIdAndType": {
+              "$ref": "#/definitions/NavigatorItemIdAndType"
+            }
+          },
+          "additionalProperties": false,
+          "required": [ "navigatorItemIdAndType" ]
+        },
+        {
+          "title": "error",
+          "$ref": "APITypes.json#/definitions/ErrorItem"
+        }
+      ]
+    },
+    "NavigatorItemIdAndTypeList": {
+      "type": "array",
+      "description": "A list of objects that consist of a navigator item identifier and a type.",
+      "items": {
+        "$ref": "#/definitions/NavigatorItemIdAndTypeOrError"
+      }
+    },
+    "DetailNavigatorItem": {
+      "type": "object",
+      "description": "The details of a detail navigator item.",
+      "properties": {
+        "navigatorItemId": {
+          "$ref": "#/definitions/NavigatorItemId"
+        },
+        "prefix": {
+          "type": "string",
+          "description": "The prefix of the navigator item's name."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the navigator item."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "navigatorItemId",
+        "prefix",
+        "name"
+      ]
+    },
+    "DetailNavigatorItemOrError": {
+      "type": "object",
+      "description": "Contains a detail navigator item or an error.",
+      "oneOf": [
+        {
+          "title": "DetailNavigatorItem",
+          "properties": {
+            "detailNavigatorItem": {
+              "$ref": "#/definitions/DetailNavigatorItem"
+            }
+          },
+          "additionalProperties": false,
+          "required": [ "detailNavigatorItem" ]
+        },
+        {
+          "title": "error",
+          "$ref": "APITypes.json#/definitions/ErrorItem"
+        }
+      ]
+    },
+    "DetailNavigatorItems": {
+      "type": "array",
+      "description": "A list of detail navigator items.",
+      "items": {
+        "$ref": "#/definitions/DetailNavigatorItemOrError"
+      }
+    },
+    "Document3DNavigatorItem": {
+      "type": "object",
+      "description": "The details of a 3D document navigator item.",
+      "properties": {
+        "navigatorItemId": {
+          "$ref": "#/definitions/NavigatorItemId"
+        },
+        "prefix": {
+          "type": "string",
+          "description": "The prefix of the navigator item's name."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the navigator item."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "navigatorItemId",
+        "prefix",
+        "name"
+      ]
+    },
+    "Document3DNavigatorItemOrError": {
+      "type": "object",
+      "description": "Contains a 3D document navigator item or an error.",
+      "oneOf": [
+        {
+          "title": "Document3DNavigatorItem",
+          "properties": {
+            "document3DNavigatorItem": {
+              "$ref": "#/definitions/Document3DNavigatorItem"
+            }
+          },
+          "additionalProperties": false,
+          "required": [ "document3DNavigatorItem" ]
+        },
+        {
+          "title": "error",
+          "$ref": "APITypes.json#/definitions/ErrorItem"
+        }
+      ]
+    },
+    "Document3DNavigatorItems": {
+      "type": "array",
+      "description": "A list of 3D document navigator items.",
+      "items": {
+        "$ref": "#/definitions/Document3DNavigatorItemOrError"
+      }
+    },
+    "ElevationNavigatorItem": {
+      "type": "object",
+      "description": "The details of an elevation navigator item.",
+      "properties": {
+        "navigatorItemId": {
+          "$ref": "#/definitions/NavigatorItemId"
+        },
+        "prefix": {
+          "type": "string",
+          "description": "The prefix of the navigator item's name."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the navigator item."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "navigatorItemId",
+        "prefix",
+        "name"
+      ]
+    },
+    "ElevationNavigatorItemOrError": {
+      "type": "object",
+      "description": "Contains an elevation navigator item or an error.",
+      "oneOf": [
+        {
+          "title": "ElevationNavigatorItem",
+          "properties": {
+            "elevationNavigatorItem": {
+              "$ref": "#/definitions/ElevationNavigatorItem"
+            }
+          },
+          "additionalProperties": false,
+          "required": [ "elevationNavigatorItem" ]
+        },
+        {
+          "title": "error",
+          "$ref": "APITypes.json#/definitions/ErrorItem"
+        }
+      ]
+    },
+    "ElevationNavigatorItems": {
+      "type": "array",
+      "description": "A list of elevation navigator items.",
+      "items": {
+        "$ref": "#/definitions/ElevationNavigatorItemOrError"
+      }
+    },
+    "InteriorElevationNavigatorItem": {
+      "type": "object",
+      "description": "The details of an interior elevation navigator item.",
+      "properties": {
+        "navigatorItemId": {
+          "$ref": "#/definitions/NavigatorItemId"
+        },
+        "prefix": {
+          "type": "string",
+          "description": "The prefix of the navigator item's name."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the navigator item."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "navigatorItemId",
+        "prefix",
+        "name"
+      ]
+    },
+    "InteriorElevationNavigatorItemOrError": {
+      "type": "object",
+      "description": "Contains an interior elevation navigator item or an error.",
+      "oneOf": [
+        {
+          "title": "InteriorElevationNavigatorItem",
+          "properties": {
+            "interiorElevationNavigatorItem": {
+              "$ref": "#/definitions/InteriorElevationNavigatorItem"
+            }
+          },
+          "additionalProperties": false,
+          "required": [ "interiorElevationNavigatorItem" ]
+        },
+        {
+          "title": "error",
+          "$ref": "APITypes.json#/definitions/ErrorItem"
+        }
+      ]
+    },
+    "InteriorElevationNavigatorItems": {
+      "type": "array",
+      "description": "A list of interior elevation navigator items.",
+      "items": {
+        "$ref": "#/definitions/InteriorElevationNavigatorItemOrError"
+      }
+    },
+    "SectionNavigatorItem": {
+      "type": "object",
+      "description": "The details of a section navigator item.",
+      "properties": {
+        "navigatorItemId": {
+          "$ref": "#/definitions/NavigatorItemId"
+        },
+        "prefix": {
+          "type": "string",
+          "description": "The prefix of the navigator item's name."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the navigator item."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "navigatorItemId",
+        "prefix",
+        "name"
+      ]
+    },
+    "SectionNavigatorItemOrError": {
+      "type": "object",
+      "description": "Contains a section navigator item or an error.",
+      "oneOf": [
+        {
+          "title": "SectionNavigatorItem",
+          "properties": {
+            "sectionNavigatorItem": {
+              "$ref": "#/definitions/SectionNavigatorItem"
+            }
+          },
+          "additionalProperties": false,
+          "required": [ "sectionNavigatorItem" ]
+        },
+        {
+          "title": "error",
+          "$ref": "APITypes.json#/definitions/ErrorItem"
+        }
+      ]
+    },
+    "SectionNavigatorItems": {
+      "type": "array",
+      "description": "A list of section navigator items.",
+      "items": {
+        "$ref": "#/definitions/SectionNavigatorItemOrError"
+      }
+    },
+    "StoryNavigatorItem": {
+      "type": "object",
+      "description": "The details of a story navigator item.",
+      "properties": {
+        "navigatorItemId": {
+          "$ref": "#/definitions/NavigatorItemId"
+        },
+        "prefix": {
+          "type": "string",
+          "description": "The prefix of the navigator item's name."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the navigator item."
+        },
+        "floorLevel": {
+          "type": "number",
+          "description": "The floor level of the story navigator item."
+        },
+        "floorNumber": {
+          "type": "number",
+          "description": "The floor number of the story navigator item."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "navigatorItemId",
+        "prefix",
+        "name",
+        "floorLevel",
+        "floorNumber"
+      ]
+    },
+    "StoryNavigatorItemOrError": {
+      "type": "object",
+      "description": "Contains a story navigator item or an error.",
+      "oneOf": [
+        {
+          "title": "StoryNavigatorItem",
+          "properties": {
+            "storyNavigatorItem": {
+              "$ref": "#/definitions/StoryNavigatorItem"
+            }
+          },
+          "additionalProperties": false,
+          "required": [ "storyNavigatorItem" ]
+        },
+        {
+          "title": "error",
+          "$ref": "APITypes.json#/definitions/ErrorItem"
+        }
+      ]
+    },
+    "StoryNavigatorItems": {
+      "type": "array",
+      "description": "A list of story navigator items.",
+      "items": {
+        "$ref": "#/definitions/StoryNavigatorItemOrError"
+      }
+    },
+    "WorksheetNavigatorItem": {
+      "type": "object",
+      "description": "The details of a worksheet navigator item.",
+      "properties": {
+        "navigatorItemId": {
+          "$ref": "#/definitions/NavigatorItemId"
+        },
+        "prefix": {
+          "type": "string",
+          "description": "The prefix of the navigator item's name."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the navigator item."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "navigatorItemId",
+        "prefix",
+        "name"
+      ]
+    },
+    "WorksheetNavigatorItemOrError": {
+      "type": "object",
+      "description": "Contains a worksheet navigator item or an error.",
+      "oneOf": [
+        {
+          "title": "WorksheetNavigatorItem",
+          "properties": {
+            "worksheetNavigatorItem": {
+              "$ref": "#/definitions/WorksheetNavigatorItem"
+            }
+          },
+          "additionalProperties": false,
+          "required": [ "worksheetNavigatorItem" ]
+        },
+        {
+          "title": "error",
+          "$ref": "APITypes.json#/definitions/ErrorItem"
+        }
+      ]
+    },
+    "WorksheetNavigatorItems": {
+      "type": "array",
+      "description": "A list of worksheet navigator items.",
+      "items": {
+        "$ref": "#/definitions/WorksheetNavigatorItemOrError"
+      }
+    },
+    "BuiltInContainerNavigatorItem": {
+      "type": "object",
+      "description": "The details of a built-in container navigator item.",
+      "properties": {
+        "navigatorItemId": {
+          "$ref": "#/definitions/NavigatorItemId"
+        },
+        "prefix": {
+          "type": "string",
+          "description": "The prefix of the navigator item's name."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the navigator item."
+        },
+        "contentIds": {
+          "$ref": "#/definitions/NavigatorItemIds",
+          "description": "The identifiers of the navigator items inside the container navigator item."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "navigatorItemId",
+        "prefix",
+        "name",
+        "contentIds"
+      ]
+    },
+    "BuiltInContainerNavigatorItemOrError": {
+      "type": "object",
+      "description": "Contains a built-in container navigator item or an error.",
+      "oneOf": [
+        {
+          "title": "WorksheetNavigatorItem",
+          "properties": {
+            "builtInContainerNavigatorItem": {
+              "$ref": "#/definitions/BuiltInContainerNavigatorItem"
+            }
+          },
+          "additionalProperties": false,
+          "required": [ "builtInContainerNavigatorItem" ]
+        },
+        {
+          "title": "error",
+          "$ref": "APITypes.json#/definitions/ErrorItem"
+        }
+      ]
+    },
+    "BuiltInContainerNavigatorItems": {
+      "type": "array",
+      "description": "A list of built-in container navigator items.",
+      "items": {
+        "$ref": "#/definitions/BuiltInContainerNavigatorItemOrError"
+      }
+    }
+  }
+}

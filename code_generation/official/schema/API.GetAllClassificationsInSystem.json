@@ -1,0 +1,231 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "description": "Returns the tree of classifications in the given classification system.",
+  "definitions": {
+    "command_parameters": {
+      "type": "object",
+      "properties": {
+        "classificationSystemId": {
+          "$ref": "APIClassificationTypes.json#/definitions/ClassificationSystemId"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "classificationSystemId"
+      ]
+    },
+    "response_parameters": {
+      "type": "object",
+      "properties": {
+        "classificationItems": {
+          "$ref": "APIClassificationTypes.json#/definitions/ClassificationItems"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "classificationItems"
+      ]
+    },
+    "examples": [
+      {
+        "command_example": {
+          "command": "API.GetAllClassificationsInSystem",
+          "parameters": {
+            "classificationSystemId": {
+              "guid": "632C30E5-2B82-4A75-BFAD-D52FEBCE9A4A"
+            }
+          }
+        },
+        "response_example": {
+          "succeeded": true,
+          "result": {
+            "classificationItems": [
+              {
+                "classificationItem": {
+                  "classificationItemId": {
+                    "guid": "DAA21B11-88B9-4897-A12E-44CD2E3D07CD"
+                  },
+                  "id": "Site",
+                  "name": "",
+                  "description": "",
+                  "children": [
+                    {
+                      "classificationItem": {
+                        "classificationItemId": {
+                          "guid": "0EE23E04-F4FC-4DAA-AE52-01A3B0503050"
+                        },
+                        "id": "Geographic Element",
+                        "name": "",
+                        "description": "",
+                        "children": [
+                          {
+                            "classificationItem": {
+                              "classificationItemId": {
+                                "guid": "645B2DEF-AFA4-4028-B432-F3BCE73AE26A"
+                              },
+                              "id": "Terrain",
+                              "name": "",
+                              "description": ""
+                            }
+                          },
+                          {
+                            "classificationItem": {
+                              "classificationItemId": {
+                                "guid": "81607A0B-009B-4DBF-9DDD-DB8018525506"
+                              },
+                              "id": "Site Geometry",
+                              "name": "",
+                              "description": ""
+                            }
+                          },
+                          {
+                            "classificationItem": {
+                              "classificationItemId": {
+                                "guid": "DC58C1E4-19B2-43B3-8F14-75E3BF9AC375"
+                              },
+                              "id": "Flora & Fauna",
+                              "name": "",
+                              "description": ""
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "classificationItem": {
+                        "classificationItemId": {
+                          "guid": "D054435C-648B-478B-95A6-8F95603FADEB"
+                        },
+                        "id": "Massing",
+                        "name": "",
+                        "description": "",
+                        "children": [
+                          {
+                            "classificationItem": {
+                              "classificationItemId": {
+                                "guid": "8C3ABC5E-1B21-40E4-9D30-D5766E4D30B6"
+                              },
+                              "id": "Morph",
+                              "name": "",
+                              "description": ""
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "classificationItem": {
+                        "classificationItemId": {
+                          "guid": "CE1FD4CB-B232-4ADE-ADBB-533704A2DA66"
+                        },
+                        "id": "Civil Element",
+                        "name": "",
+                        "description": ""
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "classificationItem": {
+                  "classificationItemId": {
+                    "guid": "5352C474-DC99-4DA5-A77B-E001CB90BF5E"
+                  },
+                  "id": "Elements",
+                  "name": "",
+                  "description": "",
+                  "children": [
+                    {
+                      "classificationItem": {
+                        "classificationItemId": {
+                          "guid": "8B729AC6-15B1-4F74-8B4F-359D80DA6871"
+                        },
+                        "id": "Construction Element",
+                        "name": "",
+                        "description": "",
+                        "children": [
+                          {
+                            "classificationItem": {
+                              "classificationItemId": {
+                                "guid": "1AEB79EB-8D88-4F2E-9EA5-3432D006AB4F"
+                              },
+                              "id": "Wall",
+                              "name": "",
+                              "description": "",
+                              "children": [
+                                {
+                                  "classificationItem": {
+                                    "classificationItemId": {
+                                      "guid": "232F57C7-3AD2-4CFF-A0EE-694B1A3A5CDA"
+                                    },
+                                    "id": "Polygonal Wall",
+                                    "name": "",
+                                    "description": ""
+                                  }
+                                },
+                                {
+                                  "classificationItem": {
+                                    "classificationItemId": {
+                                      "guid": "DAE7388F-0133-4667-A772-49170BC9F837"
+                                    },
+                                    "id": "Solid Wall",
+                                    "name": "",
+                                    "description": ""
+                                  }
+                                },
+                                {
+                                  "classificationItem": {
+                                    "classificationItemId": {
+                                      "guid": "D74432D3-D889-41BE-BA87-DC128AE430B4"
+                                    },
+                                    "id": "Standard Wall",
+                                    "name": "",
+                                    "description": ""
+                                  }
+                                }
+                              ]
+                            }
+                          },
+                          {
+                            "classificationItem": {
+                              "classificationItemId": {
+                                "guid": "31DD3189-11D1-4D7B-A53A-F0606ADEDA47"
+                              },
+                              "id": "Column",
+                              "name": "",
+                              "description": ""
+                            }
+                          },
+                          {
+                            "classificationItem": {
+                              "classificationItemId": {
+                                "guid": "BF3D655E-4EC7-428B-BE51-59DE113A1078"
+                              },
+                              "id": "Beam",
+                              "name": "",
+                              "description": ""
+                            }
+                          },
+                          {
+                            "classificationItem": {
+                              "classificationItemId": {
+                                "guid": "B5A21B5F-B35B-41B9-BFE4-CC2ACB496EE5"
+                              },
+                              "id": "Slab",
+                              "name": "",
+                              "description": ""
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

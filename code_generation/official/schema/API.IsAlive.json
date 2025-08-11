@@ -1,0 +1,38 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "description": "Checks if the Archicad connection is alive.",
+  "definitions": {
+    "command_parameters": {
+      "type": "object",
+      "properties": {
+      },
+      "additionalProperties": false
+    },
+    "response_parameters": {
+      "type": "object",
+      "properties": {
+        "isAlive": {
+          "type": "boolean",
+          "description": "Returns true if the connection is alive."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "isAlive"
+      ]
+    },
+    "examples": [
+      {
+        "command_example": {
+          "command": "API.IsAlive"
+        },
+        "response_example": {
+          "succeeded": true,
+          "result": {
+            "isAlive": true
+          }
+        }
+      }
+    ]
+  }
+}

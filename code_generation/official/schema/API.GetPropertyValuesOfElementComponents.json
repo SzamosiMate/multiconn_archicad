@@ -1,0 +1,136 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "description": "Returns the property values of the components for the given property.",
+  "definitions": {
+    "command_parameters": {
+      "type": "object",
+      "properties": {
+        "elementComponents": {
+          "$ref": "APITypes.json#/definitions/ElementComponents"
+        },
+        "properties": {
+          "$ref": "APIPropertyTypes.json#/definitions/PropertyIds"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elementComponents",
+        "properties"
+      ]
+    },
+    "response_parameters": {
+      "type": "object",
+      "properties": {
+        "propertyValuesForElementComponents": {
+          "$ref": "APIPropertyTypes.json#/definitions/PropertyValuesOrErrorArray",
+          "description": "List of property value lists. The order of the outer list is that of the given components. The order of the inner lists are that of the given properties."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "propertyValuesForElementComponents"
+      ]
+    },
+    "examples": [
+      {
+        "description": "Getting property values of two components.",
+        "command_example": {
+          "command": "API.GetPropertyValuesOfElementComponents",
+          "parameters": {
+            "elementComponents": [
+              {
+                "elementComponentId": {
+                  "elementId": {
+                    "guid": "63BA003E-4F4D-AA4A-8FBC-57379F2CDB98"
+                  },
+                  "componentId": {
+                    "guid": "2D5AC35A-CA5D-89D7-B301-875CA89D52C5"
+                  }
+                }
+              },
+              {
+                "elementComponentId": {
+                  "elementId": {
+                    "guid": "63BA003E-4F4D-AA4A-8FBC-57379F2CDB98"
+                  },
+                  "componentId": {
+                    "guid": "11111111-1111-1111-1111-111111111111"
+                  }
+                }
+              }
+            ],
+            "properties": [
+              {
+                "propertyId": {
+                  "guid": "308457FF-E4C3-4F70-A0D2-FDF3B302B030"
+                }
+              },
+              {
+                "propertyId": {
+                  "guid": "B5A371FA-FD32-4687-ADAD-6DDE020CCE0A"
+                }
+              },
+              {
+                "propertyId": {
+                  "guid": "88FF0334-FAB9-4B10-9361-33D4B6903B91"
+                }
+              },
+              {
+                "propertyId": {
+                  "guid": "11111111-2222-3333-4444-555555555555"
+                }
+              }
+            ]
+          }
+        },
+        "response_example": {
+          "succeeded": true,
+          "result": {
+            "propertyValuesForElementComponents": [
+              {
+                "propertyValues": [
+                  {
+                    "propertyValue": {
+                      "type": "area",
+                      "status": "normal",
+                      "value": 21.261114426
+                    }
+                  },
+                  {
+                    "propertyValue": {
+                      "type": "volume",
+                      "status": "normal",
+                      "value": 1.063055721
+                    }
+                  },
+                  {
+                    "propertyValue": {
+                      "type": "length",
+                      "status": "normal",
+                      "value": 0.05
+                    }
+                  },
+                  {
+                    "error": {
+                      "code": 6701,
+                      "message": "Property definition not found (property definition guid: \"11111111-2222-3333-4444-555555555555\")"
+                    }
+                  }
+                ]
+              },
+              {
+                "error": {
+                  "code": 7600,
+                  "message": "Component not found (component guid: \"11111111-1111-1111-1111-111111111111\")"
+                }
+              }
+            ]
+          }
+        }
+      }
+    ],
+    "see_also": [
+      "Property Information"
+    ]
+  }
+}

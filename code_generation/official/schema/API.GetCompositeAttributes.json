@@ -1,0 +1,138 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "description": "Returns the detailed composite attributes identified by their GUIDs.",
+  "definitions": {
+    "command_parameters": {
+      "type": "object",
+      "properties": {
+        "attributeIds": {
+          "$ref": "APIAttributeTypes.json#/definitions/AttributeIds"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "attributeIds"
+      ]
+    },
+    "response_parameters": {
+      "type": "object",
+      "properties": {
+        "attributes": {
+          "$ref": "APIAttributeTypes.json#/definitions/CompositeAttributes"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "attributes"
+      ]
+    },
+    "examples": [
+      {
+        "command_example": {
+          "command": "API.GetCompositeAttributes",
+          "parameters": {
+            "attributeIds": [
+              {
+                "attributeId": {
+                  "guid": "29EE690D-089C-4573-94C8-DEC75CFA0950"
+                }
+              },
+              {
+                "attributeId": {
+                  "guid": "00000000-1111-2222-3333-000000000000"
+                }
+              }
+            ]
+          }
+        },
+        "response_example": {
+          "succeeded": true,
+          "result": {
+            "attributes": [
+              {
+                "compositeAttribute": {
+                  "attributeId": {
+                    "guid": "29EE690D-089C-4573-94C8-DEC75CFA0950"
+                  },
+                  "name": "Composite1",
+                  "totalThickness": 0.3,
+                  "compositeSkins": [
+                    {
+                      "compositeSkin": {
+                        "buildingMaterialId": {
+                          "attributeId": {
+                            "guid": "15BD4085-04A2-42C8-AA7E-0E932566586E"
+                          }
+                        },
+                        "framePenIndex": 161,
+                        "thickness": 0.05,
+                        "isCore": false,
+                        "isFinish": true
+                      }
+                    },
+                    {
+                      "compositeSkin": {
+                        "buildingMaterialId": {
+                          "attributeId": {
+                            "guid": "BEFC5A3E-E3B9-44BE-8F63-EEB65CEC95D7"
+                          }
+                        },
+                        "framePenIndex": 141,
+                        "thickness": 0.25,
+                        "isCore": true,
+                        "isFinish": false
+                      }
+                    }
+                  ],
+                  "compositeLines": [
+                    {
+                      "compositeLine": {
+                        "lineId": {
+                          "attributeId": {
+                            "guid": "B13D03C4-2388-4761-A8A3-EE9437EA9953"
+                          }
+                        },
+                        "linePenIndex": 161
+                      }
+                    },
+                    {
+                      "compositeLine": {
+                        "lineId": {
+                          "attributeId": {
+                            "guid": "28A7C677-9234-418F-9E4D-D10C22581DF6"
+                          }
+                        },
+                        "linePenIndex": 141
+                      }
+                    },
+                    {
+                      "compositeLine": {
+                        "lineId": {
+                          "attributeId": {
+                            "guid": "B13D03C4-2388-4761-A8A3-EE9437EA9953"
+                          }
+                        },
+                        "linePenIndex": 141
+                      }
+                    }
+                  ],
+                  "useWith": [
+                    "Wall",
+                    "Slab",
+                    "Roof"
+                  ]
+                }
+              },
+              {
+                "error": {
+                  "code": 6100,
+                  "message": "Attribute is missing"
+                }
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

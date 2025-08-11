@@ -1,0 +1,164 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "description": "Returns the detailed attribute folders identified by their Ids.",
+  "definitions": {
+    "command_parameters": {
+      "type": "object",
+      "properties": {
+        "attributeFolderIds": {
+          "$ref": "APIAttributeTypes.json#/definitions/AttributeFolderIds"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "attributeFolderIds"
+      ]
+    },
+    "response_parameters": {
+      "type": "object",
+      "properties": {
+        "attributeFolders": {
+          "$ref": "APIAttributeTypes.json#/definitions/AttributeFolders"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "attributeFolders"
+      ]
+    },
+    "examples": [
+      {
+        "description": "Get Surface and Fill attribute root folders and an invalid folder.",
+        "command_example": {
+          "command": "API.GetAttributeFolders",
+          "parameters": {
+            "attributeFolderIds": [
+              {
+                "attributeFolderId": {
+                  "guid": "E16AC561-0D2A-41E8-BFE8-E2965D62576B"
+                }
+              },
+              {
+                "attributeFolderId": {
+                  "guid": "6BC92968-ABC3-4F31-81B1-5BDB9DA5A513"
+                }
+              },
+              {
+                "attributeFolderId": {
+                  "guid": "BADBAD00-ABC3-4F31-81B1-000BADBAD000"
+                }
+              }
+            ]
+          }
+        },
+        "response_example": {
+          "succeeded": true,
+          "result": {
+            "attributeFolders": [
+              {
+                "attributeFolder": {
+                  "attributeType": "Surface",
+                  "path": [
+                    "Surfaces"
+                  ],
+                  "attributeFolderId": {
+                    "guid": "E16AC561-0D2A-41E8-BFE8-E2965D62576B"
+                  },
+                  "attributeIds": [
+                    {
+                      "attributeId": {
+                        "guid": "BEF45D4F-77F2-4663-95DE-00F7FE845F0D"
+                      }
+                    },
+                    {
+                      "attributeId": {
+                        "guid": "DBCC5514-CE59-4A84-8DDF-10AFBCD33547"
+                      }
+                    },
+                    {
+                      "attributeId": {
+                        "guid": "D4D2112D-DD1C-4E88-96E0-307131AADE6E"
+                      }
+                    }
+                  ],
+                  "attributeFolderIds": [
+                    {
+                      "attributeFolderId": {
+                        "guid": "B470082A-9187-48E1-ACFD-80598F750D75"
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "attributeFolder": {
+                  "attributeType": "Fill",
+                  "path": [
+                    "Fills"
+                  ],
+                  "attributeFolderId": {
+                    "guid": "6BC92968-ABC3-4F31-81B1-5BDB9DA5A513"
+                  },
+                  "attributeIds": [
+                    {
+                      "attributeId": {
+                        "guid": "87E1F859-C78F-4188-94DC-5FF4616F7B75"
+                      }
+                    },
+                    {
+                      "attributeId": {
+                        "guid": "08EBF75D-661F-4B7E-A8DE-CD5068166E6D"
+                      }
+                    },
+                    {
+                      "attributeId": {
+                        "guid": "7D30D4FC-4C93-4FFA-82C8-AA17B32DA2B9"
+                      }
+                    },
+                    {
+                      "attributeId": {
+                        "guid": "95084D73-89D8-444E-8247-7C6ECAE0BD60"
+                      }
+                    },
+                    {
+                      "attributeId": {
+                        "guid": "D6F36B2F-58E8-444D-BAF6-93DAD430EA39"
+                      }
+                    },
+                    {
+                      "attributeId": {
+                        "guid": "DE881F49-41D1-4252-A6A4-FFD9590BEB82"
+                      }
+                    },
+                    {
+                      "attributeId": {
+                        "guid": "C20756B0-D90A-4F23-AE29-AC478F792FD4"
+                      }
+                    },
+                    {
+                      "attributeId": {
+                        "guid": "64306F90-0B79-41DD-92C1-082F61B1CE09"
+                      }
+                    },
+                    {
+                      "attributeId": {
+                        "guid": "2A41CB21-711D-44F4-9880-9863E29DB1C7"
+                      }
+                    }
+                  ],
+                  "attributeFolderIds": []
+                }
+              },
+              {
+                "error": {
+                  "code": 6108,
+                  "message": "Attribute folder not found: \"BADBAD00-ABC3-4F31-81B1-000BADBAD000\"."
+                }
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

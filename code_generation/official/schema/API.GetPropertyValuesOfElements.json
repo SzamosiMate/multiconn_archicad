@@ -1,0 +1,280 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "description": "Returns the property values of the elements for the given property.",
+  "definitions": {
+    "command_parameters": {
+      "type": "object",
+      "properties": {
+        "elements": {
+          "$ref": "APITypes.json#/definitions/Elements"
+        },
+        "properties": {
+          "$ref": "APIPropertyTypes.json#/definitions/PropertyIds"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elements",
+        "properties"
+      ]
+    },
+    "response_parameters": {
+      "type": "object",
+      "properties": {
+        "propertyValuesForElements": {
+          "$ref": "APIPropertyTypes.json#/definitions/PropertyValuesOrErrorArray",
+          "description": "List of property value lists. The order of the outer list is that of the given elements. The order of the inner lists are that of the given properties."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "propertyValuesForElements"
+      ]
+    },
+    "examples": [
+      {
+        "description": "Getting simple property values of an element.",
+        "command_example": {
+          "command": "API.GetPropertyValuesOfElements",
+          "parameters": {
+            "elements": [
+              {
+                "elementId": {
+                  "guid": "63BA003E-4F4D-AA4A-8FBC-57379F2CDB98"
+                }
+              }
+            ],
+            "properties": [
+              {
+                "propertyId": {
+                  "guid": "13A61253-66A9-4494-9393-9E8F2E19D55E"
+                }
+              },
+              {
+                "propertyId": {
+                  "guid": "F6F67733-1DC1-442A-8CF4-ACD2DF7E62C6"
+                }
+              },
+              {
+                "propertyId": {
+                  "guid": "BCB5813F-2115-4B8B-A12F-16CFE37C7B7F"
+                }
+              },
+              {
+                "propertyId": {
+                  "guid": "11111111-2222-3333-4444-555555555555"
+                }
+              }
+            ]
+          }
+        },
+        "response_example": {
+          "succeeded": true,
+          "result": {
+            "propertyValuesForElements": [
+              {
+                "propertyValues": [
+                  {
+                    "propertyValue": {
+                      "type": "boolean",
+                      "status": "normal",
+                      "value": false
+                    }
+                  },
+                  {
+                    "propertyValue": {
+                      "type": "integer",
+                      "status": "normal",
+                      "value": 888
+                    }
+                  },
+                  {
+                    "propertyValue": {
+                      "type": "string",
+                      "status": "normal",
+                      "value": "some value"
+                    }
+                  },
+                  {
+                    "error": {
+                      "code": 6701,
+                      "message": "Property definition not found (property definition guid: \"11111111-2222-3333-4444-555555555555\")"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      },
+      {
+        "description": "Getting property values of more elements and properties.",
+        "command_example": {
+          "command": "API.GetPropertyValuesOfElements",
+          "parameters": {
+            "elements": [
+              {
+                "elementId": {
+                  "guid": "11111111-2222-3333-4444-555555555555"
+                }
+              },              
+              {
+                "elementId": {
+                  "guid": "63BA003E-4F4D-AA4A-8FBC-57379F2CDB98"
+                }
+              },              
+              {
+                "elementId": {
+                  "guid": "0F7943AC-48FA-C74E-8ACE-D1CB0DB0DBB7"
+                }
+              }
+			  
+            ],
+            "properties": [
+              {
+                "propertyId": {
+                  "guid": "13A61253-66A9-4494-9393-9E8F2E19D55E"
+                }
+              },
+              {
+                "propertyId": {
+                  "guid": "11111111-2222-3333-4444-555555555555"
+                }
+              }
+            ]
+          }
+        },
+        "response_example": {
+          "succeeded": true,
+          "result": {
+          	"propertyValuesForElements": [
+          		{
+          			"error": {
+          				"code": 7204,
+          				"message": "Element not found (element guid: \"11111111-2222-3333-4444-555555555555\")"
+          			}
+          		},
+          		{
+          			"propertyValues": [
+          				{
+          					"propertyValue": {
+          						"type": "boolean",
+          						"status": "normal",
+          						"value": false
+          					}
+          				},
+          				{
+          					"error": {
+          						"code": 6701,
+          						"message": "Property definition not found (property definition guid: \"11111111-2222-3333-4444-555555555555\")"
+          					}
+          				}
+          			]
+          		},
+				{
+          			"propertyValues": [
+          				{
+          					"propertyValue": {
+          						"type": "boolean",
+          						"status": "normal",
+          						"value": true
+          					}
+          				},
+          				{
+          					"error": {
+          						"code": 6701,
+          						"message": "Property definition not found (property definition guid: \"11111111-2222-3333-4444-555555555555\")"
+          					}
+          				}
+          			]
+          		}
+          	]
+          }
+        }
+      },
+      {
+        "description": "Getting property values of an element, which has single and multiple choice enumeration properties.",
+        "command_example": {
+          "command": "API.GetPropertyValuesOfElements",
+          "parameters": {
+            "elements": [
+              {
+                "elementId": {
+                  "guid": "63BA003E-4F4D-AA4A-8FBC-57379F2CDB98"
+                }
+              }
+            ],
+            "properties": [
+              {
+                "propertyId": {
+                  "guid": "6F4A46AC-AE91-47E6-BF4A-9F9AB01A4986"
+                }
+              },
+              {
+                "propertyId": {
+                  "guid": "E480E81E-EDE3-43FC-9C52-B55A4CA1A85C"
+                }
+              },
+              {
+                "propertyId": {
+                  "guid": "9CC16F4D-9754-B744-B3F8-20BA074A3B2D"
+                }
+              }
+            ]
+          }
+        },
+        "response_example": {
+          "succeeded": true,
+          "result": {
+            "propertyValuesForElements": [
+              {
+                "propertyValues": [
+                  {
+                    "propertyValue": {
+                      "type": "number",
+                      "status": "normal",
+                      "value": 3.141592
+                    }
+                  },
+                  {
+                    "propertyValue": {
+                      "type": "singleEnum",
+                      "status": "normal",
+                      "value": {
+                        "type": "displayValue",
+                        "displayValue": "1 hour"
+                      }
+                    }
+                  },
+                  {
+                    "propertyValue": {
+                      "type": "multiEnum",
+                      "status": "normal",
+                      "value": [
+                        {
+                          "enumValueId": {
+                            "type": "displayValue",
+                            "displayValue": "Apple"
+                          }
+                        },
+                        {
+                          "enumValueId": {
+                            "type": "displayValue",
+                            "displayValue": "Orange"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    ],
+    "see_also": [
+      "Property Information"
+    ]
+  }
+}

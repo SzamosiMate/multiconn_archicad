@@ -1,0 +1,654 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "description": "Returns the details of property definitions.",
+  "definitions": {
+    "command_parameters": {
+      "type": "object",
+      "properties": {
+        "properties": {
+          "$ref": "APIPropertyTypes.json#/definitions/PropertyIds"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "properties"
+      ]
+    },
+    "response_parameters": {
+      "type": "object",
+      "properties": {
+        "propertyDefinitions": {
+          "$ref": "APIPropertyTypes.json#/definitions/PropertyDefinitionsOrErrors"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "propertyDefinitions"
+      ]
+    },
+    "examples": [
+      {
+        "description": "Get the details of properties.",
+        "command_example": {
+          "command": "API.GetDetailsOfProperties",
+          "parameters": {
+            "properties": [
+              {
+                "propertyId": {
+                  "guid": "4A0D773E-33FB-4CF7-98FD-561044BCB21D"
+                }
+              },
+              {
+                "propertyId": {
+                  "guid": "F6F67733-1DC1-442A-8CF4-ACD2DF7E62C6"
+                }
+              },
+              {
+                "propertyId": {
+                  "guid": "11111111-2222-3333-4444-555555555555"
+                }
+              }
+            ]
+          }
+        },
+        "response_example": {
+          "succeeded": true,
+          "result": {
+            "propertyDefinitions": [
+              {
+                "propertyDefinition": {
+                  "propertyId": {
+                    "guid": "4A0D773E-33FB-4CF7-98FD-561044BCB21D"
+                  },
+                  "group": {
+                    "propertyGroupId": {
+                      "guid": "572F56FE-5F89-4357-A9C3-C4FBB16D7ED4"
+                    },
+                    "name": "Window/Door"
+                  },
+                  "name": "W/D Opening Opening Volume",
+                  "description": "",
+                  "isEditable": false,
+                  "type": "volume"
+                }
+              },
+              {
+                "propertyDefinition": {
+                  "propertyId": {
+                    "guid": "F6F67733-1DC1-442A-8CF4-ACD2DF7E62C6"
+                  },
+                  "group": {
+                    "propertyGroupId": {
+                      "guid": "D1219C84-EB08-4478-BD05-90495552554A"
+                    },
+                    "name": "ENVIRONMENTAL"
+                  },
+                  "name": "Life Cycle Environmental",
+                  "description": "",
+                  "isEditable": true,
+                  "type": "integer",
+                  "defaultValue": {
+                    "basicDefaultValue": {
+                      "type": "integer", 
+                      "status": "userUndefined"
+                    }
+                  }
+                }
+              },
+              {
+                "error": {
+                  "code": 6701,
+                  "message": "Property definition not found (property definition guid: \"11111111-2222-3333-4444-555555555555\")"
+                }
+              }
+            ]
+          }
+        }
+      },
+      {
+        "description": "Get the details of properties.",
+        "command_example": {
+          "command": "API.GetDetailsOfProperties",
+          "parameters": {
+            "properties": [
+              {
+                "propertyId": {
+                  "guid": "13A61253-66A9-4494-9393-9E8F2E19D55E"
+                }
+              },
+              {
+                "propertyId": {
+                  "guid": "E480E81E-EDE3-43FC-9C52-B55A4CA1A85C"
+                }
+              },
+              {
+                "propertyId": {
+                  "guid": "9CC16F4D-9754-B744-B3F8-20BA074A3B2D"
+                }
+              }
+            ]
+          }
+        },
+        "response_example": {
+          "succeeded": true,
+          "result": {
+            "propertyDefinitions": [
+              {
+                "propertyDefinition": {
+                  "propertyId": {
+                    "guid": "13A61253-66A9-4494-9393-9E8F2E19D55E"
+                  },
+                  "group": {
+                    "propertyGroupId": {
+                      "guid": "B12F472E-419D-417E-9A76-85EA50A72109"
+                    },
+                    "name": "GENERAL RATINGS"
+                  },
+                  "name": "Combustible",
+                  "description": "",
+                  "isEditable": true,
+                  "type": "boolean",
+                  "defaultValue": {
+                    "basicDefaultValue": {
+                      "type": "boolean", 
+                      "status": "userUndefined"
+                    }
+                  }
+                }
+              },
+              {
+                "propertyDefinition": {
+                  "propertyId": {
+                    "guid": "E480E81E-EDE3-43FC-9C52-B55A4CA1A85C"
+                  },
+                  "group": {
+                    "propertyGroupId": {
+                      "guid": "B12F472E-419D-417E-9A76-85EA50A72109"
+                    },
+                    "name": "GENERAL RATINGS"
+                  },
+                  "name": "Fire Resistance Rating",
+                  "description": "minutes",
+                  "isEditable": true,
+                  "type": "singleEnum",
+                  "defaultValue": {
+                    "basicDefaultValue": {
+                      "type": "singleEnum", 
+                      "status": "userUndefined"
+                    }
+                  },
+                  "possibleEnumValues": [
+                    {
+                      "enumValue": {
+                        "enumValueId": {
+                          "type": "displayValue",
+                          "displayValue": "20 minutes"
+                        },
+                        "displayValue": "20 minutes"
+                      }
+                    },
+                    {
+                      "enumValue": {
+                        "enumValueId": {
+                          "type": "displayValue",
+                          "displayValue": "30 minutes"
+                        },
+                        "displayValue": "30 minutes"
+                      }
+                    },
+                    {
+                      "enumValue": {
+                        "enumValueId": {
+                          "type": "displayValue",
+                          "displayValue": "45 minutes"
+                        },
+                        "displayValue": "45 minutes"
+                      }
+                    },
+                    {
+                      "enumValue": {
+                        "enumValueId": {
+                          "type": "displayValue",
+                          "displayValue": "1 hour"
+                        },
+                        "displayValue": "1 hour"
+                      }
+                    },
+                    {
+                      "enumValue": {
+                        "enumValueId": {
+                          "type": "displayValue",
+                          "displayValue": "1.5 hours"
+                        },
+                        "displayValue": "1.5 hours"
+                      }
+                    },
+                    {
+                      "enumValue": {
+                        "enumValueId": {
+                          "type": "displayValue",
+                          "displayValue": "2 hours"
+                        },
+                        "displayValue": "2 hours"
+                      }
+                    },
+                    {
+                      "enumValue": {
+                        "enumValueId": {
+                          "type": "displayValue",
+                          "displayValue": "3 hours"
+                        },
+                        "displayValue": "3 hours"
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "propertyDefinition": {
+                  "propertyId": {
+                    "guid": "9CC16F4D-9754-B744-B3F8-20BA074A3B2D"
+                  },
+                  "group": {
+                    "propertyGroupId": {
+                      "guid": "6EC37DFB-BA47-2041-B04B-703ACB89BF7E"
+                    },
+                    "name": "TESTGROUP"
+                  },
+                  "name": "MultiEnumProperty",
+                  "description": "",
+                  "isEditable": true,
+                  "type": "multiEnum",
+                  "defaultValue": {
+                    "basicDefaultValue": {
+                      "type": "multiEnum", 
+                      "status": "userUndefined"
+                    }
+                  },
+                  "possibleEnumValues": [
+                    {
+                      "enumValue": {
+                        "enumValueId": {
+                          "type": "displayValue",
+                          "displayValue": "Apple"
+                        },
+                        "displayValue": "Apple"
+                      }
+                    },
+                    {
+                      "enumValue": {
+                        "enumValueId": {
+                          "type": "displayValue",
+                          "displayValue": "Orange"
+                        },
+                        "displayValue": "Orange"
+                      }
+                    },
+                    {
+                      "enumValue": {
+                        "enumValueId": {
+                          "type": "displayValue",
+                          "displayValue": "Banana"
+                        },
+                        "displayValue": "Banana"
+                      }
+                    },
+                    {
+                      "enumValue": {
+                        "enumValueId": {
+                          "type": "displayValue",
+                          "displayValue": "Mango"
+                        },
+                        "displayValue": "Mango"
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      },
+      {
+        "description": "Get the details of builtin enum properties.",
+        "command_example": {
+          "command": "API.GetDetailsOfProperties",
+          "parameters": {
+            "properties": [
+              {
+                "propertyId": {
+                  "guid": "53402BE5-29D9-44A5-B6D6-4FA90938DDC9"
+                }
+              },
+              {
+                "propertyId": {
+                  "guid": "9B2F38A8-198B-4125-9E73-5646F072C10E"
+                }
+              },
+              {
+                "propertyId": {
+                  "guid": "3FC77583-1284-478B-BA80-9C81F0A091B1"
+                }
+              },
+              {
+                "propertyId": {
+                  "guid": "9CF14061-6E9C-45BE-BD8F-D3BCF59D218E"
+                }
+              },
+              {
+                "propertyId": {
+                  "guid": "7EC8476C-8E79-44D8-8BDE-F95C81F21EC2"
+                }
+              }
+            ]
+          }
+        },
+        "response_example": {
+          "succeeded": true,
+          "result": {
+            "propertyDefinitions": [
+              {
+                "propertyDefinition": {
+                  "propertyId": {
+                    "guid": "53402BE5-29D9-44A5-B6D6-4FA90938DDC9"
+                  },
+                  "group": {
+                    "propertyGroupId": {
+                      "guid": "21AFD5A3-5024-457F-BC50-1AC8B973BA81"
+                    },
+                    "name": "CategoryPropertyDefinitionGroup"
+                  },
+                  "name": "Position",
+                  "description": "Position property",
+                  "isEditable": true,
+                  "type": "singleEnum",
+                  "possibleEnumValues": [
+                    {
+                      "enumValue": {
+                        "enumValueId": {
+                          "type": "nonLocalizedValue",
+                          "nonLocalizedValue": "Exterior"
+                        },
+                        "displayValue": "Exterior",
+                        "nonLocalizedValue": "Exterior"
+                      }
+                    },
+                    {
+                      "enumValue": {
+                        "enumValueId": {
+                          "type": "nonLocalizedValue",
+                          "nonLocalizedValue": "Interior"
+                        },
+                        "displayValue": "Interior",
+                        "nonLocalizedValue": "Interior"
+                      }
+                    },
+                    {
+                      "enumValue": {
+                        "enumValueId": {
+                          "type": "nonLocalizedValue",
+                          "nonLocalizedValue": "Undefined"
+                        },
+                        "displayValue": "Undefined",
+                        "nonLocalizedValue": "Undefined"
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "propertyDefinition": {
+                  "propertyId": {
+                    "guid": "9B2F38A8-198B-4125-9E73-5646F072C10E"
+                  },
+                  "group": {
+                    "propertyGroupId": {
+                      "guid": "21AFD5A3-5024-457F-BC50-1AC8B973BA81"
+                    },
+                    "name": "CategoryPropertyDefinitionGroup"
+                  },
+                  "name": "Structural Function",
+                  "description": "Structural Function property",
+                  "isEditable": true,
+                  "type": "singleEnum",
+                  "possibleEnumValues": [
+                    {
+                      "enumValue": {
+                        "enumValueId": {
+                          "type": "nonLocalizedValue",
+                          "nonLocalizedValue": "LoadBearingElement"
+                        },
+                        "displayValue": "Load-Bearing Element",
+                        "nonLocalizedValue": "LoadBearingElement"
+                      }
+                    },
+                    {
+                      "enumValue": {
+                        "enumValueId": {
+                          "type": "nonLocalizedValue",
+                          "nonLocalizedValue": "NonLoadBearingElement"
+                        },
+                        "displayValue": "Non-Load-Bearing Element",
+                        "nonLocalizedValue": "NonLoadBearingElement"
+                      }
+                    },
+                    {
+                      "enumValue": {
+                        "enumValueId": {
+                          "type": "nonLocalizedValue",
+                          "nonLocalizedValue": "Undefined"
+                        },
+                        "displayValue": "Undefined",
+                        "nonLocalizedValue": "Undefined"
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "propertyDefinition": {
+                  "propertyId": {
+                    "guid": "3FC77583-1284-478B-BA80-9C81F0A091B1"
+                  },
+                  "group": {
+                    "propertyGroupId": {
+                      "guid": "21AFD5A3-5024-457F-BC50-1AC8B973BA81"
+                    },
+                    "name": "CategoryPropertyDefinitionGroup"
+                  },
+                  "name": "Show On Renovation Filter",
+                  "description": "Show On Renovation Filter property",
+                  "isEditable": true,
+                  "type": "singleEnum",
+                  "possibleEnumValues": [
+                    {
+                      "enumValue": {
+                        "enumValueId": {
+                          "type": "displayValue",
+                          "displayValue": "00 Show All Elements"
+                        },
+                        "displayValue": "00 Show All Elements"
+                      }
+                    },
+                    {
+                      "enumValue": {
+                        "enumValueId": {
+                          "type": "displayValue",
+                          "displayValue": "01 Existing Plan"
+                        },
+                        "displayValue": "01 Existing Plan"
+                      }
+                    },
+                    {
+                      "enumValue": {
+                        "enumValueId": {
+                          "type": "displayValue",
+                          "displayValue": "02 Demolition Plan"
+                        },
+                        "displayValue": "02 Demolition Plan"
+                      }
+                    },
+                    {
+                      "enumValue": {
+                        "enumValueId": {
+                          "type": "displayValue",
+                          "displayValue": "03 After Demolition"
+                        },
+                        "displayValue": "03 After Demolition"
+                      }
+                    },
+                    {
+                      "enumValue": {
+                        "enumValueId": {
+                          "type": "displayValue",
+                          "displayValue": "04 Change Plan"
+                        },
+                        "displayValue": "04 Change Plan"
+                      }
+                    },
+                    {
+                      "enumValue": {
+                        "enumValueId": {
+                          "type": "displayValue",
+                          "displayValue": "05 New Construction"
+                        },
+                        "displayValue": "05 New Construction"
+                      }
+                    },
+                    {
+                      "enumValue": {
+                        "enumValueId": {
+                          "type": "displayValue",
+                          "displayValue": "06 Planned Status"
+                        },
+                        "displayValue": "06 Planned Status"
+                      }
+                    },
+                    {
+                      "enumValue": {
+                        "enumValueId": {
+                          "type": "nonLocalizedValue",
+                          "nonLocalizedValue": "AllRelevantFilters"
+                        },
+                        "displayValue": "All Relevant Filters",
+                        "nonLocalizedValue": "AllRelevantFilters"
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "propertyDefinition": {
+                  "propertyId": {
+                    "guid": "9CF14061-6E9C-45BE-BD8F-D3BCF59D218E"
+                  },
+                  "group": {
+                    "propertyGroupId": {
+                      "guid": "21AFD5A3-5024-457F-BC50-1AC8B973BA81"
+                    },
+                    "name": "CategoryPropertyDefinitionGroup"
+                  },
+                  "name": "Renovation Status",
+                  "description": "Renovation Status property",
+                  "isEditable": true,
+                  "type": "singleEnum",
+                  "possibleEnumValues": [
+                    {
+                      "enumValue": {
+                        "enumValueId": {
+                          "type": "nonLocalizedValue",
+                          "nonLocalizedValue": "Undefined"
+                        },
+                        "displayValue": "Undefined",
+                        "nonLocalizedValue": "Undefined"
+                      }
+                    },
+                    {
+                      "enumValue": {
+                        "enumValueId": {
+                          "type": "nonLocalizedValue",
+                          "nonLocalizedValue": "Existing"
+                        },
+                        "displayValue": "Existing",
+                        "nonLocalizedValue": "Existing"
+                      }
+                    },
+                    {
+                      "enumValue": {
+                        "enumValueId": {
+                          "type": "nonLocalizedValue",
+                          "nonLocalizedValue": "ToBeDemolished"
+                        },
+                        "displayValue": "To Be Demolished",
+                        "nonLocalizedValue": "ToBeDemolished"
+                      }
+                    },
+                    {
+                      "enumValue": {
+                        "enumValueId": {
+                          "type": "nonLocalizedValue",
+                          "nonLocalizedValue": "New"
+                        },
+                        "displayValue": "New",
+                        "nonLocalizedValue": "New"
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "propertyDefinition": {
+                  "propertyId": {
+                    "guid": "7EC8476C-8E79-44D8-8BDE-F95C81F21EC2"
+                  },
+                  "group": {
+                    "propertyGroupId": {
+                      "guid": "10EDC72A-FBFB-4E45-B475-264256AF12CD"
+                    },
+                    "name": "General Parameters"
+                  },
+                  "name": "Structure Type",
+                  "description": "",
+                  "isEditable": true,
+                  "type": "singleEnum",
+                  "possibleEnumValues": [
+                    {
+                      "enumValue": {
+                        "enumValueId": {
+                          "type": "nonLocalizedValue",
+                          "nonLocalizedValue": "Basic"
+                        },
+                        "displayValue": "Basic",
+                        "nonLocalizedValue": "Basic"
+                      }
+                    },
+                    {
+                      "enumValue": {
+                        "enumValueId": {
+                          "type": "nonLocalizedValue",
+                          "nonLocalizedValue": "Composite"
+                        },
+                        "displayValue": "Composite",
+                        "nonLocalizedValue": "Composite"
+                      }
+                    },
+                    {
+                      "enumValue": {
+                        "enumValueId": {
+                          "type": "nonLocalizedValue",
+                          "nonLocalizedValue": "ComplexProfile"
+                        },
+                        "displayValue": "Complex Profile",
+                        "nonLocalizedValue": "ComplexProfile"
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

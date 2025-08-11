@@ -1,0 +1,44 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "description": "Returns the names of available publisher sets.",
+  "definitions": {
+    "command_parameters": {
+      "type": "object",
+      "properties": {
+      },
+      "additionalProperties": false
+    },
+    "response_parameters": {
+      "type": "object",
+      "properties": {
+        "publisherSetNames": {
+          "type": "array",
+          "description": "The names of available publisher sets.",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "publisherSetNames"
+      ]
+    },
+    "examples": [
+      {
+        "command_example": {
+          "command": "API.GetPublisherSetNames"
+        },
+        "response_example": {
+          "succeeded": true,
+          "result": {
+            "publisherSetNames": [
+              "1 - Views",
+              "2 - Layouts"
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

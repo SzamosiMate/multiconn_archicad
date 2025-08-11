@@ -1,0 +1,68 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "description": "Creates a new layout subset.",
+  "definitions": {
+    "command_parameters": {
+      "type": "object",
+      "properties": {
+        "subsetParameters": {
+          "$ref": "APITypes.json#/definitions/Subset"
+        },
+        "parentNavigatorItemId": {
+          "$ref": "APINavigatorTypes.json#/definitions/NavigatorItemId"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "subsetParameters",
+        "parentNavigatorItemId"
+      ]
+    },
+    "response_parameters": {
+      "type": "object",
+      "properties": {
+        "createdSubsetId": {
+          "description": "The ID of the new subset navigator item in the layout book.",
+          "$ref": "APINavigatorTypes.json#/definitions/NavigatorItemId"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "createdSubsetId"
+      ]
+    },
+    "examples": [
+      {
+        "command_example": {
+          "command": "API.CreateLayoutSubset",
+          "parameters": {
+            "parentNavigatorItemId": {
+              "guid": "ECD23F92-5D0B-4E20-AC21-1700403E565E"
+            },
+            "subsetParameters": {
+              "name": "MySubset",
+              "includeToIDSequence": true,
+              "customNumbering": false,
+              "continueNumbering": true,
+              "useUpperPrefix": true,
+              "addOwnPrefix": true,
+              "customNumber": "CN",
+              "autoNumber": "AN",
+              "numberingStyle": "ABC",
+              "startAt": 0,
+              "ownPrefix": "MyPrefix"
+            }
+          }
+        },
+        "response_example": {
+          "succeeded": true,
+          "result": {
+            "createdSubsetId": {
+              "guid": "BE917CFF-6A1F-47B0-87DD-10E06395A2A5"
+            }
+          }
+        }
+      }
+    ]
+  }
+}

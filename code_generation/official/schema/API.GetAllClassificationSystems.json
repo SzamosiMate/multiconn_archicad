@@ -1,0 +1,48 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "description": "Returns the list of available classification systems.",
+  "definitions": {
+    "command_parameters": {
+      "type": "object",
+      "properties": {
+      },
+      "additionalProperties": false
+    },
+    "response_parameters": {
+      "type": "object",
+      "properties": {
+        "classificationSystems": {
+          "$ref": "APIClassificationTypes.json#/definitions/ClassificationSystems"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "classificationSystems"
+      ]
+    },
+    "examples": [
+      {
+        "command_example": {
+          "command": "API.GetAllClassificationSystems"
+        },
+        "response_example": {
+          "succeeded": true,
+          "result": {
+            "classificationSystems": [
+              {
+                "classificationSystemId": {
+                  "guid": "632C30E5-2B82-4A75-BFAD-D52FEBCE9A4A"
+                },
+                "name": "Archicad Classification",
+                "description": "",
+                "source": "www.graphisoft.com",
+                "version": "v 2.0",
+                "date": "2019-03-15"
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

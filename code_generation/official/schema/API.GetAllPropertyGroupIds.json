@@ -1,0 +1,74 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "description": "Returns the identifier of every property group in the current plan. The optional propertyType parameter can be used to filter the results based on the type of the property group (Built-in or User Defined).",
+  "definitions": {
+    "command_parameters": {
+      "type": "object",
+      "properties": {
+        "propertyType": {
+          "$ref": "APIPropertyTypes.json#/definitions/PropertyType"
+        }
+      },
+      "additionalProperties": false
+    },
+    "response_parameters": {
+      "type": "object",
+      "properties": {
+        "propertyGroupIds": {
+          "$ref": "APIPropertyTypes.json#/definitions/PropertyGroupIds"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "propertyGroupIds"
+      ]
+    },
+    "examples": [
+      {
+        "command_example": {
+          "command": "API.GetAllPropertyGroupIds",
+          "parameters": {
+            "propertyType": "UserDefined"
+          }
+        },
+        "response_example": {
+          "succeeded": true,
+          "result": {
+            "propertyGroupIds": [
+              {
+                "propertyGroupId": {
+                  "guid": "B12F472E-419D-417E-9A76-85EA50A72109"
+                }
+              },
+              {
+                "propertyGroupId": {
+                  "guid": "DD02E8F4-C293-487A-A294-6660A5833727"
+                }
+              },
+              {
+                "propertyGroupId": {
+                  "guid": "D1219C84-EB08-4478-BD05-90495552554A"
+                }
+              },
+              {
+                "propertyGroupId": {
+                  "guid": "DD952395-13B6-4121-AB97-6C8BD85B44EC"
+                }
+              },
+              {
+                "propertyGroupId": {
+                  "guid": "D912ACA9-C082-4B79-A7F3-24151CBD1AD9"
+                }
+              },
+              {
+                "propertyGroupId": {
+                  "guid": "6EC37DFB-BA47-2041-B04B-703ACB89BF7E"
+                }
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

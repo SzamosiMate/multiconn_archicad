@@ -1,0 +1,119 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "description": "Returns the detailed layer combination attributes identified by their GUIDs.",
+  "definitions": {
+    "command_parameters": {
+      "type": "object",
+      "properties": {
+        "attributeIds": {
+          "$ref": "APIAttributeTypes.json#/definitions/AttributeIds"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "attributeIds"
+      ]
+    },
+    "response_parameters": {
+      "type": "object",
+      "properties": {
+        "attributes": {
+          "$ref": "APIAttributeTypes.json#/definitions/LayerCombinationAttributes"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "attributes"
+      ]
+    },
+    "examples": [
+      {
+        "command_example": {
+          "command": "API.GetLayerCombinationAttributes",
+          "parameters": {
+            "attributeIds": [
+              {
+                "attributeId": {
+                  "guid": "3AC219F3-F620-455F-B4B9-0FF0CE8A14BF"
+                }
+              },
+              {
+                "attributeId": {
+                  "guid": "BDA01F26-42FD-413A-A6F7-57355DC40531"
+                }
+              },
+              {
+                "attributeId": {
+                  "guid": "33C03D7A-60D6-4EB5-9FA1-ED2499CE1356"
+                }
+              }
+            ]
+          }
+        },
+        "response_example": {
+          "succeeded": true,
+          "result": {
+            "attributes": [
+              {
+                "layerCombinationAttribute": {
+                  "attributeId": {
+                    "guid": "3AC219F3-F620-455F-B4B9-0FF0CE8A14BF"
+                  },
+                  "name": "02 Drafting",
+                  "layerAttributeIds": [
+                    {
+                      "attributeId": {
+                        "guid": "4D22523E-C844-4209-A123-3608C8964DE4"
+                      }
+                    },
+                    {
+                      "attributeId": {
+                        "guid": "F9FE11C7-D8E4-499D-98CA-CA9165B64FF7"
+                      }
+                    },
+                    {
+                      "attributeId": {
+                        "guid": "3186B2F6-813B-4DB7-BE94-8755BAC13B34"
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "layerCombinationAttribute": {
+                  "attributeId": {
+                    "guid": "BDA01F26-42FD-413A-A6F7-57355DC40531"
+                  },
+                  "name": "01 Site",
+                  "layerAttributeIds": [
+                    {
+                      "attributeId": {
+                        "guid": "4D22523E-C844-4209-A123-3608C8964DE4"
+                      }
+                    },
+                    {
+                      "attributeId": {
+                        "guid": "F9FE11C7-D8E4-499D-98CA-CA9165B64FF7"
+                      }
+                    },
+                    {
+                      "attributeId": {
+                        "guid": "3186B2F6-813B-4DB7-BE94-8755BAC13B34"
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "error": {
+                  "code": 6100,
+                  "message": "Attribute is missing"
+                }
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

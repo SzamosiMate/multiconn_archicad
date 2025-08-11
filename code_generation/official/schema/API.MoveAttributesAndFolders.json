@@ -1,0 +1,72 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "description": "Moves attributes and attribute folders.",
+  "definitions": {
+    "command_parameters": {
+      "type": "object",
+      "properties": {
+        "attributeFolderIds": {
+          "$ref": "APIAttributeTypes.json#/definitions/AttributeFolderIds"
+        },
+        "attributeIds": {
+          "$ref": "APIAttributeTypes.json#/definitions/AttributeIds"
+        },
+        "targetFolderId": {
+          "$ref": "APIAttributeTypes.json#/definitions/AttributeFolderId"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "attributeFolderIds",
+        "attributeIds",
+        "targetFolderId"
+      ]
+    },
+    "response_parameters": {
+      "type": "object",
+      "properties": {
+      },
+      "additionalProperties": false
+    },
+    "examples": [
+      {
+        "description": "Moving two folders and two Profile attributes to folder B.",
+        "command_example": {
+          "command": "API.MoveAttributesAndFolders",
+          "parameters": {
+            "attributeFolderIds": [
+              {
+                "attributeFolderId": {
+                  "guid": "E8A5C5FD-B2E2-4D2B-9F95-E6486E82F79A"
+                }
+              },
+              {
+                "attributeFolderId": {
+                  "guid": "4DE0E99C-AC1F-4DC0-8AE2-4C2050733E0C"
+                }
+              }
+            ],
+            "attributeIds": [
+              {
+                "attributeId": {
+                  "guid": "63F5F9DD-29F9-7A46-AD8F-4E414B5ADBC8"
+                }
+              },
+              {
+                "attributeId": {
+                  "guid": "4C92EA88-150A-4579-9765-253130AFF985"
+                }
+              }
+            ],
+            "targetFolderId": {
+              "guid": "55188E0F-A670-477F-BE4E-00F5D50C0000"
+            }
+          }
+        },
+        "response_example": {
+          "succeeded": true
+        }
+      }
+    ]
+  }
+}

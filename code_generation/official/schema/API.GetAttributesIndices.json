@@ -1,0 +1,93 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "description": "Returns the requested indices and guids of attributes.",
+  "definitions": {
+    "command_parameters": {
+      "type": "object",
+      "properties": {
+        "attributeIds": {
+          "$ref": "APIAttributeTypes.json#/definitions/AttributeIds"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "attributeIds"
+      ]
+    },
+    "response_parameters": {
+      "type": "object",
+      "properties": {
+        "attributeIndicesAndGuids": {
+          "$ref": "APIAttributeTypes.json#/definitions/AttributeIndicesAndGuids"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "attributeIndicesAndGuids"
+      ]
+    },
+    "examples": [
+      {
+        "description": "Get indices of the following attributes",
+        "command_example": {
+          "command": "API.GetAttributesIndices",
+          "parameters": {
+            "attributeIds": [
+              {
+                "attributeId": {
+                  "guid": "692A8CF4-2CD6-4863-80FB-864EEC1515C0"
+                }
+              },
+              {
+                "attributeId": {
+                  "guid": "15BD4085-04A2-42C8-AA7E-0E932566586E"
+                }
+              },
+              {
+                "attributeId": {
+                  "guid": "11111BAD-0000-0000-0000-BAD111111111"
+                }
+              },
+              {
+                "attributeId": {
+                  "guid": "F10F261B-1A5E-443B-9C03-3B023E67F319"
+                }
+              }
+            ]
+          }
+        },
+        "response_example": {
+          "succeeded": true,
+          "result": {
+            "attributeIndicesAndGuids": [
+              {
+                "attributeIndexAndGuid": {
+                  "guid": "692A8CF4-2CD6-4863-80FB-864EEC1515C0",
+                  "index": 1
+                }
+              },
+              {
+                "attributeIndexAndGuid": {
+                  "guid": "15BD4085-04A2-42C8-AA7E-0E932566586E",
+                  "index": 25
+                }
+              },
+              {
+                "error": {
+                  "code": 6100,
+                  "message": "Attribute is missing"
+                }
+              },
+              {
+                "attributeIndexAndGuid": {
+                  "guid": "F10F261B-1A5E-443B-9C03-3B023E67F319",
+                  "index": 1
+                }
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

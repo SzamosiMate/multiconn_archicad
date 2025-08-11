@@ -1,0 +1,236 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "description": "Sets the property values of elements.",
+  "definitions": {
+    "command_parameters": {
+      "type": "object",
+      "properties": {
+        "elementPropertyValues": {
+          "$ref": "APIPropertyTypes.json#/definitions/ElementPropertyValues"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elementPropertyValues"
+      ]
+    },
+    "response_parameters": {
+      "type": "object",
+      "properties": {
+        "executionResults": {
+          "$ref": "APITypes.json#/definitions/ExecutionResults"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "executionResults"
+      ]
+    },
+    "examples": [
+      {
+        "description": "Setting simple property values of an element.",
+        "command_example": {
+          "command": "API.SetPropertyValuesOfElements",
+          "parameters": {
+            "elementPropertyValues": [
+              {
+                "elementId": {
+                  "guid": "63BA003E-4F4D-AA4A-8FBC-57379F2CDB98"
+                },
+                "propertyId": {
+                  "guid": "BCB5813F-2115-4B8B-A12F-16CFE37C7B7F"
+                },
+                "propertyValue": {
+                  "type": "string",
+                  "status": "normal",
+                  "value": "some other value"
+                }
+              },
+              {
+                "elementId": {
+                  "guid": "63BA003E-4F4D-AA4A-8FBC-57379F2CDB98"
+                },
+                "propertyId": {
+                  "guid": "F6F67733-1DC1-442A-8CF4-ACD2DF7E62C6"
+                },
+                "propertyValue": {
+                  "type": "integer",
+                  "status": "normal",
+                  "value": 777
+                }
+              },
+              {
+                "elementId": {
+                  "guid": "11111111-2222-3333-4444-555555555555"
+                },
+                "propertyId": {
+                  "guid": "BCB5813F-2115-4B8B-A12F-16CFE37C7B7F"
+                },
+                "propertyValue": {
+                  "type": "string",
+                  "status": "normal",
+                  "value": "this will not work"
+                }
+              }
+            ]
+          }
+        },
+        "response_example": {
+          "succeeded": true,
+          "result": {
+            "executionResults": [
+              {
+                "success": true
+              },
+              {
+                "success": true
+              },
+              {
+                "success": false,
+                "error": {
+                  "code": 7204,
+                  "message": "Element not found (element guid: \"11111111-2222-3333-4444-555555555555\")"
+                }
+              }
+            ]
+          }
+        }
+      },
+      {
+        "description": "Setting the single choice property enumeration value of an element.",
+        "command_example": {
+          "command": "API.SetPropertyValuesOfElements",
+          "parameters": {
+            "elementPropertyValues": [
+              {
+                "elementId": {
+                  "guid": "63BA003E-4F4D-AA4A-8FBC-57379F2CDB98"
+                },
+                "propertyId": {
+                  "guid": "E480E81E-EDE3-43FC-9C52-B55A4CA1A85C"
+                },
+                "propertyValue": {
+                  "type": "singleEnum",
+                  "status": "normal",
+                  "value": {
+                    "type": "displayValue",
+                    "displayValue": "45 minutes"
+                  }
+                }
+              },
+              {
+                "elementId": {
+                  "guid": "63BA003E-4F4D-AA4A-8FBC-57379F2CDB98"
+                },
+                "propertyId": {
+                  "guid": "E480E81E-EDE3-43FC-9C52-B55A4CA1A85C"
+                },
+                "propertyValue": {
+                  "type": "singleEnum",
+                  "status": "normal",
+                  "value": {
+                    "type": "displayValue",
+                    "displayValue": "NonExistingPropertyEnumValue"
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "response_example": {
+          "succeeded": true,
+          "result": {
+            "executionResults": [
+              {
+                "success": true
+              },
+              {
+                "success": false,
+                "error": {
+                  "code": 4007,
+                  "message": "Invalid property enum value (NonExistingPropertyEnumValue)"
+                }
+              }
+            ]
+          }
+        }
+      },
+      {
+        "description": "Setting the multiple choice property enumeration value of an element.",
+        "command_example": {
+          "command": "API.SetPropertyValuesOfElements",
+          "parameters": {
+            "elementPropertyValues": [
+              {
+                "elementId": {
+                  "guid": "63BA003E-4F4D-AA4A-8FBC-57379F2CDB98"
+                },
+                "propertyId": {
+                  "guid": "9CC16F4D-9754-B744-B3F8-20BA074A3B2D"
+                },
+                "propertyValue": {
+                  "type": "multiEnum",
+                  "status": "normal",
+                  "value": [
+                    {
+                      "enumValueId": {
+                        "type": "displayValue",
+                        "displayValue": "Banana"
+                      }
+                    },
+                    {
+                      "enumValueId": {
+                        "type": "displayValue",
+                        "displayValue": "Mango"
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "elementId": {
+                  "guid": "63BA003E-4F4D-AA4A-8FBC-57379F2CDB98"
+                },
+                "propertyId": {
+                  "guid": "9CC16F4D-9754-B744-B3F8-20BA074A3B2D"
+                },
+                "propertyValue": {
+                  "type": "multiEnum",
+                  "status": "normal",
+                  "value": [
+                    {
+                      "enumValueId": {
+                        "type": "displayValue",
+                        "displayValue": "NonExistingPropertyEnumValue"
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        "response_example": {
+          "succeeded": true,
+          "result": {
+            "executionResults": [
+              {
+                "success": true
+              },
+              {
+                "success": false,
+                "error": {
+                  "code": 4007,
+                  "message": "Invalid property enum value (NonExistingPropertyEnumValue)"
+                }
+              }
+            ]
+          }
+        }
+      }
+    ],
+    "see_also": [
+      "Property Information"
+    ]
+  }
+}
