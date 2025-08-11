@@ -1,0 +1,440 @@
+[
+    {
+        "name": "API.CloneProjectMapItemToViewMap",
+        "description": "Clones a project map item to the view map.",
+        "group": "View Map Commands",
+        "version": "N/A"
+    },
+    {
+        "name": "API.CreateAttributeFolders",
+        "description": "Creates attribute folders. To create a folder, its full path has to be provided. The command will create all folders along the path, if they do not exist.",
+        "group": "Attribute Commands",
+        "version": "N/A"
+    },
+    {
+        "name": "API.CreateLayout",
+        "description": "Creates a new layout.",
+        "group": "Layout Book Commands",
+        "version": "N/A"
+    },
+    {
+        "name": "API.CreateLayoutSubset",
+        "description": "Creates a new layout subset.",
+        "group": "Layout Book Commands",
+        "version": "N/A"
+    },
+    {
+        "name": "API.CreateViewMapFolder",
+        "description": "Creates a view folder item at the given position in the navigator tree.",
+        "group": "View Map Commands",
+        "version": "N/A"
+    },
+    {
+        "name": "API.DeleteAttributeFolders",
+        "description": "Deletes attribute folders and all the deletable attributes and folders it contains. To delete a folder, its identifier has to be provided.",
+        "group": "Attribute Commands",
+        "version": "N/A"
+    },
+    {
+        "name": "API.DeleteAttributes",
+        "description": "Deletes attributes.",
+        "group": "Attribute Commands",
+        "version": "N/A"
+    },
+    {
+        "name": "API.DeleteNavigatorItems",
+        "description": "Deletes items from navigator tree.",
+        "group": "Navigator Tree Commands",
+        "version": "N/A"
+    },
+    {
+        "name": "API.ExecuteAddOnCommand",
+        "description": "Executes a command registered in an Add-On.",
+        "group": "AddOn Commands",
+        "version": "N/A"
+    },
+    {
+        "name": "API.Get2DBoundingBoxes",
+        "description": "Get the 2D bounding box of elements identified by their GUIDs. The bounding box is calculated from the global origin on the floor plan view. The output is the array of the bounding boxes respective to the input GUIDs. Only works for elements detailed in <i>Element Information</i>.",
+        "group": "Element Geometry Commands",
+        "version": "N/A"
+    },
+    {
+        "name": "API.Get3DBoundingBoxes",
+        "description": "Get the 3D bounding box of elements identified by their GUIDs. The bounding box is calculated from the global origin in the 3D view. The output is the array of the bounding boxes respective to the input GUIDs. Only works for elements detailed in <i>Element Information</i>.",
+        "group": "Element Geometry Commands",
+        "version": "N/A"
+    },
+    {
+        "name": "API.GetActivePenTables",
+        "description": "Returns the model view and layout book pen table identifiers.",
+        "group": "Attribute Commands",
+        "version": "N/A"
+    },
+    {
+        "name": "API.GetAllClassificationSystems",
+        "description": "Returns the list of available classification systems.",
+        "group": "Classification Commands",
+        "version": "N/A"
+    },
+    {
+        "name": "API.GetAllClassificationsInSystem",
+        "description": "Returns the tree of classifications in the given classification system.",
+        "group": "Classification Commands",
+        "version": "N/A"
+    },
+    {
+        "name": "API.GetAllElements",
+        "description": "Returns the identifier of every element in the current plan.",
+        "group": "Element Listing Commands",
+        "version": "N/A"
+    },
+    {
+        "name": "API.GetAllPropertyGroupIds",
+        "description": "Returns the identifier of every property group in the current plan. The optional propertyType parameter can be used to filter the results based on the type of the property group (Built-in or User Defined).",
+        "group": "Property Commands",
+        "version": "N/A"
+    },
+    {
+        "name": "API.GetAllPropertyIds",
+        "description": "Returns the identifier of every property in the current plan. The optional propertyType parameter can be used to filter the results based on the type of the property (Built-in or User Defined).",
+        "group": "Property Commands",
+        "version": "N/A"
+    },
+    {
+        "name": "API.GetAllPropertyIdsOfElements",
+        "description": "Returns all property identifiers of the given elements. The optional propertyType parameter can be used to filter the results based on the type of the property (Built-in or User Defined).",
+        "group": "Property Commands",
+        "version": "N/A"
+    },
+    {
+        "name": "API.GetAllPropertyNames",
+        "description": "Returns the human-readable names of available Property definitions for debug and development purposes.",
+        "group": "Property Commands",
+        "version": "N/A"
+    },
+    {
+        "name": "API.GetAttributeFolderStructure",
+        "description": "Returns the detailed folder structure for the attributes of a given type. If the path is not given, the root folder will be returned",
+        "group": "Attribute Commands",
+        "version": "N/A"
+    },
+    {
+        "name": "API.GetAttributeFolders",
+        "description": "Returns the detailed attribute folders identified by their Ids.",
+        "group": "Attribute Commands",
+        "version": "N/A"
+    },
+    {
+        "name": "API.GetAttributesByType",
+        "description": "Returns the identifier of every attribute of the given type.",
+        "group": "Attribute Commands",
+        "version": "N/A"
+    },
+    {
+        "name": "API.GetAttributesIndices",
+        "description": "Returns the requested indices and guids of attributes.",
+        "group": "Attribute Commands",
+        "version": "N/A"
+    },
+    {
+        "name": "API.GetBuildingMaterialAttributes",
+        "description": "Returns the detailed building material attributes identified by their GUIDs.",
+        "group": "Attribute Commands",
+        "version": "N/A"
+    },
+    {
+        "name": "API.GetBuiltInContainerNavigatorItems",
+        "description": "Returns the details of the built-in container navigator items identified by their Ids.",
+        "group": "Navigator Tree Commands",
+        "version": "N/A"
+    },
+    {
+        "name": "API.GetClassificationItemAvailability",
+        "description": "Returns the ids of property definitions available for a given classification item.",
+        "group": "Classification Commands",
+        "version": "N/A"
+    },
+    {
+        "name": "API.GetClassificationSystemIds",
+        "description": "Returns the list of available classification systems.",
+        "group": "Classification Commands",
+        "version": "N/A"
+    },
+    {
+        "name": "API.GetClassificationSystems",
+        "description": "Returns the details of classification systems identified by their GUIDs.",
+        "group": "Classification Commands",
+        "version": "N/A"
+    },
+    {
+        "name": "API.GetClassificationsOfElements",
+        "description": "Returns the classification of the given elements in the given classification systems.",
+        "group": "Classification Commands",
+        "version": "N/A"
+    },
+    {
+        "name": "API.GetComponentsOfElements",
+        "description": "Returns the identifier of every component for a list of elements. The order of the returned list is the same as the given elements.",
+        "group": "Component Commands",
+        "version": "N/A"
+    },
+    {
+        "name": "API.GetCompositeAttributes",
+        "description": "Returns the detailed composite attributes identified by their GUIDs.",
+        "group": "Attribute Commands",
+        "version": "N/A"
+    },
+    {
+        "name": "API.GetDetailNavigatorItems",
+        "description": "Returns the details of the detail navigator items identified by their Ids.",
+        "group": "Navigator Tree Commands",
+        "version": "N/A"
+    },
+    {
+        "name": "API.GetDetailsOfClassificationItems",
+        "description": "Returns the details of classification items.",
+        "group": "Classification Commands",
+        "version": "N/A"
+    },
+    {
+        "name": "API.GetDetailsOfProperties",
+        "description": "Returns the details of property definitions.",
+        "group": "Property Commands",
+        "version": "N/A"
+    },
+    {
+        "name": "API.GetDocument3DNavigatorItems",
+        "description": "Returns the details of the 3D document navigator items identified by their Ids.",
+        "group": "Navigator Tree Commands",
+        "version": "N/A"
+    },
+    {
+        "name": "API.GetElementsByClassification",
+        "description": "Returns the identifier of every element with the given classification identifier.",
+        "group": "Element Listing Commands",
+        "version": "N/A"
+    },
+    {
+        "name": "API.GetElementsByType",
+        "description": "Returns the identifier of every element of the given type on the plan.",
+        "group": "Element Listing Commands",
+        "version": "N/A"
+    },
+    {
+        "name": "API.GetElementsRelatedToZones",
+        "description": "Returns related elements of the given zones. The related elements will be grouped by type. If multiple zones was given, then the order of the returned list is that of the given zones.",
+        "group": "Element Relation Commands",
+        "version": "N/A"
+    },
+    {
+        "name": "API.GetElevationNavigatorItems",
+        "description": "Returns the detailed elevation navigator items identified by their Ids.",
+        "group": "Navigator Tree Commands",
+        "version": "N/A"
+    },
+    {
+        "name": "API.GetFillAttributes",
+        "description": "Returns the detailed fill attributes identified by their GUIDs.",
+        "group": "Attribute Commands",
+        "version": "N/A"
+    },
+    {
+        "name": "API.GetInteriorElevationNavigatorItems",
+        "description": "Returns the details of the interior elevation navigator items identified by their Ids.",
+        "group": "Navigator Tree Commands",
+        "version": "N/A"
+    },
+    {
+        "name": "API.GetLayerAttributes",
+        "description": "Returns the detailed layer attributes identified by their GUIDs.",
+        "group": "Attribute Commands",
+        "version": "N/A"
+    },
+    {
+        "name": "API.GetLayerCombinationAttributes",
+        "description": "Returns the detailed layer combination attributes identified by their GUIDs.",
+        "group": "Attribute Commands",
+        "version": "N/A"
+    },
+    {
+        "name": "API.GetLayoutSettings",
+        "description": "Returns the parameters (settings) of the given layout.",
+        "group": "Layout Book Commands",
+        "version": "N/A"
+    },
+    {
+        "name": "API.GetLineAttributes",
+        "description": "Returns the detailed line attributes identified by their GUIDs.",
+        "group": "Attribute Commands",
+        "version": "N/A"
+    },
+    {
+        "name": "API.GetNavigatorItemTree",
+        "description": "Returns the tree of navigator items.",
+        "group": "Navigator Tree Commands",
+        "version": "N/A"
+    },
+    {
+        "name": "API.GetNavigatorItemsType",
+        "description": "Returns all navigator item types based on the navigator item identifiers given. An error is returned for each identifier that is not found.",
+        "group": "Navigator Tree Commands",
+        "version": "N/A"
+    },
+    {
+        "name": "API.GetPenTableAttributes",
+        "description": "Returns the detailed pen table attributes (including their pens) identified by their GUIDs.",
+        "group": "Attribute Commands",
+        "version": "N/A"
+    },
+    {
+        "name": "API.GetProductInfo",
+        "description": "Accesses the version information from the running Archicad.",
+        "group": "Basic Commands",
+        "version": "N/A"
+    },
+    {
+        "name": "API.GetProfileAttributePreview",
+        "description": "Returns the preview image of each requested profile attribute in a base64 string format.",
+        "group": "Attribute Commands",
+        "version": "N/A"
+    },
+    {
+        "name": "API.GetProfileAttributes",
+        "description": "Returns the detailed profile attributes identified by their GUIDs.",
+        "group": "Attribute Commands",
+        "version": "N/A"
+    },
+    {
+        "name": "API.GetPropertyDefinitionAvailability",
+        "description": "Returns the ids of classification items a given property definition is available for.",
+        "group": "Property Commands",
+        "version": "N/A"
+    },
+    {
+        "name": "API.GetPropertyGroups",
+        "description": "Returns the details of property groups.",
+        "group": "Property Commands",
+        "version": "N/A"
+    },
+    {
+        "name": "API.GetPropertyIds",
+        "description": "Returns the identifiers of property definitions for the requested property names.",
+        "group": "Property Commands",
+        "version": "N/A"
+    },
+    {
+        "name": "API.GetPropertyValuesOfElementComponents",
+        "description": "Returns the property values of the components for the given property.",
+        "group": "Component Commands",
+        "version": "N/A"
+    },
+    {
+        "name": "API.GetPropertyValuesOfElements",
+        "description": "Returns the property values of the elements for the given property.",
+        "group": "Property Commands",
+        "version": "N/A"
+    },
+    {
+        "name": "API.GetPublisherSetNames",
+        "description": "Returns the names of available publisher sets.",
+        "group": "Navigator Tree Commands",
+        "version": "N/A"
+    },
+    {
+        "name": "API.GetSectionNavigatorItems",
+        "description": "Returns the details of the section navigator items identified by their Ids.",
+        "group": "Navigator Tree Commands",
+        "version": "N/A"
+    },
+    {
+        "name": "API.GetSelectedElements",
+        "description": "Returns the identifiers of selected elements in the current plan.",
+        "group": "Element Listing Commands",
+        "version": "N/A"
+    },
+    {
+        "name": "API.GetStoryNavigatorItems",
+        "description": "Returns the details of the story navigator items identified by their Ids.",
+        "group": "Navigator Tree Commands",
+        "version": "N/A"
+    },
+    {
+        "name": "API.GetSurfaceAttributes",
+        "description": "Returns the detailed surface attributes identified by their GUIDs.",
+        "group": "Attribute Commands",
+        "version": "N/A"
+    },
+    {
+        "name": "API.GetTypesOfElements",
+        "description": "Returns the types of the given elements.",
+        "group": "Element Listing Commands",
+        "version": "N/A"
+    },
+    {
+        "name": "API.GetWorksheetNavigatorItems",
+        "description": "Returns the details of the worksheet navigator items identified by their Ids.",
+        "group": "Navigator Tree Commands",
+        "version": "N/A"
+    },
+    {
+        "name": "API.GetZoneCategoryAttributes",
+        "description": "Returns the detailed zone category attributes identified by their GUIDs.",
+        "group": "Attribute Commands",
+        "version": "N/A"
+    },
+    {
+        "name": "API.IsAddOnCommandAvailable",
+        "description": "Checks if the command is available or not.",
+        "group": "AddOn Commands",
+        "version": "N/A"
+    },
+    {
+        "name": "API.IsAlive",
+        "description": "Checks if the Archicad connection is alive.",
+        "group": "Basic Commands",
+        "version": "N/A"
+    },
+    {
+        "name": "API.MoveAttributesAndFolders",
+        "description": "Moves attributes and attribute folders.",
+        "group": "Attribute Commands",
+        "version": "N/A"
+    },
+    {
+        "name": "API.MoveNavigatorItem",
+        "description": "Moves the given navigator item under the <i>parentNavigatorItemId</i> in the navigator tree. If <i>previousNavigatorItemId</i> is not given then inserts it at the first place under the new parent. If it is given then inserts it after this navigator item.",
+        "group": "Navigator Tree Commands",
+        "version": "N/A"
+    },
+    {
+        "name": "API.RenameAttributeFolders",
+        "description": "Rename attribute folder.",
+        "group": "Attribute Commands",
+        "version": "N/A"
+    },
+    {
+        "name": "API.RenameNavigatorItem",
+        "description": "Renames an existing navigator item by specifying either the name or the ID, or both.",
+        "group": "Navigator Tree Commands",
+        "version": "N/A"
+    },
+    {
+        "name": "API.SetClassificationsOfElements",
+        "description": "Sets the classifications of elements. In order to set the classification of an element to unclassified, omit the classificationItemId field.",
+        "group": "Classification Commands",
+        "version": "N/A"
+    },
+    {
+        "name": "API.SetLayoutSettings",
+        "description": "Sets the parameters (settings) of the given layout.",
+        "group": "Layout Book Commands",
+        "version": "N/A"
+    },
+    {
+        "name": "API.SetPropertyValuesOfElements",
+        "description": "Sets the property values of elements.",
+        "group": "Property Commands",
+        "version": "N/A"
+    }
+]

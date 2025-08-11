@@ -1,0 +1,386 @@
+{
+	"defaultitem" : "Introduction",
+	"menuitems" : [
+		{
+			"name" : "Introduction",
+			"htmldocumentation" : "introduction.html"
+		},
+		{
+			"name" : "Command Format",
+			"htmldocumentation" : "command_format.html"
+		},
+		{
+			"name" : "General Information",
+			"menuitems" : [
+				{
+					"name" : "Object Identification",
+					"htmldocumentation" : "object_identification.html"
+				},
+				{
+					"name" : "Element Information",
+					"htmldocumentation" : "element_information.html"
+				},
+				{
+					"name" : "Property Information",
+					"htmldocumentation" : "property_information.html"
+				},
+				{
+					"name" : "Add-On Command Information",
+					"htmldocumentation" : "addon_command_information.html"
+				}
+			]
+		},
+		{
+			"name" : "AddOn Commands",
+			"menuitems" : [
+				{
+					"name" : "ExecuteAddOnCommand",
+					"commanddocumentation" : "API.ExecuteAddOnCommand.json"
+				},
+				{
+					"name" : "IsAddOnCommandAvailable",
+					"commanddocumentation" : "API.IsAddOnCommandAvailable.json"
+				}
+			]
+		},
+		{
+			"name" : "Attribute Commands",
+			"menuitems" : [
+				{
+					"name" : "CreateAttributeFolders",
+					"commanddocumentation" : "API.CreateAttributeFolders.json"
+				},
+				{
+					"name": "DeleteAttributeFolders",
+					"commanddocumentation" : "API.DeleteAttributeFolders.json"
+				},
+				{
+					"name": "DeleteAttributes",
+					"commanddocumentation" : "API.DeleteAttributes.json"
+				},
+				{
+					"name" : "GetActivePenTables",
+					"commanddocumentation" : "API.GetActivePenTables.json"
+				},
+				{
+					"name" : "GetAttributeFolders",
+					"commanddocumentation" : "API.GetAttributeFolders.json"
+				},
+				{
+					"name" : "GetAttributeFolderStructure",
+					"commanddocumentation" : "API.GetAttributeFolderStructure.json"
+				},
+				{
+					"name" : "GetAttributesIndices",
+					"commanddocumentation" : "API.GetAttributesIndices.json"
+				},
+				{
+					"name" : "GetAttributesByType",
+					"commanddocumentation" : "API.GetAttributesByType.json"
+				},
+				{
+					"name" : "GetBuildingMaterialAttributes",
+					"commanddocumentation" : "API.GetBuildingMaterialAttributes.json"
+				},
+				{
+					"name" : "GetCompositeAttributes",
+					"commanddocumentation" : "API.GetCompositeAttributes.json"
+				},
+				{
+					"name" : "GetFillAttributes",
+					"commanddocumentation" : "API.GetFillAttributes.json"
+				},
+				{
+					"name" : "GetLayerAttributes",
+					"commanddocumentation" : "API.GetLayerAttributes.json"
+				},				
+				{
+					"name" : "GetLayerCombinationAttributes",
+					"commanddocumentation" : "API.GetLayerCombinationAttributes.json"
+				},
+				{
+					"name" : "GetLineAttributes",
+					"commanddocumentation" : "API.GetLineAttributes.json"
+				},
+				{
+					"name" : "GetPenTableAttributes",
+					"commanddocumentation" : "API.GetPenTableAttributes.json"
+				},
+				{
+					"name" : "GetProfileAttributes",
+					"commanddocumentation" : "API.GetProfileAttributes.json"
+				},
+				{
+					"name" : "GetProfileAttributePreview",
+					"commanddocumentation" : "API.GetProfileAttributePreview.json"
+				},
+				{
+					"name" : "GetSurfaceAttributes",
+					"commanddocumentation" : "API.GetSurfaceAttributes.json"
+				},
+				{
+					"name" : "GetZoneCategoryAttributes",
+					"commanddocumentation" : "API.GetZoneCategoryAttributes.json"
+				},
+				{
+					"name" : "MoveAttributesAndFolders",
+					"commanddocumentation" : "API.MoveAttributesAndFolders.json"
+				},
+				{
+					"name" : "RenameAttributeFolders",
+					"commanddocumentation" : "API.RenameAttributeFolders.json"
+				}
+			]
+		},
+		{
+			"name" : "Basic Commands",
+			"menuitems" : [
+				{
+					"name" : "IsAlive",
+					"commanddocumentation" : "API.IsAlive.json"
+				},
+				{
+					"name" : "GetProductInfo",
+					"commanddocumentation" : "API.GetProductInfo.json"
+				}
+			]
+		},
+		{
+			"name" : "Element Listing Commands",
+			"menuitems" : [
+				{
+					"name" : "GetAllElements",
+					"commanddocumentation" : "API.GetAllElements.json"
+				},
+				{
+					"name" : "GetSelectedElements",
+					"commanddocumentation" : "API.GetSelectedElements.json"
+				},
+				{
+					"name" : "GetElementsByType",
+					"commanddocumentation" : "API.GetElementsByType.json"
+				},
+				{
+					"name" : "GetTypesOfElements",
+					"commanddocumentation" : "API.GetTypesOfElements.json"
+				},
+				{
+					"name" : "GetElementsByClassification",
+					"commanddocumentation" : "API.GetElementsByClassification.json"
+				}
+			]
+		},
+		{
+			"name" : "Classification Commands",
+			"menuitems" : [
+				{
+					"name" : "GetAllClassificationSystems",
+					"commanddocumentation" : "API.GetAllClassificationSystems.json"
+				},
+				{
+					"name" : "GetClassificationSystemIds",
+					"commanddocumentation" : "API.GetClassificationSystemIds.json"
+				},
+				{
+					"name" : "GetClassificationSystems",
+					"commanddocumentation" : "API.GetClassificationSystems.json"
+				},
+				{
+					"name": "GetAllClassificationsInSystem",
+					"commanddocumentation": "API.GetAllClassificationsInSystem.json"
+				},
+				{
+					"name": "GetDetailsOfClassificationItems",
+					"commanddocumentation": "API.GetDetailsOfClassificationItems.json"
+				},
+				{
+					"name": "GetClassificationItemAvailability",
+					"commanddocumentation": "API.GetClassificationItemAvailability.json"
+				},
+				{
+					"name": "GetClassificationsOfElements",
+					"commanddocumentation": "API.GetClassificationsOfElements.json"
+				},
+				{
+					"name": "SetClassificationsOfElements",
+					"commanddocumentation": "API.SetClassificationsOfElements.json"
+				}
+			]
+		},
+		{
+			"name" : "Property Commands",
+			"menuitems" : [
+				{
+					"name" : "GetPropertyIds",
+					"commanddocumentation" : "API.GetPropertyIds.json"
+				},
+				{
+					"name": "GetAllPropertyIds",
+					"commanddocumentation": "API.GetAllPropertyIds.json"
+				},
+				{
+					"name": "GetAllPropertyNames",
+					"commanddocumentation": "API.GetAllPropertyNames.json"
+				},
+				{
+					"name": "GetDetailsOfProperties",
+					"commanddocumentation": "API.GetDetailsOfProperties.json"
+				},
+				{
+					"name": "GetPropertyDefinitionAvailability",
+					"commanddocumentation": "API.GetPropertyDefinitionAvailability.json"
+				},
+				{
+					"name": "GetPropertyGroups",
+					"commanddocumentation": "API.GetPropertyGroups.json"
+				},
+				{
+					"name": "GetAllPropertyGroupIds",
+					"commanddocumentation": "API.GetAllPropertyGroupIds.json"
+				},
+				{
+					"name": "GetPropertyValuesOfElements",
+					"commanddocumentation": "API.GetPropertyValuesOfElements.json"
+				},
+				{
+					"name": "GetAllPropertyIdsOfElements",
+					"commanddocumentation": "API.GetAllPropertyIdsOfElements.json"
+				},				
+				{
+					"name": "SetPropertyValuesOfElements",
+					"commanddocumentation": "API.SetPropertyValuesOfElements.json"
+				}
+			]
+		},		
+		{
+			"name" : "Navigator Tree Commands",
+			"menuitems" : [
+				{
+					"name" : "GetPublisherSetNames",
+					"commanddocumentation" : "API.GetPublisherSetNames.json"
+				},
+				{
+					"name" : "GetNavigatorItemsType",
+					"commanddocumentation" : "API.GetNavigatorItemsType.json"
+				},
+				{
+					"name" : "GetNavigatorItemTree",
+					"commanddocumentation" : "API.GetNavigatorItemTree.json"
+				},
+				{
+					"name" : "DeleteNavigatorItems",
+					"commanddocumentation" : "API.DeleteNavigatorItems.json"
+				},
+				{
+					"name" : "RenameNavigatorItem",
+					"commanddocumentation" : "API.RenameNavigatorItem.json"
+				},
+				{
+					"name" : "MoveNavigatorItem",
+					"commanddocumentation" : "API.MoveNavigatorItem.json"
+				},
+				{
+					"name" : "GetBuiltInContainerNavigatorItems",
+					"commanddocumentation" : "API.GetBuiltInContainerNavigatorItems.json"
+				},
+				{
+					"name" : "GetElevationNavigatorItems",
+					"commanddocumentation" : "API.GetElevationNavigatorItems.json"
+				},
+				{
+					"name" : "GetInteriorElevationNavigatorItems",
+					"commanddocumentation" : "API.GetInteriorElevationNavigatorItems.json"
+				},
+				{
+					"name" : "GetDetailNavigatorItems",
+					"commanddocumentation" : "API.GetDetailNavigatorItems.json"
+				},
+				{
+					"name" : "GetWorksheetNavigatorItems",
+					"commanddocumentation" : "API.GetWorksheetNavigatorItems.json"
+				},
+				{
+					"name" : "GetSectionNavigatorItems",
+					"commanddocumentation" : "API.GetSectionNavigatorItems.json"
+				},
+				{
+					"name" : "GetStoryNavigatorItems",
+					"commanddocumentation" : "API.GetStoryNavigatorItems.json"
+				},
+				{
+					"name" : "GetDocument3DNavigatorItems",
+					"commanddocumentation" : "API.GetDocument3DNavigatorItems.json"
+				}
+			]
+		},
+		{
+			"name" : "View Map Commands",
+			"menuitems" : [
+				{
+					"name" : "CloneProjectMapItemToViewMap",
+					"commanddocumentation" : "API.CloneProjectMapItemToViewMap.json"
+				},
+				{
+					"name" : "CreateViewMapFolder",
+					"commanddocumentation" : "API.CreateViewMapFolder.json"
+				}
+			]
+		},		
+		{
+			"name" : "Layout Book Commands",
+			"menuitems" : [
+				{
+					"name" : "CreateLayoutSubset",
+					"commanddocumentation" : "API.CreateLayoutSubset.json"
+				},
+				{
+					"name" : "GetLayoutSettings",
+					"commanddocumentation" : "API.GetLayoutSettings.json"
+				},
+				{
+					"name" : "CreateLayout",
+					"commanddocumentation" : "API.CreateLayout.json"
+				},
+				{
+					"name" : "SetLayoutSettings",
+					"commanddocumentation" : "API.SetLayoutSettings.json"
+				}
+			]
+		},		
+		{
+			"name" : "Element Geometry Commands",
+			"menuitems" : [
+				{
+					"name" : "Get2DBoundingBoxes",
+					"commanddocumentation" : "API.Get2DBoundingBoxes.json"
+				},
+				{
+					"name" : "Get3DBoundingBoxes",
+					"commanddocumentation" : "API.Get3DBoundingBoxes.json"
+				}
+			]
+		},		
+		{
+			"name" : "Element Relation Commands",
+			"menuitems" : [
+				{
+					"name" : "GetElementsRelatedToZones",
+					"commanddocumentation" : "API.GetElementsRelatedToZones.json"
+				}
+			]
+		},
+		{
+			"name": "Component Commands",
+			"menuitems": [
+				{
+					"name": "GetComponentsOfElements",
+					"commanddocumentation": "API.GetComponentsOfElements.json"
+				},
+				{
+					"name": "GetPropertyValuesOfElementComponents",
+					"commanddocumentation": "API.GetPropertyValuesOfElementComponents.json"
+				}
+			]
+		}
+	]
+}

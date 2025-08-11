@@ -47,6 +47,7 @@ def get_schema_file_names() -> set[str] | None:
     if not menu_content:
         print("❌ ERROR: Could not fetch menutree.json. Aborting.")
         return None
+    write_file(menu_content, "menutree.json")
     try:
         menu_tree = json.loads(menu_content)
         files_to_process = extract_schema_filenames_from_menu(menu_tree.get("menuitems", []))
@@ -55,6 +56,12 @@ def get_schema_file_names() -> set[str] | None:
     except json.JSONDecodeError:
         print("❌ ERROR: Could not parse menutree.json as JSON. Aborting.")
         return None
+
+def write_file(content: str, filename: str) -> None:
+    local_path = official_paths.BASE_SCHEMA_DIR / filename
+    local_path.parent.mkdir(parents=True, exist_ok=True)
+    local_path.write_text(content, encoding="utf-8")
+
 
 def process_files(files_to_process) -> None:
     """ Process the queue of files to download. """
@@ -69,9 +76,7 @@ def process_files(files_to_process) -> None:
         content = fetch_content(file_url)
 
         if content:
-            local_path = official_paths.SCHEMA_DIR / filename
-            local_path.parent.mkdir(parents=True, exist_ok=True)
-            local_path.write_text(content, encoding="utf-8")
+            write_file(content, filename)
             processed_files.add(filename)
 
             # Add any newly discovered schema files to the queue.
@@ -82,7 +87,7 @@ def process_files(files_to_process) -> None:
         time.sleep(0.1)  # Be polite to the server.
 
     print(f"\n🎉 Crawl complete! Downloaded {len(processed_files)} total files.")
-    print(f"📂 Schemas are saved in ./{official_paths.SCHEMA_DIR}/")
+    print(f"📂 Schemas are saved in ./{official_paths.BASE_SCHEMA_DIR}/")
 
 
 def run_crawler():
