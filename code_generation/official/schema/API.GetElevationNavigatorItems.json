@@ -1,0 +1,87 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "description": "Returns the detailed elevation navigator items identified by their Ids.",
+  "definitions": {
+    "command_parameters": {
+      "type": "object",
+      "properties": {
+        "navigatorItemIds": {
+          "$ref": "APINavigatorTypes.json#/definitions/NavigatorItemIds"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "navigatorItemIds"
+      ]
+    },
+    "response_parameters": {
+      "type": "object",
+      "properties": {
+        "navigatorItems": {
+          "$ref": "APINavigatorTypes.json#/definitions/ElevationNavigatorItems"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "navigatorItems"
+      ]
+    },
+    "examples": [
+      {
+        "command_example": {
+          "command": "API.GetElevationNavigatorItems",
+          "parameters": {
+            "navigatorItemIds": [
+              {
+                "navigatorItemId": {
+                  "guid": "B71A3059-18D2-410D-8080-610E7E78FDC4"
+                }
+              },
+              {
+                "navigatorItemId": {
+                  "guid": "02889779-CAEA-4CEA-9764-DA82CD1EAB8C"
+                }
+              },
+              {
+                "navigatorItemId": {
+                  "guid": "BAD00BAD-0000-0000-0000-000000000000"
+                }
+              }
+            ]
+          }
+        },
+        "response_example": {
+          "succeeded": true,
+          "result": {
+            "navigatorItems": [
+              {
+                "elevationNavigatorItem": {
+                  "navigatorItemId": {
+                    "guid": "B71A3059-18D2-410D-8080-610E7E78FDC4"
+                  },
+                  "prefix": "E-01",
+                  "name": "Elevation"
+                }
+              },
+              {
+                "elevationNavigatorItem": {
+                  "navigatorItemId": {
+                    "guid": "02889779-CAEA-4CEA-9764-DA82CD1EAB8C"
+                  },
+                  "prefix": "",
+                  "name": "North Elevation"
+                }
+              },
+              {
+                "error": {
+                  "code": 7400,
+                  "message": "Navigator item not found (navigator item guid: \"BAD00BAD-0000-0000-0000-000000000000\")"
+                }
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

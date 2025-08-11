@@ -1,0 +1,122 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "description": "Returns the detailed building material attributes identified by their GUIDs.",
+  "definitions": {
+    "command_parameters": {
+      "type": "object",
+      "properties": {
+        "attributeIds": {
+          "$ref": "APIAttributeTypes.json#/definitions/AttributeIds"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "attributeIds"
+      ]
+    },
+    "response_parameters": {
+      "type": "object",
+      "properties": {
+        "attributes": {
+          "$ref": "APIAttributeTypes.json#/definitions/BuildingMaterialAttributes"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "attributes"
+      ]
+    },
+    "examples": [
+      {
+        "command_example": {
+          "command": "API.GetBuildingMaterialAttributes",
+          "parameters": {
+            "attributeIds": [
+              {
+                "attributeId": {
+                  "guid": "692A8CF4-2CD6-4863-80FB-864EEC1515C0"
+                }
+              },
+              {
+                "attributeId": {
+                  "guid": "15BD4085-04A2-42C8-AA7E-0E932566586E"
+                }
+              },
+              {
+                "attributeId": {
+                  "guid": "11111BAD-0000-0000-0000-BAD111111111"
+                }
+              },
+              {
+                "attributeId": {
+                  "guid": "F10F261B-1A5E-443B-9C03-3B023E67F319"
+                }
+              }
+            ]
+          }
+        },
+        "response_example": {
+          "succeeded": true,
+          "result": {
+            "attributes": [
+              {
+                "buildingMaterialAttribute": {
+                  "attributeId": {
+                    "guid": "692A8CF4-2CD6-4863-80FB-864EEC1515C0"
+                  },
+                  "name": "Material1",
+                  "id": "EF-04",
+                  "connectionPriority": 540,
+                  "cutFillId": {
+                    "attributeId": {
+                      "guid": "87E1F859-C78F-4188-94DC-5FF4616F7B75"
+                    }
+                  },
+                  "cutFillPenIndex": 168,
+                  "cutSurfaceId": {
+                    "attributeId": {
+                      "guid": "BEF45D4F-77F2-4663-95DE-00F7FE845F0D"
+                    }
+                  }
+                }
+              },
+              {
+                "buildingMaterialAttribute": {
+                  "attributeId": {
+                    "guid": "15BD4085-04A2-42C8-AA7E-0E932566586E"
+                  },
+                  "name": "Material3",
+                  "id": "IF-05",
+                  "connectionPriority": 350,
+                  "cutFillId": {
+                    "attributeId": {
+                      "guid": "C20756B0-D90A-4F23-AE29-AC478F792FD4"
+                    }
+                  },
+                  "cutFillPenIndex": 180,
+                  "cutSurfaceId": {
+                    "attributeId": {
+                      "guid": "D4D2112D-DD1C-4E88-96E0-307131AADE6E"
+                    }
+                  }
+                }
+              },
+              {
+                "error": {
+                  "code": 6100,
+                  "message": "Attribute is missing"
+                }
+              },
+              {
+                "error": {
+                  "code": 6103,
+                  "message": "Attribute specified by guid has wrong type (GUID: F10F261B-1A5E-443B-9C03-3B023E67F319)"
+                }
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

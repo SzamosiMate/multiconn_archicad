@@ -1,0 +1,73 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "description": "Returns the details of the 3D document navigator items identified by their Ids.",
+  "definitions": {
+    "command_parameters": {
+      "type": "object",
+      "properties": {
+        "navigatorItemIds": {
+          "$ref": "APINavigatorTypes.json#/definitions/NavigatorItemIds"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "navigatorItemIds"
+      ]
+    },
+    "response_parameters": {
+      "type": "object",
+      "properties": {
+        "navigatorItems": {
+          "$ref": "APINavigatorTypes.json#/definitions/Document3DNavigatorItems"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "navigatorItems"
+      ]
+    },
+    "examples": [
+      {
+        "command_example": {
+          "command": "API.GetDocument3DNavigatorItems",
+          "parameters": {
+            "navigatorItemIds": [
+              {
+                "navigatorItemId": {
+                  "guid": "7DFD75B6-A92E-4FB3-B924-4DF4B2E4C7D1"
+                }
+              },
+              {
+                "navigatorItemId": {
+                  "guid": "BAD00BAD-0000-0000-0000-000000000000"
+                }
+              }
+            ]
+          }
+        },
+        "response_example": {
+          "succeeded": true,
+          "result": {
+            "navigatorItems": [
+              {
+                "document3DNavigatorItem": {
+                  "navigatorItemId": {
+                    "guid": "7DFD75B6-A92E-4FB3-B924-4DF4B2E4C7D1"
+                  },
+                  "prefix": "3D-01",
+                  "name": "0. Ground Floor"
+                }
+              },
+              {
+                "error": {
+                  "code": 7400,
+                  "message": "Navigator item not found (navigator item guid: \"BAD00BAD-0000-0000-0000-000000000000\")"
+                }
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

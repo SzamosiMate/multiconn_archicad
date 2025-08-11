@@ -1,0 +1,3134 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "description": "Returns the detailed pen table attributes (including their pens) identified by their GUIDs.",
+  "definitions": {
+    "command_parameters": {
+      "type": "object",
+      "properties": {
+        "attributeIds": {
+          "$ref": "APIAttributeTypes.json#/definitions/AttributeIds"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "attributeIds"
+      ]
+    },
+    "response_parameters": {
+      "type": "object",
+      "properties": {
+        "attributes": {
+          "$ref": "APIAttributeTypes.json#/definitions/PenTableAttributes"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "attributes"
+      ]
+    },
+    "examples": [
+      {
+        "command_example": {
+          "command": "API.GetPenTableAttributes",
+          "parameters": {
+            "attributeIds": [
+              {
+                "attributeId": {
+                  "guid": "F10F261B-1A5E-443B-9C03-3B023E67F319"
+                }
+              },
+              {
+                "attributeId": {
+                  "guid": "00000000-1111-2222-3333-000000000000"
+                }
+              }
+            ]
+          }
+        },
+        "response_example": {
+          "succeeded": true,
+          "result": {
+            "attributes": [
+              {
+                "penTableAttribute": {
+                  "attributeId": {
+                    "guid": "F10F261B-1A5E-443B-9C03-3B023E67F319"
+                  },
+                  "name": "09 Color",
+                  "pens": [
+                    {
+                      "pen": {
+                        "index": 1,
+                        "color": {
+                          "red": 0.164705882,
+                          "green": 0.164705882,
+                          "blue": 0.164705882
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 2,
+                        "color": {
+                          "red": 0.207843137,
+                          "green": 0.207843137,
+                          "blue": 0.207843137
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 3,
+                        "color": {
+                          "red": 0.247058824,
+                          "green": 0.247058824,
+                          "blue": 0.247058824
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 4,
+                        "color": {
+                          "red": 0.290196078,
+                          "green": 0.290196078,
+                          "blue": 0.290196078
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 5,
+                        "color": {
+                          "red": 0.333333333,
+                          "green": 0.333333333,
+                          "blue": 0.333333333
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 6,
+                        "color": {
+                          "red": 0.37254902,
+                          "green": 0.37254902,
+                          "blue": 0.37254902
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 7,
+                        "color": {
+                          "red": 0.415686275,
+                          "green": 0.415686275,
+                          "blue": 0.415686275
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 8,
+                        "color": {
+                          "red": 0.454901961,
+                          "green": 0.454901961,
+                          "blue": 0.454901961
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 9,
+                        "color": {
+                          "red": 0.498039216,
+                          "green": 0.498039216,
+                          "blue": 0.498039216
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 10,
+                        "color": {
+                          "red": 0.541176471,
+                          "green": 0.541176471,
+                          "blue": 0.541176471
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 11,
+                        "color": {
+                          "red": 0.580392157,
+                          "green": 0.580392157,
+                          "blue": 0.580392157
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 12,
+                        "color": {
+                          "red": 0.623529412,
+                          "green": 0.623529412,
+                          "blue": 0.623529412
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 13,
+                        "color": {
+                          "red": 0.666666667,
+                          "green": 0.666666667,
+                          "blue": 0.666666667
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 14,
+                        "color": {
+                          "red": 0.705882353,
+                          "green": 0.705882353,
+                          "blue": 0.705882353
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 15,
+                        "color": {
+                          "red": 0.749019608,
+                          "green": 0.749019608,
+                          "blue": 0.749019608
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 16,
+                        "color": {
+                          "red": 0.788235294,
+                          "green": 0.788235294,
+                          "blue": 0.788235294
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 17,
+                        "color": {
+                          "red": 0.831372549,
+                          "green": 0.831372549,
+                          "blue": 0.831372549
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 18,
+                        "color": {
+                          "red": 0.874509804,
+                          "green": 0.874509804,
+                          "blue": 0.874509804
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 19,
+                        "color": {
+                          "red": 0.91372549,
+                          "green": 0.91372549,
+                          "blue": 0.91372549
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 20,
+                        "color": {
+                          "red": 0.956862745,
+                          "green": 0.956862745,
+                          "blue": 0.956862745
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 21,
+                        "color": {
+                          "red": 0.294117647,
+                          "green": 0.070588235,
+                          "blue": 0.039215686
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 22,
+                        "color": {
+                          "red": 0.37254902,
+                          "green": 0.08627451,
+                          "blue": 0.047058824
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 23,
+                        "color": {
+                          "red": 0.447058824,
+                          "green": 0.105882353,
+                          "blue": 0.054901961
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 24,
+                        "color": {
+                          "red": 0.521568627,
+                          "green": 0.121568627,
+                          "blue": 0.062745098
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 25,
+                        "color": {
+                          "red": 0.596078431,
+                          "green": 0.137254902,
+                          "blue": 0.070588235
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 26,
+                        "color": {
+                          "red": 0.670588235,
+                          "green": 0.152941176,
+                          "blue": 0.078431373
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 27,
+                        "color": {
+                          "red": 0.741176471,
+                          "green": 0.176470588,
+                          "blue": 0.090196078
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 28,
+                        "color": {
+                          "red": 0.815686275,
+                          "green": 0.192156863,
+                          "blue": 0.101960784
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 29,
+                        "color": {
+                          "red": 0.890196078,
+                          "green": 0.207843137,
+                          "blue": 0.109803922
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 30,
+                        "color": {
+                          "red": 0.901960784,
+                          "green": 0.274509804,
+                          "blue": 0.184313725
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 31,
+                        "color": {
+                          "red": 0.909803922,
+                          "green": 0.341176471,
+                          "blue": 0.258823529
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 32,
+                        "color": {
+                          "red": 0.917647059,
+                          "green": 0.407843137,
+                          "blue": 0.333333333
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 33,
+                        "color": {
+                          "red": 0.929411765,
+                          "green": 0.470588235,
+                          "blue": 0.403921569
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 34,
+                        "color": {
+                          "red": 0.937254902,
+                          "green": 0.537254902,
+                          "blue": 0.478431373
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 35,
+                        "color": {
+                          "red": 0.945098039,
+                          "green": 0.603921569,
+                          "blue": 0.552941176
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 36,
+                        "color": {
+                          "red": 0.952941176,
+                          "green": 0.670588235,
+                          "blue": 0.62745098
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 37,
+                        "color": {
+                          "red": 0.960784314,
+                          "green": 0.737254902,
+                          "blue": 0.705882353
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 38,
+                        "color": {
+                          "red": 0.97254902,
+                          "green": 0.803921569,
+                          "blue": 0.780392157
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 39,
+                        "color": {
+                          "red": 0.984313725,
+                          "green": 0.866666667,
+                          "blue": 0.850980392
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 40,
+                        "color": {
+                          "red": 0.992156863,
+                          "green": 0.933333333,
+                          "blue": 0.925490196
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 41,
+                        "color": {
+                          "red": 0.333333333,
+                          "green": 0.250980392,
+                          "blue": 0
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 42,
+                        "color": {
+                          "red": 0.415686275,
+                          "green": 0.31372549,
+                          "blue": 0
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 43,
+                        "color": {
+                          "red": 0.501960784,
+                          "green": 0.376470588,
+                          "blue": 0
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 44,
+                        "color": {
+                          "red": 0.584313725,
+                          "green": 0.439215686,
+                          "blue": 0
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 45,
+                        "color": {
+                          "red": 0.666666667,
+                          "green": 0.501960784,
+                          "blue": 0
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 46,
+                        "color": {
+                          "red": 0.749019608,
+                          "green": 0.560784314,
+                          "blue": 0
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 47,
+                        "color": {
+                          "red": 0.835294118,
+                          "green": 0.623529412,
+                          "blue": 0
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 48,
+                        "color": {
+                          "red": 0.917647059,
+                          "green": 0.68627451,
+                          "blue": 0
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 49,
+                        "color": {
+                          "red": 1,
+                          "green": 0.749019608,
+                          "blue": 0
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 50,
+                        "color": {
+                          "red": 1,
+                          "green": 0.77254902,
+                          "blue": 0.082352941
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 51,
+                        "color": {
+                          "red": 1,
+                          "green": 0.792156863,
+                          "blue": 0.168627451
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 52,
+                        "color": {
+                          "red": 1,
+                          "green": 0.811764706,
+                          "blue": 0.250980392
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 53,
+                        "color": {
+                          "red": 1,
+                          "green": 0.835294118,
+                          "blue": 0.333333333
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 54,
+                        "color": {
+                          "red": 1,
+                          "green": 0.854901961,
+                          "blue": 0.415686275
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 55,
+                        "color": {
+                          "red": 1,
+                          "green": 0.874509804,
+                          "blue": 0.501960784
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 56,
+                        "color": {
+                          "red": 1,
+                          "green": 0.894117647,
+                          "blue": 0.584313725
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 57,
+                        "color": {
+                          "red": 1,
+                          "green": 0.917647059,
+                          "blue": 0.666666667
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 58,
+                        "color": {
+                          "red": 1,
+                          "green": 0.937254902,
+                          "blue": 0.749019608
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 59,
+                        "color": {
+                          "red": 1,
+                          "green": 0.956862745,
+                          "blue": 0.835294118
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 60,
+                        "color": {
+                          "red": 1,
+                          "green": 0.980392157,
+                          "blue": 0.917647059
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 61,
+                        "color": {
+                          "red": 0.250980392,
+                          "green": 0.333333333,
+                          "blue": 0
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 62,
+                        "color": {
+                          "red": 0.31372549,
+                          "green": 0.415686275,
+                          "blue": 0
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 63,
+                        "color": {
+                          "red": 0.376470588,
+                          "green": 0.501960784,
+                          "blue": 0
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 64,
+                        "color": {
+                          "red": 0.439215686,
+                          "green": 0.584313725,
+                          "blue": 0
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 65,
+                        "color": {
+                          "red": 0.501960784,
+                          "green": 0.666666667,
+                          "blue": 0
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 66,
+                        "color": {
+                          "red": 0.560784314,
+                          "green": 0.749019608,
+                          "blue": 0
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 67,
+                        "color": {
+                          "red": 0.623529412,
+                          "green": 0.835294118,
+                          "blue": 0
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 68,
+                        "color": {
+                          "red": 0.68627451,
+                          "green": 0.917647059,
+                          "blue": 0
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 69,
+                        "color": {
+                          "red": 0.749019608,
+                          "green": 1,
+                          "blue": 0
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 70,
+                        "color": {
+                          "red": 0.77254902,
+                          "green": 1,
+                          "blue": 0.082352941
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 71,
+                        "color": {
+                          "red": 0.792156863,
+                          "green": 1,
+                          "blue": 0.168627451
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 72,
+                        "color": {
+                          "red": 0.811764706,
+                          "green": 1,
+                          "blue": 0.250980392
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 73,
+                        "color": {
+                          "red": 0.835294118,
+                          "green": 1,
+                          "blue": 0.333333333
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 74,
+                        "color": {
+                          "red": 0.854901961,
+                          "green": 1,
+                          "blue": 0.415686275
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 75,
+                        "color": {
+                          "red": 0.874509804,
+                          "green": 1,
+                          "blue": 0.498039216
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 76,
+                        "color": {
+                          "red": 0.894117647,
+                          "green": 1,
+                          "blue": 0.584313725
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 77,
+                        "color": {
+                          "red": 0.917647059,
+                          "green": 1,
+                          "blue": 0.666666667
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 78,
+                        "color": {
+                          "red": 0.937254902,
+                          "green": 1,
+                          "blue": 0.749019608
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 79,
+                        "color": {
+                          "red": 0.956862745,
+                          "green": 1,
+                          "blue": 0.835294118
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 80,
+                        "color": {
+                          "red": 0.980392157,
+                          "green": 1,
+                          "blue": 0.917647059
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 81,
+                        "color": {
+                          "red": 0.082352941,
+                          "green": 0.333333333,
+                          "blue": 0
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 82,
+                        "color": {
+                          "red": 0.105882353,
+                          "green": 0.415686275,
+                          "blue": 0
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 83,
+                        "color": {
+                          "red": 0.125490196,
+                          "green": 0.501960784,
+                          "blue": 0
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 84,
+                        "color": {
+                          "red": 0.145098039,
+                          "green": 0.584313725,
+                          "blue": 0
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 85,
+                        "color": {
+                          "red": 0.168627451,
+                          "green": 0.666666667,
+                          "blue": 0
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 86,
+                        "color": {
+                          "red": 0.188235294,
+                          "green": 0.749019608,
+                          "blue": 0
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 87,
+                        "color": {
+                          "red": 0.207843137,
+                          "green": 0.835294118,
+                          "blue": 0
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 88,
+                        "color": {
+                          "red": 0.22745098,
+                          "green": 0.917647059,
+                          "blue": 0
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 89,
+                        "color": {
+                          "red": 0.250980392,
+                          "green": 1,
+                          "blue": 0
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 90,
+                        "color": {
+                          "red": 0.31372549,
+                          "green": 1,
+                          "blue": 0.082352941
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 91,
+                        "color": {
+                          "red": 0.376470588,
+                          "green": 1,
+                          "blue": 0.168627451
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 92,
+                        "color": {
+                          "red": 0.439215686,
+                          "green": 1,
+                          "blue": 0.250980392
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 93,
+                        "color": {
+                          "red": 0.501960784,
+                          "green": 1,
+                          "blue": 0.333333333
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 94,
+                        "color": {
+                          "red": 0.560784314,
+                          "green": 1,
+                          "blue": 0.415686275
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 95,
+                        "color": {
+                          "red": 0.623529412,
+                          "green": 1,
+                          "blue": 0.498039216
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 96,
+                        "color": {
+                          "red": 0.68627451,
+                          "green": 1,
+                          "blue": 0.584313725
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 97,
+                        "color": {
+                          "red": 0.749019608,
+                          "green": 1,
+                          "blue": 0.666666667
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 98,
+                        "color": {
+                          "red": 0.811764706,
+                          "green": 1,
+                          "blue": 0.749019608
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 99,
+                        "color": {
+                          "red": 0.874509804,
+                          "green": 1,
+                          "blue": 0.835294118
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 100,
+                        "color": {
+                          "red": 0.937254902,
+                          "green": 1,
+                          "blue": 0.917647059
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 101,
+                        "color": {
+                          "red": 0,
+                          "green": 0.333333333,
+                          "blue": 0.082352941
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 102,
+                        "color": {
+                          "red": 0,
+                          "green": 0.415686275,
+                          "blue": 0.105882353
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 103,
+                        "color": {
+                          "red": 0,
+                          "green": 0.501960784,
+                          "blue": 0.125490196
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 104,
+                        "color": {
+                          "red": 0,
+                          "green": 0.584313725,
+                          "blue": 0.145098039
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 105,
+                        "color": {
+                          "red": 0,
+                          "green": 0.666666667,
+                          "blue": 0.168627451
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 106,
+                        "color": {
+                          "red": 0,
+                          "green": 0.749019608,
+                          "blue": 0.188235294
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 107,
+                        "color": {
+                          "red": 0,
+                          "green": 0.835294118,
+                          "blue": 0.207843137
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 108,
+                        "color": {
+                          "red": 0,
+                          "green": 0.917647059,
+                          "blue": 0.22745098
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 109,
+                        "color": {
+                          "red": 0,
+                          "green": 1,
+                          "blue": 0.250980392
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 110,
+                        "color": {
+                          "red": 0.082352941,
+                          "green": 1,
+                          "blue": 0.31372549
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 111,
+                        "color": {
+                          "red": 0.168627451,
+                          "green": 1,
+                          "blue": 0.376470588
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 112,
+                        "color": {
+                          "red": 0.250980392,
+                          "green": 1,
+                          "blue": 0.439215686
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 113,
+                        "color": {
+                          "red": 0.333333333,
+                          "green": 1,
+                          "blue": 0.501960784
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 114,
+                        "color": {
+                          "red": 0.415686275,
+                          "green": 1,
+                          "blue": 0.560784314
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 115,
+                        "color": {
+                          "red": 0.498039216,
+                          "green": 1,
+                          "blue": 0.623529412
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 116,
+                        "color": {
+                          "red": 0.584313725,
+                          "green": 1,
+                          "blue": 0.68627451
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 117,
+                        "color": {
+                          "red": 0.666666667,
+                          "green": 1,
+                          "blue": 0.749019608
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 118,
+                        "color": {
+                          "red": 0.749019608,
+                          "green": 1,
+                          "blue": 0.811764706
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 119,
+                        "color": {
+                          "red": 0.835294118,
+                          "green": 1,
+                          "blue": 0.874509804
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 120,
+                        "color": {
+                          "red": 0.917647059,
+                          "green": 1,
+                          "blue": 0.937254902
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 121,
+                        "color": {
+                          "red": 0,
+                          "green": 0.333333333,
+                          "blue": 0.250980392
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 122,
+                        "color": {
+                          "red": 0,
+                          "green": 0.415686275,
+                          "blue": 0.31372549
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 123,
+                        "color": {
+                          "red": 0,
+                          "green": 0.501960784,
+                          "blue": 0.376470588
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 124,
+                        "color": {
+                          "red": 0,
+                          "green": 0.584313725,
+                          "blue": 0.439215686
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 125,
+                        "color": {
+                          "red": 0,
+                          "green": 0.666666667,
+                          "blue": 0.501960784
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 126,
+                        "color": {
+                          "red": 0,
+                          "green": 0.749019608,
+                          "blue": 0.560784314
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 127,
+                        "color": {
+                          "red": 0,
+                          "green": 0.835294118,
+                          "blue": 0.623529412
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 128,
+                        "color": {
+                          "red": 0,
+                          "green": 0.917647059,
+                          "blue": 0.68627451
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 129,
+                        "color": {
+                          "red": 0,
+                          "green": 1,
+                          "blue": 0.749019608
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 130,
+                        "color": {
+                          "red": 0.082352941,
+                          "green": 1,
+                          "blue": 0.77254902
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 131,
+                        "color": {
+                          "red": 0.168627451,
+                          "green": 1,
+                          "blue": 0.792156863
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 132,
+                        "color": {
+                          "red": 0.250980392,
+                          "green": 1,
+                          "blue": 0.811764706
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 133,
+                        "color": {
+                          "red": 0.333333333,
+                          "green": 1,
+                          "blue": 0.835294118
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 134,
+                        "color": {
+                          "red": 0.415686275,
+                          "green": 1,
+                          "blue": 0.854901961
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 135,
+                        "color": {
+                          "red": 0.498039216,
+                          "green": 1,
+                          "blue": 0.874509804
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 136,
+                        "color": {
+                          "red": 0.584313725,
+                          "green": 1,
+                          "blue": 0.894117647
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 137,
+                        "color": {
+                          "red": 0.666666667,
+                          "green": 1,
+                          "blue": 0.917647059
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 138,
+                        "color": {
+                          "red": 0.749019608,
+                          "green": 1,
+                          "blue": 0.937254902
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 139,
+                        "color": {
+                          "red": 0.835294118,
+                          "green": 1,
+                          "blue": 0.956862745
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 140,
+                        "color": {
+                          "red": 1,
+                          "green": 1,
+                          "blue": 1
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 141,
+                        "color": {
+                          "red": 0,
+                          "green": 0.250980392,
+                          "blue": 0.333333333
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 142,
+                        "color": {
+                          "red": 0,
+                          "green": 0.31372549,
+                          "blue": 0.415686275
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 143,
+                        "color": {
+                          "red": 0,
+                          "green": 0.376470588,
+                          "blue": 0.501960784
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 144,
+                        "color": {
+                          "red": 0,
+                          "green": 0.439215686,
+                          "blue": 0.584313725
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 145,
+                        "color": {
+                          "red": 0,
+                          "green": 0.501960784,
+                          "blue": 0.666666667
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 146,
+                        "color": {
+                          "red": 0,
+                          "green": 0.560784314,
+                          "blue": 0.749019608
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 147,
+                        "color": {
+                          "red": 0,
+                          "green": 0.623529412,
+                          "blue": 0.835294118
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 148,
+                        "color": {
+                          "red": 0,
+                          "green": 0.68627451,
+                          "blue": 0.917647059
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 149,
+                        "color": {
+                          "red": 0,
+                          "green": 0.749019608,
+                          "blue": 1
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 150,
+                        "color": {
+                          "red": 0.082352941,
+                          "green": 0.77254902,
+                          "blue": 1
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 151,
+                        "color": {
+                          "red": 0.168627451,
+                          "green": 0.792156863,
+                          "blue": 1
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 152,
+                        "color": {
+                          "red": 0.250980392,
+                          "green": 0.811764706,
+                          "blue": 1
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 153,
+                        "color": {
+                          "red": 0.333333333,
+                          "green": 0.835294118,
+                          "blue": 1
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 154,
+                        "color": {
+                          "red": 0.415686275,
+                          "green": 0.854901961,
+                          "blue": 1
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 155,
+                        "color": {
+                          "red": 0.501960784,
+                          "green": 0.874509804,
+                          "blue": 1
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 156,
+                        "color": {
+                          "red": 0.584313725,
+                          "green": 0.894117647,
+                          "blue": 1
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 157,
+                        "color": {
+                          "red": 0.666666667,
+                          "green": 0.917647059,
+                          "blue": 1
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 158,
+                        "color": {
+                          "red": 0.749019608,
+                          "green": 0.937254902,
+                          "blue": 1
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 159,
+                        "color": {
+                          "red": 0.835294118,
+                          "green": 0.956862745,
+                          "blue": 1
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 160,
+                        "color": {
+                          "red": 0.917647059,
+                          "green": 0.980392157,
+                          "blue": 1
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 161,
+                        "color": {
+                          "red": 0,
+                          "green": 0.082352941,
+                          "blue": 0.333333333
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 162,
+                        "color": {
+                          "red": 0,
+                          "green": 0.105882353,
+                          "blue": 0.415686275
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 163,
+                        "color": {
+                          "red": 0,
+                          "green": 0.125490196,
+                          "blue": 0.501960784
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 164,
+                        "color": {
+                          "red": 0,
+                          "green": 0.145098039,
+                          "blue": 0.584313725
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 165,
+                        "color": {
+                          "red": 0,
+                          "green": 0.168627451,
+                          "blue": 0.666666667
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 166,
+                        "color": {
+                          "red": 0,
+                          "green": 0.188235294,
+                          "blue": 0.749019608
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 167,
+                        "color": {
+                          "red": 0,
+                          "green": 0.207843137,
+                          "blue": 0.835294118
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 168,
+                        "color": {
+                          "red": 0,
+                          "green": 0.22745098,
+                          "blue": 0.917647059
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 169,
+                        "color": {
+                          "red": 0,
+                          "green": 0.250980392,
+                          "blue": 1
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 170,
+                        "color": {
+                          "red": 0.082352941,
+                          "green": 0.31372549,
+                          "blue": 1
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 171,
+                        "color": {
+                          "red": 0.168627451,
+                          "green": 0.376470588,
+                          "blue": 1
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 172,
+                        "color": {
+                          "red": 0.250980392,
+                          "green": 0.439215686,
+                          "blue": 1
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 173,
+                        "color": {
+                          "red": 0.333333333,
+                          "green": 0.501960784,
+                          "blue": 1
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 174,
+                        "color": {
+                          "red": 0.415686275,
+                          "green": 0.560784314,
+                          "blue": 1
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 175,
+                        "color": {
+                          "red": 0.498039216,
+                          "green": 0.623529412,
+                          "blue": 1
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 176,
+                        "color": {
+                          "red": 0.584313725,
+                          "green": 0.68627451,
+                          "blue": 1
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 177,
+                        "color": {
+                          "red": 0.666666667,
+                          "green": 0.749019608,
+                          "blue": 1
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 178,
+                        "color": {
+                          "red": 0.749019608,
+                          "green": 0.811764706,
+                          "blue": 1
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 179,
+                        "color": {
+                          "red": 0.835294118,
+                          "green": 0.874509804,
+                          "blue": 1
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 180,
+                        "color": {
+                          "red": 0.917647059,
+                          "green": 0.937254902,
+                          "blue": 1
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 181,
+                        "color": {
+                          "red": 0.082352941,
+                          "green": 0,
+                          "blue": 0.333333333
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 182,
+                        "color": {
+                          "red": 0.125490196,
+                          "green": 0,
+                          "blue": 0.501960784
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 183,
+                        "color": {
+                          "red": 0.145098039,
+                          "green": 0,
+                          "blue": 0.584313725
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 184,
+                        "color": {
+                          "red": 0.168627451,
+                          "green": 0,
+                          "blue": 0.666666667
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 185,
+                        "color": {
+                          "red": 0.188235294,
+                          "green": 0,
+                          "blue": 0.749019608
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 186,
+                        "color": {
+                          "red": 0.207843137,
+                          "green": 0,
+                          "blue": 0.835294118
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 187,
+                        "color": {
+                          "red": 0.22745098,
+                          "green": 0,
+                          "blue": 0.917647059
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 188,
+                        "color": {
+                          "red": 0.250980392,
+                          "green": 0,
+                          "blue": 1
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 189,
+                        "color": {
+                          "red": 0.31372549,
+                          "green": 0.082352941,
+                          "blue": 1
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 190,
+                        "color": {
+                          "red": 0.376470588,
+                          "green": 0.168627451,
+                          "blue": 1
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 191,
+                        "color": {
+                          "red": 0.439215686,
+                          "green": 0.250980392,
+                          "blue": 1
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 192,
+                        "color": {
+                          "red": 0.501960784,
+                          "green": 0.333333333,
+                          "blue": 1
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 193,
+                        "color": {
+                          "red": 0.560784314,
+                          "green": 0.415686275,
+                          "blue": 1
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 194,
+                        "color": {
+                          "red": 0.623529412,
+                          "green": 0.498039216,
+                          "blue": 1
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 195,
+                        "color": {
+                          "red": 0.68627451,
+                          "green": 0.584313725,
+                          "blue": 1
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 196,
+                        "color": {
+                          "red": 0.749019608,
+                          "green": 0.666666667,
+                          "blue": 1
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 197,
+                        "color": {
+                          "red": 0.811764706,
+                          "green": 0.749019608,
+                          "blue": 1
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 198,
+                        "color": {
+                          "red": 0.874509804,
+                          "green": 0.835294118,
+                          "blue": 1
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 199,
+                        "color": {
+                          "red": 0.937254902,
+                          "green": 0.917647059,
+                          "blue": 1
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 200,
+                        "color": {
+                          "red": 1,
+                          "green": 1,
+                          "blue": 1
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 201,
+                        "color": {
+                          "red": 0.250980392,
+                          "green": 0,
+                          "blue": 0.333333333
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 202,
+                        "color": {
+                          "red": 0.31372549,
+                          "green": 0,
+                          "blue": 0.415686275
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 203,
+                        "color": {
+                          "red": 0.376470588,
+                          "green": 0,
+                          "blue": 0.501960784
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 204,
+                        "color": {
+                          "red": 0.439215686,
+                          "green": 0,
+                          "blue": 0.584313725
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 205,
+                        "color": {
+                          "red": 0.501960784,
+                          "green": 0,
+                          "blue": 0.666666667
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 206,
+                        "color": {
+                          "red": 0.560784314,
+                          "green": 0,
+                          "blue": 0.749019608
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 207,
+                        "color": {
+                          "red": 0.623529412,
+                          "green": 0,
+                          "blue": 0.835294118
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 208,
+                        "color": {
+                          "red": 0.68627451,
+                          "green": 0,
+                          "blue": 0.917647059
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 209,
+                        "color": {
+                          "red": 0.749019608,
+                          "green": 0,
+                          "blue": 1
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 210,
+                        "color": {
+                          "red": 0.77254902,
+                          "green": 0.082352941,
+                          "blue": 1
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 211,
+                        "color": {
+                          "red": 0.792156863,
+                          "green": 0.168627451,
+                          "blue": 1
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 212,
+                        "color": {
+                          "red": 0.811764706,
+                          "green": 0.250980392,
+                          "blue": 1
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 213,
+                        "color": {
+                          "red": 0.835294118,
+                          "green": 0.333333333,
+                          "blue": 1
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 214,
+                        "color": {
+                          "red": 0.854901961,
+                          "green": 0.415686275,
+                          "blue": 1
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 215,
+                        "color": {
+                          "red": 0.874509804,
+                          "green": 0.498039216,
+                          "blue": 1
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 216,
+                        "color": {
+                          "red": 0.894117647,
+                          "green": 0.584313725,
+                          "blue": 1
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 217,
+                        "color": {
+                          "red": 0.917647059,
+                          "green": 0.666666667,
+                          "blue": 1
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 218,
+                        "color": {
+                          "red": 0.937254902,
+                          "green": 0.749019608,
+                          "blue": 1
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 219,
+                        "color": {
+                          "red": 0.956862745,
+                          "green": 0.835294118,
+                          "blue": 1
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 220,
+                        "color": {
+                          "red": 0.980392157,
+                          "green": 0.917647059,
+                          "blue": 1
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 221,
+                        "color": {
+                          "red": 0.333333333,
+                          "green": 0,
+                          "blue": 0.250980392
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 222,
+                        "color": {
+                          "red": 0.415686275,
+                          "green": 0,
+                          "blue": 0.31372549
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 223,
+                        "color": {
+                          "red": 0.501960784,
+                          "green": 0,
+                          "blue": 0.376470588
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 224,
+                        "color": {
+                          "red": 0.584313725,
+                          "green": 0,
+                          "blue": 0.439215686
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 225,
+                        "color": {
+                          "red": 0.666666667,
+                          "green": 0,
+                          "blue": 0.501960784
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 226,
+                        "color": {
+                          "red": 0.749019608,
+                          "green": 0,
+                          "blue": 0.560784314
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 227,
+                        "color": {
+                          "red": 0.835294118,
+                          "green": 0,
+                          "blue": 0.623529412
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 228,
+                        "color": {
+                          "red": 0.917647059,
+                          "green": 0,
+                          "blue": 0.68627451
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 229,
+                        "color": {
+                          "red": 1,
+                          "green": 0,
+                          "blue": 0.749019608
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 230,
+                        "color": {
+                          "red": 1,
+                          "green": 0.082352941,
+                          "blue": 0.77254902
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 231,
+                        "color": {
+                          "red": 1,
+                          "green": 0.168627451,
+                          "blue": 0.792156863
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 232,
+                        "color": {
+                          "red": 1,
+                          "green": 0.250980392,
+                          "blue": 0.811764706
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 233,
+                        "color": {
+                          "red": 1,
+                          "green": 0.333333333,
+                          "blue": 0.835294118
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 234,
+                        "color": {
+                          "red": 1,
+                          "green": 0.415686275,
+                          "blue": 0.854901961
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 235,
+                        "color": {
+                          "red": 1,
+                          "green": 0.498039216,
+                          "blue": 0.874509804
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 236,
+                        "color": {
+                          "red": 1,
+                          "green": 0.584313725,
+                          "blue": 0.894117647
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 237,
+                        "color": {
+                          "red": 1,
+                          "green": 0.666666667,
+                          "blue": 0.917647059
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 238,
+                        "color": {
+                          "red": 1,
+                          "green": 0.749019608,
+                          "blue": 0.937254902
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 239,
+                        "color": {
+                          "red": 1,
+                          "green": 0.835294118,
+                          "blue": 0.956862745
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 240,
+                        "color": {
+                          "red": 1,
+                          "green": 0.917647059,
+                          "blue": 0.980392157
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 241,
+                        "color": {
+                          "red": 0.333333333,
+                          "green": 0,
+                          "blue": 0.082352941
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 242,
+                        "color": {
+                          "red": 0.415686275,
+                          "green": 0,
+                          "blue": 0.105882353
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 243,
+                        "color": {
+                          "red": 0.501960784,
+                          "green": 0,
+                          "blue": 0.125490196
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 244,
+                        "color": {
+                          "red": 0.584313725,
+                          "green": 0,
+                          "blue": 0.145098039
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 245,
+                        "color": {
+                          "red": 0.666666667,
+                          "green": 0,
+                          "blue": 0.168627451
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 246,
+                        "color": {
+                          "red": 0.749019608,
+                          "green": 0,
+                          "blue": 0.188235294
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 247,
+                        "color": {
+                          "red": 0.835294118,
+                          "green": 0,
+                          "blue": 0.207843137
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 248,
+                        "color": {
+                          "red": 0.917647059,
+                          "green": 0,
+                          "blue": 0.22745098
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 249,
+                        "color": {
+                          "red": 1,
+                          "green": 0,
+                          "blue": 0.250980392
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 250,
+                        "color": {
+                          "red": 1,
+                          "green": 0.082352941,
+                          "blue": 0.31372549
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 251,
+                        "color": {
+                          "red": 1,
+                          "green": 0.168627451,
+                          "blue": 0.376470588
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 252,
+                        "color": {
+                          "red": 1,
+                          "green": 0.250980392,
+                          "blue": 0.439215686
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 253,
+                        "color": {
+                          "red": 1,
+                          "green": 0.333333333,
+                          "blue": 0.501960784
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 254,
+                        "color": {
+                          "red": 1,
+                          "green": 0.415686275,
+                          "blue": 0.560784314
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    },
+                    {
+                      "pen": {
+                        "index": 255,
+                        "color": {
+                          "red": 1,
+                          "green": 0.498039216,
+                          "blue": 0.623529412
+                        },
+                        "weight": 0,
+                        "description": ""
+                      }
+                    }
+               ]
+                }
+              },
+              {
+                "error": {
+                  "code": 6100,
+                  "message": "Attribute is missing"
+                }
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,85 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "description": "Returns the types of the given elements.",
+  "definitions": {
+    "command_parameters": {
+      "type": "object",
+      "properties": {
+        "elements": {
+          "$ref": "APITypes.json#/definitions/Elements"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elements"
+      ]
+    },
+    "response_parameters": {
+      "type": "object",
+      "properties": {
+        "typesOfElements": {
+          "$ref": "APITypes.json#/definitions/TypeOfElementOrErrorList"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "typesOfElements"
+      ]
+    },
+    "examples": [
+      {
+        "command_example": {
+          "command": "API.GetTypesOfElements",
+          "parameters": {
+            "elements": [
+              {
+                "elementId": {
+                  "guid": "0F7943AC-48FA-C74E-8ACE-D1CB0DB0DBB7"
+                }
+              },
+              {
+                "elementId": {
+                  "guid": "23CCB727-2A40-4441-8789-0F7B9423A8FB"
+                }
+              },
+              {
+                "elementId": {
+                  "guid": "11111111-2222-3333-4444-555555555555"
+                }
+              }
+            ]
+          }
+        },
+        "response_example": {
+          "succeeded": true,
+          "result": {
+            "typesOfElements": [
+              {
+                "typeOfElement": {
+                  "elementId": {
+                    "guid": "0F7943AC-48FA-C74E-8ACE-D1CB0DB0DBB7"
+                  },
+                  "elementType": "Wall"
+                }
+              },
+              {
+                "typeOfElement": {
+                  "elementId": {
+                    "guid": "23CCB727-2A40-4441-8789-0F7B9423A8FB"
+                  },
+                  "elementType": "Zone"
+                }
+              },
+              {
+                "error": {
+                  "code": 7204,
+                  "message": "Element not found (element guid: \"11111111-2222-3333-4444-555555555555\")"
+                }
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

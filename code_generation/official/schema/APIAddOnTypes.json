@@ -1,0 +1,55 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "definitions": {
+    "AddOnCommandId": {
+      "type": "object",
+      "description": "The identifier of an Add-On command.",
+      "properties": {
+        "commandNamespace": {
+          "type": "string",
+          "description": "The namespace of the Add-On command.",
+          "minLength": 1
+        },
+        "commandName": {
+          "type": "string",
+          "description": "The name of the Add-On command.",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "commandNamespace",
+        "commandName"
+      ]
+    },
+    "AddOnCommandIdArrayItem": {
+      "type": "object",
+      "properties": {
+        "addOnCommandId": {
+          "$ref": "#/definitions/AddOnCommandId"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "addOnCommandId"
+      ]
+    },
+    "AddOnCommandIds": {
+      "type": "array",
+      "description": "A list of Add-On command identifiers.",
+      "items": {
+        "$ref": "#/definitions/AddOnCommandIdArrayItem"
+      }
+    },
+    "AddOnCommandParameters": {
+      "type": "object",
+      "description": "The input parameters of an Add-On command.",
+      "additionalProperties": true
+    },
+    "AddOnCommandResponse": {
+      "type": "object",
+      "description": "The response returned by an Add-On command.",
+      "additionalProperties": true
+    }
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "description": "Moves the given navigator item under the <i>parentNavigatorItemId</i> in the navigator tree. If <i>previousNavigatorItemId</i> is not given then inserts it at the first place under the new parent. If it is given then inserts it after this navigator item.",
+  "definitions": {
+    "command_parameters": {
+      "type": "object",
+      "properties": {
+        "navigatorItemIdToMove": {
+          "$ref": "APINavigatorTypes.json#/definitions/NavigatorItemId"
+        },
+        "parentNavigatorItemId": {
+          "$ref": "APINavigatorTypes.json#/definitions/NavigatorItemId"
+        },
+        "previousNavigatorItemId": {
+          "$ref": "APINavigatorTypes.json#/definitions/NavigatorItemId"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "navigatorItemIdToMove",
+        "parentNavigatorItemId"
+      ]
+    },
+    "response_parameters": {
+      "type": "object",
+      "properties": {
+      },
+      "additionalProperties": false
+    },
+    "examples": [
+      {
+        "command_example": {
+          "command": "API.MoveNavigatorItem",
+          "parameters": {
+            "navigatorItemIdToMove": {
+              "guid": "6B85F1A3-2831-4FEE-8F49-1E19ACF90048"
+            },
+            "parentNavigatorItemId": {
+              "guid": "DF27178E-67E0-4D70-83AA-D0E8D4530440"
+            },
+            "previousNavigatorItemId": {
+              "guid": "14807F55-FD6C-41EA-A6C6-160E57EED613"
+            }
+          }
+        },
+        "response_example": {
+          "succeeded": true
+        }
+      }
+    ]
+  }
+}

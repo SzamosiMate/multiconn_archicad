@@ -1,0 +1,384 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "description": "Returns the tree of navigator items.",
+  "definitions": {
+    "command_parameters": {
+      "type": "object",
+      "properties": {
+        "navigatorTreeId": {
+          "$ref": "APINavigatorTypes.json#/definitions/NavigatorTreeId"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "navigatorTreeId"
+      ]
+    },
+    "response_parameters": {
+      "type": "object",
+      "properties": {
+        "navigatorTree": {
+          "$ref": "APINavigatorTypes.json#/definitions/NavigatorTree"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "navigatorTree"
+      ]
+    },
+    "examples": [
+      {
+        "description": "Get the tree of the layout book.",
+        "command_example": {
+          "command": "API.GetNavigatorItemTree",
+          "parameters": {
+            "navigatorTreeId": {
+              "type": "LayoutBook"
+            }
+          }
+        },
+        "response_example": {
+          "succeeded": true,
+          "result": {
+            "navigatorTree": {
+              "rootItem": {
+                "navigatorItemId": {
+                  "guid": "D0C2316C-DC71-44E2-B572-691D95E6AB3D"
+                },
+                "prefix": "",
+                "name": "",
+                "type": "UndefinedItem",
+                "children": [
+                  {
+                    "navigatorItem": {
+                      "navigatorItemId": {
+                        "guid": "52B690D8-CCAC-4537-A775-10EB470D505B"
+                      },
+                      "prefix": "TestCommandExamples",
+                      "name": "TestCommandExamples",
+                      "type": "LayoutBookRootItem",
+                      "children": [
+                        {
+                          "navigatorItem": {
+                            "navigatorItemId": {
+                              "guid": "D2455EAB-4075-48B1-A94D-83AF0543E341"
+                            },
+                            "prefix": "",
+                            "name": "Sheet Index",
+                            "type": "LayoutItem",
+                            "sourceNavigatorItemId": {
+                              "guid": "495FBA17-0D06-4687-AB35-0412B77039DA"
+                            },
+                            "children": [
+                              {
+                                "navigatorItem": {
+                                  "navigatorItemId": {
+                                    "guid": "E052B041-EA31-420A-B9D8-817982D0942B"
+                                  },
+                                  "prefix": "",
+                                  "name": "Sheet Index",
+                                  "type": "DrawingItem",
+                                  "sourceNavigatorItemId": {
+                                    "guid": "14807F55-FD6C-41EA-A6C6-160E57EED613"
+                                  }
+                                }
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "navigatorItem": {
+                            "navigatorItemId": {
+                              "guid": "ECD23F92-5D0B-4E20-AC21-1700403E565E"
+                            },
+                            "prefix": "A.01",
+                            "name": "Floor Plans",
+                            "type": "SubsetItem",
+                            "children": [
+                              {
+                                "navigatorItem": {
+                                  "navigatorItemId": {
+                                    "guid": "BA224EA8-D8C0-46D5-948A-F8B19AD1B3FB"
+                                  },
+                                  "prefix": "A.01.1",
+                                  "name": "Ground Floor",
+                                  "type": "LayoutItem",
+                                  "sourceNavigatorItemId": {
+                                    "guid": "493ACE47-EAD6-4F14-98B9-9E03C62F7A87"
+                                  },
+                                  "children": [
+                                    {
+                                      "navigatorItem": {
+                                        "navigatorItemId": {
+                                          "guid": "2722E255-8F7C-4FB3-B056-FBE1BCD5DFA6"
+                                        },
+                                        "prefix": "0.",
+                                        "name": "Ground Floor",
+                                        "type": "DrawingItem",
+                                        "sourceNavigatorItemId": {
+                                          "guid": "FFBF9659-5A8C-B75B-2FDC-91F51BB7B3B4"
+                                        }
+                                      }
+                                    }
+                                  ]
+                                }
+                              },
+                              {
+                                "navigatorItem": {
+                                  "navigatorItemId": {
+                                    "guid": "8A9367C8-708D-4023-8D94-B20651047F17"
+                                  },
+                                  "prefix": "A.01.2",
+                                  "name": "1. Story",
+                                  "type": "LayoutItem",
+                                  "sourceNavigatorItemId": {
+                                    "guid": "7B5BB70E-C55D-4487-91D9-5B58D371145F"
+                                  },
+                                  "children": [
+                                    {
+                                      "navigatorItem": {
+                                        "navigatorItemId": {
+                                          "guid": "6AD8D021-78BB-4206-8525-6B6C082CDF69"
+                                        },
+                                        "prefix": "1.",
+                                        "name": "Story",
+                                        "type": "DrawingItem",
+                                        "sourceNavigatorItemId": {
+                                          "guid": "027621D5-CE0F-E18B-6AFF-36947BD722B9"
+                                        }
+                                      }
+                                    }
+                                  ]
+                                }
+                              },
+                              {
+                                "navigatorItem": {
+                                  "navigatorItemId": {
+                                    "guid": "348A3031-0328-42CB-A47B-61C7E16F5276"
+                                  },
+                                  "prefix": "A.01.3",
+                                  "name": "2. Story",
+                                  "type": "LayoutItem",
+                                  "sourceNavigatorItemId": {
+                                    "guid": "6F9A2551-0E20-42A4-8D2E-2DB5DEA7A537"
+                                  },
+                                  "children": [
+                                    {
+                                      "navigatorItem": {
+                                        "navigatorItemId": {
+                                          "guid": "950F735F-BF4A-4389-AE88-BB42DF305E9B"
+                                        },
+                                        "prefix": "2.",
+                                        "name": "Story",
+                                        "type": "DrawingItem",
+                                        "sourceNavigatorItemId": {
+                                          "guid": "08274DF4-A0C9-0264-7877-92BC397501A8"
+                                        }
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "navigatorItem": {
+                            "navigatorItemId": {
+                              "guid": "DB2CFAE3-C284-4D6C-8F0B-9C7EC9C23154"
+                            },
+                            "prefix": "A.02",
+                            "name": "Elevations",
+                            "type": "SubsetItem",
+                            "children": [
+                              {
+                                "navigatorItem": {
+                                  "navigatorItemId": {
+                                    "guid": "17F34D4D-99C5-4DEB-B6A6-DF882F838A34"
+                                  },
+                                  "prefix": "A.02.1",
+                                  "name": "E-01 North Elevation",
+                                  "type": "LayoutItem",
+                                  "sourceNavigatorItemId": {
+                                    "guid": "DAD0B03B-52BF-4A1C-BFC1-40DE150DED4D"
+                                  },
+                                  "children": [
+                                    {
+                                      "navigatorItem": {
+                                        "navigatorItemId": {
+                                          "guid": "B193F93D-F800-4E19-B1BE-0E0EB48EF115"
+                                        },
+                                        "prefix": "",
+                                        "name": "North Elevation",
+                                        "type": "DrawingItem",
+                                        "sourceNavigatorItemId": {
+                                          "guid": "B423B9F8-2334-F3C1-C1C2-386E47715CA6"
+                                        }
+                                      }
+                                    }
+                                  ]
+                                }
+                              },
+                              {
+                                "navigatorItem": {
+                                  "navigatorItemId": {
+                                    "guid": "546E98DF-532D-4D38-ACD8-17BFD57206AC"
+                                  },
+                                  "prefix": "A.02.2",
+                                  "name": "E-02 East Elevation",
+                                  "type": "LayoutItem",
+                                  "sourceNavigatorItemId": {
+                                    "guid": "4B8783CD-118B-4A41-8673-CAD18899EA0E"
+                                  },
+                                  "children": [
+                                    {
+                                      "navigatorItem": {
+                                        "navigatorItemId": {
+                                          "guid": "0C3DA5A5-4341-4C73-AFD3-954180646C7B"
+                                        },
+                                        "prefix": "",
+                                        "name": "East Elevation",
+                                        "type": "DrawingItem",
+                                        "sourceNavigatorItemId": {
+                                          "guid": "5F4778D3-082F-44AC-1DCE-255091C0EFF8"
+                                        }
+                                      }
+                                    }
+                                  ]
+                                }
+                              },
+                              {
+                                "navigatorItem": {
+                                  "navigatorItemId": {
+                                    "guid": "4F0AC952-5B2E-4800-B4BB-1024BF3EE051"
+                                  },
+                                  "prefix": "A.02.3",
+                                  "name": "E-03 South Elevation",
+                                  "type": "LayoutItem",
+                                  "sourceNavigatorItemId": {
+                                    "guid": "8BE86522-3E3D-4E6D-B44B-B9CF8675248C"
+                                  },
+                                  "children": [
+                                    {
+                                      "navigatorItem": {
+                                        "navigatorItemId": {
+                                          "guid": "5981E9B8-1A1D-47DB-9128-96ACFF2C7BC6"
+                                        },
+                                        "prefix": "",
+                                        "name": "South Elevation",
+                                        "type": "DrawingItem",
+                                        "sourceNavigatorItemId": {
+                                          "guid": "32E6690B-469A-2F81-9B44-FD98931F7A6B"
+                                        }
+                                      }
+                                    }
+                                  ]
+                                }
+                              },
+                              {
+                                "navigatorItem": {
+                                  "navigatorItemId": {
+                                    "guid": "0CDEF0BB-6AF6-4CC7-A8E1-B7774C0DEEAD"
+                                  },
+                                  "prefix": "A.02.4",
+                                  "name": "E-04 West Elevation",
+                                  "type": "LayoutItem",
+                                  "sourceNavigatorItemId": {
+                                    "guid": "EE212871-010F-4ED3-8325-2A707F1A9057"
+                                  },
+                                  "children": [
+                                    {
+                                      "navigatorItem": {
+                                        "navigatorItemId": {
+                                          "guid": "0570A2D9-8C28-43EB-9157-6B778D523D90"
+                                        },
+                                        "prefix": "",
+                                        "name": "West Elevation",
+                                        "type": "DrawingItem",
+                                        "sourceNavigatorItemId": {
+                                          "guid": "EB4E50F5-4728-5FA1-7DAC-178704E391BB"
+                                        }
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "navigatorItem": {
+                            "navigatorItemId": {
+                              "guid": "AA8FCD72-0610-43B2-A565-335CAD0E8C7E"
+                            },
+                            "prefix": "Masters",
+                            "name": "Masters",
+                            "type": "MasterFolderItem",
+                            "children": [
+                              {
+                                "navigatorItem": {
+                                  "navigatorItemId": {
+                                    "guid": "C8B1EB9A-58C6-4AE6-9CAD-CF2C5DFD22D3"
+                                  },
+                                  "prefix": "A4 Portrait",
+                                  "name": "A4 Portrait",
+                                  "type": "MasterLayoutItem",
+                                  "sourceNavigatorItemId": {
+                                    "guid": "B5C6FA35-BA19-416B-BA01-EB88F3354ABA"
+                                  }
+                                }
+                              },
+                              {
+                                "navigatorItem": {
+                                  "navigatorItemId": {
+                                    "guid": "CC223D14-5290-40AA-A7FE-0D5FEB04B710"
+                                  },
+                                  "prefix": "A3 Landscape",
+                                  "name": "A3 Landscape",
+                                  "type": "MasterLayoutItem",
+                                  "sourceNavigatorItemId": {
+                                    "guid": "60F80956-C71D-4C02-8E1F-0A517B6881F8"
+                                  }
+                                }
+                              },
+                              {
+                                "navigatorItem": {
+                                  "navigatorItemId": {
+                                    "guid": "592BECD1-1C86-4637-8FD1-6ED44D4C6251"
+                                  },
+                                  "prefix": "A2 Landscape",
+                                  "name": "A2 Landscape",
+                                  "type": "MasterLayoutItem",
+                                  "sourceNavigatorItemId": {
+                                    "guid": "8FB552BE-627C-419A-BD98-078FCF4A9D47"
+                                  }
+                                }
+                              },
+                              {
+                                "navigatorItem": {
+                                  "navigatorItemId": {
+                                    "guid": "6B3E3B68-54AC-4E5A-A3EC-6390CA1F7537"
+                                  },
+                                  "prefix": "A1 Landscape",
+                                  "name": "A1 Landscape",
+                                  "type": "MasterLayoutItem",
+                                  "sourceNavigatorItemId": {
+                                    "guid": "1F200B68-0A6F-4C66-A322-E7F64B2B03AF"
+                                  }
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    ]
+  }
+}

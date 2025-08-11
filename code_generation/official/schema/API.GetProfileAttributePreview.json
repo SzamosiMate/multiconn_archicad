@@ -1,0 +1,102 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "description": "Returns the preview image of each requested profile attribute in a base64 string format.",
+  "definitions": {
+    "command_parameters": {
+      "type": "object",
+      "properties": {
+        "attributeIds": {
+          "$ref": "APIAttributeTypes.json#/definitions/AttributeIds"
+        },
+        "imageWidth": {
+          "type": "integer",
+          "description": "The width of the preview image."
+        },
+        "imageHeight": {
+          "type": "integer",
+          "description": "The height of the preview image."
+        },
+        "backgroundColor": {
+          "$ref": "APITypes.json#/definitions/RGBColor",
+          "description": "The background color of the preview image."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "attributeIds",
+        "imageWidth",
+        "imageHeight"
+      ]
+    },
+    "response_parameters": {
+      "type": "object",
+      "properties": {
+        "previewImages": {
+          "$ref": "APITypes.json#/definitions/Images",
+          "description": "The preview images of the profiles."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "previewImages"
+      ]
+    },
+    "examples": [
+      {
+        "command_example": {
+          "command": "API.GetProfileAttributePreview",
+          "parameters": {
+            "attributeIds": [
+              {
+                "attributeId": {
+                  "guid": "63F5F9DD-29F9-7A46-AD8F-4E414B5ADBC8"
+                }
+              },
+              {
+                "attributeId": {
+                  "guid": "692A8CF4-2CD6-4863-80FB-864EEC1515C0"
+                }
+              },
+              {
+                "attributeId": {
+                  "guid": "00000000-1111-2222-3333-000000000000"
+                }
+              }
+            ],
+            "imageWidth": 80,
+            "imageHeight": 80,
+            "backgroundColor": {
+              "red": 0.313,
+              "green": 0.812,
+              "blue": 0.251
+            }
+          }
+        },
+        "response_example": {
+          "succeeded": true,
+          "result": {
+            "previewImages": [
+              {
+                "image": {
+                  "content": "iVBORw0KGgoAAAANSUhEUgAAAFAAAABQCAYAAACOEfKtAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAACxIAAAsSAdLdfvwAAAGQSURBVHhe7dyxTcNAGEfxcyagzgh0bMAILMEUoQ0TYDcswQhsQMcIrGE4ckgHQgjlufif9H5SFDtV9OnyvlSebl6u16Kz7dq7zuQAIQcIOUDIAUIOEIr8G7N/vGxX373dvrarHLEncJ7n8rC/+Hyvr1SxA1yPhzIdju3u5OnquV3liB3gz+GlGqqBy7KUj+/b7jJEN7DvYKrovzG/dTDNUEsk0RBLpA4zVfRPuEo/iTYQsoGQDYRsIGQDIRsIDdHAZPENrFwigEsEcIkALhGoH54NBGwgYAMBGwjZwI3YQMAGAjYQGmF4VXwDK5cI4BIBXCKASwTqh2cDARsI2EDABkI2cCM2ELCBgA2ERhheFd/AyiUCuEQAlwjgEoH64dlAwAYCNhCwgdAIw6viG1i5RACXCOASAVwiUD88GwjYQMAGAjYQsoEbsYFAHd7u7r7dnaQ9Pyu+geu6lmma2qcl7tFPkc/O+uuU+eysf6hD6l9fnyWKXyL1NPbDS2ugTzKH4k9gOgcIOUDIAUIOECnlHd5Q24nM63AYAAAAAElFTkSuQmCC"
+                }
+              },
+              {
+                "error": {
+                  "code": 6103,
+                  "message": "Attribute specified by guid has wrong type (GUID: 692A8CF4-2CD6-4863-80FB-864EEC1515C0)"
+                }
+              },
+              {
+                "error": {
+                  "code": 6100,
+                  "message": "Attribute is missing"
+                }
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

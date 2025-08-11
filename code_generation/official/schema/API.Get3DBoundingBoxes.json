@@ -1,0 +1,77 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "description": "Get the 3D bounding box of elements identified by their GUIDs. The bounding box is calculated from the global origin in the 3D view. The output is the array of the bounding boxes respective to the input GUIDs. Only works for elements detailed in <i>Element Information</i>.",
+  "definitions": {
+    "command_parameters": {
+      "type": "object",
+      "properties": {
+        "elements": {
+          "$ref": "APITypes.json#/definitions/Elements"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elements"
+      ]
+    },
+    "response_parameters": {
+      "type": "object",
+      "properties": {
+        "boundingBoxes3D": {
+          "$ref": "APITypes.json#/definitions/BoundingBoxes3D"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "boundingBoxes3D"
+      ]
+    },
+    "examples": [
+      {
+        "command_example": {
+          "command": "API.Get3DBoundingBoxes",
+          "parameters": {
+            "elements": [
+              {
+                "elementId": {
+                  "guid": "0F7943AC-48FA-C74E-8ACE-D1CB0DB0DBB7"
+                }
+              },
+              {
+                "elementId": {
+                  "guid": "00000000-1111-2222-3333-444444444444"
+                }
+              }
+            ]
+          }
+        },
+        "response_example": {
+          "succeeded": true,
+          "result": {
+            "boundingBoxes3D": [
+              {
+                "boundingBox3D": {
+                  "xMin": 3.3,
+                  "yMin": 2.2,
+                  "zMin": 4.2,
+                  "xMax": 3.3,
+                  "yMax": 2.2,
+                  "zMax": 6.5
+                }
+              },
+              {
+                "error": {
+                  "code": 7204,
+                  "message": "The element does not exist."
+                }
+              }
+            ]
+          }
+        }
+      }
+    ],
+    "see_also": [
+      "Element Information"
+    ]
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "description": "Executes a command registered in an Add-On.",
+  "definitions": {
+    "command_parameters": {
+      "type": "object",
+      "properties": {
+        "addOnCommandId": {
+          "$ref": "APIAddOnTypes.json#/definitions/AddOnCommandId"
+        },
+        "addOnCommandParameters": {
+          "$ref": "APIAddOnTypes.json#/definitions/AddOnCommandParameters"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "addOnCommandId"
+      ]
+    },
+    "response_parameters": {
+      "type": "object",
+      "properties": {
+        "addOnCommandResponse": {
+          "$ref": "APIAddOnTypes.json#/definitions/AddOnCommandResponse"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+          "addOnCommandResponse"
+      ]
+    },
+    "examples": [
+      {
+        "command_example": {
+          "command": "API.ExecuteAddOnCommand",
+          "parameters": {
+		    "addOnCommandId": {
+			  "commandNamespace" : "MyAddOnCommandNamespace",
+			  "commandName": "MyAddOnCommandName"
+			},
+            "addOnCommandParameters": {
+              "myAddOnCommandParameter1": "X=?"
+            }
+          }
+        },
+        "response_example": {
+          "succeeded": true,
+          "result": {
+            "addOnCommandResponse": {
+              "myAddOnCommandResult1": 42
+            }
+          }
+        }
+      }
+    ]
+  }
+}

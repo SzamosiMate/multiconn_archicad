@@ -3,7 +3,7 @@ import re
 import pathlib
 import urllib.request
 from typing import Any, Dict, List
-from code_generation.paths import paths
+from code_generation.tapir.paths import paths
 
 def apply_fixes(content: str) -> str:
     content = content.replace('"type": "double"', '"type": "number"')

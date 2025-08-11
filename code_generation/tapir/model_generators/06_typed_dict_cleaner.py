@@ -1,5 +1,5 @@
 import re
-from code_generation.paths import paths
+from code_generation.tapir.paths import paths
 
 def main():
     """

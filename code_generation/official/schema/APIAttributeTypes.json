@@ -1,0 +1,1437 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "definitions": {
+    "AttributeFolderId": {
+      "type": "object",
+      "description": "The identifier of an attribute folder.",
+      "properties": {
+        "guid": {
+          "$ref": "APITypes.json#/definitions/Guid"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "guid"
+      ]
+    },
+    "AttributeFolderIdWrapperItem": {
+      "type": "object",
+      "properties": {
+        "attributeFolderId": {
+          "$ref": "#/definitions/AttributeFolderId"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "attributeFolderId"
+      ]
+    },
+    "AttributeFolderIds": {
+      "type": "array",
+      "description": "A list of attribute folder identifiers.",
+      "items": {
+        "$ref": "#/definitions/AttributeFolderIdWrapperItem"
+      }
+    },
+    "AttributeId": {
+      "type": "object",
+      "description": "The identifier of an attribute.",
+      "properties": {
+        "guid": {
+          "$ref": "APITypes.json#/definitions/Guid"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "guid"
+      ]
+    },
+    "AttributeIdWrapperItem": {
+      "type": "object",
+      "properties": {
+        "attributeId": {
+          "$ref": "#/definitions/AttributeId"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "attributeId"
+      ]
+    },
+    "AttributeIdOrError": {
+      "type": "object",
+      "description": "The attribute's identifier or an error.",
+      "oneOf": [
+        {
+          "title": "attributeId",
+          "$ref": "#/definitions/AttributeIdWrapperItem"
+        },
+        {
+          "title": "error",
+          "$ref": "APITypes.json#/definitions/ErrorItem"
+        }
+      ]
+    },
+    "AttributeIds": {
+      "type": "array",
+      "description": "A list of attribute identifiers.",
+      "items": {
+        "$ref": "#/definitions/AttributeIdWrapperItem"
+      }
+    },
+    "AttributeIndex": {
+      "type": "number",
+      "description": "The index of an attribute.",
+      "minLength": 1
+    },
+    "AttributeIndexAndGuid": {
+      "type": "object",
+      "description": "The complete identifier of an attribute.",
+      "properties": {
+        "guid": {
+          "$ref": "APITypes.json#/definitions/Guid"
+        },
+        "index": {
+          "$ref": "#/definitions/AttributeIndex"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "guid",
+        "index"
+      ]
+    },
+    "AttributeIndexAndGuidWrapperItem": {
+      "type": "object",
+      "properties": {
+        "attributeIndexAndGuid": {
+          "$ref": "#/definitions/AttributeIndexAndGuid"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "attributeIndexAndGuid"
+      ]
+    },
+    "AttributeIndexAndGuidOrError": {
+      "type": "object",
+      "description": "The attribute's identifier or an error.",
+      "oneOf": [
+        {
+          "title": "attributeIndexAndGuid",
+          "$ref": "#/definitions/AttributeIndexAndGuidWrapperItem"
+        },
+        {
+          "title": "error",
+          "$ref": "APITypes.json#/definitions/ErrorItem"
+        }
+      ]
+    },
+    "AttributeIndicesAndGuids": {
+      "type": "array",
+      "description": "A list of complete attribute identifiers.",
+      "items": {
+        "$ref": "#/definitions/AttributeIndexAndGuidOrError"
+      }
+    },
+
+    "AttributeType": {
+      "type": "string",
+      "description": "The type of an attribute.",
+      "enum": [
+        "BuildingMaterial",
+        "Composite",
+        "Fill",
+        "Layer",
+        "LayerCombination",
+        "Line",
+        "PenTable",
+        "Profile",
+        "Surface",
+        "ZoneCategory"
+      ]
+    },
+    "AttributeName": {
+      "type": "string",
+      "description": "The name of an attribute.",
+      "minLength": 1
+    },
+    "AttributeFolderName": {
+      "type": "string",
+      "description": "The name of an attribute folder. Legal names are not empty, and do not begin or end with whitespace.",
+      "minLength": 1
+    },
+    "AttributeFolderPath": {
+      "type": "array",
+      "description": "A list of attribute folder names. May be empty.",
+      "items": {
+        "$ref": "#/definitions/AttributeFolderName"
+      }
+    },
+    "AttributeFolder": {
+      "type": "object",
+      "description": "Identifies an attribute folder. The path of the root folder is repesented by empty array.",
+      "properties": {
+        "attributeType": {
+          "$ref": "#/definitions/AttributeType"
+        },
+        "path": {
+          "$ref": "#/definitions/AttributeFolderPath"
+        },
+        "attributeFolderId": {
+          "$ref": "#/definitions/AttributeFolderId"
+        },
+        "attributeIds": {
+          "$ref": "#/definitions/AttributeIds"
+        },
+        "attributeFolderIds": {
+          "$ref": "#/definitions/AttributeFolderIds"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "attributeType",
+        "path",
+        "attributeFolderId",
+        "attributeIds",
+        "attributeFolderIds"
+      ]
+    },
+    "AttributeFolderOrError": {
+      "type": "object",
+      "description": "An attribute folder or an error.",
+      "oneOf": [
+        {
+          "title": "AttributeFolder",
+          "properties": {
+            "attributeFolder": {
+              "$ref": "#/definitions/AttributeFolder"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "attributeFolder"
+          ]
+        },
+        {
+          "title": "error",
+          "$ref": "APITypes.json#/definitions/ErrorItem"
+        }
+      ]
+    },
+    "AttributeFolders": {
+      "type": "array",
+      "description": "A list of attribute folders.",
+      "items": {
+        "$ref": "#/definitions/AttributeFolderOrError"
+      }
+    },
+    "AttributeFolderCreationParameters": {
+      "type": "object",
+      "description": "Used to create an attribute folder. The folder type and it's path needs to be provided.",
+      "properties": {
+        "attributeType": {
+          "$ref": "#/definitions/AttributeType"
+        },
+        "path": {
+          "$ref": "#/definitions/AttributeFolderPath"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "attributeType",
+        "path"
+      ]
+    },
+    "AttributeFolderRenameParameters": {
+      "type": "object",
+      "description": "Used to rename an attribute folder. The folder is identified by it's Id.",
+      "properties": {
+        "attributeFolderId": {
+          "$ref": "#/definitions/AttributeFolderId"
+        },
+        "newName": {
+          "$ref": "#/definitions/AttributeFolderName"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "attributeFolderId",
+        "newName"
+      ]
+    },
+    "AttributeFolderStructureArrayItem": {
+      "type": "object",
+      "properties": {
+        "attributeFolder": {
+          "$ref": "#/definitions/AttributeFolderStructure"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "attributeFolder"
+      ]
+    },
+    "AttributeFolderStructures": {
+      "type": "array",
+      "description": "A list of attribute folder structures.",
+      "items": {
+        "$ref": "#/definitions/AttributeFolderStructureArrayItem"
+      }
+    },
+    "AttributeFolderStructure": {
+      "type": "object",
+      "description": "The details of an attribute folder structure.",
+      "properties": {
+        "attributeFolderId": {
+          "$ref": "#/definitions/AttributeFolderId"
+        },
+        "name": {
+          "$ref": "#/definitions/AttributeFolderName"
+        },
+        "attributes": {
+          "$ref": "#/definitions/AttributeHeaders",
+          "description": "The names and identifiers of the attributes contained in this folder."
+        },
+        "subfolders": {
+          "$ref": "#/definitions/AttributeFolderStructures",
+          "description": "The subfolders of this attribute folder."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "attributeFolderId",
+        "name"
+      ]
+    },
+    "AttributeFolderStructureOrError": {
+      "type": "object",
+      "description": "An attribute folder structure or an error.",
+      "oneOf": [
+        {
+          "title": "attributeFolder",
+          "$ref": "#/definitions/AttributeFolderStructure"
+        },
+        {
+          "title": "error",
+          "$ref": "APITypes.json#/definitions/ErrorItem"
+        }
+      ]
+    },
+    "AttributeHeader": {
+      "type": "object",
+      "description": "The header object of an attribute.",
+      "properties": {
+        "attributeId": {
+          "$ref": "#/definitions/AttributeId"
+        },
+        "name": {
+          "$ref": "#/definitions/AttributeName"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "attributeId",
+        "name"
+      ]
+    },
+    "AttributeHeaderArrayItem": {
+      "type": "object",
+      "properties": {
+        "attribute": {
+          "$ref": "#/definitions/AttributeHeader"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "attribute"
+      ]
+    },
+    "AttributeHeaders": {
+      "type": "array",
+      "description": "A list of attribute headers.",
+      "items": {
+        "$ref": "#/definitions/AttributeHeaderArrayItem"
+      }
+    },
+    "AppearanceType": {
+      "type": "string",
+      "description": "The appearance type of a line or fill attribute.",
+      "enum": [
+        "ScaleWithPlan",
+        "ScaleIndependent"
+      ]
+    },
+    "PenIndex": {
+      "type": "integer",
+      "description": "The index number of a pen.",
+      "minimum": 0,
+      "maximum": 255
+    },
+    "PenTableAttribute": {
+      "type": "object",
+      "description": "A pen table attribute.",
+      "properties": {
+        "attributeId": {
+          "$ref": "#/definitions/AttributeId"
+        },
+        "name": {
+          "$ref": "#/definitions/AttributeName"
+        },
+        "pens": {
+          "$ref": "#/definitions/Pens"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "attributeId",
+        "name",
+        "pens"
+      ]
+    },
+    "PenTableAttributeOrError": {
+      "type": "object",
+      "description": "A pen table attribute or an error.",
+      "oneOf": [
+        {
+          "title": "penTableAttribute",
+          "properties": {
+            "penTableAttribute": {
+              "$ref": "#/definitions/PenTableAttribute"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "penTableAttribute"
+          ]
+        },
+        {
+          "title": "error",
+          "$ref": "APITypes.json#/definitions/ErrorItem"
+        }
+      ]
+    },
+    "PenTableAttributes": {
+      "type": "array",
+      "description": "A list of pen table attributes and potential errors.",
+      "items": {
+        "$ref": "#/definitions/PenTableAttributeOrError"
+      }
+    },
+    "LayerAttribute": {
+      "type": "object",
+      "description": "A layer attribute",
+      "properties": {
+        "attributeId": {
+          "$ref": "#/definitions/AttributeId"
+        },
+        "name": {
+          "$ref": "#/definitions/AttributeName"
+        },
+        "intersectionGroupNr": {
+          "type": "integer",
+          "description": "The intersection group number"
+        },
+        "isLocked": {
+          "type": "boolean",
+          "description": "Defines whether the layer is locked or not."
+        },
+        "isHidden": {
+          "type": "boolean",
+          "description": "Defines whether the layer is hidden or not."
+        },
+        "isWireframe": {
+          "type": "boolean",
+          "description": "Defines whether the elements placed on this layer are visible as wireframes or a solid model."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "attributeId",
+        "name",
+        "intersectionGroupNr",
+        "isLocked",
+        "isHidden",
+        "isWireframe"
+      ]
+    },
+    "LayerAttributeOrError": {
+      "type": "object",
+      "description": "A layer attribute or an error.",
+      "oneOf": [
+        {
+          "title": "layerAttribute",
+          "properties": {
+            "layerAttribute": {
+              "$ref": "#/definitions/LayerAttribute"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "layerAttribute"
+          ]
+        },
+        {
+          "title": "error",
+          "$ref": "APITypes.json#/definitions/ErrorItem"
+        }
+      ]
+    },
+    "LayerAttributes": {
+      "type": "array",
+      "description": "A list of layer attributes and potential errors.",
+      "items": {
+        "$ref": "#/definitions/LayerAttributeOrError"
+      }
+    },
+    "FillPattern": {
+      "type": "integer",
+      "description": "The pattern of the fill attribute, stored in a 64 bit unsigned integer, and represented as an 8x8 matrix. Each byte in the value is a row, and the bits are the columns of the matrix."
+    },
+    "FillTypeId": {
+      "type": "string",
+      "description": "The filling type of a fill attribute.",
+      "enum": [
+        "Vector",
+        "Symbol",
+        "Solid",
+        "Empty",
+        "LinearGradient",
+        "RadialGradient",
+        "Image"
+      ]
+    },
+    "FillAttribute": {
+      "type": "object",
+      "description": "A fill attribute.",
+      "properties": {
+        "attributeId": {
+          "$ref": "#/definitions/AttributeId"
+        },
+        "name": {
+          "$ref": "#/definitions/AttributeName"
+        },
+        "subType": {
+          "$ref": "#/definitions/FillTypeId"
+        },
+        "pattern": {
+          "$ref": "#/definitions/FillPattern"
+        },
+        "appearanceType": {
+          "$ref": "#/definitions/AppearanceType"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "attributeId",
+        "name",
+        "subType",
+        "pattern",
+        "appearanceType"
+      ]
+    },
+    "FillAttributeOrError": {
+      "type": "object",
+      "description": "A fill attribute or an error.",
+      "oneOf": [
+        {
+          "title": "fillAttribute",
+          "properties": {
+            "fillAttribute": {
+              "$ref": "#/definitions/FillAttribute"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "fillAttribute"
+          ]
+        },
+        {
+          "title": "error",
+          "$ref": "APITypes.json#/definitions/ErrorItem"
+        }
+      ]
+    },
+    "FillAttributes": {
+      "type": "array",
+      "description": "A list of fill attributes and potential errors.",
+      "items": {
+        "$ref": "#/definitions/FillAttributeOrError"
+      }
+    },
+    "MaterialTypeId": {
+      "type": "string",
+      "description": "The material type of a surface attribute.",
+      "enum": [
+        "General",
+        "Simple",
+        "Matte",
+        "Metal",
+        "Plastic",
+        "Glass",
+        "Glowing",
+        "Constant"
+      ]
+    },
+    "SurfaceAttribute": {
+      "type": "object",
+      "description": "A surface attribute.",
+      "properties": {
+        "attributeId": {
+          "$ref": "#/definitions/AttributeId"
+        },
+        "name": {
+          "$ref": "#/definitions/AttributeName"
+        },
+        "materialType": {
+          "$ref": "#/definitions/MaterialTypeId"
+        },
+        "ambientReflection": {
+          "type": "integer",
+          "description": "The ambient reflection of the surface attribute.",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "diffuseReflection": {
+          "type": "integer",
+          "description": "The diffuse reflection of the surface attribute.",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "specularReflection": {
+          "type": "integer",
+          "description": "The specular reflection of the surface attribute.",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "transparencyAttenuation": {
+          "type": "integer",
+          "description": "The transparency attenuation of the surface attribute.",
+          "minimum": 0,
+          "maximum": 400
+        },
+        "emissionAttenuation": {
+          "type": "integer",
+          "description": "The emission attenuation of the surface attribute.",
+          "minimum": 0,
+          "maximum": 65535
+        },
+        "surfaceColor": {
+          "$ref": "APITypes.json#/definitions/RGBColor",
+          "description": "The surface color of the surface attribute."
+        },
+        "specularColor": {
+          "$ref": "APITypes.json#/definitions/RGBColor",
+          "description": "The specular color of the surface attribute."
+        },
+        "emissionColor": {
+          "$ref": "APITypes.json#/definitions/RGBColor",
+          "description": "The emission color of the surface attribute."
+        },
+        "fillId": {
+          "$ref": "#/definitions/AttributeIdOrError",
+          "description": "The identifier of the surface attribute's fill component."
+        },
+        "transparency": {
+          "type": "integer",
+          "description": "The transparency of the surface attribute.",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "shine": {
+          "type": "integer",
+          "description": "The shininess of the surface attribute.",
+          "minimum": 0,
+          "maximum": 10000
+        },
+        "texture": {
+          "$ref": "#/definitions/Texture",
+          "description": "The texture of the surface attribute."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "attributeId",
+        "name",
+        "materialType",
+        "ambientReflection",
+        "diffuseReflection",
+        "specularReflection",
+        "transparencyAttenuation",
+        "emissionAttenuation",
+        "surfaceColor",
+        "specularColor",
+        "emissionColor",
+        "fillId",
+        "transparency",
+        "shine"
+      ]
+    },
+    "SurfaceAttributeOrError": {
+      "type": "object",
+      "description": "A surface attribute or an error.",
+      "oneOf": [
+        {
+          "title": "surfaceAttribute",
+          "properties": {
+            "surfaceAttribute": {
+              "$ref": "#/definitions/SurfaceAttribute"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "surfaceAttribute"
+          ]
+        },
+        {
+          "title": "error",
+          "$ref": "APITypes.json#/definitions/ErrorItem"
+        }
+      ]
+    },
+    "SurfaceAttributes": {
+      "type": "array",
+      "description": "A list of surface attributes and potential errors.",
+      "items": {
+        "$ref": "#/definitions/SurfaceAttributeOrError"
+      }
+    },
+    "ProfileModifier": {
+      "type": "object",
+      "description": "A profile modifier parameter.",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The name of the modifier."
+        },
+        "value": {
+          "type": "number",
+          "description": "The value of the modifier."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "value"
+      ]
+    },
+    "ProfileModifierListItem": {
+      "type": "object",
+      "properties": {
+        "profileModifier": {
+          "$ref": "#/definitions/ProfileModifier"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "profileModifier"
+      ]
+    },
+    "ProfileModifierList": {
+      "type": "array",
+      "description": "A list of profile modifiers.",
+      "items": {
+        "$ref": "#/definitions/ProfileModifierListItem"
+      }
+    },
+    "ProfileAttribute": {
+      "type": "object",
+      "description": "A profile attribute.",
+      "properties": {
+        "attributeId": {
+          "$ref": "#/definitions/AttributeId"
+        },
+        "name": {
+          "$ref": "#/definitions/AttributeName"
+        },
+        "useWith": {
+          "$ref": "APITypes.json#/definitions/ElementTypes",
+          "description": "The list of element types for which this profile is available."
+        },
+        "width": {
+          "type": "number",
+          "description": "The default width (horizontal size) of the profile."
+        },
+        "height": {
+          "type": "number",
+          "description": "The default height (vertical size) of the profile."
+        },
+        "minimumWidth": {
+          "type": "number",
+          "description": "The minimum width (horizontal size) of the profile."
+        },
+        "minimumHeight": {
+          "type": "number",
+          "description": "The minimum height (vertical size) of the profile."
+        },
+        "widthStretchable": {
+          "type": "boolean",
+          "description": "Defines whether the profile's width can be increased beyond its default value or not."
+        },
+        "heightStretchable": {
+          "type": "boolean",
+          "description": "Defines whether the profile's height can be increased beyond its default value or not."
+        },
+        "hasCoreSkin": {
+          "type": "boolean",
+          "description": "Defines whether the profile has a core skin or not."
+        },
+        "profileModifiers": {
+          "$ref": "#/definitions/ProfileModifierList"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "attributeId",
+        "name",
+        "useWith",
+        "width",
+        "height",
+        "minimumWidth",
+        "minimumHeight",
+        "widthStretchable",
+        "heightStretchable",
+        "hasCoreSkin",
+        "profileModifiers"
+      ]
+    },
+    "ProfileAttributeOrError": {
+      "type": "object",
+      "description": "A profile attribute or an error.",
+      "oneOf": [
+        {
+          "title": "profileAttribute",
+          "properties": {
+            "profileAttribute": {
+              "$ref": "#/definitions/ProfileAttribute"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "profileAttribute"
+          ]
+        },
+        {
+          "title": "error",
+          "$ref": "APITypes.json#/definitions/ErrorItem"
+        }
+      ]
+    },
+    "ProfileAttributes": {
+      "type": "array",
+      "description": "A list of the profile attributes and potential errors.",
+      "items": {
+        "$ref": "#/definitions/ProfileAttributeOrError"
+      }
+    },
+    "CompositeLine": {
+      "type": "object",
+      "description": "A contour or separator line component for a composite attribute.",
+      "properties": {
+        "lineId": {
+          "$ref": "#/definitions/AttributeIdOrError"
+        },
+        "linePenIndex": {
+          "$ref": "#/definitions/PenIndex",
+          "description": "The index of the line pen."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "lineId"
+      ]
+    },
+    "CompositeLineListItem": {
+      "type": "object",
+      "properties": {
+        "compositeLine": {
+          "$ref": "#/definitions/CompositeLine"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "compositeLine"
+      ]
+    },
+    "CompositeLineList": {
+      "type": "array",
+      "description": "A list of contour/separator lines for the composite.",
+      "items": {
+        "$ref": "#/definitions/CompositeLineListItem"
+      }
+    },
+    "CompositeSkin": {
+      "type": "object",
+      "description": "A skin component for a composite attribute.",
+      "properties": {
+        "buildingMaterialId": {
+          "$ref": "#/definitions/AttributeIdOrError"
+        },
+        "framePenIndex": {
+          "$ref": "#/definitions/PenIndex",
+          "description": "The index of the frame pen."
+        },
+        "thickness": {
+          "type": "number",
+          "description": "The thickness of the composite skin."
+        },
+        "isCore": {
+          "type": "boolean",
+          "description": "Defines whether the composite skin is part of the core or not."
+        },
+        "isFinish": {
+          "type": "boolean",
+          "description": "Defines whether the composite skin is part of the finish or not."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "buildingMaterialId",
+        "thickness",
+        "isCore",
+        "isFinish"
+      ]
+    },
+    "CompositeSkinListItem": {
+      "type": "object",
+      "properties": {
+        "compositeSkin": {
+          "$ref": "#/definitions/CompositeSkin"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "compositeSkin"
+      ]
+    },
+    "CompositeSkinList": {
+      "type": "array",
+      "description": "A list of composite skins.",
+      "items": {
+        "$ref": "#/definitions/CompositeSkinListItem"
+      }
+    },
+    "CompositeAttribute": {
+      "type": "object",
+      "description": "A composite attribute.",
+      "properties": {
+        "attributeId": {
+          "$ref": "#/definitions/AttributeId"
+        },
+        "name": {
+          "$ref": "#/definitions/AttributeName"
+        },
+        "totalThickness": {
+          "type": "number",
+          "description": "The total thickness of the composite."
+        },
+        "compositeSkins": {
+          "$ref": "#/definitions/CompositeSkinList",
+          "description": "The skins of the composite attribute."
+        },
+        "compositeLines": {
+          "$ref": "#/definitions/CompositeLineList",
+          "description": "The contour and separator lines of the composite attribute."
+        },
+        "useWith": {
+          "$ref": "APITypes.json#/definitions/ElementTypes",
+          "description": "The list of element types for which this composite is available."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "attributeId",
+        "name",
+        "totalThickness",
+        "compositeSkins",
+        "compositeLines",
+        "useWith"
+      ]
+    },
+    "CompositeAttributeOrError": {
+      "type": "object",
+      "description": "A composite attribute or an error.",
+      "oneOf": [
+        {
+          "title": "compositeAttribute",
+          "properties": {
+            "compositeAttribute": {
+              "$ref": "#/definitions/CompositeAttribute"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "compositeAttribute"
+          ]
+        },
+        {
+          "title": "error",
+          "$ref": "APITypes.json#/definitions/ErrorItem"
+        }
+      ]
+    },
+    "CompositeAttributes": {
+      "type": "array",
+      "description": "A list of the composite attributes and potential errors.",
+      "items": {
+        "$ref": "#/definitions/CompositeAttributeOrError"
+      }
+    },
+    "Pen": {
+      "type": "object",
+      "description": "A pen attribute.",
+      "properties": {
+        "index": {
+          "$ref": "#/definitions/PenIndex",
+          "description": "The index of the pen."
+        },
+        "color": {
+          "$ref": "APITypes.json#/definitions/RGBColor",
+          "description": "The color of the pen."
+        },
+        "weight": {
+          "type": "number",
+          "description": "The thickness of the pen defined in millimeters.",
+          "minimum": 0
+        },
+        "description": {
+          "type": "string",
+          "description": "The description of the pen."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "index",
+        "color",
+        "weight",
+        "description"
+      ]
+    },
+    "PenArrayItem": {
+      "type": "object",
+      "properties": {
+        "pen": {
+          "$ref": "#/definitions/Pen"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "pen"
+      ]
+    },
+    "Pens": {
+      "type": "array",
+      "description": "A collection of pens in a pen table.",
+      "items": {
+        "$ref": "#/definitions/PenArrayItem"
+      }
+    },
+    "Texture": {
+      "type": "object",
+      "description": "A texture",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The name of the texture."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "name"
+      ]
+    },
+    "LineType": {
+      "type": "string",
+      "description": "The type of a line attribute.",
+      "enum": [
+        "SolidLine",
+        "DashedLine",
+        "SymbolLine"
+      ]
+    },
+    "LineItemType": {
+      "type": "string",
+      "description": "The type of a line item.",
+      "enum": [
+        "IllegalItemType",
+        "SeparatorItemType",
+        "CenterDotItemType",
+        "CenterLineItemType",
+        "DotItemType",
+        "RightAngleItemType",
+        "ParallelItemType",
+        "LineItemType",
+        "CircItemType",
+        "ArcItemType"
+      ]
+    },
+    "DashItem": {
+      "type": "object",
+      "description": "A dash item.",
+      "properties": {
+        "dash": {
+          "type": "number",
+          "description": "The length of the dash."
+        },
+        "gap": {
+          "type": "number",
+          "description": "The length of the gap."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "dash",
+        "gap"
+      ]
+    },
+    "LineItem": {
+      "type": "object",
+      "description": "A line item.",
+      "properties": {
+        "lineItemType": {
+          "$ref": "#/definitions/LineItemType"
+        },
+        "centerOffset": {
+          "type": "number",
+          "description": "The vertical distance from the origin of the symbol line. Used in separator, center dot, and centerline item types."
+        },
+        "length": {
+          "type": "number",
+          "description": "The length of the item. Used in centerline, right angle, and parallel item types."
+        },
+        "begPosition": {
+          "$ref": "APIGeometryTypes.json#/definitions/Point2D",
+          "description": "The beginning position of the item. Used in dot, right angle, parallel, line, circle, and arc item types."
+        },
+        "endPosition": {
+          "$ref": "APIGeometryTypes.json#/definitions/Point2D",
+          "description": "The end position of the item. Used in line item type."
+        },
+        "radius": {
+          "type": "number",
+          "description": "The radius of the item. Used in circle and arc item types."
+        },
+        "begAngle": {
+          "type": "number",
+          "description": "The beginning angle of the item, measured from the vertical axis. Used in the arc item type."
+        },
+        "endAngle": {
+          "type": "number",
+          "description": "The ending angle of the item, measured from the vertical axis. Used in the arc item type."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "lineItemType",
+        "centerOffset",
+        "length",
+        "begPosition",
+        "endPosition",
+        "radius",
+        "begAngle",
+        "endAngle"
+      ]
+    },
+    "DashOrLineItem": {
+      "type": "object",
+      "description": "A dash or line item.",
+      "oneOf": [
+        {
+          "title": "DashItem",
+          "properties": {
+            "dashItem": {
+              "$ref": "#/definitions/DashItem"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "dashItem"
+          ]
+        },
+        {
+          "title": "LineItem",
+          "properties": {
+            "lineItem": {
+              "$ref": "#/definitions/LineItem"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "lineItem"
+          ]
+        }
+      ]
+    },
+    "LineItems": {
+      "type": "array",
+      "description": "A list of dash or line items.",
+      "items": {
+        "$ref": "#/definitions/DashOrLineItem"
+      }
+    },
+    "LineAttribute": {
+      "type": "object",
+      "description": "A line attribute",
+      "properties": {
+        "attributeId": {
+          "$ref": "#/definitions/AttributeId"
+        },
+        "name": {
+          "$ref": "#/definitions/AttributeName"
+        },
+        "appearanceType": {
+          "$ref": "#/definitions/AppearanceType"
+        },
+        "displayScale": {
+          "type": "number",
+          "description": "The original scale of the line."
+        },
+        "period": {
+          "type": "number",
+          "description": "The length of the dashed or symbol line's period."
+        },
+        "height": {
+          "type": "number",
+          "description": "The height of the symbol line."
+        },
+        "lineType": {
+          "$ref": "#/definitions/LineType"
+        },
+        "lineItems": {
+          "$ref": "#/definitions/LineItems"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "attributeId",
+        "name",
+        "appearanceType",
+        "displayScale",
+        "period",
+        "height",
+        "lineType"
+      ]
+    },
+    "LineAttributeOrError": {
+      "type": "object",
+      "description": "A line attribute or an error.",
+      "oneOf": [
+        {
+          "title": "LineAttribute",
+          "properties": {
+            "lineAttribute": {
+              "$ref": "#/definitions/LineAttribute"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "lineAttribute"
+          ]
+        },
+        {
+          "title": "error",
+          "$ref": "APITypes.json#/definitions/ErrorItem"
+        }
+      ]
+    },
+    "LineAttributes": {
+      "type": "array",
+      "description": "A list of line attributes and potential errors.",
+      "items": {
+        "$ref": "#/definitions/LineAttributeOrError"
+      }
+    },
+    "ZoneCategoryAttribute": {
+      "type": "object",
+      "description": "A zone category.",
+      "properties": {
+        "attributeId": {
+          "$ref": "#/definitions/AttributeId"
+        },
+        "name": {
+          "$ref": "#/definitions/AttributeName"
+        },
+        "categoryCode": {
+          "type": "string",
+          "description": "The category code of the zone."
+        },
+        "stampName": {
+          "type": "string",
+          "description": "The stamp name of the zone category."
+        },
+        "stampMainGuid": {
+          "$ref": "APITypes.json#/definitions/Guid",
+          "description": "The main part of the stamp library part's unique identifier."
+        },
+        "stampRevisionGuid": {
+          "$ref": "APITypes.json#/definitions/Guid",
+          "description": "The revision part of the stamp library part's unique identifier."
+        },
+        "color": {
+          "$ref": "APITypes.json#/definitions/RGBColor"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "attributeId",
+        "name",
+        "categoryCode",
+        "stampName",
+        "stampMainGuid",
+        "stampRevisionGuid",
+        "color"
+      ]
+    },
+    "ZoneCategoryAttributeOrError": {
+      "type": "object",
+      "description": "A zone category attribute or an error.",
+      "oneOf": [
+        {
+          "title": "ZoneCategoryAttribute",
+          "properties": {
+            "zoneCategoryAttribute": {
+              "$ref": "#/definitions/ZoneCategoryAttribute"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "zoneCategoryAttribute"
+          ]
+        },
+        {
+          "title": "error",
+          "$ref": "APITypes.json#/definitions/ErrorItem"
+        }
+      ]
+    },
+    "ZoneCategoryAttributes": {
+      "type": "array",
+      "description": "A list of zone category attributes and potential errors.",
+      "items": {
+        "$ref": "#/definitions/ZoneCategoryAttributeOrError"
+      }
+    },
+    "BuildingMaterialAttribute": {
+      "type": "object",
+      "description": "A building material attribute",
+      "properties": {
+        "attributeId": {
+          "$ref": "#/definitions/AttributeId"
+        },
+        "name": {
+          "$ref": "#/definitions/AttributeName"
+        },
+        "id": {
+          "type": "string",
+          "description": "The id of the building material."
+        },
+        "connectionPriority": {
+          "type": "integer",
+          "description": "The connection priority of the building material."
+        },
+        "cutFillId": {
+          "$ref": "#/definitions/AttributeIdOrError",
+          "description": "The identifier of the building material attribute's fill component."
+        },
+        "cutFillPenIndex": {
+          "$ref": "#/definitions/PenIndex",
+          "description": "The cut fill pen index of the building material."
+        },
+        "cutSurfaceId": {
+          "$ref": "#/definitions/AttributeIdOrError",
+          "description": "The identifier of the building material attribute's surface component."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "attributeId",
+        "name",
+        "id",
+        "connectionPriority",
+        "cutFillId",
+        "cutFillPenIndex",
+        "cutSurfaceId"
+      ]
+    },
+    "BuildingMaterialAttributeOrError": {
+      "type": "object",
+      "description": "A building material attribute or an error.",
+      "oneOf": [
+        {
+          "title": "BuildingMaterialAttribute",
+          "properties": {
+            "buildingMaterialAttribute": {
+              "$ref": "#/definitions/BuildingMaterialAttribute"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "buildingMaterialAttribute"
+          ]
+        },
+        {
+          "title": "error",
+          "$ref": "APITypes.json#/definitions/ErrorItem"
+        }
+      ]
+    },
+    "BuildingMaterialAttributes": {
+      "type": "array",
+      "description": "A list of building material attributes and potential errors.",
+      "items": {
+        "$ref": "#/definitions/BuildingMaterialAttributeOrError"
+      }
+    },
+    "LayerCombinationAttributes": {
+      "type": "array",
+      "description": "A list of layer combination attributes and potential errors.",
+      "items": {
+        "$ref": "#/definitions/LayerCombinationAttributeOrError"
+      }
+    },
+    "LayerCombinationAttribute": {
+      "type": "object",
+      "description": "A layer combination attribute",
+      "properties": {
+        "attributeId": {
+          "$ref": "#/definitions/AttributeId"
+        },
+        "name": {
+          "$ref": "#/definitions/AttributeName"
+        },
+        "layerAttributeIds": {
+          "description": "The list of identifiers belonging to the layer attributes referenced in this layer combination.",
+          "$ref": "#/definitions/AttributeIds"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "attributeId",
+        "name",
+        "layerAttributeIds"
+      ]
+    },
+    "LayerCombinationAttributeOrError": {
+      "type": "object",
+      "description": "A layer combination attribute or an error.",
+      "oneOf": [
+        {
+          "title": "LayerCombinationAttribute",
+          "properties": {
+            "layerCombinationAttribute": {
+              "$ref": "#/definitions/LayerCombinationAttribute"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "layerCombinationAttribute"
+          ]
+        },
+        {
+          "title": "error",
+          "$ref": "APITypes.json#/definitions/ErrorItem"
+        }
+      ]
+    }
+  }
+}

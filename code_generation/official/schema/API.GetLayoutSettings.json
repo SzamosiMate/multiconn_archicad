@@ -1,0 +1,65 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "description": "Returns the parameters (settings) of the given layout.",
+  "definitions": {
+    "command_parameters": {
+      "type": "object",
+      "properties": {
+        "layoutNavigatorItemId": {
+          "$ref": "APINavigatorTypes.json#/definitions/NavigatorItemId"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "layoutNavigatorItemId"
+      ]
+    },
+    "response_parameters": {
+      "type": "object",
+      "properties": {
+        "layoutParameters": {
+          "$ref": "APITypes.json#/definitions/LayoutParameters"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "layoutParameters"
+      ]
+    },
+    "examples": [
+      {
+        "command_example": {
+          "command": "API.GetLayoutSettings",
+          "parameters": {
+            "layoutNavigatorItemId": {
+              "guid": "546E98DF-532D-4D38-ACD8-17BFD57206AC"
+            }
+          }
+        },
+        "response_example": {
+          "succeeded": true,
+          "result": {
+            "layoutParameters": {
+              "horizontalSize": 594,
+              "verticalSize": 420,
+              "leftMargin": 14,
+              "topMargin": 14,
+              "rightMargin": 14,
+              "bottomMargin": 14,
+              "customLayoutNumber": "",
+              "customLayoutNumbering": false,
+              "doNotIncludeInNumbering": false,
+              "displayMasterLayoutBelow": false,
+              "layoutPageNumber": 1,
+              "actPageIndex": 1,
+              "currentRevisionId": "",
+              "currentFinalRevisionId": "",
+              "hasIssuedRevision": false,
+              "hasActualRevision": false
+            }
+          }
+        }
+      }
+    ]
+  }
+}

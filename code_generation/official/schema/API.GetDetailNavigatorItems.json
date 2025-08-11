@@ -1,0 +1,87 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "description": "Returns the details of the detail navigator items identified by their Ids.",
+  "definitions": {
+    "command_parameters": {
+      "type": "object",
+      "properties": {
+        "navigatorItemIds": {
+          "$ref": "APINavigatorTypes.json#/definitions/NavigatorItemIds"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "navigatorItemIds"
+      ]
+    },
+    "response_parameters": {
+      "type": "object",
+      "properties": {
+        "navigatorItems": {
+          "$ref": "APINavigatorTypes.json#/definitions/DetailNavigatorItems"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "navigatorItems"
+      ]
+    },
+    "examples": [
+      {
+        "command_example": {
+          "command": "API.GetDetailNavigatorItems",
+          "parameters": {
+            "navigatorItemIds": [
+              {
+                "navigatorItemId": {
+                  "guid": "A7F7071D-54D1-4E54-9F53-129E85E45038"
+                }
+              },
+              {
+                "navigatorItemId": {
+                  "guid": "1D947DA9-DDAE-4803-B711-15A79A31E7C3"
+                }
+              },
+              {
+                "navigatorItemId": {
+                  "guid": "BAD00BAD-0000-0000-0000-000000000000"
+                }
+              }
+            ]
+          }
+        },
+        "response_example": {
+          "succeeded": true,
+          "result": {
+            "navigatorItems": [
+              {
+                "detailNavigatorItem": {
+                  "navigatorItemId": {
+                    "guid": "A7F7071D-54D1-4E54-9F53-129E85E45038"
+                  },
+                  "prefix": "D-01",
+                  "name": "Detail"
+                }
+              },
+              {
+                "detailNavigatorItem": {
+                  "navigatorItemId": {
+                    "guid": "1D947DA9-DDAE-4803-B711-15A79A31E7C3"
+                  },
+                  "prefix": "D-02",
+                  "name": "Detail"
+                }
+              },
+              {
+                "error": {
+                  "code": 7400,
+                  "message": "Navigator item not found (navigator item guid: \"BAD00BAD-0000-0000-0000-000000000000\")"
+                }
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

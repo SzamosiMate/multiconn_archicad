@@ -1,0 +1,91 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "description": "Returns the identifiers of property definitions for the requested property names.",
+  "definitions": {
+    "command_parameters": {
+      "type": "object",
+      "properties": {
+        "properties": {
+          "description": "List of property names whose ids are requested.",
+          "$ref": "APIPropertyTypes.json#/definitions/PropertyUserIds"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "properties"
+      ]
+    },
+    "response_parameters": {
+      "type": "object",
+      "properties": {
+        "properties": {
+          "description": "List of the ids of the requested properties. Order of the ids are the same as in the input. Existing properties are represented by propertyId objects, non-existing properties are represented by error objects.",
+          "$ref": "APIPropertyTypes.json#/definitions/PropertyIdsOrErrors"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "properties"
+      ]
+    },
+    "examples": [
+      {
+        "command_example": {
+          "command": "API.GetPropertyIds",
+          "parameters": {
+            "properties": [
+              {
+                "type": "UserDefined",
+                "localizedName": [ "GENERAL RATINGS", "Combustible" ]
+              },
+              {
+                "type": "UserDefined",
+                "localizedName": [ "GENERAL RATINGS", "Not existing property name" ]
+              },
+              {
+                "type": "BuiltIn",
+                "nonLocalizedName": "General_ElementID"
+              },
+              {
+                "type": "BuiltIn",
+                "nonLocalizedName": "NotExistingBuiltInPropertyName"
+              }
+            ]
+          }
+        },
+        "response_example": {
+          "succeeded": true,
+          "result": {
+            "properties": [
+              {
+                "propertyId": {
+                  "guid": "13A61253-66A9-4494-9393-9E8F2E19D55E"
+                }
+              },
+              {
+                "error": {
+                  "code": 4004,
+                  "message": "Property definition not found (no property found with this name)"
+                }
+              },
+              {
+                "propertyId": {
+                  "guid": "7E221F33-829B-4FBC-A670-E74DABCE6289"
+                }
+              },
+              {
+                "error": {
+                  "code": 4005,
+                  "message": "Property definition not found (no property found with this name)"
+                }
+              }
+            ]
+          }
+        }
+      }
+    ],
+    "see_also": [
+      "Property Information"
+    ]
+  }
+}

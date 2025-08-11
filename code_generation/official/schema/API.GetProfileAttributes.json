@@ -1,0 +1,106 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "description": "Returns the detailed profile attributes identified by their GUIDs.",
+  "definitions": {
+    "command_parameters": {
+      "type": "object",
+      "properties": {
+        "attributeIds": {
+          "$ref": "APIAttributeTypes.json#/definitions/AttributeIds"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "attributeIds"
+      ]
+    },
+    "response_parameters": {
+      "type": "object",
+      "properties": {
+        "attributes": {
+          "$ref": "APIAttributeTypes.json#/definitions/ProfileAttributes"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "attributes"
+      ]
+    },
+    "examples": [
+      {
+        "command_example": {
+          "command": "API.GetProfileAttributes",
+          "parameters": {
+            "attributeIds": [
+              {
+                "attributeId": {
+                  "guid": "63F5F9DD-29F9-7A46-AD8F-4E414B5ADBC8"
+                }
+              },
+              {
+                "attributeId": {
+                  "guid": "00000000-1111-2222-3333-000000000000"
+                }
+              }
+            ]
+          }
+        },
+        "response_example": {
+          "succeeded": true,
+          "result": {
+            "attributes": [
+              {
+                "profileAttribute": {
+                  "attributeId": {
+                    "guid": "63F5F9DD-29F9-7A46-AD8F-4E414B5ADBC8"
+                  },
+                  "name": "Profile1",
+                  "useWith": [
+                    "Wall",
+                    "Beam",
+                    "Column",
+                    "Railing",
+                    "Object"
+                  ],
+                  "width": 0.277165858,
+                  "height": 2.813971225,
+                  "minimumWidth": 0.004207082,
+                  "minimumHeight": 0.313971225,
+                  "widthStretchable": true,
+                  "heightStretchable": true,
+                  "hasCoreSkin": true,
+                  "profileModifiers": [
+                    {
+                      "profileModifier": {
+                        "name": "Brick Skin Base Offset",
+                        "value": 0.113971225
+                      }
+                    },
+                    {
+                      "profileModifier": {
+                        "name": "Another Modifier",
+                        "value": 0.15
+                      }
+                    },
+                    {
+                      "profileModifier": {
+                        "name": "Brick Skin Top Offset",
+                        "value": 0.113971225
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "error": {
+                  "code": 6100,
+                  "message": "Attribute is missing"
+                }
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "description": "Returns the list of available classification systems.",
+  "definitions": {
+    "command_parameters": {
+      "type": "object",
+      "properties": {
+      },
+      "additionalProperties": false
+    },
+    "response_parameters": {
+      "type": "object",
+      "properties": {
+        "classificationSystemIds": {
+          "$ref": "APIClassificationTypes.json#/definitions/ClassificationSystemIds"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "classificationSystemIds"
+      ]
+    },
+    "examples": [
+      {
+        "command_example": {
+          "command": "API.GetClassificationSystemIds"
+        },
+        "response_example": {
+          "succeeded": true,
+          "result": {
+            "classificationSystemIds": [
+              {
+                "classificationSystemId": {
+                  "guid": "632C30E5-2B82-4A75-BFAD-D52FEBCE9A4A"
+                }
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

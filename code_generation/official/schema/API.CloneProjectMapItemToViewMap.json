@@ -1,0 +1,60 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "description": "Clones a project map item to the view map.",
+  "definitions": {
+    "command_parameters": {
+      "type": "object",
+      "properties": {
+        "projectMapNavigatorItemId": {
+          "description": "The ID of the navigator item to be cloned. Only navigator items from the project map can be cloned.",
+          "$ref": "APINavigatorTypes.json#/definitions/NavigatorItemId"
+        },
+        "parentNavigatorItemId": {
+          "description": "The ID of the navigator item below which the new view will be inserted. Only navigator items from the view map are allowed.",
+          "$ref": "APINavigatorTypes.json#/definitions/NavigatorItemId"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "projectMapNavigatorItemId",
+        "parentNavigatorItemId"
+      ]
+    },
+    "response_parameters": {
+      "type": "object",
+      "properties": {
+        "createdNavigatorItemId": {
+          "description": "The ID of the new navigator item in view map.",
+          "$ref": "APINavigatorTypes.json#/definitions/NavigatorItemId"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "createdNavigatorItemId"
+      ]
+    },
+    "examples": [
+      {
+        "command_example": {
+          "command": "API.CloneProjectMapItemToViewMap",
+          "parameters": {
+            "projectMapNavigatorItemId": {
+              "guid": "BB0F0CC3-23D7-422D-80A9-243FD993E3A3"
+            },
+            "parentNavigatorItemId": {
+              "guid": "3C4A2145-A752-401C-AD75-902D0235F1D7"
+            }
+          }
+        },
+        "response_example": {
+          "succeeded": true,
+          "result": {
+            "createdNavigatorItemId": {
+              "guid": "B6179C98-B27B-4C6E-B943-2346CF5DE106"
+            }
+          }
+        }
+      }
+    ]
+  }
+}

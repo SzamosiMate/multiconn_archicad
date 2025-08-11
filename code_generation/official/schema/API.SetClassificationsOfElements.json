@@ -1,0 +1,101 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "description": "Sets the classifications of elements. In order to set the classification of an element to unclassified, omit the classificationItemId field.",
+  "definitions": {
+    "command_parameters": {
+      "type": "object",
+      "properties": {
+        "elementClassifications": {
+          "$ref": "APIClassificationTypes.json#/definitions/ElementClassifications"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elementClassifications"
+      ]
+    },
+    "response_parameters": {
+      "type": "object",
+      "properties": {
+        "executionResults": {
+          "$ref": "APITypes.json#/definitions/ExecutionResults"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "executionResults"
+      ]
+    },
+    "examples": [
+      {
+        "command_example": {
+          "command": "API.SetClassificationsOfElements",
+          "parameters": {
+            "elementClassifications": [
+              {
+                "elementId": {
+                  "guid": "63BA003E-4F4D-AA4A-8FBC-57379F2CDB98"
+                },
+                "classificationId": {
+                  "classificationItemId": {
+                    "guid": "DAE7388F-0133-4667-A772-49170BC9F837"
+                  },
+                  "classificationSystemId": {
+                    "guid": "632C30E5-2B82-4A75-BFAD-D52FEBCE9A4A"
+                  }
+                }
+              },
+              {
+                "elementId": {
+                  "guid": "63BA003E-4F4D-AA4A-8FBC-57379F2CDB98"
+                },
+                "classificationId": {
+                  "classificationItemId": {
+                    "guid": "11111111-2222-3333-4444-555555555555"
+                  },
+                  "classificationSystemId": {
+                    "guid": "632C30E5-2B82-4A75-BFAD-D52FEBCE9A4A"
+                  }
+                }
+              },
+              {
+                "elementId": {
+                  "guid": "11111111-2222-3333-4444-555555555555"
+                },
+                "classificationId": {
+                  "classificationSystemId": {
+                    "guid": "632C30E5-2B82-4A75-BFAD-D52FEBCE9A4A"
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "response_example": {
+          "succeeded": true,
+          "result": {
+            "executionResults": [
+              {
+                "success": true
+              },
+              {
+                "success": false,
+                "error": {
+                  "code": 6200,
+                  "message": "Classification item not found (item guid: \"11111111-2222-3333-4444-555555555555\")"
+                }
+              },
+              {
+                "success": false,
+                "error": {
+                  "code": 7204,
+                  "message": "Element not found (element guid: \"11111111-2222-3333-4444-555555555555\")"
+                }
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

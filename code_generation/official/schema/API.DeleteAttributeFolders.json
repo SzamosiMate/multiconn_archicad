@@ -1,0 +1,77 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "description": "Deletes attribute folders and all the deletable attributes and folders it contains. To delete a folder, its identifier has to be provided.",
+  "definitions": {
+    "command_parameters": {
+      "type": "object",
+      "properties": {
+        "attributeFolderIds": {
+          "$ref": "APIAttributeTypes.json#/definitions/AttributeFolderIds"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "attributeFolderIds"
+      ]
+    },
+    "response_parameters": {
+      "type": "object",
+      "properties": {
+        "executionResults": {
+          "$ref": "APITypes.json#/definitions/ExecutionResults"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "executionResults"
+      ]
+    },
+    "examples": [
+      {
+        "description": "Try deleting three folders. The first is \"Line_B\", subfolder of \"Line_A\", that contains attributes and folders. The second folder \"Fill_X\" does not exist. The third the \"Surface_C\" is an empty folder from the \"Surface\" attribute type.",
+        "command_example": {
+          "command": "API.DeleteAttributeFolders",
+          "parameters": {
+            "attributeFolderIds": [
+             {
+                "attributeFolderId": {
+                  "guid": "131A53C0-3266-4C84-B77F-85AA0DF6E9BA"
+                }
+              },
+              {
+                "attributeFolderId": {
+                  "guid": "B470082A-9187-48E1-ACFD-00000BAD0000"
+                }
+              },
+              {
+                "attributeFolderId": {
+                  "guid": "B470082A-9187-48E1-ACFD-80598F750D75"
+                }
+              }
+            ]
+          }
+        },
+        "response_example": {
+          "succeeded": true,
+          "result": {
+            "executionResults": [
+              {
+                "success": true
+              },
+              {
+                "success": false,
+                "error": {
+                  "code": 6108,
+                  "message": "Attribute folder not found: \"B470082A-9187-48E1-ACFD-00000BAD0000\"."
+                }
+              },
+              {
+                "success": true
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,137 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "description": "Returns all navigator item types based on the navigator item identifiers given. An error is returned for each identifier that is not found.",
+  "definitions": {
+    "command_parameters": {
+      "type": "object",
+      "properties": {
+        "navigatorItemIds": {
+          "$ref": "APINavigatorTypes.json#/definitions/NavigatorItemIds"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "navigatorItemIds"
+      ]
+    },
+    "response_parameters": {
+      "type": "object",
+      "properties": {
+        "navigatorItemIdAndTypeList": {
+          "$ref": "APINavigatorTypes.json#/definitions/NavigatorItemIdAndTypeList"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "navigatorItemIdAndTypeList"
+      ]
+    },
+    "examples": [
+      {
+        "command_example": {
+          "command": "API.GetNavigatorItemsType",
+          "parameters": {
+            "navigatorItemIds": [
+              {
+                "navigatorItemId": {
+                  "guid": "A7F7071D-54D1-4E54-9F53-129E85E45038"
+                }
+              },
+              {
+                "navigatorItemId": {
+                  "guid": "B71A3059-18D2-410D-8080-610E7E78FDC4"
+                }
+              },
+              {
+                "navigatorItemId": {
+                  "guid": "A8B600CE-8365-4BF4-97D3-CB5F7A56B4AC"
+                }
+              },
+              {
+                "navigatorItemId": {
+                  "guid": "527B0307-1EB3-482F-9B2B-74CF1D1D6278"
+                }
+              },
+              {
+                "navigatorItemId": {
+                  "guid": "CE10BBFC-AE97-4B76-B509-0D79691DAA75"
+                }
+              },
+              {
+                "navigatorItemId": {
+                  "guid": "75CCF4A4-E3A7-406D-A6E9-7CCED7EF05A0"
+                }
+              },
+              {
+                "navigatorItemId": {
+                  "guid": "BAD00BAD-0000-0000-0000-000000000000"
+                }
+              }
+            ]
+          }
+        },
+        "response_example": {
+          "succeeded": true,
+          "result": {
+            "navigatorItemIdAndTypeList": [
+              {
+                "navigatorItemIdAndType": {
+                  "navigatorItemId": {
+                    "guid": "A7F7071D-54D1-4E54-9F53-129E85E45038"
+                  },
+                  "navigatorItemType": "DetailItem"
+                }
+              },
+              {
+                "navigatorItemIdAndType": {
+                  "navigatorItemId": {
+                    "guid": "B71A3059-18D2-410D-8080-610E7E78FDC4"
+                  },
+                  "navigatorItemType": "ElevationItem"
+                }
+              },
+              {
+                "navigatorItemIdAndType": {
+                  "navigatorItemId": {
+                    "guid": "A8B600CE-8365-4BF4-97D3-CB5F7A56B4AC"
+                  },
+                  "navigatorItemType": "InteriorElevationItem"
+                }
+              },
+              {
+                "navigatorItemIdAndType": {
+                  "navigatorItemId": {
+                    "guid": "527B0307-1EB3-482F-9B2B-74CF1D1D6278"
+                  },
+                  "navigatorItemType": "SectionItem"
+                }
+              },
+              {
+                "navigatorItemIdAndType": {
+                  "navigatorItemId": {
+                    "guid": "CE10BBFC-AE97-4B76-B509-0D79691DAA75"
+                  },
+                  "navigatorItemType": "StoryItem"
+                }
+              },
+              {
+                "navigatorItemIdAndType": {
+                  "navigatorItemId": {
+                    "guid": "75CCF4A4-E3A7-406D-A6E9-7CCED7EF05A0"
+                  },
+                  "navigatorItemType": "WorksheetItem"
+                }
+              },
+              {
+                "error": {
+                  "code": 7400,
+                  "message": "Navigator item not found (navigator item guid: \"BAD00BAD-0000-0000-0000-000000000000\")"
+                }
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,68 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "description": "Returns the identifier of every attribute of the given type.",
+  "definitions": {
+    "command_parameters": {
+      "type": "object",
+      "properties": {
+        "attributeType": {
+          "$ref": "APIAttributeTypes.json#/definitions/AttributeType"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "attributeType"
+      ]
+    },
+    "response_parameters": {
+      "type": "object",
+      "properties": {
+        "attributeIds": {
+          "$ref": "APIAttributeTypes.json#/definitions/AttributeIds"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "attributeIds"
+      ]
+    },
+    "examples": [
+      {
+        "description": "Get all line attributes.",
+        "command_example": {
+          "command": "API.GetAttributesByType",
+          "parameters": {
+            "attributeType": "Line"
+          }
+        },
+        "response_example": {
+          "succeeded": true,
+          "result": {
+            "attributeIds": [
+              {
+                "attributeId": {
+                  "guid": "28A7C677-9234-418F-9E4D-D10C22581DF6"
+                }
+              },
+              {
+                "attributeId": {
+                  "guid": "B13D03C4-2388-4761-A8A3-EE9437EA9953"
+                }
+              },
+              {
+                "attributeId": {
+                  "guid": "85258474-EA60-4ECF-9140-C383A4592877"
+                }
+              },
+              {
+                "attributeId": {
+                  "guid": "E49F2651-D28A-4BB7-BD36-1AF60D8BDB9A"
+                }
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

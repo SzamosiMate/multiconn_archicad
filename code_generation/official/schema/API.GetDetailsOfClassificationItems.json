@@ -1,0 +1,89 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "description": "Returns the details of classification items.",
+  "definitions": {
+    "command_parameters": {
+      "type": "object",
+      "properties": {
+        "classificationItemIds": {
+          "$ref": "APIClassificationTypes.json#/definitions/ClassificationItemIds"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "classificationItemIds"
+      ]
+    },
+    "response_parameters": {
+      "type": "object",
+      "properties": {
+        "classificationItems": {
+          "$ref": "APIClassificationTypes.json#/definitions/ClassificationItemsOrErrors"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "classificationItems"
+      ]
+    },
+    "examples": [
+      {
+        "command_example": {
+          "command": "API.GetDetailsOfClassificationItems",
+          "parameters": {
+            "classificationItemIds": [
+              {
+                "classificationItemId": {
+                  "guid": "0EE23E04-F4FC-4DAA-AE52-01A3B0503050"
+                }
+              },
+              {
+                "classificationItemId": {
+                  "guid": "8B729AC6-15B1-4F74-8B4F-359D80DA6871"
+                }
+              },
+              {
+                "classificationItemId": {
+                  "guid": "11111111-2222-3333-4444-555555555555"
+                }
+              }
+            ]
+          }
+        },
+        "response_example": {
+          "succeeded": true,
+          "result": {
+            "classificationItems": [
+              {
+                "classificationItem": {
+                  "classificationItemId": {
+                    "guid": "0EE23E04-F4FC-4DAA-AE52-01A3B0503050"
+                  },
+                  "id": "Geographic Element",
+                  "name": "",
+                  "description": ""
+                }
+              },
+              {
+                "classificationItem": {
+                  "classificationItemId": {
+                    "guid": "8B729AC6-15B1-4F74-8B4F-359D80DA6871"
+                  },
+                  "id": "Construction Element",
+                  "name": "",
+                  "description": ""
+                }
+              },
+              {
+                "error": {
+                  "code": 6200,
+                  "message": "Classification item not found (item guid: \"11111111-2222-3333-4444-555555555555\")"
+                }
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

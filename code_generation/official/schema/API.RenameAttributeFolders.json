@@ -1,0 +1,87 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "description": "Rename attribute folder.",
+  "definitions": {
+    "command_parameters": {
+      "type": "object",
+      "properties": {
+        "attributeFolderParametersList": {
+          "type": "array",
+          "items": {
+            "$ref": "APIAttributeTypes.json#/definitions/AttributeFolderRenameParameters"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "attributeFolderParametersList"
+      ]
+    },
+    "response_parameters": {
+      "type": "object",
+      "properties": {
+        "executionResults": {
+          "$ref": "APITypes.json#/definitions/ExecutionResults"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "executionResults"
+      ]
+    },
+    "examples": [
+      {
+        "description": "Rename profile attribute folder A1 to P1.",
+        "command_example": {
+          "command": "API.RenameAttributeFolders",
+          "parameters": {
+            "attributeFolderParametersList": [
+              {
+                "attributeFolderId": {
+                  "guid": "4DE0E99C-AC1F-4DC0-8AE2-4C2050733E0C"
+                },
+                "newName": "P1"
+              },
+              {
+                "attributeFolderId": {
+                  "guid": "4DE0E99C-AC1F-4DC0-8AE2-0000BAD00000"
+                },
+                "newName": "NewName"
+              },
+              {
+                "attributeFolderId": {
+                  "guid": "4DE0E99C-AC1F-4DC0-8AE2-4C2050733E0C"
+                },
+                "newName": "   Invalid Name"
+              }
+            ]
+          }
+        },
+        "response_example": {
+          "succeeded": true,
+          "result": {
+            "executionResults": [
+              {
+                "success": true
+              },
+              {
+                "success": false,
+                "error": {
+                    "code": 6108,
+                    "message": "Attribute folder not found: \"4DE0E99C-AC1F-4DC0-8AE2-0000BAD00000\"."
+                }
+              },
+              {
+                "success": false,
+                "error": {
+                    "code": 6117,
+                    "message": "Cannot rename attribute folder to given name"
+                }
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

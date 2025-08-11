@@ -1,0 +1,115 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "description": "Deletes items from navigator tree.",
+  "definitions": {
+    "command_parameters": {
+      "type": "object",
+      "properties": {
+        "navigatorItemIds": {
+          "$ref": "APINavigatorTypes.json#/definitions/NavigatorItemIds"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "navigatorItemIds"
+      ]
+    },
+    "response_parameters": {
+      "type": "object",
+      "properties": {
+        "executionResults": {
+          "$ref": "APITypes.json#/definitions/ExecutionResults"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "executionResults"
+      ]
+    },
+    "examples": [
+      {
+        "description": "Delete a layout from the layout book.",
+        "command_example": {
+          "command": "API.DeleteNavigatorItems",
+          "parameters": {
+            "navigatorItemIds": [
+              {
+                "navigatorItemId": {
+                  "guid": "BA224EA8-D8C0-46D5-948A-F8B19AD1B3FB"
+                }
+              }
+            ]
+          }
+        },
+        "response_example": {
+          "succeeded": true,
+          "result": {
+            "executionResults": [
+              {
+                "success": true
+              }
+            ]
+          }
+        }
+      },
+      {
+        "description": "Deleting the previously deleted item will return error.",
+        "command_example": {
+          "command": "API.DeleteNavigatorItems",
+          "parameters": {
+            "navigatorItemIds": [
+              {
+                "navigatorItemId": {
+                  "guid": "BA224EA8-D8C0-46D5-948A-F8B19AD1B3FB"
+                }
+              }
+            ]
+          }
+        },
+        "response_example": {
+          "succeeded": true,
+          "result": {
+            "executionResults": [
+              {
+                "success": false,
+                "error": {
+                  "code": 7400,
+                  "message": "The navigator item does not exist."
+                }
+              }
+            ]
+          }
+        }
+      },
+      {
+        "description": "Deleting items from the project map is not supported.",
+        "command_example": {
+          "command": "API.DeleteNavigatorItems",
+          "parameters": {
+            "navigatorItemIds": [
+              {
+                "navigatorItemId": {
+                  "guid": "8A3BBC57-86D6-407E-8B3C-3A862E32DF3A"
+                }
+              }
+            ]
+          }
+        },
+        "response_example": {
+          "succeeded": true,
+          "result": {
+            "executionResults": [
+              {
+                "success": false,
+                "error": {
+                  "code": 7404,
+                  "message": "Deleting navigator from Project Map is not supported."
+                }
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

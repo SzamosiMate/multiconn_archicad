@@ -1,0 +1,81 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "description": "Returns the identifier of every element with the given classification identifier.",
+  "definitions": {
+    "command_parameters": {
+      "type": "object",
+      "properties": {
+        "classificationItemId": {
+          "$ref": "APIClassificationTypes.json#/definitions/ClassificationItemId"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "classificationItemId"
+      ]
+    },
+    "response_parameters": {
+      "type": "object",
+      "properties": {
+        "elements": {
+          "$ref": "APITypes.json#/definitions/Elements"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elements"
+      ]
+    },
+    "examples": [
+      {
+        "description": "The command succeeds and returns the required elements.",
+        "command_example": {
+          "command": "API.GetElementsByClassification",
+          "parameters": {
+            "classificationItemId": {
+              "guid": "1AEB79EB-8D88-4F2E-9EA5-3432D006AB4F"
+            }
+          }
+        },
+        "response_example": {
+          "succeeded": true,
+          "result": {
+            "elements": [
+              {
+                "elementId": {
+                  "guid": "0F7943AC-48FA-C74E-8ACE-D1CB0DB0DBB7"
+                }
+              },
+              {
+                "elementId": {
+                  "guid": "63BA003E-4F4D-AA4A-8FBC-57379F2CDB98"
+                }
+              }
+            ]
+          }
+        }
+      },
+      {
+        "description": "If you pass a non-existing ClassificationItemId, the command fails and returns an error.",
+        "command_example": {
+          "command": "API.GetElementsByClassification",
+          "parameters": {
+            "classificationItemId": {
+              "guid": "11111111-2222-3333-4444-555555555555"
+            }
+          }
+        },
+        "response_example": {
+          "succeeded": false,
+          "error": {
+            "code": 6200,
+            "message": "Classification item not found"
+          }
+        }
+      }
+    ],
+    "see_also": [
+      "Element Information"
+    ]
+  }
+}

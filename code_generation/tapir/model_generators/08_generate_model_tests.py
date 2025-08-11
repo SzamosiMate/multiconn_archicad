@@ -1,6 +1,6 @@
 import json
 import copy
-from code_generation.paths import paths
+from code_generation.tapir.paths import paths
 
 # We now add the known problematic schemas that need patching.
 # The `xfail` list is for problems we expect to be fixed upstream.

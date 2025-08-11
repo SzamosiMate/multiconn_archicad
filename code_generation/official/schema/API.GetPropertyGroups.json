@@ -1,0 +1,85 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "description": "Returns the details of property groups.",
+  "definitions": {
+    "command_parameters": {
+      "type": "object",
+      "properties": {
+        "propertyGroupIds": {
+          "$ref": "APIPropertyTypes.json#/definitions/PropertyGroupIds"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "propertyGroupIds"
+      ]
+    },
+    "response_parameters": {
+      "type": "object",
+      "properties": {
+        "propertyGroups": {
+          "$ref": "APIPropertyTypes.json#/definitions/PropertyGroupsOrErrors"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "propertyGroups"
+      ]
+    },
+    "examples": [
+      {
+        "command_example": {
+          "command": "API.GetPropertyGroups",
+          "parameters": {
+            "propertyGroupIds": [
+              {
+                "propertyGroupId": {
+                  "guid": "10EDC72A-FBFB-4E45-B475-264256AF12CD"
+                }
+              },
+              {
+                "propertyGroupId": {
+                  "guid": "B12F472E-419D-417E-9A76-85EA50A72109"
+                }
+              },
+              {
+                "propertyGroupId": {
+                  "guid": "11111111-2222-3333-4444-555555555555"
+                }
+              }
+            ]
+          }
+        },
+        "response_example": {
+          "succeeded": true,
+          "result": {
+            "propertyGroups": [
+              {
+                "propertyGroup": {
+                  "propertyGroupId": {
+                    "guid": "10EDC72A-FBFB-4E45-B475-264256AF12CD"
+                  },
+                  "name": "General Parameters"
+                }
+              },
+              {
+                "propertyGroup": {
+                  "propertyGroupId": {
+                    "guid": "B12F472E-419D-417E-9A76-85EA50A72109"
+                  },
+                  "name": "GENERAL RATINGS"
+                }
+              },
+              {
+                "error": {
+                  "code": 6704,
+                  "message": "Property group not found (property group guid: \"11111111-2222-3333-4444-555555555555\")"
+                }
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

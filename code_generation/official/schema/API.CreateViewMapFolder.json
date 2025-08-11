@@ -1,0 +1,65 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "description": "Creates a view folder item at the given position in the navigator tree.",
+  "definitions": {
+    "command_parameters": {
+      "type": "object",
+      "properties": {
+        "folderParameters": {
+          "$ref": "APITypes.json#/definitions/FolderParameters",
+          "description": "This is the name of the new folder."
+        },
+        "parentNavigatorItemId": {
+          "$ref": "APINavigatorTypes.json#/definitions/NavigatorItemId",
+          "description": "The newly created folder will be placed under this parent item. If this parameter is not given the folder will be created as the first item in the View Map list."
+        },
+        "previousNavigatorItemId": {
+          "$ref": "APINavigatorTypes.json#/definitions/NavigatorItemId",
+          "description": "The newly created folder will be placed after this sibling item. If this parameter is not given the folder will be created as the first item under the parent."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "folderParameters"
+      ]
+    },
+    "response_parameters": {
+      "type": "object",
+      "properties": {
+        "createdFolderNavigatorItemId": {
+          "$ref": "APINavigatorTypes.json#/definitions/NavigatorItemId"
+        }
+      },
+      "additionalProperties": false,
+    "required": [
+        "createdFolderNavigatorItemId"
+      ]
+    },
+    "examples": [
+      {
+        "command_example": {
+          "command": "API.CreateViewMapFolder",
+          "parameters": {
+            "folderParameters": {
+              "name": "Test Folder"
+            },
+            "parentNavigatorItemId": {
+              "guid": "DF27178E-67E0-4D70-83AA-D0E8D4530440"
+            },
+            "previousNavigatorItemId": {
+              "guid": "14807F55-FD6C-41EA-A6C6-160E57EED613"
+            }
+          }
+        },
+        "response_example": {
+          "succeeded": true,
+          "result": {
+            "createdFolderNavigatorItemId": {
+              "guid": "EDB6197B-0754-4741-8BA6-712865FD0F76"
+            }
+          }
+        }
+      }
+    ]
+  }
+}

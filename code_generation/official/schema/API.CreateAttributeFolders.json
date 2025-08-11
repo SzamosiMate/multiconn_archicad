@@ -1,0 +1,79 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "description": "Creates attribute folders. To create a folder, its full path has to be provided. The command will create all folders along the path, if they do not exist.",
+  "definitions": {
+    "command_parameters": {
+      "type": "object",
+      "properties": {
+        "attributeFolders": {
+          "type": "array",
+          "items": {
+            "$ref": "APIAttributeTypes.json#/definitions/AttributeFolderCreationParameters"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [ "attributeFolders" ]
+    },
+    "response_parameters": {
+      "type": "object",
+      "properties": {
+        "executionResults": {
+          "$ref": "APITypes.json#/definitions/ExecutionResults"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+          "executionResults"
+      ]
+    },
+    "examples": [
+      {
+        "description": "Creating three folders. Two in Surfaces and one in Lines.",
+        "command_example": {
+          "command": "API.CreateAttributeFolders",
+          "parameters": {
+            "attributeFolders": [
+              {
+                "attributeType": "Surface",
+                "path": [ "  InvalidPath " ]
+              },
+              {
+                "attributeType": "Surface",
+                "path": [ "ValidPath" ]
+              },
+              {
+                "attributeType": "ZoneCategory",
+                "path": [ "A", "AA" ]
+              }
+            ]
+          }
+        },
+        "response_example": {
+          "succeeded": true,
+          "result": {
+            "executionResults": [
+              {
+                "success": false,
+                "error": {
+                  "code": 6107,
+                  "message": "Illegal attribute folder name: \"  InvalidPath \"."
+                }
+              },
+              {
+                "success": true
+              },
+              {
+                "success": false,
+                "error": {
+                    "code": 6110,
+                    "message": "Folder operations not enabled for attribute type \"Lines\""
+                }
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,87 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "description": "Returns the details of the worksheet navigator items identified by their Ids.",
+  "definitions": {
+    "command_parameters": {
+      "type": "object",
+      "properties": {
+        "navigatorItemIds": {
+          "$ref": "APINavigatorTypes.json#/definitions/NavigatorItemIds"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "navigatorItemIds"
+      ]
+    },
+    "response_parameters": {
+      "type": "object",
+      "properties": {
+        "navigatorItems": {
+          "$ref": "APINavigatorTypes.json#/definitions/WorksheetNavigatorItems"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "navigatorItems"
+      ]
+    },
+    "examples": [
+      {
+        "command_example": {
+          "command": "API.GetWorksheetNavigatorItems",
+          "parameters": {
+            "navigatorItemIds": [
+              {
+                "navigatorItemId": {
+                  "guid": "75CCF4A4-E3A7-406D-A6E9-7CCED7EF05A0"
+                }
+              },
+              {
+                "navigatorItemId": {
+                  "guid": "DD75AFF4-E4A2-4E1D-AD8E-336FA274F20D"
+                }
+              },
+              {
+                "navigatorItemId": {
+                  "guid": "BAD00BAD-0000-0000-0000-000000000000"
+                }
+              }
+            ]
+          }
+        },
+        "response_example": {
+          "succeeded": true,
+          "result": {
+            "navigatorItems": [
+              {
+                "worksheetNavigatorItem": {
+                  "navigatorItemId": {
+                    "guid": "75CCF4A4-E3A7-406D-A6E9-7CCED7EF05A0"
+                  },
+                  "prefix": "W-01",
+                  "name": "Worksheet"
+                }
+              },
+              {
+                "worksheetNavigatorItem": {
+                  "navigatorItemId": {
+                    "guid": "DD75AFF4-E4A2-4E1D-AD8E-336FA274F20D"
+                  },
+                  "prefix": "W-02",
+                  "name": "Worksheet"
+                }
+              },
+              {
+                "error": {
+                  "code": 7400,
+                  "message": "Navigator item not found (navigator item guid: \"BAD00BAD-0000-0000-0000-000000000000\")"
+                }
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

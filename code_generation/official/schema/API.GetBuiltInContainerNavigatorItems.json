@@ -1,0 +1,147 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "description": "Returns the details of the built-in container navigator items identified by their Ids.",
+  "definitions": {
+    "command_parameters": {
+      "type": "object",
+      "properties": {
+        "navigatorItemIds": {
+          "$ref": "APINavigatorTypes.json#/definitions/NavigatorItemIds"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "navigatorItemIds"
+      ]
+    },
+    "response_parameters": {
+      "type": "object",
+      "properties": {
+        "navigatorItems": {
+          "$ref": "APINavigatorTypes.json#/definitions/BuiltInContainerNavigatorItems"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "navigatorItems"
+      ]
+    },
+    "examples": [
+      {
+        "command_example": {
+          "command": "API.GetBuiltInContainerNavigatorItems",
+          "parameters": {
+            "navigatorItemIds": [
+              {
+                "navigatorItemId": {
+                  "guid": "2A9BBF8F-B33A-47AA-87BA-928E007756DF"
+                }
+              },
+              {
+                "navigatorItemId": {
+                  "guid": "5E8CAD5D-E29A-41ED-9373-673589AF77F5"
+                }
+              },
+              {
+                "navigatorItemId": {
+                  "guid": "FF717D60-0370-4FC0-BFB3-81C2204176A8"
+                }
+              },
+              {
+                "navigatorItemId": {
+                  "guid": "BAD00BAD-0000-0000-0000-000000000000"
+                }
+              }
+            ]
+          }
+        },
+        "response_example": {
+          "succeeded": true,
+          "result": {
+            "navigatorItems": [
+              {
+                "builtInContainerNavigatorItem": {
+                  "navigatorItemId": {
+                    "guid": "2A9BBF8F-B33A-47AA-87BA-928E007756DF"
+                  },
+                  "prefix": "",
+                  "name": "Interior Elevations",
+                  "contentIds": [
+                    {
+                      "navigatorItemId": {
+                        "guid": "5E8CAD5D-E29A-41ED-9373-673589AF77F5"
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "builtInContainerNavigatorItem": {
+                  "navigatorItemId": {
+                    "guid": "5E8CAD5D-E29A-41ED-9373-673589AF77F5"
+                  },
+                  "prefix": "IE-01  ",
+                  "name": " ",
+                  "contentIds": [
+                    {
+                      "navigatorItemId": {
+                        "guid": "A8B600CE-8365-4BF4-97D3-CB5F7A56B4AC"
+                      }
+                    },
+                    {
+                      "navigatorItemId": {
+                        "guid": "011FA219-6C7E-4EF8-84A3-0D32EB98FC92"
+                      }
+                    },
+                    {
+                      "navigatorItemId": {
+                        "guid": "92D45543-9B07-464C-B4A0-AAD052633823"
+                      }
+                    },
+                    {
+                      "navigatorItemId": {
+                        "guid": "DC8D78FB-1E58-483C-B69A-FD28D5802DB7"
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "builtInContainerNavigatorItem": {
+                  "navigatorItemId": {
+                    "guid": "FF717D60-0370-4FC0-BFB3-81C2204176A8"
+                  },
+                  "prefix": "",
+                  "name": "Schedules",
+                  "contentIds": [
+                    {
+                      "navigatorItemId": {
+                        "guid": "7BCF1C3E-0115-4379-A6AC-77FC9089DBCF"
+                      }
+                    },
+                    {
+                      "navigatorItemId": {
+                        "guid": "B1829635-5498-4828-88DE-99DF453D758D"
+                      }
+                    },
+                    {
+                      "navigatorItemId": {
+                        "guid": "606D1FC5-5C75-4F3D-B04C-C31C7280AC93"
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "error": {
+                  "code": 7400,
+                  "message": "Navigator item not found (navigator item guid: \"BAD00BAD-0000-0000-0000-000000000000\")"
+                }
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,155 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "description": "Returns the detailed surface attributes identified by their GUIDs.",
+  "definitions": {
+    "command_parameters": {
+      "type": "object",
+      "properties": {
+        "attributeIds": {
+          "$ref": "APIAttributeTypes.json#/definitions/AttributeIds"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "attributeIds"
+      ]
+    },
+    "response_parameters": {
+      "type": "object",
+      "properties": {
+        "attributes": {
+          "$ref": "APIAttributeTypes.json#/definitions/SurfaceAttributes"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "attributes"
+      ]
+    },
+    "examples": [
+      {
+        "command_example": {
+          "command": "API.GetSurfaceAttributes",
+          "parameters": {
+            "attributeIds": [
+              {
+                "attributeId": {
+                  "guid": "D4D2112D-DD1C-4E88-96E0-307131AADE6E"
+                }
+              },
+              {
+                "attributeId": {
+                  "guid": "DBCC5514-CE59-4A84-8DDF-10AFBCD33547"
+                }
+              },
+              {
+                "attributeId": {
+                  "guid": "11111BAD-0000-0000-0000-BAD111111111"
+                }
+              },
+              {
+                "attributeId": {
+                  "guid": "F10F261B-1A5E-443B-9C03-3B023E67F319"
+                }
+              }
+            ]
+          }
+        },
+        "response_example": {
+          "succeeded": true,
+          "result": {
+            "attributes": [
+              {
+                "surfaceAttribute": {
+                  "attributeId": {
+                    "guid": "D4D2112D-DD1C-4E88-96E0-307131AADE6E"
+                  },
+                  "name": "Grass - Green",
+                  "materialType": "General",
+                  "ambientReflection": 77,
+                  "diffuseReflection": 73,
+                  "specularReflection": 0,
+                  "transparencyAttenuation": 0,
+                  "emissionAttenuation": 0,
+                  "surfaceColor": {
+                    "red": 0.337254902,
+                    "green": 0.662745098,
+                    "blue": 0.180392157
+                  },
+                  "specularColor": {
+                    "red": 1,
+                    "green": 1,
+                    "blue": 1
+                  },
+                  "emissionColor": {
+                    "red": 0,
+                    "green": 0,
+                    "blue": 0
+                  },
+                  "fillId": {
+                    "attributeId": {
+                      "guid": "64306F90-0B79-41DD-92C1-082F61B1CE09"
+                    }
+                  },
+                  "transparency": 0,
+                  "shine": 0,
+                  "texture": {
+                    "name": "Grass - Green cb -opt"
+                  }
+                }
+              },
+              {
+                "surfaceAttribute": {
+                  "attributeId": {
+                    "guid": "DBCC5514-CE59-4A84-8DDF-10AFBCD33547"
+                  },
+                  "name": "Metal - Gold",
+                  "materialType": "General",
+                  "ambientReflection": 95,
+                  "diffuseReflection": 50,
+                  "specularReflection": 90,
+                  "transparencyAttenuation": 0,
+                  "emissionAttenuation": 0,
+                  "surfaceColor": {
+                    "red": 0.992156863,
+                    "green": 0.823529412,
+                    "blue": 0.392156863
+                  },
+                  "specularColor": {
+                    "red": 0.984313725,
+                    "green": 0.854901961,
+                    "blue": 0.509803922
+                  },
+                  "emissionColor": {
+                    "red": 0,
+                    "green": 0,
+                    "blue": 0
+                  },
+                  "fillId": {
+                    "attributeId": {
+                      "guid": "DE881F49-41D1-4252-A6A4-FFD9590BEB82"
+                    }
+                  },
+                  "transparency": 0,
+                  "shine": 1600
+                }
+              },
+              {
+                "error": {
+                  "code": 6100,
+                  "message": "Attribute is missing"
+                }
+              },
+              {
+                "error": {
+                  "code": 6103,
+                  "message": "Attribute specified by guid has wrong type (GUID: F10F261B-1A5E-443B-9C03-3B023E67F319)"
+                }
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,93 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "description": "Returns the ids of classification items a given property definition is available for.",
+  "definitions": {
+    "command_parameters": {
+      "type": "object",
+      "properties": {
+        "propertyIds": {
+          "$ref": "APIPropertyTypes.json#/definitions/PropertyIds"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "propertyIds"
+      ]
+    },
+    "response_parameters": {
+      "type": "object",
+      "properties": {
+        "propertyDefinitionAvailabilityList": {
+          "$ref": "APIClassificationAndPropertyAvailabilityTypes.json#/definitions/PropertyDefinitionAvailabilityList"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "propertyDefinitionAvailabilityList"
+      ]
+    },
+    "examples": [
+      {
+        "command_example": {
+          "command": "API.GetPropertyDefinitionAvailability",
+          "parameters": {
+            "propertyIds": [
+              {
+                "propertyId": {
+                  "guid": "78B73923-1B87-460B-8D9E-6E3041CF38D6"
+                }
+              },
+              {
+                "propertyId": {
+                  "guid": "11111111-2222-3333-4444-555555555555"
+                }
+              }
+            ]
+          }
+        },
+        "response_example": {
+          "succeeded": true,
+          "result": {
+            "propertyDefinitionAvailabilityList": [
+              {
+                "propertyDefinitionAvailability": {
+                  "propertyId": {
+                    "guid": "78B73923-1B87-460B-8D9E-6E3041CF38D6"
+                  },
+                  "availableClassifications": [
+                    {
+                      "classificationItemId": {
+                        "guid": "1AEB79EB-8D88-4F2E-9EA5-3432D006AB4F"
+                      }
+                    },
+                    {
+                      "classificationItemId": {
+                        "guid": "D74432D3-D889-41BE-BA87-DC128AE430B4"
+                      }
+                    },
+                    {
+                      "classificationItemId": {
+                        "guid": "DAE7388F-0133-4667-A772-49170BC9F837"
+                      }
+                    },
+                    {
+                      "classificationItemId": {
+                        "guid": "232F57C7-3AD2-4CFF-A0EE-694B1A3A5CDA"
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "error": {
+                  "code": 6701,
+                  "message": "Property definition not found (property definition guid: \"11111111-2222-3333-4444-555555555555\")"
+                }
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

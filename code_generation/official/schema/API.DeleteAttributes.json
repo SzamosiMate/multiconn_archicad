@@ -1,0 +1,77 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "description": "Deletes attributes.",
+  "definitions": {
+    "command_parameters": {
+      "type": "object",
+      "properties": {
+        "attributeIds": {
+          "$ref": "APIAttributeTypes.json#/definitions/AttributeIds"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "attributeIds"
+      ]
+    },
+    "response_parameters": {
+      "type": "object",
+      "properties": {
+        "executionResults": {
+          "$ref": "APITypes.json#/definitions/ExecutionResults"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "executionResults"
+      ]
+    },
+    "examples": [
+      {
+        "description": "Deleting two attributes: the first two ids are valid, the third id does not exist in the project.",
+        "command_example": {
+          "command": "API.DeleteAttributes",
+            "parameters": {
+              "attributeIds": [
+                {
+                  "attributeId": {
+                    "guid": "7D30D4FC-4C93-4FFA-82C8-AA17B32DA2B9"
+                  }
+                },
+                {
+                  "attributeId": {
+                    "guid": "B13D03C4-2388-4761-A8A3-EE9437EA9953"
+                  }
+                },
+                {
+                  "attributeId": {
+                    "guid": "D4CAD19B-C68F-4534-BD7D-11C962DF638A"
+                  }
+                }
+              ]
+            }
+        },
+        "response_example": {
+          "succeeded": true,
+          "result": {
+            "executionResults": [
+              {
+                "success": true
+              },
+              {
+                "success": true
+              },
+              {
+                "success": false,
+                "error": {
+                  "code": 6102,
+                  "message": "Attribute not found by guid (GUID: D4CAD19B-C68F-4534-BD7D-11C962DF638A)"
+                }
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

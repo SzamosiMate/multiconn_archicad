@@ -1,0 +1,114 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "description": "Returns the detailed zone category attributes identified by their GUIDs.",
+  "definitions": {
+    "command_parameters": {
+      "type": "object",
+      "properties": {
+        "attributeIds": {
+          "$ref": "APIAttributeTypes.json#/definitions/AttributeIds"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "attributeIds"
+      ]
+    },
+    "response_parameters": {
+      "type": "object",
+      "properties": {
+        "attributes": {
+          "$ref": "APIAttributeTypes.json#/definitions/ZoneCategoryAttributes"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "attributes"
+      ]
+    },
+    "examples": [
+      {
+        "command_example": {
+          "command": "API.GetZoneCategoryAttributes",
+          "parameters": {
+            "attributeIds": [
+              {
+                "attributeId": {
+                  "guid": "CC8F66A8-2F98-452A-9A2B-82C57C22F347"
+                }
+              },
+              {
+                "attributeId": {
+                  "guid": "57234D66-0EE5-4EBE-8121-8923017C6B5E"
+                }
+              },
+              {
+                "attributeId": {
+                  "guid": "A950C1A1-D57D-4B82-9344-63101ED1FA58"
+                }
+              }
+            ]
+          }
+        },
+        "response_example": {
+          "succeeded": true,
+          "result": {
+            "attributes": [
+              {
+                "zoneCategoryAttribute": {
+                  "attributeId": {
+                    "guid": "CC8F66A8-2F98-452A-9A2B-82C57C22F347"
+                  },
+                  "name": "Medical Treatment",
+                  "categoryCode": "6",
+                  "stampName": "Zone Stamp 02 24",
+                  "stampMainGuid": "0B771EA0-3464-4B0C-9D19-3B26B2609DA5",
+                  "stampRevisionGuid": "DF5E0F14-2511-4DC4-832E-3CFB3D034D89",
+                  "color": {
+                    "red": 0.596078431,
+                    "green": 0.682352941,
+                    "blue": 0.552941176
+                  }
+                }
+              },
+              {
+                "zoneCategoryAttribute": {
+                  "attributeId": {
+                    "guid": "57234D66-0EE5-4EBE-8121-8923017C6B5E"
+                  },
+                  "name": "Residential and Recreation",
+                  "categoryCode": "1",
+                  "stampName": "Zone Stamp 02 24",
+                  "stampMainGuid": "0B771EA0-3464-4B0C-9D19-3B26B2609DA5",
+                  "stampRevisionGuid": "DF5E0F14-2511-4DC4-832E-3CFB3D034D89",
+                  "color": {
+                    "red": 0.560784314,
+                    "green": 0.57254902,
+                    "blue": 0.854901961
+                  }
+                }
+              },
+              {
+                "zoneCategoryAttribute": {
+                  "attributeId": {
+                    "guid": "A950C1A1-D57D-4B82-9344-63101ED1FA58"
+                  },
+                  "name": "Generic",
+                  "categoryCode": "",
+                  "stampName": "Zone Stamp 02 24",
+                  "stampMainGuid": "0B771EA0-3464-4B0C-9D19-3B26B2609DA5",
+                  "stampRevisionGuid": "DF5E0F14-2511-4DC4-832E-3CFB3D034D89",
+                  "color": {
+                    "red": 0.992156863,
+                    "green": 0.949019608,
+                    "blue": 0.815686275
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

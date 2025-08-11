@@ -1,0 +1,75 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "description": "Get the 2D bounding box of elements identified by their GUIDs. The bounding box is calculated from the global origin on the floor plan view. The output is the array of the bounding boxes respective to the input GUIDs. Only works for elements detailed in <i>Element Information</i>.",
+  "definitions": {
+    "command_parameters": {
+      "type": "object",
+      "properties": {
+        "elements": {
+          "$ref": "APITypes.json#/definitions/Elements"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elements"
+      ]
+    },
+    "response_parameters": {
+      "type": "object",
+      "properties": {
+        "boundingBoxes2D": {
+          "$ref": "APITypes.json#/definitions/BoundingBoxes2D"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "boundingBoxes2D"
+      ]
+    },
+    "examples": [
+      {
+        "command_example": {
+          "command": "API.Get2DBoundingBoxes",
+          "parameters": {
+            "elements": [
+              {
+                "elementId": {
+                  "guid": "63BA003E-4F4D-AA4A-8FBC-57379F2CDB98"
+                }
+              },
+              {
+                "elementId": {
+                  "guid": "00000000-1111-2222-3333-444444444444"
+                }
+              }
+            ]
+          }
+        },
+        "response_example": {
+          "succeeded": true,
+          "result": {
+            "boundingBoxes2D": [
+              {
+                "boundingBox2D": {
+                  "xMin": 3.3,
+                  "yMin": 2.2,
+                  "xMax": 3.3,
+                  "yMax": 2.2
+                }
+              },
+              {
+                "error": {
+                  "code": 7204,
+                  "message": "The element does not exist."
+                }
+              }
+            ]
+          }
+        }
+      }
+    ],
+    "see_also": [
+      "Element Information"
+    ]
+  }
+}

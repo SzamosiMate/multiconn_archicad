@@ -1,6 +1,6 @@
 import json
 import re
-from code_generation.paths import paths
+from code_generation.tapir.paths import paths
 
 
 def get_definition_name(block: str) -> str | None:

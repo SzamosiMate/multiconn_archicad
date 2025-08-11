@@ -1,0 +1,126 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "description": "Returns the classification of the given elements in the given classification systems.",
+  "definitions": {
+    "command_parameters": {
+      "type": "object",
+      "properties": {
+        "elements": {
+          "$ref": "APITypes.json#/definitions/Elements"
+        },
+        "classificationSystemIds": {
+          "$ref": "APIClassificationTypes.json#/definitions/ClassificationSystemIds"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elements",
+        "classificationSystemIds"
+      ]
+    },
+    "response_parameters": {
+      "type": "object",
+      "properties": {
+        "elementClassifications": {
+          "description": "The list of element classification item identifiers. Order of the ids are the same as in the input. Non-existing elements or non-existing classification systems are represented by error objects.",
+          "$ref": "APIClassificationTypes.json#/definitions/ElementClassificationsOrErrors"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elementClassifications"
+      ]
+    },
+    "examples": [
+      {
+        "command_example": {
+          "command": "API.GetClassificationsOfElements",
+          "parameters": {
+            "elements": [
+              {
+                "elementId": {
+                  "guid": "0F7943AC-48FA-C74E-8ACE-D1CB0DB0DBB7"
+                }
+              },
+              {
+                "elementId": {
+                  "guid": "63BA003E-4F4D-AA4A-8FBC-57379F2CDB98"
+                }
+              },
+              {
+                "elementId": {
+                  "guid": "11111111-2222-3333-4444-555555555555"
+                }
+              }
+            ],
+            "classificationSystemIds": [
+              {
+                "classificationSystemId": {
+                  "guid": "632C30E5-2B82-4A75-BFAD-D52FEBCE9A4A"
+                }
+              },
+              {
+                "classificationSystemId": {
+                  "guid": "11111111-2222-3333-4444-555555555555"
+                }
+              }
+            ]
+          }
+        },
+        "response_example": {
+          "succeeded": true,
+          "result": {
+            "elementClassifications": [
+              {
+                "classificationIds": [
+                  {
+                    "classificationId": {
+                      "classificationSystemId": {
+                        "guid": "632C30E5-2B82-4A75-BFAD-D52FEBCE9A4A"
+                      },
+                      "classificationItemId": {
+                        "guid": "1AEB79EB-8D88-4F2E-9EA5-3432D006AB4F"
+                      }
+                    }
+                  },
+                  {
+                    "error": {
+                      "code": 6201,
+                      "message": "Classification system not found (system guid: \"11111111-2222-3333-4444-555555555555\")"
+                    }
+                  }
+                ]
+              },
+              {
+                "classificationIds": [
+                  {
+                    "classificationId": {
+                      "classificationSystemId": {
+                        "guid": "632C30E5-2B82-4A75-BFAD-D52FEBCE9A4A"
+                      },
+                      "classificationItemId": {
+                        "guid": "1AEB79EB-8D88-4F2E-9EA5-3432D006AB4F"
+                      }
+                    }
+                  },
+                  {
+                    "error": {
+                      "code": 6201,
+                      "message": "Classification system not found (system guid: \"11111111-2222-3333-4444-555555555555\")"
+                    }
+                  }
+                ]
+              },
+              {
+                "error": {
+                  "code": 7204,
+                  "message": "Element not found (element guid: \"11111111-2222-3333-4444-555555555555\")"
+                }
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

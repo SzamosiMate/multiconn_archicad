@@ -1,0 +1,89 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "description": "Returns the identifier of every component for a list of elements. The order of the returned list is the same as the given elements.",
+  "definitions": {
+    "command_parameters": {
+      "type": "object",
+      "properties": {
+        "elements": {
+          "$ref": "APITypes.json#/definitions/Elements"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elements"
+      ]
+    },
+    "response_parameters": {
+      "type": "object",
+      "properties": {
+        "componentsOfElements": {
+          "$ref": "APITypes.json#/definitions/ElementComponentsOrErrorArray"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "componentsOfElements"
+      ]
+    },
+    "examples": [
+      {
+        "description": "Get all components for two elements",
+        "command_example": {
+          "command": "API.GetComponentsOfElements",
+          "parameters": {
+            "elements": [
+              {
+                "elementId": {
+                  "guid": "63BA003E-4F4D-AA4A-8FBC-57379F2CDB98"
+                }
+              },
+              {
+                "elementId": {
+                  "guid": "11111111-1111-1111-1111-111111111111"
+                }
+              }
+            ]
+          }
+        },
+        "response_example": {
+          "succeeded": true,
+          "result": {
+            "componentsOfElements": [
+              {
+                "elementComponents": [
+                  {
+                    "elementComponentId": {
+                      "elementId": {
+                        "guid": "63BA003E-4F4D-AA4A-8FBC-57379F2CDB98"
+                      },
+                      "componentId": {
+                        "guid": "2D5AC35A-CA5D-89D7-B301-875CA89D52C5"
+                      }
+                    }
+                  },
+                  {
+                    "elementComponentId": {
+                      "elementId": {
+                        "guid": "63BA003E-4F4D-AA4A-8FBC-57379F2CDB98"
+                      },
+                      "componentId": {
+                        "guid": "DDE68E7C-A46B-C504-C7C5-9C073D8D8BFB"
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "error": {
+                  "code": 7204,
+                  "message": "Element not found (element guid: \"11111111-1111-1111-1111-111111111111\")"
+                }
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

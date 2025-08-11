@@ -1,0 +1,87 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "description": "Returns the details of the interior elevation navigator items identified by their Ids.",
+  "definitions": {
+    "command_parameters": {
+      "type": "object",
+      "properties": {
+        "navigatorItemIds": {
+          "$ref": "APINavigatorTypes.json#/definitions/NavigatorItemIds"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "navigatorItemIds"
+      ]
+    },
+    "response_parameters": {
+      "type": "object",
+      "properties": {
+        "navigatorItems": {
+          "$ref": "APINavigatorTypes.json#/definitions/InteriorElevationNavigatorItems"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "navigatorItems"
+      ]
+    },
+    "examples": [
+      {
+        "command_example": {
+          "command": "API.GetInteriorElevationNavigatorItems",
+          "parameters": {
+            "navigatorItemIds": [
+              {
+                "navigatorItemId": {
+                  "guid": "A8B600CE-8365-4BF4-97D3-CB5F7A56B4AC"
+                }
+              },
+              {
+                "navigatorItemId": {
+                  "guid": "011FA219-6C7E-4EF8-84A3-0D32EB98FC92"
+                }
+              },
+              {
+                "navigatorItemId": {
+                  "guid": "BAD00BAD-0000-0000-0000-000000000000"
+                }
+              }
+            ]
+          }
+        },
+        "response_example": {
+          "succeeded": true,
+          "result": {
+            "navigatorItems": [
+              {
+                "interiorElevationNavigatorItem": {
+                  "navigatorItemId": {
+                    "guid": "A8B600CE-8365-4BF4-97D3-CB5F7A56B4AC"
+                  },
+                  "prefix": "IE-01 01",
+                  "name": "North"
+                }
+              },
+              {
+                "interiorElevationNavigatorItem": {
+                  "navigatorItemId": {
+                    "guid": "011FA219-6C7E-4EF8-84A3-0D32EB98FC92"
+                  },
+                  "prefix": "IE-01 02",
+                  "name": "East"
+                }
+              },
+              {
+                "error": {
+                  "code": 7400,
+                  "message": "Navigator item not found (navigator item guid: \"BAD00BAD-0000-0000-0000-000000000000\")"
+                }
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

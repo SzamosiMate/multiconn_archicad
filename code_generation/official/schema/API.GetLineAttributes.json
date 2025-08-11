@@ -1,0 +1,170 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "description": "Returns the detailed line attributes identified by their GUIDs.",
+  "definitions": {
+    "command_parameters": {
+      "type": "object",
+      "properties": {
+        "attributeIds": {
+          "$ref": "APIAttributeTypes.json#/definitions/AttributeIds"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "attributeIds"
+      ]
+    },
+    "response_parameters": {
+      "type": "object",
+      "properties": {
+        "attributes": {
+          "$ref": "APIAttributeTypes.json#/definitions/LineAttributes"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "attributes"
+      ]
+    },
+    "examples": [
+      {
+        "command_example": {
+          "command": "API.GetLineAttributes",
+          "parameters": {
+            "attributeIds": [
+              {
+                "attributeId": {
+                  "guid": "28A7C677-9234-418F-9E4D-D10C22581DF6"
+                }
+              },
+              {
+                "attributeId": {
+                  "guid": "B13D03C4-2388-4761-A8A3-EE9437EA9953"
+                }
+              },
+              {
+                "attributeId": {
+                  "guid": "E49F2651-D28A-4BB7-BD36-1AF60D8BDB9A"
+                }
+              },
+              {
+                "attributeId": {
+                  "guid": "F10F261B-1A5E-443B-9C03-3B023E67F319"
+                }
+              },
+              {
+                "attributeId": {
+                  "guid": "F10BAD1B-1A5E-443B-9C03-3B023E67F319"
+                }
+              }
+            ]
+          }
+        },
+        "response_example": {
+          "succeeded": true,
+          "result": {
+            "attributes": [
+              {
+                "lineAttribute": {
+                  "attributeId": {
+                    "guid": "28A7C677-9234-418F-9E4D-D10C22581DF6"
+                  },
+                  "name": "Solid Line",
+                  "appearanceType": "ScaleIndependent",
+                  "displayScale": 1,
+                  "period": 1999999991808,
+                  "height": 0,
+                  "lineType": "SolidLine"
+                }
+              },
+              {
+                "lineAttribute": {
+                  "attributeId": {
+                    "guid": "B13D03C4-2388-4761-A8A3-EE9437EA9953"
+                  },
+                  "name": "Dotted",
+                  "appearanceType": "ScaleIndependent",
+                  "displayScale": 1,
+                  "period": 6.349999905,
+                  "height": 0,
+                  "lineType": "DashedLine",
+                  "lineItems": [
+                    {
+                      "dashItem": {
+                        "dash": 0,
+                        "gap": 6.349999905
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "lineAttribute": {
+                  "attributeId": {
+                    "guid": "E49F2651-D28A-4BB7-BD36-1AF60D8BDB9A"
+                  },
+                  "name": "Wave",
+                  "appearanceType": "ScaleIndependent",
+                  "displayScale": 48,
+                  "period": 5.644444466,
+                  "height": 2.822222233,
+                  "lineType": "SymbolLine",
+                  "lineItems": [
+                    {
+                      "lineItem": {
+                        "lineItemType": "ArcItemType",
+                        "centerOffset": 0,
+                        "length": 0,
+                        "begPosition": {
+                          "x": 1.411111116,
+                          "y": 0
+                        },
+                        "endPosition": {
+                          "x": 0,
+                          "y": 0
+                        },
+                        "radius": 1.411111116,
+                        "begAngle": 3.141592654,
+                        "endAngle": 6.283185307
+                      }
+                    },
+                    {
+                      "lineItem": {
+                        "lineItemType": "ArcItemType",
+                        "centerOffset": 0,
+                        "length": 0,
+                        "begPosition": {
+                          "x": 4.233333349,
+                          "y": 0
+                        },
+                        "endPosition": {
+                          "x": 0,
+                          "y": 0
+                        },
+                        "radius": 1.411111116,
+                        "begAngle": 6.283185307,
+                        "endAngle": 9.424777961
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "error": {
+                  "code": 6103,
+                  "message": "Attribute specified by guid has wrong type (GUID: F10F261B-1A5E-443B-9C03-3B023E67F319)"
+                }
+              },
+              {
+                "error": {
+                  "code": 6100,
+                  "message": "Attribute is missing"
+                }
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}
