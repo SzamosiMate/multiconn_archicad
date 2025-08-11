@@ -1,6 +1,7 @@
 from datamodel_code_generator import DataModelType, InputFileType, generate, LiteralType
 from code_generation.tapir.paths import paths
 
+print("Generating Pydantic models")
 generate(
     paths.MASTER_SCHEMA_OUTPUT,
     input_file_type=InputFileType.JsonSchema,
@@ -12,6 +13,7 @@ generate(
     collapse_root_models=True
 )
 
+print("Generating Typed Dicts")
 generate(
     paths.MASTER_SCHEMA_OUTPUT,
     input_file_type=InputFileType.JsonSchema,
@@ -22,3 +24,5 @@ generate(
     use_double_quotes=True,
     collapse_root_models=False
 )
+
+print("generation complete")
