@@ -27,8 +27,13 @@ def process_type_schema(path: Path, all_defs: Dict[str, Any], base_names: Set[st
     try:
         data = json.loads(path.read_text("utf-8"))
         definitions = data.get("definitions", {})
-        all_defs.update(definitions)
-        base_names.update(definitions.keys())
+        for name, definition in definitions.items():
+            if name in ["AddOnCommandParameters", "AddOnCommandResponse"]:
+                all_defs[name] = definition
+                base_names.add(name)
+            else:
+                all_defs.update({name: definition})
+                base_names.add(name)
     except (json.JSONDecodeError, IOError) as e:
         print(f"   ⚠️ Could not process {path.name}: {e}")
 
@@ -41,15 +46,19 @@ def process_command_schema(path: Path, all_defs: Dict[str, Any], command_names: 
         command_name = path.stem.replace("API.", "")  # "API.CreateLayout" -> "CreateLayout"
 
         definitions = data.get("definitions", {})
-        if "command_parameters" in definitions:
-            new_name = f"{command_name}Parameters"
-            all_defs[new_name] = definitions["command_parameters"]
-            command_names.add(new_name)
+        if params := definitions.get("command_parameters"):
+            # Only add parameters if they have properties or are a oneOf/anyOf union
+            if params.get("properties") or params.get("oneOf") or params.get("anyOf"):
+                new_name = f"{command_name}Parameters"
+                all_defs[new_name] = params
+                command_names.add(new_name)
 
-        if "response_parameters" in definitions:
-            new_name = f"{command_name}Result"
-            all_defs[new_name] = definitions["response_parameters"]
-            command_names.add(new_name)
+        if result := definitions.get("response_parameters"):
+            # Only add results if they have properties
+            if result.get("properties"):
+                new_name = f"{command_name}Result"
+                all_defs[new_name] = result
+                command_names.add(new_name)
 
     except (json.JSONDecodeError, IOError) as e:
         print(f"   ⚠️ Could not process {path.name}: {e}")
