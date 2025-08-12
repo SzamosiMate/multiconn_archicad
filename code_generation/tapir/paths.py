@@ -14,7 +14,7 @@ class PipelinePaths:
     # These directories store intermediate and final artifacts.
     SCHEMA_DIR = pathlib.Path("../schema")
     TEMP_MODELS_DIR = pathlib.Path("../temp_models")
-    FINAL_SRC_DIR = pathlib.Path("../../src/multiconn_archicad")
+    FINAL_SRC_DIR = pathlib.Path("../../../src/multiconn_archicad")
 
     # --- Final Output Directories ---
     # These are derived from the base directories.
@@ -44,7 +44,7 @@ class PipelinePaths:
     FINAL_TYPED_DICT_COMMANDS = FINAL_DICTS_DIR / "commands.py"
 
     # --- Tests ---
-    TESTS_DIR = pathlib.Path("../../tests")
+    TESTS_DIR = pathlib.Path("../../../tests")
     GENERATED_TESTS_OUTPUT = TESTS_DIR / "test_generated_models.py"
 
     @classmethod
