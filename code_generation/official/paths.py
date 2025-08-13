@@ -23,7 +23,6 @@ class OfficialApiPaths:
     MASTER_SCHEMA_OUTPUT = SCHEMA_DIR / "official_api_master_schema.json"
     BASE_MODEL_NAMES_OUTPUT = SCHEMA_DIR / "_base_model_names.json"
     COMMAND_MODELS_NAMES_OUTPUT = SCHEMA_DIR / "_command_model_names.json"
-    COMMAND_MODEL_RENAME_MAP_OUTPUT = SCHEMA_DIR / "_command_model_rename_map.json"
     COMMAND_DETAILS_OUTPUT = SCHEMA_DIR / "_command_details.json"
 
     # --- Raw Generated Files (Intermediate) ---
@@ -42,7 +41,7 @@ class OfficialApiPaths:
 
     # --- Tests ---
     TESTS_DIR = pathlib.Path("../../../tests")
-    GENERATED_TESTS_OUTPUT = TESTS_DIR / "test_generated_models.py"
+    GENERATED_TESTS_OUTPUT = TESTS_DIR / "test_generated_official_models.py"
 
     HEADERS = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"

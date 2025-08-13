@@ -9,11 +9,14 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from .types import (
     AddOnCommandId,
+    AddOnCommandParameters,
     AddOnCommandResponse,
+    AttributeFolderCreationParameters,
     AttributeFolderId,
     AttributeFolderIdWrapperItem,
     AttributeFolderName,
     AttributeFolderRenameParameters,
+    AttributeFolderStructure,
     AttributeFolderWrapperItem,
     AttributeIdWrapperItem,
     AttributeIndexAndGuidWrapperItem,
@@ -23,9 +26,11 @@ from .types import (
     BuildingMaterialAttributeWrapperItem,
     BuiltInContainerNavigatorItemWrapperItem,
     BuiltInPropertyUserId,
+    ClassificationItemArrayItem,
+    ClassificationItemAvailabilityWrapperItem,
     ClassificationItemId,
     ClassificationItemIdArrayItem,
-    ClassificationItemInTree,
+    ClassificationItemWrapperItem,
     ClassificationSystem,
     ClassificationSystemId,
     ClassificationSystemIdArrayItem,
@@ -33,10 +38,12 @@ from .types import (
     CompositeAttributeWrapperItem,
     DetailNavigatorItemWrapperItem,
     Document3DNavigatorItemWrapperItem,
+    ElementClassification,
     ElementClassificationWrapperItem,
     ElementComponentIdArrayItem,
     ElementComponentsWrapper,
     ElementIdArrayItem,
+    ElementPropertyValue,
     ElementType,
     ElementsWrapper,
     ElevationNavigatorItemWrapperItem,
@@ -47,13 +54,18 @@ from .types import (
     ImageWrapperItem,
     InteriorElevationNavigatorItemWrapperItem,
     LayerAttributeWrapperItem,
+    LayerCombinationAttributeWrapperItem,
     LayoutParameters,
     LineAttributeWrapperItem,
     NavigatorItemId,
     NavigatorItemIdAndTypeWrapperItem,
     NavigatorItemIdWrapperItem,
+    NavigatorTree,
     OtherNavigatorTreeId,
+    PenTableAttributeWrapperItem,
     ProfileAttributeWrapperItem,
+    PropertyDefinitionAvailabilityWrapperItem,
+    PropertyDefinitionWrapperItem,
     PropertyGroupIdArrayItem,
     PropertyGroupWrapperItem,
     PropertyIdArrayItem,
@@ -1304,8 +1316,117 @@ class RenameAttributeFoldersParameters(BaseModel):
 
 
 RenameNavigatorItemParameters: TypeAlias = RenameNavigatorItemByName | RenameNavigatorItemById | RenameNavigatorItemByNameAndId
-class ClassificationItemArrayItem(BaseModel):
+
+
+class SetClassificationsOfElementsParameters(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    classificationItem: ClassificationItemInTree
+    elementClassifications: Annotated[
+        List[ElementClassification],
+        Field(description="A list of element classification identifiers."),
+    ]
+
+
+class SetLayoutSettingsParameters(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    layoutParameters: LayoutParameters
+    layoutNavigatorItemId: NavigatorItemId
+
+
+class SetPropertyValuesOfElementsParameters(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    elementPropertyValues: Annotated[
+        List[ElementPropertyValue],
+        Field(description="A list of element property values."),
+    ]
+
+
+class GetClassificationItemAvailabilityResult(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    classificationItemAvailabilityList: Annotated[
+        List[ClassificationItemAvailabilityWrapperItem | ErrorItem],
+        Field(description="A list of classification item avalabilities."),
+    ]
+
+
+class GetDetailsOfClassificationItemsResult(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    classificationItems: Annotated[
+        List[ClassificationItemWrapperItem | ErrorItem],
+        Field(description="A list of classification items or errors."),
+    ]
+
+
+class GetDetailsOfPropertiesResult(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    propertyDefinitions: Annotated[
+        List[PropertyDefinitionWrapperItem | ErrorItem],
+        Field(description="A list of property definitions or errors."),
+    ]
+
+
+class GetLayerCombinationAttributesResult(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    attributes: Annotated[
+        List[LayerCombinationAttributeWrapperItem | ErrorItem],
+        Field(
+            description="A list of layer combination attributes and potential errors."
+        ),
+    ]
+
+
+class GetPenTableAttributesResult(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    attributes: Annotated[
+        List[PenTableAttributeWrapperItem | ErrorItem],
+        Field(description="A list of pen table attributes and potential errors."),
+    ]
+
+
+class GetPropertyDefinitionAvailabilityResult(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    propertyDefinitionAvailabilityList: Annotated[
+        List[PropertyDefinitionAvailabilityWrapperItem | ErrorItem],
+        Field(description="A list of classification item avalabilities."),
+    ]
+
+
+class GetAllClassificationsInSystemResult(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    classificationItems: Annotated[
+        List[ClassificationItemArrayItem],
+        Field(description="A list of classification items."),
+    ]
+
+
+class GetAttributeFolderStructureResult(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    attributeFolder: AttributeFolderStructure
+
+
+class GetNavigatorItemTreeResult(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    navigatorTree: NavigatorTree
