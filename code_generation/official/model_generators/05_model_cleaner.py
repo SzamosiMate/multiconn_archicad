@@ -23,6 +23,7 @@ def main():
     content = surgically_fix_numbering_style_enum(content)
     content = fix_root_model_unions_to_type_alias(content)
     content = rename_problematic_wrappers(content)
+    content = remove_guid_pattern(content)
     content = assemble_final_file(content)
 
     official_paths.CLEANED_PYDANTIC_MODELS.write_text(content, encoding="utf-8")
@@ -41,9 +42,6 @@ def remove_model_rebuild_calls(content: str) -> str:
 def surgically_fix_rename_navigator_item(content: str) -> str:
     print("⚙️  Step 2: Surgically fixing `RenameNavigatorItemParameters`...")
 
-    # FIX 1: Logic Correction
-    # Start with the original content and chain the replacements,
-    # ensuring the changes from each step are passed to the next.
     current_content = content.replace(
         "RenameNavigatorItemParameters1", "RenameNavigatorItemByName", -1 # Use -1 for global replace within the block
     )
@@ -54,10 +52,6 @@ def surgically_fix_rename_navigator_item(content: str) -> str:
         "RenameNavigatorItemParameters3", "RenameNavigatorItemByNameAndId", -1
     )
 
-    # FIX 2: Regex Correction
-    # This pattern is now robust. It finds the start of the class, then
-    # non-greedily matches ALL content (`.*?`) until it finds the closing
-    # parenthesis of the `root: (...)` block, making it immune to internal newlines.
     pattern = re.compile(
         r"class RenameNavigatorItemParameters\(\s*RootModel\[.*?\]\s*\):\s+root: \(.*?\)",
         re.DOTALL
@@ -147,6 +141,18 @@ def rename_problematic_wrappers(content: str) -> str:
         print(f"    - Renamed {old_name} -> {new_name}")
 
     return content
+
+def remove_guid_pattern(code: str) -> str:
+    """
+    Removes the 'pattern=...' argument from the exact
+    'guid: Annotated[UUID, Field(...)]' definition.
+    """
+    pattern = re.compile(
+        r'(guid:\s*Annotated\[\s*UUID\s*,\s*Field\(\s*'
+        r'description="A Globally Unique Identifier \(or Universally Unique Identifier\) in its string representation as defined in RFC 4122\."\s*,\s*)'
+        r'pattern="[^"]+"\s*(,\s*)?'
+    )
+    return pattern.sub(r'\1', code)
 
 
 def assemble_final_file(content: str) -> str:

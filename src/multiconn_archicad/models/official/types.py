@@ -515,8 +515,7 @@ class ElementId(BaseModel):
         UUID,
         Field(
             description="A Globally Unique Identifier (or Universally Unique Identifier) in its string representation as defined in RFC 4122.",
-            pattern="^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
-        ),
+            ),
     ]
 
 
@@ -804,8 +803,7 @@ class ComponentId(BaseModel):
         UUID,
         Field(
             description="A Globally Unique Identifier (or Universally Unique Identifier) in its string representation as defined in RFC 4122.",
-            pattern="^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
-        ),
+            ),
     ]
 
 
@@ -842,8 +840,7 @@ class AttributeFolderId(BaseModel):
         UUID,
         Field(
             description="A Globally Unique Identifier (or Universally Unique Identifier) in its string representation as defined in RFC 4122.",
-            pattern="^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
-        ),
+            ),
     ]
 
 
@@ -862,8 +859,7 @@ class AttributeId(BaseModel):
         UUID,
         Field(
             description="A Globally Unique Identifier (or Universally Unique Identifier) in its string representation as defined in RFC 4122.",
-            pattern="^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
-        ),
+            ),
     ]
 
 
@@ -882,8 +878,7 @@ class AttributeIndexAndGuid(BaseModel):
         UUID,
         Field(
             description="A Globally Unique Identifier (or Universally Unique Identifier) in its string representation as defined in RFC 4122.",
-            pattern="^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
-        ),
+            ),
     ]
     index: Annotated[
         float, Field(description="The index of an attribute.", min_length=1)
@@ -1411,8 +1406,7 @@ class ClassificationSystemId(BaseModel):
         UUID,
         Field(
             description="A Globally Unique Identifier (or Universally Unique Identifier) in its string representation as defined in RFC 4122.",
-            pattern="^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
-        ),
+            ),
     ]
 
 
@@ -1431,8 +1425,7 @@ class ClassificationItemId(BaseModel):
         UUID,
         Field(
             description="A Globally Unique Identifier (or Universally Unique Identifier) in its string representation as defined in RFC 4122.",
-            pattern="^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
-        ),
+            ),
     ]
 
 
@@ -1551,8 +1544,7 @@ class NavigatorItemId(BaseModel):
         UUID,
         Field(
             description="A Globally Unique Identifier (or Universally Unique Identifier) in its string representation as defined in RFC 4122.",
-            pattern="^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
-        ),
+            ),
     ]
 
 
@@ -1753,8 +1745,7 @@ class PropertyId(BaseModel):
         UUID,
         Field(
             description="A Globally Unique Identifier (or Universally Unique Identifier) in its string representation as defined in RFC 4122.",
-            pattern="^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
-        ),
+            ),
     ]
 
 
@@ -1773,8 +1764,7 @@ class PropertyGroupId(BaseModel):
         UUID,
         Field(
             description="A Globally Unique Identifier (or Universally Unique Identifier) in its string representation as defined in RFC 4122.",
-            pattern="^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
-        ),
+            ),
     ]
 
 

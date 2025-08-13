@@ -3,79 +3,80 @@
 import json
 import copy
 import re
-from typing import Any, Dict, Set
+from typing import Any, Dict, Set, Union
 
 from code_generation.official.paths import official_paths
 
 # Known schemas that are too complex or recursive for hypothesis to handle efficiently.
-# We will apply test-time patches to simplify them.
-# The most common issue is recursion in NavigatorItem.
 SCHEMAS_TO_PATCH = {
     "GetNavigatorItemTreeResult",
     "GetAllClassificationsInSystemResult",
+    "GetAttributeFolderStructureResult",
+    "GetPropertyValuesOfElementComponentsResult",
 }
+
+
+def remove_uuid_patterns_recursively(data: Union[Dict, list]) -> None:
+    """
+    Recursively traverses a schema and removes the 'pattern' key from any
+    object that has 'type': 'string' and 'format': 'uuid'. This resolves
+    a conflict in hypothesis-jsonschema's strategy selection.
+    """
+    if isinstance(data, dict):
+        for value in data.values():
+            remove_uuid_patterns_recursively(value)
+    elif isinstance(data, list):
+        for item in data:
+            remove_uuid_patterns_recursively(item)
 
 
 def collect_dependencies_recursively(
     name: str, all_definitions: Dict[str, Any], collected_defs: Dict[str, Any], processed: Set[str]
 ):
-    """
-    Recursively collects all schemas referenced by a given schema name.
-
-    This is the key to creating a minimal, self-contained schema for each test,
-    which dramatically improves performance and readability.
-    """
+    """Recursively collects all schemas referenced by a given schema name."""
     if name in processed:
-        return  # Avoid infinite loops and redundant processing
-
+        return
     processed.add(name)
-
     if name not in all_definitions:
         print(f"   ⚠️ Warning: Definition for '{name}' not found in master schema.")
         return
-
     definition = all_definitions[name]
     collected_defs[name] = definition
-
-    # Find all referenced schema names within the current definition
     content_str = json.dumps(definition)
     dependencies = re.findall(r'"#/\$defs/(\w+)"', content_str)
-
     for dep_name in set(dependencies):
         collect_dependencies_recursively(dep_name, all_definitions, collected_defs, processed)
 
 
 def patch_schema_definitions(definitions: dict, model_name_to_test: str) -> dict:
-    """
-    Creates a deep copy of the definitions and applies patches to fix recursion
-    or other issues that cause Hypothesis to fail or be too slow.
-    """
+    """Applies specific patches to fix recursion or performance issues."""
     patched_defs = copy.deepcopy(definitions)
 
     if model_name_to_test == "GetNavigatorItemTreeResult":
-        # The NavigatorItem schema is recursive (`children` field).
-        # This patch removes the 'children' property to prevent Hypothesis from
-        # generating infinitely deep structures, which would time out.
         if "NavigatorItem" in patched_defs and "properties" in patched_defs["NavigatorItem"]:
             patched_defs["NavigatorItem"]["properties"].pop("children", None)
-            print(f"    - Applied patch to 'NavigatorItem' schema for {model_name_to_test} test (removed recursion).")
+            print(f"    - Applied patch to 'NavigatorItem' for {model_name_to_test} test (removed recursion).")
 
     if model_name_to_test == "GetAllClassificationsInSystemResult":
-        # The ClassificationItemInTree is also recursive.
         if "ClassificationItemInTree" in patched_defs and "properties" in patched_defs["ClassificationItemInTree"]:
             patched_defs["ClassificationItemInTree"]["properties"].pop("children", None)
-            print(
-                f"    - Applied patch to 'ClassificationItemInTree' schema for {model_name_to_test} test (removed recursion)."
-            )
+            print(f"    - Applied patch to 'ClassificationItemInTree' for {model_name_to_test} test (removed recursion).")
+
+    if model_name_to_test == "GetAttributeFolderStructureResult":
+        if "AttributeFolderStructure" in patched_defs and "properties" in patched_defs["AttributeFolderStructure"]:
+            patched_defs["AttributeFolderStructure"]["properties"].pop("subfolders", None)
+            print(f"    - Applied patch to 'AttributeFolderStructure' for {model_name_to_test} test (removed recursion).")
+
+    if model_name_to_test == "GetPropertyValuesOfElementComponentsResult":
+        if "properties" in patched_defs[model_name_to_test]:
+            patched_defs[model_name_to_test]["properties"]["propertyValuesForElementComponents"]["maxItems"] = 1
+            print(f"    - Applied patch to '{model_name_to_test}' schema (limited list size).")
 
     return patched_defs
 
 
 def main():
-    """
-    Generates a pytest file to test the instantiation of all Official API command
-    Pydantic models using property-based testing with Hypothesis.
-    """
+    """Generates a pytest file with property-based tests for Pydantic models."""
     print("--- Starting Official API Test File Generation ---")
 
     try:
@@ -88,57 +89,52 @@ def main():
         return
 
     output_path = official_paths.GENERATED_TESTS_OUTPUT
+    all_definitions_master = master_schema.get("$defs", {})
+
+    print("🔧 Applying global patch: Removing redundant 'pattern' from 'uuid' formats...")
+    remove_uuid_patterns_recursively(all_definitions_master)
+    print("✅ UUID pattern patch applied.")
 
     file_header = f"""
 # This file is automatically generated by the pipeline. Do not edit directly.
 
 import pytest
 import json
-from hypothesis import given, settings
+from hypothesis import given, settings, HealthCheck
 from hypothesis_jsonschema import from_schema
+from pydantic import ValidationError
 
 # Note: Importing from the correct final model locations
 from multiconn_archicad.models.official.types import *
 from multiconn_archicad.models.official.commands import *
 
-# Increase deadline for potentially complex model generation
-settings.register_profile("ci", deadline=1000)
+# Increase deadline and disable the 'too_slow' health check for complex models.
+settings.register_profile("ci", deadline=1000, suppress_health_check=[HealthCheck.too_slow])
 settings.load_profile("ci")
 """
 
     test_functions = []
-    all_definitions_master = master_schema.get("$defs", {})
-
-    print("⚙️  Generating tests with minimal, self-contained schemas...")
+    print("\n⚙️  Generating tests with minimal, self-contained schemas...")
     for model_name in sorted(command_model_names):
-        # Determine which set of definitions to start with (original or patched)
         source_definitions = all_definitions_master
         if model_name in SCHEMAS_TO_PATCH:
-            print(f"   - Applying patch for model: {model_name}")
+            print(f"   - Applying specific patch for model: {model_name}")
             source_definitions = patch_schema_definitions(all_definitions_master, model_name)
 
-        # Collect only the necessary dependencies for this specific model
         minimal_definitions = {}
         collect_dependencies_recursively(model_name, source_definitions, minimal_definitions, set())
 
-        # Create a small, self-contained schema for this test only
         temp_schema_for_test = {
             "$schema": "http://json-schema.org/draft-07/schema#",
             "$defs": minimal_definitions,
             "$ref": f"#/$defs/{model_name}",
         }
-
-        # Using repr() to ensure proper escaping within the raw string literal
         schema_as_string = repr(json.dumps(temp_schema_for_test))
 
         test_function = f"""
 
 @given(data=from_schema(json.loads({schema_as_string})))
 def test_instantiate_{model_name}(data: dict):
-    \"\"\"
-    Tests that the {model_name} model can be successfully instantiated
-    with valid data generated from its JSON schema.
-    \"\"\"
     try:
         {model_name}.model_validate(data)
     except Exception as e:
