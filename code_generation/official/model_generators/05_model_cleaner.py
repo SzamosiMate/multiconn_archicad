@@ -40,30 +40,53 @@ def remove_model_rebuild_calls(content: str) -> str:
 
 def surgically_fix_rename_navigator_item(content: str) -> str:
     print("⚙️  Step 2: Surgically fixing `RenameNavigatorItemParameters`...")
-    content = content.replace(
-        "class RenameNavigatorItemParameters1(BaseModel):", "class RenameNavigatorItemByName(BaseModel):", 1
+
+    # FIX 1: Logic Correction
+    # Start with the original content and chain the replacements,
+    # ensuring the changes from each step are passed to the next.
+    current_content = content.replace(
+        "RenameNavigatorItemParameters1", "RenameNavigatorItemByName", -1 # Use -1 for global replace within the block
     )
-    content = content.replace(
-        "class RenameNavigatorItemParameters2(BaseModel):", "class RenameNavigatorItemById(BaseModel):", 1
+    current_content = current_content.replace(
+        "RenameNavigatorItemParameters2", "RenameNavigatorItemById", -1
     )
-    content = content.replace(
-        "class RenameNavigatorItemParameters3(BaseModel):", "class RenameNavigatorItemByNameAndId(BaseModel):", 1
+    current_content = current_content.replace(
+        "RenameNavigatorItemParameters3", "RenameNavigatorItemByNameAndId", -1
     )
+
+    # FIX 2: Regex Correction
+    # This pattern is now robust. It finds the start of the class, then
+    # non-greedily matches ALL content (`.*?`) until it finds the closing
+    # parenthesis of the `root: (...)` block, making it immune to internal newlines.
     pattern = re.compile(
-        r"class RenameNavigatorItemParameters\(\s*RootModel\[.+?\]\):\s+root: Annotated\[.+?\]\s*\n", re.DOTALL
+        r"class RenameNavigatorItemParameters\(\s*RootModel\[.*?\]\s*\):\s+root: \(.*?\)",
+        re.DOTALL
     )
-    replacement = "RenameNavigatorItemParameters: TypeAlias = RenameNavigatorItemByName | RenameNavigatorItemById | RenameNavigatorItemByNameAndId\n"
-    cleaned_content, num_replacements = pattern.subn(replacement, content, count=1)
+    replacement = "RenameNavigatorItemParameters: TypeAlias = RenameNavigatorItemByName | RenameNavigatorItemById | RenameNavigatorItemByNameAndId"
+
+    # Operate on the `current_content` which has the renamed subclasses.
+    final_content, num_replacements = pattern.subn(replacement, current_content, count=1)
+
     if num_replacements > 0:
         print("    - Successfully renamed wrapper classes and created a clean `TypeAlias`.")
-    return cleaned_content
+    else:
+        # This warning should no longer appear.
+        print("    - ⚠️  Warning: `RenameNavigatorItemParameters` RootModel not found for replacement.")
+        return current_content # Return the partially-modified content if the regex fails
+
+    return final_content
 
 
 def surgically_fix_dash_or_line_item(content: str) -> str:
     print("⚙️  Step 3: Surgically fixing `DashOrLineItem`...")
-    content, count1 = re.subn(r"class DashOrLineItem1\(BaseModel\):.*?(?=\n\n\nclass|\Z)", "", content, flags=re.DOTALL)
-    content, count2 = re.subn(r"class DashOrLineItem2\(BaseModel\):.*?(?=\n\n\nclass|\Z)", "", content, flags=re.DOTALL)
+    lookahead = r"(?=\n\n\nclass|\Z)"
+    pattern1 = re.compile(r"class DashOrLineItem1\(BaseModel\):.*?" + lookahead, flags=re.DOTALL)
+    pattern2 = re.compile(r"class DashOrLineItem2\(BaseModel\):.*?" + lookahead, flags=re.DOTALL)
+
+    content, count1 = pattern1.subn("", content, count=1)
+    content, count2 = pattern2.subn("", content, count=1)
     content = content.replace("List[DashOrLineItem1 | DashOrLineItem2]", "List[DashItem | LineItem]")
+
     if count1 + count2 > 0:
         print("    - Successfully unwrapped to `List[DashItem | LineItem]` and removed wrapper classes.")
     return content
@@ -73,7 +96,6 @@ def surgically_fix_numbering_style_enum(content: str) -> str:
     """Renames the un-pythonic members of the NumberingStyle enum."""
     print("⚙️  Step 4: Surgically fixing `NumberingStyle` enum names...")
 
-    # A series of simple, safe replacements
     content = content.replace("field_1 = '1'", "Style1 = '1'")
     content = content.replace("field_01 = '01'", "Style01 = '01'")
     content = content.replace("field_001 = '001'", "Style001 = '001'")
@@ -84,31 +106,33 @@ def surgically_fix_numbering_style_enum(content: str) -> str:
 
 def fix_root_model_unions_to_type_alias(content: str) -> str:
     print("⚙️  Step 5: Converting remaining `RootModel` classes to `TypeAlias`...")
-    cleaned_content, num_replacements = re.subn(
-        r"class (\w+)\(RootModel\[(.+?)]\):\s+root: Annotated\[.*?\]\s*\n",
-        r"\1: TypeAlias = \2\n",
-        content,
-        flags=re.DOTALL,
+    lookahead = r"(?=\n\n\n(class |[A-Z]\w+\s*:\s*TypeAlias)|\Z)"
+    pattern = re.compile(
+        r"class (\w+)\(RootModel\[(.+?)]\):.*?" + lookahead,
+        flags=re.DOTALL
     )
+    replacement = r"\1: TypeAlias = \2"
+
+    num_replacements = 0
+    while True:
+        content, count = pattern.subn(replacement, content, count=1)
+        if count == 0:
+            break
+        num_replacements += 1
+
     print(f"    - Converted {num_replacements} models.")
-    return cleaned_content
+    return content
 
 
 def rename_problematic_wrappers(content: str) -> str:
     """
     Finds all wrapper classes ending in problematic suffixes (e.g., '1', 'OrError1')
     and renames them globally to a consistent '...WrapperItem' convention.
-    This preserves the model's structure for schema compatibility.
     """
     print("⚙️  Step 6: Renaming all problematic wrapper classes...")
 
-    # A single regex to find all classes ending with '1', 'OrError1', or 'OrErrorItem1'
     pattern = re.compile(r"class\s+(?P<full_name>(?P<base_name>\w+?)(?:1|OrError1|OrErrorItem1))\(BaseModel\):")
-
-    # We must find all matches first before replacing, to avoid modifying the string during iteration.
     matches = list(pattern.finditer(content))
-
-    # Sort by length descending to avoid partial replacements (e.g., SomeThing1 before SomeThing11)
     sorted_matches = sorted(matches, key=lambda m: len(m.group("full_name")), reverse=True)
 
     if not sorted_matches:
@@ -119,8 +143,6 @@ def rename_problematic_wrappers(content: str) -> str:
         old_name = match.group("full_name")
         base_name = match.group("base_name")
         new_name = f"{base_name}WrapperItem"
-
-        # Perform a global replacement to update the definition and all usages
         content = content.replace(old_name, new_name)
         print(f"    - Renamed {old_name} -> {new_name}")
 
@@ -148,7 +170,7 @@ def assemble_final_file(content: str) -> str:
 
     full_content = final_header + "\n\n\n" + body.strip()
 
-    full_content = re.sub(r"\n{2,}(?=(class |[A-Z]\w+\s*:\s*TypeAlias))", "\n\n\n", full_content)
+    full_content = re.sub(r"\n+(?=(class |[A-Z]\w+\s*:\s*TypeAlias))", "\n\n\n", full_content)
     full_content = re.sub(r"\n{4,}", "\n\n\n", full_content)
 
     return full_content.strip() + "\n"

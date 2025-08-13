@@ -45,7 +45,7 @@ class PipelinePaths:
 
     # --- Tests ---
     TESTS_DIR = pathlib.Path("../../../tests")
-    GENERATED_TESTS_OUTPUT = TESTS_DIR / "test_generated_models.py"
+    GENERATED_TESTS_OUTPUT = TESTS_DIR / "test_generated_tapir_models.py"
 
     @classmethod
     def create_directories(cls):

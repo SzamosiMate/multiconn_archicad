@@ -86,6 +86,8 @@ class AddOnCommandIdArrayItem(BaseModel):
 
 
 AddOnCommandIds: TypeAlias = List[AddOnCommandIdArrayItem]
+
+
 class AddOnCommandParameters(BaseModel):
     pass
     model_config = ConfigDict(
@@ -114,6 +116,8 @@ class AttributeType(Enum):
 
 
 AttributeFolderName: TypeAlias = str
+
+
 class AttributeFolderCreationParameters(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
@@ -3160,6 +3164,272 @@ class RenameNavigatorItemByNameAndId(BaseModel):
 
 
 RenameNavigatorItemParameters: TypeAlias = RenameNavigatorItemByName | RenameNavigatorItemById | RenameNavigatorItemByNameAndId
+
+
+class SetClassificationsOfElementsParameters(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    elementClassifications: Annotated[
+        List[ElementClassification],
+        Field(description="A list of element classification identifiers."),
+    ]
+
+
+class SetLayoutSettingsParameters(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    layoutParameters: LayoutParameters
+    layoutNavigatorItemId: NavigatorItemId
+
+
+class SetPropertyValuesOfElementsParameters(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    elementPropertyValues: Annotated[
+        List[ElementPropertyValue],
+        Field(description="A list of element property values."),
+    ]
+
+
+class PenTableAttribute(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    attributeId: AttributeId
+    name: Annotated[str, Field(description="The name of an attribute.", min_length=1)]
+    pens: Annotated[
+        List[PenArrayItem], Field(description="A collection of pens in a pen table.")
+    ]
+
+
+class PenTableAttributeWrapperItem(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    penTableAttribute: PenTableAttribute
+
+
+class ClassificationItemAvailability(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    classificationItemId: ClassificationItemId
+    availableProperties: Annotated[
+        List[PropertyIdArrayItem], Field(description="A list of property identifiers.")
+    ]
+
+
+class ClassificationItemAvailabilityWrapperItem(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    classificationItemAvailability: ClassificationItemAvailability
+
+
+class PropertyDefinitionAvailability(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    propertyId: PropertyId
+    availableClassifications: Annotated[
+        List[ClassificationItemIdArrayItem],
+        Field(description="A list of classification item identifiers."),
+    ]
+
+
+class PropertyDefinitionAvailabilityWrapperItem(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    propertyDefinitionAvailability: PropertyDefinitionAvailability
+
+
+class PropertyBasicDefaultValue(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    basicDefaultValue: Annotated[
+        NotAvailablePropertyValue
+        | NotEvaluatedPropertyValue
+        | NormalNumberPropertyValue
+        | NormalIntegerPropertyValue
+        | NormalStringPropertyValue
+        | NormalBooleanPropertyValue
+        | NormalLengthPropertyValue
+        | NormalAreaPropertyValue
+        | NormalVolumePropertyValue
+        | NormalAnglePropertyValue
+        | NormalNumberListPropertyValue
+        | NormalIntegerListPropertyValue
+        | NormalStringListPropertyValue
+        | NormalBooleanListPropertyValue
+        | NormalLengthListPropertyValue
+        | NormalAreaListPropertyValue
+        | NormalVolumeListPropertyValue
+        | NormalAngleListPropertyValue
+        | NormalSingleEnumPropertyValue
+        | NormalMultiEnumPropertyValue
+        | UserUndefinedPropertyValue,
+        Field(
+            description="A normal, userUndefined, notAvailable or notEvaluated property value."
+        ),
+    ]
+
+
+class PropertyDefinition(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    propertyId: PropertyId | None = None
+    group: PropertyGroup
+    name: Annotated[str, Field(description="The localized name of the property.")]
+    description: Annotated[str, Field(description="The description of the property.")]
+    isEditable: Annotated[
+        bool, Field(description="Defines whether the property is editable or not.")
+    ]
+    type: Annotated[str, Field(description="Defines the type of the property's value.")]
+    possibleEnumValues: Annotated[
+        List[PossibleEnumValuesArrayItem] | None,
+        Field(
+            description="The possible enum values of the property when the property type is enumeration."
+        ),
+    ] = None
+    defaultValue: Annotated[
+        PropertyBasicDefaultValue | None,
+        Field(description="Default value of the property."),
+    ] = None
+
+
+class PropertyDefinitionWrapperItem(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    propertyDefinition: PropertyDefinition
+
+
+class GetClassificationItemAvailabilityResult(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    classificationItemAvailabilityList: Annotated[
+        List[ClassificationItemAvailabilityWrapperItem | ErrorItem],
+        Field(description="A list of classification item avalabilities."),
+    ]
+
+
+class GetDetailsOfClassificationItemsResult(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    classificationItems: Annotated[
+        List[ClassificationItemWrapperItem | ErrorItem],
+        Field(description="A list of classification items or errors."),
+    ]
+
+
+class GetDetailsOfPropertiesResult(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    propertyDefinitions: Annotated[
+        List[PropertyDefinitionWrapperItem | ErrorItem],
+        Field(description="A list of property definitions or errors."),
+    ]
+
+
+class GetLayerCombinationAttributesResult(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    attributes: Annotated[
+        List[LayerCombinationAttributeWrapperItem | ErrorItem],
+        Field(
+            description="A list of layer combination attributes and potential errors."
+        ),
+    ]
+
+
+class GetPenTableAttributesResult(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    attributes: Annotated[
+        List[PenTableAttributeWrapperItem | ErrorItem],
+        Field(description="A list of pen table attributes and potential errors."),
+    ]
+
+
+class GetPropertyDefinitionAvailabilityResult(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    propertyDefinitionAvailabilityList: Annotated[
+        List[PropertyDefinitionAvailabilityWrapperItem | ErrorItem],
+        Field(description="A list of classification item avalabilities."),
+    ]
+
+
+class GetAllClassificationsInSystemResult(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    classificationItems: Annotated[
+        List[ClassificationItemArrayItem],
+        Field(description="A list of classification items."),
+    ]
+
+
+class GetAttributeFolderStructureResult(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    attributeFolder: AttributeFolderStructure
+
+
+class GetNavigatorItemTreeResult(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    navigatorTree: NavigatorTree
+
+
+class AttributeFolderStructureArrayItem(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    attributeFolder: AttributeFolderStructure
+
+
+class AttributeFolderStructure(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    attributeFolderId: AttributeFolderId
+    name: Annotated[
+        str,
+        Field(
+            description="The name of an attribute folder. Legal names are not empty, and do not begin or end with whitespace.",
+            min_length=1,
+        ),
+    ]
+    attributes: Annotated[
+        List[AttributeHeaderArrayItem] | None,
+        Field(
+            description="The names and identifiers of the attributes contained in this folder."
+        ),
+    ] = None
+    subfolders: Annotated[
+        List[AttributeFolderStructureArrayItem] | None,
+        Field(description="The subfolders of this attribute folder."),
+    ] = None
+
+
+AttributeFolderStructureOrError: TypeAlias = AttributeFolderStructure | ErrorItem
+
+
 class ClassificationItemArrayItem(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
