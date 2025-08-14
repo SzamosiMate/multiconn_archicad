@@ -52,37 +52,20 @@ def surgically_fix_rename_navigator_item(content: str) -> str:
         "RenameNavigatorItemParameters3", "RenameNavigatorItemByNameAndId", -1
     )
 
-    pattern = re.compile(
-        r"class RenameNavigatorItemParameters\(\s*RootModel\[.*?\]\s*\):\s+root: \(.*?\)",
-        re.DOTALL
-    )
-    replacement = "RenameNavigatorItemParameters: TypeAlias = RenameNavigatorItemByName | RenameNavigatorItemById | RenameNavigatorItemByNameAndId"
-
-    # Operate on the `current_content` which has the renamed subclasses.
-    final_content, num_replacements = pattern.subn(replacement, current_content, count=1)
-
-    if num_replacements > 0:
-        print("    - Successfully renamed wrapper classes and created a clean `TypeAlias`.")
-    else:
-        # This warning should no longer appear.
-        print("    - ⚠️  Warning: `RenameNavigatorItemParameters` RootModel not found for replacement.")
-        return current_content # Return the partially-modified content if the regex fails
-
-    return final_content
+    print("    - Successfully renamed wrapper classes.")
+    return current_content
 
 
 def surgically_fix_dash_or_line_item(content: str) -> str:
     print("⚙️  Step 3: Surgically fixing `DashOrLineItem`...")
-    lookahead = r"(?=\n\n\nclass|\Z)"
-    pattern1 = re.compile(r"class DashOrLineItem1\(BaseModel\):.*?" + lookahead, flags=re.DOTALL)
-    pattern2 = re.compile(r"class DashOrLineItem2\(BaseModel\):.*?" + lookahead, flags=re.DOTALL)
+    content = content.replace("class DashOrLineItem1(BaseModel):", "class DashItemWrapperItem(BaseModel):", 1)
+    content = content.replace("class DashOrLineItem2(BaseModel):", "class LineItemWrapperItem(BaseModel):", 1)
 
-    content, count1 = pattern1.subn("", content, count=1)
-    content, count2 = pattern2.subn("", content, count=1)
-    content = content.replace("List[DashOrLineItem1 | DashOrLineItem2]", "List[DashItem | LineItem]")
+    content = content.replace("DashOrLineItem1", "DashItemWrapperItem", -1)
+    content = content.replace("DashOrLineItem2", "LineItemWrapperItem", -1)
 
-    if count1 + count2 > 0:
-        print("    - Successfully unwrapped to `List[DashItem | LineItem]` and removed wrapper classes.")
+    print("    - Renamed wrapper classes to 'DashItemWrapperItem' and 'LineItemWrapperItem'.")
+    print("    - Updated all references to use the new names.")
     return content
 
 
@@ -144,15 +127,50 @@ def rename_problematic_wrappers(content: str) -> str:
 
 def remove_guid_pattern(code: str) -> str:
     """
-    Removes the 'pattern=...' argument from the exact
-    'guid: Annotated[UUID, Field(...)]' definition.
+    Surgically removes the 'pattern=...' argument from any field defined as
+    'Annotated[UUID, Field(...)]'. This is necessary because Pydantic V2
+    cannot apply a string pattern to a UUID object after validation.
     """
+    print("⚙️  Step 8: Removing conflicting 'pattern' from all UUID Fields...")
+
     pattern = re.compile(
-        r'(guid:\s*Annotated\[\s*UUID\s*,\s*Field\(\s*'
-        r'description="A Globally Unique Identifier \(or Universally Unique Identifier\) in its string representation as defined in RFC 4122\."\s*,\s*)'
-        r'pattern="[^"]+"\s*(,\s*)?'
+        # --- Group 1: Capture the part BEFORE the pattern argument ---
+        r"("
+        # Match any field name like 'guid:' or 'stampMainGuid:'
+        r"\w+:\s*Annotated\[\s*UUID\s*,\s*Field\("
+        # Non-greedily match any characters (including newlines) up to the pattern arg.
+        r".*?"
+        r")"
+        # --- The part to DISCARD ---
+        # Match an optional comma, the pattern argument, and its value.
+        r'(?:,\s*)?pattern\s*=\s*".*?"'
+        # --- Group 2: Capture the part AFTER the pattern argument ---
+        r"("
+        # Non-greedily match any remaining characters until the end of the annotation.
+        r".*?"
+        r"\)\s*\]"
+        r")",
+        flags=re.DOTALL,  # The DOTALL flag makes '.' match newlines, simplifying the regex.
     )
-    return pattern.sub(r'\1', code)
+
+    # The replacement consists of only the two captured groups,
+    # effectively deleting the pattern argument from the middle.
+    replacement = r"\1\2"
+
+    # We use a loop with subn to replace all occurrences in the file.
+    num_replacements = 0
+    while True:
+        code, count = pattern.subn(replacement, code, count=1)
+        if count == 0:
+            break
+        num_replacements += 1
+
+    if num_replacements > 0:
+        print(f"    - Removed {num_replacements} conflicting 'pattern' arguments from UUID fields.")
+    else:
+        print("    - No conflicting 'pattern' arguments found in UUID fields.")
+
+    return code
 
 
 def assemble_final_file(content: str) -> str:

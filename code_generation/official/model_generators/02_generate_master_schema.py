@@ -63,6 +63,13 @@ def process_command_schema(path: Path, all_defs: Dict[str, Any], command_names: 
     except (json.JSONDecodeError, IOError) as e:
         print(f"   ⚠️ Could not process {path.name}: {e}")
 
+def apply_schema_fixes(master_schema: dict) -> dict:
+    if "AttributeIndex" in master_schema["$defs"]:
+        if "minLength" in master_schema["$defs"]["AttributeIndex"]:
+            del master_schema["$defs"]["AttributeIndex"]["minLength"]
+            master_schema["$defs"]["AttributeIndex"]["minimum"] = 1
+            print("    - Patched 'AttributeIndex': Replaced 'minLength' with 'minimum'.")
+    return master_schema
 
 def main():
     """
@@ -104,6 +111,9 @@ def main():
         "description": "A consolidated, single-file schema for the official Archicad JSON API.",
         "$defs": fixed_definitions,
     }
+
+    print("\n🔧 Applying schema-level patches...")
+    master_schema = apply_schema_fixes(master_schema)
 
     # 4. Write the master schema and helper name lists to disk.
     print(f"\n💾 Writing master schema to: {official_paths.MASTER_SCHEMA_OUTPUT}")

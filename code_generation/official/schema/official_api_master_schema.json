@@ -1918,7 +1918,7 @@
     "AttributeIndex": {
       "type": "number",
       "description": "The index of an attribute.",
-      "minLength": 1
+      "minimum": 1
     },
     "AttributeIndexAndGuid": {
       "type": "object",

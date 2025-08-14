@@ -204,6 +204,13 @@ class DashItem(BaseModel):
     gap: Annotated[float, Field(description="The length of the gap.")]
 
 
+class DashItemWrapperItem(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    dashItem: DashItem
+
+
 class Point2D(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
@@ -573,7 +580,7 @@ class ElementId(BaseModel):
         UUID,
         Field(
             description="A Globally Unique Identifier (or Universally Unique Identifier) in its string representation as defined in RFC 4122.",
-            ),
+        ),
     ]
 
 
@@ -861,7 +868,7 @@ class ComponentId(BaseModel):
         UUID,
         Field(
             description="A Globally Unique Identifier (or Universally Unique Identifier) in its string representation as defined in RFC 4122.",
-            ),
+        ),
     ]
 
 
@@ -1228,7 +1235,7 @@ class AttributeFolderId(BaseModel):
         UUID,
         Field(
             description="A Globally Unique Identifier (or Universally Unique Identifier) in its string representation as defined in RFC 4122.",
-            ),
+        ),
     ]
 
 
@@ -1247,7 +1254,7 @@ class AttributeId(BaseModel):
         UUID,
         Field(
             description="A Globally Unique Identifier (or Universally Unique Identifier) in its string representation as defined in RFC 4122.",
-            ),
+        ),
     ]
 
 
@@ -1266,11 +1273,9 @@ class AttributeIndexAndGuid(BaseModel):
         UUID,
         Field(
             description="A Globally Unique Identifier (or Universally Unique Identifier) in its string representation as defined in RFC 4122.",
-            ),
+        ),
     ]
-    index: Annotated[
-        float, Field(description="The index of an attribute.", min_length=1)
-    ]
+    index: Annotated[float, Field(description="The index of an attribute.", ge=1.0)]
 
 
 class AttributeIndexAndGuidWrapperItem(BaseModel):
@@ -1670,6 +1675,13 @@ class LineItem(BaseModel):
     ]
 
 
+class LineItemWrapperItem(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    lineItem: LineItem
+
+
 class LineAttribute(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
@@ -1684,7 +1696,7 @@ class LineAttribute(BaseModel):
     height: Annotated[float, Field(description="The height of the symbol line.")]
     lineType: LineType
     lineItems: Annotated[
-        List[DashItem | LineItem] | None,
+        List[DashItemWrapperItem | LineItemWrapperItem] | None,
         Field(description="A list of dash or line items."),
     ] = None
 
@@ -1708,14 +1720,12 @@ class ZoneCategoryAttribute(BaseModel):
         UUID,
         Field(
             description="The main part of the stamp library part's unique identifier.",
-            pattern="^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
         ),
     ]
     stampRevisionGuid: Annotated[
         UUID,
         Field(
             description="The revision part of the stamp library part's unique identifier.",
-            pattern="^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
         ),
     ]
     color: RGBColor
@@ -1794,7 +1804,7 @@ class ClassificationSystemId(BaseModel):
         UUID,
         Field(
             description="A Globally Unique Identifier (or Universally Unique Identifier) in its string representation as defined in RFC 4122.",
-            ),
+        ),
     ]
 
 
@@ -1813,7 +1823,7 @@ class ClassificationItemId(BaseModel):
         UUID,
         Field(
             description="A Globally Unique Identifier (or Universally Unique Identifier) in its string representation as defined in RFC 4122.",
-            ),
+        ),
     ]
 
 
@@ -1912,7 +1922,6 @@ class ClassificationSystem(BaseModel):
         str,
         Field(
             description="The release date of the classification system's current version.",
-            pattern="^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
         ),
     ]
 
@@ -1932,7 +1941,7 @@ class NavigatorItemId(BaseModel):
         UUID,
         Field(
             description="A Globally Unique Identifier (or Universally Unique Identifier) in its string representation as defined in RFC 4122.",
-            ),
+        ),
     ]
 
 
@@ -2133,7 +2142,7 @@ class PropertyId(BaseModel):
         UUID,
         Field(
             description="A Globally Unique Identifier (or Universally Unique Identifier) in its string representation as defined in RFC 4122.",
-            ),
+        ),
     ]
 
 
@@ -2152,7 +2161,7 @@ class PropertyGroupId(BaseModel):
         UUID,
         Field(
             description="A Globally Unique Identifier (or Universally Unique Identifier) in its string representation as defined in RFC 4122.",
-            ),
+        ),
     ]
 
 
@@ -3153,7 +3162,18 @@ class RenameNavigatorItemByNameAndId(BaseModel):
     newId: Annotated[str, Field(description="New ID of the navigator item.")]
 
 
-RenameNavigatorItemParameters: TypeAlias = RenameNavigatorItemByName | RenameNavigatorItemById | RenameNavigatorItemByNameAndId
+class RenameNavigatorItemParameters(
+    RootModel[
+        RenameNavigatorItemByName
+        | RenameNavigatorItemById
+        | RenameNavigatorItemByNameAndId
+    ]
+):
+    root: (
+        RenameNavigatorItemByName
+        | RenameNavigatorItemById
+        | RenameNavigatorItemByNameAndId
+    )
 
 
 class SetClassificationsOfElementsParameters(BaseModel):
