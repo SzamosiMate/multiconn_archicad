@@ -115,9 +115,7 @@ def main():
         print("❌ ERROR: No model definitions found in input file.")
         return
 
-    # 1. First, classify every definition found in the file into two lists.
-    #    A definition is a "command" if its name is in our expanded command_names set.
-    #    Everything else is a "base" model. This is more robust.
+
     base_model_blocks = []
     command_model_blocks = []
     for block in definitions_in_order:
@@ -129,10 +127,6 @@ def main():
 
     print(f"✅ Sorted models: {len(base_model_blocks)} base | {len(command_model_blocks)} command")
 
-    # 2. Now, derive the set of available base model names *directly from the classified blocks*.
-    #    This set is now ACCURATE and contains no "phantom" names from the original schema.
-    all_base_model_names = {get_definition_name(b) for b in base_model_blocks if get_definition_name(b)}
-    print(f"⚙️  Derived an accurate set of {len(all_base_model_names)} available base models for import.")
 
     # --- Write `types.py` (Base Models) ---
     print("\n⚙️  Processing base models (types.py)...")
@@ -150,6 +144,8 @@ def main():
     print("\n⚙️  Processing command models (commands.py)...")
     needed_imports = set()
     # The dependency check now uses the ACCURATE set of base model names.
+    all_base_model_names = {get_definition_name(b) for b in base_model_blocks if get_definition_name(b)}
+    print(f"⚙️  Derived an accurate set of {len(all_base_model_names)} available base models for import.")
     for block in command_model_blocks:
         needed_imports.update(find_cross_file_dependencies(block, all_base_model_names))
     print(f"🔍 Found {len(needed_imports)} base model dependencies required by command models.")

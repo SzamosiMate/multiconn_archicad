@@ -10,7 +10,9 @@ generate(
     enum_field_as_literal=LiteralType.One,
     use_union_operator=True,
     use_double_quotes=True,
-    collapse_root_models=True
+    collapse_root_models=True,
+    field_constraints=True,
+    use_annotated=True
 )
 
 print("Generating Typed Dicts")
