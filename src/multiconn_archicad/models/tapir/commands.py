@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import List
+from typing import Annotated, List
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -37,6 +37,7 @@ from .types import (
     FavoritesFromElement,
     FieldModel,
     GDLParameterList,
+    HighlightedColor,
     Hotlink,
     Issue,
     IssueCommentStatus,
@@ -79,18 +80,22 @@ class GetAddOnVersionResult(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    version: str = Field(
-        ..., description='Version number in the form of "1.1.1".'
-    )
+    version: Annotated[
+        str, Field(description='Version number in the form of "1.1.1".', min_length=1)
+    ]
 
 
 class GetArchicadLocationResult(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    archicadLocation: str = Field(
-        ..., description="The location of the Archicad executable in the filesystem."
-    )
+    archicadLocation: Annotated[
+        str,
+        Field(
+            description="The location of the Archicad executable in the filesystem.",
+            min_length=1,
+        ),
+    ]
 
 
 class GetCurrentWindowTypeResult(BaseModel):
@@ -104,76 +109,95 @@ class GetProjectInfoResult(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    isUntitled: bool = Field(..., description="True, if the project is not saved yet.")
-    isTeamwork: bool = Field(
-        ..., description="True, if the project is a Teamwork (BIMcloud) project."
-    )
-    projectLocation: str | None = Field(
-        None,
-        description="The location of the project in the filesystem or a BIMcloud project reference.",
-    )
-    projectPath: str | None = Field(
-        None,
-        description="The path of the project. A filesystem path or a BIMcloud server relative path.",
-    )
-    projectName: str | None = Field(
-        None, description="The name of the project."
-    )
+    isUntitled: Annotated[
+        bool, Field(description="True, if the project is not saved yet.")
+    ]
+    isTeamwork: Annotated[
+        bool,
+        Field(description="True, if the project is a Teamwork (BIMcloud) project."),
+    ]
+    projectLocation: Annotated[
+        str | None,
+        Field(
+            description="The location of the project in the filesystem or a BIMcloud project reference.",
+            min_length=1,
+        ),
+    ] = None
+    projectPath: Annotated[
+        str | None,
+        Field(
+            description="The path of the project. A filesystem path or a BIMcloud server relative path.",
+            min_length=1,
+        ),
+    ] = None
+    projectName: Annotated[
+        str | None, Field(description="The name of the project.", min_length=1)
+    ] = None
 
 
 class GetProjectInfoFieldsResult(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    fields: List[FieldModel] = Field(..., description="A list of project info fields.")
+    fields: Annotated[
+        List[FieldModel], Field(description="A list of project info fields.")
+    ]
 
 
 class SetProjectInfoFieldParameters(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    projectInfoId: str = Field(
-        ..., description="The id of the project info field."
-    )
-    projectInfoValue: str = Field(
-        ..., description="The new value of the project info field."
-    )
+    projectInfoId: Annotated[
+        str, Field(description="The id of the project info field.", min_length=1)
+    ]
+    projectInfoValue: Annotated[
+        str, Field(description="The new value of the project info field.", min_length=1)
+    ]
 
 
 class GetStoriesResult(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    firstStory: int = Field(..., description="First story index.")
-    lastStory: int = Field(..., description="Last story index.")
-    actStory: int = Field(
-        ..., description="Actual (currently visible in 2D) story index."
-    )
-    skipNullFloor: bool = Field(
-        ...,
-        description="Floor indices above ground-floor level may start with 1 instead of 0.",
-    )
-    stories: List[StoryParameters] = Field(
-        ...,
-        description="A list of project stories, each with their complete parameters.",
-    )
+    firstStory: Annotated[int, Field(description="First story index.")]
+    lastStory: Annotated[int, Field(description="Last story index.")]
+    actStory: Annotated[
+        int, Field(description="Actual (currently visible in 2D) story index.")
+    ]
+    skipNullFloor: Annotated[
+        bool,
+        Field(
+            description="Floor indices above ground-floor level may start with 1 instead of 0."
+        ),
+    ]
+    stories: Annotated[
+        List[StoryParameters],
+        Field(
+            description="A list of project stories, each with their complete parameters."
+        ),
+    ]
 
 
 class SetStoriesParameters(BaseModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    stories: List[StorySettings] = Field(
-        ...,
-        description="A list of story settings, used as input for creating or modifying multiple stories.",
-    )
+    stories: Annotated[
+        List[StorySettings],
+        Field(
+            description="A list of story settings, used as input for creating or modifying multiple stories."
+        ),
+    ]
 
 
 class OpenProjectParameters(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    projectFilePath: str = Field(..., description="The target project file to open.")
+    projectFilePath: Annotated[
+        str, Field(description="The target project file to open.")
+    ]
 
 
 class GetGeoLocationResult(BaseModel):
@@ -188,247 +212,271 @@ class ChangeSelectionOfElementsResult(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    executionResultsOfAddToSelection: List[
-        SuccessfulExecutionResult | FailedExecutionResult
-    ] = Field(..., description="A list of execution results.")
-    executionResultsOfRemoveFromSelection: List[
-        SuccessfulExecutionResult | FailedExecutionResult
-    ] = Field(..., description="A list of execution results.")
+    executionResultsOfAddToSelection: Annotated[
+        List[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
+    executionResultsOfRemoveFromSelection: Annotated[
+        List[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
 
 
 class SetDetailsOfElementsResult(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    executionResults: List[SuccessfulExecutionResult | FailedExecutionResult] = Field(
-        ..., description="A list of execution results."
-    )
+    executionResults: Annotated[
+        List[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
 
 
 class Get3DBoundingBoxesResult(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    boundingBoxes3D: List[BoundingBox3DArrayItem | ErrorItem] = Field(
-        ..., description="A list of 3D bounding boxes."
-    )
+    boundingBoxes3D: Annotated[
+        List[BoundingBox3DArrayItem | ErrorItem],
+        Field(description="A list of 3D bounding boxes."),
+    ]
 
 
 class MoveElementsResult(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    executionResults: List[SuccessfulExecutionResult | FailedExecutionResult] = Field(
-        ..., description="A list of execution results."
-    )
+    executionResults: Annotated[
+        List[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
 
 
 class SetGDLParametersOfElementsResult(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    executionResults: List[SuccessfulExecutionResult | FailedExecutionResult] = Field(
-        ..., description="A list of execution results."
-    )
+    executionResults: Annotated[
+        List[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
 
 
 class GetClassificationsOfElementsResult(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    elementClassifications: List[ElementClassificationItemArray | ErrorItem] = Field(
-        ...,
-        description="The list of element classification item identifiers. Order of the ids are the same as in the input. Non-existing elements or non-existing classification systems are represented by error objects.",
-    )
+    elementClassifications: Annotated[
+        List[ElementClassificationItemArray | ErrorItem],
+        Field(
+            description="The list of element classification item identifiers. Order of the ids are the same as in the input. Non-existing elements or non-existing classification systems are represented by error objects."
+        ),
+    ]
 
 
 class SetClassificationsOfElementsResult(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    executionResults: List[SuccessfulExecutionResult | FailedExecutionResult] = Field(
-        ..., description="A list of execution results."
-    )
+    executionResults: Annotated[
+        List[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
 
 
 class CreateColumnsParameters(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    columnsData: List[ColumnsDatum] = Field(
-        ..., description="Array of data to create Columns."
-    )
+    columnsData: Annotated[
+        List[ColumnsDatum], Field(description="Array of data to create Columns.")
+    ]
 
 
 class CreateSlabsParameters(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    slabsData: List[SlabsDatum] = Field(
-        ..., description="Array of data to create Slabs."
-    )
+    slabsData: Annotated[
+        List[SlabsDatum], Field(description="Array of data to create Slabs.")
+    ]
 
 
 class CreatePolylinesParameters(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    polylinesData: List[PolylinesDatum] = Field(
-        ..., description="Array of data to create Polylines."
-    )
+    polylinesData: Annotated[
+        List[PolylinesDatum], Field(description="Array of data to create Polylines.")
+    ]
 
 
 class CreateObjectsParameters(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    objectsData: List[ObjectsDatum] = Field(
-        ..., description="Array of data to create Objects."
-    )
+    objectsData: Annotated[
+        List[ObjectsDatum], Field(description="Array of data to create Objects.")
+    ]
 
 
 class CreateMeshesParameters(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    meshesData: List[MeshesDatum] = Field(
-        ..., description="Array of data to create Meshes."
-    )
+    meshesData: Annotated[
+        List[MeshesDatum], Field(description="Array of data to create Meshes.")
+    ]
 
 
 class ApplyFavoritesToElementDefaultsParameters(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    favorites: List[str] = Field(..., description="The favorites to apply.")
+    favorites: Annotated[List[str], Field(description="The favorites to apply.")]
 
 
 class ApplyFavoritesToElementDefaultsResult(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    executionResults: List[SuccessfulExecutionResult | FailedExecutionResult] = Field(
-        ..., description="A list of execution results."
-    )
+    executionResults: Annotated[
+        List[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
 
 
 class CreateFavoritesFromElementsResult(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    executionResults: List[SuccessfulExecutionResult | FailedExecutionResult] = Field(
-        ..., description="A list of execution results."
-    )
+    executionResults: Annotated[
+        List[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
 
 
 class GetAllPropertiesResult(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    properties: List[PropertyDetails] = Field(
-        ..., description="A list of property identifiers."
-    )
+    properties: Annotated[
+        List[PropertyDetails], Field(description="A list of property identifiers.")
+    ]
 
 
 class GetPropertyValuesOfElementsResult(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    propertyValuesForElements: List[PropertyValuesArrayItem | ErrorItem] = Field(
-        ...,
-        description="List of property value lists. The order of the outer list is that of the given elements. The order of the inner lists are that of the given properties.",
-    )
+    propertyValuesForElements: Annotated[
+        List[PropertyValuesArrayItem | ErrorItem],
+        Field(
+            description="List of property value lists. The order of the outer list is that of the given elements. The order of the inner lists are that of the given properties."
+        ),
+    ]
 
 
 class SetPropertyValuesOfElementsResult(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    executionResults: List[SuccessfulExecutionResult | FailedExecutionResult] = Field(
-        ..., description="A list of execution results."
-    )
+    executionResults: Annotated[
+        List[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
 
 
 class GetPropertyValuesOfAttributesResult(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    propertyValuesForAttributes: List[PropertyValuesArrayItem | ErrorItem] = Field(
-        ...,
-        description="List of property value lists. The order of the outer list is that of the given attributes. The order of the inner lists are that of the given properties.",
-    )
+    propertyValuesForAttributes: Annotated[
+        List[PropertyValuesArrayItem | ErrorItem],
+        Field(
+            description="List of property value lists. The order of the outer list is that of the given attributes. The order of the inner lists are that of the given properties."
+        ),
+    ]
 
 
 class SetPropertyValuesOfAttributesResult(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    executionResults: List[SuccessfulExecutionResult | FailedExecutionResult] = Field(
-        ..., description="A list of execution results."
-    )
+    executionResults: Annotated[
+        List[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
 
 
 class CreatePropertyGroupsParameters(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    propertyGroups: List[PropertyGroupArrayItem] = Field(
-        ..., description="The parameters of the new property groups."
-    )
+    propertyGroups: Annotated[
+        List[PropertyGroupArrayItem],
+        Field(description="The parameters of the new property groups."),
+    ]
 
 
 class CreatePropertyGroupsResult(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    propertyGroupIds: List[PropertyGroupIdArrayItem] = Field(
-        ..., description="The identifiers of the created property groups."
-    )
+    propertyGroupIds: Annotated[
+        List[PropertyGroupIdArrayItem],
+        Field(description="The identifiers of the created property groups."),
+    ]
 
 
 class DeletePropertyGroupsParameters(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    propertyGroupIds: List[PropertyGroupIdArrayItem] = Field(
-        ..., description="The identifiers of property groups to delete."
-    )
+    propertyGroupIds: Annotated[
+        List[PropertyGroupIdArrayItem],
+        Field(description="The identifiers of property groups to delete."),
+    ]
 
 
 class DeletePropertyGroupsResult(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    executionResults: List[SuccessfulExecutionResult | FailedExecutionResult] = Field(
-        ..., description="A list of execution results."
-    )
+    executionResults: Annotated[
+        List[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
 
 
 class CreatePropertyDefinitionsResult(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    propertyIds: List[PropertyIdArrayItem | ErrorItem] = Field(
-        ..., description="A list of property identifiers."
-    )
+    propertyIds: Annotated[
+        List[PropertyIdArrayItem | ErrorItem],
+        Field(description="A list of property identifiers."),
+    ]
 
 
 class DeletePropertyDefinitionsParameters(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    propertyIds: List[PropertyIdArrayItem] = Field(
-        ..., description="The identifiers of properties to delete."
-    )
+    propertyIds: Annotated[
+        List[PropertyIdArrayItem],
+        Field(description="The identifiers of properties to delete."),
+    ]
 
 
 class DeletePropertyDefinitionsResult(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    executionResults: List[SuccessfulExecutionResult | FailedExecutionResult] = Field(
-        ..., description="A list of execution results."
-    )
+    executionResults: Annotated[
+        List[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
 
 
 class GetAttributesByTypeParameters(BaseModel):
@@ -442,53 +490,66 @@ class CreateLayersParameters(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    layerDataArray: List[LayerDataArrayItem] = Field(
-        ..., description="Array of data to create new Layers."
-    )
-    overwriteExisting: bool | None = Field(
-        None,
-        description="Overwrite the Layer if exists with the same name. The default is false.",
-    )
+    layerDataArray: Annotated[
+        List[LayerDataArrayItem],
+        Field(description="Array of data to create new Layers."),
+    ]
+    overwriteExisting: Annotated[
+        bool | None,
+        Field(
+            description="Overwrite the Layer if exists with the same name. The default is false."
+        ),
+    ] = None
 
 
 class CreateBuildingMaterialsParameters(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    buildingMaterialDataArray: List[BuildingMaterialDataArrayItem] = Field(
-        ..., description="Array of data to create new Building Materials."
-    )
-    overwriteExisting: bool | None = Field(
-        None,
-        description="Overwrite the Building Material if exists with the same name. The default is false.",
-    )
+    buildingMaterialDataArray: Annotated[
+        List[BuildingMaterialDataArrayItem],
+        Field(description="Array of data to create new Building Materials."),
+    ]
+    overwriteExisting: Annotated[
+        bool | None,
+        Field(
+            description="Overwrite the Building Material if exists with the same name. The default is false."
+        ),
+    ] = None
 
 
 class GetBuildingMaterialPhysicalPropertiesResult(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    properties: List[Property] = Field(..., description="Physical properties list.")
+    properties: Annotated[
+        List[Property], Field(description="Physical properties list.")
+    ]
 
 
 class GetLibrariesResult(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    libraries: List[Library] = Field(..., description="A list of project libraries.")
+    libraries: Annotated[
+        List[Library], Field(description="A list of project libraries.")
+    ]
 
 
 class PublishPublisherSetParameters(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    publisherSetName: str = Field(
-        ..., description="The name of the publisher set."
-    )
-    outputPath: str | None = Field(
-        None,
-        description="Full local or LAN path for publishing. Optional, by default the path set in the settings of the publiser set will be used.",
-    )
+    publisherSetName: Annotated[
+        str, Field(description="The name of the publisher set.", min_length=1)
+    ]
+    outputPath: Annotated[
+        str | None,
+        Field(
+            description="Full local or LAN path for publishing. Optional, by default the path set in the settings of the publiser set will be used.",
+            min_length=1,
+        ),
+    ] = None
 
 
 class GetModelViewOptionsResult(BaseModel):
@@ -516,9 +577,10 @@ class SetViewSettingsResult(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    executionResults: List[SuccessfulExecutionResult | FailedExecutionResult] = Field(
-        ..., description="A list of execution results."
-    )
+    executionResults: Annotated[
+        List[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
 
 
 class GetView2DTransformationsResult(BaseModel):
@@ -532,9 +594,11 @@ class CreateIssueParameters(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    name: str = Field(..., description="The name of the issue.")
+    name: Annotated[str, Field(description="The name of the issue.")]
     parentIssueId: IssueId | None = None
-    tagText: str | None = Field(None, description="Tag text of the issue, optional.")
+    tagText: Annotated[
+        str | None, Field(description="Tag text of the issue, optional.")
+    ] = None
 
 
 class CreateIssueResult(BaseModel):
@@ -549,10 +613,12 @@ class DeleteIssueParameters(BaseModel):
         extra="forbid",
     )
     issueId: IssueId
-    acceptAllElements: bool | None = Field(
-        None,
-        description="Accept all creation/deletion/modification of the deleted issue. By default false.",
-    )
+    acceptAllElements: Annotated[
+        bool | None,
+        Field(
+            description="Accept all creation/deletion/modification of the deleted issue. By default false."
+        ),
+    ] = None
 
 
 class AddCommentToIssueParameters(BaseModel):
@@ -560,9 +626,11 @@ class AddCommentToIssueParameters(BaseModel):
         extra="forbid",
     )
     issueId: IssueId
-    author: str | None = Field(None, description="The author of the new comment.")
+    author: Annotated[
+        str | None, Field(description="The author of the new comment.")
+    ] = None
     status: IssueCommentStatus | None = None
-    text: str = Field(..., description="Comment text to add.")
+    text: Annotated[str, Field(description="Comment text to add.")]
 
 
 class GetCommentsFromIssueParameters(BaseModel):
@@ -576,7 +644,9 @@ class GetCommentsFromIssueResult(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    comments: List[Comment] = Field(..., description="A list of existing comments.")
+    comments: Annotated[
+        List[Comment], Field(description="A list of existing comments.")
+    ]
 
 
 class GetElementsAttachedToIssueParameters(BaseModel):
@@ -591,33 +661,40 @@ class ExportIssuesToBCFParameters(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    issues: List[IssueIdArrayItem] | None = Field(
-        None, description="Leave it empty to export all issues."
-    )
-    exportPath: str = Field(
-        ..., description="The os path to the bcf file, including it's name."
-    )
-    useExternalId: bool = Field(
-        ...,
-        description="Use external IFC ID or Archicad IFC ID as referenced in BCF topics.",
-    )
-    alignBySurveyPoint: bool = Field(
-        ...,
-        description="Align BCF views by Archicad Survey Point or Archicad Project Origin.",
-    )
+    issues: Annotated[
+        List[IssueIdArrayItem] | None,
+        Field(description="Leave it empty to export all issues."),
+    ] = None
+    exportPath: Annotated[
+        str, Field(description="The os path to the bcf file, including it's name.")
+    ]
+    useExternalId: Annotated[
+        bool,
+        Field(
+            description="Use external IFC ID or Archicad IFC ID as referenced in BCF topics."
+        ),
+    ]
+    alignBySurveyPoint: Annotated[
+        bool,
+        Field(
+            description="Align BCF views by Archicad Survey Point or Archicad Project Origin."
+        ),
+    ]
 
 
 class ImportIssuesFromBCFParameters(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    importPath: str = Field(
-        ..., description="The os path to the bcf file, including it's name."
-    )
-    alignBySurveyPoint: bool = Field(
-        ...,
-        description="Align BCF views by Archicad Survey Point or Archicad Project Origin.",
-    )
+    importPath: Annotated[
+        str, Field(description="The os path to the bcf file, including it's name.")
+    ]
+    alignBySurveyPoint: Annotated[
+        bool,
+        Field(
+            description="Align BCF views by Archicad Survey Point or Archicad Project Origin."
+        ),
+    ]
 
 
 class GetRevisionIssuesResult(BaseModel):
@@ -659,63 +736,70 @@ class GenerateDocumentationParameters(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    destinationFolder: str = Field(
-        ..., description="Destination folder for the generated documentation files."
-    )
+    destinationFolder: Annotated[
+        str,
+        Field(
+            description="Destination folder for the generated documentation files.",
+            min_length=1,
+        ),
+    ]
 
 
 class SetDetailsOfElementsParameters(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    elementsWithDetails: List[ElementsWithDetail] = Field(
-        ..., description="The elements with parameters."
-    )
+    elementsWithDetails: Annotated[
+        List[ElementsWithDetail], Field(description="The elements with parameters.")
+    ]
 
 
 class MoveElementsParameters(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    elementsWithMoveVectors: List[ElementsWithMoveVector] = Field(
-        ..., description="The elements with move vector pairs."
-    )
+    elementsWithMoveVectors: Annotated[
+        List[ElementsWithMoveVector],
+        Field(description="The elements with move vector pairs."),
+    ]
 
 
 class GetGDLParametersOfElementsResult(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    gdlParametersOfElements: List[GDLParameterList] = Field(
-        ..., description="The GDL parameters of elements."
-    )
+    gdlParametersOfElements: Annotated[
+        List[GDLParameterList], Field(description="The GDL parameters of elements.")
+    ]
 
 
 class SetGDLParametersOfElementsParameters(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    elementsWithGDLParameters: List[ElementsWithGDLParameter] = Field(
-        ..., description="The elements with GDL parameters dictionary pairs."
-    )
+    elementsWithGDLParameters: Annotated[
+        List[ElementsWithGDLParameter],
+        Field(description="The elements with GDL parameters dictionary pairs."),
+    ]
 
 
 class SetClassificationsOfElementsParameters(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    elementClassifications: List[ElementClassification] = Field(
-        ..., description="A list of element classification identifiers."
-    )
+    elementClassifications: Annotated[
+        List[ElementClassification],
+        Field(description="A list of element classification identifiers."),
+    ]
 
 
 class CreateZonesParameters(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    zonesData: List[ZonesDatum] = Field(
-        ..., description="Array of data to create Zones."
-    )
+    zonesData: Annotated[
+        List[ZonesDatum], Field(description="Array of data to create Zones.")
+    ]
 
 
 class CreateFavoritesFromElementsParameters(BaseModel):
@@ -729,43 +813,47 @@ class SetPropertyValuesOfElementsParameters(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    elementPropertyValues: List[ElementPropertyValue] = Field(
-        ..., description="A list of element property values."
-    )
+    elementPropertyValues: Annotated[
+        List[ElementPropertyValue],
+        Field(description="A list of element property values."),
+    ]
 
 
 class SetPropertyValuesOfAttributesParameters(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    attributePropertyValues: List[AttributePropertyValue] = Field(
-        ..., description="A list of attribute property values."
-    )
+    attributePropertyValues: Annotated[
+        List[AttributePropertyValue],
+        Field(description="A list of attribute property values."),
+    ]
 
 
 class CreatePropertyDefinitionsParameters(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    propertyDefinitions: List[PropertyDefinitionArrayItem] = Field(
-        ..., description="The parameters of the new properties."
-    )
+    propertyDefinitions: Annotated[
+        List[PropertyDefinitionArrayItem],
+        Field(description="The parameters of the new properties."),
+    ]
 
 
 class GetAttributesByTypeResult(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    attributes: List[Attribute] = Field(..., description="Details of attributes.")
+    attributes: Annotated[List[Attribute], Field(description="Details of attributes.")]
 
 
 class ReserveElementsResult(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    executionResult: SuccessfulExecutionResult | FailedExecutionResult = Field(
-        ..., description="The result of the execution."
-    )
+    executionResult: Annotated[
+        SuccessfulExecutionResult | FailedExecutionResult,
+        Field(description="The result of the execution."),
+    ]
     conflicts: List[Conflict] | None = None
 
 
@@ -773,7 +861,7 @@ class GetIssuesResult(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    issues: List[Issue] = Field(..., description="A list of existing issues.")
+    issues: Annotated[List[Issue], Field(description="A list of existing issues.")]
 
 
 class GetElementsByTypeParameters(BaseModel):
@@ -781,20 +869,22 @@ class GetElementsByTypeParameters(BaseModel):
         extra="forbid",
     )
     elementType: ElementType
-    filters: List[ElementFilter] | None = Field(None, min_length=1)
-    databases: List[DatabaseIdArrayItem] | None = Field(
-        None, description="A list of Archicad databases."
-    )
+    filters: Annotated[List[ElementFilter] | None, Field(min_length=1)] = None
+    databases: Annotated[
+        List[DatabaseIdArrayItem] | None,
+        Field(description="A list of Archicad databases."),
+    ] = None
 
 
 class GetAllElementsParameters(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    filters: List[ElementFilter] | None = Field(None, min_length=1)
-    databases: List[DatabaseIdArrayItem] | None = Field(
-        None, description="A list of Archicad databases."
-    )
+    filters: Annotated[List[ElementFilter] | None, Field(min_length=1)] = None
+    databases: Annotated[
+        List[DatabaseIdArrayItem] | None,
+        Field(description="A list of Archicad databases."),
+    ] = None
 
 
 class GetDetailsOfElementsResult(BaseModel):
@@ -808,133 +898,157 @@ class CreateCompositesParameters(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    compositeDataArray: List[CompositeDataArrayItem] = Field(
-        ..., description="Array of data to create Composites."
-    )
-    overwriteExisting: bool | None = Field(
-        None,
-        description="Overwrite the Composite if exists with the same name. The default is false.",
-    )
+    compositeDataArray: Annotated[
+        List[CompositeDataArrayItem],
+        Field(description="Array of data to create Composites."),
+    ]
+    overwriteExisting: Annotated[
+        bool | None,
+        Field(
+            description="Overwrite the Composite if exists with the same name. The default is false."
+        ),
+    ] = None
 
 
 class GetDatabaseIdFromNavigatorItemIdParameters(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    navigatorItemIds: List[NavigatorItemIdArrayItem] = Field(
-        ..., description="A list of navigator item identifiers."
-    )
+    navigatorItemIds: Annotated[
+        List[NavigatorItemIdArrayItem],
+        Field(description="A list of navigator item identifiers."),
+    ]
 
 
 class GetDatabaseIdFromNavigatorItemIdResult(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    databases: List[DatabaseIdArrayItem] = Field(
-        ..., description="A list of Archicad databases."
-    )
+    databases: Annotated[
+        List[DatabaseIdArrayItem], Field(description="A list of Archicad databases.")
+    ]
 
 
 class GetViewSettingsParameters(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    navigatorItemIds: List[NavigatorItemIdArrayItem] = Field(
-        ..., description="A list of navigator item identifiers."
-    )
+    navigatorItemIds: Annotated[
+        List[NavigatorItemIdArrayItem],
+        Field(description="A list of navigator item identifiers."),
+    ]
 
 
 class GetView2DTransformationsParameters(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    databases: List[DatabaseIdArrayItem] | None = Field(
-        None, description="A list of Archicad databases."
-    )
+    databases: Annotated[
+        List[DatabaseIdArrayItem] | None,
+        Field(description="A list of Archicad databases."),
+    ] = None
 
 
 class GetCurrentRevisionChangesOfLayoutsParameters(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    layoutDatabaseIds: List[DatabaseIdArrayItem] = Field(
-        ..., description="A list of Archicad databases."
-    )
+    layoutDatabaseIds: Annotated[
+        List[DatabaseIdArrayItem], Field(description="A list of Archicad databases.")
+    ]
 
 
 class GetSelectedElementsResult(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    elements: List[ElementIdArrayItem] = Field(..., description="A list of elements.")
+    elements: Annotated[
+        List[ElementIdArrayItem], Field(description="A list of elements.")
+    ]
 
 
 class GetElementsByTypeResult(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    elements: List[ElementIdArrayItem] = Field(..., description="A list of elements.")
-    executionResultForDatabases: (
-        List[SuccessfulExecutionResult | FailedExecutionResult] | None
-    ) = Field(None, description="A list of execution results.")
+    elements: Annotated[
+        List[ElementIdArrayItem], Field(description="A list of elements.")
+    ]
+    executionResultForDatabases: Annotated[
+        List[SuccessfulExecutionResult | FailedExecutionResult] | None,
+        Field(description="A list of execution results."),
+    ] = None
 
 
 class GetAllElementsResult(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    elements: List[ElementIdArrayItem] = Field(..., description="A list of elements.")
-    executionResultForDatabases: (
-        List[SuccessfulExecutionResult | FailedExecutionResult] | None
-    ) = Field(None, description="A list of execution results.")
+    elements: Annotated[
+        List[ElementIdArrayItem], Field(description="A list of elements.")
+    ]
+    executionResultForDatabases: Annotated[
+        List[SuccessfulExecutionResult | FailedExecutionResult] | None,
+        Field(description="A list of execution results."),
+    ] = None
 
 
 class ChangeSelectionOfElementsParameters(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    addElementsToSelection: List[ElementIdArrayItem] | None = Field(
-        None, description="A list of elements."
-    )
-    removeElementsFromSelection: List[ElementIdArrayItem] | None = Field(
-        None, description="A list of elements."
-    )
+    addElementsToSelection: Annotated[
+        List[ElementIdArrayItem] | None, Field(description="A list of elements.")
+    ] = None
+    removeElementsFromSelection: Annotated[
+        List[ElementIdArrayItem] | None, Field(description="A list of elements.")
+    ] = None
 
 
 class FilterElementsParameters(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    elements: List[ElementIdArrayItem] = Field(..., description="A list of elements.")
-    filters: List[ElementFilter] | None = Field(None, min_length=1)
+    elements: Annotated[
+        List[ElementIdArrayItem], Field(description="A list of elements.")
+    ]
+    filters: Annotated[List[ElementFilter] | None, Field(min_length=1)] = None
 
 
 class FilterElementsResult(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    elements: List[ElementIdArrayItem] = Field(..., description="A list of elements.")
+    elements: Annotated[
+        List[ElementIdArrayItem], Field(description="A list of elements.")
+    ]
 
 
 class GetDetailsOfElementsParameters(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    elements: List[ElementIdArrayItem] = Field(..., description="A list of elements.")
+    elements: Annotated[
+        List[ElementIdArrayItem], Field(description="A list of elements.")
+    ]
 
 
 class Get3DBoundingBoxesParameters(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    elements: List[ElementIdArrayItem] = Field(..., description="A list of elements.")
+    elements: Annotated[
+        List[ElementIdArrayItem], Field(description="A list of elements.")
+    ]
 
 
 class GetSubelementsOfHierarchicalElementsParameters(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    elements: List[ElementIdArrayItem] = Field(..., description="A list of elements.")
+    elements: Annotated[
+        List[ElementIdArrayItem], Field(description="A list of elements.")
+    ]
 
 
 class GetSubelementsOfHierarchicalElementsResult(BaseModel):
@@ -948,7 +1062,9 @@ class GetConnectedElementsParameters(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    elements: List[ElementIdArrayItem] = Field(..., description="A list of elements.")
+    elements: Annotated[
+        List[ElementIdArrayItem], Field(description="A list of elements.")
+    ]
     connectedElementType: ElementType
 
 
@@ -963,165 +1079,199 @@ class HighlightElementsParameters(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    elements: List[ElementIdArrayItem] = Field(..., description="A list of elements.")
-    highlightedColors: List[List[int]] = Field(
-        ..., description="A list of colors to highlight elements."
-    )
-    wireframe3D: bool | None = Field(
-        None,
-        description="Optional parameter. Switch non highlighted elements in the 3D window to wireframe.",
-    )
-    nonHighlightedColor: List[int] | None = Field(
-        None,
-        description="Optional parameter. Color of the non highlighted elements as an [r, g, b, a] array. Each component must be in the 0-255 range.",
-        max_length=4,
-        min_length=4,
-    )
+    elements: Annotated[
+        List[ElementIdArrayItem], Field(description="A list of elements.")
+    ]
+    highlightedColors: Annotated[
+        List[HighlightedColor],
+        Field(description="A list of colors to highlight elements."),
+    ]
+    wireframe3D: Annotated[
+        bool | None,
+        Field(
+            description="Optional parameter. Switch non highlighted elements in the 3D window to wireframe."
+        ),
+    ] = None
+    nonHighlightedColor: Annotated[
+        List[int] | None,
+        Field(
+            description="Optional parameter. Color of the non highlighted elements as an [r, g, b, a] array. Each component must be in the 0-255 range.",
+            max_length=4,
+            min_length=4,
+        ),
+    ] = None
 
 
 class DeleteElementsParameters(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    elements: List[ElementIdArrayItem] = Field(..., description="A list of elements.")
+    elements: Annotated[
+        List[ElementIdArrayItem], Field(description="A list of elements.")
+    ]
 
 
 class GetGDLParametersOfElementsParameters(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    elements: List[ElementIdArrayItem] = Field(..., description="A list of elements.")
+    elements: Annotated[
+        List[ElementIdArrayItem], Field(description="A list of elements.")
+    ]
 
 
 class GetClassificationsOfElementsParameters(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    elements: List[ElementIdArrayItem] = Field(..., description="A list of elements.")
-    classificationSystemIds: List[ClassificationSystemIdArrayItem] = Field(
-        ..., description="A list of classification system identifiers."
-    )
+    elements: Annotated[
+        List[ElementIdArrayItem], Field(description="A list of elements.")
+    ]
+    classificationSystemIds: Annotated[
+        List[ClassificationSystemIdArrayItem],
+        Field(description="A list of classification system identifiers."),
+    ]
 
 
 class CreateColumnsResult(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    elements: List[ElementIdArrayItem] = Field(..., description="A list of elements.")
+    elements: Annotated[
+        List[ElementIdArrayItem], Field(description="A list of elements.")
+    ]
 
 
 class CreateSlabsResult(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    elements: List[ElementIdArrayItem] = Field(..., description="A list of elements.")
+    elements: Annotated[
+        List[ElementIdArrayItem], Field(description="A list of elements.")
+    ]
 
 
 class CreateZonesResult(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    elements: List[ElementIdArrayItem] = Field(..., description="A list of elements.")
+    elements: Annotated[
+        List[ElementIdArrayItem], Field(description="A list of elements.")
+    ]
 
 
 class CreatePolylinesResult(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    elements: List[ElementIdArrayItem] = Field(..., description="A list of elements.")
+    elements: Annotated[
+        List[ElementIdArrayItem], Field(description="A list of elements.")
+    ]
 
 
 class CreateObjectsResult(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    elements: List[ElementIdArrayItem] = Field(..., description="A list of elements.")
+    elements: Annotated[
+        List[ElementIdArrayItem], Field(description="A list of elements.")
+    ]
 
 
 class CreateMeshesResult(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    elements: List[ElementIdArrayItem] = Field(..., description="A list of elements.")
+    elements: Annotated[
+        List[ElementIdArrayItem], Field(description="A list of elements.")
+    ]
 
 
 class GetPropertyValuesOfElementsParameters(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    elements: List[ElementIdArrayItem] = Field(..., description="A list of elements.")
-    properties: List[PropertyIdArrayItem] = Field(
-        ..., description="A list of property identifiers."
-    )
+    elements: Annotated[
+        List[ElementIdArrayItem], Field(description="A list of elements.")
+    ]
+    properties: Annotated[
+        List[PropertyIdArrayItem], Field(description="A list of property identifiers.")
+    ]
 
 
 class GetPropertyValuesOfAttributesParameters(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    attributeIds: List[AttributeIdArrayItem] = Field(
-        ..., description="A list of attributes."
-    )
-    properties: List[PropertyIdArrayItem] = Field(
-        ..., description="A list of property identifiers."
-    )
+    attributeIds: Annotated[
+        List[AttributeIdArrayItem], Field(description="A list of attributes.")
+    ]
+    properties: Annotated[
+        List[PropertyIdArrayItem], Field(description="A list of property identifiers.")
+    ]
 
 
 class CreateLayersResult(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    attributeIds: List[AttributeIdArrayItem] = Field(
-        ..., description="A list of attributes."
-    )
+    attributeIds: Annotated[
+        List[AttributeIdArrayItem], Field(description="A list of attributes.")
+    ]
 
 
 class CreateBuildingMaterialsResult(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    attributeIds: List[AttributeIdArrayItem] = Field(
-        ..., description="A list of attributes."
-    )
+    attributeIds: Annotated[
+        List[AttributeIdArrayItem], Field(description="A list of attributes.")
+    ]
 
 
 class CreateCompositesResult(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    attributeIds: List[AttributeIdArrayItem] = Field(
-        ..., description="A list of attributes."
-    )
+    attributeIds: Annotated[
+        List[AttributeIdArrayItem], Field(description="A list of attributes.")
+    ]
 
 
 class GetBuildingMaterialPhysicalPropertiesParameters(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    attributeIds: List[AttributeIdArrayItem] = Field(
-        ..., description="A list of attributes."
-    )
+    attributeIds: Annotated[
+        List[AttributeIdArrayItem], Field(description="A list of attributes.")
+    ]
 
 
 class ReserveElementsParameters(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    elements: List[ElementIdArrayItem] = Field(..., description="A list of elements.")
+    elements: Annotated[
+        List[ElementIdArrayItem], Field(description="A list of elements.")
+    ]
 
 
 class ReleaseElementsParameters(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    elements: List[ElementIdArrayItem] = Field(..., description="A list of elements.")
+    elements: Annotated[
+        List[ElementIdArrayItem], Field(description="A list of elements.")
+    ]
 
 
 class UpdateDrawingsParameters(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    elements: List[ElementIdArrayItem] = Field(..., description="A list of elements.")
+    elements: Annotated[
+        List[ElementIdArrayItem], Field(description="A list of elements.")
+    ]
 
 
 class AttachElementsToIssueParameters(BaseModel):
@@ -1129,7 +1279,9 @@ class AttachElementsToIssueParameters(BaseModel):
         extra="forbid",
     )
     issueId: IssueId
-    elements: List[ElementIdArrayItem] = Field(..., description="A list of elements.")
+    elements: Annotated[
+        List[ElementIdArrayItem], Field(description="A list of elements.")
+    ]
     type: IssueElementType
 
 
@@ -1138,25 +1290,31 @@ class DetachElementsFromIssueParameters(BaseModel):
         extra="forbid",
     )
     issueId: IssueId
-    elements: List[ElementIdArrayItem] = Field(..., description="A list of elements.")
+    elements: Annotated[
+        List[ElementIdArrayItem], Field(description="A list of elements.")
+    ]
 
 
 class GetElementsAttachedToIssueResult(BaseModel):
     model_config = ConfigDict(
         extra="allow",
     )
-    elements: List[ElementIdArrayItem] = Field(..., description="A list of elements.")
+    elements: Annotated[
+        List[ElementIdArrayItem], Field(description="A list of elements.")
+    ]
 
 
 class GetRevisionChangesOfElementsParameters(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    elements: List[ElementIdArrayItem] = Field(..., description="A list of elements.")
+    elements: Annotated[
+        List[ElementIdArrayItem], Field(description="A list of elements.")
+    ]
 
 
 class GetHotlinksResult(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    hotlinks: List[Hotlink] = Field(..., description="A list of hotlink nodes.")
+    hotlinks: Annotated[List[Hotlink], Field(description="A list of hotlink nodes.")]

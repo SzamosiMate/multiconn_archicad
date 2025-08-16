@@ -1,101 +1,114 @@
+# code_generation/tapir/03_model_cleaner.py
+
 import re
 from code_generation.tapir.paths import paths
 
-def main():
-    """
-    Performs final, surgical cleaning of the generated Pydantic models.
-    This script handles specific syntax issues and converts the problematic
-    PropertyDefaultValue RootModel to a TypeAlias for better IDE
-    compatibility and usability.
-    """
-    print(f"--- Starting SURGICAL cleaning of {paths.RAW_PYDANTIC_MODELS} ---")
 
+def main():
+    print(f"--- Starting the cleaning of {paths.RAW_PYDANTIC_MODELS} ---")
     try:
         content = paths.RAW_PYDANTIC_MODELS.read_text(encoding="utf-8")
     except FileNotFoundError:
         print(f"Error: {paths.RAW_PYDANTIC_MODELS} not found. Please generate it first.")
         return
 
-    print("Step 1: Replacing 'constr' with 'str' for consistency...")
-    content = replace_constr_with_str(content)
-
-    print("Step 2: Surgically converting 'PropertyDefaultValue' RootModel to a TypeAlias...")
-    content = surgically_fix_property_default_value(content)
-
-    print("Step 3: Assembling and formatting the final file...")
+    # Apply the two necessary cleaning steps.
+    content = remove_master_model_definition(content)
+    content = remove_guid_pattern(content)
     content = assemble_final_file(content)
 
     paths.CLEANED_PYDANTIC_MODELS.write_text(content, encoding="utf-8")
     print(f"✅ Successfully created final, clean models at: {paths.CLEANED_PYDANTIC_MODELS}")
 
 
-### Cleaning Logic Functions (in execution order) ###
+def remove_master_model_definition(content: str) -> str:
+    """Finds and removes the boilerplate TapirMasterModels RootModel definition."""
+    print("    - Step 1: Removing boilerplate `TapirMasterModels` RootModel...")
 
-def replace_constr_with_str(content: str) -> str:
-    """
-    Replaces all instances of `constr(...)` with `str` for simplicity and consistency.
-    """
-    # First, remove the `constr` import if it exists from the pydantic import line
-    content = re.sub(r"^(from pydantic import.*?), constr", r"\1", content, flags=re.MULTILINE)
-    # Then, replace all uses of it with `str`
-    content = re.sub(r"constr\(.*?\)", "str", content)
-    print("    - All 'constr' types replaced with 'str'.")
-    return content
-
-
-def surgically_fix_property_default_value(content: str) -> str:
-    """
-    Finds the specific `PropertyDefaultValue(RootModel[...])` class definition
-    and converts it to a cleaner `TypeAlias` using the modern `|` union syntax.
-    """
-    # This regex is designed to find the multi-line PropertyDefaultValue RootModel class block.
-    # re.DOTALL lets `.` match newlines.
     pattern = re.compile(
-        r"class PropertyDefaultValue\(RootModel\[(?P<types>.+?)]\):\s+root: .+",
-        re.DOTALL
+        r"^class TapirMasterModels\(RootModel\[Any\]\):\n(?:    .*\n?)*",
+        re.MULTILINE
     )
 
-    # The replacement uses the captured group to build the TypeAlias.
-    def replacer(match: re.Match) -> str:
-        types_str = match.group("types").strip()
-        print("    - Converted 'PropertyDefaultValue' RootModel to a TypeAlias.")
-        return f"PropertyDefaultValue: TypeAlias = {types_str}"
+    cleaned_content, num_replacements = pattern.subn("", content, count=1)
 
-    content, num_replacements = pattern.subn(replacer, content, count=1)
+    if num_replacements > 0:
+        print("      - Successfully removed the definition.")
+    else:
+        print("      - Warning: `TapirMasterModels` definition not found.")
 
-    if num_replacements == 0:
-        print("    - 'PropertyDefaultValue' RootModel not found, no changes made.")
+    return cleaned_content.strip()
 
-    return content
+
+def remove_guid_pattern(code: str) -> str:
+    """
+    Surgically removes the 'pattern=...' argument from any field defined as
+    'Annotated[UUID, Field(...)]'. This is necessary because Pydantic V2
+    cannot apply a string pattern to a UUID object after validation.
+    """
+    print("⚙️  Step 2: Removing conflicting 'pattern' from all UUID Fields...")
+
+    pattern = re.compile(
+        # --- Group 1: Capture the part BEFORE the pattern argument ---
+        r"("
+        # Match any field name like 'guid:' or 'stampMainGuid:'
+        r"\w+:\s*Annotated\[\s*UUID\s*,\s*Field\("
+        # Non-greedily match any characters (including newlines) up to the pattern arg.
+        r".*?"
+        r")"
+        # --- The part to DISCARD ---
+        # Match an optional comma, the pattern argument, and its value.
+        r'(?:,\s*)?pattern\s*=\s*".*?"'
+        # --- Group 2: Capture the part AFTER the pattern argument ---
+        r"("
+        # Non-greedily match any remaining characters until the end of the annotation.
+        r".*?"
+        r"\)\s*\]"
+        r")",
+        flags=re.DOTALL,  # The DOTALL flag makes '.' match newlines, simplifying the regex.
+    )
+
+    replacement = r"\1\2"
+
+    num_replacements = 0
+    while True:
+        code, count = pattern.subn(replacement, code, count=1)
+        if count == 0:
+            break
+        num_replacements += 1
+
+    if num_replacements > 0:
+        print(f"    - Removed {num_replacements} conflicting 'pattern' arguments from UUID fields.")
+    else:
+        print("    - No conflicting 'pattern' arguments found in UUID fields.")
+
+    return code
 
 
 def assemble_final_file(content: str) -> str:
     """Adds a standard header, removes the old one, and performs final formatting."""
-    # 1. Remove the entire datamodel-codegen header block.
-    # This includes the `# generated by...` comments and all `from ...` lines.
-    body = re.sub(r"^#.*?\n\n", "", content, flags=re.DOTALL) # Removes comment block
-    body = re.sub(r"^(from|import).*\n", "", body, flags=re.MULTILINE) # Removes import lines
+    print("    - Step 3: Assembling final file with standard header...")
 
-    # 2. Remove the placeholder TapirMasterModels if it exists
-    body = re.sub(r"class TapirMasterModels\b[\s\S]*?(?=\n\n\nclass|\Z)", "", body)
+    # Remove the original datamodel-codegen header and all import lines
+    body = re.sub(r"^#.*?\n\n", "", content, flags=re.DOTALL)
+    body = re.sub(r"^(from|import).*\n", "", body, flags=re.MULTILINE)
 
-    # 3. Define the new, correct header
     header = [
         "from __future__ import annotations",
-        "from typing import Any, List, Literal, Union, TypeAlias",
+        "from typing import Any, List, Literal, Union, TypeAlias, Annotated",
         "from uuid import UUID",
         "from enum import Enum",
         "",
-        "from pydantic import BaseModel, ConfigDict, Field, RootModel",
+        "from pydantic import BaseModel, ConfigDict, Field, RootModel, StringConstraints",
         "",
         "### This file is automatically generated and surgically cleaned. Do not edit directly. ###",
     ]
+    final_header = "\n".join(header)
 
-    # 4. Assemble the final content
-    full_content = "\n".join(header) + "\n\n\n" + body.strip()
-
-    # 5. Standardize spacing between definitions for the splitter script.
-    full_content = re.sub(r"\n{2,}(?=(class |[A-Z]\w+\s*:\s*TypeAlias))", "\n\n\n", full_content)
+    # Reassemble the file with the new header and standardize spacing
+    full_content = final_header + "\n\n\n" + body.strip()
+    full_content = re.sub(r"\n+(?=(class |[A-Z]\w+\s*:\s*TypeAlias))", "\n\n\n", full_content)
+    full_content = re.sub(r"\n{4,}", "\n\n\n", full_content)
 
     return full_content.strip() + "\n"
 
