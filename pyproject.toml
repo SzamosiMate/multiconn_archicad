@@ -1,6 +1,6 @@
 [project]
 name = "multiconn_archicad"
-version = "0.3.4"
+version = "0.4.0"
 description = "MultiConn ArchiCAD is a connection object for ArchiCAD’s JSON API and its Python wrapper, designed to manage multiple open instances of ArchiCAD simultaneously."
 readme = "README.md"
 authors = [
@@ -11,12 +11,14 @@ dependencies = [
     "aiohttp>=3.11.11",
     "archicad>=28.3000",
     "psutil>=6.1.1",
-    "pywinauto>=0.6.9",
 ]
 
 [project.optional-dependencies]
 dialog-handlers = [
-    "pywinauto>=0.6.9",
+    "pywinauto>=0.6.9; platform_system=='Windows'",
+]
+pydantic = [
+    "pydantic>=2.11.7",
 ]
 
 [build-system]
@@ -24,7 +26,6 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 [tool.hatch.build.targets.sdist]
 include = [
-  "pkg/*.py",
   "/src",
 ]
 
