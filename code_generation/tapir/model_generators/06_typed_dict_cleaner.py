@@ -16,11 +16,11 @@ def main():
         return
 
     # The order of these operations is critical for success.
-
     print("Step 1: Reordering forward-referencing TypeAliases...")
+    content = surgically_fix_copy_keyword(content)
+    print("Step 2: Reordering forward-referencing TypeAliases...")
     content = fix_forward_reference_aliases(content)
-
-    print("Step 2: Assembling and formatting the final file...")
+    print("Step 3: Assembling and formatting the final file...")
     content = assemble_final_file(content)
 
     paths.CLEANED_TYPED_DICTS.write_text(content, encoding="utf-8")
@@ -28,6 +28,14 @@ def main():
 
 
 ### Cleaning Logic Functions (in execution order) ###
+
+def surgically_fix_copy_keyword(content: str) -> str:
+    field_to_fix = "copy_: NotRequired[bool]"
+    correct_field = "copy: NotRequired[bool]"
+    if field_to_fix in content:
+        content = content.replace(field_to_fix, correct_field)
+        print(f"    - Corrected '{field_to_fix}' -> '{correct_field}'")
+    return content
 
 
 def fix_forward_reference_aliases(content: str) -> str:

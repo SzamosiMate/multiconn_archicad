@@ -1130,7 +1130,7 @@ class ElementsWithDetail(TypedDict):
 class ElementsWithMoveVector(TypedDict):
     elementId: ElementId
     moveVector: MoveVector
-    copy_: NotRequired[bool]
+    copy: NotRequired[bool]
 
 
 class ElementsWithGDLParameter(TypedDict):
