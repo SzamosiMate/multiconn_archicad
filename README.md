@@ -23,7 +23,7 @@
 You can install the latest version of the package from the following link using `pip`:
 
 ```bash
-pip install https://github.com/SzamosiMate/multiconn_archicad/releases/download/v0.3.4/multiconn_archicad-0.3.4-py3-none-any.whl
+pip install https://github.com/SzamosiMate/multiconn_archicad/releases/download/v0.4.0/multiconn_archicad-0.4.0-py3-none-any.whl
 ```
 
 **Prerequisites: Tapir Add-On is Required**
@@ -303,6 +303,102 @@ except RequestError as e:
 # Only this shoud be used if you do not need to handle failiures differently
 except APIErrorBase as e:
      print(f"An API error occurred: Code={e.code}, Message='{e.message}'")
+
+```
+
+### New in v0.4: Type-Safe API Models for Tapir and Official JSON APIs
+
+This version introduces a comprehensive set of auto-generated Python models for both the **Tapir Add-On** and the **Official Archicad JSON API**. This feature is the result of a sophisticated new pipeline designed to provide a vastly improved developer experience when interacting with Archicad.
+
+Directly working with the JSON APIs often requires manually creating dictionaries for command parameters and parsing raw dictionary responses, which can be error-prone and lacks IDE support. These new models solve this by offering two powerful, complementary solutions:
+
+1.  **`TypedDicts`**: Lightweight types for static analysis and IDE autocompletion.
+2.  **`Pydantic Models`**: Robust models for runtime data validation and parsing.
+
+#### `TypedDicts` for Enhanced `core` Commands
+
+The generated `TypedDicts` are designed to be used with `core.post_command()` and `core.post_tapir_command()` to provide full type hinting for your parameters. By defining the expected structure of the command's dictionary, your IDE can offer autocompletion, and a static type checker (like MyPy or Pyright) can catch structural mistakes before you run your code.
+
+This is especially useful for catching common errors, like forgetting a required wrapper key that the Archicad API expects.
+
+**Before (Without TypedDicts):**
+
+```python
+# A common mistake: providing a list of element GUIDs directly.
+# The API actually expects a list of dictionaries, each with an "elementId" key.
+# This error would only be caught at runtime, with an error from the Archicad API.
+command_parameters = {
+    "elements": [
+        {"guid": "GUID_1"},
+        {"guid": "GUID_2"}
+    ],
+    "highlightedColors": [[50, 255, 100, 100]],
+}
+# This call would fail when sent to the API.
+conn.core.post_tapir_command('HighlightElements', command_parameters)
+```
+
+**After (With TypedDicts for Static Checking):**
+
+By using `TypedDict` in a helper function, your tools can validate the dictionary structure instantly.
+
+```python
+# Import the specific TypedDict for the command's parameters
+from multiconn_archicad.tapir.dicts.commands import HighlightElementsParameters
+
+def highlight_elements(conn: MultiConn, params: HighlightElementsParameters):
+    """A type-safe wrapper for the HighlightElements command."""
+    return conn.core.post_tapir_command('HighlightElements', params)
+
+# --- Correct Usage ---
+# The dictionary structure matches the TypedDict, so it passes static analysis.
+# Note the required `{"elementId": ...}` wrapper.
+correct_params = {
+    "elements": [
+        {"elementId": {"guid": "GUID_1"}},
+        {"elementId": {"guid": "GUID_2"}}
+    ],
+    "highlightedColors": [[0, 255, 0, 128]]
+}
+highlight_elements(conn, correct_params) # This is valid.
+
+# --- Incorrect Usage ---
+# Here, we forget the "elementId" wrapper key.
+incorrect_params = {
+    "elements": [
+        {"guid": "GUID_1"}, # Error is here!
+        {"guid": "GUID_2"}
+    ],
+    "highlightedColors": [[255, 0, 0, 128]]
+}
+
+# Your IDE and type checker will immediately flag this line with an error:
+# "Argument of type 'dict[str, list[dict[str, str]]]' cannot be assigned
+# to parameter 'params' of type 'HighlightElementsParameters'.
+# Key 'elementId' is missing from dictionary."
+highlight_elements(conn, incorrect_params) # <-- STATIC ERROR!
+```
+
+#### `Pydantic Models` for Data Validation and Future Wrappers
+
+Alongside the `TypedDicts`, the library now includes a complete set of `Pydantic` models. These are ideal for parsing and validating the JSON responses you receive from the API, ensuring the data conforms to the expected schema at runtime.
+
+They form the foundation for a future high-level wrapper that will provide a more pythonic, object-oriented interface to the APIs.
+
+**Example: Parsing an API Response**
+
+```python
+from multiconn_archicad.tapir.models.commands import GetProjectInfoResult
+
+# Raw dictionary response from the API
+response_dict = conn.core.post_tapir_command("GetProjectInfo")
+
+# Parse and validate the response using the Pydantic model
+project_info = GetProjectInfoResult.model_validate(response_dict)
+
+# Access data with dot notation and enjoy type safety
+if not project_info.isUntitled and project_info.projectName:
+    print(f"Connected to project: {project_info.projectName}")
 
 ```
 
