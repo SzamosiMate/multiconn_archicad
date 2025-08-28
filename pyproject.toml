@@ -11,6 +11,7 @@ dependencies = [
     "aiohttp>=3.11.11",
     "archicad>=28.3000",
     "psutil>=6.1.1",
+    "pywinauto>=0.6.9"
 ]
 
 [project.optional-dependencies]

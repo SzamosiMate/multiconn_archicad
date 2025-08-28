@@ -390,11 +390,12 @@ dependencies = [
     { name = "aiohttp" },
     { name = "archicad" },
     { name = "psutil" },
+    { name = "pywinauto" },
 ]
 
 [package.optional-dependencies]
 dialog-handlers = [
-    { name = "pywinauto" },
+    { name = "pywinauto", marker = "sys_platform == 'win32'" },
 ]
 pydantic = [
     { name = "pydantic" },
@@ -417,7 +418,8 @@ requires-dist = [
     { name = "archicad", specifier = ">=28.3000" },
     { name = "psutil", specifier = ">=6.1.1" },
     { name = "pydantic", marker = "extra == 'pydantic'", specifier = ">=2.11.7" },
-    { name = "pywinauto", marker = "extra == 'dialog-handlers'", specifier = ">=0.6.9" },
+    { name = "pywinauto", specifier = ">=0.6.9" },
+    { name = "pywinauto", marker = "sys_platform == 'win32' and extra == 'dialog-handlers'", specifier = ">=0.6.9" },
 ]
 provides-extras = ["dialog-handlers", "pydantic"]
 
