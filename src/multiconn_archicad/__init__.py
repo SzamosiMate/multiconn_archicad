@@ -1,3 +1,6 @@
+import sys
+import logging
+
 from .multi_conn import MultiConn
 from .conn_header import (
     ConnHeader,
@@ -23,8 +26,6 @@ from .standard_connection import StandardConnection
 from multiconn_archicad.core.core_commands import CoreCommands
 from .dialog_handlers import (
     DialogHandlerBase,
-    WinDialogHandler,
-    win_int_handler_factory,
     UnhandledDialogError,
 )
 from .errors import (
@@ -42,9 +43,8 @@ from .errors import (
     NotFullyInitializedError,
 )
 
-import logging
 
-__all__: tuple[str, ...] = (
+__all__ = [
     "MultiConn",
     "ConnHeader",
     "ArchiCadID",
@@ -56,8 +56,6 @@ __all__: tuple[str, ...] = (
     "CoreCommands",
     "TeamworkCredentials",
     "DialogHandlerBase",
-    "WinDialogHandler",
-    "win_int_handler_factory",
     "UnhandledDialogError",
     "TeamworkProjectID",
     "SoloProjectID",
@@ -80,7 +78,17 @@ __all__: tuple[str, ...] = (
     "is_product_info_initialized",
     "is_id_initialized",
     "is_header_fully_initialized",
-)
+]
+
+if sys.platform == "win32":
+    from .dialog_handlers import WinDialogHandler, win_int_handler_factory
+    __all__.extend([
+        "WinDialogHandler",
+        "win_int_handler_factory",
+    ])
+
 
 log = logging.getLogger(__name__)
 log.addHandler(logging.NullHandler())
+
+__all__ = tuple(__all__)
