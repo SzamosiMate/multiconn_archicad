@@ -23,7 +23,9 @@
 You can install the latest version of the package from the following link using `pip`:
 
 ```bash
-pip install https://github.com/SzamosiMate/multiconn_archicad/releases/download/v0.4.0/multiconn_archicad-0.4.0-py3-none-any.whl
+pip install https://github.com/SzamosiMate/multiconn_archicad/releases/download/v0.4.1/multiconn_archicad-0.4.1-py3-none-any.whl
+# To include optional Windows dialog handling support:
+pip install pywinauto
 ```
 
 **Prerequisites: Tapir Add-On is Required**
