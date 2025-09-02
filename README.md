@@ -23,9 +23,7 @@
 You can install the latest version of the package from the following link using `pip`:
 
 ```bash
-pip install https://github.com/SzamosiMate/multiconn_archicad/releases/download/v0.4.1/multiconn_archicad-0.4.1-py3-none-any.whl
-# To include optional Windows dialog handling support:
-pip install pywinauto
+pip install multiconn_archicad
 ```
 
 **Prerequisites: Tapir Add-On is Required**
@@ -37,6 +35,15 @@ This package **critically depends** on the [Tapir Archicad Add-On](https://githu
 *   Internal commands used by `multiconn_archicad` to identify running Archicad instances and projects (`GetProjectInfo`, `GetArchicadLocation`).
 
 **Without the Tapir Add-On installed, key functionalities like discovering Archicad instances, identifying projects, and running any Tapir-specific commands will fail.** Please install the latest version of Tapir before using this package.
+
+**Optional dependencies**
+```bash
+# to enable dialog handleing on windows
+pip install multiconn_archicad[dialog-handlers]
+
+# to use the pydantic opjects for data validation
+pip install multiconn_archicad[pydantic]
+```
 
 ## Usage
 
