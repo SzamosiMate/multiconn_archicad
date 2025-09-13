@@ -1,0 +1,14 @@
+{
+    "succeeded": true,
+    "result": {
+        "addOnCommandResponse": {
+            "success": false,
+            "result": {
+                "error": {
+                    "code": 5678,
+                    "message": "A Tapir add-on command failed."
+                }
+            }
+        }
+    }
+}

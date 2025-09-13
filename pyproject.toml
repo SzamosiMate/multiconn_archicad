@@ -1,17 +1,35 @@
 [project]
 name = "multiconn_archicad"
-version = "0.4.1"
-description = "MultiConn ArchiCAD is a connection object for ArchiCAD’s JSON API and its Python wrapper, designed to manage multiple open instances of ArchiCAD simultaneously."
+version = "0.4.2"
+description = "A powerful Python toolkit for multi-instance Archicad automation, supporting the official JSON API and the Tapir Add-On."
 readme = "README.md"
 authors = [
     { name = "SzamosiMate", email = "szamimate@yahoo.com" }
 ]
+license = { file = "LICENSE" }
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+
 requires-python = ">=3.12"
 dependencies = [
     "aiohttp>=3.11.11",
     "archicad>=28.3000",
     "psutil>=6.1.1"
 ]
+
+[project.urls]
+Homepage = "https://github.com/SzamosiMate/multiconn_archicad"
+Repository = "https://github.com/SzamosiMate/multiconn_archicad"
+"Bug Tracker" = "https://github.com/SzamosiMate/multiconn_archicad/issues"
 
 [project.optional-dependencies]
 dialog-handlers = [
@@ -31,6 +49,7 @@ include = [
 
 [dependency-groups]
 dev = [
+    "twine>=6.1.0",
     "datamodel-code-generator>=0.31.2",
     "hypothesis>=6.135.27",
     "hypothesis-jsonschema>=0.23.1",
@@ -38,6 +57,7 @@ dev = [
     "pytest>=8.3.4",
     "ruff>=0.8.4",
     "typeguard>=4.4.2",
+    "pytest-aiohttp>=1.1.0",
 ]
 
 [[tool.mypy.overrides]]
@@ -57,3 +77,9 @@ indent-style = "space"
 quote-style = "double"
 line-ending = "lf"
 docstring-code-format = true
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+addopts = [
+    "--import-mode=importlib",
+]

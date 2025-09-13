@@ -1,0 +1,12 @@
+{
+    "succeeded": true,
+    "result": {
+        "addOnCommandResponse": {
+            "projectName": "Untitled",
+            "projectPath": "",
+            "isUntitled": true,
+            "isTeamwork": false,
+            "projectLocation": ""
+        }
+    }
+}

@@ -1,0 +1,7 @@
+{
+    "succeeded": false,
+    "error": {
+        "code": 1234,
+        "message": "A standard API error occurred."
+    }
+}
