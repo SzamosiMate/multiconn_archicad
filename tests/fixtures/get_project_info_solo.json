@@ -1,0 +1,12 @@
+{
+    "succeeded": true,
+    "result": {
+        "addOnCommandResponse": {
+            "projectName": "My Solo Project.pln",
+            "projectPath": "C:\\Users\\Test\\Documents\\My Solo Project.pln",
+            "isUntitled": false,
+            "isTeamwork": false,
+            "projectLocation": ""
+        }
+    }
+}

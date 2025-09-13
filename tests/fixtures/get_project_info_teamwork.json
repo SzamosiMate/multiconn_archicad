@@ -1,0 +1,12 @@
+{
+    "succeeded": true,
+    "result": {
+        "addOnCommandResponse": {
+            "projectName": "Our Teamwork Project",
+            "projectPath": "Projects/Our Teamwork Project",
+            "isUntitled": false,
+            "isTeamwork": true,
+            "projectLocation": "teamwork://testuser:fakepass@https%3A%2F%2Fbimcloud.example.com/Projects%2FOur%20Teamwork%20Project"
+        }
+    }
+}
