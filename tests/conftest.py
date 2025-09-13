@@ -1,6 +1,6 @@
 import json
 from pathlib import Path
-from typing import Dict, Any
+from typing import Dict, Any, Callable, Awaitable
 
 import pytest
 from aiohttp import web
@@ -24,13 +24,19 @@ class ServerController:
             "API.IsAlive": "is_alive_true.json",
         }
         self.responses: Dict[str, str] = {}
+        self.command_handlers: Dict[str, Callable[[web.Request], Awaitable[web.Response]]] = {}
         self.reset()
 
     def reset(self):
         self.responses = self._default_responses.copy()
+        self.command_handlers = {}
 
     def set_response(self, command: str, response_filename: str):
         self.responses[command] = response_filename
+
+    def set_handler(self, command: str, handler: Callable[[web.Request], Awaitable[web.Response]]):
+        """Set a custom coroutine to handle a specific command."""
+        self.command_handlers[command] = handler
 
     def get_response_data(self, command: str) -> Dict[str, Any] | None:
         filename = self.responses.get(command)
@@ -47,6 +53,7 @@ async def handle_get(request: web.Request):
 async def archicad_api_handler(request: web.Request):
     """
     Finds the correct fixture based on the request and returns its contents.
+    Custom command handlers take precedence over fixture files.
     """
     controller: ServerController = request.app["controller"]
     payload = await request.json()
@@ -56,8 +63,12 @@ async def archicad_api_handler(request: web.Request):
     if command == "API.ExecuteAddOnCommand":
         command_name = payload.get("parameters", {}).get("addOnCommandId", {}).get("commandName")
 
-    response_data = controller.get_response_data(command_name)
+    # Check for a custom handler first
+    if handler := controller.command_handlers.get(command_name):
+        return await handler(request)
 
+    # Fall back to fixture-based responses
+    response_data = controller.get_response_data(command_name)
     if response_data:
         return web.json_response(response_data)
     else:
