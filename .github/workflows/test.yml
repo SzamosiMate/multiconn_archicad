@@ -17,6 +17,7 @@ jobs:
 
     strategy:
       matrix:
+        fail-fast: false
         os: [windows-latest, macos-latest]
         python-version: ["3.12", "3.13"]
 
@@ -36,7 +37,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install .
-          pip install pytest aiohttp
+          pip install pytest pytest-aiohttp pytest-asyncio hypothesis
 
       - name: Run Pytest Integration Tests
         run: |
