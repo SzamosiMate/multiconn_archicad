@@ -8,7 +8,10 @@ from multiconn_archicad import MultiConn, ConnHeader, Port
 from multiconn_archicad.basic_types import TeamworkProjectID, SoloProjectID
 
 
-pytestmark = pytest.mark.usefixtures("archicad_api")
+pytestmark = [
+    pytest.mark.usefixtures("archicad_api"),
+    pytest.mark.integration,
+]
 
 
 @pytest.mark.asyncio
