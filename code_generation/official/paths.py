@@ -40,7 +40,7 @@ class OfficialApiPaths:
     FINAL_TYPED_DICT_COMMANDS = FINAL_DICTS_DIR / "commands.py"
 
     # --- Tests ---
-    TESTS_DIR = pathlib.Path("../../../tests")
+    TESTS_DIR = pathlib.Path("../../../tests/generated")
     GENERATED_TESTS_OUTPUT = TESTS_DIR / "test_generated_official_models.py"
 
     HEADERS = {

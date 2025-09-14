@@ -88,6 +88,7 @@ import multiconn_archicad.dicts.tapir.commands as dicts
 # Increase deadline and disable the 'too_slow' health check for complex models.
 settings.register_profile("ci", deadline=1000, suppress_health_check=[HealthCheck.too_slow])
 settings.load_profile("ci")
+pytestmark = pytest.mark.generated
 """
 
     test_functions = []

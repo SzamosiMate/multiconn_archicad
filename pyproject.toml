@@ -83,3 +83,9 @@ asyncio_mode = "auto"
 addopts = [
     "--import-mode=importlib",
 ]
+
+markers = [
+    "unit: Marks tests as unit tests (fast, no external dependencies).",
+    "integration: Marks tests as integration tests (slower, requires mock server).",
+    "generated: Marks tests for auto-generated code.",
+]

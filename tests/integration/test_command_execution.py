@@ -6,7 +6,10 @@ from copy import deepcopy
 from multiconn_archicad import MultiConn, Port
 from multiconn_archicad.errors import StandardAPIError, TapirCommandError, CommandTimeoutError
 
-pytestmark = pytest.mark.usefixtures("archicad_api")
+pytestmark = [
+    pytest.mark.usefixtures("archicad_api"),
+    pytest.mark.integration,
+]
 
 
 @pytest.mark.asyncio

@@ -14,10 +14,9 @@ from multiconn_archicad import (
     ArchicadLocation,
 )
 
+pytestmark = pytest.mark.unit
 
 # Setup for common fixtures
-
-
 @pytest.fixture
 def reset_archicad_id_registry():
     """Reset the ArchiCadID registry before and after each test."""
