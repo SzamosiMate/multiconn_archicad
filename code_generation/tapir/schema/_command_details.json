@@ -6,6 +6,12 @@
         "version": "1.0.6"
     },
     {
+        "name": "AddFilesToEmbeddedLibrary",
+        "group": "Library Commands",
+        "description": "Adds the given files into the embedded library.",
+        "version": "1.2.2"
+    },
+    {
         "name": "ApplyFavoritesToElementDefaults",
         "group": "Favorites Commands",
         "description": "Apply the given favorites to element defaults.",
@@ -94,6 +100,12 @@
         "group": "Element Commands",
         "description": "Creates Slab elements based on the given parameters.",
         "version": "1.0.3"
+    },
+    {
+        "name": "CreateSurfaces",
+        "group": "Attribute Commands",
+        "description": "Creates Surface attributes based on the given parameters.",
+        "version": "1.2.2"
     },
     {
         "name": "CreateZones",
@@ -200,7 +212,7 @@
     {
         "name": "GetCollisions",
         "group": "Element Commands",
-        "description": "Detect collisions between elements.",
+        "description": "Detect collisions between the given two groups of elements.",
         "version": "1.2.2"
     },
     {

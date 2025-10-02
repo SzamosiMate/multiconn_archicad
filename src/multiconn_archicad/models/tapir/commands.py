@@ -37,6 +37,7 @@ from .types import (
     FailedExecutionResult,
     FavoritesFromElement,
     FieldModel,
+    File,
     GDLParameterList,
     HighlightedColor,
     Hotlink,
@@ -70,6 +71,7 @@ from .types import (
     StorySettings,
     Subelement,
     SuccessfulExecutionResult,
+    SurfaceDataArrayItem,
     SurveyPoint,
     ViewSettings,
     ViewTransformations,
@@ -552,6 +554,23 @@ class GetLibrariesResult(BaseModel):
     ]
 
 
+class AddFilesToEmbeddedLibraryParameters(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    files: Annotated[List[File], Field(description="A list of files")]
+
+
+class AddFilesToEmbeddedLibraryResult(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    executionResults: Annotated[
+        List[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
+
+
 class PublishPublisherSetParameters(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
@@ -933,6 +952,22 @@ class CreateCompositesParameters(BaseModel):
     ] = None
 
 
+class CreateSurfacesParameters(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    surfaceDataArray: Annotated[
+        List[SurfaceDataArrayItem],
+        Field(description="Array of data to create new surfaces."),
+    ]
+    overwriteExisting: Annotated[
+        bool | None,
+        Field(
+            description="Overwrite the Surface if exists with the same name. The default is false."
+        ),
+    ] = None
+
+
 class GetDatabaseIdFromNavigatorItemIdParameters(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
@@ -1102,7 +1137,10 @@ class GetCollisionsParameters(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    elements: Annotated[
+    elementsGroup1: Annotated[
+        List[ElementIdArrayItem], Field(description="A list of elements.")
+    ]
+    elementsGroup2: Annotated[
         List[ElementIdArrayItem], Field(description="A list of elements.")
     ]
     settings: Settings | None = None
@@ -1263,6 +1301,15 @@ class CreateBuildingMaterialsResult(BaseModel):
 
 
 class CreateCompositesResult(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    attributeIds: Annotated[
+        List[AttributeIdArrayItem], Field(description="A list of attributes.")
+    ]
+
+
+class CreateSurfacesResult(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )

@@ -79,6 +79,7 @@ AddonCommandType = Literal[
 
 TapirCommandType = Literal[
     "AddCommentToIssue",
+    "AddFilesToEmbeddedLibrary",
     "ApplyFavoritesToElementDefaults",
     "AttachElementsToIssue",
     "ChangeSelectionOfElements",
@@ -94,6 +95,7 @@ TapirCommandType = Literal[
     "CreatePropertyDefinitions",
     "CreatePropertyGroups",
     "CreateSlabs",
+    "CreateSurfaces",
     "CreateZones",
     "DeleteElements",
     "DeleteIssue",

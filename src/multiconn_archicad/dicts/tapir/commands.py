@@ -36,6 +36,7 @@ from .types import (
     Favorites,
     FavoritesFromElement,
     Field,
+    File,
     GDLParameterList,
     Hotlinks,
     Issue,
@@ -69,6 +70,7 @@ from .types import (
     StoriesParameters,
     StoriesSettings,
     Subelement,
+    SurfaceDataArrayItem,
     SurveyPoint,
     ViewSettingsOrError,
     ViewTransformationsOrError,
@@ -266,6 +268,14 @@ class GetLibrariesResult(TypedDict):
     libraries: List[Library]
 
 
+class AddFilesToEmbeddedLibraryParameters(TypedDict):
+    files: List[File]
+
+
+class AddFilesToEmbeddedLibraryResult(TypedDict):
+    executionResults: ExecutionResults
+
+
 class PublishPublisherSetParameters(TypedDict):
     publisherSetName: str
     outputPath: NotRequired[str]
@@ -439,6 +449,11 @@ class CreateCompositesParameters(TypedDict):
     overwriteExisting: NotRequired[bool]
 
 
+class CreateSurfacesParameters(TypedDict):
+    surfaceDataArray: List[SurfaceDataArrayItem]
+    overwriteExisting: NotRequired[bool]
+
+
 class GetDatabaseIdFromNavigatorItemIdParameters(TypedDict):
     navigatorItemIds: NavigatorItemIds
 
@@ -513,7 +528,8 @@ class GetConnectedElementsResult(TypedDict):
 
 
 class GetCollisionsParameters(TypedDict):
-    elements: Elements
+    elementsGroup1: Elements
+    elementsGroup2: Elements
     settings: NotRequired[Settings]
 
 
@@ -580,6 +596,10 @@ class CreateBuildingMaterialsResult(TypedDict):
 
 
 class CreateCompositesResult(TypedDict):
+    attributeIds: AttributeIds
+
+
+class CreateSurfacesResult(TypedDict):
     attributeIds: AttributeIds
 
 
