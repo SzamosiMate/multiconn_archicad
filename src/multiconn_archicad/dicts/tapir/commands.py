@@ -13,6 +13,7 @@ from .types import (
     BoundingBoxes3D,
     BuildingMaterialDataArrayItem,
     ClassificationSystemIds,
+    Collision,
     ColumnsDatum,
     Comment,
     CompositeDataArrayItem,
@@ -32,6 +33,7 @@ from .types import (
     ElementsWithMoveVector,
     ExecutionResult,
     ExecutionResults,
+    Favorites,
     FavoritesFromElement,
     Field,
     GDLParameterList,
@@ -62,6 +64,7 @@ from .types import (
     RevisionChange,
     RevisionChangesOfEntities,
     RevisionIssue,
+    Settings,
     SlabsDatum,
     StoriesParameters,
     StoriesSettings,
@@ -173,8 +176,16 @@ class CreateMeshesParameters(TypedDict):
     meshesData: List[MeshesDatum]
 
 
+class GetFavoritesByTypeParameters(TypedDict):
+    elementType: ElementType
+
+
+class GetFavoritesByTypeResult(TypedDict):
+    favorites: Favorites
+
+
 class ApplyFavoritesToElementDefaultsParameters(TypedDict):
-    favorites: List[str]
+    favorites: Favorites
 
 
 class ApplyFavoritesToElementDefaultsResult(TypedDict):
@@ -355,6 +366,10 @@ class SetDetailsOfElementsParameters(TypedDict):
     elementsWithDetails: List[ElementsWithDetail]
 
 
+class GetCollisionsResult(TypedDict):
+    collisions: List[Collision]
+
+
 class MoveElementsParameters(TypedDict):
     elementsWithMoveVectors: List[ElementsWithMoveVector]
 
@@ -495,6 +510,11 @@ class GetConnectedElementsParameters(TypedDict):
 
 class GetConnectedElementsResult(TypedDict):
     connectedElements: List[ConnectedElement]
+
+
+class GetCollisionsParameters(TypedDict):
+    elements: Elements
+    settings: NotRequired[Settings]
 
 
 class HighlightElementsParameters(TypedDict):

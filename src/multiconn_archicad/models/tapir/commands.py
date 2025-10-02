@@ -15,6 +15,7 @@ from .types import (
     BoundingBox3DArrayItem,
     BuildingMaterialDataArrayItem,
     ClassificationSystemIdArrayItem,
+    Collision,
     ColumnsDatum,
     Comment,
     CompositeDataArrayItem,
@@ -63,6 +64,7 @@ from .types import (
     RevisionChange,
     RevisionChangesArrayItem,
     RevisionIssue,
+    Settings,
     SlabsDatum,
     StoryParameters,
     StorySettings,
@@ -181,7 +183,7 @@ class GetStoriesResult(BaseModel):
 
 class SetStoriesParameters(BaseModel):
     model_config = ConfigDict(
-        extra="allow",
+        extra="forbid",
     )
     stories: Annotated[
         List[StorySettings],
@@ -329,11 +331,25 @@ class CreateMeshesParameters(BaseModel):
     ]
 
 
+class GetFavoritesByTypeParameters(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    elementType: ElementType
+
+
+class GetFavoritesByTypeResult(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    favorites: Annotated[List[str], Field(description="A list of favorite names")]
+
+
 class ApplyFavoritesToElementDefaultsParameters(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    favorites: Annotated[List[str], Field(description="The favorites to apply.")]
+    favorites: Annotated[List[str], Field(description="A list of favorite names")]
 
 
 class ApplyFavoritesToElementDefaultsResult(BaseModel):
@@ -754,6 +770,13 @@ class SetDetailsOfElementsParameters(BaseModel):
     ]
 
 
+class GetCollisionsResult(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    collisions: List[Collision]
+
+
 class MoveElementsParameters(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
@@ -1075,6 +1098,16 @@ class GetConnectedElementsResult(BaseModel):
     connectedElements: List[ConnectedElement]
 
 
+class GetCollisionsParameters(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    elements: Annotated[
+        List[ElementIdArrayItem], Field(description="A list of elements.")
+    ]
+    settings: Settings | None = None
+
+
 class HighlightElementsParameters(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
@@ -1297,7 +1330,7 @@ class DetachElementsFromIssueParameters(BaseModel):
 
 class GetElementsAttachedToIssueResult(BaseModel):
     model_config = ConfigDict(
-        extra="allow",
+        extra="forbid",
     )
     elements: Annotated[
         List[ElementIdArrayItem], Field(description="A list of elements.")

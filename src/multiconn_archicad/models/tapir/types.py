@@ -25,7 +25,7 @@ class AttributeType(Enum):
 
 class GDLParameterDetails(BaseModel):
     model_config = ConfigDict(
-        extra="allow",
+        extra="forbid",
     )
     name: Annotated[str | None, Field(description="The name of the parameter.")] = None
     index: Annotated[str, Field(description="The index of the parameter.")]
@@ -349,7 +349,7 @@ class PropertyDetails(BaseModel):
 
 class PropertyValue(BaseModel):
     model_config = ConfigDict(
-        extra="allow",
+        extra="forbid",
     )
     value: str
 
@@ -847,6 +847,9 @@ class GeometryType(Enum):
 
 
 class WallDetails(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
     geometryType: GeometryType
     begCoordinate: Coordinate2D
     endCoordinate: Coordinate2D
@@ -880,6 +883,9 @@ class WallDetails(BaseModel):
 
 
 class BeamDetails(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
     begCoordinate: Coordinate2D
     endCoordinate: Coordinate2D
     zCoordinate: float
@@ -902,6 +908,9 @@ class BeamDetails(BaseModel):
 
 
 class SlabDetails(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
     thickness: Annotated[float, Field(description="Thickness of the slab.")]
     level: Annotated[
         float,
@@ -931,6 +940,9 @@ class SlabDetails(BaseModel):
 
 
 class ColumnDetails(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
     origin: Coordinate2D
     zCoordinate: float
     height: Annotated[float, Field(description="height relative to bottom")]
@@ -940,12 +952,18 @@ class ColumnDetails(BaseModel):
 
 
 class ObjectDetails(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
     origin: Coordinate3D
     dimensions: Coordinate3D
     angle: float
 
 
 class PolylineDetails(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
     coordinates: List[Coordinate2D]
     arcs: Annotated[
         List[PolyArc] | None, Field(description="The arcs of the polyline.")
@@ -1078,6 +1096,9 @@ class MeshDetails(BaseModel):
 
 
 class NotYetSupportedElementTypeDetails(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
     error: str
 
 
@@ -1126,6 +1147,9 @@ class DocumentRevisionReference(BaseModel):
 
 
 class RevisionIssue(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
     revisionIssueId: RevisionIssueId
     id: str
     description: str
@@ -1143,6 +1167,9 @@ class RevisionIssue(BaseModel):
 
 
 class RevisionChange(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
     id: str
     description: str
     lastModifiedTime: str
@@ -1159,6 +1186,9 @@ class RevisionChange(BaseModel):
 
 
 class LayoutInfo(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
     id: str
     databaseId: DatabaseId
     name: str
@@ -1184,6 +1214,9 @@ class Change(BaseModel):
 
 
 class DocumentRevision(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
     revisionId: DocumentRevisionId
     id: str
     finalId: str
@@ -1221,7 +1254,7 @@ class StoryParameters(BaseModel):
 
 class StorySettings(BaseModel):
     model_config = ConfigDict(
-        extra="allow",
+        extra="forbid",
     )
     dispOnSections: Annotated[
         bool,
@@ -1262,6 +1295,9 @@ class ManualZoneGeometry(BaseModel):
 
 
 class WallSettings(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
     begCoordinate: Coordinate2D | None = None
     endCoordinate: Coordinate2D | None = None
     height: Annotated[float | None, Field(description="height relative to bottom")] = (
@@ -1300,6 +1336,9 @@ class PropertyGroupArrayItem(BaseModel):
 
 
 class EnumValue(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
     enumValueId: Annotated[
         DisplayValueEnumId | NonLocalizedValueEnumId | None,
         Field(description="The identifier of a property enumeration value."),
@@ -1417,6 +1456,9 @@ class SurveyPoint(BaseModel):
 
 
 class Details(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
     floorIndex: float | None = None
     layerIndex: float | None = None
     drawIndex: float | None = None
@@ -1426,6 +1468,30 @@ class Details(BaseModel):
             description="Defines the modifiable type-specific settings for an element. Used as input for SET requests."
         ),
     ] = None
+
+
+class Settings(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    volumeTolerance: Annotated[
+        float,
+        Field(
+            description="Intersection body volume greater then this value will be considered as a collision. Default value is 0.001."
+        ),
+    ]
+    performSurfaceCheck: Annotated[
+        bool,
+        Field(
+            description="Enables surface collision check. If disabled the surfaceTolerance value will be ignored. By default it's false."
+        ),
+    ]
+    surfaceTolerance: Annotated[
+        float,
+        Field(
+            description="Intersection body surface area greater then this value will be considered as a collision. Default value is 0.001."
+        ),
+    ]
 
 
 class HighlightedColor(RootModel[List[int]]):
@@ -1708,6 +1774,9 @@ class AttributeId(BaseModel):
 
 
 class GDLParameterList(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
     parameters: Annotated[
         List[GDLParameterDetails], Field(description="The list of GDL parameters.")
     ]
@@ -1785,6 +1854,9 @@ class DatabaseIdArrayItem(BaseModel):
 
 
 class LinkData(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
     referredView: Annotated[
         ElementId | None,
         Field(
@@ -1806,6 +1878,9 @@ class LinkData(BaseModel):
 
 
 class DetailWorksheetDetails(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
     basePoint: Annotated[
         Coordinate2D, Field(description="Coordinate of the base point")
     ]
@@ -1831,12 +1906,18 @@ class DetailWorksheetDetails(BaseModel):
 
 
 class LibPartBasedElementDetails(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
     libPart: LibPartDetails
     ownerElementId: ElementId | None = None
     ownerElementType: ElementType | None = None
 
 
 class ZoneDetails(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
     name: Annotated[str, Field(description="Name of the zone.")]
     numberStr: Annotated[str, Field(description="Zone number.")]
     categoryAttributeId: Annotated[
@@ -1906,6 +1987,16 @@ class ElementsWithDetail(BaseModel):
     )
     elementId: ElementId
     details: Annotated[Details, Field(description="Details of an element.")]
+
+
+class Collision(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    elementId1: ElementId
+    elementId2: ElementId
+    hasBodyCollision: bool
+    hasClearenceCollision: bool
 
 
 class ElementsWithMoveVector(BaseModel):
@@ -2034,6 +2125,9 @@ class CurtainWallPanelDetails(BaseModel):
 
 
 class DetailsOfElement(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
     type: ElementType
     id: str
     floorIndex: float

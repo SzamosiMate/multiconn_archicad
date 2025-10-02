@@ -198,6 +198,12 @@
         "version": "1.0.7"
     },
     {
+        "name": "GetCollisions",
+        "group": "Element Commands",
+        "description": "Detect collisions between elements.",
+        "version": "1.2.2"
+    },
+    {
         "name": "GetCommentsFromIssue",
         "group": "Issue Management Commands",
         "description": "Retrieves comments information from the specified issue.",
@@ -250,6 +256,12 @@
         "group": "Element Commands",
         "description": "Returns the identifier of every element of the given type on the plan. It works for any type. Use the optional filter parameter for filtering.",
         "version": "1.0.7"
+    },
+    {
+        "name": "GetFavoritesByType",
+        "group": "Favorites Commands",
+        "description": "Returns a list of the names of all favorites with the given element type",
+        "version": "1.2.2"
     },
     {
         "name": "GetGDLParametersOfElements",

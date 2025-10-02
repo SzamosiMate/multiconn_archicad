@@ -131,6 +131,7 @@
           "$ref": "#/$defs/GDLParameterArray"
         }
       },
+      "additionalProperties": false,
       "required": [
         "parameters"
       ]
@@ -163,7 +164,7 @@
           "description": "The value of the parameter."
         }
       },
-      "additionalProperties": true,
+      "additionalProperties": false,
       "required": [
         "index",
         "type",
@@ -660,7 +661,7 @@
           "type": "string"
         }
       },
-      "additionalProperties": true,
+      "additionalProperties": false,
       "required": [
         "value"
       ]
@@ -2106,6 +2107,7 @@
           }
         }
       },
+      "additionalProperties": false,
       "required": [
         "geometryType",
         "begCoordinate",
@@ -2149,6 +2151,7 @@
           "description": "The height of the vertical curve of the beam."
         }
       },
+      "additionalProperties": false,
       "required": [
         "begCoordinate",
         "endCoordinate",
@@ -2196,6 +2199,7 @@
           "$ref": "#/$defs/Holes2D"
         }
       },
+      "additionalProperties": false,
       "required": [
         "thickness",
         "level",
@@ -2223,6 +2227,7 @@
           "description": "base level of the column relative to the floor level"
         }
       },
+      "additionalProperties": false,
       "required": [
         "origin",
         "zCoordinate",
@@ -2285,9 +2290,11 @@
               "description": "Guid of the referred view point. Only if the marker refers to a view point."
             }
           },
+          "additionalProperties": false,
           "required": []
         }
       },
+      "additionalProperties": false,
       "required": [
         "basePoint",
         "angle",
@@ -2313,6 +2320,7 @@
           "$ref": "#/$defs/ElementType"
         }
       },
+      "additionalProperties": false,
       "required": [
         "libPart"
       ]
@@ -2330,6 +2338,7 @@
           "type": "number"
         }
       },
+      "additionalProperties": false,
       "required": [
         "origin",
         "dimensions",
@@ -2356,6 +2365,7 @@
           "type": "number"
         }
       },
+      "additionalProperties": false,
       "required": [
         "coordinates",
         "zCoordinate"
@@ -2406,6 +2416,7 @@
           "type": "number"
         }
       },
+      "additionalProperties": false,
       "required": [
         "name",
         "numberStr",
@@ -2676,6 +2687,7 @@
           "type": "string"
         }
       },
+      "additionalProperties": false,
       "required": [
         "error"
       ]
@@ -2830,6 +2842,7 @@
           "$ref": "#/$defs/RevisionCustomSchemeData"
         }
       },
+      "additionalProperties": false,
       "required": [
         "revisionIssueId",
         "id",
@@ -2870,6 +2883,7 @@
           "$ref": "#/$defs/RevisionCustomSchemeData"
         }
       },
+      "additionalProperties": false,
       "required": [
         "id",
         "description",
@@ -2913,6 +2927,7 @@
           "$ref": "#/$defs/RevisionCustomSchemeData"
         }
       },
+      "additionalProperties": false,
       "required": [
         "id",
         "databaseId",
@@ -2967,6 +2982,7 @@
           "$ref": "#/$defs/LayoutInfo"
         }
       },
+      "additionalProperties": false,
       "required": [
         "revisionId",
         "id",
@@ -3061,7 +3077,7 @@
           "description": "The name of the story."
         }
       },
-      "additionalProperties": true,
+      "additionalProperties": false,
       "required": [
         "dispOnSections",
         "level",
@@ -3148,6 +3164,7 @@
           "description": "Thickness at the end in case of trapezoid wall"
         }
       },
+      "additionalProperties": false,
       "required": []
     },
     "TypeSpecificSettings": {
@@ -3228,6 +3245,7 @@
                     "description": "Nonlocalized value of the enumeration if there is one."
                   }
                 },
+                "additionalProperties": false,
                 "required": [
                   "displayValue"
                 ]
@@ -3283,6 +3301,14 @@
       "required": [
         "propertyDefinition"
       ]
+    },
+    "Favorites": {
+      "type": "array",
+      "description": "A list of favorite names",
+      "items": {
+        "type": "string",
+        "description": "The name of a favorite."
+      }
     },
     "GetAddOnVersionResult": {
       "type": "object",
@@ -3446,7 +3472,7 @@
           "$ref": "#/$defs/StoriesSettings"
         }
       },
-      "additionalProperties": true,
+      "additionalProperties": false,
       "required": [
         "stories"
       ]
@@ -3766,6 +3792,7 @@
                 "$ref": "#/$defs/TypeSpecificDetails"
               }
             },
+            "additionalProperties": false,
             "required": [
               "type",
               "id",
@@ -3811,6 +3838,7 @@
                     "$ref": "#/$defs/TypeSpecificSettings"
                   }
                 },
+                "additionalProperties": false,
                 "required": []
               }
             },
@@ -3965,7 +3993,8 @@
               "columnSegments": {
                 "$ref": "#/$defs/Elements"
               }
-            }
+            },
+            "additionalProperties": false
           }
         }
       },
@@ -4012,6 +4041,77 @@
       "additionalProperties": false,
       "required": [
         "connectedElements"
+      ]
+    },
+    "GetCollisionsParameters": {
+      "type": "object",
+      "properties": {
+        "elements": {
+          "$ref": "#/$defs/Elements"
+        },
+        "settings": {
+          "type": "object",
+          "properties": {
+            "volumeTolerance": {
+              "type": "number",
+              "description": "Intersection body volume greater then this value will be considered as a collision. Default value is 0.001."
+            },
+            "performSurfaceCheck": {
+              "type": "boolean",
+              "description": "Enables surface collision check. If disabled the surfaceTolerance value will be ignored. By default it's false."
+            },
+            "surfaceTolerance": {
+              "type": "number",
+              "description": "Intersection body surface area greater then this value will be considered as a collision. Default value is 0.001."
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "volumeTolerance",
+            "performSurfaceCheck",
+            "surfaceTolerance"
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elements"
+      ]
+    },
+    "GetCollisionsResult": {
+      "type": "object",
+      "properties": {
+        "collisions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "elementId1": {
+                "$ref": "#/$defs/ElementId"
+              },
+              "elementId2": {
+                "$ref": "#/$defs/ElementId"
+              },
+              "hasBodyCollision": {
+                "type": "boolean"
+              },
+              "hasClearenceCollision": {
+                "type": "boolean"
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "elementId1",
+              "elementId2",
+              "hasBodyCollision",
+              "hasClearenceCollision"
+            ]
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "collisions"
       ]
     },
     "HighlightElementsParameters": {
@@ -4625,16 +4725,35 @@
         "elements"
       ]
     },
+    "GetFavoritesByTypeParameters": {
+      "type": "object",
+      "properties": {
+        "elementType": {
+          "$ref": "#/$defs/ElementType"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elementType"
+      ]
+    },
+    "GetFavoritesByTypeResult": {
+      "type": "object",
+      "properties": {
+        "favorites": {
+          "$ref": "#/$defs/Favorites"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "favorites"
+      ]
+    },
     "ApplyFavoritesToElementDefaultsParameters": {
       "type": "object",
       "properties": {
         "favorites": {
-          "type": "array",
-          "description": "The favorites to apply.",
-          "items": {
-            "type": "string",
-            "description": "The name of a favorite."
-          }
+          "$ref": "#/$defs/Favorites"
         }
       },
       "additionalProperties": false,
@@ -5832,7 +5951,7 @@
           "$ref": "#/$defs/Elements"
         }
       },
-      "additionalProperties": true,
+      "additionalProperties": false,
       "required": [
         "elements"
       ]

@@ -7,8 +7,8 @@ class PipelinePaths:
     """
 
     # --- Source URLs ---
-    COMMAND_DEFS_URL = "https://raw.githubusercontent.com/SzamosiMate/tapir-archicad-automation/additional-json-schema-fixes/docs/archicad-addon/command_definitions.js"
-    COMMON_SCHEMA_URL = "https://raw.githubusercontent.com/SzamosiMate/tapir-archicad-automation/additional-json-schema-fixes/docs/archicad-addon/common_schema_definitions.js"
+    COMMAND_DEFS_URL = "https://raw.githubusercontent.com/ENZYME-APD/tapir-archicad-automation/main/docs/archicad-addon/command_definitions.js"
+    COMMON_SCHEMA_URL = "https://raw.githubusercontent.com/ENZYME-APD/tapir-archicad-automation/main/docs/archicad-addon/common_schema_definitions.js"
 
     # --- Base Directories ---
     # These directories store intermediate and final artifacts.

@@ -835,6 +835,9 @@ class Group(TypedDict):
     name: NotRequired[str]
 
 
+Favorites = List[str]
+
+
 class Field(TypedDict):
     projectInfoId: NotRequired[str]
     projectInfoName: NotRequired[str]
@@ -873,6 +876,12 @@ class Details(TypedDict):
     layerIndex: NotRequired[float]
     drawIndex: NotRequired[float]
     typeSpecificDetails: NotRequired[TypeSpecificSettings]
+
+
+class Settings(TypedDict):
+    volumeTolerance: float
+    performSurfaceCheck: bool
+    surfaceTolerance: float
 
 
 class MoveVector(TypedDict):
@@ -1125,6 +1134,13 @@ class PropertyDefinitionArrayItem(TypedDict):
 class ElementsWithDetail(TypedDict):
     elementId: ElementId
     details: Details
+
+
+class Collision(TypedDict):
+    elementId1: ElementId
+    elementId2: ElementId
+    hasBodyCollision: bool
+    hasClearenceCollision: bool
 
 
 class ElementsWithMoveVector(TypedDict):
