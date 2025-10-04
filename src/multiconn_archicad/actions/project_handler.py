@@ -12,7 +12,7 @@ from multiconn_archicad.errors import (
     ProjectNotFoundError,
     StandardAPIError,
 )
-from multiconn_archicad.utilities.platform_utils import escape_spaces_in_path, is_using_mac
+from multiconn_archicad.utilities.platform_utils import is_using_mac
 from multiconn_archicad.utilities.exception_logging import auto_decorate_methods, log_exceptions
 from multiconn_archicad.basic_types import Port, TeamworkCredentials, TeamworkProjectID, SoloProjectID
 from multiconn_archicad.conn_header import ConnHeader, is_header_fully_initialized, ValidatedHeader
@@ -138,15 +138,19 @@ class OpenProject:
 
     def _start_process(self, project_params: ProjectParams) -> None:
         log.info(f"opening project: {project_params.conn_header.archicad_id.projectName}")
-        demo_flag = " -demo" if project_params.demo else ""
-        self.process = subprocess.Popen(
-            f"{escape_spaces_in_path(project_params.conn_header.archicad_location.archicadLocation)} "
-            f"{escape_spaces_in_path(project_params.conn_header.archicad_id.get_project_location(project_params.teamwork_credentials))}"
-            + demo_flag,
-            start_new_session=True,
-            shell=is_using_mac(),
-            text=True,
-        )
+        command = [
+            os.fspath(project_params.conn_header.archicad_location.archicadLocation),
+            os.fspath(project_params.conn_header.archicad_id.get_project_location(project_params.teamwork_credentials)),
+        ]
+        if project_params.demo:
+            command.append("-demo")
+        kwargs = {}
+        if is_using_mac():
+            kwargs["start_new_session"] = True
+        else:
+            kwargs["creationflags"] = subprocess.CREATE_NEW_PROCESS_GROUP | subprocess.DETACHED_PROCESS
+
+        self.process = subprocess.Popen(command, **kwargs)
 
     def _find_archicad_port(self):
         psutil_process = psutil.Process(self.process.pid)
