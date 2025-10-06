@@ -25,6 +25,7 @@ from .types import (
     ElementClassifications,
     ElementClassificationsOrErrors,
     ElementFilter,
+    ElementId,
     ElementPropertyValues,
     ElementType,
     Elements,
@@ -75,6 +76,7 @@ from .types import (
     ViewSettingsOrError,
     ViewTransformationsOrError,
     WindowType,
+    ZoneBoundary,
     ZonesDatum,
 )
 
@@ -374,6 +376,14 @@ class GenerateDocumentationParameters(TypedDict):
 
 class SetDetailsOfElementsParameters(TypedDict):
     elementsWithDetails: List[ElementsWithDetail]
+
+
+class GetZoneBoundariesParameters(TypedDict):
+    zoneElementId: ElementId
+
+
+class GetZoneBoundariesResult(TypedDict):
+    zoneBoundaries: List[ZoneBoundary]
 
 
 class GetCollisionsResult(TypedDict):

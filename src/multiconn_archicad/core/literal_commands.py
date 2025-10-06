@@ -142,6 +142,7 @@ TapirCommandType = Literal[
     "GetSubelementsOfHierarchicalElements",
     "GetView2DTransformations",
     "GetViewSettings",
+    "GetZoneBoundaries",
     "HighlightElements",
     "ImportIssuesFromBCF",
     "MoveElements",

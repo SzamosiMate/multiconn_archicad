@@ -1186,6 +1186,14 @@ class ElementsWithDetail(TypedDict):
     details: Details
 
 
+class ZoneBoundary(TypedDict):
+    connectedElementId: ElementId
+    isExternal: bool
+    neighbouringZoneElementId: ElementId
+    area: float
+    polygonOutline: List[Coordinate3D]
+
+
 class Collision(TypedDict):
     elementId1: ElementId
     elementId2: ElementId

@@ -1485,6 +1485,22 @@ class SetDetailsOfElementsParameters(TypedDict):
     elementsWithDetails: List[ElementsWithDetail]
 
 
+class GetZoneBoundariesParameters(TypedDict):
+    zoneElementId: ElementId
+
+
+class ZoneBoundary(TypedDict):
+    connectedElementId: ElementId
+    isExternal: bool
+    neighbouringZoneElementId: ElementId
+    area: float
+    polygonOutline: List[Coordinate3D]
+
+
+class GetZoneBoundariesResult(TypedDict):
+    zoneBoundaries: List[ZoneBoundary]
+
+
 class Collision(TypedDict):
     elementId1: ElementId
     elementId2: ElementId

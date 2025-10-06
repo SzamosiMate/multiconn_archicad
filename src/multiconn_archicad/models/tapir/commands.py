@@ -27,6 +27,7 @@ from .types import (
     ElementClassification,
     ElementClassificationItemArray,
     ElementFilter,
+    ElementId,
     ElementIdArrayItem,
     ElementPropertyValue,
     ElementType,
@@ -76,6 +77,7 @@ from .types import (
     ViewSettings,
     ViewTransformations,
     WindowType,
+    ZoneBoundary,
     ZonesDatum,
 )
 
@@ -787,6 +789,20 @@ class SetDetailsOfElementsParameters(BaseModel):
     elementsWithDetails: Annotated[
         List[ElementsWithDetail], Field(description="The elements with parameters.")
     ]
+
+
+class GetZoneBoundariesParameters(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    zoneElementId: ElementId
+
+
+class GetZoneBoundariesResult(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    zoneBoundaries: List[ZoneBoundary]
 
 
 class GetCollisionsResult(BaseModel):

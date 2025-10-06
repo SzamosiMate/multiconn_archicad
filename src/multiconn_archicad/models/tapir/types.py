@@ -2117,6 +2117,30 @@ class ElementsWithDetail(BaseModel):
     details: Annotated[Details, Field(description="Details of an element.")]
 
 
+class ZoneBoundary(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    connectedElementId: Annotated[
+        ElementId, Field(description="The unique identifier of the connected element.")
+    ]
+    isExternal: Annotated[
+        bool, Field(description="True if the boundary is an external one.")
+    ]
+    neighbouringZoneElementId: Annotated[
+        ElementId,
+        Field(
+            description="Returns the unique identifer of the other Zone the element connects to if the boundary is internal. Please note that this boundary does not represent the boundary of the element with the other Zone."
+        ),
+    ]
+    area: Annotated[
+        float, Field(description="The area of the polygon of the boundary.")
+    ]
+    polygonOutline: Annotated[
+        List[Coordinate3D], Field(description="The outline polygon of the boundary.")
+    ]
+
+
 class Collision(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
