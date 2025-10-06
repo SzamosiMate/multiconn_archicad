@@ -1,13 +1,13 @@
 import re
-from code_generation.tapir.paths import paths
+from code_generation.tapir.paths import tapir_paths
 
 
 def main():
-    print(f"--- Starting the cleaning of {paths.RAW_PYDANTIC_MODELS} ---")
+    print(f"--- Starting the cleaning of {tapir_paths.RAW_PYDANTIC_MODELS} ---")
     try:
-        content = paths.RAW_PYDANTIC_MODELS.read_text(encoding="utf-8")
+        content = tapir_paths.RAW_PYDANTIC_MODELS.read_text(encoding="utf-8")
     except FileNotFoundError:
-        print(f"Error: {paths.RAW_PYDANTIC_MODELS} not found. Please generate it first.")
+        print(f"Error: {tapir_paths.RAW_PYDANTIC_MODELS} not found. Please generate it first.")
         return
 
     # Apply the two necessary cleaning steps.
@@ -16,8 +16,8 @@ def main():
     content = remove_redundant_model_configs(content)
     content = assemble_final_file(content)
 
-    paths.CLEANED_PYDANTIC_MODELS.write_text(content, encoding="utf-8")
-    print(f"✅ Successfully created final, clean models at: {paths.CLEANED_PYDANTIC_MODELS}")
+    tapir_paths.CLEANED_PYDANTIC_MODELS.write_text(content, encoding="utf-8")
+    print(f"✅ Successfully created final, clean models at: {tapir_paths.CLEANED_PYDANTIC_MODELS}")
 
 
 def remove_master_model_definition(content: str) -> str:

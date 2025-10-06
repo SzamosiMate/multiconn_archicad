@@ -65,14 +65,10 @@ PenIndex = int
 FillPattern = int
 
 
-FillTypeId = Literal[
-    "Vector", "Symbol", "Solid", "Empty", "LinearGradient", "RadialGradient", "Image"
-]
+FillTypeId = Literal["Vector", "Symbol", "Solid", "Empty", "LinearGradient", "RadialGradient", "Image"]
 
 
-MaterialTypeId = Literal[
-    "General", "Simple", "Matte", "Metal", "Plastic", "Glass", "Glowing", "Constant"
-]
+MaterialTypeId = Literal["General", "Simple", "Matte", "Metal", "Plastic", "Glass", "Glowing", "Constant"]
 
 
 class ProfileModifier(TypedDict):
@@ -1065,9 +1061,7 @@ class InteriorElevationNavigatorItemWrapperItem(TypedDict):
     interiorElevationNavigatorItem: InteriorElevationNavigatorItem
 
 
-InteriorElevationNavigatorItemOrError = (
-    InteriorElevationNavigatorItemWrapperItem | ErrorItem
-)
+InteriorElevationNavigatorItemOrError = InteriorElevationNavigatorItemWrapperItem | ErrorItem
 
 
 InteriorElevationNavigatorItems = List[InteriorElevationNavigatorItemOrError]
@@ -1218,11 +1212,7 @@ NormalOrUserUndefinedPropertyValue = (
 )
 
 
-PropertyValue = (
-    NormalOrUserUndefinedPropertyValue
-    | NotAvailablePropertyValue
-    | NotEvaluatedPropertyValue
-)
+PropertyValue = NormalOrUserUndefinedPropertyValue | NotAvailablePropertyValue | NotEvaluatedPropertyValue
 
 
 class PropertyValueWrapperItem(TypedDict):
@@ -1313,9 +1303,7 @@ class ClassificationItemAvailabilityWrapperItem(TypedDict):
     classificationItemAvailability: ClassificationItemAvailability
 
 
-ClassificationItemAvailabilityOrError = (
-    ClassificationItemAvailabilityWrapperItem | ErrorItem
-)
+ClassificationItemAvailabilityOrError = ClassificationItemAvailabilityWrapperItem | ErrorItem
 
 
 ClassificationItemAvailabilityList = List[ClassificationItemAvailabilityOrError]
@@ -1330,9 +1318,7 @@ class PropertyDefinitionAvailabilityWrapperItem(TypedDict):
     propertyDefinitionAvailability: PropertyDefinitionAvailability
 
 
-PropertyDefinitionAvailabilityOrError = (
-    PropertyDefinitionAvailabilityWrapperItem | ErrorItem
-)
+PropertyDefinitionAvailabilityOrError = PropertyDefinitionAvailabilityWrapperItem | ErrorItem
 
 
 PropertyDefinitionAvailabilityList = List[PropertyDefinitionAvailabilityOrError]

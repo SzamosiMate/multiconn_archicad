@@ -3,7 +3,7 @@ import re
 import pathlib
 import urllib.request
 from typing import Any, Dict, List
-from code_generation.tapir.paths import paths
+from code_generation.tapir.paths import tapir_paths
 
 def apply_fixes(content: str) -> str:
     content = content.replace('"type": "double"', '"type": "number"')
@@ -183,8 +183,8 @@ def main():
     necessary schema and helper files for the project.
     """
     print("--- Starting Master Schema and Literals Generation ---")
-    common_schema_js = fetch_file_content(paths.COMMON_SCHEMA_URL)
-    command_defs_js = fetch_file_content(paths.COMMAND_DEFS_URL)
+    common_schema_js = fetch_file_content(tapir_paths.COMMON_SCHEMA_URL)
+    command_defs_js = fetch_file_content(tapir_paths.COMMAND_DEFS_URL)
 
     print("Parsing JavaScript variable assignments...")
     common_defs: Dict[str, Any] = parse_js_variable(common_schema_js, "gSchemaDefinitions")
@@ -202,26 +202,26 @@ def main():
         "$defs": fix_refs_recursive(master_defs),
     }
 
-    with open(paths.MASTER_SCHEMA_OUTPUT, "w", encoding="utf-8") as f:
+    with open(tapir_paths.MASTER_SCHEMA_OUTPUT, "w", encoding="utf-8") as f:
         json.dump(master_schema, f, indent=2)
-    print(f"✅ Successfully generated master schema at: {paths.MASTER_SCHEMA_OUTPUT}")
+    print(f"✅ Successfully generated master schema at: {tapir_paths.MASTER_SCHEMA_OUTPUT}")
 
-    with open(paths.BASE_MODEL_NAMES_OUTPUT, "w") as f:
+    with open(tapir_paths.BASE_MODEL_NAMES_OUTPUT, "w") as f:
         json.dump(list(common_defs.keys()), f)
-    with open(paths.COMMAND_MODELS_NAMES_OUTPUT, "w") as f:
+    with open(tapir_paths.COMMAND_MODELS_NAMES_OUTPUT, "w") as f:
         json.dump(list(command_defs.keys()), f)
     print(f"✅ Successfully generated base and command model name lists.")
 
     structured_command_details = get_structured_command_details(commands_list)
-    with open(paths.COMMAND_DETAILS_OUTPUT, "w", encoding="utf-8") as f:
+    with open(tapir_paths.COMMAND_DETAILS_OUTPUT, "w", encoding="utf-8") as f:
         # Use indent for a human-readable JSON file
         json.dump(structured_command_details, f, indent=4)
-    print(f"✅ Successfully generated structured command details at: {paths.COMMAND_DETAILS_OUTPUT}")
+    print(f"✅ Successfully generated structured command details at: {tapir_paths.COMMAND_DETAILS_OUTPUT}")
 
     # --- Generate literal_commands.py (deriving names from the new structure) ---
     tapir_command_names = sorted([cmd["name"] for cmd in structured_command_details])
-    generate_literal_commands_file(tapir_command_names, paths.FINAL_LITERAL_COMMANDS)
-    print(f"✅ Successfully generated literal commands at: {paths.FINAL_LITERAL_COMMANDS}")
+    generate_literal_commands_file(tapir_command_names, tapir_paths.FINAL_LITERAL_COMMANDS)
+    print(f"✅ Successfully generated literal commands at: {tapir_paths.FINAL_LITERAL_COMMANDS}")
 
 
 if __name__ == "__main__":

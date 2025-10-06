@@ -1,5 +1,5 @@
 import re
-from code_generation.tapir.paths import paths
+from code_generation.tapir.paths import tapir_paths
 
 def main():
     """
@@ -7,12 +7,12 @@ def main():
     This script addresses known artifacts from the datamodel-codegen process
     to produce a clean, valid, and usable TypedDict models file for static analysis.
     """
-    print(f"--- Starting definitive cleaning of {paths.RAW_TYPED_DICTS} ---")
+    print(f"--- Starting definitive cleaning of {tapir_paths.RAW_TYPED_DICTS} ---")
 
     try:
-        content = paths.RAW_TYPED_DICTS.read_text(encoding="utf-8")
+        content = tapir_paths.RAW_TYPED_DICTS.read_text(encoding="utf-8")
     except FileNotFoundError:
-        print(f"Error: {paths.RAW_TYPED_DICTS} not found. Please generate it first.")
+        print(f"Error: {tapir_paths.RAW_TYPED_DICTS} not found. Please generate it first.")
         return
 
     # The order of these operations is critical for success.
@@ -23,8 +23,8 @@ def main():
     print("Step 3: Assembling and formatting the final file...")
     content = assemble_final_file(content)
 
-    paths.CLEANED_TYPED_DICTS.write_text(content, encoding="utf-8")
-    print(f"✅ Successfully created final, clean TypedDict models at: {paths.CLEANED_TYPED_DICTS}")
+    tapir_paths.CLEANED_TYPED_DICTS.write_text(content, encoding="utf-8")
+    print(f"✅ Successfully created final, clean TypedDict models at: {tapir_paths.CLEANED_TYPED_DICTS}")
 
 
 ### Cleaning Logic Functions (in execution order) ###

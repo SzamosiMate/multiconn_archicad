@@ -3,7 +3,7 @@ import copy
 import re
 from typing import Any, Dict, Set
 
-from code_generation.tapir.paths import paths
+from code_generation.tapir.paths import tapir_paths
 
 KNOWN_XFAILURES = {}
 
@@ -61,15 +61,15 @@ def main():
     print("--- Starting Tapir API Combined Test File Generation (Pydantic + typeguard) ---")
 
     try:
-        with open(paths.MASTER_SCHEMA_OUTPUT, "r", encoding="utf-8") as f:
+        with open(tapir_paths.MASTER_SCHEMA_OUTPUT, "r", encoding="utf-8") as f:
             master_schema = json.load(f)
-        with open(paths.COMMAND_MODELS_NAMES_OUTPUT, "r", encoding="utf-8") as f:
+        with open(tapir_paths.COMMAND_MODELS_NAMES_OUTPUT, "r", encoding="utf-8") as f:
             command_model_names = json.load(f)
     except FileNotFoundError as e:
         print(f"❌ Error: A required file was not found. Please run the full pipeline. ({e})")
         return
 
-    output_path = paths.GENERATED_TESTS_OUTPUT
+    output_path = tapir_paths.GENERATED_TESTS_OUTPUT
     all_definitions_master = master_schema.get("$defs", {})
 
     file_header = f"""

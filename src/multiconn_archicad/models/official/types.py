@@ -10,12 +10,8 @@ from multiconn_archicad.models.base import APIModel
 
 
 class AddOnCommandId(APIModel):
-    commandNamespace: Annotated[
-        str, Field(description="The namespace of the Add-On command.", min_length=1)
-    ]
-    commandName: Annotated[
-        str, Field(description="The name of the Add-On command.", min_length=1)
-    ]
+    commandNamespace: Annotated[str, Field(description="The namespace of the Add-On command.", min_length=1)]
+    commandName: Annotated[str, Field(description="The name of the Add-On command.", min_length=1)]
 
 
 class AddOnCommandIdArrayItem(APIModel):
@@ -197,9 +193,7 @@ class UserDefinedPropertyUserId(APIModel):
 
 class BuiltInPropertyUserId(APIModel):
     type: Literal["BuiltIn"]
-    nonLocalizedName: Annotated[
-        str, Field(description="The non-localized name of the Built-In Property.")
-    ]
+    nonLocalizedName: Annotated[str, Field(description="The non-localized name of the Built-In Property.")]
 
 
 class PropertyType(Enum):
@@ -361,9 +355,7 @@ class PossibleEnumValue(APIModel):
         DisplayValueEnumId | NonLocalizedValueEnumId,
         Field(description="The identifier of a property enumeration value."),
     ]
-    displayValue: Annotated[
-        str, Field(description="Displayed value of the enumeration.")
-    ]
+    displayValue: Annotated[str, Field(description="Displayed value of the enumeration.")]
     nonLocalizedValue: Annotated[
         str | None,
         Field(description="Nonlocalized value of the enumeration if there is one."),
@@ -436,9 +428,7 @@ class TypeOfElementOrError1(APIModel):
 
 
 class ElementsWrapper(APIModel):
-    elements: Annotated[
-        List[ElementIdArrayItem], Field(description="A list of elements.")
-    ]
+    elements: Annotated[List[ElementIdArrayItem], Field(description="A list of elements.")]
 
 
 class Image(APIModel):
@@ -454,18 +444,10 @@ class FolderParameters(APIModel):
 
 
 class BoundingBox2D(APIModel):
-    xMin: Annotated[
-        float, Field(description="The minimum X value of the bounding box.")
-    ]
-    yMin: Annotated[
-        float, Field(description="The minimum Y value of the bounding box.")
-    ]
-    xMax: Annotated[
-        float, Field(description="The maximum X value of the bounding box.")
-    ]
-    yMax: Annotated[
-        float, Field(description="The maximum Y value of the bounding box.")
-    ]
+    xMin: Annotated[float, Field(description="The minimum X value of the bounding box.")]
+    yMin: Annotated[float, Field(description="The minimum Y value of the bounding box.")]
+    xMax: Annotated[float, Field(description="The maximum X value of the bounding box.")]
+    yMax: Annotated[float, Field(description="The maximum Y value of the bounding box.")]
 
 
 class BoundingBox2DOrError1(APIModel):
@@ -473,24 +455,12 @@ class BoundingBox2DOrError1(APIModel):
 
 
 class BoundingBox3D(APIModel):
-    xMin: Annotated[
-        float, Field(description="The minimum X value of the bounding box.")
-    ]
-    yMin: Annotated[
-        float, Field(description="The minimum Y value of the bounding box.")
-    ]
-    zMin: Annotated[
-        float, Field(description="The minimum Z value of the bounding box.")
-    ]
-    xMax: Annotated[
-        float, Field(description="The maximum X value of the bounding box.")
-    ]
-    yMax: Annotated[
-        float, Field(description="The maximum Y value of the bounding box.")
-    ]
-    zMax: Annotated[
-        float, Field(description="The maximum Z value of the bounding box.")
-    ]
+    xMin: Annotated[float, Field(description="The minimum X value of the bounding box.")]
+    yMin: Annotated[float, Field(description="The minimum Y value of the bounding box.")]
+    zMin: Annotated[float, Field(description="The minimum Z value of the bounding box.")]
+    xMax: Annotated[float, Field(description="The maximum X value of the bounding box.")]
+    yMax: Annotated[float, Field(description="The maximum Y value of the bounding box.")]
+    zMax: Annotated[float, Field(description="The maximum Z value of the bounding box.")]
 
 
 class BoundingBox3DOrError1(APIModel):
@@ -524,20 +494,14 @@ class NumberingStyle(Enum):
 
 
 class Subset(APIModel):
-    name: Annotated[
-        str, Field(description="The name for the layout subset.", min_length=1)
-    ]
+    name: Annotated[str, Field(description="The name for the layout subset.", min_length=1)]
     includeToIDSequence: Annotated[
         bool,
-        Field(
-            description="Defines whether this subset is included in automatic ID assignment or not."
-        ),
+        Field(description="Defines whether this subset is included in automatic ID assignment or not."),
     ]
     customNumbering: Annotated[
         bool,
-        Field(
-            description="Defines whether the IDs are generated automatically or a custom numbering is used."
-        ),
+        Field(description="Defines whether the IDs are generated automatically or a custom numbering is used."),
     ]
     continueNumbering: Annotated[
         bool,
@@ -557,69 +521,43 @@ class Subset(APIModel):
     ]
     customNumber: Annotated[str, Field(description="The custom subset ID.")]
     autoNumber: Annotated[str, Field(description="The automatic subset ID.")]
-    numberingStyle: Annotated[
-        NumberingStyle, Field(description="The style of the ID formatting.")
-    ]
+    numberingStyle: Annotated[NumberingStyle, Field(description="The style of the ID formatting.")]
     startAt: Annotated[int, Field(description="The starting value of the numbering.")]
     ownPrefix: Annotated[str, Field(description="The custom prefix for the subset.")]
 
 
 class LayoutParameters(APIModel):
-    horizontalSize: Annotated[
-        float, Field(description="The horizontal size of the layout in millimeters.")
-    ]
-    verticalSize: Annotated[
-        float, Field(description="The vertical size of the layout in millimeters.")
-    ]
-    leftMargin: Annotated[
-        float, Field(description="The layout margin from the left side of the paper.")
-    ]
-    topMargin: Annotated[
-        float, Field(description="The layout margin from the top side of the paper.")
-    ]
-    rightMargin: Annotated[
-        float, Field(description="The layout margin from the right side of the paper.")
-    ]
-    bottomMargin: Annotated[
-        float, Field(description="The layout margin from the bottom side of the paper.")
-    ]
+    horizontalSize: Annotated[float, Field(description="The horizontal size of the layout in millimeters.")]
+    verticalSize: Annotated[float, Field(description="The vertical size of the layout in millimeters.")]
+    leftMargin: Annotated[float, Field(description="The layout margin from the left side of the paper.")]
+    topMargin: Annotated[float, Field(description="The layout margin from the top side of the paper.")]
+    rightMargin: Annotated[float, Field(description="The layout margin from the right side of the paper.")]
+    bottomMargin: Annotated[float, Field(description="The layout margin from the bottom side of the paper.")]
     customLayoutNumber: Annotated[str, Field(description="The custom ID.")]
     customLayoutNumbering: Annotated[
         bool,
-        Field(
-            description="Defines whether a unique ID is used for the current layout or not."
-        ),
+        Field(description="Defines whether a unique ID is used for the current layout or not."),
     ]
     doNotIncludeInNumbering: Annotated[
         bool,
-        Field(
-            description="Defines whether this layout is included in automatic ID assignment or not."
-        ),
+        Field(description="Defines whether this layout is included in automatic ID assignment or not."),
     ]
     displayMasterLayoutBelow: Annotated[
         bool,
-        Field(
-            description="Defines whether to display the master layout above or below the layout."
-        ),
+        Field(description="Defines whether to display the master layout above or below the layout."),
     ]
     layoutPageNumber: Annotated[
         int,
-        Field(
-            description="The page number of layout when this layout contains multi-page drawings."
-        ),
+        Field(description="The page number of layout when this layout contains multi-page drawings."),
     ]
     actPageIndex: Annotated[
         int,
         Field(description="The actual index of layout inside the multi-page layout."),
     ]
-    currentRevisionId: Annotated[
-        str, Field(description="The ID of the current document revision of the layout.")
-    ]
+    currentRevisionId: Annotated[str, Field(description="The ID of the current document revision of the layout.")]
     currentFinalRevisionId: Annotated[
         str,
-        Field(
-            description="The ID with optional suffix of the current document revision of the layout."
-        ),
+        Field(description="The ID with optional suffix of the current document revision of the layout."),
     ]
     hasIssuedRevision: Annotated[
         bool,
@@ -629,9 +567,7 @@ class LayoutParameters(APIModel):
     ]
     hasActualRevision: Annotated[
         bool,
-        Field(
-            description="Defines whether an open document revision exists for the layout or not."
-        ),
+        Field(description="Defines whether an open document revision exists for the layout or not."),
     ]
 
 
@@ -744,15 +680,9 @@ class AttributeHeaderArrayItem(APIModel):
 class LayerAttribute(APIModel):
     attributeId: AttributeId
     name: Annotated[str, Field(description="The name of an attribute.", min_length=1)]
-    intersectionGroupNr: Annotated[
-        int, Field(description="The intersection group number")
-    ]
-    isLocked: Annotated[
-        bool, Field(description="Defines whether the layer is locked or not.")
-    ]
-    isHidden: Annotated[
-        bool, Field(description="Defines whether the layer is hidden or not.")
-    ]
+    intersectionGroupNr: Annotated[int, Field(description="The intersection group number")]
+    isLocked: Annotated[bool, Field(description="Defines whether the layer is locked or not.")]
+    isHidden: Annotated[bool, Field(description="Defines whether the layer is hidden or not.")]
     isWireframe: Annotated[
         bool,
         Field(
@@ -788,15 +718,11 @@ class SurfaceAttribute(APIModel):
     materialType: MaterialTypeId
     ambientReflection: Annotated[
         int,
-        Field(
-            description="The ambient reflection of the surface attribute.", ge=0, le=100
-        ),
+        Field(description="The ambient reflection of the surface attribute.", ge=0, le=100),
     ]
     diffuseReflection: Annotated[
         int,
-        Field(
-            description="The diffuse reflection of the surface attribute.", ge=0, le=100
-        ),
+        Field(description="The diffuse reflection of the surface attribute.", ge=0, le=100),
     ]
     specularReflection: Annotated[
         int,
@@ -822,15 +748,9 @@ class SurfaceAttribute(APIModel):
             le=65535,
         ),
     ]
-    surfaceColor: Annotated[
-        RGBColor, Field(description="The surface color of the surface attribute.")
-    ]
-    specularColor: Annotated[
-        RGBColor, Field(description="The specular color of the surface attribute.")
-    ]
-    emissionColor: Annotated[
-        RGBColor, Field(description="The emission color of the surface attribute.")
-    ]
+    surfaceColor: Annotated[RGBColor, Field(description="The surface color of the surface attribute.")]
+    specularColor: Annotated[RGBColor, Field(description="The specular color of the surface attribute.")]
+    emissionColor: Annotated[RGBColor, Field(description="The emission color of the surface attribute.")]
     fillId: Annotated[
         AttributeIdWrapperItem | ErrorItem,
         Field(description="The identifier of the surface attribute's fill component."),
@@ -843,9 +763,7 @@ class SurfaceAttribute(APIModel):
         int,
         Field(description="The shininess of the surface attribute.", ge=0, le=10000),
     ]
-    texture: Annotated[
-        Texture | None, Field(description="The texture of the surface attribute.")
-    ] = None
+    texture: Annotated[Texture | None, Field(description="The texture of the surface attribute.")] = None
 
 
 class SurfaceAttributeOrError1(APIModel):
@@ -857,40 +775,22 @@ class ProfileAttribute(APIModel):
     name: Annotated[str, Field(description="The name of an attribute.", min_length=1)]
     useWith: Annotated[
         List[ElementType],
-        Field(
-            description="The list of element types for which this profile is available."
-        ),
+        Field(description="The list of element types for which this profile is available."),
     ]
-    width: Annotated[
-        float, Field(description="The default width (horizontal size) of the profile.")
-    ]
-    height: Annotated[
-        float, Field(description="The default height (vertical size) of the profile.")
-    ]
-    minimumWidth: Annotated[
-        float, Field(description="The minimum width (horizontal size) of the profile.")
-    ]
-    minimumHeight: Annotated[
-        float, Field(description="The minimum height (vertical size) of the profile.")
-    ]
+    width: Annotated[float, Field(description="The default width (horizontal size) of the profile.")]
+    height: Annotated[float, Field(description="The default height (vertical size) of the profile.")]
+    minimumWidth: Annotated[float, Field(description="The minimum width (horizontal size) of the profile.")]
+    minimumHeight: Annotated[float, Field(description="The minimum height (vertical size) of the profile.")]
     widthStretchable: Annotated[
         bool,
-        Field(
-            description="Defines whether the profile's width can be increased beyond its default value or not."
-        ),
+        Field(description="Defines whether the profile's width can be increased beyond its default value or not."),
     ]
     heightStretchable: Annotated[
         bool,
-        Field(
-            description="Defines whether the profile's height can be increased beyond its default value or not."
-        ),
+        Field(description="Defines whether the profile's height can be increased beyond its default value or not."),
     ]
-    hasCoreSkin: Annotated[
-        bool, Field(description="Defines whether the profile has a core skin or not.")
-    ]
-    profileModifiers: Annotated[
-        List[ProfileModifierListItem], Field(description="A list of profile modifiers.")
-    ]
+    hasCoreSkin: Annotated[bool, Field(description="Defines whether the profile has a core skin or not.")]
+    profileModifiers: Annotated[List[ProfileModifierListItem], Field(description="A list of profile modifiers.")]
 
 
 class ProfileAttributeOrError1(APIModel):
@@ -902,9 +802,7 @@ class CompositeLine(APIModel):
         AttributeIdWrapperItem | ErrorItem,
         Field(description="The attribute's identifier or an error."),
     ]
-    linePenIndex: Annotated[
-        int | None, Field(description="The index of the line pen.", ge=0, le=255)
-    ] = None
+    linePenIndex: Annotated[int | None, Field(description="The index of the line pen.", ge=0, le=255)] = None
 
 
 class CompositeLineListItem(APIModel):
@@ -916,23 +814,15 @@ class CompositeSkin(APIModel):
         AttributeIdWrapperItem | ErrorItem,
         Field(description="The attribute's identifier or an error."),
     ]
-    framePenIndex: Annotated[
-        int | None, Field(description="The index of the frame pen.", ge=0, le=255)
-    ] = None
-    thickness: Annotated[
-        float, Field(description="The thickness of the composite skin.")
-    ]
+    framePenIndex: Annotated[int | None, Field(description="The index of the frame pen.", ge=0, le=255)] = None
+    thickness: Annotated[float, Field(description="The thickness of the composite skin.")]
     isCore: Annotated[
         bool,
-        Field(
-            description="Defines whether the composite skin is part of the core or not."
-        ),
+        Field(description="Defines whether the composite skin is part of the core or not."),
     ]
     isFinish: Annotated[
         bool,
-        Field(
-            description="Defines whether the composite skin is part of the finish or not."
-        ),
+        Field(description="Defines whether the composite skin is part of the finish or not."),
     ]
 
 
@@ -943,24 +833,18 @@ class CompositeSkinListItem(APIModel):
 class CompositeAttribute(APIModel):
     attributeId: AttributeId
     name: Annotated[str, Field(description="The name of an attribute.", min_length=1)]
-    totalThickness: Annotated[
-        float, Field(description="The total thickness of the composite.")
-    ]
+    totalThickness: Annotated[float, Field(description="The total thickness of the composite.")]
     compositeSkins: Annotated[
         List[CompositeSkinListItem],
         Field(description="The skins of the composite attribute."),
     ]
     compositeLines: Annotated[
         List[CompositeLineListItem],
-        Field(
-            description="The contour and separator lines of the composite attribute."
-        ),
+        Field(description="The contour and separator lines of the composite attribute."),
     ]
     useWith: Annotated[
         List[ElementType],
-        Field(
-            description="The list of element types for which this composite is available."
-        ),
+        Field(description="The list of element types for which this composite is available."),
     ]
 
 
@@ -992,9 +876,7 @@ class LineItem(APIModel):
     ]
     length: Annotated[
         float,
-        Field(
-            description="The length of the item. Used in centerline, right angle, and parallel item types."
-        ),
+        Field(description="The length of the item. Used in centerline, right angle, and parallel item types."),
     ]
     begPosition: Annotated[
         Point2D,
@@ -1018,9 +900,7 @@ class LineItem(APIModel):
     ]
     endAngle: Annotated[
         float,
-        Field(
-            description="The ending angle of the item, measured from the vertical axis. Used in the arc item type."
-        ),
+        Field(description="The ending angle of the item, measured from the vertical axis. Used in the arc item type."),
     ]
 
 
@@ -1033,9 +913,7 @@ class LineAttribute(APIModel):
     name: Annotated[str, Field(description="The name of an attribute.", min_length=1)]
     appearanceType: AppearanceType
     displayScale: Annotated[float, Field(description="The original scale of the line.")]
-    period: Annotated[
-        float, Field(description="The length of the dashed or symbol line's period.")
-    ]
+    period: Annotated[float, Field(description="The length of the dashed or symbol line's period.")]
     height: Annotated[float, Field(description="The height of the symbol line.")]
     lineType: LineType
     lineItems: Annotated[
@@ -1076,26 +954,18 @@ class BuildingMaterialAttribute(APIModel):
     attributeId: AttributeId
     name: Annotated[str, Field(description="The name of an attribute.", min_length=1)]
     id: Annotated[str, Field(description="The id of the building material.")]
-    connectionPriority: Annotated[
-        int, Field(description="The connection priority of the building material.")
-    ]
+    connectionPriority: Annotated[int, Field(description="The connection priority of the building material.")]
     cutFillId: Annotated[
         AttributeIdWrapperItem | ErrorItem,
-        Field(
-            description="The identifier of the building material attribute's fill component."
-        ),
+        Field(description="The identifier of the building material attribute's fill component."),
     ]
     cutFillPenIndex: Annotated[
         int,
-        Field(
-            description="The cut fill pen index of the building material.", ge=0, le=255
-        ),
+        Field(description="The cut fill pen index of the building material.", ge=0, le=255),
     ]
     cutSurfaceId: Annotated[
         AttributeIdWrapperItem | ErrorItem,
-        Field(
-            description="The identifier of the building material attribute's surface component."
-        ),
+        Field(description="The identifier of the building material attribute's surface component."),
     ]
 
 
@@ -1174,16 +1044,10 @@ class ClassificationItemDetails(APIModel):
     classificationItemId: ClassificationItemId
     id: Annotated[
         str,
-        Field(
-            description="The unique identifier of the classification item as specified by the user."
-        ),
+        Field(description="The unique identifier of the classification item as specified by the user."),
     ]
-    name: Annotated[
-        str, Field(description="The display name of the classification item.")
-    ]
-    description: Annotated[
-        str, Field(description="The description of the classification item.")
-    ]
+    name: Annotated[str, Field(description="The display name of the classification item.")]
+    description: Annotated[str, Field(description="The description of the classification item.")]
 
 
 class ClassificationItemOrError1(APIModel):
@@ -1192,21 +1056,13 @@ class ClassificationItemOrError1(APIModel):
 
 class ClassificationSystem(APIModel):
     classificationSystemId: ClassificationSystemId
-    name: Annotated[
-        str, Field(description="The display name of the classification system.")
-    ]
-    description: Annotated[
-        str, Field(description="The description of the classification system.")
-    ]
+    name: Annotated[str, Field(description="The display name of the classification system.")]
+    description: Annotated[str, Field(description="The description of the classification system.")]
     source: Annotated[
         str,
-        Field(
-            description="The source of the classification system (e.g. URL to a classification system standard)."
-        ),
+        Field(description="The source of the classification system (e.g. URL to a classification system standard)."),
     ]
-    version: Annotated[
-        str, Field(description="The version of the classification system.")
-    ]
+    version: Annotated[str, Field(description="The version of the classification system.")]
     date: Annotated[
         str,
         Field(
@@ -1234,9 +1090,7 @@ class NavigatorItemId1(APIModel):
 
 class GeneralNavigatorItemData(APIModel):
     navigatorItemId: NavigatorItemId
-    prefix: Annotated[
-        str, Field(description="The prefix of the navigator item's name.")
-    ]
+    prefix: Annotated[str, Field(description="The prefix of the navigator item's name.")]
     name: Annotated[str, Field(description="The name of the navigator item.")]
 
 
@@ -1251,9 +1105,7 @@ class NavigatorItemIdAndTypeOrError1(APIModel):
 
 class DetailNavigatorItem(APIModel):
     navigatorItemId: NavigatorItemId
-    prefix: Annotated[
-        str, Field(description="The prefix of the navigator item's name.")
-    ]
+    prefix: Annotated[str, Field(description="The prefix of the navigator item's name.")]
     name: Annotated[str, Field(description="The name of the navigator item.")]
 
 
@@ -1263,9 +1115,7 @@ class DetailNavigatorItemOrError1(APIModel):
 
 class Document3DNavigatorItem(APIModel):
     navigatorItemId: NavigatorItemId
-    prefix: Annotated[
-        str, Field(description="The prefix of the navigator item's name.")
-    ]
+    prefix: Annotated[str, Field(description="The prefix of the navigator item's name.")]
     name: Annotated[str, Field(description="The name of the navigator item.")]
 
 
@@ -1275,9 +1125,7 @@ class Document3DNavigatorItemOrError1(APIModel):
 
 class ElevationNavigatorItem(APIModel):
     navigatorItemId: NavigatorItemId
-    prefix: Annotated[
-        str, Field(description="The prefix of the navigator item's name.")
-    ]
+    prefix: Annotated[str, Field(description="The prefix of the navigator item's name.")]
     name: Annotated[str, Field(description="The name of the navigator item.")]
 
 
@@ -1287,9 +1135,7 @@ class ElevationNavigatorItemOrError1(APIModel):
 
 class InteriorElevationNavigatorItem(APIModel):
     navigatorItemId: NavigatorItemId
-    prefix: Annotated[
-        str, Field(description="The prefix of the navigator item's name.")
-    ]
+    prefix: Annotated[str, Field(description="The prefix of the navigator item's name.")]
     name: Annotated[str, Field(description="The name of the navigator item.")]
 
 
@@ -1299,9 +1145,7 @@ class InteriorElevationNavigatorItemOrError1(APIModel):
 
 class SectionNavigatorItem(APIModel):
     navigatorItemId: NavigatorItemId
-    prefix: Annotated[
-        str, Field(description="The prefix of the navigator item's name.")
-    ]
+    prefix: Annotated[str, Field(description="The prefix of the navigator item's name.")]
     name: Annotated[str, Field(description="The name of the navigator item.")]
 
 
@@ -1311,16 +1155,10 @@ class SectionNavigatorItemOrError1(APIModel):
 
 class StoryNavigatorItem(APIModel):
     navigatorItemId: NavigatorItemId
-    prefix: Annotated[
-        str, Field(description="The prefix of the navigator item's name.")
-    ]
+    prefix: Annotated[str, Field(description="The prefix of the navigator item's name.")]
     name: Annotated[str, Field(description="The name of the navigator item.")]
-    floorLevel: Annotated[
-        float, Field(description="The floor level of the story navigator item.")
-    ]
-    floorNumber: Annotated[
-        float, Field(description="The floor number of the story navigator item.")
-    ]
+    floorLevel: Annotated[float, Field(description="The floor level of the story navigator item.")]
+    floorNumber: Annotated[float, Field(description="The floor number of the story navigator item.")]
 
 
 class StoryNavigatorItemOrError1(APIModel):
@@ -1329,9 +1167,7 @@ class StoryNavigatorItemOrError1(APIModel):
 
 class WorksheetNavigatorItem(APIModel):
     navigatorItemId: NavigatorItemId
-    prefix: Annotated[
-        str, Field(description="The prefix of the navigator item's name.")
-    ]
+    prefix: Annotated[str, Field(description="The prefix of the navigator item's name.")]
     name: Annotated[str, Field(description="The name of the navigator item.")]
 
 
@@ -1341,15 +1177,11 @@ class WorksheetNavigatorItemOrError1(APIModel):
 
 class BuiltInContainerNavigatorItem(APIModel):
     navigatorItemId: NavigatorItemId
-    prefix: Annotated[
-        str, Field(description="The prefix of the navigator item's name.")
-    ]
+    prefix: Annotated[str, Field(description="The prefix of the navigator item's name.")]
     name: Annotated[str, Field(description="The name of the navigator item.")]
     contentIds: Annotated[
         List[NavigatorItemId1],
-        Field(
-            description="The identifiers of the navigator items inside the container navigator item."
-        ),
+        Field(description="The identifiers of the navigator items inside the container navigator item."),
     ]
 
 
@@ -1404,9 +1236,7 @@ class NormalSingleEnumPropertyValue(APIModel):
 class NormalMultiEnumPropertyValue(APIModel):
     type: Literal["multiEnum"]
     status: Literal["normal"]
-    value: Annotated[
-        List[EnumValueId1], Field(description="A list of enumeration identifiers.")
-    ]
+    value: Annotated[List[EnumValueId1], Field(description="A list of enumeration identifiers.")]
 
 
 class PropertyValueOrErrorItem1(APIModel):
@@ -1432,9 +1262,7 @@ class PropertyValueOrErrorItem1(APIModel):
         | NormalSingleEnumPropertyValue
         | NormalMultiEnumPropertyValue
         | UserUndefinedPropertyValue,
-        Field(
-            description="A normal, userUndefined, notAvailable or notEvaluated property value."
-        ),
+        Field(description="A normal, userUndefined, notAvailable or notEvaluated property value."),
     ]
 
 
@@ -1474,9 +1302,7 @@ class ElementPropertyValue(APIModel):
 
 class PropertyIdsOfElement(APIModel):
     elementId: ElementId
-    propertyIds: Annotated[
-        List[PropertyIdArrayItem], Field(description="A list of property identifiers.")
-    ]
+    propertyIds: Annotated[List[PropertyIdArrayItem], Field(description="A list of property identifiers.")]
 
 
 class PropertyIdsOfElementOrError1(APIModel):
@@ -1502,9 +1328,7 @@ class RenameNavigatorItemByNameAndId(APIModel):
 class PenTableAttribute(APIModel):
     attributeId: AttributeId
     name: Annotated[str, Field(description="The name of an attribute.", min_length=1)]
-    pens: Annotated[
-        List[PenArrayItem], Field(description="A collection of pens in a pen table.")
-    ]
+    pens: Annotated[List[PenArrayItem], Field(description="A collection of pens in a pen table.")]
 
 
 class PenTableAttributeOrError1(APIModel):
@@ -1513,9 +1337,7 @@ class PenTableAttributeOrError1(APIModel):
 
 class ClassificationItemAvailability(APIModel):
     classificationItemId: ClassificationItemId
-    availableProperties: Annotated[
-        List[PropertyIdArrayItem], Field(description="A list of property identifiers.")
-    ]
+    availableProperties: Annotated[List[PropertyIdArrayItem], Field(description="A list of property identifiers.")]
 
 
 class ClassificationItemAvailabilityOrError1(APIModel):
@@ -1557,9 +1379,7 @@ class PropertyBasicDefaultValue(APIModel):
         | NormalSingleEnumPropertyValue
         | NormalMultiEnumPropertyValue
         | UserUndefinedPropertyValue,
-        Field(
-            description="A normal, userUndefined, notAvailable or notEvaluated property value."
-        ),
+        Field(description="A normal, userUndefined, notAvailable or notEvaluated property value."),
     ]
 
 
@@ -1568,15 +1388,11 @@ class PropertyDefinition(APIModel):
     group: PropertyGroup
     name: Annotated[str, Field(description="The localized name of the property.")]
     description: Annotated[str, Field(description="The description of the property.")]
-    isEditable: Annotated[
-        bool, Field(description="Defines whether the property is editable or not.")
-    ]
+    isEditable: Annotated[bool, Field(description="Defines whether the property is editable or not.")]
     type: Annotated[str, Field(description="Defines the type of the property's value.")]
     possibleEnumValues: Annotated[
         List[PossibleEnumValuesArrayItem] | None,
-        Field(
-            description="The possible enum values of the property when the property type is enumeration."
-        ),
+        Field(description="The possible enum values of the property when the property type is enumeration."),
     ] = None
     defaultValue: Annotated[
         PropertyBasicDefaultValue | None,
@@ -1603,9 +1419,7 @@ class AttributeFolderStructure(APIModel):
     ]
     attributes: Annotated[
         List[AttributeHeaderArrayItem] | None,
-        Field(
-            description="The names and identifiers of the attributes contained in this folder."
-        ),
+        Field(description="The names and identifiers of the attributes contained in this folder."),
     ] = None
     subfolders: Annotated[
         List[AttributeFolderStructureArrayItem] | None,
@@ -1624,16 +1438,10 @@ class ClassificationItemInTree(APIModel):
     classificationItemId: ClassificationItemId
     id: Annotated[
         str,
-        Field(
-            description="The unique identifier of the classification item as specified by the user."
-        ),
+        Field(description="The unique identifier of the classification item as specified by the user."),
     ]
-    name: Annotated[
-        str, Field(description="The display name of the classification item.")
-    ]
-    description: Annotated[
-        str, Field(description="The description of the classification item.")
-    ]
+    name: Annotated[str, Field(description="The display name of the classification item.")]
+    description: Annotated[str, Field(description="The description of the classification item.")]
     children: Annotated[
         List[ClassificationItemArrayItem] | None,
         Field(description="A list of classification items."),
@@ -1646,13 +1454,9 @@ class NavigatorItemArrayItem(APIModel):
 
 class NavigatorItem(APIModel):
     navigatorItemId: NavigatorItemId
-    prefix: Annotated[
-        str, Field(description="The prefix of the navigator item's name.")
-    ]
+    prefix: Annotated[str, Field(description="The prefix of the navigator item's name.")]
     name: Annotated[str, Field(description="The name of the navigator item.")]
-    type: Annotated[
-        NavigatorItemType, Field(description="The type of the navigator item.")
-    ]
+    type: Annotated[NavigatorItemType, Field(description="The type of the navigator item.")]
     sourceNavigatorItemId: Annotated[
         NavigatorItemId | None,
         Field(

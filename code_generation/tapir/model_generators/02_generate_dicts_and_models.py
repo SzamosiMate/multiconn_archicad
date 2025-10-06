@@ -1,13 +1,13 @@
 from datamodel_code_generator import DataModelType, InputFileType, generate, LiteralType
-from code_generation.tapir.paths import paths
+from code_generation.tapir.paths import tapir_paths
 
 CUSTOM_BASE_CLASS = "multiconn_archicad.models.base.APIModel"
 
 print("Generating Pydantic models")
 generate(
-    paths.MASTER_SCHEMA_OUTPUT,
+    tapir_paths.MASTER_SCHEMA_OUTPUT,
     input_file_type=InputFileType.JsonSchema,
-    output=paths.RAW_PYDANTIC_MODELS,
+    output=tapir_paths.RAW_PYDANTIC_MODELS,
     output_model_type=DataModelType.PydanticV2BaseModel,
     base_class=CUSTOM_BASE_CLASS,
     enum_field_as_literal=LiteralType.One,
@@ -20,9 +20,9 @@ generate(
 
 print("Generating Typed Dicts")
 generate(
-    paths.MASTER_SCHEMA_OUTPUT,
+    tapir_paths.MASTER_SCHEMA_OUTPUT,
     input_file_type=InputFileType.JsonSchema,
-    output=paths.RAW_TYPED_DICTS,
+    output=tapir_paths.RAW_TYPED_DICTS,
     output_model_type=DataModelType.TypingTypedDict,
     enum_field_as_literal=LiteralType.All,
     use_union_operator=True,

@@ -2,10 +2,6 @@ import pathlib
 
 
 class OfficialApiPaths:
-    """
-    A central class to hold all file and directory paths for the official API schema crawler.
-    """
-
     # --- Source URL ---
     BASE_URL = "https://archicadapi.graphisoft.com/JSONInterfaceDocumentation/content/"
     MENU_TREE_URL = f"{BASE_URL}menutree.json"

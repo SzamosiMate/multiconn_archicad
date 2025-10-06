@@ -744,6 +744,9 @@ class ExecuteAddOnCommandParameters(APIModel):
 
 
 class ExecuteAddOnCommandResult(APIModel):
+    model_config = ConfigDict(
+        extra="allow",
+    )
     addOnCommandResponse: AddOnCommandResponse
 
 

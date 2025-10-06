@@ -1,6 +1,6 @@
 import json
 import re
-from code_generation.tapir.paths import paths
+from code_generation.tapir.paths import tapir_paths
 
 def get_definition_name(block: str) -> str | None:
     """Extracts the class or TypeAlias name from a block of code."""
@@ -88,16 +88,16 @@ def main():
     print("--- Starting Model Splitting Process (with Dynamic Imports) ---")
 
     try:
-        with open(paths.COMMAND_MODELS_NAMES_OUTPUT, "r", encoding="utf-8") as f:
+        with open(tapir_paths.COMMAND_MODELS_NAMES_OUTPUT, "r", encoding="utf-8") as f:
             command_names = set(json.load(f))
     except FileNotFoundError as e:
         print(f"Error: Could not find name list file. ({e})")
         return
 
     try:
-        content = paths.CLEANED_PYDANTIC_MODELS.read_text("utf-8")
+        content = tapir_paths.CLEANED_PYDANTIC_MODELS.read_text("utf-8")
     except FileNotFoundError:
-        print(f"Error: {paths.CLEANED_PYDANTIC_MODELS} not found. Please run the cleaner script first.")
+        print(f"Error: {tapir_paths.CLEANED_PYDANTIC_MODELS} not found. Please run the cleaner script first.")
         return
 
     definitions_in_order = [
@@ -133,9 +133,9 @@ def main():
     base_content_uncleaned = base_header_str + "\n\n" + base_body_str
     final_base_content = remove_unused_imports(base_content_uncleaned)
 
-    paths.FINAL_PYDANTIC_TYPES.parent.mkdir(parents=True, exist_ok=True)
-    paths.FINAL_PYDANTIC_TYPES.write_text(final_base_content + "\n", "utf-8")
-    print(f"✅ Successfully wrote {len(base_model_blocks)} definitions to {paths.FINAL_PYDANTIC_TYPES}")
+    tapir_paths.FINAL_PYDANTIC_TYPES.parent.mkdir(parents=True, exist_ok=True)
+    tapir_paths.FINAL_PYDANTIC_TYPES.write_text(final_base_content + "\n", "utf-8")
+    print(f"✅ Successfully wrote {len(base_model_blocks)} definitions to {tapir_paths.FINAL_PYDANTIC_TYPES}")
 
     # --- Write `commands.py` (Command Models) ---
     print("\nProcessing command models (commands.py)...")
@@ -155,9 +155,9 @@ def main():
     command_content_uncleaned = "\n\n\n".join(file_parts)
     final_command_content = remove_unused_imports(command_content_uncleaned)
 
-    paths.FINAL_PYDANTIC_COMMANDS.parent.mkdir(parents=True, exist_ok=True)
-    paths.FINAL_PYDANTIC_COMMANDS.write_text(final_command_content + "\n", "utf-8")
-    print(f"✅ Successfully wrote {len(command_model_blocks)} definitions to {paths.FINAL_PYDANTIC_COMMANDS}")
+    tapir_paths.FINAL_PYDANTIC_COMMANDS.parent.mkdir(parents=True, exist_ok=True)
+    tapir_paths.FINAL_PYDANTIC_COMMANDS.write_text(final_command_content + "\n", "utf-8")
+    print(f"✅ Successfully wrote {len(command_model_blocks)} definitions to {tapir_paths.FINAL_PYDANTIC_COMMANDS}")
 
 
 if __name__ == "__main__":
