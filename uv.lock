@@ -596,6 +596,7 @@ dependencies = [
     { name = "aiohttp" },
     { name = "archicad" },
     { name = "psutil" },
+    { name = "typing-extensions" },
 ]
 
 [package.optional-dependencies]
@@ -626,6 +627,7 @@ requires-dist = [
     { name = "psutil", specifier = ">=6.1.1" },
     { name = "pydantic", marker = "extra == 'pydantic'", specifier = ">=2.11.7" },
     { name = "pywinauto", marker = "sys_platform == 'win32' and extra == 'dialog-handlers'", specifier = ">=0.6.9" },
+    { name = "typing-extensions", specifier = ">=4.12.2" },
 ]
 provides-extras = ["dialog-handlers", "pydantic"]
 

@@ -7,6 +7,7 @@ from __future__ import annotations
 from typing import Any, List, Literal, TypedDict
 
 from typing_extensions import NotRequired
+from multiconn_archicad.dicts.extra_iems import extra_items
 
 OfficialArchicadApiMasterModels = Any
 

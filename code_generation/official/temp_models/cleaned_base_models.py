@@ -736,17 +736,11 @@ class DeleteNavigatorItemsResult(APIModel):
 
 
 class ExecuteAddOnCommandParameters(APIModel):
-    model_config = ConfigDict(
-        extra="allow",
-    )
     addOnCommandId: AddOnCommandId
     addOnCommandParameters: AddOnCommandParameters | None = None
 
 
 class ExecuteAddOnCommandResult(APIModel):
-    model_config = ConfigDict(
-        extra="allow",
-    )
     addOnCommandResponse: AddOnCommandResponse
 
 
