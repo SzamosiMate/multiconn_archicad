@@ -60,8 +60,8 @@ def surgically_fix_rename_navigator_item(content: str) -> str:
 
 def surgically_fix_dash_or_line_item(content: str) -> str:
     print("⚙️  Step 3: Surgically fixing `DashOrLineItem`...")
-    content = content.replace("class DashOrLineItem1(BaseModel):", "class DashItemWrapperItem(BaseModel):", 1)
-    content = content.replace("class DashOrLineItem2(BaseModel):", "class LineItemWrapperItem(BaseModel):", 1)
+    content = content.replace("class DashOrLineItem1(APIModel):", "class DashItemWrapperItem(APIModel):", 1)
+    content = content.replace("class DashOrLineItem2(APIModel):", "class LineItemWrapperItem(APIModel):", 1)
 
     content = content.replace("DashOrLineItem1", "DashItemWrapperItem", -1)
     content = content.replace("DashOrLineItem2", "LineItemWrapperItem", -1)
@@ -110,7 +110,7 @@ def rename_problematic_wrappers(content: str) -> str:
     """
     print("⚙️  Step 6: Renaming all problematic wrapper classes...")
 
-    pattern = re.compile(r"class\s+(?P<full_name>(?P<base_name>\w+?)(?:1|OrError1|OrErrorItem1))\(BaseModel\):")
+    pattern = re.compile(r"class\s+(?P<full_name>(?P<base_name>\w+?)(?:1|OrError1|OrErrorItem1))\(APIModel\):")
     matches = list(pattern.finditer(content))
     sorted_matches = sorted(matches, key=lambda m: len(m.group("full_name")), reverse=True)
 
@@ -234,7 +234,7 @@ def assemble_final_file(content: str) -> str:
         "from typing import List, Literal, TypeAlias, Annotated, Any, Union, TypedDict",
         "from uuid import UUID",
         "from enum import Enum",
-        "from pydantic import BaseModel, ConfigDict, Field, RootModel",
+        "from pydantic import APIModel, ConfigDict, Field, RootModel",
         "",
         "from multiconn_archicad.models.base import APIModel",
         "",

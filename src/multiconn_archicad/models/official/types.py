@@ -343,7 +343,7 @@ class NonLocalizedValueEnumId(APIModel):
     nonLocalizedValue: str
 
 
-class EnumValueId1(APIModel):
+class EnumValueIdWrapperItem(APIModel):
     enumValueId: Annotated[
         DisplayValueEnumId | NonLocalizedValueEnumId,
         Field(description="The identifier of a property enumeration value."),
@@ -423,7 +423,7 @@ class TypeOfElement(APIModel):
     elementType: ElementType
 
 
-class TypeOfElementOrError1(APIModel):
+class TypeOfElementWrapperItem(APIModel):
     typeOfElement: TypeOfElement
 
 
@@ -435,7 +435,7 @@ class Image(APIModel):
     content: Annotated[str, Field(description="The image content as a string .")]
 
 
-class ImageOrError1(APIModel):
+class ImageWrapperItem(APIModel):
     image: Image
 
 
@@ -450,7 +450,7 @@ class BoundingBox2D(APIModel):
     yMax: Annotated[float, Field(description="The maximum Y value of the bounding box.")]
 
 
-class BoundingBox2DOrError1(APIModel):
+class BoundingBox2DWrapperItem(APIModel):
     boundingBox2D: BoundingBox2D
 
 
@@ -463,7 +463,7 @@ class BoundingBox3D(APIModel):
     zMax: Annotated[float, Field(description="The maximum Z value of the bounding box.")]
 
 
-class BoundingBox3DOrError1(APIModel):
+class BoundingBox3DWrapperItem(APIModel):
     boundingBox3D: BoundingBox3D
 
 
@@ -653,7 +653,7 @@ class AttributeFolder(APIModel):
     ]
 
 
-class AttributeFolderOrError1(APIModel):
+class AttributeFolderWrapperItem(APIModel):
     attributeFolder: AttributeFolder
 
 
@@ -691,7 +691,7 @@ class LayerAttribute(APIModel):
     ]
 
 
-class LayerAttributeOrError1(APIModel):
+class LayerAttributeWrapperItem(APIModel):
     layerAttribute: LayerAttribute
 
 
@@ -708,7 +708,7 @@ class FillAttribute(APIModel):
     appearanceType: AppearanceType
 
 
-class FillAttributeOrError1(APIModel):
+class FillAttributeWrapperItem(APIModel):
     fillAttribute: FillAttribute
 
 
@@ -766,7 +766,7 @@ class SurfaceAttribute(APIModel):
     texture: Annotated[Texture | None, Field(description="The texture of the surface attribute.")] = None
 
 
-class SurfaceAttributeOrError1(APIModel):
+class SurfaceAttributeWrapperItem(APIModel):
     surfaceAttribute: SurfaceAttribute
 
 
@@ -793,7 +793,7 @@ class ProfileAttribute(APIModel):
     profileModifiers: Annotated[List[ProfileModifierListItem], Field(description="A list of profile modifiers.")]
 
 
-class ProfileAttributeOrError1(APIModel):
+class ProfileAttributeWrapperItem(APIModel):
     profileAttribute: ProfileAttribute
 
 
@@ -848,7 +848,7 @@ class CompositeAttribute(APIModel):
     ]
 
 
-class CompositeAttributeOrError1(APIModel):
+class CompositeAttributeWrapperItem(APIModel):
     compositeAttribute: CompositeAttribute
 
 
@@ -922,7 +922,7 @@ class LineAttribute(APIModel):
     ] = None
 
 
-class LineAttributeOrError1(APIModel):
+class LineAttributeWrapperItem(APIModel):
     lineAttribute: LineAttribute
 
 
@@ -946,7 +946,7 @@ class ZoneCategoryAttribute(APIModel):
     color: RGBColor
 
 
-class ZoneCategoryAttributeOrError1(APIModel):
+class ZoneCategoryAttributeWrapperItem(APIModel):
     zoneCategoryAttribute: ZoneCategoryAttribute
 
 
@@ -969,7 +969,7 @@ class BuildingMaterialAttribute(APIModel):
     ]
 
 
-class BuildingMaterialAttributeOrError1(APIModel):
+class BuildingMaterialAttributeWrapperItem(APIModel):
     buildingMaterialAttribute: BuildingMaterialAttribute
 
 
@@ -984,7 +984,7 @@ class LayerCombinationAttribute(APIModel):
     ]
 
 
-class LayerCombinationAttributeOrError1(APIModel):
+class LayerCombinationAttributeWrapperItem(APIModel):
     layerCombinationAttribute: LayerCombinationAttribute
 
 
@@ -1024,7 +1024,7 @@ class ClassificationId(APIModel):
     ] = None
 
 
-class ClassificationIdOrError1(APIModel):
+class ClassificationIdWrapperItem(APIModel):
     classificationId: ClassificationId
 
 
@@ -1033,9 +1033,9 @@ class ElementClassification(APIModel):
     classificationId: ClassificationId
 
 
-class ElementClassificationOrError1(APIModel):
+class ElementClassificationWrapperItem(APIModel):
     classificationIds: Annotated[
-        List[ClassificationIdOrError1 | ErrorItem],
+        List[ClassificationIdWrapperItem | ErrorItem],
         Field(description="A list of element classification identifiers or errors."),
     ]
 
@@ -1050,7 +1050,7 @@ class ClassificationItemDetails(APIModel):
     description: Annotated[str, Field(description="The description of the classification item.")]
 
 
-class ClassificationItemOrError1(APIModel):
+class ClassificationItemWrapperItem(APIModel):
     classificationItem: ClassificationItemDetails
 
 
@@ -1071,7 +1071,7 @@ class ClassificationSystem(APIModel):
     ]
 
 
-class ClassificationSystemOrError1(APIModel):
+class ClassificationSystemWrapperItem(APIModel):
     classificationSystem: ClassificationSystem
 
 
@@ -1084,7 +1084,7 @@ class NavigatorItemId(APIModel):
     ]
 
 
-class NavigatorItemId1(APIModel):
+class NavigatorItemIdWrapperItem(APIModel):
     navigatorItemId: NavigatorItemId
 
 
@@ -1099,7 +1099,7 @@ class NavigatorItemIdAndType(APIModel):
     navigatorItemId: NavigatorItemId
 
 
-class NavigatorItemIdAndTypeOrError1(APIModel):
+class NavigatorItemIdAndTypeWrapperItem(APIModel):
     navigatorItemIdAndType: NavigatorItemIdAndType
 
 
@@ -1109,7 +1109,7 @@ class DetailNavigatorItem(APIModel):
     name: Annotated[str, Field(description="The name of the navigator item.")]
 
 
-class DetailNavigatorItemOrError1(APIModel):
+class DetailNavigatorItemWrapperItem(APIModel):
     detailNavigatorItem: DetailNavigatorItem
 
 
@@ -1119,7 +1119,7 @@ class Document3DNavigatorItem(APIModel):
     name: Annotated[str, Field(description="The name of the navigator item.")]
 
 
-class Document3DNavigatorItemOrError1(APIModel):
+class Document3DNavigatorItemWrapperItem(APIModel):
     document3DNavigatorItem: Document3DNavigatorItem
 
 
@@ -1129,7 +1129,7 @@ class ElevationNavigatorItem(APIModel):
     name: Annotated[str, Field(description="The name of the navigator item.")]
 
 
-class ElevationNavigatorItemOrError1(APIModel):
+class ElevationNavigatorItemWrapperItem(APIModel):
     elevationNavigatorItem: ElevationNavigatorItem
 
 
@@ -1139,7 +1139,7 @@ class InteriorElevationNavigatorItem(APIModel):
     name: Annotated[str, Field(description="The name of the navigator item.")]
 
 
-class InteriorElevationNavigatorItemOrError1(APIModel):
+class InteriorElevationNavigatorItemWrapperItem(APIModel):
     interiorElevationNavigatorItem: InteriorElevationNavigatorItem
 
 
@@ -1149,7 +1149,7 @@ class SectionNavigatorItem(APIModel):
     name: Annotated[str, Field(description="The name of the navigator item.")]
 
 
-class SectionNavigatorItemOrError1(APIModel):
+class SectionNavigatorItemWrapperItem(APIModel):
     sectionNavigatorItem: SectionNavigatorItem
 
 
@@ -1161,7 +1161,7 @@ class StoryNavigatorItem(APIModel):
     floorNumber: Annotated[float, Field(description="The floor number of the story navigator item.")]
 
 
-class StoryNavigatorItemOrError1(APIModel):
+class StoryNavigatorItemWrapperItem(APIModel):
     storyNavigatorItem: StoryNavigatorItem
 
 
@@ -1171,7 +1171,7 @@ class WorksheetNavigatorItem(APIModel):
     name: Annotated[str, Field(description="The name of the navigator item.")]
 
 
-class WorksheetNavigatorItemOrError1(APIModel):
+class WorksheetNavigatorItemWrapperItem(APIModel):
     worksheetNavigatorItem: WorksheetNavigatorItem
 
 
@@ -1180,12 +1180,12 @@ class BuiltInContainerNavigatorItem(APIModel):
     prefix: Annotated[str, Field(description="The prefix of the navigator item's name.")]
     name: Annotated[str, Field(description="The name of the navigator item.")]
     contentIds: Annotated[
-        List[NavigatorItemId1],
+        List[NavigatorItemIdWrapperItem],
         Field(description="The identifiers of the navigator items inside the container navigator item."),
     ]
 
 
-class BuiltInContainerNavigatorItemOrError1(APIModel):
+class BuiltInContainerNavigatorItemWrapperItem(APIModel):
     builtInContainerNavigatorItem: BuiltInContainerNavigatorItem
 
 
@@ -1220,7 +1220,7 @@ class PropertyGroup(APIModel):
     name: Annotated[str, Field(description="The property group name.")]
 
 
-class PropertyGroupOrError1(APIModel):
+class PropertyGroupWrapperItem(APIModel):
     propertyGroup: PropertyGroup
 
 
@@ -1236,10 +1236,10 @@ class NormalSingleEnumPropertyValue(APIModel):
 class NormalMultiEnumPropertyValue(APIModel):
     type: Literal["multiEnum"]
     status: Literal["normal"]
-    value: Annotated[List[EnumValueId1], Field(description="A list of enumeration identifiers.")]
+    value: Annotated[List[EnumValueIdWrapperItem], Field(description="A list of enumeration identifiers.")]
 
 
-class PropertyValueOrErrorItem1(APIModel):
+class PropertyValueWrapperItem(APIModel):
     propertyValue: Annotated[
         NotAvailablePropertyValue
         | NotEvaluatedPropertyValue
@@ -1266,9 +1266,9 @@ class PropertyValueOrErrorItem1(APIModel):
     ]
 
 
-class PropertyValuesOrError1(APIModel):
+class PropertyValuesWrapperItem(APIModel):
     propertyValues: Annotated[
-        List[PropertyValueOrErrorItem1 | ErrorItem],
+        List[PropertyValueWrapperItem | ErrorItem],
         Field(description="A list of property values."),
     ]
 
@@ -1305,7 +1305,7 @@ class PropertyIdsOfElement(APIModel):
     propertyIds: Annotated[List[PropertyIdArrayItem], Field(description="A list of property identifiers.")]
 
 
-class PropertyIdsOfElementOrError1(APIModel):
+class PropertyIdsOfElementWrapperItem(APIModel):
     propertyIdsOfElement: PropertyIdsOfElement
 
 
@@ -1331,7 +1331,7 @@ class PenTableAttribute(APIModel):
     pens: Annotated[List[PenArrayItem], Field(description="A collection of pens in a pen table.")]
 
 
-class PenTableAttributeOrError1(APIModel):
+class PenTableAttributeWrapperItem(APIModel):
     penTableAttribute: PenTableAttribute
 
 
@@ -1340,7 +1340,7 @@ class ClassificationItemAvailability(APIModel):
     availableProperties: Annotated[List[PropertyIdArrayItem], Field(description="A list of property identifiers.")]
 
 
-class ClassificationItemAvailabilityOrError1(APIModel):
+class ClassificationItemAvailabilityWrapperItem(APIModel):
     classificationItemAvailability: ClassificationItemAvailability
 
 
@@ -1352,7 +1352,7 @@ class PropertyDefinitionAvailability(APIModel):
     ]
 
 
-class PropertyDefinitionAvailabilityOrError1(APIModel):
+class PropertyDefinitionAvailabilityWrapperItem(APIModel):
     propertyDefinitionAvailability: PropertyDefinitionAvailability
 
 
@@ -1400,7 +1400,7 @@ class PropertyDefinition(APIModel):
     ] = None
 
 
-class PropertyDefinitionOrError1(APIModel):
+class PropertyDefinitionWrapperItem(APIModel):
     propertyDefinition: PropertyDefinition
 
 
