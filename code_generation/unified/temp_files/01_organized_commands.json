@@ -1,0 +1,1160 @@
+{
+    "tapir": {
+        "Issue Management Commands": [
+            {
+                "name": "AddCommentToIssue",
+                "group": "Issue Management Commands",
+                "description": "Adds a new comment to the specified issue.",
+                "version": "1.0.6",
+                "source": "tapir"
+            },
+            {
+                "name": "AttachElementsToIssue",
+                "group": "Issue Management Commands",
+                "description": "Attaches elements to the specified issue.",
+                "version": "1.0.6",
+                "source": "tapir"
+            },
+            {
+                "name": "CreateIssue",
+                "group": "Issue Management Commands",
+                "description": "Creates a new issue.",
+                "version": "1.0.2",
+                "source": "tapir"
+            },
+            {
+                "name": "DeleteIssue",
+                "group": "Issue Management Commands",
+                "description": "Deletes the specified issue.",
+                "version": "1.0.2",
+                "source": "tapir"
+            },
+            {
+                "name": "DetachElementsFromIssue",
+                "group": "Issue Management Commands",
+                "description": "Detaches elements from the specified issue.",
+                "version": "1.0.6",
+                "source": "tapir"
+            },
+            {
+                "name": "ExportIssuesToBCF",
+                "group": "Issue Management Commands",
+                "description": "Exports specified issues to a BCF file.",
+                "version": "1.0.6",
+                "source": "tapir"
+            },
+            {
+                "name": "GetCommentsFromIssue",
+                "group": "Issue Management Commands",
+                "description": "Retrieves comments information from the specified issue.",
+                "version": "1.0.6",
+                "source": "tapir"
+            },
+            {
+                "name": "GetElementsAttachedToIssue",
+                "group": "Issue Management Commands",
+                "description": "Retrieves attached elements of the specified issue, filtered by attachment type.",
+                "version": "1.0.6",
+                "source": "tapir"
+            },
+            {
+                "name": "GetIssues",
+                "group": "Issue Management Commands",
+                "description": "Retrieves information about existing issues.",
+                "version": "1.0.2",
+                "source": "tapir"
+            },
+            {
+                "name": "ImportIssuesFromBCF",
+                "group": "Issue Management Commands",
+                "description": "Imports issues from the specified BCF file.",
+                "version": "1.0.6",
+                "source": "tapir"
+            }
+        ],
+        "Library Commands": [
+            {
+                "name": "AddFilesToEmbeddedLibrary",
+                "group": "Library Commands",
+                "description": "Adds the given files into the embedded library.",
+                "version": "1.2.2",
+                "source": "tapir"
+            },
+            {
+                "name": "GetLibraries",
+                "group": "Library Commands",
+                "description": "Gets the list of loaded libraries.",
+                "version": "1.0.1",
+                "source": "tapir"
+            },
+            {
+                "name": "ReloadLibraries",
+                "group": "Library Commands",
+                "description": "Executes the reload libraries command.",
+                "version": "1.0.0",
+                "source": "tapir"
+            }
+        ],
+        "Favorites Commands": [
+            {
+                "name": "ApplyFavoritesToElementDefaults",
+                "group": "Favorites Commands",
+                "description": "Apply the given favorites to element defaults.",
+                "version": "1.1.2",
+                "source": "tapir"
+            },
+            {
+                "name": "CreateFavoritesFromElements",
+                "group": "Favorites Commands",
+                "description": "Create favorites from the given elements.",
+                "version": "1.1.2",
+                "source": "tapir"
+            },
+            {
+                "name": "GetFavoritesByType",
+                "group": "Favorites Commands",
+                "description": "Returns a list of the names of all favorites with the given element type",
+                "version": "1.2.2",
+                "source": "tapir"
+            }
+        ],
+        "Element Commands": [
+            {
+                "name": "ChangeSelectionOfElements",
+                "group": "Element Commands",
+                "description": "Adds/removes a number of elements to/from the current selection.",
+                "version": "1.0.7",
+                "source": "tapir"
+            },
+            {
+                "name": "CreateColumns",
+                "group": "Element Commands",
+                "description": "Creates Column elements based on the given parameters.",
+                "version": "1.0.3",
+                "source": "tapir"
+            },
+            {
+                "name": "CreateMeshes",
+                "group": "Element Commands",
+                "description": "Creates Mesh elements based on the given parameters.",
+                "version": "1.1.9",
+                "source": "tapir"
+            },
+            {
+                "name": "CreateObjects",
+                "group": "Element Commands",
+                "description": "Creates Object elements based on the given parameters.",
+                "version": "1.0.3",
+                "source": "tapir"
+            },
+            {
+                "name": "CreatePolylines",
+                "group": "Element Commands",
+                "description": "Creates Polyline elements based on the given parameters.",
+                "version": "1.1.5",
+                "source": "tapir"
+            },
+            {
+                "name": "CreateSlabs",
+                "group": "Element Commands",
+                "description": "Creates Slab elements based on the given parameters.",
+                "version": "1.0.3",
+                "source": "tapir"
+            },
+            {
+                "name": "CreateZones",
+                "group": "Element Commands",
+                "description": "Creates Zone elements based on the given parameters.",
+                "version": "1.1.8",
+                "source": "tapir"
+            },
+            {
+                "name": "DeleteElements",
+                "group": "Element Commands",
+                "description": "Deletes elements.",
+                "version": "1.2.1",
+                "source": "tapir"
+            },
+            {
+                "name": "FilterElements",
+                "group": "Element Commands",
+                "description": "Tests an elements by the given criterias.",
+                "version": "1.0.7",
+                "source": "tapir"
+            },
+            {
+                "name": "Get3DBoundingBoxes",
+                "group": "Element Commands",
+                "description": "Get the 3D bounding box of elements. The bounding box is calculated from the global origin in the 3D view. The output is the array of the bounding boxes respective to the input array of elements.",
+                "version": "1.1.2",
+                "source": "tapir"
+            },
+            {
+                "name": "GetAllElements",
+                "group": "Element Commands",
+                "description": "Returns the identifier of all elements on the plan. Use the optional filter parameter for filtering.",
+                "version": "1.0.7",
+                "source": "tapir"
+            },
+            {
+                "name": "GetClassificationsOfElements",
+                "group": "Element Commands",
+                "description": "Returns the classification of the given elements in the given classification systems. It works for subelements of hierarchal elements also.",
+                "version": "1.0.7",
+                "source": "tapir"
+            },
+            {
+                "name": "GetCollisions",
+                "group": "Element Commands",
+                "description": "Detect collisions between the given two groups of elements.",
+                "version": "1.2.2",
+                "source": "tapir"
+            },
+            {
+                "name": "GetConnectedElements",
+                "group": "Element Commands",
+                "description": "Gets connected elements of the given elements.",
+                "version": "1.1.4",
+                "source": "tapir"
+            },
+            {
+                "name": "GetDetailsOfElements",
+                "group": "Element Commands",
+                "description": "Gets the details of the given elements (geometry parameters etc).",
+                "version": "1.0.7",
+                "source": "tapir"
+            },
+            {
+                "name": "GetElementsByType",
+                "group": "Element Commands",
+                "description": "Returns the identifier of every element of the given type on the plan. It works for any type. Use the optional filter parameter for filtering.",
+                "version": "1.0.7",
+                "source": "tapir"
+            },
+            {
+                "name": "GetGDLParametersOfElements",
+                "group": "Element Commands",
+                "description": "Gets all the GDL parameters (name, type, value) of the given elements.",
+                "version": "1.0.8",
+                "source": "tapir"
+            },
+            {
+                "name": "GetSelectedElements",
+                "group": "Element Commands",
+                "description": "Gets the list of the currently selected elements.",
+                "version": "0.1.0",
+                "source": "tapir"
+            },
+            {
+                "name": "GetSubelementsOfHierarchicalElements",
+                "group": "Element Commands",
+                "description": "Gets the subelements of the given hierarchical elements.",
+                "version": "1.0.6",
+                "source": "tapir"
+            },
+            {
+                "name": "GetZoneBoundaries",
+                "group": "Element Commands",
+                "description": "Gets the boundaries of the given Zone (connected elements, neighbour zones, etc.).",
+                "version": "1.2.3",
+                "source": "tapir"
+            },
+            {
+                "name": "HighlightElements",
+                "group": "Element Commands",
+                "description": "Highlights the elements given in the elements array. In case of empty elements array removes all previously set highlights.",
+                "version": "1.0.3",
+                "source": "tapir"
+            },
+            {
+                "name": "MoveElements",
+                "group": "Element Commands",
+                "description": "Moves elements with a given vector.",
+                "version": "1.0.2",
+                "source": "tapir"
+            },
+            {
+                "name": "SetClassificationsOfElements",
+                "group": "Element Commands",
+                "description": "Sets the classifications of elements. In order to set the classification of an element to unclassified, omit the classificationItemId field. It works for subelements of hierarchal elements also.",
+                "version": "1.0.7",
+                "source": "tapir"
+            },
+            {
+                "name": "SetDetailsOfElements",
+                "group": "Element Commands",
+                "description": "Sets the details of the given elements (floor, layer, order etc).",
+                "version": "1.0.7",
+                "source": "tapir"
+            },
+            {
+                "name": "SetGDLParametersOfElements",
+                "group": "Element Commands",
+                "description": "Sets the given GDL parameters of the given elements.",
+                "version": "1.0.8",
+                "source": "tapir"
+            }
+        ],
+        "Attribute Commands": [
+            {
+                "name": "CreateBuildingMaterials",
+                "group": "Attribute Commands",
+                "description": "Creates Building Material attributes based on the given parameters.",
+                "version": "1.0.1",
+                "source": "tapir"
+            },
+            {
+                "name": "CreateComposites",
+                "group": "Attribute Commands",
+                "description": "Creates Composite attributes based on the given parameters.",
+                "version": "1.0.2",
+                "source": "tapir"
+            },
+            {
+                "name": "CreateLayers",
+                "group": "Attribute Commands",
+                "description": "Creates Layer attributes based on the given parameters.",
+                "version": "1.0.3",
+                "source": "tapir"
+            },
+            {
+                "name": "CreateSurfaces",
+                "group": "Attribute Commands",
+                "description": "Creates Surface attributes based on the given parameters.",
+                "version": "1.2.2",
+                "source": "tapir"
+            },
+            {
+                "name": "GetAttributesByType",
+                "group": "Attribute Commands",
+                "description": "Returns the details of every attribute of the given type.",
+                "version": "1.1.3",
+                "source": "tapir"
+            },
+            {
+                "name": "GetBuildingMaterialPhysicalProperties",
+                "group": "Attribute Commands",
+                "description": "Retrieves the physical properties of the given Building Materials.",
+                "version": "0.1.3",
+                "source": "tapir"
+            }
+        ],
+        "Property Commands": [
+            {
+                "name": "CreatePropertyDefinitions",
+                "group": "Property Commands",
+                "description": "Creates Custom Property Definitions based on the given parameters.",
+                "version": "1.0.9",
+                "source": "tapir"
+            },
+            {
+                "name": "CreatePropertyGroups",
+                "group": "Property Commands",
+                "description": "Creates Property Groups based on the given parameters.",
+                "version": "1.0.7",
+                "source": "tapir"
+            },
+            {
+                "name": "DeletePropertyDefinitions",
+                "group": "Property Commands",
+                "description": "Deletes the given Custom Property Definitions.",
+                "version": "1.0.9",
+                "source": "tapir"
+            },
+            {
+                "name": "DeletePropertyGroups",
+                "group": "Property Commands",
+                "description": "Deletes the given Custom Property Groups.",
+                "version": "1.0.9",
+                "source": "tapir"
+            },
+            {
+                "name": "GetAllProperties",
+                "group": "Property Commands",
+                "description": "Returns all user defined and built-in properties.",
+                "version": "1.1.3",
+                "source": "tapir"
+            },
+            {
+                "name": "GetPropertyValuesOfAttributes",
+                "group": "Property Commands",
+                "description": "Returns the property values of the attributes for the given property.",
+                "version": "1.1.8",
+                "source": "tapir"
+            },
+            {
+                "name": "GetPropertyValuesOfElements",
+                "group": "Property Commands",
+                "description": "Returns the property values of the elements for the given property. It works for subelements of hierarchal elements also.",
+                "version": "1.0.6",
+                "source": "tapir"
+            },
+            {
+                "name": "SetPropertyValuesOfAttributes",
+                "group": "Property Commands",
+                "description": "Sets the property values of attributes.",
+                "version": "1.1.8",
+                "source": "tapir"
+            },
+            {
+                "name": "SetPropertyValuesOfElements",
+                "group": "Property Commands",
+                "description": "Sets the property values of elements. It works for subelements of hierarchal elements also.",
+                "version": "1.0.6",
+                "source": "tapir"
+            }
+        ],
+        "Developer Commands": [
+            {
+                "name": "GenerateDocumentation",
+                "group": "Developer Commands",
+                "description": "Generates files for the documentation. Used by Tapir developers only.",
+                "version": "1.0.7",
+                "source": "tapir"
+            }
+        ],
+        "Application Commands": [
+            {
+                "name": "GetAddOnVersion",
+                "group": "Application Commands",
+                "description": "Retrieves the version of the Tapir Additional JSON Commands Add-On.",
+                "version": "0.1.0",
+                "source": "tapir"
+            },
+            {
+                "name": "GetArchicadLocation",
+                "group": "Application Commands",
+                "description": "Retrieves the location of the currently running Archicad executable.",
+                "version": "0.1.0",
+                "source": "tapir"
+            },
+            {
+                "name": "GetCurrentWindowType",
+                "group": "Application Commands",
+                "description": "Returns the type of the current (active) window.",
+                "version": "1.0.7",
+                "source": "tapir"
+            },
+            {
+                "name": "QuitArchicad",
+                "group": "Application Commands",
+                "description": "Performs a quit operation on the currently running Archicad instance.",
+                "version": "0.1.0",
+                "source": "tapir"
+            }
+        ],
+        "Revision Management Commands": [
+            {
+                "name": "GetCurrentRevisionChangesOfLayouts",
+                "group": "Revision Management Commands",
+                "description": "Retrieves all changes belong to the last revision of the given layouts.",
+                "version": "1.1.9",
+                "source": "tapir"
+            },
+            {
+                "name": "GetDocumentRevisions",
+                "group": "Revision Management Commands",
+                "description": "Retrieves all document revisions.",
+                "version": "1.1.9",
+                "source": "tapir"
+            },
+            {
+                "name": "GetRevisionChanges",
+                "group": "Revision Management Commands",
+                "description": "Retrieves all changes.",
+                "version": "1.1.9",
+                "source": "tapir"
+            },
+            {
+                "name": "GetRevisionChangesOfElements",
+                "group": "Revision Management Commands",
+                "description": "Retrieves the changes belong to the given elements.",
+                "version": "1.1.9",
+                "source": "tapir"
+            },
+            {
+                "name": "GetRevisionIssues",
+                "group": "Revision Management Commands",
+                "description": "Retrieves all issues.",
+                "version": "1.1.9",
+                "source": "tapir"
+            }
+        ],
+        "Navigator Commands": [
+            {
+                "name": "GetDatabaseIdFromNavigatorItemId",
+                "group": "Navigator Commands",
+                "description": "Gets the ID of the database associated with the supplied navigator item id",
+                "version": "1.1.4",
+                "source": "tapir"
+            },
+            {
+                "name": "GetModelViewOptions",
+                "group": "Navigator Commands",
+                "description": "Gets all model view options",
+                "version": "1.1.4",
+                "source": "tapir"
+            },
+            {
+                "name": "GetView2DTransformations",
+                "group": "Navigator Commands",
+                "description": "Get zoom and rotation of 2D views",
+                "version": "1.1.7",
+                "source": "tapir"
+            },
+            {
+                "name": "GetViewSettings",
+                "group": "Navigator Commands",
+                "description": "Gets the view settings of navigator items",
+                "version": "1.1.4",
+                "source": "tapir"
+            },
+            {
+                "name": "PublishPublisherSet",
+                "group": "Navigator Commands",
+                "description": "Performs a publish operation on the currently opened project. Only the given publisher set will be published.",
+                "version": "0.1.0",
+                "source": "tapir"
+            },
+            {
+                "name": "SetViewSettings",
+                "group": "Navigator Commands",
+                "description": "Sets the view settings of navigator items",
+                "version": "1.1.4",
+                "source": "tapir"
+            },
+            {
+                "name": "UpdateDrawings",
+                "group": "Navigator Commands",
+                "description": "Performs a drawing update on the given elements.",
+                "version": "1.1.4",
+                "source": "tapir"
+            }
+        ],
+        "Project Commands": [
+            {
+                "name": "GetGeoLocation",
+                "group": "Project Commands",
+                "description": "Gets the project location details.",
+                "version": "1.1.6",
+                "source": "tapir"
+            },
+            {
+                "name": "GetHotlinks",
+                "group": "Project Commands",
+                "description": "Gets the file system locations (path) of the hotlink modules. The hotlinks can have tree hierarchy in the project.",
+                "version": "0.1.0",
+                "source": "tapir"
+            },
+            {
+                "name": "GetProjectInfo",
+                "group": "Project Commands",
+                "description": "Retrieves information about the currently loaded project.",
+                "version": "0.1.0",
+                "source": "tapir"
+            },
+            {
+                "name": "GetProjectInfoFields",
+                "group": "Project Commands",
+                "description": "Retrieves the names and values of all project info fields.",
+                "version": "0.1.2",
+                "source": "tapir"
+            },
+            {
+                "name": "GetStories",
+                "group": "Project Commands",
+                "description": "Retrieves information about the story sructure of the currently loaded project.",
+                "version": "1.1.5",
+                "source": "tapir"
+            },
+            {
+                "name": "OpenProject",
+                "group": "Project Commands",
+                "description": "Opens the given project.",
+                "version": "1.0.7",
+                "source": "tapir"
+            },
+            {
+                "name": "SetProjectInfoField",
+                "group": "Project Commands",
+                "description": "Sets the value of a project info field.",
+                "version": "0.1.2",
+                "source": "tapir"
+            },
+            {
+                "name": "SetStories",
+                "group": "Project Commands",
+                "description": "Sets the story sructure of the currently loaded project.",
+                "version": "1.1.5",
+                "source": "tapir"
+            }
+        ],
+        "Teamwork Commands": [
+            {
+                "name": "ReleaseElements",
+                "group": "Teamwork Commands",
+                "description": "Releases elements in Teamwork mode.",
+                "version": "1.1.4",
+                "source": "tapir"
+            },
+            {
+                "name": "ReserveElements",
+                "group": "Teamwork Commands",
+                "description": "Reserves elements in Teamwork mode.",
+                "version": "1.1.4",
+                "source": "tapir"
+            },
+            {
+                "name": "TeamworkReceive",
+                "group": "Teamwork Commands",
+                "description": "Performs a receive operation on the currently opened Teamwork project.",
+                "version": "0.1.0",
+                "source": "tapir"
+            },
+            {
+                "name": "TeamworkSend",
+                "group": "Teamwork Commands",
+                "description": "Performs a send operation on the currently opened Teamwork project.",
+                "version": "0.1.0",
+                "source": "tapir"
+            }
+        ]
+    },
+    "official": {
+        "View Map Commands": [
+            {
+                "name": "API.CloneProjectMapItemToViewMap",
+                "description": "Clones a project map item to the view map.",
+                "group": "View Map Commands",
+                "version": "N/A",
+                "source": "official"
+            },
+            {
+                "name": "API.CreateViewMapFolder",
+                "description": "Creates a view folder item at the given position in the navigator tree.",
+                "group": "View Map Commands",
+                "version": "N/A",
+                "source": "official"
+            }
+        ],
+        "Attribute Commands": [
+            {
+                "name": "API.CreateAttributeFolders",
+                "description": "Creates attribute folders. To create a folder, its full path has to be provided. The command will create all folders along the path, if they do not exist.",
+                "group": "Attribute Commands",
+                "version": "N/A",
+                "source": "official"
+            },
+            {
+                "name": "API.DeleteAttributeFolders",
+                "description": "Deletes attribute folders and all the deletable attributes and folders it contains. To delete a folder, its identifier has to be provided.",
+                "group": "Attribute Commands",
+                "version": "N/A",
+                "source": "official"
+            },
+            {
+                "name": "API.DeleteAttributes",
+                "description": "Deletes attributes.",
+                "group": "Attribute Commands",
+                "version": "N/A",
+                "source": "official"
+            },
+            {
+                "name": "API.GetActivePenTables",
+                "description": "Returns the model view and layout book pen table identifiers.",
+                "group": "Attribute Commands",
+                "version": "N/A",
+                "source": "official"
+            },
+            {
+                "name": "API.GetAttributeFolderStructure",
+                "description": "Returns the detailed folder structure for the attributes of a given type. If the path is not given, the root folder will be returned",
+                "group": "Attribute Commands",
+                "version": "N/A",
+                "source": "official"
+            },
+            {
+                "name": "API.GetAttributeFolders",
+                "description": "Returns the detailed attribute folders identified by their Ids.",
+                "group": "Attribute Commands",
+                "version": "N/A",
+                "source": "official"
+            },
+            {
+                "name": "API.GetAttributesByType",
+                "description": "Returns the identifier of every attribute of the given type.",
+                "group": "Attribute Commands",
+                "version": "N/A",
+                "source": "official"
+            },
+            {
+                "name": "API.GetAttributesIndices",
+                "description": "Returns the requested indices and guids of attributes.",
+                "group": "Attribute Commands",
+                "version": "N/A",
+                "source": "official"
+            },
+            {
+                "name": "API.GetBuildingMaterialAttributes",
+                "description": "Returns the detailed building material attributes identified by their GUIDs.",
+                "group": "Attribute Commands",
+                "version": "N/A",
+                "source": "official"
+            },
+            {
+                "name": "API.GetCompositeAttributes",
+                "description": "Returns the detailed composite attributes identified by their GUIDs.",
+                "group": "Attribute Commands",
+                "version": "N/A",
+                "source": "official"
+            },
+            {
+                "name": "API.GetFillAttributes",
+                "description": "Returns the detailed fill attributes identified by their GUIDs.",
+                "group": "Attribute Commands",
+                "version": "N/A",
+                "source": "official"
+            },
+            {
+                "name": "API.GetLayerAttributes",
+                "description": "Returns the detailed layer attributes identified by their GUIDs.",
+                "group": "Attribute Commands",
+                "version": "N/A",
+                "source": "official"
+            },
+            {
+                "name": "API.GetLayerCombinationAttributes",
+                "description": "Returns the detailed layer combination attributes identified by their GUIDs.",
+                "group": "Attribute Commands",
+                "version": "N/A",
+                "source": "official"
+            },
+            {
+                "name": "API.GetLineAttributes",
+                "description": "Returns the detailed line attributes identified by their GUIDs.",
+                "group": "Attribute Commands",
+                "version": "N/A",
+                "source": "official"
+            },
+            {
+                "name": "API.GetPenTableAttributes",
+                "description": "Returns the detailed pen table attributes (including their pens) identified by their GUIDs.",
+                "group": "Attribute Commands",
+                "version": "N/A",
+                "source": "official"
+            },
+            {
+                "name": "API.GetProfileAttributePreview",
+                "description": "Returns the preview image of each requested profile attribute in a base64 string format.",
+                "group": "Attribute Commands",
+                "version": "N/A",
+                "source": "official"
+            },
+            {
+                "name": "API.GetProfileAttributes",
+                "description": "Returns the detailed profile attributes identified by their GUIDs.",
+                "group": "Attribute Commands",
+                "version": "N/A",
+                "source": "official"
+            },
+            {
+                "name": "API.GetSurfaceAttributes",
+                "description": "Returns the detailed surface attributes identified by their GUIDs.",
+                "group": "Attribute Commands",
+                "version": "N/A",
+                "source": "official"
+            },
+            {
+                "name": "API.GetZoneCategoryAttributes",
+                "description": "Returns the detailed zone category attributes identified by their GUIDs.",
+                "group": "Attribute Commands",
+                "version": "N/A",
+                "source": "official"
+            },
+            {
+                "name": "API.MoveAttributesAndFolders",
+                "description": "Moves attributes and attribute folders.",
+                "group": "Attribute Commands",
+                "version": "N/A",
+                "source": "official"
+            },
+            {
+                "name": "API.RenameAttributeFolders",
+                "description": "Rename attribute folder.",
+                "group": "Attribute Commands",
+                "version": "N/A",
+                "source": "official"
+            }
+        ],
+        "Layout Book Commands": [
+            {
+                "name": "API.CreateLayout",
+                "description": "Creates a new layout.",
+                "group": "Layout Book Commands",
+                "version": "N/A",
+                "source": "official"
+            },
+            {
+                "name": "API.CreateLayoutSubset",
+                "description": "Creates a new layout subset.",
+                "group": "Layout Book Commands",
+                "version": "N/A",
+                "source": "official"
+            },
+            {
+                "name": "API.GetLayoutSettings",
+                "description": "Returns the parameters (settings) of the given layout.",
+                "group": "Layout Book Commands",
+                "version": "N/A",
+                "source": "official"
+            },
+            {
+                "name": "API.SetLayoutSettings",
+                "description": "Sets the parameters (settings) of the given layout.",
+                "group": "Layout Book Commands",
+                "version": "N/A",
+                "source": "official"
+            }
+        ],
+        "Navigator Tree Commands": [
+            {
+                "name": "API.DeleteNavigatorItems",
+                "description": "Deletes items from navigator tree.",
+                "group": "Navigator Tree Commands",
+                "version": "N/A",
+                "source": "official"
+            },
+            {
+                "name": "API.GetBuiltInContainerNavigatorItems",
+                "description": "Returns the details of the built-in container navigator items identified by their Ids.",
+                "group": "Navigator Tree Commands",
+                "version": "N/A",
+                "source": "official"
+            },
+            {
+                "name": "API.GetDetailNavigatorItems",
+                "description": "Returns the details of the detail navigator items identified by their Ids.",
+                "group": "Navigator Tree Commands",
+                "version": "N/A",
+                "source": "official"
+            },
+            {
+                "name": "API.GetDocument3DNavigatorItems",
+                "description": "Returns the details of the 3D document navigator items identified by their Ids.",
+                "group": "Navigator Tree Commands",
+                "version": "N/A",
+                "source": "official"
+            },
+            {
+                "name": "API.GetElevationNavigatorItems",
+                "description": "Returns the detailed elevation navigator items identified by their Ids.",
+                "group": "Navigator Tree Commands",
+                "version": "N/A",
+                "source": "official"
+            },
+            {
+                "name": "API.GetInteriorElevationNavigatorItems",
+                "description": "Returns the details of the interior elevation navigator items identified by their Ids.",
+                "group": "Navigator Tree Commands",
+                "version": "N/A",
+                "source": "official"
+            },
+            {
+                "name": "API.GetNavigatorItemTree",
+                "description": "Returns the tree of navigator items.",
+                "group": "Navigator Tree Commands",
+                "version": "N/A",
+                "source": "official"
+            },
+            {
+                "name": "API.GetNavigatorItemsType",
+                "description": "Returns all navigator item types based on the navigator item identifiers given. An error is returned for each identifier that is not found.",
+                "group": "Navigator Tree Commands",
+                "version": "N/A",
+                "source": "official"
+            },
+            {
+                "name": "API.GetPublisherSetNames",
+                "description": "Returns the names of available publisher sets.",
+                "group": "Navigator Tree Commands",
+                "version": "N/A",
+                "source": "official"
+            },
+            {
+                "name": "API.GetSectionNavigatorItems",
+                "description": "Returns the details of the section navigator items identified by their Ids.",
+                "group": "Navigator Tree Commands",
+                "version": "N/A",
+                "source": "official"
+            },
+            {
+                "name": "API.GetStoryNavigatorItems",
+                "description": "Returns the details of the story navigator items identified by their Ids.",
+                "group": "Navigator Tree Commands",
+                "version": "N/A",
+                "source": "official"
+            },
+            {
+                "name": "API.GetWorksheetNavigatorItems",
+                "description": "Returns the details of the worksheet navigator items identified by their Ids.",
+                "group": "Navigator Tree Commands",
+                "version": "N/A",
+                "source": "official"
+            },
+            {
+                "name": "API.MoveNavigatorItem",
+                "description": "Moves the given navigator item under the <i>parentNavigatorItemId</i> in the navigator tree. If <i>previousNavigatorItemId</i> is not given then inserts it at the first place under the new parent. If it is given then inserts it after this navigator item.",
+                "group": "Navigator Tree Commands",
+                "version": "N/A",
+                "source": "official"
+            },
+            {
+                "name": "API.RenameNavigatorItem",
+                "description": "Renames an existing navigator item by specifying either the name or the ID, or both.",
+                "group": "Navigator Tree Commands",
+                "version": "N/A",
+                "source": "official"
+            }
+        ],
+        "AddOn Commands": [
+            {
+                "name": "API.ExecuteAddOnCommand",
+                "description": "Executes a command registered in an Add-On.",
+                "group": "AddOn Commands",
+                "version": "N/A",
+                "source": "official"
+            },
+            {
+                "name": "API.IsAddOnCommandAvailable",
+                "description": "Checks if the command is available or not.",
+                "group": "AddOn Commands",
+                "version": "N/A",
+                "source": "official"
+            }
+        ],
+        "Element Geometry Commands": [
+            {
+                "name": "API.Get2DBoundingBoxes",
+                "description": "Get the 2D bounding box of elements identified by their GUIDs. The bounding box is calculated from the global origin on the floor plan view. The output is the array of the bounding boxes respective to the input GUIDs. Only works for elements detailed in <i>Element Information</i>.",
+                "group": "Element Geometry Commands",
+                "version": "N/A",
+                "source": "official"
+            },
+            {
+                "name": "API.Get3DBoundingBoxes",
+                "description": "Get the 3D bounding box of elements identified by their GUIDs. The bounding box is calculated from the global origin in the 3D view. The output is the array of the bounding boxes respective to the input GUIDs. Only works for elements detailed in <i>Element Information</i>.",
+                "group": "Element Geometry Commands",
+                "version": "N/A",
+                "source": "official"
+            }
+        ],
+        "Classification Commands": [
+            {
+                "name": "API.GetAllClassificationSystems",
+                "description": "Returns the list of available classification systems.",
+                "group": "Classification Commands",
+                "version": "N/A",
+                "source": "official"
+            },
+            {
+                "name": "API.GetAllClassificationsInSystem",
+                "description": "Returns the tree of classifications in the given classification system.",
+                "group": "Classification Commands",
+                "version": "N/A",
+                "source": "official"
+            },
+            {
+                "name": "API.GetClassificationItemAvailability",
+                "description": "Returns the ids of property definitions available for a given classification item.",
+                "group": "Classification Commands",
+                "version": "N/A",
+                "source": "official"
+            },
+            {
+                "name": "API.GetClassificationSystemIds",
+                "description": "Returns the list of available classification systems.",
+                "group": "Classification Commands",
+                "version": "N/A",
+                "source": "official"
+            },
+            {
+                "name": "API.GetClassificationSystems",
+                "description": "Returns the details of classification systems identified by their GUIDs.",
+                "group": "Classification Commands",
+                "version": "N/A",
+                "source": "official"
+            },
+            {
+                "name": "API.GetClassificationsOfElements",
+                "description": "Returns the classification of the given elements in the given classification systems.",
+                "group": "Classification Commands",
+                "version": "N/A",
+                "source": "official"
+            },
+            {
+                "name": "API.GetDetailsOfClassificationItems",
+                "description": "Returns the details of classification items.",
+                "group": "Classification Commands",
+                "version": "N/A",
+                "source": "official"
+            },
+            {
+                "name": "API.SetClassificationsOfElements",
+                "description": "Sets the classifications of elements. In order to set the classification of an element to unclassified, omit the classificationItemId field.",
+                "group": "Classification Commands",
+                "version": "N/A",
+                "source": "official"
+            }
+        ],
+        "Element Listing Commands": [
+            {
+                "name": "API.GetAllElements",
+                "description": "Returns the identifier of every element in the current plan.",
+                "group": "Element Listing Commands",
+                "version": "N/A",
+                "source": "official"
+            },
+            {
+                "name": "API.GetElementsByClassification",
+                "description": "Returns the identifier of every element with the given classification identifier.",
+                "group": "Element Listing Commands",
+                "version": "N/A",
+                "source": "official"
+            },
+            {
+                "name": "API.GetElementsByType",
+                "description": "Returns the identifier of every element of the given type on the plan.",
+                "group": "Element Listing Commands",
+                "version": "N/A",
+                "source": "official"
+            },
+            {
+                "name": "API.GetSelectedElements",
+                "description": "Returns the identifiers of selected elements in the current plan.",
+                "group": "Element Listing Commands",
+                "version": "N/A",
+                "source": "official"
+            },
+            {
+                "name": "API.GetTypesOfElements",
+                "description": "Returns the types of the given elements.",
+                "group": "Element Listing Commands",
+                "version": "N/A",
+                "source": "official"
+            }
+        ],
+        "Property Commands": [
+            {
+                "name": "API.GetAllPropertyGroupIds",
+                "description": "Returns the identifier of every property group in the current plan. The optional propertyType parameter can be used to filter the results based on the type of the property group (Built-in or User Defined).",
+                "group": "Property Commands",
+                "version": "N/A",
+                "source": "official"
+            },
+            {
+                "name": "API.GetAllPropertyIds",
+                "description": "Returns the identifier of every property in the current plan. The optional propertyType parameter can be used to filter the results based on the type of the property (Built-in or User Defined).",
+                "group": "Property Commands",
+                "version": "N/A",
+                "source": "official"
+            },
+            {
+                "name": "API.GetAllPropertyIdsOfElements",
+                "description": "Returns all property identifiers of the given elements. The optional propertyType parameter can be used to filter the results based on the type of the property (Built-in or User Defined).",
+                "group": "Property Commands",
+                "version": "N/A",
+                "source": "official"
+            },
+            {
+                "name": "API.GetAllPropertyNames",
+                "description": "Returns the human-readable names of available Property definitions for debug and development purposes.",
+                "group": "Property Commands",
+                "version": "N/A",
+                "source": "official"
+            },
+            {
+                "name": "API.GetDetailsOfProperties",
+                "description": "Returns the details of property definitions.",
+                "group": "Property Commands",
+                "version": "N/A",
+                "source": "official"
+            },
+            {
+                "name": "API.GetPropertyDefinitionAvailability",
+                "description": "Returns the ids of classification items a given property definition is available for.",
+                "group": "Property Commands",
+                "version": "N/A",
+                "source": "official"
+            },
+            {
+                "name": "API.GetPropertyGroups",
+                "description": "Returns the details of property groups.",
+                "group": "Property Commands",
+                "version": "N/A",
+                "source": "official"
+            },
+            {
+                "name": "API.GetPropertyIds",
+                "description": "Returns the identifiers of property definitions for the requested property names.",
+                "group": "Property Commands",
+                "version": "N/A",
+                "source": "official"
+            },
+            {
+                "name": "API.GetPropertyValuesOfElements",
+                "description": "Returns the property values of the elements for the given property.",
+                "group": "Property Commands",
+                "version": "N/A",
+                "source": "official"
+            },
+            {
+                "name": "API.SetPropertyValuesOfElements",
+                "description": "Sets the property values of elements.",
+                "group": "Property Commands",
+                "version": "N/A",
+                "source": "official"
+            }
+        ],
+        "Component Commands": [
+            {
+                "name": "API.GetComponentsOfElements",
+                "description": "Returns the identifier of every component for a list of elements. The order of the returned list is the same as the given elements.",
+                "group": "Component Commands",
+                "version": "N/A",
+                "source": "official"
+            },
+            {
+                "name": "API.GetPropertyValuesOfElementComponents",
+                "description": "Returns the property values of the components for the given property.",
+                "group": "Component Commands",
+                "version": "N/A",
+                "source": "official"
+            }
+        ],
+        "Element Relation Commands": [
+            {
+                "name": "API.GetElementsRelatedToZones",
+                "description": "Returns related elements of the given zones. The related elements will be grouped by type. If multiple zones was given, then the order of the returned list is that of the given zones.",
+                "group": "Element Relation Commands",
+                "version": "N/A",
+                "source": "official"
+            }
+        ],
+        "Basic Commands": [
+            {
+                "name": "API.GetProductInfo",
+                "description": "Accesses the version information from the running Archicad.",
+                "group": "Basic Commands",
+                "version": "N/A",
+                "source": "official"
+            },
+            {
+                "name": "API.IsAlive",
+                "description": "Checks if the Archicad connection is alive.",
+                "group": "Basic Commands",
+                "version": "N/A",
+                "source": "official"
+            }
+        ]
+    }
+}
