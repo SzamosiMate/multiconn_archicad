@@ -5,10 +5,14 @@ class TapirApiPaths:
     COMMAND_DEFS_URL = "https://raw.githubusercontent.com/ENZYME-APD/tapir-archicad-automation/main/docs/archicad-addon/command_definitions.js"
     COMMON_SCHEMA_URL = "https://raw.githubusercontent.com/ENZYME-APD/tapir-archicad-automation/main/docs/archicad-addon/common_schema_definitions.js"
 
+    CODE_GEN_DIR = pathlib.Path(__file__).resolve().parent.parent
+    PROJECT_ROOT = CODE_GEN_DIR.parent
+    TAPIR_DIR = CODE_GEN_DIR / "tapir"
+
     # --- Base Directories ---
-    SCHEMA_DIR = pathlib.Path("../schema")
-    TEMP_MODELS_DIR = pathlib.Path("../temp_models")
-    FINAL_SRC_DIR = pathlib.Path("../../../src/multiconn_archicad")
+    SCHEMA_DIR = TAPIR_DIR / "schema"
+    TEMP_MODELS_DIR = TAPIR_DIR / "temp_models"
+    FINAL_SRC_DIR = PROJECT_ROOT / "src" / "multiconn_archicad"
 
     # --- Final Output Directories ---
     FINAL_MODELS_DIR = FINAL_SRC_DIR / "models" / "tapir"
@@ -37,7 +41,7 @@ class TapirApiPaths:
     FINAL_TYPED_DICT_COMMANDS = FINAL_DICTS_DIR / "commands.py"
 
     # --- Tests ---
-    TESTS_DIR = pathlib.Path("../../../tests/generated")
+    TESTS_DIR = PROJECT_ROOT / "tests" / "generated"
     GENERATED_TESTS_OUTPUT = TESTS_DIR / "test_generated_tapir_models.py"
 
     @classmethod
