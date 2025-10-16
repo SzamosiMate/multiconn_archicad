@@ -4,7 +4,7 @@ import json
 import sys
 import textwrap
 from types import UnionType
-from typing import Any, get_args, get_origin, Union
+from typing import Any, get_args, get_origin, Union, Annotated
 
 from code_generation.shared.utils import camel_to_snake
 
@@ -36,7 +36,7 @@ def get_model_class(model_name: str, source: str, dependencies: dict) -> Any | N
 
 def get_clean_type_hint(annotation: Any, dependencies: dict) -> str:
     """
-    Recursively builds a clean type hint string and records model dependencies.
+    Recursively builds a clean type hint string, discarding validation metadata.
     """
     if annotation is type(None):
         return "None"
@@ -44,6 +44,10 @@ def get_clean_type_hint(annotation: Any, dependencies: dict) -> str:
     origin = get_origin(annotation)
     if origin:
         args = get_args(annotation)
+
+        if origin is Annotated:
+            return get_clean_type_hint(args[0], dependencies)
+
         if origin is UnionType or origin is Union:
             return " | ".join(get_clean_type_hint(arg, dependencies) for arg in args)
 
@@ -56,7 +60,6 @@ def get_clean_type_hint(annotation: Any, dependencies: dict) -> str:
     hint = getattr(annotation, "__name__", str(annotation))
     module_name = getattr(annotation, "__module__", "")
 
-    # Check if this type is one of ours and record it
     if "multiconn_archicad.models" in module_name:
         if ".types" in module_name:
             dependencies["types"].add(hint)
@@ -72,23 +75,15 @@ def get_clean_type_hint(annotation: Any, dependencies: dict) -> str:
 def _build_signature_and_docs(
     snake_name: str, params_model: Any, result_model: Any, dependencies: dict
 ) -> tuple[str, list[str], str]:
-    """Builds the method signature, parameter docs, and return type hint."""
+    """Builds the method signature, parameter docs (with constraints), and return type hint."""
     signature_parts, param_docs = ["self"], []
 
     if params_model:
         sig = inspect.signature(params_model)
+        required_params = [p for p in sig.parameters.values() if p.default is inspect.Parameter.empty]
+        optional_params = [p for p in sig.parameters.values() if p.default is not inspect.Parameter.empty]
 
-        required_params = []
-        optional_params = []
-        for param in sig.parameters.values():
-            if param.default is inspect.Parameter.empty:
-                required_params.append(param)
-            else:
-                optional_params.append(param)
-
-        sorted_params = required_params + optional_params
-
-        for param in sorted_params:
+        for param in required_params + optional_params:
             param_name = camel_to_snake(param.name)
             type_hint = get_clean_type_hint(param.annotation, dependencies)
 
@@ -99,8 +94,25 @@ def _build_signature_and_docs(
 
             doc_line = f"{param_name} ({type_hint})"
             field_info = params_model.model_fields.get(param.name)
-            if field_info and field_info.description:
-                doc_line += f": {field_info.description}"
+            if field_info:
+                if field_info.description:
+                    doc_line += f": {field_info.description}"
+
+                constraints = []
+                if field_info.metadata:
+                    for meta_item in field_info.metadata:
+                        min_len = getattr(meta_item, "min_length", None)
+                        if min_len is not None:
+                            constraints.append(f"min_length={min_len}")
+
+                        max_len = getattr(meta_item, "max_length", None)
+                        if max_len is not None:
+                            constraints.append(f"max_length={max_len}")
+
+                if constraints:
+                    # Use set to ensure unique constraints if multiple metadata items have them
+                    doc_line += f" (Constraints: {', '.join(sorted(list(set(constraints))))})"
+
             param_docs.append(doc_line)
 
     return_type_hint = "None"
@@ -123,9 +135,7 @@ def _build_docstring(description: str, param_docs: list[str]) -> str:
     return docstring
 
 
-def _build_body(
-    original_command_name: str, source: str, params_model: Any, return_type_hint: str
-) -> str:
+def _build_body(original_command_name: str, source: str, params_model: Any, return_type_hint: str) -> str:
     """Constructs the implementation body of the method using direct import names."""
     core_call_method = "post_tapir_command" if source == "tapir" else "post_command"
     body_lines = []
@@ -170,11 +180,8 @@ def generate_method_code(command_details: dict[str, Any]) -> dict:
     params_model = get_model_class(f"{command_name}Parameters", source, dependencies)
     result_model = get_model_class(f"{command_name}Result", source, dependencies)
 
-    signature, param_docs, return_type = _build_signature_and_docs(
-        snake_name, params_model, result_model, dependencies
-    )
+    signature, param_docs, return_type = _build_signature_and_docs(snake_name, params_model, result_model, dependencies)
     docstring = _build_docstring(command_details["description"], param_docs)
-    # Pass the string `return_type` to _build_body, not the object `result_model`
     body = _build_body(original_cmd_name, source, params_model, return_type)
 
     return {
@@ -202,7 +209,6 @@ def main():
             for command in commands:
                 total_commands += 1
                 try:
-                    # The generate_method_code now returns a dict, so we update the command entry
                     generated_data = generate_method_code(command)
                     command.update(generated_data)
                 except Exception as e:
@@ -210,7 +216,7 @@ def main():
                         f"❌ FATAL: Failed to generate code for command '{command['name']}'. Error: {e}",
                         file=sys.stderr,
                     )
-                    raise  # Re-raise to ensure the pipeline stops
+                    raise
 
     print(f"✅ Successfully generated code for {total_commands} commands.")
     with open(args.output_file, "w", encoding="utf-8") as f:
