@@ -6,12 +6,16 @@ class OfficialApiPaths:
     BASE_URL = "https://archicadapi.graphisoft.com/JSONInterfaceDocumentation/content/"
     MENU_TREE_URL = f"{BASE_URL}menutree.json"
 
-    # --- Output Directory ---
-    BASE_SCHEMA_DIR = pathlib.Path("../base_schema")
-    SCHEMA_DIR = pathlib.Path("../schema")
-    TEMP_MODELS_DIR = pathlib.Path("../temp_models")
+    CODE_GEN_DIR = pathlib.Path(__file__).resolve().parent.parent
+    PROJECT_ROOT = CODE_GEN_DIR.parent
+    OFFICIAL_DIR = CODE_GEN_DIR / "official"
 
-    FINAL_SRC_DIR = pathlib.Path("../../../src/multiconn_archicad")
+    # --- Output Directory ---
+    BASE_SCHEMA_DIR = OFFICIAL_DIR / "base_schema"
+    SCHEMA_DIR = OFFICIAL_DIR / "schema"
+    TEMP_MODELS_DIR = OFFICIAL_DIR / "temp_models"
+
+    FINAL_SRC_DIR =  PROJECT_ROOT / "src" / "multiconn_archicad"
     FINAL_MODELS_DIR = FINAL_SRC_DIR / "models" / "official"
     FINAL_DICTS_DIR = FINAL_SRC_DIR / "dicts" / "official"
 
@@ -36,7 +40,7 @@ class OfficialApiPaths:
     FINAL_TYPED_DICT_COMMANDS = FINAL_DICTS_DIR / "commands.py"
 
     # --- Tests ---
-    TESTS_DIR = pathlib.Path("../../../tests/generated")
+    TESTS_DIR = PROJECT_ROOT / "tests" / "generated"
     GENERATED_TESTS_OUTPUT = TESTS_DIR / "test_generated_official_models.py"
 
     HEADERS = {
