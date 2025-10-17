@@ -4,30 +4,30 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 
-from .official.addon import AddonCommands
-from .official.attribute import AttributeCommands
-from .official.basic import BasicCommands
-from .official.classification import ClassificationCommands
-from .official.component import ComponentCommands
-from .official.element_geometry import ElementGeometryCommands
-from .official.element_listing import ElementListingCommands
-from .official.element_relation import ElementRelationCommands
-from .official.layout_book import LayoutBookCommands
-from .official.navigator_tree import NavigatorTreeCommands
-from .official.property import PropertyCommands
-from .official.view_map import ViewMapCommands
-from .tapir.application import ApplicationCommands
-from .tapir.attribute import AttributeCommands
-from .tapir.developer import DeveloperCommands
-from .tapir.element import ElementCommands
-from .tapir.favorites import FavoritesCommands
-from .tapir.issue_management import IssueManagementCommands
-from .tapir.library import LibraryCommands
-from .tapir.navigator import NavigatorCommands
-from .tapir.project import ProjectCommands
-from .tapir.property import PropertyCommands
-from .tapir.revision_management import RevisionManagementCommands
-from .tapir.teamwork import TeamworkCommands
+from .official.addon import AddonCommands as OfficialAddonCommands
+from .official.attribute import AttributeCommands as OfficialAttributeCommands
+from .official.basic import BasicCommands as OfficialBasicCommands
+from .official.classification import ClassificationCommands as OfficialClassificationCommands
+from .official.component import ComponentCommands as OfficialComponentCommands
+from .official.element_geometry import ElementGeometryCommands as OfficialElementGeometryCommands
+from .official.element_listing import ElementListingCommands as OfficialElementListingCommands
+from .official.element_relation import ElementRelationCommands as OfficialElementRelationCommands
+from .official.layout_book import LayoutBookCommands as OfficialLayoutBookCommands
+from .official.navigator_tree import NavigatorTreeCommands as OfficialNavigatorTreeCommands
+from .official.property import PropertyCommands as OfficialPropertyCommands
+from .official.view_map import ViewMapCommands as OfficialViewMapCommands
+from .tapir.application import ApplicationCommands as TapirApplicationCommands
+from .tapir.attribute import AttributeCommands as TapirAttributeCommands
+from .tapir.developer import DeveloperCommands as TapirDeveloperCommands
+from .tapir.element import ElementCommands as TapirElementCommands
+from .tapir.favorites import FavoritesCommands as TapirFavoritesCommands
+from .tapir.issue_management import IssueManagementCommands as TapirIssueManagementCommands
+from .tapir.library import LibraryCommands as TapirLibraryCommands
+from .tapir.navigator import NavigatorCommands as TapirNavigatorCommands
+from .tapir.project import ProjectCommands as TapirProjectCommands
+from .tapir.property import PropertyCommands as TapirPropertyCommands
+from .tapir.revision_management import RevisionManagementCommands as TapirRevisionManagementCommands
+from .tapir.teamwork import TeamworkCommands as TapirTeamworkCommands
 
 if TYPE_CHECKING:
     from multiconn_archicad.core.core_commands import CoreCommands
@@ -37,36 +37,36 @@ if TYPE_CHECKING:
 class TapirApi:
     """A container for all command groups of the Archicad Tapir API."""
     def __init__(self, core: CoreCommands):
-        self.application = ApplicationCommands(core)
-        self.attribute = AttributeCommands(core)
-        self.developer = DeveloperCommands(core)
-        self.element = ElementCommands(core)
-        self.favorites = FavoritesCommands(core)
-        self.issue_management = IssueManagementCommands(core)
-        self.library = LibraryCommands(core)
-        self.navigator = NavigatorCommands(core)
-        self.project = ProjectCommands(core)
-        self.property = PropertyCommands(core)
-        self.revision_management = RevisionManagementCommands(core)
-        self.teamwork = TeamworkCommands(core)
+        self.application = TapirApplicationCommands(core)
+        self.attribute = TapirAttributeCommands(core)
+        self.developer = TapirDeveloperCommands(core)
+        self.element = TapirElementCommands(core)
+        self.favorites = TapirFavoritesCommands(core)
+        self.issue_management = TapirIssueManagementCommands(core)
+        self.library = TapirLibraryCommands(core)
+        self.navigator = TapirNavigatorCommands(core)
+        self.project = TapirProjectCommands(core)
+        self.property = TapirPropertyCommands(core)
+        self.revision_management = TapirRevisionManagementCommands(core)
+        self.teamwork = TapirTeamworkCommands(core)
 
 
 # --- Container class for Official commands ---
 class OfficialApi:
     """A container for all command groups of the Archicad Official API."""
     def __init__(self, core: CoreCommands):
-        self.addon = AddonCommands(core)
-        self.attribute = AttributeCommands(core)
-        self.basic = BasicCommands(core)
-        self.classification = ClassificationCommands(core)
-        self.component = ComponentCommands(core)
-        self.element_geometry = ElementGeometryCommands(core)
-        self.element_listing = ElementListingCommands(core)
-        self.element_relation = ElementRelationCommands(core)
-        self.layout_book = LayoutBookCommands(core)
-        self.navigator_tree = NavigatorTreeCommands(core)
-        self.property = PropertyCommands(core)
-        self.view_map = ViewMapCommands(core)
+        self.addon = OfficialAddonCommands(core)
+        self.attribute = OfficialAttributeCommands(core)
+        self.basic = OfficialBasicCommands(core)
+        self.classification = OfficialClassificationCommands(core)
+        self.component = OfficialComponentCommands(core)
+        self.element_geometry = OfficialElementGeometryCommands(core)
+        self.element_listing = OfficialElementListingCommands(core)
+        self.element_relation = OfficialElementRelationCommands(core)
+        self.layout_book = OfficialLayoutBookCommands(core)
+        self.navigator_tree = OfficialNavigatorTreeCommands(core)
+        self.property = OfficialPropertyCommands(core)
+        self.view_map = OfficialViewMapCommands(core)
 
 
 class UnifiedApi:
