@@ -4,8 +4,28 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 
-from multiconn_archicad.models.tapir.commands import AddCommentToIssueParameters, AttachElementsToIssueParameters, CreateIssueParameters, CreateIssueResult, DeleteIssueParameters, DetachElementsFromIssueParameters, ExportIssuesToBCFParameters, GetCommentsFromIssueParameters, GetCommentsFromIssueResult, GetElementsAttachedToIssueParameters, GetElementsAttachedToIssueResult, GetIssuesResult, ImportIssuesFromBCFParameters
-from multiconn_archicad.models.tapir.types import ElementIdArrayItem, IssueCommentStatus, IssueElementType, IssueId, IssueIdArrayItem
+from multiconn_archicad.models.tapir.commands import (
+    AddCommentToIssueParameters,
+    AttachElementsToIssueParameters,
+    CreateIssueParameters,
+    CreateIssueResult,
+    DeleteIssueParameters,
+    DetachElementsFromIssueParameters,
+    ExportIssuesToBCFParameters,
+    GetCommentsFromIssueParameters,
+    GetCommentsFromIssueResult,
+    GetElementsAttachedToIssueParameters,
+    GetElementsAttachedToIssueResult,
+    GetIssuesResult,
+    ImportIssuesFromBCFParameters,
+)
+from multiconn_archicad.models.tapir.types import (
+    ElementIdArrayItem,
+    IssueCommentStatus,
+    IssueElementType,
+    IssueId,
+    IssueIdArrayItem,
+)
 
 if TYPE_CHECKING:
     from multiconn_archicad.core.core_commands import CoreCommands
@@ -15,13 +35,8 @@ class IssueManagementCommands:
     def __init__(self, core: CoreCommands):
         self._core = core
 
-
     def add_comment_to_issue(
-        self,
-        issue_id: IssueId,
-        text: str,
-        author: str | None = None,
-        status: IssueCommentStatus | None = None
+        self, issue_id: IssueId, text: str, author: str | None = None, status: IssueCommentStatus | None = None
     ) -> None:
         """
         Adds a new comment to the specified issue.
@@ -37,24 +52,19 @@ class IssueManagementCommands:
             RequestError: If there is a network or connection error.
         """
         params_dict = {
-                'issueId': issue_id,
-                'author': author,
-                'status': status,
-                'text': text,
-            }
+            "issueId": issue_id,
+            "author": author,
+            "status": status,
+            "text": text,
+        }
         validated_params = AddCommentToIssueParameters(**params_dict)
         self._core.post_tapir_command(
-            "AddCommentToIssue",
-            validated_params.model_dump(by_alias=True, exclude_none=True)
+            "AddCommentToIssue", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
         return None
 
-
     def attach_elements_to_issue(
-        self,
-        issue_id: IssueId,
-        elements: list[ElementIdArrayItem],
-        type: IssueElementType
+        self, issue_id: IssueId, elements: list[ElementIdArrayItem], type: IssueElementType
     ) -> None:
         """
         Attaches elements to the specified issue.
@@ -69,23 +79,18 @@ class IssueManagementCommands:
             RequestError: If there is a network or connection error.
         """
         params_dict = {
-                'issueId': issue_id,
-                'elements': elements,
-                'type': type,
-            }
+            "issueId": issue_id,
+            "elements": elements,
+            "type": type,
+        }
         validated_params = AttachElementsToIssueParameters(**params_dict)
         self._core.post_tapir_command(
-            "AttachElementsToIssue",
-            validated_params.model_dump(by_alias=True, exclude_none=True)
+            "AttachElementsToIssue", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
         return None
 
-
     def create_issue(
-        self,
-        name: str,
-        parent_issue_id: IssueId | None = None,
-        tag_text: str | None = None
+        self, name: str, parent_issue_id: IssueId | None = None, tag_text: str | None = None
     ) -> CreateIssueResult:
         """
         Creates a new issue.
@@ -100,23 +105,17 @@ class IssueManagementCommands:
             RequestError: If there is a network or connection error.
         """
         params_dict = {
-                'name': name,
-                'parentIssueId': parent_issue_id,
-                'tagText': tag_text,
-            }
+            "name": name,
+            "parentIssueId": parent_issue_id,
+            "tagText": tag_text,
+        }
         validated_params = CreateIssueParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateIssue",
-            validated_params.model_dump(by_alias=True, exclude_none=True)
+            "CreateIssue", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
         return CreateIssueResult.model_validate(response_dict)
 
-
-    def delete_issue(
-        self,
-        issue_id: IssueId,
-        accept_all_elements: bool | None = None
-    ) -> None:
+    def delete_issue(self, issue_id: IssueId, accept_all_elements: bool | None = None) -> None:
         """
         Deletes the specified issue.
 
@@ -130,22 +129,14 @@ class IssueManagementCommands:
             RequestError: If there is a network or connection error.
         """
         params_dict = {
-                'issueId': issue_id,
-                'acceptAllElements': accept_all_elements,
-            }
+            "issueId": issue_id,
+            "acceptAllElements": accept_all_elements,
+        }
         validated_params = DeleteIssueParameters(**params_dict)
-        self._core.post_tapir_command(
-            "DeleteIssue",
-            validated_params.model_dump(by_alias=True, exclude_none=True)
-        )
+        self._core.post_tapir_command("DeleteIssue", validated_params.model_dump(by_alias=True, exclude_none=True))
         return None
 
-
-    def detach_elements_from_issue(
-        self,
-        issue_id: IssueId,
-        elements: list[ElementIdArrayItem]
-    ) -> None:
+    def detach_elements_from_issue(self, issue_id: IssueId, elements: list[ElementIdArrayItem]) -> None:
         """
         Detaches elements from the specified issue.
 
@@ -158,23 +149,21 @@ class IssueManagementCommands:
             RequestError: If there is a network or connection error.
         """
         params_dict = {
-                'issueId': issue_id,
-                'elements': elements,
-            }
+            "issueId": issue_id,
+            "elements": elements,
+        }
         validated_params = DetachElementsFromIssueParameters(**params_dict)
         self._core.post_tapir_command(
-            "DetachElementsFromIssue",
-            validated_params.model_dump(by_alias=True, exclude_none=True)
+            "DetachElementsFromIssue", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
         return None
-
 
     def export_issues_to_bcf(
         self,
         export_path: str,
         use_external_id: bool,
         align_by_survey_point: bool,
-        issues: list[IssueIdArrayItem] | None = None
+        issues: list[IssueIdArrayItem] | None = None,
     ) -> None:
         """
         Exports specified issues to a BCF file.
@@ -192,23 +181,18 @@ class IssueManagementCommands:
             RequestError: If there is a network or connection error.
         """
         params_dict = {
-                'issues': issues,
-                'exportPath': export_path,
-                'useExternalId': use_external_id,
-                'alignBySurveyPoint': align_by_survey_point,
-            }
+            "issues": issues,
+            "exportPath": export_path,
+            "useExternalId": use_external_id,
+            "alignBySurveyPoint": align_by_survey_point,
+        }
         validated_params = ExportIssuesToBCFParameters(**params_dict)
         self._core.post_tapir_command(
-            "ExportIssuesToBCF",
-            validated_params.model_dump(by_alias=True, exclude_none=True)
+            "ExportIssuesToBCF", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
         return None
 
-
-    def get_comments_from_issue(
-        self,
-        issue_id: IssueId
-    ) -> GetCommentsFromIssueResult:
+    def get_comments_from_issue(self, issue_id: IssueId) -> GetCommentsFromIssueResult:
         """
         Retrieves comments information from the specified issue.
 
@@ -220,20 +204,16 @@ class IssueManagementCommands:
             RequestError: If there is a network or connection error.
         """
         params_dict = {
-                'issueId': issue_id,
-            }
+            "issueId": issue_id,
+        }
         validated_params = GetCommentsFromIssueParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetCommentsFromIssue",
-            validated_params.model_dump(by_alias=True, exclude_none=True)
+            "GetCommentsFromIssue", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
         return GetCommentsFromIssueResult.model_validate(response_dict)
 
-
     def get_elements_attached_to_issue(
-        self,
-        issue_id: IssueId,
-        type: IssueElementType
+        self, issue_id: IssueId, type: IssueElementType
     ) -> GetElementsAttachedToIssueResult:
         """
         Retrieves attached elements of the specified issue, filtered by attachment type.
@@ -247,20 +227,16 @@ class IssueManagementCommands:
             RequestError: If there is a network or connection error.
         """
         params_dict = {
-                'issueId': issue_id,
-                'type': type,
-            }
+            "issueId": issue_id,
+            "type": type,
+        }
         validated_params = GetElementsAttachedToIssueParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetElementsAttachedToIssue",
-            validated_params.model_dump(by_alias=True, exclude_none=True)
+            "GetElementsAttachedToIssue", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
         return GetElementsAttachedToIssueResult.model_validate(response_dict)
 
-
-    def get_issues(
-        self
-    ) -> GetIssuesResult:
+    def get_issues(self) -> GetIssuesResult:
         """
         Retrieves information about existing issues.
 
@@ -268,17 +244,10 @@ class IssueManagementCommands:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
         """
-        response_dict = self._core.post_tapir_command(
-            "GetIssues"
-        )
+        response_dict = self._core.post_tapir_command("GetIssues")
         return GetIssuesResult.model_validate(response_dict)
 
-
-    def import_issues_from_bcf(
-        self,
-        import_path: str,
-        align_by_survey_point: bool
-    ) -> None:
+    def import_issues_from_bcf(self, import_path: str, align_by_survey_point: bool) -> None:
         """
         Imports issues from the specified BCF file.
 
@@ -292,12 +261,11 @@ class IssueManagementCommands:
             RequestError: If there is a network or connection error.
         """
         params_dict = {
-                'importPath': import_path,
-                'alignBySurveyPoint': align_by_survey_point,
-            }
+            "importPath": import_path,
+            "alignBySurveyPoint": align_by_survey_point,
+        }
         validated_params = ImportIssuesFromBCFParameters(**params_dict)
         self._core.post_tapir_command(
-            "ImportIssuesFromBCF",
-            validated_params.model_dump(by_alias=True, exclude_none=True)
+            "ImportIssuesFromBCF", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
         return None

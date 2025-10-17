@@ -4,7 +4,15 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 
-from multiconn_archicad.models.tapir.commands import GetCurrentRevisionChangesOfLayoutsParameters, GetCurrentRevisionChangesOfLayoutsResult, GetDocumentRevisionsResult, GetRevisionChangesOfElementsParameters, GetRevisionChangesOfElementsResult, GetRevisionChangesResult, GetRevisionIssuesResult
+from multiconn_archicad.models.tapir.commands import (
+    GetCurrentRevisionChangesOfLayoutsParameters,
+    GetCurrentRevisionChangesOfLayoutsResult,
+    GetDocumentRevisionsResult,
+    GetRevisionChangesOfElementsParameters,
+    GetRevisionChangesOfElementsResult,
+    GetRevisionChangesResult,
+    GetRevisionIssuesResult,
+)
 from multiconn_archicad.models.tapir.types import DatabaseIdArrayItem, ElementIdArrayItem
 
 if TYPE_CHECKING:
@@ -15,10 +23,8 @@ class RevisionManagementCommands:
     def __init__(self, core: CoreCommands):
         self._core = core
 
-
     def get_current_revision_changes_of_layouts(
-        self,
-        layout_database_ids: list[DatabaseIdArrayItem]
+        self, layout_database_ids: list[DatabaseIdArrayItem]
     ) -> GetCurrentRevisionChangesOfLayoutsResult:
         """
         Retrieves all changes belong to the last revision of the given layouts.
@@ -31,19 +37,15 @@ class RevisionManagementCommands:
             RequestError: If there is a network or connection error.
         """
         params_dict = {
-                'layoutDatabaseIds': layout_database_ids,
-            }
+            "layoutDatabaseIds": layout_database_ids,
+        }
         validated_params = GetCurrentRevisionChangesOfLayoutsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetCurrentRevisionChangesOfLayouts",
-            validated_params.model_dump(by_alias=True, exclude_none=True)
+            "GetCurrentRevisionChangesOfLayouts", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
         return GetCurrentRevisionChangesOfLayoutsResult.model_validate(response_dict)
 
-
-    def get_document_revisions(
-        self
-    ) -> GetDocumentRevisionsResult:
+    def get_document_revisions(self) -> GetDocumentRevisionsResult:
         """
         Retrieves all document revisions.
 
@@ -51,15 +53,10 @@ class RevisionManagementCommands:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
         """
-        response_dict = self._core.post_tapir_command(
-            "GetDocumentRevisions"
-        )
+        response_dict = self._core.post_tapir_command("GetDocumentRevisions")
         return GetDocumentRevisionsResult.model_validate(response_dict)
 
-
-    def get_revision_changes(
-        self
-    ) -> GetRevisionChangesResult:
+    def get_revision_changes(self) -> GetRevisionChangesResult:
         """
         Retrieves all changes.
 
@@ -67,15 +64,11 @@ class RevisionManagementCommands:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
         """
-        response_dict = self._core.post_tapir_command(
-            "GetRevisionChanges"
-        )
+        response_dict = self._core.post_tapir_command("GetRevisionChanges")
         return GetRevisionChangesResult.model_validate(response_dict)
 
-
     def get_revision_changes_of_elements(
-        self,
-        elements: list[ElementIdArrayItem]
+        self, elements: list[ElementIdArrayItem]
     ) -> GetRevisionChangesOfElementsResult:
         """
         Retrieves the changes belong to the given elements.
@@ -88,19 +81,15 @@ class RevisionManagementCommands:
             RequestError: If there is a network or connection error.
         """
         params_dict = {
-                'elements': elements,
-            }
+            "elements": elements,
+        }
         validated_params = GetRevisionChangesOfElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetRevisionChangesOfElements",
-            validated_params.model_dump(by_alias=True, exclude_none=True)
+            "GetRevisionChangesOfElements", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
         return GetRevisionChangesOfElementsResult.model_validate(response_dict)
 
-
-    def get_revision_issues(
-        self
-    ) -> GetRevisionIssuesResult:
+    def get_revision_issues(self) -> GetRevisionIssuesResult:
         """
         Retrieves all issues.
 
@@ -108,7 +97,5 @@ class RevisionManagementCommands:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
         """
-        response_dict = self._core.post_tapir_command(
-            "GetRevisionIssues"
-        )
+        response_dict = self._core.post_tapir_command("GetRevisionIssues")
         return GetRevisionIssuesResult.model_validate(response_dict)

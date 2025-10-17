@@ -4,8 +4,17 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 
-from multiconn_archicad.models.official.commands import GetComponentsOfElementsParameters, GetComponentsOfElementsResult, GetPropertyValuesOfElementComponentsParameters, GetPropertyValuesOfElementComponentsResult
-from multiconn_archicad.models.official.types import ElementComponentIdArrayItem, ElementIdArrayItem, PropertyIdArrayItem
+from multiconn_archicad.models.official.commands import (
+    GetComponentsOfElementsParameters,
+    GetComponentsOfElementsResult,
+    GetPropertyValuesOfElementComponentsParameters,
+    GetPropertyValuesOfElementComponentsResult,
+)
+from multiconn_archicad.models.official.types import (
+    ElementComponentIdArrayItem,
+    ElementIdArrayItem,
+    PropertyIdArrayItem,
+)
 
 if TYPE_CHECKING:
     from multiconn_archicad.core.core_commands import CoreCommands
@@ -15,11 +24,7 @@ class ComponentCommands:
     def __init__(self, core: CoreCommands):
         self._core = core
 
-
-    def get_components_of_elements(
-        self,
-        elements: list[ElementIdArrayItem]
-    ) -> GetComponentsOfElementsResult:
+    def get_components_of_elements(self, elements: list[ElementIdArrayItem]) -> GetComponentsOfElementsResult:
         """
         Returns the identifier of every component for a list of elements. The order of the
         returned list is the same as the given elements.
@@ -32,20 +37,16 @@ class ComponentCommands:
             RequestError: If there is a network or connection error.
         """
         params_dict = {
-                'elements': elements,
-            }
+            "elements": elements,
+        }
         validated_params = GetComponentsOfElementsParameters(**params_dict)
         response_dict = self._core.post_command(
-            "API.GetComponentsOfElements",
-            validated_params.model_dump(by_alias=True, exclude_none=True)
+            "API.GetComponentsOfElements", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
         return GetComponentsOfElementsResult.model_validate(response_dict)
 
-
     def get_property_values_of_element_components(
-        self,
-        element_components: list[ElementComponentIdArrayItem],
-        properties: list[PropertyIdArrayItem]
+        self, element_components: list[ElementComponentIdArrayItem], properties: list[PropertyIdArrayItem]
     ) -> GetPropertyValuesOfElementComponentsResult:
         """
         Returns the property values of the components for the given property.
@@ -60,12 +61,11 @@ class ComponentCommands:
             RequestError: If there is a network or connection error.
         """
         params_dict = {
-                'elementComponents': element_components,
-                'properties': properties,
-            }
+            "elementComponents": element_components,
+            "properties": properties,
+        }
         validated_params = GetPropertyValuesOfElementComponentsParameters(**params_dict)
         response_dict = self._core.post_command(
-            "API.GetPropertyValuesOfElementComponents",
-            validated_params.model_dump(by_alias=True, exclude_none=True)
+            "API.GetPropertyValuesOfElementComponents", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
         return GetPropertyValuesOfElementComponentsResult.model_validate(response_dict)

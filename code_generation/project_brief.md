@@ -86,7 +86,7 @@ The current pipeline is robust and delivers a high-quality client library. The i
 1.  **Implement Result Alias Simplification:**
     *   **Task:** Enhance the pipeline to identify `...Result` models that are simple aliases for common types (e.g., a model that is just a wrapper for `list[ExecutionResult]`).
     *   **Implementation:**
-        *   In **Stage 1 (Schema Analysis)**, add logic to detect these schema patterns and add a flag (e.g., `"result_is_alias_for": "list[ExecutionResult]"`) to the `_command_details.json` metadata.
+        *   In[project_brief.md](project_brief.md) **Stage 1 (Schema Analysis)**, add logic to detect these schema patterns and add a flag (e.g., `"result_is_alias_for": "list[ExecutionResult]"`) to the `_command_details.json` metadata.
         *   In **Stage 2 (Code Generation)**, use this flag to generate cleaner, more explicit return type hints directly in the method signature (e.g., `-> list[ExecutionResult]`) instead of the redundant alias name.
 
 2.  **Integrate an Automated Formatting Step:**

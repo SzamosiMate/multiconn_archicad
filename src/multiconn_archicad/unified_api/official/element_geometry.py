@@ -4,7 +4,12 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 
-from multiconn_archicad.models.official.commands import Get2DBoundingBoxesParameters, Get2DBoundingBoxesResult, Get3DBoundingBoxesParameters, Get3DBoundingBoxesResult
+from multiconn_archicad.models.official.commands import (
+    Get2DBoundingBoxesParameters,
+    Get2DBoundingBoxesResult,
+    Get3DBoundingBoxesParameters,
+    Get3DBoundingBoxesResult,
+)
 from multiconn_archicad.models.official.types import ElementIdArrayItem
 
 if TYPE_CHECKING:
@@ -15,11 +20,7 @@ class ElementGeometryCommands:
     def __init__(self, core: CoreCommands):
         self._core = core
 
-
-    def get_2d_bounding_boxes(
-        self,
-        elements: list[ElementIdArrayItem]
-    ) -> Get2DBoundingBoxesResult:
+    def get_2d_bounding_boxes(self, elements: list[ElementIdArrayItem]) -> Get2DBoundingBoxesResult:
         """
         Get the 2D bounding box of elements identified by their GUIDs. The bounding box is
         calculated from the global origin on the floor plan view. The output is the array of the
@@ -34,20 +35,15 @@ class ElementGeometryCommands:
             RequestError: If there is a network or connection error.
         """
         params_dict = {
-                'elements': elements,
-            }
+            "elements": elements,
+        }
         validated_params = Get2DBoundingBoxesParameters(**params_dict)
         response_dict = self._core.post_command(
-            "API.Get2DBoundingBoxes",
-            validated_params.model_dump(by_alias=True, exclude_none=True)
+            "API.Get2DBoundingBoxes", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
         return Get2DBoundingBoxesResult.model_validate(response_dict)
 
-
-    def get_3d_bounding_boxes(
-        self,
-        elements: list[ElementIdArrayItem]
-    ) -> Get3DBoundingBoxesResult:
+    def get_3d_bounding_boxes(self, elements: list[ElementIdArrayItem]) -> Get3DBoundingBoxesResult:
         """
         Get the 3D bounding box of elements identified by their GUIDs. The bounding box is
         calculated from the global origin in the 3D view. The output is the array of the
@@ -62,11 +58,10 @@ class ElementGeometryCommands:
             RequestError: If there is a network or connection error.
         """
         params_dict = {
-                'elements': elements,
-            }
+            "elements": elements,
+        }
         validated_params = Get3DBoundingBoxesParameters(**params_dict)
         response_dict = self._core.post_command(
-            "API.Get3DBoundingBoxes",
-            validated_params.model_dump(by_alias=True, exclude_none=True)
+            "API.Get3DBoundingBoxes", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
         return Get3DBoundingBoxesResult.model_validate(response_dict)

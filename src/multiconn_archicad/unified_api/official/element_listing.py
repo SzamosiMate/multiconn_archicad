@@ -4,7 +4,17 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 
-from multiconn_archicad.models.official.commands import GetAllElementsResult, GetElementsByClassificationParameters, GetElementsByClassificationResult, GetElementsByTypeParameters, GetElementsByTypeResult, GetSelectedElementsParameters, GetSelectedElementsResult, GetTypesOfElementsParameters, GetTypesOfElementsResult
+from multiconn_archicad.models.official.commands import (
+    GetAllElementsResult,
+    GetElementsByClassificationParameters,
+    GetElementsByClassificationResult,
+    GetElementsByTypeParameters,
+    GetElementsByTypeResult,
+    GetSelectedElementsParameters,
+    GetSelectedElementsResult,
+    GetTypesOfElementsParameters,
+    GetTypesOfElementsResult,
+)
 from multiconn_archicad.models.official.types import ClassificationItemId, ElementIdArrayItem, ElementType
 
 if TYPE_CHECKING:
@@ -15,10 +25,7 @@ class ElementListingCommands:
     def __init__(self, core: CoreCommands):
         self._core = core
 
-
-    def get_all_elements(
-        self
-    ) -> GetAllElementsResult:
+    def get_all_elements(self) -> GetAllElementsResult:
         """
         Returns the identifier of every element in the current plan.
 
@@ -26,15 +33,11 @@ class ElementListingCommands:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
         """
-        response_dict = self._core.post_command(
-            "API.GetAllElements"
-        )
+        response_dict = self._core.post_command("API.GetAllElements")
         return GetAllElementsResult.model_validate(response_dict)
 
-
     def get_elements_by_classification(
-        self,
-        classification_item_id: ClassificationItemId
+        self, classification_item_id: ClassificationItemId
     ) -> GetElementsByClassificationResult:
         """
         Returns the identifier of every element with the given classification identifier.
@@ -47,20 +50,15 @@ class ElementListingCommands:
             RequestError: If there is a network or connection error.
         """
         params_dict = {
-                'classificationItemId': classification_item_id,
-            }
+            "classificationItemId": classification_item_id,
+        }
         validated_params = GetElementsByClassificationParameters(**params_dict)
         response_dict = self._core.post_command(
-            "API.GetElementsByClassification",
-            validated_params.model_dump(by_alias=True, exclude_none=True)
+            "API.GetElementsByClassification", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
         return GetElementsByClassificationResult.model_validate(response_dict)
 
-
-    def get_elements_by_type(
-        self,
-        element_type: ElementType
-    ) -> GetElementsByTypeResult:
+    def get_elements_by_type(self, element_type: ElementType) -> GetElementsByTypeResult:
         """
         Returns the identifier of every element of the given type on the plan.
 
@@ -72,20 +70,16 @@ class ElementListingCommands:
             RequestError: If there is a network or connection error.
         """
         params_dict = {
-                'elementType': element_type,
-            }
+            "elementType": element_type,
+        }
         validated_params = GetElementsByTypeParameters(**params_dict)
         response_dict = self._core.post_command(
-            "API.GetElementsByType",
-            validated_params.model_dump(by_alias=True, exclude_none=True)
+            "API.GetElementsByType", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
         return GetElementsByTypeResult.model_validate(response_dict)
 
-
     def get_selected_elements(
-        self,
-        only_editable: bool | None = None,
-        only_supported_types: bool | None = None
+        self, only_editable: bool | None = None, only_supported_types: bool | None = None
     ) -> GetSelectedElementsResult:
         """
         Returns the identifiers of selected elements in the current plan.
@@ -103,21 +97,16 @@ class ElementListingCommands:
             RequestError: If there is a network or connection error.
         """
         params_dict = {
-                'onlyEditable': only_editable,
-                'onlySupportedTypes': only_supported_types,
-            }
+            "onlyEditable": only_editable,
+            "onlySupportedTypes": only_supported_types,
+        }
         validated_params = GetSelectedElementsParameters(**params_dict)
         response_dict = self._core.post_command(
-            "API.GetSelectedElements",
-            validated_params.model_dump(by_alias=True, exclude_none=True)
+            "API.GetSelectedElements", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
         return GetSelectedElementsResult.model_validate(response_dict)
 
-
-    def get_types_of_elements(
-        self,
-        elements: list[ElementIdArrayItem]
-    ) -> GetTypesOfElementsResult:
+    def get_types_of_elements(self, elements: list[ElementIdArrayItem]) -> GetTypesOfElementsResult:
         """
         Returns the types of the given elements.
 
@@ -129,11 +118,10 @@ class ElementListingCommands:
             RequestError: If there is a network or connection error.
         """
         params_dict = {
-                'elements': elements,
-            }
+            "elements": elements,
+        }
         validated_params = GetTypesOfElementsParameters(**params_dict)
         response_dict = self._core.post_command(
-            "API.GetTypesOfElements",
-            validated_params.model_dump(by_alias=True, exclude_none=True)
+            "API.GetTypesOfElements", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
         return GetTypesOfElementsResult.model_validate(response_dict)

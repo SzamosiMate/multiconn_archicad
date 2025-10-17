@@ -4,8 +4,57 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 
-from multiconn_archicad.models.official.commands import CreateAttributeFoldersParameters, CreateAttributeFoldersResult, DeleteAttributeFoldersParameters, DeleteAttributeFoldersResult, DeleteAttributesParameters, DeleteAttributesResult, GetActivePenTablesResult, GetAttributeFolderStructureParameters, GetAttributeFolderStructureResult, GetAttributeFoldersParameters, GetAttributeFoldersResult, GetAttributesByTypeParameters, GetAttributesByTypeResult, GetAttributesIndicesParameters, GetAttributesIndicesResult, GetBuildingMaterialAttributesParameters, GetBuildingMaterialAttributesResult, GetCompositeAttributesParameters, GetCompositeAttributesResult, GetFillAttributesParameters, GetFillAttributesResult, GetLayerAttributesParameters, GetLayerAttributesResult, GetLayerCombinationAttributesParameters, GetLayerCombinationAttributesResult, GetLineAttributesParameters, GetLineAttributesResult, GetPenTableAttributesParameters, GetPenTableAttributesResult, GetProfileAttributePreviewParameters, GetProfileAttributePreviewResult, GetProfileAttributesParameters, GetProfileAttributesResult, GetSurfaceAttributesParameters, GetSurfaceAttributesResult, GetZoneCategoryAttributesParameters, GetZoneCategoryAttributesResult, MoveAttributesAndFoldersParameters, RenameAttributeFoldersParameters, RenameAttributeFoldersResult
-from multiconn_archicad.models.official.types import AttributeFolderCreationParameters, AttributeFolderId, AttributeFolderIdWrapperItem, AttributeFolderRenameParameters, AttributeIdWrapperItem, AttributeType, RGBColor
+from multiconn_archicad.models.official.commands import (
+    CreateAttributeFoldersParameters,
+    CreateAttributeFoldersResult,
+    DeleteAttributeFoldersParameters,
+    DeleteAttributeFoldersResult,
+    DeleteAttributesParameters,
+    DeleteAttributesResult,
+    GetActivePenTablesResult,
+    GetAttributeFolderStructureParameters,
+    GetAttributeFolderStructureResult,
+    GetAttributeFoldersParameters,
+    GetAttributeFoldersResult,
+    GetAttributesByTypeParameters,
+    GetAttributesByTypeResult,
+    GetAttributesIndicesParameters,
+    GetAttributesIndicesResult,
+    GetBuildingMaterialAttributesParameters,
+    GetBuildingMaterialAttributesResult,
+    GetCompositeAttributesParameters,
+    GetCompositeAttributesResult,
+    GetFillAttributesParameters,
+    GetFillAttributesResult,
+    GetLayerAttributesParameters,
+    GetLayerAttributesResult,
+    GetLayerCombinationAttributesParameters,
+    GetLayerCombinationAttributesResult,
+    GetLineAttributesParameters,
+    GetLineAttributesResult,
+    GetPenTableAttributesParameters,
+    GetPenTableAttributesResult,
+    GetProfileAttributePreviewParameters,
+    GetProfileAttributePreviewResult,
+    GetProfileAttributesParameters,
+    GetProfileAttributesResult,
+    GetSurfaceAttributesParameters,
+    GetSurfaceAttributesResult,
+    GetZoneCategoryAttributesParameters,
+    GetZoneCategoryAttributesResult,
+    MoveAttributesAndFoldersParameters,
+    RenameAttributeFoldersParameters,
+    RenameAttributeFoldersResult,
+)
+from multiconn_archicad.models.official.types import (
+    AttributeFolderCreationParameters,
+    AttributeFolderId,
+    AttributeFolderIdWrapperItem,
+    AttributeFolderRenameParameters,
+    AttributeIdWrapperItem,
+    AttributeType,
+    RGBColor,
+)
 
 if TYPE_CHECKING:
     from multiconn_archicad.core.core_commands import CoreCommands
@@ -15,10 +64,8 @@ class AttributeCommands:
     def __init__(self, core: CoreCommands):
         self._core = core
 
-
     def create_attribute_folders(
-        self,
-        attribute_folders: list[AttributeFolderCreationParameters]
+        self, attribute_folders: list[AttributeFolderCreationParameters]
     ) -> CreateAttributeFoldersResult:
         """
         Creates attribute folders. To create a folder, its full path has to be provided. The
@@ -32,19 +79,16 @@ class AttributeCommands:
             RequestError: If there is a network or connection error.
         """
         params_dict = {
-                'attributeFolders': attribute_folders,
-            }
+            "attributeFolders": attribute_folders,
+        }
         validated_params = CreateAttributeFoldersParameters(**params_dict)
         response_dict = self._core.post_command(
-            "API.CreateAttributeFolders",
-            validated_params.model_dump(by_alias=True, exclude_none=True)
+            "API.CreateAttributeFolders", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
         return CreateAttributeFoldersResult.model_validate(response_dict)
 
-
     def delete_attribute_folders(
-        self,
-        attribute_folder_ids: list[AttributeFolderIdWrapperItem]
+        self, attribute_folder_ids: list[AttributeFolderIdWrapperItem]
     ) -> DeleteAttributeFoldersResult:
         """
         Deletes attribute folders and all the deletable attributes and folders it contains. To
@@ -59,20 +103,15 @@ class AttributeCommands:
             RequestError: If there is a network or connection error.
         """
         params_dict = {
-                'attributeFolderIds': attribute_folder_ids,
-            }
+            "attributeFolderIds": attribute_folder_ids,
+        }
         validated_params = DeleteAttributeFoldersParameters(**params_dict)
         response_dict = self._core.post_command(
-            "API.DeleteAttributeFolders",
-            validated_params.model_dump(by_alias=True, exclude_none=True)
+            "API.DeleteAttributeFolders", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
         return DeleteAttributeFoldersResult.model_validate(response_dict)
 
-
-    def delete_attributes(
-        self,
-        attribute_ids: list[AttributeIdWrapperItem]
-    ) -> DeleteAttributesResult:
+    def delete_attributes(self, attribute_ids: list[AttributeIdWrapperItem]) -> DeleteAttributesResult:
         """
         Deletes attributes.
 
@@ -84,19 +123,15 @@ class AttributeCommands:
             RequestError: If there is a network or connection error.
         """
         params_dict = {
-                'attributeIds': attribute_ids,
-            }
+            "attributeIds": attribute_ids,
+        }
         validated_params = DeleteAttributesParameters(**params_dict)
         response_dict = self._core.post_command(
-            "API.DeleteAttributes",
-            validated_params.model_dump(by_alias=True, exclude_none=True)
+            "API.DeleteAttributes", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
         return DeleteAttributesResult.model_validate(response_dict)
 
-
-    def get_active_pen_tables(
-        self
-    ) -> GetActivePenTablesResult:
+    def get_active_pen_tables(self) -> GetActivePenTablesResult:
         """
         Returns the model view and layout book pen table identifiers.
 
@@ -104,16 +139,11 @@ class AttributeCommands:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
         """
-        response_dict = self._core.post_command(
-            "API.GetActivePenTables"
-        )
+        response_dict = self._core.post_command("API.GetActivePenTables")
         return GetActivePenTablesResult.model_validate(response_dict)
 
-
     def get_attribute_folder_structure(
-        self,
-        attribute_type: AttributeType,
-        path: list[str] | None = None
+        self, attribute_type: AttributeType, path: list[str] | None = None
     ) -> GetAttributeFolderStructureResult:
         """
         Returns the detailed folder structure for the attributes of a given type. If the path is
@@ -128,20 +158,17 @@ class AttributeCommands:
             RequestError: If there is a network or connection error.
         """
         params_dict = {
-                'attributeType': attribute_type,
-                'path': path,
-            }
+            "attributeType": attribute_type,
+            "path": path,
+        }
         validated_params = GetAttributeFolderStructureParameters(**params_dict)
         response_dict = self._core.post_command(
-            "API.GetAttributeFolderStructure",
-            validated_params.model_dump(by_alias=True, exclude_none=True)
+            "API.GetAttributeFolderStructure", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
         return GetAttributeFolderStructureResult.model_validate(response_dict)
 
-
     def get_attribute_folders(
-        self,
-        attribute_folder_ids: list[AttributeFolderIdWrapperItem]
+        self, attribute_folder_ids: list[AttributeFolderIdWrapperItem]
     ) -> GetAttributeFoldersResult:
         """
         Returns the detailed attribute folders identified by their Ids.
@@ -155,20 +182,15 @@ class AttributeCommands:
             RequestError: If there is a network or connection error.
         """
         params_dict = {
-                'attributeFolderIds': attribute_folder_ids,
-            }
+            "attributeFolderIds": attribute_folder_ids,
+        }
         validated_params = GetAttributeFoldersParameters(**params_dict)
         response_dict = self._core.post_command(
-            "API.GetAttributeFolders",
-            validated_params.model_dump(by_alias=True, exclude_none=True)
+            "API.GetAttributeFolders", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
         return GetAttributeFoldersResult.model_validate(response_dict)
 
-
-    def get_attributes_by_type(
-        self,
-        attribute_type: AttributeType
-    ) -> GetAttributesByTypeResult:
+    def get_attributes_by_type(self, attribute_type: AttributeType) -> GetAttributesByTypeResult:
         """
         Returns the identifier of every attribute of the given type.
 
@@ -180,20 +202,15 @@ class AttributeCommands:
             RequestError: If there is a network or connection error.
         """
         params_dict = {
-                'attributeType': attribute_type,
-            }
+            "attributeType": attribute_type,
+        }
         validated_params = GetAttributesByTypeParameters(**params_dict)
         response_dict = self._core.post_command(
-            "API.GetAttributesByType",
-            validated_params.model_dump(by_alias=True, exclude_none=True)
+            "API.GetAttributesByType", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
         return GetAttributesByTypeResult.model_validate(response_dict)
 
-
-    def get_attributes_indices(
-        self,
-        attribute_ids: list[AttributeIdWrapperItem]
-    ) -> GetAttributesIndicesResult:
+    def get_attributes_indices(self, attribute_ids: list[AttributeIdWrapperItem]) -> GetAttributesIndicesResult:
         """
         Returns the requested indices and guids of attributes.
 
@@ -205,19 +222,16 @@ class AttributeCommands:
             RequestError: If there is a network or connection error.
         """
         params_dict = {
-                'attributeIds': attribute_ids,
-            }
+            "attributeIds": attribute_ids,
+        }
         validated_params = GetAttributesIndicesParameters(**params_dict)
         response_dict = self._core.post_command(
-            "API.GetAttributesIndices",
-            validated_params.model_dump(by_alias=True, exclude_none=True)
+            "API.GetAttributesIndices", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
         return GetAttributesIndicesResult.model_validate(response_dict)
 
-
     def get_building_material_attributes(
-        self,
-        attribute_ids: list[AttributeIdWrapperItem]
+        self, attribute_ids: list[AttributeIdWrapperItem]
     ) -> GetBuildingMaterialAttributesResult:
         """
         Returns the detailed building material attributes identified by their GUIDs.
@@ -230,20 +244,15 @@ class AttributeCommands:
             RequestError: If there is a network or connection error.
         """
         params_dict = {
-                'attributeIds': attribute_ids,
-            }
+            "attributeIds": attribute_ids,
+        }
         validated_params = GetBuildingMaterialAttributesParameters(**params_dict)
         response_dict = self._core.post_command(
-            "API.GetBuildingMaterialAttributes",
-            validated_params.model_dump(by_alias=True, exclude_none=True)
+            "API.GetBuildingMaterialAttributes", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
         return GetBuildingMaterialAttributesResult.model_validate(response_dict)
 
-
-    def get_composite_attributes(
-        self,
-        attribute_ids: list[AttributeIdWrapperItem]
-    ) -> GetCompositeAttributesResult:
+    def get_composite_attributes(self, attribute_ids: list[AttributeIdWrapperItem]) -> GetCompositeAttributesResult:
         """
         Returns the detailed composite attributes identified by their GUIDs.
 
@@ -255,20 +264,15 @@ class AttributeCommands:
             RequestError: If there is a network or connection error.
         """
         params_dict = {
-                'attributeIds': attribute_ids,
-            }
+            "attributeIds": attribute_ids,
+        }
         validated_params = GetCompositeAttributesParameters(**params_dict)
         response_dict = self._core.post_command(
-            "API.GetCompositeAttributes",
-            validated_params.model_dump(by_alias=True, exclude_none=True)
+            "API.GetCompositeAttributes", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
         return GetCompositeAttributesResult.model_validate(response_dict)
 
-
-    def get_fill_attributes(
-        self,
-        attribute_ids: list[AttributeIdWrapperItem]
-    ) -> GetFillAttributesResult:
+    def get_fill_attributes(self, attribute_ids: list[AttributeIdWrapperItem]) -> GetFillAttributesResult:
         """
         Returns the detailed fill attributes identified by their GUIDs.
 
@@ -280,20 +284,15 @@ class AttributeCommands:
             RequestError: If there is a network or connection error.
         """
         params_dict = {
-                'attributeIds': attribute_ids,
-            }
+            "attributeIds": attribute_ids,
+        }
         validated_params = GetFillAttributesParameters(**params_dict)
         response_dict = self._core.post_command(
-            "API.GetFillAttributes",
-            validated_params.model_dump(by_alias=True, exclude_none=True)
+            "API.GetFillAttributes", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
         return GetFillAttributesResult.model_validate(response_dict)
 
-
-    def get_layer_attributes(
-        self,
-        attribute_ids: list[AttributeIdWrapperItem]
-    ) -> GetLayerAttributesResult:
+    def get_layer_attributes(self, attribute_ids: list[AttributeIdWrapperItem]) -> GetLayerAttributesResult:
         """
         Returns the detailed layer attributes identified by their GUIDs.
 
@@ -305,19 +304,16 @@ class AttributeCommands:
             RequestError: If there is a network or connection error.
         """
         params_dict = {
-                'attributeIds': attribute_ids,
-            }
+            "attributeIds": attribute_ids,
+        }
         validated_params = GetLayerAttributesParameters(**params_dict)
         response_dict = self._core.post_command(
-            "API.GetLayerAttributes",
-            validated_params.model_dump(by_alias=True, exclude_none=True)
+            "API.GetLayerAttributes", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
         return GetLayerAttributesResult.model_validate(response_dict)
 
-
     def get_layer_combination_attributes(
-        self,
-        attribute_ids: list[AttributeIdWrapperItem]
+        self, attribute_ids: list[AttributeIdWrapperItem]
     ) -> GetLayerCombinationAttributesResult:
         """
         Returns the detailed layer combination attributes identified by their GUIDs.
@@ -330,20 +326,15 @@ class AttributeCommands:
             RequestError: If there is a network or connection error.
         """
         params_dict = {
-                'attributeIds': attribute_ids,
-            }
+            "attributeIds": attribute_ids,
+        }
         validated_params = GetLayerCombinationAttributesParameters(**params_dict)
         response_dict = self._core.post_command(
-            "API.GetLayerCombinationAttributes",
-            validated_params.model_dump(by_alias=True, exclude_none=True)
+            "API.GetLayerCombinationAttributes", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
         return GetLayerCombinationAttributesResult.model_validate(response_dict)
 
-
-    def get_line_attributes(
-        self,
-        attribute_ids: list[AttributeIdWrapperItem]
-    ) -> GetLineAttributesResult:
+    def get_line_attributes(self, attribute_ids: list[AttributeIdWrapperItem]) -> GetLineAttributesResult:
         """
         Returns the detailed line attributes identified by their GUIDs.
 
@@ -355,20 +346,15 @@ class AttributeCommands:
             RequestError: If there is a network or connection error.
         """
         params_dict = {
-                'attributeIds': attribute_ids,
-            }
+            "attributeIds": attribute_ids,
+        }
         validated_params = GetLineAttributesParameters(**params_dict)
         response_dict = self._core.post_command(
-            "API.GetLineAttributes",
-            validated_params.model_dump(by_alias=True, exclude_none=True)
+            "API.GetLineAttributes", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
         return GetLineAttributesResult.model_validate(response_dict)
 
-
-    def get_pen_table_attributes(
-        self,
-        attribute_ids: list[AttributeIdWrapperItem]
-    ) -> GetPenTableAttributesResult:
+    def get_pen_table_attributes(self, attribute_ids: list[AttributeIdWrapperItem]) -> GetPenTableAttributesResult:
         """
         Returns the detailed pen table attributes (including their pens) identified by their
         GUIDs.
@@ -381,22 +367,20 @@ class AttributeCommands:
             RequestError: If there is a network or connection error.
         """
         params_dict = {
-                'attributeIds': attribute_ids,
-            }
+            "attributeIds": attribute_ids,
+        }
         validated_params = GetPenTableAttributesParameters(**params_dict)
         response_dict = self._core.post_command(
-            "API.GetPenTableAttributes",
-            validated_params.model_dump(by_alias=True, exclude_none=True)
+            "API.GetPenTableAttributes", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
         return GetPenTableAttributesResult.model_validate(response_dict)
-
 
     def get_profile_attribute_preview(
         self,
         attribute_ids: list[AttributeIdWrapperItem],
         image_width: int,
         image_height: int,
-        background_color: RGBColor | None = None
+        background_color: RGBColor | None = None,
     ) -> GetProfileAttributePreviewResult:
         """
         Returns the preview image of each requested profile attribute in a base64 string format.
@@ -412,23 +396,18 @@ class AttributeCommands:
             RequestError: If there is a network or connection error.
         """
         params_dict = {
-                'attributeIds': attribute_ids,
-                'imageWidth': image_width,
-                'imageHeight': image_height,
-                'backgroundColor': background_color,
-            }
+            "attributeIds": attribute_ids,
+            "imageWidth": image_width,
+            "imageHeight": image_height,
+            "backgroundColor": background_color,
+        }
         validated_params = GetProfileAttributePreviewParameters(**params_dict)
         response_dict = self._core.post_command(
-            "API.GetProfileAttributePreview",
-            validated_params.model_dump(by_alias=True, exclude_none=True)
+            "API.GetProfileAttributePreview", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
         return GetProfileAttributePreviewResult.model_validate(response_dict)
 
-
-    def get_profile_attributes(
-        self,
-        attribute_ids: list[AttributeIdWrapperItem]
-    ) -> GetProfileAttributesResult:
+    def get_profile_attributes(self, attribute_ids: list[AttributeIdWrapperItem]) -> GetProfileAttributesResult:
         """
         Returns the detailed profile attributes identified by their GUIDs.
 
@@ -440,20 +419,15 @@ class AttributeCommands:
             RequestError: If there is a network or connection error.
         """
         params_dict = {
-                'attributeIds': attribute_ids,
-            }
+            "attributeIds": attribute_ids,
+        }
         validated_params = GetProfileAttributesParameters(**params_dict)
         response_dict = self._core.post_command(
-            "API.GetProfileAttributes",
-            validated_params.model_dump(by_alias=True, exclude_none=True)
+            "API.GetProfileAttributes", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
         return GetProfileAttributesResult.model_validate(response_dict)
 
-
-    def get_surface_attributes(
-        self,
-        attribute_ids: list[AttributeIdWrapperItem]
-    ) -> GetSurfaceAttributesResult:
+    def get_surface_attributes(self, attribute_ids: list[AttributeIdWrapperItem]) -> GetSurfaceAttributesResult:
         """
         Returns the detailed surface attributes identified by their GUIDs.
 
@@ -465,19 +439,16 @@ class AttributeCommands:
             RequestError: If there is a network or connection error.
         """
         params_dict = {
-                'attributeIds': attribute_ids,
-            }
+            "attributeIds": attribute_ids,
+        }
         validated_params = GetSurfaceAttributesParameters(**params_dict)
         response_dict = self._core.post_command(
-            "API.GetSurfaceAttributes",
-            validated_params.model_dump(by_alias=True, exclude_none=True)
+            "API.GetSurfaceAttributes", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
         return GetSurfaceAttributesResult.model_validate(response_dict)
 
-
     def get_zone_category_attributes(
-        self,
-        attribute_ids: list[AttributeIdWrapperItem]
+        self, attribute_ids: list[AttributeIdWrapperItem]
     ) -> GetZoneCategoryAttributesResult:
         """
         Returns the detailed zone category attributes identified by their GUIDs.
@@ -490,21 +461,19 @@ class AttributeCommands:
             RequestError: If there is a network or connection error.
         """
         params_dict = {
-                'attributeIds': attribute_ids,
-            }
+            "attributeIds": attribute_ids,
+        }
         validated_params = GetZoneCategoryAttributesParameters(**params_dict)
         response_dict = self._core.post_command(
-            "API.GetZoneCategoryAttributes",
-            validated_params.model_dump(by_alias=True, exclude_none=True)
+            "API.GetZoneCategoryAttributes", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
         return GetZoneCategoryAttributesResult.model_validate(response_dict)
-
 
     def move_attributes_and_folders(
         self,
         attribute_folder_ids: list[AttributeFolderIdWrapperItem],
         attribute_ids: list[AttributeIdWrapperItem],
-        target_folder_id: AttributeFolderId
+        target_folder_id: AttributeFolderId,
     ) -> None:
         """
         Moves attributes and attribute folders.
@@ -520,21 +489,18 @@ class AttributeCommands:
             RequestError: If there is a network or connection error.
         """
         params_dict = {
-                'attributeFolderIds': attribute_folder_ids,
-                'attributeIds': attribute_ids,
-                'targetFolderId': target_folder_id,
-            }
+            "attributeFolderIds": attribute_folder_ids,
+            "attributeIds": attribute_ids,
+            "targetFolderId": target_folder_id,
+        }
         validated_params = MoveAttributesAndFoldersParameters(**params_dict)
         self._core.post_command(
-            "API.MoveAttributesAndFolders",
-            validated_params.model_dump(by_alias=True, exclude_none=True)
+            "API.MoveAttributesAndFolders", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
         return None
 
-
     def rename_attribute_folders(
-        self,
-        attribute_folder_parameters_list: list[AttributeFolderRenameParameters]
+        self, attribute_folder_parameters_list: list[AttributeFolderRenameParameters]
     ) -> RenameAttributeFoldersResult:
         """
         Rename attribute folder.
@@ -547,11 +513,10 @@ class AttributeCommands:
             RequestError: If there is a network or connection error.
         """
         params_dict = {
-                'attributeFolderParametersList': attribute_folder_parameters_list,
-            }
+            "attributeFolderParametersList": attribute_folder_parameters_list,
+        }
         validated_params = RenameAttributeFoldersParameters(**params_dict)
         response_dict = self._core.post_command(
-            "API.RenameAttributeFolders",
-            validated_params.model_dump(by_alias=True, exclude_none=True)
+            "API.RenameAttributeFolders", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
         return RenameAttributeFoldersResult.model_validate(response_dict)

@@ -4,7 +4,10 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 
-from multiconn_archicad.models.official.commands import GetElementsRelatedToZonesParameters, GetElementsRelatedToZonesResult
+from multiconn_archicad.models.official.commands import (
+    GetElementsRelatedToZonesParameters,
+    GetElementsRelatedToZonesResult,
+)
 from multiconn_archicad.models.official.types import ElementIdArrayItem, ElementType
 
 if TYPE_CHECKING:
@@ -15,11 +18,8 @@ class ElementRelationCommands:
     def __init__(self, core: CoreCommands):
         self._core = core
 
-
     def get_elements_related_to_zones(
-        self,
-        zones: list[ElementIdArrayItem],
-        element_types: list[ElementType] | None = None
+        self, zones: list[ElementIdArrayItem], element_types: list[ElementType] | None = None
     ) -> GetElementsRelatedToZonesResult:
         """
         Returns related elements of the given zones. The related elements will be grouped by
@@ -36,12 +36,11 @@ class ElementRelationCommands:
             RequestError: If there is a network or connection error.
         """
         params_dict = {
-                'zones': zones,
-                'elementTypes': element_types,
-            }
+            "zones": zones,
+            "elementTypes": element_types,
+        }
         validated_params = GetElementsRelatedToZonesParameters(**params_dict)
         response_dict = self._core.post_command(
-            "API.GetElementsRelatedToZones",
-            validated_params.model_dump(by_alias=True, exclude_none=True)
+            "API.GetElementsRelatedToZones", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
         return GetElementsRelatedToZonesResult.model_validate(response_dict)

@@ -4,7 +4,12 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 
-from multiconn_archicad.models.official.commands import CloneProjectMapItemToViewMapParameters, CloneProjectMapItemToViewMapResult, CreateViewMapFolderParameters, CreateViewMapFolderResult
+from multiconn_archicad.models.official.commands import (
+    CloneProjectMapItemToViewMapParameters,
+    CloneProjectMapItemToViewMapResult,
+    CreateViewMapFolderParameters,
+    CreateViewMapFolderResult,
+)
 from multiconn_archicad.models.official.types import FolderParameters, NavigatorItemId
 
 if TYPE_CHECKING:
@@ -15,11 +20,8 @@ class ViewMapCommands:
     def __init__(self, core: CoreCommands):
         self._core = core
 
-
     def clone_project_map_item_to_view_map(
-        self,
-        project_map_navigator_item_id: NavigatorItemId,
-        parent_navigator_item_id: NavigatorItemId
+        self, project_map_navigator_item_id: NavigatorItemId, parent_navigator_item_id: NavigatorItemId
     ) -> CloneProjectMapItemToViewMapResult:
         """
         Clones a project map item to the view map.
@@ -36,22 +38,20 @@ class ViewMapCommands:
             RequestError: If there is a network or connection error.
         """
         params_dict = {
-                'projectMapNavigatorItemId': project_map_navigator_item_id,
-                'parentNavigatorItemId': parent_navigator_item_id,
-            }
+            "projectMapNavigatorItemId": project_map_navigator_item_id,
+            "parentNavigatorItemId": parent_navigator_item_id,
+        }
         validated_params = CloneProjectMapItemToViewMapParameters(**params_dict)
         response_dict = self._core.post_command(
-            "API.CloneProjectMapItemToViewMap",
-            validated_params.model_dump(by_alias=True, exclude_none=True)
+            "API.CloneProjectMapItemToViewMap", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
         return CloneProjectMapItemToViewMapResult.model_validate(response_dict)
-
 
     def create_view_map_folder(
         self,
         folder_parameters: FolderParameters,
         parent_navigator_item_id: NavigatorItemId | None = None,
-        previous_navigator_item_id: NavigatorItemId | None = None
+        previous_navigator_item_id: NavigatorItemId | None = None,
     ) -> CreateViewMapFolderResult:
         """
         Creates a view folder item at the given position in the navigator tree.
@@ -70,13 +70,12 @@ class ViewMapCommands:
             RequestError: If there is a network or connection error.
         """
         params_dict = {
-                'folderParameters': folder_parameters,
-                'parentNavigatorItemId': parent_navigator_item_id,
-                'previousNavigatorItemId': previous_navigator_item_id,
-            }
+            "folderParameters": folder_parameters,
+            "parentNavigatorItemId": parent_navigator_item_id,
+            "previousNavigatorItemId": previous_navigator_item_id,
+        }
         validated_params = CreateViewMapFolderParameters(**params_dict)
         response_dict = self._core.post_command(
-            "API.CreateViewMapFolder",
-            validated_params.model_dump(by_alias=True, exclude_none=True)
+            "API.CreateViewMapFolder", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
         return CreateViewMapFolderResult.model_validate(response_dict)

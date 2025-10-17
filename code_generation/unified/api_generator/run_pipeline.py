@@ -54,6 +54,9 @@ def main():
         "03_assemble_api_files.py", ["--input-file", str(COMMANDS_WITH_CODE_PATH), "--output-dir", str(OUTPUT_DIR)]
     )
 
+    # Run Stage 4: Format the generated output
+    run_stage("04_format_output.py", ["--output-dir", str(OUTPUT_DIR)])
+
     print("\n✅✅✅ Unified API Generation Pipeline finished successfully! ✅✅✅")
 
 

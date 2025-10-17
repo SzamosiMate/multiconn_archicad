@@ -4,8 +4,25 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 
-from multiconn_archicad.models.tapir.commands import GetDatabaseIdFromNavigatorItemIdParameters, GetDatabaseIdFromNavigatorItemIdResult, GetModelViewOptionsResult, GetView2DTransformationsParameters, GetView2DTransformationsResult, GetViewSettingsParameters, GetViewSettingsResult, PublishPublisherSetParameters, SetViewSettingsParameters, SetViewSettingsResult, UpdateDrawingsParameters
-from multiconn_archicad.models.tapir.types import DatabaseIdArrayItem, ElementIdArrayItem, NavigatorItemIdArrayItem, NavigatorItemIdsWithViewSetting
+from multiconn_archicad.models.tapir.commands import (
+    GetDatabaseIdFromNavigatorItemIdParameters,
+    GetDatabaseIdFromNavigatorItemIdResult,
+    GetModelViewOptionsResult,
+    GetView2DTransformationsParameters,
+    GetView2DTransformationsResult,
+    GetViewSettingsParameters,
+    GetViewSettingsResult,
+    PublishPublisherSetParameters,
+    SetViewSettingsParameters,
+    SetViewSettingsResult,
+    UpdateDrawingsParameters,
+)
+from multiconn_archicad.models.tapir.types import (
+    DatabaseIdArrayItem,
+    ElementIdArrayItem,
+    NavigatorItemIdArrayItem,
+    NavigatorItemIdsWithViewSetting,
+)
 
 if TYPE_CHECKING:
     from multiconn_archicad.core.core_commands import CoreCommands
@@ -15,10 +32,8 @@ class NavigatorCommands:
     def __init__(self, core: CoreCommands):
         self._core = core
 
-
     def get_database_id_from_navigator_item_id(
-        self,
-        navigator_item_ids: list[NavigatorItemIdArrayItem]
+        self, navigator_item_ids: list[NavigatorItemIdArrayItem]
     ) -> GetDatabaseIdFromNavigatorItemIdResult:
         """
         Gets the ID of the database associated with the supplied navigator item id
@@ -32,19 +47,15 @@ class NavigatorCommands:
             RequestError: If there is a network or connection error.
         """
         params_dict = {
-                'navigatorItemIds': navigator_item_ids,
-            }
+            "navigatorItemIds": navigator_item_ids,
+        }
         validated_params = GetDatabaseIdFromNavigatorItemIdParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetDatabaseIdFromNavigatorItemId",
-            validated_params.model_dump(by_alias=True, exclude_none=True)
+            "GetDatabaseIdFromNavigatorItemId", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
         return GetDatabaseIdFromNavigatorItemIdResult.model_validate(response_dict)
 
-
-    def get_model_view_options(
-        self
-    ) -> GetModelViewOptionsResult:
+    def get_model_view_options(self) -> GetModelViewOptionsResult:
         """
         Gets all model view options
 
@@ -52,15 +63,11 @@ class NavigatorCommands:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
         """
-        response_dict = self._core.post_tapir_command(
-            "GetModelViewOptions"
-        )
+        response_dict = self._core.post_tapir_command("GetModelViewOptions")
         return GetModelViewOptionsResult.model_validate(response_dict)
 
-
     def get_view_2d_transformations(
-        self,
-        databases: list[DatabaseIdArrayItem] | None = None
+        self, databases: list[DatabaseIdArrayItem] | None = None
     ) -> GetView2DTransformationsResult:
         """
         Get zoom and rotation of 2D views
@@ -73,20 +80,15 @@ class NavigatorCommands:
             RequestError: If there is a network or connection error.
         """
         params_dict = {
-                'databases': databases,
-            }
+            "databases": databases,
+        }
         validated_params = GetView2DTransformationsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetView2DTransformations",
-            validated_params.model_dump(by_alias=True, exclude_none=True)
+            "GetView2DTransformations", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
         return GetView2DTransformationsResult.model_validate(response_dict)
 
-
-    def get_view_settings(
-        self,
-        navigator_item_ids: list[NavigatorItemIdArrayItem]
-    ) -> GetViewSettingsResult:
+    def get_view_settings(self, navigator_item_ids: list[NavigatorItemIdArrayItem]) -> GetViewSettingsResult:
         """
         Gets the view settings of navigator items
 
@@ -99,21 +101,15 @@ class NavigatorCommands:
             RequestError: If there is a network or connection error.
         """
         params_dict = {
-                'navigatorItemIds': navigator_item_ids,
-            }
+            "navigatorItemIds": navigator_item_ids,
+        }
         validated_params = GetViewSettingsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetViewSettings",
-            validated_params.model_dump(by_alias=True, exclude_none=True)
+            "GetViewSettings", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
         return GetViewSettingsResult.model_validate(response_dict)
 
-
-    def publish_publisher_set(
-        self,
-        publisher_set_name: str,
-        output_path: str | None = None
-    ) -> None:
+    def publish_publisher_set(self, publisher_set_name: str, output_path: str | None = None) -> None:
         """
         Performs a publish operation on the currently opened project. Only the given publisher
         set will be published.
@@ -129,20 +125,17 @@ class NavigatorCommands:
             RequestError: If there is a network or connection error.
         """
         params_dict = {
-                'publisherSetName': publisher_set_name,
-                'outputPath': output_path,
-            }
+            "publisherSetName": publisher_set_name,
+            "outputPath": output_path,
+        }
         validated_params = PublishPublisherSetParameters(**params_dict)
         self._core.post_tapir_command(
-            "PublishPublisherSet",
-            validated_params.model_dump(by_alias=True, exclude_none=True)
+            "PublishPublisherSet", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
         return None
 
-
     def set_view_settings(
-        self,
-        navigator_item_ids_with_view_settings: list[NavigatorItemIdsWithViewSetting]
+        self, navigator_item_ids_with_view_settings: list[NavigatorItemIdsWithViewSetting]
     ) -> SetViewSettingsResult:
         """
         Sets the view settings of navigator items
@@ -155,20 +148,15 @@ class NavigatorCommands:
             RequestError: If there is a network or connection error.
         """
         params_dict = {
-                'navigatorItemIdsWithViewSettings': navigator_item_ids_with_view_settings,
-            }
+            "navigatorItemIdsWithViewSettings": navigator_item_ids_with_view_settings,
+        }
         validated_params = SetViewSettingsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "SetViewSettings",
-            validated_params.model_dump(by_alias=True, exclude_none=True)
+            "SetViewSettings", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
         return SetViewSettingsResult.model_validate(response_dict)
 
-
-    def update_drawings(
-        self,
-        elements: list[ElementIdArrayItem]
-    ) -> None:
+    def update_drawings(self, elements: list[ElementIdArrayItem]) -> None:
         """
         Performs a drawing update on the given elements.
 
@@ -180,11 +168,8 @@ class NavigatorCommands:
             RequestError: If there is a network or connection error.
         """
         params_dict = {
-                'elements': elements,
-            }
+            "elements": elements,
+        }
         validated_params = UpdateDrawingsParameters(**params_dict)
-        self._core.post_tapir_command(
-            "UpdateDrawings",
-            validated_params.model_dump(by_alias=True, exclude_none=True)
-        )
+        self._core.post_tapir_command("UpdateDrawings", validated_params.model_dump(by_alias=True, exclude_none=True))
         return None

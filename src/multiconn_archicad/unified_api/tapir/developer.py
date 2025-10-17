@@ -14,11 +14,7 @@ class DeveloperCommands:
     def __init__(self, core: CoreCommands):
         self._core = core
 
-
-    def generate_documentation(
-        self,
-        destination_folder: str
-    ) -> None:
+    def generate_documentation(self, destination_folder: str) -> None:
         """
         Generates files for the documentation. Used by Tapir developers only.
 
@@ -31,11 +27,10 @@ class DeveloperCommands:
             RequestError: If there is a network or connection error.
         """
         params_dict = {
-                'destinationFolder': destination_folder,
-            }
+            "destinationFolder": destination_folder,
+        }
         validated_params = GenerateDocumentationParameters(**params_dict)
         self._core.post_tapir_command(
-            "GenerateDocumentation",
-            validated_params.model_dump(by_alias=True, exclude_none=True)
+            "GenerateDocumentation", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
         return None

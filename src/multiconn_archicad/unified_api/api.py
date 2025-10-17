@@ -36,6 +36,7 @@ if TYPE_CHECKING:
 # --- Container class for Tapir commands ---
 class TapirApi:
     """A container for all command groups of the Archicad Tapir API."""
+
     def __init__(self, core: CoreCommands):
         self.application = TapirApplicationCommands(core)
         self.attribute = TapirAttributeCommands(core)
@@ -54,6 +55,7 @@ class TapirApi:
 # --- Container class for Official commands ---
 class OfficialApi:
     """A container for all command groups of the Archicad Official API."""
+
     def __init__(self, core: CoreCommands):
         self.addon = OfficialAddonCommands(core)
         self.attribute = OfficialAttributeCommands(core)
@@ -74,6 +76,7 @@ class UnifiedApi:
     A unified, high-level, object-oriented interface for both the Tapir
     and Official Archicad JSON APIs, organized by command groups.
     """
+
     def __init__(self, core: CoreCommands):
         self.tapir = TapirApi(core)
         self.official = OfficialApi(core)

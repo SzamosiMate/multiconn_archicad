@@ -4,8 +4,36 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 
-from multiconn_archicad.models.official.commands import GetAllPropertyGroupIdsParameters, GetAllPropertyGroupIdsResult, GetAllPropertyIdsOfElementsParameters, GetAllPropertyIdsOfElementsResult, GetAllPropertyIdsParameters, GetAllPropertyIdsResult, GetAllPropertyNamesResult, GetDetailsOfPropertiesParameters, GetDetailsOfPropertiesResult, GetPropertyDefinitionAvailabilityParameters, GetPropertyDefinitionAvailabilityResult, GetPropertyGroupsParameters, GetPropertyGroupsResult, GetPropertyIdsParameters, GetPropertyIdsResult, GetPropertyValuesOfElementsParameters, GetPropertyValuesOfElementsResult, SetPropertyValuesOfElementsParameters, SetPropertyValuesOfElementsResult
-from multiconn_archicad.models.official.types import BuiltInPropertyUserId, ElementIdArrayItem, ElementPropertyValue, PropertyGroupIdArrayItem, PropertyIdArrayItem, PropertyType, UserDefinedPropertyUserId
+from multiconn_archicad.models.official.commands import (
+    GetAllPropertyGroupIdsParameters,
+    GetAllPropertyGroupIdsResult,
+    GetAllPropertyIdsOfElementsParameters,
+    GetAllPropertyIdsOfElementsResult,
+    GetAllPropertyIdsParameters,
+    GetAllPropertyIdsResult,
+    GetAllPropertyNamesResult,
+    GetDetailsOfPropertiesParameters,
+    GetDetailsOfPropertiesResult,
+    GetPropertyDefinitionAvailabilityParameters,
+    GetPropertyDefinitionAvailabilityResult,
+    GetPropertyGroupsParameters,
+    GetPropertyGroupsResult,
+    GetPropertyIdsParameters,
+    GetPropertyIdsResult,
+    GetPropertyValuesOfElementsParameters,
+    GetPropertyValuesOfElementsResult,
+    SetPropertyValuesOfElementsParameters,
+    SetPropertyValuesOfElementsResult,
+)
+from multiconn_archicad.models.official.types import (
+    BuiltInPropertyUserId,
+    ElementIdArrayItem,
+    ElementPropertyValue,
+    PropertyGroupIdArrayItem,
+    PropertyIdArrayItem,
+    PropertyType,
+    UserDefinedPropertyUserId,
+)
 
 if TYPE_CHECKING:
     from multiconn_archicad.core.core_commands import CoreCommands
@@ -15,11 +43,7 @@ class PropertyCommands:
     def __init__(self, core: CoreCommands):
         self._core = core
 
-
-    def get_all_property_group_ids(
-        self,
-        property_type: PropertyType | None = None
-    ) -> GetAllPropertyGroupIdsResult:
+    def get_all_property_group_ids(self, property_type: PropertyType | None = None) -> GetAllPropertyGroupIdsResult:
         """
         Returns the identifier of every property group in the current plan. The optional
         propertyType parameter can be used to filter the results based on the type of the
@@ -33,20 +57,15 @@ class PropertyCommands:
             RequestError: If there is a network or connection error.
         """
         params_dict = {
-                'propertyType': property_type,
-            }
+            "propertyType": property_type,
+        }
         validated_params = GetAllPropertyGroupIdsParameters(**params_dict)
         response_dict = self._core.post_command(
-            "API.GetAllPropertyGroupIds",
-            validated_params.model_dump(by_alias=True, exclude_none=True)
+            "API.GetAllPropertyGroupIds", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
         return GetAllPropertyGroupIdsResult.model_validate(response_dict)
 
-
-    def get_all_property_ids(
-        self,
-        property_type: PropertyType | None = None
-    ) -> GetAllPropertyIdsResult:
+    def get_all_property_ids(self, property_type: PropertyType | None = None) -> GetAllPropertyIdsResult:
         """
         Returns the identifier of every property in the current plan. The optional propertyType
         parameter can be used to filter the results based on the type of the property (Built-in
@@ -60,20 +79,16 @@ class PropertyCommands:
             RequestError: If there is a network or connection error.
         """
         params_dict = {
-                'propertyType': property_type,
-            }
+            "propertyType": property_type,
+        }
         validated_params = GetAllPropertyIdsParameters(**params_dict)
         response_dict = self._core.post_command(
-            "API.GetAllPropertyIds",
-            validated_params.model_dump(by_alias=True, exclude_none=True)
+            "API.GetAllPropertyIds", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
         return GetAllPropertyIdsResult.model_validate(response_dict)
 
-
     def get_all_property_ids_of_elements(
-        self,
-        elements: list[ElementIdArrayItem],
-        property_type: PropertyType | None = None
+        self, elements: list[ElementIdArrayItem], property_type: PropertyType | None = None
     ) -> GetAllPropertyIdsOfElementsResult:
         """
         Returns all property identifiers of the given elements. The optional propertyType
@@ -89,20 +104,16 @@ class PropertyCommands:
             RequestError: If there is a network or connection error.
         """
         params_dict = {
-                'elements': elements,
-                'propertyType': property_type,
-            }
+            "elements": elements,
+            "propertyType": property_type,
+        }
         validated_params = GetAllPropertyIdsOfElementsParameters(**params_dict)
         response_dict = self._core.post_command(
-            "API.GetAllPropertyIdsOfElements",
-            validated_params.model_dump(by_alias=True, exclude_none=True)
+            "API.GetAllPropertyIdsOfElements", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
         return GetAllPropertyIdsOfElementsResult.model_validate(response_dict)
 
-
-    def get_all_property_names(
-        self
-    ) -> GetAllPropertyNamesResult:
+    def get_all_property_names(self) -> GetAllPropertyNamesResult:
         """
         Returns the human-readable names of available Property definitions for debug and
         development purposes.
@@ -111,16 +122,10 @@ class PropertyCommands:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
         """
-        response_dict = self._core.post_command(
-            "API.GetAllPropertyNames"
-        )
+        response_dict = self._core.post_command("API.GetAllPropertyNames")
         return GetAllPropertyNamesResult.model_validate(response_dict)
 
-
-    def get_details_of_properties(
-        self,
-        properties: list[PropertyIdArrayItem]
-    ) -> GetDetailsOfPropertiesResult:
+    def get_details_of_properties(self, properties: list[PropertyIdArrayItem]) -> GetDetailsOfPropertiesResult:
         """
         Returns the details of property definitions.
 
@@ -132,19 +137,16 @@ class PropertyCommands:
             RequestError: If there is a network or connection error.
         """
         params_dict = {
-                'properties': properties,
-            }
+            "properties": properties,
+        }
         validated_params = GetDetailsOfPropertiesParameters(**params_dict)
         response_dict = self._core.post_command(
-            "API.GetDetailsOfProperties",
-            validated_params.model_dump(by_alias=True, exclude_none=True)
+            "API.GetDetailsOfProperties", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
         return GetDetailsOfPropertiesResult.model_validate(response_dict)
 
-
     def get_property_definition_availability(
-        self,
-        property_ids: list[PropertyIdArrayItem]
+        self, property_ids: list[PropertyIdArrayItem]
     ) -> GetPropertyDefinitionAvailabilityResult:
         """
         Returns the ids of classification items a given property definition is available for.
@@ -157,20 +159,15 @@ class PropertyCommands:
             RequestError: If there is a network or connection error.
         """
         params_dict = {
-                'propertyIds': property_ids,
-            }
+            "propertyIds": property_ids,
+        }
         validated_params = GetPropertyDefinitionAvailabilityParameters(**params_dict)
         response_dict = self._core.post_command(
-            "API.GetPropertyDefinitionAvailability",
-            validated_params.model_dump(by_alias=True, exclude_none=True)
+            "API.GetPropertyDefinitionAvailability", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
         return GetPropertyDefinitionAvailabilityResult.model_validate(response_dict)
 
-
-    def get_property_groups(
-        self,
-        property_group_ids: list[PropertyGroupIdArrayItem]
-    ) -> GetPropertyGroupsResult:
+    def get_property_groups(self, property_group_ids: list[PropertyGroupIdArrayItem]) -> GetPropertyGroupsResult:
         """
         Returns the details of property groups.
 
@@ -183,19 +180,16 @@ class PropertyCommands:
             RequestError: If there is a network or connection error.
         """
         params_dict = {
-                'propertyGroupIds': property_group_ids,
-            }
+            "propertyGroupIds": property_group_ids,
+        }
         validated_params = GetPropertyGroupsParameters(**params_dict)
         response_dict = self._core.post_command(
-            "API.GetPropertyGroups",
-            validated_params.model_dump(by_alias=True, exclude_none=True)
+            "API.GetPropertyGroups", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
         return GetPropertyGroupsResult.model_validate(response_dict)
 
-
     def get_property_ids(
-        self,
-        properties: list[UserDefinedPropertyUserId | BuiltInPropertyUserId]
+        self, properties: list[UserDefinedPropertyUserId | BuiltInPropertyUserId]
     ) -> GetPropertyIdsResult:
         """
         Returns the identifiers of property definitions for the requested property names.
@@ -209,20 +203,16 @@ class PropertyCommands:
             RequestError: If there is a network or connection error.
         """
         params_dict = {
-                'properties': properties,
-            }
+            "properties": properties,
+        }
         validated_params = GetPropertyIdsParameters(**params_dict)
         response_dict = self._core.post_command(
-            "API.GetPropertyIds",
-            validated_params.model_dump(by_alias=True, exclude_none=True)
+            "API.GetPropertyIds", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
         return GetPropertyIdsResult.model_validate(response_dict)
 
-
     def get_property_values_of_elements(
-        self,
-        elements: list[ElementIdArrayItem],
-        properties: list[PropertyIdArrayItem]
+        self, elements: list[ElementIdArrayItem], properties: list[PropertyIdArrayItem]
     ) -> GetPropertyValuesOfElementsResult:
         """
         Returns the property values of the elements for the given property.
@@ -236,20 +226,17 @@ class PropertyCommands:
             RequestError: If there is a network or connection error.
         """
         params_dict = {
-                'elements': elements,
-                'properties': properties,
-            }
+            "elements": elements,
+            "properties": properties,
+        }
         validated_params = GetPropertyValuesOfElementsParameters(**params_dict)
         response_dict = self._core.post_command(
-            "API.GetPropertyValuesOfElements",
-            validated_params.model_dump(by_alias=True, exclude_none=True)
+            "API.GetPropertyValuesOfElements", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
         return GetPropertyValuesOfElementsResult.model_validate(response_dict)
 
-
     def set_property_values_of_elements(
-        self,
-        element_property_values: list[ElementPropertyValue]
+        self, element_property_values: list[ElementPropertyValue]
     ) -> SetPropertyValuesOfElementsResult:
         """
         Sets the property values of elements.
@@ -263,11 +250,10 @@ class PropertyCommands:
             RequestError: If there is a network or connection error.
         """
         params_dict = {
-                'elementPropertyValues': element_property_values,
-            }
+            "elementPropertyValues": element_property_values,
+        }
         validated_params = SetPropertyValuesOfElementsParameters(**params_dict)
         response_dict = self._core.post_command(
-            "API.SetPropertyValuesOfElements",
-            validated_params.model_dump(by_alias=True, exclude_none=True)
+            "API.SetPropertyValuesOfElements", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
         return SetPropertyValuesOfElementsResult.model_validate(response_dict)
