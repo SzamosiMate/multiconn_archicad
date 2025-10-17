@@ -4,7 +4,14 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 
-from multiconn_archicad.models.tapir.commands import ApplyFavoritesToElementDefaultsParameters, ApplyFavoritesToElementDefaultsResult, CreateFavoritesFromElementsParameters, CreateFavoritesFromElementsResult, GetFavoritesByTypeParameters, GetFavoritesByTypeResult
+from multiconn_archicad.models.tapir.commands import (
+    ApplyFavoritesToElementDefaultsParameters,
+    ApplyFavoritesToElementDefaultsResult,
+    CreateFavoritesFromElementsParameters,
+    CreateFavoritesFromElementsResult,
+    GetFavoritesByTypeParameters,
+    GetFavoritesByTypeResult,
+)
 from multiconn_archicad.models.tapir.types import ElementType, FavoritesFromElement
 
 if TYPE_CHECKING:
@@ -15,11 +22,7 @@ class FavoritesCommands:
     def __init__(self, core: CoreCommands):
         self._core = core
 
-
-    def apply_favorites_to_element_defaults(
-        self,
-        favorites: list[str]
-    ) -> ApplyFavoritesToElementDefaultsResult:
+    def apply_favorites_to_element_defaults(self, favorites: list[str]) -> ApplyFavoritesToElementDefaultsResult:
         """
         Apply the given favorites to element defaults.
 
@@ -31,19 +34,16 @@ class FavoritesCommands:
             RequestError: If there is a network or connection error.
         """
         params_dict = {
-                'favorites': favorites,
-            }
+            "favorites": favorites,
+        }
         validated_params = ApplyFavoritesToElementDefaultsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "ApplyFavoritesToElementDefaults",
-            validated_params.model_dump(by_alias=True, exclude_none=True)
+            "ApplyFavoritesToElementDefaults", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
         return ApplyFavoritesToElementDefaultsResult.model_validate(response_dict)
 
-
     def create_favorites_from_elements(
-        self,
-        favorites_from_elements: list[FavoritesFromElement]
+        self, favorites_from_elements: list[FavoritesFromElement]
     ) -> CreateFavoritesFromElementsResult:
         """
         Create favorites from the given elements.
@@ -56,20 +56,15 @@ class FavoritesCommands:
             RequestError: If there is a network or connection error.
         """
         params_dict = {
-                'favoritesFromElements': favorites_from_elements,
-            }
+            "favoritesFromElements": favorites_from_elements,
+        }
         validated_params = CreateFavoritesFromElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateFavoritesFromElements",
-            validated_params.model_dump(by_alias=True, exclude_none=True)
+            "CreateFavoritesFromElements", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
         return CreateFavoritesFromElementsResult.model_validate(response_dict)
 
-
-    def get_favorites_by_type(
-        self,
-        element_type: ElementType
-    ) -> GetFavoritesByTypeResult:
+    def get_favorites_by_type(self, element_type: ElementType) -> GetFavoritesByTypeResult:
         """
         Returns a list of the names of all favorites with the given element type
 
@@ -81,11 +76,10 @@ class FavoritesCommands:
             RequestError: If there is a network or connection error.
         """
         params_dict = {
-                'elementType': element_type,
-            }
+            "elementType": element_type,
+        }
         validated_params = GetFavoritesByTypeParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetFavoritesByType",
-            validated_params.model_dump(by_alias=True, exclude_none=True)
+            "GetFavoritesByType", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
         return GetFavoritesByTypeResult.model_validate(response_dict)

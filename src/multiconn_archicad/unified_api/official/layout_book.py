@@ -4,7 +4,15 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 
-from multiconn_archicad.models.official.commands import CreateLayoutParameters, CreateLayoutResult, CreateLayoutSubsetParameters, CreateLayoutSubsetResult, GetLayoutSettingsParameters, GetLayoutSettingsResult, SetLayoutSettingsParameters
+from multiconn_archicad.models.official.commands import (
+    CreateLayoutParameters,
+    CreateLayoutResult,
+    CreateLayoutSubsetParameters,
+    CreateLayoutSubsetResult,
+    GetLayoutSettingsParameters,
+    GetLayoutSettingsResult,
+    SetLayoutSettingsParameters,
+)
 from multiconn_archicad.models.official.types import LayoutParameters, NavigatorItemId, Subset
 
 if TYPE_CHECKING:
@@ -15,13 +23,12 @@ class LayoutBookCommands:
     def __init__(self, core: CoreCommands):
         self._core = core
 
-
     def create_layout(
         self,
         layout_name: str,
         layout_parameters: LayoutParameters,
         master_navigator_item_id: NavigatorItemId,
-        parent_navigator_item_id: NavigatorItemId
+        parent_navigator_item_id: NavigatorItemId,
     ) -> CreateLayoutResult:
         """
         Creates a new layout.
@@ -37,23 +44,19 @@ class LayoutBookCommands:
             RequestError: If there is a network or connection error.
         """
         params_dict = {
-                'layoutName': layout_name,
-                'layoutParameters': layout_parameters,
-                'masterNavigatorItemId': master_navigator_item_id,
-                'parentNavigatorItemId': parent_navigator_item_id,
-            }
+            "layoutName": layout_name,
+            "layoutParameters": layout_parameters,
+            "masterNavigatorItemId": master_navigator_item_id,
+            "parentNavigatorItemId": parent_navigator_item_id,
+        }
         validated_params = CreateLayoutParameters(**params_dict)
         response_dict = self._core.post_command(
-            "API.CreateLayout",
-            validated_params.model_dump(by_alias=True, exclude_none=True)
+            "API.CreateLayout", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
         return CreateLayoutResult.model_validate(response_dict)
 
-
     def create_layout_subset(
-        self,
-        subset_parameters: Subset,
-        parent_navigator_item_id: NavigatorItemId
+        self, subset_parameters: Subset, parent_navigator_item_id: NavigatorItemId
     ) -> CreateLayoutSubsetResult:
         """
         Creates a new layout subset.
@@ -67,21 +70,16 @@ class LayoutBookCommands:
             RequestError: If there is a network or connection error.
         """
         params_dict = {
-                'subsetParameters': subset_parameters,
-                'parentNavigatorItemId': parent_navigator_item_id,
-            }
+            "subsetParameters": subset_parameters,
+            "parentNavigatorItemId": parent_navigator_item_id,
+        }
         validated_params = CreateLayoutSubsetParameters(**params_dict)
         response_dict = self._core.post_command(
-            "API.CreateLayoutSubset",
-            validated_params.model_dump(by_alias=True, exclude_none=True)
+            "API.CreateLayoutSubset", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
         return CreateLayoutSubsetResult.model_validate(response_dict)
 
-
-    def get_layout_settings(
-        self,
-        layout_navigator_item_id: NavigatorItemId
-    ) -> GetLayoutSettingsResult:
+    def get_layout_settings(self, layout_navigator_item_id: NavigatorItemId) -> GetLayoutSettingsResult:
         """
         Returns the parameters (settings) of the given layout.
 
@@ -93,20 +91,16 @@ class LayoutBookCommands:
             RequestError: If there is a network or connection error.
         """
         params_dict = {
-                'layoutNavigatorItemId': layout_navigator_item_id,
-            }
+            "layoutNavigatorItemId": layout_navigator_item_id,
+        }
         validated_params = GetLayoutSettingsParameters(**params_dict)
         response_dict = self._core.post_command(
-            "API.GetLayoutSettings",
-            validated_params.model_dump(by_alias=True, exclude_none=True)
+            "API.GetLayoutSettings", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
         return GetLayoutSettingsResult.model_validate(response_dict)
 
-
     def set_layout_settings(
-        self,
-        layout_parameters: LayoutParameters,
-        layout_navigator_item_id: NavigatorItemId
+        self, layout_parameters: LayoutParameters, layout_navigator_item_id: NavigatorItemId
     ) -> None:
         """
         Sets the parameters (settings) of the given layout.
@@ -120,12 +114,9 @@ class LayoutBookCommands:
             RequestError: If there is a network or connection error.
         """
         params_dict = {
-                'layoutParameters': layout_parameters,
-                'layoutNavigatorItemId': layout_navigator_item_id,
-            }
+            "layoutParameters": layout_parameters,
+            "layoutNavigatorItemId": layout_navigator_item_id,
+        }
         validated_params = SetLayoutSettingsParameters(**params_dict)
-        self._core.post_command(
-            "API.SetLayoutSettings",
-            validated_params.model_dump(by_alias=True, exclude_none=True)
-        )
+        self._core.post_command("API.SetLayoutSettings", validated_params.model_dump(by_alias=True, exclude_none=True))
         return None

@@ -4,7 +4,11 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 
-from multiconn_archicad.models.tapir.commands import ReleaseElementsParameters, ReserveElementsParameters, ReserveElementsResult
+from multiconn_archicad.models.tapir.commands import (
+    ReleaseElementsParameters,
+    ReserveElementsParameters,
+    ReserveElementsResult,
+)
 from multiconn_archicad.models.tapir.types import ElementIdArrayItem
 
 if TYPE_CHECKING:
@@ -15,11 +19,7 @@ class TeamworkCommands:
     def __init__(self, core: CoreCommands):
         self._core = core
 
-
-    def release_elements(
-        self,
-        elements: list[ElementIdArrayItem]
-    ) -> None:
+    def release_elements(self, elements: list[ElementIdArrayItem]) -> None:
         """
         Releases elements in Teamwork mode.
 
@@ -31,20 +31,13 @@ class TeamworkCommands:
             RequestError: If there is a network or connection error.
         """
         params_dict = {
-                'elements': elements,
-            }
+            "elements": elements,
+        }
         validated_params = ReleaseElementsParameters(**params_dict)
-        self._core.post_tapir_command(
-            "ReleaseElements",
-            validated_params.model_dump(by_alias=True, exclude_none=True)
-        )
+        self._core.post_tapir_command("ReleaseElements", validated_params.model_dump(by_alias=True, exclude_none=True))
         return None
 
-
-    def reserve_elements(
-        self,
-        elements: list[ElementIdArrayItem]
-    ) -> ReserveElementsResult:
+    def reserve_elements(self, elements: list[ElementIdArrayItem]) -> ReserveElementsResult:
         """
         Reserves elements in Teamwork mode.
 
@@ -56,19 +49,15 @@ class TeamworkCommands:
             RequestError: If there is a network or connection error.
         """
         params_dict = {
-                'elements': elements,
-            }
+            "elements": elements,
+        }
         validated_params = ReserveElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "ReserveElements",
-            validated_params.model_dump(by_alias=True, exclude_none=True)
+            "ReserveElements", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
         return ReserveElementsResult.model_validate(response_dict)
 
-
-    def teamwork_receive(
-        self
-    ) -> None:
+    def teamwork_receive(self) -> None:
         """
         Performs a receive operation on the currently opened Teamwork project.
 
@@ -76,15 +65,10 @@ class TeamworkCommands:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
         """
-        self._core.post_tapir_command(
-            "TeamworkReceive"
-        )
+        self._core.post_tapir_command("TeamworkReceive")
         return None
 
-
-    def teamwork_send(
-        self
-    ) -> None:
+    def teamwork_send(self) -> None:
         """
         Performs a send operation on the currently opened Teamwork project.
 
@@ -92,7 +76,5 @@ class TeamworkCommands:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
         """
-        self._core.post_tapir_command(
-            "TeamworkSend"
-        )
+        self._core.post_tapir_command("TeamworkSend")
         return None

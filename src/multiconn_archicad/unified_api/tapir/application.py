@@ -4,7 +4,11 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 
-from multiconn_archicad.models.tapir.commands import GetAddOnVersionResult, GetArchicadLocationResult, GetCurrentWindowTypeResult
+from multiconn_archicad.models.tapir.commands import (
+    GetAddOnVersionResult,
+    GetArchicadLocationResult,
+    GetCurrentWindowTypeResult,
+)
 
 if TYPE_CHECKING:
     from multiconn_archicad.core.core_commands import CoreCommands
@@ -14,10 +18,7 @@ class ApplicationCommands:
     def __init__(self, core: CoreCommands):
         self._core = core
 
-
-    def get_add_on_version(
-        self
-    ) -> GetAddOnVersionResult:
+    def get_add_on_version(self) -> GetAddOnVersionResult:
         """
         Retrieves the version of the Tapir Additional JSON Commands Add-On.
 
@@ -25,15 +26,10 @@ class ApplicationCommands:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
         """
-        response_dict = self._core.post_tapir_command(
-            "GetAddOnVersion"
-        )
+        response_dict = self._core.post_tapir_command("GetAddOnVersion")
         return GetAddOnVersionResult.model_validate(response_dict)
 
-
-    def get_archicad_location(
-        self
-    ) -> GetArchicadLocationResult:
+    def get_archicad_location(self) -> GetArchicadLocationResult:
         """
         Retrieves the location of the currently running Archicad executable.
 
@@ -41,15 +37,10 @@ class ApplicationCommands:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
         """
-        response_dict = self._core.post_tapir_command(
-            "GetArchicadLocation"
-        )
+        response_dict = self._core.post_tapir_command("GetArchicadLocation")
         return GetArchicadLocationResult.model_validate(response_dict)
 
-
-    def get_current_window_type(
-        self
-    ) -> GetCurrentWindowTypeResult:
+    def get_current_window_type(self) -> GetCurrentWindowTypeResult:
         """
         Returns the type of the current (active) window.
 
@@ -57,15 +48,10 @@ class ApplicationCommands:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
         """
-        response_dict = self._core.post_tapir_command(
-            "GetCurrentWindowType"
-        )
+        response_dict = self._core.post_tapir_command("GetCurrentWindowType")
         return GetCurrentWindowTypeResult.model_validate(response_dict)
 
-
-    def quit_archicad(
-        self
-    ) -> None:
+    def quit_archicad(self) -> None:
         """
         Performs a quit operation on the currently running Archicad instance.
 
@@ -73,7 +59,5 @@ class ApplicationCommands:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
         """
-        self._core.post_tapir_command(
-            "QuitArchicad"
-        )
+        self._core.post_tapir_command("QuitArchicad")
         return None

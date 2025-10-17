@@ -4,7 +4,16 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 
-from multiconn_archicad.models.tapir.commands import GetGeoLocationResult, GetHotlinksResult, GetProjectInfoFieldsResult, GetProjectInfoResult, GetStoriesResult, OpenProjectParameters, SetProjectInfoFieldParameters, SetStoriesParameters
+from multiconn_archicad.models.tapir.commands import (
+    GetGeoLocationResult,
+    GetHotlinksResult,
+    GetProjectInfoFieldsResult,
+    GetProjectInfoResult,
+    GetStoriesResult,
+    OpenProjectParameters,
+    SetProjectInfoFieldParameters,
+    SetStoriesParameters,
+)
 from multiconn_archicad.models.tapir.types import StorySettings
 
 if TYPE_CHECKING:
@@ -15,10 +24,7 @@ class ProjectCommands:
     def __init__(self, core: CoreCommands):
         self._core = core
 
-
-    def get_geo_location(
-        self
-    ) -> GetGeoLocationResult:
+    def get_geo_location(self) -> GetGeoLocationResult:
         """
         Gets the project location details.
 
@@ -26,15 +32,10 @@ class ProjectCommands:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
         """
-        response_dict = self._core.post_tapir_command(
-            "GetGeoLocation"
-        )
+        response_dict = self._core.post_tapir_command("GetGeoLocation")
         return GetGeoLocationResult.model_validate(response_dict)
 
-
-    def get_hotlinks(
-        self
-    ) -> GetHotlinksResult:
+    def get_hotlinks(self) -> GetHotlinksResult:
         """
         Gets the file system locations (path) of the hotlink modules. The hotlinks can have tree
         hierarchy in the project.
@@ -43,15 +44,10 @@ class ProjectCommands:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
         """
-        response_dict = self._core.post_tapir_command(
-            "GetHotlinks"
-        )
+        response_dict = self._core.post_tapir_command("GetHotlinks")
         return GetHotlinksResult.model_validate(response_dict)
 
-
-    def get_project_info(
-        self
-    ) -> GetProjectInfoResult:
+    def get_project_info(self) -> GetProjectInfoResult:
         """
         Retrieves information about the currently loaded project.
 
@@ -59,15 +55,10 @@ class ProjectCommands:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
         """
-        response_dict = self._core.post_tapir_command(
-            "GetProjectInfo"
-        )
+        response_dict = self._core.post_tapir_command("GetProjectInfo")
         return GetProjectInfoResult.model_validate(response_dict)
 
-
-    def get_project_info_fields(
-        self
-    ) -> GetProjectInfoFieldsResult:
+    def get_project_info_fields(self) -> GetProjectInfoFieldsResult:
         """
         Retrieves the names and values of all project info fields.
 
@@ -75,15 +66,10 @@ class ProjectCommands:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
         """
-        response_dict = self._core.post_tapir_command(
-            "GetProjectInfoFields"
-        )
+        response_dict = self._core.post_tapir_command("GetProjectInfoFields")
         return GetProjectInfoFieldsResult.model_validate(response_dict)
 
-
-    def get_stories(
-        self
-    ) -> GetStoriesResult:
+    def get_stories(self) -> GetStoriesResult:
         """
         Retrieves information about the story sructure of the currently loaded project.
 
@@ -91,16 +77,10 @@ class ProjectCommands:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
         """
-        response_dict = self._core.post_tapir_command(
-            "GetStories"
-        )
+        response_dict = self._core.post_tapir_command("GetStories")
         return GetStoriesResult.model_validate(response_dict)
 
-
-    def open_project(
-        self,
-        project_file_path: str
-    ) -> None:
+    def open_project(self, project_file_path: str) -> None:
         """
         Opens the given project.
 
@@ -112,21 +92,13 @@ class ProjectCommands:
             RequestError: If there is a network or connection error.
         """
         params_dict = {
-                'projectFilePath': project_file_path,
-            }
+            "projectFilePath": project_file_path,
+        }
         validated_params = OpenProjectParameters(**params_dict)
-        self._core.post_tapir_command(
-            "OpenProject",
-            validated_params.model_dump(by_alias=True, exclude_none=True)
-        )
+        self._core.post_tapir_command("OpenProject", validated_params.model_dump(by_alias=True, exclude_none=True))
         return None
 
-
-    def set_project_info_field(
-        self,
-        project_info_id: str,
-        project_info_value: str
-    ) -> None:
+    def set_project_info_field(self, project_info_id: str, project_info_value: str) -> None:
         """
         Sets the value of a project info field.
 
@@ -140,21 +112,16 @@ class ProjectCommands:
             RequestError: If there is a network or connection error.
         """
         params_dict = {
-                'projectInfoId': project_info_id,
-                'projectInfoValue': project_info_value,
-            }
+            "projectInfoId": project_info_id,
+            "projectInfoValue": project_info_value,
+        }
         validated_params = SetProjectInfoFieldParameters(**params_dict)
         self._core.post_tapir_command(
-            "SetProjectInfoField",
-            validated_params.model_dump(by_alias=True, exclude_none=True)
+            "SetProjectInfoField", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
         return None
 
-
-    def set_stories(
-        self,
-        stories: list[StorySettings]
-    ) -> None:
+    def set_stories(self, stories: list[StorySettings]) -> None:
         """
         Sets the story sructure of the currently loaded project.
 
@@ -167,11 +134,8 @@ class ProjectCommands:
             RequestError: If there is a network or connection error.
         """
         params_dict = {
-                'stories': stories,
-            }
+            "stories": stories,
+        }
         validated_params = SetStoriesParameters(**params_dict)
-        self._core.post_tapir_command(
-            "SetStories",
-            validated_params.model_dump(by_alias=True, exclude_none=True)
-        )
+        self._core.post_tapir_command("SetStories", validated_params.model_dump(by_alias=True, exclude_none=True))
         return None

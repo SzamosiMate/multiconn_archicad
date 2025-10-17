@@ -14,10 +14,7 @@ class BasicCommands:
     def __init__(self, core: CoreCommands):
         self._core = core
 
-
-    def get_product_info(
-        self
-    ) -> GetProductInfoResult:
+    def get_product_info(self) -> GetProductInfoResult:
         """
         Accesses the version information from the running Archicad.
 
@@ -25,15 +22,10 @@ class BasicCommands:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
         """
-        response_dict = self._core.post_command(
-            "API.GetProductInfo"
-        )
+        response_dict = self._core.post_command("API.GetProductInfo")
         return GetProductInfoResult.model_validate(response_dict)
 
-
-    def is_alive(
-        self
-    ) -> IsAliveResult:
+    def is_alive(self) -> IsAliveResult:
         """
         Checks if the Archicad connection is alive.
 
@@ -41,7 +33,5 @@ class BasicCommands:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
         """
-        response_dict = self._core.post_command(
-            "API.IsAlive"
-        )
+        response_dict = self._core.post_command("API.IsAlive")
         return IsAliveResult.model_validate(response_dict)

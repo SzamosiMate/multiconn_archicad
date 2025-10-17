@@ -4,7 +4,12 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 
-from multiconn_archicad.models.official.commands import ExecuteAddOnCommandParameters, ExecuteAddOnCommandResult, IsAddOnCommandAvailableParameters, IsAddOnCommandAvailableResult
+from multiconn_archicad.models.official.commands import (
+    ExecuteAddOnCommandParameters,
+    ExecuteAddOnCommandResult,
+    IsAddOnCommandAvailableParameters,
+    IsAddOnCommandAvailableResult,
+)
 from multiconn_archicad.models.official.types import AddOnCommandId, AddOnCommandParameters
 
 if TYPE_CHECKING:
@@ -15,12 +20,11 @@ class AddonCommands:
     def __init__(self, core: CoreCommands):
         self._core = core
 
-
     def execute_add_on_command(
         self,
         add_on_command_id: AddOnCommandId,
         extra_data: Any,
-        add_on_command_parameters: AddOnCommandParameters | None = None
+        add_on_command_parameters: AddOnCommandParameters | None = None,
     ) -> ExecuteAddOnCommandResult:
         """
         Executes a command registered in an Add-On.
@@ -35,22 +39,17 @@ class AddonCommands:
             RequestError: If there is a network or connection error.
         """
         params_dict = {
-                'addOnCommandId': add_on_command_id,
-                'addOnCommandParameters': add_on_command_parameters,
-                'extra_data': extra_data,
-            }
+            "addOnCommandId": add_on_command_id,
+            "addOnCommandParameters": add_on_command_parameters,
+            "extra_data": extra_data,
+        }
         validated_params = ExecuteAddOnCommandParameters(**params_dict)
         response_dict = self._core.post_command(
-            "API.ExecuteAddOnCommand",
-            validated_params.model_dump(by_alias=True, exclude_none=True)
+            "API.ExecuteAddOnCommand", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
         return ExecuteAddOnCommandResult.model_validate(response_dict)
 
-
-    def is_add_on_command_available(
-        self,
-        add_on_command_id: AddOnCommandId
-    ) -> IsAddOnCommandAvailableResult:
+    def is_add_on_command_available(self, add_on_command_id: AddOnCommandId) -> IsAddOnCommandAvailableResult:
         """
         Checks if the command is available or not.
 
@@ -62,11 +61,10 @@ class AddonCommands:
             RequestError: If there is a network or connection error.
         """
         params_dict = {
-                'addOnCommandId': add_on_command_id,
-            }
+            "addOnCommandId": add_on_command_id,
+        }
         validated_params = IsAddOnCommandAvailableParameters(**params_dict)
         response_dict = self._core.post_command(
-            "API.IsAddOnCommandAvailable",
-            validated_params.model_dump(by_alias=True, exclude_none=True)
+            "API.IsAddOnCommandAvailable", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
         return IsAddOnCommandAvailableResult.model_validate(response_dict)

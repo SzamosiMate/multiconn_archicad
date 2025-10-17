@@ -4,7 +4,11 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 
-from multiconn_archicad.models.tapir.commands import AddFilesToEmbeddedLibraryParameters, AddFilesToEmbeddedLibraryResult, GetLibrariesResult
+from multiconn_archicad.models.tapir.commands import (
+    AddFilesToEmbeddedLibraryParameters,
+    AddFilesToEmbeddedLibraryResult,
+    GetLibrariesResult,
+)
 from multiconn_archicad.models.tapir.types import File
 
 if TYPE_CHECKING:
@@ -15,11 +19,7 @@ class LibraryCommands:
     def __init__(self, core: CoreCommands):
         self._core = core
 
-
-    def add_files_to_embedded_library(
-        self,
-        files: list[File]
-    ) -> AddFilesToEmbeddedLibraryResult:
+    def add_files_to_embedded_library(self, files: list[File]) -> AddFilesToEmbeddedLibraryResult:
         """
         Adds the given files into the embedded library.
 
@@ -31,19 +31,15 @@ class LibraryCommands:
             RequestError: If there is a network or connection error.
         """
         params_dict = {
-                'files': files,
-            }
+            "files": files,
+        }
         validated_params = AddFilesToEmbeddedLibraryParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "AddFilesToEmbeddedLibrary",
-            validated_params.model_dump(by_alias=True, exclude_none=True)
+            "AddFilesToEmbeddedLibrary", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
         return AddFilesToEmbeddedLibraryResult.model_validate(response_dict)
 
-
-    def get_libraries(
-        self
-    ) -> GetLibrariesResult:
+    def get_libraries(self) -> GetLibrariesResult:
         """
         Gets the list of loaded libraries.
 
@@ -51,15 +47,10 @@ class LibraryCommands:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
         """
-        response_dict = self._core.post_tapir_command(
-            "GetLibraries"
-        )
+        response_dict = self._core.post_tapir_command("GetLibraries")
         return GetLibrariesResult.model_validate(response_dict)
 
-
-    def reload_libraries(
-        self
-    ) -> None:
+    def reload_libraries(self) -> None:
         """
         Executes the reload libraries command.
 
@@ -67,7 +58,5 @@ class LibraryCommands:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
         """
-        self._core.post_tapir_command(
-            "ReloadLibraries"
-        )
+        self._core.post_tapir_command("ReloadLibraries")
         return None

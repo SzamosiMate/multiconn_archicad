@@ -4,8 +4,28 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 
-from multiconn_archicad.models.tapir.commands import CreateBuildingMaterialsParameters, CreateBuildingMaterialsResult, CreateCompositesParameters, CreateCompositesResult, CreateLayersParameters, CreateLayersResult, CreateSurfacesParameters, CreateSurfacesResult, GetAttributesByTypeParameters, GetAttributesByTypeResult, GetBuildingMaterialPhysicalPropertiesParameters, GetBuildingMaterialPhysicalPropertiesResult
-from multiconn_archicad.models.tapir.types import AttributeIdArrayItem, AttributeType, BuildingMaterialDataArrayItem, CompositeDataArrayItem, LayerDataArrayItem, SurfaceDataArrayItem
+from multiconn_archicad.models.tapir.commands import (
+    CreateBuildingMaterialsParameters,
+    CreateBuildingMaterialsResult,
+    CreateCompositesParameters,
+    CreateCompositesResult,
+    CreateLayersParameters,
+    CreateLayersResult,
+    CreateSurfacesParameters,
+    CreateSurfacesResult,
+    GetAttributesByTypeParameters,
+    GetAttributesByTypeResult,
+    GetBuildingMaterialPhysicalPropertiesParameters,
+    GetBuildingMaterialPhysicalPropertiesResult,
+)
+from multiconn_archicad.models.tapir.types import (
+    AttributeIdArrayItem,
+    AttributeType,
+    BuildingMaterialDataArrayItem,
+    CompositeDataArrayItem,
+    LayerDataArrayItem,
+    SurfaceDataArrayItem,
+)
 
 if TYPE_CHECKING:
     from multiconn_archicad.core.core_commands import CoreCommands
@@ -15,11 +35,8 @@ class AttributeCommands:
     def __init__(self, core: CoreCommands):
         self._core = core
 
-
     def create_building_materials(
-        self,
-        building_material_data_array: list[BuildingMaterialDataArrayItem],
-        overwrite_existing: bool | None = None
+        self, building_material_data_array: list[BuildingMaterialDataArrayItem], overwrite_existing: bool | None = None
     ) -> CreateBuildingMaterialsResult:
         """
         Creates Building Material attributes based on the given parameters.
@@ -35,21 +52,17 @@ class AttributeCommands:
             RequestError: If there is a network or connection error.
         """
         params_dict = {
-                'buildingMaterialDataArray': building_material_data_array,
-                'overwriteExisting': overwrite_existing,
-            }
+            "buildingMaterialDataArray": building_material_data_array,
+            "overwriteExisting": overwrite_existing,
+        }
         validated_params = CreateBuildingMaterialsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateBuildingMaterials",
-            validated_params.model_dump(by_alias=True, exclude_none=True)
+            "CreateBuildingMaterials", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
         return CreateBuildingMaterialsResult.model_validate(response_dict)
 
-
     def create_composites(
-        self,
-        composite_data_array: list[CompositeDataArrayItem],
-        overwrite_existing: bool | None = None
+        self, composite_data_array: list[CompositeDataArrayItem], overwrite_existing: bool | None = None
     ) -> CreateCompositesResult:
         """
         Creates Composite attributes based on the given parameters.
@@ -65,21 +78,17 @@ class AttributeCommands:
             RequestError: If there is a network or connection error.
         """
         params_dict = {
-                'compositeDataArray': composite_data_array,
-                'overwriteExisting': overwrite_existing,
-            }
+            "compositeDataArray": composite_data_array,
+            "overwriteExisting": overwrite_existing,
+        }
         validated_params = CreateCompositesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateComposites",
-            validated_params.model_dump(by_alias=True, exclude_none=True)
+            "CreateComposites", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
         return CreateCompositesResult.model_validate(response_dict)
 
-
     def create_layers(
-        self,
-        layer_data_array: list[LayerDataArrayItem],
-        overwrite_existing: bool | None = None
+        self, layer_data_array: list[LayerDataArrayItem], overwrite_existing: bool | None = None
     ) -> CreateLayersResult:
         """
         Creates Layer attributes based on the given parameters.
@@ -94,21 +103,17 @@ class AttributeCommands:
             RequestError: If there is a network or connection error.
         """
         params_dict = {
-                'layerDataArray': layer_data_array,
-                'overwriteExisting': overwrite_existing,
-            }
+            "layerDataArray": layer_data_array,
+            "overwriteExisting": overwrite_existing,
+        }
         validated_params = CreateLayersParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateLayers",
-            validated_params.model_dump(by_alias=True, exclude_none=True)
+            "CreateLayers", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
         return CreateLayersResult.model_validate(response_dict)
 
-
     def create_surfaces(
-        self,
-        surface_data_array: list[SurfaceDataArrayItem],
-        overwrite_existing: bool | None = None
+        self, surface_data_array: list[SurfaceDataArrayItem], overwrite_existing: bool | None = None
     ) -> CreateSurfacesResult:
         """
         Creates Surface attributes based on the given parameters.
@@ -124,21 +129,16 @@ class AttributeCommands:
             RequestError: If there is a network or connection error.
         """
         params_dict = {
-                'surfaceDataArray': surface_data_array,
-                'overwriteExisting': overwrite_existing,
-            }
+            "surfaceDataArray": surface_data_array,
+            "overwriteExisting": overwrite_existing,
+        }
         validated_params = CreateSurfacesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateSurfaces",
-            validated_params.model_dump(by_alias=True, exclude_none=True)
+            "CreateSurfaces", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
         return CreateSurfacesResult.model_validate(response_dict)
 
-
-    def get_attributes_by_type(
-        self,
-        attribute_type: AttributeType
-    ) -> GetAttributesByTypeResult:
+    def get_attributes_by_type(self, attribute_type: AttributeType) -> GetAttributesByTypeResult:
         """
         Returns the details of every attribute of the given type.
 
@@ -150,19 +150,16 @@ class AttributeCommands:
             RequestError: If there is a network or connection error.
         """
         params_dict = {
-                'attributeType': attribute_type,
-            }
+            "attributeType": attribute_type,
+        }
         validated_params = GetAttributesByTypeParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetAttributesByType",
-            validated_params.model_dump(by_alias=True, exclude_none=True)
+            "GetAttributesByType", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
         return GetAttributesByTypeResult.model_validate(response_dict)
 
-
     def get_building_material_physical_properties(
-        self,
-        attribute_ids: list[AttributeIdArrayItem]
+        self, attribute_ids: list[AttributeIdArrayItem]
     ) -> GetBuildingMaterialPhysicalPropertiesResult:
         """
         Retrieves the physical properties of the given Building Materials.
@@ -175,11 +172,10 @@ class AttributeCommands:
             RequestError: If there is a network or connection error.
         """
         params_dict = {
-                'attributeIds': attribute_ids,
-            }
+            "attributeIds": attribute_ids,
+        }
         validated_params = GetBuildingMaterialPhysicalPropertiesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetBuildingMaterialPhysicalProperties",
-            validated_params.model_dump(by_alias=True, exclude_none=True)
+            "GetBuildingMaterialPhysicalProperties", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
         return GetBuildingMaterialPhysicalPropertiesResult.model_validate(response_dict)
