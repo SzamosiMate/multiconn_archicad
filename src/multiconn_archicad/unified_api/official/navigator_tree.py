@@ -32,10 +32,23 @@ from multiconn_archicad.models.official.commands import (
     RenameNavigatorItemParameters,
 )
 from multiconn_archicad.models.official.types import (
+    BuiltInContainerNavigatorItemWrapperItem,
+    DetailNavigatorItemWrapperItem,
+    Document3DNavigatorItemWrapperItem,
+    ElevationNavigatorItemWrapperItem,
+    ErrorItem,
+    FailedExecutionResult,
+    InteriorElevationNavigatorItemWrapperItem,
     NavigatorItemId,
+    NavigatorItemIdAndTypeWrapperItem,
     NavigatorItemIdWrapperItem,
+    NavigatorTree,
     OtherNavigatorTreeId,
     PublisherSetId,
+    SectionNavigatorItemWrapperItem,
+    StoryNavigatorItemWrapperItem,
+    SuccessfulExecutionResult,
+    WorksheetNavigatorItemWrapperItem,
 )
 
 if TYPE_CHECKING:
@@ -48,7 +61,7 @@ class NavigatorTreeCommands:
 
     def delete_navigator_items(
         self, navigator_item_ids: list[NavigatorItemIdWrapperItem]
-    ) -> DeleteNavigatorItemsResult:
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
         """
         Deletes items from navigator tree.
 
@@ -67,11 +80,12 @@ class NavigatorTreeCommands:
         response_dict = self._core.post_command(
             "API.DeleteNavigatorItems", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return DeleteNavigatorItemsResult.model_validate(response_dict)
+        validated_response = DeleteNavigatorItemsResult.model_validate(response_dict)
+        return validated_response.executionResults
 
     def get_built_in_container_navigator_items(
         self, navigator_item_ids: list[NavigatorItemIdWrapperItem]
-    ) -> GetBuiltInContainerNavigatorItemsResult:
+    ) -> list[BuiltInContainerNavigatorItemWrapperItem | ErrorItem]:
         """
         Returns the details of the built-in container navigator items identified by their Ids.
 
@@ -90,11 +104,12 @@ class NavigatorTreeCommands:
         response_dict = self._core.post_command(
             "API.GetBuiltInContainerNavigatorItems", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return GetBuiltInContainerNavigatorItemsResult.model_validate(response_dict)
+        validated_response = GetBuiltInContainerNavigatorItemsResult.model_validate(response_dict)
+        return validated_response.navigatorItems
 
     def get_detail_navigator_items(
         self, navigator_item_ids: list[NavigatorItemIdWrapperItem]
-    ) -> GetDetailNavigatorItemsResult:
+    ) -> list[DetailNavigatorItemWrapperItem | ErrorItem]:
         """
         Returns the details of the detail navigator items identified by their Ids.
 
@@ -113,11 +128,12 @@ class NavigatorTreeCommands:
         response_dict = self._core.post_command(
             "API.GetDetailNavigatorItems", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return GetDetailNavigatorItemsResult.model_validate(response_dict)
+        validated_response = GetDetailNavigatorItemsResult.model_validate(response_dict)
+        return validated_response.navigatorItems
 
     def get_document_3d_navigator_items(
         self, navigator_item_ids: list[NavigatorItemIdWrapperItem]
-    ) -> GetDocument3DNavigatorItemsResult:
+    ) -> list[Document3DNavigatorItemWrapperItem | ErrorItem]:
         """
         Returns the details of the 3D document navigator items identified by their Ids.
 
@@ -136,11 +152,12 @@ class NavigatorTreeCommands:
         response_dict = self._core.post_command(
             "API.GetDocument3DNavigatorItems", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return GetDocument3DNavigatorItemsResult.model_validate(response_dict)
+        validated_response = GetDocument3DNavigatorItemsResult.model_validate(response_dict)
+        return validated_response.navigatorItems
 
     def get_elevation_navigator_items(
         self, navigator_item_ids: list[NavigatorItemIdWrapperItem]
-    ) -> GetElevationNavigatorItemsResult:
+    ) -> list[ElevationNavigatorItemWrapperItem | ErrorItem]:
         """
         Returns the detailed elevation navigator items identified by their Ids.
 
@@ -159,11 +176,12 @@ class NavigatorTreeCommands:
         response_dict = self._core.post_command(
             "API.GetElevationNavigatorItems", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return GetElevationNavigatorItemsResult.model_validate(response_dict)
+        validated_response = GetElevationNavigatorItemsResult.model_validate(response_dict)
+        return validated_response.navigatorItems
 
     def get_interior_elevation_navigator_items(
         self, navigator_item_ids: list[NavigatorItemIdWrapperItem]
-    ) -> GetInteriorElevationNavigatorItemsResult:
+    ) -> list[ErrorItem | InteriorElevationNavigatorItemWrapperItem]:
         """
         Returns the details of the interior elevation navigator items identified by their Ids.
 
@@ -182,16 +200,15 @@ class NavigatorTreeCommands:
         response_dict = self._core.post_command(
             "API.GetInteriorElevationNavigatorItems", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return GetInteriorElevationNavigatorItemsResult.model_validate(response_dict)
+        validated_response = GetInteriorElevationNavigatorItemsResult.model_validate(response_dict)
+        return validated_response.navigatorItems
 
-    def get_navigator_item_tree(
-        self, navigator_tree_id: PublisherSetId | OtherNavigatorTreeId
-    ) -> GetNavigatorItemTreeResult:
+    def get_navigator_item_tree(self, navigator_tree_id: OtherNavigatorTreeId | PublisherSetId) -> NavigatorTree:
         """
         Returns the tree of navigator items.
 
         Args:
-            navigator_tree_id (PublisherSetId | OtherNavigatorTreeId): The identifier of a
+            navigator_tree_id (OtherNavigatorTreeId | PublisherSetId): The identifier of a
                 navigator item tree.
 
         Raises:
@@ -205,11 +222,12 @@ class NavigatorTreeCommands:
         response_dict = self._core.post_command(
             "API.GetNavigatorItemTree", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return GetNavigatorItemTreeResult.model_validate(response_dict)
+        validated_response = GetNavigatorItemTreeResult.model_validate(response_dict)
+        return validated_response.navigatorTree
 
     def get_navigator_items_type(
         self, navigator_item_ids: list[NavigatorItemIdWrapperItem]
-    ) -> GetNavigatorItemsTypeResult:
+    ) -> list[ErrorItem | NavigatorItemIdAndTypeWrapperItem]:
         """
         Returns all navigator item types based on the navigator item identifiers given. An error
         is returned for each identifier that is not found.
@@ -229,9 +247,10 @@ class NavigatorTreeCommands:
         response_dict = self._core.post_command(
             "API.GetNavigatorItemsType", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return GetNavigatorItemsTypeResult.model_validate(response_dict)
+        validated_response = GetNavigatorItemsTypeResult.model_validate(response_dict)
+        return validated_response.navigatorItemIdAndTypeList
 
-    def get_publisher_set_names(self) -> GetPublisherSetNamesResult:
+    def get_publisher_set_names(self) -> list[str]:
         """
         Returns the names of available publisher sets.
 
@@ -240,11 +259,12 @@ class NavigatorTreeCommands:
             RequestError: If there is a network or connection error.
         """
         response_dict = self._core.post_command("API.GetPublisherSetNames")
-        return GetPublisherSetNamesResult.model_validate(response_dict)
+        validated_response = GetPublisherSetNamesResult.model_validate(response_dict)
+        return validated_response.publisherSetNames
 
     def get_section_navigator_items(
         self, navigator_item_ids: list[NavigatorItemIdWrapperItem]
-    ) -> GetSectionNavigatorItemsResult:
+    ) -> list[ErrorItem | SectionNavigatorItemWrapperItem]:
         """
         Returns the details of the section navigator items identified by their Ids.
 
@@ -263,11 +283,12 @@ class NavigatorTreeCommands:
         response_dict = self._core.post_command(
             "API.GetSectionNavigatorItems", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return GetSectionNavigatorItemsResult.model_validate(response_dict)
+        validated_response = GetSectionNavigatorItemsResult.model_validate(response_dict)
+        return validated_response.navigatorItems
 
     def get_story_navigator_items(
         self, navigator_item_ids: list[NavigatorItemIdWrapperItem]
-    ) -> GetStoryNavigatorItemsResult:
+    ) -> list[ErrorItem | StoryNavigatorItemWrapperItem]:
         """
         Returns the details of the story navigator items identified by their Ids.
 
@@ -286,11 +307,12 @@ class NavigatorTreeCommands:
         response_dict = self._core.post_command(
             "API.GetStoryNavigatorItems", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return GetStoryNavigatorItemsResult.model_validate(response_dict)
+        validated_response = GetStoryNavigatorItemsResult.model_validate(response_dict)
+        return validated_response.navigatorItems
 
     def get_worksheet_navigator_items(
         self, navigator_item_ids: list[NavigatorItemIdWrapperItem]
-    ) -> GetWorksheetNavigatorItemsResult:
+    ) -> list[ErrorItem | WorksheetNavigatorItemWrapperItem]:
         """
         Returns the details of the worksheet navigator items identified by their Ids.
 
@@ -309,7 +331,8 @@ class NavigatorTreeCommands:
         response_dict = self._core.post_command(
             "API.GetWorksheetNavigatorItems", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return GetWorksheetNavigatorItemsResult.model_validate(response_dict)
+        validated_response = GetWorksheetNavigatorItemsResult.model_validate(response_dict)
+        return validated_response.navigatorItems
 
     def move_navigator_item(
         self,

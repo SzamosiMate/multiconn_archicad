@@ -9,6 +9,7 @@ from multiconn_archicad.models.tapir.commands import (
     GetArchicadLocationResult,
     GetCurrentWindowTypeResult,
 )
+from multiconn_archicad.models.tapir.types import WindowType
 
 if TYPE_CHECKING:
     from multiconn_archicad.core.core_commands import CoreCommands
@@ -18,7 +19,7 @@ class ApplicationCommands:
     def __init__(self, core: CoreCommands):
         self._core = core
 
-    def get_add_on_version(self) -> GetAddOnVersionResult:
+    def get_add_on_version(self) -> str:
         """
         Retrieves the version of the Tapir Additional JSON Commands Add-On.
 
@@ -27,9 +28,10 @@ class ApplicationCommands:
             RequestError: If there is a network or connection error.
         """
         response_dict = self._core.post_tapir_command("GetAddOnVersion")
-        return GetAddOnVersionResult.model_validate(response_dict)
+        validated_response = GetAddOnVersionResult.model_validate(response_dict)
+        return validated_response.version
 
-    def get_archicad_location(self) -> GetArchicadLocationResult:
+    def get_archicad_location(self) -> str:
         """
         Retrieves the location of the currently running Archicad executable.
 
@@ -38,9 +40,10 @@ class ApplicationCommands:
             RequestError: If there is a network or connection error.
         """
         response_dict = self._core.post_tapir_command("GetArchicadLocation")
-        return GetArchicadLocationResult.model_validate(response_dict)
+        validated_response = GetArchicadLocationResult.model_validate(response_dict)
+        return validated_response.archicadLocation
 
-    def get_current_window_type(self) -> GetCurrentWindowTypeResult:
+    def get_current_window_type(self) -> WindowType:
         """
         Returns the type of the current (active) window.
 
@@ -49,7 +52,8 @@ class ApplicationCommands:
             RequestError: If there is a network or connection error.
         """
         response_dict = self._core.post_tapir_command("GetCurrentWindowType")
-        return GetCurrentWindowTypeResult.model_validate(response_dict)
+        validated_response = GetCurrentWindowTypeResult.model_validate(response_dict)
+        return validated_response.currentWindowType
 
     def quit_archicad(self) -> None:
         """

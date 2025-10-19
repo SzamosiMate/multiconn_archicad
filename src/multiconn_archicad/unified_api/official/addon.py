@@ -10,7 +10,7 @@ from multiconn_archicad.models.official.commands import (
     IsAddOnCommandAvailableParameters,
     IsAddOnCommandAvailableResult,
 )
-from multiconn_archicad.models.official.types import AddOnCommandId, AddOnCommandParameters
+from multiconn_archicad.models.official.types import AddOnCommandId, AddOnCommandParameters, AddOnCommandResponse
 
 if TYPE_CHECKING:
     from multiconn_archicad.core.core_commands import CoreCommands
@@ -25,7 +25,7 @@ class AddonCommands:
         add_on_command_id: AddOnCommandId,
         extra_data: Any,
         add_on_command_parameters: AddOnCommandParameters | None = None,
-    ) -> ExecuteAddOnCommandResult:
+    ) -> AddOnCommandResponse:
         """
         Executes a command registered in an Add-On.
 
@@ -47,9 +47,10 @@ class AddonCommands:
         response_dict = self._core.post_command(
             "API.ExecuteAddOnCommand", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return ExecuteAddOnCommandResult.model_validate(response_dict)
+        validated_response = ExecuteAddOnCommandResult.model_validate(response_dict)
+        return validated_response.addOnCommandResponse
 
-    def is_add_on_command_available(self, add_on_command_id: AddOnCommandId) -> IsAddOnCommandAvailableResult:
+    def is_add_on_command_available(self, add_on_command_id: AddOnCommandId) -> bool:
         """
         Checks if the command is available or not.
 
@@ -67,4 +68,5 @@ class AddonCommands:
         response_dict = self._core.post_command(
             "API.IsAddOnCommandAvailable", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return IsAddOnCommandAvailableResult.model_validate(response_dict)
+        validated_response = IsAddOnCommandAvailableResult.model_validate(response_dict)
+        return validated_response.available

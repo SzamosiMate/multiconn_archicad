@@ -9,7 +9,7 @@ from multiconn_archicad.models.tapir.commands import (
     AddFilesToEmbeddedLibraryResult,
     GetLibrariesResult,
 )
-from multiconn_archicad.models.tapir.types import File
+from multiconn_archicad.models.tapir.types import FailedExecutionResult, File, Library, SuccessfulExecutionResult
 
 if TYPE_CHECKING:
     from multiconn_archicad.core.core_commands import CoreCommands
@@ -19,7 +19,9 @@ class LibraryCommands:
     def __init__(self, core: CoreCommands):
         self._core = core
 
-    def add_files_to_embedded_library(self, files: list[File]) -> AddFilesToEmbeddedLibraryResult:
+    def add_files_to_embedded_library(
+        self, files: list[File]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
         """
         Adds the given files into the embedded library.
 
@@ -37,9 +39,10 @@ class LibraryCommands:
         response_dict = self._core.post_tapir_command(
             "AddFilesToEmbeddedLibrary", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return AddFilesToEmbeddedLibraryResult.model_validate(response_dict)
+        validated_response = AddFilesToEmbeddedLibraryResult.model_validate(response_dict)
+        return validated_response.executionResults
 
-    def get_libraries(self) -> GetLibrariesResult:
+    def get_libraries(self) -> list[Library]:
         """
         Gets the list of loaded libraries.
 
@@ -48,7 +51,8 @@ class LibraryCommands:
             RequestError: If there is a network or connection error.
         """
         response_dict = self._core.post_tapir_command("GetLibraries")
-        return GetLibrariesResult.model_validate(response_dict)
+        validated_response = GetLibrariesResult.model_validate(response_dict)
+        return validated_response.libraries
 
     def reload_libraries(self) -> None:
         """

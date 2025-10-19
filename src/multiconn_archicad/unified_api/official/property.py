@@ -29,9 +29,17 @@ from multiconn_archicad.models.official.types import (
     BuiltInPropertyUserId,
     ElementIdArrayItem,
     ElementPropertyValue,
+    ErrorItem,
+    FailedExecutionResult,
+    PropertyDefinitionAvailabilityWrapperItem,
+    PropertyDefinitionWrapperItem,
     PropertyGroupIdArrayItem,
+    PropertyGroupWrapperItem,
     PropertyIdArrayItem,
+    PropertyIdsOfElementWrapperItem,
     PropertyType,
+    PropertyValuesWrapperItem,
+    SuccessfulExecutionResult,
     UserDefinedPropertyUserId,
 )
 
@@ -43,14 +51,14 @@ class PropertyCommands:
     def __init__(self, core: CoreCommands):
         self._core = core
 
-    def get_all_property_group_ids(self, property_type: PropertyType | None = None) -> GetAllPropertyGroupIdsResult:
+    def get_all_property_group_ids(self, property_type: None | PropertyType = None) -> list[PropertyGroupIdArrayItem]:
         """
         Returns the identifier of every property group in the current plan. The optional
         propertyType parameter can be used to filter the results based on the type of the
         property group (Built-in or User Defined).
 
         Args:
-            property_type (PropertyType | None)
+            property_type (None | PropertyType)
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -63,16 +71,17 @@ class PropertyCommands:
         response_dict = self._core.post_command(
             "API.GetAllPropertyGroupIds", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return GetAllPropertyGroupIdsResult.model_validate(response_dict)
+        validated_response = GetAllPropertyGroupIdsResult.model_validate(response_dict)
+        return validated_response.propertyGroupIds
 
-    def get_all_property_ids(self, property_type: PropertyType | None = None) -> GetAllPropertyIdsResult:
+    def get_all_property_ids(self, property_type: None | PropertyType = None) -> list[PropertyIdArrayItem]:
         """
         Returns the identifier of every property in the current plan. The optional propertyType
         parameter can be used to filter the results based on the type of the property (Built-in
         or User Defined).
 
         Args:
-            property_type (PropertyType | None)
+            property_type (None | PropertyType)
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -85,11 +94,12 @@ class PropertyCommands:
         response_dict = self._core.post_command(
             "API.GetAllPropertyIds", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return GetAllPropertyIdsResult.model_validate(response_dict)
+        validated_response = GetAllPropertyIdsResult.model_validate(response_dict)
+        return validated_response.propertyIds
 
     def get_all_property_ids_of_elements(
-        self, elements: list[ElementIdArrayItem], property_type: PropertyType | None = None
-    ) -> GetAllPropertyIdsOfElementsResult:
+        self, elements: list[ElementIdArrayItem], property_type: None | PropertyType = None
+    ) -> list[ErrorItem | PropertyIdsOfElementWrapperItem]:
         """
         Returns all property identifiers of the given elements. The optional propertyType
         parameter can be used to filter the results based on the type of the property (Built-in
@@ -97,7 +107,7 @@ class PropertyCommands:
 
         Args:
             elements (list[ElementIdArrayItem]): A list of elements.
-            property_type (PropertyType | None)
+            property_type (None | PropertyType)
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -111,9 +121,10 @@ class PropertyCommands:
         response_dict = self._core.post_command(
             "API.GetAllPropertyIdsOfElements", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return GetAllPropertyIdsOfElementsResult.model_validate(response_dict)
+        validated_response = GetAllPropertyIdsOfElementsResult.model_validate(response_dict)
+        return validated_response.propertyIdsOfElements
 
-    def get_all_property_names(self) -> GetAllPropertyNamesResult:
+    def get_all_property_names(self) -> list[BuiltInPropertyUserId | UserDefinedPropertyUserId]:
         """
         Returns the human-readable names of available Property definitions for debug and
         development purposes.
@@ -123,9 +134,12 @@ class PropertyCommands:
             RequestError: If there is a network or connection error.
         """
         response_dict = self._core.post_command("API.GetAllPropertyNames")
-        return GetAllPropertyNamesResult.model_validate(response_dict)
+        validated_response = GetAllPropertyNamesResult.model_validate(response_dict)
+        return validated_response.properties
 
-    def get_details_of_properties(self, properties: list[PropertyIdArrayItem]) -> GetDetailsOfPropertiesResult:
+    def get_details_of_properties(
+        self, properties: list[PropertyIdArrayItem]
+    ) -> list[ErrorItem | PropertyDefinitionWrapperItem]:
         """
         Returns the details of property definitions.
 
@@ -143,11 +157,12 @@ class PropertyCommands:
         response_dict = self._core.post_command(
             "API.GetDetailsOfProperties", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return GetDetailsOfPropertiesResult.model_validate(response_dict)
+        validated_response = GetDetailsOfPropertiesResult.model_validate(response_dict)
+        return validated_response.propertyDefinitions
 
     def get_property_definition_availability(
         self, property_ids: list[PropertyIdArrayItem]
-    ) -> GetPropertyDefinitionAvailabilityResult:
+    ) -> list[ErrorItem | PropertyDefinitionAvailabilityWrapperItem]:
         """
         Returns the ids of classification items a given property definition is available for.
 
@@ -165,9 +180,12 @@ class PropertyCommands:
         response_dict = self._core.post_command(
             "API.GetPropertyDefinitionAvailability", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return GetPropertyDefinitionAvailabilityResult.model_validate(response_dict)
+        validated_response = GetPropertyDefinitionAvailabilityResult.model_validate(response_dict)
+        return validated_response.propertyDefinitionAvailabilityList
 
-    def get_property_groups(self, property_group_ids: list[PropertyGroupIdArrayItem]) -> GetPropertyGroupsResult:
+    def get_property_groups(
+        self, property_group_ids: list[PropertyGroupIdArrayItem]
+    ) -> list[ErrorItem | PropertyGroupWrapperItem]:
         """
         Returns the details of property groups.
 
@@ -186,16 +204,17 @@ class PropertyCommands:
         response_dict = self._core.post_command(
             "API.GetPropertyGroups", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return GetPropertyGroupsResult.model_validate(response_dict)
+        validated_response = GetPropertyGroupsResult.model_validate(response_dict)
+        return validated_response.propertyGroups
 
     def get_property_ids(
-        self, properties: list[UserDefinedPropertyUserId | BuiltInPropertyUserId]
-    ) -> GetPropertyIdsResult:
+        self, properties: list[BuiltInPropertyUserId | UserDefinedPropertyUserId]
+    ) -> list[ErrorItem | PropertyIdArrayItem]:
         """
         Returns the identifiers of property definitions for the requested property names.
 
         Args:
-            properties (list[UserDefinedPropertyUserId | BuiltInPropertyUserId]): List of
+            properties (list[BuiltInPropertyUserId | UserDefinedPropertyUserId]): List of
                 property names whose ids are requested.
 
         Raises:
@@ -209,11 +228,12 @@ class PropertyCommands:
         response_dict = self._core.post_command(
             "API.GetPropertyIds", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return GetPropertyIdsResult.model_validate(response_dict)
+        validated_response = GetPropertyIdsResult.model_validate(response_dict)
+        return validated_response.properties
 
     def get_property_values_of_elements(
         self, elements: list[ElementIdArrayItem], properties: list[PropertyIdArrayItem]
-    ) -> GetPropertyValuesOfElementsResult:
+    ) -> list[ErrorItem | PropertyValuesWrapperItem]:
         """
         Returns the property values of the elements for the given property.
 
@@ -233,11 +253,12 @@ class PropertyCommands:
         response_dict = self._core.post_command(
             "API.GetPropertyValuesOfElements", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return GetPropertyValuesOfElementsResult.model_validate(response_dict)
+        validated_response = GetPropertyValuesOfElementsResult.model_validate(response_dict)
+        return validated_response.propertyValuesForElements
 
     def set_property_values_of_elements(
         self, element_property_values: list[ElementPropertyValue]
-    ) -> SetPropertyValuesOfElementsResult:
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
         """
         Sets the property values of elements.
 
@@ -256,4 +277,5 @@ class PropertyCommands:
         response_dict = self._core.post_command(
             "API.SetPropertyValuesOfElements", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return SetPropertyValuesOfElementsResult.model_validate(response_dict)
+        validated_response = SetPropertyValuesOfElementsResult.model_validate(response_dict)
+        return validated_response.executionResults

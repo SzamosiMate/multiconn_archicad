@@ -19,11 +19,13 @@ from multiconn_archicad.models.tapir.commands import (
     GetBuildingMaterialPhysicalPropertiesResult,
 )
 from multiconn_archicad.models.tapir.types import (
+    Attribute,
     AttributeIdArrayItem,
     AttributeType,
     BuildingMaterialDataArrayItem,
     CompositeDataArrayItem,
     LayerDataArrayItem,
+    Property,
     SurfaceDataArrayItem,
 )
 
@@ -36,15 +38,15 @@ class AttributeCommands:
         self._core = core
 
     def create_building_materials(
-        self, building_material_data_array: list[BuildingMaterialDataArrayItem], overwrite_existing: bool | None = None
-    ) -> CreateBuildingMaterialsResult:
+        self, building_material_data_array: list[BuildingMaterialDataArrayItem], overwrite_existing: None | bool = None
+    ) -> list[AttributeIdArrayItem]:
         """
         Creates Building Material attributes based on the given parameters.
 
         Args:
             building_material_data_array (list[BuildingMaterialDataArrayItem]): Array of data to
                 create new Building Materials.
-            overwrite_existing (bool | None): Overwrite the Building Material if exists with the
+            overwrite_existing (None | bool): Overwrite the Building Material if exists with the
                 same name. The default is false.
 
         Raises:
@@ -59,18 +61,19 @@ class AttributeCommands:
         response_dict = self._core.post_tapir_command(
             "CreateBuildingMaterials", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return CreateBuildingMaterialsResult.model_validate(response_dict)
+        validated_response = CreateBuildingMaterialsResult.model_validate(response_dict)
+        return validated_response.attributeIds
 
     def create_composites(
-        self, composite_data_array: list[CompositeDataArrayItem], overwrite_existing: bool | None = None
-    ) -> CreateCompositesResult:
+        self, composite_data_array: list[CompositeDataArrayItem], overwrite_existing: None | bool = None
+    ) -> list[AttributeIdArrayItem]:
         """
         Creates Composite attributes based on the given parameters.
 
         Args:
             composite_data_array (list[CompositeDataArrayItem]): Array of data to create
                 Composites.
-            overwrite_existing (bool | None): Overwrite the Composite if exists with the same
+            overwrite_existing (None | bool): Overwrite the Composite if exists with the same
                 name. The default is false.
 
         Raises:
@@ -85,17 +88,18 @@ class AttributeCommands:
         response_dict = self._core.post_tapir_command(
             "CreateComposites", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return CreateCompositesResult.model_validate(response_dict)
+        validated_response = CreateCompositesResult.model_validate(response_dict)
+        return validated_response.attributeIds
 
     def create_layers(
-        self, layer_data_array: list[LayerDataArrayItem], overwrite_existing: bool | None = None
-    ) -> CreateLayersResult:
+        self, layer_data_array: list[LayerDataArrayItem], overwrite_existing: None | bool = None
+    ) -> list[AttributeIdArrayItem]:
         """
         Creates Layer attributes based on the given parameters.
 
         Args:
             layer_data_array (list[LayerDataArrayItem]): Array of data to create new Layers.
-            overwrite_existing (bool | None): Overwrite the Layer if exists with the same name.
+            overwrite_existing (None | bool): Overwrite the Layer if exists with the same name.
                 The default is false.
 
         Raises:
@@ -110,18 +114,19 @@ class AttributeCommands:
         response_dict = self._core.post_tapir_command(
             "CreateLayers", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return CreateLayersResult.model_validate(response_dict)
+        validated_response = CreateLayersResult.model_validate(response_dict)
+        return validated_response.attributeIds
 
     def create_surfaces(
-        self, surface_data_array: list[SurfaceDataArrayItem], overwrite_existing: bool | None = None
-    ) -> CreateSurfacesResult:
+        self, surface_data_array: list[SurfaceDataArrayItem], overwrite_existing: None | bool = None
+    ) -> list[AttributeIdArrayItem]:
         """
         Creates Surface attributes based on the given parameters.
 
         Args:
             surface_data_array (list[SurfaceDataArrayItem]): Array of data to create new
                 surfaces.
-            overwrite_existing (bool | None): Overwrite the Surface if exists with the same
+            overwrite_existing (None | bool): Overwrite the Surface if exists with the same
                 name. The default is false.
 
         Raises:
@@ -136,9 +141,10 @@ class AttributeCommands:
         response_dict = self._core.post_tapir_command(
             "CreateSurfaces", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return CreateSurfacesResult.model_validate(response_dict)
+        validated_response = CreateSurfacesResult.model_validate(response_dict)
+        return validated_response.attributeIds
 
-    def get_attributes_by_type(self, attribute_type: AttributeType) -> GetAttributesByTypeResult:
+    def get_attributes_by_type(self, attribute_type: AttributeType) -> list[Attribute]:
         """
         Returns the details of every attribute of the given type.
 
@@ -156,11 +162,10 @@ class AttributeCommands:
         response_dict = self._core.post_tapir_command(
             "GetAttributesByType", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return GetAttributesByTypeResult.model_validate(response_dict)
+        validated_response = GetAttributesByTypeResult.model_validate(response_dict)
+        return validated_response.attributes
 
-    def get_building_material_physical_properties(
-        self, attribute_ids: list[AttributeIdArrayItem]
-    ) -> GetBuildingMaterialPhysicalPropertiesResult:
+    def get_building_material_physical_properties(self, attribute_ids: list[AttributeIdArrayItem]) -> list[Property]:
         """
         Retrieves the physical properties of the given Building Materials.
 
@@ -178,4 +183,5 @@ class AttributeCommands:
         response_dict = self._core.post_tapir_command(
             "GetBuildingMaterialPhysicalProperties", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return GetBuildingMaterialPhysicalPropertiesResult.model_validate(response_dict)
+        validated_response = GetBuildingMaterialPhysicalPropertiesResult.model_validate(response_dict)
+        return validated_response.properties

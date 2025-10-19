@@ -21,11 +21,20 @@ from multiconn_archicad.models.official.commands import (
     SetClassificationsOfElementsResult,
 )
 from multiconn_archicad.models.official.types import (
+    ClassificationItemArrayItem,
+    ClassificationItemAvailabilityWrapperItem,
     ClassificationItemIdArrayItem,
+    ClassificationItemWrapperItem,
+    ClassificationSystem,
     ClassificationSystemId,
     ClassificationSystemIdArrayItem,
+    ClassificationSystemWrapperItem,
     ElementClassification,
+    ElementClassificationWrapperItem,
     ElementIdArrayItem,
+    ErrorItem,
+    FailedExecutionResult,
+    SuccessfulExecutionResult,
 )
 
 if TYPE_CHECKING:
@@ -36,7 +45,7 @@ class ClassificationCommands:
     def __init__(self, core: CoreCommands):
         self._core = core
 
-    def get_all_classification_systems(self) -> GetAllClassificationSystemsResult:
+    def get_all_classification_systems(self) -> list[ClassificationSystem]:
         """
         Returns the list of available classification systems.
 
@@ -45,11 +54,12 @@ class ClassificationCommands:
             RequestError: If there is a network or connection error.
         """
         response_dict = self._core.post_command("API.GetAllClassificationSystems")
-        return GetAllClassificationSystemsResult.model_validate(response_dict)
+        validated_response = GetAllClassificationSystemsResult.model_validate(response_dict)
+        return validated_response.classificationSystems
 
     def get_all_classifications_in_system(
         self, classification_system_id: ClassificationSystemId
-    ) -> GetAllClassificationsInSystemResult:
+    ) -> list[ClassificationItemArrayItem]:
         """
         Returns the tree of classifications in the given classification system.
 
@@ -67,11 +77,12 @@ class ClassificationCommands:
         response_dict = self._core.post_command(
             "API.GetAllClassificationsInSystem", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return GetAllClassificationsInSystemResult.model_validate(response_dict)
+        validated_response = GetAllClassificationsInSystemResult.model_validate(response_dict)
+        return validated_response.classificationItems
 
     def get_classification_item_availability(
         self, classification_item_ids: list[ClassificationItemIdArrayItem]
-    ) -> GetClassificationItemAvailabilityResult:
+    ) -> list[ClassificationItemAvailabilityWrapperItem | ErrorItem]:
         """
         Returns the ids of property definitions available for a given classification item.
 
@@ -90,9 +101,10 @@ class ClassificationCommands:
         response_dict = self._core.post_command(
             "API.GetClassificationItemAvailability", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return GetClassificationItemAvailabilityResult.model_validate(response_dict)
+        validated_response = GetClassificationItemAvailabilityResult.model_validate(response_dict)
+        return validated_response.classificationItemAvailabilityList
 
-    def get_classification_system_ids(self) -> GetClassificationSystemIdsResult:
+    def get_classification_system_ids(self) -> list[ClassificationSystemIdArrayItem]:
         """
         Returns the list of available classification systems.
 
@@ -101,11 +113,12 @@ class ClassificationCommands:
             RequestError: If there is a network or connection error.
         """
         response_dict = self._core.post_command("API.GetClassificationSystemIds")
-        return GetClassificationSystemIdsResult.model_validate(response_dict)
+        validated_response = GetClassificationSystemIdsResult.model_validate(response_dict)
+        return validated_response.classificationSystemIds
 
     def get_classification_systems(
         self, classification_system_ids: list[ClassificationSystemIdArrayItem]
-    ) -> GetClassificationSystemsResult:
+    ) -> list[ClassificationSystemWrapperItem | ErrorItem]:
         """
         Returns the details of classification systems identified by their GUIDs.
 
@@ -124,11 +137,12 @@ class ClassificationCommands:
         response_dict = self._core.post_command(
             "API.GetClassificationSystems", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return GetClassificationSystemsResult.model_validate(response_dict)
+        validated_response = GetClassificationSystemsResult.model_validate(response_dict)
+        return validated_response.classificationSystems
 
     def get_classifications_of_elements(
         self, elements: list[ElementIdArrayItem], classification_system_ids: list[ClassificationSystemIdArrayItem]
-    ) -> GetClassificationsOfElementsResult:
+    ) -> list[ElementClassificationWrapperItem | ErrorItem]:
         """
         Returns the classification of the given elements in the given classification systems.
 
@@ -149,11 +163,12 @@ class ClassificationCommands:
         response_dict = self._core.post_command(
             "API.GetClassificationsOfElements", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return GetClassificationsOfElementsResult.model_validate(response_dict)
+        validated_response = GetClassificationsOfElementsResult.model_validate(response_dict)
+        return validated_response.elementClassifications
 
     def get_details_of_classification_items(
         self, classification_item_ids: list[ClassificationItemIdArrayItem]
-    ) -> GetDetailsOfClassificationItemsResult:
+    ) -> list[ClassificationItemWrapperItem | ErrorItem]:
         """
         Returns the details of classification items.
 
@@ -172,11 +187,12 @@ class ClassificationCommands:
         response_dict = self._core.post_command(
             "API.GetDetailsOfClassificationItems", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return GetDetailsOfClassificationItemsResult.model_validate(response_dict)
+        validated_response = GetDetailsOfClassificationItemsResult.model_validate(response_dict)
+        return validated_response.classificationItems
 
     def set_classifications_of_elements(
         self, element_classifications: list[ElementClassification]
-    ) -> SetClassificationsOfElementsResult:
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
         """
         Sets the classifications of elements. In order to set the classification of an element
         to unclassified, omit the classificationItemId field.
@@ -196,4 +212,5 @@ class ClassificationCommands:
         response_dict = self._core.post_command(
             "API.SetClassificationsOfElements", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return SetClassificationsOfElementsResult.model_validate(response_dict)
+        validated_response = SetClassificationsOfElementsResult.model_validate(response_dict)
+        return validated_response.executionResults

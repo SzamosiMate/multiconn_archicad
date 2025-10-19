@@ -8,7 +8,7 @@ from multiconn_archicad.models.official.commands import (
     GetElementsRelatedToZonesParameters,
     GetElementsRelatedToZonesResult,
 )
-from multiconn_archicad.models.official.types import ElementIdArrayItem, ElementType
+from multiconn_archicad.models.official.types import ElementIdArrayItem, ElementType, ElementsWrapper, ErrorItem
 
 if TYPE_CHECKING:
     from multiconn_archicad.core.core_commands import CoreCommands
@@ -19,8 +19,8 @@ class ElementRelationCommands:
         self._core = core
 
     def get_elements_related_to_zones(
-        self, zones: list[ElementIdArrayItem], element_types: list[ElementType] | None = None
-    ) -> GetElementsRelatedToZonesResult:
+        self, zones: list[ElementIdArrayItem], element_types: None | list[ElementType] = None
+    ) -> list[ElementsWrapper | ErrorItem]:
         """
         Returns related elements of the given zones. The related elements will be grouped by
         type. If multiple zones was given, then the order of the returned list is that of the
@@ -28,7 +28,7 @@ class ElementRelationCommands:
 
         Args:
             zones (list[ElementIdArrayItem]): A list of elements.
-            element_types (list[ElementType] | None): If this parameter is given, then only
+            element_types (None | list[ElementType]): If this parameter is given, then only
                 related elements with the requested types will be listed.
 
         Raises:
@@ -43,4 +43,5 @@ class ElementRelationCommands:
         response_dict = self._core.post_command(
             "API.GetElementsRelatedToZones", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return GetElementsRelatedToZonesResult.model_validate(response_dict)
+        validated_response = GetElementsRelatedToZonesResult.model_validate(response_dict)
+        return validated_response.elementsRelatedToZones

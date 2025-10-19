@@ -23,9 +23,10 @@ class BasicCommands:
             RequestError: If there is a network or connection error.
         """
         response_dict = self._core.post_command("API.GetProductInfo")
-        return GetProductInfoResult.model_validate(response_dict)
+        validated_response = GetProductInfoResult.model_validate(response_dict)
+        return validated_response
 
-    def is_alive(self) -> IsAliveResult:
+    def is_alive(self) -> bool:
         """
         Checks if the Archicad connection is alive.
 
@@ -34,4 +35,5 @@ class BasicCommands:
             RequestError: If there is a network or connection error.
         """
         response_dict = self._core.post_command("API.IsAlive")
-        return IsAliveResult.model_validate(response_dict)
+        validated_response = IsAliveResult.model_validate(response_dict)
+        return validated_response.isAlive

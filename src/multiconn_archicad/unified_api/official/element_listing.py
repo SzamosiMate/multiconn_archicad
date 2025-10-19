@@ -15,7 +15,13 @@ from multiconn_archicad.models.official.commands import (
     GetTypesOfElementsParameters,
     GetTypesOfElementsResult,
 )
-from multiconn_archicad.models.official.types import ClassificationItemId, ElementIdArrayItem, ElementType
+from multiconn_archicad.models.official.types import (
+    ClassificationItemId,
+    ElementIdArrayItem,
+    ElementType,
+    ErrorItem,
+    TypeOfElementWrapperItem,
+)
 
 if TYPE_CHECKING:
     from multiconn_archicad.core.core_commands import CoreCommands
@@ -25,7 +31,7 @@ class ElementListingCommands:
     def __init__(self, core: CoreCommands):
         self._core = core
 
-    def get_all_elements(self) -> GetAllElementsResult:
+    def get_all_elements(self) -> list[ElementIdArrayItem]:
         """
         Returns the identifier of every element in the current plan.
 
@@ -34,11 +40,10 @@ class ElementListingCommands:
             RequestError: If there is a network or connection error.
         """
         response_dict = self._core.post_command("API.GetAllElements")
-        return GetAllElementsResult.model_validate(response_dict)
+        validated_response = GetAllElementsResult.model_validate(response_dict)
+        return validated_response.elements
 
-    def get_elements_by_classification(
-        self, classification_item_id: ClassificationItemId
-    ) -> GetElementsByClassificationResult:
+    def get_elements_by_classification(self, classification_item_id: ClassificationItemId) -> list[ElementIdArrayItem]:
         """
         Returns the identifier of every element with the given classification identifier.
 
@@ -56,9 +61,10 @@ class ElementListingCommands:
         response_dict = self._core.post_command(
             "API.GetElementsByClassification", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return GetElementsByClassificationResult.model_validate(response_dict)
+        validated_response = GetElementsByClassificationResult.model_validate(response_dict)
+        return validated_response.elements
 
-    def get_elements_by_type(self, element_type: ElementType) -> GetElementsByTypeResult:
+    def get_elements_by_type(self, element_type: ElementType) -> list[ElementIdArrayItem]:
         """
         Returns the identifier of every element of the given type on the plan.
 
@@ -76,19 +82,20 @@ class ElementListingCommands:
         response_dict = self._core.post_command(
             "API.GetElementsByType", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return GetElementsByTypeResult.model_validate(response_dict)
+        validated_response = GetElementsByTypeResult.model_validate(response_dict)
+        return validated_response.elements
 
     def get_selected_elements(
-        self, only_editable: bool | None = None, only_supported_types: bool | None = None
-    ) -> GetSelectedElementsResult:
+        self, only_editable: None | bool = None, only_supported_types: None | bool = None
+    ) -> list[ElementIdArrayItem]:
         """
         Returns the identifiers of selected elements in the current plan.
 
         Args:
-            only_editable (bool | None): Optional parameter that defines whether the selection
+            only_editable (None | bool): Optional parameter that defines whether the selection
                 list should include only the editable elements or all of them. The default value
                 is FALSE
-            only_supported_types (bool | None): Optional parameter. When it is set to true, only
+            only_supported_types (None | bool): Optional parameter. When it is set to true, only
                 elements with types that are supported by any other JSON API command will be
                 returned.
 
@@ -104,9 +111,10 @@ class ElementListingCommands:
         response_dict = self._core.post_command(
             "API.GetSelectedElements", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return GetSelectedElementsResult.model_validate(response_dict)
+        validated_response = GetSelectedElementsResult.model_validate(response_dict)
+        return validated_response.elements
 
-    def get_types_of_elements(self, elements: list[ElementIdArrayItem]) -> GetTypesOfElementsResult:
+    def get_types_of_elements(self, elements: list[ElementIdArrayItem]) -> list[ErrorItem | TypeOfElementWrapperItem]:
         """
         Returns the types of the given elements.
 
@@ -124,4 +132,5 @@ class ElementListingCommands:
         response_dict = self._core.post_command(
             "API.GetTypesOfElements", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return GetTypesOfElementsResult.model_validate(response_dict)
+        validated_response = GetTypesOfElementsResult.model_validate(response_dict)
+        return validated_response.typesOfElements

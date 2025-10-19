@@ -14,7 +14,7 @@ from multiconn_archicad.models.tapir.commands import (
     SetProjectInfoFieldParameters,
     SetStoriesParameters,
 )
-from multiconn_archicad.models.tapir.types import StorySettings
+from multiconn_archicad.models.tapir.types import FieldModel, Hotlink, StorySettings
 
 if TYPE_CHECKING:
     from multiconn_archicad.core.core_commands import CoreCommands
@@ -33,9 +33,10 @@ class ProjectCommands:
             RequestError: If there is a network or connection error.
         """
         response_dict = self._core.post_tapir_command("GetGeoLocation")
-        return GetGeoLocationResult.model_validate(response_dict)
+        validated_response = GetGeoLocationResult.model_validate(response_dict)
+        return validated_response
 
-    def get_hotlinks(self) -> GetHotlinksResult:
+    def get_hotlinks(self) -> list[Hotlink]:
         """
         Gets the file system locations (path) of the hotlink modules. The hotlinks can have tree
         hierarchy in the project.
@@ -45,7 +46,8 @@ class ProjectCommands:
             RequestError: If there is a network or connection error.
         """
         response_dict = self._core.post_tapir_command("GetHotlinks")
-        return GetHotlinksResult.model_validate(response_dict)
+        validated_response = GetHotlinksResult.model_validate(response_dict)
+        return validated_response.hotlinks
 
     def get_project_info(self) -> GetProjectInfoResult:
         """
@@ -56,9 +58,10 @@ class ProjectCommands:
             RequestError: If there is a network or connection error.
         """
         response_dict = self._core.post_tapir_command("GetProjectInfo")
-        return GetProjectInfoResult.model_validate(response_dict)
+        validated_response = GetProjectInfoResult.model_validate(response_dict)
+        return validated_response
 
-    def get_project_info_fields(self) -> GetProjectInfoFieldsResult:
+    def get_project_info_fields(self) -> list[FieldModel]:
         """
         Retrieves the names and values of all project info fields.
 
@@ -67,7 +70,8 @@ class ProjectCommands:
             RequestError: If there is a network or connection error.
         """
         response_dict = self._core.post_tapir_command("GetProjectInfoFields")
-        return GetProjectInfoFieldsResult.model_validate(response_dict)
+        validated_response = GetProjectInfoFieldsResult.model_validate(response_dict)
+        return validated_response.fields
 
     def get_stories(self) -> GetStoriesResult:
         """
@@ -78,7 +82,8 @@ class ProjectCommands:
             RequestError: If there is a network or connection error.
         """
         response_dict = self._core.post_tapir_command("GetStories")
-        return GetStoriesResult.model_validate(response_dict)
+        validated_response = GetStoriesResult.model_validate(response_dict)
+        return validated_response
 
     def open_project(self, project_file_path: str) -> None:
         """
@@ -103,9 +108,8 @@ class ProjectCommands:
         Sets the value of a project info field.
 
         Args:
-            project_info_id (str): The id of the project info field. (Constraints: min_length=1)
-            project_info_value (str): The new value of the project info field. (Constraints:
-                min_length=1)
+            project_info_id (str): The id of the project info field.
+            project_info_value (str): The new value of the project info field.
 
         Raises:
             ArchicadAPIError: If the API returns an error response.

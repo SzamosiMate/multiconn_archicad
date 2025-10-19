@@ -12,7 +12,12 @@ from multiconn_archicad.models.tapir.commands import (
     GetFavoritesByTypeParameters,
     GetFavoritesByTypeResult,
 )
-from multiconn_archicad.models.tapir.types import ElementType, FavoritesFromElement
+from multiconn_archicad.models.tapir.types import (
+    ElementType,
+    FailedExecutionResult,
+    FavoritesFromElement,
+    SuccessfulExecutionResult,
+)
 
 if TYPE_CHECKING:
     from multiconn_archicad.core.core_commands import CoreCommands
@@ -22,7 +27,9 @@ class FavoritesCommands:
     def __init__(self, core: CoreCommands):
         self._core = core
 
-    def apply_favorites_to_element_defaults(self, favorites: list[str]) -> ApplyFavoritesToElementDefaultsResult:
+    def apply_favorites_to_element_defaults(
+        self, favorites: list[str]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
         """
         Apply the given favorites to element defaults.
 
@@ -40,11 +47,12 @@ class FavoritesCommands:
         response_dict = self._core.post_tapir_command(
             "ApplyFavoritesToElementDefaults", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return ApplyFavoritesToElementDefaultsResult.model_validate(response_dict)
+        validated_response = ApplyFavoritesToElementDefaultsResult.model_validate(response_dict)
+        return validated_response.executionResults
 
     def create_favorites_from_elements(
         self, favorites_from_elements: list[FavoritesFromElement]
-    ) -> CreateFavoritesFromElementsResult:
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
         """
         Create favorites from the given elements.
 
@@ -62,9 +70,10 @@ class FavoritesCommands:
         response_dict = self._core.post_tapir_command(
             "CreateFavoritesFromElements", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return CreateFavoritesFromElementsResult.model_validate(response_dict)
+        validated_response = CreateFavoritesFromElementsResult.model_validate(response_dict)
+        return validated_response.executionResults
 
-    def get_favorites_by_type(self, element_type: ElementType) -> GetFavoritesByTypeResult:
+    def get_favorites_by_type(self, element_type: ElementType) -> list[str]:
         """
         Returns a list of the names of all favorites with the given element type
 
@@ -82,4 +91,5 @@ class FavoritesCommands:
         response_dict = self._core.post_tapir_command(
             "GetFavoritesByType", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return GetFavoritesByTypeResult.model_validate(response_dict)
+        validated_response = GetFavoritesByTypeResult.model_validate(response_dict)
+        return validated_response.favorites

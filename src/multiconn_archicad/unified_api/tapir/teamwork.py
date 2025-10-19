@@ -55,7 +55,8 @@ class TeamworkCommands:
         response_dict = self._core.post_tapir_command(
             "ReserveElements", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return ReserveElementsResult.model_validate(response_dict)
+        validated_response = ReserveElementsResult.model_validate(response_dict)
+        return validated_response
 
     def teamwork_receive(self) -> None:
         """

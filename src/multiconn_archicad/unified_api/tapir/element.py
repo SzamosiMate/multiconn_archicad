@@ -54,10 +54,15 @@ from multiconn_archicad.models.tapir.commands import (
     SetGDLParametersOfElementsResult,
 )
 from multiconn_archicad.models.tapir.types import (
+    BoundingBox3DArrayItem,
     ClassificationSystemIdArrayItem,
+    Collision,
     ColumnsDatum,
+    ConnectedElement,
     DatabaseIdArrayItem,
+    DetailsOfElement,
     ElementClassification,
+    ElementClassificationItemArray,
     ElementFilter,
     ElementId,
     ElementIdArrayItem,
@@ -65,12 +70,18 @@ from multiconn_archicad.models.tapir.types import (
     ElementsWithDetail,
     ElementsWithGDLParameter,
     ElementsWithMoveVector,
+    ErrorItem,
+    FailedExecutionResult,
+    GDLParameterList,
     HighlightedColor,
     MeshesDatum,
     ObjectsDatum,
     PolylinesDatum,
     Settings,
     SlabsDatum,
+    Subelement,
+    SuccessfulExecutionResult,
+    ZoneBoundary,
     ZonesDatum,
 )
 
@@ -84,15 +95,15 @@ class ElementCommands:
 
     def change_selection_of_elements(
         self,
-        add_elements_to_selection: list[ElementIdArrayItem] | None = None,
-        remove_elements_from_selection: list[ElementIdArrayItem] | None = None,
+        add_elements_to_selection: None | list[ElementIdArrayItem] = None,
+        remove_elements_from_selection: None | list[ElementIdArrayItem] = None,
     ) -> ChangeSelectionOfElementsResult:
         """
         Adds/removes a number of elements to/from the current selection.
 
         Args:
-            add_elements_to_selection (list[ElementIdArrayItem] | None): A list of elements.
-            remove_elements_from_selection (list[ElementIdArrayItem] | None): A list of
+            add_elements_to_selection (None | list[ElementIdArrayItem]): A list of elements.
+            remove_elements_from_selection (None | list[ElementIdArrayItem]): A list of
                 elements.
 
         Raises:
@@ -105,12 +116,12 @@ class ElementCommands:
         }
         validated_params = ChangeSelectionOfElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "ChangeSelectionOfElements",
-            validated_params.model_dump(by_alias=True, exclude_none=True),
+            "ChangeSelectionOfElements", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return ChangeSelectionOfElementsResult.model_validate(response_dict)
+        validated_response = ChangeSelectionOfElementsResult.model_validate(response_dict)
+        return validated_response
 
-    def create_columns(self, columns_data: list[ColumnsDatum]) -> CreateColumnsResult:
+    def create_columns(self, columns_data: list[ColumnsDatum]) -> list[ElementIdArrayItem]:
         """
         Creates Column elements based on the given parameters.
 
@@ -126,12 +137,12 @@ class ElementCommands:
         }
         validated_params = CreateColumnsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateColumns",
-            validated_params.model_dump(by_alias=True, exclude_none=True),
+            "CreateColumns", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return CreateColumnsResult.model_validate(response_dict)
+        validated_response = CreateColumnsResult.model_validate(response_dict)
+        return validated_response.elements
 
-    def create_meshes(self, meshes_data: list[MeshesDatum]) -> CreateMeshesResult:
+    def create_meshes(self, meshes_data: list[MeshesDatum]) -> list[ElementIdArrayItem]:
         """
         Creates Mesh elements based on the given parameters.
 
@@ -147,12 +158,12 @@ class ElementCommands:
         }
         validated_params = CreateMeshesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateMeshes",
-            validated_params.model_dump(by_alias=True, exclude_none=True),
+            "CreateMeshes", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return CreateMeshesResult.model_validate(response_dict)
+        validated_response = CreateMeshesResult.model_validate(response_dict)
+        return validated_response.elements
 
-    def create_objects(self, objects_data: list[ObjectsDatum]) -> CreateObjectsResult:
+    def create_objects(self, objects_data: list[ObjectsDatum]) -> list[ElementIdArrayItem]:
         """
         Creates Object elements based on the given parameters.
 
@@ -168,12 +179,12 @@ class ElementCommands:
         }
         validated_params = CreateObjectsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateObjects",
-            validated_params.model_dump(by_alias=True, exclude_none=True),
+            "CreateObjects", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return CreateObjectsResult.model_validate(response_dict)
+        validated_response = CreateObjectsResult.model_validate(response_dict)
+        return validated_response.elements
 
-    def create_polylines(self, polylines_data: list[PolylinesDatum]) -> CreatePolylinesResult:
+    def create_polylines(self, polylines_data: list[PolylinesDatum]) -> list[ElementIdArrayItem]:
         """
         Creates Polyline elements based on the given parameters.
 
@@ -189,12 +200,12 @@ class ElementCommands:
         }
         validated_params = CreatePolylinesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreatePolylines",
-            validated_params.model_dump(by_alias=True, exclude_none=True),
+            "CreatePolylines", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return CreatePolylinesResult.model_validate(response_dict)
+        validated_response = CreatePolylinesResult.model_validate(response_dict)
+        return validated_response.elements
 
-    def create_slabs(self, slabs_data: list[SlabsDatum]) -> CreateSlabsResult:
+    def create_slabs(self, slabs_data: list[SlabsDatum]) -> list[ElementIdArrayItem]:
         """
         Creates Slab elements based on the given parameters.
 
@@ -210,12 +221,12 @@ class ElementCommands:
         }
         validated_params = CreateSlabsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateSlabs",
-            validated_params.model_dump(by_alias=True, exclude_none=True),
+            "CreateSlabs", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return CreateSlabsResult.model_validate(response_dict)
+        validated_response = CreateSlabsResult.model_validate(response_dict)
+        return validated_response.elements
 
-    def create_zones(self, zones_data: list[ZonesDatum]) -> CreateZonesResult:
+    def create_zones(self, zones_data: list[ZonesDatum]) -> list[ElementIdArrayItem]:
         """
         Creates Zone elements based on the given parameters.
 
@@ -231,10 +242,10 @@ class ElementCommands:
         }
         validated_params = CreateZonesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateZones",
-            validated_params.model_dump(by_alias=True, exclude_none=True),
+            "CreateZones", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return CreateZonesResult.model_validate(response_dict)
+        validated_response = CreateZonesResult.model_validate(response_dict)
+        return validated_response.elements
 
     def delete_elements(self, elements: list[ElementIdArrayItem]) -> None:
         """
@@ -251,23 +262,18 @@ class ElementCommands:
             "elements": elements,
         }
         validated_params = DeleteElementsParameters(**params_dict)
-        self._core.post_tapir_command(
-            "DeleteElements",
-            validated_params.model_dump(by_alias=True, exclude_none=True),
-        )
+        self._core.post_tapir_command("DeleteElements", validated_params.model_dump(by_alias=True, exclude_none=True))
         return None
 
     def filter_elements(
-        self,
-        elements: list[ElementIdArrayItem],
-        filters: list[ElementFilter] | None = None,
-    ) -> FilterElementsResult:
+        self, elements: list[ElementIdArrayItem], filters: None | list[ElementFilter] = None
+    ) -> list[ElementIdArrayItem]:
         """
         Tests an elements by the given criterias.
 
         Args:
             elements (list[ElementIdArrayItem]): A list of elements.
-            filters (list[ElementFilter] | None) (Constraints: min_length=1)
+            filters (None | list[ElementFilter])
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -279,12 +285,12 @@ class ElementCommands:
         }
         validated_params = FilterElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "FilterElements",
-            validated_params.model_dump(by_alias=True, exclude_none=True),
+            "FilterElements", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return FilterElementsResult.model_validate(response_dict)
+        validated_response = FilterElementsResult.model_validate(response_dict)
+        return validated_response.elements
 
-    def get_3d_bounding_boxes(self, elements: list[ElementIdArrayItem]) -> Get3DBoundingBoxesResult:
+    def get_3d_bounding_boxes(self, elements: list[ElementIdArrayItem]) -> list[BoundingBox3DArrayItem | ErrorItem]:
         """
         Get the 3D bounding box of elements. The bounding box is calculated from the global
         origin in the 3D view. The output is the array of the bounding boxes respective to the
@@ -302,23 +308,21 @@ class ElementCommands:
         }
         validated_params = Get3DBoundingBoxesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "Get3DBoundingBoxes",
-            validated_params.model_dump(by_alias=True, exclude_none=True),
+            "Get3DBoundingBoxes", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return Get3DBoundingBoxesResult.model_validate(response_dict)
+        validated_response = Get3DBoundingBoxesResult.model_validate(response_dict)
+        return validated_response.boundingBoxes3D
 
     def get_all_elements(
-        self,
-        filters: list[ElementFilter] | None = None,
-        databases: list[DatabaseIdArrayItem] | None = None,
+        self, filters: None | list[ElementFilter] = None, databases: None | list[DatabaseIdArrayItem] = None
     ) -> GetAllElementsResult:
         """
         Returns the identifier of all elements on the plan. Use the optional filter parameter
         for filtering.
 
         Args:
-            filters (list[ElementFilter] | None) (Constraints: min_length=1)
-            databases (list[DatabaseIdArrayItem] | None): A list of Archicad databases.
+            filters (None | list[ElementFilter])
+            databases (None | list[DatabaseIdArrayItem]): A list of Archicad databases.
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -330,16 +334,14 @@ class ElementCommands:
         }
         validated_params = GetAllElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetAllElements",
-            validated_params.model_dump(by_alias=True, exclude_none=True),
+            "GetAllElements", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return GetAllElementsResult.model_validate(response_dict)
+        validated_response = GetAllElementsResult.model_validate(response_dict)
+        return validated_response
 
     def get_classifications_of_elements(
-        self,
-        elements: list[ElementIdArrayItem],
-        classification_system_ids: list[ClassificationSystemIdArrayItem],
-    ) -> GetClassificationsOfElementsResult:
+        self, elements: list[ElementIdArrayItem], classification_system_ids: list[ClassificationSystemIdArrayItem]
+    ) -> list[ElementClassificationItemArray | ErrorItem]:
         """
         Returns the classification of the given elements in the given classification systems. It
         works for subelements of hierarchal elements also.
@@ -359,24 +361,24 @@ class ElementCommands:
         }
         validated_params = GetClassificationsOfElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetClassificationsOfElements",
-            validated_params.model_dump(by_alias=True, exclude_none=True),
+            "GetClassificationsOfElements", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return GetClassificationsOfElementsResult.model_validate(response_dict)
+        validated_response = GetClassificationsOfElementsResult.model_validate(response_dict)
+        return validated_response.elementClassifications
 
     def get_collisions(
         self,
         elements_group_1: list[ElementIdArrayItem],
         elements_group_2: list[ElementIdArrayItem],
-        settings: Settings | None = None,
-    ) -> GetCollisionsResult:
+        settings: None | Settings = None,
+    ) -> list[Collision]:
         """
         Detect collisions between the given two groups of elements.
 
         Args:
             elements_group_1 (list[ElementIdArrayItem]): A list of elements.
             elements_group_2 (list[ElementIdArrayItem]): A list of elements.
-            settings (Settings | None)
+            settings (None | Settings)
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -389,16 +391,14 @@ class ElementCommands:
         }
         validated_params = GetCollisionsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetCollisions",
-            validated_params.model_dump(by_alias=True, exclude_none=True),
+            "GetCollisions", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return GetCollisionsResult.model_validate(response_dict)
+        validated_response = GetCollisionsResult.model_validate(response_dict)
+        return validated_response.collisions
 
     def get_connected_elements(
-        self,
-        elements: list[ElementIdArrayItem],
-        connected_element_type: ElementType,
-    ) -> GetConnectedElementsResult:
+        self, elements: list[ElementIdArrayItem], connected_element_type: ElementType
+    ) -> list[ConnectedElement]:
         """
         Gets connected elements of the given elements.
 
@@ -416,12 +416,12 @@ class ElementCommands:
         }
         validated_params = GetConnectedElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetConnectedElements",
-            validated_params.model_dump(by_alias=True, exclude_none=True),
+            "GetConnectedElements", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return GetConnectedElementsResult.model_validate(response_dict)
+        validated_response = GetConnectedElementsResult.model_validate(response_dict)
+        return validated_response.connectedElements
 
-    def get_details_of_elements(self, elements: list[ElementIdArrayItem]) -> GetDetailsOfElementsResult:
+    def get_details_of_elements(self, elements: list[ElementIdArrayItem]) -> list[DetailsOfElement]:
         """
         Gets the details of the given elements (geometry parameters etc).
 
@@ -437,16 +437,16 @@ class ElementCommands:
         }
         validated_params = GetDetailsOfElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetDetailsOfElements",
-            validated_params.model_dump(by_alias=True, exclude_none=True),
+            "GetDetailsOfElements", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return GetDetailsOfElementsResult.model_validate(response_dict)
+        validated_response = GetDetailsOfElementsResult.model_validate(response_dict)
+        return validated_response.detailsOfElements
 
     def get_elements_by_type(
         self,
         element_type: ElementType,
-        filters: list[ElementFilter] | None = None,
-        databases: list[DatabaseIdArrayItem] | None = None,
+        filters: None | list[ElementFilter] = None,
+        databases: None | list[DatabaseIdArrayItem] = None,
     ) -> GetElementsByTypeResult:
         """
         Returns the identifier of every element of the given type on the plan. It works for any
@@ -454,8 +454,8 @@ class ElementCommands:
 
         Args:
             element_type (ElementType)
-            filters (list[ElementFilter] | None) (Constraints: min_length=1)
-            databases (list[DatabaseIdArrayItem] | None): A list of Archicad databases.
+            filters (None | list[ElementFilter])
+            databases (None | list[DatabaseIdArrayItem]): A list of Archicad databases.
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -468,12 +468,12 @@ class ElementCommands:
         }
         validated_params = GetElementsByTypeParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetElementsByType",
-            validated_params.model_dump(by_alias=True, exclude_none=True),
+            "GetElementsByType", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return GetElementsByTypeResult.model_validate(response_dict)
+        validated_response = GetElementsByTypeResult.model_validate(response_dict)
+        return validated_response
 
-    def get_gdl_parameters_of_elements(self, elements: list[ElementIdArrayItem]) -> GetGDLParametersOfElementsResult:
+    def get_gdl_parameters_of_elements(self, elements: list[ElementIdArrayItem]) -> list[GDLParameterList]:
         """
         Gets all the GDL parameters (name, type, value) of the given elements.
 
@@ -489,12 +489,12 @@ class ElementCommands:
         }
         validated_params = GetGDLParametersOfElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetGDLParametersOfElements",
-            validated_params.model_dump(by_alias=True, exclude_none=True),
+            "GetGDLParametersOfElements", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return GetGDLParametersOfElementsResult.model_validate(response_dict)
+        validated_response = GetGDLParametersOfElementsResult.model_validate(response_dict)
+        return validated_response.gdlParametersOfElements
 
-    def get_selected_elements(self) -> GetSelectedElementsResult:
+    def get_selected_elements(self) -> list[ElementIdArrayItem]:
         """
         Gets the list of the currently selected elements.
 
@@ -503,11 +503,10 @@ class ElementCommands:
             RequestError: If there is a network or connection error.
         """
         response_dict = self._core.post_tapir_command("GetSelectedElements")
-        return GetSelectedElementsResult.model_validate(response_dict)
+        validated_response = GetSelectedElementsResult.model_validate(response_dict)
+        return validated_response.elements
 
-    def get_subelements_of_hierarchical_elements(
-        self, elements: list[ElementIdArrayItem]
-    ) -> GetSubelementsOfHierarchicalElementsResult:
+    def get_subelements_of_hierarchical_elements(self, elements: list[ElementIdArrayItem]) -> list[Subelement]:
         """
         Gets the subelements of the given hierarchical elements.
 
@@ -523,12 +522,12 @@ class ElementCommands:
         }
         validated_params = GetSubelementsOfHierarchicalElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetSubelementsOfHierarchicalElements",
-            validated_params.model_dump(by_alias=True, exclude_none=True),
+            "GetSubelementsOfHierarchicalElements", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return GetSubelementsOfHierarchicalElementsResult.model_validate(response_dict)
+        validated_response = GetSubelementsOfHierarchicalElementsResult.model_validate(response_dict)
+        return validated_response.subelements
 
-    def get_zone_boundaries(self, zone_element_id: ElementId) -> GetZoneBoundariesResult:
+    def get_zone_boundaries(self, zone_element_id: ElementId) -> list[ZoneBoundary]:
         """
         Gets the boundaries of the given Zone (connected elements, neighbour zones, etc.).
 
@@ -544,17 +543,17 @@ class ElementCommands:
         }
         validated_params = GetZoneBoundariesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetZoneBoundaries",
-            validated_params.model_dump(by_alias=True, exclude_none=True),
+            "GetZoneBoundaries", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return GetZoneBoundariesResult.model_validate(response_dict)
+        validated_response = GetZoneBoundariesResult.model_validate(response_dict)
+        return validated_response.zoneBoundaries
 
     def highlight_elements(
         self,
         elements: list[ElementIdArrayItem],
         highlighted_colors: list[HighlightedColor],
-        wireframe_3d: bool | None = None,
-        non_highlighted_color: list[int] | None = None,
+        wireframe_3d: None | bool = None,
+        non_highlighted_color: None | list[int] = None,
     ) -> None:
         """
         Highlights the elements given in the elements array. In case of empty elements array
@@ -563,11 +562,11 @@ class ElementCommands:
         Args:
             elements (list[ElementIdArrayItem]): A list of elements.
             highlighted_colors (list[HighlightedColor]): A list of colors to highlight elements.
-            wireframe_3d (bool | None): Optional parameter. Switch non highlighted elements in
+            wireframe_3d (None | bool): Optional parameter. Switch non highlighted elements in
                 the 3D window to wireframe.
-            non_highlighted_color (list[int] | None): Optional parameter. Color of the non
+            non_highlighted_color (None | list[int]): Optional parameter. Color of the non
                 highlighted elements as an [r, g, b, a] array. Each component must be in the
-                0-255 range. (Constraints: max_length=4, min_length=4)
+                0-255 range.
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -581,12 +580,13 @@ class ElementCommands:
         }
         validated_params = HighlightElementsParameters(**params_dict)
         self._core.post_tapir_command(
-            "HighlightElements",
-            validated_params.model_dump(by_alias=True, exclude_none=True),
+            "HighlightElements", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
         return None
 
-    def move_elements(self, elements_with_move_vectors: list[ElementsWithMoveVector]) -> MoveElementsResult:
+    def move_elements(
+        self, elements_with_move_vectors: list[ElementsWithMoveVector]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
         """
         Moves elements with a given vector.
 
@@ -603,14 +603,14 @@ class ElementCommands:
         }
         validated_params = MoveElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "MoveElements",
-            validated_params.model_dump(by_alias=True, exclude_none=True),
+            "MoveElements", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return MoveElementsResult.model_validate(response_dict)
+        validated_response = MoveElementsResult.model_validate(response_dict)
+        return validated_response.executionResults
 
     def set_classifications_of_elements(
         self, element_classifications: list[ElementClassification]
-    ) -> SetClassificationsOfElementsResult:
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
         """
         Sets the classifications of elements. In order to set the classification of an element
         to unclassified, omit the classificationItemId field. It works for subelements of
@@ -629,12 +629,14 @@ class ElementCommands:
         }
         validated_params = SetClassificationsOfElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "SetClassificationsOfElements",
-            validated_params.model_dump(by_alias=True, exclude_none=True),
+            "SetClassificationsOfElements", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return SetClassificationsOfElementsResult.model_validate(response_dict)
+        validated_response = SetClassificationsOfElementsResult.model_validate(response_dict)
+        return validated_response.executionResults
 
-    def set_details_of_elements(self, elements_with_details: list[ElementsWithDetail]) -> SetDetailsOfElementsResult:
+    def set_details_of_elements(
+        self, elements_with_details: list[ElementsWithDetail]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
         """
         Sets the details of the given elements (floor, layer, order etc).
 
@@ -650,15 +652,14 @@ class ElementCommands:
         }
         validated_params = SetDetailsOfElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "SetDetailsOfElements",
-            validated_params.model_dump(by_alias=True, exclude_none=True),
+            "SetDetailsOfElements", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return SetDetailsOfElementsResult.model_validate(response_dict)
+        validated_response = SetDetailsOfElementsResult.model_validate(response_dict)
+        return validated_response.executionResults
 
     def set_gdl_parameters_of_elements(
-        self,
-        elements_with_gdl_parameters: list[ElementsWithGDLParameter],
-    ) -> SetGDLParametersOfElementsResult:
+        self, elements_with_gdl_parameters: list[ElementsWithGDLParameter]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
         """
         Sets the given GDL parameters of the given elements.
 
@@ -675,7 +676,7 @@ class ElementCommands:
         }
         validated_params = SetGDLParametersOfElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "SetGDLParametersOfElements",
-            validated_params.model_dump(by_alias=True, exclude_none=True),
+            "SetGDLParametersOfElements", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return SetGDLParametersOfElementsResult.model_validate(response_dict)
+        validated_response = SetGDLParametersOfElementsResult.model_validate(response_dict)
+        return validated_response.executionResults
