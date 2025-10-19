@@ -22,7 +22,7 @@ class ViewMapCommands:
 
     def clone_project_map_item_to_view_map(
         self, project_map_navigator_item_id: NavigatorItemId, parent_navigator_item_id: NavigatorItemId
-    ) -> CloneProjectMapItemToViewMapResult:
+    ) -> NavigatorItemId:
         """
         Clones a project map item to the view map.
 
@@ -45,14 +45,15 @@ class ViewMapCommands:
         response_dict = self._core.post_command(
             "API.CloneProjectMapItemToViewMap", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return CloneProjectMapItemToViewMapResult.model_validate(response_dict)
+        validated_response = CloneProjectMapItemToViewMapResult.model_validate(response_dict)
+        return validated_response.createdNavigatorItemId
 
     def create_view_map_folder(
         self,
         folder_parameters: FolderParameters,
         parent_navigator_item_id: NavigatorItemId | None = None,
         previous_navigator_item_id: NavigatorItemId | None = None,
-    ) -> CreateViewMapFolderResult:
+    ) -> NavigatorItemId:
         """
         Creates a view folder item at the given position in the navigator tree.
 
@@ -78,4 +79,5 @@ class ViewMapCommands:
         response_dict = self._core.post_command(
             "API.CreateViewMapFolder", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return CreateViewMapFolderResult.model_validate(response_dict)
+        validated_response = CreateViewMapFolderResult.model_validate(response_dict)
+        return validated_response.createdFolderNavigatorItemId

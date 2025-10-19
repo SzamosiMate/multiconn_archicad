@@ -20,7 +20,9 @@ from multiconn_archicad.models.tapir.commands import (
     ImportIssuesFromBCFParameters,
 )
 from multiconn_archicad.models.tapir.types import (
+    Comment,
     ElementIdArrayItem,
+    Issue,
     IssueCommentStatus,
     IssueElementType,
     IssueId,
@@ -36,7 +38,7 @@ class IssueManagementCommands:
         self._core = core
 
     def add_comment_to_issue(
-        self, issue_id: IssueId, text: str, author: str | None = None, status: IssueCommentStatus | None = None
+        self, issue_id: IssueId, text: str, author: None | str = None, status: IssueCommentStatus | None = None
     ) -> None:
         """
         Adds a new comment to the specified issue.
@@ -44,7 +46,7 @@ class IssueManagementCommands:
         Args:
             issue_id (IssueId)
             text (str): Comment text to add.
-            author (str | None): The author of the new comment.
+            author (None | str): The author of the new comment.
             status (IssueCommentStatus | None)
 
         Raises:
@@ -89,16 +91,14 @@ class IssueManagementCommands:
         )
         return None
 
-    def create_issue(
-        self, name: str, parent_issue_id: IssueId | None = None, tag_text: str | None = None
-    ) -> CreateIssueResult:
+    def create_issue(self, name: str, parent_issue_id: IssueId | None = None, tag_text: None | str = None) -> IssueId:
         """
         Creates a new issue.
 
         Args:
             name (str): The name of the issue.
             parent_issue_id (IssueId | None)
-            tag_text (str | None): Tag text of the issue, optional.
+            tag_text (None | str): Tag text of the issue, optional.
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -113,15 +113,16 @@ class IssueManagementCommands:
         response_dict = self._core.post_tapir_command(
             "CreateIssue", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return CreateIssueResult.model_validate(response_dict)
+        validated_response = CreateIssueResult.model_validate(response_dict)
+        return validated_response.issueId
 
-    def delete_issue(self, issue_id: IssueId, accept_all_elements: bool | None = None) -> None:
+    def delete_issue(self, issue_id: IssueId, accept_all_elements: None | bool = None) -> None:
         """
         Deletes the specified issue.
 
         Args:
             issue_id (IssueId)
-            accept_all_elements (bool | None): Accept all creation/deletion/modification of the
+            accept_all_elements (None | bool): Accept all creation/deletion/modification of the
                 deleted issue. By default false.
 
         Raises:
@@ -163,7 +164,7 @@ class IssueManagementCommands:
         export_path: str,
         use_external_id: bool,
         align_by_survey_point: bool,
-        issues: list[IssueIdArrayItem] | None = None,
+        issues: None | list[IssueIdArrayItem] = None,
     ) -> None:
         """
         Exports specified issues to a BCF file.
@@ -174,7 +175,7 @@ class IssueManagementCommands:
                 topics.
             align_by_survey_point (bool): Align BCF views by Archicad Survey Point or Archicad
                 Project Origin.
-            issues (list[IssueIdArrayItem] | None): Leave it empty to export all issues.
+            issues (None | list[IssueIdArrayItem]): Leave it empty to export all issues.
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -192,7 +193,7 @@ class IssueManagementCommands:
         )
         return None
 
-    def get_comments_from_issue(self, issue_id: IssueId) -> GetCommentsFromIssueResult:
+    def get_comments_from_issue(self, issue_id: IssueId) -> list[Comment]:
         """
         Retrieves comments information from the specified issue.
 
@@ -210,11 +211,10 @@ class IssueManagementCommands:
         response_dict = self._core.post_tapir_command(
             "GetCommentsFromIssue", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return GetCommentsFromIssueResult.model_validate(response_dict)
+        validated_response = GetCommentsFromIssueResult.model_validate(response_dict)
+        return validated_response.comments
 
-    def get_elements_attached_to_issue(
-        self, issue_id: IssueId, type: IssueElementType
-    ) -> GetElementsAttachedToIssueResult:
+    def get_elements_attached_to_issue(self, issue_id: IssueId, type: IssueElementType) -> list[ElementIdArrayItem]:
         """
         Retrieves attached elements of the specified issue, filtered by attachment type.
 
@@ -234,9 +234,10 @@ class IssueManagementCommands:
         response_dict = self._core.post_tapir_command(
             "GetElementsAttachedToIssue", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return GetElementsAttachedToIssueResult.model_validate(response_dict)
+        validated_response = GetElementsAttachedToIssueResult.model_validate(response_dict)
+        return validated_response.elements
 
-    def get_issues(self) -> GetIssuesResult:
+    def get_issues(self) -> list[Issue]:
         """
         Retrieves information about existing issues.
 
@@ -245,7 +246,8 @@ class IssueManagementCommands:
             RequestError: If there is a network or connection error.
         """
         response_dict = self._core.post_tapir_command("GetIssues")
-        return GetIssuesResult.model_validate(response_dict)
+        validated_response = GetIssuesResult.model_validate(response_dict)
+        return validated_response.issues
 
     def import_issues_from_bcf(self, import_path: str, align_by_survey_point: bool) -> None:
         """

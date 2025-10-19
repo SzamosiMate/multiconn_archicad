@@ -13,7 +13,15 @@ from multiconn_archicad.models.tapir.commands import (
     GetRevisionChangesResult,
     GetRevisionIssuesResult,
 )
-from multiconn_archicad.models.tapir.types import DatabaseIdArrayItem, ElementIdArrayItem
+from multiconn_archicad.models.tapir.types import (
+    DatabaseIdArrayItem,
+    DocumentRevision,
+    ElementIdArrayItem,
+    ErrorItem,
+    RevisionChange,
+    RevisionChangesArrayItem,
+    RevisionIssue,
+)
 
 if TYPE_CHECKING:
     from multiconn_archicad.core.core_commands import CoreCommands
@@ -25,7 +33,7 @@ class RevisionManagementCommands:
 
     def get_current_revision_changes_of_layouts(
         self, layout_database_ids: list[DatabaseIdArrayItem]
-    ) -> GetCurrentRevisionChangesOfLayoutsResult:
+    ) -> ErrorItem | RevisionChangesArrayItem:
         """
         Retrieves all changes belong to the last revision of the given layouts.
 
@@ -43,9 +51,10 @@ class RevisionManagementCommands:
         response_dict = self._core.post_tapir_command(
             "GetCurrentRevisionChangesOfLayouts", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return GetCurrentRevisionChangesOfLayoutsResult.model_validate(response_dict)
+        validated_response = GetCurrentRevisionChangesOfLayoutsResult.model_validate(response_dict)
+        return validated_response.currentRevisionChangesOfLayouts
 
-    def get_document_revisions(self) -> GetDocumentRevisionsResult:
+    def get_document_revisions(self) -> list[DocumentRevision]:
         """
         Retrieves all document revisions.
 
@@ -54,9 +63,10 @@ class RevisionManagementCommands:
             RequestError: If there is a network or connection error.
         """
         response_dict = self._core.post_tapir_command("GetDocumentRevisions")
-        return GetDocumentRevisionsResult.model_validate(response_dict)
+        validated_response = GetDocumentRevisionsResult.model_validate(response_dict)
+        return validated_response.documentRevisions
 
-    def get_revision_changes(self) -> GetRevisionChangesResult:
+    def get_revision_changes(self) -> list[RevisionChange]:
         """
         Retrieves all changes.
 
@@ -65,11 +75,12 @@ class RevisionManagementCommands:
             RequestError: If there is a network or connection error.
         """
         response_dict = self._core.post_tapir_command("GetRevisionChanges")
-        return GetRevisionChangesResult.model_validate(response_dict)
+        validated_response = GetRevisionChangesResult.model_validate(response_dict)
+        return validated_response.revisionChanges
 
     def get_revision_changes_of_elements(
         self, elements: list[ElementIdArrayItem]
-    ) -> GetRevisionChangesOfElementsResult:
+    ) -> ErrorItem | RevisionChangesArrayItem:
         """
         Retrieves the changes belong to the given elements.
 
@@ -87,9 +98,10 @@ class RevisionManagementCommands:
         response_dict = self._core.post_tapir_command(
             "GetRevisionChangesOfElements", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return GetRevisionChangesOfElementsResult.model_validate(response_dict)
+        validated_response = GetRevisionChangesOfElementsResult.model_validate(response_dict)
+        return validated_response.revisionChangesOfElements
 
-    def get_revision_issues(self) -> GetRevisionIssuesResult:
+    def get_revision_issues(self) -> list[RevisionIssue]:
         """
         Retrieves all issues.
 
@@ -98,4 +110,5 @@ class RevisionManagementCommands:
             RequestError: If there is a network or connection error.
         """
         response_dict = self._core.post_tapir_command("GetRevisionIssues")
-        return GetRevisionIssuesResult.model_validate(response_dict)
+        validated_response = GetRevisionIssuesResult.model_validate(response_dict)
+        return validated_response.revisionIssues

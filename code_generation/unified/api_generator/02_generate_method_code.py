@@ -14,26 +14,32 @@ from multiconn_archicad.models.tapir import commands as tapir_commands
 from multiconn_archicad.models.tapir import types as tapir_types
 
 
-# --- Data Structures for Model Lookups ---
-
 MODEL_MODULES = {
     "tapir": {"commands": tapir_commands, "types": tapir_types},
     "official": {"commands": official_commands, "types": official_types},
 }
 
-# --- Helper Functions (get_model_class, get_clean_type_hint are unchanged) ---
-
 
 def get_model_class(model_name: str, source: str, dependencies: dict) -> Any | None:
+    """Safely retrieves a model class by name and tracks it as a dependency."""
     try:
         model = getattr(MODEL_MODULES[source]["commands"], model_name)
         dependencies["commands"].add(model_name)
         return model
     except AttributeError:
-        return None
+        try:
+            model = getattr(MODEL_MODULES[source]["types"], model_name)
+            dependencies["types"].add(model_name)
+            return model
+        except AttributeError:
+            return None
 
 
 def get_clean_type_hint(annotation: Any, dependencies: dict) -> str:
+    """
+    Recursively unwraps type annotations (like Annotated) to get a clean,
+    user-facing type hint string and tracks model dependencies.
+    """
     if annotation is type(None):
         return "None"
     origin = get_origin(annotation)
@@ -42,12 +48,14 @@ def get_clean_type_hint(annotation: Any, dependencies: dict) -> str:
         if origin is Annotated:
             return get_clean_type_hint(args[0], dependencies)
         if origin is UnionType or origin is Union:
-            return " | ".join(get_clean_type_hint(arg, dependencies) for arg in args)
+            return " | ".join(sorted([get_clean_type_hint(arg, dependencies) for arg in args]))
+
         origin_name = getattr(origin, "__name__", str(origin))
         if not args:
             return origin_name
         arg_hints = ", ".join(get_clean_type_hint(arg, dependencies) for arg in args)
         return f"{origin_name}[{arg_hints}]"
+
     hint = getattr(annotation, "__name__", str(annotation))
     module_name = getattr(annotation, "__module__", "")
     if "multiconn_archicad.models" in module_name:
@@ -58,53 +66,45 @@ def get_clean_type_hint(annotation: Any, dependencies: dict) -> str:
     return hint
 
 
-# --- Refactored Method Generation Logic ---
-
-
 def _build_signature_and_docs(
-    snake_name: str, params_model: Any, result_model: Any, dependencies: dict
-) -> tuple[str, list[str], str]:
+    snake_name: str, params_model: Any, return_type_hint: str, dependencies: dict
+) -> tuple[str, list[str]]:
+    """Builds the method signature and the parameter documentation lines."""
     signature_parts, param_docs = ["self"], []
     if params_model:
         sig = inspect.signature(params_model)
         required_params = [p for p in sig.parameters.values() if p.default is inspect.Parameter.empty]
         optional_params = [p for p in sig.parameters.values() if p.default is not inspect.Parameter.empty]
+
         for param in required_params + optional_params:
-            param_name = camel_to_snake(param.name)
+            param_name_snake = camel_to_snake(param.name)
             type_hint = get_clean_type_hint(param.annotation, dependencies)
-            signature_parts.append(
-                f"{param_name}: {type_hint}"
-                if param.default is inspect.Parameter.empty
-                else f"{param_name}: {type_hint} = {repr(param.default)}"
-            )
-            doc_line = f"{param_name} ({type_hint})"
+
+            if param.default is inspect.Parameter.empty:
+                signature_parts.append(f"{param_name_snake}: {type_hint}")
+            else:
+                signature_parts.append(f"{param_name_snake}: {type_hint} = {repr(param.default)}")
+
+            doc_line = f"{param_name_snake} ({type_hint})"
             field_info = params_model.model_fields.get(param.name)
             if field_info:
                 if field_info.description:
                     doc_line += f": {field_info.description}"
-                constraints = []
-                if field_info.metadata:
-                    for meta_item in field_info.metadata:
-                        min_len = getattr(meta_item, "min_length", None)
-                        if min_len is not None:
-                            constraints.append(f"min_length={min_len}")
-                        max_len = getattr(meta_item, "max_length", None)
-                        if max_len is not None:
-                            constraints.append(f"max_length={max_len}")
+                constraints = [
+                    f"{meta_item.alias}={repr(getattr(meta_item, meta_item.alias))}"
+                    for meta_item in field_info.metadata
+                    if hasattr(meta_item, "alias")
+                ]
                 if constraints:
-                    doc_line += f" (Constraints: {', '.join(sorted(list(set(constraints))))})"
+                    doc_line += f" (Constraints: {', '.join(sorted(constraints))})"
             param_docs.append(doc_line)
 
-    return_type_hint = "None"
-    if result_model:
-        return_type_hint = get_clean_type_hint(result_model, dependencies)
-
     signature = f"def {snake_name}(\n    {',\n    '.join(signature_parts)}\n) -> {return_type_hint}:"
-    return signature, param_docs, return_type_hint
+    return signature, param_docs
 
 
 def _build_docstring(description: str, param_docs: list[str]) -> str:
-    """Assembles the full method docstring, now including a 'Raises' section."""
+    """Assembles the full method docstring, including a standard 'Raises' section."""
     docstring = f'"""\n{textwrap.fill(description, width=88)}\n'
     if param_docs:
         docstring += "\nArgs:\n"
@@ -115,68 +115,82 @@ def _build_docstring(description: str, param_docs: list[str]) -> str:
     docstring += "\nRaises:\n"
     docstring += "    ArchicadAPIError: If the API returns an error response.\n"
     docstring += "    RequestError: If there is a network or connection error.\n"
-
     docstring += '"""'
     return docstring
 
 
-def _build_body(original_command_name: str, source: str, params_model: Any, return_type_hint: str) -> str:
-    """Constructs the implementation body of the method."""
+def _build_body(
+    original_command_name: str, source: str, params_model: Any, validation_model: Any, alias_property_name: str | None
+) -> str:
+    """Constructs the method body, creating the params dict and handling alias returns."""
     core_call_method = "post_tapir_command" if source == "tapir" else "post_command"
     body_lines = []
 
-    params_creation_lines = []
     if params_model:
         params_map_lines = ["{"]
         for param in inspect.signature(params_model).parameters.values():
             params_map_lines.append(f"    '{param.name}': {camel_to_snake(param.name)},")
         params_map_lines.append("}")
         params_map = "\n    ".join(params_map_lines)
-        params_creation_lines.extend(
+        body_lines.extend(
             [
                 f"params_dict = {params_map}",
                 f"validated_params = {params_model.__name__}(**params_dict)",
             ]
         )
 
-    body_lines.extend(params_creation_lines)
-
-    # Build the core API call expression
     call_args = [f'"{original_command_name}"']
     if params_model:
         call_args.append("validated_params.model_dump(by_alias=True, exclude_none=True)")
-
     call_expression = f"self._core.{core_call_method}(\n    {',\n    '.join(call_args)}\n)"
 
-    if return_type_hint == "None":
-        # If we expect no data back, don't assign the result.
+    if not validation_model:
         body_lines.append(call_expression)
         body_lines.append("return None")
     else:
-        # If we expect data, assign it and then parse it.
         body_lines.append(f"response_dict = {call_expression}")
-        body_lines.append(f"return {return_type_hint}.model_validate(response_dict)")
+        body_lines.append(f"validated_response = {validation_model.__name__}.model_validate(response_dict)")
+        if alias_property_name:
+            body_lines.append(f"return validated_response.{alias_property_name}")
+        else:
+            body_lines.append("return validated_response")
 
     return "\n".join(body_lines)
 
 
 def generate_method_code(command_details: dict[str, Any]) -> dict:
-    """Orchestrates generation and returns code and dependencies."""
-    # This function now correctly handles commands that have no specific result model
-    # by checking the 'result_model_name' from the details JSON.
+    """
+    Orchestrates generation of a single method by loading and inspecting the
+    actual Pydantic models to determine if a result is an alias.
+    """
     dependencies = {"commands": set(), "types": set()}
     original_cmd_name = command_details["name"]
     source = command_details["source"]
     command_name = original_cmd_name.removeprefix("API.") if source == "official" else original_cmd_name
     snake_name = camel_to_snake(command_name)
-    params_model = get_model_class(f"{command_name}Parameters", source, dependencies)
 
-    # Check if a result model exists. If not, the command returns None.
+    params_model = get_model_class(f"{command_name}Parameters", source, dependencies)
     result_model = get_model_class(f"{command_name}Result", source, dependencies)
 
-    signature, param_docs, return_type = _build_signature_and_docs(snake_name, params_model, result_model, dependencies)
+    final_return_type_hint = "None"
+    alias_property_name = None
+
+    if result_model:
+        if hasattr(result_model, "model_fields") and len(result_model.model_fields) == 1:
+            # --- CORRECTED LOGIC ---
+            # Get the first (and only) key-value pair from the dictionary.
+            # The key is the field name (string).
+            # The value is the FieldInfo object.
+            field_name, field_info = list(result_model.model_fields.items())[0]
+
+            alias_property_name = field_name  # This is the string name we needed
+            final_return_type_hint = get_clean_type_hint(field_info.annotation, dependencies)
+        else:
+            final_return_type_hint = get_clean_type_hint(result_model, dependencies)
+
+    signature, param_docs = _build_signature_and_docs(snake_name, params_model, final_return_type_hint, dependencies)
     docstring = _build_docstring(command_details["description"], param_docs)
-    body = _build_body(original_cmd_name, source, params_model, return_type)
+    body = _build_body(original_cmd_name, source, params_model, result_model, alias_property_name)
 
     return {
         "method_code": f"{signature}\n{textwrap.indent(docstring, '    ')}\n{textwrap.indent(body, '    ')}",
@@ -186,6 +200,7 @@ def generate_method_code(command_details: dict[str, Any]) -> dict:
 
 
 def main():
+    """Main script entry point for Stage 2 of the pipeline."""
     parser = argparse.ArgumentParser(description="Stage 2: Generate method code strings for API commands.")
     parser.add_argument("--input-file", required=True, help="Path to the organized commands JSON from Stage 1.")
     parser.add_argument("--output-file", required=True, help="Path to save JSON with the new 'method_code' field.")

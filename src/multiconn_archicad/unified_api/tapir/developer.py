@@ -20,7 +20,6 @@ class DeveloperCommands:
 
         Args:
             destination_folder (str): Destination folder for the generated documentation files.
-                (Constraints: min_length=1)
 
         Raises:
             ArchicadAPIError: If the API returns an error response.

@@ -20,8 +20,14 @@ from multiconn_archicad.models.tapir.commands import (
 from multiconn_archicad.models.tapir.types import (
     DatabaseIdArrayItem,
     ElementIdArrayItem,
+    ErrorItem,
+    FailedExecutionResult,
+    ModelViewOption,
     NavigatorItemIdArrayItem,
     NavigatorItemIdsWithViewSetting,
+    SuccessfulExecutionResult,
+    ViewSettings,
+    ViewTransformations,
 )
 
 if TYPE_CHECKING:
@@ -34,7 +40,7 @@ class NavigatorCommands:
 
     def get_database_id_from_navigator_item_id(
         self, navigator_item_ids: list[NavigatorItemIdArrayItem]
-    ) -> GetDatabaseIdFromNavigatorItemIdResult:
+    ) -> list[DatabaseIdArrayItem]:
         """
         Gets the ID of the database associated with the supplied navigator item id
 
@@ -53,9 +59,10 @@ class NavigatorCommands:
         response_dict = self._core.post_tapir_command(
             "GetDatabaseIdFromNavigatorItemId", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return GetDatabaseIdFromNavigatorItemIdResult.model_validate(response_dict)
+        validated_response = GetDatabaseIdFromNavigatorItemIdResult.model_validate(response_dict)
+        return validated_response.databases
 
-    def get_model_view_options(self) -> GetModelViewOptionsResult:
+    def get_model_view_options(self) -> list[ModelViewOption]:
         """
         Gets all model view options
 
@@ -64,16 +71,17 @@ class NavigatorCommands:
             RequestError: If there is a network or connection error.
         """
         response_dict = self._core.post_tapir_command("GetModelViewOptions")
-        return GetModelViewOptionsResult.model_validate(response_dict)
+        validated_response = GetModelViewOptionsResult.model_validate(response_dict)
+        return validated_response.modelViewOptions
 
     def get_view_2d_transformations(
-        self, databases: list[DatabaseIdArrayItem] | None = None
-    ) -> GetView2DTransformationsResult:
+        self, databases: None | list[DatabaseIdArrayItem] = None
+    ) -> list[ErrorItem | ViewTransformations]:
         """
         Get zoom and rotation of 2D views
 
         Args:
-            databases (list[DatabaseIdArrayItem] | None): A list of Archicad databases.
+            databases (None | list[DatabaseIdArrayItem]): A list of Archicad databases.
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -86,9 +94,10 @@ class NavigatorCommands:
         response_dict = self._core.post_tapir_command(
             "GetView2DTransformations", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return GetView2DTransformationsResult.model_validate(response_dict)
+        validated_response = GetView2DTransformationsResult.model_validate(response_dict)
+        return validated_response.transformations
 
-    def get_view_settings(self, navigator_item_ids: list[NavigatorItemIdArrayItem]) -> GetViewSettingsResult:
+    def get_view_settings(self, navigator_item_ids: list[NavigatorItemIdArrayItem]) -> list[ErrorItem | ViewSettings]:
         """
         Gets the view settings of navigator items
 
@@ -107,18 +116,18 @@ class NavigatorCommands:
         response_dict = self._core.post_tapir_command(
             "GetViewSettings", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return GetViewSettingsResult.model_validate(response_dict)
+        validated_response = GetViewSettingsResult.model_validate(response_dict)
+        return validated_response.viewSettings
 
-    def publish_publisher_set(self, publisher_set_name: str, output_path: str | None = None) -> None:
+    def publish_publisher_set(self, publisher_set_name: str, output_path: None | str = None) -> None:
         """
         Performs a publish operation on the currently opened project. Only the given publisher
         set will be published.
 
         Args:
-            publisher_set_name (str): The name of the publisher set. (Constraints: min_length=1)
-            output_path (str | None): Full local or LAN path for publishing. Optional, by
+            publisher_set_name (str): The name of the publisher set.
+            output_path (None | str): Full local or LAN path for publishing. Optional, by
                 default the path set in the settings of the publiser set will be used.
-                (Constraints: min_length=1)
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -136,7 +145,7 @@ class NavigatorCommands:
 
     def set_view_settings(
         self, navigator_item_ids_with_view_settings: list[NavigatorItemIdsWithViewSetting]
-    ) -> SetViewSettingsResult:
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
         """
         Sets the view settings of navigator items
 
@@ -154,7 +163,8 @@ class NavigatorCommands:
         response_dict = self._core.post_tapir_command(
             "SetViewSettings", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return SetViewSettingsResult.model_validate(response_dict)
+        validated_response = SetViewSettingsResult.model_validate(response_dict)
+        return validated_response.executionResults
 
     def update_drawings(self, elements: list[ElementIdArrayItem]) -> None:
         """

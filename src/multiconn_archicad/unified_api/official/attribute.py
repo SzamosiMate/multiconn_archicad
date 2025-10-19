@@ -51,9 +51,26 @@ from multiconn_archicad.models.official.types import (
     AttributeFolderId,
     AttributeFolderIdWrapperItem,
     AttributeFolderRenameParameters,
+    AttributeFolderStructure,
+    AttributeFolderWrapperItem,
     AttributeIdWrapperItem,
+    AttributeIndexAndGuidWrapperItem,
     AttributeType,
+    BuildingMaterialAttributeWrapperItem,
+    CompositeAttributeWrapperItem,
+    ErrorItem,
+    FailedExecutionResult,
+    FillAttributeWrapperItem,
+    ImageWrapperItem,
+    LayerAttributeWrapperItem,
+    LayerCombinationAttributeWrapperItem,
+    LineAttributeWrapperItem,
+    PenTableAttributeWrapperItem,
+    ProfileAttributeWrapperItem,
     RGBColor,
+    SuccessfulExecutionResult,
+    SurfaceAttributeWrapperItem,
+    ZoneCategoryAttributeWrapperItem,
 )
 
 if TYPE_CHECKING:
@@ -66,7 +83,7 @@ class AttributeCommands:
 
     def create_attribute_folders(
         self, attribute_folders: list[AttributeFolderCreationParameters]
-    ) -> CreateAttributeFoldersResult:
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
         """
         Creates attribute folders. To create a folder, its full path has to be provided. The
         command will create all folders along the path, if they do not exist.
@@ -85,11 +102,12 @@ class AttributeCommands:
         response_dict = self._core.post_command(
             "API.CreateAttributeFolders", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return CreateAttributeFoldersResult.model_validate(response_dict)
+        validated_response = CreateAttributeFoldersResult.model_validate(response_dict)
+        return validated_response.executionResults
 
     def delete_attribute_folders(
         self, attribute_folder_ids: list[AttributeFolderIdWrapperItem]
-    ) -> DeleteAttributeFoldersResult:
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
         """
         Deletes attribute folders and all the deletable attributes and folders it contains. To
         delete a folder, its identifier has to be provided.
@@ -109,9 +127,12 @@ class AttributeCommands:
         response_dict = self._core.post_command(
             "API.DeleteAttributeFolders", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return DeleteAttributeFoldersResult.model_validate(response_dict)
+        validated_response = DeleteAttributeFoldersResult.model_validate(response_dict)
+        return validated_response.executionResults
 
-    def delete_attributes(self, attribute_ids: list[AttributeIdWrapperItem]) -> DeleteAttributesResult:
+    def delete_attributes(
+        self, attribute_ids: list[AttributeIdWrapperItem]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
         """
         Deletes attributes.
 
@@ -129,7 +150,8 @@ class AttributeCommands:
         response_dict = self._core.post_command(
             "API.DeleteAttributes", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return DeleteAttributesResult.model_validate(response_dict)
+        validated_response = DeleteAttributesResult.model_validate(response_dict)
+        return validated_response.executionResults
 
     def get_active_pen_tables(self) -> GetActivePenTablesResult:
         """
@@ -140,18 +162,19 @@ class AttributeCommands:
             RequestError: If there is a network or connection error.
         """
         response_dict = self._core.post_command("API.GetActivePenTables")
-        return GetActivePenTablesResult.model_validate(response_dict)
+        validated_response = GetActivePenTablesResult.model_validate(response_dict)
+        return validated_response
 
     def get_attribute_folder_structure(
-        self, attribute_type: AttributeType, path: list[str] | None = None
-    ) -> GetAttributeFolderStructureResult:
+        self, attribute_type: AttributeType, path: None | list[str] = None
+    ) -> AttributeFolderStructure:
         """
         Returns the detailed folder structure for the attributes of a given type. If the path is
         not given, the root folder will be returned
 
         Args:
             attribute_type (AttributeType)
-            path (list[str] | None): A list of attribute folder names. May be empty.
+            path (None | list[str]): A list of attribute folder names. May be empty.
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -165,11 +188,12 @@ class AttributeCommands:
         response_dict = self._core.post_command(
             "API.GetAttributeFolderStructure", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return GetAttributeFolderStructureResult.model_validate(response_dict)
+        validated_response = GetAttributeFolderStructureResult.model_validate(response_dict)
+        return validated_response.attributeFolder
 
     def get_attribute_folders(
         self, attribute_folder_ids: list[AttributeFolderIdWrapperItem]
-    ) -> GetAttributeFoldersResult:
+    ) -> list[AttributeFolderWrapperItem | ErrorItem]:
         """
         Returns the detailed attribute folders identified by their Ids.
 
@@ -188,9 +212,10 @@ class AttributeCommands:
         response_dict = self._core.post_command(
             "API.GetAttributeFolders", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return GetAttributeFoldersResult.model_validate(response_dict)
+        validated_response = GetAttributeFoldersResult.model_validate(response_dict)
+        return validated_response.attributeFolders
 
-    def get_attributes_by_type(self, attribute_type: AttributeType) -> GetAttributesByTypeResult:
+    def get_attributes_by_type(self, attribute_type: AttributeType) -> list[AttributeIdWrapperItem]:
         """
         Returns the identifier of every attribute of the given type.
 
@@ -208,9 +233,12 @@ class AttributeCommands:
         response_dict = self._core.post_command(
             "API.GetAttributesByType", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return GetAttributesByTypeResult.model_validate(response_dict)
+        validated_response = GetAttributesByTypeResult.model_validate(response_dict)
+        return validated_response.attributeIds
 
-    def get_attributes_indices(self, attribute_ids: list[AttributeIdWrapperItem]) -> GetAttributesIndicesResult:
+    def get_attributes_indices(
+        self, attribute_ids: list[AttributeIdWrapperItem]
+    ) -> list[AttributeIndexAndGuidWrapperItem | ErrorItem]:
         """
         Returns the requested indices and guids of attributes.
 
@@ -228,11 +256,12 @@ class AttributeCommands:
         response_dict = self._core.post_command(
             "API.GetAttributesIndices", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return GetAttributesIndicesResult.model_validate(response_dict)
+        validated_response = GetAttributesIndicesResult.model_validate(response_dict)
+        return validated_response.attributeIndicesAndGuids
 
     def get_building_material_attributes(
         self, attribute_ids: list[AttributeIdWrapperItem]
-    ) -> GetBuildingMaterialAttributesResult:
+    ) -> list[BuildingMaterialAttributeWrapperItem | ErrorItem]:
         """
         Returns the detailed building material attributes identified by their GUIDs.
 
@@ -250,9 +279,12 @@ class AttributeCommands:
         response_dict = self._core.post_command(
             "API.GetBuildingMaterialAttributes", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return GetBuildingMaterialAttributesResult.model_validate(response_dict)
+        validated_response = GetBuildingMaterialAttributesResult.model_validate(response_dict)
+        return validated_response.attributes
 
-    def get_composite_attributes(self, attribute_ids: list[AttributeIdWrapperItem]) -> GetCompositeAttributesResult:
+    def get_composite_attributes(
+        self, attribute_ids: list[AttributeIdWrapperItem]
+    ) -> list[CompositeAttributeWrapperItem | ErrorItem]:
         """
         Returns the detailed composite attributes identified by their GUIDs.
 
@@ -270,9 +302,12 @@ class AttributeCommands:
         response_dict = self._core.post_command(
             "API.GetCompositeAttributes", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return GetCompositeAttributesResult.model_validate(response_dict)
+        validated_response = GetCompositeAttributesResult.model_validate(response_dict)
+        return validated_response.attributes
 
-    def get_fill_attributes(self, attribute_ids: list[AttributeIdWrapperItem]) -> GetFillAttributesResult:
+    def get_fill_attributes(
+        self, attribute_ids: list[AttributeIdWrapperItem]
+    ) -> list[ErrorItem | FillAttributeWrapperItem]:
         """
         Returns the detailed fill attributes identified by their GUIDs.
 
@@ -290,9 +325,12 @@ class AttributeCommands:
         response_dict = self._core.post_command(
             "API.GetFillAttributes", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return GetFillAttributesResult.model_validate(response_dict)
+        validated_response = GetFillAttributesResult.model_validate(response_dict)
+        return validated_response.attributes
 
-    def get_layer_attributes(self, attribute_ids: list[AttributeIdWrapperItem]) -> GetLayerAttributesResult:
+    def get_layer_attributes(
+        self, attribute_ids: list[AttributeIdWrapperItem]
+    ) -> list[ErrorItem | LayerAttributeWrapperItem]:
         """
         Returns the detailed layer attributes identified by their GUIDs.
 
@@ -310,11 +348,12 @@ class AttributeCommands:
         response_dict = self._core.post_command(
             "API.GetLayerAttributes", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return GetLayerAttributesResult.model_validate(response_dict)
+        validated_response = GetLayerAttributesResult.model_validate(response_dict)
+        return validated_response.attributes
 
     def get_layer_combination_attributes(
         self, attribute_ids: list[AttributeIdWrapperItem]
-    ) -> GetLayerCombinationAttributesResult:
+    ) -> list[ErrorItem | LayerCombinationAttributeWrapperItem]:
         """
         Returns the detailed layer combination attributes identified by their GUIDs.
 
@@ -332,9 +371,12 @@ class AttributeCommands:
         response_dict = self._core.post_command(
             "API.GetLayerCombinationAttributes", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return GetLayerCombinationAttributesResult.model_validate(response_dict)
+        validated_response = GetLayerCombinationAttributesResult.model_validate(response_dict)
+        return validated_response.attributes
 
-    def get_line_attributes(self, attribute_ids: list[AttributeIdWrapperItem]) -> GetLineAttributesResult:
+    def get_line_attributes(
+        self, attribute_ids: list[AttributeIdWrapperItem]
+    ) -> list[ErrorItem | LineAttributeWrapperItem]:
         """
         Returns the detailed line attributes identified by their GUIDs.
 
@@ -352,9 +394,12 @@ class AttributeCommands:
         response_dict = self._core.post_command(
             "API.GetLineAttributes", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return GetLineAttributesResult.model_validate(response_dict)
+        validated_response = GetLineAttributesResult.model_validate(response_dict)
+        return validated_response.attributes
 
-    def get_pen_table_attributes(self, attribute_ids: list[AttributeIdWrapperItem]) -> GetPenTableAttributesResult:
+    def get_pen_table_attributes(
+        self, attribute_ids: list[AttributeIdWrapperItem]
+    ) -> list[ErrorItem | PenTableAttributeWrapperItem]:
         """
         Returns the detailed pen table attributes (including their pens) identified by their
         GUIDs.
@@ -373,15 +418,16 @@ class AttributeCommands:
         response_dict = self._core.post_command(
             "API.GetPenTableAttributes", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return GetPenTableAttributesResult.model_validate(response_dict)
+        validated_response = GetPenTableAttributesResult.model_validate(response_dict)
+        return validated_response.attributes
 
     def get_profile_attribute_preview(
         self,
         attribute_ids: list[AttributeIdWrapperItem],
         image_width: int,
         image_height: int,
-        background_color: RGBColor | None = None,
-    ) -> GetProfileAttributePreviewResult:
+        background_color: None | RGBColor = None,
+    ) -> list[ErrorItem | ImageWrapperItem]:
         """
         Returns the preview image of each requested profile attribute in a base64 string format.
 
@@ -389,7 +435,7 @@ class AttributeCommands:
             attribute_ids (list[AttributeIdWrapperItem]): A list of attribute identifiers.
             image_width (int): The width of the preview image.
             image_height (int): The height of the preview image.
-            background_color (RGBColor | None): The background color of the preview image.
+            background_color (None | RGBColor): The background color of the preview image.
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -405,9 +451,12 @@ class AttributeCommands:
         response_dict = self._core.post_command(
             "API.GetProfileAttributePreview", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return GetProfileAttributePreviewResult.model_validate(response_dict)
+        validated_response = GetProfileAttributePreviewResult.model_validate(response_dict)
+        return validated_response.previewImages
 
-    def get_profile_attributes(self, attribute_ids: list[AttributeIdWrapperItem]) -> GetProfileAttributesResult:
+    def get_profile_attributes(
+        self, attribute_ids: list[AttributeIdWrapperItem]
+    ) -> list[ErrorItem | ProfileAttributeWrapperItem]:
         """
         Returns the detailed profile attributes identified by their GUIDs.
 
@@ -425,9 +474,12 @@ class AttributeCommands:
         response_dict = self._core.post_command(
             "API.GetProfileAttributes", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return GetProfileAttributesResult.model_validate(response_dict)
+        validated_response = GetProfileAttributesResult.model_validate(response_dict)
+        return validated_response.attributes
 
-    def get_surface_attributes(self, attribute_ids: list[AttributeIdWrapperItem]) -> GetSurfaceAttributesResult:
+    def get_surface_attributes(
+        self, attribute_ids: list[AttributeIdWrapperItem]
+    ) -> list[ErrorItem | SurfaceAttributeWrapperItem]:
         """
         Returns the detailed surface attributes identified by their GUIDs.
 
@@ -445,11 +497,12 @@ class AttributeCommands:
         response_dict = self._core.post_command(
             "API.GetSurfaceAttributes", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return GetSurfaceAttributesResult.model_validate(response_dict)
+        validated_response = GetSurfaceAttributesResult.model_validate(response_dict)
+        return validated_response.attributes
 
     def get_zone_category_attributes(
         self, attribute_ids: list[AttributeIdWrapperItem]
-    ) -> GetZoneCategoryAttributesResult:
+    ) -> list[ErrorItem | ZoneCategoryAttributeWrapperItem]:
         """
         Returns the detailed zone category attributes identified by their GUIDs.
 
@@ -467,7 +520,8 @@ class AttributeCommands:
         response_dict = self._core.post_command(
             "API.GetZoneCategoryAttributes", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return GetZoneCategoryAttributesResult.model_validate(response_dict)
+        validated_response = GetZoneCategoryAttributesResult.model_validate(response_dict)
+        return validated_response.attributes
 
     def move_attributes_and_folders(
         self,
@@ -501,7 +555,7 @@ class AttributeCommands:
 
     def rename_attribute_folders(
         self, attribute_folder_parameters_list: list[AttributeFolderRenameParameters]
-    ) -> RenameAttributeFoldersResult:
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
         """
         Rename attribute folder.
 
@@ -519,4 +573,5 @@ class AttributeCommands:
         response_dict = self._core.post_command(
             "API.RenameAttributeFolders", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return RenameAttributeFoldersResult.model_validate(response_dict)
+        validated_response = RenameAttributeFoldersResult.model_validate(response_dict)
+        return validated_response.executionResults

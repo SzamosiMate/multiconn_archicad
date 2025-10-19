@@ -28,10 +28,15 @@ from multiconn_archicad.models.tapir.types import (
     AttributePropertyValue,
     ElementIdArrayItem,
     ElementPropertyValue,
+    ErrorItem,
+    FailedExecutionResult,
     PropertyDefinitionArrayItem,
+    PropertyDetails,
     PropertyGroupArrayItem,
     PropertyGroupIdArrayItem,
     PropertyIdArrayItem,
+    PropertyValuesArrayItem,
+    SuccessfulExecutionResult,
 )
 
 if TYPE_CHECKING:
@@ -44,7 +49,7 @@ class PropertyCommands:
 
     def create_property_definitions(
         self, property_definitions: list[PropertyDefinitionArrayItem]
-    ) -> CreatePropertyDefinitionsResult:
+    ) -> list[ErrorItem | PropertyIdArrayItem]:
         """
         Creates Custom Property Definitions based on the given parameters.
 
@@ -63,9 +68,10 @@ class PropertyCommands:
         response_dict = self._core.post_tapir_command(
             "CreatePropertyDefinitions", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return CreatePropertyDefinitionsResult.model_validate(response_dict)
+        validated_response = CreatePropertyDefinitionsResult.model_validate(response_dict)
+        return validated_response.propertyIds
 
-    def create_property_groups(self, property_groups: list[PropertyGroupArrayItem]) -> CreatePropertyGroupsResult:
+    def create_property_groups(self, property_groups: list[PropertyGroupArrayItem]) -> list[PropertyGroupIdArrayItem]:
         """
         Creates Property Groups based on the given parameters.
 
@@ -84,9 +90,12 @@ class PropertyCommands:
         response_dict = self._core.post_tapir_command(
             "CreatePropertyGroups", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return CreatePropertyGroupsResult.model_validate(response_dict)
+        validated_response = CreatePropertyGroupsResult.model_validate(response_dict)
+        return validated_response.propertyGroupIds
 
-    def delete_property_definitions(self, property_ids: list[PropertyIdArrayItem]) -> DeletePropertyDefinitionsResult:
+    def delete_property_definitions(
+        self, property_ids: list[PropertyIdArrayItem]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
         """
         Deletes the given Custom Property Definitions.
 
@@ -104,9 +113,12 @@ class PropertyCommands:
         response_dict = self._core.post_tapir_command(
             "DeletePropertyDefinitions", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return DeletePropertyDefinitionsResult.model_validate(response_dict)
+        validated_response = DeletePropertyDefinitionsResult.model_validate(response_dict)
+        return validated_response.executionResults
 
-    def delete_property_groups(self, property_group_ids: list[PropertyGroupIdArrayItem]) -> DeletePropertyGroupsResult:
+    def delete_property_groups(
+        self, property_group_ids: list[PropertyGroupIdArrayItem]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
         """
         Deletes the given Custom Property Groups.
 
@@ -125,9 +137,10 @@ class PropertyCommands:
         response_dict = self._core.post_tapir_command(
             "DeletePropertyGroups", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return DeletePropertyGroupsResult.model_validate(response_dict)
+        validated_response = DeletePropertyGroupsResult.model_validate(response_dict)
+        return validated_response.executionResults
 
-    def get_all_properties(self) -> GetAllPropertiesResult:
+    def get_all_properties(self) -> list[PropertyDetails]:
         """
         Returns all user defined and built-in properties.
 
@@ -136,11 +149,12 @@ class PropertyCommands:
             RequestError: If there is a network or connection error.
         """
         response_dict = self._core.post_tapir_command("GetAllProperties")
-        return GetAllPropertiesResult.model_validate(response_dict)
+        validated_response = GetAllPropertiesResult.model_validate(response_dict)
+        return validated_response.properties
 
     def get_property_values_of_attributes(
         self, attribute_ids: list[AttributeIdArrayItem], properties: list[PropertyIdArrayItem]
-    ) -> GetPropertyValuesOfAttributesResult:
+    ) -> list[ErrorItem | PropertyValuesArrayItem]:
         """
         Returns the property values of the attributes for the given property.
 
@@ -160,11 +174,12 @@ class PropertyCommands:
         response_dict = self._core.post_tapir_command(
             "GetPropertyValuesOfAttributes", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return GetPropertyValuesOfAttributesResult.model_validate(response_dict)
+        validated_response = GetPropertyValuesOfAttributesResult.model_validate(response_dict)
+        return validated_response.propertyValuesForAttributes
 
     def get_property_values_of_elements(
         self, elements: list[ElementIdArrayItem], properties: list[PropertyIdArrayItem]
-    ) -> GetPropertyValuesOfElementsResult:
+    ) -> list[ErrorItem | PropertyValuesArrayItem]:
         """
         Returns the property values of the elements for the given property. It works for
         subelements of hierarchal elements also.
@@ -185,11 +200,12 @@ class PropertyCommands:
         response_dict = self._core.post_tapir_command(
             "GetPropertyValuesOfElements", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return GetPropertyValuesOfElementsResult.model_validate(response_dict)
+        validated_response = GetPropertyValuesOfElementsResult.model_validate(response_dict)
+        return validated_response.propertyValuesForElements
 
     def set_property_values_of_attributes(
         self, attribute_property_values: list[AttributePropertyValue]
-    ) -> SetPropertyValuesOfAttributesResult:
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
         """
         Sets the property values of attributes.
 
@@ -208,11 +224,12 @@ class PropertyCommands:
         response_dict = self._core.post_tapir_command(
             "SetPropertyValuesOfAttributes", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return SetPropertyValuesOfAttributesResult.model_validate(response_dict)
+        validated_response = SetPropertyValuesOfAttributesResult.model_validate(response_dict)
+        return validated_response.executionResults
 
     def set_property_values_of_elements(
         self, element_property_values: list[ElementPropertyValue]
-    ) -> SetPropertyValuesOfElementsResult:
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
         """
         Sets the property values of elements. It works for subelements of hierarchal elements
         also.
@@ -232,4 +249,5 @@ class PropertyCommands:
         response_dict = self._core.post_tapir_command(
             "SetPropertyValuesOfElements", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return SetPropertyValuesOfElementsResult.model_validate(response_dict)
+        validated_response = SetPropertyValuesOfElementsResult.model_validate(response_dict)
+        return validated_response.executionResults

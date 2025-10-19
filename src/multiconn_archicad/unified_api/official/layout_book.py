@@ -29,12 +29,12 @@ class LayoutBookCommands:
         layout_parameters: LayoutParameters,
         master_navigator_item_id: NavigatorItemId,
         parent_navigator_item_id: NavigatorItemId,
-    ) -> CreateLayoutResult:
+    ) -> NavigatorItemId:
         """
         Creates a new layout.
 
         Args:
-            layout_name (str): The name of the layout. (Constraints: min_length=1)
+            layout_name (str): The name of the layout.
             layout_parameters (LayoutParameters)
             master_navigator_item_id (NavigatorItemId)
             parent_navigator_item_id (NavigatorItemId)
@@ -53,11 +53,12 @@ class LayoutBookCommands:
         response_dict = self._core.post_command(
             "API.CreateLayout", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return CreateLayoutResult.model_validate(response_dict)
+        validated_response = CreateLayoutResult.model_validate(response_dict)
+        return validated_response.createdNavigatorItemId
 
     def create_layout_subset(
         self, subset_parameters: Subset, parent_navigator_item_id: NavigatorItemId
-    ) -> CreateLayoutSubsetResult:
+    ) -> NavigatorItemId:
         """
         Creates a new layout subset.
 
@@ -77,9 +78,10 @@ class LayoutBookCommands:
         response_dict = self._core.post_command(
             "API.CreateLayoutSubset", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return CreateLayoutSubsetResult.model_validate(response_dict)
+        validated_response = CreateLayoutSubsetResult.model_validate(response_dict)
+        return validated_response.createdSubsetId
 
-    def get_layout_settings(self, layout_navigator_item_id: NavigatorItemId) -> GetLayoutSettingsResult:
+    def get_layout_settings(self, layout_navigator_item_id: NavigatorItemId) -> LayoutParameters:
         """
         Returns the parameters (settings) of the given layout.
 
@@ -97,7 +99,8 @@ class LayoutBookCommands:
         response_dict = self._core.post_command(
             "API.GetLayoutSettings", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return GetLayoutSettingsResult.model_validate(response_dict)
+        validated_response = GetLayoutSettingsResult.model_validate(response_dict)
+        return validated_response.layoutParameters
 
     def set_layout_settings(
         self, layout_parameters: LayoutParameters, layout_navigator_item_id: NavigatorItemId

@@ -12,8 +12,11 @@ from multiconn_archicad.models.official.commands import (
 )
 from multiconn_archicad.models.official.types import (
     ElementComponentIdArrayItem,
+    ElementComponentsWrapper,
     ElementIdArrayItem,
+    ErrorItem,
     PropertyIdArrayItem,
+    PropertyValuesWrapperItem,
 )
 
 if TYPE_CHECKING:
@@ -24,7 +27,9 @@ class ComponentCommands:
     def __init__(self, core: CoreCommands):
         self._core = core
 
-    def get_components_of_elements(self, elements: list[ElementIdArrayItem]) -> GetComponentsOfElementsResult:
+    def get_components_of_elements(
+        self, elements: list[ElementIdArrayItem]
+    ) -> list[ElementComponentsWrapper | ErrorItem]:
         """
         Returns the identifier of every component for a list of elements. The order of the
         returned list is the same as the given elements.
@@ -43,11 +48,12 @@ class ComponentCommands:
         response_dict = self._core.post_command(
             "API.GetComponentsOfElements", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return GetComponentsOfElementsResult.model_validate(response_dict)
+        validated_response = GetComponentsOfElementsResult.model_validate(response_dict)
+        return validated_response.componentsOfElements
 
     def get_property_values_of_element_components(
         self, element_components: list[ElementComponentIdArrayItem], properties: list[PropertyIdArrayItem]
-    ) -> GetPropertyValuesOfElementComponentsResult:
+    ) -> list[ErrorItem | PropertyValuesWrapperItem]:
         """
         Returns the property values of the components for the given property.
 
@@ -68,4 +74,5 @@ class ComponentCommands:
         response_dict = self._core.post_command(
             "API.GetPropertyValuesOfElementComponents", validated_params.model_dump(by_alias=True, exclude_none=True)
         )
-        return GetPropertyValuesOfElementComponentsResult.model_validate(response_dict)
+        validated_response = GetPropertyValuesOfElementComponentsResult.model_validate(response_dict)
+        return validated_response.propertyValuesForElementComponents
