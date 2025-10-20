@@ -21,17 +21,13 @@ class AddonCommands:
         self._core = core
 
     def execute_add_on_command(
-        self,
-        add_on_command_id: AddOnCommandId,
-        extra_data: Any,
-        add_on_command_parameters: AddOnCommandParameters | None = None,
+        self, add_on_command_id: AddOnCommandId, add_on_command_parameters: AddOnCommandParameters | None = None
     ) -> AddOnCommandResponse:
         """
         Executes a command registered in an Add-On.
 
         Args:
             add_on_command_id (AddOnCommandId)
-            extra_data (Any)
             add_on_command_parameters (AddOnCommandParameters | None)
 
         Raises:
@@ -41,7 +37,6 @@ class AddonCommands:
         params_dict = {
             "addOnCommandId": add_on_command_id,
             "addOnCommandParameters": add_on_command_parameters,
-            "extra_data": extra_data,
         }
         validated_params = ExecuteAddOnCommandParameters(**params_dict)
         response_dict = self._core.post_command(

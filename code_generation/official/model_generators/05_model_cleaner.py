@@ -25,7 +25,6 @@ def main():
     content = rename_problematic_wrappers(content)
     content = remove_guid_pattern(content)
     content = remove_redundant_model_configs(content)
-    content = patch_addon_command(content)
     content = assemble_final_file(content)
 
     official_paths.CLEANED_PYDANTIC_MODELS.write_text(content, encoding="utf-8")
@@ -194,32 +193,6 @@ def remove_redundant_model_configs(content: str) -> str:
         print("      - Warning: No redundant config blocks were found to remove.")
 
     return cleaned_content
-
-
-def patch_addon_command(content: str) -> str:
-    """
-    Finds specific AddOn command models (Parameters and Result) and inserts
-    a ConfigDict to override the inherited 'forbid' behavior, allowing extra fields.
-    """
-    print("⚙️  Step 9: Patching AddOn command models to allow extra fields...")
-
-    models_to_patch = [
-        "ExecuteAddOnCommandParameters",
-        "ExecuteAddOnCommandResult",
-    ]
-
-    for model_name in models_to_patch:
-        pattern = re.compile(rf"(class {model_name}\(APIModel\):)")
-        replacement = r'\1\n    model_config = ConfigDict(\n        extra="allow",\n    )'
-        new_content, count = pattern.subn(replacement, content, count=1)
-
-        if count > 0:
-            print(f"    - Successfully patched '{model_name}' to allow extra fields.")
-            content = new_content
-        else:
-            print(f"    - Warning: '{model_name}' model not found for patching.")
-
-    return content
 
 
 def assemble_final_file(content: str) -> str:

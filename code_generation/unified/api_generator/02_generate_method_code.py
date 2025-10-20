@@ -20,6 +20,67 @@ MODEL_MODULES = {
 }
 
 
+def main():
+    """Main script entry point for Stage 2 of the pipeline."""
+    parser = argparse.ArgumentParser(description="Stage 2: Generate method code strings for API commands.")
+    parser.add_argument("--input-file", required=True, help="Path to the organized commands JSON from Stage 1.")
+    parser.add_argument("--output-file", required=True, help="Path to save JSON with the new 'method_code' field.")
+    args = parser.parse_args()
+
+    print(f"Reading organized command data from: {args.input_file}")
+    with open(args.input_file, "r", encoding="utf-8") as f:
+        organized_commands = json.load(f)
+
+    print("Generating method code and tracking dependencies for each command...")
+    total_commands = 0
+    for source, groups in organized_commands.items():
+        for commands in groups.values():
+            for command in commands:
+                total_commands += 1
+                try:
+                    generated_data = generate_method_code(command)
+                    command.update(generated_data)
+                except Exception as e:
+                    print(
+                        f"❌ FATAL: Failed to generate code for command '{command['name']}'. Error: {e}",
+                        file=sys.stderr,
+                    )
+                    raise
+    print(f"✅ Successfully generated code for {total_commands} commands.")
+    with open(args.output_file, "w", encoding="utf-8") as f:
+        json.dump(organized_commands, f, indent=2)
+    print(f"Enriched command data saved to: {args.output_file}")
+
+
+def generate_method_code(command_details: dict[str, Any]) -> dict:
+    """
+    Orchestrates the generation of a single API method, handling special cases
+    and falling back to a standard generation process.
+    """
+    dependencies = {"commands": set(), "types": set()}
+    original_cmd_name = command_details["name"]
+    source = command_details["source"]
+    command_name = original_cmd_name.removeprefix("API.") if source == "official" else original_cmd_name
+    snake_name = camel_to_snake(command_name)
+
+    if special_case_code := _handle_special_cases(command_name, command_details, dependencies):
+        return special_case_code
+
+    params_model = get_model_class(f"{command_name}Parameters", source, dependencies)
+    result_model = get_model_class(f"{command_name}Result", source, dependencies)
+
+    _check_for_unhandled_patterns(params_model)
+
+    return _generate_standard_method(command_details, snake_name, params_model, result_model, dependencies)
+
+
+def _handle_special_cases(command_name: str, command_details: dict[str, Any], dependencies: dict) -> dict | None:
+    """Router to delegate generation to special-case handlers. Returns generated data or None."""
+    if command_name == "RenameNavigatorItem":
+        return _generate_rename_navigator_item_fix(command_details, dependencies)
+    return None
+
+
 def get_model_class(model_name: str, source: str, dependencies: dict) -> Any | None:
     """Safely retrieves a model class by name and tracks it as a dependency."""
     try:
@@ -64,6 +125,50 @@ def get_clean_type_hint(annotation: Any, dependencies: dict) -> str:
         elif ".commands" in module_name:
             dependencies["commands"].add(hint)
     return hint
+
+
+def _check_for_unhandled_patterns(params_model: Any) -> None:
+    """
+    Checks for complex model patterns that the generator isn't equipped to handle automatically.
+    Halts the pipeline if an unhandled pattern is found.
+    """
+    if not params_model or not hasattr(params_model, "model_fields") or "root" not in params_model.model_fields:
+        return
+
+    root_field_annotation = params_model.model_fields["root"].annotation
+    origin = get_origin(root_field_annotation)
+    if origin is Union or origin is UnionType:
+        raise NotImplementedError(
+            f"Unhandled RootModel[Union[...]] pattern found in '{params_model.__name__}'. "
+            "The code generator must be updated to handle this new special case."
+        )
+
+
+def _generate_standard_method(
+    command_details: dict[str, Any], snake_name: str, params_model: Any, result_model: Any, dependencies: dict
+) -> dict:
+    """Generates method code for a standard, straightforward command."""
+    final_return_type_hint = "None"
+    alias_property_name = None
+
+    if result_model:
+        # Check if the result model is just a wrapper for a single field (alias)
+        if hasattr(result_model, "model_fields") and len(result_model.model_fields) == 1:
+            field_name, field_info = list(result_model.model_fields.items())[0]
+            alias_property_name = field_name
+            final_return_type_hint = get_clean_type_hint(field_info.annotation, dependencies)
+        else:
+            final_return_type_hint = get_clean_type_hint(result_model, dependencies)
+
+    signature, param_docs = _build_signature_and_docs(snake_name, params_model, final_return_type_hint, dependencies)
+    docstring = _build_docstring(command_details["description"], param_docs)
+    body = _build_body(command_details["name"], command_details["source"], params_model, result_model, alias_property_name)
+
+    return {
+        "method_code": f"{signature}\n{textwrap.indent(docstring, '    ')}\n{textwrap.indent(body, '    ')}",
+        "command_model_dependencies": sorted(list(dependencies["commands"])),
+        "type_model_dependencies": sorted(list(dependencies["types"])),
+    }
 
 
 def _build_signature_and_docs(
@@ -158,77 +263,58 @@ def _build_body(
     return "\n".join(body_lines)
 
 
-def generate_method_code(command_details: dict[str, Any]) -> dict:
-    """
-    Orchestrates generation of a single method by loading and inspecting the
-    actual Pydantic models to determine if a result is an alias.
-    """
-    dependencies = {"commands": set(), "types": set()}
-    original_cmd_name = command_details["name"]
-    source = command_details["source"]
-    command_name = original_cmd_name.removeprefix("API.") if source == "official" else original_cmd_name
-    snake_name = camel_to_snake(command_name)
+def _generate_rename_navigator_item_fix(command_details: dict[str, Any], dependencies: dict) -> dict:
+    """Surgical fix to generate a user-friendly method for RenameNavigatorItem."""
+    # Manually add all required model dependencies for this command
+    dependencies["commands"].update([
+        "RenameNavigatorItemParameters",
+        "RenameNavigatorItemByName",
+        "RenameNavigatorItemById",
+        "RenameNavigatorItemByNameAndId",
+    ])
+    dependencies["types"].add("NavigatorItemId")
 
-    params_model = get_model_class(f"{command_name}Parameters", source, dependencies)
-    result_model = get_model_class(f"{command_name}Result", source, dependencies)
+    signature = (
+        "def rename_navigator_item(\n"
+        "    self,\n"
+        "    navigator_item_id: NavigatorItemId,\n"
+        "    new_name: str | None = None,\n"
+        "    new_id: str | None = None\n"
+        ") -> None:"
+    )
 
-    final_return_type_hint = "None"
-    alias_property_name = None
+    docstring = _build_docstring(
+        command_details["description"],
+        [
+            "navigator_item_id (NavigatorItemId): The identifier of the navigator item to rename.",
+            "new_name (str, optional): The new name for the navigator item.",
+            "new_id (str, optional): The new ID for the navigator item.",
+        ],
+    )
 
-    if result_model:
-        if hasattr(result_model, "model_fields") and len(result_model.model_fields) == 1:
-            # --- CORRECTED LOGIC ---
-            # Get the first (and only) key-value pair from the dictionary.
-            # The key is the field name (string).
-            # The value is the FieldInfo object.
-            field_name, field_info = list(result_model.model_fields.items())[0]
+    body = textwrap.dedent("""
+        if not new_name and not new_id:
+            raise ValueError("Either 'new_name' or 'new_id' (or both) must be provided.")
 
-            alias_property_name = field_name  # This is the string name we needed
-            final_return_type_hint = get_clean_type_hint(field_info.annotation, dependencies)
+        if new_name and new_id:
+            inner_model = RenameNavigatorItemByNameAndId(navigatorItemId=navigator_item_id, newName=new_name, newId=new_id)
+        elif new_name:
+            inner_model = RenameNavigatorItemByName(navigatorItemId=navigator_item_id, newName=new_name)
         else:
-            final_return_type_hint = get_clean_type_hint(result_model, dependencies)
+            inner_model = RenameNavigatorItemById(navigatorItemId=navigator_item_id, newId=new_id)
 
-    signature, param_docs = _build_signature_and_docs(snake_name, params_model, final_return_type_hint, dependencies)
-    docstring = _build_docstring(command_details["description"], param_docs)
-    body = _build_body(original_cmd_name, source, params_model, result_model, alias_property_name)
+        validated_params = RenameNavigatorItemParameters(root=inner_model)
+        self._core.post_command(
+            "API.RenameNavigatorItem", validated_params.model_dump(by_alias=True, exclude_none=True)
+        )
+        return None
+    """).strip()
 
     return {
         "method_code": f"{signature}\n{textwrap.indent(docstring, '    ')}\n{textwrap.indent(body, '    ')}",
         "command_model_dependencies": sorted(list(dependencies["commands"])),
         "type_model_dependencies": sorted(list(dependencies["types"])),
     }
-
-
-def main():
-    """Main script entry point for Stage 2 of the pipeline."""
-    parser = argparse.ArgumentParser(description="Stage 2: Generate method code strings for API commands.")
-    parser.add_argument("--input-file", required=True, help="Path to the organized commands JSON from Stage 1.")
-    parser.add_argument("--output-file", required=True, help="Path to save JSON with the new 'method_code' field.")
-    args = parser.parse_args()
-
-    print(f"Reading organized command data from: {args.input_file}")
-    with open(args.input_file, "r", encoding="utf-8") as f:
-        organized_commands = json.load(f)
-
-    print("Generating method code and tracking dependencies for each command...")
-    total_commands = 0
-    for source, groups in organized_commands.items():
-        for commands in groups.values():
-            for command in commands:
-                total_commands += 1
-                try:
-                    generated_data = generate_method_code(command)
-                    command.update(generated_data)
-                except Exception as e:
-                    print(
-                        f"❌ FATAL: Failed to generate code for command '{command['name']}'. Error: {e}",
-                        file=sys.stderr,
-                    )
-                    raise
-    print(f"✅ Successfully generated code for {total_commands} commands.")
-    with open(args.output_file, "w", encoding="utf-8") as f:
-        json.dump(organized_commands, f, indent=2)
-    print(f"Enriched command data saved to: {args.output_file}")
 
 
 if __name__ == "__main__":
