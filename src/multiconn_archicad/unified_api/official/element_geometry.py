@@ -44,7 +44,7 @@ class ElementGeometryCommands:
         }
         validated_params = Get2DBoundingBoxesParameters(**params_dict)
         response_dict = self._core.post_command(
-            "API.Get2DBoundingBoxes", validated_params.model_dump(by_alias=True, exclude_none=True)
+            "API.Get2DBoundingBoxes", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = Get2DBoundingBoxesResult.model_validate(response_dict)
         return validated_response.boundingBoxes2D
@@ -68,7 +68,7 @@ class ElementGeometryCommands:
         }
         validated_params = Get3DBoundingBoxesParameters(**params_dict)
         response_dict = self._core.post_command(
-            "API.Get3DBoundingBoxes", validated_params.model_dump(by_alias=True, exclude_none=True)
+            "API.Get3DBoundingBoxes", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = Get3DBoundingBoxesResult.model_validate(response_dict)
         return validated_response.boundingBoxes3D

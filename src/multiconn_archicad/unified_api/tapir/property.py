@@ -66,7 +66,7 @@ class PropertyCommands:
         }
         validated_params = CreatePropertyDefinitionsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreatePropertyDefinitions", validated_params.model_dump(by_alias=True, exclude_none=True)
+            "CreatePropertyDefinitions", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = CreatePropertyDefinitionsResult.model_validate(response_dict)
         return validated_response.propertyIds
@@ -88,7 +88,7 @@ class PropertyCommands:
         }
         validated_params = CreatePropertyGroupsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreatePropertyGroups", validated_params.model_dump(by_alias=True, exclude_none=True)
+            "CreatePropertyGroups", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = CreatePropertyGroupsResult.model_validate(response_dict)
         return validated_response.propertyGroupIds
@@ -111,7 +111,7 @@ class PropertyCommands:
         }
         validated_params = DeletePropertyDefinitionsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "DeletePropertyDefinitions", validated_params.model_dump(by_alias=True, exclude_none=True)
+            "DeletePropertyDefinitions", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = DeletePropertyDefinitionsResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -135,7 +135,7 @@ class PropertyCommands:
         }
         validated_params = DeletePropertyGroupsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "DeletePropertyGroups", validated_params.model_dump(by_alias=True, exclude_none=True)
+            "DeletePropertyGroups", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = DeletePropertyGroupsResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -172,7 +172,7 @@ class PropertyCommands:
         }
         validated_params = GetPropertyValuesOfAttributesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetPropertyValuesOfAttributes", validated_params.model_dump(by_alias=True, exclude_none=True)
+            "GetPropertyValuesOfAttributes", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = GetPropertyValuesOfAttributesResult.model_validate(response_dict)
         return validated_response.propertyValuesForAttributes
@@ -198,7 +198,7 @@ class PropertyCommands:
         }
         validated_params = GetPropertyValuesOfElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetPropertyValuesOfElements", validated_params.model_dump(by_alias=True, exclude_none=True)
+            "GetPropertyValuesOfElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = GetPropertyValuesOfElementsResult.model_validate(response_dict)
         return validated_response.propertyValuesForElements
@@ -222,7 +222,7 @@ class PropertyCommands:
         }
         validated_params = SetPropertyValuesOfAttributesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "SetPropertyValuesOfAttributes", validated_params.model_dump(by_alias=True, exclude_none=True)
+            "SetPropertyValuesOfAttributes", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = SetPropertyValuesOfAttributesResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -247,7 +247,7 @@ class PropertyCommands:
         }
         validated_params = SetPropertyValuesOfElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "SetPropertyValuesOfElements", validated_params.model_dump(by_alias=True, exclude_none=True)
+            "SetPropertyValuesOfElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = SetPropertyValuesOfElementsResult.model_validate(response_dict)
         return validated_response.executionResults

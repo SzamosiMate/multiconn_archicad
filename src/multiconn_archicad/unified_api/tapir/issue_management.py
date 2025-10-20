@@ -61,7 +61,7 @@ class IssueManagementCommands:
         }
         validated_params = AddCommentToIssueParameters(**params_dict)
         self._core.post_tapir_command(
-            "AddCommentToIssue", validated_params.model_dump(by_alias=True, exclude_none=True)
+            "AddCommentToIssue", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         return None
 
@@ -87,7 +87,7 @@ class IssueManagementCommands:
         }
         validated_params = AttachElementsToIssueParameters(**params_dict)
         self._core.post_tapir_command(
-            "AttachElementsToIssue", validated_params.model_dump(by_alias=True, exclude_none=True)
+            "AttachElementsToIssue", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         return None
 
@@ -111,7 +111,7 @@ class IssueManagementCommands:
         }
         validated_params = CreateIssueParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateIssue", validated_params.model_dump(by_alias=True, exclude_none=True)
+            "CreateIssue", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = CreateIssueResult.model_validate(response_dict)
         return validated_response.issueId
@@ -134,7 +134,9 @@ class IssueManagementCommands:
             "acceptAllElements": accept_all_elements,
         }
         validated_params = DeleteIssueParameters(**params_dict)
-        self._core.post_tapir_command("DeleteIssue", validated_params.model_dump(by_alias=True, exclude_none=True))
+        self._core.post_tapir_command(
+            "DeleteIssue", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
         return None
 
     def detach_elements_from_issue(self, issue_id: IssueId, elements: list[ElementIdArrayItem]) -> None:
@@ -155,7 +157,7 @@ class IssueManagementCommands:
         }
         validated_params = DetachElementsFromIssueParameters(**params_dict)
         self._core.post_tapir_command(
-            "DetachElementsFromIssue", validated_params.model_dump(by_alias=True, exclude_none=True)
+            "DetachElementsFromIssue", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         return None
 
@@ -189,7 +191,7 @@ class IssueManagementCommands:
         }
         validated_params = ExportIssuesToBCFParameters(**params_dict)
         self._core.post_tapir_command(
-            "ExportIssuesToBCF", validated_params.model_dump(by_alias=True, exclude_none=True)
+            "ExportIssuesToBCF", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         return None
 
@@ -209,7 +211,7 @@ class IssueManagementCommands:
         }
         validated_params = GetCommentsFromIssueParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetCommentsFromIssue", validated_params.model_dump(by_alias=True, exclude_none=True)
+            "GetCommentsFromIssue", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = GetCommentsFromIssueResult.model_validate(response_dict)
         return validated_response.comments
@@ -232,7 +234,7 @@ class IssueManagementCommands:
         }
         validated_params = GetElementsAttachedToIssueParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetElementsAttachedToIssue", validated_params.model_dump(by_alias=True, exclude_none=True)
+            "GetElementsAttachedToIssue", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = GetElementsAttachedToIssueResult.model_validate(response_dict)
         return validated_response.elements
@@ -268,6 +270,6 @@ class IssueManagementCommands:
         }
         validated_params = ImportIssuesFromBCFParameters(**params_dict)
         self._core.post_tapir_command(
-            "ImportIssuesFromBCF", validated_params.model_dump(by_alias=True, exclude_none=True)
+            "ImportIssuesFromBCF", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         return None

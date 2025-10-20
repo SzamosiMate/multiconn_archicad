@@ -81,7 +81,7 @@ class NavigatorTreeCommands:
         }
         validated_params = DeleteNavigatorItemsParameters(**params_dict)
         response_dict = self._core.post_command(
-            "API.DeleteNavigatorItems", validated_params.model_dump(by_alias=True, exclude_none=True)
+            "API.DeleteNavigatorItems", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = DeleteNavigatorItemsResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -105,7 +105,8 @@ class NavigatorTreeCommands:
         }
         validated_params = GetBuiltInContainerNavigatorItemsParameters(**params_dict)
         response_dict = self._core.post_command(
-            "API.GetBuiltInContainerNavigatorItems", validated_params.model_dump(by_alias=True, exclude_none=True)
+            "API.GetBuiltInContainerNavigatorItems",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
         )
         validated_response = GetBuiltInContainerNavigatorItemsResult.model_validate(response_dict)
         return validated_response.navigatorItems
@@ -129,7 +130,7 @@ class NavigatorTreeCommands:
         }
         validated_params = GetDetailNavigatorItemsParameters(**params_dict)
         response_dict = self._core.post_command(
-            "API.GetDetailNavigatorItems", validated_params.model_dump(by_alias=True, exclude_none=True)
+            "API.GetDetailNavigatorItems", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = GetDetailNavigatorItemsResult.model_validate(response_dict)
         return validated_response.navigatorItems
@@ -153,7 +154,8 @@ class NavigatorTreeCommands:
         }
         validated_params = GetDocument3DNavigatorItemsParameters(**params_dict)
         response_dict = self._core.post_command(
-            "API.GetDocument3DNavigatorItems", validated_params.model_dump(by_alias=True, exclude_none=True)
+            "API.GetDocument3DNavigatorItems",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
         )
         validated_response = GetDocument3DNavigatorItemsResult.model_validate(response_dict)
         return validated_response.navigatorItems
@@ -177,7 +179,7 @@ class NavigatorTreeCommands:
         }
         validated_params = GetElevationNavigatorItemsParameters(**params_dict)
         response_dict = self._core.post_command(
-            "API.GetElevationNavigatorItems", validated_params.model_dump(by_alias=True, exclude_none=True)
+            "API.GetElevationNavigatorItems", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = GetElevationNavigatorItemsResult.model_validate(response_dict)
         return validated_response.navigatorItems
@@ -201,7 +203,8 @@ class NavigatorTreeCommands:
         }
         validated_params = GetInteriorElevationNavigatorItemsParameters(**params_dict)
         response_dict = self._core.post_command(
-            "API.GetInteriorElevationNavigatorItems", validated_params.model_dump(by_alias=True, exclude_none=True)
+            "API.GetInteriorElevationNavigatorItems",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
         )
         validated_response = GetInteriorElevationNavigatorItemsResult.model_validate(response_dict)
         return validated_response.navigatorItems
@@ -223,7 +226,7 @@ class NavigatorTreeCommands:
         }
         validated_params = GetNavigatorItemTreeParameters(**params_dict)
         response_dict = self._core.post_command(
-            "API.GetNavigatorItemTree", validated_params.model_dump(by_alias=True, exclude_none=True)
+            "API.GetNavigatorItemTree", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = GetNavigatorItemTreeResult.model_validate(response_dict)
         return validated_response.navigatorTree
@@ -248,7 +251,7 @@ class NavigatorTreeCommands:
         }
         validated_params = GetNavigatorItemsTypeParameters(**params_dict)
         response_dict = self._core.post_command(
-            "API.GetNavigatorItemsType", validated_params.model_dump(by_alias=True, exclude_none=True)
+            "API.GetNavigatorItemsType", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = GetNavigatorItemsTypeResult.model_validate(response_dict)
         return validated_response.navigatorItemIdAndTypeList
@@ -284,7 +287,7 @@ class NavigatorTreeCommands:
         }
         validated_params = GetSectionNavigatorItemsParameters(**params_dict)
         response_dict = self._core.post_command(
-            "API.GetSectionNavigatorItems", validated_params.model_dump(by_alias=True, exclude_none=True)
+            "API.GetSectionNavigatorItems", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = GetSectionNavigatorItemsResult.model_validate(response_dict)
         return validated_response.navigatorItems
@@ -308,7 +311,7 @@ class NavigatorTreeCommands:
         }
         validated_params = GetStoryNavigatorItemsParameters(**params_dict)
         response_dict = self._core.post_command(
-            "API.GetStoryNavigatorItems", validated_params.model_dump(by_alias=True, exclude_none=True)
+            "API.GetStoryNavigatorItems", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = GetStoryNavigatorItemsResult.model_validate(response_dict)
         return validated_response.navigatorItems
@@ -332,7 +335,7 @@ class NavigatorTreeCommands:
         }
         validated_params = GetWorksheetNavigatorItemsParameters(**params_dict)
         response_dict = self._core.post_command(
-            "API.GetWorksheetNavigatorItems", validated_params.model_dump(by_alias=True, exclude_none=True)
+            "API.GetWorksheetNavigatorItems", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = GetWorksheetNavigatorItemsResult.model_validate(response_dict)
         return validated_response.navigatorItems
@@ -363,7 +366,9 @@ class NavigatorTreeCommands:
             "previousNavigatorItemId": previous_navigator_item_id,
         }
         validated_params = MoveNavigatorItemParameters(**params_dict)
-        self._core.post_command("API.MoveNavigatorItem", validated_params.model_dump(by_alias=True, exclude_none=True))
+        self._core.post_command(
+            "API.MoveNavigatorItem", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
         return None
 
     def rename_navigator_item(
@@ -395,6 +400,6 @@ class NavigatorTreeCommands:
 
         validated_params = RenameNavigatorItemParameters(root=inner_model)
         self._core.post_command(
-            "API.RenameNavigatorItem", validated_params.model_dump(by_alias=True, exclude_none=True)
+            "API.RenameNavigatorItem", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         return None

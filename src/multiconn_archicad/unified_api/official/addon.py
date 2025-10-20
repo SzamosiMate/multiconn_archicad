@@ -40,7 +40,7 @@ class AddonCommands:
         }
         validated_params = ExecuteAddOnCommandParameters(**params_dict)
         response_dict = self._core.post_command(
-            "API.ExecuteAddOnCommand", validated_params.model_dump(by_alias=True, exclude_none=True)
+            "API.ExecuteAddOnCommand", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = ExecuteAddOnCommandResult.model_validate(response_dict)
         return validated_response.addOnCommandResponse
@@ -61,7 +61,7 @@ class AddonCommands:
         }
         validated_params = IsAddOnCommandAvailableParameters(**params_dict)
         response_dict = self._core.post_command(
-            "API.IsAddOnCommandAvailable", validated_params.model_dump(by_alias=True, exclude_none=True)
+            "API.IsAddOnCommandAvailable", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = IsAddOnCommandAvailableResult.model_validate(response_dict)
         return validated_response.available

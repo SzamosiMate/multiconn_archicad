@@ -32,7 +32,6 @@ if TYPE_CHECKING:
     from multiconn_archicad.core.core_commands import CoreCommands
 
 
-# --- Container class for Tapir commands ---
 class TapirApi:
     """A container for all command groups of the Archicad Tapir API."""
 
@@ -50,7 +49,6 @@ class TapirApi:
         self.teamwork = TapirTeamworkCommands(core)
 
 
-# --- Container class for Official commands ---
 class OfficialApi:
     """A container for all command groups of the Archicad Official API."""
 

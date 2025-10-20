@@ -49,7 +49,8 @@ class RevisionManagementCommands:
         }
         validated_params = GetCurrentRevisionChangesOfLayoutsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetCurrentRevisionChangesOfLayouts", validated_params.model_dump(by_alias=True, exclude_none=True)
+            "GetCurrentRevisionChangesOfLayouts",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
         )
         validated_response = GetCurrentRevisionChangesOfLayoutsResult.model_validate(response_dict)
         return validated_response.currentRevisionChangesOfLayouts
@@ -96,7 +97,7 @@ class RevisionManagementCommands:
         }
         validated_params = GetRevisionChangesOfElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetRevisionChangesOfElements", validated_params.model_dump(by_alias=True, exclude_none=True)
+            "GetRevisionChangesOfElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = GetRevisionChangesOfElementsResult.model_validate(response_dict)
         return validated_response.revisionChangesOfElements

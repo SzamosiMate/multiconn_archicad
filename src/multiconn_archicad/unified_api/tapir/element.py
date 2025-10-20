@@ -116,7 +116,7 @@ class ElementCommands:
         }
         validated_params = ChangeSelectionOfElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "ChangeSelectionOfElements", validated_params.model_dump(by_alias=True, exclude_none=True)
+            "ChangeSelectionOfElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = ChangeSelectionOfElementsResult.model_validate(response_dict)
         return validated_response
@@ -137,7 +137,7 @@ class ElementCommands:
         }
         validated_params = CreateColumnsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateColumns", validated_params.model_dump(by_alias=True, exclude_none=True)
+            "CreateColumns", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = CreateColumnsResult.model_validate(response_dict)
         return validated_response.elements
@@ -158,7 +158,7 @@ class ElementCommands:
         }
         validated_params = CreateMeshesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateMeshes", validated_params.model_dump(by_alias=True, exclude_none=True)
+            "CreateMeshes", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = CreateMeshesResult.model_validate(response_dict)
         return validated_response.elements
@@ -179,7 +179,7 @@ class ElementCommands:
         }
         validated_params = CreateObjectsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateObjects", validated_params.model_dump(by_alias=True, exclude_none=True)
+            "CreateObjects", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = CreateObjectsResult.model_validate(response_dict)
         return validated_response.elements
@@ -200,7 +200,7 @@ class ElementCommands:
         }
         validated_params = CreatePolylinesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreatePolylines", validated_params.model_dump(by_alias=True, exclude_none=True)
+            "CreatePolylines", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = CreatePolylinesResult.model_validate(response_dict)
         return validated_response.elements
@@ -221,7 +221,7 @@ class ElementCommands:
         }
         validated_params = CreateSlabsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateSlabs", validated_params.model_dump(by_alias=True, exclude_none=True)
+            "CreateSlabs", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = CreateSlabsResult.model_validate(response_dict)
         return validated_response.elements
@@ -242,7 +242,7 @@ class ElementCommands:
         }
         validated_params = CreateZonesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateZones", validated_params.model_dump(by_alias=True, exclude_none=True)
+            "CreateZones", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = CreateZonesResult.model_validate(response_dict)
         return validated_response.elements
@@ -262,7 +262,9 @@ class ElementCommands:
             "elements": elements,
         }
         validated_params = DeleteElementsParameters(**params_dict)
-        self._core.post_tapir_command("DeleteElements", validated_params.model_dump(by_alias=True, exclude_none=True))
+        self._core.post_tapir_command(
+            "DeleteElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
         return None
 
     def filter_elements(
@@ -285,7 +287,7 @@ class ElementCommands:
         }
         validated_params = FilterElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "FilterElements", validated_params.model_dump(by_alias=True, exclude_none=True)
+            "FilterElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = FilterElementsResult.model_validate(response_dict)
         return validated_response.elements
@@ -308,7 +310,7 @@ class ElementCommands:
         }
         validated_params = Get3DBoundingBoxesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "Get3DBoundingBoxes", validated_params.model_dump(by_alias=True, exclude_none=True)
+            "Get3DBoundingBoxes", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = Get3DBoundingBoxesResult.model_validate(response_dict)
         return validated_response.boundingBoxes3D
@@ -334,7 +336,7 @@ class ElementCommands:
         }
         validated_params = GetAllElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetAllElements", validated_params.model_dump(by_alias=True, exclude_none=True)
+            "GetAllElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = GetAllElementsResult.model_validate(response_dict)
         return validated_response
@@ -361,7 +363,7 @@ class ElementCommands:
         }
         validated_params = GetClassificationsOfElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetClassificationsOfElements", validated_params.model_dump(by_alias=True, exclude_none=True)
+            "GetClassificationsOfElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = GetClassificationsOfElementsResult.model_validate(response_dict)
         return validated_response.elementClassifications
@@ -391,7 +393,7 @@ class ElementCommands:
         }
         validated_params = GetCollisionsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetCollisions", validated_params.model_dump(by_alias=True, exclude_none=True)
+            "GetCollisions", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = GetCollisionsResult.model_validate(response_dict)
         return validated_response.collisions
@@ -416,7 +418,7 @@ class ElementCommands:
         }
         validated_params = GetConnectedElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetConnectedElements", validated_params.model_dump(by_alias=True, exclude_none=True)
+            "GetConnectedElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = GetConnectedElementsResult.model_validate(response_dict)
         return validated_response.connectedElements
@@ -437,7 +439,7 @@ class ElementCommands:
         }
         validated_params = GetDetailsOfElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetDetailsOfElements", validated_params.model_dump(by_alias=True, exclude_none=True)
+            "GetDetailsOfElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = GetDetailsOfElementsResult.model_validate(response_dict)
         return validated_response.detailsOfElements
@@ -468,7 +470,7 @@ class ElementCommands:
         }
         validated_params = GetElementsByTypeParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetElementsByType", validated_params.model_dump(by_alias=True, exclude_none=True)
+            "GetElementsByType", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = GetElementsByTypeResult.model_validate(response_dict)
         return validated_response
@@ -489,7 +491,7 @@ class ElementCommands:
         }
         validated_params = GetGDLParametersOfElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetGDLParametersOfElements", validated_params.model_dump(by_alias=True, exclude_none=True)
+            "GetGDLParametersOfElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = GetGDLParametersOfElementsResult.model_validate(response_dict)
         return validated_response.gdlParametersOfElements
@@ -522,7 +524,8 @@ class ElementCommands:
         }
         validated_params = GetSubelementsOfHierarchicalElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetSubelementsOfHierarchicalElements", validated_params.model_dump(by_alias=True, exclude_none=True)
+            "GetSubelementsOfHierarchicalElements",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
         )
         validated_response = GetSubelementsOfHierarchicalElementsResult.model_validate(response_dict)
         return validated_response.subelements
@@ -543,7 +546,7 @@ class ElementCommands:
         }
         validated_params = GetZoneBoundariesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetZoneBoundaries", validated_params.model_dump(by_alias=True, exclude_none=True)
+            "GetZoneBoundaries", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = GetZoneBoundariesResult.model_validate(response_dict)
         return validated_response.zoneBoundaries
@@ -580,7 +583,7 @@ class ElementCommands:
         }
         validated_params = HighlightElementsParameters(**params_dict)
         self._core.post_tapir_command(
-            "HighlightElements", validated_params.model_dump(by_alias=True, exclude_none=True)
+            "HighlightElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         return None
 
@@ -603,7 +606,7 @@ class ElementCommands:
         }
         validated_params = MoveElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "MoveElements", validated_params.model_dump(by_alias=True, exclude_none=True)
+            "MoveElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = MoveElementsResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -629,7 +632,7 @@ class ElementCommands:
         }
         validated_params = SetClassificationsOfElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "SetClassificationsOfElements", validated_params.model_dump(by_alias=True, exclude_none=True)
+            "SetClassificationsOfElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = SetClassificationsOfElementsResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -652,7 +655,7 @@ class ElementCommands:
         }
         validated_params = SetDetailsOfElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "SetDetailsOfElements", validated_params.model_dump(by_alias=True, exclude_none=True)
+            "SetDetailsOfElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = SetDetailsOfElementsResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -676,7 +679,7 @@ class ElementCommands:
         }
         validated_params = SetGDLParametersOfElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "SetGDLParametersOfElements", validated_params.model_dump(by_alias=True, exclude_none=True)
+            "SetGDLParametersOfElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = SetGDLParametersOfElementsResult.model_validate(response_dict)
         return validated_response.executionResults

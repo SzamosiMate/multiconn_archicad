@@ -100,7 +100,9 @@ class ProjectCommands:
             "projectFilePath": project_file_path,
         }
         validated_params = OpenProjectParameters(**params_dict)
-        self._core.post_tapir_command("OpenProject", validated_params.model_dump(by_alias=True, exclude_none=True))
+        self._core.post_tapir_command(
+            "OpenProject", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
         return None
 
     def set_project_info_field(self, project_info_id: str, project_info_value: str) -> None:
@@ -121,7 +123,7 @@ class ProjectCommands:
         }
         validated_params = SetProjectInfoFieldParameters(**params_dict)
         self._core.post_tapir_command(
-            "SetProjectInfoField", validated_params.model_dump(by_alias=True, exclude_none=True)
+            "SetProjectInfoField", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         return None
 
@@ -141,5 +143,7 @@ class ProjectCommands:
             "stories": stories,
         }
         validated_params = SetStoriesParameters(**params_dict)
-        self._core.post_tapir_command("SetStories", validated_params.model_dump(by_alias=True, exclude_none=True))
+        self._core.post_tapir_command(
+            "SetStories", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
         return None
