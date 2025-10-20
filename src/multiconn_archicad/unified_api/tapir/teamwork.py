@@ -34,7 +34,9 @@ class TeamworkCommands:
             "elements": elements,
         }
         validated_params = ReleaseElementsParameters(**params_dict)
-        self._core.post_tapir_command("ReleaseElements", validated_params.model_dump(by_alias=True, exclude_none=True))
+        self._core.post_tapir_command(
+            "ReleaseElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
         return None
 
     def reserve_elements(self, elements: list[ElementIdArrayItem]) -> ReserveElementsResult:
@@ -53,7 +55,7 @@ class TeamworkCommands:
         }
         validated_params = ReserveElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "ReserveElements", validated_params.model_dump(by_alias=True, exclude_none=True)
+            "ReserveElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = ReserveElementsResult.model_validate(response_dict)
         return validated_response

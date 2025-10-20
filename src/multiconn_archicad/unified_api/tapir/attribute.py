@@ -59,7 +59,7 @@ class AttributeCommands:
         }
         validated_params = CreateBuildingMaterialsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateBuildingMaterials", validated_params.model_dump(by_alias=True, exclude_none=True)
+            "CreateBuildingMaterials", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = CreateBuildingMaterialsResult.model_validate(response_dict)
         return validated_response.attributeIds
@@ -86,7 +86,7 @@ class AttributeCommands:
         }
         validated_params = CreateCompositesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateComposites", validated_params.model_dump(by_alias=True, exclude_none=True)
+            "CreateComposites", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = CreateCompositesResult.model_validate(response_dict)
         return validated_response.attributeIds
@@ -112,7 +112,7 @@ class AttributeCommands:
         }
         validated_params = CreateLayersParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateLayers", validated_params.model_dump(by_alias=True, exclude_none=True)
+            "CreateLayers", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = CreateLayersResult.model_validate(response_dict)
         return validated_response.attributeIds
@@ -139,7 +139,7 @@ class AttributeCommands:
         }
         validated_params = CreateSurfacesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateSurfaces", validated_params.model_dump(by_alias=True, exclude_none=True)
+            "CreateSurfaces", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = CreateSurfacesResult.model_validate(response_dict)
         return validated_response.attributeIds
@@ -160,7 +160,7 @@ class AttributeCommands:
         }
         validated_params = GetAttributesByTypeParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetAttributesByType", validated_params.model_dump(by_alias=True, exclude_none=True)
+            "GetAttributesByType", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = GetAttributesByTypeResult.model_validate(response_dict)
         return validated_response.attributes
@@ -181,7 +181,8 @@ class AttributeCommands:
         }
         validated_params = GetBuildingMaterialPhysicalPropertiesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetBuildingMaterialPhysicalProperties", validated_params.model_dump(by_alias=True, exclude_none=True)
+            "GetBuildingMaterialPhysicalProperties",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
         )
         validated_response = GetBuildingMaterialPhysicalPropertiesResult.model_validate(response_dict)
         return validated_response.properties

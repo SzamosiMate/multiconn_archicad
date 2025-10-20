@@ -246,7 +246,7 @@ def _build_body(
 
     call_args = [f'"{original_command_name}"']
     if params_model:
-        call_args.append("validated_params.model_dump(by_alias=True, exclude_none=True)")
+        call_args.append('validated_params.model_dump(mode=\'json\', by_alias=True, exclude_none=True)')
     call_expression = f"self._core.{core_call_method}(\n    {',\n    '.join(call_args)}\n)"
 
     if not validation_model:
@@ -305,7 +305,7 @@ def _generate_rename_navigator_item_fix(command_details: dict[str, Any], depende
 
         validated_params = RenameNavigatorItemParameters(root=inner_model)
         self._core.post_command(
-            "API.RenameNavigatorItem", validated_params.model_dump(by_alias=True, exclude_none=True)
+            "API.RenameNavigatorItem", validated_params.model_dump(mode=\'json\', by_alias=True, exclude_none=True)
         )
         return None
     """).strip()

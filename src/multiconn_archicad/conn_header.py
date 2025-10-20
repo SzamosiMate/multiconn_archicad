@@ -14,6 +14,7 @@ from multiconn_archicad.basic_types import (
 from multiconn_archicad.errors import RequestError, ArchicadAPIError, HeaderUnassignedError
 from multiconn_archicad.standard_connection import StandardConnection
 from multiconn_archicad.utilities.async_utils import run_sync
+from multiconn_archicad.unified_api.api import UnifiedApi
 
 
 class Status(Enum):
@@ -35,6 +36,7 @@ class ConnHeader:
         self._status: Status = Status.PENDING
         self._core: CoreCommands | None = CoreCommands(port)
         self._standard: StandardConnection | None = StandardConnection(port)
+        self._unified: UnifiedApi | None = UnifiedApi(self.core)
 
         if initialize:
             self.product_info: ProductInfo | APIResponseError = run_sync(self.get_product_info())
@@ -55,6 +57,7 @@ class ConnHeader:
         if port:
             self._core = CoreCommands(port)
             self._standard = StandardConnection(port)
+            self._unified = UnifiedApi(self.core)
             match self.status:
                 case Status.ACTIVE:
                     self.connect()
@@ -76,6 +79,12 @@ class ConnHeader:
         if self._standard is None:
             raise HeaderUnassignedError("StandardConnection is not initialized.")
         return self._standard
+
+    @property
+    def unified(self) -> UnifiedApi:
+        if self._unified is None:
+            raise HeaderUnassignedError("UnifiedApi is not initialized.")
+        return self._unified
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -149,6 +158,7 @@ class ConnHeader:
         self._port = None
         self._core = None
         self._standard = None
+        self._unified = None
 
     async def get_product_info(self) -> ProductInfo | APIResponseError:
         try:

@@ -37,7 +37,7 @@ class LibraryCommands:
         }
         validated_params = AddFilesToEmbeddedLibraryParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "AddFilesToEmbeddedLibrary", validated_params.model_dump(by_alias=True, exclude_none=True)
+            "AddFilesToEmbeddedLibrary", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = AddFilesToEmbeddedLibraryResult.model_validate(response_dict)
         return validated_response.executionResults
