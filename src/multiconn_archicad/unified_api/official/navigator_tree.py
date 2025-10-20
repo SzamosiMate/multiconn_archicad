@@ -29,6 +29,9 @@ from multiconn_archicad.models.official.commands import (
     GetWorksheetNavigatorItemsParameters,
     GetWorksheetNavigatorItemsResult,
     MoveNavigatorItemParameters,
+    RenameNavigatorItemById,
+    RenameNavigatorItemByName,
+    RenameNavigatorItemByNameAndId,
     RenameNavigatorItemParameters,
 )
 from multiconn_archicad.models.official.types import (
@@ -363,21 +366,34 @@ class NavigatorTreeCommands:
         self._core.post_command("API.MoveNavigatorItem", validated_params.model_dump(by_alias=True, exclude_none=True))
         return None
 
-    def rename_navigator_item(self, root: RootModelRootType = PydanticUndefined) -> None:
+    def rename_navigator_item(
+        self, navigator_item_id: NavigatorItemId, new_name: str | None = None, new_id: str | None = None
+    ) -> None:
         """
         Renames an existing navigator item by specifying either the name or the ID, or both.
 
         Args:
-            root (RootModelRootType)
+            navigator_item_id (NavigatorItemId): The identifier of the navigator item to rename.
+            new_name (str, optional): The new name for the navigator item.
+            new_id (str, optional): The new ID for the navigator item.
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
         """
-        params_dict = {
-            "root": root,
-        }
-        validated_params = RenameNavigatorItemParameters(**params_dict)
+        if not new_name and not new_id:
+            raise ValueError("Either 'new_name' or 'new_id' (or both) must be provided.")
+
+        if new_name and new_id:
+            inner_model = RenameNavigatorItemByNameAndId(
+                navigatorItemId=navigator_item_id, newName=new_name, newId=new_id
+            )
+        elif new_name:
+            inner_model = RenameNavigatorItemByName(navigatorItemId=navigator_item_id, newName=new_name)
+        else:
+            inner_model = RenameNavigatorItemById(navigatorItemId=navigator_item_id, newId=new_id)
+
+        validated_params = RenameNavigatorItemParameters(root=inner_model)
         self._core.post_command(
             "API.RenameNavigatorItem", validated_params.model_dump(by_alias=True, exclude_none=True)
         )

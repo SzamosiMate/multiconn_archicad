@@ -1,6 +1,6 @@
 from __future__ import annotations
 from typing import Annotated, List
-from pydantic import ConfigDict, Field, RootModel
+from pydantic import Field, RootModel
 
 from multiconn_archicad.models.base import APIModel
 
@@ -155,17 +155,11 @@ class DeleteNavigatorItemsResult(APIModel):
 
 
 class ExecuteAddOnCommandParameters(APIModel):
-    model_config = ConfigDict(
-        extra="allow",
-    )
     addOnCommandId: AddOnCommandId
     addOnCommandParameters: AddOnCommandParameters | None = None
 
 
 class ExecuteAddOnCommandResult(APIModel):
-    model_config = ConfigDict(
-        extra="allow",
-    )
     addOnCommandResponse: AddOnCommandResponse
 
 

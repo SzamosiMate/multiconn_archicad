@@ -900,20 +900,6 @@
         ]
       }
     ],
-    "Developer Commands": [
-      {
-        "name": "GenerateDocumentation",
-        "group": "Developer Commands",
-        "description": "Generates files for the documentation. Used by Tapir developers only.",
-        "version": "1.0.7",
-        "source": "tapir",
-        "method_code": "def generate_documentation(\n    self,\n    destination_folder: str\n) -> None:\n    \"\"\"\n    Generates files for the documentation. Used by Tapir developers only.\n\n    Args:\n        destination_folder (str): Destination folder for the generated documentation files.\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n    \"\"\"\n    params_dict = {\n            'destinationFolder': destination_folder,\n        }\n    validated_params = GenerateDocumentationParameters(**params_dict)\n    self._core.post_tapir_command(\n        \"GenerateDocumentation\",\n        validated_params.model_dump(by_alias=True, exclude_none=True)\n    )\n    return None",
-        "command_model_dependencies": [
-          "GenerateDocumentationParameters"
-        ],
-        "type_model_dependencies": []
-      }
-    ],
     "Application Commands": [
       {
         "name": "GetAddOnVersion",
@@ -1978,11 +1964,16 @@
         "group": "Navigator Tree Commands",
         "version": "N/A",
         "source": "official",
-        "method_code": "def rename_navigator_item(\n    self,\n    root: RootModelRootType = PydanticUndefined\n) -> None:\n    \"\"\"\n    Renames an existing navigator item by specifying either the name or the ID, or both.\n\n    Args:\n        root (RootModelRootType)\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n    \"\"\"\n    params_dict = {\n            'root': root,\n        }\n    validated_params = RenameNavigatorItemParameters(**params_dict)\n    self._core.post_command(\n        \"API.RenameNavigatorItem\",\n        validated_params.model_dump(by_alias=True, exclude_none=True)\n    )\n    return None",
+        "method_code": "def rename_navigator_item(\n    self,\n    navigator_item_id: NavigatorItemId,\n    new_name: str | None = None,\n    new_id: str | None = None\n) -> None:\n    \"\"\"\n    Renames an existing navigator item by specifying either the name or the ID, or both.\n\n    Args:\n        navigator_item_id (NavigatorItemId): The identifier of the navigator item to rename.\n        new_name (str, optional): The new name for the navigator item.\n        new_id (str, optional): The new ID for the navigator item.\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n    \"\"\"\n    if not new_name and not new_id:\n        raise ValueError(\"Either 'new_name' or 'new_id' (or both) must be provided.\")\n\n    if new_name and new_id:\n        inner_model = RenameNavigatorItemByNameAndId(navigatorItemId=navigator_item_id, newName=new_name, newId=new_id)\n    elif new_name:\n        inner_model = RenameNavigatorItemByName(navigatorItemId=navigator_item_id, newName=new_name)\n    else:\n        inner_model = RenameNavigatorItemById(navigatorItemId=navigator_item_id, newId=new_id)\n\n    validated_params = RenameNavigatorItemParameters(root=inner_model)\n    self._core.post_command(\n        \"API.RenameNavigatorItem\", validated_params.model_dump(by_alias=True, exclude_none=True)\n    )\n    return None",
         "command_model_dependencies": [
+          "RenameNavigatorItemById",
+          "RenameNavigatorItemByName",
+          "RenameNavigatorItemByNameAndId",
           "RenameNavigatorItemParameters"
         ],
-        "type_model_dependencies": []
+        "type_model_dependencies": [
+          "NavigatorItemId"
+        ]
       }
     ],
     "AddOn Commands": [
@@ -1992,7 +1983,7 @@
         "group": "AddOn Commands",
         "version": "N/A",
         "source": "official",
-        "method_code": "def execute_add_on_command(\n    self,\n    add_on_command_id: AddOnCommandId,\n    extra_data: Any,\n    add_on_command_parameters: AddOnCommandParameters | None = None\n) -> AddOnCommandResponse:\n    \"\"\"\n    Executes a command registered in an Add-On.\n\n    Args:\n        add_on_command_id (AddOnCommandId)\n        extra_data (Any)\n        add_on_command_parameters (AddOnCommandParameters | None)\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n    \"\"\"\n    params_dict = {\n            'addOnCommandId': add_on_command_id,\n            'addOnCommandParameters': add_on_command_parameters,\n            'extra_data': extra_data,\n        }\n    validated_params = ExecuteAddOnCommandParameters(**params_dict)\n    response_dict = self._core.post_command(\n        \"API.ExecuteAddOnCommand\",\n        validated_params.model_dump(by_alias=True, exclude_none=True)\n    )\n    validated_response = ExecuteAddOnCommandResult.model_validate(response_dict)\n    return validated_response.addOnCommandResponse",
+        "method_code": "def execute_add_on_command(\n    self,\n    add_on_command_id: AddOnCommandId,\n    add_on_command_parameters: AddOnCommandParameters | None = None\n) -> AddOnCommandResponse:\n    \"\"\"\n    Executes a command registered in an Add-On.\n\n    Args:\n        add_on_command_id (AddOnCommandId)\n        add_on_command_parameters (AddOnCommandParameters | None)\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n    \"\"\"\n    params_dict = {\n            'addOnCommandId': add_on_command_id,\n            'addOnCommandParameters': add_on_command_parameters,\n        }\n    validated_params = ExecuteAddOnCommandParameters(**params_dict)\n    response_dict = self._core.post_command(\n        \"API.ExecuteAddOnCommand\",\n        validated_params.model_dump(by_alias=True, exclude_none=True)\n    )\n    validated_response = ExecuteAddOnCommandResult.model_validate(response_dict)\n    return validated_response.addOnCommandResponse",
         "command_model_dependencies": [
           "ExecuteAddOnCommandParameters",
           "ExecuteAddOnCommandResult"

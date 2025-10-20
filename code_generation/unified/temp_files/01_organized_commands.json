@@ -404,15 +404,6 @@
                 "source": "tapir"
             }
         ],
-        "Developer Commands": [
-            {
-                "name": "GenerateDocumentation",
-                "group": "Developer Commands",
-                "description": "Generates files for the documentation. Used by Tapir developers only.",
-                "version": "1.0.7",
-                "source": "tapir"
-            }
-        ],
         "Application Commands": [
             {
                 "name": "GetAddOnVersion",

@@ -29,6 +29,8 @@ def main():
     for command in tapir_details + official_details:
         source = command["source"]
         group = command.get("group", "Miscellaneous")
+        if group == "Developer Commands":
+            continue
         if group not in organized[source]:
             organized[source][group] = []
         organized[source][group].append(command)
