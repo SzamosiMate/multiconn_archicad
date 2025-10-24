@@ -168,6 +168,7 @@ def _generate_standard_method(
         "method_code": f"{signature}\n{textwrap.indent(docstring, '    ')}\n{textwrap.indent(body, '    ')}",
         "command_model_dependencies": sorted(list(dependencies["commands"])),
         "type_model_dependencies": sorted(list(dependencies["types"])),
+        "alias_property_name": alias_property_name,
     }
 
 
