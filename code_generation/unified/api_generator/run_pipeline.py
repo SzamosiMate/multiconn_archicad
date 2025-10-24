@@ -9,6 +9,7 @@ BUILD_DIR = PIPELINE_ROOT / "temp_files"
 PIPELINE_DIR = PIPELINE_ROOT / "api_generator"
 PROJECT_ROOT = PIPELINE_ROOT.parent.parent
 OUTPUT_DIR = PROJECT_ROOT / "src" / "multiconn_archicad" / "unified_api"
+TEST_OUTPUT_DIR = PROJECT_ROOT / "tests" / "generated"
 
 # Define intermediate file paths
 ORGANIZED_COMMANDS_PATH = BUILD_DIR / "01_organized_commands.json"
@@ -56,6 +57,12 @@ def main():
 
     # Run Stage 4: Format the generated output
     run_stage("04_format_output.py", ["--output-dir", str(OUTPUT_DIR)])
+
+    # Run Stage 5: Generate Method Unit Tests
+    run_stage(
+        "05_generate_command_tests.py",
+        ["--input-file", str(COMMANDS_WITH_CODE_PATH), "--output-dir", str(TEST_OUTPUT_DIR)],
+    )
 
     print("\n✅✅✅ Unified API Generation Pipeline finished successfully! ✅✅✅")
 

@@ -14,7 +14,8 @@
         "type_model_dependencies": [
           "IssueCommentStatus",
           "IssueId"
-        ]
+        ],
+        "alias_property_name": null
       },
       {
         "name": "AttachElementsToIssue",
@@ -30,7 +31,8 @@
           "ElementIdArrayItem",
           "IssueElementType",
           "IssueId"
-        ]
+        ],
+        "alias_property_name": null
       },
       {
         "name": "CreateIssue",
@@ -45,7 +47,8 @@
         ],
         "type_model_dependencies": [
           "IssueId"
-        ]
+        ],
+        "alias_property_name": "issueId"
       },
       {
         "name": "DeleteIssue",
@@ -59,7 +62,8 @@
         ],
         "type_model_dependencies": [
           "IssueId"
-        ]
+        ],
+        "alias_property_name": null
       },
       {
         "name": "DetachElementsFromIssue",
@@ -74,7 +78,8 @@
         "type_model_dependencies": [
           "ElementIdArrayItem",
           "IssueId"
-        ]
+        ],
+        "alias_property_name": null
       },
       {
         "name": "ExportIssuesToBCF",
@@ -88,7 +93,8 @@
         ],
         "type_model_dependencies": [
           "IssueIdArrayItem"
-        ]
+        ],
+        "alias_property_name": null
       },
       {
         "name": "GetCommentsFromIssue",
@@ -104,7 +110,8 @@
         "type_model_dependencies": [
           "Comment",
           "IssueId"
-        ]
+        ],
+        "alias_property_name": "comments"
       },
       {
         "name": "GetElementsAttachedToIssue",
@@ -121,7 +128,8 @@
           "ElementIdArrayItem",
           "IssueElementType",
           "IssueId"
-        ]
+        ],
+        "alias_property_name": "elements"
       },
       {
         "name": "GetIssues",
@@ -135,7 +143,8 @@
         ],
         "type_model_dependencies": [
           "Issue"
-        ]
+        ],
+        "alias_property_name": "issues"
       },
       {
         "name": "ImportIssuesFromBCF",
@@ -147,7 +156,8 @@
         "command_model_dependencies": [
           "ImportIssuesFromBCFParameters"
         ],
-        "type_model_dependencies": []
+        "type_model_dependencies": [],
+        "alias_property_name": null
       }
     ],
     "Library Commands": [
@@ -166,7 +176,8 @@
           "FailedExecutionResult",
           "File",
           "SuccessfulExecutionResult"
-        ]
+        ],
+        "alias_property_name": "executionResults"
       },
       {
         "name": "GetLibraries",
@@ -180,7 +191,8 @@
         ],
         "type_model_dependencies": [
           "Library"
-        ]
+        ],
+        "alias_property_name": "libraries"
       },
       {
         "name": "ReloadLibraries",
@@ -190,7 +202,8 @@
         "source": "tapir",
         "method_code": "def reload_libraries(\n    self\n) -> None:\n    \"\"\"\n    Executes the reload libraries command.\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n    \"\"\"\n    self._core.post_tapir_command(\n        \"ReloadLibraries\"\n    )\n    return None",
         "command_model_dependencies": [],
-        "type_model_dependencies": []
+        "type_model_dependencies": [],
+        "alias_property_name": null
       }
     ],
     "Favorites Commands": [
@@ -208,7 +221,8 @@
         "type_model_dependencies": [
           "FailedExecutionResult",
           "SuccessfulExecutionResult"
-        ]
+        ],
+        "alias_property_name": "executionResults"
       },
       {
         "name": "CreateFavoritesFromElements",
@@ -225,7 +239,8 @@
           "FailedExecutionResult",
           "FavoritesFromElement",
           "SuccessfulExecutionResult"
-        ]
+        ],
+        "alias_property_name": "executionResults"
       },
       {
         "name": "GetFavoritesByType",
@@ -240,7 +255,8 @@
         ],
         "type_model_dependencies": [
           "ElementType"
-        ]
+        ],
+        "alias_property_name": "favorites"
       }
     ],
     "Element Commands": [
@@ -257,7 +273,8 @@
         ],
         "type_model_dependencies": [
           "ElementIdArrayItem"
-        ]
+        ],
+        "alias_property_name": null
       },
       {
         "name": "CreateColumns",
@@ -273,7 +290,8 @@
         "type_model_dependencies": [
           "ColumnsDatum",
           "ElementIdArrayItem"
-        ]
+        ],
+        "alias_property_name": "elements"
       },
       {
         "name": "CreateMeshes",
@@ -289,7 +307,8 @@
         "type_model_dependencies": [
           "ElementIdArrayItem",
           "MeshesDatum"
-        ]
+        ],
+        "alias_property_name": "elements"
       },
       {
         "name": "CreateObjects",
@@ -305,7 +324,8 @@
         "type_model_dependencies": [
           "ElementIdArrayItem",
           "ObjectsDatum"
-        ]
+        ],
+        "alias_property_name": "elements"
       },
       {
         "name": "CreatePolylines",
@@ -321,7 +341,8 @@
         "type_model_dependencies": [
           "ElementIdArrayItem",
           "PolylinesDatum"
-        ]
+        ],
+        "alias_property_name": "elements"
       },
       {
         "name": "CreateSlabs",
@@ -337,7 +358,8 @@
         "type_model_dependencies": [
           "ElementIdArrayItem",
           "SlabsDatum"
-        ]
+        ],
+        "alias_property_name": "elements"
       },
       {
         "name": "CreateZones",
@@ -353,7 +375,8 @@
         "type_model_dependencies": [
           "ElementIdArrayItem",
           "ZonesDatum"
-        ]
+        ],
+        "alias_property_name": "elements"
       },
       {
         "name": "DeleteElements",
@@ -367,7 +390,8 @@
         ],
         "type_model_dependencies": [
           "ElementIdArrayItem"
-        ]
+        ],
+        "alias_property_name": null
       },
       {
         "name": "FilterElements",
@@ -383,7 +407,8 @@
         "type_model_dependencies": [
           "ElementFilter",
           "ElementIdArrayItem"
-        ]
+        ],
+        "alias_property_name": "elements"
       },
       {
         "name": "Get3DBoundingBoxes",
@@ -400,7 +425,8 @@
           "BoundingBox3DArrayItem",
           "ElementIdArrayItem",
           "ErrorItem"
-        ]
+        ],
+        "alias_property_name": "boundingBoxes3D"
       },
       {
         "name": "GetAllElements",
@@ -416,7 +442,8 @@
         "type_model_dependencies": [
           "DatabaseIdArrayItem",
           "ElementFilter"
-        ]
+        ],
+        "alias_property_name": null
       },
       {
         "name": "GetClassificationsOfElements",
@@ -434,7 +461,8 @@
           "ElementClassificationItemArray",
           "ElementIdArrayItem",
           "ErrorItem"
-        ]
+        ],
+        "alias_property_name": "elementClassifications"
       },
       {
         "name": "GetCollisions",
@@ -451,7 +479,8 @@
           "Collision",
           "ElementIdArrayItem",
           "Settings"
-        ]
+        ],
+        "alias_property_name": "collisions"
       },
       {
         "name": "GetConnectedElements",
@@ -468,7 +497,8 @@
           "ConnectedElement",
           "ElementIdArrayItem",
           "ElementType"
-        ]
+        ],
+        "alias_property_name": "connectedElements"
       },
       {
         "name": "GetDetailsOfElements",
@@ -484,7 +514,8 @@
         "type_model_dependencies": [
           "DetailsOfElement",
           "ElementIdArrayItem"
-        ]
+        ],
+        "alias_property_name": "detailsOfElements"
       },
       {
         "name": "GetElementsByType",
@@ -501,7 +532,8 @@
           "DatabaseIdArrayItem",
           "ElementFilter",
           "ElementType"
-        ]
+        ],
+        "alias_property_name": null
       },
       {
         "name": "GetGDLParametersOfElements",
@@ -517,7 +549,8 @@
         "type_model_dependencies": [
           "ElementIdArrayItem",
           "GDLParameterList"
-        ]
+        ],
+        "alias_property_name": "gdlParametersOfElements"
       },
       {
         "name": "GetSelectedElements",
@@ -531,7 +564,8 @@
         ],
         "type_model_dependencies": [
           "ElementIdArrayItem"
-        ]
+        ],
+        "alias_property_name": "elements"
       },
       {
         "name": "GetSubelementsOfHierarchicalElements",
@@ -547,7 +581,8 @@
         "type_model_dependencies": [
           "ElementIdArrayItem",
           "Subelement"
-        ]
+        ],
+        "alias_property_name": "subelements"
       },
       {
         "name": "GetZoneBoundaries",
@@ -563,7 +598,8 @@
         "type_model_dependencies": [
           "ElementId",
           "ZoneBoundary"
-        ]
+        ],
+        "alias_property_name": "zoneBoundaries"
       },
       {
         "name": "HighlightElements",
@@ -578,7 +614,8 @@
         "type_model_dependencies": [
           "ElementIdArrayItem",
           "HighlightedColor"
-        ]
+        ],
+        "alias_property_name": null
       },
       {
         "name": "MoveElements",
@@ -595,7 +632,8 @@
           "ElementsWithMoveVector",
           "FailedExecutionResult",
           "SuccessfulExecutionResult"
-        ]
+        ],
+        "alias_property_name": "executionResults"
       },
       {
         "name": "SetClassificationsOfElements",
@@ -612,7 +650,8 @@
           "ElementClassification",
           "FailedExecutionResult",
           "SuccessfulExecutionResult"
-        ]
+        ],
+        "alias_property_name": "executionResults"
       },
       {
         "name": "SetDetailsOfElements",
@@ -629,7 +668,8 @@
           "ElementsWithDetail",
           "FailedExecutionResult",
           "SuccessfulExecutionResult"
-        ]
+        ],
+        "alias_property_name": "executionResults"
       },
       {
         "name": "SetGDLParametersOfElements",
@@ -646,7 +686,8 @@
           "ElementsWithGDLParameter",
           "FailedExecutionResult",
           "SuccessfulExecutionResult"
-        ]
+        ],
+        "alias_property_name": "executionResults"
       }
     ],
     "Attribute Commands": [
@@ -664,7 +705,8 @@
         "type_model_dependencies": [
           "AttributeIdArrayItem",
           "BuildingMaterialDataArrayItem"
-        ]
+        ],
+        "alias_property_name": "attributeIds"
       },
       {
         "name": "CreateComposites",
@@ -680,7 +722,8 @@
         "type_model_dependencies": [
           "AttributeIdArrayItem",
           "CompositeDataArrayItem"
-        ]
+        ],
+        "alias_property_name": "attributeIds"
       },
       {
         "name": "CreateLayers",
@@ -696,7 +739,8 @@
         "type_model_dependencies": [
           "AttributeIdArrayItem",
           "LayerDataArrayItem"
-        ]
+        ],
+        "alias_property_name": "attributeIds"
       },
       {
         "name": "CreateSurfaces",
@@ -712,7 +756,8 @@
         "type_model_dependencies": [
           "AttributeIdArrayItem",
           "SurfaceDataArrayItem"
-        ]
+        ],
+        "alias_property_name": "attributeIds"
       },
       {
         "name": "GetAttributesByType",
@@ -728,7 +773,8 @@
         "type_model_dependencies": [
           "Attribute",
           "AttributeType"
-        ]
+        ],
+        "alias_property_name": "attributes"
       },
       {
         "name": "GetBuildingMaterialPhysicalProperties",
@@ -744,7 +790,8 @@
         "type_model_dependencies": [
           "AttributeIdArrayItem",
           "Property"
-        ]
+        ],
+        "alias_property_name": "properties"
       }
     ],
     "Property Commands": [
@@ -763,7 +810,8 @@
           "ErrorItem",
           "PropertyDefinitionArrayItem",
           "PropertyIdArrayItem"
-        ]
+        ],
+        "alias_property_name": "propertyIds"
       },
       {
         "name": "CreatePropertyGroups",
@@ -779,7 +827,8 @@
         "type_model_dependencies": [
           "PropertyGroupArrayItem",
           "PropertyGroupIdArrayItem"
-        ]
+        ],
+        "alias_property_name": "propertyGroupIds"
       },
       {
         "name": "DeletePropertyDefinitions",
@@ -796,7 +845,8 @@
           "FailedExecutionResult",
           "PropertyIdArrayItem",
           "SuccessfulExecutionResult"
-        ]
+        ],
+        "alias_property_name": "executionResults"
       },
       {
         "name": "DeletePropertyGroups",
@@ -813,7 +863,8 @@
           "FailedExecutionResult",
           "PropertyGroupIdArrayItem",
           "SuccessfulExecutionResult"
-        ]
+        ],
+        "alias_property_name": "executionResults"
       },
       {
         "name": "GetAllProperties",
@@ -827,7 +878,8 @@
         ],
         "type_model_dependencies": [
           "PropertyDetails"
-        ]
+        ],
+        "alias_property_name": "properties"
       },
       {
         "name": "GetPropertyValuesOfAttributes",
@@ -845,7 +897,8 @@
           "ErrorItem",
           "PropertyIdArrayItem",
           "PropertyValuesArrayItem"
-        ]
+        ],
+        "alias_property_name": "propertyValuesForAttributes"
       },
       {
         "name": "GetPropertyValuesOfElements",
@@ -863,7 +916,8 @@
           "ErrorItem",
           "PropertyIdArrayItem",
           "PropertyValuesArrayItem"
-        ]
+        ],
+        "alias_property_name": "propertyValuesForElements"
       },
       {
         "name": "SetPropertyValuesOfAttributes",
@@ -880,7 +934,8 @@
           "AttributePropertyValue",
           "FailedExecutionResult",
           "SuccessfulExecutionResult"
-        ]
+        ],
+        "alias_property_name": "executionResults"
       },
       {
         "name": "SetPropertyValuesOfElements",
@@ -897,7 +952,8 @@
           "ElementPropertyValue",
           "FailedExecutionResult",
           "SuccessfulExecutionResult"
-        ]
+        ],
+        "alias_property_name": "executionResults"
       }
     ],
     "Application Commands": [
@@ -911,7 +967,8 @@
         "command_model_dependencies": [
           "GetAddOnVersionResult"
         ],
-        "type_model_dependencies": []
+        "type_model_dependencies": [],
+        "alias_property_name": "version"
       },
       {
         "name": "GetArchicadLocation",
@@ -923,7 +980,8 @@
         "command_model_dependencies": [
           "GetArchicadLocationResult"
         ],
-        "type_model_dependencies": []
+        "type_model_dependencies": [],
+        "alias_property_name": "archicadLocation"
       },
       {
         "name": "GetCurrentWindowType",
@@ -937,7 +995,8 @@
         ],
         "type_model_dependencies": [
           "WindowType"
-        ]
+        ],
+        "alias_property_name": "currentWindowType"
       },
       {
         "name": "QuitArchicad",
@@ -947,7 +1006,8 @@
         "source": "tapir",
         "method_code": "def quit_archicad(\n    self\n) -> None:\n    \"\"\"\n    Performs a quit operation on the currently running Archicad instance.\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n    \"\"\"\n    self._core.post_tapir_command(\n        \"QuitArchicad\"\n    )\n    return None",
         "command_model_dependencies": [],
-        "type_model_dependencies": []
+        "type_model_dependencies": [],
+        "alias_property_name": null
       }
     ],
     "Revision Management Commands": [
@@ -966,7 +1026,8 @@
           "DatabaseIdArrayItem",
           "ErrorItem",
           "RevisionChangesArrayItem"
-        ]
+        ],
+        "alias_property_name": "currentRevisionChangesOfLayouts"
       },
       {
         "name": "GetDocumentRevisions",
@@ -980,7 +1041,8 @@
         ],
         "type_model_dependencies": [
           "DocumentRevision"
-        ]
+        ],
+        "alias_property_name": "documentRevisions"
       },
       {
         "name": "GetRevisionChanges",
@@ -994,7 +1056,8 @@
         ],
         "type_model_dependencies": [
           "RevisionChange"
-        ]
+        ],
+        "alias_property_name": "revisionChanges"
       },
       {
         "name": "GetRevisionChangesOfElements",
@@ -1011,7 +1074,8 @@
           "ElementIdArrayItem",
           "ErrorItem",
           "RevisionChangesArrayItem"
-        ]
+        ],
+        "alias_property_name": "revisionChangesOfElements"
       },
       {
         "name": "GetRevisionIssues",
@@ -1025,7 +1089,8 @@
         ],
         "type_model_dependencies": [
           "RevisionIssue"
-        ]
+        ],
+        "alias_property_name": "revisionIssues"
       }
     ],
     "Navigator Commands": [
@@ -1043,7 +1108,8 @@
         "type_model_dependencies": [
           "DatabaseIdArrayItem",
           "NavigatorItemIdArrayItem"
-        ]
+        ],
+        "alias_property_name": "databases"
       },
       {
         "name": "GetModelViewOptions",
@@ -1057,7 +1123,8 @@
         ],
         "type_model_dependencies": [
           "ModelViewOption"
-        ]
+        ],
+        "alias_property_name": "modelViewOptions"
       },
       {
         "name": "GetView2DTransformations",
@@ -1074,7 +1141,8 @@
           "DatabaseIdArrayItem",
           "ErrorItem",
           "ViewTransformations"
-        ]
+        ],
+        "alias_property_name": "transformations"
       },
       {
         "name": "GetViewSettings",
@@ -1091,7 +1159,8 @@
           "ErrorItem",
           "NavigatorItemIdArrayItem",
           "ViewSettings"
-        ]
+        ],
+        "alias_property_name": "viewSettings"
       },
       {
         "name": "PublishPublisherSet",
@@ -1103,7 +1172,8 @@
         "command_model_dependencies": [
           "PublishPublisherSetParameters"
         ],
-        "type_model_dependencies": []
+        "type_model_dependencies": [],
+        "alias_property_name": null
       },
       {
         "name": "SetViewSettings",
@@ -1120,7 +1190,8 @@
           "FailedExecutionResult",
           "NavigatorItemIdsWithViewSetting",
           "SuccessfulExecutionResult"
-        ]
+        ],
+        "alias_property_name": "executionResults"
       },
       {
         "name": "UpdateDrawings",
@@ -1134,7 +1205,8 @@
         ],
         "type_model_dependencies": [
           "ElementIdArrayItem"
-        ]
+        ],
+        "alias_property_name": null
       }
     ],
     "Project Commands": [
@@ -1148,7 +1220,8 @@
         "command_model_dependencies": [
           "GetGeoLocationResult"
         ],
-        "type_model_dependencies": []
+        "type_model_dependencies": [],
+        "alias_property_name": null
       },
       {
         "name": "GetHotlinks",
@@ -1162,7 +1235,8 @@
         ],
         "type_model_dependencies": [
           "Hotlink"
-        ]
+        ],
+        "alias_property_name": "hotlinks"
       },
       {
         "name": "GetProjectInfo",
@@ -1174,7 +1248,8 @@
         "command_model_dependencies": [
           "GetProjectInfoResult"
         ],
-        "type_model_dependencies": []
+        "type_model_dependencies": [],
+        "alias_property_name": null
       },
       {
         "name": "GetProjectInfoFields",
@@ -1188,7 +1263,8 @@
         ],
         "type_model_dependencies": [
           "FieldModel"
-        ]
+        ],
+        "alias_property_name": "fields"
       },
       {
         "name": "GetStories",
@@ -1200,7 +1276,8 @@
         "command_model_dependencies": [
           "GetStoriesResult"
         ],
-        "type_model_dependencies": []
+        "type_model_dependencies": [],
+        "alias_property_name": null
       },
       {
         "name": "OpenProject",
@@ -1212,7 +1289,8 @@
         "command_model_dependencies": [
           "OpenProjectParameters"
         ],
-        "type_model_dependencies": []
+        "type_model_dependencies": [],
+        "alias_property_name": null
       },
       {
         "name": "SetProjectInfoField",
@@ -1224,7 +1302,8 @@
         "command_model_dependencies": [
           "SetProjectInfoFieldParameters"
         ],
-        "type_model_dependencies": []
+        "type_model_dependencies": [],
+        "alias_property_name": null
       },
       {
         "name": "SetStories",
@@ -1238,7 +1317,8 @@
         ],
         "type_model_dependencies": [
           "StorySettings"
-        ]
+        ],
+        "alias_property_name": null
       }
     ],
     "Teamwork Commands": [
@@ -1254,7 +1334,8 @@
         ],
         "type_model_dependencies": [
           "ElementIdArrayItem"
-        ]
+        ],
+        "alias_property_name": null
       },
       {
         "name": "ReserveElements",
@@ -1269,7 +1350,8 @@
         ],
         "type_model_dependencies": [
           "ElementIdArrayItem"
-        ]
+        ],
+        "alias_property_name": null
       },
       {
         "name": "TeamworkReceive",
@@ -1279,7 +1361,8 @@
         "source": "tapir",
         "method_code": "def teamwork_receive(\n    self\n) -> None:\n    \"\"\"\n    Performs a receive operation on the currently opened Teamwork project.\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n    \"\"\"\n    self._core.post_tapir_command(\n        \"TeamworkReceive\"\n    )\n    return None",
         "command_model_dependencies": [],
-        "type_model_dependencies": []
+        "type_model_dependencies": [],
+        "alias_property_name": null
       },
       {
         "name": "TeamworkSend",
@@ -1289,7 +1372,8 @@
         "source": "tapir",
         "method_code": "def teamwork_send(\n    self\n) -> None:\n    \"\"\"\n    Performs a send operation on the currently opened Teamwork project.\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n    \"\"\"\n    self._core.post_tapir_command(\n        \"TeamworkSend\"\n    )\n    return None",
         "command_model_dependencies": [],
-        "type_model_dependencies": []
+        "type_model_dependencies": [],
+        "alias_property_name": null
       }
     ]
   },
@@ -1308,7 +1392,8 @@
         ],
         "type_model_dependencies": [
           "NavigatorItemId"
-        ]
+        ],
+        "alias_property_name": "createdNavigatorItemId"
       },
       {
         "name": "API.CreateViewMapFolder",
@@ -1324,7 +1409,8 @@
         "type_model_dependencies": [
           "FolderParameters",
           "NavigatorItemId"
-        ]
+        ],
+        "alias_property_name": "createdFolderNavigatorItemId"
       }
     ],
     "Attribute Commands": [
@@ -1343,7 +1429,8 @@
           "AttributeFolderCreationParameters",
           "FailedExecutionResult",
           "SuccessfulExecutionResult"
-        ]
+        ],
+        "alias_property_name": "executionResults"
       },
       {
         "name": "API.DeleteAttributeFolders",
@@ -1360,7 +1447,8 @@
           "AttributeFolderIdWrapperItem",
           "FailedExecutionResult",
           "SuccessfulExecutionResult"
-        ]
+        ],
+        "alias_property_name": "executionResults"
       },
       {
         "name": "API.DeleteAttributes",
@@ -1377,7 +1465,8 @@
           "AttributeIdWrapperItem",
           "FailedExecutionResult",
           "SuccessfulExecutionResult"
-        ]
+        ],
+        "alias_property_name": "executionResults"
       },
       {
         "name": "API.GetActivePenTables",
@@ -1389,7 +1478,8 @@
         "command_model_dependencies": [
           "GetActivePenTablesResult"
         ],
-        "type_model_dependencies": []
+        "type_model_dependencies": [],
+        "alias_property_name": null
       },
       {
         "name": "API.GetAttributeFolderStructure",
@@ -1405,7 +1495,8 @@
         "type_model_dependencies": [
           "AttributeFolderStructure",
           "AttributeType"
-        ]
+        ],
+        "alias_property_name": "attributeFolder"
       },
       {
         "name": "API.GetAttributeFolders",
@@ -1422,7 +1513,8 @@
           "AttributeFolderIdWrapperItem",
           "AttributeFolderWrapperItem",
           "ErrorItem"
-        ]
+        ],
+        "alias_property_name": "attributeFolders"
       },
       {
         "name": "API.GetAttributesByType",
@@ -1438,7 +1530,8 @@
         "type_model_dependencies": [
           "AttributeIdWrapperItem",
           "AttributeType"
-        ]
+        ],
+        "alias_property_name": "attributeIds"
       },
       {
         "name": "API.GetAttributesIndices",
@@ -1455,7 +1548,8 @@
           "AttributeIdWrapperItem",
           "AttributeIndexAndGuidWrapperItem",
           "ErrorItem"
-        ]
+        ],
+        "alias_property_name": "attributeIndicesAndGuids"
       },
       {
         "name": "API.GetBuildingMaterialAttributes",
@@ -1472,7 +1566,8 @@
           "AttributeIdWrapperItem",
           "BuildingMaterialAttributeWrapperItem",
           "ErrorItem"
-        ]
+        ],
+        "alias_property_name": "attributes"
       },
       {
         "name": "API.GetCompositeAttributes",
@@ -1489,7 +1584,8 @@
           "AttributeIdWrapperItem",
           "CompositeAttributeWrapperItem",
           "ErrorItem"
-        ]
+        ],
+        "alias_property_name": "attributes"
       },
       {
         "name": "API.GetFillAttributes",
@@ -1506,7 +1602,8 @@
           "AttributeIdWrapperItem",
           "ErrorItem",
           "FillAttributeWrapperItem"
-        ]
+        ],
+        "alias_property_name": "attributes"
       },
       {
         "name": "API.GetLayerAttributes",
@@ -1523,7 +1620,8 @@
           "AttributeIdWrapperItem",
           "ErrorItem",
           "LayerAttributeWrapperItem"
-        ]
+        ],
+        "alias_property_name": "attributes"
       },
       {
         "name": "API.GetLayerCombinationAttributes",
@@ -1540,7 +1638,8 @@
           "AttributeIdWrapperItem",
           "ErrorItem",
           "LayerCombinationAttributeWrapperItem"
-        ]
+        ],
+        "alias_property_name": "attributes"
       },
       {
         "name": "API.GetLineAttributes",
@@ -1557,7 +1656,8 @@
           "AttributeIdWrapperItem",
           "ErrorItem",
           "LineAttributeWrapperItem"
-        ]
+        ],
+        "alias_property_name": "attributes"
       },
       {
         "name": "API.GetPenTableAttributes",
@@ -1574,7 +1674,8 @@
           "AttributeIdWrapperItem",
           "ErrorItem",
           "PenTableAttributeWrapperItem"
-        ]
+        ],
+        "alias_property_name": "attributes"
       },
       {
         "name": "API.GetProfileAttributePreview",
@@ -1592,7 +1693,8 @@
           "ErrorItem",
           "ImageWrapperItem",
           "RGBColor"
-        ]
+        ],
+        "alias_property_name": "previewImages"
       },
       {
         "name": "API.GetProfileAttributes",
@@ -1609,7 +1711,8 @@
           "AttributeIdWrapperItem",
           "ErrorItem",
           "ProfileAttributeWrapperItem"
-        ]
+        ],
+        "alias_property_name": "attributes"
       },
       {
         "name": "API.GetSurfaceAttributes",
@@ -1626,7 +1729,8 @@
           "AttributeIdWrapperItem",
           "ErrorItem",
           "SurfaceAttributeWrapperItem"
-        ]
+        ],
+        "alias_property_name": "attributes"
       },
       {
         "name": "API.GetZoneCategoryAttributes",
@@ -1643,7 +1747,8 @@
           "AttributeIdWrapperItem",
           "ErrorItem",
           "ZoneCategoryAttributeWrapperItem"
-        ]
+        ],
+        "alias_property_name": "attributes"
       },
       {
         "name": "API.MoveAttributesAndFolders",
@@ -1659,7 +1764,8 @@
           "AttributeFolderId",
           "AttributeFolderIdWrapperItem",
           "AttributeIdWrapperItem"
-        ]
+        ],
+        "alias_property_name": null
       },
       {
         "name": "API.RenameAttributeFolders",
@@ -1676,7 +1782,8 @@
           "AttributeFolderRenameParameters",
           "FailedExecutionResult",
           "SuccessfulExecutionResult"
-        ]
+        ],
+        "alias_property_name": "executionResults"
       }
     ],
     "Layout Book Commands": [
@@ -1694,7 +1801,8 @@
         "type_model_dependencies": [
           "LayoutParameters",
           "NavigatorItemId"
-        ]
+        ],
+        "alias_property_name": "createdNavigatorItemId"
       },
       {
         "name": "API.CreateLayoutSubset",
@@ -1710,7 +1818,8 @@
         "type_model_dependencies": [
           "NavigatorItemId",
           "Subset"
-        ]
+        ],
+        "alias_property_name": "createdSubsetId"
       },
       {
         "name": "API.GetLayoutSettings",
@@ -1726,7 +1835,8 @@
         "type_model_dependencies": [
           "LayoutParameters",
           "NavigatorItemId"
-        ]
+        ],
+        "alias_property_name": "layoutParameters"
       },
       {
         "name": "API.SetLayoutSettings",
@@ -1741,7 +1851,8 @@
         "type_model_dependencies": [
           "LayoutParameters",
           "NavigatorItemId"
-        ]
+        ],
+        "alias_property_name": null
       }
     ],
     "Navigator Tree Commands": [
@@ -1760,7 +1871,8 @@
           "FailedExecutionResult",
           "NavigatorItemIdWrapperItem",
           "SuccessfulExecutionResult"
-        ]
+        ],
+        "alias_property_name": "executionResults"
       },
       {
         "name": "API.GetBuiltInContainerNavigatorItems",
@@ -1777,7 +1889,8 @@
           "BuiltInContainerNavigatorItemWrapperItem",
           "ErrorItem",
           "NavigatorItemIdWrapperItem"
-        ]
+        ],
+        "alias_property_name": "navigatorItems"
       },
       {
         "name": "API.GetDetailNavigatorItems",
@@ -1794,7 +1907,8 @@
           "DetailNavigatorItemWrapperItem",
           "ErrorItem",
           "NavigatorItemIdWrapperItem"
-        ]
+        ],
+        "alias_property_name": "navigatorItems"
       },
       {
         "name": "API.GetDocument3DNavigatorItems",
@@ -1811,7 +1925,8 @@
           "Document3DNavigatorItemWrapperItem",
           "ErrorItem",
           "NavigatorItemIdWrapperItem"
-        ]
+        ],
+        "alias_property_name": "navigatorItems"
       },
       {
         "name": "API.GetElevationNavigatorItems",
@@ -1828,7 +1943,8 @@
           "ElevationNavigatorItemWrapperItem",
           "ErrorItem",
           "NavigatorItemIdWrapperItem"
-        ]
+        ],
+        "alias_property_name": "navigatorItems"
       },
       {
         "name": "API.GetInteriorElevationNavigatorItems",
@@ -1845,7 +1961,8 @@
           "ErrorItem",
           "InteriorElevationNavigatorItemWrapperItem",
           "NavigatorItemIdWrapperItem"
-        ]
+        ],
+        "alias_property_name": "navigatorItems"
       },
       {
         "name": "API.GetNavigatorItemTree",
@@ -1862,7 +1979,8 @@
           "NavigatorTree",
           "OtherNavigatorTreeId",
           "PublisherSetId"
-        ]
+        ],
+        "alias_property_name": "navigatorTree"
       },
       {
         "name": "API.GetNavigatorItemsType",
@@ -1879,7 +1997,8 @@
           "ErrorItem",
           "NavigatorItemIdAndTypeWrapperItem",
           "NavigatorItemIdWrapperItem"
-        ]
+        ],
+        "alias_property_name": "navigatorItemIdAndTypeList"
       },
       {
         "name": "API.GetPublisherSetNames",
@@ -1891,7 +2010,8 @@
         "command_model_dependencies": [
           "GetPublisherSetNamesResult"
         ],
-        "type_model_dependencies": []
+        "type_model_dependencies": [],
+        "alias_property_name": "publisherSetNames"
       },
       {
         "name": "API.GetSectionNavigatorItems",
@@ -1908,7 +2028,8 @@
           "ErrorItem",
           "NavigatorItemIdWrapperItem",
           "SectionNavigatorItemWrapperItem"
-        ]
+        ],
+        "alias_property_name": "navigatorItems"
       },
       {
         "name": "API.GetStoryNavigatorItems",
@@ -1925,7 +2046,8 @@
           "ErrorItem",
           "NavigatorItemIdWrapperItem",
           "StoryNavigatorItemWrapperItem"
-        ]
+        ],
+        "alias_property_name": "navigatorItems"
       },
       {
         "name": "API.GetWorksheetNavigatorItems",
@@ -1942,7 +2064,8 @@
           "ErrorItem",
           "NavigatorItemIdWrapperItem",
           "WorksheetNavigatorItemWrapperItem"
-        ]
+        ],
+        "alias_property_name": "navigatorItems"
       },
       {
         "name": "API.MoveNavigatorItem",
@@ -1956,7 +2079,8 @@
         ],
         "type_model_dependencies": [
           "NavigatorItemId"
-        ]
+        ],
+        "alias_property_name": null
       },
       {
         "name": "API.RenameNavigatorItem",
@@ -1992,7 +2116,8 @@
           "AddOnCommandId",
           "AddOnCommandParameters",
           "AddOnCommandResponse"
-        ]
+        ],
+        "alias_property_name": "addOnCommandResponse"
       },
       {
         "name": "API.IsAddOnCommandAvailable",
@@ -2007,7 +2132,8 @@
         ],
         "type_model_dependencies": [
           "AddOnCommandId"
-        ]
+        ],
+        "alias_property_name": "available"
       }
     ],
     "Element Geometry Commands": [
@@ -2026,7 +2152,8 @@
           "BoundingBox2DWrapperItem",
           "ElementIdArrayItem",
           "ErrorItem"
-        ]
+        ],
+        "alias_property_name": "boundingBoxes2D"
       },
       {
         "name": "API.Get3DBoundingBoxes",
@@ -2043,7 +2170,8 @@
           "BoundingBox3DWrapperItem",
           "ElementIdArrayItem",
           "ErrorItem"
-        ]
+        ],
+        "alias_property_name": "boundingBoxes3D"
       }
     ],
     "Classification Commands": [
@@ -2059,7 +2187,8 @@
         ],
         "type_model_dependencies": [
           "ClassificationSystem"
-        ]
+        ],
+        "alias_property_name": "classificationSystems"
       },
       {
         "name": "API.GetAllClassificationsInSystem",
@@ -2075,7 +2204,8 @@
         "type_model_dependencies": [
           "ClassificationItemArrayItem",
           "ClassificationSystemId"
-        ]
+        ],
+        "alias_property_name": "classificationItems"
       },
       {
         "name": "API.GetClassificationItemAvailability",
@@ -2092,7 +2222,8 @@
           "ClassificationItemAvailabilityWrapperItem",
           "ClassificationItemIdArrayItem",
           "ErrorItem"
-        ]
+        ],
+        "alias_property_name": "classificationItemAvailabilityList"
       },
       {
         "name": "API.GetClassificationSystemIds",
@@ -2106,7 +2237,8 @@
         ],
         "type_model_dependencies": [
           "ClassificationSystemIdArrayItem"
-        ]
+        ],
+        "alias_property_name": "classificationSystemIds"
       },
       {
         "name": "API.GetClassificationSystems",
@@ -2123,7 +2255,8 @@
           "ClassificationSystemIdArrayItem",
           "ClassificationSystemWrapperItem",
           "ErrorItem"
-        ]
+        ],
+        "alias_property_name": "classificationSystems"
       },
       {
         "name": "API.GetClassificationsOfElements",
@@ -2141,7 +2274,8 @@
           "ElementClassificationWrapperItem",
           "ElementIdArrayItem",
           "ErrorItem"
-        ]
+        ],
+        "alias_property_name": "elementClassifications"
       },
       {
         "name": "API.GetDetailsOfClassificationItems",
@@ -2158,7 +2292,8 @@
           "ClassificationItemIdArrayItem",
           "ClassificationItemWrapperItem",
           "ErrorItem"
-        ]
+        ],
+        "alias_property_name": "classificationItems"
       },
       {
         "name": "API.SetClassificationsOfElements",
@@ -2175,7 +2310,8 @@
           "ElementClassification",
           "FailedExecutionResult",
           "SuccessfulExecutionResult"
-        ]
+        ],
+        "alias_property_name": "executionResults"
       }
     ],
     "Element Listing Commands": [
@@ -2191,7 +2327,8 @@
         ],
         "type_model_dependencies": [
           "ElementIdArrayItem"
-        ]
+        ],
+        "alias_property_name": "elements"
       },
       {
         "name": "API.GetElementsByClassification",
@@ -2207,7 +2344,8 @@
         "type_model_dependencies": [
           "ClassificationItemId",
           "ElementIdArrayItem"
-        ]
+        ],
+        "alias_property_name": "elements"
       },
       {
         "name": "API.GetElementsByType",
@@ -2223,7 +2361,8 @@
         "type_model_dependencies": [
           "ElementIdArrayItem",
           "ElementType"
-        ]
+        ],
+        "alias_property_name": "elements"
       },
       {
         "name": "API.GetSelectedElements",
@@ -2238,7 +2377,8 @@
         ],
         "type_model_dependencies": [
           "ElementIdArrayItem"
-        ]
+        ],
+        "alias_property_name": "elements"
       },
       {
         "name": "API.GetTypesOfElements",
@@ -2255,7 +2395,8 @@
           "ElementIdArrayItem",
           "ErrorItem",
           "TypeOfElementWrapperItem"
-        ]
+        ],
+        "alias_property_name": "typesOfElements"
       }
     ],
     "Property Commands": [
@@ -2273,7 +2414,8 @@
         "type_model_dependencies": [
           "PropertyGroupIdArrayItem",
           "PropertyType"
-        ]
+        ],
+        "alias_property_name": "propertyGroupIds"
       },
       {
         "name": "API.GetAllPropertyIds",
@@ -2289,7 +2431,8 @@
         "type_model_dependencies": [
           "PropertyIdArrayItem",
           "PropertyType"
-        ]
+        ],
+        "alias_property_name": "propertyIds"
       },
       {
         "name": "API.GetAllPropertyIdsOfElements",
@@ -2307,7 +2450,8 @@
           "ErrorItem",
           "PropertyIdsOfElementWrapperItem",
           "PropertyType"
-        ]
+        ],
+        "alias_property_name": "propertyIdsOfElements"
       },
       {
         "name": "API.GetAllPropertyNames",
@@ -2322,7 +2466,8 @@
         "type_model_dependencies": [
           "BuiltInPropertyUserId",
           "UserDefinedPropertyUserId"
-        ]
+        ],
+        "alias_property_name": "properties"
       },
       {
         "name": "API.GetDetailsOfProperties",
@@ -2339,7 +2484,8 @@
           "ErrorItem",
           "PropertyDefinitionWrapperItem",
           "PropertyIdArrayItem"
-        ]
+        ],
+        "alias_property_name": "propertyDefinitions"
       },
       {
         "name": "API.GetPropertyDefinitionAvailability",
@@ -2356,7 +2502,8 @@
           "ErrorItem",
           "PropertyDefinitionAvailabilityWrapperItem",
           "PropertyIdArrayItem"
-        ]
+        ],
+        "alias_property_name": "propertyDefinitionAvailabilityList"
       },
       {
         "name": "API.GetPropertyGroups",
@@ -2373,7 +2520,8 @@
           "ErrorItem",
           "PropertyGroupIdArrayItem",
           "PropertyGroupWrapperItem"
-        ]
+        ],
+        "alias_property_name": "propertyGroups"
       },
       {
         "name": "API.GetPropertyIds",
@@ -2391,7 +2539,8 @@
           "ErrorItem",
           "PropertyIdArrayItem",
           "UserDefinedPropertyUserId"
-        ]
+        ],
+        "alias_property_name": "properties"
       },
       {
         "name": "API.GetPropertyValuesOfElements",
@@ -2409,7 +2558,8 @@
           "ErrorItem",
           "PropertyIdArrayItem",
           "PropertyValuesWrapperItem"
-        ]
+        ],
+        "alias_property_name": "propertyValuesForElements"
       },
       {
         "name": "API.SetPropertyValuesOfElements",
@@ -2426,7 +2576,8 @@
           "ElementPropertyValue",
           "FailedExecutionResult",
           "SuccessfulExecutionResult"
-        ]
+        ],
+        "alias_property_name": "executionResults"
       }
     ],
     "Component Commands": [
@@ -2445,7 +2596,8 @@
           "ElementComponentsWrapper",
           "ElementIdArrayItem",
           "ErrorItem"
-        ]
+        ],
+        "alias_property_name": "componentsOfElements"
       },
       {
         "name": "API.GetPropertyValuesOfElementComponents",
@@ -2463,7 +2615,8 @@
           "ErrorItem",
           "PropertyIdArrayItem",
           "PropertyValuesWrapperItem"
-        ]
+        ],
+        "alias_property_name": "propertyValuesForElementComponents"
       }
     ],
     "Element Relation Commands": [
@@ -2483,7 +2636,8 @@
           "ElementType",
           "ElementsWrapper",
           "ErrorItem"
-        ]
+        ],
+        "alias_property_name": "elementsRelatedToZones"
       }
     ],
     "Basic Commands": [
@@ -2497,7 +2651,8 @@
         "command_model_dependencies": [
           "GetProductInfoResult"
         ],
-        "type_model_dependencies": []
+        "type_model_dependencies": [],
+        "alias_property_name": null
       },
       {
         "name": "API.IsAlive",
@@ -2509,7 +2664,8 @@
         "command_model_dependencies": [
           "IsAliveResult"
         ],
-        "type_model_dependencies": []
+        "type_model_dependencies": [],
+        "alias_property_name": "isAlive"
       }
     ]
   }
