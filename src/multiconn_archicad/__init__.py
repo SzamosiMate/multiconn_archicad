@@ -23,7 +23,7 @@ from .basic_types import (
     FromAPIResponse,
 )
 from .standard_connection import StandardConnection
-from multiconn_archicad.core.core_commands import CoreCommands
+from core.core_commands import CoreCommands
 from .dialog_handlers import (
     DialogHandlerBase,
     UnhandledDialogError,
@@ -42,6 +42,7 @@ from .errors import (
     ProjectNotFoundError,
     NotFullyInitializedError,
 )
+from unified_api.api import UnifiedApi
 
 
 __all__ = [
@@ -78,6 +79,7 @@ __all__ = [
     "is_product_info_initialized",
     "is_id_initialized",
     "is_header_fully_initialized",
+    "UnifiedApi"
 ]
 
 if sys.platform == "win32":
