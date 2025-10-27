@@ -5,6 +5,7 @@ from pprint import pformat
 from multiconn_archicad.utilities.async_utils import run_sync
 from multiconn_archicad.core.core_commands import CoreCommands
 from multiconn_archicad.standard_connection import StandardConnection
+from multiconn_archicad.unified_api.api import UnifiedApi
 from multiconn_archicad.conn_header import ConnHeader, Status
 from multiconn_archicad.basic_types import Port, APIResponseError, ProductInfo, ArchiCadID, ArchicadLocation
 from multiconn_archicad.actions import (
@@ -37,6 +38,7 @@ class MultiConn:
         # command namespaces of new_value
         self.core: CoreCommands | type[CoreCommands] = CoreCommands
         self.standard: StandardConnection | type[StandardConnection] = StandardConnection
+        self.unified: UnifiedApi | type[UnifiedApi] = UnifiedApi
 
         # load actions
         self.connect: Connect = Connect(self)
@@ -175,9 +177,11 @@ class MultiConn:
         self._primary.connect()
         self.core = self._primary.core
         self.standard = self._primary.standard
+        self.unified = self._primary.unified
 
     async def _clear_primary_namespaces(self) -> None:
         self._primary = None
         log.info("Primary connection cleared")
         self.core = CoreCommands
         self.standard = StandardConnection
+        self.unified = UnifiedApi
