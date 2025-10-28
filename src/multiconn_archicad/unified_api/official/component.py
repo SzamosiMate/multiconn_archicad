@@ -37,9 +37,13 @@ class ComponentCommands:
         Args:
             elements (list[ElementIdArrayItem]): A list of elements.
 
+        Returns:
+            list[ElementComponentsWrapper | ErrorItem]: Array of component list or error.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "elements": elements,
@@ -62,9 +66,15 @@ class ComponentCommands:
                 elements.
             properties (list[PropertyIdArrayItem]): A list of property identifiers.
 
+        Returns:
+            list[ErrorItem | PropertyValuesWrapperItem]: List of property value lists. The order
+                of the outer list is that of the given components. The order of the inner lists
+                are that of the given properties.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "elementComponents": element_components,

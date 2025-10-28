@@ -49,9 +49,13 @@ class ClassificationCommands:
         """
         Returns the list of available classification systems.
 
+        Returns:
+            list[ClassificationSystem]: A list of classification systems.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         response_dict = self._core.post_command("API.GetAllClassificationSystems")
         validated_response = GetAllClassificationSystemsResult.model_validate(response_dict)
@@ -66,9 +70,13 @@ class ClassificationCommands:
         Args:
             classification_system_id (ClassificationSystemId)
 
+        Returns:
+            list[ClassificationItemArrayItem]: A list of classification items.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "classificationSystemId": classification_system_id,
@@ -91,9 +99,14 @@ class ClassificationCommands:
             classification_item_ids (list[ClassificationItemIdArrayItem]): A list of
                 classification item identifiers.
 
+        Returns:
+            list[ClassificationItemAvailabilityWrapperItem | ErrorItem]: A list of
+                classification item avalabilities.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "classificationItemIds": classification_item_ids,
@@ -110,9 +123,13 @@ class ClassificationCommands:
         """
         Returns the list of available classification systems.
 
+        Returns:
+            list[ClassificationSystemIdArrayItem]: A list of classification system identifiers.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         response_dict = self._core.post_command("API.GetClassificationSystemIds")
         validated_response = GetClassificationSystemIdsResult.model_validate(response_dict)
@@ -128,9 +145,14 @@ class ClassificationCommands:
             classification_system_ids (list[ClassificationSystemIdArrayItem]): A list of
                 classification system identifiers.
 
+        Returns:
+            list[ClassificationSystemWrapperItem | ErrorItem]: A list of classification systems
+                or errors.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "classificationSystemIds": classification_system_ids,
@@ -153,9 +175,16 @@ class ClassificationCommands:
             classification_system_ids (list[ClassificationSystemIdArrayItem]): A list of
                 classification system identifiers.
 
+        Returns:
+            list[ElementClassificationWrapperItem | ErrorItem]: The list of element
+                classification item identifiers. Order of the ids are the same as in the input.
+                Non-existing elements or non-existing classification systems are represented by
+                error objects.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "elements": elements,
@@ -179,9 +208,14 @@ class ClassificationCommands:
             classification_item_ids (list[ClassificationItemIdArrayItem]): A list of
                 classification item identifiers.
 
+        Returns:
+            list[ClassificationItemWrapperItem | ErrorItem]: A list of classification items or
+                errors.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "classificationItemIds": classification_item_ids,
@@ -205,9 +239,14 @@ class ClassificationCommands:
             element_classifications (list[ElementClassification]): A list of element
                 classification identifiers.
 
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "elementClassifications": element_classifications,

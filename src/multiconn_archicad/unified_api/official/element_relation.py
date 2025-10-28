@@ -31,9 +31,13 @@ class ElementRelationCommands:
             element_types (None | list[ElementType]): If this parameter is given, then only
                 related elements with the requested types will be listed.
 
+        Returns:
+            list[ElementsWrapper | ErrorItem]: A list of ElementsOrError items.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "zones": zones,

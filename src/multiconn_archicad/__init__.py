@@ -23,7 +23,7 @@ from .basic_types import (
     FromAPIResponse,
 )
 from .standard_connection import StandardConnection
-from core.core_commands import CoreCommands
+from .core.core_commands import CoreCommands
 from .dialog_handlers import (
     DialogHandlerBase,
     UnhandledDialogError,
@@ -42,7 +42,7 @@ from .errors import (
     ProjectNotFoundError,
     NotFullyInitializedError,
 )
-from unified_api.api import UnifiedApi
+from .unified_api.api import UnifiedApi
 
 
 __all__ = [

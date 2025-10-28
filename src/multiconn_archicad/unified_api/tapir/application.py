@@ -23,9 +23,13 @@ class ApplicationCommands:
         """
         Retrieves the version of the Tapir Additional JSON Commands Add-On.
 
+        Returns:
+            str: Version number in the form of "1.1.1".
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         response_dict = self._core.post_tapir_command("GetAddOnVersion")
         validated_response = GetAddOnVersionResult.model_validate(response_dict)
@@ -35,9 +39,13 @@ class ApplicationCommands:
         """
         Retrieves the location of the currently running Archicad executable.
 
+        Returns:
+            str: The location of the Archicad executable in the filesystem.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         response_dict = self._core.post_tapir_command("GetArchicadLocation")
         validated_response = GetArchicadLocationResult.model_validate(response_dict)
@@ -47,9 +55,13 @@ class ApplicationCommands:
         """
         Returns the type of the current (active) window.
 
+        Returns:
+            WindowType
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         response_dict = self._core.post_tapir_command("GetCurrentWindowType")
         validated_response = GetCurrentWindowTypeResult.model_validate(response_dict)
@@ -62,6 +74,7 @@ class ApplicationCommands:
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         self._core.post_tapir_command("QuitArchicad")
         return None

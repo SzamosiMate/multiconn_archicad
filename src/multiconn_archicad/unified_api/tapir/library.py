@@ -28,9 +28,14 @@ class LibraryCommands:
         Args:
             files (list[File]): A list of files
 
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "files": files,
@@ -46,9 +51,13 @@ class LibraryCommands:
         """
         Gets the list of loaded libraries.
 
+        Returns:
+            list[Library]: A list of project libraries.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         response_dict = self._core.post_tapir_command("GetLibraries")
         validated_response = GetLibrariesResult.model_validate(response_dict)
@@ -61,6 +70,7 @@ class LibraryCommands:
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         self._core.post_tapir_command("ReloadLibraries")
         return None

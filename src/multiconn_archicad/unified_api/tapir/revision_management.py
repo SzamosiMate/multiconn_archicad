@@ -40,9 +40,13 @@ class RevisionManagementCommands:
         Args:
             layout_database_ids (list[DatabaseIdArrayItem]): A list of Archicad databases.
 
+        Returns:
+            ErrorItem | RevisionChangesArrayItem
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "layoutDatabaseIds": layout_database_ids,
@@ -59,9 +63,13 @@ class RevisionManagementCommands:
         """
         Retrieves all document revisions.
 
+        Returns:
+            list[DocumentRevision]
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         response_dict = self._core.post_tapir_command("GetDocumentRevisions")
         validated_response = GetDocumentRevisionsResult.model_validate(response_dict)
@@ -71,9 +79,13 @@ class RevisionManagementCommands:
         """
         Retrieves all changes.
 
+        Returns:
+            list[RevisionChange]
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         response_dict = self._core.post_tapir_command("GetRevisionChanges")
         validated_response = GetRevisionChangesResult.model_validate(response_dict)
@@ -88,9 +100,13 @@ class RevisionManagementCommands:
         Args:
             elements (list[ElementIdArrayItem]): A list of elements.
 
+        Returns:
+            ErrorItem | RevisionChangesArrayItem
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "elements": elements,
@@ -106,9 +122,13 @@ class RevisionManagementCommands:
         """
         Retrieves all issues.
 
+        Returns:
+            list[RevisionIssue]
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         response_dict = self._core.post_tapir_command("GetRevisionIssues")
         validated_response = GetRevisionIssuesResult.model_validate(response_dict)

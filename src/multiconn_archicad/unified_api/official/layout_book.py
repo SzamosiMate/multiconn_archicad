@@ -39,9 +39,13 @@ class LayoutBookCommands:
             master_navigator_item_id (NavigatorItemId)
             parent_navigator_item_id (NavigatorItemId)
 
+        Returns:
+            NavigatorItemId: The ID of the new layout navigator item in the layout book.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "layoutName": layout_name,
@@ -66,9 +70,13 @@ class LayoutBookCommands:
             subset_parameters (Subset)
             parent_navigator_item_id (NavigatorItemId)
 
+        Returns:
+            NavigatorItemId: The ID of the new subset navigator item in the layout book.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "subsetParameters": subset_parameters,
@@ -88,9 +96,13 @@ class LayoutBookCommands:
         Args:
             layout_navigator_item_id (NavigatorItemId)
 
+        Returns:
+            LayoutParameters
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "layoutNavigatorItemId": layout_navigator_item_id,
@@ -115,6 +127,7 @@ class LayoutBookCommands:
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "layoutParameters": layout_parameters,

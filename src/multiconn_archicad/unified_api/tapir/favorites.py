@@ -36,9 +36,14 @@ class FavoritesCommands:
         Args:
             favorites (list[str]): A list of favorite names
 
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "favorites": favorites,
@@ -60,9 +65,14 @@ class FavoritesCommands:
         Args:
             favorites_from_elements (list[FavoritesFromElement])
 
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "favoritesFromElements": favorites_from_elements,
@@ -81,9 +91,13 @@ class FavoritesCommands:
         Args:
             element_type (ElementType)
 
+        Returns:
+            list[str]: A list of favorite names
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "elementType": element_type,

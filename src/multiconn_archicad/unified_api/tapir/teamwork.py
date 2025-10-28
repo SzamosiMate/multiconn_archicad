@@ -29,6 +29,7 @@ class TeamworkCommands:
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "elements": elements,
@@ -46,9 +47,13 @@ class TeamworkCommands:
         Args:
             elements (list[ElementIdArrayItem]): A list of elements.
 
+        Returns:
+            ReserveElementsResult
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "elements": elements,
@@ -67,6 +72,7 @@ class TeamworkCommands:
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         self._core.post_tapir_command("TeamworkReceive")
         return None
@@ -78,6 +84,7 @@ class TeamworkCommands:
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         self._core.post_tapir_command("TeamworkSend")
         return None

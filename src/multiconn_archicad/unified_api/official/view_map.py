@@ -33,9 +33,13 @@ class ViewMapCommands:
                 the new view will be inserted. Only navigator items from the view map are
                 allowed.
 
+        Returns:
+            NavigatorItemId: The ID of the new navigator item in view map.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "projectMapNavigatorItemId": project_map_navigator_item_id,
@@ -67,9 +71,13 @@ class ViewMapCommands:
                 be placed after this sibling item. If this parameter is not given the folder
                 will be created as the first item under the parent.
 
+        Returns:
+            NavigatorItemId
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "folderParameters": folder_parameters,

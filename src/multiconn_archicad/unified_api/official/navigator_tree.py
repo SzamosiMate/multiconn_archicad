@@ -72,9 +72,14 @@ class NavigatorTreeCommands:
             navigator_item_ids (list[NavigatorItemIdWrapperItem]): A list of navigator item
                 identifiers.
 
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "navigatorItemIds": navigator_item_ids,
@@ -96,9 +101,14 @@ class NavigatorTreeCommands:
             navigator_item_ids (list[NavigatorItemIdWrapperItem]): A list of navigator item
                 identifiers.
 
+        Returns:
+            list[BuiltInContainerNavigatorItemWrapperItem | ErrorItem]: A list of built-in
+                container navigator items.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "navigatorItemIds": navigator_item_ids,
@@ -121,9 +131,13 @@ class NavigatorTreeCommands:
             navigator_item_ids (list[NavigatorItemIdWrapperItem]): A list of navigator item
                 identifiers.
 
+        Returns:
+            list[DetailNavigatorItemWrapperItem | ErrorItem]: A list of detail navigator items.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "navigatorItemIds": navigator_item_ids,
@@ -145,9 +159,14 @@ class NavigatorTreeCommands:
             navigator_item_ids (list[NavigatorItemIdWrapperItem]): A list of navigator item
                 identifiers.
 
+        Returns:
+            list[Document3DNavigatorItemWrapperItem | ErrorItem]: A list of 3D document
+                navigator items.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "navigatorItemIds": navigator_item_ids,
@@ -170,9 +189,14 @@ class NavigatorTreeCommands:
             navigator_item_ids (list[NavigatorItemIdWrapperItem]): A list of navigator item
                 identifiers.
 
+        Returns:
+            list[ElevationNavigatorItemWrapperItem | ErrorItem]: A list of elevation navigator
+                items.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "navigatorItemIds": navigator_item_ids,
@@ -194,9 +218,14 @@ class NavigatorTreeCommands:
             navigator_item_ids (list[NavigatorItemIdWrapperItem]): A list of navigator item
                 identifiers.
 
+        Returns:
+            list[ErrorItem | InteriorElevationNavigatorItemWrapperItem]: A list of interior
+                elevation navigator items.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "navigatorItemIds": navigator_item_ids,
@@ -217,9 +246,13 @@ class NavigatorTreeCommands:
             navigator_tree_id (OtherNavigatorTreeId | PublisherSetId): The identifier of a
                 navigator item tree.
 
+        Returns:
+            NavigatorTree
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "navigatorTreeId": navigator_tree_id,
@@ -242,9 +275,14 @@ class NavigatorTreeCommands:
             navigator_item_ids (list[NavigatorItemIdWrapperItem]): A list of navigator item
                 identifiers.
 
+        Returns:
+            list[ErrorItem | NavigatorItemIdAndTypeWrapperItem]: A list of objects that consist
+                of a navigator item identifier and a type.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "navigatorItemIds": navigator_item_ids,
@@ -260,9 +298,13 @@ class NavigatorTreeCommands:
         """
         Returns the names of available publisher sets.
 
+        Returns:
+            list[str]: The names of available publisher sets.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         response_dict = self._core.post_command("API.GetPublisherSetNames")
         validated_response = GetPublisherSetNamesResult.model_validate(response_dict)
@@ -278,9 +320,14 @@ class NavigatorTreeCommands:
             navigator_item_ids (list[NavigatorItemIdWrapperItem]): A list of navigator item
                 identifiers.
 
+        Returns:
+            list[ErrorItem | SectionNavigatorItemWrapperItem]: A list of section navigator
+                items.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "navigatorItemIds": navigator_item_ids,
@@ -302,9 +349,13 @@ class NavigatorTreeCommands:
             navigator_item_ids (list[NavigatorItemIdWrapperItem]): A list of navigator item
                 identifiers.
 
+        Returns:
+            list[ErrorItem | StoryNavigatorItemWrapperItem]: A list of story navigator items.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "navigatorItemIds": navigator_item_ids,
@@ -326,9 +377,14 @@ class NavigatorTreeCommands:
             navigator_item_ids (list[NavigatorItemIdWrapperItem]): A list of navigator item
                 identifiers.
 
+        Returns:
+            list[ErrorItem | WorksheetNavigatorItemWrapperItem]: A list of worksheet navigator
+                items.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "navigatorItemIds": navigator_item_ids,
@@ -359,6 +415,7 @@ class NavigatorTreeCommands:
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "navigatorItemIdToMove": navigator_item_id_to_move,
@@ -385,6 +442,7 @@ class NavigatorTreeCommands:
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         if not new_name and not new_id:
             raise ValueError("Either 'new_name' or 'new_id' (or both) must be provided.")

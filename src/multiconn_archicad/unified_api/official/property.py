@@ -60,9 +60,13 @@ class PropertyCommands:
         Args:
             property_type (None | PropertyType)
 
+        Returns:
+            list[PropertyGroupIdArrayItem]: A list of property group identifiers.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "propertyType": property_type,
@@ -83,9 +87,13 @@ class PropertyCommands:
         Args:
             property_type (None | PropertyType)
 
+        Returns:
+            list[PropertyIdArrayItem]: A list of property identifiers.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "propertyType": property_type,
@@ -109,9 +117,14 @@ class PropertyCommands:
             elements (list[ElementIdArrayItem]): A list of elements.
             property_type (None | PropertyType)
 
+        Returns:
+            list[ErrorItem | PropertyIdsOfElementWrapperItem]: A list of property identifiers of
+                elements or errors.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "elements": elements,
@@ -130,9 +143,14 @@ class PropertyCommands:
         Returns the human-readable names of available Property definitions for debug and
         development purposes.
 
+        Returns:
+            list[BuiltInPropertyUserId | UserDefinedPropertyUserId]: A list of PropertyUserId
+                objects.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         response_dict = self._core.post_command("API.GetAllPropertyNames")
         validated_response = GetAllPropertyNamesResult.model_validate(response_dict)
@@ -147,9 +165,14 @@ class PropertyCommands:
         Args:
             properties (list[PropertyIdArrayItem]): A list of property identifiers.
 
+        Returns:
+            list[ErrorItem | PropertyDefinitionWrapperItem]: A list of property definitions or
+                errors.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "properties": properties,
@@ -170,9 +193,14 @@ class PropertyCommands:
         Args:
             property_ids (list[PropertyIdArrayItem]): A list of property identifiers.
 
+        Returns:
+            list[ErrorItem | PropertyDefinitionAvailabilityWrapperItem]: A list of
+                classification item avalabilities.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "propertyIds": property_ids,
@@ -195,9 +223,13 @@ class PropertyCommands:
             property_group_ids (list[PropertyGroupIdArrayItem]): A list of property group
                 identifiers.
 
+        Returns:
+            list[ErrorItem | PropertyGroupWrapperItem]: A list of property groups or errors.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "propertyGroupIds": property_group_ids,
@@ -219,9 +251,16 @@ class PropertyCommands:
             properties (list[BuiltInPropertyUserId | UserDefinedPropertyUserId]): List of
                 property names whose ids are requested.
 
+        Returns:
+            list[ErrorItem | PropertyIdArrayItem]: List of the ids of the requested properties.
+                Order of the ids are the same as in the input. Existing properties are
+                represented by propertyId objects, non-existing properties are represented by
+                error objects.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "properties": properties,
@@ -243,9 +282,15 @@ class PropertyCommands:
             elements (list[ElementIdArrayItem]): A list of elements.
             properties (list[PropertyIdArrayItem]): A list of property identifiers.
 
+        Returns:
+            list[ErrorItem | PropertyValuesWrapperItem]: List of property value lists. The order
+                of the outer list is that of the given elements. The order of the inner lists
+                are that of the given properties.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "elements": elements,
@@ -269,9 +314,14 @@ class PropertyCommands:
             element_property_values (list[ElementPropertyValue]): A list of element property
                 values.
 
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "elementPropertyValues": element_property_values,

@@ -30,9 +30,13 @@ class AddonCommands:
             add_on_command_id (AddOnCommandId)
             add_on_command_parameters (AddOnCommandParameters | None)
 
+        Returns:
+            AddOnCommandResponse
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "addOnCommandId": add_on_command_id,
@@ -52,9 +56,13 @@ class AddonCommands:
         Args:
             add_on_command_id (AddOnCommandId)
 
+        Returns:
+            bool: Returns true if the command is available.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "addOnCommandId": add_on_command_id,
