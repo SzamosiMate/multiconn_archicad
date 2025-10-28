@@ -4,17 +4,17 @@
 
 **MultiConn Archicad** is a Python-based connection object for Archicad's JSON API and its Python wrapper. It is designed to manage multiple open instances of Archicad simultaneously, making it easier to execute commands across multiple instances.
 
-[![Latest Release](https://img.shields.io/github/v/release/SzamosiMate/multiconn_archicad)](https://github.com/SzamosiMate/multiconn_archicad/releases/latest) 
-![License](https://img.shields.io/github/license/SzamosiMate/multiconn_archicad) 
+[![Latest Release](https://img.shields.io/github/v/release/SzamosiMate/multiconn_archicad)](https://github.com/SzamosiMate/multiconn_archicad/releases/latest) ![License](https://img.shields.io/github/license/SzamosiMate/multiconn_archicad) 
 ![Issues](https://img.shields.io/github/issues/SzamosiMate/multiconn_archicad) 
 ![Forks](https://img.shields.io/github/forks/SzamosiMate/multiconn_archicad) 
 ![Stars](https://img.shields.io/github/stars/SzamosiMate/multiconn_archicad)
 
 ## Features
 
+- **Unified High-Level API**: A modern, type-safe, and pythonic interface for both Official and Tapir APIs.
 - **Multi-connection Support**: Connect to one, multiple, or all open instances of Archicad.
 - **Seamless Integration**: Utilizes Archicad's official Python package.
-- **Tapir Add-On Integration**: Run commands using the Tapir Archicad Add-On framework
+- **Tapir Add-On Integration**: Run commands using the Tapir Archicad Add-On framework.
 - **Efficient I/O Operations**: Handles connection management using concurrent or asynchronous code.
 - **Project Management**: Find and open Archicad projects programmatically.
 
@@ -40,166 +40,138 @@ This package **critically depends** on the [Tapir Archicad Add-On](https://githu
 ```bash
 # to enable dialog handleing on windows
 pip install multiconn_archicad[dialog-handlers]
-
-# to use the pydantic opjects for data validation
-pip install multiconn_archicad[pydantic]
 ```
 
 ## Usage
 
-⚠️**Disclaimer:** MultiConn ArchiCAD is functional, stable in practice, and ready for use — it has been successfully used in several recent projects. That said, the library is still under active development: its interfaces may evolve in future releases, and it hasn’t yet undergone extensive formal testing. It’s well-suited for quick scripts and one-off automation tasks. If you’re building something long-term or mission-critical, we recommend pinning the version you’re using and keeping an eye on future updates.
+### Running Commands: The API Namespaces
 
-### Actions - managing the connection
-Actions allow you to manage the state of the connection object. You can connect to or disconnect from Archicad instances, quit instances, or refresh ports. All actions can have multiple types of inputs. For each type of input you have to call the corresponding method of the action. To connect to all available ArchiCAD instances, you have to call the .all() method on .connect ( e.g. `conn.connect.all()`). The aim of this method is to provide better autocompletion.
+The library provides three distinct namespaces for interacting with Archicad, each suited for different needs. 
 
-#### Example: Connection Management
-```python 
-from multiconn_archicad import MultiConn, Port
+*   **`unified`**: A high-level, type-safe and pythonic interface that unifies both the Official and Tapir APIs into a single, easy-to-use framework
+*   **`core`**: A low-level interface for sending raw JSON commands.
+*   **`standard`**: The official ArchiCAD python wrapper.
 
+By incorporating the 3 namespaces to a common framework it is possible to freely mix them, allowing you to reuse codes of different styles.
+
+#### Example: Using two namespaces together
+```python
+def run(conn: MultiConn | ConnHeader) -> dict[str, Any]:
+    elements = conn.standard.commands.GetAllElements()
+    command_parameters = {
+        "elements": [element.to_dict() for element in elements],
+        "highlightedColors": [[50, 255, 100, 100] for _ in range(len(elements))],
+        "wireframe3D": True,
+        "nonHighlightedColor": [0, 0, 255, 128],
+    }
+    return conn.core.post_tapir_command('HighlightElements', command_parameters)
+```
+
+### 1. The `unified` Namespace (Recommended)
+
+The `unified` namespace is the modern, high-level, and recommended way to execute commands. It provides a type-safe and pythonic interface that unifies both the Official and Tapir APIs into a single, easy-to-use framework.
+
+**Key Benefits:**
+
+*   **Object-Oriented Interface**: A clean, dot-notation structure (`conn.unified.tapir...`) makes the API intuitive and easily discoverable with IDE autocompletion.
+*   **Automatic Parameter Validation**: Inputs are validated by Pydantic models *before* a request is sent, preventing common errors and ensuring every API call is correctly formed.
+*   **IDE-Native Experience**: Full type hinting provides static error checking and a seamless development experience.
+*   **Structured & Validated Responses**: JSON responses are automatically parsed into Pydantic models, giving you reliable, object-oriented data to work with.
+
+#### Example: Using the `unified` API with Pydantic Models
+
+```python
+from multiconn_archicad import MultiConn
+from multiconn_archicad.models.official import types as official_types
+
+# By default, primary is the first open port in the port range
 conn = MultiConn()
+assert conn.primary, "No running Archicad instance found."
 
-# connect all ArchiCAD instances that were running at instantiation / the last refresh
-conn.connect.all()
+# Create a shortcut to the official_commands commands for convenience
+official_commands = conn.primary.unified.official
 
-# disconnect from the instance at port 19723   
-conn.disconnect.from_ports(Port(19723))
+# 1. Get identifiers for all elements
+elements = official_commands.element_listing.get_all_elements()
 
-# refresh all closed ports - ports with no running archicad instance   
-conn.refresh.closed_ports()
+# 2. Define the 'Element ID' property using a Pydantic model
+property_user_id = [
+    official_types.BuiltInPropertyUserId(
+        type="BuiltIn", nonLocalizedName="General_ElementID"
+    )
+]
 
-# close, and remove from the dict of open port headers the archicad instance specified by ConnHeader
-conn.quit.from_headers(conn.open_port_headers[Port(19735)])
+# 3. Get Archicad's internal ID for that property
+property_id = official_commands.property.get_property_ids(property_user_id)
+
+# 4. Fetch the property values for the elements
+value_wrappers_of_elements = official_commands.property.get_property_values_of_elements(
+    elements, property_id
+)
+
+# 5. Extract the actual values using a list comprehension
+property_values_for_elements = [
+    wrapper.propertyValues[0].propertyValue.value
+    for wrapper in value_wrappers_of_elements
+]
+
+print(f"Retrieved Element IDs for {len(property_values_for_elements)} elements.")
 ```
 
-### Project Management
+### 2. The `core` Namespace (Low-Level)
 
-The MultiConn object provides actions to find and open ArchiCAD projects programmatically.
+The `core` namespace is a low-level interface for sending raw JSON commands. It is useful for advanced scenarios or for accessing commands not yet available in the `unified` API. It requires you to build the request dictionaries manually. It is inspired by Tapir's ["aclib"](https://github.com/ENZYME-APD/tapir-archicad-automation/tree/main/archicad-addon/Examples/aclib).
 
-#### Finding ArchiCAD Instances
+*   `core.post_command()`: Sends commands to the Official JSON API.
+*   `core.post_tapir_command()`: Sends commands to the Tapir Add-On.
 
-You can use the `find_archicad` action to locate a specific ArchiCAD instance from a `ConnHeader`.
+
+#### Enhancing the `core` Namespace with `TypedDicts`
+
+To make the `core` namespace safer and easier to use, the library provides a complete set of `TypedDicts`. These allow your IDE and static type checkers (like MyPy) to validate the structure of your command dictionaries *before* you run your code, catching common mistakes like missing keys or incorrect data types.
+
+#### Example: Using `core` with `TypedDicts` for Static Checking
+
+**Before (Without TypedDicts - Error-Prone):**
+```python
+# This is a common mistake: the API expects a list of `{"elementId": ...}` wrappers.
+# This error would only be caught at runtime.
+command_parameters = {
+    "elements": [
+        {"guid": "GUID_1"},
+        {"guid": "GUID_2"}
+    ],
+}
+# This call would fail when sent to the API.
+conn.core.post_tapir_command('HighlightElements', command_parameters)
+```
+
+**After (With TypedDicts for Static Safety):**
+By using a `TypedDict` in a helper function, your tools can validate the dictionary structure instantly.
 
 ```python
-from multiconn_archicad import MultiConn, ConnHeader
+from multiconn_archicad.tapir.dicts.commands import HighlightElementsParameters
 
-conn = MultiConn()
-conn_header = ConnHeader(Port(19723))
+def highlight_elements(conn: MultiConn, params: HighlightElementsParameters):
+    """A type-safe wrapper for the HighlightElements command."""
+    return conn.core.post_tapir_command('HighlightElements', params)
 
-# Find the port for a specific connection header
-port = conn.find_archicad.from_header(conn_header)
-if port:
-    print(f"Found ArchiCAD instance at port: {port}")
+# --- Incorrect Usage ---
+incorrect_params = {
+    "elements": [
+        {"guid": "GUID_1"}, # Error is here!
+        {"guid": "GUID_2"}
+    ],
+}
+
+# Your IDE and type checker will immediately flag this line with an error,
+# preventing a runtime failure.
+highlight_elements(conn, incorrect_params) # <-- STATIC ERROR!
 ```
 
-#### Opening Projects
+### 3. The `standard` Namespace (Legacy)
 
-The `open_project` action allows you to programmatically open ArchiCAD projects.
-
-```python
-from multiconn_archicad import MultiConn, ConnHeader, TeamworkCredentials
-
-conn = MultiConn()
-
-# Open a project using a connection header
-conn_header = ConnHeader.from_dict(saved_header_data)
-port = conn.open_project.from_header(conn_header)
-# Optionally, open in demo mode:
-port = conn.open_project.from_header(conn_header, demo=True) 
-
-# For teamwork projects, you can provide credentials
-credentials = TeamworkCredentials("username", "password")
-port = conn.open_project.with_teamwork_credentials(conn_header, credentials)
-```
-
-#### Switching Projects (Solo Only)
-
-The `switch_project` action allows you to open a *different* solo project (`.pln`) within an *already running* Archicad instance, without needing to quit and restart. This is useful for quickly changing between solo project files managed by the same Archicad process.
- 
-```python
-from multiconn_archicad import MultiConn, ConnHeader, Port
-
-conn = MultiConn()
-# Assume Archicad is running on port 19723 and port 19725
-
-# Get the header for the project you want to switch *to* (e.g., loaded from a file)
-target_header = ConnHeader.from_dict(saved_header_data_for_another_project)
-
-# Specify the port of the *running instance* you want to load the new project into
-running_instance_port = Port(19723)
-
-# Switch the project on the running instance
-# This will close the current project on port 19723 and open the one defined by target_header
-new_header_state = conn.switch_project.from_header(original_port=running_instance_port, new_header=target_header)
-
-# Alternatively, switch using a file path directly
-new_path = "C:/path/to/another/project.pln"
-new_header_state_from_path = conn.switch_project.from_path(original_port=running_instance_port, new_path=new_path)
-```
-
-### Dialog Handling
-
-MultiConn can automatically handle most dialog windows that appear when opening ArchiCAD projects. This is particularly useful for batch operations and automation scripts.
-
-```python
-from multiconn_archicad import MultiConn, WinDialogHandler, win_int_handler_factory
-
-# Create a MultiConn instance with a dialog handler
-conn = MultiConn(dialog_handler=WinDialogHandler(win_int_handler_factory))
-
-# Dialog windows will be automatically handled when opening projects
-conn.open_project.from_header(conn_header)
-```
-
-The current implementation includes:
-- `EmptyDialogHandler`: Does nothing (default)
-- `WinDialogHandler`: Waits for ArchiCAD to start, and monitors appearing dialogs. If dialog appears, searches for appropriate handler in win_int_handler factory. Only works on windows.
-- `win_int_handler_factory`: Provides dialog handleing logic on a dialog by dialog basis for the INT language version. It is an example you should customize for your specific project needs. Even if you end up not modifying it, you should definitely know what it does for what dialog.
-
-### Serialization
-
-The MultiConn package allows you to save and load connection configurations, making it easier to work with specific projects across multiple sessions.
-
-#### Saving Connection Headers
-
-```python
-from multiconn_archicad import MultiConn, Port
-
-conn = MultiConn()
-conn.connect.all()
-
-# Get a connection header
-conn_header = conn.open_port_headers[Port(19723)]
-
-# Convert to dictionary for serialization
-header_dict = conn_header.to_dict()
-
-# Save to file using your preferred method
-import json
-with open('conn_header.json', 'w') as f:
-    json.dump(header_dict, f)
-```
-
-#### Loading Connection Headers
-
-```python
-from multiconn_archicad import ConnHeader, TeamworkCredentials
-
-# Load from file
-import json
-with open('conn_header.json', 'r') as f:
-    header_dict = json.load(f)
-
-# Create a header from the dictionary
-conn_header = ConnHeader.from_dict(header_dict)
-
-# For teamwork projects, you need to provide credentials
-if isinstance(conn_header.archicad_id, TeamworkProjectID):
-    credentials = TeamworkCredentials("username", "password")
-    # Use the credentials when opening the project
-    port = conn.open_project.with_teamwork_credentials(conn_header, credentials)
-```
-
-Note: Passwords are not stored in serialized connection headers for security reasons. You must provide them when loading teamwork projects.
+This namespace provides direct access to Archicad's official Python wrapper. It is maintained for backward compatibility with older scripts but is not recommended for new projects, as the `unified` API incorporates all it's features, and covers the Tapir commands as well.
 
 ### Running Commands
 
@@ -249,32 +221,154 @@ elements = {
 }
 ```
 
-### Namespaces
+### Connection Management
 
-The aim of the module is to incorporate all solutions that let users automate ArchiCAD from python. The different solutions are separated into namespaces, accessed from properties of the connection object. One of the planned features is letting users supply a list of namespaces they want to use when creating the connections. At the moment there are only two namespaces:
+Actions allow you to manage the state of the connection object.
 
-*   **`standard`**: The official ArchiCAD python wrapper.
-*   **`core`**: Provides simplified methods for interacting with the Archicad API: `core.post_command()` sends official JSON API commands, while `core.post_tapir_command()` sends commands specific to the Tapir Add-On.
-    *   **Success Response:** Returns only the essential result data (e.g., the content of the `"result"` or `"addOnCommandResponse"` field).
-    *   **Error Handling:** All errors (network, timeout, API failures, Tapir command issues) are now reported by **raising specific exceptions** (defined in `multiconn_archicad.errors`). Calls to `post_command` and `post_tapir_command` **must** be wrapped in `try...except` blocks.
-    *   Inspired by Tapir's ["aclib"](https://github.com/ENZYME-APD/tapir-archicad-automation/tree/main/archicad-addon/Examples/aclib).
+#### Example: Connection Management
+```python 
+from multiconn_archicad import MultiConn, Port
 
-#### Example: Using two namespaces together
+conn = MultiConn()
+
+# Connect to all running Archicad instances
+conn.connect.all()
+
+# Disconnect from a specific instance
+conn.disconnect.from_ports(Port(19723))
+
+# Refresh all closed ports - ports with no running archicad instance   
+conn.refresh.closed_ports()
+
+# Quit an Archicad instance
+conn.quit.from_headers(conn.open_port_headers[Port(19735)])
+```
+
+### Project Management
+
+The `MultiConn` object provides actions to find and open Archicad projects programmatically.
+
+#### Finding ArchiCAD Instances
+
+You can use the `find_archicad` action to locate a specific ArchiCAD instance from a `ConnHeader`.
+
 ```python
-def run(conn: MultiConn | ConnHeader) -> dict[str, Any]:
-    elements = conn.standard.commands.GetAllElements()
-    command_parameters = {
-        "elements": [element.to_dict() for element in elements],
-        "highlightedColors": [[50, 255, 100, 100] for _ in range(len(elements))],
-        "wireframe3D": True,
-        "nonHighlightedColor": [0, 0, 255, 128],
-    }
-    return conn.core.post_tapir_command('HighlightElements', command_parameters)
+from multiconn_archicad import MultiConn, ConnHeader
+
+conn = MultiConn()
+conn_header = ConnHeader(Port(19723))
+port = conn.find_archicad.from_header(conn_header)
+if port:
+    print(f"Found Archicad instance at port: {port}")
+```
+
+#### Opening Projects
+
+The `open_project` action allows you to start a new Archicad window an open a project. This is the only way to open teamwork projects. 
+
+```python
+from multiconn_archicad import MultiConn, ConnHeader, TeamworkCredentials
+
+conn = MultiConn()
+
+# Open a project using a connection header
+conn_header = ConnHeader.from_dict(saved_header_data)
+port = conn.open_project.from_header(conn_header)
+# Optionally, open in demo mode:
+port = conn.open_project.from_header(conn_header, demo=True) 
+
+# For teamwork projects, you can provide credentials
+credentials = TeamworkCredentials("username", "password")
+port = conn.open_project.with_teamwork_credentials(conn_header, credentials)
+```
+
+### Dialog Handling (Windows only)
+
+When you open a project with the `open_project` command different dialogs will likely pop up. The MultiConn library provides DialogHandlers to programmatically handle those dialogs. This is particularly useful for batch operations and automation scripts.
+
+```python
+from multiconn_archicad import MultiConn, WinDialogHandler, win_int_handler_factory
+
+# Create a MultiConn instance with a dialog handler
+conn = MultiConn(dialog_handler=WinDialogHandler(win_int_handler_factory))
+
+# Dialog windows will be automatically handled when opening projects
+conn.open_project.from_header(conn_header)
+```
+
+
+#### Switching Projects (Solo Only)
+
+The `switch_project` action allows you to open a *different* solo project (`.pln`) within an *already running* Archicad instance, without needing to quit and restart. This is useful for quickly changing between solo project files managed by the same Archicad process.
+ 
+```python
+from multiconn_archicad import MultiConn, ConnHeader, Port
+
+conn = MultiConn()
+# Assume Archicad is running on port 19723 and port 19725
+
+# Get the header for the project you want to switch *to* (e.g., loaded from a file)
+target_header = ConnHeader.from_dict(saved_header_data_for_another_project)
+
+# Specify the port of the *running instance* you want to load the new project into
+running_instance_port = Port(19723)
+
+# Switch the project on the running instance
+# This will close the current project on port 19723 and open the one defined by target_header
+new_header_state = conn.switch_project.from_header(original_port=running_instance_port, new_header=target_header)
+
+# Alternatively, switch using a file path directly
+new_path = "C:/path/to/another/project.pln"
+new_header_state_from_path = conn.switch_project.from_path(original_port=running_instance_port, new_path=new_path)
+```
+DialogHandlers are platform and language dependent.
+
+The current implementation includes:
+- `EmptyDialogHandler`: Does nothing (default)
+- `WinDialogHandler`: Waits for ArchiCAD to start, and monitors appearing dialogs. If dialog appears, searches for appropriate handler in win_int_handler factory. Only works on windows.
+- `win_int_handler_factory`: Provides dialog handling logic on a dialog by dialog basis for the INT language version. It is an example you should customize for your specific project needs.
+
+### Serialization
+
+You can save and load connection configurations to easily reconnect to specific projects.
+
+#### Saving Connection Headers
+```python
+import json
+from multiconn_archicad import MultiConn, Port
+
+conn = MultiConn()
+conn.connect.all()
+conn_header = conn.open_port_headers[Port(19723)]
+header_dict = conn_header.to_dict()
+
+with open('conn_header.json', 'w') as f:
+    json.dump(header_dict, f)
+```
+
+#### Loading Connection Headers
+Note: Passwords are not stored in serialized connection headers for security reasons. You must provide them when loading teamwork projects.
+
+```python
+import json
+from multiconn_archicad import ConnHeader
+
+with open('conn_header.json', 'r') as f:
+    header_dict = json.load(f)
+
+# Create a header from the dictionary
+conn_header = ConnHeader.from_dict(header_dict)
+
+# For teamwork projects, you need to provide credentials
+if isinstance(conn_header.archicad_id, TeamworkProjectID):
+    credentials = TeamworkCredentials("username", "password")
+    # Use the credentials when opening the project
+    port = conn.open_project.with_teamwork_credentials(conn_header, credentials)
 ```
 
 ### Error Handling
 
-**MultiConn Archicad** uses a structured exception hierarchy for reporting errors, particularly those originating from the `core` namespace API calls. This makes error handling more explicit and robust.
+**MultiConn Archicad** uses a structured exception hierarchy for reporting errors. This makes error handling more explicit and robust.
 
 *   All library-specific exceptions inherit from `MulticonnArchicadError`.
 *   **API Communication Errors:** Inherit from `APIErrorBase`.
@@ -309,105 +403,9 @@ except RequestError as e:
     print(f"Request failed: Message='{e.message}' (Code={e.code})")
 
 # Catch any other potential API-related error (Catches all above errors as well.
-# Only this shoud be used if you do not need to handle failiures differently
+# If you do not need to handle failures differently, only catch this!
 except APIErrorBase as e:
      print(f"An API error occurred: Code={e.code}, Message='{e.message}'")
-
-```
-
-### New in v0.4: Type-Safe API Models for Tapir and Official JSON APIs
-
-This version introduces a comprehensive set of auto-generated Python models for both the **Tapir Add-On** and the **Official Archicad JSON API**. This feature is the result of a sophisticated new pipeline designed to provide a vastly improved developer experience when interacting with Archicad.
-
-Directly working with the JSON APIs often requires manually creating dictionaries for command parameters and parsing raw dictionary responses, which can be error-prone and lacks IDE support. These new models solve this by offering two powerful, complementary solutions:
-
-1.  **`TypedDicts`**: Lightweight types for static analysis and IDE autocompletion.
-2.  **`Pydantic Models`**: Robust models for runtime data validation and parsing.
-
-#### `TypedDicts` for Enhanced `core` Commands
-
-The generated `TypedDicts` are designed to be used with `core.post_command()` and `core.post_tapir_command()` to provide full type hinting for your parameters. By defining the expected structure of the command's dictionary, your IDE can offer autocompletion, and a static type checker (like MyPy or Pyright) can catch structural mistakes before you run your code.
-
-This is especially useful for catching common errors, like forgetting a required wrapper key that the Archicad API expects.
-
-**Before (Without TypedDicts):**
-
-```python
-# A common mistake: providing a list of element GUIDs directly.
-# The API actually expects a list of dictionaries, each with an "elementId" key.
-# This error would only be caught at runtime, with an error from the Archicad API.
-command_parameters = {
-    "elements": [
-        {"guid": "GUID_1"},
-        {"guid": "GUID_2"}
-    ],
-    "highlightedColors": [[50, 255, 100, 100]],
-}
-# This call would fail when sent to the API.
-conn.core.post_tapir_command('HighlightElements', command_parameters)
-```
-
-**After (With TypedDicts for Static Checking):**
-
-By using `TypedDict` in a helper function, your tools can validate the dictionary structure instantly.
-
-```python
-# Import the specific TypedDict for the command's parameters
-from multiconn_archicad.tapir.dicts.commands import HighlightElementsParameters
-
-def highlight_elements(conn: MultiConn, params: HighlightElementsParameters):
-    """A type-safe wrapper for the HighlightElements command."""
-    return conn.core.post_tapir_command('HighlightElements', params)
-
-# --- Correct Usage ---
-# The dictionary structure matches the TypedDict, so it passes static analysis.
-# Note the required `{"elementId": ...}` wrapper.
-correct_params = {
-    "elements": [
-        {"elementId": {"guid": "GUID_1"}},
-        {"elementId": {"guid": "GUID_2"}}
-    ],
-    "highlightedColors": [[0, 255, 0, 128]]
-}
-highlight_elements(conn, correct_params) # This is valid.
-
-# --- Incorrect Usage ---
-# Here, we forget the "elementId" wrapper key.
-incorrect_params = {
-    "elements": [
-        {"guid": "GUID_1"}, # Error is here!
-        {"guid": "GUID_2"}
-    ],
-    "highlightedColors": [[255, 0, 0, 128]]
-}
-
-# Your IDE and type checker will immediately flag this line with an error:
-# "Argument of type 'dict[str, list[dict[str, str]]]' cannot be assigned
-# to parameter 'params' of type 'HighlightElementsParameters'.
-# Key 'elementId' is missing from dictionary."
-highlight_elements(conn, incorrect_params) # <-- STATIC ERROR!
-```
-
-#### `Pydantic Models` for Data Validation and Future Wrappers
-
-Alongside the `TypedDicts`, the library now includes a complete set of `Pydantic` models. These are ideal for parsing and validating the JSON responses you receive from the API, ensuring the data conforms to the expected schema at runtime.
-
-They form the foundation for a future high-level wrapper that will provide a more pythonic, object-oriented interface to the APIs.
-
-**Example: Parsing an API Response**
-
-```python
-from multiconn_archicad.tapir.models.commands import GetProjectInfoResult
-
-# Raw dictionary response from the API
-response_dict = conn.core.post_tapir_command("GetProjectInfo")
-
-# Parse and validate the response using the Pydantic model
-project_info = GetProjectInfoResult.model_validate(response_dict)
-
-# Access data with dot notation and enjoy type safety
-if not project_info.isUntitled and project_info.projectName:
-    print(f"Connected to project: {project_info.projectName}")
 
 ```
 
