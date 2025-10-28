@@ -35,9 +35,13 @@ class ElementGeometryCommands:
         Args:
             elements (list[ElementIdArrayItem]): A list of elements.
 
+        Returns:
+            list[BoundingBox2DWrapperItem | ErrorItem]: A list of 2D bounding boxes.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "elements": elements,
@@ -59,9 +63,13 @@ class ElementGeometryCommands:
         Args:
             elements (list[ElementIdArrayItem]): A list of elements.
 
+        Returns:
+            list[BoundingBox3DWrapperItem | ErrorItem]: A list of 3D bounding boxes.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "elements": elements,

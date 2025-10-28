@@ -28,9 +28,13 @@ class ProjectCommands:
         """
         Gets the project location details.
 
+        Returns:
+            GetGeoLocationResult
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         response_dict = self._core.post_tapir_command("GetGeoLocation")
         validated_response = GetGeoLocationResult.model_validate(response_dict)
@@ -41,9 +45,13 @@ class ProjectCommands:
         Gets the file system locations (path) of the hotlink modules. The hotlinks can have tree
         hierarchy in the project.
 
+        Returns:
+            list[Hotlink]: A list of hotlink nodes.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         response_dict = self._core.post_tapir_command("GetHotlinks")
         validated_response = GetHotlinksResult.model_validate(response_dict)
@@ -53,9 +61,13 @@ class ProjectCommands:
         """
         Retrieves information about the currently loaded project.
 
+        Returns:
+            GetProjectInfoResult
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         response_dict = self._core.post_tapir_command("GetProjectInfo")
         validated_response = GetProjectInfoResult.model_validate(response_dict)
@@ -65,9 +77,13 @@ class ProjectCommands:
         """
         Retrieves the names and values of all project info fields.
 
+        Returns:
+            list[FieldModel]: A list of project info fields.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         response_dict = self._core.post_tapir_command("GetProjectInfoFields")
         validated_response = GetProjectInfoFieldsResult.model_validate(response_dict)
@@ -77,9 +93,13 @@ class ProjectCommands:
         """
         Retrieves information about the story sructure of the currently loaded project.
 
+        Returns:
+            GetStoriesResult
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         response_dict = self._core.post_tapir_command("GetStories")
         validated_response = GetStoriesResult.model_validate(response_dict)
@@ -95,6 +115,7 @@ class ProjectCommands:
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "projectFilePath": project_file_path,
@@ -116,6 +137,7 @@ class ProjectCommands:
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "projectInfoId": project_info_id,
@@ -138,6 +160,7 @@ class ProjectCommands:
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "stories": stories,

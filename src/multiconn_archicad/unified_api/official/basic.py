@@ -18,9 +18,13 @@ class BasicCommands:
         """
         Accesses the version information from the running Archicad.
 
+        Returns:
+            GetProductInfoResult
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         response_dict = self._core.post_command("API.GetProductInfo")
         validated_response = GetProductInfoResult.model_validate(response_dict)
@@ -30,9 +34,13 @@ class BasicCommands:
         """
         Checks if the Archicad connection is alive.
 
+        Returns:
+            bool: Returns true if the connection is alive.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         response_dict = self._core.post_command("API.IsAlive")
         validated_response = IsAliveResult.model_validate(response_dict)

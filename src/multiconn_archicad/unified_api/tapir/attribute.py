@@ -49,9 +49,13 @@ class AttributeCommands:
             overwrite_existing (None | bool): Overwrite the Building Material if exists with the
                 same name. The default is false.
 
+        Returns:
+            list[AttributeIdArrayItem]: A list of attributes.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "buildingMaterialDataArray": building_material_data_array,
@@ -76,9 +80,13 @@ class AttributeCommands:
             overwrite_existing (None | bool): Overwrite the Composite if exists with the same
                 name. The default is false.
 
+        Returns:
+            list[AttributeIdArrayItem]: A list of attributes.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "compositeDataArray": composite_data_array,
@@ -102,9 +110,13 @@ class AttributeCommands:
             overwrite_existing (None | bool): Overwrite the Layer if exists with the same name.
                 The default is false.
 
+        Returns:
+            list[AttributeIdArrayItem]: A list of attributes.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "layerDataArray": layer_data_array,
@@ -129,9 +141,13 @@ class AttributeCommands:
             overwrite_existing (None | bool): Overwrite the Surface if exists with the same
                 name. The default is false.
 
+        Returns:
+            list[AttributeIdArrayItem]: A list of attributes.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "surfaceDataArray": surface_data_array,
@@ -151,9 +167,13 @@ class AttributeCommands:
         Args:
             attribute_type (AttributeType)
 
+        Returns:
+            list[Attribute]: Details of attributes.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "attributeType": attribute_type,
@@ -172,9 +192,13 @@ class AttributeCommands:
         Args:
             attribute_ids (list[AttributeIdArrayItem]): A list of attributes.
 
+        Returns:
+            list[Property]: Physical properties list.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "attributeIds": attribute_ids,

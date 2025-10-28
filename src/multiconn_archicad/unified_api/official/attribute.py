@@ -91,9 +91,14 @@ class AttributeCommands:
         Args:
             attribute_folders (list[AttributeFolderCreationParameters])
 
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "attributeFolders": attribute_folders,
@@ -116,9 +121,14 @@ class AttributeCommands:
             attribute_folder_ids (list[AttributeFolderIdWrapperItem]): A list of attribute
                 folder identifiers.
 
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "attributeFolderIds": attribute_folder_ids,
@@ -139,9 +149,14 @@ class AttributeCommands:
         Args:
             attribute_ids (list[AttributeIdWrapperItem]): A list of attribute identifiers.
 
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "attributeIds": attribute_ids,
@@ -157,9 +172,13 @@ class AttributeCommands:
         """
         Returns the model view and layout book pen table identifiers.
 
+        Returns:
+            GetActivePenTablesResult
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         response_dict = self._core.post_command("API.GetActivePenTables")
         validated_response = GetActivePenTablesResult.model_validate(response_dict)
@@ -176,9 +195,13 @@ class AttributeCommands:
             attribute_type (AttributeType)
             path (None | list[str]): A list of attribute folder names. May be empty.
 
+        Returns:
+            AttributeFolderStructure
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "attributeType": attribute_type,
@@ -202,9 +225,13 @@ class AttributeCommands:
             attribute_folder_ids (list[AttributeFolderIdWrapperItem]): A list of attribute
                 folder identifiers.
 
+        Returns:
+            list[AttributeFolderWrapperItem | ErrorItem]: A list of attribute folders.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "attributeFolderIds": attribute_folder_ids,
@@ -223,9 +250,13 @@ class AttributeCommands:
         Args:
             attribute_type (AttributeType)
 
+        Returns:
+            list[AttributeIdWrapperItem]: A list of attribute identifiers.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "attributeType": attribute_type,
@@ -246,9 +277,14 @@ class AttributeCommands:
         Args:
             attribute_ids (list[AttributeIdWrapperItem]): A list of attribute identifiers.
 
+        Returns:
+            list[AttributeIndexAndGuidWrapperItem | ErrorItem]: A list of complete attribute
+                identifiers.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "attributeIds": attribute_ids,
@@ -269,9 +305,14 @@ class AttributeCommands:
         Args:
             attribute_ids (list[AttributeIdWrapperItem]): A list of attribute identifiers.
 
+        Returns:
+            list[BuildingMaterialAttributeWrapperItem | ErrorItem]: A list of building material
+                attributes and potential errors.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "attributeIds": attribute_ids,
@@ -293,9 +334,14 @@ class AttributeCommands:
         Args:
             attribute_ids (list[AttributeIdWrapperItem]): A list of attribute identifiers.
 
+        Returns:
+            list[CompositeAttributeWrapperItem | ErrorItem]: A list of the composite attributes
+                and potential errors.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "attributeIds": attribute_ids,
@@ -316,9 +362,14 @@ class AttributeCommands:
         Args:
             attribute_ids (list[AttributeIdWrapperItem]): A list of attribute identifiers.
 
+        Returns:
+            list[ErrorItem | FillAttributeWrapperItem]: A list of fill attributes and potential
+                errors.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "attributeIds": attribute_ids,
@@ -339,9 +390,14 @@ class AttributeCommands:
         Args:
             attribute_ids (list[AttributeIdWrapperItem]): A list of attribute identifiers.
 
+        Returns:
+            list[ErrorItem | LayerAttributeWrapperItem]: A list of layer attributes and
+                potential errors.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "attributeIds": attribute_ids,
@@ -362,9 +418,14 @@ class AttributeCommands:
         Args:
             attribute_ids (list[AttributeIdWrapperItem]): A list of attribute identifiers.
 
+        Returns:
+            list[ErrorItem | LayerCombinationAttributeWrapperItem]: A list of layer combination
+                attributes and potential errors.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "attributeIds": attribute_ids,
@@ -386,9 +447,14 @@ class AttributeCommands:
         Args:
             attribute_ids (list[AttributeIdWrapperItem]): A list of attribute identifiers.
 
+        Returns:
+            list[ErrorItem | LineAttributeWrapperItem]: A list of line attributes and potential
+                errors.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "attributeIds": attribute_ids,
@@ -410,9 +476,14 @@ class AttributeCommands:
         Args:
             attribute_ids (list[AttributeIdWrapperItem]): A list of attribute identifiers.
 
+        Returns:
+            list[ErrorItem | PenTableAttributeWrapperItem]: A list of pen table attributes and
+                potential errors.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "attributeIds": attribute_ids,
@@ -440,9 +511,13 @@ class AttributeCommands:
             image_height (int): The height of the preview image.
             background_color (None | RGBColor): The background color of the preview image.
 
+        Returns:
+            list[ErrorItem | ImageWrapperItem]: The preview images of the profiles.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "attributeIds": attribute_ids,
@@ -466,9 +541,14 @@ class AttributeCommands:
         Args:
             attribute_ids (list[AttributeIdWrapperItem]): A list of attribute identifiers.
 
+        Returns:
+            list[ErrorItem | ProfileAttributeWrapperItem]: A list of the profile attributes and
+                potential errors.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "attributeIds": attribute_ids,
@@ -489,9 +569,14 @@ class AttributeCommands:
         Args:
             attribute_ids (list[AttributeIdWrapperItem]): A list of attribute identifiers.
 
+        Returns:
+            list[ErrorItem | SurfaceAttributeWrapperItem]: A list of surface attributes and
+                potential errors.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "attributeIds": attribute_ids,
@@ -512,9 +597,14 @@ class AttributeCommands:
         Args:
             attribute_ids (list[AttributeIdWrapperItem]): A list of attribute identifiers.
 
+        Returns:
+            list[ErrorItem | ZoneCategoryAttributeWrapperItem]: A list of zone category
+                attributes and potential errors.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "attributeIds": attribute_ids,
@@ -544,6 +634,7 @@ class AttributeCommands:
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "attributeFolderIds": attribute_folder_ids,
@@ -565,9 +656,14 @@ class AttributeCommands:
         Args:
             attribute_folder_parameters_list (list[AttributeFolderRenameParameters])
 
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "attributeFolderParametersList": attribute_folder_parameters_list,

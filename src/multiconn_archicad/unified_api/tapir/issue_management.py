@@ -52,6 +52,7 @@ class IssueManagementCommands:
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "issueId": issue_id,
@@ -79,6 +80,7 @@ class IssueManagementCommands:
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "issueId": issue_id,
@@ -100,9 +102,13 @@ class IssueManagementCommands:
             parent_issue_id (IssueId | None)
             tag_text (None | str): Tag text of the issue, optional.
 
+        Returns:
+            IssueId
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "name": name,
@@ -128,6 +134,7 @@ class IssueManagementCommands:
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "issueId": issue_id,
@@ -150,6 +157,7 @@ class IssueManagementCommands:
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "issueId": issue_id,
@@ -182,6 +190,7 @@ class IssueManagementCommands:
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "issues": issues,
@@ -202,9 +211,13 @@ class IssueManagementCommands:
         Args:
             issue_id (IssueId)
 
+        Returns:
+            list[Comment]: A list of existing comments.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "issueId": issue_id,
@@ -224,9 +237,13 @@ class IssueManagementCommands:
             issue_id (IssueId)
             type (IssueElementType)
 
+        Returns:
+            list[ElementIdArrayItem]: A list of elements.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "issueId": issue_id,
@@ -243,9 +260,13 @@ class IssueManagementCommands:
         """
         Retrieves information about existing issues.
 
+        Returns:
+            list[Issue]: A list of existing issues.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         response_dict = self._core.post_tapir_command("GetIssues")
         validated_response = GetIssuesResult.model_validate(response_dict)
@@ -263,6 +284,7 @@ class IssueManagementCommands:
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "importPath": import_path,

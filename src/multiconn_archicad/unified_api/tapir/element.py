@@ -106,9 +106,13 @@ class ElementCommands:
             remove_elements_from_selection (None | list[ElementIdArrayItem]): A list of
                 elements.
 
+        Returns:
+            ChangeSelectionOfElementsResult
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "addElementsToSelection": add_elements_to_selection,
@@ -128,9 +132,13 @@ class ElementCommands:
         Args:
             columns_data (list[ColumnsDatum]): Array of data to create Columns.
 
+        Returns:
+            list[ElementIdArrayItem]: A list of elements.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "columnsData": columns_data,
@@ -149,9 +157,13 @@ class ElementCommands:
         Args:
             meshes_data (list[MeshesDatum]): Array of data to create Meshes.
 
+        Returns:
+            list[ElementIdArrayItem]: A list of elements.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "meshesData": meshes_data,
@@ -170,9 +182,13 @@ class ElementCommands:
         Args:
             objects_data (list[ObjectsDatum]): Array of data to create Objects.
 
+        Returns:
+            list[ElementIdArrayItem]: A list of elements.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "objectsData": objects_data,
@@ -191,9 +207,13 @@ class ElementCommands:
         Args:
             polylines_data (list[PolylinesDatum]): Array of data to create Polylines.
 
+        Returns:
+            list[ElementIdArrayItem]: A list of elements.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "polylinesData": polylines_data,
@@ -212,9 +232,13 @@ class ElementCommands:
         Args:
             slabs_data (list[SlabsDatum]): Array of data to create Slabs.
 
+        Returns:
+            list[ElementIdArrayItem]: A list of elements.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "slabsData": slabs_data,
@@ -233,9 +257,13 @@ class ElementCommands:
         Args:
             zones_data (list[ZonesDatum]): Array of data to create Zones.
 
+        Returns:
+            list[ElementIdArrayItem]: A list of elements.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "zonesData": zones_data,
@@ -257,6 +285,7 @@ class ElementCommands:
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "elements": elements,
@@ -277,9 +306,13 @@ class ElementCommands:
             elements (list[ElementIdArrayItem]): A list of elements.
             filters (None | list[ElementFilter])
 
+        Returns:
+            list[ElementIdArrayItem]: A list of elements.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "elements": elements,
@@ -301,9 +334,13 @@ class ElementCommands:
         Args:
             elements (list[ElementIdArrayItem]): A list of elements.
 
+        Returns:
+            list[BoundingBox3DArrayItem | ErrorItem]: A list of 3D bounding boxes.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "elements": elements,
@@ -326,9 +363,13 @@ class ElementCommands:
             filters (None | list[ElementFilter])
             databases (None | list[DatabaseIdArrayItem]): A list of Archicad databases.
 
+        Returns:
+            GetAllElementsResult
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "filters": filters,
@@ -353,9 +394,16 @@ class ElementCommands:
             classification_system_ids (list[ClassificationSystemIdArrayItem]): A list of
                 classification system identifiers.
 
+        Returns:
+            list[ElementClassificationItemArray | ErrorItem]: The list of element classification
+                item identifiers. Order of the ids are the same as in the input. Non-existing
+                elements or non-existing classification systems are represented by error
+                objects.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "elements": elements,
@@ -382,9 +430,13 @@ class ElementCommands:
             elements_group_2 (list[ElementIdArrayItem]): A list of elements.
             settings (None | Settings)
 
+        Returns:
+            list[Collision]
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "elementsGroup1": elements_group_1,
@@ -408,9 +460,13 @@ class ElementCommands:
             elements (list[ElementIdArrayItem]): A list of elements.
             connected_element_type (ElementType)
 
+        Returns:
+            list[ConnectedElement]
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "elements": elements,
@@ -430,9 +486,13 @@ class ElementCommands:
         Args:
             elements (list[ElementIdArrayItem]): A list of elements.
 
+        Returns:
+            list[DetailsOfElement]
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "elements": elements,
@@ -459,9 +519,13 @@ class ElementCommands:
             filters (None | list[ElementFilter])
             databases (None | list[DatabaseIdArrayItem]): A list of Archicad databases.
 
+        Returns:
+            GetElementsByTypeResult
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "elementType": element_type,
@@ -482,9 +546,13 @@ class ElementCommands:
         Args:
             elements (list[ElementIdArrayItem]): A list of elements.
 
+        Returns:
+            list[GDLParameterList]: The GDL parameters of elements.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "elements": elements,
@@ -500,9 +568,13 @@ class ElementCommands:
         """
         Gets the list of the currently selected elements.
 
+        Returns:
+            list[ElementIdArrayItem]: A list of elements.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         response_dict = self._core.post_tapir_command("GetSelectedElements")
         validated_response = GetSelectedElementsResult.model_validate(response_dict)
@@ -515,9 +587,13 @@ class ElementCommands:
         Args:
             elements (list[ElementIdArrayItem]): A list of elements.
 
+        Returns:
+            list[Subelement]
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "elements": elements,
@@ -537,9 +613,13 @@ class ElementCommands:
         Args:
             zone_element_id (ElementId)
 
+        Returns:
+            list[ZoneBoundary]
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "zoneElementId": zone_element_id,
@@ -574,6 +654,7 @@ class ElementCommands:
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "elements": elements,
@@ -597,9 +678,14 @@ class ElementCommands:
             elements_with_move_vectors (list[ElementsWithMoveVector]): The elements with move
                 vector pairs.
 
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "elementsWithMoveVectors": elements_with_move_vectors,
@@ -623,9 +709,14 @@ class ElementCommands:
             element_classifications (list[ElementClassification]): A list of element
                 classification identifiers.
 
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "elementClassifications": element_classifications,
@@ -646,9 +737,14 @@ class ElementCommands:
         Args:
             elements_with_details (list[ElementsWithDetail]): The elements with parameters.
 
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "elementsWithDetails": elements_with_details,
@@ -670,9 +766,14 @@ class ElementCommands:
             elements_with_gdl_parameters (list[ElementsWithGDLParameter]): The elements with GDL
                 parameters dictionary pairs.
 
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "elementsWithGDLParameters": elements_with_gdl_parameters,

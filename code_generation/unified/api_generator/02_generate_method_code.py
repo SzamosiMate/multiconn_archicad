@@ -150,6 +150,7 @@ def _generate_standard_method(
     """Generates method code for a standard, straightforward command."""
     final_return_type_hint = "None"
     alias_property_name = None
+    return_doc_info = None
 
     if result_model:
         # Check if the result model is just a wrapper for a single field (alias)
@@ -157,11 +158,14 @@ def _generate_standard_method(
             field_name, field_info = list(result_model.model_fields.items())[0]
             alias_property_name = field_name
             final_return_type_hint = get_clean_type_hint(field_info.annotation, dependencies)
+            return_doc_info = (final_return_type_hint, field_info.description)
         else:
             final_return_type_hint = get_clean_type_hint(result_model, dependencies)
+            # Ensure a Returns section is always added for non-None return types
+            return_doc_info = (final_return_type_hint, None)
 
     signature, param_docs = _build_signature_and_docs(snake_name, params_model, final_return_type_hint, dependencies)
-    docstring = _build_docstring(command_details["description"], param_docs)
+    docstring = _build_docstring(command_details["description"], param_docs, return_doc_info)
     body = _build_body(command_details["name"], command_details["source"], params_model, result_model, alias_property_name)
 
     return {
@@ -209,7 +213,9 @@ def _build_signature_and_docs(
     return signature, param_docs
 
 
-def _build_docstring(description: str, param_docs: list[str]) -> str:
+def _build_docstring(
+    description: str, param_docs: list[str], return_doc_info: tuple[str, str | None] | None = None
+) -> str:
     """Assembles the full method docstring, including a standard 'Raises' section."""
     docstring = f'"""\n{textwrap.fill(description, width=88)}\n'
     if param_docs:
@@ -218,9 +224,20 @@ def _build_docstring(description: str, param_docs: list[str]) -> str:
             wrapped_doc = textwrap.fill(doc, width=88, initial_indent="    ", subsequent_indent=" " * 8)
             docstring += f"{wrapped_doc}\n"
 
+    if return_doc_info:
+        return_type, return_desc = return_doc_info
+        docstring += "\nReturns:\n"
+        # Only add the description part if it's a non-empty string
+        return_line = f"{return_type}: {return_desc}" if return_desc else return_type
+        wrapped_doc = textwrap.fill(
+            return_line, width=88, initial_indent="    ", subsequent_indent=" " * 8
+        )
+        docstring += f"{wrapped_doc}\n"
+
     docstring += "\nRaises:\n"
     docstring += "    ArchicadAPIError: If the API returns an error response.\n"
     docstring += "    RequestError: If there is a network or connection error.\n"
+    docstring += "    pydantic.ValidationError: If the parameters, or the API Response fail validation.\n"
     docstring += '"""'
     return docstring
 

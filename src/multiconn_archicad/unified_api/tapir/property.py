@@ -57,9 +57,13 @@ class PropertyCommands:
             property_definitions (list[PropertyDefinitionArrayItem]): The parameters of the new
                 properties.
 
+        Returns:
+            list[ErrorItem | PropertyIdArrayItem]: A list of property identifiers.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "propertyDefinitions": property_definitions,
@@ -79,9 +83,13 @@ class PropertyCommands:
             property_groups (list[PropertyGroupArrayItem]): The parameters of the new property
                 groups.
 
+        Returns:
+            list[PropertyGroupIdArrayItem]: The identifiers of the created property groups.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "propertyGroups": property_groups,
@@ -102,9 +110,14 @@ class PropertyCommands:
         Args:
             property_ids (list[PropertyIdArrayItem]): The identifiers of properties to delete.
 
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "propertyIds": property_ids,
@@ -126,9 +139,14 @@ class PropertyCommands:
             property_group_ids (list[PropertyGroupIdArrayItem]): The identifiers of property
                 groups to delete.
 
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "propertyGroupIds": property_group_ids,
@@ -144,9 +162,13 @@ class PropertyCommands:
         """
         Returns all user defined and built-in properties.
 
+        Returns:
+            list[PropertyDetails]: A list of property identifiers.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         response_dict = self._core.post_tapir_command("GetAllProperties")
         validated_response = GetAllPropertiesResult.model_validate(response_dict)
@@ -162,9 +184,15 @@ class PropertyCommands:
             attribute_ids (list[AttributeIdArrayItem]): A list of attributes.
             properties (list[PropertyIdArrayItem]): A list of property identifiers.
 
+        Returns:
+            list[ErrorItem | PropertyValuesArrayItem]: List of property value lists. The order
+                of the outer list is that of the given attributes. The order of the inner lists
+                are that of the given properties.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "attributeIds": attribute_ids,
@@ -188,9 +216,15 @@ class PropertyCommands:
             elements (list[ElementIdArrayItem]): A list of elements.
             properties (list[PropertyIdArrayItem]): A list of property identifiers.
 
+        Returns:
+            list[ErrorItem | PropertyValuesArrayItem]: List of property value lists. The order
+                of the outer list is that of the given elements. The order of the inner lists
+                are that of the given properties.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "elements": elements,
@@ -213,9 +247,14 @@ class PropertyCommands:
             attribute_property_values (list[AttributePropertyValue]): A list of attribute
                 property values.
 
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "attributePropertyValues": attribute_property_values,
@@ -238,9 +277,14 @@ class PropertyCommands:
             element_property_values (list[ElementPropertyValue]): A list of element property
                 values.
 
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "elementPropertyValues": element_property_values,

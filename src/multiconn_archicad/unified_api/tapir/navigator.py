@@ -48,9 +48,13 @@ class NavigatorCommands:
             navigator_item_ids (list[NavigatorItemIdArrayItem]): A list of navigator item
                 identifiers.
 
+        Returns:
+            list[DatabaseIdArrayItem]: A list of Archicad databases.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "navigatorItemIds": navigator_item_ids,
@@ -67,9 +71,13 @@ class NavigatorCommands:
         """
         Gets all model view options
 
+        Returns:
+            list[ModelViewOption]
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         response_dict = self._core.post_tapir_command("GetModelViewOptions")
         validated_response = GetModelViewOptionsResult.model_validate(response_dict)
@@ -84,9 +92,13 @@ class NavigatorCommands:
         Args:
             databases (None | list[DatabaseIdArrayItem]): A list of Archicad databases.
 
+        Returns:
+            list[ErrorItem | ViewTransformations]
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "databases": databases,
@@ -106,9 +118,13 @@ class NavigatorCommands:
             navigator_item_ids (list[NavigatorItemIdArrayItem]): A list of navigator item
                 identifiers.
 
+        Returns:
+            list[ErrorItem | ViewSettings]
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "navigatorItemIds": navigator_item_ids,
@@ -133,6 +149,7 @@ class NavigatorCommands:
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "publisherSetName": publisher_set_name,
@@ -153,9 +170,14 @@ class NavigatorCommands:
         Args:
             navigator_item_ids_with_view_settings (list[NavigatorItemIdsWithViewSetting])
 
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "navigatorItemIdsWithViewSettings": navigator_item_ids_with_view_settings,
@@ -177,6 +199,7 @@ class NavigatorCommands:
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
             "elements": elements,
