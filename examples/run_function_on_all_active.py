@@ -3,6 +3,10 @@ from inspect import iscoroutinefunction
 from typing import Callable, Any
 from multiconn_archicad import MultiConn, ConnHeader
 from multiconn_archicad.models.official import types as official_types
+import logging
+
+logging.basicConfig(level=logging.INFO)
+log = logging.getLogger(__name__)
 
 def add_str_to_id_standard(header: ConnHeader, str_to_add: str) -> str:
     std = header.standard
