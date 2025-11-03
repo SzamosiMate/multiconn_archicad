@@ -1,4 +1,3 @@
-import sys
 import logging
 
 from .multi_conn import MultiConn
@@ -27,6 +26,8 @@ from .core.core_commands import CoreCommands
 from .dialog_handlers import (
     DialogHandlerBase,
     UnhandledDialogError,
+    WinDialogHandler,
+    win_int_handler_factory,
 )
 from .errors import (
     MulticonnArchicadError,
@@ -58,6 +59,8 @@ __all__ = [
     "TeamworkCredentials",
     "DialogHandlerBase",
     "UnhandledDialogError",
+    "WinDialogHandler",
+    "win_int_handler_factory",
     "TeamworkProjectID",
     "SoloProjectID",
     "UntitledProjectID",
@@ -79,15 +82,8 @@ __all__ = [
     "is_product_info_initialized",
     "is_id_initialized",
     "is_header_fully_initialized",
-    "UnifiedApi"
+    "UnifiedApi",
 ]
-
-if sys.platform == "win32":
-    from .dialog_handlers import WinDialogHandler, win_int_handler_factory
-    __all__.extend([
-        "WinDialogHandler",
-        "win_int_handler_factory",
-    ])
 
 
 log = logging.getLogger(__name__)
