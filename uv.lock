@@ -1,6 +1,6 @@
 version = 1
 revision = 2
-requires-python = ">=3.12"
+requires-python = ">=3.12, <3.15"
 
 [[package]]
 name = "aiohappyeyeballs"
@@ -775,10 +775,10 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "aiohttp", specifier = ">=3.11.11" },
+    { name = "aiohttp", specifier = ">=3.11.11,<4.0" },
     { name = "archicad", specifier = ">=28.3000" },
-    { name = "psutil", specifier = ">=6.1.1" },
-    { name = "pydantic", specifier = ">=2.11.7" },
+    { name = "psutil", specifier = ">=6.1.1,<8.0" },
+    { name = "pydantic", specifier = ">=2.11.7,<3.0" },
     { name = "pywinauto", marker = "sys_platform == 'win32' and extra == 'dialog-handlers'", specifier = ">=0.6.9" },
     { name = "typing-extensions", specifier = ">=4.12.2" },
 ]
