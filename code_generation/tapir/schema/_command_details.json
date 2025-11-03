@@ -32,7 +32,7 @@
     {
         "name": "CreateBuildingMaterials",
         "group": "Attribute Commands",
-        "description": "Creates Building Material attributes based on the given parameters.",
+        "description": "Creates or overwrites Building Material attributes based on the given parameters.",
         "version": "1.0.1"
     },
     {
@@ -44,7 +44,7 @@
     {
         "name": "CreateComposites",
         "group": "Attribute Commands",
-        "description": "Creates Composite attributes based on the given parameters.",
+        "description": "Creates or overwrites Composite attributes based on the given parameters.",
         "version": "1.0.2"
     },
     {
@@ -60,9 +60,15 @@
         "version": "1.0.2"
     },
     {
+        "name": "CreateLayerCombinations",
+        "group": "Attribute Commands",
+        "description": "Creates or overwrites Layer Combination attributes based on the given parameters.",
+        "version": "1.2.4"
+    },
+    {
         "name": "CreateLayers",
         "group": "Attribute Commands",
-        "description": "Creates Layer attributes based on the given parameters.",
+        "description": "Creates or overwrites Layer attributes based on the given parameters.",
         "version": "1.0.3"
     },
     {
@@ -104,7 +110,7 @@
     {
         "name": "CreateSurfaces",
         "group": "Attribute Commands",
-        "description": "Creates Surface attributes based on the given parameters.",
+        "description": "Creates or overwrites Surface attributes based on the given parameters.",
         "version": "1.2.2"
     },
     {
@@ -298,6 +304,12 @@
         "group": "Issue Management Commands",
         "description": "Retrieves information about existing issues.",
         "version": "1.0.2"
+    },
+    {
+        "name": "GetLayerCombinations",
+        "group": "Attribute Commands",
+        "description": "Returns the details of layer combination attributes.",
+        "version": "1.2.4"
     },
     {
         "name": "GetLibraries",

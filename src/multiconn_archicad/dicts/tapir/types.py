@@ -820,6 +820,9 @@ class ManualZoneGeometry(TypedDict):
     holes: NotRequired[Holes2D]
 
 
+ZoneCreationGeometry = AutomaticZoneGeometry | ManualZoneGeometry
+
+
 class WallSettings(TypedDict):
     begCoordinate: NotRequired[Coordinate2D]
     endCoordinate: NotRequired[Coordinate2D]
@@ -952,30 +955,6 @@ class MeshesDatum(TypedDict):
     sublines: NotRequired[List[Subline]]
 
 
-class LayerDataArrayItem(TypedDict):
-    name: str
-    isHidden: NotRequired[bool]
-    isLocked: NotRequired[bool]
-    isWireframe: NotRequired[bool]
-
-
-class BuildingMaterialDataArrayItem(TypedDict):
-    name: str
-    id: NotRequired[str]
-    manufacturer: NotRequired[str]
-    description: NotRequired[str]
-    connPriority: NotRequired[int]
-    cutFillIndex: NotRequired[int]
-    cutFillPen: NotRequired[int]
-    cutFillBackgroundPen: NotRequired[int]
-    cutSurfaceIndex: NotRequired[int]
-    thermalConductivity: NotRequired[float]
-    density: NotRequired[float]
-    heatCapacity: NotRequired[float]
-    embodiedEnergy: NotRequired[float]
-    embodiedCarbon: NotRequired[float]
-
-
 class Properties(TypedDict):
     thermalConductivity: NotRequired[float]
     density: NotRequired[float]
@@ -1048,6 +1027,31 @@ class ElementId(TypedDict):
 
 class AttributeId(TypedDict):
     guid: Guid
+
+
+class LayersOfLayerCombinationItem(TypedDict):
+    attributeId: AttributeId
+    isHidden: bool
+    isLocked: bool
+    isWireframe: bool
+    intersectionGroupNr: int
+
+
+LayersOfLayerCombination = List[LayersOfLayerCombinationItem]
+
+
+class LayerCombinationAttributeDetails(TypedDict):
+    attributeId: AttributeId
+    attributeIndex: NotRequired[int]
+    name: str
+    layers: LayersOfLayerCombination
+
+
+class LayerCombinationAttribute(TypedDict):
+    layerCombination: LayerCombinationAttributeDetails
+
+
+LayerCombinationAttributeOrError = LayerCombinationAttribute | ErrorItem
 
 
 GDLParameterArray = List[GDLParameterDetails]
@@ -1212,7 +1216,7 @@ class ZonesDatum(TypedDict):
     numberStr: str
     categoryAttributeId: NotRequired[AttributeId]
     stampPosition: NotRequired[Coordinate2D]
-    geometry: AutomaticZoneGeometry | ManualZoneGeometry
+    geometry: ZoneCreationGeometry
 
 
 class FavoritesFromElement(TypedDict):
@@ -1224,6 +1228,42 @@ class Attribute(TypedDict):
     attributeId: AttributeId
     index: float
     name: str
+
+
+class LayerDataArrayItem(TypedDict):
+    attributeId: NotRequired[AttributeId]
+    index: NotRequired[str]
+    name: str
+    isHidden: NotRequired[bool]
+    isLocked: NotRequired[bool]
+    isWireframe: NotRequired[bool]
+    intersectionGroupNr: NotRequired[int]
+
+
+class LayerCombinationDataArrayItem(TypedDict):
+    attributeId: NotRequired[AttributeId]
+    index: NotRequired[str]
+    name: str
+    layers: LayersOfLayerCombination
+
+
+class BuildingMaterialDataArrayItem(TypedDict):
+    attributeId: NotRequired[AttributeId]
+    index: NotRequired[str]
+    name: str
+    id: NotRequired[str]
+    manufacturer: NotRequired[str]
+    description: NotRequired[str]
+    connPriority: NotRequired[int]
+    cutFillIndex: NotRequired[int]
+    cutFillPen: NotRequired[int]
+    cutFillBackgroundPen: NotRequired[int]
+    cutSurfaceIndex: NotRequired[int]
+    thermalConductivity: NotRequired[float]
+    density: NotRequired[float]
+    heatCapacity: NotRequired[float]
+    embodiedEnergy: NotRequired[float]
+    embodiedCarbon: NotRequired[float]
 
 
 class Conflict(TypedDict):
@@ -1304,6 +1344,8 @@ class Separator(TypedDict):
 
 
 class CompositeDataArrayItem(TypedDict):
+    attributeId: NotRequired[AttributeId]
+    index: NotRequired[str]
     name: str
     useWith: NotRequired[List[str]]
     skins: List[Skin]
@@ -1311,6 +1353,8 @@ class CompositeDataArrayItem(TypedDict):
 
 
 class SurfaceDataArrayItem(TypedDict):
+    attributeId: NotRequired[AttributeId]
+    index: NotRequired[str]
     name: str
     materialType: SurfaceType
     ambientReflection: float

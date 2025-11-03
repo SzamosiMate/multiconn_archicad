@@ -1250,30 +1250,6 @@ class MeshesDatum(APIModel):
     ] = None
 
 
-class LayerDataArrayItem(APIModel):
-    name: Annotated[str, Field(description="Name.")]
-    isHidden: Annotated[bool | None, Field(description="Hide/Show.")] = None
-    isLocked: Annotated[bool | None, Field(description="Lock/Unlock.")] = None
-    isWireframe: Annotated[bool | None, Field(description="Force the model to wireframe.")] = None
-
-
-class BuildingMaterialDataArrayItem(APIModel):
-    name: Annotated[str, Field(description="Name.")]
-    id: Annotated[str | None, Field(description="Identifier.")] = None
-    manufacturer: Annotated[str | None, Field(description="Manufacturer.")] = None
-    description: Annotated[str | None, Field(description="Decription.")] = None
-    connPriority: Annotated[int | None, Field(description="Intersection priority.")] = None
-    cutFillIndex: Annotated[int | None, Field(description="Index of the Cut Fill.")] = None
-    cutFillPen: Annotated[int | None, Field(description="Cut Fill Foreground Pen.")] = None
-    cutFillBackgroundPen: Annotated[int | None, Field(description="Cut Fill Background Pen.")] = None
-    cutSurfaceIndex: Annotated[int | None, Field(description="Index of the Cut Surface.")] = None
-    thermalConductivity: Annotated[float | None, Field(description="Thermal Conductivity.")] = None
-    density: Annotated[float | None, Field(description="Density.")] = None
-    heatCapacity: Annotated[float | None, Field(description="Heat Capacity.")] = None
-    embodiedEnergy: Annotated[float | None, Field(description="Embodied Energy.")] = None
-    embodiedCarbon: Annotated[float | None, Field(description="Embodied Carbon.")] = None
-
-
 class Properties(APIModel):
     thermalConductivity: Annotated[float | None, Field(description="Thermal Conductivity.")] = None
     density: Annotated[float | None, Field(description="Density.")] = None
@@ -1370,6 +1346,42 @@ class AttributeId(APIModel):
             description="A Globally Unique Identifier (or Universally Unique Identifier) in its string representation as defined in RFC 4122.",
         ),
     ]
+
+
+class LayersOfLayerCombinationItem(APIModel):
+    attributeId: Annotated[AttributeId, Field(description="The identifier of the Layer attribute.")]
+    isHidden: Annotated[bool, Field(description="Visibility of the Layer in the Layer Combination.")]
+    isLocked: Annotated[bool, Field(description="Lock state of the Layer in the Layer Combination.")]
+    isWireframe: Annotated[
+        bool,
+        Field(description="Is wireframe mode forced for the Layer in the Layer Combination."),
+    ]
+    intersectionGroupNr: Annotated[
+        int,
+        Field(
+            description="Intersection group of the Layer in the Layer Combination. Elements on layers having the same group will be intersected."
+        ),
+    ]
+
+
+class LayerCombinationAttributeDetails(APIModel):
+    attributeId: Annotated[
+        AttributeId,
+        Field(description="The identifier of the layer combination attribute."),
+    ]
+    attributeIndex: Annotated[
+        int | None,
+        Field(description="The index identifier of the layer combination attribute."),
+    ] = None
+    name: Annotated[str, Field(description="The name of the layer combination.")]
+    layers: Annotated[
+        List[LayersOfLayerCombinationItem],
+        Field(description="List of Layers included in the Layer Combination."),
+    ]
+
+
+class LayerCombinationAttribute(APIModel):
+    layerCombination: LayerCombinationAttributeDetails
 
 
 class GDLParameterList(APIModel):
@@ -1559,7 +1571,10 @@ class ZonesDatum(APIModel):
         Coordinate2D | None,
         Field(description="Position of the origin of the zone stamp."),
     ] = None
-    geometry: AutomaticZoneGeometry | ManualZoneGeometry
+    geometry: Annotated[
+        AutomaticZoneGeometry | ManualZoneGeometry,
+        Field(description="Defines the geometry of a zone. Used as input for creating zones."),
+    ]
 
 
 class FavoritesFromElement(APIModel):
@@ -1571,6 +1586,89 @@ class Attribute(APIModel):
     attributeId: AttributeId
     index: Annotated[float, Field(description="Index of the attribute.")]
     name: Annotated[str, Field(description="Name of the attribute.")]
+
+
+class LayerDataArrayItem(APIModel):
+    attributeId: Annotated[
+        AttributeId | None,
+        Field(description="Indentifier of the existing Layer to overwrite, ignored if overwriteExisting is false."),
+    ] = None
+    index: Annotated[
+        str | None,
+        Field(description="Index of the existing Layer to overwrite, ignored if overwriteExisting is false."),
+    ] = None
+    name: Annotated[
+        str,
+        Field(
+            description="Name. If overwriteExisting is true, then the existing Layer with the given name will be overwritten."
+        ),
+    ]
+    isHidden: Annotated[bool | None, Field(description="Hide/Show.")] = None
+    isLocked: Annotated[bool | None, Field(description="Lock/Unlock.")] = None
+    isWireframe: Annotated[bool | None, Field(description="Force the model to wireframe.")] = None
+    intersectionGroupNr: Annotated[
+        int | None,
+        Field(description="Intersection group. Elements on layers having the same group will be intersected."),
+    ] = None
+
+
+class LayerCombinationDataArrayItem(APIModel):
+    attributeId: Annotated[
+        AttributeId | None,
+        Field(
+            description="Indentifier of the existing Layer Combination to overwrite, ignored if overwriteExisting is false."
+        ),
+    ] = None
+    index: Annotated[
+        str | None,
+        Field(
+            description="Index of the existing Layer Combination to overwrite, ignored if overwriteExisting is false."
+        ),
+    ] = None
+    name: Annotated[
+        str,
+        Field(
+            description="Name. If overwriteExisting is true, then the existing Layer Combination with the given name will be overwritten."
+        ),
+    ]
+    layers: Annotated[
+        List[LayersOfLayerCombinationItem],
+        Field(description="List of Layers included in the Layer Combination."),
+    ]
+
+
+class BuildingMaterialDataArrayItem(APIModel):
+    attributeId: Annotated[
+        AttributeId | None,
+        Field(
+            description="Indentifier of the existing Building Material to overwrite, ignored if overwriteExisting is false."
+        ),
+    ] = None
+    index: Annotated[
+        str | None,
+        Field(
+            description="Index of the existing Building Material to overwrite, ignored if overwriteExisting is false."
+        ),
+    ] = None
+    name: Annotated[
+        str,
+        Field(
+            description="Name. If overwriteExisting is true, then the existing Building Material with the given name will be overwritten."
+        ),
+    ]
+    id: Annotated[str | None, Field(description="Identifier.")] = None
+    manufacturer: Annotated[str | None, Field(description="Manufacturer.")] = None
+    description: Annotated[str | None, Field(description="Decription.")] = None
+    connPriority: Annotated[int | None, Field(description="Intersection priority.")] = None
+    cutFillIndex: Annotated[int | None, Field(description="Index of the Cut Fill.")] = None
+    cutFillPen: Annotated[int | None, Field(description="Cut Fill Foreground Pen.")] = None
+    cutFillBackgroundPen: Annotated[int | None, Field(description="Cut Fill Background Pen.")] = None
+    cutSurfaceIndex: Annotated[int | None, Field(description="Index of the Cut Surface.")] = None
+    thermalConductivity: Annotated[float | None, Field(description="Thermal Conductivity.")] = None
+    density: Annotated[float | None, Field(description="Density.")] = None
+    heatCapacity: Annotated[float | None, Field(description="Heat Capacity.")] = None
+    embodiedEnergy: Annotated[float | None, Field(description="Embodied Energy.")] = None
+    embodiedCarbon: Annotated[float | None, Field(description="Embodied Carbon.")] = None
 
 
 class Conflict(APIModel):
@@ -1657,7 +1755,20 @@ class Separator(APIModel):
 
 
 class CompositeDataArrayItem(APIModel):
-    name: Annotated[str, Field(description="Name.")]
+    attributeId: Annotated[
+        AttributeId | None,
+        Field(description="Indentifier of the existing Composite to overwrite, ignored if overwriteExisting is false."),
+    ] = None
+    index: Annotated[
+        str | None,
+        Field(description="Index of the existing Composite to overwrite, ignored if overwriteExisting is false."),
+    ] = None
+    name: Annotated[
+        str,
+        Field(
+            description="Name. If overwriteExisting is true, then the existing Composite with the given name will be overwritten."
+        ),
+    ]
     useWith: Annotated[
         List[str] | None,
         Field(description="Array of types the composite can used with."),
@@ -1670,7 +1781,20 @@ class CompositeDataArrayItem(APIModel):
 
 
 class SurfaceDataArrayItem(APIModel):
-    name: Annotated[str, Field(description="Name.")]
+    attributeId: Annotated[
+        AttributeId | None,
+        Field(description="Indentifier of the existing Surface to overwrite, ignored if overwriteExisting is false."),
+    ] = None
+    index: Annotated[
+        str | None,
+        Field(description="Index of the existing surface to overwrite, ignored if overwriteExisting is false."),
+    ] = None
+    name: Annotated[
+        str,
+        Field(
+            description="Name. If overwriteExisting is true, then the existing surface with the given name will be overwritten."
+        ),
+    ]
     materialType: SurfaceType
     ambientReflection: Annotated[float, Field(description="Ambient percentage [0..100].")]
     diffuseReflection: Annotated[float, Field(description="Diffuse percentage [0..100].")]
