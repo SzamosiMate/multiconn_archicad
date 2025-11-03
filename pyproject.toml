@@ -85,7 +85,8 @@ addopts = [
 ]
 
 markers = [
-    "unit: Marks tests as unit tests (fast, no external dependencies).",
-    "integration: Marks tests as integration tests (slower, requires mock server).",
-    "generated: Marks tests for auto-generated code.",
+    "unit: Marks tests as unit tests.",
+    "integration: Marks tests as integration tests. (uses a mock server)",
+    "generated: Marks tests for auto-generated classes.",
+    "generated_methods: Marks tests for auto-generated methods of the UnifiedApi."
 ]
