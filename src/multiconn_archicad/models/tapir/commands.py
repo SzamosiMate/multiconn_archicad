@@ -47,6 +47,8 @@ from .types import (
     IssueElementType,
     IssueId,
     IssueIdArrayItem,
+    LayerCombinationAttribute,
+    LayerCombinationDataArrayItem,
     LayerDataArrayItem,
     Library,
     MeshesDatum,
@@ -352,28 +354,6 @@ class GetAttributesByTypeParameters(APIModel):
     attributeType: AttributeType
 
 
-class CreateLayersParameters(APIModel):
-    layerDataArray: Annotated[
-        List[LayerDataArrayItem],
-        Field(description="Array of data to create new Layers."),
-    ]
-    overwriteExisting: Annotated[
-        bool | None,
-        Field(description="Overwrite the Layer if exists with the same name. The default is false."),
-    ] = None
-
-
-class CreateBuildingMaterialsParameters(APIModel):
-    buildingMaterialDataArray: Annotated[
-        List[BuildingMaterialDataArrayItem],
-        Field(description="Array of data to create new Building Materials."),
-    ]
-    overwriteExisting: Annotated[
-        bool | None,
-        Field(description="Overwrite the Building Material if exists with the same name. The default is false."),
-    ] = None
-
-
 class GetBuildingMaterialPhysicalPropertiesResult(APIModel):
     properties: Annotated[List[Property], Field(description="Physical properties list.")]
 
@@ -593,6 +573,52 @@ class GetAttributesByTypeResult(APIModel):
     attributes: Annotated[List[Attribute], Field(description="Details of attributes.")]
 
 
+class CreateLayersParameters(APIModel):
+    layerDataArray: Annotated[
+        List[LayerDataArrayItem],
+        Field(description="Array of data to create new Layers."),
+    ]
+    overwriteExisting: Annotated[
+        bool | None,
+        Field(
+            description="Overwrite the Layer if exists with the same name, or if index is given with the same index. The default is false."
+        ),
+    ] = None
+
+
+class CreateLayerCombinationsParameters(APIModel):
+    layerCombinationDataArray: Annotated[
+        List[LayerCombinationDataArrayItem],
+        Field(description="Array of data to create new Layer Combinations."),
+    ]
+    overwriteExisting: Annotated[
+        bool | None,
+        Field(
+            description="Overwrite the Layer Combination if exists with the same guid/index/name. The default is false."
+        ),
+    ] = None
+
+
+class CreateBuildingMaterialsParameters(APIModel):
+    buildingMaterialDataArray: Annotated[
+        List[BuildingMaterialDataArrayItem],
+        Field(description="Array of data to create new Building Materials."),
+    ]
+    overwriteExisting: Annotated[
+        bool | None,
+        Field(
+            description="Overwrite the Building Material if exists with the same name, or if index is given with the same index. The default is false."
+        ),
+    ] = None
+
+
+class GetLayerCombinationsResult(APIModel):
+    layerCombinations: Annotated[
+        List[LayerCombinationAttribute | ErrorItem],
+        Field(description="A list of layer combinations."),
+    ]
+
+
 class ReserveElementsResult(APIModel):
     executionResult: Annotated[
         SuccessfulExecutionResult | FailedExecutionResult,
@@ -633,7 +659,9 @@ class CreateCompositesParameters(APIModel):
     ]
     overwriteExisting: Annotated[
         bool | None,
-        Field(description="Overwrite the Composite if exists with the same name. The default is false."),
+        Field(
+            description="Overwrite the Composite if exists with the same name, or if index is given with the same index. The default is false."
+        ),
     ] = None
 
 
@@ -644,7 +672,9 @@ class CreateSurfacesParameters(APIModel):
     ]
     overwriteExisting: Annotated[
         bool | None,
-        Field(description="Overwrite the Surface if exists with the same name. The default is false."),
+        Field(
+            description="Overwrite the Surface if exists with the same name, or if index is given with the same index. The default is false."
+        ),
     ] = None
 
 
@@ -818,6 +848,10 @@ class CreateLayersResult(APIModel):
     attributeIds: Annotated[List[AttributeIdArrayItem], Field(description="A list of attributes.")]
 
 
+class CreateLayerCombinationsResult(APIModel):
+    attributeIds: Annotated[List[AttributeIdArrayItem], Field(description="A list of attributes.")]
+
+
 class CreateBuildingMaterialsResult(APIModel):
     attributeIds: Annotated[List[AttributeIdArrayItem], Field(description="A list of attributes.")]
 
@@ -832,6 +866,10 @@ class CreateSurfacesResult(APIModel):
 
 class GetBuildingMaterialPhysicalPropertiesParameters(APIModel):
     attributeIds: Annotated[List[AttributeIdArrayItem], Field(description="A list of attributes.")]
+
+
+class GetLayerCombinationsParameters(APIModel):
+    attributes: Annotated[List[AttributeIdArrayItem], Field(description="A list of attributes.")]
 
 
 class ReserveElementsParameters(APIModel):

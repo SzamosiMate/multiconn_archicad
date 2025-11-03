@@ -828,6 +828,9 @@ class ManualZoneGeometry(TypedDict):
     holes: NotRequired[Holes2D]
 
 
+ZoneCreationGeometry = AutomaticZoneGeometry | ManualZoneGeometry
+
+
 class WallSettings(TypedDict):
     begCoordinate: NotRequired[Coordinate2D]
     endCoordinate: NotRequired[Coordinate2D]
@@ -1131,40 +1134,6 @@ class GetAttributesByTypeParameters(TypedDict):
     attributeType: AttributeType
 
 
-class LayerDataArrayItem(TypedDict):
-    name: str
-    isHidden: NotRequired[bool]
-    isLocked: NotRequired[bool]
-    isWireframe: NotRequired[bool]
-
-
-class CreateLayersParameters(TypedDict):
-    layerDataArray: List[LayerDataArrayItem]
-    overwriteExisting: NotRequired[bool]
-
-
-class BuildingMaterialDataArrayItem(TypedDict):
-    name: str
-    id: NotRequired[str]
-    manufacturer: NotRequired[str]
-    description: NotRequired[str]
-    connPriority: NotRequired[int]
-    cutFillIndex: NotRequired[int]
-    cutFillPen: NotRequired[int]
-    cutFillBackgroundPen: NotRequired[int]
-    cutSurfaceIndex: NotRequired[int]
-    thermalConductivity: NotRequired[float]
-    density: NotRequired[float]
-    heatCapacity: NotRequired[float]
-    embodiedEnergy: NotRequired[float]
-    embodiedCarbon: NotRequired[float]
-
-
-class CreateBuildingMaterialsParameters(TypedDict):
-    buildingMaterialDataArray: List[BuildingMaterialDataArrayItem]
-    overwriteExisting: NotRequired[bool]
-
-
 class Properties(TypedDict):
     thermalConductivity: NotRequired[float]
     density: NotRequired[float]
@@ -1349,6 +1318,31 @@ class ElementId(TypedDict):
 
 class AttributeId(TypedDict):
     guid: Guid
+
+
+class LayersOfLayerCombinationItem(TypedDict):
+    attributeId: AttributeId
+    isHidden: bool
+    isLocked: bool
+    isWireframe: bool
+    intersectionGroupNr: int
+
+
+LayersOfLayerCombination = List[LayersOfLayerCombinationItem]
+
+
+class LayerCombinationAttributeDetails(TypedDict):
+    attributeId: AttributeId
+    attributeIndex: NotRequired[int]
+    name: str
+    layers: LayersOfLayerCombination
+
+
+class LayerCombinationAttribute(TypedDict):
+    layerCombination: LayerCombinationAttributeDetails
+
+
+LayerCombinationAttributeOrError = LayerCombinationAttribute | ErrorItem
 
 
 GDLParameterArray = List[GDLParameterDetails]
@@ -1545,7 +1539,7 @@ class ZonesDatum(TypedDict):
     numberStr: str
     categoryAttributeId: NotRequired[AttributeId]
     stampPosition: NotRequired[Coordinate2D]
-    geometry: AutomaticZoneGeometry | ManualZoneGeometry
+    geometry: ZoneCreationGeometry
 
 
 class CreateZonesParameters(TypedDict):
@@ -1581,6 +1575,61 @@ class Attribute(TypedDict):
 
 class GetAttributesByTypeResult(TypedDict):
     attributes: List[Attribute]
+
+
+class LayerDataArrayItem(TypedDict):
+    attributeId: NotRequired[AttributeId]
+    index: NotRequired[str]
+    name: str
+    isHidden: NotRequired[bool]
+    isLocked: NotRequired[bool]
+    isWireframe: NotRequired[bool]
+    intersectionGroupNr: NotRequired[int]
+
+
+class CreateLayersParameters(TypedDict):
+    layerDataArray: List[LayerDataArrayItem]
+    overwriteExisting: NotRequired[bool]
+
+
+class LayerCombinationDataArrayItem(TypedDict):
+    attributeId: NotRequired[AttributeId]
+    index: NotRequired[str]
+    name: str
+    layers: LayersOfLayerCombination
+
+
+class CreateLayerCombinationsParameters(TypedDict):
+    layerCombinationDataArray: List[LayerCombinationDataArrayItem]
+    overwriteExisting: NotRequired[bool]
+
+
+class BuildingMaterialDataArrayItem(TypedDict):
+    attributeId: NotRequired[AttributeId]
+    index: NotRequired[str]
+    name: str
+    id: NotRequired[str]
+    manufacturer: NotRequired[str]
+    description: NotRequired[str]
+    connPriority: NotRequired[int]
+    cutFillIndex: NotRequired[int]
+    cutFillPen: NotRequired[int]
+    cutFillBackgroundPen: NotRequired[int]
+    cutSurfaceIndex: NotRequired[int]
+    thermalConductivity: NotRequired[float]
+    density: NotRequired[float]
+    heatCapacity: NotRequired[float]
+    embodiedEnergy: NotRequired[float]
+    embodiedCarbon: NotRequired[float]
+
+
+class CreateBuildingMaterialsParameters(TypedDict):
+    buildingMaterialDataArray: List[BuildingMaterialDataArrayItem]
+    overwriteExisting: NotRequired[bool]
+
+
+class GetLayerCombinationsResult(TypedDict):
+    layerCombinations: List[LayerCombinationAttributeOrError]
 
 
 class Conflict(TypedDict):
@@ -1685,6 +1734,8 @@ class Separator(TypedDict):
 
 
 class CompositeDataArrayItem(TypedDict):
+    attributeId: NotRequired[AttributeId]
+    index: NotRequired[str]
     name: str
     useWith: NotRequired[List[str]]
     skins: List[Skin]
@@ -1697,6 +1748,8 @@ class CreateCompositesParameters(TypedDict):
 
 
 class SurfaceDataArrayItem(TypedDict):
+    attributeId: NotRequired[AttributeId]
+    index: NotRequired[str]
     name: str
     materialType: SurfaceType
     ambientReflection: float
@@ -1895,6 +1948,10 @@ class CreateLayersResult(TypedDict):
     attributeIds: AttributeIds
 
 
+class CreateLayerCombinationsResult(TypedDict):
+    attributeIds: AttributeIds
+
+
 class CreateBuildingMaterialsResult(TypedDict):
     attributeIds: AttributeIds
 
@@ -1909,6 +1966,10 @@ class CreateSurfacesResult(TypedDict):
 
 class GetBuildingMaterialPhysicalPropertiesParameters(TypedDict):
     attributeIds: AttributeIds
+
+
+class GetLayerCombinationsParameters(TypedDict):
+    attributes: AttributeIds
 
 
 class ReserveElementsParameters(TypedDict):

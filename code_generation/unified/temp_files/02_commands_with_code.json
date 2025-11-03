@@ -694,10 +694,10 @@
       {
         "name": "CreateBuildingMaterials",
         "group": "Attribute Commands",
-        "description": "Creates Building Material attributes based on the given parameters.",
+        "description": "Creates or overwrites Building Material attributes based on the given parameters.",
         "version": "1.0.1",
         "source": "tapir",
-        "method_code": "def create_building_materials(\n    self,\n    building_material_data_array: list[BuildingMaterialDataArrayItem],\n    overwrite_existing: None | bool = None\n) -> list[AttributeIdArrayItem]:\n    \"\"\"\n    Creates Building Material attributes based on the given parameters.\n\n    Args:\n        building_material_data_array (list[BuildingMaterialDataArrayItem]): Array of data to\n            create new Building Materials.\n        overwrite_existing (None | bool): Overwrite the Building Material if exists with the\n            same name. The default is false.\n\n    Returns:\n        list[AttributeIdArrayItem]: A list of attributes.\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    params_dict = {\n            'buildingMaterialDataArray': building_material_data_array,\n            'overwriteExisting': overwrite_existing,\n        }\n    validated_params = CreateBuildingMaterialsParameters(**params_dict)\n    response_dict = self._core.post_tapir_command(\n        \"CreateBuildingMaterials\",\n        validated_params.model_dump(mode='json', by_alias=True, exclude_none=True)\n    )\n    validated_response = CreateBuildingMaterialsResult.model_validate(response_dict)\n    return validated_response.attributeIds",
+        "method_code": "def create_building_materials(\n    self,\n    building_material_data_array: list[BuildingMaterialDataArrayItem],\n    overwrite_existing: None | bool = None\n) -> list[AttributeIdArrayItem]:\n    \"\"\"\n    Creates or overwrites Building Material attributes based on the given parameters.\n\n    Args:\n        building_material_data_array (list[BuildingMaterialDataArrayItem]): Array of data to\n            create new Building Materials.\n        overwrite_existing (None | bool): Overwrite the Building Material if exists with the\n            same name, or if index is given with the same index. The default is false.\n\n    Returns:\n        list[AttributeIdArrayItem]: A list of attributes.\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    params_dict = {\n            'buildingMaterialDataArray': building_material_data_array,\n            'overwriteExisting': overwrite_existing,\n        }\n    validated_params = CreateBuildingMaterialsParameters(**params_dict)\n    response_dict = self._core.post_tapir_command(\n        \"CreateBuildingMaterials\",\n        validated_params.model_dump(mode='json', by_alias=True, exclude_none=True)\n    )\n    validated_response = CreateBuildingMaterialsResult.model_validate(response_dict)\n    return validated_response.attributeIds",
         "command_model_dependencies": [
           "CreateBuildingMaterialsParameters",
           "CreateBuildingMaterialsResult"
@@ -711,10 +711,10 @@
       {
         "name": "CreateComposites",
         "group": "Attribute Commands",
-        "description": "Creates Composite attributes based on the given parameters.",
+        "description": "Creates or overwrites Composite attributes based on the given parameters.",
         "version": "1.0.2",
         "source": "tapir",
-        "method_code": "def create_composites(\n    self,\n    composite_data_array: list[CompositeDataArrayItem],\n    overwrite_existing: None | bool = None\n) -> list[AttributeIdArrayItem]:\n    \"\"\"\n    Creates Composite attributes based on the given parameters.\n\n    Args:\n        composite_data_array (list[CompositeDataArrayItem]): Array of data to create\n            Composites.\n        overwrite_existing (None | bool): Overwrite the Composite if exists with the same\n            name. The default is false.\n\n    Returns:\n        list[AttributeIdArrayItem]: A list of attributes.\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    params_dict = {\n            'compositeDataArray': composite_data_array,\n            'overwriteExisting': overwrite_existing,\n        }\n    validated_params = CreateCompositesParameters(**params_dict)\n    response_dict = self._core.post_tapir_command(\n        \"CreateComposites\",\n        validated_params.model_dump(mode='json', by_alias=True, exclude_none=True)\n    )\n    validated_response = CreateCompositesResult.model_validate(response_dict)\n    return validated_response.attributeIds",
+        "method_code": "def create_composites(\n    self,\n    composite_data_array: list[CompositeDataArrayItem],\n    overwrite_existing: None | bool = None\n) -> list[AttributeIdArrayItem]:\n    \"\"\"\n    Creates or overwrites Composite attributes based on the given parameters.\n\n    Args:\n        composite_data_array (list[CompositeDataArrayItem]): Array of data to create\n            Composites.\n        overwrite_existing (None | bool): Overwrite the Composite if exists with the same\n            name, or if index is given with the same index. The default is false.\n\n    Returns:\n        list[AttributeIdArrayItem]: A list of attributes.\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    params_dict = {\n            'compositeDataArray': composite_data_array,\n            'overwriteExisting': overwrite_existing,\n        }\n    validated_params = CreateCompositesParameters(**params_dict)\n    response_dict = self._core.post_tapir_command(\n        \"CreateComposites\",\n        validated_params.model_dump(mode='json', by_alias=True, exclude_none=True)\n    )\n    validated_response = CreateCompositesResult.model_validate(response_dict)\n    return validated_response.attributeIds",
         "command_model_dependencies": [
           "CreateCompositesParameters",
           "CreateCompositesResult"
@@ -726,12 +726,29 @@
         "alias_property_name": "attributeIds"
       },
       {
+        "name": "CreateLayerCombinations",
+        "group": "Attribute Commands",
+        "description": "Creates or overwrites Layer Combination attributes based on the given parameters.",
+        "version": "1.2.4",
+        "source": "tapir",
+        "method_code": "def create_layer_combinations(\n    self,\n    layer_combination_data_array: list[LayerCombinationDataArrayItem],\n    overwrite_existing: None | bool = None\n) -> list[AttributeIdArrayItem]:\n    \"\"\"\n    Creates or overwrites Layer Combination attributes based on the given parameters.\n\n    Args:\n        layer_combination_data_array (list[LayerCombinationDataArrayItem]): Array of data to\n            create new Layer Combinations.\n        overwrite_existing (None | bool): Overwrite the Layer Combination if exists with the\n            same guid/index/name. The default is false.\n\n    Returns:\n        list[AttributeIdArrayItem]: A list of attributes.\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    params_dict = {\n            'layerCombinationDataArray': layer_combination_data_array,\n            'overwriteExisting': overwrite_existing,\n        }\n    validated_params = CreateLayerCombinationsParameters(**params_dict)\n    response_dict = self._core.post_tapir_command(\n        \"CreateLayerCombinations\",\n        validated_params.model_dump(mode='json', by_alias=True, exclude_none=True)\n    )\n    validated_response = CreateLayerCombinationsResult.model_validate(response_dict)\n    return validated_response.attributeIds",
+        "command_model_dependencies": [
+          "CreateLayerCombinationsParameters",
+          "CreateLayerCombinationsResult"
+        ],
+        "type_model_dependencies": [
+          "AttributeIdArrayItem",
+          "LayerCombinationDataArrayItem"
+        ],
+        "alias_property_name": "attributeIds"
+      },
+      {
         "name": "CreateLayers",
         "group": "Attribute Commands",
-        "description": "Creates Layer attributes based on the given parameters.",
+        "description": "Creates or overwrites Layer attributes based on the given parameters.",
         "version": "1.0.3",
         "source": "tapir",
-        "method_code": "def create_layers(\n    self,\n    layer_data_array: list[LayerDataArrayItem],\n    overwrite_existing: None | bool = None\n) -> list[AttributeIdArrayItem]:\n    \"\"\"\n    Creates Layer attributes based on the given parameters.\n\n    Args:\n        layer_data_array (list[LayerDataArrayItem]): Array of data to create new Layers.\n        overwrite_existing (None | bool): Overwrite the Layer if exists with the same name.\n            The default is false.\n\n    Returns:\n        list[AttributeIdArrayItem]: A list of attributes.\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    params_dict = {\n            'layerDataArray': layer_data_array,\n            'overwriteExisting': overwrite_existing,\n        }\n    validated_params = CreateLayersParameters(**params_dict)\n    response_dict = self._core.post_tapir_command(\n        \"CreateLayers\",\n        validated_params.model_dump(mode='json', by_alias=True, exclude_none=True)\n    )\n    validated_response = CreateLayersResult.model_validate(response_dict)\n    return validated_response.attributeIds",
+        "method_code": "def create_layers(\n    self,\n    layer_data_array: list[LayerDataArrayItem],\n    overwrite_existing: None | bool = None\n) -> list[AttributeIdArrayItem]:\n    \"\"\"\n    Creates or overwrites Layer attributes based on the given parameters.\n\n    Args:\n        layer_data_array (list[LayerDataArrayItem]): Array of data to create new Layers.\n        overwrite_existing (None | bool): Overwrite the Layer if exists with the same name,\n            or if index is given with the same index. The default is false.\n\n    Returns:\n        list[AttributeIdArrayItem]: A list of attributes.\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    params_dict = {\n            'layerDataArray': layer_data_array,\n            'overwriteExisting': overwrite_existing,\n        }\n    validated_params = CreateLayersParameters(**params_dict)\n    response_dict = self._core.post_tapir_command(\n        \"CreateLayers\",\n        validated_params.model_dump(mode='json', by_alias=True, exclude_none=True)\n    )\n    validated_response = CreateLayersResult.model_validate(response_dict)\n    return validated_response.attributeIds",
         "command_model_dependencies": [
           "CreateLayersParameters",
           "CreateLayersResult"
@@ -745,10 +762,10 @@
       {
         "name": "CreateSurfaces",
         "group": "Attribute Commands",
-        "description": "Creates Surface attributes based on the given parameters.",
+        "description": "Creates or overwrites Surface attributes based on the given parameters.",
         "version": "1.2.2",
         "source": "tapir",
-        "method_code": "def create_surfaces(\n    self,\n    surface_data_array: list[SurfaceDataArrayItem],\n    overwrite_existing: None | bool = None\n) -> list[AttributeIdArrayItem]:\n    \"\"\"\n    Creates Surface attributes based on the given parameters.\n\n    Args:\n        surface_data_array (list[SurfaceDataArrayItem]): Array of data to create new\n            surfaces.\n        overwrite_existing (None | bool): Overwrite the Surface if exists with the same\n            name. The default is false.\n\n    Returns:\n        list[AttributeIdArrayItem]: A list of attributes.\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    params_dict = {\n            'surfaceDataArray': surface_data_array,\n            'overwriteExisting': overwrite_existing,\n        }\n    validated_params = CreateSurfacesParameters(**params_dict)\n    response_dict = self._core.post_tapir_command(\n        \"CreateSurfaces\",\n        validated_params.model_dump(mode='json', by_alias=True, exclude_none=True)\n    )\n    validated_response = CreateSurfacesResult.model_validate(response_dict)\n    return validated_response.attributeIds",
+        "method_code": "def create_surfaces(\n    self,\n    surface_data_array: list[SurfaceDataArrayItem],\n    overwrite_existing: None | bool = None\n) -> list[AttributeIdArrayItem]:\n    \"\"\"\n    Creates or overwrites Surface attributes based on the given parameters.\n\n    Args:\n        surface_data_array (list[SurfaceDataArrayItem]): Array of data to create new\n            surfaces.\n        overwrite_existing (None | bool): Overwrite the Surface if exists with the same\n            name, or if index is given with the same index. The default is false.\n\n    Returns:\n        list[AttributeIdArrayItem]: A list of attributes.\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    params_dict = {\n            'surfaceDataArray': surface_data_array,\n            'overwriteExisting': overwrite_existing,\n        }\n    validated_params = CreateSurfacesParameters(**params_dict)\n    response_dict = self._core.post_tapir_command(\n        \"CreateSurfaces\",\n        validated_params.model_dump(mode='json', by_alias=True, exclude_none=True)\n    )\n    validated_response = CreateSurfacesResult.model_validate(response_dict)\n    return validated_response.attributeIds",
         "command_model_dependencies": [
           "CreateSurfacesParameters",
           "CreateSurfacesResult"
@@ -792,6 +809,24 @@
           "Property"
         ],
         "alias_property_name": "properties"
+      },
+      {
+        "name": "GetLayerCombinations",
+        "group": "Attribute Commands",
+        "description": "Returns the details of layer combination attributes.",
+        "version": "1.2.4",
+        "source": "tapir",
+        "method_code": "def get_layer_combinations(\n    self,\n    attributes: list[AttributeIdArrayItem]\n) -> list[ErrorItem | LayerCombinationAttribute]:\n    \"\"\"\n    Returns the details of layer combination attributes.\n\n    Args:\n        attributes (list[AttributeIdArrayItem]): A list of attributes.\n\n    Returns:\n        list[ErrorItem | LayerCombinationAttribute]: A list of layer combinations.\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    params_dict = {\n            'attributes': attributes,\n        }\n    validated_params = GetLayerCombinationsParameters(**params_dict)\n    response_dict = self._core.post_tapir_command(\n        \"GetLayerCombinations\",\n        validated_params.model_dump(mode='json', by_alias=True, exclude_none=True)\n    )\n    validated_response = GetLayerCombinationsResult.model_validate(response_dict)\n    return validated_response.layerCombinations",
+        "command_model_dependencies": [
+          "GetLayerCombinationsParameters",
+          "GetLayerCombinationsResult"
+        ],
+        "type_model_dependencies": [
+          "AttributeIdArrayItem",
+          "ErrorItem",
+          "LayerCombinationAttribute"
+        ],
+        "alias_property_name": "layerCombinations"
       }
     ],
     "Property Commands": [

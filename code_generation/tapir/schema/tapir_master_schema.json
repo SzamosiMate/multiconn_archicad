@@ -99,6 +99,95 @@
         "guid"
       ]
     },
+    "LayersOfLayerCombination": {
+      "type": "array",
+      "description": "List of Layers included in the Layer Combination.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "attributeId": {
+            "description": "The identifier of the Layer attribute.",
+            "$ref": "#/$defs/AttributeId"
+          },
+          "isHidden": {
+            "type": "boolean",
+            "description": "Visibility of the Layer in the Layer Combination."
+          },
+          "isLocked": {
+            "type": "boolean",
+            "description": "Lock state of the Layer in the Layer Combination."
+          },
+          "isWireframe": {
+            "type": "boolean",
+            "description": "Is wireframe mode forced for the Layer in the Layer Combination."
+          },
+          "intersectionGroupNr": {
+            "type": "integer",
+            "description": "Intersection group of the Layer in the Layer Combination. Elements on layers having the same group will be intersected."
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "attributeId",
+          "isHidden",
+          "isLocked",
+          "isWireframe",
+          "intersectionGroupNr"
+        ]
+      }
+    },
+    "LayerCombinationAttributeDetails": {
+      "type": "object",
+      "description": "The details of the layer combination attribute.",
+      "properties": {
+        "attributeId": {
+          "description": "The identifier of the layer combination attribute.",
+          "$ref": "#/$defs/AttributeId"
+        },
+        "attributeIndex": {
+          "type": "integer",
+          "description": "The index identifier of the layer combination attribute."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the layer combination."
+        },
+        "layers": {
+          "$ref": "#/$defs/LayersOfLayerCombination"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "attributeId",
+        "name",
+        "layers"
+      ]
+    },
+    "LayerCombinationAttribute": {
+      "type": "object",
+      "description": "A layer combination attribute.",
+      "properties": {
+        "layerCombination": {
+          "$ref": "#/$defs/LayerCombinationAttributeDetails"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "layerCombination"
+      ]
+    },
+    "LayerCombinationAttributeOrError": {
+      "type": "object",
+      "description": "A layer combination attribute or an error.",
+      "oneOf": [
+        {
+          "$ref": "#/$defs/LayerCombinationAttribute"
+        },
+        {
+          "$ref": "#/$defs/ErrorItem"
+        }
+      ]
+    },
     "Guid": {
       "type": "string",
       "description": "A Globally Unique Identifier (or Universally Unique Identifier) in its string representation as defined in RFC 4122.",
@@ -3237,6 +3326,18 @@
         "polygonCoordinates"
       ]
     },
+    "ZoneCreationGeometry": {
+      "description": "Defines the geometry of a zone. Used as input for creating zones.",
+      "type": "object",
+      "oneOf": [
+        {
+          "$ref": "#/$defs/AutomaticZoneGeometry"
+        },
+        {
+          "$ref": "#/$defs/ManualZoneGeometry"
+        }
+      ]
+    },
     "WallSettings": {
       "type": "object",
       "description": "Settings for modifying a wall.",
@@ -4667,15 +4768,7 @@
                 "description": "Position of the origin of the zone stamp."
               },
               "geometry": {
-                "type": "object",
-                "oneOf": [
-                  {
-                    "$ref": "#/$defs/AutomaticZoneGeometry"
-                  },
-                  {
-                    "$ref": "#/$defs/ManualZoneGeometry"
-                  }
-                ]
+                "$ref": "#/$defs/ZoneCreationGeometry"
               }
             },
             "additionalProperties": false,
@@ -5276,9 +5369,17 @@
             "type": "object",
             "description": "Data to create a Layer.",
             "properties": {
+              "attributeId": {
+                "description": "Indentifier of the existing Layer to overwrite, ignored if overwriteExisting is false.",
+                "$ref": "#/$defs/AttributeId"
+              },
+              "index": {
+                "type": "string",
+                "description": "Index of the existing Layer to overwrite, ignored if overwriteExisting is false."
+              },
               "name": {
                 "type": "string",
-                "description": "Name."
+                "description": "Name. If overwriteExisting is true, then the existing Layer with the given name will be overwritten."
               },
               "isHidden": {
                 "type": "boolean",
@@ -5291,6 +5392,10 @@
               "isWireframe": {
                 "type": "boolean",
                 "description": "Force the model to wireframe."
+              },
+              "intersectionGroupNr": {
+                "type": "integer",
+                "description": "Intersection group. Elements on layers having the same group will be intersected."
               }
             },
             "additionalProperties": false,
@@ -5301,7 +5406,7 @@
         },
         "overwriteExisting": {
           "type": "boolean",
-          "description": "Overwrite the Layer if exists with the same name. The default is false."
+          "description": "Overwrite the Layer if exists with the same name, or if index is given with the same index. The default is false."
         }
       },
       "additionalProperties": false,
@@ -5310,6 +5415,61 @@
       ]
     },
     "CreateLayersResult": {
+      "type": "object",
+      "properties": {
+        "attributeIds": {
+          "$ref": "#/$defs/AttributeIds"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "attributeIds"
+      ]
+    },
+    "CreateLayerCombinationsParameters": {
+      "type": "object",
+      "properties": {
+        "layerCombinationDataArray": {
+          "type": "array",
+          "description": "Array of data to create new Layer Combinations.",
+          "items": {
+            "type": "object",
+            "description": "Data to create a Layer Combination.",
+            "properties": {
+              "attributeId": {
+                "description": "Indentifier of the existing Layer Combination to overwrite, ignored if overwriteExisting is false.",
+                "$ref": "#/$defs/AttributeId"
+              },
+              "index": {
+                "type": "string",
+                "description": "Index of the existing Layer Combination to overwrite, ignored if overwriteExisting is false."
+              },
+              "name": {
+                "type": "string",
+                "description": "Name. If overwriteExisting is true, then the existing Layer Combination with the given name will be overwritten."
+              },
+              "layers": {
+                "$ref": "#/$defs/LayersOfLayerCombination"
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "name",
+              "layers"
+            ]
+          }
+        },
+        "overwriteExisting": {
+          "type": "boolean",
+          "description": "Overwrite the Layer Combination if exists with the same guid/index/name. The default is false."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "layerCombinationDataArray"
+      ]
+    },
+    "CreateLayerCombinationsResult": {
       "type": "object",
       "properties": {
         "attributeIds": {
@@ -5331,9 +5491,17 @@
             "type": "object",
             "description": "Data to create a Building Material.",
             "properties": {
+              "attributeId": {
+                "description": "Indentifier of the existing Building Material to overwrite, ignored if overwriteExisting is false.",
+                "$ref": "#/$defs/AttributeId"
+              },
+              "index": {
+                "type": "string",
+                "description": "Index of the existing Building Material to overwrite, ignored if overwriteExisting is false."
+              },
               "name": {
                 "type": "string",
-                "description": "Name."
+                "description": "Name. If overwriteExisting is true, then the existing Building Material with the given name will be overwritten."
               },
               "id": {
                 "type": "string",
@@ -5396,7 +5564,7 @@
         },
         "overwriteExisting": {
           "type": "boolean",
-          "description": "Overwrite the Building Material if exists with the same name. The default is false."
+          "description": "Overwrite the Building Material if exists with the same name, or if index is given with the same index. The default is false."
         }
       },
       "additionalProperties": false,
@@ -5426,9 +5594,17 @@
             "type": "object",
             "description": "Data to create a Composite.",
             "properties": {
+              "attributeId": {
+                "description": "Indentifier of the existing Composite to overwrite, ignored if overwriteExisting is false.",
+                "$ref": "#/$defs/AttributeId"
+              },
+              "index": {
+                "type": "string",
+                "description": "Index of the existing Composite to overwrite, ignored if overwriteExisting is false."
+              },
               "name": {
                 "type": "string",
-                "description": "Name."
+                "description": "Name. If overwriteExisting is true, then the existing Composite with the given name will be overwritten."
               },
               "useWith": {
                 "type": "array",
@@ -5503,7 +5679,7 @@
         },
         "overwriteExisting": {
           "type": "boolean",
-          "description": "Overwrite the Composite if exists with the same name. The default is false."
+          "description": "Overwrite the Composite if exists with the same name, or if index is given with the same index. The default is false."
         }
       },
       "additionalProperties": false,
@@ -5533,9 +5709,17 @@
             "type": "object",
             "description": "Data to create a surface.",
             "properties": {
+              "attributeId": {
+                "description": "Indentifier of the existing Surface to overwrite, ignored if overwriteExisting is false.",
+                "$ref": "#/$defs/AttributeId"
+              },
+              "index": {
+                "type": "string",
+                "description": "Index of the existing surface to overwrite, ignored if overwriteExisting is false."
+              },
               "name": {
                 "type": "string",
-                "description": "Name."
+                "description": "Name. If overwriteExisting is true, then the existing surface with the given name will be overwritten."
               },
               "materialType": {
                 "$ref": "#/$defs/SurfaceType"
@@ -5603,7 +5787,7 @@
         },
         "overwriteExisting": {
           "type": "boolean",
-          "description": "Overwrite the Surface if exists with the same name. The default is false."
+          "description": "Overwrite the Surface if exists with the same name, or if index is given with the same index. The default is false."
         }
       },
       "additionalProperties": false,
@@ -5677,6 +5861,34 @@
       "additionalProperties": false,
       "required": [
         "properties"
+      ]
+    },
+    "GetLayerCombinationsParameters": {
+      "type": "object",
+      "properties": {
+        "attributes": {
+          "$ref": "#/$defs/AttributeIds"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "attributes"
+      ]
+    },
+    "GetLayerCombinationsResult": {
+      "type": "object",
+      "properties": {
+        "layerCombinations": {
+          "type": "array",
+          "description": "A list of layer combinations.",
+          "items": {
+            "$ref": "#/$defs/LayerCombinationAttributeOrError"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "layerCombinations"
       ]
     },
     "GetLibrariesResult": {

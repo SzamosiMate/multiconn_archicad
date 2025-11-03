@@ -45,6 +45,8 @@ from .types import (
     IssueElementType,
     IssueId,
     Issues,
+    LayerCombinationAttributeOrError,
+    LayerCombinationDataArrayItem,
     LayerDataArrayItem,
     Library,
     MeshesDatum,
@@ -252,16 +254,6 @@ class GetAttributesByTypeParameters(TypedDict):
     attributeType: AttributeType
 
 
-class CreateLayersParameters(TypedDict):
-    layerDataArray: List[LayerDataArrayItem]
-    overwriteExisting: NotRequired[bool]
-
-
-class CreateBuildingMaterialsParameters(TypedDict):
-    buildingMaterialDataArray: List[BuildingMaterialDataArrayItem]
-    overwriteExisting: NotRequired[bool]
-
-
 class GetBuildingMaterialPhysicalPropertiesResult(TypedDict):
     properties: List[Property]
 
@@ -428,6 +420,25 @@ class CreatePropertyDefinitionsParameters(TypedDict):
 
 class GetAttributesByTypeResult(TypedDict):
     attributes: List[Attribute]
+
+
+class CreateLayersParameters(TypedDict):
+    layerDataArray: List[LayerDataArrayItem]
+    overwriteExisting: NotRequired[bool]
+
+
+class CreateLayerCombinationsParameters(TypedDict):
+    layerCombinationDataArray: List[LayerCombinationDataArrayItem]
+    overwriteExisting: NotRequired[bool]
+
+
+class CreateBuildingMaterialsParameters(TypedDict):
+    buildingMaterialDataArray: List[BuildingMaterialDataArrayItem]
+    overwriteExisting: NotRequired[bool]
+
+
+class GetLayerCombinationsResult(TypedDict):
+    layerCombinations: List[LayerCombinationAttributeOrError]
 
 
 class ReserveElementsResult(TypedDict):
@@ -601,6 +612,10 @@ class CreateLayersResult(TypedDict):
     attributeIds: AttributeIds
 
 
+class CreateLayerCombinationsResult(TypedDict):
+    attributeIds: AttributeIds
+
+
 class CreateBuildingMaterialsResult(TypedDict):
     attributeIds: AttributeIds
 
@@ -615,6 +630,10 @@ class CreateSurfacesResult(TypedDict):
 
 class GetBuildingMaterialPhysicalPropertiesParameters(TypedDict):
     attributeIds: AttributeIds
+
+
+class GetLayerCombinationsParameters(TypedDict):
+    attributes: AttributeIds
 
 
 class ReserveElementsParameters(TypedDict):

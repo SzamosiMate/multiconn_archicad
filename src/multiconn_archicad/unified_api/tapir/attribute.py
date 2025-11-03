@@ -9,6 +9,8 @@ from multiconn_archicad.models.tapir.commands import (
     CreateBuildingMaterialsResult,
     CreateCompositesParameters,
     CreateCompositesResult,
+    CreateLayerCombinationsParameters,
+    CreateLayerCombinationsResult,
     CreateLayersParameters,
     CreateLayersResult,
     CreateSurfacesParameters,
@@ -17,6 +19,8 @@ from multiconn_archicad.models.tapir.commands import (
     GetAttributesByTypeResult,
     GetBuildingMaterialPhysicalPropertiesParameters,
     GetBuildingMaterialPhysicalPropertiesResult,
+    GetLayerCombinationsParameters,
+    GetLayerCombinationsResult,
 )
 from multiconn_archicad.models.tapir.types import (
     Attribute,
@@ -24,6 +28,9 @@ from multiconn_archicad.models.tapir.types import (
     AttributeType,
     BuildingMaterialDataArrayItem,
     CompositeDataArrayItem,
+    ErrorItem,
+    LayerCombinationAttribute,
+    LayerCombinationDataArrayItem,
     LayerDataArrayItem,
     Property,
     SurfaceDataArrayItem,
@@ -41,13 +48,13 @@ class AttributeCommands:
         self, building_material_data_array: list[BuildingMaterialDataArrayItem], overwrite_existing: None | bool = None
     ) -> list[AttributeIdArrayItem]:
         """
-        Creates Building Material attributes based on the given parameters.
+        Creates or overwrites Building Material attributes based on the given parameters.
 
         Args:
             building_material_data_array (list[BuildingMaterialDataArrayItem]): Array of data to
                 create new Building Materials.
             overwrite_existing (None | bool): Overwrite the Building Material if exists with the
-                same name. The default is false.
+                same name, or if index is given with the same index. The default is false.
 
         Returns:
             list[AttributeIdArrayItem]: A list of attributes.
@@ -72,13 +79,13 @@ class AttributeCommands:
         self, composite_data_array: list[CompositeDataArrayItem], overwrite_existing: None | bool = None
     ) -> list[AttributeIdArrayItem]:
         """
-        Creates Composite attributes based on the given parameters.
+        Creates or overwrites Composite attributes based on the given parameters.
 
         Args:
             composite_data_array (list[CompositeDataArrayItem]): Array of data to create
                 Composites.
             overwrite_existing (None | bool): Overwrite the Composite if exists with the same
-                name. The default is false.
+                name, or if index is given with the same index. The default is false.
 
         Returns:
             list[AttributeIdArrayItem]: A list of attributes.
@@ -99,16 +106,47 @@ class AttributeCommands:
         validated_response = CreateCompositesResult.model_validate(response_dict)
         return validated_response.attributeIds
 
+    def create_layer_combinations(
+        self, layer_combination_data_array: list[LayerCombinationDataArrayItem], overwrite_existing: None | bool = None
+    ) -> list[AttributeIdArrayItem]:
+        """
+        Creates or overwrites Layer Combination attributes based on the given parameters.
+
+        Args:
+            layer_combination_data_array (list[LayerCombinationDataArrayItem]): Array of data to
+                create new Layer Combinations.
+            overwrite_existing (None | bool): Overwrite the Layer Combination if exists with the
+                same guid/index/name. The default is false.
+
+        Returns:
+            list[AttributeIdArrayItem]: A list of attributes.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "layerCombinationDataArray": layer_combination_data_array,
+            "overwriteExisting": overwrite_existing,
+        }
+        validated_params = CreateLayerCombinationsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "CreateLayerCombinations", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = CreateLayerCombinationsResult.model_validate(response_dict)
+        return validated_response.attributeIds
+
     def create_layers(
         self, layer_data_array: list[LayerDataArrayItem], overwrite_existing: None | bool = None
     ) -> list[AttributeIdArrayItem]:
         """
-        Creates Layer attributes based on the given parameters.
+        Creates or overwrites Layer attributes based on the given parameters.
 
         Args:
             layer_data_array (list[LayerDataArrayItem]): Array of data to create new Layers.
-            overwrite_existing (None | bool): Overwrite the Layer if exists with the same name.
-                The default is false.
+            overwrite_existing (None | bool): Overwrite the Layer if exists with the same name,
+                or if index is given with the same index. The default is false.
 
         Returns:
             list[AttributeIdArrayItem]: A list of attributes.
@@ -133,13 +171,13 @@ class AttributeCommands:
         self, surface_data_array: list[SurfaceDataArrayItem], overwrite_existing: None | bool = None
     ) -> list[AttributeIdArrayItem]:
         """
-        Creates Surface attributes based on the given parameters.
+        Creates or overwrites Surface attributes based on the given parameters.
 
         Args:
             surface_data_array (list[SurfaceDataArrayItem]): Array of data to create new
                 surfaces.
             overwrite_existing (None | bool): Overwrite the Surface if exists with the same
-                name. The default is false.
+                name, or if index is given with the same index. The default is false.
 
         Returns:
             list[AttributeIdArrayItem]: A list of attributes.
@@ -210,3 +248,30 @@ class AttributeCommands:
         )
         validated_response = GetBuildingMaterialPhysicalPropertiesResult.model_validate(response_dict)
         return validated_response.properties
+
+    def get_layer_combinations(
+        self, attributes: list[AttributeIdArrayItem]
+    ) -> list[ErrorItem | LayerCombinationAttribute]:
+        """
+        Returns the details of layer combination attributes.
+
+        Args:
+            attributes (list[AttributeIdArrayItem]): A list of attributes.
+
+        Returns:
+            list[ErrorItem | LayerCombinationAttribute]: A list of layer combinations.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "attributes": attributes,
+        }
+        validated_params = GetLayerCombinationsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetLayerCombinations", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetLayerCombinationsResult.model_validate(response_dict)
+        return validated_response.layerCombinations
