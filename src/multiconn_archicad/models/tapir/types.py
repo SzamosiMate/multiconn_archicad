@@ -1,8 +1,8 @@
 from __future__ import annotations
-from typing import Annotated, Any, List, Literal
+from typing import Annotated, Any, List, Literal, TypeAlias
 from uuid import UUID
 from enum import Enum
-from pydantic import Field, RootModel
+from pydantic import Field
 
 from multiconn_archicad.models.base import APIModel
 
@@ -154,11 +154,11 @@ class ErrorItem(APIModel):
 
 
 class SuccessfulExecutionResult(APIModel):
-    success: Literal[True]
+    success: Literal[True] = True
 
 
 class FailedExecutionResult(APIModel):
-    success: Literal[False]
+    success: Literal[False] = False
     error: Annotated[Error, Field(description="The details of an execution failure.")]
 
 
@@ -410,12 +410,12 @@ class PropertyDataType(Enum):
 
 
 class DisplayValueEnumId(APIModel):
-    type: Literal["displayValue"]
+    type: Literal["displayValue"] = "displayValue"
     displayValue: str
 
 
 class NonLocalizedValueEnumId(APIModel):
-    type: Literal["nonLocalizedValue"]
+    type: Literal["nonLocalizedValue"] = "nonLocalizedValue"
     nonLocalizedValue: str
 
 
@@ -428,113 +428,113 @@ class EnumValueIdArrayItem(APIModel):
 
 class UserUndefinedPropertyValue(APIModel):
     type: PropertyDataType
-    status: Literal["userUndefined"]
+    status: Literal["userUndefined"] = "userUndefined"
 
 
 class NotAvailablePropertyValue(APIModel):
     type: PropertyDataType
-    status: Literal["notAvailable"]
+    status: Literal["notAvailable"] = "notAvailable"
 
 
 class NormalNumberPropertyValue(APIModel):
-    type: Literal["number"]
-    status: Literal["normal"]
+    type: Literal["number"] = "number"
+    status: Literal["normal"] = "normal"
     value: float
 
 
 class NormalIntegerPropertyValue(APIModel):
-    type: Literal["integer"]
-    status: Literal["normal"]
+    type: Literal["integer"] = "integer"
+    status: Literal["normal"] = "normal"
     value: int
 
 
 class NormalStringPropertyValue(APIModel):
-    type: Literal["string"]
-    status: Literal["normal"]
+    type: Literal["string"] = "string"
+    status: Literal["normal"] = "normal"
     value: str
 
 
 class NormalBooleanPropertyValue(APIModel):
-    type: Literal["boolean"]
-    status: Literal["normal"]
+    type: Literal["boolean"] = "boolean"
+    status: Literal["normal"] = "normal"
     value: bool
 
 
 class NormalLengthPropertyValue(APIModel):
-    type: Literal["length"]
-    status: Literal["normal"]
+    type: Literal["length"] = "length"
+    status: Literal["normal"] = "normal"
     value: float
 
 
 class NormalAreaPropertyValue(APIModel):
-    type: Literal["area"]
-    status: Literal["normal"]
+    type: Literal["area"] = "area"
+    status: Literal["normal"] = "normal"
     value: float
 
 
 class NormalVolumePropertyValue(APIModel):
-    type: Literal["volume"]
-    status: Literal["normal"]
+    type: Literal["volume"] = "volume"
+    status: Literal["normal"] = "normal"
     value: float
 
 
 class NormalAnglePropertyValue(APIModel):
-    type: Literal["angle"]
-    status: Literal["normal"]
+    type: Literal["angle"] = "angle"
+    status: Literal["normal"] = "normal"
     value: float
 
 
 class NormalNumberListPropertyValue(APIModel):
-    type: Literal["numberList"]
-    status: Literal["normal"]
+    type: Literal["numberList"] = "numberList"
+    status: Literal["normal"] = "normal"
     value: List[float]
 
 
 class NormalIntegerListPropertyValue(APIModel):
-    type: Literal["integerList"]
-    status: Literal["normal"]
+    type: Literal["integerList"] = "integerList"
+    status: Literal["normal"] = "normal"
     value: List[int]
 
 
 class NormalStringListPropertyValue(APIModel):
-    type: Literal["stringList"]
-    status: Literal["normal"]
+    type: Literal["stringList"] = "stringList"
+    status: Literal["normal"] = "normal"
     value: List[str]
 
 
 class NormalBooleanListPropertyValue(APIModel):
-    type: Literal["booleanList"]
-    status: Literal["normal"]
+    type: Literal["booleanList"] = "booleanList"
+    status: Literal["normal"] = "normal"
     value: List[bool]
 
 
 class NormalLengthListPropertyValue(APIModel):
-    type: Literal["lengthList"]
-    status: Literal["normal"]
+    type: Literal["lengthList"] = "lengthList"
+    status: Literal["normal"] = "normal"
     value: List[float]
 
 
 class NormalAreaListPropertyValue(APIModel):
-    type: Literal["areaList"]
-    status: Literal["normal"]
+    type: Literal["areaList"] = "areaList"
+    status: Literal["normal"] = "normal"
     value: List[float]
 
 
 class NormalVolumeListPropertyValue(APIModel):
-    type: Literal["volumeList"]
-    status: Literal["normal"]
+    type: Literal["volumeList"] = "volumeList"
+    status: Literal["normal"] = "normal"
     value: List[float]
 
 
 class NormalAngleListPropertyValue(APIModel):
-    type: Literal["angleList"]
-    status: Literal["normal"]
+    type: Literal["angleList"] = "angleList"
+    status: Literal["normal"] = "normal"
     value: List[float]
 
 
 class NormalSingleEnumPropertyValue(APIModel):
-    type: Literal["singleEnum"]
-    status: Literal["normal"]
+    type: Literal["singleEnum"] = "singleEnum"
+    status: Literal["normal"] = "normal"
     value: Annotated[
         DisplayValueEnumId | NonLocalizedValueEnumId,
         Field(description="The identifier of a property enumeration value."),
@@ -542,8 +542,8 @@ class NormalSingleEnumPropertyValue(APIModel):
 
 
 class NormalMultiEnumPropertyValue(APIModel):
-    type: Literal["multiEnum"]
-    status: Literal["normal"]
+    type: Literal["multiEnum"] = "multiEnum"
+    status: Literal["normal"] = "normal"
     value: Annotated[
         List[EnumValueIdArrayItem],
         Field(description="A list of enumeration identifiers."),
@@ -1042,6 +1042,9 @@ class WallSettings(APIModel):
     ] = None
 
 
+TypeSpecificSettings: TypeAlias = WallSettings
+
+
 class PropertyGroup(APIModel):
     name: str
     description: str | None = None
@@ -1134,12 +1137,7 @@ class Details(APIModel):
     floorIndex: float | None = None
     layerIndex: float | None = None
     drawIndex: float | None = None
-    typeSpecificDetails: Annotated[
-        WallSettings | None,
-        Field(
-            description="Defines the modifiable type-specific settings for an element. Used as input for SET requests."
-        ),
-    ] = None
+    typeSpecificDetails: TypeSpecificSettings | None = None
 
 
 class Settings(APIModel):
@@ -1163,15 +1161,7 @@ class Settings(APIModel):
     ]
 
 
-class HighlightedColor(RootModel[List[int]]):
-    root: Annotated[
-        List[int],
-        Field(
-            description="Color of the highlighted element as an [r, g, b, a] array. Each component must be in the 0-255 range.",
-            max_length=4,
-            min_length=4,
-        ),
-    ]
+HighlightedColor: TypeAlias = List[int]
 
 
 class MoveVector(APIModel):

@@ -16,6 +16,7 @@ generate(
     collapse_root_models=True,
     field_constraints=True,
     use_annotated=True,
+    use_one_literal_as_default=True,
 )
 
 print("Generating Typed Dicts")

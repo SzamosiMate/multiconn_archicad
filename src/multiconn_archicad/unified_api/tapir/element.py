@@ -73,7 +73,6 @@ from multiconn_archicad.models.tapir.types import (
     ErrorItem,
     FailedExecutionResult,
     GDLParameterList,
-    HighlightedColor,
     MeshesDatum,
     ObjectsDatum,
     PolylinesDatum,
@@ -634,7 +633,7 @@ class ElementCommands:
     def highlight_elements(
         self,
         elements: list[ElementIdArrayItem],
-        highlighted_colors: list[HighlightedColor],
+        highlighted_colors: list[list[int]],
         wireframe_3d: None | bool = None,
         non_highlighted_color: None | list[int] = None,
     ) -> None:
@@ -644,7 +643,7 @@ class ElementCommands:
 
         Args:
             elements (list[ElementIdArrayItem]): A list of elements.
-            highlighted_colors (list[HighlightedColor]): A list of colors to highlight elements.
+            highlighted_colors (list[list[int]]): A list of colors to highlight elements.
             wireframe_3d (None | bool): Optional parameter. Switch non highlighted elements in
                 the 3D window to wireframe.
             non_highlighted_color (None | list[int]): Optional parameter. Color of the non

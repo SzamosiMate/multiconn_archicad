@@ -12,6 +12,7 @@ def main():
 
     # Apply the two necessary cleaning steps.
     content = remove_master_model_definition(content)
+    content = fix_root_model_unions_to_type_alias(content)
     content = remove_guid_pattern(content)
     content = remove_redundant_model_configs(content)
     content = assemble_final_file(content)
@@ -39,13 +40,33 @@ def remove_master_model_definition(content: str) -> str:
     return cleaned_content.strip()
 
 
+def fix_root_model_unions_to_type_alias(content: str) -> str:
+    print("⚙️  Step 2: Converting remaining `RootModel` classes to `TypeAlias`...")
+    lookahead = r"(?=\n\n\n(class |[A-Z]\w+\s*:\s*TypeAlias)|\Z)"
+    pattern = re.compile(
+        r"class (\w+)\(RootModel\[(.+?)]\):.*?" + lookahead,
+        flags=re.DOTALL
+    )
+    replacement = r"\1: TypeAlias = \2"
+
+    num_replacements = 0
+    while True:
+        content, count = pattern.subn(replacement, content, count=1)
+        if count == 0:
+            break
+        num_replacements += 1
+
+    print(f"    - Converted {num_replacements} models.")
+    return content
+
+
 def remove_guid_pattern(code: str) -> str:
     """
     Surgically removes the 'pattern=...' argument from any field defined as
     'Annotated[UUID, Field(...)]'. This is necessary because Pydantic V2
     cannot apply a string pattern to a UUID object after validation.
     """
-    print("⚙️  Step 2: Removing conflicting 'pattern' from all UUID Fields...")
+    print("⚙️  Step 3: Removing conflicting 'pattern' from all UUID Fields...")
 
     pattern = re.compile(
         # --- Group 1: Capture the part BEFORE the pattern argument ---
@@ -114,7 +135,7 @@ def assemble_final_file(content: str) -> str:
 
     header = [
         "from __future__ import annotations",
-        "from typing import Any, List, Literal, Annotated",
+        "from typing import Any, List, Literal, Annotated, TypeAlias",
         "from uuid import UUID",
         "from enum import Enum",
         "from pydantic import Field, RootModel",

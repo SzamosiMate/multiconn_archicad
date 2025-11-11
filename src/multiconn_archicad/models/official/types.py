@@ -171,7 +171,7 @@ class PublisherSetId(APIModel):
     type: Annotated[
         Literal["PublisherSets"],
         Field(description="The type of the navigator item tree."),
-    ]
+    ] = "PublisherSets"
     name: Annotated[str, Field(description="The name of the publisher set.")]
 
 
@@ -180,7 +180,7 @@ class OtherNavigatorTreeId(APIModel):
 
 
 class UserDefinedPropertyUserId(APIModel):
-    type: Literal["UserDefined"]
+    type: Literal["UserDefined"] = "UserDefined"
     localizedName: Annotated[
         List[str],
         Field(
@@ -192,7 +192,7 @@ class UserDefinedPropertyUserId(APIModel):
 
 
 class BuiltInPropertyUserId(APIModel):
-    type: Literal["BuiltIn"]
+    type: Literal["BuiltIn"] = "BuiltIn"
     nonLocalizedName: Annotated[str, Field(description="The non-localized name of the Built-In Property.")]
 
 
@@ -202,98 +202,98 @@ class PropertyType(Enum):
 
 
 class NormalNumberPropertyValue(APIModel):
-    type: Literal["number"]
-    status: Literal["normal"]
+    type: Literal["number"] = "number"
+    status: Literal["normal"] = "normal"
     value: float
 
 
 class NormalIntegerPropertyValue(APIModel):
-    type: Literal["integer"]
-    status: Literal["normal"]
+    type: Literal["integer"] = "integer"
+    status: Literal["normal"] = "normal"
     value: int
 
 
 class NormalStringPropertyValue(APIModel):
-    type: Literal["string"]
-    status: Literal["normal"]
+    type: Literal["string"] = "string"
+    status: Literal["normal"] = "normal"
     value: str
 
 
 class NormalBooleanPropertyValue(APIModel):
-    type: Literal["boolean"]
-    status: Literal["normal"]
+    type: Literal["boolean"] = "boolean"
+    status: Literal["normal"] = "normal"
     value: bool
 
 
 class NormalLengthPropertyValue(APIModel):
-    type: Literal["length"]
-    status: Literal["normal"]
+    type: Literal["length"] = "length"
+    status: Literal["normal"] = "normal"
     value: float
 
 
 class NormalAreaPropertyValue(APIModel):
-    type: Literal["area"]
-    status: Literal["normal"]
+    type: Literal["area"] = "area"
+    status: Literal["normal"] = "normal"
     value: float
 
 
 class NormalVolumePropertyValue(APIModel):
-    type: Literal["volume"]
-    status: Literal["normal"]
+    type: Literal["volume"] = "volume"
+    status: Literal["normal"] = "normal"
     value: float
 
 
 class NormalAnglePropertyValue(APIModel):
-    type: Literal["angle"]
-    status: Literal["normal"]
+    type: Literal["angle"] = "angle"
+    status: Literal["normal"] = "normal"
     value: float
 
 
 class NormalNumberListPropertyValue(APIModel):
-    type: Literal["numberList"]
-    status: Literal["normal"]
+    type: Literal["numberList"] = "numberList"
+    status: Literal["normal"] = "normal"
     value: List[float]
 
 
 class NormalIntegerListPropertyValue(APIModel):
-    type: Literal["integerList"]
-    status: Literal["normal"]
+    type: Literal["integerList"] = "integerList"
+    status: Literal["normal"] = "normal"
     value: List[int]
 
 
 class NormalStringListPropertyValue(APIModel):
-    type: Literal["stringList"]
-    status: Literal["normal"]
+    type: Literal["stringList"] = "stringList"
+    status: Literal["normal"] = "normal"
     value: List[str]
 
 
 class NormalBooleanListPropertyValue(APIModel):
-    type: Literal["booleanList"]
-    status: Literal["normal"]
+    type: Literal["booleanList"] = "booleanList"
+    status: Literal["normal"] = "normal"
     value: List[bool]
 
 
 class NormalLengthListPropertyValue(APIModel):
-    type: Literal["lengthList"]
-    status: Literal["normal"]
+    type: Literal["lengthList"] = "lengthList"
+    status: Literal["normal"] = "normal"
     value: List[float]
 
 
 class NormalAreaListPropertyValue(APIModel):
-    type: Literal["areaList"]
-    status: Literal["normal"]
+    type: Literal["areaList"] = "areaList"
+    status: Literal["normal"] = "normal"
     value: List[float]
 
 
 class NormalVolumeListPropertyValue(APIModel):
-    type: Literal["volumeList"]
-    status: Literal["normal"]
+    type: Literal["volumeList"] = "volumeList"
+    status: Literal["normal"] = "normal"
     value: List[float]
 
 
 class NormalAngleListPropertyValue(APIModel):
-    type: Literal["angleList"]
-    status: Literal["normal"]
+    type: Literal["angleList"] = "angleList"
+    status: Literal["normal"] = "normal"
     value: List[float]
 
 
@@ -320,26 +320,26 @@ class PropertyValueType(Enum):
 
 class UserUndefinedPropertyValue(APIModel):
     type: PropertyValueType
-    status: Literal["userUndefined"]
+    status: Literal["userUndefined"] = "userUndefined"
 
 
 class NotAvailablePropertyValue(APIModel):
     type: PropertyValueType
-    status: Literal["notAvailable"]
+    status: Literal["notAvailable"] = "notAvailable"
 
 
 class NotEvaluatedPropertyValue(APIModel):
     type: PropertyValueType
-    status: Literal["notEvaluated"]
+    status: Literal["notEvaluated"] = "notEvaluated"
 
 
 class DisplayValueEnumId(APIModel):
-    type: Literal["displayValue"]
+    type: Literal["displayValue"] = "displayValue"
     displayValue: str
 
 
 class NonLocalizedValueEnumId(APIModel):
-    type: Literal["nonLocalizedValue"]
+    type: Literal["nonLocalizedValue"] = "nonLocalizedValue"
     nonLocalizedValue: str
 
 
@@ -376,11 +376,11 @@ class ErrorItem(APIModel):
 
 
 class SuccessfulExecutionResult(APIModel):
-    success: Literal[True]
+    success: Literal[True] = True
 
 
 class FailedExecutionResult(APIModel):
-    success: Literal[False]
+    success: Literal[False] = False
     error: Annotated[Error, Field(description="The details of an execution failure.")]
 
 
@@ -1225,8 +1225,8 @@ class PropertyGroupWrapperItem(APIModel):
 
 
 class NormalSingleEnumPropertyValue(APIModel):
-    type: Literal["singleEnum"]
-    status: Literal["normal"]
+    type: Literal["singleEnum"] = "singleEnum"
+    status: Literal["normal"] = "normal"
     value: Annotated[
         DisplayValueEnumId | NonLocalizedValueEnumId,
         Field(description="The identifier of a property enumeration value."),
@@ -1234,8 +1234,8 @@ class NormalSingleEnumPropertyValue(APIModel):
 
 
 class NormalMultiEnumPropertyValue(APIModel):
-    type: Literal["multiEnum"]
-    status: Literal["normal"]
+    type: Literal["multiEnum"] = "multiEnum"
+    status: Literal["normal"] = "normal"
     value: Annotated[List[EnumValueIdWrapperItem], Field(description="A list of enumeration identifiers.")]
 
 
@@ -1383,6 +1383,9 @@ class PropertyBasicDefaultValue(APIModel):
     ]
 
 
+PropertyDefaultValue: TypeAlias = PropertyBasicDefaultValue
+
+
 class PropertyDefinition(APIModel):
     propertyId: PropertyId | None = None
     group: PropertyGroup
@@ -1394,10 +1397,7 @@ class PropertyDefinition(APIModel):
         List[PossibleEnumValuesArrayItem] | None,
         Field(description="The possible enum values of the property when the property type is enumeration."),
     ] = None
-    defaultValue: Annotated[
-        PropertyBasicDefaultValue | None,
-        Field(description="Default value of the property."),
-    ] = None
+    defaultValue: PropertyDefaultValue | None = None
 
 
 class PropertyDefinitionWrapperItem(APIModel):
