@@ -60,6 +60,12 @@
         "version": "1.0.2"
     },
     {
+        "name": "CreateLabels",
+        "group": "Element Commands",
+        "description": "Creates Label elements based on the given parameters.",
+        "version": "1.2.5"
+    },
+    {
         "name": "CreateLayerCombinations",
         "group": "Attribute Commands",
         "description": "Creates or overwrites Layer Combination attributes based on the given parameters.",
@@ -264,6 +270,12 @@
         "version": "1.1.9"
     },
     {
+        "name": "GetElementPreviewImage",
+        "group": "Element Commands",
+        "description": "Returns the preview image of the given element.",
+        "version": "1.2.7"
+    },
+    {
         "name": "GetElementsAttachedToIssue",
         "group": "Issue Management Commands",
         "description": "Retrieves attached elements of the specified issue, filtered by attachment type.",
@@ -274,6 +286,12 @@
         "group": "Element Commands",
         "description": "Returns the identifier of every element of the given type on the plan. It works for any type. Use the optional filter parameter for filtering.",
         "version": "1.0.7"
+    },
+    {
+        "name": "GetFavoritePreviewImage",
+        "group": "Favorites Commands",
+        "description": "Returns the preview image of the given favorite.",
+        "version": "1.2.7"
     },
     {
         "name": "GetFavoritesByType",
@@ -366,6 +384,12 @@
         "version": "1.1.9"
     },
     {
+        "name": "GetRoomImage",
+        "group": "Element Commands",
+        "description": "Returns the room image of the given zone.",
+        "version": "1.2.7"
+    },
+    {
         "name": "GetSelectedElements",
         "group": "Element Commands",
         "description": "Gets the list of the currently selected elements.",
@@ -406,6 +430,12 @@
         "group": "Element Commands",
         "description": "Highlights the elements given in the elements array. In case of empty elements array removes all previously set highlights.",
         "version": "1.0.3"
+    },
+    {
+        "name": "IFCFileOperation",
+        "group": "Project Commands",
+        "description": "Executes an IFC file operation.",
+        "version": "1.2.6"
     },
     {
         "name": "ImportIssuesFromBCF",

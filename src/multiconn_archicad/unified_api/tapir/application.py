@@ -3,13 +3,15 @@
 
 from __future__ import annotations
 from typing import TYPE_CHECKING
+from pydantic import TypeAdapter
 
 from multiconn_archicad.models.tapir.commands import (
     GetAddOnVersionResult,
     GetArchicadLocationResult,
     GetCurrentWindowTypeResult,
+    QuitArchicadResult,
 )
-from multiconn_archicad.models.tapir.types import WindowType
+from multiconn_archicad.models.tapir.types import FailedExecutionResult, SuccessfulExecutionResult, WindowType
 
 if TYPE_CHECKING:
     from multiconn_archicad.core.core_commands import CoreCommands
@@ -67,14 +69,18 @@ class ApplicationCommands:
         validated_response = GetCurrentWindowTypeResult.model_validate(response_dict)
         return validated_response.currentWindowType
 
-    def quit_archicad(self) -> None:
+    def quit_archicad(self) -> FailedExecutionResult | SuccessfulExecutionResult:
         """
         Performs a quit operation on the currently running Archicad instance.
+
+        Returns:
+            FailedExecutionResult | SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
             pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
-        self._core.post_tapir_command("QuitArchicad")
-        return None
+        response_dict = self._core.post_tapir_command("QuitArchicad")
+        validated_response = TypeAdapter(QuitArchicadResult).validate_python(response_dict)
+        return validated_response
