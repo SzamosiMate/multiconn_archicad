@@ -15,7 +15,6 @@ def main():
         print(f"Error: {tapir_paths.RAW_TYPED_DICTS} not found. Please generate it first.")
         return
 
-    # The order of these operations is critical for success.
     print("Step 1: Reordering forward-referencing TypeAliases...")
     content = surgically_fix_copy_keyword(content)
     print("Step 2: Reordering forward-referencing TypeAliases...")

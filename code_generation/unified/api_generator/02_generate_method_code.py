@@ -52,6 +52,11 @@ def main():
     print(f"Enriched command data saved to: {args.output_file}")
 
 
+def is_union(obj: Any) -> bool:
+    origin = get_origin(obj)
+    return origin is Union or origin is UnionType
+
+
 def generate_method_code(command_details: dict[str, Any]) -> dict:
     """
     Orchestrates the generation of a single API method, handling special cases
@@ -152,21 +157,41 @@ def _generate_standard_method(
     alias_property_name = None
     return_doc_info = None
 
+    command_name = (
+        command_details["name"].removeprefix("API.")
+        if command_details["source"] == "official"
+        else command_details["name"]
+    )
+    params_model_name = f"{command_name}Parameters" if params_model else None
+    result_model_name = f"{command_name}Result" if result_model else None
+
     if result_model:
         # Check if the result model is just a wrapper for a single field (alias)
-        if hasattr(result_model, "model_fields") and len(result_model.model_fields) == 1:
+        if (
+            inspect.isclass(result_model)
+            and hasattr(result_model, "model_fields")
+            and len(result_model.model_fields) == 1
+        ):
             field_name, field_info = list(result_model.model_fields.items())[0]
             alias_property_name = field_name
             final_return_type_hint = get_clean_type_hint(field_info.annotation, dependencies)
             return_doc_info = (final_return_type_hint, field_info.description)
         else:
             final_return_type_hint = get_clean_type_hint(result_model, dependencies)
-            # Ensure a Returns section is always added for non-None return types
             return_doc_info = (final_return_type_hint, None)
 
     signature, param_docs = _build_signature_and_docs(snake_name, params_model, final_return_type_hint, dependencies)
     docstring = _build_docstring(command_details["description"], param_docs, return_doc_info)
-    body = _build_body(command_details["name"], command_details["source"], params_model, result_model, alias_property_name)
+
+    body = _build_body(
+        command_details["name"],
+        command_details["source"],
+        params_model,
+        params_model_name,
+        result_model,
+        result_model_name,
+        alias_property_name,
+    )
 
     return {
         "method_code": f"{signature}\n{textwrap.indent(docstring, '    ')}\n{textwrap.indent(body, '    ')}",
@@ -174,7 +199,6 @@ def _generate_standard_method(
         "type_model_dependencies": sorted(list(dependencies["types"])),
         "alias_property_name": alias_property_name,
     }
-
 
 def _build_signature_and_docs(
     snake_name: str, params_model: Any, return_type_hint: str, dependencies: dict
@@ -243,7 +267,13 @@ def _build_docstring(
 
 
 def _build_body(
-    original_command_name: str, source: str, params_model: Any, validation_model: Any, alias_property_name: str | None
+    original_command_name: str,
+    source: str,
+    params_model: Any,
+    params_model_name: str | None,
+    validation_model: Any,
+    validation_model_name: str | None,
+    alias_property_name: str | None,
 ) -> str:
     """Constructs the method body, creating the params dict and handling alias returns."""
     core_call_method = "post_tapir_command" if source == "tapir" else "post_command"
@@ -258,13 +288,13 @@ def _build_body(
         body_lines.extend(
             [
                 f"params_dict = {params_map}",
-                f"validated_params = {params_model.__name__}(**params_dict)",
+                f"validated_params = {params_model_name}(**params_dict)",
             ]
         )
 
     call_args = [f'"{original_command_name}"']
     if params_model:
-        call_args.append('validated_params.model_dump(mode=\'json\', by_alias=True, exclude_none=True)')
+        call_args.append("validated_params.model_dump(mode='json', by_alias=True, exclude_none=True)")
     call_expression = f"self._core.{core_call_method}(\n    {',\n    '.join(call_args)}\n)"
 
     if not validation_model:
@@ -272,7 +302,14 @@ def _build_body(
         body_lines.append("return None")
     else:
         body_lines.append(f"response_dict = {call_expression}")
-        body_lines.append(f"validated_response = {validation_model.__name__}.model_validate(response_dict)")
+
+        if is_union(validation_model):
+            body_lines.append(
+                f"validated_response = TypeAdapter({validation_model_name}).validate_python(response_dict)"
+            )
+        else:
+            body_lines.append(f"validated_response = {validation_model_name}.model_validate(response_dict)")
+
         if alias_property_name:
             body_lines.append(f"return validated_response.{alias_property_name}")
         else:

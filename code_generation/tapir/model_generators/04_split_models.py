@@ -4,8 +4,7 @@ from code_generation.tapir.paths import tapir_paths
 
 def get_definition_name(block: str) -> str | None:
     """Extracts the class or TypeAlias name from a block of code."""
-    # Corrected to handle TypeAlias syntax properly
-    match = re.search(r"^(?:class\s+(\w+)|(\w+)\s*:\s*TypeAlias)", block, re.MULTILINE)
+    match = re.search(r"^(?:class\s+(\w+)|(\w+)\s*[:=]\s*(?:TypeAlias\s*=)?)", block, re.MULTILINE)
     if match:
         return match.group(1) or match.group(2)
     return None

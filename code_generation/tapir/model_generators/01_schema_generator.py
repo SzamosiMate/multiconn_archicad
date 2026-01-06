@@ -56,10 +56,16 @@ def get_command_defs(commands_list: List[Dict[str, Any]]) -> Dict[str, Any]:
             command_name = command.get("name")
             if not command_name:
                 continue
-            if command.get("inputScheme"):
-                command_defs[f"{command_name}Parameters"] = command["inputScheme"]
-            if command.get("outputScheme") and command["outputScheme"].get("type") == "object":
-                command_defs[f"{command_name}Result"] = command["outputScheme"]
+            input_scheme = command.get("inputScheme")
+            if input_scheme is not None:
+                if not isinstance(input_scheme, dict):
+                    raise TypeError(f"Command '{command_name}' has an invalid inputScheme type: {type(input_scheme)}")
+                command_defs[f"{command_name}Parameters"] = input_scheme
+            output_scheme = command.get("outputScheme")
+            if output_scheme is not None:
+                if not isinstance(output_scheme, dict):
+                    raise TypeError(f"Command '{command_name}' has an invalid outputScheme type: {type(output_scheme)}")
+                command_defs[f"{command_name}Result"] = output_scheme
     return command_defs
 
 
