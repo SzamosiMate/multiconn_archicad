@@ -42,21 +42,24 @@ def remove_master_model_definition(content: str) -> str:
 
 def fix_root_model_unions_to_type_alias(content: str) -> str:
     print("⚙️  Step 2: Converting remaining `RootModel` classes to `TypeAlias`...")
-    lookahead = r"(?=\n\n\n(class |[A-Z]\w+\s*:\s*TypeAlias)|\Z)"
+
+    lookahead = r"(?=\n\n+(class |[A-Z]\w+\s*[:=])|\Z)"
+
+    # 1. We allow whitespace (\s*) inside the class header to handle multiline signatures.
+    # 2. We capture the name and the inner type.
+    # 3. We consume everything until the lookahead (the entire class body).
     pattern = re.compile(
-        r"class (\w+)\(RootModel\[(.+?)]\):.*?" + lookahead,
-        flags=re.DOTALL
+        r"class\s+(\w+)\s*\(\s*RootModel\s*\[\s*(.+?)\s*\]\s*\)\s*:.*?" + lookahead, flags=re.DOTALL | re.MULTILINE
     )
-    replacement = r"\1: TypeAlias = \2"
 
-    num_replacements = 0
-    while True:
-        content, count = pattern.subn(replacement, content, count=1)
-        if count == 0:
-            break
-        num_replacements += 1
+    def replacer(match):
+        name = match.group(1)
+        inner_type = re.sub(r"\s+", " ", match.group(2)).strip()
+        return f"{name}: TypeAlias = {inner_type}"
 
-    print(f"    - Converted {num_replacements} models.")
+    content, num_replacements = pattern.subn(replacer, content)
+
+    print(f"    - Converted {num_replacements} models to TypeAlias.")
     return content
 
 
