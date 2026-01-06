@@ -3,13 +3,17 @@
 
 from __future__ import annotations
 from typing import TYPE_CHECKING
+from pydantic import TypeAdapter
 
 from multiconn_archicad.models.tapir.commands import (
     ReleaseElementsParameters,
+    ReleaseElementsResult,
     ReserveElementsParameters,
     ReserveElementsResult,
+    TeamworkReceiveResult,
+    TeamworkSendResult,
 )
-from multiconn_archicad.models.tapir.types import ElementIdArrayItem
+from multiconn_archicad.models.tapir.types import ElementIdArrayItem, FailedExecutionResult, SuccessfulExecutionResult
 
 if TYPE_CHECKING:
     from multiconn_archicad.core.core_commands import CoreCommands
@@ -19,12 +23,15 @@ class TeamworkCommands:
     def __init__(self, core: CoreCommands):
         self._core = core
 
-    def release_elements(self, elements: list[ElementIdArrayItem]) -> None:
+    def release_elements(self, elements: list[ElementIdArrayItem]) -> FailedExecutionResult | SuccessfulExecutionResult:
         """
         Releases elements in Teamwork mode.
 
         Args:
             elements (list[ElementIdArrayItem]): A list of elements.
+
+        Returns:
+            FailedExecutionResult | SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -35,10 +42,11 @@ class TeamworkCommands:
             "elements": elements,
         }
         validated_params = ReleaseElementsParameters(**params_dict)
-        self._core.post_tapir_command(
+        response_dict = self._core.post_tapir_command(
             "ReleaseElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
-        return None
+        validated_response = TypeAdapter(ReleaseElementsResult).validate_python(response_dict)
+        return validated_response
 
     def reserve_elements(self, elements: list[ElementIdArrayItem]) -> ReserveElementsResult:
         """
@@ -65,26 +73,34 @@ class TeamworkCommands:
         validated_response = ReserveElementsResult.model_validate(response_dict)
         return validated_response
 
-    def teamwork_receive(self) -> None:
+    def teamwork_receive(self) -> FailedExecutionResult | SuccessfulExecutionResult:
         """
         Performs a receive operation on the currently opened Teamwork project.
 
+        Returns:
+            FailedExecutionResult | SuccessfulExecutionResult
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
             pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
-        self._core.post_tapir_command("TeamworkReceive")
-        return None
+        response_dict = self._core.post_tapir_command("TeamworkReceive")
+        validated_response = TypeAdapter(TeamworkReceiveResult).validate_python(response_dict)
+        return validated_response
 
-    def teamwork_send(self) -> None:
+    def teamwork_send(self) -> FailedExecutionResult | SuccessfulExecutionResult:
         """
         Performs a send operation on the currently opened Teamwork project.
 
+        Returns:
+            FailedExecutionResult | SuccessfulExecutionResult
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
             pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
-        self._core.post_tapir_command("TeamworkSend")
-        return None
+        response_dict = self._core.post_tapir_command("TeamworkSend")
+        validated_response = TypeAdapter(TeamworkSendResult).validate_python(response_dict)
+        return validated_response

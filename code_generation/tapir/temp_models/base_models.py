@@ -35,18 +35,56 @@ class AttributeType(Enum):
     BuildingMaterial = "BuildingMaterial"
 
 
+class PossibleNumericValue(APIModel):
+    value: Annotated[float, Field(description="The numeric value.")]
+    flag: Annotated[str | None, Field(description="The flag.")] = None
+    description: Annotated[
+        str | None, Field(description="The description of the value.")
+    ] = None
+
+
+class Flag(Enum):
+    Hidden = "Hidden"
+    HiddenFromScript = "HiddenFromScript"
+    Disabled = "Disabled"
+    Child = "Child"
+    Unique = "Unique"
+    Fixed = "Fixed"
+
+
 class GDLParameterDetails(APIModel):
-    name: Annotated[str | None, Field(description="The name of the parameter.")] = None
-    index: Annotated[str, Field(description="The index of the parameter.")]
+    name: Annotated[str, Field(description="The name of the parameter.")]
+    displayName: Annotated[str, Field(description="The display name of the parameter.")]
+    index: Annotated[int, Field(description="The index of the parameter.")]
     type: Annotated[str, Field(description="The type of the parameter.")]
     dimension1: Annotated[
-        float | None,
-        Field(description="The 1st dimension of array (in case of array value)."),
-    ] = None
+        int, Field(description="The 1st dimension of array (in case of array value).")
+    ]
     dimension2: Annotated[
-        float | None,
-        Field(description="The 2nd dimension of array (in case of array value)."),
+        int, Field(description="The 2nd dimension of array (in case of array value).")
+    ]
+    value: Annotated[Any, Field(description="The value of the parameter.")]
+    valueDescription: Annotated[
+        str | None, Field(description="The value description for numeric parameter.")
     ] = None
+    isLocked: Annotated[
+        bool,
+        Field(description="The parameter is locked; i.e. the user cannot modify it"),
+    ]
+    flags: Annotated[List[Flag], Field(description="The flags of the parameter.")]
+    possibleValues: List[str] | List[PossibleNumericValue] | None = None
+    canHaveCustomValue: Annotated[
+        bool | None, Field(description="The parameter can have a custom value.")
+    ] = None
+
+
+class SetGDLParameterByNameDetails(APIModel):
+    name: Annotated[str, Field(description="The name of the parameter.")]
+    value: Annotated[Any, Field(description="The value of the parameter.")]
+
+
+class SetGDLParameterByIndexDetails(APIModel):
+    index: Annotated[int, Field(description="The index of the parameter.")]
     value: Annotated[Any, Field(description="The value of the parameter.")]
 
 
@@ -1195,6 +1233,9 @@ class GetArchicadLocationResult(APIModel):
     ]
 
 
+QuitArchicadResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
+
+
 class GetCurrentWindowTypeResult(APIModel):
     currentWindowType: WindowType
 
@@ -1283,10 +1324,16 @@ class SetStoriesParameters(APIModel):
     ]
 
 
+SetStoriesResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
+
+
 class OpenProjectParameters(APIModel):
     projectFilePath: Annotated[
         str, Field(description="The target project file to open.")
     ]
+
+
+OpenProjectResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
 
 
 class ProjectLocation(APIModel):
@@ -1355,6 +1402,31 @@ class GetGeoLocationResult(APIModel):
     surveyPoint: SurveyPoint
 
 
+class Method(Enum):
+    save = "save"
+    merge = "merge"
+    open = "open"
+
+
+class FileType(Enum):
+    ifc = "ifc"
+    ifcxml = "ifcxml"
+    ifczip = "ifczip"
+    ifcxmlzip = "ifcxmlzip"
+
+
+class IFCFileOperationParameters(APIModel):
+    method: Annotated[Method, Field(description="The file operation method to use.")]
+    ifcFilePath: Annotated[str, Field(description="The target IFC file to use.")]
+    fileType: Annotated[
+        FileType | None,
+        Field(description="The type of the IFC file. The default is 'ifc'."),
+    ] = None
+
+
+IFCFileOperationResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
+
+
 class ChangeSelectionOfElementsResult(APIModel):
     executionResultsOfAddToSelection: Annotated[
         List[SuccessfulExecutionResult | FailedExecutionResult],
@@ -1411,6 +1483,9 @@ class Settings(APIModel):
 HighlightedColor: TypeAlias = List[int]
 
 
+HighlightElementsResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
+
+
 class MoveVector(APIModel):
     x: Annotated[float, Field(description="X value of the vector.")]
     y: Annotated[float, Field(description="Y value of the vector.")]
@@ -1422,6 +1497,9 @@ class MoveElementsResult(APIModel):
         List[SuccessfulExecutionResult | FailedExecutionResult],
         Field(description="A list of execution results."),
     ]
+
+
+DeleteElementsResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
 
 
 class SetGDLParametersOfElementsResult(APIModel):
@@ -1565,12 +1643,54 @@ class CreateMeshesParameters(APIModel):
     ]
 
 
+class ImageType(Enum):
+    field_2D = "2D"
+    Section = "Section"
+    field_3D = "3D"
+
+
+class Format(Enum):
+    png = "png"
+    jpg = "jpg"
+
+
+class GetElementPreviewImageResult(APIModel):
+    previewImage: Annotated[str, Field(description="The base64 encoded preview image.")]
+
+
+class GetRoomImageResult(APIModel):
+    roomImage: Annotated[str, Field(description="The base64 encoded room image.")]
+
+
 class GetFavoritesByTypeParameters(APIModel):
     elementType: ElementType
 
 
 class GetFavoritesByTypeResult(APIModel):
     favorites: Annotated[List[str], Field(description="A list of favorite names")]
+
+
+class GetFavoritePreviewImageParameters(APIModel):
+    favorite: Annotated[str, Field(description="The name of the favorite.")]
+    imageType: Annotated[
+        ImageType | None,
+        Field(description="The type of the preview image. Default is 3D."),
+    ] = None
+    format: Annotated[
+        Format | None, Field(description="The image format. Default is png.")
+    ] = None
+    width: Annotated[
+        int | None,
+        Field(description="The width of the preview image in pixels. Default is 128."),
+    ] = None
+    height: Annotated[
+        int | None,
+        Field(description="The height of the preview image in pixels. Default is 128."),
+    ] = None
+
+
+class GetFavoritePreviewImageResult(APIModel):
+    previewImage: Annotated[str, Field(description="The base64 encoded preview image.")]
 
 
 class ApplyFavoritesToElementDefaultsParameters(APIModel):
@@ -1733,6 +1853,9 @@ class GetLibrariesResult(APIModel):
     ]
 
 
+ReloadLibrariesResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
+
+
 class Type1(Enum):
     Window = "Window"
     Door = "Door"
@@ -1772,9 +1895,18 @@ class AddFilesToEmbeddedLibraryResult(APIModel):
     ]
 
 
+TeamworkSendResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
+
+
+TeamworkReceiveResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
+
+
 class User(APIModel):
     userId: float
     userName: str
+
+
+ReleaseElementsResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
 
 
 class PublishPublisherSetParameters(APIModel):
@@ -1788,6 +1920,9 @@ class PublishPublisherSetParameters(APIModel):
             min_length=1,
         ),
     ] = None
+
+
+UpdateDrawingsResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
 
 
 class ModelViewOption(APIModel):
@@ -1844,6 +1979,9 @@ class DeleteIssueParameters(APIModel):
     ] = None
 
 
+DeleteIssueResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
+
+
 class AddCommentToIssueParameters(APIModel):
     issueId: IssueId
     author: Annotated[
@@ -1851,6 +1989,9 @@ class AddCommentToIssueParameters(APIModel):
     ] = None
     status: IssueCommentStatus | None = None
     text: Annotated[str, Field(description="Comment text to add.")]
+
+
+AddCommentToIssueResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
 
 
 class GetCommentsFromIssueParameters(APIModel):
@@ -1874,6 +2015,12 @@ class GetCommentsFromIssueResult(APIModel):
     comments: Annotated[
         List[Comment], Field(description="A list of existing comments.")
     ]
+
+
+AttachElementsToIssueResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
+
+
+DetachElementsFromIssueResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
 
 
 class GetElementsAttachedToIssueParameters(APIModel):
@@ -1903,6 +2050,9 @@ class ExportIssuesToBCFParameters(APIModel):
     ]
 
 
+ExportIssuesToBCFResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
+
+
 class ImportIssuesFromBCFParameters(APIModel):
     importPath: Annotated[
         str, Field(description="The os path to the bcf file, including it's name.")
@@ -1913,6 +2063,9 @@ class ImportIssuesFromBCFParameters(APIModel):
             description="Align BCF views by Archicad Survey Point or Archicad Project Origin."
         ),
     ]
+
+
+ImportIssuesFromBCFResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
 
 
 class GetRevisionIssuesResult(APIModel):
@@ -1943,6 +2096,9 @@ class GenerateDocumentationParameters(APIModel):
             min_length=1,
         ),
     ]
+
+
+GenerateDocumentationResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
 
 
 class ElementId(APIModel):
@@ -2176,21 +2332,6 @@ class PropertyDefinitionArrayItem(APIModel):
     propertyDefinition: PropertyDefinition
 
 
-class ElementsWithDetail(APIModel):
-    elementId: ElementId
-    details: Annotated[Details, Field(description="Details of an element.")]
-
-
-class SetDetailsOfElementsParameters(APIModel):
-    elementsWithDetails: Annotated[
-        List[ElementsWithDetail], Field(description="The elements with parameters.")
-    ]
-
-
-class GetZoneBoundariesParameters(APIModel):
-    zoneElementId: ElementId
-
-
 class ZoneBoundary(APIModel):
     connectedElementId: Annotated[
         ElementId, Field(description="The unique identifier of the connected element.")
@@ -2212,8 +2353,26 @@ class ZoneBoundary(APIModel):
     ]
 
 
-class GetZoneBoundariesResult(APIModel):
+class ZoneBoundariesResponse(APIModel):
     zoneBoundaries: List[ZoneBoundary]
+
+
+class ElementsWithDetail(APIModel):
+    elementId: ElementId
+    details: Annotated[Details, Field(description="Details of an element.")]
+
+
+class SetDetailsOfElementsParameters(APIModel):
+    elementsWithDetails: Annotated[
+        List[ElementsWithDetail], Field(description="The elements with parameters.")
+    ]
+
+
+class GetZoneBoundariesParameters(APIModel):
+    zoneElementId: ElementId
+
+
+GetZoneBoundariesResult: TypeAlias = ZoneBoundariesResponse | ErrorItem
 
 
 class Collision(APIModel):
@@ -2255,7 +2414,8 @@ class GetGDLParametersOfElementsResult(APIModel):
 class ElementsWithGDLParameter(APIModel):
     elementId: ElementId
     gdlParameters: Annotated[
-        List[GDLParameterDetails], Field(description="The list of GDL parameters.")
+        List[SetGDLParameterByNameDetails | SetGDLParameterByIndexDetails],
+        Field(description="The list of GDL parameters."),
     ]
 
 
@@ -2297,6 +2457,86 @@ class CreateZonesParameters(APIModel):
     zonesData: Annotated[
         List[ZonesDatum], Field(description="Array of data to create Zones.")
     ]
+
+
+class LabelsDatum(APIModel):
+    parentElementId: Annotated[
+        ElementId | None,
+        Field(description="The parent element if the label is an associative label."),
+    ] = None
+    text: Annotated[
+        str | None, Field(description="The text content if the label is a text label.")
+    ] = None
+    begCoordinate: Annotated[
+        Coordinate2D | None,
+        Field(
+            description="The begin coordinate of leader line. Optional parameter, but either begCoordinate or parentElementId must be provided."
+        ),
+    ] = None
+    floorInd: Annotated[
+        float | None,
+        Field(
+            description="The identifier of the floor. Optional parameter, by default the current floor or the floor of the parent element is used."
+        ),
+    ] = None
+
+
+class CreateLabelsParameters(APIModel):
+    labelsData: Annotated[
+        List[LabelsDatum], Field(description="Array of data to create Labels.")
+    ]
+
+
+class GetElementPreviewImageParameters(APIModel):
+    elementId: ElementId
+    imageType: Annotated[
+        ImageType | None,
+        Field(description="The type of the preview image. Default is 3D."),
+    ] = None
+    format: Annotated[
+        Format | None, Field(description="The image format. Default is png.")
+    ] = None
+    width: Annotated[
+        int | None,
+        Field(description="The width of the preview image in pixels. Default is 128."),
+    ] = None
+    height: Annotated[
+        int | None,
+        Field(description="The height of the preview image in pixels. Default is 128."),
+    ] = None
+
+
+class GetRoomImageParameters(APIModel):
+    zoneId: ElementId
+    format: Annotated[
+        Format | None, Field(description="The image format. Default is png.")
+    ] = None
+    width: Annotated[
+        int | None,
+        Field(description="The width of the preview image in pixels. Default is 256."),
+    ] = None
+    height: Annotated[
+        int | None,
+        Field(description="The height of the preview image in pixels. Default is 256."),
+    ] = None
+    offset: Annotated[
+        float | None,
+        Field(
+            description="Offset of the clip polygon from the edge of the zone. Default is 0.001."
+        ),
+    ] = None
+    scale: Annotated[
+        float | None,
+        Field(
+            description="Scale of the view (e.g. 0.005 for 1:200). Default is 0.005."
+        ),
+    ] = None
+    backgroundColor: Annotated[
+        ColorRGB | None,
+        Field(
+            description="Background color of the generated image. Default is white (1.0, 1.0, 1.0)."
+        ),
+    ] = None
 
 
 class FavoritesFromElement(APIModel):
@@ -3012,6 +3252,12 @@ class CreateObjectsResult(APIModel):
 
 
 class CreateMeshesResult(APIModel):
+    elements: Annotated[
+        List[ElementIdArrayItem], Field(description="A list of elements.")
+    ]
+
+
+class CreateLabelsResult(APIModel):
     elements: Annotated[
         List[ElementIdArrayItem], Field(description="A list of elements.")
     ]

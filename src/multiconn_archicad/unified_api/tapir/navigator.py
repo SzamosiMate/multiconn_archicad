@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 from typing import TYPE_CHECKING
+from pydantic import TypeAdapter
 
 from multiconn_archicad.models.tapir.commands import (
     GetDatabaseIdFromNavigatorItemIdParameters,
@@ -16,6 +17,7 @@ from multiconn_archicad.models.tapir.commands import (
     SetViewSettingsParameters,
     SetViewSettingsResult,
     UpdateDrawingsParameters,
+    UpdateDrawingsResult,
 )
 from multiconn_archicad.models.tapir.types import (
     DatabaseIdArrayItem,
@@ -189,12 +191,15 @@ class NavigatorCommands:
         validated_response = SetViewSettingsResult.model_validate(response_dict)
         return validated_response.executionResults
 
-    def update_drawings(self, elements: list[ElementIdArrayItem]) -> None:
+    def update_drawings(self, elements: list[ElementIdArrayItem]) -> FailedExecutionResult | SuccessfulExecutionResult:
         """
         Performs a drawing update on the given elements.
 
         Args:
             elements (list[ElementIdArrayItem]): A list of elements.
+
+        Returns:
+            FailedExecutionResult | SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -205,7 +210,8 @@ class NavigatorCommands:
             "elements": elements,
         }
         validated_params = UpdateDrawingsParameters(**params_dict)
-        self._core.post_tapir_command(
+        response_dict = self._core.post_tapir_command(
             "UpdateDrawings", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
-        return None
+        validated_response = TypeAdapter(UpdateDrawingsResult).validate_python(response_dict)
+        return validated_response

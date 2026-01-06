@@ -3,30 +3,39 @@
 
 from __future__ import annotations
 from typing import TYPE_CHECKING
+from pydantic import TypeAdapter
 
 from multiconn_archicad.models.tapir.commands import (
     AddCommentToIssueParameters,
+    AddCommentToIssueResult,
     AttachElementsToIssueParameters,
+    AttachElementsToIssueResult,
     CreateIssueParameters,
     CreateIssueResult,
     DeleteIssueParameters,
+    DeleteIssueResult,
     DetachElementsFromIssueParameters,
+    DetachElementsFromIssueResult,
     ExportIssuesToBCFParameters,
+    ExportIssuesToBCFResult,
     GetCommentsFromIssueParameters,
     GetCommentsFromIssueResult,
     GetElementsAttachedToIssueParameters,
     GetElementsAttachedToIssueResult,
     GetIssuesResult,
     ImportIssuesFromBCFParameters,
+    ImportIssuesFromBCFResult,
 )
 from multiconn_archicad.models.tapir.types import (
     Comment,
     ElementIdArrayItem,
+    FailedExecutionResult,
     Issue,
     IssueCommentStatus,
     IssueElementType,
     IssueId,
     IssueIdArrayItem,
+    SuccessfulExecutionResult,
 )
 
 if TYPE_CHECKING:
@@ -39,7 +48,7 @@ class IssueManagementCommands:
 
     def add_comment_to_issue(
         self, issue_id: IssueId, text: str, author: None | str = None, status: IssueCommentStatus | None = None
-    ) -> None:
+    ) -> FailedExecutionResult | SuccessfulExecutionResult:
         """
         Adds a new comment to the specified issue.
 
@@ -48,6 +57,9 @@ class IssueManagementCommands:
             text (str): Comment text to add.
             author (None | str): The author of the new comment.
             status (IssueCommentStatus | None)
+
+        Returns:
+            FailedExecutionResult | SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -61,14 +73,15 @@ class IssueManagementCommands:
             "text": text,
         }
         validated_params = AddCommentToIssueParameters(**params_dict)
-        self._core.post_tapir_command(
+        response_dict = self._core.post_tapir_command(
             "AddCommentToIssue", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
-        return None
+        validated_response = TypeAdapter(AddCommentToIssueResult).validate_python(response_dict)
+        return validated_response
 
     def attach_elements_to_issue(
         self, issue_id: IssueId, elements: list[ElementIdArrayItem], type: IssueElementType
-    ) -> None:
+    ) -> FailedExecutionResult | SuccessfulExecutionResult:
         """
         Attaches elements to the specified issue.
 
@@ -76,6 +89,9 @@ class IssueManagementCommands:
             issue_id (IssueId)
             elements (list[ElementIdArrayItem]): A list of elements.
             type (IssueElementType)
+
+        Returns:
+            FailedExecutionResult | SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -88,10 +104,11 @@ class IssueManagementCommands:
             "type": type,
         }
         validated_params = AttachElementsToIssueParameters(**params_dict)
-        self._core.post_tapir_command(
+        response_dict = self._core.post_tapir_command(
             "AttachElementsToIssue", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
-        return None
+        validated_response = TypeAdapter(AttachElementsToIssueResult).validate_python(response_dict)
+        return validated_response
 
     def create_issue(self, name: str, parent_issue_id: IssueId | None = None, tag_text: None | str = None) -> IssueId:
         """
@@ -122,7 +139,9 @@ class IssueManagementCommands:
         validated_response = CreateIssueResult.model_validate(response_dict)
         return validated_response.issueId
 
-    def delete_issue(self, issue_id: IssueId, accept_all_elements: None | bool = None) -> None:
+    def delete_issue(
+        self, issue_id: IssueId, accept_all_elements: None | bool = None
+    ) -> FailedExecutionResult | SuccessfulExecutionResult:
         """
         Deletes the specified issue.
 
@@ -130,6 +149,9 @@ class IssueManagementCommands:
             issue_id (IssueId)
             accept_all_elements (None | bool): Accept all creation/deletion/modification of the
                 deleted issue. By default false.
+
+        Returns:
+            FailedExecutionResult | SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -141,18 +163,24 @@ class IssueManagementCommands:
             "acceptAllElements": accept_all_elements,
         }
         validated_params = DeleteIssueParameters(**params_dict)
-        self._core.post_tapir_command(
+        response_dict = self._core.post_tapir_command(
             "DeleteIssue", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
-        return None
+        validated_response = TypeAdapter(DeleteIssueResult).validate_python(response_dict)
+        return validated_response
 
-    def detach_elements_from_issue(self, issue_id: IssueId, elements: list[ElementIdArrayItem]) -> None:
+    def detach_elements_from_issue(
+        self, issue_id: IssueId, elements: list[ElementIdArrayItem]
+    ) -> FailedExecutionResult | SuccessfulExecutionResult:
         """
         Detaches elements from the specified issue.
 
         Args:
             issue_id (IssueId)
             elements (list[ElementIdArrayItem]): A list of elements.
+
+        Returns:
+            FailedExecutionResult | SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -164,10 +192,11 @@ class IssueManagementCommands:
             "elements": elements,
         }
         validated_params = DetachElementsFromIssueParameters(**params_dict)
-        self._core.post_tapir_command(
+        response_dict = self._core.post_tapir_command(
             "DetachElementsFromIssue", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
-        return None
+        validated_response = TypeAdapter(DetachElementsFromIssueResult).validate_python(response_dict)
+        return validated_response
 
     def export_issues_to_bcf(
         self,
@@ -175,7 +204,7 @@ class IssueManagementCommands:
         use_external_id: bool,
         align_by_survey_point: bool,
         issues: None | list[IssueIdArrayItem] = None,
-    ) -> None:
+    ) -> FailedExecutionResult | SuccessfulExecutionResult:
         """
         Exports specified issues to a BCF file.
 
@@ -186,6 +215,9 @@ class IssueManagementCommands:
             align_by_survey_point (bool): Align BCF views by Archicad Survey Point or Archicad
                 Project Origin.
             issues (None | list[IssueIdArrayItem]): Leave it empty to export all issues.
+
+        Returns:
+            FailedExecutionResult | SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -199,10 +231,11 @@ class IssueManagementCommands:
             "alignBySurveyPoint": align_by_survey_point,
         }
         validated_params = ExportIssuesToBCFParameters(**params_dict)
-        self._core.post_tapir_command(
+        response_dict = self._core.post_tapir_command(
             "ExportIssuesToBCF", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
-        return None
+        validated_response = TypeAdapter(ExportIssuesToBCFResult).validate_python(response_dict)
+        return validated_response
 
     def get_comments_from_issue(self, issue_id: IssueId) -> list[Comment]:
         """
@@ -272,7 +305,9 @@ class IssueManagementCommands:
         validated_response = GetIssuesResult.model_validate(response_dict)
         return validated_response.issues
 
-    def import_issues_from_bcf(self, import_path: str, align_by_survey_point: bool) -> None:
+    def import_issues_from_bcf(
+        self, import_path: str, align_by_survey_point: bool
+    ) -> FailedExecutionResult | SuccessfulExecutionResult:
         """
         Imports issues from the specified BCF file.
 
@@ -280,6 +315,9 @@ class IssueManagementCommands:
             import_path (str): The os path to the bcf file, including it's name.
             align_by_survey_point (bool): Align BCF views by Archicad Survey Point or Archicad
                 Project Origin.
+
+        Returns:
+            FailedExecutionResult | SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -291,7 +329,8 @@ class IssueManagementCommands:
             "alignBySurveyPoint": align_by_survey_point,
         }
         validated_params = ImportIssuesFromBCFParameters(**params_dict)
-        self._core.post_tapir_command(
+        response_dict = self._core.post_tapir_command(
             "ImportIssuesFromBCF", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
-        return None
+        validated_response = TypeAdapter(ImportIssuesFromBCFResult).validate_python(response_dict)
+        return validated_response

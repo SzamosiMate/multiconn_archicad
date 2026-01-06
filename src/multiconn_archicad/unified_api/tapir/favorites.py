@@ -3,12 +3,15 @@
 
 from __future__ import annotations
 from typing import TYPE_CHECKING
+from pydantic import TypeAdapter
 
 from multiconn_archicad.models.tapir.commands import (
     ApplyFavoritesToElementDefaultsParameters,
     ApplyFavoritesToElementDefaultsResult,
     CreateFavoritesFromElementsParameters,
     CreateFavoritesFromElementsResult,
+    GetFavoritePreviewImageParameters,
+    GetFavoritePreviewImageResult,
     GetFavoritesByTypeParameters,
     GetFavoritesByTypeResult,
 )
@@ -16,6 +19,8 @@ from multiconn_archicad.models.tapir.types import (
     ElementType,
     FailedExecutionResult,
     FavoritesFromElement,
+    Format,
+    ImageType,
     SuccessfulExecutionResult,
 )
 
@@ -83,6 +88,46 @@ class FavoritesCommands:
         )
         validated_response = CreateFavoritesFromElementsResult.model_validate(response_dict)
         return validated_response.executionResults
+
+    def get_favorite_preview_image(
+        self,
+        favorite: str,
+        image_type: ImageType | None = None,
+        format: Format | None = None,
+        width: None | int = None,
+        height: None | int = None,
+    ) -> str:
+        """
+        Returns the preview image of the given favorite.
+
+        Args:
+            favorite (str): The name of the favorite.
+            image_type (ImageType | None): The type of the preview image. Default is 3D.
+            format (Format | None): The image format. Default is png.
+            width (None | int): The width of the preview image in pixels. Default is 128.
+            height (None | int): The height of the preview image in pixels. Default is 128.
+
+        Returns:
+            str: The base64 encoded preview image.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "favorite": favorite,
+            "imageType": image_type,
+            "format": format,
+            "width": width,
+            "height": height,
+        }
+        validated_params = GetFavoritePreviewImageParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetFavoritePreviewImage", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetFavoritePreviewImageResult.model_validate(response_dict)
+        return validated_response.previewImage
 
     def get_favorites_by_type(self, element_type: ElementType) -> list[str]:
         """

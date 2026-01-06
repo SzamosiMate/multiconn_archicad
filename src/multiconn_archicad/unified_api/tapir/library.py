@@ -3,11 +3,13 @@
 
 from __future__ import annotations
 from typing import TYPE_CHECKING
+from pydantic import TypeAdapter
 
 from multiconn_archicad.models.tapir.commands import (
     AddFilesToEmbeddedLibraryParameters,
     AddFilesToEmbeddedLibraryResult,
     GetLibrariesResult,
+    ReloadLibrariesResult,
 )
 from multiconn_archicad.models.tapir.types import FailedExecutionResult, File, Library, SuccessfulExecutionResult
 
@@ -63,14 +65,18 @@ class LibraryCommands:
         validated_response = GetLibrariesResult.model_validate(response_dict)
         return validated_response.libraries
 
-    def reload_libraries(self) -> None:
+    def reload_libraries(self) -> FailedExecutionResult | SuccessfulExecutionResult:
         """
         Executes the reload libraries command.
+
+        Returns:
+            FailedExecutionResult | SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
             pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
-        self._core.post_tapir_command("ReloadLibraries")
-        return None
+        response_dict = self._core.post_tapir_command("ReloadLibraries")
+        validated_response = TypeAdapter(ReloadLibrariesResult).validate_python(response_dict)
+        return validated_response

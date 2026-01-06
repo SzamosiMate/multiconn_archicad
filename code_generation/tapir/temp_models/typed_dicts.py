@@ -31,13 +31,46 @@ AttributeType = Literal[
 Guid = str
 
 
+PossibleStringValues = List[str]
+
+
+class PossibleNumericValue(TypedDict):
+    value: float
+    flag: NotRequired[str]
+    description: NotRequired[str]
+
+
+PossibleNumericValues = List[PossibleNumericValue]
+
+
 class GDLParameterDetails(TypedDict):
-    name: NotRequired[str]
-    index: str
+    name: str
+    displayName: str
+    index: int
     type: str
-    dimension1: NotRequired[float]
-    dimension2: NotRequired[float]
+    dimension1: int
+    dimension2: int
     value: Any
+    valueDescription: NotRequired[str]
+    isLocked: bool
+    flags: List[
+        Literal["Hidden", "HiddenFromScript", "Disabled", "Child", "Unique", "Fixed"]
+    ]
+    possibleValues: NotRequired[PossibleStringValues | PossibleNumericValues]
+    canHaveCustomValue: NotRequired[bool]
+
+
+class SetGDLParameterByNameDetails(TypedDict):
+    name: str
+    value: Any
+
+
+class SetGDLParameterByIndexDetails(TypedDict):
+    index: int
+    value: Any
+
+
+SetGDLParameterDetails = SetGDLParameterByNameDetails | SetGDLParameterByIndexDetails
 
 
 class PolyArc(TypedDict):
@@ -879,6 +912,9 @@ class GetArchicadLocationResult(TypedDict):
     archicadLocation: str
 
 
+QuitArchicadResult = ExecutionResult
+
+
 class GetCurrentWindowTypeResult(TypedDict):
     currentWindowType: WindowType
 
@@ -918,8 +954,14 @@ class SetStoriesParameters(TypedDict):
     stories: StoriesSettings
 
 
+SetStoriesResult = ExecutionResult
+
+
 class OpenProjectParameters(TypedDict):
     projectFilePath: str
+
+
+OpenProjectResult = ExecutionResult
 
 
 class ProjectLocation(TypedDict):
@@ -954,6 +996,15 @@ class GetGeoLocationResult(TypedDict):
     surveyPoint: SurveyPoint
 
 
+class IFCFileOperationParameters(TypedDict):
+    method: Literal["save", "merge", "open"]
+    ifcFilePath: str
+    fileType: NotRequired[Literal["ifc", "ifcxml", "ifczip", "ifcxmlzip"]]
+
+
+IFCFileOperationResult = ExecutionResult
+
+
 class ChangeSelectionOfElementsResult(TypedDict):
     executionResultsOfAddToSelection: ExecutionResults
     executionResultsOfRemoveFromSelection: ExecutionResults
@@ -980,6 +1031,9 @@ class Settings(TypedDict):
     surfaceTolerance: float
 
 
+HighlightElementsResult = ExecutionResult
+
+
 class MoveVector(TypedDict):
     x: float
     y: float
@@ -988,6 +1042,9 @@ class MoveVector(TypedDict):
 
 class MoveElementsResult(TypedDict):
     executionResults: ExecutionResults
+
+
+DeleteElementsResult = ExecutionResult
 
 
 class SetGDLParametersOfElementsResult(TypedDict):
@@ -1062,12 +1119,32 @@ class CreateMeshesParameters(TypedDict):
     meshesData: List[MeshesDatum]
 
 
+class GetElementPreviewImageResult(TypedDict):
+    previewImage: str
+
+
+class GetRoomImageResult(TypedDict):
+    roomImage: str
+
+
 class GetFavoritesByTypeParameters(TypedDict):
     elementType: ElementType
 
 
 class GetFavoritesByTypeResult(TypedDict):
     favorites: Favorites
+
+
+class GetFavoritePreviewImageParameters(TypedDict):
+    favorite: str
+    imageType: NotRequired[Literal["2D", "Section", "3D"]]
+    format: NotRequired[Literal["png", "jpg"]]
+    width: NotRequired[int]
+    height: NotRequired[int]
+
+
+class GetFavoritePreviewImageResult(TypedDict):
+    previewImage: str
 
 
 class ApplyFavoritesToElementDefaultsParameters(TypedDict):
@@ -1164,6 +1241,9 @@ class GetLibrariesResult(TypedDict):
     libraries: List[Library]
 
 
+ReloadLibrariesResult = ExecutionResult
+
+
 class File(TypedDict):
     inputPath: str
     outputPath: str
@@ -1194,14 +1274,26 @@ class AddFilesToEmbeddedLibraryResult(TypedDict):
     executionResults: ExecutionResults
 
 
+TeamworkSendResult = ExecutionResult
+
+
+TeamworkReceiveResult = ExecutionResult
+
+
 class User(TypedDict):
     userId: float
     userName: str
 
 
+ReleaseElementsResult = ExecutionResult
+
+
 class PublishPublisherSetParameters(TypedDict):
     publisherSetName: str
     outputPath: NotRequired[str]
+
+
+UpdateDrawingsResult = ExecutionResult
 
 
 class ModelViewOption(TypedDict):
@@ -1248,11 +1340,17 @@ class DeleteIssueParameters(TypedDict):
     acceptAllElements: NotRequired[bool]
 
 
+DeleteIssueResult = ExecutionResult
+
+
 class AddCommentToIssueParameters(TypedDict):
     issueId: IssueId
     author: NotRequired[str]
     status: NotRequired[IssueCommentStatus]
     text: str
+
+
+AddCommentToIssueResult = ExecutionResult
 
 
 class GetCommentsFromIssueParameters(TypedDict):
@@ -1271,6 +1369,12 @@ class GetCommentsFromIssueResult(TypedDict):
     comments: List[Comment]
 
 
+AttachElementsToIssueResult = ExecutionResult
+
+
+DetachElementsFromIssueResult = ExecutionResult
+
+
 class GetElementsAttachedToIssueParameters(TypedDict):
     issueId: IssueId
     type: IssueElementType
@@ -1283,9 +1387,15 @@ class ExportIssuesToBCFParameters(TypedDict):
     alignBySurveyPoint: bool
 
 
+ExportIssuesToBCFResult = ExecutionResult
+
+
 class ImportIssuesFromBCFParameters(TypedDict):
     importPath: str
     alignBySurveyPoint: bool
+
+
+ImportIssuesFromBCFResult = ExecutionResult
 
 
 class GetRevisionIssuesResult(TypedDict):
@@ -1310,6 +1420,9 @@ class GetRevisionChangesOfElementsResult(TypedDict):
 
 class GenerateDocumentationParameters(TypedDict):
     destinationFolder: str
+
+
+GenerateDocumentationResult = ExecutionResult
 
 
 class ElementId(TypedDict):
@@ -1343,6 +1456,9 @@ class LayerCombinationAttribute(TypedDict):
 
 
 LayerCombinationAttributeOrError = LayerCombinationAttribute | ErrorItem
+
+
+SetGDLParameterArray = List[SetGDLParameterDetails]
 
 
 GDLParameterArray = List[GDLParameterDetails]
@@ -1470,6 +1586,21 @@ class PropertyDefinitionArrayItem(TypedDict):
     propertyDefinition: PropertyDefinition
 
 
+class ZoneBoundary(TypedDict):
+    connectedElementId: ElementId
+    isExternal: bool
+    neighbouringZoneElementId: ElementId
+    area: float
+    polygonOutline: List[Coordinate3D]
+
+
+class ZoneBoundariesResponse(TypedDict):
+    zoneBoundaries: List[ZoneBoundary]
+
+
+ZoneBoundariesResponseOrError = ZoneBoundariesResponse | ErrorItem
+
+
 class ElementsWithDetail(TypedDict):
     elementId: ElementId
     details: Details
@@ -1483,16 +1614,7 @@ class GetZoneBoundariesParameters(TypedDict):
     zoneElementId: ElementId
 
 
-class ZoneBoundary(TypedDict):
-    connectedElementId: ElementId
-    isExternal: bool
-    neighbouringZoneElementId: ElementId
-    area: float
-    polygonOutline: List[Coordinate3D]
-
-
-class GetZoneBoundariesResult(TypedDict):
-    zoneBoundaries: List[ZoneBoundary]
+GetZoneBoundariesResult = ZoneBoundariesResponseOrError
 
 
 class Collision(TypedDict):
@@ -1522,7 +1644,7 @@ class GetGDLParametersOfElementsResult(TypedDict):
 
 class ElementsWithGDLParameter(TypedDict):
     elementId: ElementId
-    gdlParameters: GDLParameterArray
+    gdlParameters: SetGDLParameterArray
 
 
 class SetGDLParametersOfElementsParameters(TypedDict):
@@ -1544,6 +1666,35 @@ class ZonesDatum(TypedDict):
 
 class CreateZonesParameters(TypedDict):
     zonesData: List[ZonesDatum]
+
+
+class LabelsDatum(TypedDict):
+    parentElementId: NotRequired[ElementId]
+    text: NotRequired[str]
+    begCoordinate: NotRequired[Coordinate2D]
+    floorInd: NotRequired[float]
+
+
+class CreateLabelsParameters(TypedDict):
+    labelsData: List[LabelsDatum]
+
+
+class GetElementPreviewImageParameters(TypedDict):
+    elementId: ElementId
+    imageType: NotRequired[Literal["2D", "Section", "3D"]]
+    format: NotRequired[Literal["png", "jpg"]]
+    width: NotRequired[int]
+    height: NotRequired[int]
+
+
+class GetRoomImageParameters(TypedDict):
+    zoneId: ElementId
+    format: NotRequired[Literal["png", "jpg"]]
+    width: NotRequired[int]
+    height: NotRequired[int]
+    offset: NotRequired[float]
+    scale: NotRequired[float]
+    backgroundColor: NotRequired[ColorRGB]
 
 
 class FavoritesFromElement(TypedDict):
@@ -1931,6 +2082,10 @@ class CreateObjectsResult(TypedDict):
 
 
 class CreateMeshesResult(TypedDict):
+    elements: Elements
+
+
+class CreateLabelsResult(TypedDict):
     elements: Elements
 
 

@@ -3,12 +3,15 @@
 
 from __future__ import annotations
 from typing import TYPE_CHECKING
+from pydantic import TypeAdapter
 
 from multiconn_archicad.models.tapir.commands import (
     ChangeSelectionOfElementsParameters,
     ChangeSelectionOfElementsResult,
     CreateColumnsParameters,
     CreateColumnsResult,
+    CreateLabelsParameters,
+    CreateLabelsResult,
     CreateMeshesParameters,
     CreateMeshesResult,
     CreateObjectsParameters,
@@ -20,6 +23,7 @@ from multiconn_archicad.models.tapir.commands import (
     CreateZonesParameters,
     CreateZonesResult,
     DeleteElementsParameters,
+    DeleteElementsResult,
     FilterElementsParameters,
     FilterElementsResult,
     Get3DBoundingBoxesParameters,
@@ -34,16 +38,21 @@ from multiconn_archicad.models.tapir.commands import (
     GetConnectedElementsResult,
     GetDetailsOfElementsParameters,
     GetDetailsOfElementsResult,
+    GetElementPreviewImageParameters,
+    GetElementPreviewImageResult,
     GetElementsByTypeParameters,
     GetElementsByTypeResult,
     GetGDLParametersOfElementsParameters,
     GetGDLParametersOfElementsResult,
+    GetRoomImageParameters,
+    GetRoomImageResult,
     GetSelectedElementsResult,
     GetSubelementsOfHierarchicalElementsParameters,
     GetSubelementsOfHierarchicalElementsResult,
     GetZoneBoundariesParameters,
     GetZoneBoundariesResult,
     HighlightElementsParameters,
+    HighlightElementsResult,
     MoveElementsParameters,
     MoveElementsResult,
     SetClassificationsOfElementsParameters,
@@ -57,6 +66,7 @@ from multiconn_archicad.models.tapir.types import (
     BoundingBox3DArrayItem,
     ClassificationSystemIdArrayItem,
     Collision,
+    ColorRGB,
     ColumnsDatum,
     ConnectedElement,
     DatabaseIdArrayItem,
@@ -72,7 +82,10 @@ from multiconn_archicad.models.tapir.types import (
     ElementsWithMoveVector,
     ErrorItem,
     FailedExecutionResult,
+    Format,
     GDLParameterList,
+    ImageType,
+    LabelsDatum,
     MeshesDatum,
     ObjectsDatum,
     PolylinesDatum,
@@ -80,7 +93,7 @@ from multiconn_archicad.models.tapir.types import (
     SlabsDatum,
     Subelement,
     SuccessfulExecutionResult,
-    ZoneBoundary,
+    ZoneBoundariesResponse,
     ZonesDatum,
 )
 
@@ -147,6 +160,31 @@ class ElementCommands:
             "CreateColumns", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = CreateColumnsResult.model_validate(response_dict)
+        return validated_response.elements
+
+    def create_labels(self, labels_data: list[LabelsDatum]) -> list[ElementIdArrayItem]:
+        """
+        Creates Label elements based on the given parameters.
+
+        Args:
+            labels_data (list[LabelsDatum]): Array of data to create Labels.
+
+        Returns:
+            list[ElementIdArrayItem]: A list of elements.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "labelsData": labels_data,
+        }
+        validated_params = CreateLabelsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "CreateLabels", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = CreateLabelsResult.model_validate(response_dict)
         return validated_response.elements
 
     def create_meshes(self, meshes_data: list[MeshesDatum]) -> list[ElementIdArrayItem]:
@@ -274,12 +312,15 @@ class ElementCommands:
         validated_response = CreateZonesResult.model_validate(response_dict)
         return validated_response.elements
 
-    def delete_elements(self, elements: list[ElementIdArrayItem]) -> None:
+    def delete_elements(self, elements: list[ElementIdArrayItem]) -> FailedExecutionResult | SuccessfulExecutionResult:
         """
         Deletes elements.
 
         Args:
             elements (list[ElementIdArrayItem]): A list of elements.
+
+        Returns:
+            FailedExecutionResult | SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -290,10 +331,11 @@ class ElementCommands:
             "elements": elements,
         }
         validated_params = DeleteElementsParameters(**params_dict)
-        self._core.post_tapir_command(
+        response_dict = self._core.post_tapir_command(
             "DeleteElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
-        return None
+        validated_response = TypeAdapter(DeleteElementsResult).validate_python(response_dict)
+        return validated_response
 
     def filter_elements(
         self, elements: list[ElementIdArrayItem], filters: None | list[ElementFilter] = None
@@ -503,6 +545,46 @@ class ElementCommands:
         validated_response = GetDetailsOfElementsResult.model_validate(response_dict)
         return validated_response.detailsOfElements
 
+    def get_element_preview_image(
+        self,
+        element_id: ElementId,
+        image_type: ImageType | None = None,
+        format: Format | None = None,
+        width: None | int = None,
+        height: None | int = None,
+    ) -> str:
+        """
+        Returns the preview image of the given element.
+
+        Args:
+            element_id (ElementId)
+            image_type (ImageType | None): The type of the preview image. Default is 3D.
+            format (Format | None): The image format. Default is png.
+            width (None | int): The width of the preview image in pixels. Default is 128.
+            height (None | int): The height of the preview image in pixels. Default is 128.
+
+        Returns:
+            str: The base64 encoded preview image.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elementId": element_id,
+            "imageType": image_type,
+            "format": format,
+            "width": width,
+            "height": height,
+        }
+        validated_params = GetElementPreviewImageParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetElementPreviewImage", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetElementPreviewImageResult.model_validate(response_dict)
+        return validated_response.previewImage
+
     def get_elements_by_type(
         self,
         element_type: ElementType,
@@ -563,6 +645,54 @@ class ElementCommands:
         validated_response = GetGDLParametersOfElementsResult.model_validate(response_dict)
         return validated_response.gdlParametersOfElements
 
+    def get_room_image(
+        self,
+        zone_id: ElementId,
+        format: Format | None = None,
+        width: None | int = None,
+        height: None | int = None,
+        offset: None | float = None,
+        scale: None | float = None,
+        background_color: ColorRGB | None = None,
+    ) -> str:
+        """
+        Returns the room image of the given zone.
+
+        Args:
+            zone_id (ElementId)
+            format (Format | None): The image format. Default is png.
+            width (None | int): The width of the preview image in pixels. Default is 256.
+            height (None | int): The height of the preview image in pixels. Default is 256.
+            offset (None | float): Offset of the clip polygon from the edge of the zone. Default
+                is 0.001.
+            scale (None | float): Scale of the view (e.g. 0.005 for 1:200). Default is 0.005.
+            background_color (ColorRGB | None): Background color of the generated image. Default
+                is white (1.0, 1.0, 1.0).
+
+        Returns:
+            str: The base64 encoded room image.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "zoneId": zone_id,
+            "format": format,
+            "width": width,
+            "height": height,
+            "offset": offset,
+            "scale": scale,
+            "backgroundColor": background_color,
+        }
+        validated_params = GetRoomImageParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetRoomImage", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetRoomImageResult.model_validate(response_dict)
+        return validated_response.roomImage
+
     def get_selected_elements(self) -> list[ElementIdArrayItem]:
         """
         Gets the list of the currently selected elements.
@@ -605,7 +735,7 @@ class ElementCommands:
         validated_response = GetSubelementsOfHierarchicalElementsResult.model_validate(response_dict)
         return validated_response.subelements
 
-    def get_zone_boundaries(self, zone_element_id: ElementId) -> list[ZoneBoundary]:
+    def get_zone_boundaries(self, zone_element_id: ElementId) -> ErrorItem | ZoneBoundariesResponse:
         """
         Gets the boundaries of the given Zone (connected elements, neighbour zones, etc.).
 
@@ -613,7 +743,7 @@ class ElementCommands:
             zone_element_id (ElementId)
 
         Returns:
-            list[ZoneBoundary]
+            ErrorItem | ZoneBoundariesResponse
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -627,8 +757,8 @@ class ElementCommands:
         response_dict = self._core.post_tapir_command(
             "GetZoneBoundaries", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
-        validated_response = GetZoneBoundariesResult.model_validate(response_dict)
-        return validated_response.zoneBoundaries
+        validated_response = TypeAdapter(GetZoneBoundariesResult).validate_python(response_dict)
+        return validated_response
 
     def highlight_elements(
         self,
@@ -636,7 +766,7 @@ class ElementCommands:
         highlighted_colors: list[list[int]],
         wireframe_3d: None | bool = None,
         non_highlighted_color: None | list[int] = None,
-    ) -> None:
+    ) -> FailedExecutionResult | SuccessfulExecutionResult:
         """
         Highlights the elements given in the elements array. In case of empty elements array
         removes all previously set highlights.
@@ -650,6 +780,9 @@ class ElementCommands:
                 highlighted elements as an [r, g, b, a] array. Each component must be in the
                 0-255 range.
 
+        Returns:
+            FailedExecutionResult | SuccessfulExecutionResult
+
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
@@ -662,10 +795,11 @@ class ElementCommands:
             "nonHighlightedColor": non_highlighted_color,
         }
         validated_params = HighlightElementsParameters(**params_dict)
-        self._core.post_tapir_command(
+        response_dict = self._core.post_tapir_command(
             "HighlightElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
-        return None
+        validated_response = TypeAdapter(HighlightElementsResult).validate_python(response_dict)
+        return validated_response
 
     def move_elements(
         self, elements_with_move_vectors: list[ElementsWithMoveVector]

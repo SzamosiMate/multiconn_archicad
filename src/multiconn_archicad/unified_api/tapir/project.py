@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 from typing import TYPE_CHECKING
+from pydantic import TypeAdapter
 
 from multiconn_archicad.models.tapir.commands import (
     GetGeoLocationResult,
@@ -10,11 +11,23 @@ from multiconn_archicad.models.tapir.commands import (
     GetProjectInfoFieldsResult,
     GetProjectInfoResult,
     GetStoriesResult,
+    IFCFileOperationParameters,
+    IFCFileOperationResult,
     OpenProjectParameters,
+    OpenProjectResult,
     SetProjectInfoFieldParameters,
     SetStoriesParameters,
+    SetStoriesResult,
 )
-from multiconn_archicad.models.tapir.types import FieldModel, Hotlink, StorySettings
+from multiconn_archicad.models.tapir.types import (
+    FailedExecutionResult,
+    FieldModel,
+    FileType,
+    Hotlink,
+    Method,
+    StorySettings,
+    SuccessfulExecutionResult,
+)
 
 if TYPE_CHECKING:
     from multiconn_archicad.core.core_commands import CoreCommands
@@ -105,12 +118,46 @@ class ProjectCommands:
         validated_response = GetStoriesResult.model_validate(response_dict)
         return validated_response
 
-    def open_project(self, project_file_path: str) -> None:
+    def ifc_file_operation(
+        self, method: Method, ifc_file_path: str, file_type: FileType | None = None
+    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+        """
+        Executes an IFC file operation.
+
+        Args:
+            method (Method): The file operation method to use.
+            ifc_file_path (str): The target IFC file to use.
+            file_type (FileType | None): The type of the IFC file. The default is 'ifc'.
+
+        Returns:
+            FailedExecutionResult | SuccessfulExecutionResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "method": method,
+            "ifcFilePath": ifc_file_path,
+            "fileType": file_type,
+        }
+        validated_params = IFCFileOperationParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "IFCFileOperation", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = TypeAdapter(IFCFileOperationResult).validate_python(response_dict)
+        return validated_response
+
+    def open_project(self, project_file_path: str) -> FailedExecutionResult | SuccessfulExecutionResult:
         """
         Opens the given project.
 
         Args:
             project_file_path (str): The target project file to open.
+
+        Returns:
+            FailedExecutionResult | SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -121,10 +168,11 @@ class ProjectCommands:
             "projectFilePath": project_file_path,
         }
         validated_params = OpenProjectParameters(**params_dict)
-        self._core.post_tapir_command(
+        response_dict = self._core.post_tapir_command(
             "OpenProject", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
-        return None
+        validated_response = TypeAdapter(OpenProjectResult).validate_python(response_dict)
+        return validated_response
 
     def set_project_info_field(self, project_info_id: str, project_info_value: str) -> None:
         """
@@ -149,13 +197,16 @@ class ProjectCommands:
         )
         return None
 
-    def set_stories(self, stories: list[StorySettings]) -> None:
+    def set_stories(self, stories: list[StorySettings]) -> FailedExecutionResult | SuccessfulExecutionResult:
         """
         Sets the story sructure of the currently loaded project.
 
         Args:
             stories (list[StorySettings]): A list of story settings, used as input for creating
                 or modifying multiple stories.
+
+        Returns:
+            FailedExecutionResult | SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -166,7 +217,8 @@ class ProjectCommands:
             "stories": stories,
         }
         validated_params = SetStoriesParameters(**params_dict)
-        self._core.post_tapir_command(
+        response_dict = self._core.post_tapir_command(
             "SetStories", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
-        return None
+        validated_response = TypeAdapter(SetStoriesResult).validate_python(response_dict)
+        return validated_response
