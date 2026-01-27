@@ -480,6 +480,12 @@
         "version": "1.0.0"
     },
     {
+        "name": "RemoveElementNotificationClient",
+        "group": "Element Commands",
+        "description": "Removes an element notification client.",
+        "version": "1.2.8"
+    },
+    {
         "name": "ReserveElements",
         "group": "Teamwork Commands",
         "description": "Reserves elements in Teamwork mode.",
@@ -496,6 +502,12 @@
         "group": "Element Commands",
         "description": "Sets the details of the given elements (floor, layer, order etc).",
         "version": "1.0.7"
+    },
+    {
+        "name": "SetElementNotificationClient",
+        "group": "Element Commands",
+        "description": "Sets up a new notification client to receive element events.",
+        "version": "1.2.8"
     },
     {
         "name": "SetGDLParametersOfElements",

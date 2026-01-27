@@ -11,7 +11,12 @@ from multiconn_archicad.models.tapir.commands import (
     GetLibrariesResult,
     ReloadLibrariesResult,
 )
-from multiconn_archicad.models.tapir.types import FailedExecutionResult, File, Library, SuccessfulExecutionResult
+from multiconn_archicad.models.tapir.types import (
+    FailedExecutionResult,
+    Library,
+    LibraryFileAddition,
+    SuccessfulExecutionResult,
+)
 
 if TYPE_CHECKING:
     from multiconn_archicad.core.core_commands import CoreCommands
@@ -22,13 +27,14 @@ class LibraryCommands:
         self._core = core
 
     def add_files_to_embedded_library(
-        self, files: list[File]
+        self, files: list[LibraryFileAddition]
     ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
         """
         Adds the given files into the embedded library.
 
         Args:
-            files (list[File]): A list of files
+            files (list[LibraryFileAddition]): A list of library file additions to the embedded
+                library
 
         Returns:
             list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution

@@ -146,7 +146,7 @@ class NavigatorCommands:
         Args:
             publisher_set_name (str): The name of the publisher set.
             output_path (None | str): Full local or LAN path for publishing. Optional, by
-                default the path set in the settings of the publiser set will be used.
+                default the path set in the settings of the publisher set will be used.
 
         Raises:
             ArchicadAPIError: If the API returns an error response.

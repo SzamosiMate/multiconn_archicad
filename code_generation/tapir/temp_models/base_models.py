@@ -920,6 +920,14 @@ class CurtainWallSegmentDetails(APIModel):
     ] = None
 
 
+class CurtainWallFrameType(Enum):
+    Deleted = "Deleted"
+    Division = "Division"
+    Corner = "Corner"
+    Boundary = "Boundary"
+    Custom = "Custom"
+
+
 class PanelConnectionHole(APIModel):
     d: Annotated[float, Field(description="Depth of the panel connection hole.")]
     w: Annotated[float, Field(description="Width of the panel connection hole.")]
@@ -930,14 +938,6 @@ class FrameContour(APIModel):
     a2: Annotated[float, Field(description="Width2 of the frame contour.")]
     b1: Annotated[float, Field(description="Length1 of the frame contour.")]
     b2: Annotated[float, Field(description="Length2 of the frame contour.")]
-
-
-class Type(Enum):
-    Deleted = "Deleted"
-    Division = "Division"
-    Corner = "Corner"
-    Boundary = "Boundary"
-    Custom = "Custom"
 
 
 class CurtainWallFrameDetails(APIModel):
@@ -958,7 +958,7 @@ class CurtainWallFrameDetails(APIModel):
         ),
     ]
     className: str
-    type: Type
+    type: CurtainWallFrameType
 
 
 class MeshSkirtType(Enum):
@@ -1102,7 +1102,7 @@ class DocumentRevision(APIModel):
     status: Status
     changes: Annotated[
         List[Change] | None,
-        Field(description="All changes belong to the given document revision."),
+        Field(description="All changes belonging to the given document revision."),
     ] = None
     layoutInfo: LayoutInfo
 
@@ -1217,6 +1217,42 @@ class Group(APIModel):
     name: str | None = None
 
 
+class BuildingMaterialPhysicalProperties(APIModel):
+    thermalConductivity: Annotated[float, Field(description="Thermal Conductivity.")]
+    density: Annotated[float, Field(description="Density.")]
+    heatCapacity: Annotated[float, Field(description="Heat Capacity.")]
+    embodiedEnergy: Annotated[float, Field(description="Embodied Energy.")]
+    embodiedCarbon: Annotated[float, Field(description="Embodied Carbon.")]
+
+
+class ProjectInfoField(APIModel):
+    projectInfoId: Annotated[
+        str, Field(description="The id of the project info field.")
+    ]
+    projectInfoName: Annotated[
+        str, Field(description="The name of the project info field visible on UI.")
+    ]
+    projectInfoValue: Annotated[
+        str, Field(description="The value of the project info field.")
+    ]
+
+
+class LibraryPartType(Enum):
+    Window = "Window"
+    Door = "Door"
+    Object = "Object"
+    Lamp = "Lamp"
+    Room = "Room"
+    Property = "Property"
+    PlanSign = "PlanSign"
+    Label = "Label"
+    Macro = "Macro"
+    Pict = "Pict"
+    ListScheme = "ListScheme"
+    Skylight = "Skylight"
+    OpeningSymbol = "OpeningSymbol"
+
+
 class GetAddOnVersionResult(APIModel):
     version: Annotated[
         str, Field(description='Version number in the form of "1.1.1".', min_length=1)
@@ -1265,25 +1301,6 @@ class GetProjectInfoResult(APIModel):
     projectName: Annotated[
         str | None, Field(description="The name of the project.", min_length=1)
     ] = None
-
-
-class FieldModel(APIModel):
-    projectInfoId: Annotated[
-        str | None, Field(description="The id of the project info field.")
-    ] = None
-    projectInfoName: Annotated[
-        str | None,
-        Field(description="The name of the project info field visible on UI."),
-    ] = None
-    projectInfoValue: Annotated[
-        str | None, Field(description="The value of the project info field.")
-    ] = None
-
-
-class GetProjectInfoFieldsResult(APIModel):
-    fields: Annotated[
-        List[FieldModel], Field(description="A list of project info fields.")
-    ]
 
 
 class SetProjectInfoFieldParameters(APIModel):
@@ -1525,124 +1542,6 @@ class SetClassificationsOfElementsResult(APIModel):
     ]
 
 
-class Coordinates(APIModel):
-    x: Annotated[float, Field(description="X value of the coordinate.")]
-    y: Annotated[float, Field(description="Y value of the coordinate.")]
-    z: Annotated[float, Field(description="Z value of the coordinate.")]
-
-
-class ColumnsDatum(APIModel):
-    coordinates: Annotated[Coordinates, Field(description="3D coordinate.")]
-
-
-class CreateColumnsParameters(APIModel):
-    columnsData: Annotated[
-        List[ColumnsDatum], Field(description="Array of data to create Columns.")
-    ]
-
-
-class SlabsDatum(APIModel):
-    level: Annotated[
-        float,
-        Field(description="The Z coordinate value of the reference line of the slab."),
-    ]
-    polygonCoordinates: Annotated[
-        List[Coordinate2D],
-        Field(description="The 2D coordinates of the edge of the slab.", min_length=3),
-    ]
-    polygonArcs: Annotated[
-        List[PolyArc] | None, Field(description="Polygon outline arcs of the slab.")
-    ] = None
-    holes: Annotated[
-        List[Hole2D] | None,
-        Field(
-            description="A list of 2D holes in an element defined by closed polylines"
-        ),
-    ] = None
-
-
-class CreateSlabsParameters(APIModel):
-    slabsData: Annotated[
-        List[SlabsDatum], Field(description="Array of data to create Slabs.")
-    ]
-
-
-class PolylinesDatum(APIModel):
-    floorInd: Annotated[
-        float | None,
-        Field(
-            description="The identifier of the floor. Optinal parameter, by default the current floor is used."
-        ),
-    ] = None
-    coordinates: Annotated[
-        List[Coordinate2D],
-        Field(description="The 2D coordinates of the polyline.", min_length=2),
-    ]
-    arcs: Annotated[
-        List[PolyArc] | None, Field(description="The arcs of the polyline.")
-    ] = None
-
-
-class CreatePolylinesParameters(APIModel):
-    polylinesData: Annotated[
-        List[PolylinesDatum], Field(description="Array of data to create Polylines.")
-    ]
-
-
-class ObjectsDatum(APIModel):
-    libraryPartName: Annotated[
-        str, Field(description="The name of the library part to use.")
-    ]
-    coordinates: Coordinate3D
-    dimensions: Dimensions3D | None = None
-
-
-class CreateObjectsParameters(APIModel):
-    objectsData: Annotated[
-        List[ObjectsDatum], Field(description="Array of data to create Objects.")
-    ]
-
-
-class MeshesDatum(APIModel):
-    floorIndex: int | None = None
-    level: Annotated[
-        float | None, Field(description="The Z reference level of coordinates.")
-    ] = None
-    skirtType: MeshSkirtType | None = None
-    skirtLevel: Annotated[
-        float | None, Field(description="The height of the skirt.")
-    ] = None
-    polygonCoordinates: Annotated[
-        List[Coordinate3D],
-        Field(
-            description="The 3D coordinates of the outline polygon of the mesh.",
-            min_length=3,
-        ),
-    ]
-    polygonArcs: Annotated[
-        List[PolyArc] | None, Field(description="Polygon outline arcs of the mesh.")
-    ] = None
-    holes: Annotated[
-        List[Hole3D] | None,
-        Field(
-            description="A list of 3D holes in an element defined by closed polylines"
-        ),
-    ] = None
-    sublines: Annotated[
-        List[Subline] | None,
-        Field(
-            description="The leveling sublines inside the polygon of the mesh.",
-            min_length=1,
-        ),
-    ] = None
-
-
-class CreateMeshesParameters(APIModel):
-    meshesData: Annotated[
-        List[MeshesDatum], Field(description="Array of data to create Meshes.")
-    ]
-
-
 class ImageType(Enum):
     field_2D = "2D"
     Section = "Section"
@@ -1660,6 +1559,45 @@ class GetElementPreviewImageResult(APIModel):
 
 class GetRoomImageResult(APIModel):
     roomImage: Annotated[str, Field(description="The base64 encoded room image.")]
+
+
+class SetElementNotificationClientParameters(APIModel):
+    host: Annotated[
+        str | None,
+        Field(
+            description="The host address of the notification client. If not provided, localhost is used."
+        ),
+    ] = None
+    port: Annotated[
+        int, Field(description="The port number of the notification client.")
+    ]
+    notifyOnNewElement: Annotated[
+        bool | None, Field(description="Notify on creation of a new element.")
+    ] = True
+    notifyOnModificationOfAnElement: Annotated[
+        bool | None, Field(description="Notify on modification/deletion of an element.")
+    ] = True
+    notifyOnReservationChanges: Annotated[
+        bool | None, Field(description="Notify on reservation changes of an element.")
+    ] = True
+
+
+SetElementNotificationClientResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
+
+
+class RemoveElementNotificationClientParameters(APIModel):
+    host: Annotated[
+        str | None,
+        Field(
+            description="The host address of the notification client. If not provided, localhost is used."
+        ),
+    ] = None
+    port: Annotated[
+        int, Field(description="The port number of the notification client.")
+    ]
+
+
+RemoveElementNotificationClientResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
 
 
 class GetFavoritesByTypeParameters(APIModel):
@@ -1802,32 +1740,6 @@ class GetAttributesByTypeParameters(APIModel):
     attributeType: AttributeType
 
 
-class Properties(APIModel):
-    thermalConductivity: Annotated[
-        float | None, Field(description="Thermal Conductivity.")
-    ] = None
-    density: Annotated[float | None, Field(description="Density.")] = None
-    heatCapacity: Annotated[float | None, Field(description="Heat Capacity.")] = None
-    embodiedEnergy: Annotated[float | None, Field(description="Embodied Energy.")] = (
-        None
-    )
-    embodiedCarbon: Annotated[float | None, Field(description="Embodied Carbon.")] = (
-        None
-    )
-
-
-class Property(APIModel):
-    properties: Annotated[
-        Properties | None, Field(description="Physical properties.")
-    ] = None
-
-
-class GetBuildingMaterialPhysicalPropertiesResult(APIModel):
-    properties: Annotated[
-        List[Property], Field(description="Physical properties list.")
-    ]
-
-
 class Library(APIModel):
     name: Annotated[str, Field(description="Library name.")]
     path: Annotated[str, Field(description="A filesystem path to library location.")]
@@ -1854,38 +1766,6 @@ class GetLibrariesResult(APIModel):
 
 
 ReloadLibrariesResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
-
-
-class Type1(Enum):
-    Window = "Window"
-    Door = "Door"
-    Object = "Object"
-    Lamp = "Lamp"
-    Room = "Room"
-    Property = "Property"
-    PlanSign = "PlanSign"
-    Label = "Label"
-    Macro = "Macro"
-    Pict = "Pict"
-    ListScheme = "ListScheme"
-    Skylight = "Skylight"
-    OpeningSymbol = "OpeningSymbol"
-
-
-class File(APIModel):
-    inputPath: Annotated[str, Field(description="The path to the input file.")]
-    outputPath: Annotated[
-        str,
-        Field(description="The relative path to the new file inside embedded library."),
-    ]
-    type: Annotated[
-        Type1 | None,
-        Field(description="The type of the library part. By default 'Pict'."),
-    ] = None
-
-
-class AddFilesToEmbeddedLibraryParameters(APIModel):
-    files: Annotated[List[File], Field(description="A list of files")]
 
 
 class AddFilesToEmbeddedLibraryResult(APIModel):
@@ -1916,7 +1796,7 @@ class PublishPublisherSetParameters(APIModel):
     outputPath: Annotated[
         str | None,
         Field(
-            description="Full local or LAN path for publishing. Optional, by default the path set in the settings of the publiser set will be used.",
+            description="Full local or LAN path for publishing. Optional, by default the path set in the settings of the publisher set will be used.",
             min_length=1,
         ),
     ] = None
@@ -2099,6 +1979,94 @@ class GenerateDocumentationParameters(APIModel):
 
 
 GenerateDocumentationResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
+
+
+class Coordinates(APIModel):
+    x: Annotated[float, Field(description="X value of the coordinate.")]
+    y: Annotated[float, Field(description="Y value of the coordinate.")]
+    z: Annotated[float, Field(description="Z value of the coordinate.")]
+
+
+class ColumnData(APIModel):
+    coordinates: Annotated[Coordinates, Field(description="3D coordinate.")]
+
+
+class SlabData(APIModel):
+    level: Annotated[
+        float,
+        Field(description="The Z coordinate value of the reference line of the slab."),
+    ]
+    polygonCoordinates: Annotated[
+        List[Coordinate2D],
+        Field(description="The 2D coordinates of the edge of the slab.", min_length=3),
+    ]
+    polygonArcs: Annotated[
+        List[PolyArc] | None, Field(description="Polygon outline arcs of the slab.")
+    ] = None
+    holes: Annotated[
+        List[Hole2D] | None,
+        Field(
+            description="A list of 2D holes in an element defined by closed polylines"
+        ),
+    ] = None
+
+
+class PolylineData(APIModel):
+    floorInd: Annotated[
+        float | None,
+        Field(
+            description="The identifier of the floor. Optional parameter, by default the current floor is used."
+        ),
+    ] = None
+    coordinates: Annotated[
+        List[Coordinate2D],
+        Field(description="The 2D coordinates of the polyline.", min_length=2),
+    ]
+    arcs: Annotated[
+        List[PolyArc] | None, Field(description="The arcs of the polyline.")
+    ] = None
+
+
+class ObjectData(APIModel):
+    libraryPartName: Annotated[
+        str, Field(description="The name of the library part to use.")
+    ]
+    coordinates: Coordinate3D
+    dimensions: Dimensions3D | None = None
+
+
+class MeshData(APIModel):
+    floorIndex: int | None = None
+    level: Annotated[
+        float | None, Field(description="The Z reference level of coordinates.")
+    ] = None
+    skirtType: MeshSkirtType | None = None
+    skirtLevel: Annotated[
+        float | None, Field(description="The height of the skirt.")
+    ] = None
+    polygonCoordinates: Annotated[
+        List[Coordinate3D],
+        Field(
+            description="The 3D coordinates of the outline polygon of the mesh.",
+            min_length=3,
+        ),
+    ]
+    polygonArcs: Annotated[
+        List[PolyArc] | None, Field(description="Polygon outline arcs of the mesh.")
+    ] = None
+    holes: Annotated[
+        List[Hole3D] | None,
+        Field(
+            description="A list of 3D holes in an element defined by closed polylines"
+        ),
+    ] = None
+    sublines: Annotated[
+        List[Subline] | None,
+        Field(
+            description="The leveling sublines inside the polygon of the mesh.",
+            min_length=1,
+        ),
+    ] = None
 
 
 class ElementId(APIModel):
@@ -2342,7 +2310,7 @@ class ZoneBoundary(APIModel):
     neighbouringZoneElementId: Annotated[
         ElementId,
         Field(
-            description="Returns the unique identifer of the other Zone the element connects to if the boundary is internal. Please note that this boundary does not represent the boundary of the element with the other Zone."
+            description="Returns the unique identifier of the other Zone the element connects to if the boundary is internal. Please note that this boundary does not represent the boundary of the element with the other Zone."
         ),
     ]
     area: Annotated[
@@ -2355,6 +2323,28 @@ class ZoneBoundary(APIModel):
 
 class ZoneBoundariesResponse(APIModel):
     zoneBoundaries: List[ZoneBoundary]
+
+
+class BuildingMaterialPhysicalPropertiesArrayItem(APIModel):
+    properties: BuildingMaterialPhysicalProperties
+
+
+class LibraryFileAddition(APIModel):
+    inputPath: Annotated[str, Field(description="The path to the input file.")]
+    outputPath: Annotated[
+        str,
+        Field(description="The relative path to the new file inside embedded library."),
+    ]
+    type: Annotated[
+        LibraryPartType | None,
+        Field(description="The type of the library part. By default 'Pict'."),
+    ] = "Pict"
+
+
+class GetProjectInfoFieldsResult(APIModel):
+    fields: Annotated[
+        List[ProjectInfoField], Field(description="A list of project info fields.")
+    ]
 
 
 class ElementsWithDetail(APIModel):
@@ -2433,57 +2423,33 @@ class SetClassificationsOfElementsParameters(APIModel):
     ]
 
 
-class ZonesDatum(APIModel):
-    floorIndex: float | None = None
-    name: Annotated[str, Field(description="Name of the zone.")]
-    numberStr: Annotated[str, Field(description="Zone number.")]
-    categoryAttributeId: Annotated[
-        AttributeId | None,
-        Field(description="The identifier of the zone category attribute."),
-    ] = None
-    stampPosition: Annotated[
-        Coordinate2D | None,
-        Field(description="Position of the origin of the zone stamp."),
-    ] = None
-    geometry: Annotated[
-        AutomaticZoneGeometry | ManualZoneGeometry,
-        Field(
-            description="Defines the geometry of a zone. Used as input for creating zones."
-        ),
+class CreateColumnsParameters(APIModel):
+    columnsData: Annotated[
+        List[ColumnData], Field(description="Array of data to create Columns.")
     ]
 
 
-class CreateZonesParameters(APIModel):
-    zonesData: Annotated[
-        List[ZonesDatum], Field(description="Array of data to create Zones.")
+class CreateSlabsParameters(APIModel):
+    slabsData: Annotated[
+        List[SlabData], Field(description="Array of data to create Slabs.")
     ]
 
 
-class LabelsDatum(APIModel):
-    parentElementId: Annotated[
-        ElementId | None,
-        Field(description="The parent element if the label is an associative label."),
-    ] = None
-    text: Annotated[
-        str | None, Field(description="The text content if the label is a text label.")
-    ] = None
-    begCoordinate: Annotated[
-        Coordinate2D | None,
-        Field(
-            description="The begin coordinate of leader line. Optional parameter, but either begCoordinate or parentElementId must be provided."
-        ),
-    ] = None
-    floorInd: Annotated[
-        float | None,
-        Field(
-            description="The identifier of the floor. Optional parameter, by default the current floor or the floor of the parent element is used."
-        ),
-    ] = None
+class CreatePolylinesParameters(APIModel):
+    polylinesData: Annotated[
+        List[PolylineData], Field(description="Array of data to create Polylines.")
+    ]
 
 
-class CreateLabelsParameters(APIModel):
-    labelsData: Annotated[
-        List[LabelsDatum], Field(description="Array of data to create Labels.")
+class CreateObjectsParameters(APIModel):
+    objectsData: Annotated[
+        List[ObjectData], Field(description="Array of data to create Objects.")
+    ]
+
+
+class CreateMeshesParameters(APIModel):
+    meshesData: Annotated[
+        List[MeshData], Field(description="Array of data to create Meshes.")
     ]
 
 
@@ -2762,6 +2728,48 @@ class GetIssuesResult(APIModel):
     issues: Annotated[List[Issue], Field(description="A list of existing issues.")]
 
 
+class ZoneData(APIModel):
+    floorIndex: float | None = None
+    name: Annotated[str, Field(description="Name of the zone.")]
+    numberStr: Annotated[str, Field(description="Zone number.")]
+    categoryAttributeId: Annotated[
+        AttributeId | None,
+        Field(description="The identifier of the zone category attribute."),
+    ] = None
+    stampPosition: Annotated[
+        Coordinate2D | None,
+        Field(description="Position of the origin of the zone stamp."),
+    ] = None
+    geometry: Annotated[
+        AutomaticZoneGeometry | ManualZoneGeometry,
+        Field(
+            description="Defines the geometry of a zone. Used as input for creating zones."
+        ),
+    ]
+
+
+class LabelData(APIModel):
+    parentElementId: Annotated[
+        ElementId | None,
+        Field(description="The parent element if the label is an associative label."),
+    ] = None
+    text: Annotated[
+        str | None, Field(description="The text content if the label is a text label.")
+    ] = None
+    begCoordinate: Annotated[
+        Coordinate2D | None,
+        Field(
+            description="The begin coordinate of leader line. Optional parameter, but either begCoordinate or parentElementId must be provided."
+        ),
+    ] = None
+    floorInd: Annotated[
+        float | None,
+        Field(
+            description="The identifier of the floor. Optional parameter, by default the current floor or the floor of the parent element is used."
+        ),
+    ] = None
+
+
 class ElementIdArrayItem(APIModel):
     elementId: ElementId
 
@@ -2840,6 +2848,18 @@ class DetailsOfElement(APIModel):
 
 class GetDetailsOfElementsResult(APIModel):
     detailsOfElements: List[DetailsOfElement]
+
+
+class CreateZonesParameters(APIModel):
+    zonesData: Annotated[
+        List[ZoneData], Field(description="Array of data to create Zones.")
+    ]
+
+
+class CreateLabelsParameters(APIModel):
+    labelsData: Annotated[
+        List[LabelData], Field(description="Array of data to create Labels.")
+    ]
 
 
 class Skin(APIModel):
@@ -2959,6 +2979,20 @@ class CreateSurfacesParameters(APIModel):
             description="Overwrite the Surface if exists with the same name, or if index is given with the same index. The default is false."
         ),
     ] = None
+
+
+class GetBuildingMaterialPhysicalPropertiesResult(APIModel):
+    properties: Annotated[
+        List[BuildingMaterialPhysicalPropertiesArrayItem],
+        Field(description="A list of building material physical properties"),
+    ]
+
+
+class AddFilesToEmbeddedLibraryParameters(APIModel):
+    files: Annotated[
+        List[LibraryFileAddition],
+        Field(description="A list of library file additions to the embedded library"),
+    ]
 
 
 class GetDatabaseIdFromNavigatorItemIdParameters(APIModel):

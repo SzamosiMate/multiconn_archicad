@@ -183,6 +183,61 @@ TapirCommandType = Literal[
     output_path.write_text(file_content, encoding="utf-8")
 
 
+def extract_inline_schema(defs: Dict[str, Any], parent_name: str, path: List[str], new_def_name: str):
+    """
+    Helper to extract an inline schema definition into a named $ref.
+
+    :param defs: The master definitions dictionary.
+    :param parent_name: The name of the parent definition containing the inline schema.
+    :param path: List of keys to traverse to reach the inline schema (e.g. ["properties", "items"]).
+    :param new_def_name: The new unique name for the extracted definition.
+    """
+    if parent_name not in defs:
+        return
+
+    # Navigate to the target
+    current = defs[parent_name]
+    for key in path[:-1]:
+        if isinstance(current, dict) and key in current:
+            current = current[key]
+        else:
+            return
+
+    last_key = path[-1]
+    if last_key in current:
+        target_schema = current[last_key]
+
+        if "$ref" in target_schema:
+            return
+
+        # 1. Create the new top-level definition
+        print(f"  -> Extracting {parent_name} / {path} to {new_def_name}")
+        defs[new_def_name] = target_schema
+
+        # 2. Replace the original location with a $ref
+        current[last_key] = {"$ref": f"#/$defs/{new_def_name}"}
+
+
+def improve_schema_names(master_defs: Dict[str, Any]):
+    print("Refactoring schema to improve model names...")
+
+    creation_data_types = {
+        "CreateColumnsParameters": ("columnsData", "ColumnData"),
+        "CreateSlabsParameters": ("slabsData", "SlabData"),
+        "CreatePolylinesParameters": ("polylinesData", "PolylineData"),
+        "CreateObjectsParameters": ("objectsData", "ObjectData"),
+        "CreateMeshesParameters": ("meshesData", "MeshData"),
+        "CreateZonesParameters": ("zonesData", "ZoneData"),
+        "CreateBeamsParameters": ("beamsData", "BeamData"),
+        "CreateWallsParameters": ("wallsData", "WallData"),
+        "CreateLabelsParameters": ("labelsData", "LabelData")
+    }
+
+    for parent_model, (field_name, new_model_name) in creation_data_types.items():
+        if parent_model in master_defs:
+            extract_inline_schema(master_defs, parent_model, ["properties", field_name, "items"], new_model_name)
+
+
 def main():
     """
     Fetches, parses, and merges schema definitions, and generates all
@@ -201,11 +256,14 @@ def main():
     master_defs = {**common_defs, **command_defs}
     print(f"Total unique definitions for master schema: {len(master_defs)}")
 
+    fix_refs_recursive(master_defs)
+    improve_schema_names(master_defs)
+
     master_schema = {
         "$schema": "http://json-schema.org/draft-07/schema#",
         "title": "TapirMasterModels",
         "description": "A consolidated, single-file schema for the Archicad Tapir JSON API.",
-        "$defs": fix_refs_recursive(master_defs),
+        "$defs": master_defs,
     }
 
     with open(tapir_paths.MASTER_SCHEMA_OUTPUT, "w", encoding="utf-8") as f:

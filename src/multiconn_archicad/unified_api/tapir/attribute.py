@@ -28,12 +28,12 @@ from multiconn_archicad.models.tapir.types import (
     AttributeIdArrayItem,
     AttributeType,
     BuildingMaterialDataArrayItem,
+    BuildingMaterialPhysicalPropertiesArrayItem,
     CompositeDataArrayItem,
     ErrorItem,
     LayerCombinationAttribute,
     LayerCombinationDataArrayItem,
     LayerDataArrayItem,
-    Property,
     SurfaceDataArrayItem,
 )
 
@@ -224,7 +224,9 @@ class AttributeCommands:
         validated_response = GetAttributesByTypeResult.model_validate(response_dict)
         return validated_response.attributes
 
-    def get_building_material_physical_properties(self, attribute_ids: list[AttributeIdArrayItem]) -> list[Property]:
+    def get_building_material_physical_properties(
+        self, attribute_ids: list[AttributeIdArrayItem]
+    ) -> list[BuildingMaterialPhysicalPropertiesArrayItem]:
         """
         Retrieves the physical properties of the given Building Materials.
 
@@ -232,7 +234,8 @@ class AttributeCommands:
             attribute_ids (list[AttributeIdArrayItem]): A list of attributes.
 
         Returns:
-            list[Property]: Physical properties list.
+            list[BuildingMaterialPhysicalPropertiesArrayItem]: A list of building material
+                physical properties
 
         Raises:
             ArchicadAPIError: If the API returns an error response.

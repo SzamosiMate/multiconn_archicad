@@ -21,10 +21,10 @@ from multiconn_archicad.models.tapir.commands import (
 )
 from multiconn_archicad.models.tapir.types import (
     FailedExecutionResult,
-    FieldModel,
     FileType,
     Hotlink,
     Method,
+    ProjectInfoField,
     StorySettings,
     SuccessfulExecutionResult,
 )
@@ -86,12 +86,12 @@ class ProjectCommands:
         validated_response = GetProjectInfoResult.model_validate(response_dict)
         return validated_response
 
-    def get_project_info_fields(self) -> list[FieldModel]:
+    def get_project_info_fields(self) -> list[ProjectInfoField]:
         """
         Retrieves the names and values of all project info fields.
 
         Returns:
-            list[FieldModel]: A list of project info fields.
+            list[ProjectInfoField]: A list of project info fields.
 
         Raises:
             ArchicadAPIError: If the API returns an error response.

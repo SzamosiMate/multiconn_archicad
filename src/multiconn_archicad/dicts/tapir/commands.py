@@ -12,10 +12,11 @@ from .types import (
     AttributeType,
     BoundingBoxes3D,
     BuildingMaterialDataArrayItem,
+    BuildingMaterialPhysicalPropertiesList,
     ClassificationSystemIds,
     Collision,
     ColorRGB,
-    ColumnsDatum,
+    ColumnData,
     Comment,
     CompositeDataArrayItem,
     Conflict,
@@ -37,8 +38,6 @@ from .types import (
     ExecutionResults,
     Favorites,
     FavoritesFromElement,
-    Field,
-    File,
     GDLParameterList,
     Hotlinks,
     Issue,
@@ -46,19 +45,20 @@ from .types import (
     IssueElementType,
     IssueId,
     Issues,
-    LabelsDatum,
+    LabelData,
     LayerCombinationAttributeOrError,
     LayerCombinationDataArrayItem,
     LayerDataArrayItem,
     Library,
-    MeshesDatum,
+    LibraryFileAdditions,
+    MeshData,
     ModelViewOption,
     NavigatorItemIds,
     NavigatorItemIdsWithViewSetting,
-    ObjectsDatum,
-    PolylinesDatum,
+    ObjectData,
+    PolylineData,
+    ProjectInfoFields,
     ProjectLocation,
-    Property,
     PropertyDefinitionArrayItem,
     PropertyDetails,
     PropertyGroupArrayItem,
@@ -71,7 +71,7 @@ from .types import (
     RevisionChangesOfEntities,
     RevisionIssue,
     Settings,
-    SlabsDatum,
+    SlabData,
     StoriesParameters,
     StoriesSettings,
     Subelement,
@@ -81,7 +81,7 @@ from .types import (
     ViewTransformationsOrError,
     WindowType,
     ZoneBoundariesResponseOrError,
-    ZonesDatum,
+    ZoneData,
 )
 
 
@@ -106,10 +106,6 @@ class GetProjectInfoResult(TypedDict):
     projectLocation: NotRequired[str]
     projectPath: NotRequired[str]
     projectName: NotRequired[str]
-
-
-class GetProjectInfoFieldsResult(TypedDict):
-    fields: List[Field]
 
 
 class SetProjectInfoFieldParameters(TypedDict):
@@ -188,32 +184,31 @@ class SetClassificationsOfElementsResult(TypedDict):
     executionResults: ExecutionResults
 
 
-class CreateColumnsParameters(TypedDict):
-    columnsData: List[ColumnsDatum]
-
-
-class CreateSlabsParameters(TypedDict):
-    slabsData: List[SlabsDatum]
-
-
-class CreatePolylinesParameters(TypedDict):
-    polylinesData: List[PolylinesDatum]
-
-
-class CreateObjectsParameters(TypedDict):
-    objectsData: List[ObjectsDatum]
-
-
-class CreateMeshesParameters(TypedDict):
-    meshesData: List[MeshesDatum]
-
-
 class GetElementPreviewImageResult(TypedDict):
     previewImage: str
 
 
 class GetRoomImageResult(TypedDict):
     roomImage: str
+
+
+class SetElementNotificationClientParameters(TypedDict):
+    host: NotRequired[str]
+    port: int
+    notifyOnNewElement: NotRequired[bool]
+    notifyOnModificationOfAnElement: NotRequired[bool]
+    notifyOnReservationChanges: NotRequired[bool]
+
+
+SetElementNotificationClientResult = ExecutionResult
+
+
+class RemoveElementNotificationClientParameters(TypedDict):
+    host: NotRequired[str]
+    port: int
+
+
+RemoveElementNotificationClientResult = ExecutionResult
 
 
 class GetFavoritesByTypeParameters(TypedDict):
@@ -300,19 +295,11 @@ class GetAttributesByTypeParameters(TypedDict):
     attributeType: AttributeType
 
 
-class GetBuildingMaterialPhysicalPropertiesResult(TypedDict):
-    properties: List[Property]
-
-
 class GetLibrariesResult(TypedDict):
     libraries: List[Library]
 
 
 ReloadLibrariesResult = ExecutionResult
-
-
-class AddFilesToEmbeddedLibraryParameters(TypedDict):
-    files: List[File]
 
 
 class AddFilesToEmbeddedLibraryResult(TypedDict):
@@ -448,6 +435,10 @@ class GenerateDocumentationParameters(TypedDict):
 GenerateDocumentationResult = ExecutionResult
 
 
+class GetProjectInfoFieldsResult(TypedDict):
+    fields: ProjectInfoFields
+
+
 class SetDetailsOfElementsParameters(TypedDict):
     elementsWithDetails: List[ElementsWithDetail]
 
@@ -479,12 +470,24 @@ class SetClassificationsOfElementsParameters(TypedDict):
     elementClassifications: ElementClassifications
 
 
-class CreateZonesParameters(TypedDict):
-    zonesData: List[ZonesDatum]
+class CreateColumnsParameters(TypedDict):
+    columnsData: List[ColumnData]
 
 
-class CreateLabelsParameters(TypedDict):
-    labelsData: List[LabelsDatum]
+class CreateSlabsParameters(TypedDict):
+    slabsData: List[SlabData]
+
+
+class CreatePolylinesParameters(TypedDict):
+    polylinesData: List[PolylineData]
+
+
+class CreateObjectsParameters(TypedDict):
+    objectsData: List[ObjectData]
+
+
+class CreateMeshesParameters(TypedDict):
+    meshesData: List[MeshData]
 
 
 class GetElementPreviewImageParameters(TypedDict):
@@ -568,6 +571,14 @@ class GetDetailsOfElementsResult(TypedDict):
     detailsOfElements: List[DetailsOfElement]
 
 
+class CreateZonesParameters(TypedDict):
+    zonesData: List[ZoneData]
+
+
+class CreateLabelsParameters(TypedDict):
+    labelsData: List[LabelData]
+
+
 class CreateCompositesParameters(TypedDict):
     compositeDataArray: List[CompositeDataArrayItem]
     overwriteExisting: NotRequired[bool]
@@ -576,6 +587,14 @@ class CreateCompositesParameters(TypedDict):
 class CreateSurfacesParameters(TypedDict):
     surfaceDataArray: List[SurfaceDataArrayItem]
     overwriteExisting: NotRequired[bool]
+
+
+class GetBuildingMaterialPhysicalPropertiesResult(TypedDict):
+    properties: BuildingMaterialPhysicalPropertiesList
+
+
+class AddFilesToEmbeddedLibraryParameters(TypedDict):
+    files: LibraryFileAdditions
 
 
 class GetDatabaseIdFromNavigatorItemIdParameters(TypedDict):

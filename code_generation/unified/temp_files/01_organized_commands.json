@@ -302,6 +302,13 @@
                 "source": "tapir"
             },
             {
+                "name": "RemoveElementNotificationClient",
+                "group": "Element Commands",
+                "description": "Removes an element notification client.",
+                "version": "1.2.8",
+                "source": "tapir"
+            },
+            {
                 "name": "SetClassificationsOfElements",
                 "group": "Element Commands",
                 "description": "Sets the classifications of elements. In order to set the classification of an element to unclassified, omit the classificationItemId field. It works for subelements of hierarchal elements also.",
@@ -313,6 +320,13 @@
                 "group": "Element Commands",
                 "description": "Sets the details of the given elements (floor, layer, order etc).",
                 "version": "1.0.7",
+                "source": "tapir"
+            },
+            {
+                "name": "SetElementNotificationClient",
+                "group": "Element Commands",
+                "description": "Sets up a new notification client to receive element events.",
+                "version": "1.2.8",
                 "source": "tapir"
             },
             {

@@ -2844,6 +2844,17 @@
         "frames"
       ]
     },
+    "CurtainWallFrameType": {
+      "type": "string",
+      "description": "Enumeration of available curtain wall frame types.",
+      "enum": [
+        "Deleted",
+        "Division",
+        "Corner",
+        "Boundary",
+        "Custom"
+      ]
+    },
     "CurtainWallFrameDetails": {
       "type": "object",
       "properties": {
@@ -2912,14 +2923,7 @@
           "type": "string"
         },
         "type": {
-          "type": "string",
-          "enum": [
-            "Deleted",
-            "Division",
-            "Corner",
-            "Boundary",
-            "Custom"
-          ]
+          "$ref": "#/$defs/CurtainWallFrameType"
         }
       },
       "additionalProperties": false,
@@ -3289,7 +3293,7 @@
         },
         "changes": {
           "type": "array",
-          "description": "All changes belong to the given document revision.",
+          "description": "All changes belonging to the given document revision.",
           "items": {
             "type": "object",
             "properties": {
@@ -3665,7 +3669,7 @@
               },
               "neighbouringZoneElementId": {
                 "$ref": "#/$defs/ElementId",
-                "description": "Returns the unique identifer of the other Zone the element connects to if the boundary is internal. Please note that this boundary does not represent the boundary of the element with the other Zone."
+                "description": "Returns the unique identifier of the other Zone the element connects to if the boundary is internal. Please note that this boundary does not represent the boundary of the element with the other Zone."
               },
               "area": {
                 "type": "number",
@@ -3705,6 +3709,142 @@
         {
           "$ref": "#/$defs/ErrorItem"
         }
+      ]
+    },
+    "BuildingMaterialPhysicalPropertiesList": {
+      "type": "array",
+      "description": "A list of building material physical properties",
+      "items": {
+        "$ref": "#/$defs/BuildingMaterialPhysicalPropertiesArrayItem"
+      }
+    },
+    "BuildingMaterialPhysicalPropertiesArrayItem": {
+      "type": "object",
+      "properties": {
+        "properties": {
+          "$ref": "#/$defs/BuildingMaterialPhysicalProperties"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "properties"
+      ]
+    },
+    "BuildingMaterialPhysicalProperties": {
+      "type": "object",
+      "description": "The physical properties of a single building material.",
+      "properties": {
+        "thermalConductivity": {
+          "type": "number",
+          "description": "Thermal Conductivity."
+        },
+        "density": {
+          "type": "number",
+          "description": "Density."
+        },
+        "heatCapacity": {
+          "type": "number",
+          "description": "Heat Capacity."
+        },
+        "embodiedEnergy": {
+          "type": "number",
+          "description": "Embodied Energy."
+        },
+        "embodiedCarbon": {
+          "type": "number",
+          "description": "Embodied Carbon."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "thermalConductivity",
+        "density",
+        "heatCapacity",
+        "embodiedEnergy",
+        "embodiedCarbon"
+      ]
+    },
+    "ProjectInfoFields": {
+      "type": "array",
+      "description": "A list of project info fields.",
+      "items": {
+        "$ref": "#/$defs/ProjectInfoField"
+      }
+    },
+    "ProjectInfoField": {
+      "type": "object",
+      "properties": {
+        "projectInfoId": {
+          "type": "string",
+          "description": "The id of the project info field."
+        },
+        "projectInfoName": {
+          "type": "string",
+          "description": "The name of the project info field visible on UI."
+        },
+        "projectInfoValue": {
+          "type": "string",
+          "description": "The value of the project info field."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "projectInfoId",
+        "projectInfoName",
+        "projectInfoValue"
+      ]
+    },
+    "LibraryFileAdditions": {
+      "type": "array",
+      "description": "A list of library file additions to the embedded library",
+      "items": {
+        "$ref": "#/$defs/LibraryFileAddition"
+      }
+    },
+    "LibraryFileAddition": {
+      "type": "object",
+      "properties": {
+        "inputPath": {
+          "type": "string",
+          "description": "The path to the input file."
+        },
+        "outputPath": {
+          "type": "string",
+          "description": "The relative path to the new file inside embedded library."
+        },
+        "type": {
+          "description": "The type of the library part. By default 'Pict'.",
+          "default": "Pict",
+          "allOf": [
+            {
+              "$ref": "#/$defs/LibraryPartType"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "inputPath",
+        "outputPath"
+      ]
+    },
+    "LibraryPartType": {
+      "type": "string",
+      "description": "Enumeration of available library part types.",
+      "enum": [
+        "Window",
+        "Door",
+        "Object",
+        "Lamp",
+        "Room",
+        "Property",
+        "PlanSign",
+        "Label",
+        "Macro",
+        "Pict",
+        "ListScheme",
+        "Skylight",
+        "OpeningSymbol"
       ]
     },
     "GetAddOnVersionResult": {
@@ -3787,25 +3927,7 @@
       "type": "object",
       "properties": {
         "fields": {
-          "type": "array",
-          "description": "A list of project info fields.",
-          "items": {
-            "type": "object",
-            "properties": {
-              "projectInfoId": {
-                "type": "string",
-                "description": "The id of the project info field."
-              },
-              "projectInfoName": {
-                "type": "string",
-                "description": "The name of the project info field visible on UI."
-              },
-              "projectInfoValue": {
-                "type": "string",
-                "description": "The value of the project info field."
-              }
-            }
-          }
+          "$ref": "#/$defs/ProjectInfoFields"
         }
       },
       "additionalProperties": false,
@@ -4435,7 +4557,9 @@
               "columnSegments": {
                 "$ref": "#/$defs/Elements"
               }
-            }
+            },
+            "additionalProperties": false,
+            "required": []
           }
         }
       },
@@ -4826,38 +4950,7 @@
           "type": "array",
           "description": "Array of data to create Columns.",
           "items": {
-            "type": "object",
-            "description": "The parameters of the new Column.",
-            "properties": {
-              "coordinates": {
-                "type": "object",
-                "description": "3D coordinate.",
-                "properties": {
-                  "x": {
-                    "type": "number",
-                    "description": "X value of the coordinate."
-                  },
-                  "y": {
-                    "type": "number",
-                    "description": "Y value of the coordinate."
-                  },
-                  "z": {
-                    "type": "number",
-                    "description": "Z value of the coordinate."
-                  }
-                },
-                "additionalProperties": false,
-                "required": [
-                  "x",
-                  "y",
-                  "z"
-                ]
-              }
-            },
-            "additionalProperties": false,
-            "required": [
-              "coordinates"
-            ]
+            "$ref": "#/$defs/ColumnData"
           }
         }
       },
@@ -4885,37 +4978,7 @@
           "type": "array",
           "description": "Array of data to create Slabs.",
           "items": {
-            "type": "object",
-            "description": "The parameters of the new Slab.",
-            "properties": {
-              "level": {
-                "type": "number",
-                "description": "The Z coordinate value of the reference line of the slab."
-              },
-              "polygonCoordinates": {
-                "type": "array",
-                "description": "The 2D coordinates of the edge of the slab.",
-                "items": {
-                  "$ref": "#/$defs/Coordinate2D"
-                },
-                "minItems": 3
-              },
-              "polygonArcs": {
-                "type": "array",
-                "description": "Polygon outline arcs of the slab.",
-                "items": {
-                  "$ref": "#/$defs/PolyArc"
-                }
-              },
-              "holes": {
-                "$ref": "#/$defs/Holes2D"
-              }
-            },
-            "additionalProperties": false,
-            "required": [
-              "level",
-              "polygonCoordinates"
-            ]
+            "$ref": "#/$defs/SlabData"
           }
         }
       },
@@ -4943,38 +5006,7 @@
           "type": "array",
           "description": "Array of data to create Zones.",
           "items": {
-            "type": "object",
-            "description": "The parameters of the new Zone.",
-            "properties": {
-              "floorIndex": {
-                "type": "number"
-              },
-              "name": {
-                "type": "string",
-                "description": "Name of the zone."
-              },
-              "numberStr": {
-                "type": "string",
-                "description": "Zone number."
-              },
-              "categoryAttributeId": {
-                "$ref": "#/$defs/AttributeId",
-                "description": "The identifier of the zone category attribute."
-              },
-              "stampPosition": {
-                "$ref": "#/$defs/Coordinate2D",
-                "description": "Position of the origin of the zone stamp."
-              },
-              "geometry": {
-                "$ref": "#/$defs/ZoneCreationGeometry"
-              }
-            },
-            "additionalProperties": false,
-            "required": [
-              "name",
-              "numberStr",
-              "geometry"
-            ]
+            "$ref": "#/$defs/ZoneData"
           }
         }
       },
@@ -5002,33 +5034,7 @@
           "type": "array",
           "description": "Array of data to create Polylines.",
           "items": {
-            "type": "object",
-            "description": "The parameters of the new Polyline.",
-            "properties": {
-              "floorInd": {
-                "type": "number",
-                "description": "The identifier of the floor. Optinal parameter, by default the current floor is used."
-              },
-              "coordinates": {
-                "type": "array",
-                "description": "The 2D coordinates of the polyline.",
-                "items": {
-                  "$ref": "#/$defs/Coordinate2D"
-                },
-                "minItems": 2
-              },
-              "arcs": {
-                "type": "array",
-                "description": "The arcs of the polyline.",
-                "items": {
-                  "$ref": "#/$defs/PolyArc"
-                }
-              }
-            },
-            "additionalProperties": false,
-            "required": [
-              "coordinates"
-            ]
+            "$ref": "#/$defs/PolylineData"
           }
         }
       },
@@ -5056,25 +5062,7 @@
           "type": "array",
           "description": "Array of data to create Objects.",
           "items": {
-            "type": "object",
-            "description": "The parameters of the new Object.",
-            "properties": {
-              "libraryPartName": {
-                "type": "string",
-                "description": "The name of the library part to use."
-              },
-              "coordinates": {
-                "$ref": "#/$defs/Coordinate3D"
-              },
-              "dimensions": {
-                "$ref": "#/$defs/Dimensions3D"
-              }
-            },
-            "additionalProperties": false,
-            "required": [
-              "libraryPartName",
-              "coordinates"
-            ]
+            "$ref": "#/$defs/ObjectData"
           }
         }
       },
@@ -5102,67 +5090,7 @@
           "type": "array",
           "description": "Array of data to create Meshes.",
           "items": {
-            "type": "object",
-            "description": "The parameters of the new Mesh.",
-            "properties": {
-              "floorIndex": {
-                "type": "integer"
-              },
-              "level": {
-                "type": "number",
-                "description": "The Z reference level of coordinates."
-              },
-              "skirtType": {
-                "$ref": "#/$defs/MeshSkirtType"
-              },
-              "skirtLevel": {
-                "type": "number",
-                "description": "The height of the skirt."
-              },
-              "polygonCoordinates": {
-                "type": "array",
-                "description": "The 3D coordinates of the outline polygon of the mesh.",
-                "items": {
-                  "$ref": "#/$defs/Coordinate3D"
-                },
-                "minItems": 3
-              },
-              "polygonArcs": {
-                "type": "array",
-                "description": "Polygon outline arcs of the mesh.",
-                "items": {
-                  "$ref": "#/$defs/PolyArc"
-                }
-              },
-              "holes": {
-                "$ref": "#/$defs/Holes3D"
-              },
-              "sublines": {
-                "type": "array",
-                "description": "The leveling sublines inside the polygon of the mesh.",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "coordinates": {
-                      "type": "array",
-                      "description": "The 3D coordinates of the leveling subline of the mesh.",
-                      "items": {
-                        "$ref": "#/$defs/Coordinate3D"
-                      }
-                    }
-                  },
-                  "additionalProperties": false,
-                  "required": [
-                    "coordinates"
-                  ]
-                },
-                "minItems": 1
-              }
-            },
-            "additionalProperties": false,
-            "required": [
-              "polygonCoordinates"
-            ]
+            "$ref": "#/$defs/MeshData"
           }
         }
       },
@@ -5190,28 +5118,7 @@
           "type": "array",
           "description": "Array of data to create Labels.",
           "items": {
-            "type": "object",
-            "description": "The parameters of the new Label.",
-            "properties": {
-              "parentElementId": {
-                "$ref": "#/$defs/ElementId",
-                "description": "The parent element if the label is an associative label."
-              },
-              "text": {
-                "type": "string",
-                "description": "The text content if the label is a text label."
-              },
-              "begCoordinate": {
-                "$ref": "#/$defs/Coordinate2D",
-                "description": "The begin coordinate of leader line. Optional parameter, but either begCoordinate or parentElementId must be provided."
-              },
-              "floorInd": {
-                "type": "number",
-                "description": "The identifier of the floor. Optional parameter, by default the current floor or the floor of the parent element is used."
-              }
-            },
-            "additionalProperties": false,
-            "required": []
+            "$ref": "#/$defs/LabelData"
           }
         }
       },
@@ -5334,6 +5241,61 @@
       "required": [
         "roomImage"
       ]
+    },
+    "SetElementNotificationClientParameters": {
+      "type": "object",
+      "properties": {
+        "host": {
+          "type": "string",
+          "description": "The host address of the notification client. If not provided, localhost is used."
+        },
+        "port": {
+          "type": "integer",
+          "description": "The port number of the notification client."
+        },
+        "notifyOnNewElement": {
+          "type": "boolean",
+          "description": "Notify on creation of a new element.",
+          "default": true
+        },
+        "notifyOnModificationOfAnElement": {
+          "type": "boolean",
+          "description": "Notify on modification/deletion of an element.",
+          "default": true
+        },
+        "notifyOnReservationChanges": {
+          "type": "boolean",
+          "description": "Notify on reservation changes of an element.",
+          "default": true
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "port"
+      ]
+    },
+    "SetElementNotificationClientResult": {
+      "$ref": "#/$defs/ExecutionResult"
+    },
+    "RemoveElementNotificationClientParameters": {
+      "type": "object",
+      "properties": {
+        "host": {
+          "type": "string",
+          "description": "The host address of the notification client. If not provided, localhost is used."
+        },
+        "port": {
+          "type": "integer",
+          "description": "The port number of the notification client."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "port"
+      ]
+    },
+    "RemoveElementNotificationClientResult": {
+      "$ref": "#/$defs/ExecutionResult"
     },
     "GetFavoritesByTypeParameters": {
       "type": "object",
@@ -6224,39 +6186,7 @@
       "type": "object",
       "properties": {
         "properties": {
-          "type": "array",
-          "description": "Physical properties list.",
-          "items": {
-            "type": "object",
-            "properties": {
-              "properties": {
-                "type": "object",
-                "description": "Physical properties.",
-                "properties": {
-                  "thermalConductivity": {
-                    "type": "number",
-                    "description": "Thermal Conductivity."
-                  },
-                  "density": {
-                    "type": "number",
-                    "description": "Density."
-                  },
-                  "heatCapacity": {
-                    "type": "number",
-                    "description": "Heat Capacity."
-                  },
-                  "embodiedEnergy": {
-                    "type": "number",
-                    "description": "Embodied Energy."
-                  },
-                  "embodiedCarbon": {
-                    "type": "number",
-                    "description": "Embodied Carbon."
-                  }
-                }
-              }
-            }
-          }
+          "$ref": "#/$defs/BuildingMaterialPhysicalPropertiesList"
         }
       },
       "additionalProperties": false,
@@ -6352,45 +6282,7 @@
       "type": "object",
       "properties": {
         "files": {
-          "type": "array",
-          "description": "A list of files",
-          "items": {
-            "type": "object",
-            "properties": {
-              "inputPath": {
-                "type": "string",
-                "description": "The path to the input file."
-              },
-              "outputPath": {
-                "type": "string",
-                "description": "The relative path to the new file inside embedded library."
-              },
-              "type": {
-                "type": "string",
-                "description": "The type of the library part. By default 'Pict'.",
-                "enum": [
-                  "Window",
-                  "Door",
-                  "Object",
-                  "Lamp",
-                  "Room",
-                  "Property",
-                  "PlanSign",
-                  "Label",
-                  "Macro",
-                  "Pict",
-                  "ListScheme",
-                  "Skylight",
-                  "OpeningSymbol"
-                ]
-              }
-            },
-            "additionalProperties": false,
-            "required": [
-              "inputPath",
-              "outputPath"
-            ]
-          }
+          "$ref": "#/$defs/LibraryFileAdditions"
         }
       },
       "additionalProperties": false,
@@ -6497,7 +6389,7 @@
         },
         "outputPath": {
           "type": "string",
-          "description": "Full local or LAN path for publishing. Optional, by default the path set in the settings of the publiser set will be used.",
+          "description": "Full local or LAN path for publishing. Optional, by default the path set in the settings of the publisher set will be used.",
           "minLength": 1
         }
       },
@@ -7085,6 +6977,244 @@
     },
     "GenerateDocumentationResult": {
       "$ref": "#/$defs/ExecutionResult"
+    },
+    "ColumnData": {
+      "type": "object",
+      "description": "The parameters of the new Column.",
+      "properties": {
+        "coordinates": {
+          "type": "object",
+          "description": "3D coordinate.",
+          "properties": {
+            "x": {
+              "type": "number",
+              "description": "X value of the coordinate."
+            },
+            "y": {
+              "type": "number",
+              "description": "Y value of the coordinate."
+            },
+            "z": {
+              "type": "number",
+              "description": "Z value of the coordinate."
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "x",
+            "y",
+            "z"
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "coordinates"
+      ]
+    },
+    "SlabData": {
+      "type": "object",
+      "description": "The parameters of the new Slab.",
+      "properties": {
+        "level": {
+          "type": "number",
+          "description": "The Z coordinate value of the reference line of the slab."
+        },
+        "polygonCoordinates": {
+          "type": "array",
+          "description": "The 2D coordinates of the edge of the slab.",
+          "items": {
+            "$ref": "#/$defs/Coordinate2D"
+          },
+          "minItems": 3
+        },
+        "polygonArcs": {
+          "type": "array",
+          "description": "Polygon outline arcs of the slab.",
+          "items": {
+            "$ref": "#/$defs/PolyArc"
+          }
+        },
+        "holes": {
+          "$ref": "#/$defs/Holes2D"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "level",
+        "polygonCoordinates"
+      ]
+    },
+    "PolylineData": {
+      "type": "object",
+      "description": "The parameters of the new Polyline.",
+      "properties": {
+        "floorInd": {
+          "type": "number",
+          "description": "The identifier of the floor. Optional parameter, by default the current floor is used."
+        },
+        "coordinates": {
+          "type": "array",
+          "description": "The 2D coordinates of the polyline.",
+          "items": {
+            "$ref": "#/$defs/Coordinate2D"
+          },
+          "minItems": 2
+        },
+        "arcs": {
+          "type": "array",
+          "description": "The arcs of the polyline.",
+          "items": {
+            "$ref": "#/$defs/PolyArc"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "coordinates"
+      ]
+    },
+    "ObjectData": {
+      "type": "object",
+      "description": "The parameters of the new Object.",
+      "properties": {
+        "libraryPartName": {
+          "type": "string",
+          "description": "The name of the library part to use."
+        },
+        "coordinates": {
+          "$ref": "#/$defs/Coordinate3D"
+        },
+        "dimensions": {
+          "$ref": "#/$defs/Dimensions3D"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "libraryPartName",
+        "coordinates"
+      ]
+    },
+    "MeshData": {
+      "type": "object",
+      "description": "The parameters of the new Mesh.",
+      "properties": {
+        "floorIndex": {
+          "type": "integer"
+        },
+        "level": {
+          "type": "number",
+          "description": "The Z reference level of coordinates."
+        },
+        "skirtType": {
+          "$ref": "#/$defs/MeshSkirtType"
+        },
+        "skirtLevel": {
+          "type": "number",
+          "description": "The height of the skirt."
+        },
+        "polygonCoordinates": {
+          "type": "array",
+          "description": "The 3D coordinates of the outline polygon of the mesh.",
+          "items": {
+            "$ref": "#/$defs/Coordinate3D"
+          },
+          "minItems": 3
+        },
+        "polygonArcs": {
+          "type": "array",
+          "description": "Polygon outline arcs of the mesh.",
+          "items": {
+            "$ref": "#/$defs/PolyArc"
+          }
+        },
+        "holes": {
+          "$ref": "#/$defs/Holes3D"
+        },
+        "sublines": {
+          "type": "array",
+          "description": "The leveling sublines inside the polygon of the mesh.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "coordinates": {
+                "type": "array",
+                "description": "The 3D coordinates of the leveling subline of the mesh.",
+                "items": {
+                  "$ref": "#/$defs/Coordinate3D"
+                }
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "coordinates"
+            ]
+          },
+          "minItems": 1
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "polygonCoordinates"
+      ]
+    },
+    "ZoneData": {
+      "type": "object",
+      "description": "The parameters of the new Zone.",
+      "properties": {
+        "floorIndex": {
+          "type": "number"
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the zone."
+        },
+        "numberStr": {
+          "type": "string",
+          "description": "Zone number."
+        },
+        "categoryAttributeId": {
+          "$ref": "#/$defs/AttributeId",
+          "description": "The identifier of the zone category attribute."
+        },
+        "stampPosition": {
+          "$ref": "#/$defs/Coordinate2D",
+          "description": "Position of the origin of the zone stamp."
+        },
+        "geometry": {
+          "$ref": "#/$defs/ZoneCreationGeometry"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "numberStr",
+        "geometry"
+      ]
+    },
+    "LabelData": {
+      "type": "object",
+      "description": "The parameters of the new Label.",
+      "properties": {
+        "parentElementId": {
+          "$ref": "#/$defs/ElementId",
+          "description": "The parent element if the label is an associative label."
+        },
+        "text": {
+          "type": "string",
+          "description": "The text content if the label is a text label."
+        },
+        "begCoordinate": {
+          "$ref": "#/$defs/Coordinate2D",
+          "description": "The begin coordinate of leader line. Optional parameter, but either begCoordinate or parentElementId must be provided."
+        },
+        "floorInd": {
+          "type": "number",
+          "description": "The identifier of the floor. Optional parameter, by default the current floor or the floor of the parent element is used."
+        }
+      },
+      "additionalProperties": false,
+      "required": []
     }
   }
 }

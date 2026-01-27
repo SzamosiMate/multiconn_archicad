@@ -55,10 +55,14 @@ from multiconn_archicad.models.tapir.commands import (
     HighlightElementsResult,
     MoveElementsParameters,
     MoveElementsResult,
+    RemoveElementNotificationClientParameters,
+    RemoveElementNotificationClientResult,
     SetClassificationsOfElementsParameters,
     SetClassificationsOfElementsResult,
     SetDetailsOfElementsParameters,
     SetDetailsOfElementsResult,
+    SetElementNotificationClientParameters,
+    SetElementNotificationClientResult,
     SetGDLParametersOfElementsParameters,
     SetGDLParametersOfElementsResult,
 )
@@ -67,7 +71,7 @@ from multiconn_archicad.models.tapir.types import (
     ClassificationSystemIdArrayItem,
     Collision,
     ColorRGB,
-    ColumnsDatum,
+    ColumnData,
     ConnectedElement,
     DatabaseIdArrayItem,
     DetailsOfElement,
@@ -85,16 +89,16 @@ from multiconn_archicad.models.tapir.types import (
     Format,
     GDLParameterList,
     ImageType,
-    LabelsDatum,
-    MeshesDatum,
-    ObjectsDatum,
-    PolylinesDatum,
+    LabelData,
+    MeshData,
+    ObjectData,
+    PolylineData,
     Settings,
-    SlabsDatum,
+    SlabData,
     Subelement,
     SuccessfulExecutionResult,
     ZoneBoundariesResponse,
-    ZonesDatum,
+    ZoneData,
 )
 
 if TYPE_CHECKING:
@@ -137,12 +141,12 @@ class ElementCommands:
         validated_response = ChangeSelectionOfElementsResult.model_validate(response_dict)
         return validated_response
 
-    def create_columns(self, columns_data: list[ColumnsDatum]) -> list[ElementIdArrayItem]:
+    def create_columns(self, columns_data: list[ColumnData]) -> list[ElementIdArrayItem]:
         """
         Creates Column elements based on the given parameters.
 
         Args:
-            columns_data (list[ColumnsDatum]): Array of data to create Columns.
+            columns_data (list[ColumnData]): Array of data to create Columns.
 
         Returns:
             list[ElementIdArrayItem]: A list of elements.
@@ -162,12 +166,12 @@ class ElementCommands:
         validated_response = CreateColumnsResult.model_validate(response_dict)
         return validated_response.elements
 
-    def create_labels(self, labels_data: list[LabelsDatum]) -> list[ElementIdArrayItem]:
+    def create_labels(self, labels_data: list[LabelData]) -> list[ElementIdArrayItem]:
         """
         Creates Label elements based on the given parameters.
 
         Args:
-            labels_data (list[LabelsDatum]): Array of data to create Labels.
+            labels_data (list[LabelData]): Array of data to create Labels.
 
         Returns:
             list[ElementIdArrayItem]: A list of elements.
@@ -187,12 +191,12 @@ class ElementCommands:
         validated_response = CreateLabelsResult.model_validate(response_dict)
         return validated_response.elements
 
-    def create_meshes(self, meshes_data: list[MeshesDatum]) -> list[ElementIdArrayItem]:
+    def create_meshes(self, meshes_data: list[MeshData]) -> list[ElementIdArrayItem]:
         """
         Creates Mesh elements based on the given parameters.
 
         Args:
-            meshes_data (list[MeshesDatum]): Array of data to create Meshes.
+            meshes_data (list[MeshData]): Array of data to create Meshes.
 
         Returns:
             list[ElementIdArrayItem]: A list of elements.
@@ -212,12 +216,12 @@ class ElementCommands:
         validated_response = CreateMeshesResult.model_validate(response_dict)
         return validated_response.elements
 
-    def create_objects(self, objects_data: list[ObjectsDatum]) -> list[ElementIdArrayItem]:
+    def create_objects(self, objects_data: list[ObjectData]) -> list[ElementIdArrayItem]:
         """
         Creates Object elements based on the given parameters.
 
         Args:
-            objects_data (list[ObjectsDatum]): Array of data to create Objects.
+            objects_data (list[ObjectData]): Array of data to create Objects.
 
         Returns:
             list[ElementIdArrayItem]: A list of elements.
@@ -237,12 +241,12 @@ class ElementCommands:
         validated_response = CreateObjectsResult.model_validate(response_dict)
         return validated_response.elements
 
-    def create_polylines(self, polylines_data: list[PolylinesDatum]) -> list[ElementIdArrayItem]:
+    def create_polylines(self, polylines_data: list[PolylineData]) -> list[ElementIdArrayItem]:
         """
         Creates Polyline elements based on the given parameters.
 
         Args:
-            polylines_data (list[PolylinesDatum]): Array of data to create Polylines.
+            polylines_data (list[PolylineData]): Array of data to create Polylines.
 
         Returns:
             list[ElementIdArrayItem]: A list of elements.
@@ -262,12 +266,12 @@ class ElementCommands:
         validated_response = CreatePolylinesResult.model_validate(response_dict)
         return validated_response.elements
 
-    def create_slabs(self, slabs_data: list[SlabsDatum]) -> list[ElementIdArrayItem]:
+    def create_slabs(self, slabs_data: list[SlabData]) -> list[ElementIdArrayItem]:
         """
         Creates Slab elements based on the given parameters.
 
         Args:
-            slabs_data (list[SlabsDatum]): Array of data to create Slabs.
+            slabs_data (list[SlabData]): Array of data to create Slabs.
 
         Returns:
             list[ElementIdArrayItem]: A list of elements.
@@ -287,12 +291,12 @@ class ElementCommands:
         validated_response = CreateSlabsResult.model_validate(response_dict)
         return validated_response.elements
 
-    def create_zones(self, zones_data: list[ZonesDatum]) -> list[ElementIdArrayItem]:
+    def create_zones(self, zones_data: list[ZoneData]) -> list[ElementIdArrayItem]:
         """
         Creates Zone elements based on the given parameters.
 
         Args:
-            zones_data (list[ZonesDatum]): Array of data to create Zones.
+            zones_data (list[ZoneData]): Array of data to create Zones.
 
         Returns:
             list[ElementIdArrayItem]: A list of elements.
@@ -830,6 +834,37 @@ class ElementCommands:
         validated_response = MoveElementsResult.model_validate(response_dict)
         return validated_response.executionResults
 
+    def remove_element_notification_client(
+        self, port: int, host: None | str = None
+    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+        """
+        Removes an element notification client.
+
+        Args:
+            port (int): The port number of the notification client.
+            host (None | str): The host address of the notification client. If not provided,
+                localhost is used.
+
+        Returns:
+            FailedExecutionResult | SuccessfulExecutionResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "host": host,
+            "port": port,
+        }
+        validated_params = RemoveElementNotificationClientParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "RemoveElementNotificationClient",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+        )
+        validated_response = TypeAdapter(RemoveElementNotificationClientResult).validate_python(response_dict)
+        return validated_response
+
     def set_classifications_of_elements(
         self, element_classifications: list[ElementClassification]
     ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
@@ -888,6 +923,49 @@ class ElementCommands:
         )
         validated_response = SetDetailsOfElementsResult.model_validate(response_dict)
         return validated_response.executionResults
+
+    def set_element_notification_client(
+        self,
+        port: int,
+        host: None | str = None,
+        notify_on_new_element: None | bool = True,
+        notify_on_modification_of_an_element: None | bool = True,
+        notify_on_reservation_changes: None | bool = True,
+    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+        """
+        Sets up a new notification client to receive element events.
+
+        Args:
+            port (int): The port number of the notification client.
+            host (None | str): The host address of the notification client. If not provided,
+                localhost is used.
+            notify_on_new_element (None | bool): Notify on creation of a new element.
+            notify_on_modification_of_an_element (None | bool): Notify on modification/deletion
+                of an element.
+            notify_on_reservation_changes (None | bool): Notify on reservation changes of an
+                element.
+
+        Returns:
+            FailedExecutionResult | SuccessfulExecutionResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "host": host,
+            "port": port,
+            "notifyOnNewElement": notify_on_new_element,
+            "notifyOnModificationOfAnElement": notify_on_modification_of_an_element,
+            "notifyOnReservationChanges": notify_on_reservation_changes,
+        }
+        validated_params = SetElementNotificationClientParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "SetElementNotificationClient", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = TypeAdapter(SetElementNotificationClientResult).validate_python(response_dict)
+        return validated_response
 
     def set_gdl_parameters_of_elements(
         self, elements_with_gdl_parameters: list[ElementsWithGDLParameter]
