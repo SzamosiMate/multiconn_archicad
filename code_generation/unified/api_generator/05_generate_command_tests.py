@@ -184,7 +184,10 @@ class TestGenerator:
             body_lines.append(f"args, _ = command_group._core.{core_method}.call_args")
             body_lines.append(f"assert args[0] == '{cmd_name}'")
             if snake_name != "rename_navigator_item":
-                body_lines.append("assert set(args[1].keys()) == set(input_data.keys())")
+                body_lines.append(
+                    f"expected_payload = commands.{params_model_name}.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)"
+                )
+                body_lines.append("assert args[1] == expected_payload")
 
         if has_result:
             if alias_prop:

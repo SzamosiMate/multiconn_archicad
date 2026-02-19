@@ -578,6 +578,29 @@
                 "source": "tapir"
             }
         ],
+        "Design Options Commands": [
+            {
+                "name": "GetDesignOptionCombinations",
+                "group": "Design Options Commands",
+                "description": "Retrieves information about existing design option combinations.",
+                "version": "1.2.7",
+                "source": "tapir"
+            },
+            {
+                "name": "GetDesignOptionSets",
+                "group": "Design Options Commands",
+                "description": "Retrieves information about existing design option sets. Available from Archicad 29.",
+                "version": "1.2.7",
+                "source": "tapir"
+            },
+            {
+                "name": "GetDesignOptions",
+                "group": "Design Options Commands",
+                "description": "Retrieves information about existing design options. Available from Archicad 29.",
+                "version": "1.2.7",
+                "source": "tapir"
+            }
+        ],
         "Project Commands": [
             {
                 "name": "GetGeoLocation",
@@ -626,6 +649,13 @@
                 "group": "Project Commands",
                 "description": "Opens the given project.",
                 "version": "1.0.7",
+                "source": "tapir"
+            },
+            {
+                "name": "SetGeoLocation",
+                "group": "Project Commands",
+                "description": "Sets the project location details.",
+                "version": "1.2.9",
                 "source": "tapir"
             },
             {

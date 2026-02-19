@@ -72,7 +72,6 @@ from multiconn_archicad.models.tapir.types import (
     Collision,
     ColorRGB,
     ColumnData,
-    ConnectedElement,
     DatabaseIdArrayItem,
     DetailsOfElement,
     ElementClassification,
@@ -88,6 +87,8 @@ from multiconn_archicad.models.tapir.types import (
     FailedExecutionResult,
     Format,
     GDLParameterList,
+    GetConnectedElementsResponse,
+    GetElementsByTypeResponse,
     ImageType,
     LabelData,
     MeshData,
@@ -399,7 +400,7 @@ class ElementCommands:
 
     def get_all_elements(
         self, filters: None | list[ElementFilter] = None, databases: None | list[DatabaseIdArrayItem] = None
-    ) -> GetAllElementsResult:
+    ) -> ErrorItem | GetElementsByTypeResponse:
         """
         Returns the identifier of all elements on the plan. Use the optional filter parameter
         for filtering.
@@ -409,7 +410,7 @@ class ElementCommands:
             databases (None | list[DatabaseIdArrayItem]): A list of Archicad databases.
 
         Returns:
-            GetAllElementsResult
+            ErrorItem | GetElementsByTypeResponse
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -424,7 +425,7 @@ class ElementCommands:
         response_dict = self._core.post_tapir_command(
             "GetAllElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
-        validated_response = GetAllElementsResult.model_validate(response_dict)
+        validated_response = TypeAdapter(GetAllElementsResult).validate_python(response_dict)
         return validated_response
 
     def get_classifications_of_elements(
@@ -497,7 +498,7 @@ class ElementCommands:
 
     def get_connected_elements(
         self, elements: list[ElementIdArrayItem], connected_element_type: ElementType
-    ) -> list[ConnectedElement]:
+    ) -> ErrorItem | GetConnectedElementsResponse:
         """
         Gets connected elements of the given elements.
 
@@ -506,7 +507,7 @@ class ElementCommands:
             connected_element_type (ElementType)
 
         Returns:
-            list[ConnectedElement]
+            ErrorItem | GetConnectedElementsResponse
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -521,8 +522,8 @@ class ElementCommands:
         response_dict = self._core.post_tapir_command(
             "GetConnectedElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
-        validated_response = GetConnectedElementsResult.model_validate(response_dict)
-        return validated_response.connectedElements
+        validated_response = TypeAdapter(GetConnectedElementsResult).validate_python(response_dict)
+        return validated_response
 
     def get_details_of_elements(self, elements: list[ElementIdArrayItem]) -> list[DetailsOfElement]:
         """
@@ -594,7 +595,7 @@ class ElementCommands:
         element_type: ElementType,
         filters: None | list[ElementFilter] = None,
         databases: None | list[DatabaseIdArrayItem] = None,
-    ) -> GetElementsByTypeResult:
+    ) -> ErrorItem | GetElementsByTypeResponse:
         """
         Returns the identifier of every element of the given type on the plan. It works for any
         type. Use the optional filter parameter for filtering.
@@ -605,7 +606,7 @@ class ElementCommands:
             databases (None | list[DatabaseIdArrayItem]): A list of Archicad databases.
 
         Returns:
-            GetElementsByTypeResult
+            ErrorItem | GetElementsByTypeResponse
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -621,7 +622,7 @@ class ElementCommands:
         response_dict = self._core.post_tapir_command(
             "GetElementsByType", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
-        validated_response = GetElementsByTypeResult.model_validate(response_dict)
+        validated_response = TypeAdapter(GetElementsByTypeResult).validate_python(response_dict)
         return validated_response
 
     def get_gdl_parameters_of_elements(self, elements: list[ElementIdArrayItem]) -> list[GDLParameterList]:

@@ -18,6 +18,7 @@ from .official.property import PropertyCommands as OfficialPropertyCommands
 from .official.view_map import ViewMapCommands as OfficialViewMapCommands
 from .tapir.application import ApplicationCommands as TapirApplicationCommands
 from .tapir.attribute import AttributeCommands as TapirAttributeCommands
+from .tapir.design_options import DesignOptionsCommands as TapirDesignOptionsCommands
 from .tapir.element import ElementCommands as TapirElementCommands
 from .tapir.favorites import FavoritesCommands as TapirFavoritesCommands
 from .tapir.issue_management import IssueManagementCommands as TapirIssueManagementCommands
@@ -38,6 +39,7 @@ class TapirApi:
     def __init__(self, core: CoreCommands):
         self.application = TapirApplicationCommands(core)
         self.attribute = TapirAttributeCommands(core)
+        self.design_options = TapirDesignOptionsCommands(core)
         self.element = TapirElementCommands(core)
         self.favorites = TapirFavoritesCommands(core)
         self.issue_management = TapirIssueManagementCommands(core)

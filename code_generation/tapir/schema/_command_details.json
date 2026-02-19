@@ -258,6 +258,24 @@
         "version": "1.1.4"
     },
     {
+        "name": "GetDesignOptionCombinations",
+        "group": "Design Options Commands",
+        "description": "Retrieves information about existing design option combinations.",
+        "version": "1.2.7"
+    },
+    {
+        "name": "GetDesignOptionSets",
+        "group": "Design Options Commands",
+        "description": "Retrieves information about existing design option sets. Available from Archicad 29.",
+        "version": "1.2.7"
+    },
+    {
+        "name": "GetDesignOptions",
+        "group": "Design Options Commands",
+        "description": "Retrieves information about existing design options. Available from Archicad 29.",
+        "version": "1.2.7"
+    },
+    {
         "name": "GetDetailsOfElements",
         "group": "Element Commands",
         "description": "Gets the details of the given elements (geometry parameters etc).",
@@ -514,6 +532,12 @@
         "group": "Element Commands",
         "description": "Sets the given GDL parameters of the given elements.",
         "version": "1.0.8"
+    },
+    {
+        "name": "SetGeoLocation",
+        "group": "Project Commands",
+        "description": "Sets the project location details.",
+        "version": "1.2.9"
     },
     {
         "name": "SetProjectInfoField",

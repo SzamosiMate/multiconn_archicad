@@ -1133,53 +1133,8 @@ class LibraryPartType(Enum):
     OpeningSymbol = "OpeningSymbol"
 
 
-class ProjectLocation(APIModel):
-    longitude: Annotated[float, Field(description="longitude in degrees")]
-    latitude: Annotated[float, Field(description="latitude in degrees")]
-    altitude: Annotated[float, Field(description="altitude in meters")]
-    north: Annotated[float, Field(description="north direction in radians")]
-
-
-class Position(APIModel):
-    eastings: Annotated[
-        float,
-        Field(
-            description="Location along the easting of the coordinate system of the target map coordinate reference system."
-        ),
-    ]
-    northings: Annotated[
-        float,
-        Field(
-            description="Location along the northing of the coordinate system of the target map coordinate reference system."
-        ),
-    ]
-    elevation: Annotated[
-        float,
-        Field(description="Orthogonal height relative to the vertical datum specified."),
-    ]
-
-
-class GeoReferencingParameters(APIModel):
-    crsName: Annotated[
-        str,
-        Field(description="Name by which the coordinate reference system is identified."),
-    ]
-    description: Annotated[
-        str,
-        Field(description="Informal description of this coordinate reference system."),
-    ]
-    geodeticDatum: Annotated[str, Field(description="Name by which this datum is identified.")]
-    verticalDatum: Annotated[str, Field(description="Name by which the vertical datum is identified.")]
-    mapProjection: Annotated[str, Field(description="Name by which the map projection is identified.")]
-    mapZone: Annotated[
-        str,
-        Field(description="Name by which the map zone, relating to the MapProjection, is identified."),
-    ]
-
-
-class SurveyPoint(APIModel):
-    position: Position
-    geoReferencingParameters: GeoReferencingParameters
+class GetFavoritesByTypeResponse(APIModel):
+    favorites: Annotated[List[str], Field(description="A list of favorite names")]
 
 
 class Method(Enum):
@@ -1353,6 +1308,55 @@ class MeshData(APIModel):
     ] = None
 
 
+class ProjectLocation(APIModel):
+    longitude: Annotated[float, Field(description="longitude in degrees")]
+    latitude: Annotated[float, Field(description="latitude in degrees")]
+    altitude: Annotated[float, Field(description="altitude in meters")]
+    north: Annotated[float, Field(description="north direction in radians")]
+
+
+class SurveyPointPosition(APIModel):
+    eastings: Annotated[
+        float,
+        Field(
+            description="Location along the easting of the coordinate system of the target map coordinate reference system."
+        ),
+    ]
+    northings: Annotated[
+        float,
+        Field(
+            description="Location along the northing of the coordinate system of the target map coordinate reference system."
+        ),
+    ]
+    elevation: Annotated[
+        float,
+        Field(description="Orthogonal height relative to the vertical datum specified."),
+    ]
+
+
+class GeoReferencingParameters(APIModel):
+    crsName: Annotated[
+        str,
+        Field(description="Name by which the coordinate reference system is identified."),
+    ]
+    description: Annotated[
+        str,
+        Field(description="Informal description of this coordinate reference system."),
+    ]
+    geodeticDatum: Annotated[str, Field(description="Name by which this datum is identified.")]
+    verticalDatum: Annotated[str, Field(description="Name by which the vertical datum is identified.")]
+    mapProjection: Annotated[str, Field(description="Name by which the map projection is identified.")]
+    mapZone: Annotated[
+        str,
+        Field(description="Name by which the map zone, relating to the MapProjection, is identified."),
+    ]
+
+
+class SurveyPoint(APIModel):
+    position: SurveyPointPosition
+    geoReferencingParameters: GeoReferencingParameters
+
+
 class ElementId(APIModel):
     guid: Annotated[
         UUID,
@@ -1369,6 +1373,19 @@ class AttributeId(APIModel):
             description="A Globally Unique Identifier (or Universally Unique Identifier) in its string representation as defined in RFC 4122.",
         ),
     ]
+
+
+class GuidId(APIModel):
+    guid: Annotated[
+        UUID,
+        Field(
+            description="A Globally Unique Identifier (or Universally Unique Identifier) in its string representation as defined in RFC 4122.",
+        ),
+    ]
+
+
+class DesignOptionIdArrayItem(APIModel):
+    designOptionId: GuidId
 
 
 class LayersOfLayerCombinationItem(APIModel):
@@ -1573,6 +1590,16 @@ class LibraryFileAddition(APIModel):
     ] = "Pict"
 
 
+class Attribute(APIModel):
+    attributeId: AttributeId
+    index: Annotated[float, Field(description="Index of the attribute.")]
+    name: Annotated[str, Field(description="Name of the attribute.")]
+
+
+class GetAttributesByTypeResponse(APIModel):
+    attributes: Annotated[List[Attribute], Field(description="Details of attributes.")]
+
+
 class ElementsWithDetail(APIModel):
     elementId: ElementId
     details: Annotated[Details, Field(description="Details of an element.")]
@@ -1608,12 +1635,6 @@ class ElementsWithGDLParameter(APIModel):
 class FavoritesFromElement(APIModel):
     elementId: ElementId
     favorite: str
-
-
-class Attribute(APIModel):
-    attributeId: AttributeId
-    index: Annotated[float, Field(description="Index of the attribute.")]
-    name: Annotated[str, Field(description="Name of the attribute.")]
 
 
 class LayerDataArrayItem(APIModel):
@@ -1713,6 +1734,34 @@ class Issue(APIModel):
     tagText: Annotated[str, Field(description="Issue tag text - labels")]
     tagTextElementId: ElementId
     isTagTextElemVisible: Annotated[bool, Field(description="The visibility of the attached tag text element")]
+
+
+class DesignOption(APIModel):
+    designOptionId: Annotated[GuidId, Field(description="The guid identifier of the design option.")]
+    name: Annotated[str, Field(description="The name of the design option.")]
+    id: Annotated[str, Field(description="The string id of the design option.")]
+    ownerSetName: Annotated[str, Field(description="The name of the owner design option set.")]
+
+
+class DesignOptionSet(APIModel):
+    designOptionSetId: Annotated[GuidId, Field(description="The guid identifier of the design option set.")]
+    name: Annotated[str, Field(description="The name of the design option set.")]
+    designOptions: Annotated[
+        List[DesignOptionIdArrayItem],
+        Field(description="The list of design options in the set."),
+    ]
+
+
+class DesignOptionCombination(APIModel):
+    designOptionCombinationId: Annotated[
+        GuidId,
+        Field(description="The guid identifier of the design option combination."),
+    ]
+    name: Annotated[str, Field(description="The name of the design option combination.")]
+    activeDesignOptions: Annotated[
+        List[DesignOptionIdArrayItem] | None,
+        Field(description="The list of active design options in the combination. Available from Archicad 29."),
+    ] = None
 
 
 class ZoneData(APIModel):
@@ -1879,6 +1928,22 @@ class SurfaceDataArrayItem(APIModel):
     texture: Texture | None = None
 
 
+class GetElementsByTypeResponse(APIModel):
+    elements: Annotated[List[ElementIdArrayItem], Field(description="A list of elements.")]
+    executionResultForDatabases: Annotated[
+        List[SuccessfulExecutionResult | FailedExecutionResult] | None,
+        Field(description="A list of execution results."),
+    ] = None
+
+
+class ConnectedElement(APIModel):
+    elements: Annotated[List[ElementIdArrayItem], Field(description="A list of elements.")]
+
+
+class GetConnectedElementsResponse(APIModel):
+    connectedElements: List[ConnectedElement]
+
+
 class Subelement(APIModel):
     cWallSegments: Annotated[List[ElementIdArrayItem] | None, Field(description="A list of elements.")] = None
     cWallFrames: Annotated[List[ElementIdArrayItem] | None, Field(description="A list of elements.")] = None
@@ -1911,10 +1976,6 @@ class Subelement(APIModel):
     railingBalusters: Annotated[List[ElementIdArrayItem] | None, Field(description="A list of elements.")] = None
     beamSegments: Annotated[List[ElementIdArrayItem] | None, Field(description="A list of elements.")] = None
     columnSegments: Annotated[List[ElementIdArrayItem] | None, Field(description="A list of elements.")] = None
-
-
-class ConnectedElement(APIModel):
-    elements: Annotated[List[ElementIdArrayItem], Field(description="A list of elements.")]
 
 
 class Hotlink(APIModel):

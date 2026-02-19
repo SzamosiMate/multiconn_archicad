@@ -99,6 +99,31 @@
         "guid"
       ]
     },
+    "GuidId": {
+      "type": "object",
+      "description": "Identifier.",
+      "properties": {
+        "guid": {
+          "$ref": "#/$defs/Guid"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "guid"
+      ]
+    },
+    "DesignOptionIdArrayItem": {
+      "type": "object",
+      "properties": {
+        "designOptionId": {
+          "$ref": "#/$defs/GuidId"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "designOptionId"
+      ]
+    },
     "LayersOfLayerCombination": {
       "type": "array",
       "description": "List of Layers included in the Layer Combination.",
@@ -3847,6 +3872,144 @@
         "OpeningSymbol"
       ]
     },
+    "GetElementsByTypeResponse": {
+      "type": "object",
+      "description": "The response of the GetElementsByType command.",
+      "properties": {
+        "elements": {
+          "$ref": "#/$defs/Elements"
+        },
+        "executionResultForDatabases": {
+          "$ref": "#/$defs/ExecutionResults"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elements"
+      ]
+    },
+    "GetElementsByTypeResponseOrError": {
+      "type": "object",
+      "description": "The response of the GetElementsByType command or an error.",
+      "oneOf": [
+        {
+          "$ref": "#/$defs/GetElementsByTypeResponse"
+        },
+        {
+          "$ref": "#/$defs/ErrorItem"
+        }
+      ]
+    },
+    "GetFavoritesByTypeResponse": {
+      "type": "object",
+      "description": "The response of the GetFavoritesByType command.",
+      "properties": {
+        "favorites": {
+          "$ref": "#/$defs/Favorites"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "favorites"
+      ]
+    },
+    "GetFavoritesByTypeResponseOrError": {
+      "type": "object",
+      "description": "The response of the GetFavoritesByType command or an error.",
+      "oneOf": [
+        {
+          "$ref": "#/$defs/GetFavoritesByTypeResponse"
+        },
+        {
+          "$ref": "#/$defs/ErrorItem"
+        }
+      ]
+    },
+    "GetConnectedElementsResponse": {
+      "type": "object",
+      "description": "The response of the GetConnectedElements command.",
+      "properties": {
+        "connectedElements": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "elements": {
+                "$ref": "#/$defs/Elements"
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "elements"
+            ]
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "connectedElements"
+      ]
+    },
+    "GetConnectedElementsResponseOrError": {
+      "type": "object",
+      "description": "The response of the GetConnectedElements command or an error.",
+      "oneOf": [
+        {
+          "$ref": "#/$defs/GetConnectedElementsResponse"
+        },
+        {
+          "$ref": "#/$defs/ErrorItem"
+        }
+      ]
+    },
+    "GetAttributesByTypeResponse": {
+      "type": "object",
+      "description": "The response of the GetAttributesByType command.",
+      "properties": {
+        "attributes": {
+          "type": "array",
+          "description": "Details of attributes.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "attributeId": {
+                "$ref": "#/$defs/AttributeId"
+              },
+              "index": {
+                "type": "number",
+                "description": "Index of the attribute."
+              },
+              "name": {
+                "type": "string",
+                "description": "Name of the attribute."
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "attributeId",
+              "index",
+              "name"
+            ]
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "attributes"
+      ]
+    },
+    "GetAttributesByTypeResponseOrError": {
+      "type": "object",
+      "description": "The response of the GetAttributesByType command or an error.",
+      "oneOf": [
+        {
+          "$ref": "#/$defs/GetAttributesByTypeResponse"
+        },
+        {
+          "$ref": "#/$defs/ErrorItem"
+        }
+      ]
+    },
     "GetAddOnVersionResult": {
       "type": "object",
       "properties": {
@@ -4034,103 +4197,10 @@
       "type": "object",
       "properties": {
         "projectLocation": {
-          "type": "object",
-          "properties": {
-            "longitude": {
-              "type": "number",
-              "description": "longitude in degrees"
-            },
-            "latitude": {
-              "type": "number",
-              "description": "latitude in degrees"
-            },
-            "altitude": {
-              "type": "number",
-              "description": "altitude in meters"
-            },
-            "north": {
-              "type": "number",
-              "description": "north direction in radians"
-            }
-          },
-          "additionalProperties": false,
-          "required": [
-            "longitude",
-            "latitude",
-            "altitude",
-            "north"
-          ]
+          "$ref": "#/$defs/ProjectLocation"
         },
         "surveyPoint": {
-          "type": "object",
-          "properties": {
-            "position": {
-              "type": "object",
-              "properties": {
-                "eastings": {
-                  "type": "number",
-                  "description": "Location along the easting of the coordinate system of the target map coordinate reference system."
-                },
-                "northings": {
-                  "type": "number",
-                  "description": "Location along the northing of the coordinate system of the target map coordinate reference system."
-                },
-                "elevation": {
-                  "type": "number",
-                  "description": "Orthogonal height relative to the vertical datum specified."
-                }
-              },
-              "additionalProperties": false,
-              "required": [
-                "eastings",
-                "northings",
-                "elevation"
-              ]
-            },
-            "geoReferencingParameters": {
-              "type": "object",
-              "properties": {
-                "crsName": {
-                  "type": "string",
-                  "description": "Name by which the coordinate reference system is identified."
-                },
-                "description": {
-                  "type": "string",
-                  "description": "Informal description of this coordinate reference system."
-                },
-                "geodeticDatum": {
-                  "type": "string",
-                  "description": "Name by which this datum is identified."
-                },
-                "verticalDatum": {
-                  "type": "string",
-                  "description": "Name by which the vertical datum is identified."
-                },
-                "mapProjection": {
-                  "type": "string",
-                  "description": "Name by which the map projection is identified."
-                },
-                "mapZone": {
-                  "type": "string",
-                  "description": "Name by which the map zone, relating to the MapProjection, is identified."
-                }
-              },
-              "additionalProperties": false,
-              "required": [
-                "crsName",
-                "description",
-                "geodeticDatum",
-                "verticalDatum",
-                "mapProjection",
-                "mapZone"
-              ]
-            }
-          },
-          "additionalProperties": false,
-          "required": [
-            "position",
-            "geoReferencingParameters"
-          ]
+          "$ref": "#/$defs/SurveyPoint"
         }
       },
       "additionalProperties": false,
@@ -4138,6 +4208,22 @@
         "projectLocation",
         "surveyPoint"
       ]
+    },
+    "SetGeoLocationParameters": {
+      "type": "object",
+      "properties": {
+        "projectLocation": {
+          "$ref": "#/$defs/ProjectLocation"
+        },
+        "surveyPoint": {
+          "$ref": "#/$defs/SurveyPoint"
+        }
+      },
+      "additionalProperties": false,
+      "required": []
+    },
+    "SetGeoLocationResult": {
+      "$ref": "#/$defs/ExecutionResult"
     },
     "IFCFileOperationParameters": {
       "type": "object",
@@ -4210,19 +4296,7 @@
       ]
     },
     "GetElementsByTypeResult": {
-      "type": "object",
-      "properties": {
-        "elements": {
-          "$ref": "#/$defs/Elements"
-        },
-        "executionResultForDatabases": {
-          "$ref": "#/$defs/ExecutionResults"
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "elements"
-      ]
+      "$ref": "#/$defs/GetElementsByTypeResponseOrError"
     },
     "GetAllElementsParameters": {
       "type": "object",
@@ -4242,19 +4316,7 @@
       "required": []
     },
     "GetAllElementsResult": {
-      "type": "object",
-      "properties": {
-        "elements": {
-          "$ref": "#/$defs/Elements"
-        },
-        "executionResultForDatabases": {
-          "$ref": "#/$defs/ExecutionResults"
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "elements"
-      ]
+      "$ref": "#/$defs/GetElementsByTypeResponseOrError"
     },
     "ChangeSelectionOfElementsParameters": {
       "type": "object",
@@ -4585,28 +4647,7 @@
       ]
     },
     "GetConnectedElementsResult": {
-      "type": "object",
-      "properties": {
-        "connectedElements": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "elements": {
-                "$ref": "#/$defs/Elements"
-              }
-            },
-            "additionalProperties": false,
-            "required": [
-              "elements"
-            ]
-          }
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "connectedElements"
-      ]
+      "$ref": "#/$defs/GetConnectedElementsResponseOrError"
     },
     "GetZoneBoundariesParameters": {
       "type": "object",
@@ -5310,16 +5351,7 @@
       ]
     },
     "GetFavoritesByTypeResult": {
-      "type": "object",
-      "properties": {
-        "favorites": {
-          "$ref": "#/$defs/Favorites"
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "favorites"
-      ]
+      "$ref": "#/$defs/GetFavoritesByTypeResponseOrError"
     },
     "GetFavoritePreviewImageParameters": {
       "type": "object",
@@ -5688,39 +5720,7 @@
       ]
     },
     "GetAttributesByTypeResult": {
-      "type": "object",
-      "properties": {
-        "attributes": {
-          "type": "array",
-          "description": "Details of attributes.",
-          "items": {
-            "type": "object",
-            "properties": {
-              "attributeId": {
-                "$ref": "#/$defs/AttributeId"
-              },
-              "index": {
-                "type": "number",
-                "description": "Index of the attribute."
-              },
-              "name": {
-                "type": "string",
-                "description": "Name of the attribute."
-              }
-            },
-            "additionalProperties": false,
-            "required": [
-              "attributeId",
-              "index",
-              "name"
-            ]
-          }
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "attributes"
-      ]
+      "$ref": "#/$defs/GetAttributesByTypeResponseOrError"
     },
     "CreateLayersParameters": {
       "type": "object",
@@ -6961,6 +6961,121 @@
         "revisionChangesOfElements"
       ]
     },
+    "GetDesignOptionsResult": {
+      "type": "object",
+      "properties": {
+        "designOptions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "designOptionId": {
+                "$ref": "#/$defs/GuidId",
+                "description": "The guid identifier of the design option."
+              },
+              "name": {
+                "type": "string",
+                "description": "The name of the design option."
+              },
+              "id": {
+                "type": "string",
+                "description": "The string id of the design option."
+              },
+              "ownerSetName": {
+                "type": "string",
+                "description": "The name of the owner design option set."
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "designOptionId",
+              "name",
+              "id",
+              "ownerSetName"
+            ]
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "designOptions"
+      ]
+    },
+    "GetDesignOptionSetsResult": {
+      "type": "object",
+      "properties": {
+        "designOptionSets": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "designOptionSetId": {
+                "$ref": "#/$defs/GuidId",
+                "description": "The guid identifier of the design option set."
+              },
+              "name": {
+                "type": "string",
+                "description": "The name of the design option set."
+              },
+              "designOptions": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/DesignOptionIdArrayItem"
+                },
+                "description": "The list of design options in the set."
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "designOptionSetId",
+              "name",
+              "designOptions"
+            ]
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "designOptionSets"
+      ]
+    },
+    "GetDesignOptionCombinationsResult": {
+      "type": "object",
+      "properties": {
+        "designOptionCombinations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "designOptionCombinationId": {
+                "$ref": "#/$defs/GuidId",
+                "description": "The guid identifier of the design option combination."
+              },
+              "name": {
+                "type": "string",
+                "description": "The name of the design option combination."
+              },
+              "activeDesignOptions": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/DesignOptionIdArrayItem"
+                },
+                "description": "The list of active design options in the combination. Available from Archicad 29."
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "designOptionCombinationId",
+              "name"
+            ]
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "designOptionCombinations"
+      ]
+    },
     "GenerateDocumentationParameters": {
       "type": "object",
       "properties": {
@@ -7215,6 +7330,111 @@
       },
       "additionalProperties": false,
       "required": []
+    },
+    "ProjectLocation": {
+      "type": "object",
+      "properties": {
+        "longitude": {
+          "type": "number",
+          "description": "longitude in degrees"
+        },
+        "latitude": {
+          "type": "number",
+          "description": "latitude in degrees"
+        },
+        "altitude": {
+          "type": "number",
+          "description": "altitude in meters"
+        },
+        "north": {
+          "type": "number",
+          "description": "north direction in radians"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "longitude",
+        "latitude",
+        "altitude",
+        "north"
+      ]
+    },
+    "SurveyPointPosition": {
+      "type": "object",
+      "properties": {
+        "eastings": {
+          "type": "number",
+          "description": "Location along the easting of the coordinate system of the target map coordinate reference system."
+        },
+        "northings": {
+          "type": "number",
+          "description": "Location along the northing of the coordinate system of the target map coordinate reference system."
+        },
+        "elevation": {
+          "type": "number",
+          "description": "Orthogonal height relative to the vertical datum specified."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "eastings",
+        "northings",
+        "elevation"
+      ]
+    },
+    "GeoReferencingParameters": {
+      "type": "object",
+      "properties": {
+        "crsName": {
+          "type": "string",
+          "description": "Name by which the coordinate reference system is identified."
+        },
+        "description": {
+          "type": "string",
+          "description": "Informal description of this coordinate reference system."
+        },
+        "geodeticDatum": {
+          "type": "string",
+          "description": "Name by which this datum is identified."
+        },
+        "verticalDatum": {
+          "type": "string",
+          "description": "Name by which the vertical datum is identified."
+        },
+        "mapProjection": {
+          "type": "string",
+          "description": "Name by which the map projection is identified."
+        },
+        "mapZone": {
+          "type": "string",
+          "description": "Name by which the map zone, relating to the MapProjection, is identified."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "crsName",
+        "description",
+        "geodeticDatum",
+        "verticalDatum",
+        "mapProjection",
+        "mapZone"
+      ]
+    },
+    "SurveyPoint": {
+      "type": "object",
+      "properties": {
+        "position": {
+          "$ref": "#/$defs/SurveyPointPosition"
+        },
+        "geoReferencingParameters": {
+          "$ref": "#/$defs/GeoReferencingParameters"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "position",
+        "geoReferencingParameters"
+      ]
     }
   }
 }

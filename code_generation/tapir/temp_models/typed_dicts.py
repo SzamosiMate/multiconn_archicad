@@ -938,6 +938,13 @@ LibraryPartType = Literal[
 ]
 
 
+class GetFavoritesByTypeResponse(TypedDict):
+    favorites: Favorites
+
+
+GetFavoritesByTypeResponseOrError = GetFavoritesByTypeResponse | ErrorItem
+
+
 class GetAddOnVersionResult(TypedDict):
     version: str
 
@@ -988,36 +995,7 @@ class OpenProjectParameters(TypedDict):
 OpenProjectResult = ExecutionResult
 
 
-class ProjectLocation(TypedDict):
-    longitude: float
-    latitude: float
-    altitude: float
-    north: float
-
-
-class Position(TypedDict):
-    eastings: float
-    northings: float
-    elevation: float
-
-
-class GeoReferencingParameters(TypedDict):
-    crsName: str
-    description: str
-    geodeticDatum: str
-    verticalDatum: str
-    mapProjection: str
-    mapZone: str
-
-
-class SurveyPoint(TypedDict):
-    position: Position
-    geoReferencingParameters: GeoReferencingParameters
-
-
-class GetGeoLocationResult(TypedDict):
-    projectLocation: ProjectLocation
-    surveyPoint: SurveyPoint
+SetGeoLocationResult = ExecutionResult
 
 
 class IFCFileOperationParameters(TypedDict):
@@ -1114,8 +1092,7 @@ class GetFavoritesByTypeParameters(TypedDict):
     elementType: ElementType
 
 
-class GetFavoritesByTypeResult(TypedDict):
-    favorites: Favorites
+GetFavoritesByTypeResult = GetFavoritesByTypeResponseOrError
 
 
 class GetFavoritePreviewImageParameters(TypedDict):
@@ -1406,12 +1383,47 @@ class MeshData(TypedDict):
     sublines: NotRequired[List[Subline]]
 
 
+class ProjectLocation(TypedDict):
+    longitude: float
+    latitude: float
+    altitude: float
+    north: float
+
+
+class SurveyPointPosition(TypedDict):
+    eastings: float
+    northings: float
+    elevation: float
+
+
+class GeoReferencingParameters(TypedDict):
+    crsName: str
+    description: str
+    geodeticDatum: str
+    verticalDatum: str
+    mapProjection: str
+    mapZone: str
+
+
+class SurveyPoint(TypedDict):
+    position: SurveyPointPosition
+    geoReferencingParameters: GeoReferencingParameters
+
+
 class ElementId(TypedDict):
     guid: Guid
 
 
 class AttributeId(TypedDict):
     guid: Guid
+
+
+class GuidId(TypedDict):
+    guid: Guid
+
+
+class DesignOptionIdArrayItem(TypedDict):
+    designOptionId: GuidId
 
 
 class LayersOfLayerCombinationItem(TypedDict):
@@ -1595,8 +1607,31 @@ class LibraryFileAddition(TypedDict):
     type: NotRequired[LibraryPartType]
 
 
+class Attribute(TypedDict):
+    attributeId: AttributeId
+    index: float
+    name: str
+
+
+class GetAttributesByTypeResponse(TypedDict):
+    attributes: List[Attribute]
+
+
+GetAttributesByTypeResponseOrError = GetAttributesByTypeResponse | ErrorItem
+
+
 class GetProjectInfoFieldsResult(TypedDict):
     fields: ProjectInfoFields
+
+
+class GetGeoLocationResult(TypedDict):
+    projectLocation: ProjectLocation
+    surveyPoint: SurveyPoint
+
+
+class SetGeoLocationParameters(TypedDict):
+    projectLocation: NotRequired[ProjectLocation]
+    surveyPoint: NotRequired[SurveyPoint]
 
 
 class ElementsWithDetail(TypedDict):
@@ -1712,14 +1747,7 @@ class CreatePropertyDefinitionsParameters(TypedDict):
     propertyDefinitions: List[PropertyDefinitionArrayItem]
 
 
-class Attribute(TypedDict):
-    attributeId: AttributeId
-    index: float
-    name: str
-
-
-class GetAttributesByTypeResult(TypedDict):
-    attributes: List[Attribute]
+GetAttributesByTypeResult = GetAttributesByTypeResponseOrError
 
 
 class LayerDataArrayItem(TypedDict):
@@ -1800,6 +1828,37 @@ class Issue(TypedDict):
 
 class GetIssuesResult(TypedDict):
     issues: List[Issue]
+
+
+class DesignOption(TypedDict):
+    designOptionId: GuidId
+    name: str
+    id: str
+    ownerSetName: str
+
+
+class GetDesignOptionsResult(TypedDict):
+    designOptions: List[DesignOption]
+
+
+class DesignOptionSet(TypedDict):
+    designOptionSetId: GuidId
+    name: str
+    designOptions: List[DesignOptionIdArrayItem]
+
+
+class GetDesignOptionSetsResult(TypedDict):
+    designOptionSets: List[DesignOptionSet]
+
+
+class DesignOptionCombination(TypedDict):
+    designOptionCombinationId: GuidId
+    name: str
+    activeDesignOptions: NotRequired[List[DesignOptionIdArrayItem]]
+
+
+class GetDesignOptionCombinationsResult(TypedDict):
+    designOptionCombinations: List[DesignOptionCombination]
 
 
 class ZoneData(TypedDict):
@@ -1982,18 +2041,33 @@ Elements = List[ElementIdArrayItem]
 AttributeIds = List[AttributeIdArrayItem]
 
 
+class GetElementsByTypeResponse(TypedDict):
+    elements: Elements
+    executionResultForDatabases: NotRequired[ExecutionResults]
+
+
+GetElementsByTypeResponseOrError = GetElementsByTypeResponse | ErrorItem
+
+
+class ConnectedElement(TypedDict):
+    elements: Elements
+
+
+class GetConnectedElementsResponse(TypedDict):
+    connectedElements: List[ConnectedElement]
+
+
+GetConnectedElementsResponseOrError = GetConnectedElementsResponse | ErrorItem
+
+
 class GetSelectedElementsResult(TypedDict):
     elements: Elements
 
 
-class GetElementsByTypeResult(TypedDict):
-    elements: Elements
-    executionResultForDatabases: NotRequired[ExecutionResults]
+GetElementsByTypeResult = GetElementsByTypeResponseOrError
 
 
-class GetAllElementsResult(TypedDict):
-    elements: Elements
-    executionResultForDatabases: NotRequired[ExecutionResults]
+GetAllElementsResult = GetElementsByTypeResponseOrError
 
 
 class ChangeSelectionOfElementsParameters(TypedDict):
@@ -2061,12 +2135,7 @@ class GetConnectedElementsParameters(TypedDict):
     connectedElementType: ElementType
 
 
-class ConnectedElement(TypedDict):
-    elements: Elements
-
-
-class GetConnectedElementsResult(TypedDict):
-    connectedElements: List[ConnectedElement]
+GetConnectedElementsResult = GetConnectedElementsResponseOrError
 
 
 class GetCollisionsParameters(TypedDict):

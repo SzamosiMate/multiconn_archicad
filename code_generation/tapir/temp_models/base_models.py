@@ -1253,6 +1253,10 @@ class LibraryPartType(Enum):
     OpeningSymbol = "OpeningSymbol"
 
 
+class GetFavoritesByTypeResponse(APIModel):
+    favorites: Annotated[List[str], Field(description="A list of favorite names")]
+
+
 class GetAddOnVersionResult(APIModel):
     version: Annotated[
         str, Field(description='Version number in the form of "1.1.1".', min_length=1)
@@ -1353,70 +1357,7 @@ class OpenProjectParameters(APIModel):
 OpenProjectResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
 
 
-class ProjectLocation(APIModel):
-    longitude: Annotated[float, Field(description="longitude in degrees")]
-    latitude: Annotated[float, Field(description="latitude in degrees")]
-    altitude: Annotated[float, Field(description="altitude in meters")]
-    north: Annotated[float, Field(description="north direction in radians")]
-
-
-class Position(APIModel):
-    eastings: Annotated[
-        float,
-        Field(
-            description="Location along the easting of the coordinate system of the target map coordinate reference system."
-        ),
-    ]
-    northings: Annotated[
-        float,
-        Field(
-            description="Location along the northing of the coordinate system of the target map coordinate reference system."
-        ),
-    ]
-    elevation: Annotated[
-        float,
-        Field(
-            description="Orthogonal height relative to the vertical datum specified."
-        ),
-    ]
-
-
-class GeoReferencingParameters(APIModel):
-    crsName: Annotated[
-        str,
-        Field(
-            description="Name by which the coordinate reference system is identified."
-        ),
-    ]
-    description: Annotated[
-        str,
-        Field(description="Informal description of this coordinate reference system."),
-    ]
-    geodeticDatum: Annotated[
-        str, Field(description="Name by which this datum is identified.")
-    ]
-    verticalDatum: Annotated[
-        str, Field(description="Name by which the vertical datum is identified.")
-    ]
-    mapProjection: Annotated[
-        str, Field(description="Name by which the map projection is identified.")
-    ]
-    mapZone: Annotated[
-        str,
-        Field(
-            description="Name by which the map zone, relating to the MapProjection, is identified."
-        ),
-    ]
-
-
-class SurveyPoint(APIModel):
-    position: Position
-    geoReferencingParameters: GeoReferencingParameters
-
-
-class GetGeoLocationResult(APIModel):
-    projectLocation: ProjectLocation
-    surveyPoint: SurveyPoint
+SetGeoLocationResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
 
 
 class Method(Enum):
@@ -1604,8 +1545,7 @@ class GetFavoritesByTypeParameters(APIModel):
     elementType: ElementType
 
 
-class GetFavoritesByTypeResult(APIModel):
-    favorites: Annotated[List[str], Field(description="A list of favorite names")]
+GetFavoritesByTypeResult: TypeAlias = GetFavoritesByTypeResponse | ErrorItem
 
 
 class GetFavoritePreviewImageParameters(APIModel):
@@ -2069,6 +2009,67 @@ class MeshData(APIModel):
     ] = None
 
 
+class ProjectLocation(APIModel):
+    longitude: Annotated[float, Field(description="longitude in degrees")]
+    latitude: Annotated[float, Field(description="latitude in degrees")]
+    altitude: Annotated[float, Field(description="altitude in meters")]
+    north: Annotated[float, Field(description="north direction in radians")]
+
+
+class SurveyPointPosition(APIModel):
+    eastings: Annotated[
+        float,
+        Field(
+            description="Location along the easting of the coordinate system of the target map coordinate reference system."
+        ),
+    ]
+    northings: Annotated[
+        float,
+        Field(
+            description="Location along the northing of the coordinate system of the target map coordinate reference system."
+        ),
+    ]
+    elevation: Annotated[
+        float,
+        Field(
+            description="Orthogonal height relative to the vertical datum specified."
+        ),
+    ]
+
+
+class GeoReferencingParameters(APIModel):
+    crsName: Annotated[
+        str,
+        Field(
+            description="Name by which the coordinate reference system is identified."
+        ),
+    ]
+    description: Annotated[
+        str,
+        Field(description="Informal description of this coordinate reference system."),
+    ]
+    geodeticDatum: Annotated[
+        str, Field(description="Name by which this datum is identified.")
+    ]
+    verticalDatum: Annotated[
+        str, Field(description="Name by which the vertical datum is identified.")
+    ]
+    mapProjection: Annotated[
+        str, Field(description="Name by which the map projection is identified.")
+    ]
+    mapZone: Annotated[
+        str,
+        Field(
+            description="Name by which the map zone, relating to the MapProjection, is identified."
+        ),
+    ]
+
+
+class SurveyPoint(APIModel):
+    position: SurveyPointPosition
+    geoReferencingParameters: GeoReferencingParameters
+
+
 class ElementId(APIModel):
     guid: Annotated[
         UUID,
@@ -2085,6 +2086,19 @@ class AttributeId(APIModel):
             description="A Globally Unique Identifier (or Universally Unique Identifier) in its string representation as defined in RFC 4122.",
         ),
     ]
+
+
+class GuidId(APIModel):
+    guid: Annotated[
+        UUID,
+        Field(
+            description="A Globally Unique Identifier (or Universally Unique Identifier) in its string representation as defined in RFC 4122.",
+        ),
+    ]
+
+
+class DesignOptionIdArrayItem(APIModel):
+    designOptionId: GuidId
 
 
 class LayersOfLayerCombinationItem(APIModel):
@@ -2341,10 +2355,30 @@ class LibraryFileAddition(APIModel):
     ] = "Pict"
 
 
+class Attribute(APIModel):
+    attributeId: AttributeId
+    index: Annotated[float, Field(description="Index of the attribute.")]
+    name: Annotated[str, Field(description="Name of the attribute.")]
+
+
+class GetAttributesByTypeResponse(APIModel):
+    attributes: Annotated[List[Attribute], Field(description="Details of attributes.")]
+
+
 class GetProjectInfoFieldsResult(APIModel):
     fields: Annotated[
         List[ProjectInfoField], Field(description="A list of project info fields.")
     ]
+
+
+class GetGeoLocationResult(APIModel):
+    projectLocation: ProjectLocation
+    surveyPoint: SurveyPoint
+
+
+class SetGeoLocationParameters(APIModel):
+    projectLocation: ProjectLocation | None = None
+    surveyPoint: SurveyPoint | None = None
 
 
 class ElementsWithDetail(APIModel):
@@ -2535,14 +2569,7 @@ class CreatePropertyDefinitionsParameters(APIModel):
     ]
 
 
-class Attribute(APIModel):
-    attributeId: AttributeId
-    index: Annotated[float, Field(description="Index of the attribute.")]
-    name: Annotated[str, Field(description="Name of the attribute.")]
-
-
-class GetAttributesByTypeResult(APIModel):
-    attributes: Annotated[List[Attribute], Field(description="Details of attributes.")]
+GetAttributesByTypeResult: TypeAlias = GetAttributesByTypeResponse | ErrorItem
 
 
 class LayerDataArrayItem(APIModel):
@@ -2726,6 +2753,56 @@ class Issue(APIModel):
 
 class GetIssuesResult(APIModel):
     issues: Annotated[List[Issue], Field(description="A list of existing issues.")]
+
+
+class DesignOption(APIModel):
+    designOptionId: Annotated[
+        GuidId, Field(description="The guid identifier of the design option.")
+    ]
+    name: Annotated[str, Field(description="The name of the design option.")]
+    id: Annotated[str, Field(description="The string id of the design option.")]
+    ownerSetName: Annotated[
+        str, Field(description="The name of the owner design option set.")
+    ]
+
+
+class GetDesignOptionsResult(APIModel):
+    designOptions: List[DesignOption]
+
+
+class DesignOptionSet(APIModel):
+    designOptionSetId: Annotated[
+        GuidId, Field(description="The guid identifier of the design option set.")
+    ]
+    name: Annotated[str, Field(description="The name of the design option set.")]
+    designOptions: Annotated[
+        List[DesignOptionIdArrayItem],
+        Field(description="The list of design options in the set."),
+    ]
+
+
+class GetDesignOptionSetsResult(APIModel):
+    designOptionSets: List[DesignOptionSet]
+
+
+class DesignOptionCombination(APIModel):
+    designOptionCombinationId: Annotated[
+        GuidId,
+        Field(description="The guid identifier of the design option combination."),
+    ]
+    name: Annotated[
+        str, Field(description="The name of the design option combination.")
+    ]
+    activeDesignOptions: Annotated[
+        List[DesignOptionIdArrayItem] | None,
+        Field(
+            description="The list of active design options in the combination. Available from Archicad 29."
+        ),
+    ] = None
+
+
+class GetDesignOptionCombinationsResult(APIModel):
+    designOptionCombinations: List[DesignOptionCombination]
 
 
 class ZoneData(APIModel):
@@ -3028,30 +3105,36 @@ class GetCurrentRevisionChangesOfLayoutsParameters(APIModel):
     ]
 
 
+class GetElementsByTypeResponse(APIModel):
+    elements: Annotated[
+        List[ElementIdArrayItem], Field(description="A list of elements.")
+    ]
+    executionResultForDatabases: Annotated[
+        List[SuccessfulExecutionResult | FailedExecutionResult] | None,
+        Field(description="A list of execution results."),
+    ] = None
+
+
+class ConnectedElement(APIModel):
+    elements: Annotated[
+        List[ElementIdArrayItem], Field(description="A list of elements.")
+    ]
+
+
+class GetConnectedElementsResponse(APIModel):
+    connectedElements: List[ConnectedElement]
+
+
 class GetSelectedElementsResult(APIModel):
     elements: Annotated[
         List[ElementIdArrayItem], Field(description="A list of elements.")
     ]
 
 
-class GetElementsByTypeResult(APIModel):
-    elements: Annotated[
-        List[ElementIdArrayItem], Field(description="A list of elements.")
-    ]
-    executionResultForDatabases: Annotated[
-        List[SuccessfulExecutionResult | FailedExecutionResult] | None,
-        Field(description="A list of execution results."),
-    ] = None
+GetElementsByTypeResult: TypeAlias = GetElementsByTypeResponse | ErrorItem
 
 
-class GetAllElementsResult(APIModel):
-    elements: Annotated[
-        List[ElementIdArrayItem], Field(description="A list of elements.")
-    ]
-    executionResultForDatabases: Annotated[
-        List[SuccessfulExecutionResult | FailedExecutionResult] | None,
-        Field(description="A list of execution results."),
-    ] = None
+GetAllElementsResult: TypeAlias = GetElementsByTypeResponse | ErrorItem
 
 
 class ChangeSelectionOfElementsParameters(APIModel):
@@ -3189,14 +3272,7 @@ class GetConnectedElementsParameters(APIModel):
     connectedElementType: ElementType
 
 
-class ConnectedElement(APIModel):
-    elements: Annotated[
-        List[ElementIdArrayItem], Field(description="A list of elements.")
-    ]
-
-
-class GetConnectedElementsResult(APIModel):
-    connectedElements: List[ConnectedElement]
+GetConnectedElementsResult: TypeAlias = GetConnectedElementsResponse | ErrorItem
 
 
 class GetCollisionsParameters(APIModel):

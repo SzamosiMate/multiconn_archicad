@@ -8,7 +8,6 @@ from multiconn_archicad.models.base import APIModel
 
 
 from .types import (
-    Attribute,
     AttributeIdArrayItem,
     AttributePropertyValue,
     AttributeType,
@@ -22,8 +21,10 @@ from .types import (
     Comment,
     CompositeDataArrayItem,
     Conflict,
-    ConnectedElement,
     DatabaseIdArrayItem,
+    DesignOption,
+    DesignOptionCombination,
+    DesignOptionSet,
     DetailsOfElement,
     DocumentRevision,
     ElementClassification,
@@ -42,6 +43,10 @@ from .types import (
     FileType,
     Format,
     GDLParameterList,
+    GetAttributesByTypeResponse,
+    GetConnectedElementsResponse,
+    GetElementsByTypeResponse,
+    GetFavoritesByTypeResponse,
     HighlightedColor,
     Hotlink,
     ImageType,
@@ -170,9 +175,7 @@ class OpenProjectParameters(APIModel):
 OpenProjectResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
 
 
-class GetGeoLocationResult(APIModel):
-    projectLocation: ProjectLocation
-    surveyPoint: SurveyPoint
+SetGeoLocationResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
 
 
 class IFCFileOperationParameters(APIModel):
@@ -289,8 +292,7 @@ class GetFavoritesByTypeParameters(APIModel):
     elementType: ElementType
 
 
-class GetFavoritesByTypeResult(APIModel):
-    favorites: Annotated[List[str], Field(description="A list of favorite names")]
+GetFavoritesByTypeResult: TypeAlias = GetFavoritesByTypeResponse | ErrorItem
 
 
 class GetFavoritePreviewImageParameters(APIModel):
@@ -598,6 +600,16 @@ class GetProjectInfoFieldsResult(APIModel):
     fields: Annotated[List[ProjectInfoField], Field(description="A list of project info fields.")]
 
 
+class GetGeoLocationResult(APIModel):
+    projectLocation: ProjectLocation
+    surveyPoint: SurveyPoint
+
+
+class SetGeoLocationParameters(APIModel):
+    projectLocation: ProjectLocation | None = None
+    surveyPoint: SurveyPoint | None = None
+
+
 class SetDetailsOfElementsParameters(APIModel):
     elementsWithDetails: Annotated[List[ElementsWithDetail], Field(description="The elements with parameters.")]
 
@@ -725,8 +737,7 @@ class CreatePropertyDefinitionsParameters(APIModel):
     ]
 
 
-class GetAttributesByTypeResult(APIModel):
-    attributes: Annotated[List[Attribute], Field(description="Details of attributes.")]
+GetAttributesByTypeResult: TypeAlias = GetAttributesByTypeResponse | ErrorItem
 
 
 class CreateLayersParameters(APIModel):
@@ -785,6 +796,18 @@ class ReserveElementsResult(APIModel):
 
 class GetIssuesResult(APIModel):
     issues: Annotated[List[Issue], Field(description="A list of existing issues.")]
+
+
+class GetDesignOptionsResult(APIModel):
+    designOptions: List[DesignOption]
+
+
+class GetDesignOptionSetsResult(APIModel):
+    designOptionSets: List[DesignOptionSet]
+
+
+class GetDesignOptionCombinationsResult(APIModel):
+    designOptionCombinations: List[DesignOptionCombination]
 
 
 class GetElementsByTypeParameters(APIModel):
@@ -889,20 +912,10 @@ class GetSelectedElementsResult(APIModel):
     elements: Annotated[List[ElementIdArrayItem], Field(description="A list of elements.")]
 
 
-class GetElementsByTypeResult(APIModel):
-    elements: Annotated[List[ElementIdArrayItem], Field(description="A list of elements.")]
-    executionResultForDatabases: Annotated[
-        List[SuccessfulExecutionResult | FailedExecutionResult] | None,
-        Field(description="A list of execution results."),
-    ] = None
+GetElementsByTypeResult: TypeAlias = GetElementsByTypeResponse | ErrorItem
 
 
-class GetAllElementsResult(APIModel):
-    elements: Annotated[List[ElementIdArrayItem], Field(description="A list of elements.")]
-    executionResultForDatabases: Annotated[
-        List[SuccessfulExecutionResult | FailedExecutionResult] | None,
-        Field(description="A list of execution results."),
-    ] = None
+GetAllElementsResult: TypeAlias = GetElementsByTypeResponse | ErrorItem
 
 
 class ChangeSelectionOfElementsParameters(APIModel):
@@ -942,8 +955,7 @@ class GetConnectedElementsParameters(APIModel):
     connectedElementType: ElementType
 
 
-class GetConnectedElementsResult(APIModel):
-    connectedElements: List[ConnectedElement]
+GetConnectedElementsResult: TypeAlias = GetConnectedElementsResponse | ErrorItem
 
 
 class GetCollisionsParameters(APIModel):
