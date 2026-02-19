@@ -82,6 +82,12 @@ class APIResponseError(BaseModel):
 
 
 @dataclass
+class PendingResponse(APIResponseError):
+    code: int | None = None
+    message: str = "Identifying..."
+
+
+@dataclass
 class TeamworkCredentials(BaseModel):
     username: str
     password: str | None
