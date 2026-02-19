@@ -928,31 +928,11 @@ LibraryPartType = Literal[
 ]
 
 
-class ProjectLocation(TypedDict):
-    longitude: float
-    latitude: float
-    altitude: float
-    north: float
+class GetFavoritesByTypeResponse(TypedDict):
+    favorites: Favorites
 
 
-class Position(TypedDict):
-    eastings: float
-    northings: float
-    elevation: float
-
-
-class GeoReferencingParameters(TypedDict):
-    crsName: str
-    description: str
-    geodeticDatum: str
-    verticalDatum: str
-    mapProjection: str
-    mapZone: str
-
-
-class SurveyPoint(TypedDict):
-    position: Position
-    geoReferencingParameters: GeoReferencingParameters
+GetFavoritesByTypeResponseOrError = GetFavoritesByTypeResponse | ErrorItem
 
 
 class Details(TypedDict):
@@ -1046,12 +1026,47 @@ class MeshData(TypedDict):
     sublines: NotRequired[List[Subline]]
 
 
+class ProjectLocation(TypedDict):
+    longitude: float
+    latitude: float
+    altitude: float
+    north: float
+
+
+class SurveyPointPosition(TypedDict):
+    eastings: float
+    northings: float
+    elevation: float
+
+
+class GeoReferencingParameters(TypedDict):
+    crsName: str
+    description: str
+    geodeticDatum: str
+    verticalDatum: str
+    mapProjection: str
+    mapZone: str
+
+
+class SurveyPoint(TypedDict):
+    position: SurveyPointPosition
+    geoReferencingParameters: GeoReferencingParameters
+
+
 class ElementId(TypedDict):
     guid: Guid
 
 
 class AttributeId(TypedDict):
     guid: Guid
+
+
+class GuidId(TypedDict):
+    guid: Guid
+
+
+class DesignOptionIdArrayItem(TypedDict):
+    designOptionId: GuidId
 
 
 class LayersOfLayerCombinationItem(TypedDict):
@@ -1235,6 +1250,19 @@ class LibraryFileAddition(TypedDict):
     type: NotRequired[LibraryPartType]
 
 
+class Attribute(TypedDict):
+    attributeId: AttributeId
+    index: float
+    name: str
+
+
+class GetAttributesByTypeResponse(TypedDict):
+    attributes: List[Attribute]
+
+
+GetAttributesByTypeResponseOrError = GetAttributesByTypeResponse | ErrorItem
+
+
 class ElementsWithDetail(TypedDict):
     elementId: ElementId
     details: Details
@@ -1261,12 +1289,6 @@ class ElementsWithGDLParameter(TypedDict):
 class FavoritesFromElement(TypedDict):
     elementId: ElementId
     favorite: str
-
-
-class Attribute(TypedDict):
-    attributeId: AttributeId
-    index: float
-    name: str
 
 
 class LayerDataArrayItem(TypedDict):
@@ -1319,6 +1341,25 @@ class Issue(TypedDict):
     tagText: str
     tagTextElementId: ElementId
     isTagTextElemVisible: bool
+
+
+class DesignOption(TypedDict):
+    designOptionId: GuidId
+    name: str
+    id: str
+    ownerSetName: str
+
+
+class DesignOptionSet(TypedDict):
+    designOptionSetId: GuidId
+    name: str
+    designOptions: List[DesignOptionIdArrayItem]
+
+
+class DesignOptionCombination(TypedDict):
+    designOptionCombinationId: GuidId
+    name: str
+    activeDesignOptions: NotRequired[List[DesignOptionIdArrayItem]]
 
 
 class ZoneData(TypedDict):
@@ -1438,6 +1479,25 @@ Elements = List[ElementIdArrayItem]
 AttributeIds = List[AttributeIdArrayItem]
 
 
+class GetElementsByTypeResponse(TypedDict):
+    elements: Elements
+    executionResultForDatabases: NotRequired[ExecutionResults]
+
+
+GetElementsByTypeResponseOrError = GetElementsByTypeResponse | ErrorItem
+
+
+class ConnectedElement(TypedDict):
+    elements: Elements
+
+
+class GetConnectedElementsResponse(TypedDict):
+    connectedElements: List[ConnectedElement]
+
+
+GetConnectedElementsResponseOrError = GetConnectedElementsResponse | ErrorItem
+
+
 class Subelement(TypedDict):
     cWallSegments: NotRequired[Elements]
     cWallFrames: NotRequired[Elements]
@@ -1466,10 +1526,6 @@ class Subelement(TypedDict):
     railingBalusters: NotRequired[Elements]
     beamSegments: NotRequired[Elements]
     columnSegments: NotRequired[Elements]
-
-
-class ConnectedElement(TypedDict):
-    elements: Elements
 
 
 class Hotlink(TypedDict):

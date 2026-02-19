@@ -17,9 +17,11 @@ from multiconn_archicad.models.tapir.commands import (
 )
 from multiconn_archicad.models.tapir.types import (
     ElementType,
+    ErrorItem,
     FailedExecutionResult,
     FavoritesFromElement,
     Format,
+    GetFavoritesByTypeResponse,
     ImageType,
     SuccessfulExecutionResult,
 )
@@ -129,7 +131,7 @@ class FavoritesCommands:
         validated_response = GetFavoritePreviewImageResult.model_validate(response_dict)
         return validated_response.previewImage
 
-    def get_favorites_by_type(self, element_type: ElementType) -> list[str]:
+    def get_favorites_by_type(self, element_type: ElementType) -> ErrorItem | GetFavoritesByTypeResponse:
         """
         Returns a list of the names of all favorites with the given element type
 
@@ -137,7 +139,7 @@ class FavoritesCommands:
             element_type (ElementType)
 
         Returns:
-            list[str]: A list of favorite names
+            ErrorItem | GetFavoritesByTypeResponse
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -151,5 +153,5 @@ class FavoritesCommands:
         response_dict = self._core.post_tapir_command(
             "GetFavoritesByType", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
-        validated_response = GetFavoritesByTypeResult.model_validate(response_dict)
-        return validated_response.favorites
+        validated_response = TypeAdapter(GetFavoritesByTypeResult).validate_python(response_dict)
+        return validated_response

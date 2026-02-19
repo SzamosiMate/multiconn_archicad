@@ -24,13 +24,13 @@ from multiconn_archicad.models.tapir.commands import (
     GetLayerCombinationsResult,
 )
 from multiconn_archicad.models.tapir.types import (
-    Attribute,
     AttributeIdArrayItem,
     AttributeType,
     BuildingMaterialDataArrayItem,
     BuildingMaterialPhysicalPropertiesArrayItem,
     CompositeDataArrayItem,
     ErrorItem,
+    GetAttributesByTypeResponse,
     LayerCombinationAttribute,
     LayerCombinationDataArrayItem,
     LayerDataArrayItem,
@@ -199,7 +199,7 @@ class AttributeCommands:
         validated_response = CreateSurfacesResult.model_validate(response_dict)
         return validated_response.attributeIds
 
-    def get_attributes_by_type(self, attribute_type: AttributeType) -> list[Attribute]:
+    def get_attributes_by_type(self, attribute_type: AttributeType) -> ErrorItem | GetAttributesByTypeResponse:
         """
         Returns the details of every attribute of the given type.
 
@@ -207,7 +207,7 @@ class AttributeCommands:
             attribute_type (AttributeType)
 
         Returns:
-            list[Attribute]: Details of attributes.
+            ErrorItem | GetAttributesByTypeResponse
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -221,8 +221,8 @@ class AttributeCommands:
         response_dict = self._core.post_tapir_command(
             "GetAttributesByType", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
-        validated_response = GetAttributesByTypeResult.model_validate(response_dict)
-        return validated_response.attributes
+        validated_response = TypeAdapter(GetAttributesByTypeResult).validate_python(response_dict)
+        return validated_response
 
     def get_building_material_physical_properties(
         self, attribute_ids: list[AttributeIdArrayItem]

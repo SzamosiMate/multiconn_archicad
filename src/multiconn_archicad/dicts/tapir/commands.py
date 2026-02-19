@@ -6,7 +6,6 @@ from typing_extensions import NotRequired
 
 
 from .types import (
-    Attribute,
     AttributeIds,
     AttributePropertyValues,
     AttributeType,
@@ -20,8 +19,10 @@ from .types import (
     Comment,
     CompositeDataArrayItem,
     Conflict,
-    ConnectedElement,
     Databases,
+    DesignOption,
+    DesignOptionCombination,
+    DesignOptionSet,
     DetailsOfElement,
     DocumentRevision,
     ElementClassifications,
@@ -39,6 +40,10 @@ from .types import (
     Favorites,
     FavoritesFromElement,
     GDLParameterList,
+    GetAttributesByTypeResponseOrError,
+    GetConnectedElementsResponseOrError,
+    GetElementsByTypeResponseOrError,
+    GetFavoritesByTypeResponseOrError,
     Hotlinks,
     Issue,
     IssueCommentStatus,
@@ -135,9 +140,7 @@ class OpenProjectParameters(TypedDict):
 OpenProjectResult = ExecutionResult
 
 
-class GetGeoLocationResult(TypedDict):
-    projectLocation: ProjectLocation
-    surveyPoint: SurveyPoint
+SetGeoLocationResult = ExecutionResult
 
 
 class IFCFileOperationParameters(TypedDict):
@@ -215,8 +218,7 @@ class GetFavoritesByTypeParameters(TypedDict):
     elementType: ElementType
 
 
-class GetFavoritesByTypeResult(TypedDict):
-    favorites: Favorites
+GetFavoritesByTypeResult = GetFavoritesByTypeResponseOrError
 
 
 class GetFavoritePreviewImageParameters(TypedDict):
@@ -439,6 +441,16 @@ class GetProjectInfoFieldsResult(TypedDict):
     fields: ProjectInfoFields
 
 
+class GetGeoLocationResult(TypedDict):
+    projectLocation: ProjectLocation
+    surveyPoint: SurveyPoint
+
+
+class SetGeoLocationParameters(TypedDict):
+    projectLocation: NotRequired[ProjectLocation]
+    surveyPoint: NotRequired[SurveyPoint]
+
+
 class SetDetailsOfElementsParameters(TypedDict):
     elementsWithDetails: List[ElementsWithDetail]
 
@@ -524,8 +536,7 @@ class CreatePropertyDefinitionsParameters(TypedDict):
     propertyDefinitions: List[PropertyDefinitionArrayItem]
 
 
-class GetAttributesByTypeResult(TypedDict):
-    attributes: List[Attribute]
+GetAttributesByTypeResult = GetAttributesByTypeResponseOrError
 
 
 class CreateLayersParameters(TypedDict):
@@ -554,6 +565,18 @@ class ReserveElementsResult(TypedDict):
 
 class GetIssuesResult(TypedDict):
     issues: List[Issue]
+
+
+class GetDesignOptionsResult(TypedDict):
+    designOptions: List[DesignOption]
+
+
+class GetDesignOptionSetsResult(TypedDict):
+    designOptionSets: List[DesignOptionSet]
+
+
+class GetDesignOptionCombinationsResult(TypedDict):
+    designOptionCombinations: List[DesignOptionCombination]
 
 
 class GetElementsByTypeParameters(TypedDict):
@@ -621,14 +644,10 @@ class GetSelectedElementsResult(TypedDict):
     elements: Elements
 
 
-class GetElementsByTypeResult(TypedDict):
-    elements: Elements
-    executionResultForDatabases: NotRequired[ExecutionResults]
+GetElementsByTypeResult = GetElementsByTypeResponseOrError
 
 
-class GetAllElementsResult(TypedDict):
-    elements: Elements
-    executionResultForDatabases: NotRequired[ExecutionResults]
+GetAllElementsResult = GetElementsByTypeResponseOrError
 
 
 class ChangeSelectionOfElementsParameters(TypedDict):
@@ -666,8 +685,7 @@ class GetConnectedElementsParameters(TypedDict):
     connectedElementType: ElementType
 
 
-class GetConnectedElementsResult(TypedDict):
-    connectedElements: List[ConnectedElement]
+GetConnectedElementsResult = GetConnectedElementsResponseOrError
 
 
 class GetCollisionsParameters(TypedDict):

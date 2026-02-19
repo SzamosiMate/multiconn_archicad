@@ -15,6 +15,8 @@ from multiconn_archicad.models.tapir.commands import (
     IFCFileOperationResult,
     OpenProjectParameters,
     OpenProjectResult,
+    SetGeoLocationParameters,
+    SetGeoLocationResult,
     SetProjectInfoFieldParameters,
     SetStoriesParameters,
     SetStoriesResult,
@@ -25,8 +27,10 @@ from multiconn_archicad.models.tapir.types import (
     Hotlink,
     Method,
     ProjectInfoField,
+    ProjectLocation,
     StorySettings,
     SuccessfulExecutionResult,
+    SurveyPoint,
 )
 
 if TYPE_CHECKING:
@@ -172,6 +176,35 @@ class ProjectCommands:
             "OpenProject", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = TypeAdapter(OpenProjectResult).validate_python(response_dict)
+        return validated_response
+
+    def set_geo_location(
+        self, project_location: None | ProjectLocation = None, survey_point: None | SurveyPoint = None
+    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+        """
+        Sets the project location details.
+
+        Args:
+            project_location (None | ProjectLocation)
+            survey_point (None | SurveyPoint)
+
+        Returns:
+            FailedExecutionResult | SuccessfulExecutionResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "projectLocation": project_location,
+            "surveyPoint": survey_point,
+        }
+        validated_params = SetGeoLocationParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "SetGeoLocation", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = TypeAdapter(SetGeoLocationResult).validate_python(response_dict)
         return validated_response
 
     def set_project_info_field(self, project_info_id: str, project_info_value: str) -> None:

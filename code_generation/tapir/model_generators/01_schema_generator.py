@@ -237,6 +237,47 @@ def improve_schema_names(master_defs: Dict[str, Any]):
         if parent_model in master_defs:
             extract_inline_schema(master_defs, parent_model, ["properties", field_name, "items"], new_model_name)
 
+def unify_set_get_schemas(master_defs: Dict[str, Any]):
+    extract_inline_schema(
+        master_defs,
+        "GetGeoLocationResult",
+        ["properties", "projectLocation"],
+        "ProjectLocation"
+    )
+
+    # Hierarchy: GetGeoLocationResult -> surveyPoint -> position
+    extract_inline_schema(
+        master_defs,
+        "GetGeoLocationResult",
+        ["properties", "surveyPoint", "properties", "position"],
+        "SurveyPointPosition",
+    )
+
+    # Hierarchy: GetGeoLocationResult -> surveyPoint -> geoReferencingParameters
+    extract_inline_schema(
+        master_defs,
+        "GetGeoLocationResult",
+        ["properties", "surveyPoint", "properties", "geoReferencingParameters"],
+        "GeoReferencingParameters",
+    )
+
+    # Hierarchy: GetGeoLocationResult -> surveyPoint (wrapper)
+    extract_inline_schema(
+        master_defs,
+        "GetGeoLocationResult",
+        ["properties", "surveyPoint"],
+        "SurveyPoint"
+    )
+
+    if "SetGeoLocationParameters" in master_defs:
+        params = master_defs["SetGeoLocationParameters"]["properties"]
+        if "projectLocation" in params:
+            params["projectLocation"] = {"$ref": "#/$defs/ProjectLocation"}
+        if "surveyPoint" in params:
+            params["surveyPoint"] = {"$ref": "#/$defs/SurveyPoint"}
+
+    print("  -> Consolidated GeoLocation models to strict definitions.")
+
 
 def main():
     """
@@ -258,6 +299,7 @@ def main():
 
     fix_refs_recursive(master_defs)
     improve_schema_names(master_defs)
+    unify_set_get_schemas(master_defs)
 
     master_schema = {
         "$schema": "http://json-schema.org/draft-07/schema#",
