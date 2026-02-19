@@ -1,18 +1,21 @@
 import asyncio
-import functools
-from typing import Callable, Coroutine, Any
 import threading
+import concurrent.futures
+from typing import Awaitable, TypeVar, Union, Coroutine, Any
 import logging
 
 log = logging.getLogger(__name__)
 
 _BACKGROUND_LOOP: asyncio.AbstractEventLoop | None = None
 _BACKGROUND_THREAD: threading.Thread | None = None
-_THREAD_LOCK = threading.Lock()  # To protect access to global loop/thread vars
+_THREAD_LOCK = threading.Lock()
+
+T = TypeVar("T")
+AsyncHandle = Union[asyncio.Task[T], concurrent.futures.Future[T]]
 
 
 def _ensure_background_loop_running():
-    """Starts the background event loop if not already running. Thread-safe."""
+    """Starts the background event loop if not already running."""
     global _BACKGROUND_LOOP, _BACKGROUND_THREAD
 
     if (
@@ -31,48 +34,63 @@ def _ensure_background_loop_running():
                 name="MultiConnArchicadAsyncRunner",
                 daemon=True,
             )
-            log.debug(f"Starting background asyncio thread: {_BACKGROUND_THREAD.name}")
             _BACKGROUND_THREAD.start()
 
 
-def run_sync[T](coro: Coroutine[Any, Any, T]) -> T:
-    """
-    Runs an awaitable coroutine from a synchronous context
-    using a background event loop.
-    """
+def run_sync(awaitable: Awaitable[T]) -> T:
+    """ Runs an Awaitable (Coroutine or Task) from a synchronous context."""
     _ensure_background_loop_running()
 
     if threading.current_thread() is _BACKGROUND_THREAD:
-        log.error("run_sync cannot be called from the background asyncio thread itself.")
-        raise RuntimeError("run_sync cannot be called from the background asyncio thread itself.")
-    else:
-        assert _BACKGROUND_LOOP
-        future = asyncio.run_coroutine_threadsafe(coro, _BACKGROUND_LOOP)
+        raise RuntimeError("run_sync cannot be called from the background thread.")
+
+    async def wrapper():
+        return await awaitable
+
+    # Submit to background loop and wait for result
+    assert _BACKGROUND_LOOP
+    future = asyncio.run_coroutine_threadsafe(wrapper(), _BACKGROUND_LOOP)
+    return future.result()
+
+
+def start_background_task(coro: Coroutine[Any, Any, T]) -> AsyncHandle[T]:
+    """
+    Schedules a coroutine to run on the background loop.
+
+    Context-Aware:
+    - If called from the background thread (e.g. inside scan_ports), returns an asyncio.Task.
+    - If called from the main thread (e.g. user script), returns a concurrent.futures.Future.
+    """
+    _ensure_background_loop_running()
+    assert _BACKGROUND_LOOP
+
     try:
-        # Block the calling thread until the coroutine finishes and return/raise result.
-        result = future.result()
-        return result
-    except Exception as e:
-        log.debug(f"Exception propagated from background coroutine via run_sync: {e}")
-        raise
+        current_loop = asyncio.get_running_loop()
+        if current_loop is _BACKGROUND_LOOP:
+            return current_loop.create_task(coro)
+    except RuntimeError:
+        pass
+
+    return asyncio.run_coroutine_threadsafe(coro, _BACKGROUND_LOOP)
 
 
-def callable_from_sync_or_async_context[T, **P](
-    async_func: Callable[P, Coroutine[Any, Any, T]],
-) -> Callable[P, T | Coroutine[Any, Any, T]]:
+def wait_for_handle(handle: AsyncHandle[T] | None) -> T | None:
     """
-    Decorator for public async methods.
-    - If called from an async context, it behaves like a normal async function (returns awaitable).
-    - If called from a sync context, it runs the async function to completion
-      using the shared background event loop (via run_sync) and returns the result.
+    Blocks the calling thread until the handle finishes.
     """
+    if handle is None:
+        return None
 
-    @functools.wraps(async_func)
-    def wrapper(*args: P.args, **kwargs: P.kwargs) -> T | Coroutine[Any, Any, T]:
-        try:
-            asyncio.get_running_loop().is_running()
-            return async_func(*args, **kwargs)
-        except RuntimeError:
-            return run_sync(async_func(*args, **kwargs))
+    if threading.current_thread() is _BACKGROUND_THREAD:
+        if handle.done():
+            return handle.result()
+        else:
+            return None
 
-    return wrapper
+    if isinstance(handle, concurrent.futures.Future):
+        return handle.result()
+
+    if isinstance(handle, asyncio.Task):
+        return run_sync(handle)
+
+    return None

@@ -1,19 +1,21 @@
 import asyncio
+import concurrent.futures
 from enum import Enum
-from typing import Self, Any, TypeGuard, Coroutine
+from typing import Self, Any, TypeGuard
 from pprint import pformat
 
 from multiconn_archicad.core.core_commands import CoreCommands
 from multiconn_archicad.basic_types import (
     ArchiCadID,
     APIResponseError,
+    PendingResponse,
     ProductInfo,
     Port,
-    ArchicadLocation,
+    ArchicadLocation
 )
 from multiconn_archicad.errors import RequestError, ArchicadAPIError, HeaderUnassignedError
 from multiconn_archicad.standard_connection import StandardConnection
-from multiconn_archicad.utilities.async_utils import run_sync
+from multiconn_archicad.utilities.async_utils import start_background_task, wait_for_handle, AsyncHandle
 from multiconn_archicad.unified_api.api import UnifiedApi
 
 
@@ -31,17 +33,22 @@ class Status(Enum):
 
 
 class ConnHeader:
-    def __init__(self, port: Port, initialize: bool = True):
+    def __init__(self, port: Port, initialize: bool = True, ui_mode: bool = False):
         self._port: Port | None = port
         self._status: Status = Status.PENDING
+        self._ui_mode = ui_mode
+
         self._core: CoreCommands | None = CoreCommands(port)
         self._standard: StandardConnection | None = StandardConnection(port)
         self._unified: UnifiedApi | None = UnifiedApi(self.core)
 
-        if initialize:
-            self.product_info: ProductInfo | APIResponseError = run_sync(self.get_product_info())
-            self.archicad_id: ArchiCadID | APIResponseError = run_sync(self.get_archicad_id())
-            self.archicad_location: ArchicadLocation | APIResponseError = run_sync(self.get_archicad_location())
+        self._product_info: ProductInfo | APIResponseError = PendingResponse()
+        self._archicad_id: ArchiCadID | APIResponseError = PendingResponse()
+        self._archicad_location: ArchicadLocation | APIResponseError = PendingResponse()
+
+        self._init_handle: AsyncHandle | None = None
+        if initialize and port:
+            self._init_handle = start_background_task(self.refresh_metadata())
 
     @property
     def status(self) -> Status:
@@ -86,6 +93,21 @@ class ConnHeader:
             raise HeaderUnassignedError("UnifiedApi is not initialized.")
         return self._unified
 
+    @property
+    def product_info(self) -> ProductInfo | APIResponseError:
+        self._sync_if_needed()
+        return self._product_info
+
+    @property
+    def archicad_id(self) -> ArchiCadID | APIResponseError:
+        self._sync_if_needed()
+        return self._archicad_id
+
+    @property
+    def archicad_location(self) -> ArchicadLocation | APIResponseError:
+        self._sync_if_needed()
+        return self._archicad_location
+
     def to_dict(self) -> dict[str, Any]:
         return {
             "port": self.port,
@@ -98,12 +120,14 @@ class ConnHeader:
     def from_dict(cls, data: dict[str, Any]) -> Self:
         instance = cls(initialize=False, port=Port(data["port"]))
         instance._status = Status.UNASSIGNED
-        instance.product_info = ProductInfo.from_dict(data["productInfo"])
-        instance.archicad_id = ArchiCadID.from_dict(data["archicadId"])
-        instance.archicad_location = ArchicadLocation.from_dict(data["archicadLocation"])
+        instance._product_info = ProductInfo.from_dict(data["productInfo"])
+        instance._archicad_id = ArchiCadID.from_dict(data["archicadId"])
+        instance._archicad_location = ArchicadLocation.from_dict(data["archicadLocation"])
         return instance
 
     def __eq__(self, other: Any) -> bool:
+        if self is other:
+            return True
         if isinstance(other, ConnHeader):
             if is_header_fully_initialized(self) and is_header_fully_initialized(other):
                 if (
@@ -128,24 +152,40 @@ class ConnHeader:
         }
         return f"{self.__class__.__name__}(\n{pformat(attrs, width=200, indent=4)})"
 
-    @classmethod
-    async def async_init(cls, port: Port) -> Self:
-        instance = cls(port, initialize=False)
-
-        async def _set(attr: str, coro: Coroutine) -> None:
-            setattr(instance, attr, await coro)
-
-        await asyncio.gather(
-            _set("product_info", instance.get_product_info()),
-            _set("archicad_id", instance.get_archicad_id()),
-            _set("archicad_location", instance.get_archicad_location()),
+    async def refresh_metadata(self):
+        await self.cancel_init_handle()
+        metadata = await asyncio.gather(
+            self.get_product_info(timeout=3.0),
+            self.get_archicad_id(timeout=3.0),
+            self.get_archicad_location(timeout=3.0),
         )
-        return instance
+        self._assign_metadata(*metadata)
+
+    async def cancel_init_handle(self) -> None:
+        if self._init_handle and not self._init_handle.done():
+            self._init_handle.cancel()
+            try:
+                await self._init_handle
+            except (asyncio.CancelledError, Exception):
+                pass
+
+    def _assign_metadata(self,
+                        product_info: ProductInfo | APIResponseError,
+                        archicad_id: ArchiCadID | APIResponseError,
+                        archicad_location: ArchicadLocation| APIResponseError) -> None:
+        if isinstance(self._product_info, APIResponseError) or isinstance(product_info, ProductInfo):
+            self._product_info = product_info
+        if isinstance(self._archicad_id, APIResponseError) or isinstance(archicad_id, ArchiCadID):
+            self._archicad_id = archicad_id
+        if isinstance(self._archicad_location, APIResponseError) or isinstance(archicad_location, ArchicadLocation):
+            self._archicad_location = archicad_location
 
     def connect(self) -> None:
         if is_product_info_initialized(self.product_info):
             self.standard.connect(self.product_info)
             self._status = Status.ACTIVE
+        elif isinstance(self.product_info, PendingResponse):
+            self._status = Status.PENDING
         else:
             self._status = Status.FAILED
 
@@ -160,23 +200,31 @@ class ConnHeader:
         self._standard = None
         self._unified = None
 
-    async def get_product_info(self) -> ProductInfo | APIResponseError:
+    def _sync_if_needed(self):
+        if self._ui_mode:
+            return
         try:
-            result = await self.core.post_command_async(command="API.GetProductInfo", timeout=0.2)
+            wait_for_handle(self._init_handle)
+        except (concurrent.futures.CancelledError, asyncio.CancelledError):
+            pass
+
+    async def get_product_info(self, timeout: float) -> ProductInfo | APIResponseError:
+        try:
+            result = await self.core.post_command_async(command="API.GetProductInfo", timeout=timeout)
             return ProductInfo.from_api_response(result)
         except (RequestError, ArchicadAPIError) as e:
             return APIResponseError.from_exception(e)
 
-    async def get_archicad_id(self) -> ArchiCadID | APIResponseError:
+    async def get_archicad_id(self, timeout: float) -> ArchiCadID | APIResponseError:
         try:
-            result = await self.core.post_tapir_command_async(command="GetProjectInfo", timeout=0.2)
+            result = await self.core.post_tapir_command_async(command="GetProjectInfo", timeout=timeout)
             return ArchiCadID.from_api_response(result)
         except (RequestError, ArchicadAPIError) as e:
             return APIResponseError.from_exception(e)
 
-    async def get_archicad_location(self) -> ArchicadLocation | APIResponseError:
+    async def get_archicad_location(self, timeout: float) -> ArchicadLocation | APIResponseError:
         try:
-            result = await self.core.post_tapir_command_async(command="GetArchicadLocation", timeout=0.2)
+            result = await self.core.post_tapir_command_async(command="GetArchicadLocation", timeout=timeout)
             return ArchicadLocation.from_api_response(result)
         except (RequestError, ArchicadAPIError) as e:
             return APIResponseError.from_exception(e)
