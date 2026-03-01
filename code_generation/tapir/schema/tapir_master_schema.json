@@ -3676,7 +3676,7 @@
         "description": "The name of a favorite."
       }
     },
-    "ZoneBoundariesResponse": {
+    "ZoneBoundariesWrapper": {
       "type": "object",
       "properties": {
         "zoneBoundaries": {
@@ -3724,12 +3724,12 @@
         "zoneBoundaries"
       ]
     },
-    "ZoneBoundariesResponseOrError": {
+    "ZoneBoundariesOrError": {
       "type": "object",
       "description": "The response of the zone boundaries command or an error.",
       "oneOf": [
         {
-          "$ref": "#/$defs/ZoneBoundariesResponse"
+          "$ref": "#/$defs/ZoneBoundariesWrapper"
         },
         {
           "$ref": "#/$defs/ErrorItem"
@@ -3839,12 +3839,7 @@
         },
         "type": {
           "description": "The type of the library part. By default 'Pict'.",
-          "default": "Pict",
-          "allOf": [
-            {
-              "$ref": "#/$defs/LibraryPartType"
-            }
-          ]
+          "$ref": "#/$defs/LibraryPartType"
         }
       },
       "additionalProperties": false,
@@ -3872,7 +3867,7 @@
         "OpeningSymbol"
       ]
     },
-    "GetElementsByTypeResponse": {
+    "ElementsWithExecutionResults": {
       "type": "object",
       "description": "The response of the GetElementsByType command.",
       "properties": {
@@ -3888,19 +3883,19 @@
         "elements"
       ]
     },
-    "GetElementsByTypeResponseOrError": {
+    "ElementsWithExecutionResultsOrError": {
       "type": "object",
       "description": "The response of the GetElementsByType command or an error.",
       "oneOf": [
         {
-          "$ref": "#/$defs/GetElementsByTypeResponse"
+          "$ref": "#/$defs/ElementsWithExecutionResults"
         },
         {
           "$ref": "#/$defs/ErrorItem"
         }
       ]
     },
-    "GetFavoritesByTypeResponse": {
+    "FavoritesWrapper": {
       "type": "object",
       "description": "The response of the GetFavoritesByType command.",
       "properties": {
@@ -3913,19 +3908,19 @@
         "favorites"
       ]
     },
-    "GetFavoritesByTypeResponseOrError": {
+    "FavoritesOrError": {
       "type": "object",
       "description": "The response of the GetFavoritesByType command or an error.",
       "oneOf": [
         {
-          "$ref": "#/$defs/GetFavoritesByTypeResponse"
+          "$ref": "#/$defs/FavoritesWrapper"
         },
         {
           "$ref": "#/$defs/ErrorItem"
         }
       ]
     },
-    "GetConnectedElementsResponse": {
+    "ConnectedElementsWrapper": {
       "type": "object",
       "description": "The response of the GetConnectedElements command.",
       "properties": {
@@ -3950,47 +3945,50 @@
         "connectedElements"
       ]
     },
-    "GetConnectedElementsResponseOrError": {
+    "ConnectedElementsOrError": {
       "type": "object",
       "description": "The response of the GetConnectedElements command or an error.",
       "oneOf": [
         {
-          "$ref": "#/$defs/GetConnectedElementsResponse"
+          "$ref": "#/$defs/ConnectedElementsWrapper"
         },
         {
           "$ref": "#/$defs/ErrorItem"
         }
       ]
     },
-    "GetAttributesByTypeResponse": {
+    "AttributeHeaders": {
+      "type": "array",
+      "description": "Details of attributes.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "attributeId": {
+            "$ref": "#/$defs/AttributeId"
+          },
+          "index": {
+            "type": "number",
+            "description": "Index of the attribute."
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the attribute."
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "attributeId",
+          "index",
+          "name"
+        ]
+      }
+    },
+    "AttributeHeadersWrapper": {
       "type": "object",
       "description": "The response of the GetAttributesByType command.",
       "properties": {
         "attributes": {
-          "type": "array",
-          "description": "Details of attributes.",
-          "items": {
-            "type": "object",
-            "properties": {
-              "attributeId": {
-                "$ref": "#/$defs/AttributeId"
-              },
-              "index": {
-                "type": "number",
-                "description": "Index of the attribute."
-              },
-              "name": {
-                "type": "string",
-                "description": "Name of the attribute."
-              }
-            },
-            "additionalProperties": false,
-            "required": [
-              "attributeId",
-              "index",
-              "name"
-            ]
-          }
+          "$ref": "#/$defs/AttributeHeaders"
         }
       },
       "additionalProperties": false,
@@ -3998,12 +3996,12 @@
         "attributes"
       ]
     },
-    "GetAttributesByTypeResponseOrError": {
+    "AttributeHeadersOrError": {
       "type": "object",
       "description": "The response of the GetAttributesByType command or an error.",
       "oneOf": [
         {
-          "$ref": "#/$defs/GetAttributesByTypeResponse"
+          "$ref": "#/$defs/AttributeHeadersWrapper"
         },
         {
           "$ref": "#/$defs/ErrorItem"
@@ -4052,6 +4050,21 @@
       "required": [
         "currentWindowType"
       ]
+    },
+    "ChangeWindowParameters": {
+      "type": "object",
+      "properties": {
+        "windowType": {
+          "$ref": "#/$defs/WindowType"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "windowType"
+      ]
+    },
+    "ChangeWindowResult": {
+      "$ref": "#/$defs/ExecutionResult"
     },
     "GetProjectInfoResult": {
       "type": "object",
@@ -4296,7 +4309,7 @@
       ]
     },
     "GetElementsByTypeResult": {
-      "$ref": "#/$defs/GetElementsByTypeResponseOrError"
+      "$ref": "#/$defs/ElementsWithExecutionResultsOrError"
     },
     "GetAllElementsParameters": {
       "type": "object",
@@ -4316,7 +4329,7 @@
       "required": []
     },
     "GetAllElementsResult": {
-      "$ref": "#/$defs/GetElementsByTypeResponseOrError"
+      "$ref": "#/$defs/ElementsWithExecutionResultsOrError"
     },
     "ChangeSelectionOfElementsParameters": {
       "type": "object",
@@ -4647,7 +4660,7 @@
       ]
     },
     "GetConnectedElementsResult": {
-      "$ref": "#/$defs/GetConnectedElementsResponseOrError"
+      "$ref": "#/$defs/ConnectedElementsOrError"
     },
     "GetZoneBoundariesParameters": {
       "type": "object",
@@ -4662,7 +4675,7 @@
       ]
     },
     "GetZoneBoundariesResult": {
-      "$ref": "#/$defs/ZoneBoundariesResponseOrError"
+      "$ref": "#/$defs/ZoneBoundariesOrError"
     },
     "GetCollisionsParameters": {
       "type": "object",
@@ -5296,18 +5309,15 @@
         },
         "notifyOnNewElement": {
           "type": "boolean",
-          "description": "Notify on creation of a new element.",
-          "default": true
+          "description": "Notify on creation of a new element. Optional parameter, by default true."
         },
         "notifyOnModificationOfAnElement": {
           "type": "boolean",
-          "description": "Notify on modification/deletion of an element.",
-          "default": true
+          "description": "Notify on modification/deletion of an element. Optional parameter, by default true."
         },
         "notifyOnReservationChanges": {
           "type": "boolean",
-          "description": "Notify on reservation changes of an element.",
-          "default": true
+          "description": "Notify on reservation changes of an element. Optional parameter, by default true."
         }
       },
       "additionalProperties": false,
@@ -5351,7 +5361,7 @@
       ]
     },
     "GetFavoritesByTypeResult": {
-      "$ref": "#/$defs/GetFavoritesByTypeResponseOrError"
+      "$ref": "#/$defs/FavoritesOrError"
     },
     "GetFavoritePreviewImageParameters": {
       "type": "object",
@@ -5720,7 +5730,7 @@
       ]
     },
     "GetAttributesByTypeResult": {
-      "$ref": "#/$defs/GetAttributesByTypeResponseOrError"
+      "$ref": "#/$defs/AttributeHeadersOrError"
     },
     "CreateLayersParameters": {
       "type": "object",
@@ -6553,6 +6563,48 @@
       "required": [
         "transformations"
       ]
+    },
+    "Set3DCutPlanesParameters": {
+      "type": "object",
+      "properties": {
+        "cutPlanes": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "description": "Defines a 3D cut plane using the plane equation: pa*x + pb*y + pc*z + pd = 0",
+            "properties": {
+              "pa": {
+                "type": "number",
+                "description": "Coefficient of x in the plane equation. The x coordinate of the normal vector of the plane."
+              },
+              "pb": {
+                "type": "number",
+                "description": "Coefficient of y in the plane equation. The y coordinate of the normal vector of the plane."
+              },
+              "pc": {
+                "type": "number",
+                "description": "Coefficient of z in the plane equation. The z coordinate of the normal vector of the plane."
+              },
+              "pd": {
+                "type": "number",
+                "description": "Constant term in the plane equation. The distance of the plane from the origin along the normal vector."
+              }
+            },
+            "required": [
+              "pa",
+              "pb",
+              "pc",
+              "pd"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "Set3DCutPlanesResult": {
+      "$ref": "#/$defs/ExecutionResult"
     },
     "CreateIssueParameters": {
       "type": "object",

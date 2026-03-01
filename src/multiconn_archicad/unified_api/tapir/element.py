@@ -72,6 +72,7 @@ from multiconn_archicad.models.tapir.types import (
     Collision,
     ColorRGB,
     ColumnData,
+    ConnectedElementsWrapper,
     DatabaseIdArrayItem,
     DetailsOfElement,
     ElementClassification,
@@ -81,14 +82,13 @@ from multiconn_archicad.models.tapir.types import (
     ElementIdArrayItem,
     ElementType,
     ElementsWithDetail,
+    ElementsWithExecutionResults,
     ElementsWithGDLParameter,
     ElementsWithMoveVector,
     ErrorItem,
     FailedExecutionResult,
     Format,
     GDLParameterList,
-    GetConnectedElementsResponse,
-    GetElementsByTypeResponse,
     ImageType,
     LabelData,
     MeshData,
@@ -98,7 +98,7 @@ from multiconn_archicad.models.tapir.types import (
     SlabData,
     Subelement,
     SuccessfulExecutionResult,
-    ZoneBoundariesResponse,
+    ZoneBoundariesWrapper,
     ZoneData,
 )
 
@@ -400,7 +400,7 @@ class ElementCommands:
 
     def get_all_elements(
         self, filters: None | list[ElementFilter] = None, databases: None | list[DatabaseIdArrayItem] = None
-    ) -> ErrorItem | GetElementsByTypeResponse:
+    ) -> ElementsWithExecutionResults | ErrorItem:
         """
         Returns the identifier of all elements on the plan. Use the optional filter parameter
         for filtering.
@@ -410,7 +410,7 @@ class ElementCommands:
             databases (None | list[DatabaseIdArrayItem]): A list of Archicad databases.
 
         Returns:
-            ErrorItem | GetElementsByTypeResponse
+            ElementsWithExecutionResults | ErrorItem
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -498,7 +498,7 @@ class ElementCommands:
 
     def get_connected_elements(
         self, elements: list[ElementIdArrayItem], connected_element_type: ElementType
-    ) -> ErrorItem | GetConnectedElementsResponse:
+    ) -> ConnectedElementsWrapper | ErrorItem:
         """
         Gets connected elements of the given elements.
 
@@ -507,7 +507,7 @@ class ElementCommands:
             connected_element_type (ElementType)
 
         Returns:
-            ErrorItem | GetConnectedElementsResponse
+            ConnectedElementsWrapper | ErrorItem
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -595,7 +595,7 @@ class ElementCommands:
         element_type: ElementType,
         filters: None | list[ElementFilter] = None,
         databases: None | list[DatabaseIdArrayItem] = None,
-    ) -> ErrorItem | GetElementsByTypeResponse:
+    ) -> ElementsWithExecutionResults | ErrorItem:
         """
         Returns the identifier of every element of the given type on the plan. It works for any
         type. Use the optional filter parameter for filtering.
@@ -606,7 +606,7 @@ class ElementCommands:
             databases (None | list[DatabaseIdArrayItem]): A list of Archicad databases.
 
         Returns:
-            ErrorItem | GetElementsByTypeResponse
+            ElementsWithExecutionResults | ErrorItem
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -740,7 +740,7 @@ class ElementCommands:
         validated_response = GetSubelementsOfHierarchicalElementsResult.model_validate(response_dict)
         return validated_response.subelements
 
-    def get_zone_boundaries(self, zone_element_id: ElementId) -> ErrorItem | ZoneBoundariesResponse:
+    def get_zone_boundaries(self, zone_element_id: ElementId) -> ErrorItem | ZoneBoundariesWrapper:
         """
         Gets the boundaries of the given Zone (connected elements, neighbour zones, etc.).
 
@@ -748,7 +748,7 @@ class ElementCommands:
             zone_element_id (ElementId)
 
         Returns:
-            ErrorItem | ZoneBoundariesResponse
+            ErrorItem | ZoneBoundariesWrapper
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -929,9 +929,9 @@ class ElementCommands:
         self,
         port: int,
         host: None | str = None,
-        notify_on_new_element: None | bool = True,
-        notify_on_modification_of_an_element: None | bool = True,
-        notify_on_reservation_changes: None | bool = True,
+        notify_on_new_element: None | bool = None,
+        notify_on_modification_of_an_element: None | bool = None,
+        notify_on_reservation_changes: None | bool = None,
     ) -> FailedExecutionResult | SuccessfulExecutionResult:
         """
         Sets up a new notification client to receive element events.
@@ -940,11 +940,12 @@ class ElementCommands:
             port (int): The port number of the notification client.
             host (None | str): The host address of the notification client. If not provided,
                 localhost is used.
-            notify_on_new_element (None | bool): Notify on creation of a new element.
+            notify_on_new_element (None | bool): Notify on creation of a new element. Optional
+                parameter, by default true.
             notify_on_modification_of_an_element (None | bool): Notify on modification/deletion
-                of an element.
+                of an element. Optional parameter, by default true.
             notify_on_reservation_changes (None | bool): Notify on reservation changes of an
-                element.
+                element. Optional parameter, by default true.
 
         Returns:
             FailedExecutionResult | SuccessfulExecutionResult

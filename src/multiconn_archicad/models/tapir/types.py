@@ -1133,7 +1133,7 @@ class LibraryPartType(Enum):
     OpeningSymbol = "OpeningSymbol"
 
 
-class GetFavoritesByTypeResponse(APIModel):
+class FavoritesWrapper(APIModel):
     favorites: Annotated[List[str], Field(description="A list of favorite names")]
 
 
@@ -1223,6 +1223,33 @@ class ModelViewOption(APIModel):
 class NavigatorItemIdsWithViewSetting(APIModel):
     navigatorItemId: NavigatorItemId
     viewSettings: ViewSettings
+
+
+class CutPlane(APIModel):
+    pa: Annotated[
+        float,
+        Field(
+            description="Coefficient of x in the plane equation. The x coordinate of the normal vector of the plane."
+        ),
+    ]
+    pb: Annotated[
+        float,
+        Field(
+            description="Coefficient of y in the plane equation. The y coordinate of the normal vector of the plane."
+        ),
+    ]
+    pc: Annotated[
+        float,
+        Field(
+            description="Coefficient of z in the plane equation. The z coordinate of the normal vector of the plane."
+        ),
+    ]
+    pd: Annotated[
+        float,
+        Field(
+            description="Constant term in the plane equation. The distance of the plane from the origin along the normal vector."
+        ),
+    ]
 
 
 class Comment(APIModel):
@@ -1570,7 +1597,7 @@ class ZoneBoundary(APIModel):
     polygonOutline: Annotated[List[Coordinate3D], Field(description="The outline polygon of the boundary.")]
 
 
-class ZoneBoundariesResponse(APIModel):
+class ZoneBoundariesWrapper(APIModel):
     zoneBoundaries: List[ZoneBoundary]
 
 
@@ -1587,17 +1614,17 @@ class LibraryFileAddition(APIModel):
     type: Annotated[
         LibraryPartType | None,
         Field(description="The type of the library part. By default 'Pict'."),
-    ] = "Pict"
+    ] = None
 
 
-class Attribute(APIModel):
+class AttributeHeader(APIModel):
     attributeId: AttributeId
     index: Annotated[float, Field(description="Index of the attribute.")]
     name: Annotated[str, Field(description="Name of the attribute.")]
 
 
-class GetAttributesByTypeResponse(APIModel):
-    attributes: Annotated[List[Attribute], Field(description="Details of attributes.")]
+class AttributeHeadersWrapper(APIModel):
+    attributes: Annotated[List[AttributeHeader], Field(description="Details of attributes.")]
 
 
 class ElementsWithDetail(APIModel):
@@ -1928,7 +1955,7 @@ class SurfaceDataArrayItem(APIModel):
     texture: Texture | None = None
 
 
-class GetElementsByTypeResponse(APIModel):
+class ElementsWithExecutionResults(APIModel):
     elements: Annotated[List[ElementIdArrayItem], Field(description="A list of elements.")]
     executionResultForDatabases: Annotated[
         List[SuccessfulExecutionResult | FailedExecutionResult] | None,
@@ -1940,7 +1967,7 @@ class ConnectedElement(APIModel):
     elements: Annotated[List[ElementIdArrayItem], Field(description="A list of elements.")]
 
 
-class GetConnectedElementsResponse(APIModel):
+class ConnectedElementsWrapper(APIModel):
     connectedElements: List[ConnectedElement]
 
 

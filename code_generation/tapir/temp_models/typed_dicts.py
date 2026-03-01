@@ -938,11 +938,11 @@ LibraryPartType = Literal[
 ]
 
 
-class GetFavoritesByTypeResponse(TypedDict):
+class FavoritesWrapper(TypedDict):
     favorites: Favorites
 
 
-GetFavoritesByTypeResponseOrError = GetFavoritesByTypeResponse | ErrorItem
+FavoritesOrError = FavoritesWrapper | ErrorItem
 
 
 class GetAddOnVersionResult(TypedDict):
@@ -958,6 +958,13 @@ QuitArchicadResult = ExecutionResult
 
 class GetCurrentWindowTypeResult(TypedDict):
     currentWindowType: WindowType
+
+
+class ChangeWindowParameters(TypedDict):
+    windowType: WindowType
+
+
+ChangeWindowResult = ExecutionResult
 
 
 class GetProjectInfoResult(TypedDict):
@@ -1092,7 +1099,7 @@ class GetFavoritesByTypeParameters(TypedDict):
     elementType: ElementType
 
 
-GetFavoritesByTypeResult = GetFavoritesByTypeResponseOrError
+GetFavoritesByTypeResult = FavoritesOrError
 
 
 class GetFavoritePreviewImageParameters(TypedDict):
@@ -1241,6 +1248,20 @@ class SetViewSettingsResult(TypedDict):
 
 class GetView2DTransformationsResult(TypedDict):
     transformations: List[ViewTransformationsOrError]
+
+
+class CutPlane(TypedDict):
+    pa: float
+    pb: float
+    pc: float
+    pd: float
+
+
+class Set3DCutPlanesParameters(TypedDict):
+    cutPlanes: NotRequired[List[CutPlane]]
+
+
+Set3DCutPlanesResult = ExecutionResult
 
 
 class CreateIssueParameters(TypedDict):
@@ -1587,11 +1608,11 @@ class ZoneBoundary(TypedDict):
     polygonOutline: List[Coordinate3D]
 
 
-class ZoneBoundariesResponse(TypedDict):
+class ZoneBoundariesWrapper(TypedDict):
     zoneBoundaries: List[ZoneBoundary]
 
 
-ZoneBoundariesResponseOrError = ZoneBoundariesResponse | ErrorItem
+ZoneBoundariesOrError = ZoneBoundariesWrapper | ErrorItem
 
 
 class BuildingMaterialPhysicalPropertiesArrayItem(TypedDict):
@@ -1607,17 +1628,20 @@ class LibraryFileAddition(TypedDict):
     type: NotRequired[LibraryPartType]
 
 
-class Attribute(TypedDict):
+class AttributeHeader(TypedDict):
     attributeId: AttributeId
     index: float
     name: str
 
 
-class GetAttributesByTypeResponse(TypedDict):
-    attributes: List[Attribute]
+AttributeHeaders = List[AttributeHeader]
 
 
-GetAttributesByTypeResponseOrError = GetAttributesByTypeResponse | ErrorItem
+class AttributeHeadersWrapper(TypedDict):
+    attributes: AttributeHeaders
+
+
+AttributeHeadersOrError = AttributeHeadersWrapper | ErrorItem
 
 
 class GetProjectInfoFieldsResult(TypedDict):
@@ -1647,7 +1671,7 @@ class GetZoneBoundariesParameters(TypedDict):
     zoneElementId: ElementId
 
 
-GetZoneBoundariesResult = ZoneBoundariesResponseOrError
+GetZoneBoundariesResult = ZoneBoundariesOrError
 
 
 class Collision(TypedDict):
@@ -1747,7 +1771,7 @@ class CreatePropertyDefinitionsParameters(TypedDict):
     propertyDefinitions: List[PropertyDefinitionArrayItem]
 
 
-GetAttributesByTypeResult = GetAttributesByTypeResponseOrError
+GetAttributesByTypeResult = AttributeHeadersOrError
 
 
 class LayerDataArrayItem(TypedDict):
@@ -2041,33 +2065,33 @@ Elements = List[ElementIdArrayItem]
 AttributeIds = List[AttributeIdArrayItem]
 
 
-class GetElementsByTypeResponse(TypedDict):
+class ElementsWithExecutionResults(TypedDict):
     elements: Elements
     executionResultForDatabases: NotRequired[ExecutionResults]
 
 
-GetElementsByTypeResponseOrError = GetElementsByTypeResponse | ErrorItem
+ElementsWithExecutionResultsOrError = ElementsWithExecutionResults | ErrorItem
 
 
 class ConnectedElement(TypedDict):
     elements: Elements
 
 
-class GetConnectedElementsResponse(TypedDict):
+class ConnectedElementsWrapper(TypedDict):
     connectedElements: List[ConnectedElement]
 
 
-GetConnectedElementsResponseOrError = GetConnectedElementsResponse | ErrorItem
+ConnectedElementsOrError = ConnectedElementsWrapper | ErrorItem
 
 
 class GetSelectedElementsResult(TypedDict):
     elements: Elements
 
 
-GetElementsByTypeResult = GetElementsByTypeResponseOrError
+GetElementsByTypeResult = ElementsWithExecutionResultsOrError
 
 
-GetAllElementsResult = GetElementsByTypeResponseOrError
+GetAllElementsResult = ElementsWithExecutionResultsOrError
 
 
 class ChangeSelectionOfElementsParameters(TypedDict):
@@ -2135,7 +2159,7 @@ class GetConnectedElementsParameters(TypedDict):
     connectedElementType: ElementType
 
 
-GetConnectedElementsResult = GetConnectedElementsResponseOrError
+GetConnectedElementsResult = ConnectedElementsOrError
 
 
 class GetCollisionsParameters(TypedDict):
