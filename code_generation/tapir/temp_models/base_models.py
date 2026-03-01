@@ -1253,7 +1253,7 @@ class LibraryPartType(Enum):
     OpeningSymbol = "OpeningSymbol"
 
 
-class GetFavoritesByTypeResponse(APIModel):
+class FavoritesWrapper(APIModel):
     favorites: Annotated[List[str], Field(description="A list of favorite names")]
 
 
@@ -1278,6 +1278,13 @@ QuitArchicadResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResul
 
 class GetCurrentWindowTypeResult(APIModel):
     currentWindowType: WindowType
+
+
+class ChangeWindowParameters(APIModel):
+    windowType: WindowType
+
+
+ChangeWindowResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
 
 
 class GetProjectInfoResult(APIModel):
@@ -1513,14 +1520,23 @@ class SetElementNotificationClientParameters(APIModel):
         int, Field(description="The port number of the notification client.")
     ]
     notifyOnNewElement: Annotated[
-        bool | None, Field(description="Notify on creation of a new element.")
-    ] = True
+        bool | None,
+        Field(
+            description="Notify on creation of a new element. Optional parameter, by default true."
+        ),
+    ] = None
     notifyOnModificationOfAnElement: Annotated[
-        bool | None, Field(description="Notify on modification/deletion of an element.")
-    ] = True
+        bool | None,
+        Field(
+            description="Notify on modification/deletion of an element. Optional parameter, by default true."
+        ),
+    ] = None
     notifyOnReservationChanges: Annotated[
-        bool | None, Field(description="Notify on reservation changes of an element.")
-    ] = True
+        bool | None,
+        Field(
+            description="Notify on reservation changes of an element. Optional parameter, by default true."
+        ),
+    ] = None
 
 
 SetElementNotificationClientResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
@@ -1545,7 +1561,7 @@ class GetFavoritesByTypeParameters(APIModel):
     elementType: ElementType
 
 
-GetFavoritesByTypeResult: TypeAlias = GetFavoritesByTypeResponse | ErrorItem
+GetFavoritesByTypeResult: TypeAlias = FavoritesWrapper | ErrorItem
 
 
 class GetFavoritePreviewImageParameters(APIModel):
@@ -1775,6 +1791,40 @@ class SetViewSettingsResult(APIModel):
 
 class GetView2DTransformationsResult(APIModel):
     transformations: List[ViewTransformations | ErrorItem]
+
+
+class CutPlane(APIModel):
+    pa: Annotated[
+        float,
+        Field(
+            description="Coefficient of x in the plane equation. The x coordinate of the normal vector of the plane."
+        ),
+    ]
+    pb: Annotated[
+        float,
+        Field(
+            description="Coefficient of y in the plane equation. The y coordinate of the normal vector of the plane."
+        ),
+    ]
+    pc: Annotated[
+        float,
+        Field(
+            description="Coefficient of z in the plane equation. The z coordinate of the normal vector of the plane."
+        ),
+    ]
+    pd: Annotated[
+        float,
+        Field(
+            description="Constant term in the plane equation. The distance of the plane from the origin along the normal vector."
+        ),
+    ]
+
+
+class Set3DCutPlanesParameters(APIModel):
+    cutPlanes: Annotated[List[CutPlane] | None, Field(min_length=1)] = None
+
+
+Set3DCutPlanesResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
 
 
 class CreateIssueParameters(APIModel):
@@ -2335,7 +2385,7 @@ class ZoneBoundary(APIModel):
     ]
 
 
-class ZoneBoundariesResponse(APIModel):
+class ZoneBoundariesWrapper(APIModel):
     zoneBoundaries: List[ZoneBoundary]
 
 
@@ -2352,17 +2402,19 @@ class LibraryFileAddition(APIModel):
     type: Annotated[
         LibraryPartType | None,
         Field(description="The type of the library part. By default 'Pict'."),
-    ] = "Pict"
+    ] = None
 
 
-class Attribute(APIModel):
+class AttributeHeader(APIModel):
     attributeId: AttributeId
     index: Annotated[float, Field(description="Index of the attribute.")]
     name: Annotated[str, Field(description="Name of the attribute.")]
 
 
-class GetAttributesByTypeResponse(APIModel):
-    attributes: Annotated[List[Attribute], Field(description="Details of attributes.")]
+class AttributeHeadersWrapper(APIModel):
+    attributes: Annotated[
+        List[AttributeHeader], Field(description="Details of attributes.")
+    ]
 
 
 class GetProjectInfoFieldsResult(APIModel):
@@ -2396,7 +2448,7 @@ class GetZoneBoundariesParameters(APIModel):
     zoneElementId: ElementId
 
 
-GetZoneBoundariesResult: TypeAlias = ZoneBoundariesResponse | ErrorItem
+GetZoneBoundariesResult: TypeAlias = ZoneBoundariesWrapper | ErrorItem
 
 
 class Collision(APIModel):
@@ -2569,7 +2621,7 @@ class CreatePropertyDefinitionsParameters(APIModel):
     ]
 
 
-GetAttributesByTypeResult: TypeAlias = GetAttributesByTypeResponse | ErrorItem
+GetAttributesByTypeResult: TypeAlias = AttributeHeadersWrapper | ErrorItem
 
 
 class LayerDataArrayItem(APIModel):
@@ -3105,7 +3157,7 @@ class GetCurrentRevisionChangesOfLayoutsParameters(APIModel):
     ]
 
 
-class GetElementsByTypeResponse(APIModel):
+class ElementsWithExecutionResults(APIModel):
     elements: Annotated[
         List[ElementIdArrayItem], Field(description="A list of elements.")
     ]
@@ -3121,7 +3173,7 @@ class ConnectedElement(APIModel):
     ]
 
 
-class GetConnectedElementsResponse(APIModel):
+class ConnectedElementsWrapper(APIModel):
     connectedElements: List[ConnectedElement]
 
 
@@ -3131,10 +3183,10 @@ class GetSelectedElementsResult(APIModel):
     ]
 
 
-GetElementsByTypeResult: TypeAlias = GetElementsByTypeResponse | ErrorItem
+GetElementsByTypeResult: TypeAlias = ElementsWithExecutionResults | ErrorItem
 
 
-GetAllElementsResult: TypeAlias = GetElementsByTypeResponse | ErrorItem
+GetAllElementsResult: TypeAlias = ElementsWithExecutionResults | ErrorItem
 
 
 class ChangeSelectionOfElementsParameters(APIModel):
@@ -3272,7 +3324,7 @@ class GetConnectedElementsParameters(APIModel):
     connectedElementType: ElementType
 
 
-GetConnectedElementsResult: TypeAlias = GetConnectedElementsResponse | ErrorItem
+GetConnectedElementsResult: TypeAlias = ConnectedElementsWrapper | ErrorItem
 
 
 class GetCollisionsParameters(APIModel):

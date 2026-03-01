@@ -24,13 +24,13 @@ from multiconn_archicad.models.tapir.commands import (
     GetLayerCombinationsResult,
 )
 from multiconn_archicad.models.tapir.types import (
+    AttributeHeadersWrapper,
     AttributeIdArrayItem,
     AttributeType,
     BuildingMaterialDataArrayItem,
     BuildingMaterialPhysicalPropertiesArrayItem,
     CompositeDataArrayItem,
     ErrorItem,
-    GetAttributesByTypeResponse,
     LayerCombinationAttribute,
     LayerCombinationDataArrayItem,
     LayerDataArrayItem,
@@ -199,7 +199,7 @@ class AttributeCommands:
         validated_response = CreateSurfacesResult.model_validate(response_dict)
         return validated_response.attributeIds
 
-    def get_attributes_by_type(self, attribute_type: AttributeType) -> ErrorItem | GetAttributesByTypeResponse:
+    def get_attributes_by_type(self, attribute_type: AttributeType) -> AttributeHeadersWrapper | ErrorItem:
         """
         Returns the details of every attribute of the given type.
 
@@ -207,7 +207,7 @@ class AttributeCommands:
             attribute_type (AttributeType)
 
         Returns:
-            ErrorItem | GetAttributesByTypeResponse
+            AttributeHeadersWrapper | ErrorItem
 
         Raises:
             ArchicadAPIError: If the API returns an error response.

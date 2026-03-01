@@ -8,6 +8,7 @@ from multiconn_archicad.models.base import APIModel
 
 
 from .types import (
+    AttributeHeadersWrapper,
     AttributeIdArrayItem,
     AttributePropertyValue,
     AttributeType,
@@ -21,6 +22,8 @@ from .types import (
     Comment,
     CompositeDataArrayItem,
     Conflict,
+    ConnectedElementsWrapper,
+    CutPlane,
     DatabaseIdArrayItem,
     DesignOption,
     DesignOptionCombination,
@@ -35,18 +38,16 @@ from .types import (
     ElementPropertyValue,
     ElementType,
     ElementsWithDetail,
+    ElementsWithExecutionResults,
     ElementsWithGDLParameter,
     ElementsWithMoveVector,
     ErrorItem,
     FailedExecutionResult,
     FavoritesFromElement,
+    FavoritesWrapper,
     FileType,
     Format,
     GDLParameterList,
-    GetAttributesByTypeResponse,
-    GetConnectedElementsResponse,
-    GetElementsByTypeResponse,
-    GetFavoritesByTypeResponse,
     HighlightedColor,
     Hotlink,
     ImageType,
@@ -90,7 +91,7 @@ from .types import (
     ViewSettings,
     ViewTransformations,
     WindowType,
-    ZoneBoundariesResponse,
+    ZoneBoundariesWrapper,
     ZoneData,
 )
 
@@ -114,6 +115,13 @@ QuitArchicadResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResul
 
 class GetCurrentWindowTypeResult(APIModel):
     currentWindowType: WindowType
+
+
+class ChangeWindowParameters(APIModel):
+    windowType: WindowType
+
+
+ChangeWindowResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
 
 
 class GetProjectInfoResult(APIModel):
@@ -265,13 +273,18 @@ class SetElementNotificationClientParameters(APIModel):
         Field(description="The host address of the notification client. If not provided, localhost is used."),
     ] = None
     port: Annotated[int, Field(description="The port number of the notification client.")]
-    notifyOnNewElement: Annotated[bool | None, Field(description="Notify on creation of a new element.")] = True
+    notifyOnNewElement: Annotated[
+        bool | None,
+        Field(description="Notify on creation of a new element. Optional parameter, by default true."),
+    ] = None
     notifyOnModificationOfAnElement: Annotated[
-        bool | None, Field(description="Notify on modification/deletion of an element.")
-    ] = True
+        bool | None,
+        Field(description="Notify on modification/deletion of an element. Optional parameter, by default true."),
+    ] = None
     notifyOnReservationChanges: Annotated[
-        bool | None, Field(description="Notify on reservation changes of an element.")
-    ] = True
+        bool | None,
+        Field(description="Notify on reservation changes of an element. Optional parameter, by default true."),
+    ] = None
 
 
 SetElementNotificationClientResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
@@ -292,7 +305,7 @@ class GetFavoritesByTypeParameters(APIModel):
     elementType: ElementType
 
 
-GetFavoritesByTypeResult: TypeAlias = GetFavoritesByTypeResponse | ErrorItem
+GetFavoritesByTypeResult: TypeAlias = FavoritesWrapper | ErrorItem
 
 
 class GetFavoritePreviewImageParameters(APIModel):
@@ -483,6 +496,13 @@ class GetView2DTransformationsResult(APIModel):
     transformations: List[ViewTransformations | ErrorItem]
 
 
+class Set3DCutPlanesParameters(APIModel):
+    cutPlanes: Annotated[List[CutPlane] | None, Field(min_length=1)] = None
+
+
+Set3DCutPlanesResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
+
+
 class CreateIssueParameters(APIModel):
     name: Annotated[str, Field(description="The name of the issue.")]
     parentIssueId: IssueId | None = None
@@ -618,7 +638,7 @@ class GetZoneBoundariesParameters(APIModel):
     zoneElementId: ElementId
 
 
-GetZoneBoundariesResult: TypeAlias = ZoneBoundariesResponse | ErrorItem
+GetZoneBoundariesResult: TypeAlias = ZoneBoundariesWrapper | ErrorItem
 
 
 class GetCollisionsResult(APIModel):
@@ -737,7 +757,7 @@ class CreatePropertyDefinitionsParameters(APIModel):
     ]
 
 
-GetAttributesByTypeResult: TypeAlias = GetAttributesByTypeResponse | ErrorItem
+GetAttributesByTypeResult: TypeAlias = AttributeHeadersWrapper | ErrorItem
 
 
 class CreateLayersParameters(APIModel):
@@ -912,10 +932,10 @@ class GetSelectedElementsResult(APIModel):
     elements: Annotated[List[ElementIdArrayItem], Field(description="A list of elements.")]
 
 
-GetElementsByTypeResult: TypeAlias = GetElementsByTypeResponse | ErrorItem
+GetElementsByTypeResult: TypeAlias = ElementsWithExecutionResults | ErrorItem
 
 
-GetAllElementsResult: TypeAlias = GetElementsByTypeResponse | ErrorItem
+GetAllElementsResult: TypeAlias = ElementsWithExecutionResults | ErrorItem
 
 
 class ChangeSelectionOfElementsParameters(APIModel):
@@ -955,7 +975,7 @@ class GetConnectedElementsParameters(APIModel):
     connectedElementType: ElementType
 
 
-GetConnectedElementsResult: TypeAlias = GetConnectedElementsResponse | ErrorItem
+GetConnectedElementsResult: TypeAlias = ConnectedElementsWrapper | ErrorItem
 
 
 class GetCollisionsParameters(APIModel):

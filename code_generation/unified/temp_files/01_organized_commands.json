@@ -337,6 +337,43 @@
                 "source": "tapir"
             }
         ],
+        "Application Commands": [
+            {
+                "name": "ChangeWindow",
+                "group": "Application Commands",
+                "description": "Changes the current (active) window to the given window.",
+                "version": "1.3.1",
+                "source": "tapir"
+            },
+            {
+                "name": "GetAddOnVersion",
+                "group": "Application Commands",
+                "description": "Retrieves the version of the Tapir Additional JSON Commands Add-On.",
+                "version": "0.1.0",
+                "source": "tapir"
+            },
+            {
+                "name": "GetArchicadLocation",
+                "group": "Application Commands",
+                "description": "Retrieves the location of the currently running Archicad executable.",
+                "version": "0.1.0",
+                "source": "tapir"
+            },
+            {
+                "name": "GetCurrentWindowType",
+                "group": "Application Commands",
+                "description": "Returns the type of the current (active) window.",
+                "version": "1.0.7",
+                "source": "tapir"
+            },
+            {
+                "name": "QuitArchicad",
+                "group": "Application Commands",
+                "description": "Performs a quit operation on the currently running Archicad instance.",
+                "version": "0.1.0",
+                "source": "tapir"
+            }
+        ],
         "Attribute Commands": [
             {
                 "name": "CreateBuildingMaterials",
@@ -460,36 +497,6 @@
                 "source": "tapir"
             }
         ],
-        "Application Commands": [
-            {
-                "name": "GetAddOnVersion",
-                "group": "Application Commands",
-                "description": "Retrieves the version of the Tapir Additional JSON Commands Add-On.",
-                "version": "0.1.0",
-                "source": "tapir"
-            },
-            {
-                "name": "GetArchicadLocation",
-                "group": "Application Commands",
-                "description": "Retrieves the location of the currently running Archicad executable.",
-                "version": "0.1.0",
-                "source": "tapir"
-            },
-            {
-                "name": "GetCurrentWindowType",
-                "group": "Application Commands",
-                "description": "Returns the type of the current (active) window.",
-                "version": "1.0.7",
-                "source": "tapir"
-            },
-            {
-                "name": "QuitArchicad",
-                "group": "Application Commands",
-                "description": "Performs a quit operation on the currently running Archicad instance.",
-                "version": "0.1.0",
-                "source": "tapir"
-            }
-        ],
         "Revision Management Commands": [
             {
                 "name": "GetCurrentRevisionChangesOfLayouts",
@@ -564,6 +571,13 @@
                 "source": "tapir"
             },
             {
+                "name": "Set3DCutPlanes",
+                "group": "Navigator Commands",
+                "description": "Sets the 3D cut planes.",
+                "version": "1.3.1",
+                "source": "tapir"
+            },
+            {
                 "name": "SetViewSettings",
                 "group": "Navigator Commands",
                 "description": "Sets the view settings of navigator items",
@@ -583,21 +597,21 @@
                 "name": "GetDesignOptionCombinations",
                 "group": "Design Options Commands",
                 "description": "Retrieves information about existing design option combinations.",
-                "version": "1.2.7",
+                "version": "1.2.9",
                 "source": "tapir"
             },
             {
                 "name": "GetDesignOptionSets",
                 "group": "Design Options Commands",
                 "description": "Retrieves information about existing design option sets. Available from Archicad 29.",
-                "version": "1.2.7",
+                "version": "1.2.9",
                 "source": "tapir"
             },
             {
                 "name": "GetDesignOptions",
                 "group": "Design Options Commands",
                 "description": "Retrieves information about existing design options. Available from Archicad 29.",
-                "version": "1.2.7",
+                "version": "1.2.9",
                 "source": "tapir"
             }
         ],

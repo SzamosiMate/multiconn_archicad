@@ -6,6 +6,7 @@ from typing_extensions import NotRequired
 
 
 from .types import (
+    AttributeHeadersOrError,
     AttributeIds,
     AttributePropertyValues,
     AttributeType,
@@ -19,6 +20,8 @@ from .types import (
     Comment,
     CompositeDataArrayItem,
     Conflict,
+    ConnectedElementsOrError,
+    CutPlane,
     Databases,
     DesignOption,
     DesignOptionCombination,
@@ -33,17 +36,15 @@ from .types import (
     ElementType,
     Elements,
     ElementsWithDetail,
+    ElementsWithExecutionResultsOrError,
     ElementsWithGDLParameter,
     ElementsWithMoveVector,
     ExecutionResult,
     ExecutionResults,
     Favorites,
     FavoritesFromElement,
+    FavoritesOrError,
     GDLParameterList,
-    GetAttributesByTypeResponseOrError,
-    GetConnectedElementsResponseOrError,
-    GetElementsByTypeResponseOrError,
-    GetFavoritesByTypeResponseOrError,
     Hotlinks,
     Issue,
     IssueCommentStatus,
@@ -85,7 +86,7 @@ from .types import (
     ViewSettingsOrError,
     ViewTransformationsOrError,
     WindowType,
-    ZoneBoundariesResponseOrError,
+    ZoneBoundariesOrError,
     ZoneData,
 )
 
@@ -103,6 +104,13 @@ QuitArchicadResult = ExecutionResult
 
 class GetCurrentWindowTypeResult(TypedDict):
     currentWindowType: WindowType
+
+
+class ChangeWindowParameters(TypedDict):
+    windowType: WindowType
+
+
+ChangeWindowResult = ExecutionResult
 
 
 class GetProjectInfoResult(TypedDict):
@@ -218,7 +226,7 @@ class GetFavoritesByTypeParameters(TypedDict):
     elementType: ElementType
 
 
-GetFavoritesByTypeResult = GetFavoritesByTypeResponseOrError
+GetFavoritesByTypeResult = FavoritesOrError
 
 
 class GetFavoritePreviewImageParameters(TypedDict):
@@ -345,6 +353,13 @@ class GetView2DTransformationsResult(TypedDict):
     transformations: List[ViewTransformationsOrError]
 
 
+class Set3DCutPlanesParameters(TypedDict):
+    cutPlanes: NotRequired[List[CutPlane]]
+
+
+Set3DCutPlanesResult = ExecutionResult
+
+
 class CreateIssueParameters(TypedDict):
     name: str
     parentIssueId: NotRequired[IssueId]
@@ -459,7 +474,7 @@ class GetZoneBoundariesParameters(TypedDict):
     zoneElementId: ElementId
 
 
-GetZoneBoundariesResult = ZoneBoundariesResponseOrError
+GetZoneBoundariesResult = ZoneBoundariesOrError
 
 
 class GetCollisionsResult(TypedDict):
@@ -536,7 +551,7 @@ class CreatePropertyDefinitionsParameters(TypedDict):
     propertyDefinitions: List[PropertyDefinitionArrayItem]
 
 
-GetAttributesByTypeResult = GetAttributesByTypeResponseOrError
+GetAttributesByTypeResult = AttributeHeadersOrError
 
 
 class CreateLayersParameters(TypedDict):
@@ -644,10 +659,10 @@ class GetSelectedElementsResult(TypedDict):
     elements: Elements
 
 
-GetElementsByTypeResult = GetElementsByTypeResponseOrError
+GetElementsByTypeResult = ElementsWithExecutionResultsOrError
 
 
-GetAllElementsResult = GetElementsByTypeResponseOrError
+GetAllElementsResult = ElementsWithExecutionResultsOrError
 
 
 class ChangeSelectionOfElementsParameters(TypedDict):
@@ -685,7 +700,7 @@ class GetConnectedElementsParameters(TypedDict):
     connectedElementType: ElementType
 
 
-GetConnectedElementsResult = GetConnectedElementsResponseOrError
+GetConnectedElementsResult = ConnectedElementsOrError
 
 
 class GetCollisionsParameters(TypedDict):

@@ -928,11 +928,11 @@ LibraryPartType = Literal[
 ]
 
 
-class GetFavoritesByTypeResponse(TypedDict):
+class FavoritesWrapper(TypedDict):
     favorites: Favorites
 
 
-GetFavoritesByTypeResponseOrError = GetFavoritesByTypeResponse | ErrorItem
+FavoritesOrError = FavoritesWrapper | ErrorItem
 
 
 class Details(TypedDict):
@@ -976,6 +976,13 @@ class ModelViewOption(TypedDict):
 class NavigatorItemIdsWithViewSetting(TypedDict):
     navigatorItemId: NavigatorItemId
     viewSettings: ViewSettings
+
+
+class CutPlane(TypedDict):
+    pa: float
+    pb: float
+    pc: float
+    pd: float
 
 
 class Comment(TypedDict):
@@ -1230,11 +1237,11 @@ class ZoneBoundary(TypedDict):
     polygonOutline: List[Coordinate3D]
 
 
-class ZoneBoundariesResponse(TypedDict):
+class ZoneBoundariesWrapper(TypedDict):
     zoneBoundaries: List[ZoneBoundary]
 
 
-ZoneBoundariesResponseOrError = ZoneBoundariesResponse | ErrorItem
+ZoneBoundariesOrError = ZoneBoundariesWrapper | ErrorItem
 
 
 class BuildingMaterialPhysicalPropertiesArrayItem(TypedDict):
@@ -1250,17 +1257,20 @@ class LibraryFileAddition(TypedDict):
     type: NotRequired[LibraryPartType]
 
 
-class Attribute(TypedDict):
+class AttributeHeader(TypedDict):
     attributeId: AttributeId
     index: float
     name: str
 
 
-class GetAttributesByTypeResponse(TypedDict):
-    attributes: List[Attribute]
+AttributeHeaders = List[AttributeHeader]
 
 
-GetAttributesByTypeResponseOrError = GetAttributesByTypeResponse | ErrorItem
+class AttributeHeadersWrapper(TypedDict):
+    attributes: AttributeHeaders
+
+
+AttributeHeadersOrError = AttributeHeadersWrapper | ErrorItem
 
 
 class ElementsWithDetail(TypedDict):
@@ -1479,23 +1489,23 @@ Elements = List[ElementIdArrayItem]
 AttributeIds = List[AttributeIdArrayItem]
 
 
-class GetElementsByTypeResponse(TypedDict):
+class ElementsWithExecutionResults(TypedDict):
     elements: Elements
     executionResultForDatabases: NotRequired[ExecutionResults]
 
 
-GetElementsByTypeResponseOrError = GetElementsByTypeResponse | ErrorItem
+ElementsWithExecutionResultsOrError = ElementsWithExecutionResults | ErrorItem
 
 
 class ConnectedElement(TypedDict):
     elements: Elements
 
 
-class GetConnectedElementsResponse(TypedDict):
+class ConnectedElementsWrapper(TypedDict):
     connectedElements: List[ConnectedElement]
 
 
-GetConnectedElementsResponseOrError = GetConnectedElementsResponse | ErrorItem
+ConnectedElementsOrError = ConnectedElementsWrapper | ErrorItem
 
 
 class Subelement(TypedDict):

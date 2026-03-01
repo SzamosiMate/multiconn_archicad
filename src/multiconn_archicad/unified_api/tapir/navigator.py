@@ -14,12 +14,15 @@ from multiconn_archicad.models.tapir.commands import (
     GetViewSettingsParameters,
     GetViewSettingsResult,
     PublishPublisherSetParameters,
+    Set3DCutPlanesParameters,
+    Set3DCutPlanesResult,
     SetViewSettingsParameters,
     SetViewSettingsResult,
     UpdateDrawingsParameters,
     UpdateDrawingsResult,
 )
 from multiconn_archicad.models.tapir.types import (
+    CutPlane,
     DatabaseIdArrayItem,
     ElementIdArrayItem,
     ErrorItem,
@@ -162,6 +165,33 @@ class NavigatorCommands:
             "PublishPublisherSet", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         return None
+
+    def set_3d_cut_planes(
+        self, cut_planes: None | list[CutPlane] = None
+    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+        """
+        Sets the 3D cut planes.
+
+        Args:
+            cut_planes (None | list[CutPlane])
+
+        Returns:
+            FailedExecutionResult | SuccessfulExecutionResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "cutPlanes": cut_planes,
+        }
+        validated_params = Set3DCutPlanesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "Set3DCutPlanes", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = TypeAdapter(Set3DCutPlanesResult).validate_python(response_dict)
+        return validated_response
 
     def set_view_settings(
         self, navigator_item_ids_with_view_settings: list[NavigatorItemIdsWithViewSetting]

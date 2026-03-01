@@ -6,6 +6,8 @@ from typing import TYPE_CHECKING
 from pydantic import TypeAdapter
 
 from multiconn_archicad.models.tapir.commands import (
+    ChangeWindowParameters,
+    ChangeWindowResult,
     GetAddOnVersionResult,
     GetArchicadLocationResult,
     GetCurrentWindowTypeResult,
@@ -20,6 +22,31 @@ if TYPE_CHECKING:
 class ApplicationCommands:
     def __init__(self, core: CoreCommands):
         self._core = core
+
+    def change_window(self, window_type: WindowType) -> FailedExecutionResult | SuccessfulExecutionResult:
+        """
+        Changes the current (active) window to the given window.
+
+        Args:
+            window_type (WindowType)
+
+        Returns:
+            FailedExecutionResult | SuccessfulExecutionResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "windowType": window_type,
+        }
+        validated_params = ChangeWindowParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "ChangeWindow", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = TypeAdapter(ChangeWindowResult).validate_python(response_dict)
+        return validated_response
 
     def get_add_on_version(self) -> str:
         """
