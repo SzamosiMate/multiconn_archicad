@@ -1,6 +1,5 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
-from multiconn_archicad.utilities.async_utils import run_sync
 
 if TYPE_CHECKING:
     from multiconn_archicad.conn_header import ConnHeader
@@ -32,7 +31,7 @@ class Refresh:
         self.execute_action(self.multi_conn.closed_ports)
 
     def execute_action(self, ports: list[Port]) -> None:
-        run_sync(self.multi_conn.scan_ports(ports))
+        self.multi_conn.scan_ports(ports)
         self.multi_conn.open_port_headers = dict(sorted(self.multi_conn.open_port_headers.items()))
         log.info(
             f"Refreshing - Open ports: {len(self.multi_conn.open_port_headers)}, "

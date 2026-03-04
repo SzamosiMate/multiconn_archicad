@@ -89,4 +89,7 @@ __all__ = [
 log = logging.getLogger(__name__)
 log.addHandler(logging.NullHandler())
 
+logging.getLogger("httpx").setLevel(logging.WARNING)
+logging.getLogger("httpcore").setLevel(logging.WARNING)
+
 __all__ = tuple(__all__)

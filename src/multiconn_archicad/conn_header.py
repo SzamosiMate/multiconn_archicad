@@ -1,8 +1,9 @@
-import asyncio
-import concurrent.futures
+from concurrent.futures import Future, CancelledError
+import threading
 from enum import Enum
 from typing import Self, Any, TypeGuard
 from pprint import pformat
+import logging
 
 from multiconn_archicad.core.core_commands import CoreCommands
 from multiconn_archicad.basic_types import (
@@ -15,8 +16,10 @@ from multiconn_archicad.basic_types import (
 )
 from multiconn_archicad.errors import RequestError, ArchicadAPIError, HeaderUnassignedError
 from multiconn_archicad.standard_connection import StandardConnection
-from multiconn_archicad.utilities.async_utils import start_background_task, wait_for_handle, AsyncHandle
 from multiconn_archicad.unified_api.api import UnifiedApi
+from multiconn_archicad.utilities.thread_utils import EXECUTOR
+
+log = logging.getLogger(__name__)
 
 
 class Status(Enum):
@@ -36,7 +39,8 @@ class ConnHeader:
     def __init__(self, port: Port, initialize: bool = True, ui_mode: bool = False):
         self._port: Port | None = port
         self._status: Status = Status.PENDING
-        self._ui_mode = ui_mode
+        self._ui_mode: bool = ui_mode
+        self._is_cancelled: bool = False
 
         self._core: CoreCommands | None = CoreCommands(port)
         self._standard: StandardConnection | None = StandardConnection(port)
@@ -46,9 +50,10 @@ class ConnHeader:
         self._archicad_id: ArchiCadID | APIResponseError = PendingResponse()
         self._archicad_location: ArchicadLocation | APIResponseError = PendingResponse()
 
-        self._init_handle: AsyncHandle | None = None
+        self._init_future: Future | None = None
+        self._fetch_token: object | None = None
         if initialize and port:
-            self._init_handle = start_background_task(self.refresh_metadata())
+            self.refresh_metadata()
 
     @property
     def status(self) -> Status:
@@ -152,22 +157,27 @@ class ConnHeader:
         }
         return f"{self.__class__.__name__}(\n{pformat(attrs, width=200, indent=4)})"
 
-    async def refresh_metadata(self):
-        await self.cancel_init_handle()
-        metadata = await asyncio.gather(
-            self.get_product_info(timeout=3.0),
-            self.get_archicad_id(timeout=3.0),
-            self.get_archicad_location(timeout=3.0),
-        )
-        self._assign_metadata(*metadata)
+    def refresh_metadata(self):
+        """Starts a new fetch, superseding any currently running fetch."""
+        self._is_cancelled = False
+        self._fetch_token = object()
+        self._init_future = EXECUTOR.submit(self._fetch_worker, self._fetch_token)
 
-    async def cancel_init_handle(self) -> None:
-        if self._init_handle and not self._init_handle.done():
-            self._init_handle.cancel()
-            try:
-                await self._init_handle
-            except (asyncio.CancelledError, Exception):
-                pass
+    def _fetch_worker(self,  my_token: object):
+        product_info = self.get_product_info(timeout=3.0)
+        archicad_id = self.get_archicad_id(timeout=3.0)
+        archicad_location = self.get_archicad_location(timeout=3.0)
+
+        if self._fetch_token is not my_token or self._is_cancelled:
+            return
+
+        self._assign_metadata(product_info, archicad_id, archicad_location)
+
+        if is_product_info_initialized(self._product_info):
+            self._status = Status.ACTIVE
+            self.connect()
+        else:
+            self._status = Status.FAILED
 
     def _assign_metadata(self,
                         product_info: ProductInfo | APIResponseError,
@@ -181,10 +191,13 @@ class ConnHeader:
             self._archicad_location = archicad_location
 
     def connect(self) -> None:
-        if is_product_info_initialized(self.product_info):
-            self.standard.connect(self.product_info)
+        self._sync_if_needed()
+        info = self._product_info
+
+        if is_product_info_initialized(info):
+            self.standard.connect(info)
             self._status = Status.ACTIVE
-        elif isinstance(self.product_info, PendingResponse):
+        elif isinstance(info, PendingResponse):
             self._status = Status.PENDING
         else:
             self._status = Status.FAILED
@@ -194,37 +207,47 @@ class ConnHeader:
         self._status = Status.PENDING
 
     def unassign(self) -> None:
+        self.cancel()
         self._status = Status.UNASSIGNED
         self._port = None
         self._core = None
         self._standard = None
         self._unified = None
 
-    def _sync_if_needed(self):
-        if self._ui_mode:
-            return
-        try:
-            wait_for_handle(self._init_handle)
-        except (concurrent.futures.CancelledError, asyncio.CancelledError):
-            pass
+    def cancel(self):
+        self._is_cancelled = True
 
-    async def get_product_info(self, timeout: float) -> ProductInfo | APIResponseError:
+    def _sync_if_needed(self):
+        """Safely blocks the thread if not in UI mode."""
+        if self._ui_mode or not self._init_future:
+            return
+        if threading.current_thread().name.startswith("MultiConnWorker"):
+            return
+        if not self._init_future.done():
+            try:
+                self._init_future.result()
+            except CancelledError:
+                pass
+            except Exception as e:
+                log.warning(f"Background fetch failed: {e}")
+
+    def get_product_info(self, timeout: float) -> ProductInfo | APIResponseError:
         try:
-            result = await self.core.post_command_async(command="API.GetProductInfo", timeout=timeout)
+            result = self.core.post_command(command="API.GetProductInfo", timeout=timeout)
             return ProductInfo.from_api_response(result)
         except (RequestError, ArchicadAPIError) as e:
             return APIResponseError.from_exception(e)
 
-    async def get_archicad_id(self, timeout: float) -> ArchiCadID | APIResponseError:
+    def get_archicad_id(self, timeout: float) -> ArchiCadID | APIResponseError:
         try:
-            result = await self.core.post_tapir_command_async(command="GetProjectInfo", timeout=timeout)
+            result = self.core.post_tapir_command(command="GetProjectInfo", timeout=timeout)
             return ArchiCadID.from_api_response(result)
         except (RequestError, ArchicadAPIError) as e:
             return APIResponseError.from_exception(e)
 
-    async def get_archicad_location(self, timeout: float) -> ArchicadLocation | APIResponseError:
+    def get_archicad_location(self, timeout: float) -> ArchicadLocation | APIResponseError:
         try:
-            result = await self.core.post_tapir_command_async(command="GetArchicadLocation", timeout=timeout)
+            result = self.core.post_tapir_command(command="GetArchicadLocation", timeout=timeout)
             return ArchicadLocation.from_api_response(result)
         except (RequestError, ArchicadAPIError) as e:
             return APIResponseError.from_exception(e)

@@ -1,8 +1,7 @@
-import asyncio
 from pprint import pformat
 
-from multiconn_archicad.utilities.async_utils import run_sync
 from multiconn_archicad.utilities.network_utils import is_port_listening
+from multiconn_archicad.utilities.thread_utils import EXECUTOR
 from multiconn_archicad.core.core_commands import CoreCommands
 from multiconn_archicad.standard_connection import StandardConnection
 from multiconn_archicad.unified_api.api import UnifiedApi
@@ -58,7 +57,7 @@ class MultiConn:
 
         self.refresh.all_ports()
         port = Port(cli_args.port) if cli_args.port else port
-        run_sync(self._set_primary(port))
+        self._set_primary(port)
 
     @property
     def pending(self) -> dict[Port, ConnHeader]:
@@ -90,7 +89,7 @@ class MultiConn:
 
     @primary.setter
     def primary(self, new_value: Port | ConnHeader) -> None:
-        run_sync(self._set_primary(new_value))
+        self._set_primary(new_value)
 
     def __repr__(self) -> str:
         attrs = {name: getattr(self, name) for name in ["pending", "active", "failed", "primary", "dialog_handler"]}
@@ -107,58 +106,59 @@ class MultiConn:
             if conn_header.status == status and conn_header.port
         }
 
-    async def scan_ports(self, ports: list[Port]) -> None:
-        tasks = [self.check_port(port) for port in ports]
-        await asyncio.gather(*tasks)
+    def scan_ports(self, ports: list[Port]) -> None:
+        list(EXECUTOR.map(self.check_port, ports))
 
-    async def check_port(self, port: Port) -> None:
-        if await is_port_listening(self._base_url, port):
-            await self.create_or_refresh_connection(port)
+    def check_port(self, port: Port) -> None:
+        if is_port_listening(self._base_url, port):
+            self.create_or_refresh_connection(port)
         else:
-            await self.close_if_open(port)
+            self.close_if_open(port)
 
-
-    async def create_or_refresh_connection(self, port: Port) -> None:
+    def create_or_refresh_connection(self, port: Port) -> None:
         if port not in self.open_port_headers.keys():
             self.open_port_headers[port] = ConnHeader(port, ui_mode=self._ui_mode)
         else:
-            await self.open_port_headers[port].refresh_metadata()
+            self.open_port_headers[port].refresh_metadata()
 
-    async def close_if_open(self, port: Port) -> None:
+    def close_if_open(self, port: Port) -> ConnHeader | None:
+        header = None
         if port in self.open_port_headers.keys():
             log.info(f"Removing connection header for inactive/unresponsive port {port}.")
-            self.open_port_headers.pop(port)
+            header = self.open_port_headers.pop(port)
+            header.cancel()
             if self._primary and self._primary.port == port:
-                await self._set_primary()
+                self._set_primary()
+        return header
 
-    async def _set_primary(self, new_value: None | Port | ConnHeader = None) -> None:
+    def _set_primary(self, new_value: None | Port | ConnHeader = None) -> None:
         if isinstance(new_value, Port):
-            await self._set_primary_from_port(new_value)
+            self._set_primary_from_port(new_value)
         elif isinstance(new_value, ConnHeader):
-            await self._set_primary_from_header(new_value)
+            self._set_primary_from_header(new_value)
         else:
-            await self._set_primary_from_none()
+            self._set_primary_from_none()
 
-    async def _set_primary_from_port(self, port: Port) -> None:
+    def _set_primary_from_port(self, port: Port) -> None:
         if port in self.open_port_headers.keys():
-            await self._set_primary_namespaces(port)
+            self._set_primary_namespaces(port)
         else:
             raise KeyError(f"Failed to set primary. Port {port} is closed.")
 
-    async def _set_primary_from_header(self, header: ConnHeader) -> None:
+    def _set_primary_from_header(self, header: ConnHeader) -> None:
         if header in self.open_port_headers.values() and header.port:
-            await self._set_primary_namespaces(header.port)
+            self._set_primary_namespaces(header.port)
         else:
             raise KeyError(f"Failed to set primary. There is no open port with header: {header}")
 
-    async def _set_primary_from_none(self) -> None:
+    def _set_primary_from_none(self) -> None:
         for port in self._port_range:
             if port in self.open_port_headers.keys():
-                await self._set_primary_namespaces(port)
+                self._set_primary_namespaces(port)
                 return
-        await self._clear_primary_namespaces()
+        self._clear_primary_namespaces()
 
-    async def _set_primary_namespaces(self, port: Port) -> None:
+    def _set_primary_namespaces(self, port: Port) -> None:
         self._primary = ConnHeader(port, ui_mode=self._ui_mode)
         log.info(f"Primary connection set to Archicad instance on port {port}")
         self._primary.connect()
@@ -166,7 +166,7 @@ class MultiConn:
         self.standard = self._primary.standard
         self.unified = self._primary.unified
 
-    async def _clear_primary_namespaces(self) -> None:
+    def _clear_primary_namespaces(self) -> None:
         self._primary = None
         log.info("Primary connection cleared")
         self.core = CoreCommands
