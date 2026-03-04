@@ -69,6 +69,7 @@ class QuitAndDisconnect:
             if conn_header.port is None:
                 continue
             log.info(f"Sending Quit command to Archicad on port {conn_header.port} and unassigning header.")
+            conn_header.cancel()
             quit_successful = False
             try:
                 conn_header.core.post_tapir_command("QuitArchicad", timeout=force_after)
