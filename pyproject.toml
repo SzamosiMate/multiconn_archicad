@@ -57,7 +57,6 @@ dev = [
     "pytest>=8.3.4",
     "ruff>=0.8.4",
     "typeguard>=4.4.2",
-    "pytest-aiohttp>=1.1.0",
 ]
 
 [[tool.mypy.overrides]]
@@ -79,7 +78,6 @@ line-ending = "lf"
 docstring-code-format = true
 
 [tool.pytest.ini_options]
-asyncio_mode = "auto"
 addopts = [
     "--import-mode=importlib",
 ]

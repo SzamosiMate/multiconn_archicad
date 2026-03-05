@@ -1,5 +1,4 @@
 import pytest
-import asyncio
 
 from multiconn_archicad import MultiConn, Port
 from multiconn_archicad.conn_header import Status
@@ -40,71 +39,75 @@ def test_init_with_invalid_port_raises_error(monkeypatch):
         MultiConn(port=Port(19723))
 
 
-@pytest.mark.asyncio
-async def test_discover_single_instance(archicad_api):
+
+def test_discover_single_instance(archicad_api):
     archicad_api.set_response("GetProjectInfo", "get_project_info_solo.json")
-    conn = await asyncio.to_thread(MultiConn)
+    conn = MultiConn()
     assert len(conn.open_port_headers) == 1
-    managed_header = conn.open_port_headers[archicad_api.server.port]
-    assert managed_header.status == Status.PENDING
+    managed_header = conn.open_port_headers[archicad_api.server_port]
+    assert managed_header.status == Status.ACTIVE
     assert conn.primary is not None
     assert conn.primary.status == Status.ACTIVE
 
 
-@pytest.mark.asyncio
-async def test_connect_all_and_status_change(archicad_api):
+
+def test_connect_all_and_status_change(archicad_api):
     archicad_api.set_response("GetProjectInfo", "get_project_info_solo.json")
-    conn = await asyncio.to_thread(MultiConn)
-    managed_header = conn.open_port_headers[archicad_api.server.port]
+    conn = MultiConn()
+    managed_header = conn.open_port_headers[archicad_api.server_port]
+
+    conn.disconnect.all()
     assert managed_header.status == Status.PENDING
+
     conn.connect.all()
     assert managed_header.status == Status.ACTIVE
 
 
-@pytest.mark.asyncio
-async def test_disconnect_and_status_change(archicad_api):
+
+def test_disconnect_and_status_change(archicad_api):
     archicad_api.set_response("GetProjectInfo", "get_project_info_solo.json")
-    conn = await asyncio.to_thread(MultiConn)
+    conn = MultiConn()
     conn.connect.all()
-    managed_header = conn.open_port_headers[archicad_api.server.port]
+    managed_header = conn.open_port_headers[archicad_api.server_port]
     assert managed_header.status == Status.ACTIVE
     conn.disconnect.from_headers(managed_header)
     assert managed_header.status == Status.PENDING
 
 
-@pytest.mark.asyncio
-async def test_refresh_detects_closed_instance(archicad_api):
+
+def test_refresh_detects_closed_instance(archicad_api):
     """
     Verifies that refresh removes headers for closed instances.
     """
     archicad_api.set_response("GetProjectInfo", "get_project_info_solo.json")
-    conn = await asyncio.to_thread(MultiConn)
+    conn = MultiConn()
     assert len(conn.open_port_headers) == 1
 
-    await archicad_api.server.close()
+    archicad_api.http_server.shutdown()
+    archicad_api.http_server.server_close()
 
-    await conn.scan_ports(conn.port_range)
-    await conn._set_primary()
+    conn.scan_ports(conn.port_range)
+    conn._set_primary()
 
     assert len(conn.open_port_headers) == 0
     assert conn.primary is None
 
 
-@pytest.mark.asyncio
-async def test_quit_all_sends_command_and_removes_header(archicad_api):
+
+def test_quit_all_sends_command_and_removes_header(archicad_api):
     """
     Verifies that quit sends the command and removes the header.
     """
     archicad_api.set_response("GetProjectInfo", "get_project_info_solo.json")
     archicad_api.set_response("QuitArchicad", "success_empty_tapir.json")
-    conn = await asyncio.to_thread(MultiConn)
+    conn = MultiConn()
 
-    header_to_quit = conn.open_port_headers[archicad_api.server.port]
+    header_to_quit = conn.open_port_headers[archicad_api.server_port]
 
     processed_headers = []
     for header in list(conn.open_port_headers.values()):
-        await header.core.post_tapir_command_async("QuitArchicad")
-        await conn.close_if_open(header.port)
+        header.core.post_tapir_command("QuitArchicad")
+        conn.close_if_open(header.port)
         header.unassign()
         processed_headers.append(header)
 
