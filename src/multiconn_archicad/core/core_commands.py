@@ -76,8 +76,8 @@ class CoreCommands:
         if response.get("error"):
             log.warning(f"response: {response}")
             raise TapirCommandError(
-                message=response["result"].get("error", {}).get("message", "no message"),
-                code=response["result"].get("error", {}).get("code", None),
+                message=response.get("error", {}).get("message", "no message"),
+                code=response.get("error", {}).get("code", None),
             )
         return response
 
