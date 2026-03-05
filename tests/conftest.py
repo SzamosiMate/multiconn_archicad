@@ -1,9 +1,10 @@
 import json
+import threading
+from http.server import HTTPServer, BaseHTTPRequestHandler
 from pathlib import Path
-from typing import Dict, Any, Callable, Awaitable
+from typing import Dict, Any, Callable
 
 import pytest
-from aiohttp import web
 
 # Import modules for configuration patching
 import multiconn_archicad.multi_conn as multi_conn
@@ -11,20 +12,21 @@ import multiconn_archicad.utilities.cli_parser as cli_parser
 from multiconn_archicad.basic_types import Port
 
 FIXTURES_DIR = Path(__file__).parent / "fixtures"
-TEST_PORT = 19743
 
 
 class ServerController:
     """A controller to manage the state of the fake Archicad server for tests."""
+
     def __init__(self):
-        self.server = None
+        self.server_host = "127.0.0.1"
+        self.server_port = None  # Will be assigned dynamically
         self._default_responses = {
             "API.GetProductInfo": "get_product_info_AC27_INT.json",
             "GetArchicadLocation": "get_archicad_location_win.json",
             "API.IsAlive": "is_alive_true.json",
         }
         self.responses: Dict[str, str] = {}
-        self.command_handlers: Dict[str, Callable[[web.Request], Awaitable[web.Response]]] = {}
+        self.command_handlers: Dict[str, Callable[[dict], dict]] = {}
         self.reset()
 
     def reset(self):
@@ -34,8 +36,10 @@ class ServerController:
     def set_response(self, command: str, response_filename: str):
         self.responses[command] = response_filename
 
-    def set_handler(self, command: str, handler: Callable[[web.Request], Awaitable[web.Response]]):
-        """Set a custom coroutine to handle a specific command."""
+    def set_handler(self, command: str, handler: Callable[[dict], dict]):
+        """Set a custom function to handle a specific command.
+        The handler takes the JSON payload (dict) and returns a JSON response (dict).
+        """
         self.command_handlers[command] = handler
 
     def get_response_data(self, command: str) -> Dict[str, Any] | None:
@@ -47,57 +51,94 @@ class ServerController:
         return None
 
 
-async def handle_get(request: web.Request):
-    return web.Response(status=200, text="Server is alive")
+def create_handler_class(controller: ServerController):
+    """Factory to create a RequestHandler bound to our controller."""
 
-async def archicad_api_handler(request: web.Request):
-    """
-    Finds the correct fixture based on the request and returns its contents.
-    Custom command handlers take precedence over fixture files.
-    """
-    controller: ServerController = request.app["controller"]
-    payload = await request.json()
-    command = payload.get("command")
+    class ArchicadAPIHandler(BaseHTTPRequestHandler):
+        def log_message(self, format, *args):
+            pass  # Suppress HTTP server logging to keep test output clean
 
-    command_name = command
-    if command == "API.ExecuteAddOnCommand":
-        command_name = payload.get("parameters", {}).get("addOnCommandId", {}).get("commandName")
+        def do_GET(self):
+            self.send_response(200)
+            self.send_header("Content-Type", "text/plain")
+            self.end_headers()
+            self.wfile.write(b"Server is alive")
 
-    # Check for a custom handler first
-    if handler := controller.command_handlers.get(command_name):
-        return await handler(request)
+        def do_POST(self):
+            # Parse the incoming JSON
+            content_length = int(self.headers.get('Content-Length', 0))
+            body = self.rfile.read(content_length)
+            payload = json.loads(body)
 
-    # Fall back to fixture-based responses
-    response_data = controller.get_response_data(command_name)
-    if response_data:
-        return web.json_response(response_data)
-    else:
-        # Return a generic success if no specific response is configured
-        return web.json_response({"succeeded": True, "result": {}})
+            command = payload.get("command")
+            command_name = command
+            # Unwrap Tapir AddOn commands
+            if command == "API.ExecuteAddOnCommand":
+                command_name = payload.get("parameters", {}).get("addOnCommandId", {}).get("commandName")
+
+            # Route to a custom handler if defined, otherwise load from fixtures
+            if handler := controller.command_handlers.get(command_name):
+                response_dict = handler(payload)
+            else:
+                response_dict = controller.get_response_data(command_name)
+                if not response_dict:
+                    # Generic fallback success
+                    response_dict = {"succeeded": True, "result": {}}
+
+            # Send the response back
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(json.dumps(response_dict).encode('utf-8'))
+
+    return ArchicadAPIHandler
 
 
 @pytest.fixture
-async def archicad_api(aiohttp_server, monkeypatch):
+def archicad_api(monkeypatch):
     """
-    Starts the mock server and applies configuration patches to the library.
+    Starts the synchronous mock server on a background thread within the Archicad port range,
+    and patches the library configuration.
     """
-    app = web.Application()
     controller = ServerController()
-    app["controller"] = controller
-    app.router.add_get("/", handle_get)
-    app.router.add_post("/", archicad_api_handler)
 
-    server = await aiohttp_server(app, port=TEST_PORT)
-    controller.server = server
+    valid_ports = range(19723, 19745)  # 19723 to 19744
+    server = None
+    assigned_port = None
+
+    # Try to bind to the first available port in the Archicad range
+    HandlerClass = create_handler_class(controller)
+    for port in valid_ports:
+        try:
+            server = HTTPServer((controller.server_host, port), HandlerClass)
+            assigned_port = port
+            break
+        except OSError:
+            continue
+
+    if server is None:
+        raise RuntimeError(f"Could not find an open port in the Archicad range {valid_ports} for the mock server.")
+
+    controller.server_port = assigned_port
+    controller.http_server = server
+
+    server_thread = threading.Thread(target=server.serve_forever, daemon=True)
+    server_thread.start()
 
     # Patch library configuration to connect to our mock server
     class MockArgs:
-        host = f"http://{server.host}"
-        port = server.port
+        host = f"http://{controller.server_host}"
+        port = controller.server_port
+
     cli_parser._parsed_cli_args_cache = MockArgs()
-    monkeypatch.setattr(multi_conn.MultiConn, "_port_range", [Port(server.port)])
+
+    monkeypatch.setattr(multi_conn.MultiConn, "_port_range", [Port(assigned_port)])
     monkeypatch.setattr(Port, "__new__", lambda cls, value: int.__new__(cls, value))
 
     yield controller
 
+    # Teardown: Safely shut down the server and thread
+    server.shutdown()
+    server.server_close()
+    server_thread.join(timeout=1.0)
     cli_parser._parsed_cli_args_cache = None
