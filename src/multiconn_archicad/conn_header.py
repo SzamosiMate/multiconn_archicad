@@ -1,7 +1,8 @@
+from __future__ import annotations
 from concurrent.futures import Future, CancelledError
 import threading
 from enum import Enum
-from typing import Self, Any, TypeGuard
+from typing import Self, Any, TypeGuard, TYPE_CHECKING
 from pprint import pformat
 import logging
 
@@ -18,6 +19,9 @@ from multiconn_archicad.errors import RequestError, ArchicadAPIError, HeaderUnas
 from multiconn_archicad.standard_connection import StandardConnection
 from multiconn_archicad.unified_api.api import UnifiedApi
 from multiconn_archicad.utilities.thread_utils import EXECUTOR
+
+if TYPE_CHECKING:
+    from multiconn_archicad.multi_conn import MultiConn
 
 log = logging.getLogger(__name__)
 
@@ -37,26 +41,28 @@ class Status(Enum):
 
 class ConnHeader:
     def __init__(self, port: Port, initialize: bool = True, ui_mode: bool = False):
+
         self._port: Port | None = port
         self._status: Status = Status.PENDING
         self._ui_mode: bool = ui_mode
         self._is_cancelled: bool = False
 
+        self._fetch_token: object | None = None
+        self.init_future: Future | None = None
+
         self._core: CoreCommands | None = CoreCommands(port)
         self._standard: StandardConnection | None = StandardConnection(port)
         self._unified: UnifiedApi | None = UnifiedApi(self.core)
 
-        self._product_info: ProductInfo | APIResponseError = PendingResponse()
-        self._archicad_id: ArchiCadID | APIResponseError = PendingResponse()
-        self._archicad_location: ArchicadLocation | APIResponseError = PendingResponse()
-
-        self._init_future: Future | None = None
-        self._fetch_token: object | None = None
+        self._product_info = PendingResponse()
+        self._archicad_id = PendingResponse()
+        self._archicad_location = PendingResponse()
         if initialize and port:
             self.refresh_metadata()
 
     @property
     def status(self) -> Status:
+        self._sync_if_needed()
         return self._status
 
     @property
@@ -82,18 +88,21 @@ class ConnHeader:
 
     @property
     def core(self) -> CoreCommands:
+        self._sync_if_needed()
         if self._core is None:
             raise HeaderUnassignedError("CoreCommands is not initialized.")
         return self._core
 
     @property
     def standard(self) -> StandardConnection:
+        self._sync_if_needed()
         if self._standard is None:
             raise HeaderUnassignedError("StandardConnection is not initialized.")
         return self._standard
 
     @property
     def unified(self) -> UnifiedApi:
+        self._sync_if_needed()
         if self._unified is None:
             raise HeaderUnassignedError("UnifiedApi is not initialized.")
         return self._unified
@@ -161,23 +170,22 @@ class ConnHeader:
         """Starts a new fetch, superseding any currently running fetch."""
         self._is_cancelled = False
         self._fetch_token = object()
-        self._init_future = EXECUTOR.submit(self._fetch_worker, self._fetch_token)
+        self.init_future = EXECUTOR.submit(self._fetch_worker, self._fetch_token)
 
-    def _fetch_worker(self,  my_token: object):
-        product_info = self.get_product_info(timeout=3.0)
-        archicad_id = self.get_archicad_id(timeout=3.0)
-        archicad_location = self.get_archicad_location(timeout=3.0)
+    def _fetch_worker(self,  my_token: object) -> None | tuple[
+        ProductInfo | APIResponseError,
+        ArchiCadID | APIResponseError,
+        ArchicadLocation | APIResponseError
+    ]:
+        product_info = self.get_product_info(timeout=5.0)
+        archicad_id = self.get_archicad_id(timeout=5.0)
+        archicad_location = self.get_archicad_location(timeout=5.0)
 
         if self._fetch_token is not my_token or self._is_cancelled:
-            return
+            return None
 
         self._assign_metadata(product_info, archicad_id, archicad_location)
-
-        if is_product_info_initialized(self._product_info):
-            self._status = Status.ACTIVE
-            self.connect()
-        else:
-            self._status = Status.FAILED
+        return product_info, archicad_id, archicad_location
 
     def _assign_metadata(self,
                         product_info: ProductInfo | APIResponseError,
@@ -197,8 +205,6 @@ class ConnHeader:
         if is_product_info_initialized(info):
             self.standard.connect(info)
             self._status = Status.ACTIVE
-        elif isinstance(info, PendingResponse):
-            self._status = Status.PENDING
         else:
             self._status = Status.FAILED
 
@@ -217,15 +223,33 @@ class ConnHeader:
     def cancel(self):
         self._is_cancelled = True
 
+    def sync_and_connect_from_master(self, master_future: Future) -> None:
+        """
+        Callback to be executed when a master header's fetch is complete.
+        It syncs the metadata from the master's result and then connects itself.
+        """
+        if master_future.cancelled() or master_future.exception():
+            log.warning(f"Master fetch for port {self.port} failed. Primary connection cannot be established.")
+            self._status = Status.FAILED
+            return
+
+        fetched_data = master_future.result()
+        if not fetched_data:
+            return
+
+        product_info, archicad_id, archicad_location = fetched_data
+        self._assign_metadata(product_info, archicad_id, archicad_location)
+        self.connect()
+
     def _sync_if_needed(self):
         """Safely blocks the thread if not in UI mode."""
-        if self._ui_mode or not self._init_future:
+        if self._ui_mode or not self.init_future:
             return
         if threading.current_thread().name.startswith("MultiConnWorker"):
             return
-        if not self._init_future.done():
+        if not self.init_future.done():
             try:
-                self._init_future.result()
+                self.init_future.result()
             except CancelledError:
                 pass
             except Exception as e:
@@ -237,6 +261,8 @@ class ConnHeader:
             return ProductInfo.from_api_response(result)
         except (RequestError, ArchicadAPIError) as e:
             return APIResponseError.from_exception(e)
+        except (KeyError, TypeError) as e:
+            return APIResponseError(code=None, message=f"Malformed API response: missing key {e}")
 
     def get_archicad_id(self, timeout: float) -> ArchiCadID | APIResponseError:
         try:
@@ -244,6 +270,8 @@ class ConnHeader:
             return ArchiCadID.from_api_response(result)
         except (RequestError, ArchicadAPIError) as e:
             return APIResponseError.from_exception(e)
+        except (KeyError, TypeError) as e:
+            return APIResponseError(code=None, message=f"Malformed API response: missing key {e}")
 
     def get_archicad_location(self, timeout: float) -> ArchicadLocation | APIResponseError:
         try:
@@ -251,6 +279,8 @@ class ConnHeader:
             return ArchicadLocation.from_api_response(result)
         except (RequestError, ArchicadAPIError) as e:
             return APIResponseError.from_exception(e)
+        except (KeyError, TypeError) as e:
+            return APIResponseError(code=None, message=f"Malformed API response: missing key {e}")
 
 
 class ValidatedHeader(ConnHeader):

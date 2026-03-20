@@ -41,11 +41,6 @@ class MultiConn:
         self.dialog_handler: DialogHandlerBase = dialog_handler
         self._ui_mode = ui_mode
 
-        # command namespaces of new_value
-        self.core: CoreCommands | type[CoreCommands] = CoreCommands
-        self.standard: StandardConnection | type[StandardConnection] = StandardConnection
-        self.unified: UnifiedApi | type[UnifiedApi] = UnifiedApi
-
         # load actions
         self.connect: Connect = Connect(self)
         self.disconnect: Disconnect = Disconnect(self)
@@ -91,6 +86,18 @@ class MultiConn:
     def primary(self, new_value: Port | ConnHeader) -> None:
         self._set_primary(new_value)
 
+    @property
+    def core(self) -> CoreCommands | type[CoreCommands]:
+        return self._primary.core if self._primary else CoreCommands
+
+    @property
+    def standard(self) -> StandardConnection | type[StandardConnection]:
+        return self._primary.standard if self._primary else StandardConnection
+
+    @property
+    def unified(self) -> UnifiedApi | type[UnifiedApi]:
+        return self._primary.unified if self._primary else UnifiedApi
+
     def __repr__(self) -> str:
         attrs = {name: getattr(self, name) for name in ["pending", "active", "failed", "primary", "dialog_handler"]}
         return f"{self.__class__.__name__}({attrs})"
@@ -134,41 +141,34 @@ class MultiConn:
     def _set_primary(self, new_value: None | Port | ConnHeader = None) -> None:
         if isinstance(new_value, Port):
             self._set_primary_from_port(new_value)
-        elif isinstance(new_value, ConnHeader):
+        elif isinstance(new_value, ConnHeader) and new_value.port in self.open_ports:
             self._set_primary_from_header(new_value)
+        elif self.open_ports:
+            self._set_primary_from_port(sorted(self.open_ports)[0])
         else:
-            self._set_primary_from_none()
+            self._primary = None
+            log.info("Primary connection cleared")
 
     def _set_primary_from_port(self, port: Port) -> None:
         if port in self.open_port_headers.keys():
-            self._set_primary_namespaces(port)
+            self._copy_header(self.open_port_headers[port])
+            log.info(f"Primary connection set to Archicad instance on port {port}")
         else:
             raise KeyError(f"Failed to set primary. Port {port} is closed.")
 
     def _set_primary_from_header(self, header: ConnHeader) -> None:
         if header in self.open_port_headers.values() and header.port:
-            self._set_primary_namespaces(header.port)
+            self._copy_header(self.open_port_headers[header.port])
+            log.info(f"Archicad instance matching the header found on port {header.port}. Setting primary.")
         else:
             raise KeyError(f"Failed to set primary. There is no open port with header: {header}")
 
-    def _set_primary_from_none(self) -> None:
-        for port in self._port_range:
-            if port in self.open_port_headers.keys():
-                self._set_primary_namespaces(port)
-                return
-        self._clear_primary_namespaces()
+    def _copy_header(self, master_header: ConnHeader) -> None:
+        primary_header = ConnHeader(port=master_header.port, ui_mode=self._ui_mode, initialize=False)
 
-    def _set_primary_namespaces(self, port: Port) -> None:
-        self._primary = ConnHeader(port, ui_mode=self._ui_mode)
-        log.info(f"Primary connection set to Archicad instance on port {port}")
-        self._primary.connect()
-        self.core = self._primary.core
-        self.standard = self._primary.standard
-        self.unified = self._primary.unified
+        primary_header.init_future = master_header.init_future
+        if master_header.init_future:
+            master_header.init_future.add_done_callback(primary_header.sync_and_connect_from_master)
 
-    def _clear_primary_namespaces(self) -> None:
-        self._primary = None
-        log.info("Primary connection cleared")
-        self.core = CoreCommands
-        self.standard = StandardConnection
-        self.unified = UnifiedApi
+        self._primary = primary_header
+
