@@ -45,7 +45,7 @@ def test_discover_single_instance(archicad_api):
     conn = MultiConn()
     assert len(conn.open_port_headers) == 1
     managed_header = conn.open_port_headers[archicad_api.server_port]
-    assert managed_header.status == Status.ACTIVE
+    assert managed_header.status == Status.PENDING
     assert conn.primary is not None
     assert conn.primary.status == Status.ACTIVE
 
