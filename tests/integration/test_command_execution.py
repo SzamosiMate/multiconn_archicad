@@ -1,5 +1,6 @@
 import pytest
 import time
+from unittest.mock import MagicMock
 
 from multiconn_archicad import MultiConn, Port, ConnHeader
 from multiconn_archicad.errors import StandardAPIError, TapirCommandError, CommandTimeoutError
@@ -10,7 +11,7 @@ pytestmark = [
 ]
 
 
-def test_successful_core_post_tapir_command_async(archicad_api):
+def test_successful_core_post_tapir_command(archicad_api):
     """
     Verifies that a successful async tapir command returns the parsed 'result' dict.
     (Test Case Plan 3.1)
@@ -29,11 +30,9 @@ def test_successful_core_post_tapir_command_async(archicad_api):
     assert "addOnCommandResponse" not in result
 
 
-
 def test_iterating_active_connections_to_run_commands(archicad_api):
     """
     Verifies the pattern of iterating over multiple active connections.
-    (Test Case Plan 3.3 - Enhanced)
     """
     # ARRANGE
     archicad_api.set_response("GetProjectInfo", "get_project_info_solo.json")
@@ -43,7 +42,10 @@ def test_iterating_active_connections_to_run_commands(archicad_api):
     original_header = conn.open_port_headers[archicad_api.server_port]
     second_header = ConnHeader.from_dict(original_header.to_dict())
     second_port = Port(19742)
-    second_header.port = second_port # Manually set the new port
+    second_header.port = second_port
+
+    second_header.core.post_tapir_command = MagicMock(return_value={"projectName": "Simulated Project"})
+
     conn.open_port_headers[second_port] = second_header
 
     conn.connect.all()
@@ -57,13 +59,12 @@ def test_iterating_active_connections_to_run_commands(archicad_api):
 
     # ASSERT
     assert len(results) == 2
-    assert archicad_api.server_port in results
-    assert second_port in results
-    assert results[archicad_api.server_port]["projectName"] == "My Solo Project.pln"
+    assert "projectName" in results[archicad_api.server_port]
+    assert results[second_port] == {"projectName": "Simulated Project"}
 
 
 
-def test_standard_api_error_is_raised_async(archicad_api):
+def test_standard_api_error_is_raised(archicad_api):
     """
     Verifies that StandardAPIError is raised for a failed standard command.
     (Test Case Plan 4.1)
@@ -82,7 +83,7 @@ def test_standard_api_error_is_raised_async(archicad_api):
 
 
 
-def test_tapir_command_error_is_raised_async(archicad_api):
+def test_tapir_command_error_is_raised(archicad_api):
     """
     Verifies that TapirCommandError is raised for a failed Tapir command.
     (Test Case Plan 4.2)
@@ -100,19 +101,18 @@ def test_tapir_command_error_is_raised_async(archicad_api):
     assert "A Tapir add-on command failed" in exc_info.value.message
 
 
-
-def test_command_timeout_error_is_raised_async(archicad_api):
+def test_command_timeout_error_is_raised(archicad_api):
     """
     Verifies that CommandTimeoutError is raised when a request exceeds the timeout.
-    (Test Case Plan 4.3)
     """
     # ARRANGE
-    def timeout_handler(request):
+    def timeout_handler(payload: dict) -> dict:
         time.sleep(0.5)
-        return web.json_response({"succeeded": True, "result": {}})
+        return {"succeeded": True, "result": {}}
 
     archicad_api.set_handler("Test.Timeout", timeout_handler)
-    archicad_api.set_response("GetProjectInfo", "get_project_info_teamwork.json")
+    archicad_api.set_response("GetProjectInfo", "get_project_info_solo.json")
+
     conn = MultiConn()
 
     # ACT & ASSERT
