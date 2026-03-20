@@ -166,9 +166,8 @@ class MultiConn:
     def _copy_header(self, master_header: ConnHeader) -> None:
         primary_header = ConnHeader(port=master_header.port, ui_mode=self._ui_mode, initialize=False)
 
-        primary_header.init_future = master_header.init_future
         if master_header.init_future:
-            master_header.init_future.add_done_callback(primary_header.sync_and_connect_from_master)
+            primary_header.sync_from_master_future(master_header.init_future)
 
         self._primary = primary_header
 

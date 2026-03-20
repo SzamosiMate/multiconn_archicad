@@ -2,7 +2,7 @@ from __future__ import annotations
 from concurrent.futures import Future, CancelledError
 import threading
 from enum import Enum
-from typing import Self, Any, TypeGuard, TYPE_CHECKING
+from typing import Self, Any, TypeGuard
 from pprint import pformat
 import logging
 
@@ -20,8 +20,6 @@ from multiconn_archicad.standard_connection import StandardConnection
 from multiconn_archicad.unified_api.api import UnifiedApi
 from multiconn_archicad.utilities.thread_utils import EXECUTOR
 
-if TYPE_CHECKING:
-    from multiconn_archicad.multi_conn import MultiConn
 
 log = logging.getLogger(__name__)
 
@@ -223,23 +221,28 @@ class ConnHeader:
     def cancel(self):
         self._is_cancelled = True
 
-    def sync_and_connect_from_master(self, master_future: Future) -> None:
-        """
-        Callback to be executed when a master header's fetch is complete.
-        It syncs the metadata from the master's result and then connects itself.
-        """
-        if master_future.cancelled() or master_future.exception():
-            log.warning(f"Master fetch for port {self.port} failed. Primary connection cannot be established.")
-            self._status = Status.FAILED
-            return
+    def sync_from_master_future(self, master_future: Future) -> None:
+        """Chains this header to a master future to synchronize metadata and connect once the master fetch completes."""
+        self.init_future = Future()
 
-        fetched_data = master_future.result()
-        if not fetched_data:
-            return
+        def _callback(completed_master: Future):
+            if self._is_cancelled:
+                self.init_future.cancel()
+                return
 
-        product_info, archicad_id, archicad_location = fetched_data
-        self._assign_metadata(product_info, archicad_id, archicad_location)
-        self.connect()
+            try:
+                res = completed_master.result()
+                if res:
+                    self._assign_metadata(*res)
+                    self.connect()
+                self.init_future.set_result(res)
+
+            except CancelledError:
+                self.init_future.cancel()
+            except Exception as e:
+                self.init_future.set_exception(e)
+
+        master_future.add_done_callback(_callback)
 
     def _sync_if_needed(self):
         """Safely blocks the thread if not in UI mode."""
