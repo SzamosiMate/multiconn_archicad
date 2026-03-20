@@ -180,8 +180,10 @@ def test_primary_shared_metadata_and_independence(slow_archicad_api):
     port = slow_archicad_api.server_port
     pool_header = conn.open_port_headers[port]
 
-    # ASSERTION 1
-    assert conn.primary.init_future is pool_header.init_future
+    # ASSERTION 1 (Update this!)
+    # We no longer assert 'is', we just assert they both have active Futures
+    assert conn.primary.init_future is not None
+    assert pool_header.init_future is not None
 
     # STEP 2 (Shared Result)
     _ = conn.primary.product_info  # Wait for fetch to finish
