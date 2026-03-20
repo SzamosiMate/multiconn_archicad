@@ -23,11 +23,10 @@ log = logging.getLogger(__name__)
 
 
 class CoreCommands:
-    def __init__(self, port: Port = Port(19723), host: str = "http://127.0.0.1"):
+    def __init__(self, port: Port | None = None, host: str = "http://127.0.0.1"):
         cli_args = get_cli_args_once()
-        self.port: Port = Port(cli_args.port) if cli_args.port else port
+        self.port: Port | None = port if port else (Port(cli_args.port)) if cli_args.port else None
         self.url: str = f"{cli_args.host if cli_args.host else host}:{self.port}"
-        self.client = httpx.Client(timeout=None)
 
     def __repr__(self) -> str:
         attrs = ", ".join(f"{k}={v!r}" for k, v in vars(self).items())
@@ -84,9 +83,10 @@ class CoreCommands:
     def _post_command(self, payload: dict, timeout: float | int | None) -> dict[str, Any]:
         command_name = payload.get("command")
         try:
-            response = self.client.post(self.url, json=payload, timeout=timeout)
-            response.raise_for_status()
-            result = response.json()
+            with httpx.Client(timeout=timeout) as client:
+                response = client.post(self.url, json=payload, timeout=timeout)
+                response.raise_for_status()
+                result = response.json()
         except httpx.TimeoutException as e:
             message = f"Command '{command_name}' to {self.url} timed out after {timeout} seconds."
             log.warning(message)
