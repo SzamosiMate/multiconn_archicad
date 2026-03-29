@@ -12,7 +12,7 @@ JsonType = Union[str, int, float, bool, None, list["JsonType"], dict[str, "JsonT
 
 class Port(int):
     def __new__(cls, value):
-        if not (19723 <= value <= 19744):
+        if not (19723 <= value < 19744):
             raise ValueError(f"Port value must be between 19723 and 19744, got {value}.")
         return int.__new__(cls, value)
 
