@@ -15,7 +15,10 @@ def test_no_running_archicad_and_no_port_arg(monkeypatch):
     Verifies that with no running AC and no port argument, primary is None.
     """
     # ARRANGE
-    cli_parser._parsed_cli_args_cache = None
+    class EmptyArgs:
+        host = "http://127.0.0.1"
+        port = None
+    monkeypatch.setattr("multiconn_archicad.utilities.cli_parser.get_cli_args_once", lambda: EmptyArgs())
     monkeypatch.setattr("multiconn_archicad.multi_conn.MultiConn._port_range", [])
 
     # ACT
@@ -31,7 +34,10 @@ def test_init_with_invalid_port_raises_error(monkeypatch):
     Verifies that providing a port with no running AC raises an error immediately.
     """
     # ARRANGE
-    cli_parser._parsed_cli_args_cache = None
+    class EmptyArgs:
+        host = "http://127.0.0.1"
+        port = None
+    monkeypatch.setattr("multiconn_archicad.utilities.cli_parser.get_cli_args_once", lambda: EmptyArgs())
     monkeypatch.setattr("multiconn_archicad.multi_conn.MultiConn._port_range", [])
 
     # ACT & ASSERT

@@ -86,7 +86,7 @@ def test_ui_mode_returns_pending_immediately(slow_archicad_api):
     assert status == Status.PENDING
 
     # ASSERT 3 (Resolution)
-    time.sleep(1.0)  # Wait for 3 * 0.2s background fetches to complete
+    time.sleep(0.7)  # Wait for 3 * 0.2s background fetches to complete
 
     resolved_product_info = conn.primary.product_info
     resolved_status = conn.primary.status
@@ -207,3 +207,58 @@ def test_primary_shared_metadata_and_independence(slow_archicad_api):
     _ = conn.primary.product_info  # Block and wait for the new fetch to finish
     assert conn.primary.product_info.version == 28
     assert pool_header.product_info.version == 27
+
+
+def test_stress_multiple_connections_performance(slow_archicad_api, monkeypatch):
+    """
+    STRESS TEST: Simulates a fully saturated environment (all 21 Archicad ports open).
+    Proves that the ThreadPool processes them in parallel and does not degrade linearly.
+    """
+    from multiconn_archicad.basic_types import Port
+    import httpx
+
+    # 1. Restore the full 21-port range
+    full_range =[Port(p) for p in range(19723, 19744)]
+    monkeypatch.setattr("multiconn_archicad.multi_conn.MultiConn._port_range", full_range)
+
+    # 2. Mock the TCP knock so MultiConn thinks all 21 ports are actively listening
+    monkeypatch.setattr("multiconn_archicad.multi_conn.is_port_listening", lambda url, port: True)
+
+    # 3. ROUTING FIX: Silently redirect all httpx requests to the single mock server!
+    mock_url = f"http://127.0.0.1:{slow_archicad_api.server_port}"
+    original_post = httpx.Client.post
+
+    def routed_post(self_client, url, *args, **kwargs):
+        # Ignore the port CoreCommands thinks it's hitting, and force the mock port
+        return original_post(self_client, mock_url, *args, **kwargs)
+
+    monkeypatch.setattr(httpx.Client, "post", routed_post)
+
+    # ACT 1: Initialization
+    start_time = time.perf_counter()
+    conn = MultiConn(ui_mode=False)
+    init_duration = time.perf_counter() - start_time
+
+    # ASSERT 1: The TCP knock and thread spawning must remain lightning fast (< 0.2s)
+    assert init_duration < 0.2, f"Init bottlenecked with 21 ports! Took {init_duration:.2f}s"
+    assert len(conn.open_port_headers) == 21  # 21 ports in range
+
+    # ACT 2: Data Fetching
+    fetch_start = time.perf_counter()
+
+    # Trigger the sync tollbooth on the primary
+    _ = conn.primary.product_info
+
+    # Trigger the sync tollbooth on the last port to ensure everything finished
+    _ = conn.open_port_headers[Port(19743)].product_info
+
+    fetch_duration = time.perf_counter() - fetch_start
+
+    # ASSERT 2: The Parallelism Proof
+    # 21 parallel batches of 3 sequential requests (0.2s * 3 = 0.6s total expected)
+    # Allowed threshold is < 1.5s to account for OS thread scheduling overhead
+    assert 0.6 <= fetch_duration < 1.5, f"Parallel fetch failed or bottlenecked! Took {fetch_duration:.2f}s"
+
+    # Ensure they resolved correctly
+    assert conn.primary.status == Status.ACTIVE
+    assert conn.open_port_headers[Port(19743)].status == Status.PENDING

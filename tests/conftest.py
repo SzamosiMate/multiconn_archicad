@@ -1,6 +1,8 @@
 import json
+import sys
 import threading
-from http.server import HTTPServer, BaseHTTPRequestHandler
+from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
+import concurrent.futures
 from pathlib import Path
 from typing import Dict, Any, Callable
 
@@ -13,6 +15,20 @@ from multiconn_archicad.basic_types import Port
 
 FIXTURES_DIR = Path(__file__).parent / "fixtures"
 
+class QuietThreadingHTTPServer(ThreadingHTTPServer):
+    """A custom server that suppresses ONLY expected socket teardown errors."""
+
+    def handle_error(self, request, client_address):
+        # socketserver leaves the exception in sys.exc_info()
+        exc_type, exc_value, exc_traceback = sys.exc_info()
+        # These are the exact errors raised when a socket is killed during teardown
+        expected_teardown_errors = (ConnectionAbortedError, ConnectionResetError, BrokenPipeError)
+
+        if exc_type and issubclass(exc_type, expected_teardown_errors):
+            # It's an expected shutdown interruption. Suppress it cleanly.
+            return
+
+        super().handle_error(request, client_address)
 
 class ServerController:
     """A controller to manage the state of the fake Archicad server for tests."""
@@ -95,6 +111,27 @@ def create_handler_class(controller: ServerController):
 
 
 @pytest.fixture
+def isolate_executor(monkeypatch):
+    """
+    Gives every test a completely blank, isolated ThreadPool.
+    Prevents zombie threads from previous tests from exhausting the worker pool.
+    """
+    executor = concurrent.futures.ThreadPoolExecutor(max_workers=25, thread_name_prefix="MultiConnWorker")
+    monkeypatch.setattr("multiconn_archicad.multi_conn.EXECUTOR", executor)
+    monkeypatch.setattr("multiconn_archicad.conn_header.EXECUTOR", executor)
+    yield
+    executor.shutdown(wait=False, cancel_futures=True)
+
+
+def pytest_collection_modifyitems(config, items):
+    """ Dynamically apply the 'isolate_executor' fixture to all tests marked with 'integration'. """
+    for item in items:
+        if item.get_closest_marker("integration"):
+            if "isolate_executor" not in item.fixturenames:
+                item.fixturenames.append("isolate_executor")
+
+
+@pytest.fixture
 def archicad_api(monkeypatch):
     """
     Starts the synchronous mock server on a background thread within the Archicad port range,
@@ -102,15 +139,14 @@ def archicad_api(monkeypatch):
     """
     controller = ServerController()
 
-    valid_ports = range(19723, 19745)  # 19723 to 19744
+    valid_ports = range(19723, 19745)
     server = None
     assigned_port = None
 
-    # Try to bind to the first available port in the Archicad range
     HandlerClass = create_handler_class(controller)
     for port in valid_ports:
         try:
-            server = HTTPServer((controller.server_host, port), HandlerClass)
+            server = QuietThreadingHTTPServer((controller.server_host, port), HandlerClass)
             assigned_port = port
             break
         except OSError:
@@ -130,10 +166,9 @@ def archicad_api(monkeypatch):
         host = f"http://{controller.server_host}"
         port = controller.server_port
 
-    cli_parser._parsed_cli_args_cache = MockArgs()
-
     monkeypatch.setattr(multi_conn.MultiConn, "_port_range", [Port(assigned_port)])
     monkeypatch.setattr(Port, "__new__", lambda cls, value: int.__new__(cls, value))
+    monkeypatch.setattr("multiconn_archicad.utilities.cli_parser.get_cli_args_once", lambda: MockArgs())
 
     yield controller
 
