@@ -3,6 +3,7 @@ import json
 from typing import Any, TYPE_CHECKING
 import httpx
 import logging
+import asyncio
 
 from multiconn_archicad.errors import (
     CommandTimeoutError,
@@ -80,6 +81,18 @@ class CoreCommands:
             )
         return response
 
+    async def post_command_async(
+        self, command: AddonCommandType, parameters: dict | None = None, timeout: float | None = None
+    ) -> dict[str, Any]:
+        """Asynchronous wrapper for post_command."""
+        return await asyncio.to_thread(self.post_command, command, parameters, timeout)
+
+    async def post_tapir_command_async(
+        self, command: TapirCommandType, parameters: dict | None = None, timeout: float | None = None
+    ) -> dict[str, Any]:
+        """Asynchronous wrapper for post_tapir_command."""
+        return await asyncio.to_thread(self.post_tapir_command, command, parameters, timeout)
+
     def _post_command(self, payload: dict, timeout: float | int | None) -> dict[str, Any]:
         command_name = payload.get("command")
         try:
@@ -89,7 +102,7 @@ class CoreCommands:
                 result = response.json()
         except httpx.TimeoutException as e:
             message = f"Command '{command_name}' to {self.url} timed out after {timeout} seconds."
-            log.warning(message)
+            log.info(message)
             raise CommandTimeoutError(message) from e
         except httpx.RequestError as e:
             message = f"HTTP error for command '{command_name}' to {self.url}: {e}"
