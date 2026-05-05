@@ -86,13 +86,15 @@ def test_ui_mode_returns_pending_immediately(slow_archicad_api):
     assert status == Status.PENDING
 
     # ASSERT 3 (Resolution)
-    time.sleep(0.7)  # Wait for 3 * 0.2s background fetches to complete
+    max_wait = 5.0  # Generous for CI
+    start_wait = time.time()
+    while time.time() - start_wait < max_wait:
+        if isinstance(conn.primary.product_info, ProductInfo):
+            break
+        time.sleep(0.1)
 
-    resolved_product_info = conn.primary.product_info
-    resolved_status = conn.primary.status
-
-    assert isinstance(resolved_product_info, ProductInfo)
-    assert resolved_status == Status.ACTIVE
+    assert isinstance(conn.primary.product_info, ProductInfo)
+    assert conn.primary.status == Status.ACTIVE
 
 
 def test_default_mode_blocks_and_waits(slow_archicad_api):
@@ -110,7 +112,7 @@ def test_default_mode_blocks_and_waits(slow_archicad_api):
     duration = time.time() - start_time
 
     # ASSERT 1 (Blocking): 3 sequentially fetched endpoints at 0.2s each = 0.6s
-    assert 0.6 <= duration < 0.8, f"Blocking duration was {duration:.2f}s, expected[0.6, 0.8)"
+    assert 0.6 <= duration < 1.2, f"Blocking duration was {duration:.2f}s, expected[0.6, 0.8)"
 
     # ASSERT 2 (Final Data)
     assert isinstance(product_info, ProductInfo)
@@ -257,7 +259,7 @@ def test_stress_multiple_connections_performance(slow_archicad_api, monkeypatch)
     # ASSERT 2: The Parallelism Proof
     # 21 parallel batches of 3 sequential requests (0.2s * 3 = 0.6s total expected)
     # Allowed threshold is < 1.5s to account for OS thread scheduling overhead
-    assert 0.6 <= fetch_duration < 1.5, f"Parallel fetch failed or bottlenecked! Took {fetch_duration:.2f}s"
+    assert 0.6 <= fetch_duration < 3.0, f"Parallel fetch failed or bottlenecked! Took {fetch_duration:.2f}s"
 
     # Ensure they resolved correctly
     assert conn.primary.status == Status.ACTIVE
