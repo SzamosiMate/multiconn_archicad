@@ -22,7 +22,6 @@ skip_on_github = pytest.mark.skipif(
 )
 
 
-@skip_on_github
 @pytest.fixture
 def slow_archicad_api(archicad_api):
     """
