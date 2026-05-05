@@ -2,25 +2,21 @@
 
 ## 
 
-**MultiConn Archicad** is a Python-based connection object for Archicad's JSON API and its Python wrapper. It is designed to manage multiple open instances of Archicad simultaneously, making it easier to execute commands across multiple instances.
+**MultiConn Archicad** is a high-performance connection manager for Archicad's JSON API. It is designed to handle complex workflows involving multiple simultaneous Archicad instances with a focus on stability, type-safety, and non-blocking execution.
 
 [![Latest Release](https://img.shields.io/github/v/release/SzamosiMate/multiconn_archicad)](https://github.com/SzamosiMate/multiconn_archicad/releases/latest) ![License](https://img.shields.io/github/license/SzamosiMate/multiconn_archicad) 
 ![Issues](https://img.shields.io/github/issues/SzamosiMate/multiconn_archicad) 
-![Forks](https://img.shields.io/github/forks/SzamosiMate/multiconn_archicad) 
-![Stars](https://img.shields.io/github/stars/SzamosiMate/multiconn_archicad)
 
 ## Features
 
-- **Unified High-Level API**: A modern, type-safe, and pythonic interface for both Official and Tapir APIs.
-- **Multi-connection Support**: Connect to one, multiple, or all open instances of Archicad.
-- **Seamless Integration**: Utilizes Archicad's official Python package.
-- **Tapir Add-On Integration**: Run commands using the Tapir Archicad Add-On framework.
-- **Efficient I/O Operations**: Handles connection management using concurrent or asynchronous code.
-- **Project Management**: Find and open Archicad projects programmatically.
+- **Unified High-Level API**: Modern, Pydantic-validated interface for both Official and Tapir APIs.
+- **Multi-instance Management**: Seamlessly execute commands across one, several, or all open Archicad projects.
+- **Project Automation**: Programmatically find, open, and switch between solo and teamwork projects.
+- **Thread-Safe Architecture**: Built on a synchronous threading model using `httpx` for maximum stability and performance.
+- **Lazy Metadata Evaluation**: Initializes instantly by offloading heavy API discovery (Project info, versioning) to background threads.
+- **UI Mode Support**: Prevent GUI freezes in plugins by using non-blocking placeholders.
 
 ## Installation
-
-You can install the latest version of the package from the following link using `pip`:
 
 ```bash
 pip install multiconn_archicad
@@ -38,9 +34,34 @@ This package **critically depends** on the [Tapir Archicad Add-On](https://githu
 
 **Optional dependencies**
 ```bash
-# to enable dialog handleing on windows
+# To enable dialog handling on Windows
 pip install multiconn_archicad[dialog-handlers]
 ```
+
+## High-Performance Threaded Architecture
+
+Version 0.6.0 introduces a significant architectural shift from `asyncio` to **Synchronous Threading**. This change provides better stability when interacting with Archicad’s C++ host environment while maintaining a responsive API.
+
+### 1. Instant Initialization (Lazy Loading)
+When you instantiate `MultiConn()`, it returns control to your script in milliseconds. It performs a "TCP knock" to find open ports and spawns background threads to fetch project metadata (like `projectName` and `version`).
+
+### 2. Sync-on-Demand
+In standard scripts, the library uses "Lazy Evaluation." If you access a property (e.g., `conn.primary.product_info`) before the background thread has finished fetching it, the library will **automatically pause** your main thread for a fraction of a second until the data is ready.
+
+### 3. UI Mode (Non-Blocking)
+If you are developing a GUI (e.g., using PyQt, Tkinter, or Blender), you can enable `ui_mode=True`. This prevents the main thread from ever freezing. 
+
+```python
+conn = MultiConn(ui_mode=True)
+
+# In UI mode, this returns instantly without waiting for the network.
+# If data isn't ready, it returns a `PendingResponse` placeholder.
+info = conn.primary.product_info
+if isinstance(info, PendingResponse):
+    print("Still fetching data...")
+```
+
+---
 
 ## Usage
 
@@ -223,11 +244,16 @@ elements = {
 
 ### Connection Management
 
-Actions allow you to manage the state of the connection object.
+MultiConn tracks every open Archicad instance. You can access these via specific filters:
 
-#### Example: Connection Management
-```python 
+- **`active`**: Successfully connected and identified instances.
+- **`pending`**: Discovered instances currently fetching metadata or waiting for `connect()`.
+- **`failed`**: Instances that are unresponsive or returned API errors.
+
+#### Example: Parallel Execution
+```python
 from multiconn_archicad import MultiConn, Port
+
 
 conn = MultiConn()
 
