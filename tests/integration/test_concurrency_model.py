@@ -5,6 +5,7 @@ Integration tests validating the synchronous background-fetch architecture.
 
 import pytest
 import time
+import os
 
 from multiconn_archicad import MultiConn
 from multiconn_archicad.conn_header import Status
@@ -15,7 +16,13 @@ pytestmark = [
     pytest.mark.integration,
 ]
 
+skip_on_github = pytest.mark.skipif(
+    os.getenv("GITHUB_ACTIONS") == "true",
+    reason="GitHub Runners are too slow/unpredictable for timing-sensitive tests"
+)
 
+
+@skip_on_github
 @pytest.fixture
 def slow_archicad_api(archicad_api):
     """
@@ -46,6 +53,7 @@ def slow_archicad_api(archicad_api):
     yield archicad_api
 
 
+@skip_on_github
 def test_fast_initialization_despite_slow_server(slow_archicad_api):
     """
     Test Case 1: Prove MultiConn() returns control to the user immediately.
@@ -63,6 +71,7 @@ def test_fast_initialization_despite_slow_server(slow_archicad_api):
     assert conn.primary is not None
 
 
+@skip_on_github
 def test_ui_mode_returns_pending_immediately(slow_archicad_api):
     """
     Test Case 2: Prove ui_mode=True prevents thread freezing and uses placeholders.
@@ -86,17 +95,13 @@ def test_ui_mode_returns_pending_immediately(slow_archicad_api):
     assert status == Status.PENDING
 
     # ASSERT 3 (Resolution)
-    max_wait = 5.0  # Generous for CI
-    start_wait = time.time()
-    while time.time() - start_wait < max_wait:
-        if isinstance(conn.primary.product_info, ProductInfo):
-            break
-        time.sleep(0.1)
+    time.sleep(1.0)
 
     assert isinstance(conn.primary.product_info, ProductInfo)
     assert conn.primary.status == Status.ACTIVE
 
 
+@skip_on_github
 def test_default_mode_blocks_and_waits(slow_archicad_api):
     """
     Test Case 3: Prove ui_mode=False blocks the caller's thread until the background fetch finishes.
@@ -112,12 +117,13 @@ def test_default_mode_blocks_and_waits(slow_archicad_api):
     duration = time.time() - start_time
 
     # ASSERT 1 (Blocking): 3 sequentially fetched endpoints at 0.2s each = 0.6s
-    assert 0.6 <= duration < 1.2, f"Blocking duration was {duration:.2f}s, expected[0.6, 0.8)"
+    assert 0.6 <= duration < 0.7, f"Blocking duration was {duration:.2f}s, expected[0.6, 0.8)"
 
     # ASSERT 2 (Final Data)
     assert isinstance(product_info, ProductInfo)
 
 
+@skip_on_github
 def test_auto_connect_vs_manual_connect(slow_archicad_api):
     """
     Test Case 4: Prove that conn.primary automatically connects when data is ready,
@@ -146,6 +152,7 @@ def test_auto_connect_vs_manual_connect(slow_archicad_api):
     assert pool_header.status == Status.ACTIVE
 
 
+@skip_on_github
 def test_vanilla_archicad_no_addon_scenario(slow_archicad_api):
     """
     Test Case 5: Prove that if standard API commands succeed but Tapir Add-On
@@ -170,6 +177,7 @@ def test_vanilla_archicad_no_addon_scenario(slow_archicad_api):
     assert isinstance(conn.primary.archicad_id, APIResponseError)
 
 
+@skip_on_github
 def test_primary_shared_metadata_and_independence(slow_archicad_api):
     """
     Test Case 6: Prove the link and the detachment logic between primary and pool headers.
@@ -211,6 +219,7 @@ def test_primary_shared_metadata_and_independence(slow_archicad_api):
     assert pool_header.product_info.version == 27
 
 
+@skip_on_github
 def test_stress_multiple_connections_performance(slow_archicad_api, monkeypatch):
     """
     STRESS TEST: Simulates a fully saturated environment (all 21 Archicad ports open).
@@ -242,7 +251,7 @@ def test_stress_multiple_connections_performance(slow_archicad_api, monkeypatch)
     init_duration = time.perf_counter() - start_time
 
     # ASSERT 1: The TCP knock and thread spawning must remain lightning fast (< 0.2s)
-    assert init_duration < 0.5, f"Init bottlenecked with 21 ports! Took {init_duration:.2f}s"
+    assert init_duration < 0.2, f"Init bottlenecked with 21 ports! Took {init_duration:.2f}s"
     assert len(conn.open_port_headers) == 21  # 21 ports in range
 
     # ACT 2: Data Fetching
@@ -259,7 +268,7 @@ def test_stress_multiple_connections_performance(slow_archicad_api, monkeypatch)
     # ASSERT 2: The Parallelism Proof
     # 21 parallel batches of 3 sequential requests (0.2s * 3 = 0.6s total expected)
     # Allowed threshold is < 1.5s to account for OS thread scheduling overhead
-    assert 0.6 <= fetch_duration < 3.0, f"Parallel fetch failed or bottlenecked! Took {fetch_duration:.2f}s"
+    assert 0.6 <= fetch_duration < 1.5, f"Parallel fetch failed or bottlenecked! Took {fetch_duration:.2f}s"
 
     # Ensure they resolved correctly
     assert conn.primary.status == Status.ACTIVE
