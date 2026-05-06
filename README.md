@@ -5,7 +5,7 @@
 **MultiConn Archicad** is a high-performance connection manager for Archicad's JSON API. It is designed to handle complex workflows involving multiple simultaneous Archicad instances with a focus on stability, type-safety, and non-blocking execution.
 
 [![Latest Release](https://img.shields.io/github/v/release/SzamosiMate/multiconn_archicad)](https://github.com/SzamosiMate/multiconn_archicad/releases/latest)
-![CI Status](https://github.com/SzamosiMate/multiconn_archicad/actions/workflows/test.yml/badge.svg)
+[![CI Status](https://github.com/SzamosiMate/multiconn_archicad/actions/workflows/test.yml/badge.svg)](https://github.com/SzamosiMate/multiconn_archicad/actions/workflows/test.yml)
 [![codecov](https://codecov.io/gh/SzamosiMate/multiconn_archicad/graph/badge.svg?token=I7EHLXFKVW)](https://codecov.io/gh/SzamosiMate/multiconn_archicad)
 ![License](https://img.shields.io/github/license/SzamosiMate/multiconn_archicad) 
 
