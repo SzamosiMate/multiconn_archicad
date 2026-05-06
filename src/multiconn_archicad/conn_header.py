@@ -52,9 +52,9 @@ class ConnHeader:
         self._standard: StandardConnection | None = StandardConnection(port)
         self._unified: UnifiedApi | None = UnifiedApi(self.core)
 
-        self._product_info = PendingResponse()
-        self._archicad_id = PendingResponse()
-        self._archicad_location = PendingResponse()
+        self._product_info: ProductInfo | APIResponseError = PendingResponse()
+        self._archicad_id: ArchiCadID | APIResponseError  = PendingResponse()
+        self._archicad_location: ArchicadLocation | APIResponseError  = PendingResponse()
         if initialize and port:
             self.refresh_metadata()
 
@@ -226,6 +226,8 @@ class ConnHeader:
         self.init_future = Future()
 
         def _callback(completed_master: Future):
+            if self.init_future is None:
+                return
             if self._is_cancelled:
                 self.init_future.cancel()
                 return

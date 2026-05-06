@@ -164,6 +164,7 @@ class MultiConn:
             raise KeyError(f"Failed to set primary. There is no open port with header: {header}")
 
     def _copy_header(self, master_header: ConnHeader) -> None:
+        assert master_header.port, "Cannot copy unassigned header"
         primary_header = ConnHeader(port=master_header.port, ui_mode=self._ui_mode, initialize=False)
 
         if master_header.init_future:
