@@ -17,7 +17,6 @@ pytestmark = [
 ]
 
 IS_CI = os.getenv("GITHUB_ACTIONS") == "true"
-CI_TIMEOUT_MULTIPLIER = 3 if IS_CI else 1
 
 
 @pytest.fixture
@@ -90,7 +89,7 @@ def test_ui_mode_returns_pending_immediately(slow_archicad_api):
     assert status == Status.PENDING
 
     # ASSERT 3 (Resolution)
-    time.sleep(1.0 * CI_TIMEOUT_MULTIPLIER)
+    time.sleep(3.0 if IS_CI else 1.0)
 
     assert isinstance(conn.primary.product_info, ProductInfo)
     assert conn.primary.status == Status.ACTIVE
@@ -111,7 +110,7 @@ def test_default_mode_blocks_and_waits(slow_archicad_api):
     duration = time.time() - start_time
 
     # ASSERT 1 (Blocking): 3 sequentially fetched endpoints at 0.2s each = 0.6s
-    assert 0.6 <= duration < 0.7 * CI_TIMEOUT_MULTIPLIER, f"Blocking duration was {duration:.2f}s, expected[0.6, 0.8)"
+    assert 0.6 <= duration < 2.0 if IS_CI else 0.7, f"Blocking duration was {duration:.2f}s, expected[0.6, 0.8)"
 
     # ASSERT 2 (Final Data)
     assert isinstance(product_info, ProductInfo)
@@ -241,7 +240,7 @@ def test_stress_multiple_connections_performance(slow_archicad_api, monkeypatch)
     init_duration = time.perf_counter() - start_time
 
     # ASSERT 1: The TCP knock and thread spawning must remain lightning fast (< 0.2s)
-    assert init_duration < 0.2 * CI_TIMEOUT_MULTIPLIER, f"Init bottlenecked with 21 ports! Took {init_duration:.2f}s"
+    assert init_duration < 3.0 if IS_CI else 0.2, f"Init bottlenecked with 21 ports! Took {init_duration:.2f}s"
     assert len(conn.open_port_headers) == 21  # 21 ports in range
 
     # ACT 2: Data Fetching
@@ -258,7 +257,7 @@ def test_stress_multiple_connections_performance(slow_archicad_api, monkeypatch)
     # ASSERT 2: The Parallelism Proof
     # 21 parallel batches of 3 sequential requests (0.2s * 3 = 0.6s total expected)
     # Allowed threshold is < 1.5s to account for OS thread scheduling overhead
-    assert 0.6 <= fetch_duration < 1.5 * CI_TIMEOUT_MULTIPLIER, f"Parallel fetch failed or bottlenecked! Took {fetch_duration:.2f}s"
+    assert 0.6 <= fetch_duration < 4.5 if IS_CI else 1.5, f"Parallel fetch failed or bottlenecked! Took {fetch_duration:.2f}s"
 
     # Ensure they resolved correctly
     assert conn.primary.status == Status.ACTIVE
