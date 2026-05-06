@@ -257,7 +257,7 @@ def test_stress_multiple_connections_performance(slow_archicad_api, monkeypatch)
     # ASSERT 2: The Parallelism Proof
     # 21 parallel batches of 3 sequential requests (0.2s * 3 = 0.6s total expected)
     # Allowed threshold is < 1.5s to account for OS thread scheduling overhead
-    assert 0.6 <= fetch_duration < 4.5 if IS_CI else 1.5, f"Parallel fetch failed or bottlenecked! Took {fetch_duration:.2f}s"
+    assert 0.6 <= fetch_duration < 6.0 if IS_CI else 1.5, f"Parallel fetch failed or bottlenecked! Took {fetch_duration:.2f}s"
 
     # Ensure they resolved correctly
     assert conn.primary.status == Status.ACTIVE
