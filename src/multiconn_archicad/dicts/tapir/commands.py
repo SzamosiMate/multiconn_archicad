@@ -6,10 +6,16 @@ from typing_extensions import NotRequired
 
 
 from .types import (
+    Angle,
+    Area,
+    AssociativeDimensionData,
+    AssociativeDimensionOnSectionData,
     AttributeHeadersOrError,
     AttributeIds,
     AttributePropertyValues,
     AttributeType,
+    BeamData,
+    BeamWithDetails,
     BoundingBoxes3D,
     BuildingMaterialDataArrayItem,
     BuildingMaterialPhysicalPropertiesList,
@@ -17,20 +23,27 @@ from .types import (
     Collision,
     ColorRGB,
     ColumnData,
+    ColumnWithDetails,
     Comment,
     CompositeDataArrayItem,
     Conflict,
     ConnectedElementsOrError,
     CutPlane,
+    DatabaseId,
     Databases,
     DesignOption,
     DesignOptionCombination,
     DesignOptionSet,
+    DetailData,
     DetailsOfElement,
     DocumentRevision,
+    DoorData,
+    DoorWithDetails,
+    DrawingData,
     ElementClassifications,
     ElementClassificationsOrErrors,
     ElementFilter,
+    ElementGroupParameters,
     ElementId,
     ElementPropertyValues,
     ElementType,
@@ -45,6 +58,7 @@ from .types import (
     FavoritesFromElement,
     FavoritesOrError,
     GDLParameterList,
+    GroupIdOrError,
     Hotlinks,
     Issue,
     IssueCommentStatus,
@@ -55,13 +69,18 @@ from .types import (
     LayerCombinationAttributeOrError,
     LayerCombinationDataArrayItem,
     LayerDataArrayItem,
+    LayoutData,
+    Length,
     Library,
     LibraryFileAdditions,
     MeshData,
     ModelViewOption,
+    MorphData,
+    MorphWithDetails,
     NavigatorItemIds,
     NavigatorItemIdsWithViewSetting,
     ObjectData,
+    OpeningData,
     PolylineData,
     ProjectInfoFields,
     ProjectLocation,
@@ -76,16 +95,27 @@ from .types import (
     RevisionChange,
     RevisionChangesOfEntities,
     RevisionIssue,
+    RoofData,
+    RoofWithDetails,
     Settings,
     SlabData,
+    SlabWithDetails,
     StoriesParameters,
     StoriesSettings,
     Subelement,
+    SubsetData,
     SurfaceDataArrayItem,
     SurveyPoint,
     ViewSettingsOrError,
     ViewTransformationsOrError,
+    Volume,
+    WallData,
+    WallThicknessDimensionData,
+    WallWithDetails,
+    WindowData,
     WindowType,
+    WindowWithDetails,
+    WorksheetData,
     ZoneBoundariesOrError,
     ZoneData,
 )
@@ -108,6 +138,7 @@ class GetCurrentWindowTypeResult(TypedDict):
 
 class ChangeWindowParameters(TypedDict):
     windowType: WindowType
+    databaseId: NotRequired[DatabaseId]
 
 
 ChangeWindowResult = ExecutionResult
@@ -148,6 +179,19 @@ class OpenProjectParameters(TypedDict):
 OpenProjectResult = ExecutionResult
 
 
+CloseProjectResult = ExecutionResult
+
+
+SaveProjectResult = ExecutionResult
+
+
+class GetCalculationUnitsResult(TypedDict):
+    length: Length
+    area: Area
+    volume: Volume
+    angle: Angle
+
+
 SetGeoLocationResult = ExecutionResult
 
 
@@ -158,6 +202,16 @@ class IFCFileOperationParameters(TypedDict):
 
 
 IFCFileOperationResult = ExecutionResult
+
+
+class PrintViewParameters(TypedDict):
+    grid: NotRequired[bool]
+    fixText: NotRequired[bool]
+    scale: NotRequired[int]
+    printArea: NotRequired[Literal["currentView", "entireDrawing", "marquee"]]
+
+
+PrintViewResult = ExecutionResult
 
 
 class ChangeSelectionOfElementsResult(TypedDict):
@@ -195,6 +249,38 @@ class SetClassificationsOfElementsResult(TypedDict):
     executionResults: ExecutionResults
 
 
+class ModifyWallsResult(TypedDict):
+    executionResults: ExecutionResults
+
+
+class ModifyBeamsResult(TypedDict):
+    executionResults: ExecutionResults
+
+
+class ModifySlabsResult(TypedDict):
+    executionResults: ExecutionResults
+
+
+class ModifyColumnsResult(TypedDict):
+    executionResults: ExecutionResults
+
+
+class ModifyWindowsResult(TypedDict):
+    executionResults: ExecutionResults
+
+
+class ModifyDoorsResult(TypedDict):
+    executionResults: ExecutionResults
+
+
+class ModifyMorphsResult(TypedDict):
+    executionResults: ExecutionResults
+
+
+class ModifyRoofsResult(TypedDict):
+    executionResults: ExecutionResults
+
+
 class GetElementPreviewImageResult(TypedDict):
     previewImage: str
 
@@ -220,6 +306,10 @@ class RemoveElementNotificationClientParameters(TypedDict):
 
 
 RemoveElementNotificationClientResult = ExecutionResult
+
+
+class CreateGroupsResult(TypedDict):
+    groupGuids: List[GroupIdOrError]
 
 
 class GetFavoritesByTypeParameters(TypedDict):
@@ -325,32 +415,19 @@ TeamworkReceiveResult = ExecutionResult
 ReleaseElementsResult = ExecutionResult
 
 
-class PublishPublisherSetParameters(TypedDict):
-    publisherSetName: str
-    outputPath: NotRequired[str]
-
-
 UpdateDrawingsResult = ExecutionResult
+
+
+class CreateSubsetsResult(TypedDict):
+    executionResults: ExecutionResults
 
 
 class GetModelViewOptionsResult(TypedDict):
     modelViewOptions: List[ModelViewOption]
 
 
-class GetViewSettingsResult(TypedDict):
-    viewSettings: List[ViewSettingsOrError]
-
-
-class SetViewSettingsParameters(TypedDict):
-    navigatorItemIdsWithViewSettings: List[NavigatorItemIdsWithViewSetting]
-
-
 class SetViewSettingsResult(TypedDict):
     executionResults: ExecutionResults
-
-
-class GetView2DTransformationsResult(TypedDict):
-    transformations: List[ViewTransformationsOrError]
 
 
 class Set3DCutPlanesParameters(TypedDict):
@@ -358,6 +435,9 @@ class Set3DCutPlanesParameters(TypedDict):
 
 
 Set3DCutPlanesResult = ExecutionResult
+
+
+FitInWindowResult = ExecutionResult
 
 
 class CreateIssueParameters(TypedDict):
@@ -501,6 +581,10 @@ class CreateColumnsParameters(TypedDict):
     columnsData: List[ColumnData]
 
 
+class CreateBeamsParameters(TypedDict):
+    beamsData: List[BeamData]
+
+
 class CreateSlabsParameters(TypedDict):
     slabsData: List[SlabData]
 
@@ -578,6 +662,38 @@ class ReserveElementsResult(TypedDict):
     conflicts: NotRequired[List[Conflict]]
 
 
+class CreateDetailsParameters(TypedDict):
+    detailsData: List[DetailData]
+
+
+class CreateWorksheetsParameters(TypedDict):
+    worksheetsData: List[WorksheetData]
+
+
+class CreateLayoutsParameters(TypedDict):
+    layoutsData: List[LayoutData]
+
+
+class CreateSubsetsParameters(TypedDict):
+    subsetsData: List[SubsetData]
+
+
+class CreateDrawingsParameters(TypedDict):
+    drawingsData: List[DrawingData]
+
+
+class GetViewSettingsResult(TypedDict):
+    viewSettings: List[ViewSettingsOrError]
+
+
+class SetViewSettingsParameters(TypedDict):
+    navigatorItemIdsWithViewSettings: List[NavigatorItemIdsWithViewSetting]
+
+
+class GetView2DTransformationsResult(TypedDict):
+    transformations: List[ViewTransformationsOrError]
+
+
 class GetIssuesResult(TypedDict):
     issues: List[Issue]
 
@@ -609,12 +725,84 @@ class GetDetailsOfElementsResult(TypedDict):
     detailsOfElements: List[DetailsOfElement]
 
 
+class CreateWallsParameters(TypedDict):
+    wallsData: List[WallData]
+
+
+class CreateWindowsParameters(TypedDict):
+    windowsData: List[WindowData]
+
+
+class CreateDoorsParameters(TypedDict):
+    doorsData: List[DoorData]
+
+
+class CreateOpeningsParameters(TypedDict):
+    openingsData: List[OpeningData]
+
+
+class CreateMorphsParameters(TypedDict):
+    morphsData: List[MorphData]
+
+
+class CreateRoofsParameters(TypedDict):
+    roofsData: List[RoofData]
+
+
+class CreateAssociativeDimensionsParameters(TypedDict):
+    dimensionsData: List[AssociativeDimensionData]
+
+
+class CreateAssociativeDimensionsOnSectionParameters(TypedDict):
+    dimensionsData: List[AssociativeDimensionOnSectionData]
+
+
+class CreateWallThicknessDimensionsParameters(TypedDict):
+    dimensionsData: List[WallThicknessDimensionData]
+
+
 class CreateZonesParameters(TypedDict):
     zonesData: List[ZoneData]
 
 
 class CreateLabelsParameters(TypedDict):
     labelsData: List[LabelData]
+
+
+class ModifyWallsParameters(TypedDict):
+    wallsWithDetails: List[WallWithDetails]
+
+
+class ModifyBeamsParameters(TypedDict):
+    beamsWithDetails: List[BeamWithDetails]
+
+
+class ModifySlabsParameters(TypedDict):
+    slabsWithDetails: List[SlabWithDetails]
+
+
+class ModifyColumnsParameters(TypedDict):
+    columnsWithDetails: List[ColumnWithDetails]
+
+
+class ModifyWindowsParameters(TypedDict):
+    windowsWithDetails: List[WindowWithDetails]
+
+
+class ModifyDoorsParameters(TypedDict):
+    doorsWithDetails: List[DoorWithDetails]
+
+
+class ModifyMorphsParameters(TypedDict):
+    morphsWithDetails: List[MorphWithDetails]
+
+
+class ModifyRoofsParameters(TypedDict):
+    roofsWithDetails: List[RoofWithDetails]
+
+
+class CreateGroupsParameters(TypedDict):
+    elementGroups: List[ElementGroupParameters]
 
 
 class CreateCompositesParameters(TypedDict):
@@ -635,11 +823,29 @@ class AddFilesToEmbeddedLibraryParameters(TypedDict):
     files: LibraryFileAdditions
 
 
+class PublishPublisherSetParameters(TypedDict):
+    publisherSetName: str
+    outputPath: NotRequired[str]
+    selectedNavigatorItemIds: NotRequired[NavigatorItemIds]
+
+
 class GetDatabaseIdFromNavigatorItemIdParameters(TypedDict):
     navigatorItemIds: NavigatorItemIds
 
 
 class GetDatabaseIdFromNavigatorItemIdResult(TypedDict):
+    databases: Databases
+
+
+class CreateDetailsResult(TypedDict):
+    databases: Databases
+
+
+class CreateWorksheetsResult(TypedDict):
+    databases: Databases
+
+
+class CreateLayoutsResult(TypedDict):
     databases: Databases
 
 
@@ -733,7 +939,47 @@ class CreateColumnsResult(TypedDict):
     elements: Elements
 
 
+class CreateWallsResult(TypedDict):
+    elements: Elements
+
+
+class CreateBeamsResult(TypedDict):
+    elements: Elements
+
+
 class CreateSlabsResult(TypedDict):
+    elements: Elements
+
+
+class CreateWindowsResult(TypedDict):
+    elements: Elements
+
+
+class CreateDoorsResult(TypedDict):
+    elements: Elements
+
+
+class CreateOpeningsResult(TypedDict):
+    elements: Elements
+
+
+class CreateMorphsResult(TypedDict):
+    elements: Elements
+
+
+class CreateRoofsResult(TypedDict):
+    elements: Elements
+
+
+class CreateAssociativeDimensionsResult(TypedDict):
+    elements: Elements
+
+
+class CreateAssociativeDimensionsOnSectionResult(TypedDict):
+    elements: Elements
+
+
+class CreateWallThicknessDimensionsResult(TypedDict):
     elements: Elements
 
 
@@ -805,6 +1051,14 @@ class ReleaseElementsParameters(TypedDict):
 
 class UpdateDrawingsParameters(TypedDict):
     elements: Elements
+
+
+class CreateDrawingsResult(TypedDict):
+    elements: Elements
+
+
+class FitInWindowParameters(TypedDict):
+    elements: NotRequired[Elements]
 
 
 class AttachElementsToIssueParameters(TypedDict):

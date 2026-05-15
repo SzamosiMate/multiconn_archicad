@@ -3,7 +3,11 @@ import re
 import pathlib
 import urllib.request
 from typing import Any, Dict, List
+
 from code_generation.tapir.paths import tapir_paths
+from code_generation.official.official_commands import OFFICIAL_ADDON_COMMANDS
+from code_generation.shared.schema_patching import apply_permanent_patches, apply_temporary_patches
+
 
 def apply_fixes(content: str) -> str:
     content = content.replace('"type": "double"', '"type": "number"')
@@ -86,197 +90,27 @@ def get_structured_command_details(commands_list: List[Dict[str, Any]]) -> List[
                     "description": command.get("description", ""),
                     "version": command.get("version", "N/A"),
                 })
-    # Sort alphabetically by command name for consistent output
     return sorted(details, key=lambda x: x['name'])
 
 
 def generate_literal_commands_file(tapir_commands: List[str], output_path: pathlib.Path):
-    """Generates the literal_commands.py file from a static template and a dynamic list."""
+    """Generates the literal_commands.py file from lists."""
     print(f"Generating literal commands file at {output_path}...")
 
-    # Static template for the official Archicad commands, which are not in the schema
-    addon_command_template = """
-AddonCommandType = Literal[
-    "API.ExecuteAddOnCommand",
-    "API.IsAddOnCommandAvailable",
-    "API.CreateAttributeFolders",
-    "API.DeleteAttributeFolders",
-    "API.DeleteAttributes",
-    "API.GetActivePenTables",
-    "API.GetAttributeFolders",
-    "API.GetAttributeFolderStructure",
-    "API.GetAttributesIndices",
-    "API.GetAttributesByType",
-    "API.GetBuildingMaterialAttributes",
-    "API.GetCompositeAttributes",
-    "API.GetFillAttributes",
-    "API.GetLayerAttributes",
-    "API.GetLayerCombinationAttributes",
-    "API.GetLineAttributes",
-    "API.GetPenTableAttributes",
-    "API.GetProfileAttributes",
-    "API.GetProfileAttributePreview",
-    "API.GetSurfaceAttributes",
-    "API.GetZoneCategoryAttributes",
-    "API.MoveAttributesAndFolders",
-    "API.RenameAttributeFolders",
-    "API.IsAlive",
-    "API.GetProductInfo",
-    "API.GetAllElements",
-    "API.GetSelectedElements",
-    "API.GetElementsByType",
-    "API.GetTypesOfElements",
-    "API.GetElementsByClassification",
-    "API.GetAllClassificationSystems",
-    "API.GetClassificationSystemIds",
-    "API.GetClassificationSystems",
-    "API.GetAllClassificationsInSystem",
-    "API.GetDetailsOfClassificationItems",
-    "API.GetClassificationItemAvailability",
-    "API.GetClassificationsOfElements",
-    "API.SetClassificationsOfElements",
-    "API.GetPropertyIds",
-    "API.GetAllPropertyIds",
-    "API.GetAllPropertyNames",
-    "API.GetDetailsOfProperties",
-    "API.GetPropertyDefinitionAvailability",
-    "API.GetPropertyGroups",
-    "API.GetAllPropertyGroupIds",
-    "API.GetPropertyValuesOfElements",
-    "API.GetAllPropertyIdsOfElements",
-    "API.SetPropertyValuesOfElements",
-    "API.GetPublisherSetNames",
-    "API.GetNavigatorItemsType",
-    "API.GetNavigatorItemTree",
-    "API.DeleteNavigatorItems",
-    "API.RenameNavigatorItem",
-    "API.MoveNavigatorItem",
-    "API.GetBuiltInContainerNavigatorItems",
-    "API.GetElevationNavigatorItems",
-    "API.GetInteriorElevationNavigatorItems",
-    "API.GetDetailNavigatorItems",
-    "API.GetWorksheetNavigatorItems",
-    "API.GetSectionNavigatorItems",
-    "API.GetStoryNavigatorItems",
-    "API.GetDocument3DNavigatorItems",
-    "API.CloneProjectMapItemToViewMap",
-    "API.CreateViewMapFolder",
-    "API.CreateLayoutSubset",
-    "API.GetLayoutSettings",
-    "API.CreateLayout",
-    "API.SetLayoutSettings",
-    "API.Get2DBoundingBoxes",
-    "API.Get3DBoundingBoxes",
-    "API.GetElementsRelatedToZones",
-    "API.GetComponentsOfElements",
-    "API.GetPropertyValuesOfElementComponents",
-]
-"""
+    formatted_addon_commands = ",\n".join(f'    "{name}"' for name in OFFICIAL_ADDON_COMMANDS)
     formatted_tapir_commands = ",\n".join(f'    "{name}"' for name in tapir_commands)
+
     file_content = f"""from typing import Literal
-{addon_command_template}
+
+AddonCommandType = Literal[
+{formatted_addon_commands},
+]
 
 TapirCommandType = Literal[
 {formatted_tapir_commands},
 ]
 """
     output_path.write_text(file_content, encoding="utf-8")
-
-
-def extract_inline_schema(defs: Dict[str, Any], parent_name: str, path: List[str], new_def_name: str):
-    """
-    Helper to extract an inline schema definition into a named $ref.
-
-    :param defs: The master definitions dictionary.
-    :param parent_name: The name of the parent definition containing the inline schema.
-    :param path: List of keys to traverse to reach the inline schema (e.g. ["properties", "items"]).
-    :param new_def_name: The new unique name for the extracted definition.
-    """
-    if parent_name not in defs:
-        return
-
-    # Navigate to the target
-    current = defs[parent_name]
-    for key in path[:-1]:
-        if isinstance(current, dict) and key in current:
-            current = current[key]
-        else:
-            return
-
-    last_key = path[-1]
-    if last_key in current:
-        target_schema = current[last_key]
-
-        if "$ref" in target_schema:
-            return
-
-        # 1. Create the new top-level definition
-        print(f"  -> Extracting {parent_name} / {path} to {new_def_name}")
-        defs[new_def_name] = target_schema
-
-        # 2. Replace the original location with a $ref
-        current[last_key] = {"$ref": f"#/$defs/{new_def_name}"}
-
-
-def improve_schema_names(master_defs: Dict[str, Any]):
-    print("Refactoring schema to improve model names...")
-
-    creation_data_types = {
-        "CreateColumnsParameters": ("columnsData", "ColumnData"),
-        "CreateSlabsParameters": ("slabsData", "SlabData"),
-        "CreatePolylinesParameters": ("polylinesData", "PolylineData"),
-        "CreateObjectsParameters": ("objectsData", "ObjectData"),
-        "CreateMeshesParameters": ("meshesData", "MeshData"),
-        "CreateZonesParameters": ("zonesData", "ZoneData"),
-        "CreateBeamsParameters": ("beamsData", "BeamData"),
-        "CreateWallsParameters": ("wallsData", "WallData"),
-        "CreateLabelsParameters": ("labelsData", "LabelData")
-    }
-
-    for parent_model, (field_name, new_model_name) in creation_data_types.items():
-        if parent_model in master_defs:
-            extract_inline_schema(master_defs, parent_model, ["properties", field_name, "items"], new_model_name)
-
-def unify_set_get_schemas(master_defs: Dict[str, Any]):
-    extract_inline_schema(
-        master_defs,
-        "GetGeoLocationResult",
-        ["properties", "projectLocation"],
-        "ProjectLocation"
-    )
-
-    # Hierarchy: GetGeoLocationResult -> surveyPoint -> position
-    extract_inline_schema(
-        master_defs,
-        "GetGeoLocationResult",
-        ["properties", "surveyPoint", "properties", "position"],
-        "SurveyPointPosition",
-    )
-
-    # Hierarchy: GetGeoLocationResult -> surveyPoint -> geoReferencingParameters
-    extract_inline_schema(
-        master_defs,
-        "GetGeoLocationResult",
-        ["properties", "surveyPoint", "properties", "geoReferencingParameters"],
-        "GeoReferencingParameters",
-    )
-
-    # Hierarchy: GetGeoLocationResult -> surveyPoint (wrapper)
-    extract_inline_schema(
-        master_defs,
-        "GetGeoLocationResult",
-        ["properties", "surveyPoint"],
-        "SurveyPoint"
-    )
-
-    if "SetGeoLocationParameters" in master_defs:
-        params = master_defs["SetGeoLocationParameters"]["properties"]
-        if "projectLocation" in params:
-            params["projectLocation"] = {"$ref": "#/$defs/ProjectLocation"}
-        if "surveyPoint" in params:
-            params["surveyPoint"] = {"$ref": "#/$defs/SurveyPoint"}
-
-    print("  -> Consolidated GeoLocation models to strict definitions.")
 
 
 def main():
@@ -298,8 +132,8 @@ def main():
     print(f"Total unique definitions for master schema: {len(master_defs)}")
 
     fix_refs_recursive(master_defs)
-    improve_schema_names(master_defs)
-    unify_set_get_schemas(master_defs)
+    apply_permanent_patches(master_defs)
+    apply_temporary_patches(master_defs)
 
     master_schema = {
         "$schema": "http://json-schema.org/draft-07/schema#",
@@ -320,11 +154,9 @@ def main():
 
     structured_command_details = get_structured_command_details(commands_list)
     with open(tapir_paths.COMMAND_DETAILS_OUTPUT, "w", encoding="utf-8") as f:
-        # Use indent for a human-readable JSON file
         json.dump(structured_command_details, f, indent=4)
     print(f"✅ Successfully generated structured command details at: {tapir_paths.COMMAND_DETAILS_OUTPUT}")
 
-    # --- Generate literal_commands.py (deriving names from the new structure) ---
     tapir_command_names = sorted([cmd["name"] for cmd in structured_command_details])
     generate_literal_commands_file(tapir_command_names, tapir_paths.FINAL_LITERAL_COMMANDS)
     print(f"✅ Successfully generated literal commands at: {tapir_paths.FINAL_LITERAL_COMMANDS}")

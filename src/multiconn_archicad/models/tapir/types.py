@@ -305,6 +305,54 @@ class WindowType(Enum):
     Unknown = "Unknown"
 
 
+class LengthType(Enum):
+    Meter = "Meter"
+    Decimeter = "Decimeter"
+    Centimeter = "Centimeter"
+    Millimeter = "Millimeter"
+    FootFracInch = "FootFracInch"
+    FootDecInch = "FootDecInch"
+    DecFoot = "DecFoot"
+    FracInch = "FracInch"
+    DecInch = "DecInch"
+
+
+class AreaType(Enum):
+    SquareMeter = "SquareMeter"
+    SquareCentimeter = "SquareCentimeter"
+    SquareMillimeter = "SquareMillimeter"
+    SquareFoot = "SquareFoot"
+    SquareInch = "SquareInch"
+
+
+class VolumeType(Enum):
+    CubicMeter = "CubicMeter"
+    Liter = "Liter"
+    CubicCentimeter = "CubicCentimeter"
+    CubicMillimeter = "CubicMillimeter"
+    CubicFoot = "CubicFoot"
+    CubicInch = "CubicInch"
+    CubicYard = "CubicYard"
+    Gallon = "Gallon"
+
+
+class AngleType(Enum):
+    DecimalDegree = "DecimalDegree"
+    DegreeMinSec = "DegreeMinSec"
+    Grad = "Grad"
+    Radian = "Radian"
+    Surveyors = "Surveyors"
+
+
+class AccuracyType(Enum):
+    Off = "Off"
+    ShowSmall5 = "ShowSmall5"
+    ShowSmall25 = "ShowSmall25"
+    ShowSmall1 = "ShowSmall1"
+    ShowSmall01 = "ShowSmall01"
+    InchCaseFractions = "InchCaseFractions"
+
+
 class IssueId(APIModel):
     guid: Annotated[
         UUID,
@@ -675,46 +723,6 @@ class DatabaseId(APIModel):
     ]
 
 
-class ViewSettings(APIModel):
-    modelViewOptions: Annotated[
-        str | None,
-        Field(description="The name of the model view options. If empty, the view has custom model view options."),
-    ] = None
-    layerCombination: Annotated[
-        str | None,
-        Field(description="The name of the layer combination. If empty, the view has custom layer combination."),
-    ] = None
-    dimensionStyle: Annotated[
-        str | None,
-        Field(description="The name of the dimension style. If empty, the view has custom dimension style."),
-    ] = None
-    penSetName: Annotated[
-        str | None,
-        Field(description="The name of the pen set. If empty, the view has custom pen set."),
-    ] = None
-    graphicOverrideCombination: Annotated[
-        str | None,
-        Field(
-            description="The name of the graphic override combination. If empty, the view has custom graphic override combination."
-        ),
-    ] = None
-
-
-class Zoom(APIModel):
-    xMin: Annotated[float, Field(description="The minimum X value of the zoom box.")]
-    yMin: Annotated[float, Field(description="The minimum Y value of the zoom box.")]
-    xMax: Annotated[float, Field(description="The maximum X value of the zoom box.")]
-    yMax: Annotated[float, Field(description="The maximum Y value of the zoom box.")]
-
-
-class ViewTransformations(APIModel):
-    zoom: Annotated[
-        Zoom,
-        Field(description="The actual zoom parameters, rectangular region of the model."),
-    ]
-    rotation: Annotated[float, Field(description="The orientation in radian.")]
-
-
 class Hole2D(APIModel):
     polygonOutline: Annotated[
         List[Coordinate2D] | None,
@@ -737,33 +745,6 @@ class GeometryType(Enum):
     Polygonal = "Polygonal"
 
 
-class WallDetails(APIModel):
-    geometryType: GeometryType
-    begCoordinate: Coordinate2D
-    endCoordinate: Coordinate2D
-    zCoordinate: float
-    height: Annotated[float, Field(description="height relative to bottom")]
-    bottomOffset: Annotated[float, Field(description="base level of the wall relative to the floor level")]
-    offset: Annotated[float, Field(description="wall's base line's offset from ref. line")]
-    arcAngle: Annotated[float | None, Field(description="The arc angle of the curved wall in radians.")] = None
-    begThickness: Annotated[
-        float | None,
-        Field(description="Thickness at the beginning in case of trapezoid wall"),
-    ] = None
-    endThickness: Annotated[
-        float | None,
-        Field(description="Thickness at the end in case of trapezoid wall"),
-    ] = None
-    polygonOutline: Annotated[
-        List[Coordinate2D] | None,
-        Field(description="Polygon outline in case of polygonal wall"),
-    ] = None
-    polygonArcs: Annotated[
-        List[PolyArc] | None,
-        Field(description="Polygon arcs in case of polygonal wall"),
-    ] = None
-
-
 class BeamDetails(APIModel):
     begCoordinate: Coordinate2D
     endCoordinate: Coordinate2D
@@ -776,25 +757,6 @@ class BeamDetails(APIModel):
         Field(description="The arc angle of the (horizontally) curved beam in radians."),
     ]
     verticalCurveHeight: Annotated[float, Field(description="The height of the vertical curve of the beam.")]
-
-
-class SlabDetails(APIModel):
-    thickness: Annotated[float, Field(description="Thickness of the slab.")]
-    level: Annotated[
-        float,
-        Field(description="Distance of the reference level of the slab from the floor level."),
-    ]
-    offsetFromTop: Annotated[
-        float,
-        Field(description="Vertical distance between the reference level and the top of the slab."),
-    ]
-    zCoordinate: float
-    polygonOutline: Annotated[List[Coordinate2D], Field(description="Polygon outline of the slab.")]
-    polygonArcs: Annotated[List[PolyArc] | None, Field(description="Polygon outline arcs of the slab.")] = None
-    holes: Annotated[
-        List[Hole2D],
-        Field(description="A list of 2D holes in an element defined by closed polylines"),
-    ]
 
 
 class ColumnDetails(APIModel):
@@ -1137,6 +1099,44 @@ class FavoritesWrapper(APIModel):
     favorites: Annotated[List[str], Field(description="A list of favorite names")]
 
 
+class GroupId(APIModel):
+    guid: Annotated[
+        UUID,
+        Field(
+            description="A Globally Unique Identifier (or Universally Unique Identifier) in its string representation as defined in RFC 4122.",
+        ),
+    ]
+
+
+class GroupIdArrayItem(APIModel):
+    groupId: GroupId
+
+
+class Length(APIModel):
+    unit: LengthType
+    accuracy: AccuracyType
+    decimals: Annotated[int, Field(description="Number of decimals to display for length values.")]
+    roundInch: Annotated[int | None, Field(description="Fractional inches.")] = None
+
+
+class Area(APIModel):
+    unit: AreaType
+    accuracy: AccuracyType
+    decimals: Annotated[int, Field(description="Number of decimals to display for area values.")]
+
+
+class Volume(APIModel):
+    unit: VolumeType
+    accuracy: AccuracyType
+    decimals: Annotated[int, Field(description="Number of decimals to display for volume values.")]
+
+
+class Angle(APIModel):
+    unit: AngleType
+    decimals: Annotated[int, Field(description="Number of decimals to display for angle values.")]
+    accuracy: Annotated[int, Field(description="Accuracy for angle values.")]
+
+
 class Method(Enum):
     save = "save"
     merge = "merge"
@@ -1148,6 +1148,12 @@ class FileType(Enum):
     ifcxml = "ifcxml"
     ifczip = "ifczip"
     ifcxmlzip = "ifcxmlzip"
+
+
+class PrintArea(Enum):
+    currentView = "currentView"
+    entireDrawing = "entireDrawing"
+    marquee = "marquee"
 
 
 class Details(APIModel):
@@ -1220,11 +1226,6 @@ class ModelViewOption(APIModel):
     name: str
 
 
-class NavigatorItemIdsWithViewSetting(APIModel):
-    navigatorItemId: NavigatorItemId
-    viewSettings: ViewSettings
-
-
 class CutPlane(APIModel):
     pa: Annotated[
         float,
@@ -1273,6 +1274,8 @@ class Coordinates(APIModel):
 
 class ColumnData(APIModel):
     coordinates: Annotated[Coordinates, Field(description="3D coordinate.")]
+    height: Annotated[float | None, Field(description="Optional column height.", gt=0.0)] = None
+    axisRotationAngle: Annotated[float | None, Field(description="Optional column rotation angle in radians.")] = None
 
 
 class SlabData(APIModel):
@@ -1280,6 +1283,7 @@ class SlabData(APIModel):
         float,
         Field(description="The Z coordinate value of the reference line of the slab."),
     ]
+    thickness: Annotated[float | None, Field(description="Optional slab thickness.", gt=0.0)] = None
     polygonCoordinates: Annotated[
         List[Coordinate2D],
         Field(description="The 2D coordinates of the edge of the slab.", min_length=3),
@@ -1296,6 +1300,23 @@ class PolylineData(APIModel):
         float | None,
         Field(description="The identifier of the floor. Optional parameter, by default the current floor is used."),
     ] = None
+    layerIndex: Annotated[
+        int | None,
+        Field(
+            description="Layer attribute index to place the polyline on. Optional parameter, by default the current layer is used."
+        ),
+    ] = None
+    linePenIndex: Annotated[
+        int | None,
+        Field(description="Pen index of the polyline contour. Optional parameter, by default the current pen is used."),
+    ] = None
+    lineTypeIndex: Annotated[
+        int | None,
+        Field(
+            description="Line type attribute index of the polyline contour. Optional parameter, by default the current line type is used."
+        ),
+    ] = None
+    penWeightMm: Annotated[float | None, Field(description="Optional pen weight override in mm.")] = None
     coordinates: Annotated[
         List[Coordinate2D],
         Field(description="The 2D coordinates of the polyline.", min_length=2),
@@ -1333,6 +1354,78 @@ class MeshData(APIModel):
             min_length=1,
         ),
     ] = None
+
+
+class BeamData(APIModel):
+    begCoordinate: Coordinate2D
+    endCoordinate: Coordinate2D
+    zCoordinate: float
+    offset: float | None = None
+    slantAngle: float | None = None
+    arcAngle: float | None = None
+    verticalCurveHeight: float | None = None
+
+
+class DetailData(APIModel):
+    name: Annotated[str, Field(min_length=1)]
+    referenceId: Annotated[str, Field(min_length=1)]
+
+
+class WorksheetData(APIModel):
+    name: Annotated[str, Field(min_length=1)]
+    referenceId: Annotated[str, Field(min_length=1)]
+
+
+class LayoutData(APIModel):
+    masterLayoutName: Annotated[str, Field(min_length=1)]
+    layoutName: Annotated[str, Field(min_length=1)]
+
+
+class SubsetData(APIModel):
+    name: Annotated[str, Field(min_length=1)]
+    parentNavigatorItemId: NavigatorItemId | None = None
+    ownPrefix: str | None = None
+    customNumber: str | None = None
+
+
+class DrawingData(APIModel):
+    navigatorItemId: NavigatorItemId
+    layoutDatabaseId: DatabaseId | None = None
+    name: Annotated[str, Field(min_length=1)]
+    position: Coordinate2D
+    scale: Annotated[float | None, Field(gt=0.0)] = None
+
+
+class Level(APIModel):
+    levelHeight: float
+    levelAngle: Annotated[float, Field(gt=0.0)]
+
+
+class Preset(Enum):
+    WallCompositeFaces = "WallCompositeFaces"
+    WallSkinBorders = "WallSkinBorders"
+    SlabCompositeFaces = "SlabCompositeFaces"
+    SlabSkinBorders = "SlabSkinBorders"
+    BeamOrColumnRefLineEndPoints = "BeamOrColumnRefLineEndPoints"
+    BeamOrColumnBoundingBoxCorners = "BeamOrColumnBoundingBoxCorners"
+    DoorWindowWallHoleCorners = "DoorWindowWallHoleCorners"
+    DoorWindowModelHotspots = "DoorWindowModelHotspots"
+
+
+class WallStructureType(Enum):
+    Basic = "Basic"
+    Composite = "Composite"
+    Profile = "Profile"
+
+
+class SlabStructureType(Enum):
+    Basic = "Basic"
+    Composite = "Composite"
+
+
+class RoofStructureType(Enum):
+    Basic = "Basic"
+    Composite = "Composite"
 
 
 class ProjectLocation(APIModel):
@@ -1382,6 +1475,13 @@ class GeoReferencingParameters(APIModel):
 class SurveyPoint(APIModel):
     position: SurveyPointPosition
     geoReferencingParameters: GeoReferencingParameters
+
+
+class Zoom(APIModel):
+    xMin: Annotated[float, Field(description="The minimum X value of the zoom box.")]
+    yMin: Annotated[float, Field(description="The minimum Y value of the zoom box.")]
+    xMax: Annotated[float, Field(description="The maximum X value of the zoom box.")]
+    yMax: Annotated[float, Field(description="The maximum Y value of the zoom box.")]
 
 
 class ElementId(APIModel):
@@ -1504,6 +1604,99 @@ class NavigatorItemIdArrayItem(APIModel):
 
 class DatabaseIdArrayItem(APIModel):
     databaseId: DatabaseId
+
+
+class ViewSettings(APIModel):
+    modelViewOptions: Annotated[
+        str | None,
+        Field(description="The name of the model view options. If empty, the view has custom model view options."),
+    ] = None
+    layerCombination: Annotated[
+        str | None,
+        Field(description="The name of the layer combination. If empty, the view has custom layer combination."),
+    ] = None
+    dimensionStyle: Annotated[
+        str | None,
+        Field(description="The name of the dimension style. If empty, the view has custom dimension style."),
+    ] = None
+    penSetName: Annotated[
+        str | None,
+        Field(description="The name of the pen set. If empty, the view has custom pen set."),
+    ] = None
+    graphicOverrideCombination: Annotated[
+        str | None,
+        Field(
+            description="The name of the graphic override combination. If empty, the view has custom graphic override combination."
+        ),
+    ] = None
+    drawingScale: Annotated[
+        int | None,
+        Field(description="The drawing scale stored on the view, if enabled."),
+    ] = None
+    saveZoom: Annotated[bool | None, Field(description="Whether the zoom box is stored in the view.")] = None
+    ignoreSavedZoom: Annotated[
+        bool | None,
+        Field(description="Whether changing to the view should ignore its stored zoom."),
+    ] = None
+    zoom: Zoom | None = None
+
+
+class ViewTransformations(APIModel):
+    zoom: Zoom
+    rotation: Annotated[float, Field(description="The orientation in radian.")]
+
+
+class WallDetails(APIModel):
+    geometryType: GeometryType
+    begCoordinate: Coordinate2D
+    endCoordinate: Coordinate2D
+    zCoordinate: float
+    height: Annotated[float, Field(description="height relative to bottom")]
+    bottomOffset: Annotated[float, Field(description="base level of the wall relative to the floor level")]
+    offset: Annotated[float, Field(description="wall's base line's offset from ref. line")]
+    arcAngle: Annotated[float | None, Field(description="The arc angle of the curved wall in radians.")] = None
+    begThickness: Annotated[
+        float | None,
+        Field(description="Thickness at the beginning in case of trapezoid wall"),
+    ] = None
+    endThickness: Annotated[
+        float | None,
+        Field(description="Thickness at the end in case of trapezoid wall"),
+    ] = None
+    polygonOutline: Annotated[
+        List[Coordinate2D] | None,
+        Field(description="Polygon outline in case of polygonal wall"),
+    ] = None
+    polygonArcs: Annotated[
+        List[PolyArc] | None,
+        Field(description="Polygon arcs in case of polygonal wall"),
+    ] = None
+    structureType: WallStructureType | None = None
+    buildingMaterialId: AttributeId | None = None
+    compositeId: AttributeId | None = None
+    profileId: AttributeId | None = None
+
+
+class SlabDetails(APIModel):
+    thickness: Annotated[float, Field(description="Thickness of the slab.")]
+    level: Annotated[
+        float,
+        Field(description="Distance of the reference level of the slab from the floor level."),
+    ]
+    offsetFromTop: Annotated[
+        float,
+        Field(description="Vertical distance between the reference level and the top of the slab."),
+    ]
+    zCoordinate: float
+    polygonOutline: Annotated[List[Coordinate2D], Field(description="Polygon outline of the slab.")]
+    polygonArcs: Annotated[List[PolyArc] | None, Field(description="Polygon outline arcs of the slab.")] = None
+    holes: Annotated[
+        List[Hole2D],
+        Field(description="A list of 2D holes in an element defined by closed polylines"),
+    ]
+    structureType: SlabStructureType | None = None
+    buildingMaterialId: AttributeId | None = None
+    compositeId: AttributeId | None = None
 
 
 class LinkData(APIModel):
@@ -1752,6 +1945,11 @@ class Conflict(APIModel):
     user: User
 
 
+class NavigatorItemIdsWithViewSetting(APIModel):
+    navigatorItemId: NavigatorItemId
+    viewSettings: ViewSettings
+
+
 class Issue(APIModel):
     issueId: IssueId
     name: Annotated[str, Field(description="Issue name")]
@@ -1809,6 +2007,19 @@ class ZoneData(APIModel):
     ]
 
 
+class WallData(APIModel):
+    begCoordinate: Coordinate2D
+    endCoordinate: Coordinate2D
+    zCoordinate: float
+    height: Annotated[float, Field(gt=0.0)]
+    thickness: Annotated[float, Field(gt=0.0)]
+    offset: float | None = None
+    structureType: WallStructureType | None = None
+    buildingMaterialId: AttributeId | None = None
+    compositeId: AttributeId | None = None
+    profileId: AttributeId | None = None
+
+
 class LabelData(APIModel):
     parentElementId: Annotated[
         ElementId | None,
@@ -1826,6 +2037,174 @@ class LabelData(APIModel):
         Field(
             description="The identifier of the floor. Optional parameter, by default the current floor or the floor of the parent element is used."
         ),
+    ] = None
+
+
+class WindowData(APIModel):
+    ownerWallId: ElementId
+    centerOffset: Annotated[float, Field(ge=0.0)]
+    sillHeight: float | None = None
+    width: Annotated[float | None, Field(gt=0.0)] = None
+    height: Annotated[float | None, Field(gt=0.0)] = None
+
+
+class DoorData(APIModel):
+    ownerWallId: ElementId
+    centerOffset: Annotated[float, Field(ge=0.0)]
+    sillHeight: float | None = None
+    width: Annotated[float | None, Field(gt=0.0)] = None
+    height: Annotated[float | None, Field(gt=0.0)] = None
+
+
+class MorphData(APIModel):
+    basePoint: Coordinate3D
+    size: Dimensions3D
+    buildingMaterialId: AttributeId | None = None
+
+
+class RoofData(APIModel):
+    level: float
+    thickness: Annotated[float | None, Field(gt=0.0)] = None
+    polygonCoordinates: Annotated[List[Coordinate2D], Field(min_length=3)]
+    polygonArcs: List[PolyArc] | None = None
+    holes: Annotated[
+        List[Hole2D] | None,
+        Field(description="A list of 2D holes in an element defined by closed polylines"),
+    ] = None
+    eavesOverhang: float | None = None
+    levels: Annotated[List[Level] | None, Field(max_length=16, min_length=1)] = None
+    structureType: RoofStructureType | None = None
+    buildingMaterialId: AttributeId | None = None
+    compositeId: AttributeId | None = None
+
+
+class OpeningData(APIModel):
+    ownerElementId: ElementId
+    basePoint: Coordinate3D
+    width: Annotated[float | None, Field(gt=0.0)] = None
+    height: Annotated[float | None, Field(gt=0.0)] = None
+
+
+class WitnessPoint(APIModel):
+    elementId: ElementId
+    line: bool | None = None
+    inIndex: int | None = None
+    special: int | None = None
+    nodeType: int | None = None
+    nodeStatus: int | None = None
+    nodeId: Annotated[float | None, Field(ge=0.0)] = None
+
+
+class AssociativeDimensionData(APIModel):
+    referencePoint: Coordinate2D
+    direction: Coordinate2D
+    floorIndex: float | None = None
+    witnessPoints: Annotated[List[WitnessPoint], Field(min_length=2)]
+
+
+class AssociativeDimensionOnSectionData(APIModel):
+    sectionElementId: ElementId
+    referencePoint: Coordinate2D
+    preset: Preset
+    direction: Coordinate2D | None = None
+    skinBorderIndices: Annotated[List[int] | None, Field(min_length=1)] = None
+    beginPlane: bool | None = None
+    totalSizePlane: bool | None = None
+    placeOnTop: bool | None = None
+
+
+class WallThicknessDimensionData(APIModel):
+    wallId: ElementId
+    referencePoint: Coordinate2D
+    direction: Coordinate2D
+
+
+class WallWithDetails(APIModel):
+    elementId: ElementId
+    begCoordinate: Coordinate2D | None = None
+    endCoordinate: Coordinate2D | None = None
+    height: Annotated[float | None, Field(gt=0.0)] = None
+    thickness: Annotated[float | None, Field(gt=0.0)] = None
+    bottomOffset: float | None = None
+    offset: float | None = None
+    structureType: WallStructureType | None = None
+    buildingMaterialId: AttributeId | None = None
+    compositeId: AttributeId | None = None
+    profileId: AttributeId | None = None
+
+
+class BeamWithDetails(APIModel):
+    elementId: ElementId
+    begCoordinate: Coordinate2D | None = None
+    endCoordinate: Coordinate2D | None = None
+    level: float | None = None
+    offset: float | None = None
+    slantAngle: float | None = None
+    arcAngle: float | None = None
+    verticalCurveHeight: float | None = None
+
+
+class SlabWithDetails(APIModel):
+    elementId: ElementId
+    zCoordinate: float | None = None
+    thickness: Annotated[float | None, Field(gt=0.0)] = None
+    structureType: SlabStructureType | None = None
+    buildingMaterialId: AttributeId | None = None
+    compositeId: AttributeId | None = None
+    polygonOutline: Annotated[List[Coordinate2D] | None, Field(min_length=3)] = None
+    polygonArcs: List[PolyArc] | None = None
+    holes: Annotated[
+        List[Hole2D] | None,
+        Field(description="A list of 2D holes in an element defined by closed polylines"),
+    ] = None
+
+
+class ColumnWithDetails(APIModel):
+    elementId: ElementId
+    origin: Coordinate2D | None = None
+    zCoordinate: float | None = None
+    height: Annotated[float | None, Field(gt=0.0)] = None
+    bottomOffset: float | None = None
+    axisRotationAngle: float | None = None
+
+
+class WindowWithDetails(APIModel):
+    elementId: ElementId
+    width: Annotated[float | None, Field(gt=0.0)] = None
+    height: Annotated[float | None, Field(gt=0.0)] = None
+    sillHeight: float | None = None
+    centerOffset: Annotated[float | None, Field(ge=0.0)] = None
+
+
+class DoorWithDetails(APIModel):
+    elementId: ElementId
+    width: Annotated[float | None, Field(gt=0.0)] = None
+    height: Annotated[float | None, Field(gt=0.0)] = None
+    sillHeight: float | None = None
+    centerOffset: Annotated[float | None, Field(ge=0.0)] = None
+
+
+class MorphWithDetails(APIModel):
+    elementId: ElementId
+    translation: Coordinate3D | None = None
+    rotationDegreesZ: float | None = None
+    buildingMaterialId: AttributeId | None = None
+
+
+class RoofWithDetails(APIModel):
+    elementId: ElementId
+    level: float | None = None
+    thickness: Annotated[float | None, Field(gt=0.0)] = None
+    eavesOverhang: float | None = None
+    levels: Annotated[List[Level] | None, Field(max_length=16, min_length=1)] = None
+    structureType: RoofStructureType | None = None
+    buildingMaterialId: AttributeId | None = None
+    compositeId: AttributeId | None = None
+    polygonOutline: Annotated[List[Coordinate2D] | None, Field(min_length=3)] = None
+    polygonArcs: List[PolyArc] | None = None
+    holes: Annotated[
+        List[Hole2D] | None,
+        Field(description="A list of 2D holes in an element defined by closed polylines"),
     ] = None
 
 
@@ -1855,6 +2234,17 @@ class CurtainWallPanelDetails(APIModel):
         List[ElementIdArrayItem],
         Field(description="The surrounding frames.", min_length=3),
     ]
+
+
+class ElementGroupParameters(APIModel):
+    elements: Annotated[
+        List[ElementIdArrayItem | GroupIdArrayItem],
+        Field(description="The elements or child groups to be grouped.", min_length=2),
+    ]
+    parentGroupId: Annotated[
+        GroupId | None,
+        Field(description="Optional parent group ID to nest this group under."),
+    ] = None
 
 
 class DetailsOfElement(APIModel):

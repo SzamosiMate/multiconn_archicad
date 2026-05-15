@@ -8,10 +8,16 @@ from multiconn_archicad.models.base import APIModel
 
 
 from .types import (
+    Angle,
+    Area,
+    AssociativeDimensionData,
+    AssociativeDimensionOnSectionData,
     AttributeHeadersWrapper,
     AttributeIdArrayItem,
     AttributePropertyValue,
     AttributeType,
+    BeamData,
+    BeamWithDetails,
     BoundingBox3DArrayItem,
     BuildingMaterialDataArrayItem,
     BuildingMaterialPhysicalPropertiesArrayItem,
@@ -19,20 +25,27 @@ from .types import (
     Collision,
     ColorRGB,
     ColumnData,
+    ColumnWithDetails,
     Comment,
     CompositeDataArrayItem,
     Conflict,
     ConnectedElementsWrapper,
     CutPlane,
+    DatabaseId,
     DatabaseIdArrayItem,
     DesignOption,
     DesignOptionCombination,
     DesignOptionSet,
+    DetailData,
     DetailsOfElement,
     DocumentRevision,
+    DoorData,
+    DoorWithDetails,
+    DrawingData,
     ElementClassification,
     ElementClassificationItemArray,
     ElementFilter,
+    ElementGroupParameters,
     ElementId,
     ElementIdArrayItem,
     ElementPropertyValue,
@@ -48,6 +61,7 @@ from .types import (
     FileType,
     Format,
     GDLParameterList,
+    GroupIdArrayItem,
     HighlightedColor,
     Hotlink,
     ImageType,
@@ -60,15 +74,21 @@ from .types import (
     LayerCombinationAttribute,
     LayerCombinationDataArrayItem,
     LayerDataArrayItem,
+    LayoutData,
+    Length,
     Library,
     LibraryFileAddition,
     MeshData,
     Method,
     ModelViewOption,
+    MorphData,
+    MorphWithDetails,
     NavigatorItemIdArrayItem,
     NavigatorItemIdsWithViewSetting,
     ObjectData,
+    OpeningData,
     PolylineData,
+    PrintArea,
     ProjectInfoField,
     ProjectLocation,
     PropertyDefinitionArrayItem,
@@ -80,17 +100,28 @@ from .types import (
     RevisionChange,
     RevisionChangesArrayItem,
     RevisionIssue,
+    RoofData,
+    RoofWithDetails,
     Settings,
     SlabData,
+    SlabWithDetails,
     StoryParameters,
     StorySettings,
     Subelement,
+    SubsetData,
     SuccessfulExecutionResult,
     SurfaceDataArrayItem,
     SurveyPoint,
     ViewSettings,
     ViewTransformations,
+    Volume,
+    WallData,
+    WallThicknessDimensionData,
+    WallWithDetails,
+    WindowData,
     WindowType,
+    WindowWithDetails,
+    WorksheetData,
     ZoneBoundariesWrapper,
     ZoneData,
 )
@@ -119,6 +150,7 @@ class GetCurrentWindowTypeResult(APIModel):
 
 class ChangeWindowParameters(APIModel):
     windowType: WindowType
+    databaseId: DatabaseId | None = None
 
 
 ChangeWindowResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
@@ -183,6 +215,19 @@ class OpenProjectParameters(APIModel):
 OpenProjectResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
 
 
+CloseProjectResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
+
+
+SaveProjectResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
+
+
+class GetCalculationUnitsResult(APIModel):
+    length: Length
+    area: Area
+    volume: Volume
+    angle: Angle
+
+
 SetGeoLocationResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
 
 
@@ -196,6 +241,19 @@ class IFCFileOperationParameters(APIModel):
 
 
 IFCFileOperationResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
+
+
+class PrintViewParameters(APIModel):
+    grid: Annotated[bool | None, Field(description="Print the grid. The default is false.")] = None
+    fixText: Annotated[bool | None, Field(description="Use fixed text size. The default is false.")] = None
+    scale: Annotated[int | None, Field(description="Print scale. The default is 100.")] = None
+    printArea: Annotated[
+        PrintArea | None,
+        Field(description="The area to print. The default is 'currentView'."),
+    ] = None
+
+
+PrintViewResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
 
 
 class ChangeSelectionOfElementsResult(APIModel):
@@ -259,6 +317,62 @@ class SetClassificationsOfElementsResult(APIModel):
     ]
 
 
+class ModifyWallsResult(APIModel):
+    executionResults: Annotated[
+        List[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
+
+
+class ModifyBeamsResult(APIModel):
+    executionResults: Annotated[
+        List[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
+
+
+class ModifySlabsResult(APIModel):
+    executionResults: Annotated[
+        List[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
+
+
+class ModifyColumnsResult(APIModel):
+    executionResults: Annotated[
+        List[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
+
+
+class ModifyWindowsResult(APIModel):
+    executionResults: Annotated[
+        List[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
+
+
+class ModifyDoorsResult(APIModel):
+    executionResults: Annotated[
+        List[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
+
+
+class ModifyMorphsResult(APIModel):
+    executionResults: Annotated[
+        List[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
+
+
+class ModifyRoofsResult(APIModel):
+    executionResults: Annotated[
+        List[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
+
+
 class GetElementPreviewImageResult(APIModel):
     previewImage: Annotated[str, Field(description="The base64 encoded preview image.")]
 
@@ -299,6 +413,13 @@ class RemoveElementNotificationClientParameters(APIModel):
 
 
 RemoveElementNotificationClientResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
+
+
+class CreateGroupsResult(APIModel):
+    groupGuids: Annotated[
+        List[GroupIdArrayItem | ErrorItem],
+        Field(description="The results of the group creation operations."),
+    ]
 
 
 class GetFavoritesByTypeParameters(APIModel):
@@ -459,30 +580,18 @@ TeamworkReceiveResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionRe
 ReleaseElementsResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
 
 
-class PublishPublisherSetParameters(APIModel):
-    publisherSetName: Annotated[str, Field(description="The name of the publisher set.", min_length=1)]
-    outputPath: Annotated[
-        str | None,
-        Field(
-            description="Full local or LAN path for publishing. Optional, by default the path set in the settings of the publisher set will be used.",
-            min_length=1,
-        ),
-    ] = None
-
-
 UpdateDrawingsResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
+
+
+class CreateSubsetsResult(APIModel):
+    executionResults: Annotated[
+        List[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
 
 
 class GetModelViewOptionsResult(APIModel):
     modelViewOptions: List[ModelViewOption]
-
-
-class GetViewSettingsResult(APIModel):
-    viewSettings: List[ViewSettings | ErrorItem]
-
-
-class SetViewSettingsParameters(APIModel):
-    navigatorItemIdsWithViewSettings: List[NavigatorItemIdsWithViewSetting]
 
 
 class SetViewSettingsResult(APIModel):
@@ -492,15 +601,14 @@ class SetViewSettingsResult(APIModel):
     ]
 
 
-class GetView2DTransformationsResult(APIModel):
-    transformations: List[ViewTransformations | ErrorItem]
-
-
 class Set3DCutPlanesParameters(APIModel):
     cutPlanes: Annotated[List[CutPlane] | None, Field(min_length=1)] = None
 
 
 Set3DCutPlanesResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
+
+
+FitInWindowResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
 
 
 class CreateIssueParameters(APIModel):
@@ -674,6 +782,10 @@ class CreateColumnsParameters(APIModel):
     columnsData: Annotated[List[ColumnData], Field(description="Array of data to create Columns.")]
 
 
+class CreateBeamsParameters(APIModel):
+    beamsData: List[BeamData]
+
+
 class CreateSlabsParameters(APIModel):
     slabsData: Annotated[List[SlabData], Field(description="Array of data to create Slabs.")]
 
@@ -814,6 +926,38 @@ class ReserveElementsResult(APIModel):
     conflicts: List[Conflict] | None = None
 
 
+class CreateDetailsParameters(APIModel):
+    detailsData: List[DetailData]
+
+
+class CreateWorksheetsParameters(APIModel):
+    worksheetsData: List[WorksheetData]
+
+
+class CreateLayoutsParameters(APIModel):
+    layoutsData: List[LayoutData]
+
+
+class CreateSubsetsParameters(APIModel):
+    subsetsData: List[SubsetData]
+
+
+class CreateDrawingsParameters(APIModel):
+    drawingsData: List[DrawingData]
+
+
+class GetViewSettingsResult(APIModel):
+    viewSettings: List[ViewSettings | ErrorItem]
+
+
+class SetViewSettingsParameters(APIModel):
+    navigatorItemIdsWithViewSettings: List[NavigatorItemIdsWithViewSetting]
+
+
+class GetView2DTransformationsResult(APIModel):
+    transformations: List[ViewTransformations | ErrorItem]
+
+
 class GetIssuesResult(APIModel):
     issues: Annotated[List[Issue], Field(description="A list of existing issues.")]
 
@@ -851,12 +995,87 @@ class GetDetailsOfElementsResult(APIModel):
     detailsOfElements: List[DetailsOfElement]
 
 
+class CreateWallsParameters(APIModel):
+    wallsData: List[WallData]
+
+
+class CreateWindowsParameters(APIModel):
+    windowsData: List[WindowData]
+
+
+class CreateDoorsParameters(APIModel):
+    doorsData: List[DoorData]
+
+
+class CreateOpeningsParameters(APIModel):
+    openingsData: List[OpeningData]
+
+
+class CreateMorphsParameters(APIModel):
+    morphsData: List[MorphData]
+
+
+class CreateRoofsParameters(APIModel):
+    roofsData: List[RoofData]
+
+
+class CreateAssociativeDimensionsParameters(APIModel):
+    dimensionsData: List[AssociativeDimensionData]
+
+
+class CreateAssociativeDimensionsOnSectionParameters(APIModel):
+    dimensionsData: List[AssociativeDimensionOnSectionData]
+
+
+class CreateWallThicknessDimensionsParameters(APIModel):
+    dimensionsData: List[WallThicknessDimensionData]
+
+
 class CreateZonesParameters(APIModel):
     zonesData: Annotated[List[ZoneData], Field(description="Array of data to create Zones.")]
 
 
 class CreateLabelsParameters(APIModel):
     labelsData: Annotated[List[LabelData], Field(description="Array of data to create Labels.")]
+
+
+class ModifyWallsParameters(APIModel):
+    wallsWithDetails: List[WallWithDetails]
+
+
+class ModifyBeamsParameters(APIModel):
+    beamsWithDetails: List[BeamWithDetails]
+
+
+class ModifySlabsParameters(APIModel):
+    slabsWithDetails: List[SlabWithDetails]
+
+
+class ModifyColumnsParameters(APIModel):
+    columnsWithDetails: List[ColumnWithDetails]
+
+
+class ModifyWindowsParameters(APIModel):
+    windowsWithDetails: List[WindowWithDetails]
+
+
+class ModifyDoorsParameters(APIModel):
+    doorsWithDetails: List[DoorWithDetails]
+
+
+class ModifyMorphsParameters(APIModel):
+    morphsWithDetails: List[MorphWithDetails]
+
+
+class ModifyRoofsParameters(APIModel):
+    roofsWithDetails: List[RoofWithDetails]
+
+
+class CreateGroupsParameters(APIModel):
+    elementGroups: Annotated[
+        List[ElementGroupParameters],
+        Field(description="A list of element groups to create."),
+    ]
 
 
 class CreateCompositesParameters(APIModel):
@@ -899,6 +1118,21 @@ class AddFilesToEmbeddedLibraryParameters(APIModel):
     ]
 
 
+class PublishPublisherSetParameters(APIModel):
+    publisherSetName: Annotated[str, Field(description="The name of the publisher set.", min_length=1)]
+    outputPath: Annotated[
+        str | None,
+        Field(
+            description="Full local or LAN path for publishing. Optional, by default the path set in the settings of the publisher set will be used.",
+            min_length=1,
+        ),
+    ] = None
+    selectedNavigatorItemIds: Annotated[
+        List[NavigatorItemIdArrayItem] | None,
+        Field(description="Optional publisher-tree navigator items to publish instead of the whole publisher set."),
+    ] = None
+
+
 class GetDatabaseIdFromNavigatorItemIdParameters(APIModel):
     navigatorItemIds: Annotated[
         List[NavigatorItemIdArrayItem],
@@ -907,6 +1141,18 @@ class GetDatabaseIdFromNavigatorItemIdParameters(APIModel):
 
 
 class GetDatabaseIdFromNavigatorItemIdResult(APIModel):
+    databases: Annotated[List[DatabaseIdArrayItem], Field(description="A list of Archicad databases.")]
+
+
+class CreateDetailsResult(APIModel):
+    databases: Annotated[List[DatabaseIdArrayItem], Field(description="A list of Archicad databases.")]
+
+
+class CreateWorksheetsResult(APIModel):
+    databases: Annotated[List[DatabaseIdArrayItem], Field(description="A list of Archicad databases.")]
+
+
+class CreateLayoutsResult(APIModel):
     databases: Annotated[List[DatabaseIdArrayItem], Field(description="A list of Archicad databases.")]
 
 
@@ -1024,7 +1270,47 @@ class CreateColumnsResult(APIModel):
     elements: Annotated[List[ElementIdArrayItem], Field(description="A list of elements.")]
 
 
+class CreateWallsResult(APIModel):
+    elements: Annotated[List[ElementIdArrayItem], Field(description="A list of elements.")]
+
+
+class CreateBeamsResult(APIModel):
+    elements: Annotated[List[ElementIdArrayItem], Field(description="A list of elements.")]
+
+
 class CreateSlabsResult(APIModel):
+    elements: Annotated[List[ElementIdArrayItem], Field(description="A list of elements.")]
+
+
+class CreateWindowsResult(APIModel):
+    elements: Annotated[List[ElementIdArrayItem], Field(description="A list of elements.")]
+
+
+class CreateDoorsResult(APIModel):
+    elements: Annotated[List[ElementIdArrayItem], Field(description="A list of elements.")]
+
+
+class CreateOpeningsResult(APIModel):
+    elements: Annotated[List[ElementIdArrayItem], Field(description="A list of elements.")]
+
+
+class CreateMorphsResult(APIModel):
+    elements: Annotated[List[ElementIdArrayItem], Field(description="A list of elements.")]
+
+
+class CreateRoofsResult(APIModel):
+    elements: Annotated[List[ElementIdArrayItem], Field(description="A list of elements.")]
+
+
+class CreateAssociativeDimensionsResult(APIModel):
+    elements: Annotated[List[ElementIdArrayItem], Field(description="A list of elements.")]
+
+
+class CreateAssociativeDimensionsOnSectionResult(APIModel):
+    elements: Annotated[List[ElementIdArrayItem], Field(description="A list of elements.")]
+
+
+class CreateWallThicknessDimensionsResult(APIModel):
     elements: Annotated[List[ElementIdArrayItem], Field(description="A list of elements.")]
 
 
@@ -1096,6 +1382,14 @@ class ReleaseElementsParameters(APIModel):
 
 class UpdateDrawingsParameters(APIModel):
     elements: Annotated[List[ElementIdArrayItem], Field(description="A list of elements.")]
+
+
+class CreateDrawingsResult(APIModel):
+    elements: Annotated[List[ElementIdArrayItem], Field(description="A list of elements.")]
+
+
+class FitInWindowParameters(APIModel):
+    elements: Annotated[List[ElementIdArrayItem] | None, Field(description="A list of elements.")] = None
 
 
 class AttachElementsToIssueParameters(APIModel):

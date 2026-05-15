@@ -6,6 +6,8 @@ from typing import TYPE_CHECKING
 from pydantic import TypeAdapter
 
 from multiconn_archicad.models.tapir.commands import (
+    CloseProjectResult,
+    GetCalculationUnitsResult,
     GetGeoLocationResult,
     GetHotlinksResult,
     GetProjectInfoFieldsResult,
@@ -15,6 +17,9 @@ from multiconn_archicad.models.tapir.commands import (
     IFCFileOperationResult,
     OpenProjectParameters,
     OpenProjectResult,
+    PrintViewParameters,
+    PrintViewResult,
+    SaveProjectResult,
     SetGeoLocationParameters,
     SetGeoLocationResult,
     SetProjectInfoFieldParameters,
@@ -26,6 +31,7 @@ from multiconn_archicad.models.tapir.types import (
     FileType,
     Hotlink,
     Method,
+    PrintArea,
     ProjectInfoField,
     ProjectLocation,
     StorySettings,
@@ -40,6 +46,38 @@ if TYPE_CHECKING:
 class ProjectCommands:
     def __init__(self, core: CoreCommands):
         self._core = core
+
+    def close_project(self) -> FailedExecutionResult | SuccessfulExecutionResult:
+        """
+        Closes the currently opened project.
+
+        Returns:
+            FailedExecutionResult | SuccessfulExecutionResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        response_dict = self._core.post_tapir_command("CloseProject")
+        validated_response = TypeAdapter(CloseProjectResult).validate_python(response_dict)
+        return validated_response
+
+    def get_calculation_units(self) -> GetCalculationUnitsResult:
+        """
+        Gets the project calculation units.
+
+        Returns:
+            GetCalculationUnitsResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        response_dict = self._core.post_tapir_command("GetCalculationUnits")
+        validated_response = GetCalculationUnitsResult.model_validate(response_dict)
+        return validated_response
 
     def get_geo_location(self) -> GetGeoLocationResult:
         """
@@ -176,6 +214,59 @@ class ProjectCommands:
             "OpenProject", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = TypeAdapter(OpenProjectResult).validate_python(response_dict)
+        return validated_response
+
+    def print_view(
+        self,
+        grid: None | bool = None,
+        fix_text: None | bool = None,
+        scale: None | int = None,
+        print_area: None | PrintArea = None,
+    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+        """
+        Prints from the current view.
+
+        Args:
+            grid (None | bool): Print the grid. The default is false.
+            fix_text (None | bool): Use fixed text size. The default is false.
+            scale (None | int): Print scale. The default is 100.
+            print_area (None | PrintArea): The area to print. The default is 'currentView'.
+
+        Returns:
+            FailedExecutionResult | SuccessfulExecutionResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "grid": grid,
+            "fixText": fix_text,
+            "scale": scale,
+            "printArea": print_area,
+        }
+        validated_params = PrintViewParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "PrintView", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = TypeAdapter(PrintViewResult).validate_python(response_dict)
+        return validated_response
+
+    def save_project(self) -> FailedExecutionResult | SuccessfulExecutionResult:
+        """
+        Saves the currently opened project.
+
+        Returns:
+            FailedExecutionResult | SuccessfulExecutionResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        response_dict = self._core.post_tapir_command("SaveProject")
+        validated_response = TypeAdapter(SaveProjectResult).validate_python(response_dict)
         return validated_response
 
     def set_geo_location(

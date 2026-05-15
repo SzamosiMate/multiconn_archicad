@@ -20,6 +20,9 @@ from .tapir.application import ApplicationCommands as TapirApplicationCommands
 from .tapir.attribute import AttributeCommands as TapirAttributeCommands
 from .tapir.design_options import DesignOptionsCommands as TapirDesignOptionsCommands
 from .tapir.element import ElementCommands as TapirElementCommands
+from .tapir.element_creation import ElementCreationCommands as TapirElementCreationCommands
+from .tapir.element_grouping import ElementGroupingCommands as TapirElementGroupingCommands
+from .tapir.element_modification import ElementModificationCommands as TapirElementModificationCommands
 from .tapir.favorites import FavoritesCommands as TapirFavoritesCommands
 from .tapir.issue_management import IssueManagementCommands as TapirIssueManagementCommands
 from .tapir.library import LibraryCommands as TapirLibraryCommands
@@ -41,6 +44,9 @@ class TapirApi:
         self.attribute = TapirAttributeCommands(core)
         self.design_options = TapirDesignOptionsCommands(core)
         self.element = TapirElementCommands(core)
+        self.element_creation = TapirElementCreationCommands(core)
+        self.element_grouping = TapirElementGroupingCommands(core)
+        self.element_modification = TapirElementModificationCommands(core)
         self.favorites = TapirFavoritesCommands(core)
         self.issue_management = TapirIssueManagementCommands(core)
         self.library = TapirLibraryCommands(core)

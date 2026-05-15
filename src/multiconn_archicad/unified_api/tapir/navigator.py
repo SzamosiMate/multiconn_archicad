@@ -6,6 +6,18 @@ from typing import TYPE_CHECKING
 from pydantic import TypeAdapter
 
 from multiconn_archicad.models.tapir.commands import (
+    CreateDetailsParameters,
+    CreateDetailsResult,
+    CreateDrawingsParameters,
+    CreateDrawingsResult,
+    CreateLayoutsParameters,
+    CreateLayoutsResult,
+    CreateSubsetsParameters,
+    CreateSubsetsResult,
+    CreateWorksheetsParameters,
+    CreateWorksheetsResult,
+    FitInWindowParameters,
+    FitInWindowResult,
     GetDatabaseIdFromNavigatorItemIdParameters,
     GetDatabaseIdFromNavigatorItemIdResult,
     GetModelViewOptionsResult,
@@ -24,15 +36,20 @@ from multiconn_archicad.models.tapir.commands import (
 from multiconn_archicad.models.tapir.types import (
     CutPlane,
     DatabaseIdArrayItem,
+    DetailData,
+    DrawingData,
     ElementIdArrayItem,
     ErrorItem,
     FailedExecutionResult,
+    LayoutData,
     ModelViewOption,
     NavigatorItemIdArrayItem,
     NavigatorItemIdsWithViewSetting,
+    SubsetData,
     SuccessfulExecutionResult,
     ViewSettings,
     ViewTransformations,
+    WorksheetData,
 )
 
 if TYPE_CHECKING:
@@ -42,6 +59,159 @@ if TYPE_CHECKING:
 class NavigatorCommands:
     def __init__(self, core: CoreCommands):
         self._core = core
+
+    def create_details(self, details_data: list[DetailData]) -> list[DatabaseIdArrayItem]:
+        """
+        Creates independent Detail databases.
+
+        Args:
+            details_data (list[DetailData])
+
+        Returns:
+            list[DatabaseIdArrayItem]: A list of Archicad databases.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "detailsData": details_data,
+        }
+        validated_params = CreateDetailsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "CreateDetails", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = CreateDetailsResult.model_validate(response_dict)
+        return validated_response.databases
+
+    def create_drawings(self, drawings_data: list[DrawingData]) -> list[ElementIdArrayItem]:
+        """
+        Creates Drawing elements on the specified or active layout from navigator items.
+
+        Args:
+            drawings_data (list[DrawingData])
+
+        Returns:
+            list[ElementIdArrayItem]: A list of elements.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "drawingsData": drawings_data,
+        }
+        validated_params = CreateDrawingsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "CreateDrawings", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = CreateDrawingsResult.model_validate(response_dict)
+        return validated_response.elements
+
+    def create_layouts(self, layouts_data: list[LayoutData]) -> list[DatabaseIdArrayItem]:
+        """
+        Creates Layouts and their backing master layouts.
+
+        Args:
+            layouts_data (list[LayoutData])
+
+        Returns:
+            list[DatabaseIdArrayItem]: A list of Archicad databases.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "layoutsData": layouts_data,
+        }
+        validated_params = CreateLayoutsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "CreateLayouts", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = CreateLayoutsResult.model_validate(response_dict)
+        return validated_response.databases
+
+    def create_subsets(self, subsets_data: list[SubsetData]) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Creates Layout Book subsets.
+
+        Args:
+            subsets_data (list[SubsetData])
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "subsetsData": subsets_data,
+        }
+        validated_params = CreateSubsetsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "CreateSubsets", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = CreateSubsetsResult.model_validate(response_dict)
+        return validated_response.executionResults
+
+    def create_worksheets(self, worksheets_data: list[WorksheetData]) -> list[DatabaseIdArrayItem]:
+        """
+        Creates independent Worksheet databases.
+
+        Args:
+            worksheets_data (list[WorksheetData])
+
+        Returns:
+            list[DatabaseIdArrayItem]: A list of Archicad databases.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "worksheetsData": worksheets_data,
+        }
+        validated_params = CreateWorksheetsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "CreateWorksheets", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = CreateWorksheetsResult.model_validate(response_dict)
+        return validated_response.databases
+
+    def fit_in_window(
+        self, elements: None | list[ElementIdArrayItem] = None
+    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+        """
+        Zooms to the given elements or fits everything in the window.
+
+        Args:
+            elements (None | list[ElementIdArrayItem]): A list of elements.
+
+        Returns:
+            FailedExecutionResult | SuccessfulExecutionResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elements": elements,
+        }
+        validated_params = FitInWindowParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "FitInWindow", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = TypeAdapter(FitInWindowResult).validate_python(response_dict)
+        return validated_response
 
     def get_database_id_from_navigator_item_id(
         self, navigator_item_ids: list[NavigatorItemIdArrayItem]
@@ -141,7 +311,12 @@ class NavigatorCommands:
         validated_response = GetViewSettingsResult.model_validate(response_dict)
         return validated_response.viewSettings
 
-    def publish_publisher_set(self, publisher_set_name: str, output_path: None | str = None) -> None:
+    def publish_publisher_set(
+        self,
+        publisher_set_name: str,
+        output_path: None | str = None,
+        selected_navigator_item_ids: None | list[NavigatorItemIdArrayItem] = None,
+    ) -> None:
         """
         Performs a publish operation on the currently opened project. Only the given publisher
         set will be published.
@@ -150,6 +325,8 @@ class NavigatorCommands:
             publisher_set_name (str): The name of the publisher set.
             output_path (None | str): Full local or LAN path for publishing. Optional, by
                 default the path set in the settings of the publisher set will be used.
+            selected_navigator_item_ids (None | list[NavigatorItemIdArrayItem]): Optional
+                publisher-tree navigator items to publish instead of the whole publisher set.
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -159,6 +336,7 @@ class NavigatorCommands:
         params_dict = {
             "publisherSetName": publisher_set_name,
             "outputPath": output_path,
+            "selectedNavigatorItemIds": selected_navigator_item_ids,
         }
         validated_params = PublishPublisherSetParameters(**params_dict)
         self._core.post_tapir_command(

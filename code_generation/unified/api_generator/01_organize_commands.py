@@ -29,8 +29,19 @@ def main():
     for command in tapir_details + official_details:
         source = command["source"]
         group = command.get("group", "Miscellaneous")
+
         if group == "Developer Commands":
             continue
+
+        if group == "Element Commands":
+            cmd_name = command["name"].removeprefix("API.")
+            print(cmd_name)
+            if "Create" in cmd_name:
+                print("found creation!")
+                group = "Element Creation"
+            elif "Modify" in cmd_name:
+                group = "Element Modification"
+
         if group not in organized[source]:
             organized[source][group] = []
         organized[source][group].append(command)
