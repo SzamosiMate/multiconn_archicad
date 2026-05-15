@@ -8,20 +8,6 @@ from pydantic import TypeAdapter
 from multiconn_archicad.models.tapir.commands import (
     ChangeSelectionOfElementsParameters,
     ChangeSelectionOfElementsResult,
-    CreateColumnsParameters,
-    CreateColumnsResult,
-    CreateLabelsParameters,
-    CreateLabelsResult,
-    CreateMeshesParameters,
-    CreateMeshesResult,
-    CreateObjectsParameters,
-    CreateObjectsResult,
-    CreatePolylinesParameters,
-    CreatePolylinesResult,
-    CreateSlabsParameters,
-    CreateSlabsResult,
-    CreateZonesParameters,
-    CreateZonesResult,
     DeleteElementsParameters,
     DeleteElementsResult,
     FilterElementsParameters,
@@ -71,7 +57,6 @@ from multiconn_archicad.models.tapir.types import (
     ClassificationSystemIdArrayItem,
     Collision,
     ColorRGB,
-    ColumnData,
     ConnectedElementsWrapper,
     DatabaseIdArrayItem,
     DetailsOfElement,
@@ -90,16 +75,10 @@ from multiconn_archicad.models.tapir.types import (
     Format,
     GDLParameterList,
     ImageType,
-    LabelData,
-    MeshData,
-    ObjectData,
-    PolylineData,
     Settings,
-    SlabData,
     Subelement,
     SuccessfulExecutionResult,
     ZoneBoundariesWrapper,
-    ZoneData,
 )
 
 if TYPE_CHECKING:
@@ -141,181 +120,6 @@ class ElementCommands:
         )
         validated_response = ChangeSelectionOfElementsResult.model_validate(response_dict)
         return validated_response
-
-    def create_columns(self, columns_data: list[ColumnData]) -> list[ElementIdArrayItem]:
-        """
-        Creates Column elements based on the given parameters.
-
-        Args:
-            columns_data (list[ColumnData]): Array of data to create Columns.
-
-        Returns:
-            list[ElementIdArrayItem]: A list of elements.
-
-        Raises:
-            ArchicadAPIError: If the API returns an error response.
-            RequestError: If there is a network or connection error.
-            pydantic.ValidationError: If the parameters, or the API Response fail validation.
-        """
-        params_dict = {
-            "columnsData": columns_data,
-        }
-        validated_params = CreateColumnsParameters(**params_dict)
-        response_dict = self._core.post_tapir_command(
-            "CreateColumns", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
-        )
-        validated_response = CreateColumnsResult.model_validate(response_dict)
-        return validated_response.elements
-
-    def create_labels(self, labels_data: list[LabelData]) -> list[ElementIdArrayItem]:
-        """
-        Creates Label elements based on the given parameters.
-
-        Args:
-            labels_data (list[LabelData]): Array of data to create Labels.
-
-        Returns:
-            list[ElementIdArrayItem]: A list of elements.
-
-        Raises:
-            ArchicadAPIError: If the API returns an error response.
-            RequestError: If there is a network or connection error.
-            pydantic.ValidationError: If the parameters, or the API Response fail validation.
-        """
-        params_dict = {
-            "labelsData": labels_data,
-        }
-        validated_params = CreateLabelsParameters(**params_dict)
-        response_dict = self._core.post_tapir_command(
-            "CreateLabels", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
-        )
-        validated_response = CreateLabelsResult.model_validate(response_dict)
-        return validated_response.elements
-
-    def create_meshes(self, meshes_data: list[MeshData]) -> list[ElementIdArrayItem]:
-        """
-        Creates Mesh elements based on the given parameters.
-
-        Args:
-            meshes_data (list[MeshData]): Array of data to create Meshes.
-
-        Returns:
-            list[ElementIdArrayItem]: A list of elements.
-
-        Raises:
-            ArchicadAPIError: If the API returns an error response.
-            RequestError: If there is a network or connection error.
-            pydantic.ValidationError: If the parameters, or the API Response fail validation.
-        """
-        params_dict = {
-            "meshesData": meshes_data,
-        }
-        validated_params = CreateMeshesParameters(**params_dict)
-        response_dict = self._core.post_tapir_command(
-            "CreateMeshes", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
-        )
-        validated_response = CreateMeshesResult.model_validate(response_dict)
-        return validated_response.elements
-
-    def create_objects(self, objects_data: list[ObjectData]) -> list[ElementIdArrayItem]:
-        """
-        Creates Object elements based on the given parameters.
-
-        Args:
-            objects_data (list[ObjectData]): Array of data to create Objects.
-
-        Returns:
-            list[ElementIdArrayItem]: A list of elements.
-
-        Raises:
-            ArchicadAPIError: If the API returns an error response.
-            RequestError: If there is a network or connection error.
-            pydantic.ValidationError: If the parameters, or the API Response fail validation.
-        """
-        params_dict = {
-            "objectsData": objects_data,
-        }
-        validated_params = CreateObjectsParameters(**params_dict)
-        response_dict = self._core.post_tapir_command(
-            "CreateObjects", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
-        )
-        validated_response = CreateObjectsResult.model_validate(response_dict)
-        return validated_response.elements
-
-    def create_polylines(self, polylines_data: list[PolylineData]) -> list[ElementIdArrayItem]:
-        """
-        Creates Polyline elements based on the given parameters.
-
-        Args:
-            polylines_data (list[PolylineData]): Array of data to create Polylines.
-
-        Returns:
-            list[ElementIdArrayItem]: A list of elements.
-
-        Raises:
-            ArchicadAPIError: If the API returns an error response.
-            RequestError: If there is a network or connection error.
-            pydantic.ValidationError: If the parameters, or the API Response fail validation.
-        """
-        params_dict = {
-            "polylinesData": polylines_data,
-        }
-        validated_params = CreatePolylinesParameters(**params_dict)
-        response_dict = self._core.post_tapir_command(
-            "CreatePolylines", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
-        )
-        validated_response = CreatePolylinesResult.model_validate(response_dict)
-        return validated_response.elements
-
-    def create_slabs(self, slabs_data: list[SlabData]) -> list[ElementIdArrayItem]:
-        """
-        Creates Slab elements based on the given parameters.
-
-        Args:
-            slabs_data (list[SlabData]): Array of data to create Slabs.
-
-        Returns:
-            list[ElementIdArrayItem]: A list of elements.
-
-        Raises:
-            ArchicadAPIError: If the API returns an error response.
-            RequestError: If there is a network or connection error.
-            pydantic.ValidationError: If the parameters, or the API Response fail validation.
-        """
-        params_dict = {
-            "slabsData": slabs_data,
-        }
-        validated_params = CreateSlabsParameters(**params_dict)
-        response_dict = self._core.post_tapir_command(
-            "CreateSlabs", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
-        )
-        validated_response = CreateSlabsResult.model_validate(response_dict)
-        return validated_response.elements
-
-    def create_zones(self, zones_data: list[ZoneData]) -> list[ElementIdArrayItem]:
-        """
-        Creates Zone elements based on the given parameters.
-
-        Args:
-            zones_data (list[ZoneData]): Array of data to create Zones.
-
-        Returns:
-            list[ElementIdArrayItem]: A list of elements.
-
-        Raises:
-            ArchicadAPIError: If the API returns an error response.
-            RequestError: If there is a network or connection error.
-            pydantic.ValidationError: If the parameters, or the API Response fail validation.
-        """
-        params_dict = {
-            "zonesData": zones_data,
-        }
-        validated_params = CreateZonesParameters(**params_dict)
-        response_dict = self._core.post_tapir_command(
-            "CreateZones", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
-        )
-        validated_response = CreateZonesResult.model_validate(response_dict)
-        return validated_response.elements
 
     def delete_elements(self, elements: list[ElementIdArrayItem]) -> FailedExecutionResult | SuccessfulExecutionResult:
         """

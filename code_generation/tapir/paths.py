@@ -2,8 +2,8 @@ import pathlib
 
 class TapirApiPaths:
     # --- Source URLs ---
-    COMMAND_DEFS_URL = "https://raw.githubusercontent.com/SzamosiMate/tapir-archicad-automation/refs/heads/schema-response-naming/docs/archicad-addon/command_definitions.js"
-    COMMON_SCHEMA_URL = "https://raw.githubusercontent.com/SzamosiMate/tapir-archicad-automation/refs/heads/schema-response-naming/docs/archicad-addon/common_schema_definitions.js"
+    COMMAND_DEFS_URL = "https://raw.githubusercontent.com/ENZYME-APD/tapir-archicad-automation/refs/heads/main/docs/archicad-addon/command_definitions.js"
+    COMMON_SCHEMA_URL = "https://raw.githubusercontent.com/ENZYME-APD/tapir-archicad-automation/refs/heads/main/docs/archicad-addon/common_schema_definitions.js"
 
     CODE_GEN_DIR = pathlib.Path(__file__).resolve().parent.parent
     PROJECT_ROOT = CODE_GEN_DIR.parent

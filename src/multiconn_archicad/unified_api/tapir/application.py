@@ -13,7 +13,12 @@ from multiconn_archicad.models.tapir.commands import (
     GetCurrentWindowTypeResult,
     QuitArchicadResult,
 )
-from multiconn_archicad.models.tapir.types import FailedExecutionResult, SuccessfulExecutionResult, WindowType
+from multiconn_archicad.models.tapir.types import (
+    DatabaseId,
+    FailedExecutionResult,
+    SuccessfulExecutionResult,
+    WindowType,
+)
 
 if TYPE_CHECKING:
     from multiconn_archicad.core.core_commands import CoreCommands
@@ -23,12 +28,15 @@ class ApplicationCommands:
     def __init__(self, core: CoreCommands):
         self._core = core
 
-    def change_window(self, window_type: WindowType) -> FailedExecutionResult | SuccessfulExecutionResult:
+    def change_window(
+        self, window_type: WindowType, database_id: DatabaseId | None = None
+    ) -> FailedExecutionResult | SuccessfulExecutionResult:
         """
         Changes the current (active) window to the given window.
 
         Args:
             window_type (WindowType)
+            database_id (DatabaseId | None)
 
         Returns:
             FailedExecutionResult | SuccessfulExecutionResult
@@ -40,6 +48,7 @@ class ApplicationCommands:
         """
         params_dict = {
             "windowType": window_type,
+            "databaseId": database_id,
         }
         validated_params = ChangeWindowParameters(**params_dict)
         response_dict = self._core.post_tapir_command(

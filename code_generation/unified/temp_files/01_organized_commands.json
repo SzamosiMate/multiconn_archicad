@@ -134,55 +134,6 @@
                 "source": "tapir"
             },
             {
-                "name": "CreateColumns",
-                "group": "Element Commands",
-                "description": "Creates Column elements based on the given parameters.",
-                "version": "1.0.3",
-                "source": "tapir"
-            },
-            {
-                "name": "CreateLabels",
-                "group": "Element Commands",
-                "description": "Creates Label elements based on the given parameters.",
-                "version": "1.2.5",
-                "source": "tapir"
-            },
-            {
-                "name": "CreateMeshes",
-                "group": "Element Commands",
-                "description": "Creates Mesh elements based on the given parameters.",
-                "version": "1.1.9",
-                "source": "tapir"
-            },
-            {
-                "name": "CreateObjects",
-                "group": "Element Commands",
-                "description": "Creates Object elements based on the given parameters.",
-                "version": "1.0.3",
-                "source": "tapir"
-            },
-            {
-                "name": "CreatePolylines",
-                "group": "Element Commands",
-                "description": "Creates Polyline elements based on the given parameters.",
-                "version": "1.1.5",
-                "source": "tapir"
-            },
-            {
-                "name": "CreateSlabs",
-                "group": "Element Commands",
-                "description": "Creates Slab elements based on the given parameters.",
-                "version": "1.0.3",
-                "source": "tapir"
-            },
-            {
-                "name": "CreateZones",
-                "group": "Element Commands",
-                "description": "Creates Zone elements based on the given parameters.",
-                "version": "1.1.8",
-                "source": "tapir"
-            },
-            {
                 "name": "DeleteElements",
                 "group": "Element Commands",
                 "description": "Deletes elements.",
@@ -374,6 +325,227 @@
                 "source": "tapir"
             }
         ],
+        "Project Commands": [
+            {
+                "name": "CloseProject",
+                "group": "Project Commands",
+                "description": "Closes the currently opened project.",
+                "version": "1.3.1",
+                "source": "tapir"
+            },
+            {
+                "name": "GetCalculationUnits",
+                "group": "Project Commands",
+                "description": "Gets the project calculation units.",
+                "version": "1.4.0",
+                "source": "tapir"
+            },
+            {
+                "name": "GetGeoLocation",
+                "group": "Project Commands",
+                "description": "Gets the project location details.",
+                "version": "1.1.6",
+                "source": "tapir"
+            },
+            {
+                "name": "GetHotlinks",
+                "group": "Project Commands",
+                "description": "Gets the file system locations (path) of the hotlink modules. The hotlinks can have tree hierarchy in the project.",
+                "version": "0.1.0",
+                "source": "tapir"
+            },
+            {
+                "name": "GetProjectInfo",
+                "group": "Project Commands",
+                "description": "Retrieves information about the currently loaded project.",
+                "version": "0.1.0",
+                "source": "tapir"
+            },
+            {
+                "name": "GetProjectInfoFields",
+                "group": "Project Commands",
+                "description": "Retrieves the names and values of all project info fields.",
+                "version": "0.1.2",
+                "source": "tapir"
+            },
+            {
+                "name": "GetStories",
+                "group": "Project Commands",
+                "description": "Retrieves information about the story sructure of the currently loaded project.",
+                "version": "1.1.5",
+                "source": "tapir"
+            },
+            {
+                "name": "IFCFileOperation",
+                "group": "Project Commands",
+                "description": "Executes an IFC file operation.",
+                "version": "1.2.6",
+                "source": "tapir"
+            },
+            {
+                "name": "OpenProject",
+                "group": "Project Commands",
+                "description": "Opens the given project.",
+                "version": "1.0.7",
+                "source": "tapir"
+            },
+            {
+                "name": "PrintView",
+                "group": "Project Commands",
+                "description": "Prints from the current view.",
+                "version": "1.3.1",
+                "source": "tapir"
+            },
+            {
+                "name": "SaveProject",
+                "group": "Project Commands",
+                "description": "Saves the currently opened project.",
+                "version": "1.3.1",
+                "source": "tapir"
+            },
+            {
+                "name": "SetGeoLocation",
+                "group": "Project Commands",
+                "description": "Sets the project location details.",
+                "version": "1.2.9",
+                "source": "tapir"
+            },
+            {
+                "name": "SetProjectInfoField",
+                "group": "Project Commands",
+                "description": "Sets the value of a project info field.",
+                "version": "0.1.2",
+                "source": "tapir"
+            },
+            {
+                "name": "SetStories",
+                "group": "Project Commands",
+                "description": "Sets the story sructure of the currently loaded project.",
+                "version": "1.1.5",
+                "source": "tapir"
+            }
+        ],
+        "Element Creation": [
+            {
+                "name": "CreateAssociativeDimensions",
+                "group": "Element Commands",
+                "description": "Creates associative linear dimensions from explicit witness point references.",
+                "version": "1.4.0",
+                "source": "tapir"
+            },
+            {
+                "name": "CreateAssociativeDimensionsOnSection",
+                "group": "Element Commands",
+                "description": "Creates associative linear dimensions on section elements using common wall, slab, beam, column and opening presets.",
+                "version": "1.4.0",
+                "source": "tapir"
+            },
+            {
+                "name": "CreateBeams",
+                "group": "Element Commands",
+                "description": "Creates Beam elements based on the given parameters.",
+                "version": "1.4.0",
+                "source": "tapir"
+            },
+            {
+                "name": "CreateColumns",
+                "group": "Element Commands",
+                "description": "Creates Column elements based on the given parameters.",
+                "version": "1.0.3",
+                "source": "tapir"
+            },
+            {
+                "name": "CreateDoors",
+                "group": "Element Commands",
+                "description": "Creates Door elements in host walls based on the given parameters.",
+                "version": "1.4.0",
+                "source": "tapir"
+            },
+            {
+                "name": "CreateLabels",
+                "group": "Element Commands",
+                "description": "Creates Label elements based on the given parameters.",
+                "version": "1.2.5",
+                "source": "tapir"
+            },
+            {
+                "name": "CreateMeshes",
+                "group": "Element Commands",
+                "description": "Creates Mesh elements based on the given parameters.",
+                "version": "1.1.9",
+                "source": "tapir"
+            },
+            {
+                "name": "CreateMorphs",
+                "group": "Element Commands",
+                "description": "Creates Morph elements from simple box definitions.",
+                "version": "1.4.0",
+                "source": "tapir"
+            },
+            {
+                "name": "CreateObjects",
+                "group": "Element Commands",
+                "description": "Creates Object elements based on the given parameters.",
+                "version": "1.0.3",
+                "source": "tapir"
+            },
+            {
+                "name": "CreateOpenings",
+                "group": "Element Commands",
+                "description": "Creates Opening elements in the given host elements.",
+                "version": "1.4.0",
+                "source": "tapir"
+            },
+            {
+                "name": "CreatePolylines",
+                "group": "Element Commands",
+                "description": "Creates Polyline elements based on the given parameters.",
+                "version": "1.1.5",
+                "source": "tapir"
+            },
+            {
+                "name": "CreateRoofs",
+                "group": "Element Commands",
+                "description": "Creates multi-plane Roof elements based on footprint, level and roof profile data.",
+                "version": "1.4.0",
+                "source": "tapir"
+            },
+            {
+                "name": "CreateSlabs",
+                "group": "Element Commands",
+                "description": "Creates Slab elements based on the given parameters.",
+                "version": "1.0.3",
+                "source": "tapir"
+            },
+            {
+                "name": "CreateWallThicknessDimensions",
+                "group": "Element Commands",
+                "description": "Creates associative wall thickness dimensions for the given walls.",
+                "version": "1.4.0",
+                "source": "tapir"
+            },
+            {
+                "name": "CreateWalls",
+                "group": "Element Commands",
+                "description": "Creates Wall elements based on the given parameters.",
+                "version": "1.4.0",
+                "source": "tapir"
+            },
+            {
+                "name": "CreateWindows",
+                "group": "Element Commands",
+                "description": "Creates Window elements in host walls based on the given parameters.",
+                "version": "1.4.0",
+                "source": "tapir"
+            },
+            {
+                "name": "CreateZones",
+                "group": "Element Commands",
+                "description": "Creates Zone elements based on the given parameters.",
+                "version": "1.1.8",
+                "source": "tapir"
+            }
+        ],
         "Attribute Commands": [
             {
                 "name": "CreateBuildingMaterials",
@@ -429,6 +601,115 @@
                 "group": "Attribute Commands",
                 "description": "Returns the details of layer combination attributes.",
                 "version": "1.2.4",
+                "source": "tapir"
+            }
+        ],
+        "Navigator Commands": [
+            {
+                "name": "CreateDetails",
+                "group": "Navigator Commands",
+                "description": "Creates independent Detail databases.",
+                "version": "1.4.0",
+                "source": "tapir"
+            },
+            {
+                "name": "CreateDrawings",
+                "group": "Navigator Commands",
+                "description": "Creates Drawing elements on the specified or active layout from navigator items.",
+                "version": "1.4.0",
+                "source": "tapir"
+            },
+            {
+                "name": "CreateLayouts",
+                "group": "Navigator Commands",
+                "description": "Creates Layouts and their backing master layouts.",
+                "version": "1.4.0",
+                "source": "tapir"
+            },
+            {
+                "name": "CreateSubsets",
+                "group": "Navigator Commands",
+                "description": "Creates Layout Book subsets.",
+                "version": "1.4.0",
+                "source": "tapir"
+            },
+            {
+                "name": "CreateWorksheets",
+                "group": "Navigator Commands",
+                "description": "Creates independent Worksheet databases.",
+                "version": "1.4.0",
+                "source": "tapir"
+            },
+            {
+                "name": "FitInWindow",
+                "group": "Navigator Commands",
+                "description": "Zooms to the given elements or fits everything in the window.",
+                "version": "1.3.1",
+                "source": "tapir"
+            },
+            {
+                "name": "GetDatabaseIdFromNavigatorItemId",
+                "group": "Navigator Commands",
+                "description": "Gets the ID of the database associated with the supplied navigator item id",
+                "version": "1.1.4",
+                "source": "tapir"
+            },
+            {
+                "name": "GetModelViewOptions",
+                "group": "Navigator Commands",
+                "description": "Gets all model view options",
+                "version": "1.1.4",
+                "source": "tapir"
+            },
+            {
+                "name": "GetView2DTransformations",
+                "group": "Navigator Commands",
+                "description": "Get zoom and rotation of 2D views",
+                "version": "1.1.7",
+                "source": "tapir"
+            },
+            {
+                "name": "GetViewSettings",
+                "group": "Navigator Commands",
+                "description": "Gets the view settings of navigator items",
+                "version": "1.1.4",
+                "source": "tapir"
+            },
+            {
+                "name": "PublishPublisherSet",
+                "group": "Navigator Commands",
+                "description": "Performs a publish operation on the currently opened project. Only the given publisher set will be published.",
+                "version": "0.1.0",
+                "source": "tapir"
+            },
+            {
+                "name": "Set3DCutPlanes",
+                "group": "Navigator Commands",
+                "description": "Sets the 3D cut planes.",
+                "version": "1.3.1",
+                "source": "tapir"
+            },
+            {
+                "name": "SetViewSettings",
+                "group": "Navigator Commands",
+                "description": "Sets the view settings of navigator items",
+                "version": "1.1.4",
+                "source": "tapir"
+            },
+            {
+                "name": "UpdateDrawings",
+                "group": "Navigator Commands",
+                "description": "Performs a drawing update on the given elements.",
+                "version": "1.1.4",
+                "source": "tapir"
+            }
+        ],
+        "Element grouping Commands": [
+            {
+                "name": "CreateGroups",
+                "group": "Element grouping Commands",
+                "description": "Creates groups of the passed elements",
+                "version": "1.4.0",
                 "source": "tapir"
             }
         ],
@@ -534,64 +815,6 @@
                 "source": "tapir"
             }
         ],
-        "Navigator Commands": [
-            {
-                "name": "GetDatabaseIdFromNavigatorItemId",
-                "group": "Navigator Commands",
-                "description": "Gets the ID of the database associated with the supplied navigator item id",
-                "version": "1.1.4",
-                "source": "tapir"
-            },
-            {
-                "name": "GetModelViewOptions",
-                "group": "Navigator Commands",
-                "description": "Gets all model view options",
-                "version": "1.1.4",
-                "source": "tapir"
-            },
-            {
-                "name": "GetView2DTransformations",
-                "group": "Navigator Commands",
-                "description": "Get zoom and rotation of 2D views",
-                "version": "1.1.7",
-                "source": "tapir"
-            },
-            {
-                "name": "GetViewSettings",
-                "group": "Navigator Commands",
-                "description": "Gets the view settings of navigator items",
-                "version": "1.1.4",
-                "source": "tapir"
-            },
-            {
-                "name": "PublishPublisherSet",
-                "group": "Navigator Commands",
-                "description": "Performs a publish operation on the currently opened project. Only the given publisher set will be published.",
-                "version": "0.1.0",
-                "source": "tapir"
-            },
-            {
-                "name": "Set3DCutPlanes",
-                "group": "Navigator Commands",
-                "description": "Sets the 3D cut planes.",
-                "version": "1.3.1",
-                "source": "tapir"
-            },
-            {
-                "name": "SetViewSettings",
-                "group": "Navigator Commands",
-                "description": "Sets the view settings of navigator items",
-                "version": "1.1.4",
-                "source": "tapir"
-            },
-            {
-                "name": "UpdateDrawings",
-                "group": "Navigator Commands",
-                "description": "Performs a drawing update on the given elements.",
-                "version": "1.1.4",
-                "source": "tapir"
-            }
-        ],
         "Design Options Commands": [
             {
                 "name": "GetDesignOptionCombinations",
@@ -615,75 +838,61 @@
                 "source": "tapir"
             }
         ],
-        "Project Commands": [
+        "Element Modification": [
             {
-                "name": "GetGeoLocation",
-                "group": "Project Commands",
-                "description": "Gets the project location details.",
-                "version": "1.1.6",
+                "name": "ModifyBeams",
+                "group": "Element Commands",
+                "description": "Modifies Beam elements based on the given parameters.",
+                "version": "1.4.0",
                 "source": "tapir"
             },
             {
-                "name": "GetHotlinks",
-                "group": "Project Commands",
-                "description": "Gets the file system locations (path) of the hotlink modules. The hotlinks can have tree hierarchy in the project.",
-                "version": "0.1.0",
+                "name": "ModifyColumns",
+                "group": "Element Commands",
+                "description": "Modifies Column elements based on the given parameters.",
+                "version": "1.4.0",
                 "source": "tapir"
             },
             {
-                "name": "GetProjectInfo",
-                "group": "Project Commands",
-                "description": "Retrieves information about the currently loaded project.",
-                "version": "0.1.0",
+                "name": "ModifyDoors",
+                "group": "Element Commands",
+                "description": "Modifies Door elements based on the given parameters.",
+                "version": "1.4.0",
                 "source": "tapir"
             },
             {
-                "name": "GetProjectInfoFields",
-                "group": "Project Commands",
-                "description": "Retrieves the names and values of all project info fields.",
-                "version": "0.1.2",
+                "name": "ModifyMorphs",
+                "group": "Element Commands",
+                "description": "Modifies Morph elements based on the given parameters.",
+                "version": "1.4.0",
                 "source": "tapir"
             },
             {
-                "name": "GetStories",
-                "group": "Project Commands",
-                "description": "Retrieves information about the story sructure of the currently loaded project.",
-                "version": "1.1.5",
+                "name": "ModifyRoofs",
+                "group": "Element Commands",
+                "description": "Modifies multi-plane Roof elements based on the given parameters.",
+                "version": "1.4.0",
                 "source": "tapir"
             },
             {
-                "name": "IFCFileOperation",
-                "group": "Project Commands",
-                "description": "Executes an IFC file operation.",
-                "version": "1.2.6",
+                "name": "ModifySlabs",
+                "group": "Element Commands",
+                "description": "Modifies Slab elements based on the given parameters.",
+                "version": "1.4.0",
                 "source": "tapir"
             },
             {
-                "name": "OpenProject",
-                "group": "Project Commands",
-                "description": "Opens the given project.",
-                "version": "1.0.7",
+                "name": "ModifyWalls",
+                "group": "Element Commands",
+                "description": "Modifies Wall elements based on the given parameters.",
+                "version": "1.4.0",
                 "source": "tapir"
             },
             {
-                "name": "SetGeoLocation",
-                "group": "Project Commands",
-                "description": "Sets the project location details.",
-                "version": "1.2.9",
-                "source": "tapir"
-            },
-            {
-                "name": "SetProjectInfoField",
-                "group": "Project Commands",
-                "description": "Sets the value of a project info field.",
-                "version": "0.1.2",
-                "source": "tapir"
-            },
-            {
-                "name": "SetStories",
-                "group": "Project Commands",
-                "description": "Sets the story sructure of the currently loaded project.",
-                "version": "1.1.5",
+                "name": "ModifyWindows",
+                "group": "Element Commands",
+                "description": "Modifies Window elements based on the given parameters.",
+                "version": "1.4.0",
                 "source": "tapir"
             }
         ],

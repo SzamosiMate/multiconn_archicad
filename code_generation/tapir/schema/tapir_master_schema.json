@@ -823,6 +823,69 @@
         "Unknown"
       ]
     },
+    "LengthType": {
+      "type": "string",
+      "description": "The type of the length measurement unit.",
+      "enum": [
+        "Meter",
+        "Decimeter",
+        "Centimeter",
+        "Millimeter",
+        "FootFracInch",
+        "FootDecInch",
+        "DecFoot",
+        "FracInch",
+        "DecInch"
+      ]
+    },
+    "AreaType": {
+      "type": "string",
+      "description": "The type of the area measurement unit.",
+      "enum": [
+        "SquareMeter",
+        "SquareCentimeter",
+        "SquareMillimeter",
+        "SquareFoot",
+        "SquareInch"
+      ]
+    },
+    "VolumeType": {
+      "type": "string",
+      "description": "The type of the volume measurement unit.",
+      "enum": [
+        "CubicMeter",
+        "Liter",
+        "CubicCentimeter",
+        "CubicMillimeter",
+        "CubicFoot",
+        "CubicInch",
+        "CubicYard",
+        "Gallon"
+      ]
+    },
+    "AngleType": {
+      "type": "string",
+      "description": "The type of the angle measurement unit.",
+      "enum": [
+        "DecimalDegree",
+        "DegreeMinSec",
+        "Grad",
+        "Radian",
+        "Surveyors"
+      ]
+    },
+    "AccuracyType": {
+      "type": "string",
+      "description": "Methods for rounding decimal values.",
+      "enum": [
+        "Off",
+        "ShowSmall5",
+        "ShowSmall25",
+        "ShowSmall1",
+        "ShowSmall01",
+        "InchCaseFractions"
+      ]
+    },
     "IssueId": {
       "type": "object",
       "description": "The identifier of an issue.",
@@ -2264,6 +2327,21 @@
         "graphicOverrideCombination": {
           "type": "string",
           "description": "The name of the graphic override combination. If empty, the view has custom graphic override combination."
+        },
+        "drawingScale": {
+          "type": "integer",
+          "description": "The drawing scale stored on the view, if enabled."
+        },
+        "saveZoom": {
+          "type": "boolean",
+          "description": "Whether the zoom box is stored in the view."
+        },
+        "ignoreSavedZoom": {
+          "type": "boolean",
+          "description": "Whether changing to the view should ignore its stored zoom."
+        },
+        "zoom": {
+          "$ref": "#/$defs/Zoom"
         }
       },
       "additionalProperties": false,
@@ -2284,33 +2362,7 @@
       "type": "object",
       "properties": {
         "zoom": {
-          "type": "object",
-          "description": "The actual zoom parameters, rectangular region of the model.",
-          "properties": {
-            "xMin": {
-              "type": "number",
-              "description": "The minimum X value of the zoom box."
-            },
-            "yMin": {
-              "type": "number",
-              "description": "The minimum Y value of the zoom box."
-            },
-            "xMax": {
-              "type": "number",
-              "description": "The maximum X value of the zoom box."
-            },
-            "yMax": {
-              "type": "number",
-              "description": "The maximum Y value of the zoom box."
-            }
-          },
-          "additionalProperties": false,
-          "required": [
-            "xMin",
-            "yMin",
-            "xMax",
-            "yMax"
-          ]
+          "$ref": "#/$defs/Zoom"
         },
         "rotation": {
           "type": "number",
@@ -2455,6 +2507,18 @@
           "items": {
             "$ref": "#/$defs/PolyArc"
           }
+        },
+        "structureType": {
+          "$ref": "#/$defs/WallStructureType"
+        },
+        "buildingMaterialId": {
+          "$ref": "#/$defs/AttributeId"
+        },
+        "compositeId": {
+          "$ref": "#/$defs/AttributeId"
+        },
+        "profileId": {
+          "$ref": "#/$defs/AttributeId"
         }
       },
       "additionalProperties": false,
@@ -2547,6 +2611,15 @@
         },
         "holes": {
           "$ref": "#/$defs/Holes2D"
+        },
+        "structureType": {
+          "$ref": "#/$defs/SlabStructureType"
+        },
+        "buildingMaterialId": {
+          "$ref": "#/$defs/AttributeId"
+        },
+        "compositeId": {
+          "$ref": "#/$defs/AttributeId"
         }
       },
       "additionalProperties": false,
@@ -4008,6 +4081,82 @@
         }
       ]
     },
+    "GroupId": {
+      "type": "object",
+      "description": "The identifier of a group.",
+      "properties": {
+        "guid": {
+          "$ref": "#/$defs/Guid"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "guid"
+      ]
+    },
+    "GroupIdArrayItem": {
+      "type": "object",
+      "description": "A wrapper containing the group identifier.",
+      "properties": {
+        "groupId": {
+          "$ref": "#/$defs/GroupId"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "groupId"
+      ]
+    },
+    "GroupIdOrError": {
+      "type": "object",
+      "description": "A groupId or an error.",
+      "oneOf": [
+        {
+          "$ref": "#/$defs/GroupIdArrayItem"
+        },
+        {
+          "$ref": "#/$defs/ErrorItem"
+        }
+      ]
+    },
+    "ElementOrGroupId": {
+      "type": "object",
+      "description": "An identifier representing either an Element or a Group.",
+      "oneOf": [
+        {
+          "$ref": "#/$defs/ElementIdArrayItem"
+        },
+        {
+          "$ref": "#/$defs/GroupIdArrayItem"
+        }
+      ]
+    },
+    "ElementOrGroupIds": {
+      "type": "array",
+      "description": "A list of element and/or group identifiers.",
+      "items": {
+        "$ref": "#/$defs/ElementOrGroupId"
+      },
+      "minItems": 2
+    },
+    "ElementGroupParameters": {
+      "type": "object",
+      "description": "The parameters for creating a single group",
+      "properties": {
+        "elements": {
+          "$ref": "#/$defs/ElementOrGroupIds",
+          "description": "The elements or child groups to be grouped."
+        },
+        "parentGroupId": {
+          "$ref": "#/$defs/GroupId",
+          "description": "Optional parent group ID to nest this group under."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elements"
+      ]
+    },
     "GetAddOnVersionResult": {
       "type": "object",
       "properties": {
@@ -4056,6 +4205,9 @@
       "properties": {
         "windowType": {
           "$ref": "#/$defs/WindowType"
+        },
+        "databaseId": {
+          "$ref": "#/$defs/DatabaseId"
         }
       },
       "additionalProperties": false,
@@ -4206,6 +4358,113 @@
     "OpenProjectResult": {
       "$ref": "#/$defs/ExecutionResult"
     },
+    "CloseProjectResult": {
+      "$ref": "#/$defs/ExecutionResult"
+    },
+    "SaveProjectResult": {
+      "$ref": "#/$defs/ExecutionResult"
+    },
+    "GetCalculationUnitsResult": {
+      "type": "object",
+      "properties": {
+        "length": {
+          "type": "object",
+          "properties": {
+            "unit": {
+              "$ref": "#/$defs/LengthType"
+            },
+            "accuracy": {
+              "$ref": "#/$defs/AccuracyType"
+            },
+            "decimals": {
+              "type": "integer",
+              "description": "Number of decimals to display for length values."
+            },
+            "roundInch": {
+              "type": "integer",
+              "description": "Fractional inches."
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "unit",
+            "accuracy",
+            "decimals"
+          ]
+        },
+        "area": {
+          "type": "object",
+          "properties": {
+            "unit": {
+              "$ref": "#/$defs/AreaType"
+            },
+            "accuracy": {
+              "$ref": "#/$defs/AccuracyType"
+            },
+            "decimals": {
+              "type": "integer",
+              "description": "Number of decimals to display for area values."
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "unit",
+            "accuracy",
+            "decimals"
+          ]
+        },
+        "volume": {
+          "type": "object",
+          "properties": {
+            "unit": {
+              "$ref": "#/$defs/VolumeType"
+            },
+            "accuracy": {
+              "$ref": "#/$defs/AccuracyType"
+            },
+            "decimals": {
+              "type": "integer",
+              "description": "Number of decimals to display for volume values."
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "unit",
+            "accuracy",
+            "decimals"
+          ]
+        },
+        "angle": {
+          "type": "object",
+          "properties": {
+            "unit": {
+              "$ref": "#/$defs/AngleType"
+            },
+            "decimals": {
+              "type": "integer",
+              "description": "Number of decimals to display for angle values."
+            },
+            "accuracy": {
+              "type": "integer",
+              "description": "Accuracy for angle values."
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "unit",
+            "decimals",
+            "accuracy"
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "length",
+        "area",
+        "volume",
+        "angle"
+      ]
+    },
     "GetGeoLocationResult": {
       "type": "object",
       "properties": {
@@ -4272,6 +4531,37 @@
       ]
     },
     "IFCFileOperationResult": {
+      "$ref": "#/$defs/ExecutionResult"
+    },
+    "PrintViewParameters": {
+      "type": "object",
+      "properties": {
+        "grid": {
+          "type": "boolean",
+          "description": "Print the grid. The default is false."
+        },
+        "fixText": {
+          "type": "boolean",
+          "description": "Use fixed text size. The default is false."
+        },
+        "scale": {
+          "type": "integer",
+          "description": "Print scale. The default is 100."
+        },
+        "printArea": {
+          "type": "string",
+          "description": "The area to print. The default is 'currentView'.",
+          "enum": [
+            "currentView",
+            "entireDrawing",
+            "marquee"
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "required": []
+    },
+    "PrintViewResult": {
       "$ref": "#/$defs/ExecutionResult"
     },
     "GetSelectedElementsResult": {
@@ -5025,6 +5315,60 @@
         "elements"
       ]
     },
+    "CreateWallsParameters": {
+      "type": "object",
+      "properties": {
+        "wallsData": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/WallData"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "wallsData"
+      ]
+    },
+    "CreateWallsResult": {
+      "type": "object",
+      "properties": {
+        "elements": {
+          "$ref": "#/$defs/Elements"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elements"
+      ]
+    },
+    "CreateBeamsParameters": {
+      "type": "object",
+      "properties": {
+        "beamsData": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/BeamData"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "beamsData"
+      ]
+    },
+    "CreateBeamsResult": {
+      "type": "object",
+      "properties": {
+        "elements": {
+          "$ref": "#/$defs/Elements"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elements"
+      ]
+    },
     "CreateSlabsParameters": {
       "type": "object",
       "properties": {
@@ -5042,6 +5386,222 @@
       ]
     },
     "CreateSlabsResult": {
+      "type": "object",
+      "properties": {
+        "elements": {
+          "$ref": "#/$defs/Elements"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elements"
+      ]
+    },
+    "CreateWindowsParameters": {
+      "type": "object",
+      "properties": {
+        "windowsData": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/WindowData"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "windowsData"
+      ]
+    },
+    "CreateWindowsResult": {
+      "type": "object",
+      "properties": {
+        "elements": {
+          "$ref": "#/$defs/Elements"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elements"
+      ]
+    },
+    "CreateDoorsParameters": {
+      "type": "object",
+      "properties": {
+        "doorsData": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/DoorData"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "doorsData"
+      ]
+    },
+    "CreateDoorsResult": {
+      "type": "object",
+      "properties": {
+        "elements": {
+          "$ref": "#/$defs/Elements"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elements"
+      ]
+    },
+    "CreateOpeningsParameters": {
+      "type": "object",
+      "properties": {
+        "openingsData": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/OpeningData"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "openingsData"
+      ]
+    },
+    "CreateOpeningsResult": {
+      "type": "object",
+      "properties": {
+        "elements": {
+          "$ref": "#/$defs/Elements"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elements"
+      ]
+    },
+    "CreateMorphsParameters": {
+      "type": "object",
+      "properties": {
+        "morphsData": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/MorphData"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "morphsData"
+      ]
+    },
+    "CreateMorphsResult": {
+      "type": "object",
+      "properties": {
+        "elements": {
+          "$ref": "#/$defs/Elements"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elements"
+      ]
+    },
+    "CreateRoofsParameters": {
+      "type": "object",
+      "properties": {
+        "roofsData": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/RoofData"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "roofsData"
+      ]
+    },
+    "CreateRoofsResult": {
+      "type": "object",
+      "properties": {
+        "elements": {
+          "$ref": "#/$defs/Elements"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elements"
+      ]
+    },
+    "CreateAssociativeDimensionsParameters": {
+      "type": "object",
+      "properties": {
+        "dimensionsData": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/AssociativeDimensionData"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "dimensionsData"
+      ]
+    },
+    "CreateAssociativeDimensionsResult": {
+      "type": "object",
+      "properties": {
+        "elements": {
+          "$ref": "#/$defs/Elements"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elements"
+      ]
+    },
+    "CreateAssociativeDimensionsOnSectionParameters": {
+      "type": "object",
+      "properties": {
+        "dimensionsData": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/AssociativeDimensionOnSectionData"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "dimensionsData"
+      ]
+    },
+    "CreateAssociativeDimensionsOnSectionResult": {
+      "type": "object",
+      "properties": {
+        "elements": {
+          "$ref": "#/$defs/Elements"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elements"
+      ]
+    },
+    "CreateWallThicknessDimensionsParameters": {
+      "type": "object",
+      "properties": {
+        "dimensionsData": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/WallThicknessDimensionData"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "dimensionsData"
+      ]
+    },
+    "CreateWallThicknessDimensionsResult": {
       "type": "object",
       "properties": {
         "elements": {
@@ -5191,6 +5751,222 @@
       "additionalProperties": false,
       "required": [
         "elements"
+      ]
+    },
+    "ModifyWallsParameters": {
+      "type": "object",
+      "properties": {
+        "wallsWithDetails": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/WallWithDetails"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "wallsWithDetails"
+      ]
+    },
+    "ModifyWallsResult": {
+      "type": "object",
+      "properties": {
+        "executionResults": {
+          "$ref": "#/$defs/ExecutionResults"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "executionResults"
+      ]
+    },
+    "ModifyBeamsParameters": {
+      "type": "object",
+      "properties": {
+        "beamsWithDetails": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/BeamWithDetails"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "beamsWithDetails"
+      ]
+    },
+    "ModifyBeamsResult": {
+      "type": "object",
+      "properties": {
+        "executionResults": {
+          "$ref": "#/$defs/ExecutionResults"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "executionResults"
+      ]
+    },
+    "ModifySlabsParameters": {
+      "type": "object",
+      "properties": {
+        "slabsWithDetails": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/SlabWithDetails"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "slabsWithDetails"
+      ]
+    },
+    "ModifySlabsResult": {
+      "type": "object",
+      "properties": {
+        "executionResults": {
+          "$ref": "#/$defs/ExecutionResults"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "executionResults"
+      ]
+    },
+    "ModifyColumnsParameters": {
+      "type": "object",
+      "properties": {
+        "columnsWithDetails": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ColumnWithDetails"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "columnsWithDetails"
+      ]
+    },
+    "ModifyColumnsResult": {
+      "type": "object",
+      "properties": {
+        "executionResults": {
+          "$ref": "#/$defs/ExecutionResults"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "executionResults"
+      ]
+    },
+    "ModifyWindowsParameters": {
+      "type": "object",
+      "properties": {
+        "windowsWithDetails": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/WindowWithDetails"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "windowsWithDetails"
+      ]
+    },
+    "ModifyWindowsResult": {
+      "type": "object",
+      "properties": {
+        "executionResults": {
+          "$ref": "#/$defs/ExecutionResults"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "executionResults"
+      ]
+    },
+    "ModifyDoorsParameters": {
+      "type": "object",
+      "properties": {
+        "doorsWithDetails": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/DoorWithDetails"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "doorsWithDetails"
+      ]
+    },
+    "ModifyDoorsResult": {
+      "type": "object",
+      "properties": {
+        "executionResults": {
+          "$ref": "#/$defs/ExecutionResults"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "executionResults"
+      ]
+    },
+    "ModifyMorphsParameters": {
+      "type": "object",
+      "properties": {
+        "morphsWithDetails": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/MorphWithDetails"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "morphsWithDetails"
+      ]
+    },
+    "ModifyMorphsResult": {
+      "type": "object",
+      "properties": {
+        "executionResults": {
+          "$ref": "#/$defs/ExecutionResults"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "executionResults"
+      ]
+    },
+    "ModifyRoofsParameters": {
+      "type": "object",
+      "properties": {
+        "roofsWithDetails": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/RoofWithDetails"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "roofsWithDetails"
+      ]
+    },
+    "ModifyRoofsResult": {
+      "type": "object",
+      "properties": {
+        "executionResults": {
+          "$ref": "#/$defs/ExecutionResults"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "executionResults"
       ]
     },
     "GetElementPreviewImageParameters": {
@@ -5347,6 +6123,38 @@
     },
     "RemoveElementNotificationClientResult": {
       "$ref": "#/$defs/ExecutionResult"
+    },
+    "CreateGroupsParameters": {
+      "type": "object",
+      "properties": {
+        "elementGroups": {
+          "type": "array",
+          "description": "A list of element groups to create.",
+          "items": {
+            "$ref": "#/$defs/ElementGroupParameters"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elementGroups"
+      ]
+    },
+    "CreateGroupsResult": {
+      "type": "object",
+      "properties": {
+        "groupGuids": {
+          "type": "array",
+          "description": "The results of the group creation operations.",
+          "items": {
+            "$ref": "#/$defs/GroupIdOrError"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "groupGuids"
+      ]
     },
     "GetFavoritesByTypeParameters": {
       "type": "object",
@@ -6401,6 +7209,10 @@
           "type": "string",
           "description": "Full local or LAN path for publishing. Optional, by default the path set in the settings of the publisher set will be used.",
           "minLength": 1
+        },
+        "selectedNavigatorItemIds": {
+          "$ref": "#/$defs/NavigatorItemIds",
+          "description": "Optional publisher-tree navigator items to publish instead of the whole publisher set."
         }
       },
       "additionalProperties": false,
@@ -6445,6 +7257,141 @@
       "additionalProperties": false,
       "required": [
         "databases"
+      ]
+    },
+    "CreateDetailsParameters": {
+      "type": "object",
+      "properties": {
+        "detailsData": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/DetailData"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "detailsData"
+      ]
+    },
+    "CreateDetailsResult": {
+      "type": "object",
+      "properties": {
+        "databases": {
+          "$ref": "#/$defs/Databases"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "databases"
+      ]
+    },
+    "CreateWorksheetsParameters": {
+      "type": "object",
+      "properties": {
+        "worksheetsData": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/WorksheetData"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "worksheetsData"
+      ]
+    },
+    "CreateWorksheetsResult": {
+      "type": "object",
+      "properties": {
+        "databases": {
+          "$ref": "#/$defs/Databases"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "databases"
+      ]
+    },
+    "CreateLayoutsParameters": {
+      "type": "object",
+      "properties": {
+        "layoutsData": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/LayoutData"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "layoutsData"
+      ]
+    },
+    "CreateLayoutsResult": {
+      "type": "object",
+      "properties": {
+        "databases": {
+          "$ref": "#/$defs/Databases"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "databases"
+      ]
+    },
+    "CreateSubsetsParameters": {
+      "type": "object",
+      "properties": {
+        "subsetsData": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/SubsetData"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "subsetsData"
+      ]
+    },
+    "CreateSubsetsResult": {
+      "type": "object",
+      "properties": {
+        "executionResults": {
+          "$ref": "#/$defs/ExecutionResults"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "executionResults"
+      ]
+    },
+    "CreateDrawingsParameters": {
+      "type": "object",
+      "properties": {
+        "drawingsData": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/DrawingData"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "drawingsData"
+      ]
+    },
+    "CreateDrawingsResult": {
+      "type": "object",
+      "properties": {
+        "elements": {
+          "$ref": "#/$defs/Elements"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elements"
       ]
     },
     "GetModelViewOptionsResult": {
@@ -6604,6 +7551,19 @@
       "additionalProperties": false
     },
     "Set3DCutPlanesResult": {
+      "$ref": "#/$defs/ExecutionResult"
+    },
+    "FitInWindowParameters": {
+      "type": "object",
+      "properties": {
+        "elements": {
+          "$ref": "#/$defs/Elements"
+        }
+      },
+      "additionalProperties": false,
+      "required": []
+    },
+    "FitInWindowResult": {
       "$ref": "#/$defs/ExecutionResult"
     },
     "CreateIssueParameters": {
@@ -7172,6 +8132,15 @@
             "y",
             "z"
           ]
+        },
+        "height": {
+          "type": "number",
+          "description": "Optional column height.",
+          "exclusiveMinimum": 0.0
+        },
+        "axisRotationAngle": {
+          "type": "number",
+          "description": "Optional column rotation angle in radians."
         }
       },
       "additionalProperties": false,
@@ -7186,6 +8155,11 @@
         "level": {
           "type": "number",
           "description": "The Z coordinate value of the reference line of the slab."
+        },
+        "thickness": {
+          "type": "number",
+          "description": "Optional slab thickness.",
+          "exclusiveMinimum": 0.0
         },
         "polygonCoordinates": {
           "type": "array",
@@ -7219,6 +8193,22 @@
         "floorInd": {
           "type": "number",
           "description": "The identifier of the floor. Optional parameter, by default the current floor is used."
+        },
+        "layerIndex": {
+          "type": "integer",
+          "description": "Layer attribute index to place the polyline on. Optional parameter, by default the current layer is used."
+        },
+        "linePenIndex": {
+          "type": "integer",
+          "description": "Pen index of the polyline contour. Optional parameter, by default the current pen is used."
+        },
+        "lineTypeIndex": {
+          "type": "integer",
+          "description": "Line type attribute index of the polyline contour. Optional parameter, by default the current line type is used."
+        },
+        "penWeightMm": {
+          "type": "number",
+          "description": "Optional pen weight override in mm."
         },
         "coordinates": {
           "type": "array",
@@ -7359,6 +8349,83 @@
         "geometry"
       ]
     },
+    "BeamData": {
+      "type": "object",
+      "properties": {
+        "begCoordinate": {
+          "$ref": "#/$defs/Coordinate2D"
+        },
+        "endCoordinate": {
+          "$ref": "#/$defs/Coordinate2D"
+        },
+        "zCoordinate": {
+          "type": "number"
+        },
+        "offset": {
+          "type": "number"
+        },
+        "slantAngle": {
+          "type": "number"
+        },
+        "arcAngle": {
+          "type": "number"
+        },
+        "verticalCurveHeight": {
+          "type": "number"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "begCoordinate",
+        "endCoordinate",
+        "zCoordinate"
+      ]
+    },
+    "WallData": {
+      "type": "object",
+      "properties": {
+        "begCoordinate": {
+          "$ref": "#/$defs/Coordinate2D"
+        },
+        "endCoordinate": {
+          "$ref": "#/$defs/Coordinate2D"
+        },
+        "zCoordinate": {
+          "type": "number"
+        },
+        "height": {
+          "type": "number",
+          "exclusiveMinimum": 0.0
+        },
+        "thickness": {
+          "type": "number",
+          "exclusiveMinimum": 0.0
+        },
+        "offset": {
+          "type": "number"
+        },
+        "structureType": {
+          "$ref": "#/$defs/WallStructureType"
+        },
+        "buildingMaterialId": {
+          "$ref": "#/$defs/AttributeId"
+        },
+        "compositeId": {
+          "$ref": "#/$defs/AttributeId"
+        },
+        "profileId": {
+          "$ref": "#/$defs/AttributeId"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "begCoordinate",
+        "endCoordinate",
+        "zCoordinate",
+        "height",
+        "thickness"
+      ]
+    },
     "LabelData": {
       "type": "object",
       "description": "The parameters of the new Label.",
@@ -7382,6 +8449,715 @@
       },
       "additionalProperties": false,
       "required": []
+    },
+    "DetailData": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "referenceId": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "referenceId"
+      ]
+    },
+    "WorksheetData": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "referenceId": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "referenceId"
+      ]
+    },
+    "LayoutData": {
+      "type": "object",
+      "properties": {
+        "masterLayoutName": {
+          "type": "string",
+          "minLength": 1
+        },
+        "layoutName": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "masterLayoutName",
+        "layoutName"
+      ]
+    },
+    "SubsetData": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "parentNavigatorItemId": {
+          "$ref": "#/$defs/NavigatorItemId"
+        },
+        "ownPrefix": {
+          "type": "string"
+        },
+        "customNumber": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "name"
+      ]
+    },
+    "DrawingData": {
+      "type": "object",
+      "properties": {
+        "navigatorItemId": {
+          "$ref": "#/$defs/NavigatorItemId"
+        },
+        "layoutDatabaseId": {
+          "$ref": "#/$defs/DatabaseId"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "position": {
+          "$ref": "#/$defs/Coordinate2D"
+        },
+        "scale": {
+          "type": "number",
+          "exclusiveMinimum": 0.0
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "navigatorItemId",
+        "name",
+        "position"
+      ]
+    },
+    "WindowData": {
+      "type": "object",
+      "properties": {
+        "ownerWallId": {
+          "$ref": "#/$defs/ElementId"
+        },
+        "centerOffset": {
+          "type": "number",
+          "minimum": 0.0
+        },
+        "sillHeight": {
+          "type": "number"
+        },
+        "width": {
+          "type": "number",
+          "exclusiveMinimum": 0.0
+        },
+        "height": {
+          "type": "number",
+          "exclusiveMinimum": 0.0
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "ownerWallId",
+        "centerOffset"
+      ]
+    },
+    "DoorData": {
+      "type": "object",
+      "properties": {
+        "ownerWallId": {
+          "$ref": "#/$defs/ElementId"
+        },
+        "centerOffset": {
+          "type": "number",
+          "minimum": 0.0
+        },
+        "sillHeight": {
+          "type": "number"
+        },
+        "width": {
+          "type": "number",
+          "exclusiveMinimum": 0.0
+        },
+        "height": {
+          "type": "number",
+          "exclusiveMinimum": 0.0
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "ownerWallId",
+        "centerOffset"
+      ]
+    },
+    "MorphData": {
+      "type": "object",
+      "properties": {
+        "basePoint": {
+          "$ref": "#/$defs/Coordinate3D"
+        },
+        "size": {
+          "$ref": "#/$defs/Dimensions3D"
+        },
+        "buildingMaterialId": {
+          "$ref": "#/$defs/AttributeId"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "basePoint",
+        "size"
+      ]
+    },
+    "RoofData": {
+      "type": "object",
+      "properties": {
+        "level": {
+          "type": "number"
+        },
+        "thickness": {
+          "type": "number",
+          "exclusiveMinimum": 0.0
+        },
+        "polygonCoordinates": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Coordinate2D"
+          },
+          "minItems": 3
+        },
+        "polygonArcs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/PolyArc"
+          }
+        },
+        "holes": {
+          "$ref": "#/$defs/Holes2D"
+        },
+        "eavesOverhang": {
+          "type": "number"
+        },
+        "levels": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 16,
+          "items": {
+            "type": "object",
+            "properties": {
+              "levelHeight": {
+                "type": "number"
+              },
+              "levelAngle": {
+                "type": "number",
+                "exclusiveMinimum": 0.0
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "levelHeight",
+              "levelAngle"
+            ]
+          }
+        },
+        "structureType": {
+          "$ref": "#/$defs/RoofStructureType"
+        },
+        "buildingMaterialId": {
+          "$ref": "#/$defs/AttributeId"
+        },
+        "compositeId": {
+          "$ref": "#/$defs/AttributeId"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "level",
+        "polygonCoordinates"
+      ]
+    },
+    "OpeningData": {
+      "type": "object",
+      "properties": {
+        "ownerElementId": {
+          "$ref": "#/$defs/ElementId"
+        },
+        "basePoint": {
+          "$ref": "#/$defs/Coordinate3D"
+        },
+        "width": {
+          "type": "number",
+          "exclusiveMinimum": 0.0
+        },
+        "height": {
+          "type": "number",
+          "exclusiveMinimum": 0.0
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "ownerElementId",
+        "basePoint"
+      ]
+    },
+    "AssociativeDimensionData": {
+      "type": "object",
+      "properties": {
+        "referencePoint": {
+          "$ref": "#/$defs/Coordinate2D"
+        },
+        "direction": {
+          "$ref": "#/$defs/Coordinate2D"
+        },
+        "floorIndex": {
+          "type": "number"
+        },
+        "witnessPoints": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "elementId": {
+                "$ref": "#/$defs/ElementId"
+              },
+              "line": {
+                "type": "boolean"
+              },
+              "inIndex": {
+                "type": "integer"
+              },
+              "special": {
+                "type": "integer"
+              },
+              "nodeType": {
+                "type": "integer"
+              },
+              "nodeStatus": {
+                "type": "integer"
+              },
+              "nodeId": {
+                "type": "number",
+                "minimum": 0.0
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "elementId"
+            ]
+          },
+          "minItems": 2
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "referencePoint",
+        "direction",
+        "witnessPoints"
+      ]
+    },
+    "AssociativeDimensionOnSectionData": {
+      "type": "object",
+      "properties": {
+        "sectionElementId": {
+          "$ref": "#/$defs/ElementId"
+        },
+        "referencePoint": {
+          "$ref": "#/$defs/Coordinate2D"
+        },
+        "preset": {
+          "type": "string",
+          "enum": [
+            "WallCompositeFaces",
+            "WallSkinBorders",
+            "SlabCompositeFaces",
+            "SlabSkinBorders",
+            "BeamOrColumnRefLineEndPoints",
+            "BeamOrColumnBoundingBoxCorners",
+            "DoorWindowWallHoleCorners",
+            "DoorWindowModelHotspots"
+          ]
+        },
+        "direction": {
+          "$ref": "#/$defs/Coordinate2D"
+        },
+        "skinBorderIndices": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          },
+          "minItems": 1
+        },
+        "beginPlane": {
+          "type": "boolean"
+        },
+        "totalSizePlane": {
+          "type": "boolean"
+        },
+        "placeOnTop": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "sectionElementId",
+        "referencePoint",
+        "preset"
+      ]
+    },
+    "WallThicknessDimensionData": {
+      "type": "object",
+      "properties": {
+        "wallId": {
+          "$ref": "#/$defs/ElementId"
+        },
+        "referencePoint": {
+          "$ref": "#/$defs/Coordinate2D"
+        },
+        "direction": {
+          "$ref": "#/$defs/Coordinate2D"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "wallId",
+        "referencePoint",
+        "direction"
+      ]
+    },
+    "WallWithDetails": {
+      "type": "object",
+      "properties": {
+        "elementId": {
+          "$ref": "#/$defs/ElementId"
+        },
+        "begCoordinate": {
+          "$ref": "#/$defs/Coordinate2D"
+        },
+        "endCoordinate": {
+          "$ref": "#/$defs/Coordinate2D"
+        },
+        "height": {
+          "type": "number",
+          "exclusiveMinimum": 0.0
+        },
+        "thickness": {
+          "type": "number",
+          "exclusiveMinimum": 0.0
+        },
+        "bottomOffset": {
+          "type": "number"
+        },
+        "offset": {
+          "type": "number"
+        },
+        "structureType": {
+          "$ref": "#/$defs/WallStructureType"
+        },
+        "buildingMaterialId": {
+          "$ref": "#/$defs/AttributeId"
+        },
+        "compositeId": {
+          "$ref": "#/$defs/AttributeId"
+        },
+        "profileId": {
+          "$ref": "#/$defs/AttributeId"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elementId"
+      ]
+    },
+    "BeamWithDetails": {
+      "type": "object",
+      "properties": {
+        "elementId": {
+          "$ref": "#/$defs/ElementId"
+        },
+        "begCoordinate": {
+          "$ref": "#/$defs/Coordinate2D"
+        },
+        "endCoordinate": {
+          "$ref": "#/$defs/Coordinate2D"
+        },
+        "level": {
+          "type": "number"
+        },
+        "offset": {
+          "type": "number"
+        },
+        "slantAngle": {
+          "type": "number"
+        },
+        "arcAngle": {
+          "type": "number"
+        },
+        "verticalCurveHeight": {
+          "type": "number"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elementId"
+      ]
+    },
+    "SlabWithDetails": {
+      "type": "object",
+      "properties": {
+        "elementId": {
+          "$ref": "#/$defs/ElementId"
+        },
+        "zCoordinate": {
+          "type": "number"
+        },
+        "thickness": {
+          "type": "number",
+          "exclusiveMinimum": 0.0
+        },
+        "structureType": {
+          "$ref": "#/$defs/SlabStructureType"
+        },
+        "buildingMaterialId": {
+          "$ref": "#/$defs/AttributeId"
+        },
+        "compositeId": {
+          "$ref": "#/$defs/AttributeId"
+        },
+        "polygonOutline": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Coordinate2D"
+          },
+          "minItems": 3
+        },
+        "polygonArcs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/PolyArc"
+          }
+        },
+        "holes": {
+          "$ref": "#/$defs/Holes2D"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elementId"
+      ]
+    },
+    "ColumnWithDetails": {
+      "type": "object",
+      "properties": {
+        "elementId": {
+          "$ref": "#/$defs/ElementId"
+        },
+        "origin": {
+          "$ref": "#/$defs/Coordinate2D"
+        },
+        "zCoordinate": {
+          "type": "number"
+        },
+        "height": {
+          "type": "number",
+          "exclusiveMinimum": 0.0
+        },
+        "bottomOffset": {
+          "type": "number"
+        },
+        "axisRotationAngle": {
+          "type": "number"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elementId"
+      ]
+    },
+    "WindowWithDetails": {
+      "type": "object",
+      "properties": {
+        "elementId": {
+          "$ref": "#/$defs/ElementId"
+        },
+        "width": {
+          "type": "number",
+          "exclusiveMinimum": 0.0
+        },
+        "height": {
+          "type": "number",
+          "exclusiveMinimum": 0.0
+        },
+        "sillHeight": {
+          "type": "number"
+        },
+        "centerOffset": {
+          "type": "number",
+          "minimum": 0.0
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elementId"
+      ]
+    },
+    "DoorWithDetails": {
+      "type": "object",
+      "properties": {
+        "elementId": {
+          "$ref": "#/$defs/ElementId"
+        },
+        "width": {
+          "type": "number",
+          "exclusiveMinimum": 0.0
+        },
+        "height": {
+          "type": "number",
+          "exclusiveMinimum": 0.0
+        },
+        "sillHeight": {
+          "type": "number"
+        },
+        "centerOffset": {
+          "type": "number",
+          "minimum": 0.0
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elementId"
+      ]
+    },
+    "MorphWithDetails": {
+      "type": "object",
+      "properties": {
+        "elementId": {
+          "$ref": "#/$defs/ElementId"
+        },
+        "translation": {
+          "$ref": "#/$defs/Coordinate3D"
+        },
+        "rotationDegreesZ": {
+          "type": "number"
+        },
+        "buildingMaterialId": {
+          "$ref": "#/$defs/AttributeId"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elementId"
+      ]
+    },
+    "RoofWithDetails": {
+      "type": "object",
+      "properties": {
+        "elementId": {
+          "$ref": "#/$defs/ElementId"
+        },
+        "level": {
+          "type": "number"
+        },
+        "thickness": {
+          "type": "number",
+          "exclusiveMinimum": 0.0
+        },
+        "eavesOverhang": {
+          "type": "number"
+        },
+        "levels": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 16,
+          "items": {
+            "type": "object",
+            "properties": {
+              "levelHeight": {
+                "type": "number"
+              },
+              "levelAngle": {
+                "type": "number",
+                "exclusiveMinimum": 0.0
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "levelHeight",
+              "levelAngle"
+            ]
+          }
+        },
+        "structureType": {
+          "$ref": "#/$defs/RoofStructureType"
+        },
+        "buildingMaterialId": {
+          "$ref": "#/$defs/AttributeId"
+        },
+        "compositeId": {
+          "$ref": "#/$defs/AttributeId"
+        },
+        "polygonOutline": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Coordinate2D"
+          },
+          "minItems": 3
+        },
+        "polygonArcs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/PolyArc"
+          }
+        },
+        "holes": {
+          "$ref": "#/$defs/Holes2D"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elementId"
+      ]
+    },
+    "WallStructureType": {
+      "type": "string",
+      "enum": [
+        "Basic",
+        "Composite",
+        "Profile"
+      ]
+    },
+    "SlabStructureType": {
+      "type": "string",
+      "enum": [
+        "Basic",
+        "Composite"
+      ]
+    },
+    "RoofStructureType": {
+      "type": "string",
+      "enum": [
+        "Basic",
+        "Composite"
+      ]
     },
     "ProjectLocation": {
       "type": "object",
@@ -7486,6 +9262,35 @@
       "required": [
         "position",
         "geoReferencingParameters"
+      ]
+    },
+    "Zoom": {
+      "type": "object",
+      "description": "The actual zoom parameters, rectangular region of the model.",
+      "properties": {
+        "xMin": {
+          "type": "number",
+          "description": "The minimum X value of the zoom box."
+        },
+        "yMin": {
+          "type": "number",
+          "description": "The minimum Y value of the zoom box."
+        },
+        "xMax": {
+          "type": "number",
+          "description": "The maximum X value of the zoom box."
+        },
+        "yMax": {
+          "type": "number",
+          "description": "The maximum Y value of the zoom box."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "xMin",
+        "yMin",
+        "xMax",
+        "yMax"
       ]
     }
   }

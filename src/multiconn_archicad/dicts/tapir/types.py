@@ -255,6 +255,40 @@ WindowType = Literal[
 ]
 
 
+LengthType = Literal[
+    "Meter",
+    "Decimeter",
+    "Centimeter",
+    "Millimeter",
+    "FootFracInch",
+    "FootDecInch",
+    "DecFoot",
+    "FracInch",
+    "DecInch",
+]
+
+
+AreaType = Literal["SquareMeter", "SquareCentimeter", "SquareMillimeter", "SquareFoot", "SquareInch"]
+
+
+VolumeType = Literal[
+    "CubicMeter",
+    "Liter",
+    "CubicCentimeter",
+    "CubicMillimeter",
+    "CubicFoot",
+    "CubicInch",
+    "CubicYard",
+    "Gallon",
+]
+
+
+AngleType = Literal["DecimalDegree", "DegreeMinSec", "Grad", "Radian", "Surveyors"]
+
+
+AccuracyType = Literal["Off", "ShowSmall5", "ShowSmall25", "ShowSmall1", "ShowSmall01", "InchCaseFractions"]
+
+
 class IssueId(TypedDict):
     guid: Guid
 
@@ -583,32 +617,6 @@ class DatabaseId(TypedDict):
     guid: Guid
 
 
-class ViewSettings(TypedDict):
-    modelViewOptions: NotRequired[str]
-    layerCombination: NotRequired[str]
-    dimensionStyle: NotRequired[str]
-    penSetName: NotRequired[str]
-    graphicOverrideCombination: NotRequired[str]
-
-
-ViewSettingsOrError = ViewSettings | ErrorItem
-
-
-class Zoom(TypedDict):
-    xMin: float
-    yMin: float
-    xMax: float
-    yMax: float
-
-
-class ViewTransformations(TypedDict):
-    zoom: Zoom
-    rotation: float
-
-
-ViewTransformationsOrError = ViewTransformations | ErrorItem
-
-
 class Hole2D(TypedDict):
     polygonOutline: NotRequired[List[Coordinate2D]]
     polygonArcs: NotRequired[List[PolyArc]]
@@ -625,21 +633,6 @@ class Hole3D(TypedDict):
 Holes3D = List[Hole3D]
 
 
-class WallDetails(TypedDict):
-    geometryType: Literal["Straight", "Trapezoid", "Polygonal"]
-    begCoordinate: Coordinate2D
-    endCoordinate: Coordinate2D
-    zCoordinate: float
-    height: float
-    bottomOffset: float
-    offset: float
-    arcAngle: NotRequired[float]
-    begThickness: NotRequired[float]
-    endThickness: NotRequired[float]
-    polygonOutline: NotRequired[List[Coordinate2D]]
-    polygonArcs: NotRequired[List[PolyArc]]
-
-
 class BeamDetails(TypedDict):
     begCoordinate: Coordinate2D
     endCoordinate: Coordinate2D
@@ -649,16 +642,6 @@ class BeamDetails(TypedDict):
     slantAngle: float
     arcAngle: float
     verticalCurveHeight: float
-
-
-class SlabDetails(TypedDict):
-    thickness: float
-    level: float
-    offsetFromTop: float
-    zCoordinate: float
-    polygonOutline: List[Coordinate2D]
-    polygonArcs: NotRequired[List[PolyArc]]
-    holes: Holes2D
 
 
 class ColumnDetails(TypedDict):
@@ -935,6 +918,42 @@ class FavoritesWrapper(TypedDict):
 FavoritesOrError = FavoritesWrapper | ErrorItem
 
 
+class GroupId(TypedDict):
+    guid: Guid
+
+
+class GroupIdArrayItem(TypedDict):
+    groupId: GroupId
+
+
+GroupIdOrError = GroupIdArrayItem | ErrorItem
+
+
+class Length(TypedDict):
+    unit: LengthType
+    accuracy: AccuracyType
+    decimals: int
+    roundInch: NotRequired[int]
+
+
+class Area(TypedDict):
+    unit: AreaType
+    accuracy: AccuracyType
+    decimals: int
+
+
+class Volume(TypedDict):
+    unit: VolumeType
+    accuracy: AccuracyType
+    decimals: int
+
+
+class Angle(TypedDict):
+    unit: AngleType
+    decimals: int
+    accuracy: int
+
+
 class Details(TypedDict):
     floorIndex: NotRequired[float]
     layerIndex: NotRequired[float]
@@ -973,11 +992,6 @@ class ModelViewOption(TypedDict):
     name: str
 
 
-class NavigatorItemIdsWithViewSetting(TypedDict):
-    navigatorItemId: NavigatorItemId
-    viewSettings: ViewSettings
-
-
 class CutPlane(TypedDict):
     pa: float
     pb: float
@@ -1001,10 +1015,13 @@ class Coordinates(TypedDict):
 
 class ColumnData(TypedDict):
     coordinates: Coordinates
+    height: NotRequired[float]
+    axisRotationAngle: NotRequired[float]
 
 
 class SlabData(TypedDict):
     level: float
+    thickness: NotRequired[float]
     polygonCoordinates: List[Coordinate2D]
     polygonArcs: NotRequired[List[PolyArc]]
     holes: NotRequired[Holes2D]
@@ -1012,6 +1029,10 @@ class SlabData(TypedDict):
 
 class PolylineData(TypedDict):
     floorInd: NotRequired[float]
+    layerIndex: NotRequired[int]
+    linePenIndex: NotRequired[int]
+    lineTypeIndex: NotRequired[int]
+    penWeightMm: NotRequired[float]
     coordinates: List[Coordinate2D]
     arcs: NotRequired[List[PolyArc]]
 
@@ -1031,6 +1052,60 @@ class MeshData(TypedDict):
     polygonArcs: NotRequired[List[PolyArc]]
     holes: NotRequired[Holes3D]
     sublines: NotRequired[List[Subline]]
+
+
+class BeamData(TypedDict):
+    begCoordinate: Coordinate2D
+    endCoordinate: Coordinate2D
+    zCoordinate: float
+    offset: NotRequired[float]
+    slantAngle: NotRequired[float]
+    arcAngle: NotRequired[float]
+    verticalCurveHeight: NotRequired[float]
+
+
+class DetailData(TypedDict):
+    name: str
+    referenceId: str
+
+
+class WorksheetData(TypedDict):
+    name: str
+    referenceId: str
+
+
+class LayoutData(TypedDict):
+    masterLayoutName: str
+    layoutName: str
+
+
+class SubsetData(TypedDict):
+    name: str
+    parentNavigatorItemId: NotRequired[NavigatorItemId]
+    ownPrefix: NotRequired[str]
+    customNumber: NotRequired[str]
+
+
+class DrawingData(TypedDict):
+    navigatorItemId: NavigatorItemId
+    layoutDatabaseId: NotRequired[DatabaseId]
+    name: str
+    position: Coordinate2D
+    scale: NotRequired[float]
+
+
+class Level(TypedDict):
+    levelHeight: float
+    levelAngle: float
+
+
+WallStructureType = Literal["Basic", "Composite", "Profile"]
+
+
+SlabStructureType = Literal["Basic", "Composite"]
+
+
+RoofStructureType = Literal["Basic", "Composite"]
 
 
 class ProjectLocation(TypedDict):
@@ -1058,6 +1133,13 @@ class GeoReferencingParameters(TypedDict):
 class SurveyPoint(TypedDict):
     position: SurveyPointPosition
     geoReferencingParameters: GeoReferencingParameters
+
+
+class Zoom(TypedDict):
+    xMin: float
+    yMin: float
+    xMax: float
+    yMax: float
 
 
 class ElementId(TypedDict):
@@ -1176,6 +1258,61 @@ class NavigatorItemIdArrayItem(TypedDict):
 
 class DatabaseIdArrayItem(TypedDict):
     databaseId: DatabaseId
+
+
+class ViewSettings(TypedDict):
+    modelViewOptions: NotRequired[str]
+    layerCombination: NotRequired[str]
+    dimensionStyle: NotRequired[str]
+    penSetName: NotRequired[str]
+    graphicOverrideCombination: NotRequired[str]
+    drawingScale: NotRequired[int]
+    saveZoom: NotRequired[bool]
+    ignoreSavedZoom: NotRequired[bool]
+    zoom: NotRequired[Zoom]
+
+
+ViewSettingsOrError = ViewSettings | ErrorItem
+
+
+class ViewTransformations(TypedDict):
+    zoom: Zoom
+    rotation: float
+
+
+ViewTransformationsOrError = ViewTransformations | ErrorItem
+
+
+class WallDetails(TypedDict):
+    geometryType: Literal["Straight", "Trapezoid", "Polygonal"]
+    begCoordinate: Coordinate2D
+    endCoordinate: Coordinate2D
+    zCoordinate: float
+    height: float
+    bottomOffset: float
+    offset: float
+    arcAngle: NotRequired[float]
+    begThickness: NotRequired[float]
+    endThickness: NotRequired[float]
+    polygonOutline: NotRequired[List[Coordinate2D]]
+    polygonArcs: NotRequired[List[PolyArc]]
+    structureType: NotRequired[WallStructureType]
+    buildingMaterialId: NotRequired[AttributeId]
+    compositeId: NotRequired[AttributeId]
+    profileId: NotRequired[AttributeId]
+
+
+class SlabDetails(TypedDict):
+    thickness: float
+    level: float
+    offsetFromTop: float
+    zCoordinate: float
+    polygonOutline: List[Coordinate2D]
+    polygonArcs: NotRequired[List[PolyArc]]
+    holes: Holes2D
+    structureType: NotRequired[SlabStructureType]
+    buildingMaterialId: NotRequired[AttributeId]
+    compositeId: NotRequired[AttributeId]
 
 
 class LinkData(TypedDict):
@@ -1342,6 +1479,11 @@ class Conflict(TypedDict):
     user: User
 
 
+class NavigatorItemIdsWithViewSetting(TypedDict):
+    navigatorItemId: NavigatorItemId
+    viewSettings: ViewSettings
+
+
 class Issue(TypedDict):
     issueId: IssueId
     name: str
@@ -1381,11 +1523,192 @@ class ZoneData(TypedDict):
     geometry: ZoneCreationGeometry
 
 
+class WallData(TypedDict):
+    begCoordinate: Coordinate2D
+    endCoordinate: Coordinate2D
+    zCoordinate: float
+    height: float
+    thickness: float
+    offset: NotRequired[float]
+    structureType: NotRequired[WallStructureType]
+    buildingMaterialId: NotRequired[AttributeId]
+    compositeId: NotRequired[AttributeId]
+    profileId: NotRequired[AttributeId]
+
+
 class LabelData(TypedDict):
     parentElementId: NotRequired[ElementId]
     text: NotRequired[str]
     begCoordinate: NotRequired[Coordinate2D]
     floorInd: NotRequired[float]
+
+
+class WindowData(TypedDict):
+    ownerWallId: ElementId
+    centerOffset: float
+    sillHeight: NotRequired[float]
+    width: NotRequired[float]
+    height: NotRequired[float]
+
+
+class DoorData(TypedDict):
+    ownerWallId: ElementId
+    centerOffset: float
+    sillHeight: NotRequired[float]
+    width: NotRequired[float]
+    height: NotRequired[float]
+
+
+class MorphData(TypedDict):
+    basePoint: Coordinate3D
+    size: Dimensions3D
+    buildingMaterialId: NotRequired[AttributeId]
+
+
+class RoofData(TypedDict):
+    level: float
+    thickness: NotRequired[float]
+    polygonCoordinates: List[Coordinate2D]
+    polygonArcs: NotRequired[List[PolyArc]]
+    holes: NotRequired[Holes2D]
+    eavesOverhang: NotRequired[float]
+    levels: NotRequired[List[Level]]
+    structureType: NotRequired[RoofStructureType]
+    buildingMaterialId: NotRequired[AttributeId]
+    compositeId: NotRequired[AttributeId]
+
+
+class OpeningData(TypedDict):
+    ownerElementId: ElementId
+    basePoint: Coordinate3D
+    width: NotRequired[float]
+    height: NotRequired[float]
+
+
+class WitnessPoint(TypedDict):
+    elementId: ElementId
+    line: NotRequired[bool]
+    inIndex: NotRequired[int]
+    special: NotRequired[int]
+    nodeType: NotRequired[int]
+    nodeStatus: NotRequired[int]
+    nodeId: NotRequired[float]
+
+
+class AssociativeDimensionData(TypedDict):
+    referencePoint: Coordinate2D
+    direction: Coordinate2D
+    floorIndex: NotRequired[float]
+    witnessPoints: List[WitnessPoint]
+
+
+class AssociativeDimensionOnSectionData(TypedDict):
+    sectionElementId: ElementId
+    referencePoint: Coordinate2D
+    preset: Literal[
+        "WallCompositeFaces",
+        "WallSkinBorders",
+        "SlabCompositeFaces",
+        "SlabSkinBorders",
+        "BeamOrColumnRefLineEndPoints",
+        "BeamOrColumnBoundingBoxCorners",
+        "DoorWindowWallHoleCorners",
+        "DoorWindowModelHotspots",
+    ]
+    direction: NotRequired[Coordinate2D]
+    skinBorderIndices: NotRequired[List[int]]
+    beginPlane: NotRequired[bool]
+    totalSizePlane: NotRequired[bool]
+    placeOnTop: NotRequired[bool]
+
+
+class WallThicknessDimensionData(TypedDict):
+    wallId: ElementId
+    referencePoint: Coordinate2D
+    direction: Coordinate2D
+
+
+class WallWithDetails(TypedDict):
+    elementId: ElementId
+    begCoordinate: NotRequired[Coordinate2D]
+    endCoordinate: NotRequired[Coordinate2D]
+    height: NotRequired[float]
+    thickness: NotRequired[float]
+    bottomOffset: NotRequired[float]
+    offset: NotRequired[float]
+    structureType: NotRequired[WallStructureType]
+    buildingMaterialId: NotRequired[AttributeId]
+    compositeId: NotRequired[AttributeId]
+    profileId: NotRequired[AttributeId]
+
+
+class BeamWithDetails(TypedDict):
+    elementId: ElementId
+    begCoordinate: NotRequired[Coordinate2D]
+    endCoordinate: NotRequired[Coordinate2D]
+    level: NotRequired[float]
+    offset: NotRequired[float]
+    slantAngle: NotRequired[float]
+    arcAngle: NotRequired[float]
+    verticalCurveHeight: NotRequired[float]
+
+
+class SlabWithDetails(TypedDict):
+    elementId: ElementId
+    zCoordinate: NotRequired[float]
+    thickness: NotRequired[float]
+    structureType: NotRequired[SlabStructureType]
+    buildingMaterialId: NotRequired[AttributeId]
+    compositeId: NotRequired[AttributeId]
+    polygonOutline: NotRequired[List[Coordinate2D]]
+    polygonArcs: NotRequired[List[PolyArc]]
+    holes: NotRequired[Holes2D]
+
+
+class ColumnWithDetails(TypedDict):
+    elementId: ElementId
+    origin: NotRequired[Coordinate2D]
+    zCoordinate: NotRequired[float]
+    height: NotRequired[float]
+    bottomOffset: NotRequired[float]
+    axisRotationAngle: NotRequired[float]
+
+
+class WindowWithDetails(TypedDict):
+    elementId: ElementId
+    width: NotRequired[float]
+    height: NotRequired[float]
+    sillHeight: NotRequired[float]
+    centerOffset: NotRequired[float]
+
+
+class DoorWithDetails(TypedDict):
+    elementId: ElementId
+    width: NotRequired[float]
+    height: NotRequired[float]
+    sillHeight: NotRequired[float]
+    centerOffset: NotRequired[float]
+
+
+class MorphWithDetails(TypedDict):
+    elementId: ElementId
+    translation: NotRequired[Coordinate3D]
+    rotationDegreesZ: NotRequired[float]
+    buildingMaterialId: NotRequired[AttributeId]
+
+
+class RoofWithDetails(TypedDict):
+    elementId: ElementId
+    level: NotRequired[float]
+    thickness: NotRequired[float]
+    eavesOverhang: NotRequired[float]
+    levels: NotRequired[List[Level]]
+    structureType: NotRequired[RoofStructureType]
+    buildingMaterialId: NotRequired[AttributeId]
+    compositeId: NotRequired[AttributeId]
+    polygonOutline: NotRequired[List[Coordinate2D]]
+    polygonArcs: NotRequired[List[PolyArc]]
+    holes: NotRequired[Holes2D]
 
 
 class ElementIdArrayItem(TypedDict):
@@ -1432,6 +1755,17 @@ BuildingMaterialPhysicalPropertiesList = List[BuildingMaterialPhysicalProperties
 
 
 LibraryFileAdditions = List[LibraryFileAddition]
+
+
+ElementOrGroupId = ElementIdArrayItem | GroupIdArrayItem
+
+
+ElementOrGroupIds = List[ElementOrGroupId]
+
+
+class ElementGroupParameters(TypedDict):
+    elements: ElementOrGroupIds
+    parentGroupId: NotRequired[GroupId]
 
 
 class DetailsOfElement(TypedDict):
