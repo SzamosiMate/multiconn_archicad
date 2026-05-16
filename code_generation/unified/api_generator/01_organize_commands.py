@@ -38,9 +38,11 @@ def main():
             print(cmd_name)
             if "Create" in cmd_name:
                 print("found creation!")
-                group = "Element Creation"
+                group = "Element Creation Commands"
             elif "Modify" in cmd_name:
-                group = "Element Modification"
+                group = "Element Modification Commands"
+
+            command["group"] = group
 
         if group not in organized[source]:
             organized[source][group] = []
