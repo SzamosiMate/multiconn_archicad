@@ -1010,10 +1010,10 @@
         "alias_property_name": null
       }
     ],
-    "Element Creation": [
+    "Element Creation Commands": [
       {
         "name": "CreateAssociativeDimensions",
-        "group": "Element Commands",
+        "group": "Element Creation Commands",
         "description": "Creates associative linear dimensions from explicit witness point references.",
         "version": "1.4.0",
         "source": "tapir",
@@ -1030,7 +1030,7 @@
       },
       {
         "name": "CreateAssociativeDimensionsOnSection",
-        "group": "Element Commands",
+        "group": "Element Creation Commands",
         "description": "Creates associative linear dimensions on section elements using common wall, slab, beam, column and opening presets.",
         "version": "1.4.0",
         "source": "tapir",
@@ -1047,7 +1047,7 @@
       },
       {
         "name": "CreateBeams",
-        "group": "Element Commands",
+        "group": "Element Creation Commands",
         "description": "Creates Beam elements based on the given parameters.",
         "version": "1.4.0",
         "source": "tapir",
@@ -1064,7 +1064,7 @@
       },
       {
         "name": "CreateColumns",
-        "group": "Element Commands",
+        "group": "Element Creation Commands",
         "description": "Creates Column elements based on the given parameters.",
         "version": "1.0.3",
         "source": "tapir",
@@ -1081,7 +1081,7 @@
       },
       {
         "name": "CreateDoors",
-        "group": "Element Commands",
+        "group": "Element Creation Commands",
         "description": "Creates Door elements in host walls based on the given parameters.",
         "version": "1.4.0",
         "source": "tapir",
@@ -1098,7 +1098,7 @@
       },
       {
         "name": "CreateLabels",
-        "group": "Element Commands",
+        "group": "Element Creation Commands",
         "description": "Creates Label elements based on the given parameters.",
         "version": "1.2.5",
         "source": "tapir",
@@ -1115,7 +1115,7 @@
       },
       {
         "name": "CreateMeshes",
-        "group": "Element Commands",
+        "group": "Element Creation Commands",
         "description": "Creates Mesh elements based on the given parameters.",
         "version": "1.1.9",
         "source": "tapir",
@@ -1132,7 +1132,7 @@
       },
       {
         "name": "CreateMorphs",
-        "group": "Element Commands",
+        "group": "Element Creation Commands",
         "description": "Creates Morph elements from simple box definitions.",
         "version": "1.4.0",
         "source": "tapir",
@@ -1149,7 +1149,7 @@
       },
       {
         "name": "CreateObjects",
-        "group": "Element Commands",
+        "group": "Element Creation Commands",
         "description": "Creates Object elements based on the given parameters.",
         "version": "1.0.3",
         "source": "tapir",
@@ -1166,7 +1166,7 @@
       },
       {
         "name": "CreateOpenings",
-        "group": "Element Commands",
+        "group": "Element Creation Commands",
         "description": "Creates Opening elements in the given host elements.",
         "version": "1.4.0",
         "source": "tapir",
@@ -1183,7 +1183,7 @@
       },
       {
         "name": "CreatePolylines",
-        "group": "Element Commands",
+        "group": "Element Creation Commands",
         "description": "Creates Polyline elements based on the given parameters.",
         "version": "1.1.5",
         "source": "tapir",
@@ -1200,7 +1200,7 @@
       },
       {
         "name": "CreateRoofs",
-        "group": "Element Commands",
+        "group": "Element Creation Commands",
         "description": "Creates multi-plane Roof elements based on footprint, level and roof profile data.",
         "version": "1.4.0",
         "source": "tapir",
@@ -1217,7 +1217,7 @@
       },
       {
         "name": "CreateSlabs",
-        "group": "Element Commands",
+        "group": "Element Creation Commands",
         "description": "Creates Slab elements based on the given parameters.",
         "version": "1.0.3",
         "source": "tapir",
@@ -1234,7 +1234,7 @@
       },
       {
         "name": "CreateWallThicknessDimensions",
-        "group": "Element Commands",
+        "group": "Element Creation Commands",
         "description": "Creates associative wall thickness dimensions for the given walls.",
         "version": "1.4.0",
         "source": "tapir",
@@ -1251,7 +1251,7 @@
       },
       {
         "name": "CreateWalls",
-        "group": "Element Commands",
+        "group": "Element Creation Commands",
         "description": "Creates Wall elements based on the given parameters.",
         "version": "1.4.0",
         "source": "tapir",
@@ -1268,7 +1268,7 @@
       },
       {
         "name": "CreateWindows",
-        "group": "Element Commands",
+        "group": "Element Creation Commands",
         "description": "Creates Window elements in host walls based on the given parameters.",
         "version": "1.4.0",
         "source": "tapir",
@@ -1285,7 +1285,7 @@
       },
       {
         "name": "CreateZones",
-        "group": "Element Commands",
+        "group": "Element Creation Commands",
         "description": "Creates Zone elements based on the given parameters.",
         "version": "1.1.8",
         "source": "tapir",
@@ -1996,10 +1996,10 @@
         "alias_property_name": "designOptions"
       }
     ],
-    "Element Modification": [
+    "Element Modification Commands": [
       {
         "name": "ModifyBeams",
-        "group": "Element Commands",
+        "group": "Element Modification Commands",
         "description": "Modifies Beam elements based on the given parameters.",
         "version": "1.4.0",
         "source": "tapir",
@@ -2017,7 +2017,7 @@
       },
       {
         "name": "ModifyColumns",
-        "group": "Element Commands",
+        "group": "Element Modification Commands",
         "description": "Modifies Column elements based on the given parameters.",
         "version": "1.4.0",
         "source": "tapir",
@@ -2035,7 +2035,7 @@
       },
       {
         "name": "ModifyDoors",
-        "group": "Element Commands",
+        "group": "Element Modification Commands",
         "description": "Modifies Door elements based on the given parameters.",
         "version": "1.4.0",
         "source": "tapir",
@@ -2053,7 +2053,7 @@
       },
       {
         "name": "ModifyMorphs",
-        "group": "Element Commands",
+        "group": "Element Modification Commands",
         "description": "Modifies Morph elements based on the given parameters.",
         "version": "1.4.0",
         "source": "tapir",
@@ -2071,7 +2071,7 @@
       },
       {
         "name": "ModifyRoofs",
-        "group": "Element Commands",
+        "group": "Element Modification Commands",
         "description": "Modifies multi-plane Roof elements based on the given parameters.",
         "version": "1.4.0",
         "source": "tapir",
@@ -2089,7 +2089,7 @@
       },
       {
         "name": "ModifySlabs",
-        "group": "Element Commands",
+        "group": "Element Modification Commands",
         "description": "Modifies Slab elements based on the given parameters.",
         "version": "1.4.0",
         "source": "tapir",
@@ -2107,7 +2107,7 @@
       },
       {
         "name": "ModifyWalls",
-        "group": "Element Commands",
+        "group": "Element Modification Commands",
         "description": "Modifies Wall elements based on the given parameters.",
         "version": "1.4.0",
         "source": "tapir",
@@ -2125,7 +2125,7 @@
       },
       {
         "name": "ModifyWindows",
-        "group": "Element Commands",
+        "group": "Element Modification Commands",
         "description": "Modifies Window elements based on the given parameters.",
         "version": "1.4.0",
         "source": "tapir",
