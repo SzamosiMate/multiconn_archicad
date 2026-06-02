@@ -196,12 +196,13 @@ class ConnHeader:
         if isinstance(self._archicad_location, APIResponseError) or isinstance(archicad_location, ArchicadLocation):
             self._archicad_location = archicad_location
 
-    def connect(self) -> None:
-        self._sync_if_needed()
+    def connect(self, sync: bool = True) -> None:
+        if sync:
+            self._sync_if_needed()
         info = self._product_info
 
         if is_product_info_initialized(info):
-            self.standard.connect(info)
+            self._standard.connect(info)
             self._status = Status.ACTIVE
         else:
             self._status = Status.FAILED
@@ -236,7 +237,7 @@ class ConnHeader:
                 res = completed_master.result()
                 if res:
                     self._assign_metadata(*res)
-                    self.connect()
+                    self.connect(sync=False)
                 self.init_future.set_result(res)
 
             except CancelledError:

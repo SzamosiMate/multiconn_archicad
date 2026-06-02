@@ -2,7 +2,6 @@ import pytest
 
 from multiconn_archicad import MultiConn, Port
 from multiconn_archicad.conn_header import Status
-import multiconn_archicad.utilities.cli_parser as cli_parser
 
 pytestmark = [
     pytest.mark.usefixtures("archicad_api"),
