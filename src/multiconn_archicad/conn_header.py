@@ -47,6 +47,8 @@ class ConnHeader:
 
         self._fetch_token: object | None = None
         self.init_future: Future | None = None
+        self._unpacked_future: Future | None = None
+        self._auto_connect: bool = False
 
         self._core: CoreCommands | None = CoreCommands(port)
         self._standard: StandardConnection | None = StandardConnection(port)
@@ -196,16 +198,10 @@ class ConnHeader:
         if isinstance(self._archicad_location, APIResponseError) or isinstance(archicad_location, ArchicadLocation):
             self._archicad_location = archicad_location
 
-    def connect(self, sync: bool = True) -> None:
-        if sync:
-            self._sync_if_needed()
-        info = self._product_info
-
-        if is_product_info_initialized(info):
-            self._standard.connect(info)
-            self._status = Status.ACTIVE
-        else:
-            self._status = Status.FAILED
+    def connect(self) -> None:
+        """Public method to wait for metadata and establish standard API connection."""
+        self._sync_if_needed()
+        self._resolve_connection_state()
 
     def disconnect(self) -> None:
         self.standard.disconnect()
@@ -223,43 +219,51 @@ class ConnHeader:
         self._is_cancelled = True
 
     def sync_from_master_future(self, master_future: Future) -> None:
-        """Chains this header to a master future to synchronize metadata and connect once the master fetch completes."""
-        self.init_future = Future()
-
-        def _callback(completed_master: Future):
-            if self.init_future is None:
-                return
-            if self._is_cancelled:
-                self.init_future.cancel()
-                return
-
-            try:
-                res = completed_master.result()
-                if res:
-                    self._assign_metadata(*res)
-                    self.connect(sync=False)
-                self.init_future.set_result(res)
-
-            except CancelledError:
-                self.init_future.cancel()
-            except Exception as e:
-                self.init_future.set_exception(e)
-
-        master_future.add_done_callback(_callback)
+        """ Links this header to a master future."""
+        self.init_future = master_future
+        self._auto_connect = True
 
     def _sync_if_needed(self):
-        """Safely blocks the thread if not in UI mode."""
-        if self._ui_mode or not self.init_future:
+        """Safely unpacks the future when data is needed or ready."""
+        if (not self.init_future or
+            self.init_future is self._unpacked_future or
+            threading.current_thread().name.startswith("MultiConnWorker")):
             return
-        if threading.current_thread().name.startswith("MultiConnWorker"):
-            return
-        if not self.init_future.done():
-            try:
-                self.init_future.result()
-            except CancelledError:
-                pass
-            except Exception as e:
-                log.warning(f"Background fetch failed: {e}")
+
+        if self._ui_mode: # UI Mode: Only unpack if the background thread is already done (non-blocking)
+            if self.init_future.done():
+                self._unpack_future()
+        else: # Standard Mode: Safely block and wait for the data
+            self._unpack_future()
+
+    def _unpack_future(self) -> None:
+        """Helper to resolve the future and mutate state."""
+        try:
+            res = self.init_future.result()
+            if res and self.init_future is not self._unpacked_future:
+                self._assign_metadata(*res)
+                self._unpacked_future = self.init_future
+
+                if self._auto_connect and self._status == Status.PENDING:
+                    self._resolve_connection_state()
+
+        except CancelledError:
+            pass
+        except Exception as e:
+            log.warning(f"Background fetch failed: {e}")
+            self._status = Status.FAILED
+            self._unpacked_future = self.init_future
+
+    def _resolve_connection_state(self) -> None:
+        """Configures standard connection and updates header status based on product info."""
+        info = self._product_info
+        if is_product_info_initialized(info):
+            if self._standard is None:
+                raise HeaderUnassignedError("StandardConnection is not initialized.")
+            self._standard.connect(info)
+            self._status = Status.ACTIVE
+        else:
+            self._status = Status.FAILED
 
     def get_product_info(self, timeout: float) -> ProductInfo | APIResponseError:
         try:
