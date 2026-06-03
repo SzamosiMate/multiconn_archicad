@@ -1,5 +1,6 @@
 import json
 import sys
+import socket
 import threading
 from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
 import concurrent.futures
@@ -177,3 +178,26 @@ def archicad_api(monkeypatch):
     server.server_close()
     server_thread.join(timeout=1.0)
     cli_parser._parsed_cli_args_cache = None
+
+
+def pytest_sessionstart(session):
+    """
+    Pre-flight guard to ensure no real Archicad instances or lingering processes
+    are listening on the standard port range (19723-19743) that can interfere with the tests.
+    """
+    lingering_ports = []
+
+    for port in range(19723, 19744):
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            s.settimeout(0.05)
+            # Attempt a quick TCP connection to check for active listeners
+            if s.connect_ex(("127.0.0.1", port)) == 0:
+                lingering_ports.append(port)
+
+    if lingering_ports:
+        print("\n" + "=" * 80)
+        print(f" [CRITICAL] Active listeners detected on Archicad ports: {lingering_ports}")
+        print(" Please close any running Archicad instances or lingering processes on these ports")
+        print(" before executing the test suite to prevent socket-routing test interference.")
+        print("=" * 80 + "\n")
+        sys.exit(1)
