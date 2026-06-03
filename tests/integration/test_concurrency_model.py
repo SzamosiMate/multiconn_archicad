@@ -1,8 +1,3 @@
-"""
-test_architecture.py
-Integration tests validating the synchronous background-fetch architecture.
-"""
-
 import pytest
 import time
 import os
@@ -13,6 +8,7 @@ from multiconn_archicad.basic_types import PendingResponse, ProductInfo, APIResp
 
 
 pytestmark = [
+    pytest.mark.usefixtures("fuzz_threads"),
     pytest.mark.integration,
 ]
 
