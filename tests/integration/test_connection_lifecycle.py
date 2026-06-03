@@ -5,6 +5,7 @@ from multiconn_archicad.conn_header import Status
 
 pytestmark = [
     pytest.mark.usefixtures("archicad_api"),
+    pytest.mark.usefixtures("fuzz_threads"),
     pytest.mark.integration,
 ]
 

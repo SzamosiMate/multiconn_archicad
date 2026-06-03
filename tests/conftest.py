@@ -180,6 +180,17 @@ def archicad_api(monkeypatch):
     cli_parser._parsed_cli_args_cache = None
 
 
+@pytest.fixture
+def fuzz_threads():
+    """Aggressively alters CPython thread scheduling to expose race conditions."""
+    original_interval = sys.getswitchinterval()
+    sys.setswitchinterval(0.000001)  # 1-microsecond timeslices
+    try:
+        yield
+    finally:
+        sys.setswitchinterval(original_interval)
+
+
 def pytest_sessionstart(session):
     """
     Pre-flight guard to ensure no real Archicad instances or lingering processes
