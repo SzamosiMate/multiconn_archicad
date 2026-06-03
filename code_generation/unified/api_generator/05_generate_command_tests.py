@@ -191,7 +191,7 @@ class TestGenerator:
 
         if has_result:
             if alias_prop:
-                body_lines.append(f"assert normalize_for_comparison(result) == mock_response['{alias_prop}']")
+                body_lines.append(f"assert normalize_for_comparison(result) == normalize_for_comparison(mock_response['{alias_prop}'])")
             else:
                 result_obj = self._get_model_object(result_model_name, source)
                 if is_union(result_obj):

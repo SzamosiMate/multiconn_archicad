@@ -1,3 +1,4 @@
+import uuid
 from pydantic import BaseModel
 from enum import Enum
 from typing import Any
@@ -9,10 +10,21 @@ def normalize_for_comparison(value: Any) -> Any:
     """
     if isinstance(value, BaseModel):
         return value.model_dump(mode='json', by_alias=True, exclude_none=True)
+
+    # Recursively traverse dictionaries, lists, and tuples
+    if isinstance(value, dict):
+        return {k: normalize_for_comparison(v) for k, v in value.items()}
     if isinstance(value, list):
         return [normalize_for_comparison(item) for item in value]
     if isinstance(value, tuple):
         return [normalize_for_comparison(item) for item in value]
     if isinstance(value, Enum):
         return value.value
+
+    # Canonicalize UUID strings to lowercase to prevent generative casing mismatches
+    if isinstance(value, str):
+        try:
+            return str(uuid.UUID(value))
+        except ValueError:
+            return value
     return value
