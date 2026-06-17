@@ -109,6 +109,10 @@ def apply_permanent_patches(master_defs: dict[str, Any]):
         "CreateAssociativeDimensionsParameters": ("dimensionsData", "AssociativeDimensionData"),
         "CreateAssociativeDimensionsOnSectionParameters": ("dimensionsData", "AssociativeDimensionOnSectionData"),
         "CreateWallThicknessDimensionsParameters": ("dimensionsData", "WallThicknessDimensionData"),
+        "CreateSectionsParameters": ("sectionsData", "SectionData"),
+        "CreateStairsParameters": ("stairsData", "SectionData"),
+        "CreateLampsParameters": ("lampsData", "LampData"),
+        "CreateTextsParameters": ("textsData", "TextData"),
     }
 
     for parent_model, (field_name, new_model_name) in creation_data_types.items():
@@ -145,12 +149,38 @@ def apply_temporary_patches(master_defs: dict[str, Any]):
     extract_inline_enum(master_defs, "RoofData", ["structureType"], "RoofStructureType")
     extract_inline_enum(master_defs, "RoofWithDetails", ["structureType"], "RoofStructureType")
 
+    # --- Extract conflicting inline Schemas ---
+    extract_inline_schema(master_defs, "DimensionData", ["witnessPoints", "items"], "CoordinateWitnessPoint")
+    extract_inline_schema(master_defs, "AssociativeDimensionData", ["witnessPoints", "items"], "AssociativeWitnessPoint")
+    extract_inline_schema(
+        master_defs, "CreateProjectInfoFieldsParameters", ["projectInfoFields", "items"], "ProjectInfoFieldData"
+    )
+    extract_inline_schema(master_defs, "CreateDesignOptionsParameters", ["designOptions", "items"], "DesignOptionData")
+    extract_inline_schema(
+        master_defs,
+        "GetDesignOptionCombinationsResult",
+        ["designOptionCombinations", "items"],
+        "DesignOptionCombinationDetails",
+    )
+    extract_inline_schema(
+        master_defs,
+        "CreateDesignOptionCombinationsParameters",
+        ["designOptionCombinations", "items"],
+        "DesignOptionCombinationData",
+    )
+
     # --- Unify GeoLocation schemas ---
     extract_inline_schema(master_defs, "GetGeoLocationResult", ["projectLocation"], "ProjectLocation")
     extract_inline_schema(master_defs, "GetGeoLocationResult", ["surveyPoint", "position"], "SurveyPointPosition")
     extract_inline_schema(master_defs, "GetGeoLocationResult", ["surveyPoint", "geoReferencingParameters"],
                           "GeoReferencingParameters")
     extract_inline_schema(master_defs, "GetGeoLocationResult", ["surveyPoint"], "SurveyPoint")
+
+    # 1. Fix the bad inline schema by pointing it to the existing ArrayItem definition
+    if "GetElementsOfDesignOptionsParameters" in master_defs:
+        params = master_defs["GetElementsOfDesignOptionsParameters"].get("properties", {})
+        if "designOptions" in params:
+            params["designOptions"]["items"] = {"$ref": "#/$defs/DesignOptionIdArrayItem"}
 
     if "SetGeoLocationParameters" in master_defs:
         params = master_defs["SetGeoLocationParameters"]["properties"]
@@ -159,6 +189,13 @@ def apply_temporary_patches(master_defs: dict[str, Any]):
         if "surveyPoint" in params:
             params["surveyPoint"] = {"$ref": "#/$defs/SurveyPoint"}
 
+    nav_window = master_defs.get("NavigatorItemIdOrDatabaseIdAndWindowType")
+    if nav_window and "oneOf" in nav_window and len(nav_window["oneOf"]) > 1:
+        # Extract the second union element (the inline object) to a new definition
+        master_defs["DatabaseIdAndWindowType"] = nav_window["oneOf"][1]
+        # Replace the inline object with a $ref
+        nav_window["oneOf"][1] = {"$ref": "#/$defs/DatabaseIdAndWindowType"}
+
     # --- Unify Zoom schemas ---
     extract_inline_schema(master_defs, "ViewTransformations", ["zoom"], "Zoom")
 
@@ -166,3 +203,6 @@ def apply_temporary_patches(master_defs: dict[str, Any]):
         params = master_defs["ViewSettings"]["properties"]
         if "zoom" in params:
             params["zoom"] = {"$ref": "#/$defs/Zoom"}
+
+    # --- remove malformed Export Favorites result ---
+        master_defs.pop("ExportFavoritesResult", None)

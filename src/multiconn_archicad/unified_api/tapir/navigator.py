@@ -12,6 +12,8 @@ from multiconn_archicad.models.tapir.commands import (
     CreateDrawingsResult,
     CreateLayoutsParameters,
     CreateLayoutsResult,
+    CreateSectionsParameters,
+    CreateSectionsResult,
     CreateSubsetsParameters,
     CreateSubsetsResult,
     CreateWorksheetsParameters,
@@ -45,6 +47,7 @@ from multiconn_archicad.models.tapir.types import (
     ModelViewOption,
     NavigatorItemIdArrayItem,
     NavigatorItemIdsWithViewSetting,
+    SectionData,
     SubsetData,
     SuccessfulExecutionResult,
     ViewSettings,
@@ -134,6 +137,31 @@ class NavigatorCommands:
         )
         validated_response = CreateLayoutsResult.model_validate(response_dict)
         return validated_response.databases
+
+    def create_sections(self, sections_data: list[SectionData]) -> list[ElementIdArrayItem]:
+        """
+        Creates Section elements on the floor plan.
+
+        Args:
+            sections_data (list[SectionData])
+
+        Returns:
+            list[ElementIdArrayItem]: A list of elements.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "sectionsData": sections_data,
+        }
+        validated_params = CreateSectionsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "CreateSections", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = CreateSectionsResult.model_validate(response_dict)
+        return validated_response.elements
 
     def create_subsets(self, subsets_data: list[SubsetData]) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
         """

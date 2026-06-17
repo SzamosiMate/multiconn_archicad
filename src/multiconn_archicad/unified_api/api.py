@@ -18,12 +18,14 @@ from .official.property import PropertyCommands as OfficialPropertyCommands
 from .official.view_map import ViewMapCommands as OfficialViewMapCommands
 from .tapir.application import ApplicationCommands as TapirApplicationCommands
 from .tapir.attribute import AttributeCommands as TapirAttributeCommands
+from .tapir.classification import ClassificationCommands as TapirClassificationCommands
 from .tapir.design_options import DesignOptionsCommands as TapirDesignOptionsCommands
 from .tapir.element import ElementCommands as TapirElementCommands
 from .tapir.element_creation import ElementCreationCommands as TapirElementCreationCommands
 from .tapir.element_grouping import ElementGroupingCommands as TapirElementGroupingCommands
 from .tapir.element_modification import ElementModificationCommands as TapirElementModificationCommands
 from .tapir.favorites import FavoritesCommands as TapirFavoritesCommands
+from .tapir.ifc import IfcCommands as TapirIfcCommands
 from .tapir.issue_management import IssueManagementCommands as TapirIssueManagementCommands
 from .tapir.library import LibraryCommands as TapirLibraryCommands
 from .tapir.navigator import NavigatorCommands as TapirNavigatorCommands
@@ -42,12 +44,14 @@ class TapirApi:
     def __init__(self, core: CoreCommands):
         self.application = TapirApplicationCommands(core)
         self.attribute = TapirAttributeCommands(core)
+        self.classification = TapirClassificationCommands(core)
         self.design_options = TapirDesignOptionsCommands(core)
         self.element = TapirElementCommands(core)
         self.element_creation = TapirElementCreationCommands(core)
         self.element_grouping = TapirElementGroupingCommands(core)
         self.element_modification = TapirElementModificationCommands(core)
         self.favorites = TapirFavoritesCommands(core)
+        self.ifc = TapirIfcCommands(core)
         self.issue_management = TapirIssueManagementCommands(core)
         self.library = TapirLibraryCommands(core)
         self.navigator = TapirNavigatorCommands(core)

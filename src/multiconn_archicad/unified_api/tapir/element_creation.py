@@ -18,6 +18,8 @@ from multiconn_archicad.models.tapir.commands import (
     CreateDoorsResult,
     CreateLabelsParameters,
     CreateLabelsResult,
+    CreateLampsParameters,
+    CreateLampsResult,
     CreateMeshesParameters,
     CreateMeshesResult,
     CreateMorphsParameters,
@@ -32,6 +34,10 @@ from multiconn_archicad.models.tapir.commands import (
     CreateRoofsResult,
     CreateSlabsParameters,
     CreateSlabsResult,
+    CreateStairsParameters,
+    CreateStairsResult,
+    CreateTextsParameters,
+    CreateTextsResult,
     CreateWallThicknessDimensionsParameters,
     CreateWallThicknessDimensionsResult,
     CreateWallsParameters,
@@ -49,13 +55,16 @@ from multiconn_archicad.models.tapir.types import (
     DoorData,
     ElementIdArrayItem,
     LabelData,
+    LampData,
     MeshData,
     MorphData,
     ObjectData,
     OpeningData,
     PolylineData,
     RoofData,
+    SectionData,
     SlabData,
+    TextData,
     WallData,
     WallThicknessDimensionData,
     WindowData,
@@ -224,6 +233,31 @@ class ElementCreationCommands:
             "CreateLabels", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = CreateLabelsResult.model_validate(response_dict)
+        return validated_response.elements
+
+    def create_lamps(self, lamps_data: list[LampData]) -> list[ElementIdArrayItem]:
+        """
+        Creates Lamp elements based on the given parameters.
+
+        Args:
+            lamps_data (list[LampData]): Array of data to create Lamps.
+
+        Returns:
+            list[ElementIdArrayItem]: A list of elements.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "lampsData": lamps_data,
+        }
+        validated_params = CreateLampsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "CreateLamps", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = CreateLampsResult.model_validate(response_dict)
         return validated_response.elements
 
     def create_meshes(self, meshes_data: list[MeshData]) -> list[ElementIdArrayItem]:
@@ -399,6 +433,56 @@ class ElementCreationCommands:
             "CreateSlabs", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = CreateSlabsResult.model_validate(response_dict)
+        return validated_response.elements
+
+    def create_stairs(self, stairs_data: list[SectionData]) -> list[ElementIdArrayItem]:
+        """
+        Creates Stair elements based on the given baseline and parameters.
+
+        Args:
+            stairs_data (list[SectionData]): Array of data to create Stair elements.
+
+        Returns:
+            list[ElementIdArrayItem]: A list of elements.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "stairsData": stairs_data,
+        }
+        validated_params = CreateStairsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "CreateStairs", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = CreateStairsResult.model_validate(response_dict)
+        return validated_response.elements
+
+    def create_texts(self, texts_data: list[TextData]) -> list[ElementIdArrayItem]:
+        """
+        Creates standalone Text elements based on the given parameters.
+
+        Args:
+            texts_data (list[TextData]): Array of data to create Texts.
+
+        Returns:
+            list[ElementIdArrayItem]: A list of elements.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "textsData": texts_data,
+        }
+        validated_params = CreateTextsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "CreateTexts", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = CreateTextsResult.model_validate(response_dict)
         return validated_response.elements
 
     def create_wall_thickness_dimensions(

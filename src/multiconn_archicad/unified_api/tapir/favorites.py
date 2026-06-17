@@ -10,12 +10,16 @@ from multiconn_archicad.models.tapir.commands import (
     ApplyFavoritesToElementDefaultsResult,
     CreateFavoritesFromElementsParameters,
     CreateFavoritesFromElementsResult,
+    ExportFavoritesParameters,
     GetFavoritePreviewImageParameters,
     GetFavoritePreviewImageResult,
     GetFavoritesByTypeParameters,
     GetFavoritesByTypeResult,
+    ImportFavoritesParameters,
+    ImportFavoritesResult,
 )
 from multiconn_archicad.models.tapir.types import (
+    ConflictPolicy,
     ElementType,
     ErrorItem,
     FailedExecutionResult,
@@ -91,6 +95,31 @@ class FavoritesCommands:
         validated_response = CreateFavoritesFromElementsResult.model_validate(response_dict)
         return validated_response.executionResults
 
+    def export_favorites(self, path: str, names: None | list[str] = None) -> None:
+        """
+        Export the project's Favorites to a .prefs file or folder.
+
+        Args:
+            path (str): Absolute path on the AC host. If extension matches the Favorite binary
+                format (.prefs), writes a single file; otherwise treats as folder.
+            names (None | list[str]): Optional subset of Favorites to export. Default: export
+                all.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "path": path,
+            "names": names,
+        }
+        validated_params = ExportFavoritesParameters(**params_dict)
+        self._core.post_tapir_command(
+            "ExportFavorites", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        return None
+
     def get_favorite_preview_image(
         self,
         favorite: str,
@@ -155,3 +184,43 @@ class FavoritesCommands:
         )
         validated_response = TypeAdapter(GetFavoritesByTypeResult).validate_python(response_dict)
         return validated_response
+
+    def import_favorites(
+        self,
+        path: str,
+        target_folder: None | list[str] = None,
+        import_folders: None | bool = None,
+        conflict_policy: ConflictPolicy | None = None,
+    ) -> None | str:
+        """
+        Import Favorites from a .prefs file or folder into the current project.
+
+        Args:
+            path (str): Absolute path on the AC host to a Favorites file (.prefs) or folder.
+            target_folder (None | list[str]): Folder hierarchy under which to import. Empty =
+                root.
+            import_folders (None | bool): If true and `path` is a folder, the folder structure
+                is preserved.
+            conflict_policy (ConflictPolicy | None): How to resolve name conflicts. Default
+                Overwrite.
+
+        Returns:
+            None | str: Set when conflictPolicy=Error and a name collided; absent otherwise.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "path": path,
+            "targetFolder": target_folder,
+            "importFolders": import_folders,
+            "conflictPolicy": conflict_policy,
+        }
+        validated_params = ImportFavoritesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "ImportFavorites", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = ImportFavoritesResult.model_validate(response_dict)
+        return validated_response.firstConflictName

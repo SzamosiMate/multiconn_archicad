@@ -53,6 +53,8 @@ def main():
 
 
 def is_union(obj: Any) -> bool:
+    if isinstance(obj, UnionType):
+        return True
     origin = get_origin(obj)
     return origin is Union or origin is UnionType
 
@@ -204,6 +206,27 @@ def _build_signature_and_docs(
     snake_name: str, params_model: Any, return_type_hint: str, dependencies: dict
 ) -> tuple[str, list[str]]:
     """Builds the method signature and the parameter documentation lines."""
+    if params_model is None:
+        return f"def {snake_name}(self) -> {return_type_hint}:", []
+
+    if is_union(params_model):
+        args = get_args(params_model)
+        type_names = []
+        for arg in args:
+            name = getattr(arg, "__name__", str(arg).split(".")[-1])
+            type_names.append(name)
+            module_name = getattr(arg, "__module__", "")
+            if "multiconn_archicad.models" in module_name:
+                if ".types" in module_name:
+                    dependencies["types"].add(name)
+                elif ".commands" in module_name:
+                    dependencies["commands"].add(name)
+
+        union_str = " | ".join(type_names)
+        signature = f"def {snake_name}(\n    self,\n    parameters: {union_str}\n) -> {return_type_hint}:"
+        param_docs = [f"parameters ({union_str}): Union model configuration parameters."]
+        return signature, param_docs
+
     signature_parts, param_docs = ["self"], []
     if params_model:
         sig = inspect.signature(params_model)
@@ -280,17 +303,20 @@ def _build_body(
     body_lines = []
 
     if params_model:
-        params_map_lines = ["{"]
-        for param in inspect.signature(params_model).parameters.values():
-            params_map_lines.append(f"    '{param.name}': {camel_to_snake(param.name)},")
-        params_map_lines.append("}")
-        params_map = "\n    ".join(params_map_lines)
-        body_lines.extend(
-            [
-                f"params_dict = {params_map}",
-                f"validated_params = {params_model_name}(**params_dict)",
-            ]
-        )
+        if is_union(params_model):
+            body_lines.append(f"validated_params = TypeAdapter({params_model_name}).validate_python(parameters)")
+        else:
+            params_map_lines = ["{"]
+            for param in inspect.signature(params_model).parameters.values():
+                params_map_lines.append(f"    '{param.name}': {camel_to_snake(param.name)},")
+            params_map_lines.append("}")
+            params_map = "\n    ".join(params_map_lines)
+            body_lines.extend(
+                [
+                    f"params_dict = {params_map}",
+                    f"validated_params = {params_model_name}(**params_dict)",
+                ]
+            )
 
     call_args = [f'"{original_command_name}"']
     if params_model:

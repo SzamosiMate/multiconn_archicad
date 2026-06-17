@@ -8,6 +8,8 @@ from pydantic import TypeAdapter
 from multiconn_archicad.models.tapir.commands import (
     AddFilesToEmbeddedLibraryParameters,
     AddFilesToEmbeddedLibraryResult,
+    GetAvailableLibraryPartsParameters,
+    GetAvailableLibraryPartsResult,
     GetLibrariesResult,
     ReloadLibrariesResult,
 )
@@ -15,6 +17,7 @@ from multiconn_archicad.models.tapir.types import (
     FailedExecutionResult,
     Library,
     LibraryFileAddition,
+    LibraryPartType,
     SuccessfulExecutionResult,
 )
 
@@ -54,6 +57,35 @@ class LibraryCommands:
         )
         validated_response = AddFilesToEmbeddedLibraryResult.model_validate(response_dict)
         return validated_response.executionResults
+
+    def get_available_library_parts(
+        self, filter_by_type_id: LibraryPartType | None = None
+    ) -> GetAvailableLibraryPartsResult:
+        """
+        Lists library parts currently available to the project. Filter by typeId (e.g. 'Door',
+        'Window', 'Object', 'Lamp').
+
+        Args:
+            filter_by_type_id (LibraryPartType | None): Optional. Filter by libpart type
+                (matches the value returned by LibPartTypeIdToString).
+
+        Returns:
+            GetAvailableLibraryPartsResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "filterByTypeId": filter_by_type_id,
+        }
+        validated_params = GetAvailableLibraryPartsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetAvailableLibraryParts", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetAvailableLibraryPartsResult.model_validate(response_dict)
+        return validated_response
 
     def get_libraries(self) -> list[Library]:
         """

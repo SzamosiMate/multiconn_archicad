@@ -6,11 +6,43 @@ from typing import TYPE_CHECKING
 from pydantic import TypeAdapter
 
 from multiconn_archicad.models.tapir.commands import (
+    CreateDesignOptionCombinationsParameters,
+    CreateDesignOptionCombinationsResult,
+    CreateDesignOptionSetsParameters,
+    CreateDesignOptionSetsResult,
+    CreateDesignOptionsParameters,
+    CreateDesignOptionsResult,
     GetDesignOptionCombinationsResult,
+    GetDesignOptionForElementsParameters,
+    GetDesignOptionForElementsResult,
     GetDesignOptionSetsResult,
     GetDesignOptionsResult,
+    GetElementsOfDesignOptionsParameters,
+    GetElementsOfDesignOptionsResult,
+    MoveDesignOptionsToAnotherSetParameters,
+    MoveDesignOptionsToAnotherSetResult,
+    MoveElementsToDesignOptionsParameters,
+    MoveElementsToDesignOptionsResult,
+    SetActiveDesignOptionsInCombinationsParameters,
+    SetActiveDesignOptionsInCombinationsResult,
 )
-from multiconn_archicad.models.tapir.types import DesignOption, DesignOptionCombination, DesignOptionSet
+from multiconn_archicad.models.tapir.types import (
+    ActiveDesignOptionsInCombination,
+    DesignOptionAndSetPair,
+    DesignOptionCombinationData,
+    DesignOptionCombinationDetails,
+    DesignOptionCombinationIdArrayItem,
+    DesignOptionData,
+    DesignOptionDetails,
+    DesignOptionForElement,
+    DesignOptionIdArrayItem,
+    DesignOptionSet,
+    ElementDesignOptionPair,
+    ElementIdArrayItem,
+    ErrorItem,
+    FailedExecutionResult,
+    SuccessfulExecutionResult,
+)
 
 if TYPE_CHECKING:
     from multiconn_archicad.core.core_commands import CoreCommands
@@ -20,12 +52,97 @@ class DesignOptionsCommands:
     def __init__(self, core: CoreCommands):
         self._core = core
 
-    def get_design_option_combinations(self) -> list[DesignOptionCombination]:
+    def create_design_option_combinations(
+        self, design_option_combinations: list[DesignOptionCombinationData]
+    ) -> list[DesignOptionCombinationIdArrayItem | ErrorItem]:
+        """
+        Creates new design option combinations with the given parameters. Available from
+        Archicad 29.
+
+        Args:
+            design_option_combinations (list[DesignOptionCombinationData])
+
+        Returns:
+            list[DesignOptionCombinationIdArrayItem | ErrorItem]: A list of design option
+                combination identifiers or errors.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "designOptionCombinations": design_option_combinations,
+        }
+        validated_params = CreateDesignOptionCombinationsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "CreateDesignOptionCombinations", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = CreateDesignOptionCombinationsResult.model_validate(response_dict)
+        return validated_response.designOptionCombinationIdsOrErrors
+
+    def create_design_option_sets(
+        self, design_option_sets: list[str]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Creates new design option sets with the given names. Available from Archicad 29.
+
+        Args:
+            design_option_sets (list[str])
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "designOptionSets": design_option_sets,
+        }
+        validated_params = CreateDesignOptionSetsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "CreateDesignOptionSets", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = CreateDesignOptionSetsResult.model_validate(response_dict)
+        return validated_response.executionResults
+
+    def create_design_options(
+        self, design_options: list[DesignOptionData]
+    ) -> list[DesignOptionIdArrayItem | ErrorItem]:
+        """
+        Creates new design options with the given parameters. Available from Archicad 29.
+
+        Args:
+            design_options (list[DesignOptionData])
+
+        Returns:
+            list[DesignOptionIdArrayItem | ErrorItem]: A list of design option identifiers or
+                errors.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "designOptions": design_options,
+        }
+        validated_params = CreateDesignOptionsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "CreateDesignOptions", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = CreateDesignOptionsResult.model_validate(response_dict)
+        return validated_response.designOptionIdsOrErrors
+
+    def get_design_option_combinations(self) -> list[DesignOptionCombinationDetails]:
         """
         Retrieves information about existing design option combinations.
 
         Returns:
-            list[DesignOptionCombination]
+            list[DesignOptionCombinationDetails]
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -35,6 +152,32 @@ class DesignOptionsCommands:
         response_dict = self._core.post_tapir_command("GetDesignOptionCombinations")
         validated_response = GetDesignOptionCombinationsResult.model_validate(response_dict)
         return validated_response.designOptionCombinations
+
+    def get_design_option_for_elements(self, elements: list[ElementIdArrayItem]) -> list[DesignOptionForElement]:
+        """
+        Retrieves the design option association for the specified elements. Available from
+        Archicad 29.
+
+        Args:
+            elements (list[ElementIdArrayItem]): A list of elements.
+
+        Returns:
+            list[DesignOptionForElement]
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elements": elements,
+        }
+        validated_params = GetDesignOptionForElementsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetDesignOptionForElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetDesignOptionForElementsResult.model_validate(response_dict)
+        return validated_response.designOptionForElements
 
     def get_design_option_sets(self) -> list[DesignOptionSet]:
         """
@@ -52,12 +195,12 @@ class DesignOptionsCommands:
         validated_response = GetDesignOptionSetsResult.model_validate(response_dict)
         return validated_response.designOptionSets
 
-    def get_design_options(self) -> list[DesignOption]:
+    def get_design_options(self) -> list[DesignOptionDetails]:
         """
         Retrieves information about existing design options. Available from Archicad 29.
 
         Returns:
-            list[DesignOption]
+            list[DesignOptionDetails]
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -67,3 +210,116 @@ class DesignOptionsCommands:
         response_dict = self._core.post_tapir_command("GetDesignOptions")
         validated_response = GetDesignOptionsResult.model_validate(response_dict)
         return validated_response.designOptions
+
+    def get_elements_of_design_options(self, design_options: list[DesignOptionIdArrayItem]) -> list[Any]:
+        """
+        Retrieves the elements associated with the given design options. Available from Archicad
+        29.
+
+        Args:
+            design_options (list[DesignOptionIdArrayItem])
+
+        Returns:
+            list[Any]
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "designOptions": design_options,
+        }
+        validated_params = GetElementsOfDesignOptionsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetElementsOfDesignOptions", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetElementsOfDesignOptionsResult.model_validate(response_dict)
+        return validated_response.elementsOfDesignOptions
+
+    def move_design_options_to_another_set(
+        self, design_option_and_set_pairs: list[DesignOptionAndSetPair]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Moves the given design options to another sets. Available from Archicad 29.
+
+        Args:
+            design_option_and_set_pairs (list[DesignOptionAndSetPair])
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "designOptionAndSetPairs": design_option_and_set_pairs,
+        }
+        validated_params = MoveDesignOptionsToAnotherSetParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "MoveDesignOptionsToAnotherSet", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = MoveDesignOptionsToAnotherSetResult.model_validate(response_dict)
+        return validated_response.executionResults
+
+    def move_elements_to_design_options(
+        self, element_design_option_pairs: list[ElementDesignOptionPair]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Moves the given elements into the given design options. Use NULLGuid for design option
+        to remove the element from any design options and move it to the main model. Available
+        from Archicad 29.
+
+        Args:
+            element_design_option_pairs (list[ElementDesignOptionPair])
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elementDesignOptionPairs": element_design_option_pairs,
+        }
+        validated_params = MoveElementsToDesignOptionsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "MoveElementsToDesignOptions", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = MoveElementsToDesignOptionsResult.model_validate(response_dict)
+        return validated_response.executionResults
+
+    def set_active_design_options_in_combinations(
+        self, active_design_options_in_combinations: list[ActiveDesignOptionsInCombination]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Sets active design options in the given combinations. Available from Archicad 29.
+
+        Args:
+            active_design_options_in_combinations (list[ActiveDesignOptionsInCombination])
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "activeDesignOptionsInCombinations": active_design_options_in_combinations,
+        }
+        validated_params = SetActiveDesignOptionsInCombinationsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "SetActiveDesignOptionsInCombinations",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+        )
+        validated_response = SetActiveDesignOptionsInCombinationsResult.model_validate(response_dict)
+        return validated_response.executionResults

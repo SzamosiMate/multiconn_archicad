@@ -643,6 +643,43 @@ class ClassificationSystemIdArrayItem(APIModel):
     classificationSystemId: ClassificationSystemId
 
 
+class ClassificationSystemDetails(APIModel):
+    name: Annotated[str, Field(description="The display name of the classification system.")]
+    description: Annotated[str, Field(description="The description of the classification system.")]
+    source: Annotated[
+        str,
+        Field(description="The source of the classification system (e.g. URL to a classification system standard)."),
+    ]
+    version: Annotated[str, Field(description="The version of the classification system.")]
+    date: Annotated[
+        str,
+        Field(
+            description="The release date of the classification system's current version.",
+        ),
+    ]
+
+
+class ClassificationItemDetails(APIModel):
+    id: Annotated[
+        str,
+        Field(description="The unique identifier of the classification item as specified by the user."),
+    ]
+    name: Annotated[str, Field(description="The display name of the classification item.")]
+    description: Annotated[str, Field(description="The description of the classification item.")]
+    children: Annotated[
+        List[ClassificationItemDetails] | None,
+        Field(description="A list of classification items."),
+    ] = None
+
+
+class ClassificationSystemsWithItem(APIModel):
+    classificationSystem: ClassificationSystemDetails
+    classificationItems: Annotated[
+        List[ClassificationItemDetails],
+        Field(description="A list of classification items in the classification system."),
+    ]
+
+
 class ClassificationItemId(APIModel):
     guid: Annotated[
         UUID,
@@ -675,6 +712,12 @@ class ElementClassificationItemArray(APIModel):
         List[ClassificationIdArrayItem | ErrorItem],
         Field(description="A list of element classification identifiers or errors."),
     ]
+
+
+class ElementIFCProperty(APIModel):
+    propertySetName: str
+    name: str
+    value: str
 
 
 class BoundingBox3D(APIModel):
@@ -770,6 +813,16 @@ class ObjectDetails(APIModel):
     origin: Coordinate3D
     dimensions: Coordinate3D
     angle: float
+
+
+class WindowDoorDetails(APIModel):
+    width: Annotated[float, Field(description="Opening width.")]
+    height: Annotated[float, Field(description="Opening height.")]
+    sillHeight: Annotated[float, Field(description="Sill height (window) or threshold height (door).")]
+    centerOffset: Annotated[float, Field(description="Center offset along the owner wall reference line.")]
+    reflected: bool
+    refSide: bool
+    oSide: bool
 
 
 class PolylineDetails(APIModel):
@@ -1080,6 +1133,7 @@ class ProjectInfoField(APIModel):
 
 
 class LibraryPartType(Enum):
+    Spec = "Spec"
     Window = "Window"
     Door = "Door"
     Object = "Object"
@@ -1090,9 +1144,11 @@ class LibraryPartType(Enum):
     Label = "Label"
     Macro = "Macro"
     Pict = "Pict"
+    Picture = "Picture"
     ListScheme = "ListScheme"
     Skylight = "Skylight"
     OpeningSymbol = "OpeningSymbol"
+    Unknown = "Unknown"
 
 
 class FavoritesWrapper(APIModel):
@@ -1110,6 +1166,15 @@ class GroupId(APIModel):
 
 class GroupIdArrayItem(APIModel):
     groupId: GroupId
+
+
+class DesignOptionCombinationId(APIModel):
+    guid: Annotated[
+        UUID,
+        Field(
+            description="A Globally Unique Identifier (or Universally Unique Identifier) in its string representation as defined in RFC 4122.",
+        ),
+    ]
 
 
 class Length(APIModel):
@@ -1135,19 +1200,6 @@ class Angle(APIModel):
     unit: AngleType
     decimals: Annotated[int, Field(description="Number of decimals to display for angle values.")]
     accuracy: Annotated[int, Field(description="Accuracy for angle values.")]
-
-
-class Method(Enum):
-    save = "save"
-    merge = "merge"
-    open = "open"
-
-
-class FileType(Enum):
-    ifc = "ifc"
-    ifcxml = "ifcxml"
-    ifczip = "ifczip"
-    ifcxmlzip = "ifcxmlzip"
 
 
 class PrintArea(Enum):
@@ -1204,6 +1256,26 @@ class Format(Enum):
     jpg = "jpg"
 
 
+class ConflictPolicy(Enum):
+    Error = "Error"
+    Skip = "Skip"
+    Overwrite = "Overwrite"
+    Append = "Append"
+
+
+class Method(Enum):
+    save = "save"
+    merge = "merge"
+    open = "open"
+
+
+class FileType(Enum):
+    ifc = "ifc"
+    ifcxml = "ifcxml"
+    ifczip = "ifczip"
+    ifcxmlzip = "ifcxmlzip"
+
+
 class Library(APIModel):
     name: Annotated[str, Field(description="Library name.")]
     path: Annotated[str, Field(description="A filesystem path to library location.")]
@@ -1215,6 +1287,19 @@ class Library(APIModel):
         Field(description="URL address of the TeamWork server hosting the library."),
     ] = None
     urlWebLibrary: Annotated[str | None, Field(description="URL of the downloaded Internet library.")] = None
+
+
+class LibraryPart(APIModel):
+    guid: str | None = None
+    index: int | None = None
+    documentName: str | None = None
+    fileName: str | None = None
+    typeId: LibraryPartType | None = None
+
+
+class SkippedSampleItem(APIModel):
+    index: int | None = None
+    code: int | None = None
 
 
 class User(APIModel):
@@ -1266,6 +1351,13 @@ class Comment(APIModel):
     creaTime: Annotated[int, Field(description="Comment creation time")]
 
 
+class Type(Enum):
+    NotExistingElement = "NotExistingElement"
+    MissingDesignOption = "MissingDesignOption"
+    NotLinkedToAnyDesignOption = "NotLinkedToAnyDesignOption"
+    LinkedToDesignOption = "LinkedToDesignOption"
+
+
 class Coordinates(APIModel):
     x: Annotated[float, Field(description="X value of the coordinate.")]
     y: Annotated[float, Field(description="Y value of the coordinate.")]
@@ -1276,6 +1368,20 @@ class ColumnData(APIModel):
     coordinates: Annotated[Coordinates, Field(description="3D coordinate.")]
     height: Annotated[float | None, Field(description="Optional column height.", gt=0.0)] = None
     axisRotationAngle: Annotated[float | None, Field(description="Optional column rotation angle in radians.")] = None
+    width: Annotated[
+        float | None,
+        Field(
+            description="Cross section width of the column. Applied to all segments.",
+            gt=0.0,
+        ),
+    ] = None
+    depth: Annotated[
+        float | None,
+        Field(
+            description="Cross section depth (height) of the column. Applied to all segments. Only effective for rectangular columns.",
+            gt=0.0,
+        ),
+    ] = None
 
 
 class SlabData(APIModel):
@@ -1330,11 +1436,41 @@ class ObjectData(APIModel):
     dimensions: Dimensions3D | None = None
 
 
+class Ridges(Enum):
+    AllSharp = "AllSharp"
+    AllSmooth = "AllSmooth"
+    UserDefined = "UserDefined"
+
+
 class MeshData(APIModel):
     floorIndex: int | None = None
     level: Annotated[float | None, Field(description="The Z reference level of coordinates.")] = None
     skirtType: MeshSkirtType | None = None
     skirtLevel: Annotated[float | None, Field(description="The height of the skirt.")] = None
+    ridges: Annotated[
+        Ridges | None,
+        Field(
+            description="How ridges between mesh facets are displayed in 3D: 'AllSharp' shows all ridges, 'AllSmooth' hides them, 'UserDefined' shows only ridges along user-defined level lines (the drawing-set look for contour-line topography)."
+        ),
+    ] = None
+    showLines: Annotated[
+        bool | None,
+        Field(
+            description="Whether to show secondary mesh lines (level lines other than the user-defined ones) on plan."
+        ),
+    ] = None
+    contourPen: Annotated[
+        int | None,
+        Field(description="Optional pen attribute index for the mesh's contour line."),
+    ] = None
+    levelPen: Annotated[
+        int | None,
+        Field(description="Optional pen attribute index for the mesh's level lines."),
+    ] = None
+    lineTypeIndex: Annotated[
+        int | None,
+        Field(description="Optional line type attribute index for the mesh's contour."),
+    ] = None
     polygonCoordinates: Annotated[
         List[Coordinate3D],
         Field(
@@ -1364,6 +1500,20 @@ class BeamData(APIModel):
     slantAngle: float | None = None
     arcAngle: float | None = None
     verticalCurveHeight: float | None = None
+    width: Annotated[
+        float | None,
+        Field(
+            description="Cross section width of the beam. Applied to all segments.",
+            gt=0.0,
+        ),
+    ] = None
+    height: Annotated[
+        float | None,
+        Field(
+            description="Cross section height of the beam. Applied to all segments.",
+            gt=0.0,
+        ),
+    ] = None
 
 
 class DetailData(APIModel):
@@ -1412,6 +1562,59 @@ class Preset(Enum):
     DoorWindowModelHotspots = "DoorWindowModelHotspots"
 
 
+class SectionData(APIModel):
+    baseLinePoints: Annotated[
+        List[Coordinate2D],
+        Field(
+            description="2D coordinates defining the stair baseline polyline. Minimum 2 points for a straight stair, 3+ for L-shaped or U-shaped stairs.",
+            min_length=2,
+        ),
+    ]
+    zCoordinate: Annotated[
+        float,
+        Field(description="The Z coordinate (absolute elevation) of the stair base."),
+    ]
+    totalHeight: Annotated[float | None, Field(description="Total height of the stair.", gt=0.0)] = None
+    flightWidth: Annotated[float | None, Field(description="Width of the stair flight.", gt=0.0)] = None
+    stepNum: Annotated[int | None, Field(description="Number of risers (steps).", ge=1)] = None
+    riserHeight: Annotated[float | None, Field(description="Height of each riser.", gt=0.0)] = None
+    treadDepth: Annotated[float | None, Field(description="Depth (going) of each tread.", gt=0.0)] = None
+
+
+class LampData(APIModel):
+    libraryPartName: Annotated[str, Field(description="The name of the lamp library part to use.")]
+    coordinates: Coordinate3D
+    dimensions: Dimensions3D | None = None
+
+
+class Justification(Enum):
+    Left = "Left"
+    Center = "Center"
+    Right = "Right"
+    Full = "Full"
+
+
+class TextData(APIModel):
+    coordinate: Annotated[
+        Coordinate3D,
+        Field(
+            description="The placement position of the text. The z value is used to determine the floor when floorIndex is omitted."
+        ),
+    ]
+    text: Annotated[str, Field(description="The text content. Newlines create multiple lines.")]
+    height: Annotated[
+        float | None,
+        Field(description="The character height in millimeters. Optional; defaults to the Text tool default."),
+    ] = None
+    pen: Annotated[int | None, Field(description="Optional pen attribute index.")] = None
+    angle: Annotated[float | None, Field(description="Optional rotation angle in radians.")] = None
+    justification: Annotated[Justification | None, Field(description="Optional text justification.")] = None
+    floorIndex: Annotated[
+        int | None,
+        Field(description="Optional floor index. If omitted, derived from the coordinate's z value."),
+    ] = None
+
+
 class WallStructureType(Enum):
     Basic = "Basic"
     Composite = "Composite"
@@ -1426,6 +1629,25 @@ class SlabStructureType(Enum):
 class RoofStructureType(Enum):
     Basic = "Basic"
     Composite = "Composite"
+
+
+class WitnessForm(Enum):
+    None_ = "None"
+    Small = "Small"
+    Large = "Large"
+    Fix = "Fix"
+    Unknown = "Unknown"
+
+
+class ProjectInfoFieldData(APIModel):
+    projectInfoName: Annotated[str, Field(description="Display name of the project info field.", min_length=1)]
+    projectInfoValue: Annotated[str | None, Field(description="Initial value of the project info field.")] = None
+
+
+class DesignOptionData(APIModel):
+    name: Annotated[str, Field(description="The name of the design option.")]
+    id: Annotated[str, Field(description="The string id of the design option.")]
+    ownerSetName: Annotated[str, Field(description="The name of the owner design option set.")]
 
 
 class ProjectLocation(APIModel):
@@ -1477,6 +1699,11 @@ class SurveyPoint(APIModel):
     geoReferencingParameters: GeoReferencingParameters
 
 
+class DatabaseIdAndWindowType(APIModel):
+    windowType: WindowType
+    databaseId: DatabaseId | None = None
+
+
 class Zoom(APIModel):
     xMin: Annotated[float, Field(description="The minimum X value of the zoom box.")]
     yMin: Annotated[float, Field(description="The minimum Y value of the zoom box.")]
@@ -1511,8 +1738,21 @@ class GuidId(APIModel):
     ]
 
 
+class DesignOptionId(APIModel):
+    guid: Annotated[
+        UUID,
+        Field(
+            description="A Globally Unique Identifier (or Universally Unique Identifier) in its string representation as defined in RFC 4122.",
+        ),
+    ]
+
+
 class DesignOptionIdArrayItem(APIModel):
-    designOptionId: GuidId
+    designOptionId: DesignOptionId
+
+
+class DesignOptionCombinationIdArrayItem(APIModel):
+    designOptionCombinationId: DesignOptionCombinationId
 
 
 class LayersOfLayerCombinationItem(APIModel):
@@ -1591,6 +1831,40 @@ class BasicDefaultValue(APIModel):
         | UserUndefinedPropertyValue,
         Field(description="A normal, userUndefined, notAvailable or notEvaluated property value."),
     ]
+
+
+class NewClassificationItem(APIModel):
+    classificationSystemId: ClassificationSystemId
+    classificationItemDetails: ClassificationItemDetails
+    parentClassificationItemId: Annotated[
+        ClassificationItemId | None,
+        Field(
+            description="The identifier of the parent classification item. If not specified, the new classification item will be created as a child of the root."
+        ),
+    ] = None
+    nextClassificationItemId: Annotated[
+        ClassificationItemId | None,
+        Field(
+            description="The identifier of the next sibling classification item. If not specified, the new classification item will be created as the last child of its parent."
+        ),
+    ] = None
+
+
+class ElementIFCProperties(APIModel):
+    elementId: ElementId
+    ifcProperties: List[ElementIFCProperty]
+
+
+class ElementIFCType(APIModel):
+    elementId: ElementId
+    ifcType: str
+    typeObjectIFCType: str
+
+
+class ElementIFCIds(APIModel):
+    elementId: ElementId
+    ifcId: str
+    externalIFCId: str
 
 
 class ElementClassification(APIModel):
@@ -1741,7 +2015,7 @@ class ZoneDetails(APIModel):
     categoryAttributeId: Annotated[AttributeId, Field(description="The identifier of the zone category attribute.")]
     stampPosition: Annotated[Coordinate2D, Field(description="Position of the origin of the zone stamp.")]
     isManual: Annotated[bool, Field(description="Is the coordinates of the zone manually placed?")]
-    polygonCoordinates: Annotated[
+    polygonOutline: Annotated[
         List[Coordinate2D],
         Field(description="The 2D coordinates of the edge of the zone.", min_length=3),
     ]
@@ -1820,6 +2094,13 @@ class AttributeHeadersWrapper(APIModel):
     attributes: Annotated[List[AttributeHeader], Field(description="Details of attributes.")]
 
 
+class DesignOptionDetails(APIModel):
+    designOptionId: DesignOptionId
+    name: Annotated[str, Field(description="The name of the design option.")]
+    id: Annotated[str, Field(description="The string id of the design option.")]
+    ownerSetName: Annotated[str, Field(description="The name of the owner design option set.")]
+
+
 class ElementsWithDetail(APIModel):
     elementId: ElementId
     details: Annotated[Details, Field(description="Details of an element.")]
@@ -1850,6 +2131,10 @@ class ElementsWithGDLParameter(APIModel):
         List[SetGDLParameterByNameDetails | SetGDLParameterByIndexDetails],
         Field(description="The list of GDL parameters."),
     ]
+
+
+class Element(APIModel):
+    elementId: ElementId
 
 
 class FavoritesFromElement(APIModel):
@@ -1961,13 +2246,6 @@ class Issue(APIModel):
     isTagTextElemVisible: Annotated[bool, Field(description="The visibility of the attached tag text element")]
 
 
-class DesignOption(APIModel):
-    designOptionId: Annotated[GuidId, Field(description="The guid identifier of the design option.")]
-    name: Annotated[str, Field(description="The name of the design option.")]
-    id: Annotated[str, Field(description="The string id of the design option.")]
-    ownerSetName: Annotated[str, Field(description="The name of the owner design option set.")]
-
-
 class DesignOptionSet(APIModel):
     designOptionSetId: Annotated[GuidId, Field(description="The guid identifier of the design option set.")]
     name: Annotated[str, Field(description="The name of the design option set.")]
@@ -1977,16 +2255,36 @@ class DesignOptionSet(APIModel):
     ]
 
 
-class DesignOptionCombination(APIModel):
-    designOptionCombinationId: Annotated[
-        GuidId,
-        Field(description="The guid identifier of the design option combination."),
-    ]
-    name: Annotated[str, Field(description="The name of the design option combination.")]
+class DesignOptionForElement(APIModel):
+    elementId: Annotated[ElementId, Field(description="The identifier of the element.")]
+    type: Annotated[Type, Field(description="The type of the associated design option.")]
+    designOption: DesignOptionDetails | None = None
+
+
+class ActiveDesignOptionsInCombination(APIModel):
+    designOptionCombinationId: DesignOptionCombinationId
     activeDesignOptions: Annotated[
-        List[DesignOptionIdArrayItem] | None,
-        Field(description="The list of active design options in the combination. Available from Archicad 29."),
+        List[DesignOptionIdArrayItem],
+        Field(description="The list of active design options in the combination."),
+    ]
+
+
+class ElementDesignOptionPair(APIModel):
+    elementId: ElementId
+    designOptionId: Annotated[
+        DesignOptionId,
+        Field(
+            description="The identifier of the design option to move the element into. Use NULLGuid to remove the element from any design option and move it to the main model."
+        ),
+    ]
+
+
+class DesignOptionAndSetPair(APIModel):
+    designOptionId: Annotated[
+        DesignOptionId | None,
+        Field(description="The identifier of the design option to move."),
     ] = None
+    setName: str
 
 
 class ZoneData(APIModel):
@@ -2046,6 +2344,15 @@ class WindowData(APIModel):
     sillHeight: float | None = None
     width: Annotated[float | None, Field(gt=0.0)] = None
     height: Annotated[float | None, Field(gt=0.0)] = None
+    reflected: bool | None = None
+    refSide: bool | None = None
+    oSide: bool | None = None
+    favoriteName: Annotated[
+        str | None,
+        Field(
+            description="Optional. Name of an existing Window favorite (as returned by `GetFavoritesByType`). Applied to the Window tool defaults before the create."
+        ),
+    ] = None
 
 
 class DoorData(APIModel):
@@ -2054,6 +2361,15 @@ class DoorData(APIModel):
     sillHeight: float | None = None
     width: Annotated[float | None, Field(gt=0.0)] = None
     height: Annotated[float | None, Field(gt=0.0)] = None
+    reflected: bool | None = None
+    refSide: bool | None = None
+    oSide: bool | None = None
+    favoriteName: Annotated[
+        str | None,
+        Field(
+            description="Optional. Name of an existing Door favorite (as returned by `GetFavoritesByType`). Applied to the Door tool defaults before the create."
+        ),
+    ] = None
 
 
 class MorphData(APIModel):
@@ -2083,23 +2399,6 @@ class OpeningData(APIModel):
     basePoint: Coordinate3D
     width: Annotated[float | None, Field(gt=0.0)] = None
     height: Annotated[float | None, Field(gt=0.0)] = None
-
-
-class WitnessPoint(APIModel):
-    elementId: ElementId
-    line: bool | None = None
-    inIndex: int | None = None
-    special: int | None = None
-    nodeType: int | None = None
-    nodeStatus: int | None = None
-    nodeId: Annotated[float | None, Field(ge=0.0)] = None
-
-
-class AssociativeDimensionData(APIModel):
-    referencePoint: Coordinate2D
-    direction: Coordinate2D
-    floorIndex: float | None = None
-    witnessPoints: Annotated[List[WitnessPoint], Field(min_length=2)]
 
 
 class AssociativeDimensionOnSectionData(APIModel):
@@ -2174,6 +2473,9 @@ class WindowWithDetails(APIModel):
     height: Annotated[float | None, Field(gt=0.0)] = None
     sillHeight: float | None = None
     centerOffset: Annotated[float | None, Field(ge=0.0)] = None
+    reflected: bool | None = None
+    refSide: bool | None = None
+    oSide: bool | None = None
 
 
 class DoorWithDetails(APIModel):
@@ -2182,6 +2484,9 @@ class DoorWithDetails(APIModel):
     height: Annotated[float | None, Field(gt=0.0)] = None
     sillHeight: float | None = None
     centerOffset: Annotated[float | None, Field(ge=0.0)] = None
+    reflected: bool | None = None
+    refSide: bool | None = None
+    oSide: bool | None = None
 
 
 class MorphWithDetails(APIModel):
@@ -2208,12 +2513,62 @@ class RoofWithDetails(APIModel):
     ] = None
 
 
+class CoordinateWitnessPoint(APIModel):
+    coordinate: Coordinate2D | None = None
+    coordinate3D: Coordinate3D | None = None
+    dimensionPosition: Coordinate2D | None = None
+    dimensionValue: float | None = None
+    witnessForm: WitnessForm | None = None
+    witnessVal: float | None = None
+    baseElementId: ElementId | None = None
+
+
+class AssociativeWitnessPoint(APIModel):
+    elementId: ElementId
+    line: bool | None = None
+    inIndex: int | None = None
+    special: int | None = None
+    nodeType: int | None = None
+    nodeStatus: int | None = None
+    nodeId: Annotated[float | None, Field(ge=0.0)] = None
+
+
+class DesignOptionCombinationDetails(APIModel):
+    designOptionCombinationId: Annotated[
+        GuidId,
+        Field(description="The guid identifier of the design option combination."),
+    ]
+    name: Annotated[str, Field(description="The name of the design option combination.")]
+    activeDesignOptions: Annotated[
+        List[DesignOptionIdArrayItem] | None,
+        Field(description="The list of active design options in the combination. Available from Archicad 29."),
+    ] = None
+
+
+class DesignOptionCombinationData(APIModel):
+    name: Annotated[str, Field(description="The name of the design option combination.")]
+    activeDesignOptions: Annotated[
+        List[DesignOptionIdArrayItem],
+        Field(description="The list of active design options in the combination."),
+    ]
+
+
 class ElementIdArrayItem(APIModel):
     elementId: ElementId
 
 
 class AttributeIdArrayItem(APIModel):
     attributeId: AttributeId
+
+
+class ElementsByIFCId(APIModel):
+    ifcId: str
+    elements: Annotated[
+        List[ElementIdArrayItem],
+        Field(
+            description="A list of element identifiers having the given IFC identifier. If the given IFC identifier is an external identifier, the list can contain multiple elements as the IFC can be placed multiple times."
+        ),
+    ]
 
 
 class CurtainWallPanelDetails(APIModel):
@@ -2247,6 +2602,13 @@ class ElementGroupParameters(APIModel):
     ] = None
 
 
+class DimensionData(APIModel):
+    elementId: ElementId | None = None
+    direction: Coordinate2D | None = None
+    dimensionLinePosition: Coordinate2D | None = None
+    witnessPoints: List[CoordinateWitnessPoint] | None = None
+
+
 class DetailsOfElement(APIModel):
     type: ElementType
     id: str
@@ -2259,6 +2621,7 @@ class DetailsOfElement(APIModel):
         | SlabDetails
         | ColumnDetails
         | DetailWorksheetDetails
+        | WindowDoorDetails
         | LibPartBasedElementDetails
         | PolylineDetails
         | ZoneDetails
@@ -2345,6 +2708,13 @@ class SurfaceDataArrayItem(APIModel):
     texture: Texture | None = None
 
 
+class AssociativeDimensionData(APIModel):
+    referencePoint: Coordinate2D
+    direction: Coordinate2D
+    floorIndex: float | None = None
+    witnessPoints: Annotated[List[AssociativeWitnessPoint], Field(min_length=2)]
+
+
 class ElementsWithExecutionResults(APIModel):
     elements: Annotated[List[ElementIdArrayItem], Field(description="A list of elements.")]
     executionResultForDatabases: Annotated[
@@ -2359,6 +2729,14 @@ class ConnectedElement(APIModel):
 
 class ConnectedElementsWrapper(APIModel):
     connectedElements: List[ConnectedElement]
+
+
+class ElementsOfDesignOption(APIModel):
+    designOptionId: DesignOptionId
+    elements: Annotated[List[ElementIdArrayItem], Field(description="A list of elements.")]
+
+
+ElementsOfDesignOptionOrError: TypeAlias = ElementsOfDesignOption | ErrorItem
 
 
 class Subelement(APIModel):
@@ -2401,3 +2779,6 @@ class Hotlink(APIModel):
         List[Hotlink] | None,
         Field(description="The children of the hotlink node if it has any."),
     ] = None
+
+
+ClassificationItemDetails.model_rebuild()
