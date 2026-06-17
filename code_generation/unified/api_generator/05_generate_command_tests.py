@@ -21,35 +21,31 @@ MODEL_MAP = {
     "official": {"commands": official_commands, "types": official_types},
 }
 
-KNOWN_RECURSIVE_SCHEMAS = {
-    "tapir": {"GetHotlinksResult"},
-    "official": {
-        "GetNavigatorItemTreeResult",
-        "GetAllClassificationsInSystemResult",
-        "GetAttributeFolderStructureResult",
-    },
-}
 
 def is_union(obj: Any) -> bool:
+    if isinstance(obj, UnionType):
+        return True
     origin = get_origin(obj)
     return origin is Union or origin is UnionType
 
 
 def patch_recursive_schemas(definitions: dict, model_name_to_test: str, source: str) -> dict:
     patched_defs = copy.deepcopy(definitions)
-    if source == "tapir" and model_name_to_test == "GetHotlinksResult":
-        if "Hotlink" in patched_defs and "properties" in patched_defs["Hotlink"]:
-            patched_defs["Hotlink"]["properties"].pop("children", None)
-    if source == "official":
-        if model_name_to_test == "GetNavigatorItemTreeResult":
-            if "NavigatorItem" in patched_defs and "properties" in patched_defs["NavigatorItem"]:
-                patched_defs["NavigatorItem"]["properties"].pop("children", None)
-        elif model_name_to_test == "GetAllClassificationsInSystemResult":
-            if "ClassificationItemInTree" in patched_defs and "properties" in patched_defs["ClassificationItemInTree"]:
-                patched_defs["ClassificationItemInTree"]["properties"].pop("children", None)
-        elif model_name_to_test == "GetAttributeFolderStructureResult":
-            if "AttributeFolderStructure" in patched_defs and "properties" in patched_defs["AttributeFolderStructure"]:
-                patched_defs["AttributeFolderStructure"]["properties"].pop("subfolders", None)
+
+    # Tapir recursive types
+    if "Hotlink" in patched_defs and "properties" in patched_defs["Hotlink"]:
+        patched_defs["Hotlink"]["properties"].pop("children", None)
+    if "ClassificationItemDetails" in patched_defs and "properties" in patched_defs["ClassificationItemDetails"]:
+        patched_defs["ClassificationItemDetails"]["properties"].pop("children", None)
+
+    # Official recursive types
+    if "NavigatorItem" in patched_defs and "properties" in patched_defs["NavigatorItem"]:
+        patched_defs["NavigatorItem"]["properties"].pop("children", None)
+    if "ClassificationItemInTree" in patched_defs and "properties" in patched_defs["ClassificationItemInTree"]:
+        patched_defs["ClassificationItemInTree"]["properties"].pop("children", None)
+    if "AttributeFolderStructure" in patched_defs and "properties" in patched_defs["AttributeFolderStructure"]:
+        patched_defs["AttributeFolderStructure"]["properties"].pop("subfolders", None)
+
     return patched_defs
 
 
@@ -115,8 +111,9 @@ class TestGenerator:
     def _get_minimal_schema_for_model(self, model_name: str, source: str) -> str:
         master_schema = self._master_schemas[source]
         all_definitions = master_schema.get("$defs", {})
-        if model_name in KNOWN_RECURSIVE_SCHEMAS.get(source, set()):
-            all_definitions = patch_recursive_schemas(all_definitions, model_name, source)
+
+        all_definitions = patch_recursive_schemas(all_definitions, model_name, source)
+
         minimal_definitions = {}
         collect_dependencies_recursively(model_name, all_definitions, minimal_definitions, set())
         if not minimal_definitions:
@@ -160,6 +157,9 @@ class TestGenerator:
         core_method = "post_tapir_command" if source == "tapir" else "post_command"
         alias_prop = command_details.get("alias_property_name")
 
+        params_obj = self._get_model_object(params_model_name, source) if params_model_name else None
+        is_params_union = is_union(params_obj) if params_obj else False
+
         body_lines = ["# 1. ARRANGE"]
         body_lines.append(f"command_group = {aliased_class_name}(core=MagicMock())")
         if has_result:
@@ -169,12 +169,17 @@ class TestGenerator:
 
         body_lines.append("\n# 2. ACT")
         if has_params:
-            body_lines.append("kwargs = {camel_to_snake(k): v for k, v in input_data.items()}")
-            if snake_name == "rename_navigator_item":
-                body_lines.append("if not kwargs.get('new_name') and not kwargs.get('new_id'): kwargs['new_name'] = 'default_name'")
+            if is_params_union:
+                body_lines.append(f"result = command_group.{snake_name}(parameters=input_data)")
+            else:
+                body_lines.append("kwargs = {camel_to_snake(k): v for k, v in input_data.items()}")
+                if snake_name == "rename_navigator_item":
+                    body_lines.append(
+                        "if not kwargs.get('new_name') and not kwargs.get('new_id'): kwargs['new_name'] = 'default_name'"
+                    )
+                body_lines.append(f"result = command_group.{snake_name}(**kwargs)")
         else:
-            body_lines.append("kwargs = {}")
-        body_lines.append(f"result = command_group.{snake_name}(**kwargs)")
+            body_lines.append(f"result = command_group.{snake_name}()")
 
         body_lines.append("\n# 3. ASSERT")
         if not has_params:
@@ -184,14 +189,19 @@ class TestGenerator:
             body_lines.append(f"args, _ = command_group._core.{core_method}.call_args")
             body_lines.append(f"assert args[0] == '{cmd_name}'")
             if snake_name != "rename_navigator_item":
-                body_lines.append(
-                    f"expected_payload = commands.{params_model_name}.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)"
-                )
+                if is_params_union:
+                    body_lines.append(
+                        f"expected_payload = TypeAdapter(commands.{params_model_name}).validate_python(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)"
+                    )
+                else:
+                    body_lines.append(
+                        f"expected_payload = commands.{params_model_name}.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)"
+                    )
                 body_lines.append("assert args[1] == expected_payload")
 
         if has_result:
             if alias_prop:
-                body_lines.append(f"assert normalize_for_comparison(result) == normalize_for_comparison(mock_response['{alias_prop}'])")
+                body_lines.append(f"assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('{alias_prop}'))")
             else:
                 result_obj = self._get_model_object(result_model_name, source)
                 if is_union(result_obj):
@@ -252,6 +262,7 @@ pytestmark = pytest.mark.generated_methods
             output_path = self._output_dir / f"test_generated_{source}_methods.py"
             output_path.write_text(file_content, encoding="utf-8")
             print(f"  - Wrote {len(self._generated_tests[source])} tests to {output_path.name}")
+
 
 def main():
     parser = argparse.ArgumentParser(description="Stage 5: Generate unit tests for Unified API methods.")

@@ -547,12 +547,41 @@ class ClassificationSystemIdArrayItem(TypedDict):
 ClassificationSystemIds = List[ClassificationSystemIdArrayItem]
 
 
+Date = str
+
+
+class ClassificationSystemDetails(TypedDict):
+    name: str
+    description: str
+    source: str
+    version: str
+    date: Date
+
+
+class ClassificationItemDetails(TypedDict):
+    id: str
+    name: str
+    description: str
+    children: NotRequired[List[ClassificationItemDetails]]
+
+
+class ClassificationSystemsWithItem(TypedDict):
+    classificationSystem: ClassificationSystemDetails
+    classificationItems: List[ClassificationItemDetails]
+
+
+ClassificationSystemsWithItems = List[ClassificationSystemsWithItem]
+
+
 class ClassificationItemId(TypedDict):
     guid: Guid
 
 
 class ClassificationItemIdArrayItem(TypedDict):
     classificationItemId: ClassificationItemId
+
+
+ClassificationItemIds = List[ClassificationItemIdArrayItem]
 
 
 class ClassificationId(TypedDict):
@@ -578,6 +607,12 @@ ElementClassificationOrError = ElementClassificationItemArray | ErrorItem
 
 
 ElementClassificationsOrErrors = List[ElementClassificationOrError]
+
+
+class ElementIFCProperty(TypedDict):
+    propertySetName: str
+    name: str
+    value: str
 
 
 class BoundingBox3D(TypedDict):
@@ -655,6 +690,16 @@ class ObjectDetails(TypedDict):
     origin: Coordinate3D
     dimensions: Coordinate3D
     angle: float
+
+
+class WindowDoorDetails(TypedDict):
+    width: float
+    height: float
+    sillHeight: float
+    centerOffset: float
+    reflected: bool
+    refSide: bool
+    oSide: bool
 
 
 class PolylineDetails(TypedDict):
@@ -895,6 +940,7 @@ class ProjectInfoField(TypedDict):
 
 
 LibraryPartType = Literal[
+    "Spec",
     "Window",
     "Door",
     "Object",
@@ -905,9 +951,11 @@ LibraryPartType = Literal[
     "Label",
     "Macro",
     "Pict",
+    "Picture",
     "ListScheme",
     "Skylight",
     "OpeningSymbol",
+    "Unknown",
 ]
 
 
@@ -927,6 +975,10 @@ class GroupIdArrayItem(TypedDict):
 
 
 GroupIdOrError = GroupIdArrayItem | ErrorItem
+
+
+class DesignOptionCombinationId(TypedDict):
+    guid: Guid
 
 
 class Length(TypedDict):
@@ -983,6 +1035,19 @@ class Library(TypedDict):
     urlWebLibrary: NotRequired[str]
 
 
+class LibraryPart(TypedDict):
+    guid: NotRequired[str]
+    index: NotRequired[int]
+    documentName: NotRequired[str]
+    fileName: NotRequired[str]
+    typeId: NotRequired[LibraryPartType]
+
+
+class SkippedSampleItem(TypedDict):
+    index: NotRequired[int]
+    code: NotRequired[int]
+
+
 class User(TypedDict):
     userId: float
     userName: str
@@ -1017,6 +1082,8 @@ class ColumnData(TypedDict):
     coordinates: Coordinates
     height: NotRequired[float]
     axisRotationAngle: NotRequired[float]
+    width: NotRequired[float]
+    depth: NotRequired[float]
 
 
 class SlabData(TypedDict):
@@ -1048,6 +1115,11 @@ class MeshData(TypedDict):
     level: NotRequired[float]
     skirtType: NotRequired[MeshSkirtType]
     skirtLevel: NotRequired[float]
+    ridges: NotRequired[Literal["AllSharp", "AllSmooth", "UserDefined"]]
+    showLines: NotRequired[bool]
+    contourPen: NotRequired[int]
+    levelPen: NotRequired[int]
+    lineTypeIndex: NotRequired[int]
     polygonCoordinates: List[Coordinate3D]
     polygonArcs: NotRequired[List[PolyArc]]
     holes: NotRequired[Holes3D]
@@ -1062,6 +1134,8 @@ class BeamData(TypedDict):
     slantAngle: NotRequired[float]
     arcAngle: NotRequired[float]
     verticalCurveHeight: NotRequired[float]
+    width: NotRequired[float]
+    height: NotRequired[float]
 
 
 class DetailData(TypedDict):
@@ -1099,6 +1173,32 @@ class Level(TypedDict):
     levelAngle: float
 
 
+class SectionData(TypedDict):
+    baseLinePoints: List[Coordinate2D]
+    zCoordinate: float
+    totalHeight: NotRequired[float]
+    flightWidth: NotRequired[float]
+    stepNum: NotRequired[int]
+    riserHeight: NotRequired[float]
+    treadDepth: NotRequired[float]
+
+
+class LampData(TypedDict):
+    libraryPartName: str
+    coordinates: Coordinate3D
+    dimensions: NotRequired[Dimensions3D]
+
+
+class TextData(TypedDict):
+    coordinate: Coordinate3D
+    text: str
+    height: NotRequired[float]
+    pen: NotRequired[int]
+    angle: NotRequired[float]
+    justification: NotRequired[Literal["Left", "Center", "Right", "Full"]]
+    floorIndex: NotRequired[int]
+
+
 WallStructureType = Literal["Basic", "Composite", "Profile"]
 
 
@@ -1106,6 +1206,17 @@ SlabStructureType = Literal["Basic", "Composite"]
 
 
 RoofStructureType = Literal["Basic", "Composite"]
+
+
+class ProjectInfoFieldData(TypedDict):
+    projectInfoName: str
+    projectInfoValue: NotRequired[str]
+
+
+class DesignOptionData(TypedDict):
+    name: str
+    id: str
+    ownerSetName: str
 
 
 class ProjectLocation(TypedDict):
@@ -1135,6 +1246,11 @@ class SurveyPoint(TypedDict):
     geoReferencingParameters: GeoReferencingParameters
 
 
+class DatabaseIdAndWindowType(TypedDict):
+    windowType: WindowType
+    databaseId: NotRequired[DatabaseId]
+
+
 class Zoom(TypedDict):
     xMin: float
     yMin: float
@@ -1154,8 +1270,16 @@ class GuidId(TypedDict):
     guid: Guid
 
 
+class DesignOptionId(TypedDict):
+    guid: Guid
+
+
 class DesignOptionIdArrayItem(TypedDict):
-    designOptionId: GuidId
+    designOptionId: DesignOptionId
+
+
+class DesignOptionCombinationIdArrayItem(TypedDict):
+    designOptionCombinationId: DesignOptionCombinationId
 
 
 class LayersOfLayerCombinationItem(TypedDict):
@@ -1242,6 +1366,63 @@ class BasicDefaultValue(TypedDict):
 
 
 PropertyDefaultValue = BasicDefaultValue | ExpressionDefaultValue
+
+
+class NewClassificationItem(TypedDict):
+    classificationSystemId: ClassificationSystemId
+    classificationItemDetails: ClassificationItemDetails
+    parentClassificationItemId: NotRequired[ClassificationItemId]
+    nextClassificationItemId: NotRequired[ClassificationItemId]
+
+
+NewClassificationItems = List[NewClassificationItem]
+
+
+DesignOptionIdOrError = DesignOptionIdArrayItem | ErrorItem
+
+
+DesignOptionCombinationIdOrError = DesignOptionCombinationIdArrayItem | ErrorItem
+
+
+DesignOptionIdsOrErrors = List[DesignOptionIdOrError]
+
+
+DesignOptionCombinationIdsOrErrors = List[DesignOptionCombinationIdOrError]
+
+
+class ElementIFCProperties(TypedDict):
+    elementId: ElementId
+    ifcProperties: List[ElementIFCProperty]
+
+
+class ElementIFCType(TypedDict):
+    elementId: ElementId
+    ifcType: str
+    typeObjectIFCType: str
+
+
+class ElementIFCIds(TypedDict):
+    elementId: ElementId
+    ifcId: str
+    externalIFCId: str
+
+
+ElementIFCPropertiesOrError = ElementIFCProperties | ErrorItem
+
+
+ElementIFCTypeOrError = ElementIFCType | ErrorItem
+
+
+ElementIFCIdsOrError = ElementIFCIds | ErrorItem
+
+
+ElementIFCPropertiesOrErrors = List[ElementIFCPropertiesOrError]
+
+
+ElementIFCTypesOrErrors = List[ElementIFCTypeOrError]
+
+
+ElementIFCIdsOrErrors = List[ElementIFCIdsOrError]
 
 
 class ElementClassification(TypedDict):
@@ -1345,7 +1526,7 @@ class ZoneDetails(TypedDict):
     categoryAttributeId: AttributeId
     stampPosition: Coordinate2D
     isManual: bool
-    polygonCoordinates: List[Coordinate2D]
+    polygonOutline: List[Coordinate2D]
     polygonArcs: NotRequired[List[PolyArc]]
     holes: NotRequired[Holes2D]
     zCoordinate: float
@@ -1410,6 +1591,13 @@ class AttributeHeadersWrapper(TypedDict):
 AttributeHeadersOrError = AttributeHeadersWrapper | ErrorItem
 
 
+class DesignOptionDetails(TypedDict):
+    designOptionId: DesignOptionId
+    name: str
+    id: str
+    ownerSetName: str
+
+
 class ElementsWithDetail(TypedDict):
     elementId: ElementId
     details: Details
@@ -1431,6 +1619,10 @@ class ElementsWithMoveVector(TypedDict):
 class ElementsWithGDLParameter(TypedDict):
     elementId: ElementId
     gdlParameters: SetGDLParameterArray
+
+
+class Element(TypedDict):
+    elementId: ElementId
 
 
 class FavoritesFromElement(TypedDict):
@@ -1495,23 +1687,36 @@ class Issue(TypedDict):
     isTagTextElemVisible: bool
 
 
-class DesignOption(TypedDict):
-    designOptionId: GuidId
-    name: str
-    id: str
-    ownerSetName: str
-
-
 class DesignOptionSet(TypedDict):
     designOptionSetId: GuidId
     name: str
     designOptions: List[DesignOptionIdArrayItem]
 
 
-class DesignOptionCombination(TypedDict):
-    designOptionCombinationId: GuidId
-    name: str
-    activeDesignOptions: NotRequired[List[DesignOptionIdArrayItem]]
+class DesignOptionForElement(TypedDict):
+    elementId: ElementId
+    type: Literal[
+        "NotExistingElement",
+        "MissingDesignOption",
+        "NotLinkedToAnyDesignOption",
+        "LinkedToDesignOption",
+    ]
+    designOption: NotRequired[DesignOptionDetails]
+
+
+class ActiveDesignOptionsInCombination(TypedDict):
+    designOptionCombinationId: DesignOptionCombinationId
+    activeDesignOptions: List[DesignOptionIdArrayItem]
+
+
+class ElementDesignOptionPair(TypedDict):
+    elementId: ElementId
+    designOptionId: DesignOptionId
+
+
+class DesignOptionAndSetPair(TypedDict):
+    designOptionId: NotRequired[DesignOptionId]
+    setName: str
 
 
 class ZoneData(TypedDict):
@@ -1549,6 +1754,10 @@ class WindowData(TypedDict):
     sillHeight: NotRequired[float]
     width: NotRequired[float]
     height: NotRequired[float]
+    reflected: NotRequired[bool]
+    refSide: NotRequired[bool]
+    oSide: NotRequired[bool]
+    favoriteName: NotRequired[str]
 
 
 class DoorData(TypedDict):
@@ -1557,6 +1766,10 @@ class DoorData(TypedDict):
     sillHeight: NotRequired[float]
     width: NotRequired[float]
     height: NotRequired[float]
+    reflected: NotRequired[bool]
+    refSide: NotRequired[bool]
+    oSide: NotRequired[bool]
+    favoriteName: NotRequired[str]
 
 
 class MorphData(TypedDict):
@@ -1583,23 +1796,6 @@ class OpeningData(TypedDict):
     basePoint: Coordinate3D
     width: NotRequired[float]
     height: NotRequired[float]
-
-
-class WitnessPoint(TypedDict):
-    elementId: ElementId
-    line: NotRequired[bool]
-    inIndex: NotRequired[int]
-    special: NotRequired[int]
-    nodeType: NotRequired[int]
-    nodeStatus: NotRequired[int]
-    nodeId: NotRequired[float]
-
-
-class AssociativeDimensionData(TypedDict):
-    referencePoint: Coordinate2D
-    direction: Coordinate2D
-    floorIndex: NotRequired[float]
-    witnessPoints: List[WitnessPoint]
 
 
 class AssociativeDimensionOnSectionData(TypedDict):
@@ -1680,6 +1876,9 @@ class WindowWithDetails(TypedDict):
     height: NotRequired[float]
     sillHeight: NotRequired[float]
     centerOffset: NotRequired[float]
+    reflected: NotRequired[bool]
+    refSide: NotRequired[bool]
+    oSide: NotRequired[bool]
 
 
 class DoorWithDetails(TypedDict):
@@ -1688,6 +1887,9 @@ class DoorWithDetails(TypedDict):
     height: NotRequired[float]
     sillHeight: NotRequired[float]
     centerOffset: NotRequired[float]
+    reflected: NotRequired[bool]
+    refSide: NotRequired[bool]
+    oSide: NotRequired[bool]
 
 
 class MorphWithDetails(TypedDict):
@@ -1711,12 +1913,54 @@ class RoofWithDetails(TypedDict):
     holes: NotRequired[Holes2D]
 
 
+class CoordinateWitnessPoint(TypedDict):
+    coordinate: NotRequired[Coordinate2D]
+    coordinate3D: NotRequired[Coordinate3D]
+    dimensionPosition: NotRequired[Coordinate2D]
+    dimensionValue: NotRequired[float]
+    witnessForm: NotRequired[Literal["None", "Small", "Large", "Fix", "Unknown"]]
+    witnessVal: NotRequired[float]
+    baseElementId: NotRequired[ElementId]
+
+
+class AssociativeWitnessPoint(TypedDict):
+    elementId: ElementId
+    line: NotRequired[bool]
+    inIndex: NotRequired[int]
+    special: NotRequired[int]
+    nodeType: NotRequired[int]
+    nodeStatus: NotRequired[int]
+    nodeId: NotRequired[float]
+
+
+class DesignOptionCombinationDetails(TypedDict):
+    designOptionCombinationId: GuidId
+    name: str
+    activeDesignOptions: NotRequired[List[DesignOptionIdArrayItem]]
+
+
+class DesignOptionCombinationData(TypedDict):
+    name: str
+    activeDesignOptions: List[DesignOptionIdArrayItem]
+
+
 class ElementIdArrayItem(TypedDict):
     elementId: ElementId
 
 
 class AttributeIdArrayItem(TypedDict):
     attributeId: AttributeId
+
+
+NavigatorItemIdOrDatabaseIdAndWindowType = NavigatorItemIdArrayItem | DatabaseIdAndWindowType
+
+
+class ElementsByIFCId(TypedDict):
+    ifcId: str
+    elements: List[ElementIdArrayItem]
+
+
+ElementsByIFCIds = List[ElementsByIFCId]
 
 
 NavigatorItemIds = List[NavigatorItemIdArrayItem]
@@ -1739,6 +1983,7 @@ TypeSpecificDetails = (
     | SlabDetails
     | ColumnDetails
     | DetailWorksheetDetails
+    | WindowDoorDetails
     | LibPartBasedElementDetails
     | PolylineDetails
     | ZoneDetails
@@ -1766,6 +2011,16 @@ ElementOrGroupIds = List[ElementOrGroupId]
 class ElementGroupParameters(TypedDict):
     elements: ElementOrGroupIds
     parentGroupId: NotRequired[GroupId]
+
+
+class DimensionData(TypedDict):
+    elementId: NotRequired[ElementId]
+    direction: NotRequired[Coordinate2D]
+    dimensionLinePosition: NotRequired[Coordinate2D]
+    witnessPoints: NotRequired[List[CoordinateWitnessPoint]]
+
+
+DimensionDataOrError = DimensionData | ErrorItem
 
 
 class DetailsOfElement(TypedDict):
@@ -1817,6 +2072,13 @@ class SurfaceDataArrayItem(TypedDict):
     texture: NotRequired[Texture]
 
 
+class AssociativeDimensionData(TypedDict):
+    referencePoint: Coordinate2D
+    direction: Coordinate2D
+    floorIndex: NotRequired[float]
+    witnessPoints: List[AssociativeWitnessPoint]
+
+
 Elements = List[ElementIdArrayItem]
 
 
@@ -1840,6 +2102,14 @@ class ConnectedElementsWrapper(TypedDict):
 
 
 ConnectedElementsOrError = ConnectedElementsWrapper | ErrorItem
+
+
+class ElementsOfDesignOption(TypedDict):
+    designOptionId: DesignOptionId
+    elements: Elements
+
+
+ElementsOfDesignOptionOrError = ElementsOfDesignOption | ErrorItem
 
 
 class Subelement(TypedDict):

@@ -14,8 +14,9 @@ from multiconn_archicad.models.tapir.commands import (
     QuitArchicadResult,
 )
 from multiconn_archicad.models.tapir.types import (
-    DatabaseId,
+    DatabaseIdAndWindowType,
     FailedExecutionResult,
+    NavigatorItemIdArrayItem,
     SuccessfulExecutionResult,
     WindowType,
 )
@@ -29,14 +30,14 @@ class ApplicationCommands:
         self._core = core
 
     def change_window(
-        self, window_type: WindowType, database_id: DatabaseId | None = None
+        self, parameters: NavigatorItemIdArrayItem | DatabaseIdAndWindowType
     ) -> FailedExecutionResult | SuccessfulExecutionResult:
         """
         Changes the current (active) window to the given window.
 
         Args:
-            window_type (WindowType)
-            database_id (DatabaseId | None)
+            parameters (NavigatorItemIdArrayItem | DatabaseIdAndWindowType): Union model
+                configuration parameters.
 
         Returns:
             FailedExecutionResult | SuccessfulExecutionResult
@@ -46,11 +47,7 @@ class ApplicationCommands:
             RequestError: If there is a network or connection error.
             pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
-        params_dict = {
-            "windowType": window_type,
-            "databaseId": database_id,
-        }
-        validated_params = ChangeWindowParameters(**params_dict)
+        validated_params = TypeAdapter(ChangeWindowParameters).validate_python(parameters)
         response_dict = self._core.post_tapir_command(
             "ChangeWindow", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )

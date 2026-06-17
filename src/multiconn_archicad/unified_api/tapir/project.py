@@ -7,18 +7,20 @@ from pydantic import TypeAdapter
 
 from multiconn_archicad.models.tapir.commands import (
     CloseProjectResult,
+    CreateProjectInfoFieldsParameters,
+    CreateProjectInfoFieldsResult,
     GetCalculationUnitsResult,
     GetGeoLocationResult,
     GetHotlinksResult,
     GetProjectInfoFieldsResult,
     GetProjectInfoResult,
     GetStoriesResult,
-    IFCFileOperationParameters,
-    IFCFileOperationResult,
     OpenProjectParameters,
     OpenProjectResult,
     PrintViewParameters,
     PrintViewResult,
+    RebuildViewParameters,
+    RebuildViewResult,
     SaveProjectResult,
     SetGeoLocationParameters,
     SetGeoLocationResult,
@@ -28,11 +30,10 @@ from multiconn_archicad.models.tapir.commands import (
 )
 from multiconn_archicad.models.tapir.types import (
     FailedExecutionResult,
-    FileType,
     Hotlink,
-    Method,
     PrintArea,
     ProjectInfoField,
+    ProjectInfoFieldData,
     ProjectLocation,
     StorySettings,
     SuccessfulExecutionResult,
@@ -62,6 +63,32 @@ class ProjectCommands:
         response_dict = self._core.post_tapir_command("CloseProject")
         validated_response = TypeAdapter(CloseProjectResult).validate_python(response_dict)
         return validated_response
+
+    def create_project_info_fields(self, project_info_fields: list[ProjectInfoFieldData]) -> list[ProjectInfoField]:
+        """
+        Creates one or more custom project info fields.
+
+        Args:
+            project_info_fields (list[ProjectInfoFieldData]): Array of custom project info
+                fields to create.
+
+        Returns:
+            list[ProjectInfoField]: A list of project info fields.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "projectInfoFields": project_info_fields,
+        }
+        validated_params = CreateProjectInfoFieldsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "CreateProjectInfoFields", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = CreateProjectInfoFieldsResult.model_validate(response_dict)
+        return validated_response.fields
 
     def get_calculation_units(self) -> GetCalculationUnitsResult:
         """
@@ -160,37 +187,6 @@ class ProjectCommands:
         validated_response = GetStoriesResult.model_validate(response_dict)
         return validated_response
 
-    def ifc_file_operation(
-        self, method: Method, ifc_file_path: str, file_type: FileType | None = None
-    ) -> FailedExecutionResult | SuccessfulExecutionResult:
-        """
-        Executes an IFC file operation.
-
-        Args:
-            method (Method): The file operation method to use.
-            ifc_file_path (str): The target IFC file to use.
-            file_type (FileType | None): The type of the IFC file. The default is 'ifc'.
-
-        Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
-
-        Raises:
-            ArchicadAPIError: If the API returns an error response.
-            RequestError: If there is a network or connection error.
-            pydantic.ValidationError: If the parameters, or the API Response fail validation.
-        """
-        params_dict = {
-            "method": method,
-            "ifcFilePath": ifc_file_path,
-            "fileType": file_type,
-        }
-        validated_params = IFCFileOperationParameters(**params_dict)
-        response_dict = self._core.post_tapir_command(
-            "IFCFileOperation", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
-        )
-        validated_response = TypeAdapter(IFCFileOperationResult).validate_python(response_dict)
-        return validated_response
-
     def open_project(self, project_file_path: str) -> FailedExecutionResult | SuccessfulExecutionResult:
         """
         Opens the given project.
@@ -251,6 +247,32 @@ class ProjectCommands:
             "PrintView", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = TypeAdapter(PrintViewResult).validate_python(response_dict)
+        return validated_response
+
+    def rebuild_view(self, regenerate: None | bool = None) -> FailedExecutionResult | SuccessfulExecutionResult:
+        """
+        Rebuilds the current view.
+
+        Args:
+            regenerate (None | bool): Regenerate the view. The default is false, meaning the
+                view will not be regenerated, but rebuilt.
+
+        Returns:
+            FailedExecutionResult | SuccessfulExecutionResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "regenerate": regenerate,
+        }
+        validated_params = RebuildViewParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "RebuildView", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = TypeAdapter(RebuildViewResult).validate_python(response_dict)
         return validated_response
 
     def save_project(self) -> FailedExecutionResult | SuccessfulExecutionResult:

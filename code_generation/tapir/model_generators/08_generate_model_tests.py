@@ -10,7 +10,12 @@ from code_generation.tapir.paths import tapir_paths
 
 KNOWN_XFAILURES = {}
 
-SCHEMAS_TO_PATCH = {"GetHotlinksResult", "GetDetailsOfElementsResult"}
+SCHEMAS_TO_PATCH = {
+    "GetHotlinksResult",
+    "GetDetailsOfElementsResult",
+    "CreateClassificationItemsParameters",
+    "CreateClassificationSystemsParameters"
+}
 
 
 def is_union(obj: Any) -> bool:
@@ -57,6 +62,11 @@ def patch_schema_definitions(definitions: dict, model_name_to_test: str) -> dict
         if "properties" in item_schema and "type" in item_schema["properties"]:
             item_schema["properties"]["type"] = {"const": "Wall"}
             print(f"    - Patched element 'type' discriminator to be 'Wall' for {model_name_to_test} test.")
+
+    if model_name_to_test in ("CreateClassificationItemsParameters", "CreateClassificationSystemsParameters"):
+        if "ClassificationItemDetails" in patched_defs and "properties" in patched_defs["ClassificationItemDetails"]:
+            patched_defs["ClassificationItemDetails"]["properties"].pop("children", None)
+            print(f"    - Applied patch to 'ClassificationItemDetails' schema for {model_name_to_test} test (removed recursion).")
 
     return patched_defs
 

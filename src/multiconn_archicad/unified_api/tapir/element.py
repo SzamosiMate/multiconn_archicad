@@ -16,14 +16,14 @@ from multiconn_archicad.models.tapir.commands import (
     Get3DBoundingBoxesResult,
     GetAllElementsParameters,
     GetAllElementsResult,
-    GetClassificationsOfElementsParameters,
-    GetClassificationsOfElementsResult,
     GetCollisionsParameters,
     GetCollisionsResult,
     GetConnectedElementsParameters,
     GetConnectedElementsResult,
     GetDetailsOfElementsParameters,
     GetDetailsOfElementsResult,
+    GetDimensionDataParameters,
+    GetDimensionDataResult,
     GetElementPreviewImageParameters,
     GetElementPreviewImageResult,
     GetElementsByTypeParameters,
@@ -39,29 +39,30 @@ from multiconn_archicad.models.tapir.commands import (
     GetZoneBoundariesResult,
     HighlightElementsParameters,
     HighlightElementsResult,
+    LockElementsParameters,
+    LockElementsResult,
     MoveElementsParameters,
     MoveElementsResult,
     RemoveElementNotificationClientParameters,
     RemoveElementNotificationClientResult,
-    SetClassificationsOfElementsParameters,
-    SetClassificationsOfElementsResult,
     SetDetailsOfElementsParameters,
     SetDetailsOfElementsResult,
     SetElementNotificationClientParameters,
     SetElementNotificationClientResult,
     SetGDLParametersOfElementsParameters,
     SetGDLParametersOfElementsResult,
+    UnlockElementsParameters,
+    UnlockElementsResult,
 )
 from multiconn_archicad.models.tapir.types import (
     BoundingBox3DArrayItem,
-    ClassificationSystemIdArrayItem,
     Collision,
     ColorRGB,
     ConnectedElementsWrapper,
     DatabaseIdArrayItem,
     DetailsOfElement,
-    ElementClassification,
-    ElementClassificationItemArray,
+    DimensionData,
+    Element,
     ElementFilter,
     ElementId,
     ElementIdArrayItem,
@@ -232,40 +233,6 @@ class ElementCommands:
         validated_response = TypeAdapter(GetAllElementsResult).validate_python(response_dict)
         return validated_response
 
-    def get_classifications_of_elements(
-        self, elements: list[ElementIdArrayItem], classification_system_ids: list[ClassificationSystemIdArrayItem]
-    ) -> list[ElementClassificationItemArray | ErrorItem]:
-        """
-        Returns the classification of the given elements in the given classification systems. It
-        works for subelements of hierarchal elements also.
-
-        Args:
-            elements (list[ElementIdArrayItem]): A list of elements.
-            classification_system_ids (list[ClassificationSystemIdArrayItem]): A list of
-                classification system identifiers.
-
-        Returns:
-            list[ElementClassificationItemArray | ErrorItem]: The list of element classification
-                item identifiers. Order of the ids are the same as in the input. Non-existing
-                elements or non-existing classification systems are represented by error
-                objects.
-
-        Raises:
-            ArchicadAPIError: If the API returns an error response.
-            RequestError: If there is a network or connection error.
-            pydantic.ValidationError: If the parameters, or the API Response fail validation.
-        """
-        params_dict = {
-            "elements": elements,
-            "classificationSystemIds": classification_system_ids,
-        }
-        validated_params = GetClassificationsOfElementsParameters(**params_dict)
-        response_dict = self._core.post_tapir_command(
-            "GetClassificationsOfElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
-        )
-        validated_response = GetClassificationsOfElementsResult.model_validate(response_dict)
-        return validated_response.elementClassifications
-
     def get_collisions(
         self,
         elements_group_1: list[ElementIdArrayItem],
@@ -353,6 +320,31 @@ class ElementCommands:
         )
         validated_response = GetDetailsOfElementsResult.model_validate(response_dict)
         return validated_response.detailsOfElements
+
+    def get_dimension_data(self, elements: list[Element]) -> list[DimensionData | ErrorItem]:
+        """
+        Gets witness point data (coordinates, measured values) from existing dimension chains.
+
+        Args:
+            elements (list[Element]): The identifier of the dimension elements.
+
+        Returns:
+            list[DimensionData | ErrorItem]
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elements": elements,
+        }
+        validated_params = GetDimensionDataParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetDimensionData", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetDimensionDataResult.model_validate(response_dict)
+        return validated_response.dimensionsData
 
     def get_element_preview_image(
         self,
@@ -610,6 +602,31 @@ class ElementCommands:
         validated_response = TypeAdapter(HighlightElementsResult).validate_python(response_dict)
         return validated_response
 
+    def lock_elements(self, elements: list[ElementIdArrayItem]) -> FailedExecutionResult | SuccessfulExecutionResult:
+        """
+        Locks the given elements. Manual lock, not teamwork!
+
+        Args:
+            elements (list[ElementIdArrayItem]): A list of elements.
+
+        Returns:
+            FailedExecutionResult | SuccessfulExecutionResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elements": elements,
+        }
+        validated_params = LockElementsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "LockElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = TypeAdapter(LockElementsResult).validate_python(response_dict)
+        return validated_response
+
     def move_elements(
         self, elements_with_move_vectors: list[ElementsWithMoveVector]
     ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
@@ -669,37 +686,6 @@ class ElementCommands:
         )
         validated_response = TypeAdapter(RemoveElementNotificationClientResult).validate_python(response_dict)
         return validated_response
-
-    def set_classifications_of_elements(
-        self, element_classifications: list[ElementClassification]
-    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
-        """
-        Sets the classifications of elements. In order to set the classification of an element
-        to unclassified, omit the classificationItemId field. It works for subelements of
-        hierarchal elements also.
-
-        Args:
-            element_classifications (list[ElementClassification]): A list of element
-                classification identifiers.
-
-        Returns:
-            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
-                results.
-
-        Raises:
-            ArchicadAPIError: If the API returns an error response.
-            RequestError: If there is a network or connection error.
-            pydantic.ValidationError: If the parameters, or the API Response fail validation.
-        """
-        params_dict = {
-            "elementClassifications": element_classifications,
-        }
-        validated_params = SetClassificationsOfElementsParameters(**params_dict)
-        response_dict = self._core.post_tapir_command(
-            "SetClassificationsOfElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
-        )
-        validated_response = SetClassificationsOfElementsResult.model_validate(response_dict)
-        return validated_response.executionResults
 
     def set_details_of_elements(
         self, elements_with_details: list[ElementsWithDetail]
@@ -801,3 +787,28 @@ class ElementCommands:
         )
         validated_response = SetGDLParametersOfElementsResult.model_validate(response_dict)
         return validated_response.executionResults
+
+    def unlock_elements(self, elements: list[ElementIdArrayItem]) -> FailedExecutionResult | SuccessfulExecutionResult:
+        """
+        Unlocks the given elements. Manual lock, not teamwork!
+
+        Args:
+            elements (list[ElementIdArrayItem]): A list of elements.
+
+        Returns:
+            FailedExecutionResult | SuccessfulExecutionResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elements": elements,
+        }
+        validated_params = UnlockElementsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "UnlockElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = TypeAdapter(UnlockElementsResult).validate_python(response_dict)
+        return validated_response

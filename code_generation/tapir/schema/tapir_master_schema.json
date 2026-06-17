@@ -112,16 +112,41 @@
         "guid"
       ]
     },
+    "DesignOptionId": {
+      "type": "object",
+      "description": "The identifier of a design option.",
+      "properties": {
+        "guid": {
+          "$ref": "#/$defs/Guid"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "guid"
+      ]
+    },
     "DesignOptionIdArrayItem": {
       "type": "object",
       "properties": {
         "designOptionId": {
-          "$ref": "#/$defs/GuidId"
+          "$ref": "#/$defs/DesignOptionId"
         }
       },
       "additionalProperties": false,
       "required": [
         "designOptionId"
+      ]
+    },
+    "DesignOptionCombinationIdArrayItem": {
+      "type": "object",
+      "properties": {
+        "designOptionCombinationId": {
+          "$ref": "#/$defs/DesignOptionCombinationId"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "designOptionCombinationId"
       ]
     },
     "LayersOfLayerCombination": {
@@ -821,6 +846,17 @@
         "ModelCompare",
         "Interactive Schedule",
         "Unknown"
+      ]
+    },
+    "NavigatorItemIdOrDatabaseIdAndWindowType": {
+      "description": "Identifies the window to change to. Either a navigatorItemId on its own (the navigator item's saved view settings are applied), or a windowType optionally narrowed to a specific databaseId.",
+      "oneOf": [
+        {
+          "$ref": "#/$defs/NavigatorItemIdArrayItem"
+        },
+        {
+          "$ref": "#/$defs/DatabaseIdAndWindowType"
+        }
       ]
     },
     "LengthType": {
@@ -2009,6 +2045,128 @@
         "$ref": "#/$defs/ClassificationSystemIdArrayItem"
       }
     },
+    "Date": {
+      "type": "string",
+      "description": "A date in its string representation as defined in ISO 8601: YYYY-MM-DD.",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+    },
+    "ClassificationSystemDetails": {
+      "type": "object",
+      "description": "The details of a classification system.",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The display name of the classification system."
+        },
+        "description": {
+          "type": "string",
+          "description": "The description of the classification system."
+        },
+        "source": {
+          "type": "string",
+          "description": "The source of the classification system (e.g. URL to a classification system standard)."
+        },
+        "version": {
+          "type": "string",
+          "description": "The version of the classification system."
+        },
+        "date": {
+          "$ref": "#/$defs/Date",
+          "description": "The release date of the classification system's current version."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "description",
+        "source",
+        "version",
+        "date"
+      ]
+    },
+    "ClassificationItemDetails": {
+      "type": "object",
+      "description": "The details of a classification item.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The unique identifier of the classification item as specified by the user."
+        },
+        "name": {
+          "type": "string",
+          "description": "The display name of the classification item."
+        },
+        "description": {
+          "type": "string",
+          "description": "The description of the classification item."
+        },
+        "children": {
+          "type": "array",
+          "description": "A list of classification items.",
+          "items": {
+            "$ref": "#/$defs/ClassificationItemDetails"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "description"
+      ]
+    },
+    "ClassificationSystemsWithItems": {
+      "type": "array",
+      "description": "Classification systems with items.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "classificationSystem": {
+            "$ref": "#/$defs/ClassificationSystemDetails"
+          },
+          "classificationItems": {
+            "type": "array",
+            "description": "A list of classification items in the classification system.",
+            "items": {
+              "$ref": "#/$defs/ClassificationItemDetails"
+            }
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "classificationSystem",
+          "classificationItems"
+        ]
+      }
+    },
+    "NewClassificationItems": {
+      "type": "array",
+      "description": "Classification systems with items.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "classificationSystemId": {
+            "$ref": "#/$defs/ClassificationSystemId"
+          },
+          "classificationItemDetails": {
+            "$ref": "#/$defs/ClassificationItemDetails"
+          },
+          "parentClassificationItemId": {
+            "description": "The identifier of the parent classification item. If not specified, the new classification item will be created as a child of the root.",
+            "$ref": "#/$defs/ClassificationItemId"
+          },
+          "nextClassificationItemId": {
+            "description": "The identifier of the next sibling classification item. If not specified, the new classification item will be created as the last child of its parent.",
+            "$ref": "#/$defs/ClassificationItemId"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "classificationSystemId",
+          "classificationItemDetails"
+        ]
+      }
+    },
     "ClassificationItemId": {
       "type": "object",
       "description": "The identifier of a classification item.",
@@ -2033,6 +2191,13 @@
       "required": [
         "classificationItemId"
       ]
+    },
+    "ClassificationItemIds": {
+      "type": "array",
+      "description": "A list of classification item identifiers.",
+      "items": {
+        "$ref": "#/$defs/ClassificationItemIdArrayItem"
+      }
     },
     "ClassificationId": {
       "type": "object",
@@ -2076,11 +2241,49 @@
         }
       ]
     },
+    "DesignOptionIdOrError": {
+      "type": "object",
+      "description": "A design option identifier or an error.",
+      "oneOf": [
+        {
+          "$ref": "#/$defs/DesignOptionIdArrayItem"
+        },
+        {
+          "$ref": "#/$defs/ErrorItem"
+        }
+      ]
+    },
+    "DesignOptionCombinationIdOrError": {
+      "type": "object",
+      "description": "A design option combination identifier or an error.",
+      "oneOf": [
+        {
+          "$ref": "#/$defs/DesignOptionCombinationIdArrayItem"
+        },
+        {
+          "$ref": "#/$defs/ErrorItem"
+        }
+      ]
+    },
     "ClassificationIdsOrErrors": {
       "type": "array",
       "description": "A list of element classification identifiers or errors.",
       "items": {
         "$ref": "#/$defs/ClassificationIdOrError"
+      }
+    },
+    "DesignOptionIdsOrErrors": {
+      "type": "array",
+      "description": "A list of design option identifiers or errors.",
+      "items": {
+        "$ref": "#/$defs/DesignOptionIdOrError"
+      }
+    },
+    "DesignOptionCombinationIdsOrErrors": {
+      "type": "array",
+      "description": "A list of design option combination identifiers or errors.",
+      "items": {
+        "$ref": "#/$defs/DesignOptionCombinationIdOrError"
       }
     },
     "ElementClassificationItemArray": {
@@ -2112,6 +2315,170 @@
       "description": "A list of element classification identifiers or errors.",
       "items": {
         "$ref": "#/$defs/ElementClassificationOrError"
+      }
+    },
+    "ElementIFCProperty": {
+      "type": "object",
+      "description": "The details of an IFC property value of an element.",
+      "properties": {
+        "propertySetName": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "propertySetName",
+        "name",
+        "value"
+      ]
+    },
+    "ElementIFCProperties": {
+      "type": "object",
+      "description": "The IFC properties of an element.",
+      "properties": {
+        "elementId": {
+          "$ref": "#/$defs/ElementId"
+        },
+        "ifcProperties": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ElementIFCProperty"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elementId",
+        "ifcProperties"
+      ]
+    },
+    "ElementIFCType": {
+      "type": "object",
+      "description": "The IFC type of an element.",
+      "properties": {
+        "elementId": {
+          "$ref": "#/$defs/ElementId"
+        },
+        "ifcType": {
+          "type": "string"
+        },
+        "typeObjectIFCType": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elementId",
+        "ifcType",
+        "typeObjectIFCType"
+      ]
+    },
+    "ElementIFCIds": {
+      "type": "object",
+      "description": "The IFC identifiers of an element.",
+      "properties": {
+        "elementId": {
+          "$ref": "#/$defs/ElementId"
+        },
+        "ifcId": {
+          "type": "string"
+        },
+        "externalIFCId": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elementId",
+        "ifcId",
+        "externalIFCId"
+      ]
+    },
+    "ElementIFCPropertiesOrError": {
+      "type": "object",
+      "description": "Element IFC properties or error.",
+      "oneOf": [
+        {
+          "$ref": "#/$defs/ElementIFCProperties"
+        },
+        {
+          "$ref": "#/$defs/ErrorItem"
+        }
+      ]
+    },
+    "ElementIFCTypeOrError": {
+      "type": "object",
+      "description": "Element IFC type or error.",
+      "oneOf": [
+        {
+          "$ref": "#/$defs/ElementIFCType"
+        },
+        {
+          "$ref": "#/$defs/ErrorItem"
+        }
+      ]
+    },
+    "ElementIFCIdsOrError": {
+      "type": "object",
+      "description": "Element IFC identifiers or error.",
+      "oneOf": [
+        {
+          "$ref": "#/$defs/ElementIFCIds"
+        },
+        {
+          "$ref": "#/$defs/ErrorItem"
+        }
+      ]
+    },
+    "ElementIFCPropertiesOrErrors": {
+      "type": "array",
+      "description": "A list of the IFC properties of elements or errors.",
+      "items": {
+        "$ref": "#/$defs/ElementIFCPropertiesOrError"
+      }
+    },
+    "ElementIFCTypesOrErrors": {
+      "type": "array",
+      "description": "A list of the IFC types of elements or errors.",
+      "items": {
+        "$ref": "#/$defs/ElementIFCTypeOrError"
+      }
+    },
+    "ElementIFCIdsOrErrors": {
+      "type": "array",
+      "description": "A list of the IFC identifiers of elements or errors.",
+      "items": {
+        "$ref": "#/$defs/ElementIFCIdsOrError"
+      }
+    },
+    "ElementsByIFCIds": {
+      "type": "array",
+      "description": "A list of elements identified by their IFC identifiers or errors.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "ifcId": {
+            "type": "string"
+          },
+          "elements": {
+            "type": "array",
+            "description": "A list of element identifiers having the given IFC identifier. If the given IFC identifier is an external identifier, the list can contain multiple elements as the IFC can be placed multiple times.",
+            "items": {
+              "$ref": "#/$defs/ElementIdArrayItem"
+            }
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "ifcId",
+          "elements"
+        ]
       }
     },
     "ElementClassification": {
@@ -2768,6 +3135,46 @@
         "angle"
       ]
     },
+    "WindowDoorDetails": {
+      "$ref": "#/$defs/LibPartBasedElementDetails",
+      "properties": {
+        "width": {
+          "type": "number",
+          "description": "Opening width."
+        },
+        "height": {
+          "type": "number",
+          "description": "Opening height."
+        },
+        "sillHeight": {
+          "type": "number",
+          "description": "Sill height (window) or threshold height (door)."
+        },
+        "centerOffset": {
+          "type": "number",
+          "description": "Center offset along the owner wall reference line."
+        },
+        "reflected": {
+          "type": "boolean"
+        },
+        "refSide": {
+          "type": "boolean"
+        },
+        "oSide": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "width",
+        "height",
+        "sillHeight",
+        "centerOffset",
+        "reflected",
+        "refSide",
+        "oSide"
+      ]
+    },
     "PolylineDetails": {
       "type": "object",
       "properties": {
@@ -2817,7 +3224,7 @@
           "type": "boolean",
           "description": "Is the coordinates of the zone manually placed?"
         },
-        "polygonCoordinates": {
+        "polygonOutline": {
           "type": "array",
           "description": "The 2D coordinates of the edge of the zone.",
           "items": {
@@ -2846,7 +3253,7 @@
         "categoryAttributeId",
         "stampPosition",
         "isManual",
-        "polygonCoordinates",
+        "polygonOutline",
         "zCoordinate"
       ]
     },
@@ -3137,6 +3544,9 @@
         },
         {
           "$ref": "#/$defs/DetailWorksheetDetails"
+        },
+        {
+          "$ref": "#/$defs/WindowDoorDetails"
         },
         {
           "$ref": "#/$defs/LibPartBasedElementDetails"
@@ -3923,8 +4333,9 @@
     },
     "LibraryPartType": {
       "type": "string",
-      "description": "Enumeration of available library part types.",
+      "description": "Enumeration of available library part types. 'Unknown' is the schema-valid catch-all returned for any libpart whose typeID is not one of the named values (rare ACAPI sentinels and any future SDK subtype).",
       "enum": [
+        "Spec",
         "Window",
         "Door",
         "Object",
@@ -3935,9 +4346,11 @@
         "Label",
         "Macro",
         "Pict",
+        "Picture",
         "ListScheme",
         "Skylight",
-        "OpeningSymbol"
+        "OpeningSymbol",
+        "Unknown"
       ]
     },
     "ElementsWithExecutionResults": {
@@ -4024,6 +4437,34 @@
       "oneOf": [
         {
           "$ref": "#/$defs/ConnectedElementsWrapper"
+        },
+        {
+          "$ref": "#/$defs/ErrorItem"
+        }
+      ]
+    },
+    "ElementsOfDesignOption": {
+      "type": "object",
+      "properties": {
+        "designOptionId": {
+          "$ref": "#/$defs/DesignOptionId"
+        },
+        "elements": {
+          "$ref": "#/$defs/Elements"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "designOptionId",
+        "elements"
+      ]
+    },
+    "ElementsOfDesignOptionOrError": {
+      "type": "object",
+      "description": "The elements of the design option or an error.",
+      "oneOf": [
+        {
+          "$ref": "#/$defs/ElementsOfDesignOption"
         },
         {
           "$ref": "#/$defs/ErrorItem"
@@ -4157,6 +4598,78 @@
         "elements"
       ]
     },
+    "DimensionData": {
+      "type": "object",
+      "description": "Dimension element data including witness points and geometry.",
+      "properties": {
+        "elementId": {
+          "$ref": "#/$defs/ElementId"
+        },
+        "direction": {
+          "$ref": "#/$defs/Coordinate2D"
+        },
+        "dimensionLinePosition": {
+          "$ref": "#/$defs/Coordinate2D"
+        },
+        "witnessPoints": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CoordinateWitnessPoint"
+          }
+        }
+      }
+    },
+    "DimensionDataOrError": {
+      "type": "object",
+      "oneOf": [
+        {
+          "$ref": "#/$defs/DimensionData"
+        },
+        {
+          "$ref": "#/$defs/ErrorItem"
+        }
+      ]
+    },
+    "DesignOptionCombinationId": {
+      "type": "object",
+      "description": "The identifier of a design option combination.",
+      "properties": {
+        "guid": {
+          "$ref": "#/$defs/Guid"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "guid"
+      ]
+    },
+    "DesignOptionDetails": {
+      "type": "object",
+      "properties": {
+        "designOptionId": {
+          "$ref": "#/$defs/DesignOptionId"
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the design option."
+        },
+        "id": {
+          "type": "string",
+          "description": "The string id of the design option."
+        },
+        "ownerSetName": {
+          "type": "string",
+          "description": "The name of the owner design option set."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "designOptionId",
+        "name",
+        "id",
+        "ownerSetName"
+      ]
+    },
     "GetAddOnVersionResult": {
       "type": "object",
       "properties": {
@@ -4201,19 +4714,7 @@
       ]
     },
     "ChangeWindowParameters": {
-      "type": "object",
-      "properties": {
-        "windowType": {
-          "$ref": "#/$defs/WindowType"
-        },
-        "databaseId": {
-          "$ref": "#/$defs/DatabaseId"
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "windowType"
-      ]
+      "$ref": "#/$defs/NavigatorItemIdOrDatabaseIdAndWindowType"
     },
     "ChangeWindowResult": {
       "$ref": "#/$defs/ExecutionResult"
@@ -4281,6 +4782,34 @@
       "required": [
         "projectInfoId",
         "projectInfoValue"
+      ]
+    },
+    "CreateProjectInfoFieldsParameters": {
+      "type": "object",
+      "properties": {
+        "projectInfoFields": {
+          "type": "array",
+          "description": "Array of custom project info fields to create.",
+          "items": {
+            "$ref": "#/$defs/ProjectInfoFieldData"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "projectInfoFields"
+      ]
+    },
+    "CreateProjectInfoFieldsResult": {
+      "type": "object",
+      "properties": {
+        "fields": {
+          "$ref": "#/$defs/ProjectInfoFields"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "fields"
       ]
     },
     "GetStoriesResult": {
@@ -4497,42 +5026,6 @@
     "SetGeoLocationResult": {
       "$ref": "#/$defs/ExecutionResult"
     },
-    "IFCFileOperationParameters": {
-      "type": "object",
-      "properties": {
-        "method": {
-          "type": "string",
-          "description": "The file operation method to use.",
-          "enum": [
-            "save",
-            "merge",
-            "open"
-          ]
-        },
-        "ifcFilePath": {
-          "type": "string",
-          "description": "The target IFC file to use."
-        },
-        "fileType": {
-          "type": "string",
-          "description": "The type of the IFC file. The default is 'ifc'.",
-          "enum": [
-            "ifc",
-            "ifcxml",
-            "ifczip",
-            "ifcxmlzip"
-          ]
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "method",
-        "ifcFilePath"
-      ]
-    },
-    "IFCFileOperationResult": {
-      "$ref": "#/$defs/ExecutionResult"
-    },
     "PrintViewParameters": {
       "type": "object",
       "properties": {
@@ -4562,6 +5055,20 @@
       "required": []
     },
     "PrintViewResult": {
+      "$ref": "#/$defs/ExecutionResult"
+    },
+    "RebuildViewParameters": {
+      "type": "object",
+      "properties": {
+        "regenerate": {
+          "type": "boolean",
+          "description": "Regenerate the view. The default is false, meaning the view will not be regenerated, but rebuilt."
+        }
+      },
+      "additionalProperties": false,
+      "required": []
+    },
+    "RebuildViewResult": {
       "$ref": "#/$defs/ExecutionResult"
     },
     "GetSelectedElementsResult": {
@@ -5165,6 +5672,36 @@
     "DeleteElementsResult": {
       "$ref": "#/$defs/ExecutionResult"
     },
+    "LockElementsParameters": {
+      "type": "object",
+      "properties": {
+        "elements": {
+          "$ref": "#/$defs/Elements"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elements"
+      ]
+    },
+    "LockElementsResult": {
+      "$ref": "#/$defs/ExecutionResult"
+    },
+    "UnlockElementsParameters": {
+      "type": "object",
+      "properties": {
+        "elements": {
+          "$ref": "#/$defs/Elements"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elements"
+      ]
+    },
+    "UnlockElementsResult": {
+      "$ref": "#/$defs/ExecutionResult"
+    },
     "GetGDLParametersOfElementsParameters": {
       "type": "object",
       "properties": {
@@ -5223,59 +5760,6 @@
       ]
     },
     "SetGDLParametersOfElementsResult": {
-      "type": "object",
-      "properties": {
-        "executionResults": {
-          "$ref": "#/$defs/ExecutionResults"
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "executionResults"
-      ]
-    },
-    "GetClassificationsOfElementsParameters": {
-      "type": "object",
-      "properties": {
-        "elements": {
-          "$ref": "#/$defs/Elements"
-        },
-        "classificationSystemIds": {
-          "$ref": "#/$defs/ClassificationSystemIds"
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "elements",
-        "classificationSystemIds"
-      ]
-    },
-    "GetClassificationsOfElementsResult": {
-      "type": "object",
-      "properties": {
-        "elementClassifications": {
-          "$ref": "#/$defs/ElementClassificationsOrErrors",
-          "description": "The list of element classification item identifiers. Order of the ids are the same as in the input. Non-existing elements or non-existing classification systems are represented by error objects."
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "elementClassifications"
-      ]
-    },
-    "SetClassificationsOfElementsParameters": {
-      "type": "object",
-      "properties": {
-        "elementClassifications": {
-          "$ref": "#/$defs/ElementClassifications"
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "elementClassifications"
-      ]
-    },
-    "SetClassificationsOfElementsResult": {
       "type": "object",
       "properties": {
         "executionResults": {
@@ -5358,6 +5842,34 @@
       ]
     },
     "CreateBeamsResult": {
+      "type": "object",
+      "properties": {
+        "elements": {
+          "$ref": "#/$defs/Elements"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elements"
+      ]
+    },
+    "CreateStairsParameters": {
+      "type": "object",
+      "properties": {
+        "stairsData": {
+          "type": "array",
+          "description": "Array of data to create Stair elements.",
+          "items": {
+            "$ref": "#/$defs/SectionData"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "stairsData"
+      ]
+    },
+    "CreateStairsResult": {
       "type": "object",
       "properties": {
         "elements": {
@@ -5613,6 +6125,46 @@
         "elements"
       ]
     },
+    "GetDimensionDataParameters": {
+      "type": "object",
+      "properties": {
+        "elements": {
+          "type": "array",
+          "description": "The identifier of the dimension elements.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "elementId": {
+                "$ref": "#/$defs/ElementId"
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "elementId"
+            ]
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elements"
+      ]
+    },
+    "GetDimensionDataResult": {
+      "type": "object",
+      "properties": {
+        "dimensionsData": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/DimensionDataOrError"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "dimensionsData"
+      ]
+    },
     "CreateZonesParameters": {
       "type": "object",
       "properties": {
@@ -5697,6 +6249,34 @@
         "elements"
       ]
     },
+    "CreateLampsParameters": {
+      "type": "object",
+      "properties": {
+        "lampsData": {
+          "type": "array",
+          "description": "Array of data to create Lamps.",
+          "items": {
+            "$ref": "#/$defs/LampData"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "lampsData"
+      ]
+    },
+    "CreateLampsResult": {
+      "type": "object",
+      "properties": {
+        "elements": {
+          "$ref": "#/$defs/Elements"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elements"
+      ]
+    },
     "CreateMeshesParameters": {
       "type": "object",
       "properties": {
@@ -5742,6 +6322,34 @@
       ]
     },
     "CreateLabelsResult": {
+      "type": "object",
+      "properties": {
+        "elements": {
+          "$ref": "#/$defs/Elements"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elements"
+      ]
+    },
+    "CreateTextsParameters": {
+      "type": "object",
+      "properties": {
+        "textsData": {
+          "type": "array",
+          "description": "Array of data to create Texts.",
+          "items": {
+            "$ref": "#/$defs/TextData"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "textsData"
+      ]
+    },
+    "CreateTextsResult": {
       "type": "object",
       "properties": {
         "elements": {
@@ -6287,6 +6895,70 @@
         "executionResults"
       ]
     },
+    "ImportFavoritesParameters": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "Absolute path on the AC host to a Favorites file (.prefs) or folder."
+        },
+        "targetFolder": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Folder hierarchy under which to import. Empty = root."
+        },
+        "importFolders": {
+          "type": "boolean",
+          "description": "If true and `path` is a folder, the folder structure is preserved."
+        },
+        "conflictPolicy": {
+          "type": "string",
+          "enum": [
+            "Error",
+            "Skip",
+            "Overwrite",
+            "Append"
+          ],
+          "description": "How to resolve name conflicts. Default Overwrite."
+        }
+      },
+      "required": [
+        "path"
+      ],
+      "additionalProperties": false
+    },
+    "ImportFavoritesResult": {
+      "type": "object",
+      "properties": {
+        "firstConflictName": {
+          "type": "string",
+          "description": "Set when conflictPolicy=Error and a name collided; absent otherwise."
+        }
+      },
+      "additionalProperties": false
+    },
+    "ExportFavoritesParameters": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "Absolute path on the AC host. If extension matches the Favorite binary format (.prefs), writes a single file; otherwise treats as folder."
+        },
+        "names": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Optional subset of Favorites to export. Default: export all."
+        }
+      },
+      "required": [
+        "path"
+      ],
+      "additionalProperties": false
+    },
     "GetAllPropertiesResult": {
       "type": "object",
       "properties": {
@@ -6514,6 +7186,155 @@
       ]
     },
     "DeletePropertyDefinitionsResult": {
+      "type": "object",
+      "properties": {
+        "executionResults": {
+          "$ref": "#/$defs/ExecutionResults"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "executionResults"
+      ]
+    },
+    "GetClassificationsOfElementsParameters": {
+      "type": "object",
+      "properties": {
+        "elements": {
+          "$ref": "#/$defs/Elements"
+        },
+        "classificationSystemIds": {
+          "$ref": "#/$defs/ClassificationSystemIds"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elements",
+        "classificationSystemIds"
+      ]
+    },
+    "GetClassificationsOfElementsResult": {
+      "type": "object",
+      "properties": {
+        "elementClassifications": {
+          "$ref": "#/$defs/ElementClassificationsOrErrors",
+          "description": "The list of element classification item identifiers. Order of the ids are the same as in the input. Non-existing elements or non-existing classification systems are represented by error objects."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elementClassifications"
+      ]
+    },
+    "SetClassificationsOfElementsParameters": {
+      "type": "object",
+      "properties": {
+        "elementClassifications": {
+          "$ref": "#/$defs/ElementClassifications"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elementClassifications"
+      ]
+    },
+    "SetClassificationsOfElementsResult": {
+      "type": "object",
+      "properties": {
+        "executionResults": {
+          "$ref": "#/$defs/ExecutionResults"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "executionResults"
+      ]
+    },
+    "CreateClassificationSystemsParameters": {
+      "type": "object",
+      "properties": {
+        "classificationSystemsWithItems": {
+          "$ref": "#/$defs/ClassificationSystemsWithItems"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "classificationSystemsWithItems"
+      ]
+    },
+    "CreateClassificationSystemsResult": {
+      "type": "object",
+      "properties": {
+        "executionResults": {
+          "$ref": "#/$defs/ExecutionResults"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "executionResults"
+      ]
+    },
+    "CreateClassificationItemsParameters": {
+      "type": "object",
+      "properties": {
+        "newClassificationItems": {
+          "$ref": "#/$defs/NewClassificationItems"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "newClassificationItems"
+      ]
+    },
+    "CreateClassificationItemsResult": {
+      "type": "object",
+      "properties": {
+        "executionResults": {
+          "$ref": "#/$defs/ExecutionResults"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "executionResults"
+      ]
+    },
+    "DeleteClassificationSystemsParameters": {
+      "type": "object",
+      "properties": {
+        "classificationSystemIds": {
+          "$ref": "#/$defs/ClassificationSystemIds"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "classificationSystemIds"
+      ]
+    },
+    "DeleteClassificationSystemsResult": {
+      "type": "object",
+      "properties": {
+        "executionResults": {
+          "$ref": "#/$defs/ExecutionResults"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "executionResults"
+      ]
+    },
+    "DeleteClassificationItemsParameters": {
+      "type": "object",
+      "properties": {
+        "classificationItemIds": {
+          "$ref": "#/$defs/ClassificationItemIds"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "classificationItemIds"
+      ]
+    },
+    "DeleteClassificationItemsResult": {
       "type": "object",
       "properties": {
         "executionResults": {
@@ -7040,6 +7861,142 @@
         "layerCombinations"
       ]
     },
+    "IFCFileOperationParameters": {
+      "type": "object",
+      "properties": {
+        "method": {
+          "type": "string",
+          "description": "The file operation method to use.",
+          "enum": [
+            "save",
+            "merge",
+            "open"
+          ]
+        },
+        "ifcFilePath": {
+          "type": "string",
+          "description": "The target IFC file to use."
+        },
+        "fileType": {
+          "type": "string",
+          "description": "The type of the IFC file. The default is 'ifc'.",
+          "enum": [
+            "ifc",
+            "ifcxml",
+            "ifczip",
+            "ifcxmlzip"
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "method",
+        "ifcFilePath"
+      ]
+    },
+    "IFCFileOperationResult": {
+      "$ref": "#/$defs/ExecutionResult"
+    },
+    "GetElementsByIFCIdsParameters": {
+      "type": "object",
+      "properties": {
+        "ifcIds": {
+          "type": "array",
+          "description": "A list of IFC identifiers to get the corresponding elements for.",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "ifcIds"
+      ]
+    },
+    "GetElementsByIFCIdsResult": {
+      "type": "object",
+      "properties": {
+        "elementsByIFCIds": {
+          "$ref": "#/$defs/ElementsByIFCIds"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elementsByIFCIds"
+      ]
+    },
+    "GetIFCIdsOfElementsParameters": {
+      "type": "object",
+      "properties": {
+        "elements": {
+          "$ref": "#/$defs/Elements"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elements"
+      ]
+    },
+    "GetIFCIdsOfElementsResult": {
+      "type": "object",
+      "properties": {
+        "elementIFCIds": {
+          "$ref": "#/$defs/ElementIFCIdsOrErrors"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elementIFCIds"
+      ]
+    },
+    "GetIFCTypeOfElementsParameters": {
+      "type": "object",
+      "properties": {
+        "elements": {
+          "$ref": "#/$defs/Elements"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elements"
+      ]
+    },
+    "GetIFCTypeOfElementsResult": {
+      "type": "object",
+      "properties": {
+        "elementIFCTypes": {
+          "$ref": "#/$defs/ElementIFCTypesOrErrors"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elementIFCTypes"
+      ]
+    },
+    "GetIFCPropertiesOfElementsParameters": {
+      "type": "object",
+      "properties": {
+        "elements": {
+          "$ref": "#/$defs/Elements"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elements"
+      ]
+    },
+    "GetIFCPropertiesOfElementsResult": {
+      "type": "object",
+      "properties": {
+        "elementIFCProperties": {
+          "$ref": "#/$defs/ElementIFCPropertiesOrErrors"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elementIFCProperties"
+      ]
+    },
     "GetLibrariesResult": {
       "type": "object",
       "properties": {
@@ -7118,6 +8075,68 @@
       "additionalProperties": false,
       "required": [
         "executionResults"
+      ]
+    },
+    "GetAvailableLibraryPartsParameters": {
+      "type": "object",
+      "properties": {
+        "filterByTypeId": {
+          "$ref": "#/$defs/LibraryPartType",
+          "description": "Optional. Filter by libpart type (matches the value returned by LibPartTypeIdToString)."
+        }
+      },
+      "additionalProperties": false
+    },
+    "GetAvailableLibraryPartsResult": {
+      "type": "object",
+      "properties": {
+        "libraryParts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "guid": {
+                "type": "string"
+              },
+              "index": {
+                "type": "integer"
+              },
+              "documentName": {
+                "type": "string"
+              },
+              "fileName": {
+                "type": "string"
+              },
+              "typeId": {
+                "$ref": "#/$defs/LibraryPartType"
+              }
+            }
+          }
+        },
+        "skippedCount": {
+          "type": "integer",
+          "description": "Library parts that ACAPI_LibraryPart_Get failed to read. Non-zero means the inventory is partial."
+        },
+        "skippedSample": {
+          "type": "array",
+          "description": "First five failed indices with their ACAPI error code, for diagnostic.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "index": {
+                "type": "integer"
+              },
+              "code": {
+                "type": "integer"
+              }
+            }
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "libraryParts",
+        "skippedCount"
       ]
     },
     "TeamworkSendResult": {
@@ -7566,6 +8585,33 @@
     "FitInWindowResult": {
       "$ref": "#/$defs/ExecutionResult"
     },
+    "CreateSectionsParameters": {
+      "type": "object",
+      "properties": {
+        "sectionsData": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/SectionData"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "sectionsData"
+      ]
+    },
+    "CreateSectionsResult": {
+      "type": "object",
+      "properties": {
+        "elements": {
+          "$ref": "#/$defs/Elements"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elements"
+      ]
+    },
     "CreateIssueParameters": {
       "type": "object",
       "properties": {
@@ -7979,32 +9025,7 @@
         "designOptions": {
           "type": "array",
           "items": {
-            "type": "object",
-            "properties": {
-              "designOptionId": {
-                "$ref": "#/$defs/GuidId",
-                "description": "The guid identifier of the design option."
-              },
-              "name": {
-                "type": "string",
-                "description": "The name of the design option."
-              },
-              "id": {
-                "type": "string",
-                "description": "The string id of the design option."
-              },
-              "ownerSetName": {
-                "type": "string",
-                "description": "The name of the owner design option set."
-              }
-            },
-            "additionalProperties": false,
-            "required": [
-              "designOptionId",
-              "name",
-              "id",
-              "ownerSetName"
-            ]
+            "$ref": "#/$defs/DesignOptionDetails"
           }
         }
       },
@@ -8057,35 +9078,301 @@
         "designOptionCombinations": {
           "type": "array",
           "items": {
-            "type": "object",
-            "properties": {
-              "designOptionCombinationId": {
-                "$ref": "#/$defs/GuidId",
-                "description": "The guid identifier of the design option combination."
-              },
-              "name": {
-                "type": "string",
-                "description": "The name of the design option combination."
-              },
-              "activeDesignOptions": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/$defs/DesignOptionIdArrayItem"
-                },
-                "description": "The list of active design options in the combination. Available from Archicad 29."
-              }
-            },
-            "additionalProperties": false,
-            "required": [
-              "designOptionCombinationId",
-              "name"
-            ]
+            "$ref": "#/$defs/DesignOptionCombinationDetails"
           }
         }
       },
       "additionalProperties": false,
       "required": [
         "designOptionCombinations"
+      ]
+    },
+    "GetElementsOfDesignOptionsParameters": {
+      "type": "object",
+      "properties": {
+        "designOptions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/DesignOptionIdArrayItem"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "designOptions"
+      ]
+    },
+    "GetElementsOfDesignOptionsResult": {
+      "type": "object",
+      "properties": {
+        "elementsOfDesignOptions": {
+          "type": "array",
+          "items": {
+            "#ref": "#/ElementsOfDesignOptionOrError"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elementsOfDesignOptions"
+      ]
+    },
+    "GetDesignOptionForElementsParameters": {
+      "type": "object",
+      "properties": {
+        "elements": {
+          "$ref": "#/$defs/Elements"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elements"
+      ]
+    },
+    "GetDesignOptionForElementsResult": {
+      "type": "object",
+      "properties": {
+        "designOptionForElements": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "elementId": {
+                "$ref": "#/$defs/ElementId",
+                "description": "The identifier of the element."
+              },
+              "type": {
+                "type": "string",
+                "description": "The type of the associated design option.",
+                "enum": [
+                  "NotExistingElement",
+                  "MissingDesignOption",
+                  "NotLinkedToAnyDesignOption",
+                  "LinkedToDesignOption"
+                ]
+              },
+              "designOption": {
+                "$ref": "#/$defs/DesignOptionDetails"
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "elementId",
+              "type"
+            ]
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "designOptionForElements"
+      ]
+    },
+    "CreateDesignOptionSetsParameters": {
+      "type": "object",
+      "properties": {
+        "designOptionSets": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "designOptionSets"
+      ]
+    },
+    "CreateDesignOptionSetsResult": {
+      "type": "object",
+      "properties": {
+        "executionResults": {
+          "$ref": "#/$defs/ExecutionResults"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "executionResults"
+      ]
+    },
+    "CreateDesignOptionsParameters": {
+      "type": "object",
+      "properties": {
+        "designOptions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/DesignOptionData"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "designOptions"
+      ]
+    },
+    "CreateDesignOptionsResult": {
+      "type": "object",
+      "properties": {
+        "designOptionIdsOrErrors": {
+          "$ref": "#/$defs/DesignOptionIdsOrErrors"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "designOptionIdsOrErrors"
+      ]
+    },
+    "CreateDesignOptionCombinationsParameters": {
+      "type": "object",
+      "properties": {
+        "designOptionCombinations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/DesignOptionCombinationData"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "designOptionCombinations"
+      ]
+    },
+    "CreateDesignOptionCombinationsResult": {
+      "type": "object",
+      "properties": {
+        "designOptionCombinationIdsOrErrors": {
+          "$ref": "#/$defs/DesignOptionCombinationIdsOrErrors"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "designOptionCombinationIdsOrErrors"
+      ]
+    },
+    "SetActiveDesignOptionsInCombinationsParameters": {
+      "type": "object",
+      "properties": {
+        "activeDesignOptionsInCombinations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "designOptionCombinationId": {
+                "$ref": "#/$defs/DesignOptionCombinationId"
+              },
+              "activeDesignOptions": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/DesignOptionIdArrayItem"
+                },
+                "description": "The list of active design options in the combination."
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "designOptionCombinationId",
+              "activeDesignOptions"
+            ]
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "activeDesignOptionsInCombinations"
+      ]
+    },
+    "SetActiveDesignOptionsInCombinationsResult": {
+      "type": "object",
+      "properties": {
+        "executionResults": {
+          "$ref": "#/$defs/ExecutionResults"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "executionResults"
+      ]
+    },
+    "MoveElementsToDesignOptionsParameters": {
+      "type": "object",
+      "properties": {
+        "elementDesignOptionPairs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "elementId": {
+                "$ref": "#/$defs/ElementId"
+              },
+              "designOptionId": {
+                "description": "The identifier of the design option to move the element into. Use NULLGuid to remove the element from any design option and move it to the main model.",
+                "$ref": "#/$defs/DesignOptionId"
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "elementId",
+              "designOptionId"
+            ]
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elementDesignOptionPairs"
+      ]
+    },
+    "MoveElementsToDesignOptionsResult": {
+      "type": "object",
+      "properties": {
+        "executionResults": {
+          "$ref": "#/$defs/ExecutionResults"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "executionResults"
+      ]
+    },
+    "MoveDesignOptionsToAnotherSetParameters": {
+      "type": "object",
+      "properties": {
+        "designOptionAndSetPairs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "designOptionId": {
+                "description": "The identifier of the design option to move.",
+                "$ref": "#/$defs/DesignOptionId"
+              },
+              "setName": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "elementId",
+              "setName"
+            ]
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "designOptionAndSetPairs"
+      ]
+    },
+    "MoveDesignOptionsToAnotherSetResult": {
+      "type": "object",
+      "properties": {
+        "executionResults": {
+          "$ref": "#/$defs/ExecutionResults"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "executionResults"
       ]
     },
     "GenerateDocumentationParameters": {
@@ -8141,6 +9428,16 @@
         "axisRotationAngle": {
           "type": "number",
           "description": "Optional column rotation angle in radians."
+        },
+        "width": {
+          "type": "number",
+          "description": "Cross section width of the column. Applied to all segments.",
+          "exclusiveMinimum": 0.0
+        },
+        "depth": {
+          "type": "number",
+          "description": "Cross section depth (height) of the column. Applied to all segments. Only effective for rectangular columns.",
+          "exclusiveMinimum": 0.0
         }
       },
       "additionalProperties": false,
@@ -8270,6 +9567,31 @@
           "type": "number",
           "description": "The height of the skirt."
         },
+        "ridges": {
+          "type": "string",
+          "description": "How ridges between mesh facets are displayed in 3D: 'AllSharp' shows all ridges, 'AllSmooth' hides them, 'UserDefined' shows only ridges along user-defined level lines (the drawing-set look for contour-line topography).",
+          "enum": [
+            "AllSharp",
+            "AllSmooth",
+            "UserDefined"
+          ]
+        },
+        "showLines": {
+          "type": "boolean",
+          "description": "Whether to show secondary mesh lines (level lines other than the user-defined ones) on plan."
+        },
+        "contourPen": {
+          "type": "integer",
+          "description": "Optional pen attribute index for the mesh's contour line."
+        },
+        "levelPen": {
+          "type": "integer",
+          "description": "Optional pen attribute index for the mesh's level lines."
+        },
+        "lineTypeIndex": {
+          "type": "integer",
+          "description": "Optional line type attribute index for the mesh's contour."
+        },
         "polygonCoordinates": {
           "type": "array",
           "description": "The 3D coordinates of the outline polygon of the mesh.",
@@ -8372,6 +9694,16 @@
         },
         "verticalCurveHeight": {
           "type": "number"
+        },
+        "width": {
+          "type": "number",
+          "description": "Cross section width of the beam. Applied to all segments.",
+          "exclusiveMinimum": 0.0
+        },
+        "height": {
+          "type": "number",
+          "description": "Cross section height of the beam. Applied to all segments.",
+          "exclusiveMinimum": 0.0
         }
       },
       "additionalProperties": false,
@@ -8574,6 +9906,19 @@
         "height": {
           "type": "number",
           "exclusiveMinimum": 0.0
+        },
+        "reflected": {
+          "type": "boolean"
+        },
+        "refSide": {
+          "type": "boolean"
+        },
+        "oSide": {
+          "type": "boolean"
+        },
+        "favoriteName": {
+          "type": "string",
+          "description": "Optional. Name of an existing Window favorite (as returned by `GetFavoritesByType`). Applied to the Window tool defaults before the create."
         }
       },
       "additionalProperties": false,
@@ -8602,6 +9947,19 @@
         "height": {
           "type": "number",
           "exclusiveMinimum": 0.0
+        },
+        "reflected": {
+          "type": "boolean"
+        },
+        "refSide": {
+          "type": "boolean"
+        },
+        "oSide": {
+          "type": "boolean"
+        },
+        "favoriteName": {
+          "type": "string",
+          "description": "Optional. Name of an existing Door favorite (as returned by `GetFavoritesByType`). Applied to the Door tool defaults before the create."
         }
       },
       "additionalProperties": false,
@@ -8735,35 +10093,7 @@
         "witnessPoints": {
           "type": "array",
           "items": {
-            "type": "object",
-            "properties": {
-              "elementId": {
-                "$ref": "#/$defs/ElementId"
-              },
-              "line": {
-                "type": "boolean"
-              },
-              "inIndex": {
-                "type": "integer"
-              },
-              "special": {
-                "type": "integer"
-              },
-              "nodeType": {
-                "type": "integer"
-              },
-              "nodeStatus": {
-                "type": "integer"
-              },
-              "nodeId": {
-                "type": "number",
-                "minimum": 0.0
-              }
-            },
-            "additionalProperties": false,
-            "required": [
-              "elementId"
-            ]
+            "$ref": "#/$defs/AssociativeWitnessPoint"
           },
           "minItems": 2
         }
@@ -8842,6 +10172,120 @@
         "wallId",
         "referencePoint",
         "direction"
+      ]
+    },
+    "SectionData": {
+      "type": "object",
+      "description": "The parameters of the new Stair.",
+      "properties": {
+        "baseLinePoints": {
+          "type": "array",
+          "description": "2D coordinates defining the stair baseline polyline. Minimum 2 points for a straight stair, 3+ for L-shaped or U-shaped stairs.",
+          "items": {
+            "$ref": "#/$defs/Coordinate2D"
+          },
+          "minItems": 2
+        },
+        "zCoordinate": {
+          "type": "number",
+          "description": "The Z coordinate (absolute elevation) of the stair base."
+        },
+        "totalHeight": {
+          "type": "number",
+          "description": "Total height of the stair.",
+          "exclusiveMinimum": 0.0
+        },
+        "flightWidth": {
+          "type": "number",
+          "description": "Width of the stair flight.",
+          "exclusiveMinimum": 0.0
+        },
+        "stepNum": {
+          "type": "integer",
+          "description": "Number of risers (steps).",
+          "minimum": 1
+        },
+        "riserHeight": {
+          "type": "number",
+          "description": "Height of each riser.",
+          "exclusiveMinimum": 0.0
+        },
+        "treadDepth": {
+          "type": "number",
+          "description": "Depth (going) of each tread.",
+          "exclusiveMinimum": 0.0
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "baseLinePoints",
+        "zCoordinate"
+      ]
+    },
+    "LampData": {
+      "type": "object",
+      "description": "The parameters of the new Lamp.",
+      "properties": {
+        "libraryPartName": {
+          "type": "string",
+          "description": "The name of the lamp library part to use."
+        },
+        "coordinates": {
+          "$ref": "#/$defs/Coordinate3D"
+        },
+        "dimensions": {
+          "$ref": "#/$defs/Dimensions3D"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "libraryPartName",
+        "coordinates"
+      ]
+    },
+    "TextData": {
+      "type": "object",
+      "description": "The parameters of the new Text element.",
+      "properties": {
+        "coordinate": {
+          "$ref": "#/$defs/Coordinate3D",
+          "description": "The placement position of the text. The z value is used to determine the floor when floorIndex is omitted."
+        },
+        "text": {
+          "type": "string",
+          "description": "The text content. Newlines create multiple lines."
+        },
+        "height": {
+          "type": "number",
+          "description": "The character height in millimeters. Optional; defaults to the Text tool default."
+        },
+        "pen": {
+          "type": "integer",
+          "description": "Optional pen attribute index."
+        },
+        "angle": {
+          "type": "number",
+          "description": "Optional rotation angle in radians."
+        },
+        "justification": {
+          "type": "string",
+          "description": "Optional text justification.",
+          "enum": [
+            "Left",
+            "Center",
+            "Right",
+            "Full"
+          ]
+        },
+        "floorIndex": {
+          "type": "integer",
+          "description": "Optional floor index. If omitted, derived from the coordinate's z value."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "coordinate",
+        "text"
       ]
     },
     "WallWithDetails": {
@@ -9013,6 +10457,15 @@
         "centerOffset": {
           "type": "number",
           "minimum": 0.0
+        },
+        "reflected": {
+          "type": "boolean"
+        },
+        "refSide": {
+          "type": "boolean"
+        },
+        "oSide": {
+          "type": "boolean"
         }
       },
       "additionalProperties": false,
@@ -9040,6 +10493,15 @@
         "centerOffset": {
           "type": "number",
           "minimum": 0.0
+        },
+        "reflected": {
+          "type": "boolean"
+        },
+        "refSide": {
+          "type": "boolean"
+        },
+        "oSide": {
+          "type": "boolean"
         }
       },
       "additionalProperties": false,
@@ -9159,6 +10621,157 @@
         "Composite"
       ]
     },
+    "CoordinateWitnessPoint": {
+      "type": "object",
+      "properties": {
+        "coordinate": {
+          "$ref": "#/$defs/Coordinate2D"
+        },
+        "coordinate3D": {
+          "$ref": "#/$defs/Coordinate3D"
+        },
+        "dimensionPosition": {
+          "$ref": "#/$defs/Coordinate2D"
+        },
+        "dimensionValue": {
+          "type": "number"
+        },
+        "witnessForm": {
+          "type": "string",
+          "enum": [
+            "None",
+            "Small",
+            "Large",
+            "Fix",
+            "Unknown"
+          ]
+        },
+        "witnessVal": {
+          "type": "number"
+        },
+        "baseElementId": {
+          "$ref": "#/$defs/ElementId"
+        }
+      }
+    },
+    "AssociativeWitnessPoint": {
+      "type": "object",
+      "properties": {
+        "elementId": {
+          "$ref": "#/$defs/ElementId"
+        },
+        "line": {
+          "type": "boolean"
+        },
+        "inIndex": {
+          "type": "integer"
+        },
+        "special": {
+          "type": "integer"
+        },
+        "nodeType": {
+          "type": "integer"
+        },
+        "nodeStatus": {
+          "type": "integer"
+        },
+        "nodeId": {
+          "type": "number",
+          "minimum": 0.0
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elementId"
+      ]
+    },
+    "ProjectInfoFieldData": {
+      "type": "object",
+      "properties": {
+        "projectInfoName": {
+          "type": "string",
+          "description": "Display name of the project info field.",
+          "minLength": 1
+        },
+        "projectInfoValue": {
+          "type": "string",
+          "description": "Initial value of the project info field."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "projectInfoName"
+      ]
+    },
+    "DesignOptionData": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The name of the design option."
+        },
+        "id": {
+          "type": "string",
+          "description": "The string id of the design option."
+        },
+        "ownerSetName": {
+          "type": "string",
+          "description": "The name of the owner design option set."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "id",
+        "ownerSetName"
+      ]
+    },
+    "DesignOptionCombinationDetails": {
+      "type": "object",
+      "properties": {
+        "designOptionCombinationId": {
+          "$ref": "#/$defs/GuidId",
+          "description": "The guid identifier of the design option combination."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the design option combination."
+        },
+        "activeDesignOptions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/DesignOptionIdArrayItem"
+          },
+          "description": "The list of active design options in the combination. Available from Archicad 29."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "designOptionCombinationId",
+        "name"
+      ]
+    },
+    "DesignOptionCombinationData": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The name of the design option combination."
+        },
+        "activeDesignOptions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/DesignOptionIdArrayItem"
+          },
+          "description": "The list of active design options in the combination."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "activeDesignOptions"
+      ]
+    },
     "ProjectLocation": {
       "type": "object",
       "properties": {
@@ -9262,6 +10875,21 @@
       "required": [
         "position",
         "geoReferencingParameters"
+      ]
+    },
+    "DatabaseIdAndWindowType": {
+      "type": "object",
+      "properties": {
+        "windowType": {
+          "$ref": "#/$defs/WindowType"
+        },
+        "databaseId": {
+          "$ref": "#/$defs/DatabaseId"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "windowType"
       ]
     },
     "Zoom": {

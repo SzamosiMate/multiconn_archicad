@@ -146,10 +146,30 @@ def main():
         json.dump(master_schema, f, indent=2)
     print(f"✅ Successfully generated master schema at: {tapir_paths.MASTER_SCHEMA_OUTPUT}")
 
+    valid_command_model_names = set()
+    for command_group in commands_list:
+        for command in command_group.get("commands", []):
+            command_name = command.get("name")
+            if not command_name:
+                continue
+            if command.get("inputScheme") is not None:
+                valid_command_model_names.add(f"{command_name}Parameters")
+            if command.get("outputScheme") is not None:
+                valid_command_model_names.add(f"{command_name}Result")
+
+    # Dispatch the active, patched keys from master_defs into base and command lists
+    final_base_names = []
+    final_command_names = []
+    for key in master_defs.keys():
+        if key in valid_command_model_names:
+            final_command_names.append(key)
+        else:
+            final_base_names.append(key)
+
     with open(tapir_paths.BASE_MODEL_NAMES_OUTPUT, "w") as f:
-        json.dump(list(common_defs.keys()), f)
+        json.dump(final_base_names, f)
     with open(tapir_paths.COMMAND_MODELS_NAMES_OUTPUT, "w") as f:
-        json.dump(list(command_defs.keys()), f)
+        json.dump(final_command_names, f)
     print(f"✅ Successfully generated base and command model name lists.")
 
     structured_command_details = get_structured_command_details(commands_list)
