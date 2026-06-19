@@ -217,6 +217,7 @@ TapirCommandType = Literal[
     "ReloadLibraries",
     "RemoveElementNotificationClient",
     "ReserveElements",
+    "RotateElements",
     "SaveProject",
     "Set3DCutPlanes",
     "SetActiveDesignOptionsInCombinations",

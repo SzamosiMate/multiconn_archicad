@@ -818,7 +818,8 @@
         "IsIndependent",
         "InCroppedView",
         "HasAccessRight",
-        "IsOverriddenByRenovation"
+        "IsOverriddenByRenovation",
+        "IncludeSubElemObjects"
       ]
     },
     "WindowType": {
@@ -3220,6 +3221,14 @@
           "$ref": "#/$defs/Coordinate2D",
           "description": "Position of the origin of the zone stamp."
         },
+        "stampAngle": {
+          "type": "number",
+          "description": "Rotation angle of the zone stamp in radians."
+        },
+        "fixedStampAngle": {
+          "type": "boolean",
+          "description": "If true, the zone stamp angle remains fixed when the element is rotated."
+        },
         "isManual": {
           "type": "boolean",
           "description": "Is the coordinates of the zone manually placed?"
@@ -4016,12 +4025,35 @@
       "additionalProperties": false,
       "required": []
     },
+    "ZoneSettings": {
+      "type": "object",
+      "description": "Settings for modifying a zone.",
+      "properties": {
+        "stampPosition": {
+          "$ref": "#/$defs/Coordinate2D",
+          "description": "Position of the origin of the zone stamp."
+        },
+        "stampAngle": {
+          "type": "number",
+          "description": "Rotation angle of the zone stamp in radians."
+        },
+        "fixedStampAngle": {
+          "type": "boolean",
+          "description": "If true, the zone stamp angle remains fixed when the element is rotated."
+        }
+      },
+      "additionalProperties": false,
+      "required": []
+    },
     "TypeSpecificSettings": {
       "description": "Defines the modifiable type-specific settings for an element. Used as input for SET requests.",
       "type": "object",
       "oneOf": [
         {
           "$ref": "#/$defs/WallSettings"
+        },
+        {
+          "$ref": "#/$defs/ZoneSettings"
         }
       ]
     },
@@ -5646,6 +5678,111 @@
       ]
     },
     "MoveElementsResult": {
+      "type": "object",
+      "properties": {
+        "executionResults": {
+          "$ref": "#/$defs/ExecutionResults"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "executionResults"
+      ]
+    },
+    "RotateElementsParameters": {
+      "type": "object",
+      "properties": {
+        "elementsWithRotations": {
+          "type": "array",
+          "description": "The elements with rotation settings.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "elementId": {
+                "$ref": "#/$defs/ElementId"
+              },
+              "rotation": {
+                "type": "object",
+                "description": "Rotation parameters for an element.",
+                "properties": {
+                  "beginPoint": {
+                    "type": "object",
+                    "description": "Starting point of the rotation arc.",
+                    "properties": {
+                      "x": {
+                        "type": "number"
+                      },
+                      "y": {
+                        "type": "number"
+                      }
+                    },
+                    "additionalProperties": false,
+                    "required": [
+                      "x",
+                      "y"
+                    ]
+                  },
+                  "endPoint": {
+                    "type": "object",
+                    "description": "End point of the rotation arc.",
+                    "properties": {
+                      "x": {
+                        "type": "number"
+                      },
+                      "y": {
+                        "type": "number"
+                      }
+                    },
+                    "additionalProperties": false,
+                    "required": [
+                      "x",
+                      "y"
+                    ]
+                  },
+                  "origin": {
+                    "type": "object",
+                    "description": "Center of rotation.",
+                    "properties": {
+                      "x": {
+                        "type": "number"
+                      },
+                      "y": {
+                        "type": "number"
+                      }
+                    },
+                    "additionalProperties": false,
+                    "required": [
+                      "x",
+                      "y"
+                    ]
+                  }
+                },
+                "additionalProperties": false,
+                "required": [
+                  "beginPoint",
+                  "endPoint",
+                  "origin"
+                ]
+              },
+              "copy": {
+                "type": "boolean",
+                "description": "Optional parameter. If true, a copy of the element is rotated. By default it's false."
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "elementId",
+              "rotation"
+            ]
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elementsWithRotations"
+      ]
+    },
+    "RotateElementsResult": {
       "type": "object",
       "properties": {
         "executionResults": {
@@ -9438,6 +9575,21 @@
           "type": "number",
           "description": "Cross section depth (height) of the column. Applied to all segments. Only effective for rectangular columns.",
           "exclusiveMinimum": 0.0
+        },
+        "coreAnchor": {
+          "type": "string",
+          "description": "Optional anchor point of the column core on a 3x3 grid.",
+          "enum": [
+            "TopLeft",
+            "TopCenter",
+            "TopRight",
+            "MiddleLeft",
+            "Center",
+            "MiddleRight",
+            "BottomLeft",
+            "BottomCenter",
+            "BottomRight"
+          ]
         }
       },
       "additionalProperties": false,
@@ -9457,6 +9609,16 @@
           "type": "number",
           "description": "Optional slab thickness.",
           "exclusiveMinimum": 0.0
+        },
+        "referencePlaneLocation": {
+          "type": "string",
+          "description": "Optional location of the slab reference plane. For a basic (homogeneous) slab only 'Top' or 'Bottom' are valid.",
+          "enum": [
+            "Top",
+            "CoreTop",
+            "CoreBottom",
+            "Bottom"
+          ]
         },
         "polygonCoordinates": {
           "type": "array",
@@ -9660,6 +9822,14 @@
           "$ref": "#/$defs/Coordinate2D",
           "description": "Position of the origin of the zone stamp."
         },
+        "stampAngle": {
+          "type": "number",
+          "description": "Optional zone stamp rotation angle in radians."
+        },
+        "fixedStampAngle": {
+          "type": "boolean",
+          "description": "If true, the zone stamp angle remains fixed when the element is rotated."
+        },
         "geometry": {
           "$ref": "#/$defs/ZoneCreationGeometry"
         }
@@ -9704,6 +9874,21 @@
           "type": "number",
           "description": "Cross section height of the beam. Applied to all segments.",
           "exclusiveMinimum": 0.0
+        },
+        "anchorPoint": {
+          "type": "string",
+          "description": "Optional anchor point of the beam cross section on a 3x3 grid.",
+          "enum": [
+            "TopLeft",
+            "TopCenter",
+            "TopRight",
+            "MiddleLeft",
+            "Center",
+            "MiddleRight",
+            "BottomLeft",
+            "BottomCenter",
+            "BottomRight"
+          ]
         }
       },
       "additionalProperties": false,
@@ -9735,6 +9920,17 @@
         },
         "offset": {
           "type": "number"
+        },
+        "referenceLineLocation": {
+          "type": "string",
+          "enum": [
+            "Outside",
+            "Center",
+            "Inside",
+            "CoreOutside",
+            "CoreCenter",
+            "CoreInside"
+          ]
         },
         "structureType": {
           "$ref": "#/$defs/WallStructureType"

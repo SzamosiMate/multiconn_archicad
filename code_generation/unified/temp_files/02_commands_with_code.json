@@ -703,6 +703,24 @@
         "alias_property_name": null
       },
       {
+        "name": "RotateElements",
+        "group": "Element Commands",
+        "description": "Rotates elements around a reference point.",
+        "version": "1.5.3",
+        "source": "tapir",
+        "method_code": "def rotate_elements(\n    self,\n    elements_with_rotations: list[ElementsWithRotation]\n) -> list[FailedExecutionResult | SuccessfulExecutionResult]:\n    \"\"\"\n    Rotates elements around a reference point.\n\n    Args:\n        elements_with_rotations (list[ElementsWithRotation]): The elements with rotation\n            settings.\n\n    Returns:\n        list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution\n            results.\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    params_dict = {\n            'elementsWithRotations': elements_with_rotations,\n        }\n    validated_params = RotateElementsParameters(**params_dict)\n    response_dict = self._core.post_tapir_command(\n        \"RotateElements\",\n        validated_params.model_dump(mode='json', by_alias=True, exclude_none=True)\n    )\n    validated_response = RotateElementsResult.model_validate(response_dict)\n    return validated_response.executionResults",
+        "command_model_dependencies": [
+          "RotateElementsParameters",
+          "RotateElementsResult"
+        ],
+        "type_model_dependencies": [
+          "ElementsWithRotation",
+          "FailedExecutionResult",
+          "SuccessfulExecutionResult"
+        ],
+        "alias_property_name": "executionResults"
+      },
+      {
         "name": "SetDetailsOfElements",
         "group": "Element Commands",
         "description": "Sets the details of the given elements (floor, layer, order etc).",

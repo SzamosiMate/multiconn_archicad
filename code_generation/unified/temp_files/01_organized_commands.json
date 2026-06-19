@@ -288,6 +288,13 @@
                 "source": "tapir"
             },
             {
+                "name": "RotateElements",
+                "group": "Element Commands",
+                "description": "Rotates elements around a reference point.",
+                "version": "1.5.3",
+                "source": "tapir"
+            },
+            {
                 "name": "SetDetailsOfElements",
                 "group": "Element Commands",
                 "description": "Sets the details of the given elements (floor, layer, order etc).",
