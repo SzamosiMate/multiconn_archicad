@@ -45,6 +45,8 @@ from multiconn_archicad.models.tapir.commands import (
     MoveElementsResult,
     RemoveElementNotificationClientParameters,
     RemoveElementNotificationClientResult,
+    RotateElementsParameters,
+    RotateElementsResult,
     SetDetailsOfElementsParameters,
     SetDetailsOfElementsResult,
     SetElementNotificationClientParameters,
@@ -71,6 +73,7 @@ from multiconn_archicad.models.tapir.types import (
     ElementsWithExecutionResults,
     ElementsWithGDLParameter,
     ElementsWithMoveVector,
+    ElementsWithRotation,
     ErrorItem,
     FailedExecutionResult,
     Format,
@@ -686,6 +689,35 @@ class ElementCommands:
         )
         validated_response = TypeAdapter(RemoveElementNotificationClientResult).validate_python(response_dict)
         return validated_response
+
+    def rotate_elements(
+        self, elements_with_rotations: list[ElementsWithRotation]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Rotates elements around a reference point.
+
+        Args:
+            elements_with_rotations (list[ElementsWithRotation]): The elements with rotation
+                settings.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elementsWithRotations": elements_with_rotations,
+        }
+        validated_params = RotateElementsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "RotateElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = RotateElementsResult.model_validate(response_dict)
+        return validated_response.executionResults
 
     def set_details_of_elements(
         self, elements_with_details: list[ElementsWithDetail]

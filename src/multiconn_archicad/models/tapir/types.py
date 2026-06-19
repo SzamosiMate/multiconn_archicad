@@ -279,6 +279,7 @@ class ElementFilter(Enum):
     InCroppedView = "InCroppedView"
     HasAccessRight = "HasAccessRight"
     IsOverriddenByRenovation = "IsOverriddenByRenovation"
+    IncludeSubElemObjects = "IncludeSubElemObjects"
 
 
 class WindowType(Enum):
@@ -1085,7 +1086,16 @@ class WallSettings(APIModel):
     ] = None
 
 
-TypeSpecificSettings: TypeAlias = WallSettings
+class ZoneSettings(APIModel):
+    stampPosition: Annotated[
+        Coordinate2D | None,
+        Field(description="Position of the origin of the zone stamp."),
+    ] = None
+    stampAngle: Annotated[float | None, Field(description="Rotation angle of the zone stamp in radians.")] = None
+    fixedStampAngle: Annotated[
+        bool | None,
+        Field(description="If true, the zone stamp angle remains fixed when the element is rotated."),
+    ] = None
 
 
 class PropertyGroup(APIModel):
@@ -1212,7 +1222,12 @@ class Details(APIModel):
     floorIndex: float | None = None
     layerIndex: float | None = None
     drawIndex: float | None = None
-    typeSpecificDetails: TypeSpecificSettings | None = None
+    typeSpecificDetails: Annotated[
+        WallSettings | ZoneSettings | None,
+        Field(
+            description="Defines the modifiable type-specific settings for an element. Used as input for SET requests."
+        ),
+    ] = None
 
 
 class Settings(APIModel):
@@ -1243,6 +1258,27 @@ class MoveVector(APIModel):
     x: Annotated[float, Field(description="X value of the vector.")]
     y: Annotated[float, Field(description="Y value of the vector.")]
     z: Annotated[float, Field(description="Z value of the vector.")]
+
+
+class BeginPoint(APIModel):
+    x: float
+    y: float
+
+
+class EndPoint(APIModel):
+    x: float
+    y: float
+
+
+class Origin(APIModel):
+    x: float
+    y: float
+
+
+class Rotation(APIModel):
+    beginPoint: Annotated[BeginPoint, Field(description="Starting point of the rotation arc.")]
+    endPoint: Annotated[EndPoint, Field(description="End point of the rotation arc.")]
+    origin: Annotated[Origin, Field(description="Center of rotation.")]
 
 
 class ImageType(Enum):
@@ -1364,6 +1400,18 @@ class Coordinates(APIModel):
     z: Annotated[float, Field(description="Z value of the coordinate.")]
 
 
+class CoreAnchor(Enum):
+    TopLeft = "TopLeft"
+    TopCenter = "TopCenter"
+    TopRight = "TopRight"
+    MiddleLeft = "MiddleLeft"
+    Center = "Center"
+    MiddleRight = "MiddleRight"
+    BottomLeft = "BottomLeft"
+    BottomCenter = "BottomCenter"
+    BottomRight = "BottomRight"
+
+
 class ColumnData(APIModel):
     coordinates: Annotated[Coordinates, Field(description="3D coordinate.")]
     height: Annotated[float | None, Field(description="Optional column height.", gt=0.0)] = None
@@ -1382,6 +1430,17 @@ class ColumnData(APIModel):
             gt=0.0,
         ),
     ] = None
+    coreAnchor: Annotated[
+        CoreAnchor | None,
+        Field(description="Optional anchor point of the column core on a 3x3 grid."),
+    ] = None
+
+
+class ReferencePlaneLocation(Enum):
+    Top = "Top"
+    CoreTop = "CoreTop"
+    CoreBottom = "CoreBottom"
+    Bottom = "Bottom"
 
 
 class SlabData(APIModel):
@@ -1390,6 +1449,12 @@ class SlabData(APIModel):
         Field(description="The Z coordinate value of the reference line of the slab."),
     ]
     thickness: Annotated[float | None, Field(description="Optional slab thickness.", gt=0.0)] = None
+    referencePlaneLocation: Annotated[
+        ReferencePlaneLocation | None,
+        Field(
+            description="Optional location of the slab reference plane. For a basic (homogeneous) slab only 'Top' or 'Bottom' are valid."
+        ),
+    ] = None
     polygonCoordinates: Annotated[
         List[Coordinate2D],
         Field(description="The 2D coordinates of the edge of the slab.", min_length=3),
@@ -1492,6 +1557,18 @@ class MeshData(APIModel):
     ] = None
 
 
+class AnchorPoint(Enum):
+    TopLeft = "TopLeft"
+    TopCenter = "TopCenter"
+    TopRight = "TopRight"
+    MiddleLeft = "MiddleLeft"
+    Center = "Center"
+    MiddleRight = "MiddleRight"
+    BottomLeft = "BottomLeft"
+    BottomCenter = "BottomCenter"
+    BottomRight = "BottomRight"
+
+
 class BeamData(APIModel):
     begCoordinate: Coordinate2D
     endCoordinate: Coordinate2D
@@ -1514,6 +1591,19 @@ class BeamData(APIModel):
             gt=0.0,
         ),
     ] = None
+    anchorPoint: Annotated[
+        AnchorPoint | None,
+        Field(description="Optional anchor point of the beam cross section on a 3x3 grid."),
+    ] = None
+
+
+class ReferenceLineLocation(Enum):
+    Outside = "Outside"
+    Center = "Center"
+    Inside = "Inside"
+    CoreOutside = "CoreOutside"
+    CoreCenter = "CoreCenter"
+    CoreInside = "CoreInside"
 
 
 class DetailData(APIModel):
@@ -2014,6 +2104,11 @@ class ZoneDetails(APIModel):
     numberStr: Annotated[str, Field(description="Zone number.")]
     categoryAttributeId: Annotated[AttributeId, Field(description="The identifier of the zone category attribute.")]
     stampPosition: Annotated[Coordinate2D, Field(description="Position of the origin of the zone stamp.")]
+    stampAngle: Annotated[float | None, Field(description="Rotation angle of the zone stamp in radians.")] = None
+    fixedStampAngle: Annotated[
+        bool | None,
+        Field(description="If true, the zone stamp angle remains fixed when the element is rotated."),
+    ] = None
     isManual: Annotated[bool, Field(description="Is the coordinates of the zone manually placed?")]
     polygonOutline: Annotated[
         List[Coordinate2D],
@@ -2121,6 +2216,18 @@ class ElementsWithMoveVector(APIModel):
         Field(
             alias="copy",
             description="Optional parameter. If true, then a copy of the element will be moved. By default it's false.",
+        ),
+    ] = None
+
+
+class ElementsWithRotation(APIModel):
+    elementId: ElementId
+    rotation: Annotated[Rotation, Field(description="Rotation parameters for an element.")]
+    copy_: Annotated[
+        bool | None,
+        Field(
+            alias="copy",
+            description="Optional parameter. If true, a copy of the element is rotated. By default it's false.",
         ),
     ] = None
 
@@ -2299,6 +2406,14 @@ class ZoneData(APIModel):
         Coordinate2D | None,
         Field(description="Position of the origin of the zone stamp."),
     ] = None
+    stampAngle: Annotated[
+        float | None,
+        Field(description="Optional zone stamp rotation angle in radians."),
+    ] = None
+    fixedStampAngle: Annotated[
+        bool | None,
+        Field(description="If true, the zone stamp angle remains fixed when the element is rotated."),
+    ] = None
     geometry: Annotated[
         AutomaticZoneGeometry | ManualZoneGeometry,
         Field(description="Defines the geometry of a zone. Used as input for creating zones."),
@@ -2312,6 +2427,7 @@ class WallData(APIModel):
     height: Annotated[float, Field(gt=0.0)]
     thickness: Annotated[float, Field(gt=0.0)]
     offset: float | None = None
+    referenceLineLocation: ReferenceLineLocation | None = None
     structureType: WallStructureType | None = None
     buildingMaterialId: AttributeId | None = None
     compositeId: AttributeId | None = None

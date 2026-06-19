@@ -233,6 +233,7 @@ ElementFilter = Literal[
     "InCroppedView",
     "HasAccessRight",
     "IsOverriddenByRenovation",
+    "IncludeSubElemObjects",
 ]
 
 
@@ -909,7 +910,13 @@ class WallSettings(TypedDict):
     endThickness: NotRequired[float]
 
 
-TypeSpecificSettings = WallSettings
+class ZoneSettings(TypedDict):
+    stampPosition: NotRequired[Coordinate2D]
+    stampAngle: NotRequired[float]
+    fixedStampAngle: NotRequired[bool]
+
+
+TypeSpecificSettings = WallSettings | ZoneSettings
 
 
 class PropertyGroup(TypedDict):
@@ -1142,6 +1149,31 @@ class MoveVector(TypedDict):
 
 
 class MoveElementsResult(TypedDict):
+    executionResults: ExecutionResults
+
+
+class BeginPoint(TypedDict):
+    x: float
+    y: float
+
+
+class EndPoint(TypedDict):
+    x: float
+    y: float
+
+
+class Origin(TypedDict):
+    x: float
+    y: float
+
+
+class Rotation(TypedDict):
+    beginPoint: BeginPoint
+    endPoint: EndPoint
+    origin: Origin
+
+
+class RotateElementsResult(TypedDict):
     executionResults: ExecutionResults
 
 
@@ -1599,11 +1631,27 @@ class ColumnData(TypedDict):
     axisRotationAngle: NotRequired[float]
     width: NotRequired[float]
     depth: NotRequired[float]
+    coreAnchor: NotRequired[
+        Literal[
+            "TopLeft",
+            "TopCenter",
+            "TopRight",
+            "MiddleLeft",
+            "Center",
+            "MiddleRight",
+            "BottomLeft",
+            "BottomCenter",
+            "BottomRight",
+        ]
+    ]
 
 
 class SlabData(TypedDict):
     level: float
     thickness: NotRequired[float]
+    referencePlaneLocation: NotRequired[
+        Literal["Top", "CoreTop", "CoreBottom", "Bottom"]
+    ]
     polygonCoordinates: List[Coordinate2D]
     polygonArcs: NotRequired[List[PolyArc]]
     holes: NotRequired[Holes2D]
@@ -1651,6 +1699,19 @@ class BeamData(TypedDict):
     verticalCurveHeight: NotRequired[float]
     width: NotRequired[float]
     height: NotRequired[float]
+    anchorPoint: NotRequired[
+        Literal[
+            "TopLeft",
+            "TopCenter",
+            "TopRight",
+            "MiddleLeft",
+            "Center",
+            "MiddleRight",
+            "BottomLeft",
+            "BottomCenter",
+            "BottomRight",
+        ]
+    ]
 
 
 class DetailData(TypedDict):
@@ -2040,6 +2101,8 @@ class ZoneDetails(TypedDict):
     numberStr: str
     categoryAttributeId: AttributeId
     stampPosition: Coordinate2D
+    stampAngle: NotRequired[float]
+    fixedStampAngle: NotRequired[bool]
     isManual: bool
     polygonOutline: List[Coordinate2D]
     polygonArcs: NotRequired[List[PolyArc]]
@@ -2170,6 +2233,16 @@ class ElementsWithMoveVector(TypedDict):
 
 class MoveElementsParameters(TypedDict):
     elementsWithMoveVectors: List[ElementsWithMoveVector]
+
+
+class ElementsWithRotation(TypedDict):
+    elementId: ElementId
+    rotation: Rotation
+    copy: NotRequired[bool]
+
+
+class RotateElementsParameters(TypedDict):
+    elementsWithRotations: List[ElementsWithRotation]
 
 
 class GetGDLParametersOfElementsResult(TypedDict):
@@ -2490,6 +2563,8 @@ class ZoneData(TypedDict):
     numberStr: str
     categoryAttributeId: NotRequired[AttributeId]
     stampPosition: NotRequired[Coordinate2D]
+    stampAngle: NotRequired[float]
+    fixedStampAngle: NotRequired[bool]
     geometry: ZoneCreationGeometry
 
 
@@ -2500,6 +2575,11 @@ class WallData(TypedDict):
     height: float
     thickness: float
     offset: NotRequired[float]
+    referenceLineLocation: NotRequired[
+        Literal[
+            "Outside", "Center", "Inside", "CoreOutside", "CoreCenter", "CoreInside"
+        ]
+    ]
     structureType: NotRequired[WallStructureType]
     buildingMaterialId: NotRequired[AttributeId]
     compositeId: NotRequired[AttributeId]

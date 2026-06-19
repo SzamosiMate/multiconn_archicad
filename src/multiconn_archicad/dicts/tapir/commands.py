@@ -68,6 +68,7 @@ from .types import (
     ElementsWithExecutionResultsOrError,
     ElementsWithGDLParameter,
     ElementsWithMoveVector,
+    ElementsWithRotation,
     ExecutionResult,
     ExecutionResults,
     Favorites,
@@ -249,6 +250,10 @@ HighlightElementsResult = ExecutionResult
 
 
 class MoveElementsResult(TypedDict):
+    executionResults: ExecutionResults
+
+
+class RotateElementsResult(TypedDict):
     executionResults: ExecutionResults
 
 
@@ -686,6 +691,10 @@ class GetCollisionsResult(TypedDict):
 
 class MoveElementsParameters(TypedDict):
     elementsWithMoveVectors: List[ElementsWithMoveVector]
+
+
+class RotateElementsParameters(TypedDict):
+    elementsWithRotations: List[ElementsWithRotation]
 
 
 class GetGDLParametersOfElementsResult(TypedDict):

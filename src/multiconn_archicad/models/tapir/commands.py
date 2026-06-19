@@ -71,6 +71,7 @@ from .types import (
     ElementsWithExecutionResults,
     ElementsWithGDLParameter,
     ElementsWithMoveVector,
+    ElementsWithRotation,
     Error,
     ErrorItem,
     FailedExecutionResult,
@@ -109,6 +110,7 @@ from .types import (
     NewClassificationItem,
     ObjectData,
     OpeningData,
+    Origin,
     PolylineData,
     PrintArea,
     ProjectInfoField,
@@ -306,6 +308,13 @@ HighlightElementsResult: TypeAlias = SuccessfulExecutionResult | FailedExecution
 
 
 class MoveElementsResult(APIModel):
+    executionResults: Annotated[
+        List[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
+
+
+class RotateElementsResult(APIModel):
     executionResults: Annotated[
         List[SuccessfulExecutionResult | FailedExecutionResult],
         Field(description="A list of execution results."),
@@ -959,6 +968,13 @@ class MoveElementsParameters(APIModel):
     elementsWithMoveVectors: Annotated[
         List[ElementsWithMoveVector],
         Field(description="The elements with move vector pairs."),
+    ]
+
+
+class RotateElementsParameters(APIModel):
+    elementsWithRotations: Annotated[
+        List[ElementsWithRotation],
+        Field(description="The elements with rotation settings."),
     ]
 
 
