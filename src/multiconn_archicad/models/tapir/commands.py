@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Annotated, Any, List, TypeAlias
+from typing import Annotated, List, TypeAlias
 from pydantic import Field
 
 from multiconn_archicad.models.base import APIModel
@@ -67,6 +67,7 @@ from .types import (
     ElementPropertyValue,
     ElementType,
     ElementsByIFCId,
+    ElementsOfDesignOption,
     ElementsWithDetail,
     ElementsWithExecutionResults,
     ElementsWithGDLParameter,
@@ -110,7 +111,6 @@ from .types import (
     NewClassificationItem,
     ObjectData,
     OpeningData,
-    Origin,
     PolylineData,
     PrintArea,
     ProjectInfoField,
@@ -873,10 +873,6 @@ class GetCurrentRevisionChangesOfLayoutsResult(APIModel):
 
 class GetRevisionChangesOfElementsResult(APIModel):
     revisionChangesOfElements: RevisionChangesArrayItem | ErrorItem
-
-
-class GetElementsOfDesignOptionsResult(APIModel):
-    elementsOfDesignOptions: List[Any]
 
 
 class CreateDesignOptionSetsParameters(APIModel):
@@ -1767,6 +1763,10 @@ class GetElementsAttachedToIssueResult(APIModel):
 
 class GetRevisionChangesOfElementsParameters(APIModel):
     elements: Annotated[List[ElementIdArrayItem], Field(description="A list of elements.")]
+
+
+class GetElementsOfDesignOptionsResult(APIModel):
+    elementsOfDesignOptions: List[ElementsOfDesignOption | ErrorItem]
 
 
 class GetDesignOptionForElementsParameters(APIModel):

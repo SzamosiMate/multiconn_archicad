@@ -1032,25 +1032,10 @@ class MoveVector(TypedDict):
     z: float
 
 
-class BeginPoint(TypedDict):
-    x: float
-    y: float
-
-
-class EndPoint(TypedDict):
-    x: float
-    y: float
-
-
-class Origin(TypedDict):
-    x: float
-    y: float
-
-
 class Rotation(TypedDict):
-    beginPoint: BeginPoint
-    endPoint: EndPoint
-    origin: Origin
+    beginPoint: Coordinate2D
+    endPoint: Coordinate2D
+    origin: Coordinate2D
 
 
 class Library(TypedDict):

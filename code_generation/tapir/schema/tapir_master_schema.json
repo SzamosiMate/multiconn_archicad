@@ -1,5 +1,5 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$schema": "https://json-schema.org/draft/2019-09/schema",
   "title": "TapirMasterModels",
   "description": "A consolidated, single-file schema for the Archicad Tapir JSON API.",
   "$defs": {
@@ -5706,55 +5706,16 @@
                 "description": "Rotation parameters for an element.",
                 "properties": {
                   "beginPoint": {
-                    "type": "object",
-                    "description": "Starting point of the rotation arc.",
-                    "properties": {
-                      "x": {
-                        "type": "number"
-                      },
-                      "y": {
-                        "type": "number"
-                      }
-                    },
-                    "additionalProperties": false,
-                    "required": [
-                      "x",
-                      "y"
-                    ]
+                    "$ref": "#/$defs/Coordinate2D",
+                    "description": "Starting point of the rotation arc."
                   },
                   "endPoint": {
-                    "type": "object",
-                    "description": "End point of the rotation arc.",
-                    "properties": {
-                      "x": {
-                        "type": "number"
-                      },
-                      "y": {
-                        "type": "number"
-                      }
-                    },
-                    "additionalProperties": false,
-                    "required": [
-                      "x",
-                      "y"
-                    ]
+                    "$ref": "#/$defs/Coordinate2D",
+                    "description": "End point of the rotation arc."
                   },
                   "origin": {
-                    "type": "object",
-                    "description": "Center of rotation.",
-                    "properties": {
-                      "x": {
-                        "type": "number"
-                      },
-                      "y": {
-                        "type": "number"
-                      }
-                    },
-                    "additionalProperties": false,
-                    "required": [
-                      "x",
-                      "y"
-                    ]
+                    "$ref": "#/$defs/Coordinate2D",
+                    "description": "Center of rotation."
                   }
                 },
                 "additionalProperties": false,
@@ -9245,7 +9206,7 @@
         "elementsOfDesignOptions": {
           "type": "array",
           "items": {
-            "#ref": "#/ElementsOfDesignOptionOrError"
+            "$ref": "#/$defs/ElementsOfDesignOptionOrError"
           }
         }
       },

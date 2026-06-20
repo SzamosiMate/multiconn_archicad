@@ -78,6 +78,32 @@ def extract_inline_enum(defs: dict[str, Any], parent_name: str, path: list[str],
             container["properties"][key] = {"$ref": f"#/$defs/{new_def_name}"}
 
 
+def replace_inline_schema_with_ref(
+    defs: dict[str, Any], parent_name: str, path: list[str], ref_name: str, preserve_description: bool = False
+):
+    """
+    Replaces an inline schema at the given path with a $ref.
+    Optionally preserves the original 'description' as a sibling keyword (valid in Draft 2019-09).
+    """
+    container, target_schema, key = _get_target_from_path(defs, parent_name, path)
+
+    if not target_schema or "$ref" in target_schema:
+        return
+
+    print(f"  -> Replacing inline Model {parent_name} / {path} with {ref_name}")
+
+    new_schema = {"$ref": f"#/$defs/{ref_name}"}
+
+    if preserve_description and "description" in target_schema:
+        new_schema["description"] = target_schema["description"]
+
+    if container:
+        if key == "items":
+            container["items"] = new_schema
+        else:
+            container["properties"][key] = new_schema
+
+
 def apply_permanent_patches(master_defs: dict[str, Any]):
     """
     Patches that are required permanently due to limitations in code generators
@@ -149,6 +175,11 @@ def apply_temporary_patches(master_defs: dict[str, Any]):
     extract_inline_enum(master_defs, "RoofData", ["structureType"], "RoofStructureType")
     extract_inline_enum(master_defs, "RoofWithDetails", ["structureType"], "RoofStructureType")
 
+    # --- Replace inline Coordinate2D properties in RotateElementsParameters ---
+    replace_inline_schema_with_ref(master_defs, "RotateElementsParameters", ["elementsWithRotations", "items", "rotation", "beginPoint"], "Coordinate2D", preserve_description=True)
+    replace_inline_schema_with_ref(master_defs, "RotateElementsParameters", ["elementsWithRotations", "items", "rotation", "endPoint"], "Coordinate2D", preserve_description=True)
+    replace_inline_schema_with_ref(master_defs, "RotateElementsParameters", ["elementsWithRotations", "items", "rotation", "origin"], "Coordinate2D", preserve_description=True)
+
     # --- Extract conflicting inline Schemas ---
     extract_inline_schema(master_defs, "DimensionData", ["witnessPoints", "items"], "CoordinateWitnessPoint")
     extract_inline_schema(master_defs, "AssociativeDimensionData", ["witnessPoints", "items"], "AssociativeWitnessPoint")
@@ -176,11 +207,19 @@ def apply_temporary_patches(master_defs: dict[str, Any]):
                           "GeoReferencingParameters")
     extract_inline_schema(master_defs, "GetGeoLocationResult", ["surveyPoint"], "SurveyPoint")
 
-    # 1. Fix the bad inline schema by pointing it to the existing ArrayItem definition
+    # Fix the bad inline schema by pointing it to the existing ArrayItem definition
     if "GetElementsOfDesignOptionsParameters" in master_defs:
         params = master_defs["GetElementsOfDesignOptionsParameters"].get("properties", {})
         if "designOptions" in params:
             params["designOptions"]["items"] = {"$ref": "#/$defs/DesignOptionIdArrayItem"}
+
+    # Fix broken #ref in GetElementsOfDesignOptionsResult
+    if "GetElementsOfDesignOptionsResult" in master_defs:
+        res_props = master_defs["GetElementsOfDesignOptionsResult"].get("properties", {})
+        if "elementsOfDesignOptions" in res_props:
+            res_props["elementsOfDesignOptions"]["items"] = {
+                "$ref": "#/$defs/ElementsOfDesignOptionOrError"
+            }
 
     if "SetGeoLocationParameters" in master_defs:
         params = master_defs["SetGeoLocationParameters"]["properties"]
