@@ -1571,27 +1571,14 @@ class MoveElementsResult(APIModel):
     ]
 
 
-class BeginPoint(APIModel):
-    x: float
-    y: float
-
-
-class EndPoint(APIModel):
-    x: float
-    y: float
-
-
-class Origin(APIModel):
-    x: float
-    y: float
-
-
 class Rotation(APIModel):
     beginPoint: Annotated[
-        BeginPoint, Field(description="Starting point of the rotation arc.")
+        Coordinate2D, Field(description="Starting point of the rotation arc.")
     ]
-    endPoint: Annotated[EndPoint, Field(description="End point of the rotation arc.")]
-    origin: Annotated[Origin, Field(description="Center of rotation.")]
+    endPoint: Annotated[
+        Coordinate2D, Field(description="End point of the rotation arc.")
+    ]
+    origin: Annotated[Coordinate2D, Field(description="Center of rotation.")]
 
 
 class RotateElementsResult(APIModel):
@@ -2317,10 +2304,6 @@ class GetCurrentRevisionChangesOfLayoutsResult(APIModel):
 
 class GetRevisionChangesOfElementsResult(APIModel):
     revisionChangesOfElements: RevisionChangesArrayItem | ErrorItem
-
-
-class GetElementsOfDesignOptionsResult(APIModel):
-    elementsOfDesignOptions: List[Any]
 
 
 class Type(Enum):
@@ -4699,9 +4682,6 @@ class ElementsOfDesignOption(APIModel):
     ]
 
 
-ElementsOfDesignOptionOrError: TypeAlias = ElementsOfDesignOption | ErrorItem
-
-
 class GetSelectedElementsResult(APIModel):
     elements: Annotated[
         List[ElementIdArrayItem], Field(description="A list of elements.")
@@ -5183,6 +5163,10 @@ class GetRevisionChangesOfElementsParameters(APIModel):
     elements: Annotated[
         List[ElementIdArrayItem], Field(description="A list of elements.")
     ]
+
+
+class GetElementsOfDesignOptionsResult(APIModel):
+    elementsOfDesignOptions: List[ElementsOfDesignOption | ErrorItem]
 
 
 class GetDesignOptionForElementsParameters(APIModel):

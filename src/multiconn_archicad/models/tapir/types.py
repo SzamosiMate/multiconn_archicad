@@ -1260,25 +1260,10 @@ class MoveVector(APIModel):
     z: Annotated[float, Field(description="Z value of the vector.")]
 
 
-class BeginPoint(APIModel):
-    x: float
-    y: float
-
-
-class EndPoint(APIModel):
-    x: float
-    y: float
-
-
-class Origin(APIModel):
-    x: float
-    y: float
-
-
 class Rotation(APIModel):
-    beginPoint: Annotated[BeginPoint, Field(description="Starting point of the rotation arc.")]
-    endPoint: Annotated[EndPoint, Field(description="End point of the rotation arc.")]
-    origin: Annotated[Origin, Field(description="Center of rotation.")]
+    beginPoint: Annotated[Coordinate2D, Field(description="Starting point of the rotation arc.")]
+    endPoint: Annotated[Coordinate2D, Field(description="End point of the rotation arc.")]
+    origin: Annotated[Coordinate2D, Field(description="Center of rotation.")]
 
 
 class ImageType(Enum):
@@ -2850,9 +2835,6 @@ class ConnectedElementsWrapper(APIModel):
 class ElementsOfDesignOption(APIModel):
     designOptionId: DesignOptionId
     elements: Annotated[List[ElementIdArrayItem], Field(description="A list of elements.")]
-
-
-ElementsOfDesignOptionOrError: TypeAlias = ElementsOfDesignOption | ErrorItem
 
 
 class Subelement(APIModel):

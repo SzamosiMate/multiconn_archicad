@@ -1152,25 +1152,10 @@ class MoveElementsResult(TypedDict):
     executionResults: ExecutionResults
 
 
-class BeginPoint(TypedDict):
-    x: float
-    y: float
-
-
-class EndPoint(TypedDict):
-    x: float
-    y: float
-
-
-class Origin(TypedDict):
-    x: float
-    y: float
-
-
 class Rotation(TypedDict):
-    beginPoint: BeginPoint
-    endPoint: EndPoint
-    origin: Origin
+    beginPoint: Coordinate2D
+    endPoint: Coordinate2D
+    origin: Coordinate2D
 
 
 class RotateElementsResult(TypedDict):
@@ -1586,10 +1571,6 @@ class GetCurrentRevisionChangesOfLayoutsResult(TypedDict):
 
 class GetRevisionChangesOfElementsResult(TypedDict):
     revisionChangesOfElements: RevisionChangesOfEntities
-
-
-class GetElementsOfDesignOptionsResult(TypedDict):
-    elementsOfDesignOptions: List[Any]
 
 
 class CreateDesignOptionSetsParameters(TypedDict):
@@ -3414,6 +3395,10 @@ class GetElementsAttachedToIssueResult(TypedDict):
 
 class GetRevisionChangesOfElementsParameters(TypedDict):
     elements: Elements
+
+
+class GetElementsOfDesignOptionsResult(TypedDict):
+    elementsOfDesignOptions: List[ElementsOfDesignOptionOrError]
 
 
 class GetDesignOptionForElementsParameters(TypedDict):

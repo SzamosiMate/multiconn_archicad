@@ -1820,13 +1820,15 @@
         "description": "Retrieves the elements associated with the given design options. Available from Archicad 29.",
         "version": "1.5.1",
         "source": "tapir",
-        "method_code": "def get_elements_of_design_options(\n    self,\n    design_options: list[DesignOptionIdArrayItem]\n) -> list[Any]:\n    \"\"\"\n    Retrieves the elements associated with the given design options. Available from Archicad\n    29.\n\n    Args:\n        design_options (list[DesignOptionIdArrayItem])\n\n    Returns:\n        list[Any]\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    params_dict = {\n            'designOptions': design_options,\n        }\n    validated_params = GetElementsOfDesignOptionsParameters(**params_dict)\n    response_dict = self._core.post_tapir_command(\n        \"GetElementsOfDesignOptions\",\n        validated_params.model_dump(mode='json', by_alias=True, exclude_none=True)\n    )\n    validated_response = GetElementsOfDesignOptionsResult.model_validate(response_dict)\n    return validated_response.elementsOfDesignOptions",
+        "method_code": "def get_elements_of_design_options(\n    self,\n    design_options: list[DesignOptionIdArrayItem]\n) -> list[ElementsOfDesignOption | ErrorItem]:\n    \"\"\"\n    Retrieves the elements associated with the given design options. Available from Archicad\n    29.\n\n    Args:\n        design_options (list[DesignOptionIdArrayItem])\n\n    Returns:\n        list[ElementsOfDesignOption | ErrorItem]\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    params_dict = {\n            'designOptions': design_options,\n        }\n    validated_params = GetElementsOfDesignOptionsParameters(**params_dict)\n    response_dict = self._core.post_tapir_command(\n        \"GetElementsOfDesignOptions\",\n        validated_params.model_dump(mode='json', by_alias=True, exclude_none=True)\n    )\n    validated_response = GetElementsOfDesignOptionsResult.model_validate(response_dict)\n    return validated_response.elementsOfDesignOptions",
         "command_model_dependencies": [
           "GetElementsOfDesignOptionsParameters",
           "GetElementsOfDesignOptionsResult"
         ],
         "type_model_dependencies": [
-          "DesignOptionIdArrayItem"
+          "DesignOptionIdArrayItem",
+          "ElementsOfDesignOption",
+          "ErrorItem"
         ],
         "alias_property_name": "elementsOfDesignOptions"
       },

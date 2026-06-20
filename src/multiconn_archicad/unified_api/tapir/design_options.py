@@ -39,6 +39,7 @@ from multiconn_archicad.models.tapir.types import (
     DesignOptionSet,
     ElementDesignOptionPair,
     ElementIdArrayItem,
+    ElementsOfDesignOption,
     ErrorItem,
     FailedExecutionResult,
     SuccessfulExecutionResult,
@@ -211,7 +212,9 @@ class DesignOptionsCommands:
         validated_response = GetDesignOptionsResult.model_validate(response_dict)
         return validated_response.designOptions
 
-    def get_elements_of_design_options(self, design_options: list[DesignOptionIdArrayItem]) -> list[Any]:
+    def get_elements_of_design_options(
+        self, design_options: list[DesignOptionIdArrayItem]
+    ) -> list[ElementsOfDesignOption | ErrorItem]:
         """
         Retrieves the elements associated with the given design options. Available from Archicad
         29.
@@ -220,7 +223,7 @@ class DesignOptionsCommands:
             design_options (list[DesignOptionIdArrayItem])
 
         Returns:
-            list[Any]
+            list[ElementsOfDesignOption | ErrorItem]
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
