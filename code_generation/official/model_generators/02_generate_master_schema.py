@@ -106,7 +106,7 @@ def main():
 
     # 3. Assemble the final master schema object.
     master_schema = {
-        "$schema": "http://json-schema.org/draft-07/schema#",
+        "$schema": "https://json-schema.org/draft/2019-09/schema",
         "title": "OfficialArchicadApiMasterModels",
         "description": "A consolidated, single-file schema for the official Archicad JSON API.",
         "$defs": fixed_definitions,
