@@ -50,7 +50,7 @@ include = [
 [dependency-groups]
 dev = [
     "twine>=6.1.0",
-    "datamodel-code-generator==0.35.0",
+    "datamodel-code-generator>=0.64.0",
     "hypothesis>=6.135.27",
     "hypothesis-jsonschema>=0.23.1",
     "mypy>=1.14.0",

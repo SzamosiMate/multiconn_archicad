@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Any, List, Literal, TypedDict
+from typing import Any, Literal, TypeAlias, TypedDict
 from typing_extensions import NotRequired
 
 from multiconn_archicad.dicts.extra_iems import extra_items
@@ -8,6 +8,7 @@ from multiconn_archicad.dicts.extra_iems import extra_items
 
 
 class AddOnCommandId(TypedDict):
+    """The identifier of an Add-On command."""
     commandNamespace: str
     commandName: str
 
@@ -16,23 +17,24 @@ class AddOnCommandIdArrayItem(TypedDict):
     addOnCommandId: AddOnCommandId
 
 
-AddOnCommandIds = List[AddOnCommandIdArrayItem]
+AddOnCommandIds: TypeAlias = list[AddOnCommandIdArrayItem]
+"""A list of Add-On command identifiers."""
 
 
 @extra_items(Any)
 class AddOnCommandParameters(TypedDict):
-    pass
+    """The input parameters of an Add-On command."""
 
 
 @extra_items(Any)
 class AddOnCommandResponse(TypedDict):
-    pass
+    """The response returned by an Add-On command."""
 
 
-AttributeIndex = float
+AttributeIndex: TypeAlias = float
 
 
-AttributeType = Literal[
+AttributeType: TypeAlias = Literal[
     "BuildingMaterial",
     "Composite",
     "Fill",
@@ -46,36 +48,39 @@ AttributeType = Literal[
 ]
 
 
-AttributeName = str
+AttributeName: TypeAlias = str
 
 
-AttributeFolderName = str
+AttributeFolderName: TypeAlias = str
 
 
-AttributeFolderPath = List[AttributeFolderName]
+AttributeFolderPath: TypeAlias = list[AttributeFolderName]
+"""A list of attribute folder names. May be empty."""
 
 
 class AttributeFolderCreationParameters(TypedDict):
+    """Used to create an attribute folder. The folder type and it's path needs to be provided."""
     attributeType: AttributeType
     path: AttributeFolderPath
 
 
-AppearanceType = Literal["ScaleWithPlan", "ScaleIndependent"]
+AppearanceType: TypeAlias = Literal["ScaleWithPlan", "ScaleIndependent"]
 
 
-PenIndex = int
+PenIndex: TypeAlias = int
 
 
-FillPattern = int
+FillPattern: TypeAlias = int
 
 
-FillTypeId = Literal["Vector", "Symbol", "Solid", "Empty", "LinearGradient", "RadialGradient", "Image"]
+FillTypeId: TypeAlias = Literal["Vector", "Symbol", "Solid", "Empty", "LinearGradient", "RadialGradient", "Image"]
 
 
-MaterialTypeId = Literal["General", "Simple", "Matte", "Metal", "Plastic", "Glass", "Glowing", "Constant"]
+MaterialTypeId: TypeAlias = Literal["General", "Simple", "Matte", "Metal", "Plastic", "Glass", "Glowing", "Constant"]
 
 
 class ProfileModifier(TypedDict):
+    """A profile modifier parameter."""
     name: str
     value: float
 
@@ -84,17 +89,19 @@ class ProfileModifierListItem(TypedDict):
     profileModifier: ProfileModifier
 
 
-ProfileModifierList = List[ProfileModifierListItem]
+ProfileModifierList: TypeAlias = list[ProfileModifierListItem]
+"""A list of profile modifiers."""
 
 
 class Texture(TypedDict):
+    """A texture"""
     name: str
 
 
-LineType = Literal["SolidLine", "DashedLine", "SymbolLine"]
+LineType: TypeAlias = Literal["SolidLine", "DashedLine", "SymbolLine"]
 
 
-LineItemType = Literal[
+LineItemType: TypeAlias = Literal[
     "IllegalItemType",
     "SeparatorItemType",
     "CenterDotItemType",
@@ -109,20 +116,23 @@ LineItemType = Literal[
 
 
 class DashItem(TypedDict):
+    """A dash item."""
     dash: float
     gap: float
 
 
 class DashItemWrapperItem(TypedDict):
+    """A dash or line item."""
     dashItem: DashItem
 
 
 class Point2D(TypedDict):
+    """Coordinates of a 2D point"""
     x: float
     y: float
 
 
-NavigatorItemType = Literal[
+NavigatorItemType: TypeAlias = Literal[
     "UndefinedItem",
     "ProjectMapRootItem",
     "StoryItem",
@@ -152,137 +162,158 @@ NavigatorItemType = Literal[
 ]
 
 
-NavigatorItemMapType = Literal["ProjectMap", "ViewMap", "MyViewMap", "LayoutBook"]
+NavigatorItemMapType: TypeAlias = Literal["ProjectMap", "ViewMap", "MyViewMap", "LayoutBook"]
 
 
 class PublisherSetId(TypedDict):
+    """The identifier of a publisher set."""
     type: Literal["PublisherSets"]
     name: str
 
 
 class OtherNavigatorTreeId(TypedDict):
+    """The identifier of a navigator item tree."""
     type: NavigatorItemMapType
 
 
-NavigatorTreeId = PublisherSetId | OtherNavigatorTreeId
+NavigatorTreeId: TypeAlias = PublisherSetId | OtherNavigatorTreeId
 
 
 class UserDefinedPropertyUserId(TypedDict):
+    """The unique identifier of a User-Defined Property, identified by its name."""
     type: Literal["UserDefined"]
-    localizedName: List[str]
+    localizedName: list[str]
 
 
 class BuiltInPropertyUserId(TypedDict):
+    """The unique identifier of a Built-In Property, identified by its name."""
     type: Literal["BuiltIn"]
     nonLocalizedName: str
 
 
-PropertyUserId = UserDefinedPropertyUserId | BuiltInPropertyUserId
+PropertyUserId: TypeAlias = UserDefinedPropertyUserId | BuiltInPropertyUserId
 
 
-PropertyUserIds = List[PropertyUserId]
+PropertyUserIds: TypeAlias = list[PropertyUserId]
+"""A list of PropertyUserId objects."""
 
 
-PropertyType = Literal["UserDefined", "BuiltIn"]
+PropertyType: TypeAlias = Literal["UserDefined", "BuiltIn"]
 
 
 class NormalNumberPropertyValue(TypedDict):
+    """A number property value containing a valid numeric value."""
     type: Literal["number"]
     status: Literal["normal"]
     value: float
 
 
 class NormalIntegerPropertyValue(TypedDict):
+    """An integer property value containing a valid integer number."""
     type: Literal["integer"]
     status: Literal["normal"]
     value: int
 
 
 class NormalStringPropertyValue(TypedDict):
+    """A string property value containing a valid string."""
     type: Literal["string"]
     status: Literal["normal"]
     value: str
 
 
 class NormalBooleanPropertyValue(TypedDict):
+    """A boolean property value containing a valid boolean value."""
     type: Literal["boolean"]
     status: Literal["normal"]
     value: bool
 
 
 class NormalLengthPropertyValue(TypedDict):
+    """A length property value containing a real length value. The value is measured in SI (meters)."""
     type: Literal["length"]
     status: Literal["normal"]
     value: float
 
 
 class NormalAreaPropertyValue(TypedDict):
+    """An area property value containing a real area. The value is measured in SI (square meters)."""
     type: Literal["area"]
     status: Literal["normal"]
     value: float
 
 
 class NormalVolumePropertyValue(TypedDict):
+    """A volume property value containing a real volume. The value is measured in SI (cubic meters)."""
     type: Literal["volume"]
     status: Literal["normal"]
     value: float
 
 
 class NormalAnglePropertyValue(TypedDict):
+    """An angle property value containing a real angle. The value is measured in SI (radians)."""
     type: Literal["angle"]
     status: Literal["normal"]
     value: float
 
 
 class NormalNumberListPropertyValue(TypedDict):
+    """A number list property value containing numbers in an array."""
     type: Literal["numberList"]
     status: Literal["normal"]
-    value: List[float]
+    value: list[float]
 
 
 class NormalIntegerListPropertyValue(TypedDict):
+    """An integer list property value containing integers in an array."""
     type: Literal["integerList"]
     status: Literal["normal"]
-    value: List[int]
+    value: list[int]
 
 
 class NormalStringListPropertyValue(TypedDict):
+    """A string list property value containing strings in an array."""
     type: Literal["stringList"]
     status: Literal["normal"]
-    value: List[str]
+    value: list[str]
 
 
 class NormalBooleanListPropertyValue(TypedDict):
+    """A boolean list property value containing boolean values in an array."""
     type: Literal["booleanList"]
     status: Literal["normal"]
-    value: List[bool]
+    value: list[bool]
 
 
 class NormalLengthListPropertyValue(TypedDict):
+    """A length list property value containing length values in an array. The values are measured in SI (meters)."""
     type: Literal["lengthList"]
     status: Literal["normal"]
-    value: List[float]
+    value: list[float]
 
 
 class NormalAreaListPropertyValue(TypedDict):
+    """An area list property value containing areas in an array. The values are measured in SI (square meters)."""
     type: Literal["areaList"]
     status: Literal["normal"]
-    value: List[float]
+    value: list[float]
 
 
 class NormalVolumeListPropertyValue(TypedDict):
+    """A volume list property value containing volumes in an array. The values are measured in SI (cubic meters)."""
     type: Literal["volumeList"]
     status: Literal["normal"]
-    value: List[float]
+    value: list[float]
 
 
 class NormalAngleListPropertyValue(TypedDict):
+    """An angle list property value containing angles in an array. The values are measured in SI (radians)."""
     type: Literal["angleList"]
     status: Literal["normal"]
-    value: List[float]
+    value: list[float]
 
 
-PropertyValueType = Literal[
+PropertyValueType: TypeAlias = Literal[
     "number",
     "integer",
     "string",
@@ -305,41 +336,48 @@ PropertyValueType = Literal[
 
 
 class UserUndefinedPropertyValue(TypedDict):
+    """A userUndefined value means that there is no actual number/string/etc. value, but the user deliberately set an Undefined value: this is a valid value, too."""
     type: PropertyValueType
     status: Literal["userUndefined"]
 
 
 class NotAvailablePropertyValue(TypedDict):
+    """A notAvailable value means that the property is not available for the property owner (and therefore it has no property value for it)."""
     type: PropertyValueType
     status: Literal["notAvailable"]
 
 
 class NotEvaluatedPropertyValue(TypedDict):
+    """A notEvaluated value means that the property could not be evaluated for the property owner for some reason."""
     type: PropertyValueType
     status: Literal["notEvaluated"]
 
 
 class DisplayValueEnumId(TypedDict):
+    """An enumeration value identifier using the displayed value."""
     type: Literal["displayValue"]
     displayValue: str
 
 
 class NonLocalizedValueEnumId(TypedDict):
+    """An enumeration value identifier using the nonlocalized value."""
     type: Literal["nonLocalizedValue"]
     nonLocalizedValue: str
 
 
-EnumValueId = DisplayValueEnumId | NonLocalizedValueEnumId
+EnumValueId: TypeAlias = DisplayValueEnumId | NonLocalizedValueEnumId
 
 
 class EnumValueIdWrapperItem(TypedDict):
     enumValueId: EnumValueId
 
 
-EnumValueIds = List[EnumValueIdWrapperItem]
+EnumValueIds: TypeAlias = list[EnumValueIdWrapperItem]
+"""A list of enumeration identifiers."""
 
 
 class PossibleEnumValue(TypedDict):
+    """The description of an enumeration value."""
     enumValueId: EnumValueId
     displayValue: str
     nonLocalizedValue: NotRequired[str]
@@ -349,10 +387,12 @@ class PossibleEnumValuesArrayItem(TypedDict):
     enumValue: PossibleEnumValue
 
 
-PossibleEnumValues = List[PossibleEnumValuesArrayItem]
+PossibleEnumValues: TypeAlias = list[PossibleEnumValuesArrayItem]
+"""A list of enumeration values."""
 
 
 class Error(TypedDict):
+    """The details of an error."""
     code: int
     message: str
 
@@ -362,27 +402,31 @@ class ErrorItem(TypedDict):
 
 
 class SuccessfulExecutionResult(TypedDict):
+    """The result of a successful execution."""
     success: Literal[True]
 
 
 class FailedExecutionResult(TypedDict):
+    """The result of a failed execution."""
     success: Literal[False]
     error: Error
 
 
-ExecutionResult = SuccessfulExecutionResult | FailedExecutionResult
+ExecutionResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
 
 
-ExecutionResults = List[ExecutionResult]
+ExecutionResults: TypeAlias = list[ExecutionResult]
+"""A list of execution results."""
 
 
-Guid = str
+Guid: TypeAlias = str
 
 
-Date = str
+Date: TypeAlias = str
 
 
 class ElementId(TypedDict):
+    """The identifier of an element."""
     guid: Guid
 
 
@@ -390,10 +434,11 @@ class ElementIdArrayItem(TypedDict):
     elementId: ElementId
 
 
-Elements = List[ElementIdArrayItem]
+Elements: TypeAlias = list[ElementIdArrayItem]
+"""A list of elements."""
 
 
-ElementType = Literal[
+ElementType: TypeAlias = Literal[
     "Wall",
     "Column",
     "Beam",
@@ -415,53 +460,64 @@ ElementType = Literal[
 ]
 
 
-ElementTypes = List[ElementType]
+ElementTypes: TypeAlias = list[ElementType]
+"""A list of element types."""
 
 
 class TypeOfElement(TypedDict):
+    """An element id and its corresponding element type."""
     elementId: ElementId
     elementType: ElementType
 
 
 class TypeOfElementWrapperItem(TypedDict):
+    """The type of an element or an error."""
     typeOfElement: TypeOfElement
 
 
-TypeOfElementOrError = TypeOfElementWrapperItem | ErrorItem
+TypeOfElementOrError: TypeAlias = TypeOfElementWrapperItem | ErrorItem
 
 
-TypeOfElementOrErrorList = List[TypeOfElementOrError]
+TypeOfElementOrErrorList: TypeAlias = list[TypeOfElementOrError]
+"""A list of element types or errors."""
 
 
 class ElementsWrapper(TypedDict):
+    """A wrapper for a list of elements."""
     elements: Elements
 
 
-ElementsOrError = ElementsWrapper | ErrorItem
+ElementsOrError: TypeAlias = ElementsWrapper | ErrorItem
 
 
-ElementsOrErrorArray = List[ElementsOrError]
+ElementsOrErrorArray: TypeAlias = list[ElementsOrError]
+"""A list of ElementsOrError items."""
 
 
 class Image(TypedDict):
+    """An image encoded as a Base64 string."""
     content: str
 
 
 class ImageWrapperItem(TypedDict):
+    """An image or an error."""
     image: Image
 
 
-ImageOrError = ImageWrapperItem | ErrorItem
+ImageOrError: TypeAlias = ImageWrapperItem | ErrorItem
 
 
-Images = List[ImageOrError]
+Images: TypeAlias = list[ImageOrError]
+"""A list of images and potential errors."""
 
 
 class FolderParameters(TypedDict):
+    """The parameters of a folder."""
     name: str
 
 
 class BoundingBox2D(TypedDict):
+    """The 2D bounding box of an element."""
     xMin: float
     yMin: float
     xMax: float
@@ -469,16 +525,19 @@ class BoundingBox2D(TypedDict):
 
 
 class BoundingBox2DWrapperItem(TypedDict):
+    """A 2D bounding box or an error."""
     boundingBox2D: BoundingBox2D
 
 
-BoundingBox2DOrError = BoundingBox2DWrapperItem | ErrorItem
+BoundingBox2DOrError: TypeAlias = BoundingBox2DWrapperItem | ErrorItem
 
 
-BoundingBoxes2D = List[BoundingBox2DOrError]
+BoundingBoxes2D: TypeAlias = list[BoundingBox2DOrError]
+"""A list of 2D bounding boxes."""
 
 
 class BoundingBox3D(TypedDict):
+    """A 3D bounding box of an element."""
     xMin: float
     yMin: float
     zMin: float
@@ -488,25 +547,29 @@ class BoundingBox3D(TypedDict):
 
 
 class BoundingBox3DWrapperItem(TypedDict):
+    """A 3D bounding box or an error."""
     boundingBox3D: BoundingBox3D
 
 
-BoundingBox3DOrError = BoundingBox3DWrapperItem | ErrorItem
+BoundingBox3DOrError: TypeAlias = BoundingBox3DWrapperItem | ErrorItem
 
 
-BoundingBoxes3D = List[BoundingBox3DOrError]
+BoundingBoxes3D: TypeAlias = list[BoundingBox3DOrError]
+"""A list of 3D bounding boxes."""
 
 
 class RGBColor(TypedDict):
+    """A color model represented via its red, green and blue components."""
     red: float
     green: float
     blue: float
 
 
-NumberingStyle = Literal["Undefined", "abc", "ABC", "1", "01", "001", "0001", "noID"]
+NumberingStyle: TypeAlias = Literal["Undefined", "abc", "ABC", "1", "01", "001", "0001", "noID"]
 
 
 class Subset(TypedDict):
+    """A set of options used to assign IDs to the layouts contained in the subset."""
     name: str
     includeToIDSequence: bool
     customNumbering: bool
@@ -521,6 +584,7 @@ class Subset(TypedDict):
 
 
 class LayoutParameters(TypedDict):
+    """The parameters of the layout."""
     horizontalSize: float
     verticalSize: float
     leftMargin: float
@@ -540,32 +604,39 @@ class LayoutParameters(TypedDict):
 
 
 class ComponentId(TypedDict):
+    """The identifier of a component."""
     guid: Guid
 
 
 class ElementComponentId(TypedDict):
+    """The identifier of an element's component."""
     elementId: ElementId
     componentId: ComponentId
 
 
 class ElementComponentIdArrayItem(TypedDict):
+    """An item of a component array."""
     elementComponentId: ElementComponentId
 
 
-ElementComponents = List[ElementComponentIdArrayItem]
+ElementComponents: TypeAlias = list[ElementComponentIdArrayItem]
+"""List of components of elements."""
 
 
 class ElementComponentsWrapper(TypedDict):
+    """List of components."""
     elementComponents: ElementComponents
 
 
-ElementComponentsOrError = ElementComponentsWrapper | ErrorItem
+ElementComponentsOrError: TypeAlias = ElementComponentsWrapper | ErrorItem
 
 
-ElementComponentsOrErrorArray = List[ElementComponentsOrError]
+ElementComponentsOrErrorArray: TypeAlias = list[ElementComponentsOrError]
+"""Array of component list or error."""
 
 
 class AttributeFolderId(TypedDict):
+    """The identifier of an attribute folder."""
     guid: Guid
 
 
@@ -573,10 +644,12 @@ class AttributeFolderIdWrapperItem(TypedDict):
     attributeFolderId: AttributeFolderId
 
 
-AttributeFolderIds = List[AttributeFolderIdWrapperItem]
+AttributeFolderIds: TypeAlias = list[AttributeFolderIdWrapperItem]
+"""A list of attribute folder identifiers."""
 
 
 class AttributeId(TypedDict):
+    """The identifier of an attribute."""
     guid: Guid
 
 
@@ -584,13 +657,15 @@ class AttributeIdWrapperItem(TypedDict):
     attributeId: AttributeId
 
 
-AttributeIdOrError = AttributeIdWrapperItem | ErrorItem
+AttributeIdOrError: TypeAlias = AttributeIdWrapperItem | ErrorItem
 
 
-AttributeIds = List[AttributeIdWrapperItem]
+AttributeIds: TypeAlias = list[AttributeIdWrapperItem]
+"""A list of attribute identifiers."""
 
 
 class AttributeIndexAndGuid(TypedDict):
+    """The complete identifier of an attribute."""
     guid: Guid
     index: AttributeIndex
 
@@ -599,13 +674,15 @@ class AttributeIndexAndGuidWrapperItem(TypedDict):
     attributeIndexAndGuid: AttributeIndexAndGuid
 
 
-AttributeIndexAndGuidOrError = AttributeIndexAndGuidWrapperItem | ErrorItem
+AttributeIndexAndGuidOrError: TypeAlias = AttributeIndexAndGuidWrapperItem | ErrorItem
 
 
-AttributeIndicesAndGuids = List[AttributeIndexAndGuidOrError]
+AttributeIndicesAndGuids: TypeAlias = list[AttributeIndexAndGuidOrError]
+"""A list of complete attribute identifiers."""
 
 
 class AttributeFolder(TypedDict):
+    """Identifies an attribute folder. The path of the root folder is repesented by empty array."""
     attributeType: AttributeType
     path: AttributeFolderPath
     attributeFolderId: AttributeFolderId
@@ -614,21 +691,25 @@ class AttributeFolder(TypedDict):
 
 
 class AttributeFolderWrapperItem(TypedDict):
+    """An attribute folder or an error."""
     attributeFolder: AttributeFolder
 
 
-AttributeFolderOrError = AttributeFolderWrapperItem | ErrorItem
+AttributeFolderOrError: TypeAlias = AttributeFolderWrapperItem | ErrorItem
 
 
-AttributeFolders = List[AttributeFolderOrError]
+AttributeFolders: TypeAlias = list[AttributeFolderOrError]
+"""A list of attribute folders."""
 
 
 class AttributeFolderRenameParameters(TypedDict):
+    """Used to rename an attribute folder. The folder is identified by it's Id."""
     attributeFolderId: AttributeFolderId
     newName: AttributeFolderName
 
 
 class AttributeHeader(TypedDict):
+    """The header object of an attribute."""
     attributeId: AttributeId
     name: AttributeName
 
@@ -637,10 +718,12 @@ class AttributeHeaderArrayItem(TypedDict):
     attribute: AttributeHeader
 
 
-AttributeHeaders = List[AttributeHeaderArrayItem]
+AttributeHeaders: TypeAlias = list[AttributeHeaderArrayItem]
+"""A list of attribute headers."""
 
 
 class LayerAttribute(TypedDict):
+    """A layer attribute"""
     attributeId: AttributeId
     name: AttributeName
     intersectionGroupNr: int
@@ -650,16 +733,19 @@ class LayerAttribute(TypedDict):
 
 
 class LayerAttributeWrapperItem(TypedDict):
+    """A layer attribute or an error."""
     layerAttribute: LayerAttribute
 
 
-LayerAttributeOrError = LayerAttributeWrapperItem | ErrorItem
+LayerAttributeOrError: TypeAlias = LayerAttributeWrapperItem | ErrorItem
 
 
-LayerAttributes = List[LayerAttributeOrError]
+LayerAttributes: TypeAlias = list[LayerAttributeOrError]
+"""A list of layer attributes and potential errors."""
 
 
 class FillAttribute(TypedDict):
+    """A fill attribute."""
     attributeId: AttributeId
     name: AttributeName
     subType: FillTypeId
@@ -668,16 +754,19 @@ class FillAttribute(TypedDict):
 
 
 class FillAttributeWrapperItem(TypedDict):
+    """A fill attribute or an error."""
     fillAttribute: FillAttribute
 
 
-FillAttributeOrError = FillAttributeWrapperItem | ErrorItem
+FillAttributeOrError: TypeAlias = FillAttributeWrapperItem | ErrorItem
 
 
-FillAttributes = List[FillAttributeOrError]
+FillAttributes: TypeAlias = list[FillAttributeOrError]
+"""A list of fill attributes and potential errors."""
 
 
 class SurfaceAttribute(TypedDict):
+    """A surface attribute."""
     attributeId: AttributeId
     name: AttributeName
     materialType: MaterialTypeId
@@ -696,16 +785,19 @@ class SurfaceAttribute(TypedDict):
 
 
 class SurfaceAttributeWrapperItem(TypedDict):
+    """A surface attribute or an error."""
     surfaceAttribute: SurfaceAttribute
 
 
-SurfaceAttributeOrError = SurfaceAttributeWrapperItem | ErrorItem
+SurfaceAttributeOrError: TypeAlias = SurfaceAttributeWrapperItem | ErrorItem
 
 
-SurfaceAttributes = List[SurfaceAttributeOrError]
+SurfaceAttributes: TypeAlias = list[SurfaceAttributeOrError]
+"""A list of surface attributes and potential errors."""
 
 
 class ProfileAttribute(TypedDict):
+    """A profile attribute."""
     attributeId: AttributeId
     name: AttributeName
     useWith: ElementTypes
@@ -720,16 +812,19 @@ class ProfileAttribute(TypedDict):
 
 
 class ProfileAttributeWrapperItem(TypedDict):
+    """A profile attribute or an error."""
     profileAttribute: ProfileAttribute
 
 
-ProfileAttributeOrError = ProfileAttributeWrapperItem | ErrorItem
+ProfileAttributeOrError: TypeAlias = ProfileAttributeWrapperItem | ErrorItem
 
 
-ProfileAttributes = List[ProfileAttributeOrError]
+ProfileAttributes: TypeAlias = list[ProfileAttributeOrError]
+"""A list of the profile attributes and potential errors."""
 
 
 class CompositeLine(TypedDict):
+    """A contour or separator line component for a composite attribute."""
     lineId: AttributeIdOrError
     linePenIndex: NotRequired[PenIndex]
 
@@ -738,10 +833,12 @@ class CompositeLineListItem(TypedDict):
     compositeLine: CompositeLine
 
 
-CompositeLineList = List[CompositeLineListItem]
+CompositeLineList: TypeAlias = list[CompositeLineListItem]
+"""A list of contour/separator lines for the composite."""
 
 
 class CompositeSkin(TypedDict):
+    """A skin component for a composite attribute."""
     buildingMaterialId: AttributeIdOrError
     framePenIndex: NotRequired[PenIndex]
     thickness: float
@@ -753,10 +850,12 @@ class CompositeSkinListItem(TypedDict):
     compositeSkin: CompositeSkin
 
 
-CompositeSkinList = List[CompositeSkinListItem]
+CompositeSkinList: TypeAlias = list[CompositeSkinListItem]
+"""A list of composite skins."""
 
 
 class CompositeAttribute(TypedDict):
+    """A composite attribute."""
     attributeId: AttributeId
     name: AttributeName
     totalThickness: float
@@ -766,16 +865,19 @@ class CompositeAttribute(TypedDict):
 
 
 class CompositeAttributeWrapperItem(TypedDict):
+    """A composite attribute or an error."""
     compositeAttribute: CompositeAttribute
 
 
-CompositeAttributeOrError = CompositeAttributeWrapperItem | ErrorItem
+CompositeAttributeOrError: TypeAlias = CompositeAttributeWrapperItem | ErrorItem
 
 
-CompositeAttributes = List[CompositeAttributeOrError]
+CompositeAttributes: TypeAlias = list[CompositeAttributeOrError]
+"""A list of the composite attributes and potential errors."""
 
 
 class Pen(TypedDict):
+    """A pen attribute."""
     index: PenIndex
     color: RGBColor
     weight: float
@@ -786,10 +888,12 @@ class PenArrayItem(TypedDict):
     pen: Pen
 
 
-Pens = List[PenArrayItem]
+Pens: TypeAlias = list[PenArrayItem]
+"""A collection of pens in a pen table."""
 
 
 class LineItem(TypedDict):
+    """A line item."""
     lineItemType: LineItemType
     centerOffset: float
     length: float
@@ -801,16 +905,19 @@ class LineItem(TypedDict):
 
 
 class LineItemWrapperItem(TypedDict):
+    """A dash or line item."""
     lineItem: LineItem
 
 
-DashOrLineItem = DashItemWrapperItem | LineItemWrapperItem
+DashOrLineItem: TypeAlias = DashItemWrapperItem | LineItemWrapperItem
 
 
-LineItems = List[DashOrLineItem]
+LineItems: TypeAlias = list[DashOrLineItem]
+"""A list of dash or line items."""
 
 
 class LineAttribute(TypedDict):
+    """A line attribute"""
     attributeId: AttributeId
     name: AttributeName
     appearanceType: AppearanceType
@@ -822,16 +929,19 @@ class LineAttribute(TypedDict):
 
 
 class LineAttributeWrapperItem(TypedDict):
+    """A line attribute or an error."""
     lineAttribute: LineAttribute
 
 
-LineAttributeOrError = LineAttributeWrapperItem | ErrorItem
+LineAttributeOrError: TypeAlias = LineAttributeWrapperItem | ErrorItem
 
 
-LineAttributes = List[LineAttributeOrError]
+LineAttributes: TypeAlias = list[LineAttributeOrError]
+"""A list of line attributes and potential errors."""
 
 
 class ZoneCategoryAttribute(TypedDict):
+    """A zone category."""
     attributeId: AttributeId
     name: AttributeName
     categoryCode: str
@@ -842,16 +952,19 @@ class ZoneCategoryAttribute(TypedDict):
 
 
 class ZoneCategoryAttributeWrapperItem(TypedDict):
+    """A zone category attribute or an error."""
     zoneCategoryAttribute: ZoneCategoryAttribute
 
 
-ZoneCategoryAttributeOrError = ZoneCategoryAttributeWrapperItem | ErrorItem
+ZoneCategoryAttributeOrError: TypeAlias = ZoneCategoryAttributeWrapperItem | ErrorItem
 
 
-ZoneCategoryAttributes = List[ZoneCategoryAttributeOrError]
+ZoneCategoryAttributes: TypeAlias = list[ZoneCategoryAttributeOrError]
+"""A list of zone category attributes and potential errors."""
 
 
 class BuildingMaterialAttribute(TypedDict):
+    """A building material attribute"""
     attributeId: AttributeId
     name: AttributeName
     id: str
@@ -862,29 +975,34 @@ class BuildingMaterialAttribute(TypedDict):
 
 
 class BuildingMaterialAttributeWrapperItem(TypedDict):
+    """A building material attribute or an error."""
     buildingMaterialAttribute: BuildingMaterialAttribute
 
 
-BuildingMaterialAttributeOrError = BuildingMaterialAttributeWrapperItem | ErrorItem
+BuildingMaterialAttributeOrError: TypeAlias = BuildingMaterialAttributeWrapperItem | ErrorItem
 
 
-BuildingMaterialAttributes = List[BuildingMaterialAttributeOrError]
+BuildingMaterialAttributes: TypeAlias = list[BuildingMaterialAttributeOrError]
+"""A list of building material attributes and potential errors."""
 
 
 class LayerCombinationAttribute(TypedDict):
+    """A layer combination attribute"""
     attributeId: AttributeId
     name: AttributeName
     layerAttributeIds: AttributeIds
 
 
 class LayerCombinationAttributeWrapperItem(TypedDict):
+    """A layer combination attribute or an error."""
     layerCombinationAttribute: LayerCombinationAttribute
 
 
-LayerCombinationAttributeOrError = LayerCombinationAttributeWrapperItem | ErrorItem
+LayerCombinationAttributeOrError: TypeAlias = LayerCombinationAttributeWrapperItem | ErrorItem
 
 
 class ClassificationSystemId(TypedDict):
+    """The identifier of a classification system."""
     guid: Guid
 
 
@@ -892,10 +1010,12 @@ class ClassificationSystemIdArrayItem(TypedDict):
     classificationSystemId: ClassificationSystemId
 
 
-ClassificationSystemIds = List[ClassificationSystemIdArrayItem]
+ClassificationSystemIds: TypeAlias = list[ClassificationSystemIdArrayItem]
+"""A list of classification system identifiers."""
 
 
 class ClassificationItemId(TypedDict):
+    """The identifier of a classification item."""
     guid: Guid
 
 
@@ -903,43 +1023,52 @@ class ClassificationItemIdArrayItem(TypedDict):
     classificationItemId: ClassificationItemId
 
 
-ClassificationItemIds = List[ClassificationItemIdArrayItem]
+ClassificationItemIds: TypeAlias = list[ClassificationItemIdArrayItem]
+"""A list of classification item identifiers."""
 
 
 class ClassificationId(TypedDict):
+    """The element classification identifier."""
     classificationSystemId: ClassificationSystemId
     classificationItemId: NotRequired[ClassificationItemId]
 
 
 class ClassificationIdWrapperItem(TypedDict):
+    """A classification identifier or an error."""
     classificationId: ClassificationId
 
 
-ClassificationIdOrError = ClassificationIdWrapperItem | ErrorItem
+ClassificationIdOrError: TypeAlias = ClassificationIdWrapperItem | ErrorItem
 
 
-ClassificationIdsOrErrors = List[ClassificationIdOrError]
+ClassificationIdsOrErrors: TypeAlias = list[ClassificationIdOrError]
+"""A list of element classification identifiers or errors."""
 
 
 class ElementClassification(TypedDict):
+    """The classification of an element."""
     elementId: ElementId
     classificationId: ClassificationId
 
 
-ElementClassifications = List[ElementClassification]
+ElementClassifications: TypeAlias = list[ElementClassification]
+"""A list of element classification identifiers."""
 
 
 class ElementClassificationWrapperItem(TypedDict):
+    """Element classification identifiers or errors."""
     classificationIds: ClassificationIdsOrErrors
 
 
-ElementClassificationOrError = ElementClassificationWrapperItem | ErrorItem
+ElementClassificationOrError: TypeAlias = ElementClassificationWrapperItem | ErrorItem
 
 
-ElementClassificationsOrErrors = List[ElementClassificationOrError]
+ElementClassificationsOrErrors: TypeAlias = list[ElementClassificationOrError]
+"""A list of element classification identifiers or errors."""
 
 
 class ClassificationItemDetails(TypedDict):
+    """The details of a classification item."""
     classificationItemId: ClassificationItemId
     id: str
     name: str
@@ -947,13 +1076,15 @@ class ClassificationItemDetails(TypedDict):
 
 
 class ClassificationItemWrapperItem(TypedDict):
+    """A classification item or an error."""
     classificationItem: ClassificationItemDetails
 
 
-ClassificationItemOrError = ClassificationItemWrapperItem | ErrorItem
+ClassificationItemOrError: TypeAlias = ClassificationItemWrapperItem | ErrorItem
 
 
 class ClassificationSystem(TypedDict):
+    """The details of a classification system."""
     classificationSystemId: ClassificationSystemId
     name: str
     description: str
@@ -962,20 +1093,24 @@ class ClassificationSystem(TypedDict):
     date: Date
 
 
-ClassificationSystems = List[ClassificationSystem]
+ClassificationSystems: TypeAlias = list[ClassificationSystem]
+"""A list of classification systems."""
 
 
 class ClassificationSystemWrapperItem(TypedDict):
+    """Contains a classification system or error."""
     classificationSystem: ClassificationSystem
 
 
-ClassificationSystemOrError = ClassificationSystemWrapperItem | ErrorItem
+ClassificationSystemOrError: TypeAlias = ClassificationSystemWrapperItem | ErrorItem
 
 
-ClassificationSystemsOrErrors = List[ClassificationSystemOrError]
+ClassificationSystemsOrErrors: TypeAlias = list[ClassificationSystemOrError]
+"""A list of classification systems or errors."""
 
 
 class NavigatorItemId(TypedDict):
+    """The identifier of a navigator item."""
     guid: Guid
 
 
@@ -983,111 +1118,132 @@ class NavigatorItemIdWrapperItem(TypedDict):
     navigatorItemId: NavigatorItemId
 
 
-NavigatorItemIds = List[NavigatorItemIdWrapperItem]
+NavigatorItemIds: TypeAlias = list[NavigatorItemIdWrapperItem]
+"""A list of navigator item identifiers."""
 
 
 class GeneralNavigatorItemData(TypedDict):
+    """The common data of a navigator item."""
     navigatorItemId: NavigatorItemId
     prefix: str
     name: str
 
 
 class NavigatorItemIdAndType(TypedDict):
+    """Consists of a navigator item type and an identifier."""
     navigatorItemType: NavigatorItemType
     navigatorItemId: NavigatorItemId
 
 
 class NavigatorItemIdAndTypeWrapperItem(TypedDict):
+    """Contains a pair of navigator item type and identifier or an error."""
     navigatorItemIdAndType: NavigatorItemIdAndType
 
 
-NavigatorItemIdAndTypeOrError = NavigatorItemIdAndTypeWrapperItem | ErrorItem
+NavigatorItemIdAndTypeOrError: TypeAlias = NavigatorItemIdAndTypeWrapperItem | ErrorItem
 
 
-NavigatorItemIdAndTypeList = List[NavigatorItemIdAndTypeOrError]
+NavigatorItemIdAndTypeList: TypeAlias = list[NavigatorItemIdAndTypeOrError]
+"""A list of objects that consist of a navigator item identifier and a type."""
 
 
 class DetailNavigatorItem(TypedDict):
+    """The details of a detail navigator item."""
     navigatorItemId: NavigatorItemId
     prefix: str
     name: str
 
 
 class DetailNavigatorItemWrapperItem(TypedDict):
+    """Contains a detail navigator item or an error."""
     detailNavigatorItem: DetailNavigatorItem
 
 
-DetailNavigatorItemOrError = DetailNavigatorItemWrapperItem | ErrorItem
+DetailNavigatorItemOrError: TypeAlias = DetailNavigatorItemWrapperItem | ErrorItem
 
 
-DetailNavigatorItems = List[DetailNavigatorItemOrError]
+DetailNavigatorItems: TypeAlias = list[DetailNavigatorItemOrError]
+"""A list of detail navigator items."""
 
 
 class Document3DNavigatorItem(TypedDict):
+    """The details of a 3D document navigator item."""
     navigatorItemId: NavigatorItemId
     prefix: str
     name: str
 
 
 class Document3DNavigatorItemWrapperItem(TypedDict):
+    """Contains a 3D document navigator item or an error."""
     document3DNavigatorItem: Document3DNavigatorItem
 
 
-Document3DNavigatorItemOrError = Document3DNavigatorItemWrapperItem | ErrorItem
+Document3DNavigatorItemOrError: TypeAlias = Document3DNavigatorItemWrapperItem | ErrorItem
 
 
-Document3DNavigatorItems = List[Document3DNavigatorItemOrError]
+Document3DNavigatorItems: TypeAlias = list[Document3DNavigatorItemOrError]
+"""A list of 3D document navigator items."""
 
 
 class ElevationNavigatorItem(TypedDict):
+    """The details of an elevation navigator item."""
     navigatorItemId: NavigatorItemId
     prefix: str
     name: str
 
 
 class ElevationNavigatorItemWrapperItem(TypedDict):
+    """Contains an elevation navigator item or an error."""
     elevationNavigatorItem: ElevationNavigatorItem
 
 
-ElevationNavigatorItemOrError = ElevationNavigatorItemWrapperItem | ErrorItem
+ElevationNavigatorItemOrError: TypeAlias = ElevationNavigatorItemWrapperItem | ErrorItem
 
 
-ElevationNavigatorItems = List[ElevationNavigatorItemOrError]
+ElevationNavigatorItems: TypeAlias = list[ElevationNavigatorItemOrError]
+"""A list of elevation navigator items."""
 
 
 class InteriorElevationNavigatorItem(TypedDict):
+    """The details of an interior elevation navigator item."""
     navigatorItemId: NavigatorItemId
     prefix: str
     name: str
 
 
 class InteriorElevationNavigatorItemWrapperItem(TypedDict):
+    """Contains an interior elevation navigator item or an error."""
     interiorElevationNavigatorItem: InteriorElevationNavigatorItem
 
 
-InteriorElevationNavigatorItemOrError = InteriorElevationNavigatorItemWrapperItem | ErrorItem
+InteriorElevationNavigatorItemOrError: TypeAlias = InteriorElevationNavigatorItemWrapperItem | ErrorItem
 
 
-InteriorElevationNavigatorItems = List[InteriorElevationNavigatorItemOrError]
+InteriorElevationNavigatorItems: TypeAlias = list[InteriorElevationNavigatorItemOrError]
+"""A list of interior elevation navigator items."""
 
 
 class SectionNavigatorItem(TypedDict):
+    """The details of a section navigator item."""
     navigatorItemId: NavigatorItemId
     prefix: str
     name: str
 
 
 class SectionNavigatorItemWrapperItem(TypedDict):
+    """Contains a section navigator item or an error."""
     sectionNavigatorItem: SectionNavigatorItem
 
 
-SectionNavigatorItemOrError = SectionNavigatorItemWrapperItem | ErrorItem
+SectionNavigatorItemOrError: TypeAlias = SectionNavigatorItemWrapperItem | ErrorItem
 
 
-SectionNavigatorItems = List[SectionNavigatorItemOrError]
+SectionNavigatorItems: TypeAlias = list[SectionNavigatorItemOrError]
+"""A list of section navigator items."""
 
 
 class StoryNavigatorItem(TypedDict):
+    """The details of a story navigator item."""
     navigatorItemId: NavigatorItemId
     prefix: str
     name: str
@@ -1096,32 +1252,38 @@ class StoryNavigatorItem(TypedDict):
 
 
 class StoryNavigatorItemWrapperItem(TypedDict):
+    """Contains a story navigator item or an error."""
     storyNavigatorItem: StoryNavigatorItem
 
 
-StoryNavigatorItemOrError = StoryNavigatorItemWrapperItem | ErrorItem
+StoryNavigatorItemOrError: TypeAlias = StoryNavigatorItemWrapperItem | ErrorItem
 
 
-StoryNavigatorItems = List[StoryNavigatorItemOrError]
+StoryNavigatorItems: TypeAlias = list[StoryNavigatorItemOrError]
+"""A list of story navigator items."""
 
 
 class WorksheetNavigatorItem(TypedDict):
+    """The details of a worksheet navigator item."""
     navigatorItemId: NavigatorItemId
     prefix: str
     name: str
 
 
 class WorksheetNavigatorItemWrapperItem(TypedDict):
+    """Contains a worksheet navigator item or an error."""
     worksheetNavigatorItem: WorksheetNavigatorItem
 
 
-WorksheetNavigatorItemOrError = WorksheetNavigatorItemWrapperItem | ErrorItem
+WorksheetNavigatorItemOrError: TypeAlias = WorksheetNavigatorItemWrapperItem | ErrorItem
 
 
-WorksheetNavigatorItems = List[WorksheetNavigatorItemOrError]
+WorksheetNavigatorItems: TypeAlias = list[WorksheetNavigatorItemOrError]
+"""A list of worksheet navigator items."""
 
 
 class BuiltInContainerNavigatorItem(TypedDict):
+    """The details of a built-in container navigator item."""
     navigatorItemId: NavigatorItemId
     prefix: str
     name: str
@@ -1129,16 +1291,19 @@ class BuiltInContainerNavigatorItem(TypedDict):
 
 
 class BuiltInContainerNavigatorItemWrapperItem(TypedDict):
+    """Contains a built-in container navigator item or an error."""
     builtInContainerNavigatorItem: BuiltInContainerNavigatorItem
 
 
-BuiltInContainerNavigatorItemOrError = BuiltInContainerNavigatorItemWrapperItem | ErrorItem
+BuiltInContainerNavigatorItemOrError: TypeAlias = BuiltInContainerNavigatorItemWrapperItem | ErrorItem
 
 
-BuiltInContainerNavigatorItems = List[BuiltInContainerNavigatorItemOrError]
+BuiltInContainerNavigatorItems: TypeAlias = list[BuiltInContainerNavigatorItemOrError]
+"""A list of built-in container navigator items."""
 
 
 class PropertyId(TypedDict):
+    """The identifier of a property."""
     guid: Guid
 
 
@@ -1146,10 +1311,12 @@ class PropertyIdArrayItem(TypedDict):
     propertyId: PropertyId
 
 
-PropertyIds = List[PropertyIdArrayItem]
+PropertyIds: TypeAlias = list[PropertyIdArrayItem]
+"""A list of property identifiers."""
 
 
 class PropertyGroupId(TypedDict):
+    """The identifier of a property group."""
     guid: Guid
 
 
@@ -1157,43 +1324,50 @@ class PropertyGroupIdArrayItem(TypedDict):
     propertyGroupId: PropertyGroupId
 
 
-PropertyGroupIds = List[PropertyGroupIdArrayItem]
+PropertyGroupIds: TypeAlias = list[PropertyGroupIdArrayItem]
+"""A list of property group identifiers."""
 
 
-PropertyIdOrError = PropertyIdArrayItem | ErrorItem
+PropertyIdOrError: TypeAlias = PropertyIdArrayItem | ErrorItem
 
 
-PropertyIdsOrErrors = List[PropertyIdOrError]
+PropertyIdsOrErrors: TypeAlias = list[PropertyIdOrError]
+"""A list of property identifiers or errors."""
 
 
 class PropertyGroup(TypedDict):
+    """A property group."""
     propertyGroupId: PropertyGroupId
     name: str
 
 
 class PropertyGroupWrapperItem(TypedDict):
+    """A property group or an error."""
     propertyGroup: PropertyGroup
 
 
-PropertyGroupOrError = PropertyGroupWrapperItem | ErrorItem
+PropertyGroupOrError: TypeAlias = PropertyGroupWrapperItem | ErrorItem
 
 
-PropertyGroupsOrErrors = List[PropertyGroupOrError]
+PropertyGroupsOrErrors: TypeAlias = list[PropertyGroupOrError]
+"""A list of property groups or errors."""
 
 
 class NormalSingleEnumPropertyValue(TypedDict):
+    """A single enumeration property value containing the ID of the selected enum value."""
     type: Literal["singleEnum"]
     status: Literal["normal"]
     value: EnumValueId
 
 
 class NormalMultiEnumPropertyValue(TypedDict):
+    """A multiple choice enumeration property value containing the IDs of the selected enum values in an array."""
     type: Literal["multiEnum"]
     status: Literal["normal"]
     value: EnumValueIds
 
 
-NormalOrUserUndefinedPropertyValue = (
+NormalOrUserUndefinedPropertyValue: TypeAlias = (
     NormalNumberPropertyValue
     | NormalIntegerPropertyValue
     | NormalStringPropertyValue
@@ -1216,51 +1390,60 @@ NormalOrUserUndefinedPropertyValue = (
 )
 
 
-PropertyValue = NormalOrUserUndefinedPropertyValue | NotAvailablePropertyValue | NotEvaluatedPropertyValue
+PropertyValue: TypeAlias = NormalOrUserUndefinedPropertyValue | NotAvailablePropertyValue | NotEvaluatedPropertyValue
 
 
 class PropertyValueWrapperItem(TypedDict):
+    """A property value or an error"""
     propertyValue: PropertyValue
 
 
-PropertyValueOrErrorItem = PropertyValueWrapperItem | ErrorItem
+PropertyValueOrErrorItem: TypeAlias = PropertyValueWrapperItem | ErrorItem
 
 
-PropertyValues = List[PropertyValueOrErrorItem]
+PropertyValues: TypeAlias = list[PropertyValueOrErrorItem]
+"""A list of property values."""
 
 
 class PropertyValuesWrapperItem(TypedDict):
+    """A list of property values or an error."""
     propertyValues: PropertyValues
 
 
-PropertyValuesOrError = PropertyValuesWrapperItem | ErrorItem
+PropertyValuesOrError: TypeAlias = PropertyValuesWrapperItem | ErrorItem
 
 
-PropertyValuesOrErrorArray = List[PropertyValuesOrError]
+PropertyValuesOrErrorArray: TypeAlias = list[PropertyValuesOrError]
+"""A list of property value lists."""
 
 
 class ElementPropertyValue(TypedDict):
+    """A property value with the identifiers of the property and its owner element."""
     elementId: ElementId
     propertyId: PropertyId
     propertyValue: NormalOrUserUndefinedPropertyValue
 
 
-ElementPropertyValues = List[ElementPropertyValue]
+ElementPropertyValues: TypeAlias = list[ElementPropertyValue]
+"""A list of element property values."""
 
 
 class PropertyIdsOfElement(TypedDict):
+    """A list property identifiers of an owner element."""
     elementId: ElementId
     propertyIds: PropertyIds
 
 
 class PropertyIdsOfElementWrapperItem(TypedDict):
+    """A list property identifiers of an owner element or an error."""
     propertyIdsOfElement: PropertyIdsOfElement
 
 
-PropertyIdsOfElementOrError = PropertyIdsOfElementWrapperItem | ErrorItem
+PropertyIdsOfElementOrError: TypeAlias = PropertyIdsOfElementWrapperItem | ErrorItem
 
 
-PropertyIdsOfElementOrErrorArray = List[PropertyIdsOfElementOrError]
+PropertyIdsOfElementOrErrorArray: TypeAlias = list[PropertyIdsOfElementOrError]
+"""A list of property identifiers of elements or errors."""
 
 
 class RenameNavigatorItemByName(TypedDict):
@@ -1280,65 +1463,78 @@ class RenameNavigatorItemByNameAndId(TypedDict):
 
 
 class PenTableAttribute(TypedDict):
+    """A pen table attribute."""
     attributeId: AttributeId
     name: AttributeName
     pens: Pens
 
 
 class PenTableAttributeWrapperItem(TypedDict):
+    """A pen table attribute or an error."""
     penTableAttribute: PenTableAttribute
 
 
-PenTableAttributeOrError = PenTableAttributeWrapperItem | ErrorItem
+PenTableAttributeOrError: TypeAlias = PenTableAttributeWrapperItem | ErrorItem
 
 
-PenTableAttributes = List[PenTableAttributeOrError]
+PenTableAttributes: TypeAlias = list[PenTableAttributeOrError]
+"""A list of pen table attributes and potential errors."""
 
 
-LayerCombinationAttributes = List[LayerCombinationAttributeOrError]
+LayerCombinationAttributes: TypeAlias = list[LayerCombinationAttributeOrError]
+"""A list of layer combination attributes and potential errors."""
 
 
 class ClassificationItemAvailability(TypedDict):
+    """Contains the ids of property definitions available for the given classification item."""
     classificationItemId: ClassificationItemId
     availableProperties: PropertyIds
 
 
 class ClassificationItemAvailabilityWrapperItem(TypedDict):
+    """Contains the ids of property definitions available for the given classification item or error."""
     classificationItemAvailability: ClassificationItemAvailability
 
 
-ClassificationItemAvailabilityOrError = ClassificationItemAvailabilityWrapperItem | ErrorItem
+ClassificationItemAvailabilityOrError: TypeAlias = ClassificationItemAvailabilityWrapperItem | ErrorItem
 
 
-ClassificationItemAvailabilityList = List[ClassificationItemAvailabilityOrError]
+ClassificationItemAvailabilityList: TypeAlias = list[ClassificationItemAvailabilityOrError]
+"""A list of classification item avalabilities."""
 
 
 class PropertyDefinitionAvailability(TypedDict):
+    """Contains the ids of classification items the given property definiton is available for."""
     propertyId: PropertyId
     availableClassifications: ClassificationItemIds
 
 
 class PropertyDefinitionAvailabilityWrapperItem(TypedDict):
+    """Contains the ids of classification items the given property definiton is available for or error."""
     propertyDefinitionAvailability: PropertyDefinitionAvailability
 
 
-PropertyDefinitionAvailabilityOrError = PropertyDefinitionAvailabilityWrapperItem | ErrorItem
+PropertyDefinitionAvailabilityOrError: TypeAlias = PropertyDefinitionAvailabilityWrapperItem | ErrorItem
 
 
-PropertyDefinitionAvailabilityList = List[PropertyDefinitionAvailabilityOrError]
+PropertyDefinitionAvailabilityList: TypeAlias = list[PropertyDefinitionAvailabilityOrError]
+"""A list of classification item avalabilities."""
 
 
-ClassificationItemsOrErrors = List[ClassificationItemOrError]
+ClassificationItemsOrErrors: TypeAlias = list[ClassificationItemOrError]
+"""A list of classification items or errors."""
 
 
 class PropertyBasicDefaultValue(TypedDict):
+    """Default value of the property in case of a basic property value (ie. not an expression)."""
     basicDefaultValue: PropertyValue
 
 
-PropertyDefaultValue = PropertyBasicDefaultValue
+PropertyDefaultValue: TypeAlias = PropertyBasicDefaultValue
 
 
 class PropertyDefinition(TypedDict):
+    """A property definition. The default value of a property appears if and only if it is a custom property and is not an expression type property. (This may change in the future.)"""
     propertyId: NotRequired[PropertyId]
     group: PropertyGroup
     name: str
@@ -1350,40 +1546,46 @@ class PropertyDefinition(TypedDict):
 
 
 class PropertyDefinitionWrapperItem(TypedDict):
+    """A property definition or an error."""
     propertyDefinition: PropertyDefinition
 
 
-PropertyDefinitionOrError = PropertyDefinitionWrapperItem | ErrorItem
+PropertyDefinitionOrError: TypeAlias = PropertyDefinitionWrapperItem | ErrorItem
 
 
-PropertyDefinitionsOrErrors = List[PropertyDefinitionOrError]
+PropertyDefinitionsOrErrors: TypeAlias = list[PropertyDefinitionOrError]
+"""A list of property definitions or errors."""
 
 
 class AttributeFolderStructureArrayItem(TypedDict):
     attributeFolder: AttributeFolderStructure
 
 
-AttributeFolderStructures = List[AttributeFolderStructureArrayItem]
+AttributeFolderStructures: TypeAlias = list[AttributeFolderStructureArrayItem]
+"""A list of attribute folder structures."""
 
 
 class AttributeFolderStructure(TypedDict):
+    """The details of an attribute folder structure."""
     attributeFolderId: AttributeFolderId
     name: AttributeFolderName
     attributes: NotRequired[AttributeHeaders]
     subfolders: NotRequired[AttributeFolderStructures]
 
 
-AttributeFolderStructureOrError = AttributeFolderStructure | ErrorItem
+AttributeFolderStructureOrError: TypeAlias = AttributeFolderStructure | ErrorItem
 
 
 class ClassificationItemArrayItem(TypedDict):
     classificationItem: ClassificationItemInTree
 
 
-ClassificationItems = List[ClassificationItemArrayItem]
+ClassificationItems: TypeAlias = list[ClassificationItemArrayItem]
+"""A list of classification items."""
 
 
 class ClassificationItemInTree(TypedDict):
+    """The details of a classification item."""
     classificationItemId: ClassificationItemId
     id: str
     name: str
@@ -1395,10 +1597,12 @@ class NavigatorItemArrayItem(TypedDict):
     navigatorItem: NavigatorItem
 
 
-NavigatorItems = List[NavigatorItemArrayItem]
+NavigatorItems: TypeAlias = list[NavigatorItemArrayItem]
+"""A list of navigator items."""
 
 
 class NavigatorItem(TypedDict):
+    """The details of a navigator item."""
     navigatorItemId: NavigatorItemId
     prefix: str
     name: str
@@ -1408,4 +1612,5 @@ class NavigatorItem(TypedDict):
 
 
 class NavigatorTree(TypedDict):
+    """A tree of navigator items."""
     rootItem: NavigatorItem

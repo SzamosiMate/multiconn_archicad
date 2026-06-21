@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Annotated, List, Literal, TypeAlias
+from typing import Annotated, Literal, TypeAlias
 from uuid import UUID
 from enum import Enum
 from pydantic import ConfigDict, Field
@@ -10,6 +10,7 @@ from multiconn_archicad.models.base import APIModel
 
 
 class AddOnCommandId(APIModel):
+    """The identifier of an Add-On command."""
     commandNamespace: Annotated[str, Field(description="The namespace of the Add-On command.", min_length=1)]
     commandName: Annotated[str, Field(description="The name of the Add-On command.", min_length=1)]
 
@@ -18,24 +19,25 @@ class AddOnCommandIdArrayItem(APIModel):
     addOnCommandId: AddOnCommandId
 
 
-AddOnCommandIds: TypeAlias = List[AddOnCommandIdArrayItem]
+AddOnCommandIds: TypeAlias = list[AddOnCommandIdArrayItem]
 
 
 class AddOnCommandParameters(APIModel):
-    pass
+    """The input parameters of an Add-On command."""
     model_config = ConfigDict(
         extra="allow",
     )
 
 
 class AddOnCommandResponse(APIModel):
-    pass
+    """The response returned by an Add-On command."""
     model_config = ConfigDict(
         extra="allow",
     )
 
 
 class AttributeType(Enum):
+    """The type of an attribute."""
     BuildingMaterial = "BuildingMaterial"
     Composite = "Composite"
     Fill = "Fill"
@@ -52,19 +54,22 @@ AttributeFolderName: TypeAlias = str
 
 
 class AttributeFolderCreationParameters(APIModel):
+    """Used to create an attribute folder. The folder type and it's path needs to be provided."""
     attributeType: AttributeType
     path: Annotated[
-        List[AttributeFolderName],
+        list[AttributeFolderName],
         Field(description="A list of attribute folder names. May be empty."),
     ]
 
 
 class AppearanceType(Enum):
+    """The appearance type of a line or fill attribute."""
     ScaleWithPlan = "ScaleWithPlan"
     ScaleIndependent = "ScaleIndependent"
 
 
 class FillTypeId(Enum):
+    """The filling type of a fill attribute."""
     Vector = "Vector"
     Symbol = "Symbol"
     Solid = "Solid"
@@ -75,6 +80,7 @@ class FillTypeId(Enum):
 
 
 class MaterialTypeId(Enum):
+    """The material type of a surface attribute."""
     General = "General"
     Simple = "Simple"
     Matte = "Matte"
@@ -86,6 +92,7 @@ class MaterialTypeId(Enum):
 
 
 class ProfileModifier(APIModel):
+    """A profile modifier parameter."""
     name: Annotated[str, Field(description="The name of the modifier.")]
     value: Annotated[float, Field(description="The value of the modifier.")]
 
@@ -95,16 +102,19 @@ class ProfileModifierListItem(APIModel):
 
 
 class Texture(APIModel):
+    """A texture"""
     name: Annotated[str, Field(description="The name of the texture.")]
 
 
 class LineType(Enum):
+    """The type of a line attribute."""
     SolidLine = "SolidLine"
     DashedLine = "DashedLine"
     SymbolLine = "SymbolLine"
 
 
 class LineItemType(Enum):
+    """The type of a line item."""
     IllegalItemType = "IllegalItemType"
     SeparatorItemType = "SeparatorItemType"
     CenterDotItemType = "CenterDotItemType"
@@ -118,20 +128,24 @@ class LineItemType(Enum):
 
 
 class DashItem(APIModel):
+    """A dash item."""
     dash: Annotated[float, Field(description="The length of the dash.")]
     gap: Annotated[float, Field(description="The length of the gap.")]
 
 
 class DashItemWrapperItem(APIModel):
+    """A dash or line item."""
     dashItem: DashItem
 
 
 class Point2D(APIModel):
+    """Coordinates of a 2D point"""
     x: Annotated[float, Field(description="X coordinate of 2D point")]
     y: Annotated[float, Field(description="Y coordinate of 2D point")]
 
 
 class NavigatorItemType(Enum):
+    """The type of a navigator item. The 'UndefinedItem' type is used when the actual type of the navigator item cannot be retrieved from Archicad."""
     UndefinedItem = "UndefinedItem"
     ProjectMapRootItem = "ProjectMapRootItem"
     StoryItem = "StoryItem"
@@ -161,6 +175,7 @@ class NavigatorItemType(Enum):
 
 
 class NavigatorItemMapType(Enum):
+    """The type of the navigator item tree."""
     ProjectMap = "ProjectMap"
     ViewMap = "ViewMap"
     MyViewMap = "MyViewMap"
@@ -168,6 +183,7 @@ class NavigatorItemMapType(Enum):
 
 
 class PublisherSetId(APIModel):
+    """The identifier of a publisher set."""
     type: Annotated[
         Literal["PublisherSets"],
         Field(description="The type of the navigator item tree."),
@@ -176,13 +192,15 @@ class PublisherSetId(APIModel):
 
 
 class OtherNavigatorTreeId(APIModel):
+    """The identifier of a navigator item tree."""
     type: NavigatorItemMapType
 
 
 class UserDefinedPropertyUserId(APIModel):
+    """The unique identifier of a User-Defined Property, identified by its name."""
     type: Literal["UserDefined"] = "UserDefined"
     localizedName: Annotated[
-        List[str],
+        list[str],
         Field(
             description="A two-element list of the localized name parts. The first element is the name of the group the property belongs to, and the second element is the actual name of the property.",
             max_length=2,
@@ -192,109 +210,127 @@ class UserDefinedPropertyUserId(APIModel):
 
 
 class BuiltInPropertyUserId(APIModel):
+    """The unique identifier of a Built-In Property, identified by its name."""
     type: Literal["BuiltIn"] = "BuiltIn"
     nonLocalizedName: Annotated[str, Field(description="The non-localized name of the Built-In Property.")]
 
 
 class PropertyType(Enum):
+    """The type of a property group or a property definition."""
     UserDefined = "UserDefined"
     BuiltIn = "BuiltIn"
 
 
 class NormalNumberPropertyValue(APIModel):
+    """A number property value containing a valid numeric value."""
     type: Literal["number"] = "number"
     status: Literal["normal"] = "normal"
     value: float
 
 
 class NormalIntegerPropertyValue(APIModel):
+    """An integer property value containing a valid integer number."""
     type: Literal["integer"] = "integer"
     status: Literal["normal"] = "normal"
     value: int
 
 
 class NormalStringPropertyValue(APIModel):
+    """A string property value containing a valid string."""
     type: Literal["string"] = "string"
     status: Literal["normal"] = "normal"
     value: str
 
 
 class NormalBooleanPropertyValue(APIModel):
+    """A boolean property value containing a valid boolean value."""
     type: Literal["boolean"] = "boolean"
     status: Literal["normal"] = "normal"
     value: bool
 
 
 class NormalLengthPropertyValue(APIModel):
+    """A length property value containing a real length value. The value is measured in SI (meters)."""
     type: Literal["length"] = "length"
     status: Literal["normal"] = "normal"
     value: float
 
 
 class NormalAreaPropertyValue(APIModel):
+    """An area property value containing a real area. The value is measured in SI (square meters)."""
     type: Literal["area"] = "area"
     status: Literal["normal"] = "normal"
     value: float
 
 
 class NormalVolumePropertyValue(APIModel):
+    """A volume property value containing a real volume. The value is measured in SI (cubic meters)."""
     type: Literal["volume"] = "volume"
     status: Literal["normal"] = "normal"
     value: float
 
 
 class NormalAnglePropertyValue(APIModel):
+    """An angle property value containing a real angle. The value is measured in SI (radians)."""
     type: Literal["angle"] = "angle"
     status: Literal["normal"] = "normal"
     value: float
 
 
 class NormalNumberListPropertyValue(APIModel):
+    """A number list property value containing numbers in an array."""
     type: Literal["numberList"] = "numberList"
     status: Literal["normal"] = "normal"
-    value: List[float]
+    value: list[float]
 
 
 class NormalIntegerListPropertyValue(APIModel):
+    """An integer list property value containing integers in an array."""
     type: Literal["integerList"] = "integerList"
     status: Literal["normal"] = "normal"
-    value: List[int]
+    value: list[int]
 
 
 class NormalStringListPropertyValue(APIModel):
+    """A string list property value containing strings in an array."""
     type: Literal["stringList"] = "stringList"
     status: Literal["normal"] = "normal"
-    value: List[str]
+    value: list[str]
 
 
 class NormalBooleanListPropertyValue(APIModel):
+    """A boolean list property value containing boolean values in an array."""
     type: Literal["booleanList"] = "booleanList"
     status: Literal["normal"] = "normal"
-    value: List[bool]
+    value: list[bool]
 
 
 class NormalLengthListPropertyValue(APIModel):
+    """A length list property value containing length values in an array. The values are measured in SI (meters)."""
     type: Literal["lengthList"] = "lengthList"
     status: Literal["normal"] = "normal"
-    value: List[float]
+    value: list[float]
 
 
 class NormalAreaListPropertyValue(APIModel):
+    """An area list property value containing areas in an array. The values are measured in SI (square meters)."""
     type: Literal["areaList"] = "areaList"
     status: Literal["normal"] = "normal"
-    value: List[float]
+    value: list[float]
 
 
 class NormalVolumeListPropertyValue(APIModel):
+    """A volume list property value containing volumes in an array. The values are measured in SI (cubic meters)."""
     type: Literal["volumeList"] = "volumeList"
     status: Literal["normal"] = "normal"
-    value: List[float]
+    value: list[float]
 
 
 class NormalAngleListPropertyValue(APIModel):
+    """An angle list property value containing angles in an array. The values are measured in SI (radians)."""
     type: Literal["angleList"] = "angleList"
     status: Literal["normal"] = "normal"
-    value: List[float]
+    value: list[float]
 
 
 class PropertyValueType(Enum):
@@ -319,26 +355,31 @@ class PropertyValueType(Enum):
 
 
 class UserUndefinedPropertyValue(APIModel):
+    """A userUndefined value means that there is no actual number/string/etc. value, but the user deliberately set an Undefined value: this is a valid value, too."""
     type: PropertyValueType
     status: Literal["userUndefined"] = "userUndefined"
 
 
 class NotAvailablePropertyValue(APIModel):
+    """A notAvailable value means that the property is not available for the property owner (and therefore it has no property value for it)."""
     type: PropertyValueType
     status: Literal["notAvailable"] = "notAvailable"
 
 
 class NotEvaluatedPropertyValue(APIModel):
+    """A notEvaluated value means that the property could not be evaluated for the property owner for some reason."""
     type: PropertyValueType
     status: Literal["notEvaluated"] = "notEvaluated"
 
 
 class DisplayValueEnumId(APIModel):
+    """An enumeration value identifier using the displayed value."""
     type: Literal["displayValue"] = "displayValue"
     displayValue: str
 
 
 class NonLocalizedValueEnumId(APIModel):
+    """An enumeration value identifier using the nonlocalized value."""
     type: Literal["nonLocalizedValue"] = "nonLocalizedValue"
     nonLocalizedValue: str
 
@@ -351,6 +392,7 @@ class EnumValueIdWrapperItem(APIModel):
 
 
 class PossibleEnumValue(APIModel):
+    """The description of an enumeration value."""
     enumValueId: Annotated[
         DisplayValueEnumId | NonLocalizedValueEnumId,
         Field(description="The identifier of a property enumeration value."),
@@ -367,6 +409,7 @@ class PossibleEnumValuesArrayItem(APIModel):
 
 
 class Error(APIModel):
+    """The details of an error."""
     code: Annotated[int, Field(description="The code of the error.")]
     message: Annotated[str, Field(description="The error message.")]
 
@@ -376,15 +419,18 @@ class ErrorItem(APIModel):
 
 
 class SuccessfulExecutionResult(APIModel):
+    """The result of a successful execution."""
     success: Literal[True] = True
 
 
 class FailedExecutionResult(APIModel):
+    """The result of a failed execution."""
     success: Literal[False] = False
     error: Annotated[Error, Field(description="The details of an execution failure.")]
 
 
 class ElementId(APIModel):
+    """The identifier of an element."""
     guid: Annotated[
         UUID,
         Field(
@@ -398,6 +444,7 @@ class ElementIdArrayItem(APIModel):
 
 
 class ElementType(Enum):
+    """The type of an element."""
     Wall = "Wall"
     Column = "Column"
     Beam = "Beam"
@@ -419,31 +466,38 @@ class ElementType(Enum):
 
 
 class TypeOfElement(APIModel):
+    """An element id and its corresponding element type."""
     elementId: ElementId
     elementType: ElementType
 
 
 class TypeOfElementWrapperItem(APIModel):
+    """The type of an element or an error."""
     typeOfElement: TypeOfElement
 
 
 class ElementsWrapper(APIModel):
-    elements: Annotated[List[ElementIdArrayItem], Field(description="A list of elements.")]
+    """A wrapper for a list of elements."""
+    elements: Annotated[list[ElementIdArrayItem], Field(description="A list of elements.")]
 
 
 class Image(APIModel):
+    """An image encoded as a Base64 string."""
     content: Annotated[str, Field(description="The image content as a string .")]
 
 
 class ImageWrapperItem(APIModel):
+    """An image or an error."""
     image: Image
 
 
 class FolderParameters(APIModel):
+    """The parameters of a folder."""
     name: Annotated[str, Field(description="The name of the folder.")]
 
 
 class BoundingBox2D(APIModel):
+    """The 2D bounding box of an element."""
     xMin: Annotated[float, Field(description="The minimum X value of the bounding box.")]
     yMin: Annotated[float, Field(description="The minimum Y value of the bounding box.")]
     xMax: Annotated[float, Field(description="The maximum X value of the bounding box.")]
@@ -451,10 +505,12 @@ class BoundingBox2D(APIModel):
 
 
 class BoundingBox2DWrapperItem(APIModel):
+    """A 2D bounding box or an error."""
     boundingBox2D: BoundingBox2D
 
 
 class BoundingBox3D(APIModel):
+    """A 3D bounding box of an element."""
     xMin: Annotated[float, Field(description="The minimum X value of the bounding box.")]
     yMin: Annotated[float, Field(description="The minimum Y value of the bounding box.")]
     zMin: Annotated[float, Field(description="The minimum Z value of the bounding box.")]
@@ -464,10 +520,12 @@ class BoundingBox3D(APIModel):
 
 
 class BoundingBox3DWrapperItem(APIModel):
+    """A 3D bounding box or an error."""
     boundingBox3D: BoundingBox3D
 
 
 class RGBColor(APIModel):
+    """A color model represented via its red, green and blue components."""
     red: Annotated[
         float,
         Field(description="The red component of the color model.", ge=0.0, le=1.0),
@@ -483,6 +541,7 @@ class RGBColor(APIModel):
 
 
 class NumberingStyle(Enum):
+    """A supported numbering style."""
     Undefined = "Undefined"
     abc = "abc"
     ABC = "ABC"
@@ -494,6 +553,7 @@ class NumberingStyle(Enum):
 
 
 class Subset(APIModel):
+    """A set of options used to assign IDs to the layouts contained in the subset."""
     name: Annotated[str, Field(description="The name for the layout subset.", min_length=1)]
     includeToIDSequence: Annotated[
         bool,
@@ -527,6 +587,7 @@ class Subset(APIModel):
 
 
 class LayoutParameters(APIModel):
+    """The parameters of the layout."""
     horizontalSize: Annotated[float, Field(description="The horizontal size of the layout in millimeters.")]
     verticalSize: Annotated[float, Field(description="The vertical size of the layout in millimeters.")]
     leftMargin: Annotated[float, Field(description="The layout margin from the left side of the paper.")]
@@ -572,6 +633,7 @@ class LayoutParameters(APIModel):
 
 
 class ComponentId(APIModel):
+    """The identifier of a component."""
     guid: Annotated[
         UUID,
         Field(
@@ -581,22 +643,26 @@ class ComponentId(APIModel):
 
 
 class ElementComponentId(APIModel):
+    """The identifier of an element's component."""
     elementId: ElementId
     componentId: ComponentId
 
 
 class ElementComponentIdArrayItem(APIModel):
+    """An item of a component array."""
     elementComponentId: ElementComponentId
 
 
 class ElementComponentsWrapper(APIModel):
+    """List of components."""
     elementComponents: Annotated[
-        List[ElementComponentIdArrayItem],
+        list[ElementComponentIdArrayItem],
         Field(description="List of components of elements."),
     ]
 
 
 class AttributeFolderId(APIModel):
+    """The identifier of an attribute folder."""
     guid: Annotated[
         UUID,
         Field(
@@ -610,6 +676,7 @@ class AttributeFolderIdWrapperItem(APIModel):
 
 
 class AttributeId(APIModel):
+    """The identifier of an attribute."""
     guid: Annotated[
         UUID,
         Field(
@@ -623,6 +690,7 @@ class AttributeIdWrapperItem(APIModel):
 
 
 class AttributeIndexAndGuid(APIModel):
+    """The complete identifier of an attribute."""
     guid: Annotated[
         UUID,
         Field(
@@ -637,27 +705,30 @@ class AttributeIndexAndGuidWrapperItem(APIModel):
 
 
 class AttributeFolder(APIModel):
+    """Identifies an attribute folder. The path of the root folder is repesented by empty array."""
     attributeType: AttributeType
     path: Annotated[
-        List[AttributeFolderName],
+        list[AttributeFolderName],
         Field(description="A list of attribute folder names. May be empty."),
     ]
     attributeFolderId: AttributeFolderId
     attributeIds: Annotated[
-        List[AttributeIdWrapperItem],
+        list[AttributeIdWrapperItem],
         Field(description="A list of attribute identifiers."),
     ]
     attributeFolderIds: Annotated[
-        List[AttributeFolderIdWrapperItem],
+        list[AttributeFolderIdWrapperItem],
         Field(description="A list of attribute folder identifiers."),
     ]
 
 
 class AttributeFolderWrapperItem(APIModel):
+    """An attribute folder or an error."""
     attributeFolder: AttributeFolder
 
 
 class AttributeFolderRenameParameters(APIModel):
+    """Used to rename an attribute folder. The folder is identified by it's Id."""
     attributeFolderId: AttributeFolderId
     newName: Annotated[
         str,
@@ -669,6 +740,7 @@ class AttributeFolderRenameParameters(APIModel):
 
 
 class AttributeHeader(APIModel):
+    """The header object of an attribute."""
     attributeId: AttributeId
     name: Annotated[str, Field(description="The name of an attribute.", min_length=1)]
 
@@ -678,6 +750,7 @@ class AttributeHeaderArrayItem(APIModel):
 
 
 class LayerAttribute(APIModel):
+    """A layer attribute"""
     attributeId: AttributeId
     name: Annotated[str, Field(description="The name of an attribute.", min_length=1)]
     intersectionGroupNr: Annotated[int, Field(description="The intersection group number")]
@@ -692,10 +765,12 @@ class LayerAttribute(APIModel):
 
 
 class LayerAttributeWrapperItem(APIModel):
+    """A layer attribute or an error."""
     layerAttribute: LayerAttribute
 
 
 class FillAttribute(APIModel):
+    """A fill attribute."""
     attributeId: AttributeId
     name: Annotated[str, Field(description="The name of an attribute.", min_length=1)]
     subType: FillTypeId
@@ -709,10 +784,12 @@ class FillAttribute(APIModel):
 
 
 class FillAttributeWrapperItem(APIModel):
+    """A fill attribute or an error."""
     fillAttribute: FillAttribute
 
 
 class SurfaceAttribute(APIModel):
+    """A surface attribute."""
     attributeId: AttributeId
     name: Annotated[str, Field(description="The name of an attribute.", min_length=1)]
     materialType: MaterialTypeId
@@ -767,14 +844,16 @@ class SurfaceAttribute(APIModel):
 
 
 class SurfaceAttributeWrapperItem(APIModel):
+    """A surface attribute or an error."""
     surfaceAttribute: SurfaceAttribute
 
 
 class ProfileAttribute(APIModel):
+    """A profile attribute."""
     attributeId: AttributeId
     name: Annotated[str, Field(description="The name of an attribute.", min_length=1)]
     useWith: Annotated[
-        List[ElementType],
+        list[ElementType],
         Field(description="The list of element types for which this profile is available."),
     ]
     width: Annotated[float, Field(description="The default width (horizontal size) of the profile.")]
@@ -790,14 +869,16 @@ class ProfileAttribute(APIModel):
         Field(description="Defines whether the profile's height can be increased beyond its default value or not."),
     ]
     hasCoreSkin: Annotated[bool, Field(description="Defines whether the profile has a core skin or not.")]
-    profileModifiers: Annotated[List[ProfileModifierListItem], Field(description="A list of profile modifiers.")]
+    profileModifiers: Annotated[list[ProfileModifierListItem], Field(description="A list of profile modifiers.")]
 
 
 class ProfileAttributeWrapperItem(APIModel):
+    """A profile attribute or an error."""
     profileAttribute: ProfileAttribute
 
 
 class CompositeLine(APIModel):
+    """A contour or separator line component for a composite attribute."""
     lineId: Annotated[
         AttributeIdWrapperItem | ErrorItem,
         Field(description="The attribute's identifier or an error."),
@@ -810,6 +891,7 @@ class CompositeLineListItem(APIModel):
 
 
 class CompositeSkin(APIModel):
+    """A skin component for a composite attribute."""
     buildingMaterialId: Annotated[
         AttributeIdWrapperItem | ErrorItem,
         Field(description="The attribute's identifier or an error."),
@@ -831,28 +913,31 @@ class CompositeSkinListItem(APIModel):
 
 
 class CompositeAttribute(APIModel):
+    """A composite attribute."""
     attributeId: AttributeId
     name: Annotated[str, Field(description="The name of an attribute.", min_length=1)]
     totalThickness: Annotated[float, Field(description="The total thickness of the composite.")]
     compositeSkins: Annotated[
-        List[CompositeSkinListItem],
+        list[CompositeSkinListItem],
         Field(description="The skins of the composite attribute."),
     ]
     compositeLines: Annotated[
-        List[CompositeLineListItem],
+        list[CompositeLineListItem],
         Field(description="The contour and separator lines of the composite attribute."),
     ]
     useWith: Annotated[
-        List[ElementType],
+        list[ElementType],
         Field(description="The list of element types for which this composite is available."),
     ]
 
 
 class CompositeAttributeWrapperItem(APIModel):
+    """A composite attribute or an error."""
     compositeAttribute: CompositeAttribute
 
 
 class Pen(APIModel):
+    """A pen attribute."""
     index: Annotated[int, Field(description="The index of the pen.", ge=0, le=255)]
     color: Annotated[RGBColor, Field(description="The color of the pen.")]
     weight: Annotated[
@@ -867,6 +952,7 @@ class PenArrayItem(APIModel):
 
 
 class LineItem(APIModel):
+    """A line item."""
     lineItemType: LineItemType
     centerOffset: Annotated[
         float,
@@ -905,10 +991,12 @@ class LineItem(APIModel):
 
 
 class LineItemWrapperItem(APIModel):
+    """A dash or line item."""
     lineItem: LineItem
 
 
 class LineAttribute(APIModel):
+    """A line attribute"""
     attributeId: AttributeId
     name: Annotated[str, Field(description="The name of an attribute.", min_length=1)]
     appearanceType: AppearanceType
@@ -917,16 +1005,18 @@ class LineAttribute(APIModel):
     height: Annotated[float, Field(description="The height of the symbol line.")]
     lineType: LineType
     lineItems: Annotated[
-        List[DashItemWrapperItem | LineItemWrapperItem] | None,
+        list[DashItemWrapperItem | LineItemWrapperItem] | None,
         Field(description="A list of dash or line items."),
     ] = None
 
 
 class LineAttributeWrapperItem(APIModel):
+    """A line attribute or an error."""
     lineAttribute: LineAttribute
 
 
 class ZoneCategoryAttribute(APIModel):
+    """A zone category."""
     attributeId: AttributeId
     name: Annotated[str, Field(description="The name of an attribute.", min_length=1)]
     categoryCode: Annotated[str, Field(description="The category code of the zone.")]
@@ -947,10 +1037,12 @@ class ZoneCategoryAttribute(APIModel):
 
 
 class ZoneCategoryAttributeWrapperItem(APIModel):
+    """A zone category attribute or an error."""
     zoneCategoryAttribute: ZoneCategoryAttribute
 
 
 class BuildingMaterialAttribute(APIModel):
+    """A building material attribute"""
     attributeId: AttributeId
     name: Annotated[str, Field(description="The name of an attribute.", min_length=1)]
     id: Annotated[str, Field(description="The id of the building material.")]
@@ -970,14 +1062,16 @@ class BuildingMaterialAttribute(APIModel):
 
 
 class BuildingMaterialAttributeWrapperItem(APIModel):
+    """A building material attribute or an error."""
     buildingMaterialAttribute: BuildingMaterialAttribute
 
 
 class LayerCombinationAttribute(APIModel):
+    """A layer combination attribute"""
     attributeId: AttributeId
     name: Annotated[str, Field(description="The name of an attribute.", min_length=1)]
     layerAttributeIds: Annotated[
-        List[AttributeIdWrapperItem],
+        list[AttributeIdWrapperItem],
         Field(
             description="The list of identifiers belonging to the layer attributes referenced in this layer combination."
         ),
@@ -985,10 +1079,12 @@ class LayerCombinationAttribute(APIModel):
 
 
 class LayerCombinationAttributeWrapperItem(APIModel):
+    """A layer combination attribute or an error."""
     layerCombinationAttribute: LayerCombinationAttribute
 
 
 class ClassificationSystemId(APIModel):
+    """The identifier of a classification system."""
     guid: Annotated[
         UUID,
         Field(
@@ -1002,6 +1098,7 @@ class ClassificationSystemIdArrayItem(APIModel):
 
 
 class ClassificationItemId(APIModel):
+    """The identifier of a classification item."""
     guid: Annotated[
         UUID,
         Field(
@@ -1015,6 +1112,7 @@ class ClassificationItemIdArrayItem(APIModel):
 
 
 class ClassificationId(APIModel):
+    """The element classification identifier."""
     classificationSystemId: ClassificationSystemId
     classificationItemId: Annotated[
         ClassificationItemId | None,
@@ -1025,22 +1123,26 @@ class ClassificationId(APIModel):
 
 
 class ClassificationIdWrapperItem(APIModel):
+    """A classification identifier or an error."""
     classificationId: ClassificationId
 
 
 class ElementClassification(APIModel):
+    """The classification of an element."""
     elementId: ElementId
     classificationId: ClassificationId
 
 
 class ElementClassificationWrapperItem(APIModel):
+    """Element classification identifiers or errors."""
     classificationIds: Annotated[
-        List[ClassificationIdWrapperItem | ErrorItem],
+        list[ClassificationIdWrapperItem | ErrorItem],
         Field(description="A list of element classification identifiers or errors."),
     ]
 
 
 class ClassificationItemDetails(APIModel):
+    """The details of a classification item."""
     classificationItemId: ClassificationItemId
     id: Annotated[
         str,
@@ -1051,10 +1153,12 @@ class ClassificationItemDetails(APIModel):
 
 
 class ClassificationItemWrapperItem(APIModel):
+    """A classification item or an error."""
     classificationItem: ClassificationItemDetails
 
 
 class ClassificationSystem(APIModel):
+    """The details of a classification system."""
     classificationSystemId: ClassificationSystemId
     name: Annotated[str, Field(description="The display name of the classification system.")]
     description: Annotated[str, Field(description="The description of the classification system.")]
@@ -1072,10 +1176,12 @@ class ClassificationSystem(APIModel):
 
 
 class ClassificationSystemWrapperItem(APIModel):
+    """Contains a classification system or error."""
     classificationSystem: ClassificationSystem
 
 
 class NavigatorItemId(APIModel):
+    """The identifier of a navigator item."""
     guid: Annotated[
         UUID,
         Field(
@@ -1089,71 +1195,85 @@ class NavigatorItemIdWrapperItem(APIModel):
 
 
 class GeneralNavigatorItemData(APIModel):
+    """The common data of a navigator item."""
     navigatorItemId: NavigatorItemId
     prefix: Annotated[str, Field(description="The prefix of the navigator item's name.")]
     name: Annotated[str, Field(description="The name of the navigator item.")]
 
 
 class NavigatorItemIdAndType(APIModel):
+    """Consists of a navigator item type and an identifier."""
     navigatorItemType: NavigatorItemType
     navigatorItemId: NavigatorItemId
 
 
 class NavigatorItemIdAndTypeWrapperItem(APIModel):
+    """Contains a pair of navigator item type and identifier or an error."""
     navigatorItemIdAndType: NavigatorItemIdAndType
 
 
 class DetailNavigatorItem(APIModel):
+    """The details of a detail navigator item."""
     navigatorItemId: NavigatorItemId
     prefix: Annotated[str, Field(description="The prefix of the navigator item's name.")]
     name: Annotated[str, Field(description="The name of the navigator item.")]
 
 
 class DetailNavigatorItemWrapperItem(APIModel):
+    """Contains a detail navigator item or an error."""
     detailNavigatorItem: DetailNavigatorItem
 
 
 class Document3DNavigatorItem(APIModel):
+    """The details of a 3D document navigator item."""
     navigatorItemId: NavigatorItemId
     prefix: Annotated[str, Field(description="The prefix of the navigator item's name.")]
     name: Annotated[str, Field(description="The name of the navigator item.")]
 
 
 class Document3DNavigatorItemWrapperItem(APIModel):
+    """Contains a 3D document navigator item or an error."""
     document3DNavigatorItem: Document3DNavigatorItem
 
 
 class ElevationNavigatorItem(APIModel):
+    """The details of an elevation navigator item."""
     navigatorItemId: NavigatorItemId
     prefix: Annotated[str, Field(description="The prefix of the navigator item's name.")]
     name: Annotated[str, Field(description="The name of the navigator item.")]
 
 
 class ElevationNavigatorItemWrapperItem(APIModel):
+    """Contains an elevation navigator item or an error."""
     elevationNavigatorItem: ElevationNavigatorItem
 
 
 class InteriorElevationNavigatorItem(APIModel):
+    """The details of an interior elevation navigator item."""
     navigatorItemId: NavigatorItemId
     prefix: Annotated[str, Field(description="The prefix of the navigator item's name.")]
     name: Annotated[str, Field(description="The name of the navigator item.")]
 
 
 class InteriorElevationNavigatorItemWrapperItem(APIModel):
+    """Contains an interior elevation navigator item or an error."""
     interiorElevationNavigatorItem: InteriorElevationNavigatorItem
 
 
 class SectionNavigatorItem(APIModel):
+    """The details of a section navigator item."""
     navigatorItemId: NavigatorItemId
     prefix: Annotated[str, Field(description="The prefix of the navigator item's name.")]
     name: Annotated[str, Field(description="The name of the navigator item.")]
 
 
 class SectionNavigatorItemWrapperItem(APIModel):
+    """Contains a section navigator item or an error."""
     sectionNavigatorItem: SectionNavigatorItem
 
 
 class StoryNavigatorItem(APIModel):
+    """The details of a story navigator item."""
     navigatorItemId: NavigatorItemId
     prefix: Annotated[str, Field(description="The prefix of the navigator item's name.")]
     name: Annotated[str, Field(description="The name of the navigator item.")]
@@ -1162,34 +1282,40 @@ class StoryNavigatorItem(APIModel):
 
 
 class StoryNavigatorItemWrapperItem(APIModel):
+    """Contains a story navigator item or an error."""
     storyNavigatorItem: StoryNavigatorItem
 
 
 class WorksheetNavigatorItem(APIModel):
+    """The details of a worksheet navigator item."""
     navigatorItemId: NavigatorItemId
     prefix: Annotated[str, Field(description="The prefix of the navigator item's name.")]
     name: Annotated[str, Field(description="The name of the navigator item.")]
 
 
 class WorksheetNavigatorItemWrapperItem(APIModel):
+    """Contains a worksheet navigator item or an error."""
     worksheetNavigatorItem: WorksheetNavigatorItem
 
 
 class BuiltInContainerNavigatorItem(APIModel):
+    """The details of a built-in container navigator item."""
     navigatorItemId: NavigatorItemId
     prefix: Annotated[str, Field(description="The prefix of the navigator item's name.")]
     name: Annotated[str, Field(description="The name of the navigator item.")]
     contentIds: Annotated[
-        List[NavigatorItemIdWrapperItem],
+        list[NavigatorItemIdWrapperItem],
         Field(description="The identifiers of the navigator items inside the container navigator item."),
     ]
 
 
 class BuiltInContainerNavigatorItemWrapperItem(APIModel):
+    """Contains a built-in container navigator item or an error."""
     builtInContainerNavigatorItem: BuiltInContainerNavigatorItem
 
 
 class PropertyId(APIModel):
+    """The identifier of a property."""
     guid: Annotated[
         UUID,
         Field(
@@ -1203,6 +1329,7 @@ class PropertyIdArrayItem(APIModel):
 
 
 class PropertyGroupId(APIModel):
+    """The identifier of a property group."""
     guid: Annotated[
         UUID,
         Field(
@@ -1216,15 +1343,18 @@ class PropertyGroupIdArrayItem(APIModel):
 
 
 class PropertyGroup(APIModel):
+    """A property group."""
     propertyGroupId: PropertyGroupId
     name: Annotated[str, Field(description="The property group name.")]
 
 
 class PropertyGroupWrapperItem(APIModel):
+    """A property group or an error."""
     propertyGroup: PropertyGroup
 
 
 class NormalSingleEnumPropertyValue(APIModel):
+    """A single enumeration property value containing the ID of the selected enum value."""
     type: Literal["singleEnum"] = "singleEnum"
     status: Literal["normal"] = "normal"
     value: Annotated[
@@ -1234,12 +1364,14 @@ class NormalSingleEnumPropertyValue(APIModel):
 
 
 class NormalMultiEnumPropertyValue(APIModel):
+    """A multiple choice enumeration property value containing the IDs of the selected enum values in an array."""
     type: Literal["multiEnum"] = "multiEnum"
     status: Literal["normal"] = "normal"
-    value: Annotated[List[EnumValueIdWrapperItem], Field(description="A list of enumeration identifiers.")]
+    value: Annotated[list[EnumValueIdWrapperItem], Field(description="A list of enumeration identifiers.")]
 
 
 class PropertyValueWrapperItem(APIModel):
+    """A property value or an error"""
     propertyValue: Annotated[
         NotAvailablePropertyValue
         | NotEvaluatedPropertyValue
@@ -1267,13 +1399,15 @@ class PropertyValueWrapperItem(APIModel):
 
 
 class PropertyValuesWrapperItem(APIModel):
+    """A list of property values or an error."""
     propertyValues: Annotated[
-        List[PropertyValueWrapperItem | ErrorItem],
+        list[PropertyValueWrapperItem | ErrorItem],
         Field(description="A list of property values."),
     ]
 
 
 class ElementPropertyValue(APIModel):
+    """A property value with the identifiers of the property and its owner element."""
     elementId: ElementId
     propertyId: PropertyId
     propertyValue: Annotated[
@@ -1301,11 +1435,13 @@ class ElementPropertyValue(APIModel):
 
 
 class PropertyIdsOfElement(APIModel):
+    """A list property identifiers of an owner element."""
     elementId: ElementId
-    propertyIds: Annotated[List[PropertyIdArrayItem], Field(description="A list of property identifiers.")]
+    propertyIds: Annotated[list[PropertyIdArrayItem], Field(description="A list of property identifiers.")]
 
 
 class PropertyIdsOfElementWrapperItem(APIModel):
+    """A list property identifiers of an owner element or an error."""
     propertyIdsOfElement: PropertyIdsOfElement
 
 
@@ -1326,37 +1462,44 @@ class RenameNavigatorItemByNameAndId(APIModel):
 
 
 class PenTableAttribute(APIModel):
+    """A pen table attribute."""
     attributeId: AttributeId
     name: Annotated[str, Field(description="The name of an attribute.", min_length=1)]
-    pens: Annotated[List[PenArrayItem], Field(description="A collection of pens in a pen table.")]
+    pens: Annotated[list[PenArrayItem], Field(description="A collection of pens in a pen table.")]
 
 
 class PenTableAttributeWrapperItem(APIModel):
+    """A pen table attribute or an error."""
     penTableAttribute: PenTableAttribute
 
 
 class ClassificationItemAvailability(APIModel):
+    """Contains the ids of property definitions available for the given classification item."""
     classificationItemId: ClassificationItemId
-    availableProperties: Annotated[List[PropertyIdArrayItem], Field(description="A list of property identifiers.")]
+    availableProperties: Annotated[list[PropertyIdArrayItem], Field(description="A list of property identifiers.")]
 
 
 class ClassificationItemAvailabilityWrapperItem(APIModel):
+    """Contains the ids of property definitions available for the given classification item or error."""
     classificationItemAvailability: ClassificationItemAvailability
 
 
 class PropertyDefinitionAvailability(APIModel):
+    """Contains the ids of classification items the given property definiton is available for."""
     propertyId: PropertyId
     availableClassifications: Annotated[
-        List[ClassificationItemIdArrayItem],
+        list[ClassificationItemIdArrayItem],
         Field(description="A list of classification item identifiers."),
     ]
 
 
 class PropertyDefinitionAvailabilityWrapperItem(APIModel):
+    """Contains the ids of classification items the given property definiton is available for or error."""
     propertyDefinitionAvailability: PropertyDefinitionAvailability
 
 
 class PropertyBasicDefaultValue(APIModel):
+    """Default value of the property in case of a basic property value (ie. not an expression)."""
     basicDefaultValue: Annotated[
         NotAvailablePropertyValue
         | NotEvaluatedPropertyValue
@@ -1387,6 +1530,7 @@ PropertyDefaultValue: TypeAlias = PropertyBasicDefaultValue
 
 
 class PropertyDefinition(APIModel):
+    """A property definition. The default value of a property appears if and only if it is a custom property and is not an expression type property. (This may change in the future.)"""
     propertyId: PropertyId | None = None
     group: PropertyGroup
     name: Annotated[str, Field(description="The localized name of the property.")]
@@ -1394,13 +1538,14 @@ class PropertyDefinition(APIModel):
     isEditable: Annotated[bool, Field(description="Defines whether the property is editable or not.")]
     type: Annotated[str, Field(description="Defines the type of the property's value.")]
     possibleEnumValues: Annotated[
-        List[PossibleEnumValuesArrayItem] | None,
+        list[PossibleEnumValuesArrayItem] | None,
         Field(description="The possible enum values of the property when the property type is enumeration."),
     ] = None
     defaultValue: PropertyDefaultValue | None = None
 
 
 class PropertyDefinitionWrapperItem(APIModel):
+    """A property definition or an error."""
     propertyDefinition: PropertyDefinition
 
 
@@ -1409,6 +1554,7 @@ class AttributeFolderStructureArrayItem(APIModel):
 
 
 class AttributeFolderStructure(APIModel):
+    """The details of an attribute folder structure."""
     attributeFolderId: AttributeFolderId
     name: Annotated[
         str,
@@ -1418,16 +1564,13 @@ class AttributeFolderStructure(APIModel):
         ),
     ]
     attributes: Annotated[
-        List[AttributeHeaderArrayItem] | None,
+        list[AttributeHeaderArrayItem] | None,
         Field(description="The names and identifiers of the attributes contained in this folder."),
     ] = None
     subfolders: Annotated[
-        List[AttributeFolderStructureArrayItem] | None,
+        list[AttributeFolderStructureArrayItem] | None,
         Field(description="The subfolders of this attribute folder."),
     ] = None
-
-
-AttributeFolderStructureOrError: TypeAlias = AttributeFolderStructure | ErrorItem
 
 
 class ClassificationItemArrayItem(APIModel):
@@ -1435,6 +1578,7 @@ class ClassificationItemArrayItem(APIModel):
 
 
 class ClassificationItemInTree(APIModel):
+    """The details of a classification item."""
     classificationItemId: ClassificationItemId
     id: Annotated[
         str,
@@ -1443,7 +1587,7 @@ class ClassificationItemInTree(APIModel):
     name: Annotated[str, Field(description="The display name of the classification item.")]
     description: Annotated[str, Field(description="The description of the classification item.")]
     children: Annotated[
-        List[ClassificationItemArrayItem] | None,
+        list[ClassificationItemArrayItem] | None,
         Field(description="A list of classification items."),
     ] = None
 
@@ -1453,6 +1597,7 @@ class NavigatorItemArrayItem(APIModel):
 
 
 class NavigatorItem(APIModel):
+    """The details of a navigator item."""
     navigatorItemId: NavigatorItemId
     prefix: Annotated[str, Field(description="The prefix of the navigator item's name.")]
     name: Annotated[str, Field(description="The name of the navigator item.")]
@@ -1464,10 +1609,14 @@ class NavigatorItem(APIModel):
         ),
     ] = None
     children: Annotated[
-        List[NavigatorItemArrayItem] | None,
+        list[NavigatorItemArrayItem] | None,
         Field(description="The children of the navigator item if it has any."),
     ] = None
 
 
 class NavigatorTree(APIModel):
+    """A tree of navigator items."""
     rootItem: NavigatorItem
+
+
+AttributeFolderStructureOrError: TypeAlias = AttributeFolderStructure | ErrorItem

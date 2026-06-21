@@ -200,11 +200,10 @@ def assemble_final_file(content: str) -> str:
     print("⚙️  Step 7: Assembling final file...")
     body = re.sub(r"^#.*?\n\n", "", content, flags=re.DOTALL)
     body = re.sub(r"^(from|import).*\n", "", body, flags=re.MULTILINE)
-    body = re.sub(r"^OfficialArchicadApiMasterModels\s*:\s*TypeAlias = .*\n", "", body, flags=re.MULTILINE)
 
     header = [
         "from __future__ import annotations",
-        "from typing import List, Literal, TypeAlias, Annotated, Any, Union, TypedDict",
+        "from typing import Literal, TypeAlias, Annotated, Any, Union, TypedDict",
         "from uuid import UUID",
         "from enum import Enum",
         "from pydantic import APIModel, ConfigDict, Field, RootModel",

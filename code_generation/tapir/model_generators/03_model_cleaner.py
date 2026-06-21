@@ -10,8 +10,7 @@ def main():
         print(f"Error: {tapir_paths.RAW_PYDANTIC_MODELS} not found. Please generate it first.")
         return
 
-    # Apply the two necessary cleaning steps.
-    content = remove_master_model_definition(content)
+    # Apply the necessary cleaning steps.
     content = fix_root_model_unions_to_type_alias(content)
     content = remove_guid_pattern(content)
     content = remove_redundant_model_configs(content)
@@ -19,25 +18,6 @@ def main():
 
     tapir_paths.CLEANED_PYDANTIC_MODELS.write_text(content, encoding="utf-8")
     print(f"✅ Successfully created final, clean models at: {tapir_paths.CLEANED_PYDANTIC_MODELS}")
-
-
-def remove_master_model_definition(content: str) -> str:
-    """Finds and removes the boilerplate TapirMasterModels RootModel definition."""
-    print("    - Step 1: Removing boilerplate `TapirMasterModels` RootModel...")
-
-    pattern = re.compile(
-        r"^class TapirMasterModels\(RootModel\[Any\]\):\n(?:    .*\n?)*",
-        re.MULTILINE
-    )
-
-    cleaned_content, num_replacements = pattern.subn("", content, count=1)
-
-    if num_replacements > 0:
-        print("      - Successfully removed the definition.")
-    else:
-        print("      - Warning: `TapirMasterModels` definition not found.")
-
-    return cleaned_content.strip()
 
 
 def fix_root_model_unions_to_type_alias(content: str) -> str:
@@ -138,7 +118,7 @@ def assemble_final_file(content: str) -> str:
 
     header = [
         "from __future__ import annotations",
-        "from typing import Any, List, Literal, Annotated, TypeAlias",
+        "from typing import Any, Literal, Annotated, TypeAlias",
         "from uuid import UUID",
         "from enum import Enum",
         "from pydantic import Field, RootModel",
