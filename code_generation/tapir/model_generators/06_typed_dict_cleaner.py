@@ -1,12 +1,8 @@
 import re
 from code_generation.tapir.paths import tapir_paths
 
+
 def main():
-    """
-    Performs a final, surgical cleaning of the generated TypedDict models.
-    This script addresses known artifacts from the datamodel-codegen process
-    to produce a clean, valid, and usable TypedDict models file for static analysis.
-    """
     print(f"--- Starting definitive cleaning of {tapir_paths.RAW_TYPED_DICTS} ---")
 
     try:
@@ -16,67 +12,58 @@ def main():
         return
 
     print("Step 1: Reordering forward-referencing TypeAliases...")
-    content = surgically_fix_copy_keyword(content)
-    print("Step 2: Reordering forward-referencing TypeAliases...")
     content = fix_forward_reference_aliases(content)
-    print("Step 3: Assembling and formatting the final file...")
+
+    print("Step 2: Assembling and formatting the final file...")
     content = assemble_final_file(content)
 
     tapir_paths.CLEANED_TYPED_DICTS.write_text(content, encoding="utf-8")
     print(f"✅ Successfully created final, clean TypedDict models at: {tapir_paths.CLEANED_TYPED_DICTS}")
 
 
-### Cleaning Logic Functions (in execution order) ###
-
-def surgically_fix_copy_keyword(content: str) -> str:
-    field_to_fix = "copy_: NotRequired[bool]"
-    correct_field = "copy: NotRequired[bool]"
-    if field_to_fix in content:
-        content = content.replace(field_to_fix, correct_field)
-        print(f"    - Corrected '{field_to_fix}' -> '{correct_field}'")
-    return content
-
-
 def fix_forward_reference_aliases(content: str) -> str:
     """
-    Finds patterns like `Alias = List[Class]` defined before `class Class(TypedDict)`
-    and swaps them to ensure correct definition order for static analysis.
+    Finds patterns like `Alias: TypeAlias = list["Class"]` defined before `class Class(TypedDict)`
+    and swaps them to ensure correct definition order. It also strips the quotes from the
+    forward-reference, turning it into a solid runtime type to prevent Typeguard NameErrors.
     """
-    # This regex finds the problematic alias and class definition blocks.
-    # It uses a backreference `(?P=class_name)` to ensure it matches the correct class.
     pattern = re.compile(
-        r"^(?P<alias_block>(?P<alias_name>\w+)\s*=\s*List\[(?P<class_name>\w+)\])\n+(?P<class_block>class\s+(?P=class_name)\(TypedDict\):(?:\n(?:    .*))+)",
-        re.MULTILINE
+        r"^(?P<alias_block>(?P<alias_name>\w+):\s*TypeAlias\s*=\s*list\[[\"'](?P<class_name>\w+)[\"']\](?:\n[ \t]*\"\"\"[^\"]+\"\"\")?)\n+(?P<class_block>class\s+(?P=class_name)\(TypedDict\):(?:\n(?:    .*|))*)",
+        re.MULTILINE,
     )
 
-    # The replacement function swaps the captured groups.
     def replacer(match):
-        print(f"    - Reordered '{match.group('alias_name')}' to be after '{match.group('class_name')}'.")
-        return f"{match.group('class_block')}\n\n\n{match.group('alias_block')}"
+        alias_block = match.group("alias_block").strip()
+        class_block = match.group("class_block").strip()
+        class_name = match.group("class_name")
 
-    # Substitute all occurrences found in the content.
+        # Changes `Hotlinks: TypeAlias = list["Hotlink"]` to `list[Hotlink]`
+        alias_block = re.sub(rf'list\[["\']{class_name}["\']\]', f"list[{class_name}]", alias_block)
+
+        print(
+            f"    - Reordered '{match.group('alias_name')}' to be after '{class_name}' and stripped forward-ref quotes."
+        )
+
+        return f"{class_block}\n\n\n{alias_block}\n\n\n"
+
     content, num_replacements = pattern.subn(replacer, content)
-
     if num_replacements == 0:
         print("    - No forward-reference aliases needed reordering.")
-
     return content
 
 
 def assemble_final_file(content: str) -> str:
-    """Adds a standard header, imports, and performs final formatting."""
-    content = content.replace("TapirMasterModels = Any", "")
-
+    """Adds standard headers and ensures consistent double-blank line separation between definitions."""
     body_lines = [
         line for line in content.splitlines()
         if line.strip()
-        and not line.strip().startswith(("#", "from __future__", "from typing"))
+        and not line.strip().startswith(("#", "from __future__", "from typing", "###"))
     ]
 
     header = [
         "from __future__ import annotations",
         "",
-        "from typing import Any, List, Literal, TypedDict",
+        "from typing import Any, Literal, TypeAlias, TypedDict",
         "",
         "from typing_extensions import NotRequired",
         "",
@@ -85,9 +72,9 @@ def assemble_final_file(content: str) -> str:
 
     final_content = "\n".join(header + [""] + body_lines)
 
-    # Standardize spacing between definitions for readability.
-    final_content = re.sub(r'\n(class |[A-Z]\w+\s*=)', r'\n\n\n\1', final_content)
-    # Clean up excessive newlines that might be introduced during processing.
+    # Ensure consistent double-blank lines (\n\n\n) between definitions so that
+    # the split scripts can identify class boundaries easily.
+    final_content = re.sub(r'\n(class |[A-Z]\w+\s*=|[A-Z]\w+\s*:\s*TypeAlias\s*=)', r'\n\n\n\1', final_content)
     final_content = re.sub(r'\n{4,}', '\n\n\n', final_content)
 
     return final_content.strip() + "\n"

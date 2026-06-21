@@ -133,11 +133,10 @@ def assemble_final_file(content: str) -> str:
     # Remove the placeholder model and all original import/header lines
     body = re.sub(r"^#.*?\n\n", "", content, flags=re.DOTALL)
     body = re.sub(r"^(from|import).*\n", "", body, flags=re.MULTILINE)
-    body = re.sub(r"^OfficialArchicadApiMasterModels\s*=\s*Any\n*", "", body, flags=re.MULTILINE)
 
     header = [
         "from __future__ import annotations",
-        "from typing import Any, List, Literal, TypedDict, Union",
+        "from typing import Any, TypeAlias, Literal, TypedDict, Union",
         "from typing_extensions import NotRequired",
         "",
         "from multiconn_archicad.dicts.extra_iems import extra_items",

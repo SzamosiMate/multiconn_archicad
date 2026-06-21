@@ -17,7 +17,7 @@ def get_header_lines() -> list[str]:
     """Creates a comprehensive list of all possible header import lines for the model files."""
     return [
         "from __future__ import annotations",
-        "from typing import List, Literal, TypeAlias, Annotated, Any, Union, TypedDict",
+        "from typing import Literal, TypeAlias, Annotated, Any, Union, TypedDict",
         "from uuid import UUID",
         "from enum import Enum",
         "from pydantic import BaseModel, ConfigDict, Field, RootModel",
@@ -53,7 +53,7 @@ def remove_unused_imports(content: str) -> str:
     def is_used(name: str, text: str) -> bool:
         return bool(re.search(rf"\b{name}\b", text))
 
-    typing_imports = ["Annotated", "Any", "List", "Literal", "TypeAlias", "TypedDict", "Union"]
+    typing_imports = ["Annotated", "Any", "Literal", "TypeAlias", "TypedDict", "Union"]
     used_typing = [name for name in typing_imports if is_used(name, body)]
 
     if "from typing import" in header:

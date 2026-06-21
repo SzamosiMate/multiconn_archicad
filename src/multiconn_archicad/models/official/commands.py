@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Annotated, List
+from typing import Annotated
 from pydantic import Field, RootModel
 
 from multiconn_archicad.models.base import APIModel
@@ -96,7 +96,7 @@ class GetProductInfoResult(APIModel):
 
 
 class GetPublisherSetNamesResult(APIModel):
-    publisherSetNames: Annotated[List[str], Field(description="The names of available publisher sets.")]
+    publisherSetNames: Annotated[list[str], Field(description="The names of available publisher sets.")]
 
 
 class GetSelectedElementsParameters(APIModel):
@@ -123,33 +123,33 @@ class IsAliveResult(APIModel):
 
 
 class CreateAttributeFoldersParameters(APIModel):
-    attributeFolders: List[AttributeFolderCreationParameters]
+    attributeFolders: list[AttributeFolderCreationParameters]
 
 
 class CreateAttributeFoldersResult(APIModel):
     executionResults: Annotated[
-        List[SuccessfulExecutionResult | FailedExecutionResult],
+        list[SuccessfulExecutionResult | FailedExecutionResult],
         Field(description="A list of execution results."),
     ]
 
 
 class DeleteAttributeFoldersResult(APIModel):
     executionResults: Annotated[
-        List[SuccessfulExecutionResult | FailedExecutionResult],
+        list[SuccessfulExecutionResult | FailedExecutionResult],
         Field(description="A list of execution results."),
     ]
 
 
 class DeleteAttributesResult(APIModel):
     executionResults: Annotated[
-        List[SuccessfulExecutionResult | FailedExecutionResult],
+        list[SuccessfulExecutionResult | FailedExecutionResult],
         Field(description="A list of execution results."),
     ]
 
 
 class DeleteNavigatorItemsResult(APIModel):
     executionResults: Annotated[
-        List[SuccessfulExecutionResult | FailedExecutionResult],
+        list[SuccessfulExecutionResult | FailedExecutionResult],
         Field(description="A list of execution results."),
     ]
 
@@ -164,29 +164,29 @@ class ExecuteAddOnCommandResult(APIModel):
 
 
 class Get2DBoundingBoxesParameters(APIModel):
-    elements: Annotated[List[ElementIdArrayItem], Field(description="A list of elements.")]
+    elements: Annotated[list[ElementIdArrayItem], Field(description="A list of elements.")]
 
 
 class Get2DBoundingBoxesResult(APIModel):
     boundingBoxes2D: Annotated[
-        List[BoundingBox2DWrapperItem | ErrorItem],
+        list[BoundingBox2DWrapperItem | ErrorItem],
         Field(description="A list of 2D bounding boxes."),
     ]
 
 
 class Get3DBoundingBoxesParameters(APIModel):
-    elements: Annotated[List[ElementIdArrayItem], Field(description="A list of elements.")]
+    elements: Annotated[list[ElementIdArrayItem], Field(description="A list of elements.")]
 
 
 class Get3DBoundingBoxesResult(APIModel):
     boundingBoxes3D: Annotated[
-        List[BoundingBox3DWrapperItem | ErrorItem],
+        list[BoundingBox3DWrapperItem | ErrorItem],
         Field(description="A list of 3D bounding boxes."),
     ]
 
 
 class GetAllElementsResult(APIModel):
-    elements: Annotated[List[ElementIdArrayItem], Field(description="A list of elements.")]
+    elements: Annotated[list[ElementIdArrayItem], Field(description="A list of elements.")]
 
 
 class GetAllPropertyGroupIdsParameters(APIModel):
@@ -198,13 +198,13 @@ class GetAllPropertyIdsParameters(APIModel):
 
 
 class GetAllPropertyIdsOfElementsParameters(APIModel):
-    elements: Annotated[List[ElementIdArrayItem], Field(description="A list of elements.")]
+    elements: Annotated[list[ElementIdArrayItem], Field(description="A list of elements.")]
     propertyType: PropertyType | None = None
 
 
 class GetAllPropertyNamesResult(APIModel):
     properties: Annotated[
-        List[UserDefinedPropertyUserId | BuiltInPropertyUserId],
+        list[UserDefinedPropertyUserId | BuiltInPropertyUserId],
         Field(description="A list of PropertyUserId objects."),
     ]
 
@@ -212,7 +212,7 @@ class GetAllPropertyNamesResult(APIModel):
 class GetAttributeFolderStructureParameters(APIModel):
     attributeType: AttributeType
     path: Annotated[
-        List[AttributeFolderName] | None,
+        list[AttributeFolderName] | None,
         Field(description="A list of attribute folder names. May be empty."),
     ] = None
 
@@ -222,18 +222,18 @@ class GetAttributesByTypeParameters(APIModel):
 
 
 class GetComponentsOfElementsParameters(APIModel):
-    elements: Annotated[List[ElementIdArrayItem], Field(description="A list of elements.")]
+    elements: Annotated[list[ElementIdArrayItem], Field(description="A list of elements.")]
 
 
 class GetComponentsOfElementsResult(APIModel):
     componentsOfElements: Annotated[
-        List[ElementComponentsWrapper | ErrorItem],
+        list[ElementComponentsWrapper | ErrorItem],
         Field(description="Array of component list or error."),
     ]
 
 
 class GetElementsByClassificationResult(APIModel):
-    elements: Annotated[List[ElementIdArrayItem], Field(description="A list of elements.")]
+    elements: Annotated[list[ElementIdArrayItem], Field(description="A list of elements.")]
 
 
 class GetElementsByTypeParameters(APIModel):
@@ -241,13 +241,13 @@ class GetElementsByTypeParameters(APIModel):
 
 
 class GetElementsByTypeResult(APIModel):
-    elements: Annotated[List[ElementIdArrayItem], Field(description="A list of elements.")]
+    elements: Annotated[list[ElementIdArrayItem], Field(description="A list of elements.")]
 
 
 class GetElementsRelatedToZonesParameters(APIModel):
-    zones: Annotated[List[ElementIdArrayItem], Field(description="A list of elements.")]
+    zones: Annotated[list[ElementIdArrayItem], Field(description="A list of elements.")]
     elementTypes: Annotated[
-        List[ElementType] | None,
+        list[ElementType] | None,
         Field(
             description="If this parameter is given, then only related elements with the requested types will be listed."
         ),
@@ -256,7 +256,7 @@ class GetElementsRelatedToZonesParameters(APIModel):
 
 class GetElementsRelatedToZonesResult(APIModel):
     elementsRelatedToZones: Annotated[
-        List[ElementsWrapper | ErrorItem],
+        list[ElementsWrapper | ErrorItem],
         Field(description="A list of ElementsOrError items."),
     ]
 
@@ -274,29 +274,29 @@ class GetNavigatorItemTreeParameters(APIModel):
 
 class GetProfileAttributePreviewResult(APIModel):
     previewImages: Annotated[
-        List[ImageWrapperItem | ErrorItem],
+        list[ImageWrapperItem | ErrorItem],
         Field(description="The preview images of the profiles."),
     ]
 
 
 class GetPropertyIdsParameters(APIModel):
     properties: Annotated[
-        List[UserDefinedPropertyUserId | BuiltInPropertyUserId],
+        list[UserDefinedPropertyUserId | BuiltInPropertyUserId],
         Field(description="List of property names whose ids are requested."),
     ]
 
 
 class GetSelectedElementsResult(APIModel):
-    elements: Annotated[List[ElementIdArrayItem], Field(description="A list of elements.")]
+    elements: Annotated[list[ElementIdArrayItem], Field(description="A list of elements.")]
 
 
 class GetTypesOfElementsParameters(APIModel):
-    elements: Annotated[List[ElementIdArrayItem], Field(description="A list of elements.")]
+    elements: Annotated[list[ElementIdArrayItem], Field(description="A list of elements.")]
 
 
 class GetTypesOfElementsResult(APIModel):
     typesOfElements: Annotated[
-        List[TypeOfElementWrapperItem | ErrorItem],
+        list[TypeOfElementWrapperItem | ErrorItem],
         Field(description="A list of element types or errors."),
     ]
 
@@ -307,21 +307,21 @@ class IsAddOnCommandAvailableParameters(APIModel):
 
 class RenameAttributeFoldersResult(APIModel):
     executionResults: Annotated[
-        List[SuccessfulExecutionResult | FailedExecutionResult],
+        list[SuccessfulExecutionResult | FailedExecutionResult],
         Field(description="A list of execution results."),
     ]
 
 
 class SetClassificationsOfElementsResult(APIModel):
     executionResults: Annotated[
-        List[SuccessfulExecutionResult | FailedExecutionResult],
+        list[SuccessfulExecutionResult | FailedExecutionResult],
         Field(description="A list of execution results."),
     ]
 
 
 class SetPropertyValuesOfElementsResult(APIModel):
     executionResults: Annotated[
-        List[SuccessfulExecutionResult | FailedExecutionResult],
+        list[SuccessfulExecutionResult | FailedExecutionResult],
         Field(description="A list of execution results."),
     ]
 
@@ -396,21 +396,21 @@ class CreateViewMapFolderResult(APIModel):
 
 class DeleteAttributeFoldersParameters(APIModel):
     attributeFolderIds: Annotated[
-        List[AttributeFolderIdWrapperItem],
+        list[AttributeFolderIdWrapperItem],
         Field(description="A list of attribute folder identifiers."),
     ]
 
 
 class DeleteAttributesParameters(APIModel):
     attributeIds: Annotated[
-        List[AttributeIdWrapperItem],
+        list[AttributeIdWrapperItem],
         Field(description="A list of attribute identifiers."),
     ]
 
 
 class DeleteNavigatorItemsParameters(APIModel):
     navigatorItemIds: Annotated[
-        List[NavigatorItemIdWrapperItem],
+        list[NavigatorItemIdWrapperItem],
         Field(description="A list of navigator item identifiers."),
     ]
 
@@ -432,110 +432,110 @@ class GetAllClassificationsInSystemParameters(APIModel):
 
 class GetAllClassificationSystemsResult(APIModel):
     classificationSystems: Annotated[
-        List[ClassificationSystem],
+        list[ClassificationSystem],
         Field(description="A list of classification systems."),
     ]
 
 
 class GetAllPropertyGroupIdsResult(APIModel):
     propertyGroupIds: Annotated[
-        List[PropertyGroupIdArrayItem],
+        list[PropertyGroupIdArrayItem],
         Field(description="A list of property group identifiers."),
     ]
 
 
 class GetAllPropertyIdsResult(APIModel):
-    propertyIds: Annotated[List[PropertyIdArrayItem], Field(description="A list of property identifiers.")]
+    propertyIds: Annotated[list[PropertyIdArrayItem], Field(description="A list of property identifiers.")]
 
 
 class GetAllPropertyIdsOfElementsResult(APIModel):
     propertyIdsOfElements: Annotated[
-        List[PropertyIdsOfElementWrapperItem | ErrorItem],
+        list[PropertyIdsOfElementWrapperItem | ErrorItem],
         Field(description="A list of property identifiers of elements or errors."),
     ]
 
 
 class GetAttributeFoldersParameters(APIModel):
     attributeFolderIds: Annotated[
-        List[AttributeFolderIdWrapperItem],
+        list[AttributeFolderIdWrapperItem],
         Field(description="A list of attribute folder identifiers."),
     ]
 
 
 class GetAttributeFoldersResult(APIModel):
     attributeFolders: Annotated[
-        List[AttributeFolderWrapperItem | ErrorItem],
+        list[AttributeFolderWrapperItem | ErrorItem],
         Field(description="A list of attribute folders."),
     ]
 
 
 class GetAttributesByTypeResult(APIModel):
     attributeIds: Annotated[
-        List[AttributeIdWrapperItem],
+        list[AttributeIdWrapperItem],
         Field(description="A list of attribute identifiers."),
     ]
 
 
 class GetAttributesIndicesParameters(APIModel):
     attributeIds: Annotated[
-        List[AttributeIdWrapperItem],
+        list[AttributeIdWrapperItem],
         Field(description="A list of attribute identifiers."),
     ]
 
 
 class GetAttributesIndicesResult(APIModel):
     attributeIndicesAndGuids: Annotated[
-        List[AttributeIndexAndGuidWrapperItem | ErrorItem],
+        list[AttributeIndexAndGuidWrapperItem | ErrorItem],
         Field(description="A list of complete attribute identifiers."),
     ]
 
 
 class GetBuildingMaterialAttributesParameters(APIModel):
     attributeIds: Annotated[
-        List[AttributeIdWrapperItem],
+        list[AttributeIdWrapperItem],
         Field(description="A list of attribute identifiers."),
     ]
 
 
 class GetBuildingMaterialAttributesResult(APIModel):
     attributes: Annotated[
-        List[BuildingMaterialAttributeWrapperItem | ErrorItem],
+        list[BuildingMaterialAttributeWrapperItem | ErrorItem],
         Field(description="A list of building material attributes and potential errors."),
     ]
 
 
 class GetBuiltInContainerNavigatorItemsParameters(APIModel):
     navigatorItemIds: Annotated[
-        List[NavigatorItemIdWrapperItem],
+        list[NavigatorItemIdWrapperItem],
         Field(description="A list of navigator item identifiers."),
     ]
 
 
 class GetBuiltInContainerNavigatorItemsResult(APIModel):
     navigatorItems: Annotated[
-        List[BuiltInContainerNavigatorItemWrapperItem | ErrorItem],
+        list[BuiltInContainerNavigatorItemWrapperItem | ErrorItem],
         Field(description="A list of built-in container navigator items."),
     ]
 
 
 class GetClassificationItemAvailabilityParameters(APIModel):
     classificationItemIds: Annotated[
-        List[ClassificationItemIdArrayItem],
+        list[ClassificationItemIdArrayItem],
         Field(description="A list of classification item identifiers."),
     ]
 
 
 class GetClassificationsOfElementsParameters(APIModel):
-    elements: Annotated[List[ElementIdArrayItem], Field(description="A list of elements.")]
+    elements: Annotated[list[ElementIdArrayItem], Field(description="A list of elements.")]
     classificationSystemIds: Annotated[
-        List[ClassificationSystemIdArrayItem],
+        list[ClassificationSystemIdArrayItem],
         Field(description="A list of classification system identifiers."),
     ]
 
 
 class GetClassificationsOfElementsResult(APIModel):
     elementClassifications: Annotated[
-        List[ElementClassificationWrapperItem | ErrorItem],
+        list[ElementClassificationWrapperItem | ErrorItem],
         Field(
             description="The list of element classification item identifiers. Order of the ids are the same as in the input. Non-existing elements or non-existing classification systems are represented by error objects."
         ),
@@ -544,74 +544,74 @@ class GetClassificationsOfElementsResult(APIModel):
 
 class GetClassificationSystemIdsResult(APIModel):
     classificationSystemIds: Annotated[
-        List[ClassificationSystemIdArrayItem],
+        list[ClassificationSystemIdArrayItem],
         Field(description="A list of classification system identifiers."),
     ]
 
 
 class GetClassificationSystemsParameters(APIModel):
     classificationSystemIds: Annotated[
-        List[ClassificationSystemIdArrayItem],
+        list[ClassificationSystemIdArrayItem],
         Field(description="A list of classification system identifiers."),
     ]
 
 
 class GetClassificationSystemsResult(APIModel):
     classificationSystems: Annotated[
-        List[ClassificationSystemWrapperItem | ErrorItem],
+        list[ClassificationSystemWrapperItem | ErrorItem],
         Field(description="A list of classification systems or errors."),
     ]
 
 
 class GetCompositeAttributesParameters(APIModel):
     attributeIds: Annotated[
-        List[AttributeIdWrapperItem],
+        list[AttributeIdWrapperItem],
         Field(description="A list of attribute identifiers."),
     ]
 
 
 class GetCompositeAttributesResult(APIModel):
     attributes: Annotated[
-        List[CompositeAttributeWrapperItem | ErrorItem],
+        list[CompositeAttributeWrapperItem | ErrorItem],
         Field(description="A list of the composite attributes and potential errors."),
     ]
 
 
 class GetDetailNavigatorItemsParameters(APIModel):
     navigatorItemIds: Annotated[
-        List[NavigatorItemIdWrapperItem],
+        list[NavigatorItemIdWrapperItem],
         Field(description="A list of navigator item identifiers."),
     ]
 
 
 class GetDetailNavigatorItemsResult(APIModel):
     navigatorItems: Annotated[
-        List[DetailNavigatorItemWrapperItem | ErrorItem],
+        list[DetailNavigatorItemWrapperItem | ErrorItem],
         Field(description="A list of detail navigator items."),
     ]
 
 
 class GetDetailsOfClassificationItemsParameters(APIModel):
     classificationItemIds: Annotated[
-        List[ClassificationItemIdArrayItem],
+        list[ClassificationItemIdArrayItem],
         Field(description="A list of classification item identifiers."),
     ]
 
 
 class GetDetailsOfPropertiesParameters(APIModel):
-    properties: Annotated[List[PropertyIdArrayItem], Field(description="A list of property identifiers.")]
+    properties: Annotated[list[PropertyIdArrayItem], Field(description="A list of property identifiers.")]
 
 
 class GetDocument3DNavigatorItemsParameters(APIModel):
     navigatorItemIds: Annotated[
-        List[NavigatorItemIdWrapperItem],
+        list[NavigatorItemIdWrapperItem],
         Field(description="A list of navigator item identifiers."),
     ]
 
 
 class GetDocument3DNavigatorItemsResult(APIModel):
     navigatorItems: Annotated[
-        List[Document3DNavigatorItemWrapperItem | ErrorItem],
+        list[Document3DNavigatorItemWrapperItem | ErrorItem],
         Field(description="A list of 3D document navigator items."),
     ]
 
@@ -622,63 +622,63 @@ class GetElementsByClassificationParameters(APIModel):
 
 class GetElevationNavigatorItemsParameters(APIModel):
     navigatorItemIds: Annotated[
-        List[NavigatorItemIdWrapperItem],
+        list[NavigatorItemIdWrapperItem],
         Field(description="A list of navigator item identifiers."),
     ]
 
 
 class GetElevationNavigatorItemsResult(APIModel):
     navigatorItems: Annotated[
-        List[ElevationNavigatorItemWrapperItem | ErrorItem],
+        list[ElevationNavigatorItemWrapperItem | ErrorItem],
         Field(description="A list of elevation navigator items."),
     ]
 
 
 class GetFillAttributesParameters(APIModel):
     attributeIds: Annotated[
-        List[AttributeIdWrapperItem],
+        list[AttributeIdWrapperItem],
         Field(description="A list of attribute identifiers."),
     ]
 
 
 class GetFillAttributesResult(APIModel):
     attributes: Annotated[
-        List[FillAttributeWrapperItem | ErrorItem],
+        list[FillAttributeWrapperItem | ErrorItem],
         Field(description="A list of fill attributes and potential errors."),
     ]
 
 
 class GetInteriorElevationNavigatorItemsParameters(APIModel):
     navigatorItemIds: Annotated[
-        List[NavigatorItemIdWrapperItem],
+        list[NavigatorItemIdWrapperItem],
         Field(description="A list of navigator item identifiers."),
     ]
 
 
 class GetInteriorElevationNavigatorItemsResult(APIModel):
     navigatorItems: Annotated[
-        List[InteriorElevationNavigatorItemWrapperItem | ErrorItem],
+        list[InteriorElevationNavigatorItemWrapperItem | ErrorItem],
         Field(description="A list of interior elevation navigator items."),
     ]
 
 
 class GetLayerAttributesParameters(APIModel):
     attributeIds: Annotated[
-        List[AttributeIdWrapperItem],
+        list[AttributeIdWrapperItem],
         Field(description="A list of attribute identifiers."),
     ]
 
 
 class GetLayerAttributesResult(APIModel):
     attributes: Annotated[
-        List[LayerAttributeWrapperItem | ErrorItem],
+        list[LayerAttributeWrapperItem | ErrorItem],
         Field(description="A list of layer attributes and potential errors."),
     ]
 
 
 class GetLayerCombinationAttributesParameters(APIModel):
     attributeIds: Annotated[
-        List[AttributeIdWrapperItem],
+        list[AttributeIdWrapperItem],
         Field(description="A list of attribute identifiers."),
     ]
 
@@ -689,42 +689,42 @@ class GetLayoutSettingsParameters(APIModel):
 
 class GetLineAttributesParameters(APIModel):
     attributeIds: Annotated[
-        List[AttributeIdWrapperItem],
+        list[AttributeIdWrapperItem],
         Field(description="A list of attribute identifiers."),
     ]
 
 
 class GetLineAttributesResult(APIModel):
     attributes: Annotated[
-        List[LineAttributeWrapperItem | ErrorItem],
+        list[LineAttributeWrapperItem | ErrorItem],
         Field(description="A list of line attributes and potential errors."),
     ]
 
 
 class GetNavigatorItemsTypeParameters(APIModel):
     navigatorItemIds: Annotated[
-        List[NavigatorItemIdWrapperItem],
+        list[NavigatorItemIdWrapperItem],
         Field(description="A list of navigator item identifiers."),
     ]
 
 
 class GetNavigatorItemsTypeResult(APIModel):
     navigatorItemIdAndTypeList: Annotated[
-        List[NavigatorItemIdAndTypeWrapperItem | ErrorItem],
+        list[NavigatorItemIdAndTypeWrapperItem | ErrorItem],
         Field(description="A list of objects that consist of a navigator item identifier and a type."),
     ]
 
 
 class GetPenTableAttributesParameters(APIModel):
     attributeIds: Annotated[
-        List[AttributeIdWrapperItem],
+        list[AttributeIdWrapperItem],
         Field(description="A list of attribute identifiers."),
     ]
 
 
 class GetProfileAttributePreviewParameters(APIModel):
     attributeIds: Annotated[
-        List[AttributeIdWrapperItem],
+        list[AttributeIdWrapperItem],
         Field(description="A list of attribute identifiers."),
     ]
     imageWidth: Annotated[int, Field(description="The width of the preview image.")]
@@ -734,39 +734,39 @@ class GetProfileAttributePreviewParameters(APIModel):
 
 class GetProfileAttributesParameters(APIModel):
     attributeIds: Annotated[
-        List[AttributeIdWrapperItem],
+        list[AttributeIdWrapperItem],
         Field(description="A list of attribute identifiers."),
     ]
 
 
 class GetProfileAttributesResult(APIModel):
     attributes: Annotated[
-        List[ProfileAttributeWrapperItem | ErrorItem],
+        list[ProfileAttributeWrapperItem | ErrorItem],
         Field(description="A list of the profile attributes and potential errors."),
     ]
 
 
 class GetPropertyDefinitionAvailabilityParameters(APIModel):
-    propertyIds: Annotated[List[PropertyIdArrayItem], Field(description="A list of property identifiers.")]
+    propertyIds: Annotated[list[PropertyIdArrayItem], Field(description="A list of property identifiers.")]
 
 
 class GetPropertyGroupsParameters(APIModel):
     propertyGroupIds: Annotated[
-        List[PropertyGroupIdArrayItem],
+        list[PropertyGroupIdArrayItem],
         Field(description="A list of property group identifiers."),
     ]
 
 
 class GetPropertyGroupsResult(APIModel):
     propertyGroups: Annotated[
-        List[PropertyGroupWrapperItem | ErrorItem],
+        list[PropertyGroupWrapperItem | ErrorItem],
         Field(description="A list of property groups or errors."),
     ]
 
 
 class GetPropertyIdsResult(APIModel):
     properties: Annotated[
-        List[PropertyIdArrayItem | ErrorItem],
+        list[PropertyIdArrayItem | ErrorItem],
         Field(
             description="List of the ids of the requested properties. Order of the ids are the same as in the input. Existing properties are represented by propertyId objects, non-existing properties are represented by error objects."
         ),
@@ -775,15 +775,15 @@ class GetPropertyIdsResult(APIModel):
 
 class GetPropertyValuesOfElementComponentsParameters(APIModel):
     elementComponents: Annotated[
-        List[ElementComponentIdArrayItem],
+        list[ElementComponentIdArrayItem],
         Field(description="List of components of elements."),
     ]
-    properties: Annotated[List[PropertyIdArrayItem], Field(description="A list of property identifiers.")]
+    properties: Annotated[list[PropertyIdArrayItem], Field(description="A list of property identifiers.")]
 
 
 class GetPropertyValuesOfElementComponentsResult(APIModel):
     propertyValuesForElementComponents: Annotated[
-        List[PropertyValuesWrapperItem | ErrorItem],
+        list[PropertyValuesWrapperItem | ErrorItem],
         Field(
             description="List of property value lists. The order of the outer list is that of the given components. The order of the inner lists are that of the given properties."
         ),
@@ -791,13 +791,13 @@ class GetPropertyValuesOfElementComponentsResult(APIModel):
 
 
 class GetPropertyValuesOfElementsParameters(APIModel):
-    elements: Annotated[List[ElementIdArrayItem], Field(description="A list of elements.")]
-    properties: Annotated[List[PropertyIdArrayItem], Field(description="A list of property identifiers.")]
+    elements: Annotated[list[ElementIdArrayItem], Field(description="A list of elements.")]
+    properties: Annotated[list[PropertyIdArrayItem], Field(description="A list of property identifiers.")]
 
 
 class GetPropertyValuesOfElementsResult(APIModel):
     propertyValuesForElements: Annotated[
-        List[PropertyValuesWrapperItem | ErrorItem],
+        list[PropertyValuesWrapperItem | ErrorItem],
         Field(
             description="List of property value lists. The order of the outer list is that of the given elements. The order of the inner lists are that of the given properties."
         ),
@@ -806,81 +806,81 @@ class GetPropertyValuesOfElementsResult(APIModel):
 
 class GetSectionNavigatorItemsParameters(APIModel):
     navigatorItemIds: Annotated[
-        List[NavigatorItemIdWrapperItem],
+        list[NavigatorItemIdWrapperItem],
         Field(description="A list of navigator item identifiers."),
     ]
 
 
 class GetSectionNavigatorItemsResult(APIModel):
     navigatorItems: Annotated[
-        List[SectionNavigatorItemWrapperItem | ErrorItem],
+        list[SectionNavigatorItemWrapperItem | ErrorItem],
         Field(description="A list of section navigator items."),
     ]
 
 
 class GetStoryNavigatorItemsParameters(APIModel):
     navigatorItemIds: Annotated[
-        List[NavigatorItemIdWrapperItem],
+        list[NavigatorItemIdWrapperItem],
         Field(description="A list of navigator item identifiers."),
     ]
 
 
 class GetStoryNavigatorItemsResult(APIModel):
     navigatorItems: Annotated[
-        List[StoryNavigatorItemWrapperItem | ErrorItem],
+        list[StoryNavigatorItemWrapperItem | ErrorItem],
         Field(description="A list of story navigator items."),
     ]
 
 
 class GetSurfaceAttributesParameters(APIModel):
     attributeIds: Annotated[
-        List[AttributeIdWrapperItem],
+        list[AttributeIdWrapperItem],
         Field(description="A list of attribute identifiers."),
     ]
 
 
 class GetSurfaceAttributesResult(APIModel):
     attributes: Annotated[
-        List[SurfaceAttributeWrapperItem | ErrorItem],
+        list[SurfaceAttributeWrapperItem | ErrorItem],
         Field(description="A list of surface attributes and potential errors."),
     ]
 
 
 class GetWorksheetNavigatorItemsParameters(APIModel):
     navigatorItemIds: Annotated[
-        List[NavigatorItemIdWrapperItem],
+        list[NavigatorItemIdWrapperItem],
         Field(description="A list of navigator item identifiers."),
     ]
 
 
 class GetWorksheetNavigatorItemsResult(APIModel):
     navigatorItems: Annotated[
-        List[WorksheetNavigatorItemWrapperItem | ErrorItem],
+        list[WorksheetNavigatorItemWrapperItem | ErrorItem],
         Field(description="A list of worksheet navigator items."),
     ]
 
 
 class GetZoneCategoryAttributesParameters(APIModel):
     attributeIds: Annotated[
-        List[AttributeIdWrapperItem],
+        list[AttributeIdWrapperItem],
         Field(description="A list of attribute identifiers."),
     ]
 
 
 class GetZoneCategoryAttributesResult(APIModel):
     attributes: Annotated[
-        List[ZoneCategoryAttributeWrapperItem | ErrorItem],
+        list[ZoneCategoryAttributeWrapperItem | ErrorItem],
         Field(description="A list of zone category attributes and potential errors."),
     ]
 
 
 class MoveAttributesAndFoldersParameters(APIModel):
     attributeFolderIds: Annotated[
-        List[AttributeFolderIdWrapperItem],
+        list[AttributeFolderIdWrapperItem],
         Field(description="A list of attribute folder identifiers."),
     ]
     attributeIds: Annotated[
-        List[AttributeIdWrapperItem],
+        list[AttributeIdWrapperItem],
         Field(description="A list of attribute identifiers."),
     ]
     targetFolderId: AttributeFolderId
@@ -893,7 +893,7 @@ class MoveNavigatorItemParameters(APIModel):
 
 
 class RenameAttributeFoldersParameters(APIModel):
-    attributeFolderParametersList: List[AttributeFolderRenameParameters]
+    attributeFolderParametersList: list[AttributeFolderRenameParameters]
 
 
 class RenameNavigatorItemParameters(
@@ -904,7 +904,7 @@ class RenameNavigatorItemParameters(
 
 class SetClassificationsOfElementsParameters(APIModel):
     elementClassifications: Annotated[
-        List[ElementClassification],
+        list[ElementClassification],
         Field(description="A list of element classification identifiers."),
     ]
 
@@ -916,56 +916,56 @@ class SetLayoutSettingsParameters(APIModel):
 
 class SetPropertyValuesOfElementsParameters(APIModel):
     elementPropertyValues: Annotated[
-        List[ElementPropertyValue],
+        list[ElementPropertyValue],
         Field(description="A list of element property values."),
     ]
 
 
 class GetClassificationItemAvailabilityResult(APIModel):
     classificationItemAvailabilityList: Annotated[
-        List[ClassificationItemAvailabilityWrapperItem | ErrorItem],
+        list[ClassificationItemAvailabilityWrapperItem | ErrorItem],
         Field(description="A list of classification item avalabilities."),
     ]
 
 
 class GetDetailsOfClassificationItemsResult(APIModel):
     classificationItems: Annotated[
-        List[ClassificationItemWrapperItem | ErrorItem],
+        list[ClassificationItemWrapperItem | ErrorItem],
         Field(description="A list of classification items or errors."),
     ]
 
 
 class GetDetailsOfPropertiesResult(APIModel):
     propertyDefinitions: Annotated[
-        List[PropertyDefinitionWrapperItem | ErrorItem],
+        list[PropertyDefinitionWrapperItem | ErrorItem],
         Field(description="A list of property definitions or errors."),
     ]
 
 
 class GetLayerCombinationAttributesResult(APIModel):
     attributes: Annotated[
-        List[LayerCombinationAttributeWrapperItem | ErrorItem],
+        list[LayerCombinationAttributeWrapperItem | ErrorItem],
         Field(description="A list of layer combination attributes and potential errors."),
     ]
 
 
 class GetPenTableAttributesResult(APIModel):
     attributes: Annotated[
-        List[PenTableAttributeWrapperItem | ErrorItem],
+        list[PenTableAttributeWrapperItem | ErrorItem],
         Field(description="A list of pen table attributes and potential errors."),
     ]
 
 
 class GetPropertyDefinitionAvailabilityResult(APIModel):
     propertyDefinitionAvailabilityList: Annotated[
-        List[PropertyDefinitionAvailabilityWrapperItem | ErrorItem],
+        list[PropertyDefinitionAvailabilityWrapperItem | ErrorItem],
         Field(description="A list of classification item avalabilities."),
     ]
 
 
 class GetAllClassificationsInSystemResult(APIModel):
     classificationItems: Annotated[
-        List[ClassificationItemArrayItem],
+        list[ClassificationItemArrayItem],
         Field(description="A list of classification items."),
     ]
 

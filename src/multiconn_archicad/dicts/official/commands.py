@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import List, TypedDict
+from typing import TypeAlias, TypedDict
 from typing_extensions import NotRequired
 
 from multiconn_archicad.dicts.extra_iems import extra_items
@@ -95,7 +95,7 @@ class GetProductInfoResult(TypedDict):
 
 
 class GetPublisherSetNamesResult(TypedDict):
-    publisherSetNames: List[str]
+    publisherSetNames: list[str]
 
 
 class GetSelectedElementsParameters(TypedDict):
@@ -112,7 +112,7 @@ class IsAliveResult(TypedDict):
 
 
 class CreateAttributeFoldersParameters(TypedDict):
-    attributeFolders: List[AttributeFolderCreationParameters]
+    attributeFolders: list[AttributeFolderCreationParameters]
 
 
 class CreateAttributeFoldersResult(TypedDict):
@@ -594,10 +594,12 @@ class MoveNavigatorItemParameters(TypedDict):
 
 
 class RenameAttributeFoldersParameters(TypedDict):
-    attributeFolderParametersList: List[AttributeFolderRenameParameters]
+    attributeFolderParametersList: list[AttributeFolderRenameParameters]
 
 
-RenameNavigatorItemParameters = RenameNavigatorItemByName | RenameNavigatorItemById | RenameNavigatorItemByNameAndId
+RenameNavigatorItemParameters: TypeAlias = (
+    RenameNavigatorItemByName | RenameNavigatorItemById | RenameNavigatorItemByNameAndId
+)
 
 
 class SetClassificationsOfElementsParameters(TypedDict):

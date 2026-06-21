@@ -90,7 +90,7 @@ def process_files(files_to_process) -> None:
     print(f"📂 Schemas are saved in ./{official_paths.BASE_SCHEMA_DIR}/")
 
 
-def run_crawler():
+def main():
     """Orchestrates the schema crawling and downloading process."""
     print("--- Starting Official Archicad Schema Crawl ---")
     official_paths.create_directories()
@@ -98,4 +98,4 @@ def run_crawler():
     process_files(files_to_process)
 
 if __name__ == "__main__":
-    run_crawler()
+    main()

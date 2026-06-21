@@ -5,8 +5,8 @@ from code_generation.official.paths import official_paths
 
 def get_definition_name(block: str) -> str | None:
     """Extracts the class or TypeAlias name from a block of code."""
-    # This regex handles both `class MyDict(TypedDict):` and `MyAlias = ...`
-    match = re.search(r"^(?:class\s+(\w+)|(\w+)\s*=)", block, re.MULTILINE)
+    # Matches class ClassName(TypedDict) or AliasName: TypeAlias = ...
+    match = re.search(r"^(?:class\s+(\w+)|(\w+)\s*(?::\s*[^=\n]+)?\s*=)", block, re.MULTILINE)
     if match:
         return match.group(1) or match.group(2)
     return None
@@ -16,7 +16,7 @@ def get_header_lines() -> list[str]:
     """Creates a comprehensive list of all possible header import lines for the dict files."""
     return [
         "from __future__ import annotations",
-        "from typing import Any, List, Literal, TypedDict, Union",
+        "from typing import Any, TypeAlias, Literal, TypedDict, Union",
         "from typing_extensions import NotRequired",
         "from uuid import UUID",
         "",
@@ -52,7 +52,7 @@ def remove_unused_imports(content: str) -> str:
         return bool(re.search(rf"\b{name}\b", text))
 
     # Clean typing imports
-    typing_imports = ["Any", "List", "Literal", "TypedDict", "Union"]
+    typing_imports = ["Any", "TypeAlias", "Literal", "TypedDict", "Union"]
     used_typing = [name for name in typing_imports if is_used(name, body)]
 
     if "from typing import" in header:
