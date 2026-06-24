@@ -1,0 +1,12 @@
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.hypothesis
+.venv
+/.env
+/.coverage
