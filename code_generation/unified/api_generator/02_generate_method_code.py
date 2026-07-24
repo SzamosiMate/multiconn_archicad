@@ -83,7 +83,7 @@ def generate_method_code(command_details: dict[str, Any]) -> dict:
 
 def _handle_special_cases(command_name: str, command_details: dict[str, Any], dependencies: dict) -> dict | None:
     """Router to delegate generation to special-case handlers. Returns generated data or None."""
-    if command_name == "RenameNavigatorItem":
+    if command_name == "RenameNavigatorItem" and command_details["source"] == "official":
         return _generate_rename_navigator_item_fix(command_details, dependencies)
     return None
 
