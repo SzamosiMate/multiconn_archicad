@@ -136,7 +136,7 @@ def apply_permanent_patches(master_defs: dict[str, Any]):
         "CreateAssociativeDimensionsOnSectionParameters": ("dimensionsData", "AssociativeDimensionOnSectionData"),
         "CreateWallThicknessDimensionsParameters": ("dimensionsData", "WallThicknessDimensionData"),
         "CreateSectionsParameters": ("sectionsData", "SectionData"),
-        "CreateStairsParameters": ("stairsData", "SectionData"),
+        "CreateStairsParameters": ("stairsData", "StairData"),
         "CreateLampsParameters": ("lampsData", "LampData"),
         "CreateTextsParameters": ("textsData", "TextData"),
     }
