@@ -8,8 +8,12 @@ from pydantic import TypeAdapter
 from multiconn_archicad.models.tapir.commands import (
     ApplyFavoritesToElementDefaultsParameters,
     ApplyFavoritesToElementDefaultsResult,
+    ApplyFavoritesToElementsParameters,
+    ApplyFavoritesToElementsResult,
     CreateFavoritesFromElementsParameters,
     CreateFavoritesFromElementsResult,
+    DeleteFavoritesParameters,
+    DeleteFavoritesResult,
     ExportFavoritesParameters,
     GetFavoritePreviewImageParameters,
     GetFavoritePreviewImageResult,
@@ -17,13 +21,20 @@ from multiconn_archicad.models.tapir.commands import (
     GetFavoritesByTypeResult,
     ImportFavoritesParameters,
     ImportFavoritesResult,
+    RenameFavoritesParameters,
+    RenameFavoritesResult,
+    UpdateFavoritesFromElementsParameters,
+    UpdateFavoritesFromElementsResult,
 )
 from multiconn_archicad.models.tapir.types import (
     ConflictPolicy,
     ElementType,
     ErrorItem,
     FailedExecutionResult,
+    FavoriteRename,
     FavoritesFromElement,
+    FavoritesFromElementUpdate,
+    FavoritesToApplyItem,
     FavoritesWrapper,
     Format,
     ImageType,
@@ -67,6 +78,55 @@ class FavoritesCommands:
         validated_response = ApplyFavoritesToElementDefaultsResult.model_validate(response_dict)
         return validated_response.executionResults
 
+    def apply_favorites_to_elements(
+        self,
+        favorites_to_apply: list[FavoritesToApplyItem],
+        apply_settings: None | bool = None,
+        apply_classifications: None | bool = None,
+        apply_categories: None | bool = None,
+        apply_properties: None | bool = None,
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Apply the given favorites to existing elements. Only settings-type parameters are
+        changed - geometry (position, floor, and dimensions such as a Wall's height) is left
+        untouched, so applying a Favorite never moves or resizes the target element. By default
+        settings, classifications, categories and properties are all applied; each can be opted
+        out of individually.
+
+        Args:
+            favorites_to_apply (list[FavoritesToApplyItem])
+            apply_settings (None | bool): Whether to apply the Favorite's settings-type
+                parameters (structure, materials, pens, etc. - never geometry). Default is true.
+            apply_classifications (None | bool): Whether to apply the Favorite's
+                classifications. Default is true.
+            apply_categories (None | bool): Whether to apply the Favorite's element categories
+                (e.g. IFC categories). Default is true.
+            apply_properties (None | bool): Whether to apply the Favorite's property values.
+                Default is true.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "favoritesToApply": favorites_to_apply,
+            "applySettings": apply_settings,
+            "applyClassifications": apply_classifications,
+            "applyCategories": apply_categories,
+            "applyProperties": apply_properties,
+        }
+        validated_params = ApplyFavoritesToElementsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "ApplyFavoritesToElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = ApplyFavoritesToElementsResult.model_validate(response_dict)
+        return validated_response.executionResults
+
     def create_favorites_from_elements(
         self, favorites_from_elements: list[FavoritesFromElement]
     ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
@@ -93,6 +153,32 @@ class FavoritesCommands:
             "CreateFavoritesFromElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = CreateFavoritesFromElementsResult.model_validate(response_dict)
+        return validated_response.executionResults
+
+    def delete_favorites(self, favorites: list[str]) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Delete existing favorites.
+
+        Args:
+            favorites (list[str]): A list of favorite names
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "favorites": favorites,
+        }
+        validated_params = DeleteFavoritesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "DeleteFavorites", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = DeleteFavoritesResult.model_validate(response_dict)
         return validated_response.executionResults
 
     def export_favorites(self, path: str, names: None | list[str] = None) -> None:
@@ -224,3 +310,59 @@ class FavoritesCommands:
         )
         validated_response = ImportFavoritesResult.model_validate(response_dict)
         return validated_response.firstConflictName
+
+    def rename_favorites(
+        self, renames: list[FavoriteRename]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Rename existing favorites.
+
+        Args:
+            renames (list[FavoriteRename])
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "renames": renames,
+        }
+        validated_params = RenameFavoritesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "RenameFavorites", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = RenameFavoritesResult.model_validate(response_dict)
+        return validated_response.executionResults
+
+    def update_favorites_from_elements(
+        self, favorites_from_elements: list[FavoritesFromElementUpdate]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Update existing favorites from the given elements.
+
+        Args:
+            favorites_from_elements (list[FavoritesFromElementUpdate])
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "favoritesFromElements": favorites_from_elements,
+        }
+        validated_params = UpdateFavoritesFromElementsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "UpdateFavoritesFromElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = UpdateFavoritesFromElementsResult.model_validate(response_dict)
+        return validated_response.executionResults

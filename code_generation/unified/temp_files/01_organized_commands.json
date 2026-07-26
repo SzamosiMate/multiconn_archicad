@@ -111,10 +111,24 @@
                 "source": "tapir"
             },
             {
+                "name": "ApplyFavoritesToElements",
+                "group": "Favorites Commands",
+                "description": "Apply the given favorites to existing elements. Only settings-type parameters are changed - geometry (position, floor, and dimensions such as a Wall's height) is left untouched, so applying a Favorite never moves or resizes the target element. By default settings, classifications, categories and properties are all applied; each can be opted out of individually.",
+                "version": "1.5.4",
+                "source": "tapir"
+            },
+            {
                 "name": "CreateFavoritesFromElements",
                 "group": "Favorites Commands",
                 "description": "Create favorites from the given elements.",
                 "version": "1.1.2",
+                "source": "tapir"
+            },
+            {
+                "name": "DeleteFavorites",
+                "group": "Favorites Commands",
+                "description": "Delete existing favorites.",
+                "version": "1.5.4",
                 "source": "tapir"
             },
             {
@@ -143,6 +157,20 @@
                 "group": "Favorites Commands",
                 "description": "Import Favorites from a .prefs file or folder into the current project.",
                 "version": "1.5.0",
+                "source": "tapir"
+            },
+            {
+                "name": "RenameFavorites",
+                "group": "Favorites Commands",
+                "description": "Rename existing favorites.",
+                "version": "1.5.4",
+                "source": "tapir"
+            },
+            {
+                "name": "UpdateFavoritesFromElements",
+                "group": "Favorites Commands",
+                "description": "Update existing favorites from the given elements.",
+                "version": "1.5.4",
                 "source": "tapir"
             }
         ],
@@ -321,6 +349,13 @@
                 "description": "Unlocks the given elements. Manual lock, not teamwork!",
                 "version": "1.5.2",
                 "source": "tapir"
+            },
+            {
+                "name": "UpdateZones",
+                "group": "Element Commands",
+                "description": "Updates all Zones (recalculates their geometry, updates their Zone Stamps and the connected elements).",
+                "version": "1.5.4",
+                "source": "tapir"
             }
         ],
         "Application Commands": [
@@ -360,6 +395,190 @@
                 "source": "tapir"
             }
         ],
+        "Navigator Commands": [
+            {
+                "name": "CloneProjectMapItemToViewMap",
+                "group": "Navigator Commands",
+                "description": "Clones Project Map viewpoints into the View Map, optionally into a specified folder.",
+                "version": "1.1.7",
+                "source": "tapir"
+            },
+            {
+                "name": "CreateDetails",
+                "group": "Navigator Commands",
+                "description": "Creates independent Detail databases.",
+                "version": "1.4.0",
+                "source": "tapir"
+            },
+            {
+                "name": "CreateDrawings",
+                "group": "Navigator Commands",
+                "description": "Creates Drawing elements on the specified or active layout from navigator items.",
+                "version": "1.4.0",
+                "source": "tapir"
+            },
+            {
+                "name": "CreateLayout",
+                "group": "Navigator Commands",
+                "description": "Creates Layouts and their backing master layouts.",
+                "version": "1.4.0",
+                "source": "tapir"
+            },
+            {
+                "name": "CreateLayoutSubset",
+                "group": "Navigator Commands",
+                "description": "Creates Layout Book subsets.",
+                "version": "1.4.0",
+                "source": "tapir"
+            },
+            {
+                "name": "CreateSections",
+                "group": "Navigator Commands",
+                "description": "Creates Section elements on the floor plan.",
+                "version": "1.5.0",
+                "source": "tapir"
+            },
+            {
+                "name": "CreateViewMapFolder",
+                "group": "Navigator Commands",
+                "description": "Creates a new folder in the View Map.",
+                "version": "1.1.7",
+                "source": "tapir"
+            },
+            {
+                "name": "CreateViewsInViewMap",
+                "group": "Navigator Commands",
+                "description": "Creates independent (non-clone) navigator views in the View Map by copying database and settings from source items.",
+                "version": "1.1.7",
+                "source": "tapir"
+            },
+            {
+                "name": "CreateWorksheets",
+                "group": "Navigator Commands",
+                "description": "Creates independent Worksheet databases.",
+                "version": "1.4.0",
+                "source": "tapir"
+            },
+            {
+                "name": "DeleteNavigatorItems",
+                "group": "Navigator Commands",
+                "description": "Deletes navigator items from the navigator tree.",
+                "version": "1.1.7",
+                "source": "tapir"
+            },
+            {
+                "name": "FitInWindow",
+                "group": "Navigator Commands",
+                "description": "Zooms to the given elements or fits everything in the window.",
+                "version": "1.3.1",
+                "source": "tapir"
+            },
+            {
+                "name": "GetDatabaseIdFromNavigatorItemId",
+                "group": "Navigator Commands",
+                "description": "Gets the ID of the database associated with the supplied navigator item id",
+                "version": "1.1.4",
+                "source": "tapir"
+            },
+            {
+                "name": "GetLayoutCustomScheme",
+                "group": "Navigator Commands",
+                "description": "Gets the Layout Info Panel custom field definitions (name and key) from Book Settings.",
+                "version": "1.1.7",
+                "source": "tapir"
+            },
+            {
+                "name": "GetLayoutSettings",
+                "group": "Navigator Commands",
+                "description": "Gets settings of layouts, including Layout Info Panel custom data fields.",
+                "version": "1.1.7",
+                "source": "tapir"
+            },
+            {
+                "name": "GetModelViewOptions",
+                "group": "Navigator Commands",
+                "description": "Gets all model view options",
+                "version": "1.1.4",
+                "source": "tapir"
+            },
+            {
+                "name": "GetNavigatorItemTree",
+                "group": "Navigator Commands",
+                "description": "Returns the full navigator item tree for the specified map.",
+                "version": "1.1.7",
+                "source": "tapir"
+            },
+            {
+                "name": "GetView2DTransformations",
+                "group": "Navigator Commands",
+                "description": "Get zoom and rotation of 2D views",
+                "version": "1.1.7",
+                "source": "tapir"
+            },
+            {
+                "name": "GetViewSettings",
+                "group": "Navigator Commands",
+                "description": "Gets the view settings of navigator items",
+                "version": "1.1.4",
+                "source": "tapir"
+            },
+            {
+                "name": "MoveNavigatorItem",
+                "group": "Navigator Commands",
+                "description": "Moves a navigator item to a new parent in the navigator tree.",
+                "version": "1.1.7",
+                "source": "tapir"
+            },
+            {
+                "name": "PublishPublisherSet",
+                "group": "Navigator Commands",
+                "description": "Performs a publish operation on the currently opened project. Only the given publisher set will be published.",
+                "version": "0.1.0",
+                "source": "tapir"
+            },
+            {
+                "name": "RenameNavigatorItem",
+                "group": "Navigator Commands",
+                "description": "Renames a navigator item or changes its ID.",
+                "version": "1.1.7",
+                "source": "tapir"
+            },
+            {
+                "name": "Set3DCutPlanes",
+                "group": "Navigator Commands",
+                "description": "Sets the 3D cut planes.",
+                "version": "1.3.1",
+                "source": "tapir"
+            },
+            {
+                "name": "SetLayoutSettings",
+                "group": "Navigator Commands",
+                "description": "Sets settings of layouts, including Layout Info Panel custom data fields.",
+                "version": "1.1.7",
+                "source": "tapir"
+            },
+            {
+                "name": "SetViewRotation",
+                "group": "Navigator Commands",
+                "description": "Set the rotation angle of 2D views via their floor plan database.",
+                "version": "1.1.7",
+                "source": "tapir"
+            },
+            {
+                "name": "SetViewSettings",
+                "group": "Navigator Commands",
+                "description": "Sets the view settings of navigator items",
+                "version": "1.1.4",
+                "source": "tapir"
+            },
+            {
+                "name": "UpdateDrawings",
+                "group": "Navigator Commands",
+                "description": "Performs a drawing update on the given elements.",
+                "version": "1.1.4",
+                "source": "tapir"
+            }
+        ],
         "Project Commands": [
             {
                 "name": "CloseProject",
@@ -373,6 +592,13 @@
                 "group": "Project Commands",
                 "description": "Creates one or more custom project info fields.",
                 "version": "1.5.2",
+                "source": "tapir"
+            },
+            {
+                "name": "DeleteProjectInfoFields",
+                "group": "Project Commands",
+                "description": "Deletes one or more custom project info fields. Hardcoded fields cannot be deleted.",
+                "version": "1.5.4",
                 "source": "tapir"
             },
             {
@@ -625,6 +851,13 @@
                 "source": "tapir"
             },
             {
+                "name": "CreateFills",
+                "group": "Attribute Commands",
+                "description": "Creates or overwrites Fill attributes based on the given parameters.",
+                "version": "1.5.4",
+                "source": "tapir"
+            },
+            {
                 "name": "CreateLayerCombinations",
                 "group": "Attribute Commands",
                 "description": "Creates or overwrites Layer Combination attributes based on the given parameters.",
@@ -639,10 +872,52 @@
                 "source": "tapir"
             },
             {
+                "name": "CreateLines",
+                "group": "Attribute Commands",
+                "description": "Creates or overwrites Line attributes based on the given parameters.",
+                "version": "1.5.4",
+                "source": "tapir"
+            },
+            {
+                "name": "CreateMEPSystems",
+                "group": "Attribute Commands",
+                "description": "Creates or overwrites MEP System attributes based on the given parameters.",
+                "version": "1.5.4",
+                "source": "tapir"
+            },
+            {
+                "name": "CreatePenTables",
+                "group": "Attribute Commands",
+                "description": "Creates or overwrites Pen Table attributes based on the given parameters.",
+                "version": "1.5.4",
+                "source": "tapir"
+            },
+            {
+                "name": "CreateProfiles",
+                "group": "Attribute Commands",
+                "description": "Creates or overwrites Profile attributes as a copy of an existing Profile's geometry, based on the given parameters.",
+                "version": "1.5.4",
+                "source": "tapir"
+            },
+            {
                 "name": "CreateSurfaces",
                 "group": "Attribute Commands",
                 "description": "Creates or overwrites Surface attributes based on the given parameters.",
                 "version": "1.2.2",
+                "source": "tapir"
+            },
+            {
+                "name": "CreateZoneCategories",
+                "group": "Attribute Commands",
+                "description": "Creates or overwrites Zone Category attributes based on the given parameters.",
+                "version": "1.5.4",
+                "source": "tapir"
+            },
+            {
+                "name": "DeleteAttributes",
+                "group": "Attribute Commands",
+                "description": "Deletes the given attributes.",
+                "version": "1.5.4",
                 "source": "tapir"
             },
             {
@@ -660,10 +935,80 @@
                 "source": "tapir"
             },
             {
+                "name": "GetBuildingMaterials",
+                "group": "Attribute Commands",
+                "description": "Returns the details of the given Building Material attributes.",
+                "version": "1.5.4",
+                "source": "tapir"
+            },
+            {
+                "name": "GetComposites",
+                "group": "Attribute Commands",
+                "description": "Returns the details of the given Composite attributes.",
+                "version": "1.5.4",
+                "source": "tapir"
+            },
+            {
+                "name": "GetFills",
+                "group": "Attribute Commands",
+                "description": "Returns the details of the given Fill attributes.",
+                "version": "1.5.4",
+                "source": "tapir"
+            },
+            {
                 "name": "GetLayerCombinations",
                 "group": "Attribute Commands",
                 "description": "Returns the details of layer combination attributes.",
                 "version": "1.2.4",
+                "source": "tapir"
+            },
+            {
+                "name": "GetLayers",
+                "group": "Attribute Commands",
+                "description": "Returns the details of the given Layer attributes.",
+                "version": "1.5.4",
+                "source": "tapir"
+            },
+            {
+                "name": "GetLines",
+                "group": "Attribute Commands",
+                "description": "Returns the details of the given Line attributes.",
+                "version": "1.5.4",
+                "source": "tapir"
+            },
+            {
+                "name": "GetMEPSystems",
+                "group": "Attribute Commands",
+                "description": "Returns the details of the given MEP System attributes.",
+                "version": "1.5.4",
+                "source": "tapir"
+            },
+            {
+                "name": "GetPenTables",
+                "group": "Attribute Commands",
+                "description": "Returns the details of the given Pen Table attributes.",
+                "version": "1.5.4",
+                "source": "tapir"
+            },
+            {
+                "name": "GetProfiles",
+                "group": "Attribute Commands",
+                "description": "Returns the details of the given Profile attributes.",
+                "version": "1.5.4",
+                "source": "tapir"
+            },
+            {
+                "name": "GetSurfaces",
+                "group": "Attribute Commands",
+                "description": "Returns the details of the given Surface attributes.",
+                "version": "1.5.4",
+                "source": "tapir"
+            },
+            {
+                "name": "GetZoneCategories",
+                "group": "Attribute Commands",
+                "description": "Returns the details of the given Zone Category attributes.",
+                "version": "1.5.4",
                 "source": "tapir"
             }
         ],
@@ -790,113 +1135,6 @@
                 "source": "tapir"
             }
         ],
-        "Navigator Commands": [
-            {
-                "name": "CreateDetails",
-                "group": "Navigator Commands",
-                "description": "Creates independent Detail databases.",
-                "version": "1.4.0",
-                "source": "tapir"
-            },
-            {
-                "name": "CreateDrawings",
-                "group": "Navigator Commands",
-                "description": "Creates Drawing elements on the specified or active layout from navigator items.",
-                "version": "1.4.0",
-                "source": "tapir"
-            },
-            {
-                "name": "CreateLayouts",
-                "group": "Navigator Commands",
-                "description": "Creates Layouts and their backing master layouts.",
-                "version": "1.4.0",
-                "source": "tapir"
-            },
-            {
-                "name": "CreateSections",
-                "group": "Navigator Commands",
-                "description": "Creates Section elements on the floor plan.",
-                "version": "1.5.0",
-                "source": "tapir"
-            },
-            {
-                "name": "CreateSubsets",
-                "group": "Navigator Commands",
-                "description": "Creates Layout Book subsets.",
-                "version": "1.4.0",
-                "source": "tapir"
-            },
-            {
-                "name": "CreateWorksheets",
-                "group": "Navigator Commands",
-                "description": "Creates independent Worksheet databases.",
-                "version": "1.4.0",
-                "source": "tapir"
-            },
-            {
-                "name": "FitInWindow",
-                "group": "Navigator Commands",
-                "description": "Zooms to the given elements or fits everything in the window.",
-                "version": "1.3.1",
-                "source": "tapir"
-            },
-            {
-                "name": "GetDatabaseIdFromNavigatorItemId",
-                "group": "Navigator Commands",
-                "description": "Gets the ID of the database associated with the supplied navigator item id",
-                "version": "1.1.4",
-                "source": "tapir"
-            },
-            {
-                "name": "GetModelViewOptions",
-                "group": "Navigator Commands",
-                "description": "Gets all model view options",
-                "version": "1.1.4",
-                "source": "tapir"
-            },
-            {
-                "name": "GetView2DTransformations",
-                "group": "Navigator Commands",
-                "description": "Get zoom and rotation of 2D views",
-                "version": "1.1.7",
-                "source": "tapir"
-            },
-            {
-                "name": "GetViewSettings",
-                "group": "Navigator Commands",
-                "description": "Gets the view settings of navigator items",
-                "version": "1.1.4",
-                "source": "tapir"
-            },
-            {
-                "name": "PublishPublisherSet",
-                "group": "Navigator Commands",
-                "description": "Performs a publish operation on the currently opened project. Only the given publisher set will be published.",
-                "version": "0.1.0",
-                "source": "tapir"
-            },
-            {
-                "name": "Set3DCutPlanes",
-                "group": "Navigator Commands",
-                "description": "Sets the 3D cut planes.",
-                "version": "1.3.1",
-                "source": "tapir"
-            },
-            {
-                "name": "SetViewSettings",
-                "group": "Navigator Commands",
-                "description": "Sets the view settings of navigator items",
-                "version": "1.1.4",
-                "source": "tapir"
-            },
-            {
-                "name": "UpdateDrawings",
-                "group": "Navigator Commands",
-                "description": "Performs a drawing update on the given elements.",
-                "version": "1.1.4",
-                "source": "tapir"
-            }
-        ],
         "Element grouping Commands": [
             {
                 "name": "CreateGroups",
@@ -968,6 +1206,36 @@
                 "group": "Property Commands",
                 "description": "Sets the property values of elements. It works for subelements of hierarchal elements also.",
                 "version": "1.0.6",
+                "source": "tapir"
+            },
+            {
+                "name": "UpdatePropertyDefinitions",
+                "group": "Property Commands",
+                "description": "Updates the expression(s) of existing expression-based Custom Property Definitions.",
+                "version": "1.5.4",
+                "source": "tapir"
+            }
+        ],
+        "Solid Element Operation Commands": [
+            {
+                "name": "CreateSolidElementLinks",
+                "group": "Solid Element Operation Commands",
+                "description": "Creates solid element operation links between target and operator elements.",
+                "version": "1.5.4",
+                "source": "tapir"
+            },
+            {
+                "name": "GetSolidElementLinks",
+                "group": "Solid Element Operation Commands",
+                "description": "Returns solid element operation links for each queried element, grouped by role (target or operator).",
+                "version": "1.5.4",
+                "source": "tapir"
+            },
+            {
+                "name": "RemoveSolidElementLinks",
+                "group": "Solid Element Operation Commands",
+                "description": "Removes solid element operation links between target and operator elements.",
+                "version": "1.5.4",
                 "source": "tapir"
             }
         ],
@@ -1045,6 +1313,22 @@
                 "source": "tapir"
             }
         ],
+        "Script UI Commands": [
+            {
+                "name": "GetScriptUIResult",
+                "group": "Script UI Commands",
+                "description": "Retrieves and clears the result last submitted from the Script UI palette's page (via window.ACAPI.SubmitResult), if any.",
+                "version": "1.5.4",
+                "source": "tapir"
+            },
+            {
+                "name": "ShowScriptUI",
+                "group": "Script UI Commands",
+                "description": "Shows the given HTML content in a native Archicad palette (a tkinter alternative for Python scripts).",
+                "version": "1.5.4",
+                "source": "tapir"
+            }
+        ],
         "Element Modification Commands": [
             {
                 "name": "ModifyBeams",
@@ -1065,6 +1349,13 @@
                 "group": "Element Modification Commands",
                 "description": "Modifies Door elements based on the given parameters.",
                 "version": "1.4.0",
+                "source": "tapir"
+            },
+            {
+                "name": "ModifyMeshes",
+                "group": "Element Modification Commands",
+                "description": "Modifies the attributes of Mesh elements based on the given parameters.",
+                "version": "1.5.4",
                 "source": "tapir"
             },
             {

@@ -6,36 +6,57 @@ from typing import TYPE_CHECKING
 from pydantic import TypeAdapter
 
 from multiconn_archicad.models.tapir.commands import (
+    CloneProjectMapItemToViewMapParameters,
+    CloneProjectMapItemToViewMapResult,
     CreateDetailsParameters,
     CreateDetailsResult,
     CreateDrawingsParameters,
     CreateDrawingsResult,
-    CreateLayoutsParameters,
-    CreateLayoutsResult,
+    CreateLayoutParameters,
+    CreateLayoutResult,
+    CreateLayoutSubsetParameters,
+    CreateLayoutSubsetResult,
     CreateSectionsParameters,
     CreateSectionsResult,
-    CreateSubsetsParameters,
-    CreateSubsetsResult,
+    CreateViewMapFolderParameters,
+    CreateViewMapFolderResult,
+    CreateViewsInViewMapParameters,
+    CreateViewsInViewMapResult,
     CreateWorksheetsParameters,
     CreateWorksheetsResult,
+    DeleteNavigatorItemsParameters,
+    DeleteNavigatorItemsResult,
     FitInWindowParameters,
     FitInWindowResult,
     GetDatabaseIdFromNavigatorItemIdParameters,
     GetDatabaseIdFromNavigatorItemIdResult,
+    GetLayoutCustomSchemeResult,
+    GetLayoutSettingsParameters,
+    GetLayoutSettingsResult,
     GetModelViewOptionsResult,
+    GetNavigatorItemTreeParameters,
     GetView2DTransformationsParameters,
     GetView2DTransformationsResult,
     GetViewSettingsParameters,
     GetViewSettingsResult,
+    MoveNavigatorItemParameters,
+    MoveNavigatorItemResult,
     PublishPublisherSetParameters,
+    RenameNavigatorItemParameters,
+    RenameNavigatorItemResult,
     Set3DCutPlanesParameters,
     Set3DCutPlanesResult,
+    SetLayoutSettingsParameters,
+    SetLayoutSettingsResult,
+    SetViewRotationParameters,
+    SetViewRotationResult,
     SetViewSettingsParameters,
     SetViewSettingsResult,
     UpdateDrawingsParameters,
     UpdateDrawingsResult,
 )
 from multiconn_archicad.models.tapir.types import (
+    CustomSchemeItem,
     CutPlane,
     DatabaseIdArrayItem,
     DetailData,
@@ -44,12 +65,20 @@ from multiconn_archicad.models.tapir.types import (
     ErrorItem,
     FailedExecutionResult,
     LayoutData,
+    LayoutDatabaseId,
+    LayoutSetting,
+    LayoutSettingsData,
     ModelViewOption,
+    NavigatorItemId,
     NavigatorItemIdArrayItem,
+    NavigatorItemIdsWithRotationItem,
     NavigatorItemIdsWithViewSetting,
+    NavigatorMapId,
     SectionData,
     SubsetData,
     SuccessfulExecutionResult,
+    ViewCloneData,
+    ViewData,
     ViewSettings,
     ViewTransformations,
     WorksheetData,
@@ -62,6 +91,34 @@ if TYPE_CHECKING:
 class NavigatorCommands:
     def __init__(self, core: CoreCommands):
         self._core = core
+
+    def clone_project_map_item_to_view_map(
+        self, views_data: list[ViewCloneData]
+    ) -> list[ErrorItem | NavigatorItemIdArrayItem]:
+        """
+        Clones Project Map viewpoints into the View Map, optionally into a specified folder.
+
+        Args:
+            views_data (list[ViewCloneData]): Array of views to clone from the Project Map to
+                the View Map.
+
+        Returns:
+            list[ErrorItem | NavigatorItemIdArrayItem]
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "viewsData": views_data,
+        }
+        validated_params = CloneProjectMapItemToViewMapParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "CloneProjectMapItemToViewMap", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = CloneProjectMapItemToViewMapResult.model_validate(response_dict)
+        return validated_response.navigatorItems
 
     def create_details(self, details_data: list[DetailData]) -> list[DatabaseIdArrayItem]:
         """
@@ -113,7 +170,7 @@ class NavigatorCommands:
         validated_response = CreateDrawingsResult.model_validate(response_dict)
         return validated_response.elements
 
-    def create_layouts(self, layouts_data: list[LayoutData]) -> list[DatabaseIdArrayItem]:
+    def create_layout(self, layouts_data: list[LayoutData]) -> list[DatabaseIdArrayItem]:
         """
         Creates Layouts and their backing master layouts.
 
@@ -131,12 +188,37 @@ class NavigatorCommands:
         params_dict = {
             "layoutsData": layouts_data,
         }
-        validated_params = CreateLayoutsParameters(**params_dict)
+        validated_params = CreateLayoutParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateLayouts", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateLayout", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
-        validated_response = CreateLayoutsResult.model_validate(response_dict)
+        validated_response = CreateLayoutResult.model_validate(response_dict)
         return validated_response.databases
+
+    def create_layout_subset(self, subsets_data: list[SubsetData]) -> list[ErrorItem | NavigatorItemIdArrayItem]:
+        """
+        Creates Layout Book subsets.
+
+        Args:
+            subsets_data (list[SubsetData])
+
+        Returns:
+            list[ErrorItem | NavigatorItemIdArrayItem]
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "subsetsData": subsets_data,
+        }
+        validated_params = CreateLayoutSubsetParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "CreateLayoutSubset", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = CreateLayoutSubsetResult.model_validate(response_dict)
+        return validated_response.navigatorItems
 
     def create_sections(self, sections_data: list[SectionData]) -> list[ElementIdArrayItem]:
         """
@@ -163,16 +245,19 @@ class NavigatorCommands:
         validated_response = CreateSectionsResult.model_validate(response_dict)
         return validated_response.elements
 
-    def create_subsets(self, subsets_data: list[SubsetData]) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+    def create_view_map_folder(
+        self, folder_name: str, parent_navigator_item_id: NavigatorItemId | None = None
+    ) -> NavigatorItemId:
         """
-        Creates Layout Book subsets.
+        Creates a new folder in the View Map.
 
         Args:
-            subsets_data (list[SubsetData])
+            folder_name (str): Name of the new folder to create in the View Map.
+            parent_navigator_item_id (NavigatorItemId | None): Navigator item ID of the parent
+                View Map folder. Optional; defaults to the View Map root.
 
         Returns:
-            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
-                results.
+            NavigatorItemId
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -180,14 +265,42 @@ class NavigatorCommands:
             pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
-            "subsetsData": subsets_data,
+            "folderName": folder_name,
+            "parentNavigatorItemId": parent_navigator_item_id,
         }
-        validated_params = CreateSubsetsParameters(**params_dict)
+        validated_params = CreateViewMapFolderParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateSubsets", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateViewMapFolder", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
-        validated_response = CreateSubsetsResult.model_validate(response_dict)
-        return validated_response.executionResults
+        validated_response = CreateViewMapFolderResult.model_validate(response_dict)
+        return validated_response.navigatorItemId
+
+    def create_views_in_view_map(self, views_data: list[ViewData]) -> list[ErrorItem | NavigatorItemIdArrayItem]:
+        """
+        Creates independent (non-clone) navigator views in the View Map by copying database and
+        settings from source items.
+
+        Args:
+            views_data (list[ViewData]): Array of views to create as independent (non-clone)
+                items in the View Map.
+
+        Returns:
+            list[ErrorItem | NavigatorItemIdArrayItem]
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "viewsData": views_data,
+        }
+        validated_params = CreateViewsInViewMapParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "CreateViewsInViewMap", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = CreateViewsInViewMapResult.model_validate(response_dict)
+        return validated_response.navigatorItems
 
     def create_worksheets(self, worksheets_data: list[WorksheetData]) -> list[DatabaseIdArrayItem]:
         """
@@ -213,6 +326,35 @@ class NavigatorCommands:
         )
         validated_response = CreateWorksheetsResult.model_validate(response_dict)
         return validated_response.databases
+
+    def delete_navigator_items(
+        self, navigator_item_ids: list[NavigatorItemIdArrayItem]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Deletes navigator items from the navigator tree.
+
+        Args:
+            navigator_item_ids (list[NavigatorItemIdArrayItem]): A list of navigator item
+                identifiers.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "navigatorItemIds": navigator_item_ids,
+        }
+        validated_params = DeleteNavigatorItemsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "DeleteNavigatorItems", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = DeleteNavigatorItemsResult.model_validate(response_dict)
+        return validated_response.executionResults
 
     def fit_in_window(
         self, elements: None | list[ElementIdArrayItem] = None
@@ -270,6 +412,47 @@ class NavigatorCommands:
         validated_response = GetDatabaseIdFromNavigatorItemIdResult.model_validate(response_dict)
         return validated_response.databases
 
+    def get_layout_custom_scheme(self) -> list[CustomSchemeItem]:
+        """
+        Gets the Layout Info Panel custom field definitions (name and key) from Book Settings.
+
+        Returns:
+            list[CustomSchemeItem]
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        response_dict = self._core.post_tapir_command("GetLayoutCustomScheme")
+        validated_response = GetLayoutCustomSchemeResult.model_validate(response_dict)
+        return validated_response.customScheme
+
+    def get_layout_settings(self, layout_database_ids: list[LayoutDatabaseId]) -> list[LayoutSetting]:
+        """
+        Gets settings of layouts, including Layout Info Panel custom data fields.
+
+        Args:
+            layout_database_ids (list[LayoutDatabaseId])
+
+        Returns:
+            list[LayoutSetting]
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "layoutDatabaseIds": layout_database_ids,
+        }
+        validated_params = GetLayoutSettingsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetLayoutSettings", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetLayoutSettingsResult.model_validate(response_dict)
+        return validated_response.layoutSettings
+
     def get_model_view_options(self) -> list[ModelViewOption]:
         """
         Gets all model view options
@@ -286,13 +469,38 @@ class NavigatorCommands:
         validated_response = GetModelViewOptionsResult.model_validate(response_dict)
         return validated_response.modelViewOptions
 
+    def get_navigator_item_tree(self, navigator_map_id: NavigatorMapId) -> None:
+        """
+        Returns the full navigator item tree for the specified map.
+
+        Args:
+            navigator_map_id (NavigatorMapId): The navigator map to retrieve.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "navigatorMapId": navigator_map_id,
+        }
+        validated_params = GetNavigatorItemTreeParameters(**params_dict)
+        self._core.post_tapir_command(
+            "GetNavigatorItemTree", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        return None
+
     def get_view_2d_transformations(
-        self, databases: None | list[DatabaseIdArrayItem] = None
+        self,
+        navigator_item_ids: None | list[NavigatorItemIdArrayItem] = None,
+        databases: None | list[DatabaseIdArrayItem] = None,
     ) -> list[ErrorItem | ViewTransformations]:
         """
         Get zoom and rotation of 2D views
 
         Args:
+            navigator_item_ids (None | list[NavigatorItemIdArrayItem]): A list of navigator item
+                identifiers.
             databases (None | list[DatabaseIdArrayItem]): A list of Archicad databases.
 
         Returns:
@@ -304,6 +512,7 @@ class NavigatorCommands:
             pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         params_dict = {
+            "navigatorItemIds": navigator_item_ids,
             "databases": databases,
         }
         validated_params = GetView2DTransformationsParameters(**params_dict)
@@ -339,6 +548,40 @@ class NavigatorCommands:
         validated_response = GetViewSettingsResult.model_validate(response_dict)
         return validated_response.viewSettings
 
+    def move_navigator_item(
+        self,
+        navigator_item_id_to_move: NavigatorItemId,
+        parent_navigator_item_id: NavigatorItemId,
+        previous_navigator_item_id: NavigatorItemId | None = None,
+    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+        """
+        Moves a navigator item to a new parent in the navigator tree.
+
+        Args:
+            navigator_item_id_to_move (NavigatorItemId)
+            parent_navigator_item_id (NavigatorItemId)
+            previous_navigator_item_id (NavigatorItemId | None)
+
+        Returns:
+            FailedExecutionResult | SuccessfulExecutionResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "navigatorItemIdToMove": navigator_item_id_to_move,
+            "parentNavigatorItemId": parent_navigator_item_id,
+            "previousNavigatorItemId": previous_navigator_item_id,
+        }
+        validated_params = MoveNavigatorItemParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "MoveNavigatorItem", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = TypeAdapter(MoveNavigatorItemResult).validate_python(response_dict)
+        return validated_response
+
     def publish_publisher_set(
         self,
         publisher_set_name: str,
@@ -372,6 +615,37 @@ class NavigatorCommands:
         )
         return None
 
+    def rename_navigator_item(
+        self, navigator_item_id: NavigatorItemId, new_name: None | str = None, new_id: None | str = None
+    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+        """
+        Renames a navigator item or changes its ID.
+
+        Args:
+            navigator_item_id (NavigatorItemId)
+            new_name (None | str)
+            new_id (None | str)
+
+        Returns:
+            FailedExecutionResult | SuccessfulExecutionResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "navigatorItemId": navigator_item_id,
+            "newName": new_name,
+            "newId": new_id,
+        }
+        validated_params = RenameNavigatorItemParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "RenameNavigatorItem", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = TypeAdapter(RenameNavigatorItemResult).validate_python(response_dict)
+        return validated_response
+
     def set_3d_cut_planes(
         self, cut_planes: None | list[CutPlane] = None
     ) -> FailedExecutionResult | SuccessfulExecutionResult:
@@ -398,6 +672,62 @@ class NavigatorCommands:
         )
         validated_response = TypeAdapter(Set3DCutPlanesResult).validate_python(response_dict)
         return validated_response
+
+    def set_layout_settings(
+        self, layouts_data: list[LayoutSettingsData]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Sets settings of layouts, including Layout Info Panel custom data fields.
+
+        Args:
+            layouts_data (list[LayoutSettingsData])
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "layoutsData": layouts_data,
+        }
+        validated_params = SetLayoutSettingsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "SetLayoutSettings", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = SetLayoutSettingsResult.model_validate(response_dict)
+        return validated_response.executionResults
+
+    def set_view_rotation(
+        self, navigator_item_ids_with_rotation: list[NavigatorItemIdsWithRotationItem]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Set the rotation angle of 2D views via their floor plan database.
+
+        Args:
+            navigator_item_ids_with_rotation (list[NavigatorItemIdsWithRotationItem])
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "navigatorItemIdsWithRotation": navigator_item_ids_with_rotation,
+        }
+        validated_params = SetViewRotationParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "SetViewRotation", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = SetViewRotationResult.model_validate(response_dict)
+        return validated_response.executionResults
 
     def set_view_settings(
         self, navigator_item_ids_with_view_settings: list[NavigatorItemIdsWithViewSetting]

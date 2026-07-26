@@ -10,31 +10,94 @@ from multiconn_archicad.models.tapir.commands import (
     CreateBuildingMaterialsResult,
     CreateCompositesParameters,
     CreateCompositesResult,
+    CreateFillsParameters,
+    CreateFillsResult,
     CreateLayerCombinationsParameters,
     CreateLayerCombinationsResult,
     CreateLayersParameters,
     CreateLayersResult,
+    CreateLinesParameters,
+    CreateLinesResult,
+    CreateMEPSystemsParameters,
+    CreateMEPSystemsResult,
+    CreatePenTablesParameters,
+    CreatePenTablesResult,
+    CreateProfilesParameters,
+    CreateProfilesResult,
     CreateSurfacesParameters,
     CreateSurfacesResult,
+    CreateZoneCategoriesParameters,
+    CreateZoneCategoriesResult,
+    DeleteAttributesParameters,
+    DeleteAttributesResult,
     GetAttributesByTypeParameters,
     GetAttributesByTypeResult,
     GetBuildingMaterialPhysicalPropertiesParameters,
     GetBuildingMaterialPhysicalPropertiesResult,
+    GetBuildingMaterialsParameters,
+    GetBuildingMaterialsResult,
+    GetCompositesParameters,
+    GetCompositesResult,
+    GetFillsParameters,
+    GetFillsResult,
     GetLayerCombinationsParameters,
     GetLayerCombinationsResult,
+    GetLayersParameters,
+    GetLayersResult,
+    GetLinesParameters,
+    GetLinesResult,
+    GetMEPSystemsParameters,
+    GetMEPSystemsResult,
+    GetPenTablesParameters,
+    GetPenTablesResult,
+    GetProfilesParameters,
+    GetProfilesResult,
+    GetSurfacesParameters,
+    GetSurfacesResult,
+    GetZoneCategoriesParameters,
+    GetZoneCategoriesResult,
 )
 from multiconn_archicad.models.tapir.types import (
     AttributeHeadersWrapper,
     AttributeIdArrayItem,
     AttributeType,
+    AttributesToDeleteItem,
+    BuildingMaterialAttribute,
+    BuildingMaterialAttributeField,
     BuildingMaterialDataArrayItem,
     BuildingMaterialPhysicalPropertiesArrayItem,
+    CompositeAttribute,
+    CompositeAttributeField,
     CompositeDataArrayItem,
     ErrorItem,
+    FailedExecutionResult,
+    FillAttribute,
+    FillAttributeField,
+    FillDataArrayItem,
+    LayerAttribute,
+    LayerAttributeField,
     LayerCombinationAttribute,
     LayerCombinationDataArrayItem,
     LayerDataArrayItem,
+    LineAttribute,
+    LineAttributeField,
+    LineDataArrayItem,
+    MEPSystemAttribute,
+    MEPSystemAttributeField,
+    MEPSystemDataArrayItem,
+    PenTableAttribute,
+    PenTableAttributeField,
+    PenTableDataArrayItem,
+    ProfileAttribute,
+    ProfileAttributeField,
+    ProfileDataArrayItem,
+    SuccessfulExecutionResult,
+    SurfaceAttribute,
+    SurfaceAttributeField,
     SurfaceDataArrayItem,
+    ZoneCategoryAttribute,
+    ZoneCategoryAttributeField,
+    ZoneCategoryDataArrayItem,
 )
 
 if TYPE_CHECKING:
@@ -107,6 +170,36 @@ class AttributeCommands:
         validated_response = CreateCompositesResult.model_validate(response_dict)
         return validated_response.attributeIds
 
+    def create_fills(
+        self, fill_data_array: list[FillDataArrayItem], overwrite_existing: None | bool = None
+    ) -> list[AttributeIdArrayItem]:
+        """
+        Creates or overwrites Fill attributes based on the given parameters.
+
+        Args:
+            fill_data_array (list[FillDataArrayItem]): Array of data to create new Fills.
+            overwrite_existing (None | bool): Overwrite the Fill if exists with the same name,
+                or if index is given with the same index. The default is false.
+
+        Returns:
+            list[AttributeIdArrayItem]: A list of attributes.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "fillDataArray": fill_data_array,
+            "overwriteExisting": overwrite_existing,
+        }
+        validated_params = CreateFillsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "CreateFills", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = CreateFillsResult.model_validate(response_dict)
+        return validated_response.attributeIds
+
     def create_layer_combinations(
         self, layer_combination_data_array: list[LayerCombinationDataArrayItem], overwrite_existing: None | bool = None
     ) -> list[AttributeIdArrayItem]:
@@ -168,6 +261,130 @@ class AttributeCommands:
         validated_response = CreateLayersResult.model_validate(response_dict)
         return validated_response.attributeIds
 
+    def create_lines(
+        self, line_data_array: list[LineDataArrayItem], overwrite_existing: None | bool = None
+    ) -> list[AttributeIdArrayItem]:
+        """
+        Creates or overwrites Line attributes based on the given parameters.
+
+        Args:
+            line_data_array (list[LineDataArrayItem]): Array of data to create new Lines.
+            overwrite_existing (None | bool): Overwrite the Line if exists with the same name,
+                or if index is given with the same index. The default is false.
+
+        Returns:
+            list[AttributeIdArrayItem]: A list of attributes.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "lineDataArray": line_data_array,
+            "overwriteExisting": overwrite_existing,
+        }
+        validated_params = CreateLinesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "CreateLines", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = CreateLinesResult.model_validate(response_dict)
+        return validated_response.attributeIds
+
+    def create_mep_systems(
+        self, mep_system_data_array: list[MEPSystemDataArrayItem], overwrite_existing: None | bool = None
+    ) -> list[AttributeIdArrayItem]:
+        """
+        Creates or overwrites MEP System attributes based on the given parameters.
+
+        Args:
+            mep_system_data_array (list[MEPSystemDataArrayItem]): Array of data to create new
+                MEP Systems.
+            overwrite_existing (None | bool): Overwrite the MEP System if exists with the same
+                name, or if index is given with the same index. The default is false.
+
+        Returns:
+            list[AttributeIdArrayItem]: A list of attributes.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "mepSystemDataArray": mep_system_data_array,
+            "overwriteExisting": overwrite_existing,
+        }
+        validated_params = CreateMEPSystemsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "CreateMEPSystems", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = CreateMEPSystemsResult.model_validate(response_dict)
+        return validated_response.attributeIds
+
+    def create_pen_tables(
+        self, pen_table_data_array: list[PenTableDataArrayItem], overwrite_existing: None | bool = None
+    ) -> list[AttributeIdArrayItem]:
+        """
+        Creates or overwrites Pen Table attributes based on the given parameters.
+
+        Args:
+            pen_table_data_array (list[PenTableDataArrayItem]): Array of data to create new Pen
+                Tables.
+            overwrite_existing (None | bool): Overwrite the Pen Table if exists with the same
+                name, or if index is given with the same index. The default is false.
+
+        Returns:
+            list[AttributeIdArrayItem]: A list of attributes.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "penTableDataArray": pen_table_data_array,
+            "overwriteExisting": overwrite_existing,
+        }
+        validated_params = CreatePenTablesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "CreatePenTables", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = CreatePenTablesResult.model_validate(response_dict)
+        return validated_response.attributeIds
+
+    def create_profiles(
+        self, profile_data_array: list[ProfileDataArrayItem], overwrite_existing: None | bool = None
+    ) -> list[AttributeIdArrayItem]:
+        """
+        Creates or overwrites Profile attributes as a copy of an existing Profile's geometry,
+        based on the given parameters.
+
+        Args:
+            profile_data_array (list[ProfileDataArrayItem]): Array of data to create new
+                Profiles.
+            overwrite_existing (None | bool): Overwrite the Profile if exists with the same
+                name, or if index is given with the same index. The default is false.
+
+        Returns:
+            list[AttributeIdArrayItem]: A list of attributes.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "profileDataArray": profile_data_array,
+            "overwriteExisting": overwrite_existing,
+        }
+        validated_params = CreateProfilesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "CreateProfiles", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = CreateProfilesResult.model_validate(response_dict)
+        return validated_response.attributeIds
+
     def create_surfaces(
         self, surface_data_array: list[SurfaceDataArrayItem], overwrite_existing: None | bool = None
     ) -> list[AttributeIdArrayItem]:
@@ -198,6 +415,65 @@ class AttributeCommands:
         )
         validated_response = CreateSurfacesResult.model_validate(response_dict)
         return validated_response.attributeIds
+
+    def create_zone_categories(
+        self, zone_category_data_array: list[ZoneCategoryDataArrayItem], overwrite_existing: None | bool = None
+    ) -> list[AttributeIdArrayItem]:
+        """
+        Creates or overwrites Zone Category attributes based on the given parameters.
+
+        Args:
+            zone_category_data_array (list[ZoneCategoryDataArrayItem]): Array of data to create
+                new Zone Categories.
+            overwrite_existing (None | bool): Overwrite the Zone Category if exists with the
+                same name, or if index is given with the same index. The default is false.
+
+        Returns:
+            list[AttributeIdArrayItem]: A list of attributes.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "zoneCategoryDataArray": zone_category_data_array,
+            "overwriteExisting": overwrite_existing,
+        }
+        validated_params = CreateZoneCategoriesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "CreateZoneCategories", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = CreateZoneCategoriesResult.model_validate(response_dict)
+        return validated_response.attributeIds
+
+    def delete_attributes(
+        self, attributes_to_delete: list[AttributesToDeleteItem]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Deletes the given attributes.
+
+        Args:
+            attributes_to_delete (list[AttributesToDeleteItem]): Array of attributes to delete.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "attributesToDelete": attributes_to_delete,
+        }
+        validated_params = DeleteAttributesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "DeleteAttributes", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = DeleteAttributesResult.model_validate(response_dict)
+        return validated_response.executionResults
 
     def get_attributes_by_type(self, attribute_type: AttributeType) -> AttributeHeadersWrapper | ErrorItem:
         """
@@ -253,6 +529,98 @@ class AttributeCommands:
         validated_response = GetBuildingMaterialPhysicalPropertiesResult.model_validate(response_dict)
         return validated_response.properties
 
+    def get_building_materials(
+        self, attribute_ids: list[AttributeIdArrayItem], fields: None | list[BuildingMaterialAttributeField] = None
+    ) -> list[BuildingMaterialAttribute | ErrorItem]:
+        """
+        Returns the details of the given Building Material attributes.
+
+        Args:
+            attribute_ids (list[AttributeIdArrayItem]): A list of attributes.
+            fields (None | list[BuildingMaterialAttributeField]): Names of the fields to return
+                for each Building Material. If omitted, every field is returned.
+
+        Returns:
+            list[BuildingMaterialAttribute | ErrorItem]: A list of building materials or errors.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "attributeIds": attribute_ids,
+            "fields": fields,
+        }
+        validated_params = GetBuildingMaterialsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetBuildingMaterials", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetBuildingMaterialsResult.model_validate(response_dict)
+        return validated_response.buildingMaterials
+
+    def get_composites(
+        self, attribute_ids: list[AttributeIdArrayItem], fields: None | list[CompositeAttributeField] = None
+    ) -> list[CompositeAttribute | ErrorItem]:
+        """
+        Returns the details of the given Composite attributes.
+
+        Args:
+            attribute_ids (list[AttributeIdArrayItem]): A list of attributes.
+            fields (None | list[CompositeAttributeField]): Names of the fields to return for
+                each Composite. If omitted, every field is returned.
+
+        Returns:
+            list[CompositeAttribute | ErrorItem]: A list of composites or errors.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "attributeIds": attribute_ids,
+            "fields": fields,
+        }
+        validated_params = GetCompositesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetComposites", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetCompositesResult.model_validate(response_dict)
+        return validated_response.composites
+
+    def get_fills(
+        self, attribute_ids: list[AttributeIdArrayItem], fields: None | list[FillAttributeField] = None
+    ) -> list[ErrorItem | FillAttribute]:
+        """
+        Returns the details of the given Fill attributes.
+
+        Args:
+            attribute_ids (list[AttributeIdArrayItem]): A list of attributes.
+            fields (None | list[FillAttributeField]): Names of the fields to return for each
+                Fill. If omitted, every field is returned. Requesting only the fields you need
+                avoids fetching lineItems/symbolLines/symbolArcs/symbolHotspots, which can be
+                large.
+
+        Returns:
+            list[ErrorItem | FillAttribute]: A list of fills or errors.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "attributeIds": attribute_ids,
+            "fields": fields,
+        }
+        validated_params = GetFillsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetFills", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetFillsResult.model_validate(response_dict)
+        return validated_response.fills
+
     def get_layer_combinations(
         self, attributes: list[AttributeIdArrayItem]
     ) -> list[ErrorItem | LayerCombinationAttribute]:
@@ -279,3 +647,219 @@ class AttributeCommands:
         )
         validated_response = GetLayerCombinationsResult.model_validate(response_dict)
         return validated_response.layerCombinations
+
+    def get_layers(
+        self, attribute_ids: list[AttributeIdArrayItem], fields: None | list[LayerAttributeField] = None
+    ) -> list[ErrorItem | LayerAttribute]:
+        """
+        Returns the details of the given Layer attributes.
+
+        Args:
+            attribute_ids (list[AttributeIdArrayItem]): A list of attributes.
+            fields (None | list[LayerAttributeField]): Names of the fields to return for each
+                Layer. If omitted, every field is returned.
+
+        Returns:
+            list[ErrorItem | LayerAttribute]: A list of layers or errors.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "attributeIds": attribute_ids,
+            "fields": fields,
+        }
+        validated_params = GetLayersParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetLayers", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetLayersResult.model_validate(response_dict)
+        return validated_response.layers
+
+    def get_lines(
+        self, attribute_ids: list[AttributeIdArrayItem], fields: None | list[LineAttributeField] = None
+    ) -> list[ErrorItem | LineAttribute]:
+        """
+        Returns the details of the given Line attributes.
+
+        Args:
+            attribute_ids (list[AttributeIdArrayItem]): A list of attributes.
+            fields (None | list[LineAttributeField]): Names of the fields to return for each
+                Line. If omitted, every field is returned. Requesting only the fields you need
+                avoids fetching dashItems/lineItems, which can be large.
+
+        Returns:
+            list[ErrorItem | LineAttribute]: A list of lines or errors.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "attributeIds": attribute_ids,
+            "fields": fields,
+        }
+        validated_params = GetLinesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetLines", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetLinesResult.model_validate(response_dict)
+        return validated_response.lines
+
+    def get_mep_systems(
+        self, attribute_ids: list[AttributeIdArrayItem], fields: None | list[MEPSystemAttributeField] = None
+    ) -> list[ErrorItem | MEPSystemAttribute]:
+        """
+        Returns the details of the given MEP System attributes.
+
+        Args:
+            attribute_ids (list[AttributeIdArrayItem]): A list of attributes.
+            fields (None | list[MEPSystemAttributeField]): Names of the fields to return for
+                each MEP System. If omitted, every field is returned.
+
+        Returns:
+            list[ErrorItem | MEPSystemAttribute]: A list of MEP systems or errors.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "attributeIds": attribute_ids,
+            "fields": fields,
+        }
+        validated_params = GetMEPSystemsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetMEPSystems", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetMEPSystemsResult.model_validate(response_dict)
+        return validated_response.mepSystems
+
+    def get_pen_tables(
+        self, attribute_ids: list[AttributeIdArrayItem], fields: None | list[PenTableAttributeField] = None
+    ) -> list[ErrorItem | PenTableAttribute]:
+        """
+        Returns the details of the given Pen Table attributes.
+
+        Args:
+            attribute_ids (list[AttributeIdArrayItem]): A list of attributes.
+            fields (None | list[PenTableAttributeField]): Names of the fields to return for each
+                Pen Table. If omitted, every field is returned. Requesting only the fields you
+                need avoids fetching the 255-element pens array.
+
+        Returns:
+            list[ErrorItem | PenTableAttribute]: A list of pen tables or errors.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "attributeIds": attribute_ids,
+            "fields": fields,
+        }
+        validated_params = GetPenTablesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetPenTables", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetPenTablesResult.model_validate(response_dict)
+        return validated_response.penTables
+
+    def get_profiles(
+        self, attribute_ids: list[AttributeIdArrayItem], fields: None | list[ProfileAttributeField] = None
+    ) -> list[ErrorItem | ProfileAttribute]:
+        """
+        Returns the details of the given Profile attributes.
+
+        Args:
+            attribute_ids (list[AttributeIdArrayItem]): A list of attributes.
+            fields (None | list[ProfileAttributeField]): Names of the fields to return for each
+                Profile. If omitted, every field is returned. Note the raw cross-section vector
+                geometry itself is not exposed; width/height/minimumWidth/minimumHeight/widthStr
+                etchable/heightStretchable/hasCoreSkin/profileModifiers are derived measurements
+                matching what the Profile Editor shows, computed from the profile's internal
+                stretch/parameter data.
+
+        Returns:
+            list[ErrorItem | ProfileAttribute]: A list of profiles or errors.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "attributeIds": attribute_ids,
+            "fields": fields,
+        }
+        validated_params = GetProfilesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetProfiles", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetProfilesResult.model_validate(response_dict)
+        return validated_response.profiles
+
+    def get_surfaces(
+        self, attribute_ids: list[AttributeIdArrayItem], fields: None | list[SurfaceAttributeField] = None
+    ) -> list[ErrorItem | SurfaceAttribute]:
+        """
+        Returns the details of the given Surface attributes.
+
+        Args:
+            attribute_ids (list[AttributeIdArrayItem]): A list of attributes.
+            fields (None | list[SurfaceAttributeField]): Names of the fields to return for each
+                Surface. If omitted, every field is returned.
+
+        Returns:
+            list[ErrorItem | SurfaceAttribute]: A list of surfaces or errors.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "attributeIds": attribute_ids,
+            "fields": fields,
+        }
+        validated_params = GetSurfacesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetSurfaces", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetSurfacesResult.model_validate(response_dict)
+        return validated_response.surfaces
+
+    def get_zone_categories(
+        self, attribute_ids: list[AttributeIdArrayItem], fields: None | list[ZoneCategoryAttributeField] = None
+    ) -> list[ErrorItem | ZoneCategoryAttribute]:
+        """
+        Returns the details of the given Zone Category attributes.
+
+        Args:
+            attribute_ids (list[AttributeIdArrayItem]): A list of attributes.
+            fields (None | list[ZoneCategoryAttributeField]): Names of the fields to return for
+                each Zone Category. If omitted, every field is returned.
+
+        Returns:
+            list[ErrorItem | ZoneCategoryAttribute]: A list of zone categories or errors.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "attributeIds": attribute_ids,
+            "fields": fields,
+        }
+        validated_params = GetZoneCategoriesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetZoneCategories", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetZoneCategoriesResult.model_validate(response_dict)
+        return validated_response.zoneCategories

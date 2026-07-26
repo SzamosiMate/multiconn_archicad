@@ -23,6 +23,8 @@ from multiconn_archicad.models.tapir.commands import (
     SetPropertyValuesOfAttributesResult,
     SetPropertyValuesOfElementsParameters,
     SetPropertyValuesOfElementsResult,
+    UpdatePropertyDefinitionsParameters,
+    UpdatePropertyDefinitionsResult,
 )
 from multiconn_archicad.models.tapir.types import (
     AttributeIdArrayItem,
@@ -33,6 +35,7 @@ from multiconn_archicad.models.tapir.types import (
     FailedExecutionResult,
     PropertyDefinitionArrayItem,
     PropertyDetails,
+    PropertyExpressionUpdate,
     PropertyGroupArrayItem,
     PropertyGroupIdArrayItem,
     PropertyIdArrayItem,
@@ -295,4 +298,33 @@ class PropertyCommands:
             "SetPropertyValuesOfElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = SetPropertyValuesOfElementsResult.model_validate(response_dict)
+        return validated_response.executionResults
+
+    def update_property_definitions(
+        self, property_definitions: list[PropertyExpressionUpdate]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Updates the expression(s) of existing expression-based Custom Property Definitions.
+
+        Args:
+            property_definitions (list[PropertyExpressionUpdate]): The list of expression-based
+                property definitions to update.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "propertyDefinitions": property_definitions,
+        }
+        validated_params = UpdatePropertyDefinitionsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "UpdatePropertyDefinitions", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = UpdatePropertyDefinitionsResult.model_validate(response_dict)
         return validated_response.executionResults

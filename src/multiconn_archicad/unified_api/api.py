@@ -32,6 +32,8 @@ from .tapir.navigator import NavigatorCommands as TapirNavigatorCommands
 from .tapir.project import ProjectCommands as TapirProjectCommands
 from .tapir.property import PropertyCommands as TapirPropertyCommands
 from .tapir.revision_management import RevisionManagementCommands as TapirRevisionManagementCommands
+from .tapir.script_ui import ScriptUiCommands as TapirScriptUiCommands
+from .tapir.solid_element_operation import SolidElementOperationCommands as TapirSolidElementOperationCommands
 from .tapir.teamwork import TeamworkCommands as TapirTeamworkCommands
 
 if TYPE_CHECKING:
@@ -58,6 +60,8 @@ class TapirApi:
         self.project = TapirProjectCommands(core)
         self.property = TapirPropertyCommands(core)
         self.revision_management = TapirRevisionManagementCommands(core)
+        self.script_ui = TapirScriptUiCommands(core)
+        self.solid_element_operation = TapirSolidElementOperationCommands(core)
         self.teamwork = TapirTeamworkCommands(core)
 
 

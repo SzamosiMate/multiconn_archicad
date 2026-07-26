@@ -9,6 +9,8 @@ from multiconn_archicad.models.tapir.commands import (
     CloseProjectResult,
     CreateProjectInfoFieldsParameters,
     CreateProjectInfoFieldsResult,
+    DeleteProjectInfoFieldsParameters,
+    DeleteProjectInfoFieldsResult,
     GetCalculationUnitsResult,
     GetGeoLocationResult,
     GetHotlinksResult,
@@ -89,6 +91,35 @@ class ProjectCommands:
         )
         validated_response = CreateProjectInfoFieldsResult.model_validate(response_dict)
         return validated_response.fields
+
+    def delete_project_info_fields(
+        self, project_info_ids: list[str]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Deletes one or more custom project info fields. Hardcoded fields cannot be deleted.
+
+        Args:
+            project_info_ids (list[str]): List of project info field ids to delete. Only custom
+                fields (ids starting with 'autotext-') can be deleted.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "projectInfoIds": project_info_ids,
+        }
+        validated_params = DeleteProjectInfoFieldsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "DeleteProjectInfoFields", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = DeleteProjectInfoFieldsResult.model_validate(response_dict)
+        return validated_response.executionResults
 
     def get_calculation_units(self) -> GetCalculationUnitsResult:
         """
