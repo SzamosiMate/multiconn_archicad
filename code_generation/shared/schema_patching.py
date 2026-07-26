@@ -161,6 +161,10 @@ def apply_permanent_patches(master_defs: dict[str, Any]):
         "CreateStairsParameters": ("stairsData", "StairData"),
         "CreateLampsParameters": ("lampsData", "LampData"),
         "CreateTextsParameters": ("textsData", "TextData"),
+        "SetLayoutSettingsParameters": ("layoutsData", "LayoutSettingsData"),
+        "CloneProjectMapItemToViewMapParameters": ("viewsData", "ViewCloneData"),
+        "CreateViewsInViewMapParameters": ("viewsData", "ViewData"),
+        "CreateMEPSystemsParameters": ("mepSystemDataArray", "MEPSystemDataArrayItem"),
     }
 
     for parent_model, (field_name, new_model_name) in creation_data_types.items():
@@ -175,10 +179,15 @@ def apply_permanent_patches(master_defs: dict[str, Any]):
         "ModifyDoorsParameters": ("doorsWithDetails", "DoorWithDetails"),
         "ModifyMorphsParameters": ("morphsWithDetails", "MorphWithDetails"),
         "ModifyRoofsParameters": ("roofsWithDetails", "RoofWithDetails"),
+        "ModifyMeshesParameters": ("meshesData", "MeshWithDetails"),
     }
 
     for parent_model, (field_name, new_model_name) in element_modification_datatypes.items():
         extract_inline_schema(master_defs, parent_model, [field_name, "items"], new_model_name)
+
+    # ModifyMeshes wraps its payload one level deeper than the other Modify commands:
+    # the MeshWithDetails wrapper (extracted above) carries the actual data in 'meshData'.
+    extract_inline_schema(master_defs, "MeshWithDetails", ["meshData"], "MeshModificationData")
 
 
 def apply_temporary_patches(master_defs: dict[str, Any]):
@@ -197,6 +206,18 @@ def apply_temporary_patches(master_defs: dict[str, Any]):
     extract_inline_enum(master_defs, "RoofData", ["structureType"], "RoofStructureType")
     extract_inline_enum(master_defs, "RoofWithDetails", ["structureType"], "RoofStructureType")
 
+    # --- Name the per-attribute-type detail field enums (Tapir 1.5.4 attribute commands) ---
+    extract_inline_enum(master_defs, "GetFillsParameters", ["fields", "items"], "FillAttributeField")
+    extract_inline_enum(master_defs, "GetZoneCategoriesParameters", ["fields", "items"], "ZoneCategoryAttributeField")
+    extract_inline_enum(master_defs, "GetMEPSystemsParameters", ["fields", "items"], "MEPSystemAttributeField")
+    extract_inline_enum(master_defs, "GetPenTablesParameters", ["fields", "items"], "PenTableAttributeField")
+    extract_inline_enum(master_defs, "GetProfilesParameters", ["fields", "items"], "ProfileAttributeField")
+    extract_inline_enum(master_defs, "GetCompositesParameters", ["fields", "items"], "CompositeAttributeField")
+    extract_inline_enum(master_defs, "GetSurfacesParameters", ["fields", "items"], "SurfaceAttributeField")
+    extract_inline_enum(master_defs, "GetLayersParameters", ["fields", "items"], "LayerAttributeField")
+    extract_inline_enum(master_defs, "GetBuildingMaterialsParameters", ["fields", "items"], "BuildingMaterialAttributeField")
+    extract_inline_enum(master_defs, "GetLinesParameters", ["fields", "items"], "LineAttributeField")
+
     # --- Replace inline Coordinate2D properties in RotateElementsParameters ---
     replace_inline_schema_with_ref(master_defs, "RotateElementsParameters", ["elementsWithRotations", "items", "rotation", "beginPoint"], "Coordinate2D", preserve_description=True)
     replace_inline_schema_with_ref(master_defs, "RotateElementsParameters", ["elementsWithRotations", "items", "rotation", "endPoint"], "Coordinate2D", preserve_description=True)
@@ -205,6 +226,11 @@ def apply_temporary_patches(master_defs: dict[str, Any]):
     # --- Extract conflicting inline Schemas ---
     extract_inline_schema(master_defs, "DimensionData", ["witnessPoints", "items"], "CoordinateWitnessPoint")
     extract_inline_schema(master_defs, "AssociativeDimensionData", ["witnessPoints", "items"], "AssociativeWitnessPoint")
+    extract_inline_schema(master_defs, "RenameFavoritesParameters", ["renames", "items"], "FavoriteRename")
+    extract_inline_schema(master_defs, "UpdatePropertyDefinitionsParameters", ["propertyDefinitions", "items"], "PropertyExpressionUpdate")
+    extract_inline_schema(master_defs, "UpdateFavoritesFromElementsParameters", ["favoritesFromElements", "items"], "FavoritesFromElementUpdate")
+    extract_inline_schema(master_defs, "RemoveSolidElementLinksParameters", ["solidLinks", "items"], "SolidLinkReference")
+    extract_inline_schema(master_defs, "GetSolidElementLinksResult", ["solidLinks", "items"], "SolidLinksOfElement")
     extract_inline_schema(
         master_defs, "CreateProjectInfoFieldsParameters", ["projectInfoFields", "items"], "ProjectInfoFieldData"
     )
@@ -252,6 +278,93 @@ def apply_temporary_patches(master_defs: dict[str, Any]):
     # --- Unify Zoom schemas ---
     extract_inline_schema(master_defs, "ViewTransformations", ["zoom"], "Zoom")
     replace_inline_schema_with_ref(master_defs, "ViewSettings", ["zoom"], "Zoom")
+
+    # --- Unify Morph Get/Create/Modify sub-schemas (Tapir 1.5.5 full morph parameter coverage) ---
+    extract_inline_schema(master_defs, "MorphDetails", ["linkToSettings"], "LinkToSettings")
+    replace_inline_schema_with_ref(master_defs, "MorphData", ["linkToSettings"], "LinkToSettings")
+    replace_inline_schema_with_ref(master_defs, "MorphWithDetails", ["linkToSettings"], "LinkToSettings")
+    extract_inline_enum(master_defs, "MorphDetails", ["displayOption"], "DisplayOption")
+    replace_inline_schema_with_ref(master_defs, "MorphData", ["displayOption"], "DisplayOption")
+    replace_inline_schema_with_ref(master_defs, "MorphWithDetails", ["displayOption"], "DisplayOption")
+    extract_inline_enum(master_defs, "MorphDetails", ["viewDepthLimitation"], "ViewDepthLimitation")
+    replace_inline_schema_with_ref(master_defs, "MorphData", ["viewDepthLimitation"], "ViewDepthLimitation")
+    replace_inline_schema_with_ref(master_defs, "MorphWithDetails", ["viewDepthLimitation"], "ViewDepthLimitation")
+    extract_inline_enum(master_defs, "MorphDetails", ["textureProjectionType"], "TextureProjectionType")
+    replace_inline_schema_with_ref(master_defs, "MorphData", ["textureProjectionType"], "TextureProjectionType")
+    replace_inline_schema_with_ref(master_defs, "MorphWithDetails", ["textureProjectionType"], "TextureProjectionType")
+    extract_inline_schema(master_defs, "MorphDetails", ["coverFillOrientation"], "CoverFillOrientation")
+    replace_inline_schema_with_ref(master_defs, "MorphData", ["coverFillOrientation"], "CoverFillOrientation")
+    replace_inline_schema_with_ref(master_defs, "MorphWithDetails", ["coverFillOrientation"], "CoverFillOrientation")
+    extract_inline_enum(master_defs, "CoverFillOrientation", ["type"], "CoverFillOrientationType")
+
+    # --- Morph body geometry ---
+    extract_inline_schema(master_defs, "MorphBody", ["polygons", "items"], "MorphPolygon")
+    extract_inline_schema(master_defs, "MorphPolygon", ["holes", "items"], "MorphPolygonHole")
+
+    # --- Design option link type ---
+    extract_inline_enum(
+        master_defs, "GetDesignOptionForElementsResult", ["designOptionForElements", "items", "type"], "DesignOptionLinkType"
+    )
+
+    # --- Unify Mesh Get/Create/Modify sub-schemas ---
+    extract_inline_enum(master_defs, "MeshDetails", ["ridges"], "MeshRidges")
+    replace_inline_schema_with_ref(master_defs, "MeshData", ["ridges"], "MeshRidges", preserve_description=True)
+    replace_inline_schema_with_ref(master_defs, "MeshModificationData", ["ridges"], "MeshRidges", preserve_description=True)
+    extract_inline_schema(master_defs, "MeshDetails", ["sublines", "items"], "MeshSubline")
+    replace_inline_schema_with_ref(master_defs, "MeshData", ["sublines", "items"], "MeshSubline")
+    replace_inline_schema_with_ref(master_defs, "MeshModificationData", ["sublines", "items"], "MeshSubline")
+
+    # --- Line/Fill attribute creation sub-schemas (Tapir 1.5.4 attribute commands) ---
+    replace_inline_schema_with_ref(
+        master_defs, "CreateLinesParameters", ["lineDataArray", "items", "dashItems", "items"], "LineDashItem"
+    )
+    extract_inline_schema(
+        master_defs, "CreateLinesParameters", ["lineDataArray", "items", "lineItems", "items"], "LineSymbolItemData"
+    )
+    replace_inline_schema_with_ref(
+        master_defs, "CreateFillsParameters", ["fillDataArray", "items", "lineItems", "items"], "FillLineItem"
+    )
+    replace_inline_schema_with_ref(
+        master_defs, "CreateFillsParameters", ["fillDataArray", "items", "symbolLines", "items"], "FillSymbolLine"
+    )
+    replace_inline_schema_with_ref(
+        master_defs, "CreateFillsParameters", ["fillDataArray", "items", "symbolArcs", "items"], "FillSymbolArc"
+    )
+
+    # --- Attribute detail enums ---
+    extract_inline_enum(master_defs, "FillAttribute", ["subType"], "FillSubType")
+    extract_inline_enum(master_defs, "MEPSystemAttribute", ["domain", "items"], "MEPSystemDomain")
+    extract_inline_enum(master_defs, "ProfileAttribute", ["useWith", "items"], "ProfileUseWith")
+
+    # --- Pen table pens ---
+    extract_inline_schema(
+        master_defs, "CreatePenTablesParameters", ["penTableDataArray", "items", "pens", "items"], "PenData"
+    )
+
+    # --- Drawing bounds ---
+    extract_inline_schema(master_defs, "DrawingDetails", ["bounds"], "BoundingBox2D")
+
+    # --- Profile skins ---
+    extract_inline_schema(
+        master_defs, "CreateProfilesParameters", ["profileDataArray", "items", "newSkins", "items"], "ProfileSkinData"
+    )
+    extract_inline_schema(master_defs, "ProfileSkinData", ["contours", "items"], "ProfileSkinContour")
+    extract_inline_schema(
+        master_defs,
+        "CreateProfilesParameters",
+        ["profileDataArray", "items", "skinOverrides", "items", "edgeOverrides", "items"],
+        "ProfileEdgeOverride",
+    )
+    replace_inline_schema_with_ref(master_defs, "ProfileSkinData", ["edgeOverrides", "items"], "ProfileEdgeOverride")
+
+    # --- Solid element operation links (create side; Remove/Get variants are extracted above) ---
+    extract_inline_schema(master_defs, "CreateSolidElementLinksParameters", ["solidLinks", "items"], "SolidLinkData")
+
+    # --- Layout custom data (Get and Set sides have different required lists) ---
+    extract_inline_schema(
+        master_defs, "GetLayoutSettingsResult", ["layoutSettings", "items", "customData", "items"], "LayoutCustomData"
+    )
+    extract_inline_schema(master_defs, "LayoutSettingsData", ["customData", "items"], "LayoutCustomDataToSet")
 
     # --- remove malformed Export Favorites result ---
     master_defs.pop("ExportFavoritesResult", None)
