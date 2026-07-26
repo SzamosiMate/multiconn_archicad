@@ -238,6 +238,974 @@
         }
       ]
     },
+    "LineAttribute": {
+      "type": "object",
+      "description": "A line attribute.",
+      "properties": {
+        "attributeId": {
+          "$ref": "#/$defs/AttributeId"
+        },
+        "index": {
+          "type": "integer"
+        },
+        "name": {
+          "type": "string"
+        },
+        "scaleWithPlan": {
+          "type": "boolean"
+        },
+        "defineScale": {
+          "type": "number"
+        },
+        "lineType": {
+          "type": "string",
+          "enum": [
+            "Solid",
+            "Dashed",
+            "Symbol"
+          ]
+        },
+        "period": {
+          "type": "number"
+        },
+        "height": {
+          "type": "number"
+        },
+        "dashItems": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/LineDashItem"
+          }
+        },
+        "lineItems": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/LineSymbolItem"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "attributeId",
+        "index",
+        "name"
+      ]
+    },
+    "LineAttributeOrError": {
+      "type": "object",
+      "description": "A line attribute or an error.",
+      "oneOf": [
+        {
+          "$ref": "#/$defs/LineAttribute"
+        },
+        {
+          "$ref": "#/$defs/ErrorItem"
+        }
+      ]
+    },
+    "LineDashItem": {
+      "type": "object",
+      "properties": {
+        "dash": {
+          "type": "number"
+        },
+        "gap": {
+          "type": "number"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "dash",
+        "gap"
+      ]
+    },
+    "LineSymbolItem": {
+      "type": "object",
+      "properties": {
+        "itemType": {
+          "type": "string"
+        },
+        "centerOffset": {
+          "type": "number"
+        },
+        "length": {
+          "type": "number"
+        },
+        "begPos": {
+          "$ref": "#/$defs/Coordinate2D"
+        },
+        "endPos": {
+          "$ref": "#/$defs/Coordinate2D"
+        },
+        "radius": {
+          "type": "number"
+        },
+        "beginAngle": {
+          "type": "number"
+        },
+        "endAngle": {
+          "type": "number"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "itemType",
+        "centerOffset",
+        "length",
+        "begPos",
+        "endPos",
+        "radius",
+        "beginAngle",
+        "endAngle"
+      ]
+    },
+    "FillAttribute": {
+      "type": "object",
+      "description": "A fill attribute.",
+      "properties": {
+        "attributeId": {
+          "$ref": "#/$defs/AttributeId"
+        },
+        "index": {
+          "type": "integer"
+        },
+        "name": {
+          "type": "string"
+        },
+        "subType": {
+          "$ref": "#/$defs/FillSubType"
+        },
+        "scaleWithPlan": {
+          "type": "boolean"
+        },
+        "useForWalls": {
+          "type": "boolean"
+        },
+        "useForDraft": {
+          "type": "boolean"
+        },
+        "useForCover": {
+          "type": "boolean"
+        },
+        "horizontalSpacing": {
+          "type": "number"
+        },
+        "verticalSpacing": {
+          "type": "number"
+        },
+        "angle": {
+          "type": "number"
+        },
+        "bitPattern": {
+          "type": "string"
+        },
+        "gradientStart": {
+          "$ref": "#/$defs/Coordinate2D"
+        },
+        "gradientEnd": {
+          "$ref": "#/$defs/Coordinate2D"
+        },
+        "percent": {
+          "type": "number"
+        },
+        "texture": {
+          "$ref": "#/$defs/Texture"
+        },
+        "lineItems": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/FillLineItem"
+          }
+        },
+        "symbolLines": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/FillSymbolLine"
+          }
+        },
+        "symbolArcs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/FillSymbolArc"
+          }
+        },
+        "symbolHotspots": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Coordinate2D"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "attributeId",
+        "index",
+        "name"
+      ]
+    },
+    "FillAttributeOrError": {
+      "type": "object",
+      "description": "A fill attribute or an error.",
+      "oneOf": [
+        {
+          "$ref": "#/$defs/FillAttribute"
+        },
+        {
+          "$ref": "#/$defs/ErrorItem"
+        }
+      ]
+    },
+    "FillLineItem": {
+      "type": "object",
+      "properties": {
+        "frequency": {
+          "type": "number"
+        },
+        "direction": {
+          "type": "number"
+        },
+        "offsetLine": {
+          "type": "number"
+        },
+        "offset": {
+          "$ref": "#/$defs/Coordinate2D"
+        },
+        "lineLengths": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "frequency",
+        "direction",
+        "offsetLine",
+        "offset"
+      ]
+    },
+    "FillSymbolLine": {
+      "type": "object",
+      "properties": {
+        "begin": {
+          "$ref": "#/$defs/Coordinate2D"
+        },
+        "end": {
+          "$ref": "#/$defs/Coordinate2D"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "begin",
+        "end"
+      ]
+    },
+    "FillSymbolArc": {
+      "type": "object",
+      "properties": {
+        "begin": {
+          "$ref": "#/$defs/Coordinate2D"
+        },
+        "origin": {
+          "$ref": "#/$defs/Coordinate2D"
+        },
+        "angle": {
+          "type": "number"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "begin",
+        "origin",
+        "angle"
+      ]
+    },
+    "ZoneCategoryAttribute": {
+      "type": "object",
+      "description": "A zone category attribute.",
+      "properties": {
+        "attributeId": {
+          "$ref": "#/$defs/AttributeId"
+        },
+        "index": {
+          "type": "integer"
+        },
+        "name": {
+          "type": "string"
+        },
+        "categoryCode": {
+          "type": "string"
+        },
+        "color": {
+          "$ref": "#/$defs/ColorRGB"
+        },
+        "stampName": {
+          "type": "string"
+        },
+        "stampMainGuid": {
+          "type": "string"
+        },
+        "stampRevGuid": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "attributeId",
+        "index",
+        "name"
+      ]
+    },
+    "ZoneCategoryAttributeOrError": {
+      "type": "object",
+      "description": "A zone category attribute or an error.",
+      "oneOf": [
+        {
+          "$ref": "#/$defs/ZoneCategoryAttribute"
+        },
+        {
+          "$ref": "#/$defs/ErrorItem"
+        }
+      ]
+    },
+    "MEPSystemAttribute": {
+      "type": "object",
+      "description": "An MEP system attribute.",
+      "properties": {
+        "attributeId": {
+          "$ref": "#/$defs/AttributeId"
+        },
+        "index": {
+          "type": "integer"
+        },
+        "name": {
+          "type": "string"
+        },
+        "domain": {
+          "type": "array",
+          "description": "The domain(s) this system belongs to. Archicad 29+ allows only one; earlier versions may report several.",
+          "items": {
+            "$ref": "#/$defs/MEPSystemDomain"
+          }
+        },
+        "contourPen": {
+          "type": "integer"
+        },
+        "fillPen": {
+          "type": "integer"
+        },
+        "fillBackgroundPen": {
+          "type": "integer"
+        },
+        "centerLinePen": {
+          "type": "integer"
+        },
+        "fillId": {
+          "$ref": "#/$defs/AttributeIdArrayItem"
+        },
+        "centerLineTypeId": {
+          "$ref": "#/$defs/AttributeIdArrayItem"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "attributeId",
+        "index",
+        "name"
+      ]
+    },
+    "MEPSystemAttributeOrError": {
+      "type": "object",
+      "description": "An MEP system attribute or an error.",
+      "oneOf": [
+        {
+          "$ref": "#/$defs/MEPSystemAttribute"
+        },
+        {
+          "$ref": "#/$defs/ErrorItem"
+        }
+      ]
+    },
+    "PenTableAttribute": {
+      "type": "object",
+      "description": "A pen table attribute.",
+      "properties": {
+        "attributeId": {
+          "$ref": "#/$defs/AttributeId"
+        },
+        "index": {
+          "type": "integer"
+        },
+        "name": {
+          "type": "string"
+        },
+        "isActiveForModel": {
+          "type": "boolean"
+        },
+        "isActiveForLayout": {
+          "type": "boolean"
+        },
+        "pens": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/PenTablePen"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "attributeId",
+        "index",
+        "name"
+      ]
+    },
+    "PenTableAttributeOrError": {
+      "type": "object",
+      "description": "A pen table attribute or an error.",
+      "oneOf": [
+        {
+          "$ref": "#/$defs/PenTableAttribute"
+        },
+        {
+          "$ref": "#/$defs/ErrorItem"
+        }
+      ]
+    },
+    "PenTablePen": {
+      "type": "object",
+      "properties": {
+        "index": {
+          "type": "integer"
+        },
+        "color": {
+          "$ref": "#/$defs/ColorRGB"
+        },
+        "width": {
+          "type": "number"
+        },
+        "description": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "index",
+        "color",
+        "width",
+        "description"
+      ]
+    },
+    "ProfileAttribute": {
+      "type": "object",
+      "description": "A profile attribute.",
+      "properties": {
+        "attributeId": {
+          "$ref": "#/$defs/AttributeId"
+        },
+        "index": {
+          "type": "integer"
+        },
+        "name": {
+          "type": "string"
+        },
+        "wallType": {
+          "type": "boolean"
+        },
+        "beamType": {
+          "type": "boolean"
+        },
+        "coluType": {
+          "type": "boolean"
+        },
+        "handrailType": {
+          "type": "boolean"
+        },
+        "otherGDLObjectType": {
+          "type": "boolean"
+        },
+        "useWith": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ProfileUseWith"
+          }
+        },
+        "width": {
+          "type": "number"
+        },
+        "height": {
+          "type": "number"
+        },
+        "minimumWidth": {
+          "type": "number"
+        },
+        "minimumHeight": {
+          "type": "number"
+        },
+        "widthStretchable": {
+          "type": "boolean"
+        },
+        "heightStretchable": {
+          "type": "boolean"
+        },
+        "hasCoreSkin": {
+          "type": "boolean"
+        },
+        "profileModifiers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ProfileModifier"
+          }
+        },
+        "skins": {
+          "type": "array",
+          "description": "The profile's skins (hatches), each with its building material/surface/fill, contour and cut-end line settings, and per-edge line data.",
+          "items": {
+            "$ref": "#/$defs/ProfileSkin"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "attributeId",
+        "index",
+        "name"
+      ]
+    },
+    "ProfileModifier": {
+      "type": "object",
+      "description": "A stretchable edge-offset parameter of the profile, as named by the profile's author in the Profile Editor. Its value is a live geometric measurement matching what the Profile Editor's dimension shows.",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "User-authored label, e.g. 'Largeur support'. Present only if the profile's author assigned one."
+        },
+        "value": {
+          "type": "number",
+          "description": "Present only when the parameter's dimension anchors could be resolved to concrete positions."
+        }
+      },
+      "additionalProperties": false
+    },
+    "ProfileSkin": {
+      "type": "object",
+      "description": "One skin (hatch) of the profile's cross-section.",
+      "properties": {
+        "skinId": {
+          "type": "string",
+          "description": "Internal identifier of this skin, stable for the lifetime of the profile. Pass it back in CreateProfiles' skinOverrides to target this skin for modification."
+        },
+        "buildingMaterialId": {
+          "$ref": "#/$defs/AttributeIdArrayItem"
+        },
+        "surfaceId": {
+          "$ref": "#/$defs/AttributeIdArrayItem"
+        },
+        "fillId": {
+          "$ref": "#/$defs/AttributeIdArrayItem"
+        },
+        "contourPen": {
+          "type": "integer"
+        },
+        "contourLineTypeId": {
+          "$ref": "#/$defs/AttributeIdArrayItem"
+        },
+        "isCore": {
+          "type": "boolean"
+        },
+        "isFinish": {
+          "type": "boolean"
+        },
+        "visibleCutEndLines": {
+          "type": "boolean"
+        },
+        "cutEndLinePen": {
+          "type": "integer"
+        },
+        "cutEndLineTypeId": {
+          "$ref": "#/$defs/AttributeIdArrayItem"
+        },
+        "edges": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ProfileEdge"
+          }
+        },
+        "outlineCoords": {
+          "type": "array",
+          "description": "The skin's outline polygon vertices, present only when the skinOutlines field is requested alongside skins.",
+          "items": {
+            "$ref": "#/$defs/Coordinate2D"
+          }
+        },
+        "outlineSubPolyEnds": {
+          "type": "array",
+          "description": "Index (into outlineCoords) of the last vertex of each contour, for skins whose outline has holes or multiple contours.",
+          "items": {
+            "type": "integer"
+          }
+        },
+        "outlineArcs": {
+          "type": "array",
+          "description": "Marks which consecutive outlineCoords pairs are connected by an arc instead of a straight edge.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "begIndex": {
+                "type": "integer"
+              },
+              "endIndex": {
+                "type": "integer"
+              },
+              "arcAngle": {
+                "type": "number"
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "begIndex",
+              "endIndex",
+              "arcAngle"
+            ]
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "ProfileEdge": {
+      "type": "object",
+      "description": "One edge of a profile skin's outline.",
+      "properties": {
+        "buildingMaterialId": {
+          "$ref": "#/$defs/AttributeIdArrayItem"
+        },
+        "pen": {
+          "type": "integer"
+        },
+        "lineTypeId": {
+          "$ref": "#/$defs/AttributeIdArrayItem"
+        },
+        "isVisibleLine": {
+          "type": "boolean"
+        },
+        "isCutEndLine": {
+          "type": "boolean"
+        },
+        "isInnerLine": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    },
+    "ProfileAttributeOrError": {
+      "type": "object",
+      "description": "A profile attribute or an error.",
+      "oneOf": [
+        {
+          "$ref": "#/$defs/ProfileAttribute"
+        },
+        {
+          "$ref": "#/$defs/ErrorItem"
+        }
+      ]
+    },
+    "CompositeAttribute": {
+      "type": "object",
+      "description": "A composite attribute.",
+      "properties": {
+        "attributeId": {
+          "$ref": "#/$defs/AttributeId"
+        },
+        "index": {
+          "type": "integer"
+        },
+        "name": {
+          "type": "string"
+        },
+        "useWith": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "skins": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CompositeSkin"
+          }
+        },
+        "separators": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CompositeSeparator"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "attributeId",
+        "index",
+        "name"
+      ]
+    },
+    "CompositeAttributeOrError": {
+      "type": "object",
+      "description": "A composite attribute or an error.",
+      "oneOf": [
+        {
+          "$ref": "#/$defs/CompositeAttribute"
+        },
+        {
+          "$ref": "#/$defs/ErrorItem"
+        }
+      ]
+    },
+    "CompositeSkin": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "Core",
+            "Finish",
+            "Other"
+          ]
+        },
+        "buildingMaterialId": {
+          "$ref": "#/$defs/AttributeIdArrayItem"
+        },
+        "framePen": {
+          "type": "integer"
+        },
+        "thickness": {
+          "type": "number"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "framePen",
+        "thickness"
+      ]
+    },
+    "CompositeSeparator": {
+      "type": "object",
+      "properties": {
+        "lineTypeId": {
+          "$ref": "#/$defs/AttributeIdArrayItem"
+        },
+        "linePen": {
+          "type": "integer"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "linePen"
+      ]
+    },
+    "SurfaceAttribute": {
+      "type": "object",
+      "description": "A surface attribute.",
+      "properties": {
+        "attributeId": {
+          "$ref": "#/$defs/AttributeId"
+        },
+        "index": {
+          "type": "integer"
+        },
+        "name": {
+          "type": "string"
+        },
+        "materialType": {
+          "$ref": "#/$defs/SurfaceType"
+        },
+        "ambientReflection": {
+          "type": "number"
+        },
+        "diffuseReflection": {
+          "type": "number"
+        },
+        "specularReflection": {
+          "type": "number"
+        },
+        "transparency": {
+          "type": "number"
+        },
+        "shine": {
+          "type": "number"
+        },
+        "transparencyAttenuation": {
+          "type": "number"
+        },
+        "emissionAttenuation": {
+          "type": "number"
+        },
+        "surfaceColor": {
+          "$ref": "#/$defs/ColorRGB"
+        },
+        "specularColor": {
+          "$ref": "#/$defs/ColorRGB"
+        },
+        "emissionColor": {
+          "$ref": "#/$defs/ColorRGB"
+        },
+        "fillId": {
+          "$ref": "#/$defs/AttributeIdArrayItem"
+        },
+        "texture": {
+          "$ref": "#/$defs/Texture"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "attributeId",
+        "index",
+        "name"
+      ]
+    },
+    "SurfaceAttributeOrError": {
+      "type": "object",
+      "description": "A surface attribute or an error.",
+      "oneOf": [
+        {
+          "$ref": "#/$defs/SurfaceAttribute"
+        },
+        {
+          "$ref": "#/$defs/ErrorItem"
+        }
+      ]
+    },
+    "LayerAttribute": {
+      "type": "object",
+      "description": "A layer attribute.",
+      "properties": {
+        "attributeId": {
+          "$ref": "#/$defs/AttributeId"
+        },
+        "index": {
+          "type": "integer"
+        },
+        "name": {
+          "type": "string"
+        },
+        "isHidden": {
+          "type": "boolean"
+        },
+        "isLocked": {
+          "type": "boolean"
+        },
+        "isWireframe": {
+          "type": "boolean"
+        },
+        "intersectionGroupNr": {
+          "type": "integer"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "attributeId",
+        "index",
+        "name"
+      ]
+    },
+    "LayerAttributeOrError": {
+      "type": "object",
+      "description": "A layer attribute or an error.",
+      "oneOf": [
+        {
+          "$ref": "#/$defs/LayerAttribute"
+        },
+        {
+          "$ref": "#/$defs/ErrorItem"
+        }
+      ]
+    },
+    "BuildingMaterialAttribute": {
+      "type": "object",
+      "description": "A building material attribute.",
+      "properties": {
+        "attributeId": {
+          "$ref": "#/$defs/AttributeId"
+        },
+        "index": {
+          "type": "integer"
+        },
+        "name": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "manufacturer": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "connPriority": {
+          "type": "integer"
+        },
+        "cutFillIndex": {
+          "type": "integer"
+        },
+        "cutFillPen": {
+          "type": "integer"
+        },
+        "cutFillBackgroundPen": {
+          "type": "integer"
+        },
+        "cutSurfaceIndex": {
+          "type": "integer"
+        },
+        "cutFillOrientation": {
+          "type": "string",
+          "enum": [
+            "ProjectOrigin",
+            "ElementOrigin",
+            "FitToSkin"
+          ]
+        },
+        "thermalConductivity": {
+          "type": "number"
+        },
+        "density": {
+          "type": "number"
+        },
+        "heatCapacity": {
+          "type": "number"
+        },
+        "embodiedEnergy": {
+          "type": "number"
+        },
+        "embodiedCarbon": {
+          "type": "number"
+        },
+        "showUncutLines": {
+          "type": "boolean"
+        },
+        "collisionDetection": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "attributeId",
+        "index",
+        "name"
+      ]
+    },
+    "BuildingMaterialAttributeOrError": {
+      "type": "object",
+      "description": "A building material attribute or an error.",
+      "oneOf": [
+        {
+          "$ref": "#/$defs/BuildingMaterialAttribute"
+        },
+        {
+          "$ref": "#/$defs/ErrorItem"
+        }
+      ]
+    },
     "Guid": {
       "type": "string",
       "description": "A Globally Unique Identifier (or Universally Unique Identifier) in its string representation as defined in RFC 4122.",
@@ -418,8 +1386,16 @@
           "type": "string",
           "description": "The name of the parameter."
         },
+        "index1": {
+          "type": "integer",
+          "description": "Optional 1-based first index for changing a single item of an array parameter without resizing it. Only valid for array parameters and only together with a single (non-list) value."
+        },
+        "index2": {
+          "type": "integer",
+          "description": "Optional 1-based second index for changing a single item of a two-dimensional array parameter. Only valid together with index1. Defaults to 1."
+        },
         "value": {
-          "description": "The value of the parameter."
+          "description": "The new value of the parameter. For array parameters provide a list of values for one-dimensional arrays (e.g. [1, 2, 3]) or a list of lists for two-dimensional arrays (e.g. [[11, 12], [21, 22]]); the array parameter is resized to match the given values. Alternatively provide index1 (and optionally index2) together with a single value to change one item of the array without resizing it. Within one command call whole-array (list) values are applied after all single-value changes."
         }
       },
       "additionalProperties": false,
@@ -436,8 +1412,16 @@
           "type": "integer",
           "description": "The index of the parameter."
         },
+        "index1": {
+          "type": "integer",
+          "description": "Optional 1-based first index for changing a single item of an array parameter without resizing it. Only valid for array parameters and only together with a single (non-list) value."
+        },
+        "index2": {
+          "type": "integer",
+          "description": "Optional 1-based second index for changing a single item of a two-dimensional array parameter. Only valid together with index1. Defaults to 1."
+        },
         "value": {
-          "description": "The value of the parameter."
+          "description": "The new value of the parameter. For array parameters provide a list of values for one-dimensional arrays (e.g. [1, 2, 3]) or a list of lists for two-dimensional arrays (e.g. [[11, 12], [21, 22]]); the array parameter is resized to match the given values. Alternatively provide index1 (and optionally index2) together with a single value to change one item of the array without resizing it. Within one command call whole-array (list) values are applied after all single-value changes."
         }
       },
       "additionalProperties": false,
@@ -1089,6 +2073,17 @@
         },
         "propertyIsEditable": {
           "type": "boolean"
+        },
+        "isExpressionBased": {
+          "type": "boolean",
+          "description": "True if the property value is computed from an expression."
+        },
+        "expressions": {
+          "type": "array",
+          "description": "The expression strings of an expression-based property. Only present when isExpressionBased is true.",
+          "items": {
+            "type": "string"
+          }
         }
       },
       "additionalProperties": false,
@@ -1100,7 +2095,8 @@
         "propertyCollectionType",
         "propertyValueType",
         "propertyMeasureType",
-        "propertyIsEditable"
+        "propertyIsEditable",
+        "isExpressionBased"
       ]
     },
     "PropertyValue": {
@@ -2615,6 +3611,18 @@
         "$ref": "#/$defs/NavigatorItemIdArrayItem"
       }
     },
+    "NavigatorItemIdOrError": {
+      "type": "object",
+      "description": "A propertyId or an error.",
+      "oneOf": [
+        {
+          "$ref": "#/$defs/NavigatorItemIdArrayItem"
+        },
+        {
+          "$ref": "#/$defs/ErrorItem"
+        }
+      ]
+    },
     "NavigatorItemIdArrayItem": {
       "type": "object",
       "properties": {
@@ -2710,6 +3718,36 @@
         },
         "zoom": {
           "$ref": "#/$defs/Zoom"
+        },
+        "rotation": {
+          "type": "number",
+          "description": "View rotation angle in radians. Read via GetViewSettings; use SetViewRotation to change it."
+        },
+        "structureDisplay": {
+          "type": "string",
+          "description": "Structure display mode. One of EntireStructure, CoreOnly, WithoutFinishes, StructureOnly.",
+          "enum": [
+            "EntireStructure",
+            "CoreOnly",
+            "WithoutFinishes",
+            "StructureOnly"
+          ]
+        },
+        "renovationFilterGuid": {
+          "$ref": "#/$defs/Guid",
+          "description": "GUID of the renovation filter applied to the view."
+        },
+        "d3styleName": {
+          "type": "string",
+          "description": "Name of the 3D style. Empty if not set."
+        },
+        "renderingSceneName": {
+          "type": "string",
+          "description": "Name of the rendering scene. Empty if not set."
+        },
+        "usePhotoRendering": {
+          "type": "boolean",
+          "description": "Whether photo rendering is used for this view."
         }
       },
       "additionalProperties": false,
@@ -2838,6 +3876,9 @@
         "zCoordinate": {
           "type": "number"
         },
+        "flipped": {
+          "type": "boolean"
+        },
         "height": {
           "type": "number",
           "description": "height relative to bottom"
@@ -2856,11 +3897,11 @@
         },
         "begThickness": {
           "type": "number",
-          "description": "Thickness at the beginning in case of trapezoid wall"
+          "description": "Thickness at the beginning of wall, it will return 0 for poly wall type"
         },
         "endThickness": {
           "type": "number",
-          "description": "Thickness at the end in case of trapezoid wall"
+          "description": "Thickness at the end of wall, it will return 0 for poly wall type"
         },
         "polygonOutline": {
           "type": "array",
@@ -3272,6 +4313,9 @@
         "height": {
           "type": "number"
         },
+        "flipped": {
+          "type": "boolean"
+        },
         "angle": {
           "type": "number",
           "description": "The rotation angle of the curtain wall in radians."
@@ -3464,6 +4508,10 @@
     "MeshDetails": {
       "type": "object",
       "properties": {
+        "floorIndex": {
+          "type": "integer",
+          "description": "The index of the story the mesh is placed on."
+        },
         "level": {
           "type": "number",
           "description": "The Z reference level of coordinates."
@@ -3474,6 +4522,25 @@
         "skirtLevel": {
           "type": "number",
           "description": "The height of the skirt."
+        },
+        "ridges": {
+          "$ref": "#/$defs/MeshRidges"
+        },
+        "showLines": {
+          "type": "boolean",
+          "description": "Whether to show secondary mesh lines on plan."
+        },
+        "contourPen": {
+          "type": "integer",
+          "description": "Pen attribute index for the mesh contour line."
+        },
+        "levelPen": {
+          "type": "integer",
+          "description": "Pen attribute index for the mesh level lines."
+        },
+        "lineTypeIndex": {
+          "type": "integer",
+          "description": "Line type attribute index for the mesh contour."
         },
         "polygonCoordinates": {
           "type": "array",
@@ -3497,20 +4564,7 @@
           "type": "array",
           "description": "The leveling sublines inside the polygon of the mesh.",
           "items": {
-            "type": "object",
-            "properties": {
-              "coordinates": {
-                "type": "array",
-                "description": "The 3D coordinates of the leveling subline of the mesh.",
-                "items": {
-                  "$ref": "#/$defs/Coordinate3D"
-                }
-              }
-            },
-            "additionalProperties": false,
-            "required": [
-              "coordinates"
-            ]
+            "$ref": "#/$defs/MeshSubline"
           },
           "minItems": 1
         }
@@ -3521,6 +4575,333 @@
         "skirtType",
         "skirtLevel",
         "polygonCoordinates"
+      ]
+    },
+    "StoryVisibility": {
+      "type": "object",
+      "description": "Per-story visibility settings (API_StoryVisibility): the home story, plus how many stories above/below also show this element.",
+      "properties": {
+        "showOnHome": {
+          "type": "boolean",
+          "description": "Show on the home story."
+        },
+        "showAllAbove": {
+          "type": "boolean",
+          "description": "Show on all stories above the home story."
+        },
+        "showAllBelow": {
+          "type": "boolean",
+          "description": "Show on all stories below the home story."
+        },
+        "showRelAbove": {
+          "type": "integer",
+          "description": "Show this many stories above the home story (ignored when showAllAbove is true)."
+        },
+        "showRelBelow": {
+          "type": "integer",
+          "description": "Show this many stories below the home story (ignored when showAllBelow is true)."
+        }
+      },
+      "additionalProperties": false
+    },
+    "MorphBody": {
+      "description": "A Morph's full body geometry: an indexed vertex list plus one entry per face (polygon). Shared shape between GetDetailsOfElements' output and CreateMorphs/ModifyMorphs' input - what Get reports is what Create/Modify accept back. There is no fillet/chamfer operation in the Archicad API - a caller wanting rounded geometry must supply the already-tessellated facets here; edgeOverrides only controls how an existing straight edge is DISPLAYED (hidden/visible/smooth-shaded), not its shape.",
+      "type": "object",
+      "properties": {
+        "bodyType": {
+          "type": "string",
+          "description": "Whether the body is a closed solid or an open surface shell. Reported accurately on Get; on Create/Modify this is set on the element but a confirmed Archicad SDK bug means it may not take effect (bodyType has been observed always coming back Solid regardless of what was requested - see edgeOverrides' note).",
+          "enum": [
+            "Solid",
+            "Surface"
+          ]
+        },
+        "isClosed": {
+          "type": "boolean",
+          "description": "READ-ONLY, Get output only (ignored if sent to Create/Modify). Geometrically computed (Modeler::MeshBody::IsClosedBody): true if every edge in the body has exactly two adjacent faces (a watertight/manifold volume), false if any edge borders only one face (an open shell / has holes or gaps). Distinct from bodyType, which is the caller's declared INTENT (Solid vs Surface) rather than the actual computed geometry - a body can be declared bodyType 'Solid' yet still be geometrically open if a face is missing."
+        },
+        "edgeDefault": {
+          "type": "string",
+          "description": "Default display status for every edge that has no entry in edgeOverrides. Reported accurately on Get; on Create/Modify this is set on the element but does not take effect due to the same confirmed Archicad SDK bug as edgeOverrides (element.morph.edgeType is silently discarded by ACAPI_Element_Create/Change).",
+          "enum": [
+            "HardVisible",
+            "HardHidden",
+            "SoftHidden"
+          ]
+        },
+        "vertices": {
+          "type": "array",
+          "description": "Flat, indexed vertex list, local to the Morph's own placement (not world coordinates).",
+          "items": {
+            "$ref": "#/$defs/Coordinate3D"
+          },
+          "minItems": 4
+        },
+        "polygons": {
+          "type": "array",
+          "description": "One entry per face. Each face is a closed loop of vertex indices (into `vertices`), counterclockwise as seen from outside the body.",
+          "items": {
+            "$ref": "#/$defs/MorphPolygon"
+          },
+          "minItems": 4
+        },
+        "edgeOverrides": {
+          "type": "array",
+          "description": "READ-ONLY in practice: reported accurately by GetDetailsOfElements (reflecting whatever Archicad itself currently has), but CreateMorphs/ModifyMorphs silently ignore this field on input - per-edge display status cannot be set by an add-on due to a confirmed, still-unresolved Archicad SDK bug (element.morph.edgeType/bodyType are silently discarded by ACAPI_Element_Create/Change; see the GRAPHISOFT community forum thread 'Help with setting morph's hidden edges in the API'). Sparse when present - only edges whose display status differs from edgeDefault get an entry. Identifies an edge by the (unordered) pair of vertex indices it connects.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "vertexIds": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                },
+                "minItems": 2,
+                "maxItems": 2
+              },
+              "hidden": {
+                "type": "boolean",
+                "description": "Hide this edge's line entirely."
+              },
+              "smooth": {
+                "type": "boolean",
+                "description": "Shade the two adjacent faces smoothly across this edge instead of as a hard crease - the 'aide a la courbe' rounded-look hint. Does not change actual geometry."
+              },
+              "silhouetteOnly": {
+                "type": "boolean",
+                "description": "Show this edge's line only where it forms a silhouette/contour from the current viewpoint."
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "vertexIds"
+            ]
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "vertices",
+        "polygons"
+      ]
+    },
+    "MorphDetails": {
+      "type": "object",
+      "properties": {
+        "origin": {
+          "$ref": "#/$defs/Coordinate3D",
+          "description": "Translation component of the Morph's placement transform (tranmat's origin column)."
+        },
+        "xAxis": {
+          "$ref": "#/$defs/Coordinate3D",
+          "description": "X axis of the Morph's placement transform (tranmat's first column). Omit on Create to get an identity rotation; give all three of xAxis/yAxis/zAxis together or none at all."
+        },
+        "yAxis": {
+          "$ref": "#/$defs/Coordinate3D",
+          "description": "Y axis of the Morph's placement transform (tranmat's second column). Give all three of xAxis/yAxis/zAxis together or none at all."
+        },
+        "zAxis": {
+          "$ref": "#/$defs/Coordinate3D",
+          "description": "Z axis of the Morph's placement transform (tranmat's third column). Give all three of xAxis/yAxis/zAxis together or none at all."
+        },
+        "buildingMaterialId": {
+          "$ref": "#/$defs/AttributeId",
+          "description": "The Morph's building material - a single, whole-volume property (what the mass is 'made of', governing cut-fill/quantity takeoff), NOT settable per face. Per-face appearance is controlled separately by each polygon's own surfaceId (see MorphBody) - confirmed live these are two independent, unrelated attributes (a Morph can have one uniform building material while showing a different Surface finish on each face)."
+        },
+        "surfaceId": {
+          "$ref": "#/$defs/AttributeId",
+          "description": "The Morph's own default Surface (element.morph.material) - used for any face that has no per-face surfaceId override of its own (see MorphBody polygons[].surfaceId). Distinct from buildingMaterialId (the whole-volume material). Confirmed live that Archicad silently discards this specific field when set through ACAPI_Element_Create alone (reproduced identically on Archicad 27 and 29 - not a version-specific issue, unlike polygons[].surfaceId below); CreateMorphs works around this transparently with an internal follow-up Change right after Create, so this field behaves correctly end-to-end despite the underlying quirk."
+        },
+        "body": {
+          "$ref": "#/$defs/MorphBody"
+        },
+        "castShadow": {
+          "type": "boolean",
+          "description": "Whether the body casts shadow in 3D."
+        },
+        "receiveShadow": {
+          "type": "boolean",
+          "description": "Whether the body receives shadow in 3D."
+        },
+        "isAutoOnStoryVisibility": {
+          "type": "boolean",
+          "description": "When true, the per-story visibility (showContour/showFill) is calculated automatically from the Morph's vertical extent instead of using the explicit values."
+        },
+        "showContour": {
+          "$ref": "#/$defs/StoryVisibility",
+          "description": "Which stories display this Morph's contour. Reported accurately on Get, but confirmed live that Create/Modify do not reliably apply it (showAllBelow/showRelAbove/showRelBelow silently come back reset even when explicitly set and isAutoOnStoryVisibility is false) - the same class of confirmed Archicad SDK write bug as bodyType/edgeType/level (see MorphBody's notes). Set on the element regardless since doing so is harmless and forward-compatible."
+        },
+        "showFill": {
+          "$ref": "#/$defs/StoryVisibility",
+          "description": "Which stories display this Morph's floor plan fill. Same write-reliability caveat as showContour."
+        },
+        "linkToSettings": {
+          "$ref": "#/$defs/LinkToSettings"
+        },
+        "displayOption": {
+          "$ref": "#/$defs/DisplayOption"
+        },
+        "viewDepthLimitation": {
+          "$ref": "#/$defs/ViewDepthLimitation"
+        },
+        "cutFillPen": {
+          "type": "integer",
+          "description": "Overridden cut fill foreground pen (otherwise inherited from the building material). Omit to leave uninherited/unset."
+        },
+        "cutFillBackgroundPen": {
+          "type": "integer",
+          "description": "Overridden cut fill background pen (otherwise inherited from the building material). Omit to leave uninherited/unset."
+        },
+        "cutLineType": {
+          "$ref": "#/$defs/AttributeId",
+          "description": "Line type of the cut contour."
+        },
+        "cutLinePen": {
+          "type": "integer",
+          "description": "Pen of the cut contour."
+        },
+        "uncutLineType": {
+          "$ref": "#/$defs/AttributeId",
+          "description": "Line type of the (uncut) contour."
+        },
+        "uncutLinePen": {
+          "type": "integer",
+          "description": "Pen of the (uncut) contour."
+        },
+        "overheadLineType": {
+          "$ref": "#/$defs/AttributeId",
+          "description": "Line type of the overhead part (floor plan only)."
+        },
+        "overheadLinePen": {
+          "type": "integer",
+          "description": "Pen of the overhead part (floor plan only)."
+        },
+        "useCoverFillType": {
+          "type": "boolean",
+          "description": "Use a dedicated floor plan fill instead of the one from the building material."
+        },
+        "outlineContourDisplay": {
+          "type": "boolean",
+          "description": "Outline contour display."
+        },
+        "coverFillType": {
+          "$ref": "#/$defs/AttributeId",
+          "description": "Floor plan fill type (only used when useCoverFillType is true)."
+        },
+        "coverFillPen": {
+          "type": "integer",
+          "description": "Floor plan fill foreground pen."
+        },
+        "coverFillBGPen": {
+          "type": "integer",
+          "description": "Floor plan fill background pen."
+        },
+        "use3DHatching": {
+          "type": "boolean",
+          "description": "Derive the floor plan fill from the 3D material instead of coverFillType."
+        },
+        "coverFillOrientation": {
+          "$ref": "#/$defs/CoverFillOrientation"
+        },
+        "useDistortedCoverFill": {
+          "type": "boolean",
+          "description": "Show the floor plan hatching as if projected onto a plane."
+        },
+        "textureProjectionType": {
+          "$ref": "#/$defs/TextureProjectionType"
+        },
+        "textureProjectionCoords": {
+          "type": "array",
+          "description": "Texture projection coordinate system: origin, then 3 axis endpoints.",
+          "items": {
+            "$ref": "#/$defs/Coordinate3D"
+          },
+          "minItems": 4,
+          "maxItems": 4
+        },
+        "level": {
+          "type": "number",
+          "description": "Z position of the free shape relative to the floor level. Reported accurately on Get, but a confirmed Archicad SDK bug means it may not take effect on Create/Modify (same class of bug as bodyType/edgeType - see MorphBody's notes)."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "origin",
+        "body"
+      ]
+    },
+    "DrawingDetails": {
+      "type": "object",
+      "properties": {
+        "pos": {
+          "$ref": "#/$defs/Coordinate2D",
+          "description": "Position of the drawing's reference point on the layout."
+        },
+        "angle": {
+          "type": "number",
+          "description": "Rotation angle of the drawing in radians."
+        },
+        "ratio": {
+          "type": "number",
+          "description": "Scale ratio applied to the drawing relative to its source view."
+        },
+        "drawingScale": {
+          "type": "number",
+          "description": "The nominal scale of the drawing."
+        },
+        "modelOffset": {
+          "$ref": "#/$defs/Coordinate2D",
+          "description": "Offset of the model origin within the drawing."
+        },
+        "isCutWithFrame": {
+          "type": "boolean",
+          "description": "Whether the drawing is clipped by a custom polygon (see clipPolygon) instead of showing the full auto-fit extent."
+        },
+        "bounds": {
+          "$ref": "#/$defs/BoundingBox2D"
+        },
+        "clipPolygon": {
+          "type": "array",
+          "description": "Polygon (in model coordinates) used to clip the drawing view. Present only when isCutWithFrame is true.",
+          "items": {
+            "$ref": "#/$defs/Coordinate2D"
+          },
+          "minItems": 3
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "pos",
+        "angle",
+        "ratio",
+        "drawingScale",
+        "modelOffset",
+        "isCutWithFrame",
+        "bounds"
+      ]
+    },
+    "LabelDetails": {
+      "$ref": "#/$defs/LibPartBasedElementDetails",
+      "properties": {
+        "begCoordinate": {
+          "$ref": "#/$defs/Coordinate2D"
+        },
+        "midCoordinate": {
+          "$ref": "#/$defs/Coordinate2D"
+        },
+        "endCoordinate": {
+          "$ref": "#/$defs/Coordinate2D"
+        },
+        "hasLeaderLine": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "begCoordinate",
+        "midCoordinate",
+        "endCoordinate",
+        "hasLeaderLine"
       ]
     },
     "NotYetSupportedElementTypeDetails": {
@@ -3580,6 +4961,15 @@
         },
         {
           "$ref": "#/$defs/MeshDetails"
+        },
+        {
+          "$ref": "#/$defs/MorphDetails"
+        },
+        {
+          "$ref": "#/$defs/DrawingDetails"
+        },
+        {
+          "$ref": "#/$defs/LabelDetails"
         },
         {
           "$ref": "#/$defs/NotYetSupportedElementTypeDetails"
@@ -3885,6 +5275,10 @@
           "type": "number",
           "description": "The story level."
         },
+        "height": {
+          "type": "number",
+          "description": "Story height, calculated as the level of the story above minus this story's level. Omitted for the topmost story, which has no story above."
+        },
         "name": {
           "type": "string",
           "description": "The name of the story."
@@ -4045,6 +5439,21 @@
       "additionalProperties": false,
       "required": []
     },
+    "DrawingSettings": {
+      "description": "Modifiable settings for a Drawing element placed on a layout.",
+      "type": "object",
+      "properties": {
+        "clipPolygon": {
+          "type": "array",
+          "description": "Polygon (in model coordinates) used to clip the drawing view. At least 3 points. Setting this also enables polygon clipping (useDrawingPolyClip).",
+          "items": {
+            "$ref": "#/$defs/Coordinate2D"
+          },
+          "minItems": 3
+        }
+      },
+      "additionalProperties": false
+    },
     "TypeSpecificSettings": {
       "description": "Defines the modifiable type-specific settings for an element. Used as input for SET requests.",
       "type": "object",
@@ -4054,6 +5463,9 @@
         },
         {
           "$ref": "#/$defs/ZoneSettings"
+        },
+        {
+          "$ref": "#/$defs/DrawingSettings"
         }
       ]
     },
@@ -4702,6 +6114,36 @@
         "ownerSetName"
       ]
     },
+    "SolidOperationType": {
+      "type": "string",
+      "description": "The type of solid element operation.",
+      "enum": [
+        "Subtraction",
+        "SubtractionUpwards",
+        "SubtractionDownwards",
+        "Intersection",
+        "Addition"
+      ]
+    },
+    "SolidLinkFlags": {
+      "type": "object",
+      "description": "Flags controlling the behaviour of a solid element operation link.",
+      "properties": {
+        "inheritOperatorAttributes": {
+          "type": "boolean",
+          "description": "If true, the target element inherits the attributes of the operator element."
+        },
+        "skipPolygonHoles": {
+          "type": "boolean",
+          "description": "If true, holes of the operator (roof/slab) are ignored during the operation."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "inheritOperatorAttributes",
+        "skipPolygonHoles"
+      ]
+    },
     "GetAddOnVersionResult": {
       "type": "object",
       "properties": {
@@ -4842,6 +6284,34 @@
       "additionalProperties": false,
       "required": [
         "fields"
+      ]
+    },
+    "DeleteProjectInfoFieldsParameters": {
+      "type": "object",
+      "properties": {
+        "projectInfoIds": {
+          "type": "array",
+          "description": "List of project info field ids to delete. Only custom fields (ids starting with 'autotext-') can be deleted.",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "projectInfoIds"
+      ]
+    },
+    "DeleteProjectInfoFieldsResult": {
+      "type": "object",
+      "properties": {
+        "executionResults": {
+          "$ref": "#/$defs/ExecutionResults"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "executionResults"
       ]
     },
     "GetStoriesResult": {
@@ -5258,6 +6728,21 @@
               },
               "details": {
                 "$ref": "#/$defs/TypeSpecificDetails"
+              },
+              "floorPlanPolygons": {
+                "type": "array",
+                "description": "Cut-fill polygons as drawn on the floor plan (wall joins resolved by ArchiCAD). Available for elements with a cut-fill representation (walls, columns, beams). Absent when the element has no cut fill or when the floor plan database is not accessible.",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "coordinates": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/$defs/Coordinate2D"
+                      }
+                    }
+                  }
+                }
               }
             },
             "additionalProperties": false,
@@ -5505,6 +6990,28 @@
     },
     "GetZoneBoundariesResult": {
       "$ref": "#/$defs/ZoneBoundariesOrError"
+    },
+    "UpdateZonesParameters": {
+      "type": "object",
+      "properties": {
+        "keepStampPosition": {
+          "type": "boolean",
+          "description": "Keep the position of the Zone Stamps. The default is true."
+        },
+        "undoTopTrim": {
+          "type": "boolean",
+          "description": "Undo the trimming of the top of the Zones. The default is false."
+        },
+        "undoBottomTrim": {
+          "type": "boolean",
+          "description": "Undo the trimming of the bottom of the Zones. The default is false."
+        }
+      },
+      "additionalProperties": false,
+      "required": []
+    },
+    "UpdateZonesResult": {
+      "$ref": "#/$defs/ExecutionResult"
     },
     "GetCollisionsParameters": {
       "type": "object",
@@ -5958,7 +7465,7 @@
           "type": "array",
           "description": "Array of data to create Stair elements.",
           "items": {
-            "$ref": "#/$defs/SectionData"
+            "$ref": "#/$defs/StairData"
           }
         }
       },
@@ -6675,6 +8182,34 @@
         "executionResults"
       ]
     },
+    "ModifyMeshesParameters": {
+      "type": "object",
+      "properties": {
+        "meshesData": {
+          "type": "array",
+          "description": "Array of meshes to modify.",
+          "items": {
+            "$ref": "#/$defs/MeshWithDetails"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "meshesData"
+      ]
+    },
+    "ModifyMeshesResult": {
+      "type": "object",
+      "properties": {
+        "executionResults": {
+          "$ref": "#/$defs/ExecutionResults"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "executionResults"
+      ]
+    },
     "GetElementPreviewImageParameters": {
       "type": "object",
       "properties": {
@@ -6966,6 +8501,13 @@
               },
               "favorite": {
                 "type": "string"
+              },
+              "folder": {
+                "type": "array",
+                "description": "Optional folder hierarchy in the Favorites palette to place the new favorite under. Empty/omitted = root.",
+                "items": {
+                  "type": "string"
+                }
               }
             },
             "additionalProperties": false,
@@ -7056,6 +8598,141 @@
         "path"
       ],
       "additionalProperties": false
+    },
+    "ApplyFavoritesToElementsParameters": {
+      "type": "object",
+      "properties": {
+        "favoritesToApply": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "description": "The identifier of the element and the name of the Favorite to apply to it.",
+            "properties": {
+              "elementId": {
+                "$ref": "#/$defs/ElementId"
+              },
+              "favorite": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "elementId",
+              "favorite"
+            ]
+          }
+        },
+        "applySettings": {
+          "type": "boolean",
+          "description": "Whether to apply the Favorite's settings-type parameters (structure, materials, pens, etc. - never geometry). Default is true."
+        },
+        "applyClassifications": {
+          "type": "boolean",
+          "description": "Whether to apply the Favorite's classifications. Default is true."
+        },
+        "applyCategories": {
+          "type": "boolean",
+          "description": "Whether to apply the Favorite's element categories (e.g. IFC categories). Default is true."
+        },
+        "applyProperties": {
+          "type": "boolean",
+          "description": "Whether to apply the Favorite's property values. Default is true."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "favoritesToApply"
+      ]
+    },
+    "ApplyFavoritesToElementsResult": {
+      "type": "object",
+      "properties": {
+        "executionResults": {
+          "$ref": "#/$defs/ExecutionResults"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "executionResults"
+      ]
+    },
+    "UpdateFavoritesFromElementsParameters": {
+      "type": "object",
+      "properties": {
+        "favoritesFromElements": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/FavoritesFromElementUpdate"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "favoritesFromElements"
+      ]
+    },
+    "UpdateFavoritesFromElementsResult": {
+      "type": "object",
+      "properties": {
+        "executionResults": {
+          "$ref": "#/$defs/ExecutionResults"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "executionResults"
+      ]
+    },
+    "RenameFavoritesParameters": {
+      "type": "object",
+      "properties": {
+        "renames": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/FavoriteRename"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "renames"
+      ]
+    },
+    "RenameFavoritesResult": {
+      "type": "object",
+      "properties": {
+        "executionResults": {
+          "$ref": "#/$defs/ExecutionResults"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "executionResults"
+      ]
+    },
+    "DeleteFavoritesParameters": {
+      "type": "object",
+      "properties": {
+        "favorites": {
+          "$ref": "#/$defs/Favorites"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "favorites"
+      ]
+    },
+    "DeleteFavoritesResult": {
+      "type": "object",
+      "properties": {
+        "executionResults": {
+          "$ref": "#/$defs/ExecutionResults"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "executionResults"
+      ]
     },
     "GetAllPropertiesResult": {
       "type": "object",
@@ -7295,6 +8972,34 @@
         "executionResults"
       ]
     },
+    "UpdatePropertyDefinitionsParameters": {
+      "type": "object",
+      "properties": {
+        "propertyDefinitions": {
+          "type": "array",
+          "description": "The list of expression-based property definitions to update.",
+          "items": {
+            "$ref": "#/$defs/PropertyExpressionUpdate"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "propertyDefinitions"
+      ]
+    },
+    "UpdatePropertyDefinitionsResult": {
+      "type": "object",
+      "properties": {
+        "executionResults": {
+          "$ref": "#/$defs/ExecutionResults"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "executionResults"
+      ]
+    },
     "GetClassificationsOfElementsParameters": {
       "type": "object",
       "properties": {
@@ -7459,6 +9164,47 @@
     "GetAttributesByTypeResult": {
       "$ref": "#/$defs/AttributeHeadersOrError"
     },
+    "DeleteAttributesParameters": {
+      "type": "object",
+      "properties": {
+        "attributesToDelete": {
+          "type": "array",
+          "description": "Array of attributes to delete.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "attributeType": {
+                "$ref": "#/$defs/AttributeType"
+              },
+              "attributeId": {
+                "$ref": "#/$defs/AttributeIdArrayItem"
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "attributeType",
+              "attributeId"
+            ]
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "attributesToDelete"
+      ]
+    },
+    "DeleteAttributesResult": {
+      "type": "object",
+      "properties": {
+        "executionResults": {
+          "$ref": "#/$defs/ExecutionResults"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "executionResults"
+      ]
+    },
     "CreateLayersParameters": {
       "type": "object",
       "properties": {
@@ -7581,6 +9327,534 @@
         "attributeIds"
       ]
     },
+    "CreateLinesParameters": {
+      "type": "object",
+      "properties": {
+        "lineDataArray": {
+          "type": "array",
+          "description": "Array of data to create new Lines.",
+          "items": {
+            "type": "object",
+            "description": "Data to create a Line.",
+            "properties": {
+              "attributeId": {
+                "description": "Indentifier of the existing Line to overwrite, ignored if overwriteExisting is false.",
+                "$ref": "#/$defs/AttributeId"
+              },
+              "index": {
+                "type": "string",
+                "description": "Index of the existing Line to overwrite, ignored if overwriteExisting is false."
+              },
+              "name": {
+                "type": "string",
+                "description": "Name. If overwriteExisting is true, then the existing Line with the given name will be overwritten."
+              },
+              "scaleWithPlan": {
+                "type": "boolean",
+                "description": "If true, the line type parameters are defined in meters at the given defineScale and scale on printout with the actual plan scale. If false (default), the parameters are fixed values in millimeters as the line will appear on the printout."
+              },
+              "defineScale": {
+                "type": "number",
+                "description": "The floor plan scale the line type is defined with. Only used if scaleWithPlan is true."
+              },
+              "lineType": {
+                "type": "string",
+                "description": "Solid, Dashed, or Symbol. Defaults to Solid."
+              },
+              "period": {
+                "type": "number",
+                "description": "The length of one period (Dashed and Symbol line types)."
+              },
+              "height": {
+                "type": "number",
+                "description": "The height of the symbol line (Symbol line type only)."
+              },
+              "dashItems": {
+                "type": "array",
+                "description": "Dash-gap pairs describing one period (Dashed line type only).",
+                "items": {
+                  "$ref": "#/$defs/LineDashItem"
+                }
+              },
+              "lineItems": {
+                "type": "array",
+                "description": "Symbol items describing one period (Symbol line type only).",
+                "items": {
+                  "$ref": "#/$defs/LineSymbolItemData"
+                }
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "name"
+            ]
+          }
+        },
+        "overwriteExisting": {
+          "type": "boolean",
+          "description": "Overwrite the Line if exists with the same name, or if index is given with the same index. The default is false."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "lineDataArray"
+      ]
+    },
+    "CreateLinesResult": {
+      "type": "object",
+      "properties": {
+        "attributeIds": {
+          "$ref": "#/$defs/AttributeIds"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "attributeIds"
+      ]
+    },
+    "CreateFillsParameters": {
+      "type": "object",
+      "properties": {
+        "fillDataArray": {
+          "type": "array",
+          "description": "Array of data to create new Fills.",
+          "items": {
+            "type": "object",
+            "description": "Data to create a Fill.",
+            "properties": {
+              "attributeId": {
+                "description": "Indentifier of the existing Fill to overwrite, ignored if overwriteExisting is false.",
+                "$ref": "#/$defs/AttributeId"
+              },
+              "index": {
+                "type": "string",
+                "description": "Index of the existing Fill to overwrite, ignored if overwriteExisting is false."
+              },
+              "name": {
+                "type": "string",
+                "description": "Name. If overwriteExisting is true, then the existing Fill with the given name will be overwritten."
+              },
+              "subType": {
+                "type": "string",
+                "description": "Vector, Solid, Empty, Symbol, LinearGradient, RadialGradient, or Image. Defaults to Vector. Only one Solid and one Empty fill may exist. Image fills use the texture field's name to reference the image library part."
+              },
+              "scaleWithPlan": {
+                "type": "boolean",
+                "description": "The fill is scale dependent."
+              },
+              "useForWalls": {
+                "type": "boolean",
+                "description": "This fill can be used for cut fills."
+              },
+              "useForDraft": {
+                "type": "boolean",
+                "description": "This fill can be used for drafting fills."
+              },
+              "useForCover": {
+                "type": "boolean",
+                "description": "This fill can be used for cover fills."
+              },
+              "horizontalSpacing": {
+                "type": "number",
+                "description": "The fill's spacing factor in the X direction (Vector fills)."
+              },
+              "verticalSpacing": {
+                "type": "number",
+                "description": "The fill's spacing factor in the Y direction (Vector fills)."
+              },
+              "angle": {
+                "type": "number",
+                "description": "The angle of the fill in radians (Vector, Symbol, and gradient fills)."
+              },
+              "bitPattern": {
+                "type": "string",
+                "description": "16 hex characters (8 bytes) describing the fill's bitmap pattern, one line of the pattern per byte, matching the Pattern field of the Attribute Manager XML export."
+              },
+              "gradientStart": {
+                "description": "Gradient start point (LinearGradient/RadialGradient fills only).",
+                "$ref": "#/$defs/Coordinate2D"
+              },
+              "gradientEnd": {
+                "description": "Gradient end point (LinearGradient/RadialGradient fills only).",
+                "$ref": "#/$defs/Coordinate2D"
+              },
+              "percent": {
+                "type": "number",
+                "description": "Translucency percentage [0..1] (gradient and some Solid fills)."
+              },
+              "texture": {
+                "description": "Texture parameters (Image and gradient fills). Only name, rotationAngle, xSize, ySize, mirrorX, and mirrorY are used for Fills.",
+                "$ref": "#/$defs/Texture"
+              },
+              "lineItems": {
+                "type": "array",
+                "description": "Vectorial fill line items (Vector fills only).",
+                "items": {
+                  "$ref": "#/$defs/FillLineItem"
+                }
+              },
+              "symbolLines": {
+                "type": "array",
+                "description": "Line items of the fill's repeating symbol pattern (Symbol fills only).",
+                "items": {
+                  "$ref": "#/$defs/FillSymbolLine"
+                }
+              },
+              "symbolArcs": {
+                "type": "array",
+                "description": "Arc items of the fill's repeating symbol pattern (Symbol fills only).",
+                "items": {
+                  "$ref": "#/$defs/FillSymbolArc"
+                }
+              },
+              "symbolHotspots": {
+                "type": "array",
+                "description": "Hotspot coordinates of the fill's repeating symbol pattern (Symbol fills only).",
+                "items": {
+                  "$ref": "#/$defs/Coordinate2D"
+                }
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "name"
+            ]
+          }
+        },
+        "overwriteExisting": {
+          "type": "boolean",
+          "description": "Overwrite the Fill if exists with the same name, or if index is given with the same index. The default is false."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "fillDataArray"
+      ]
+    },
+    "CreateFillsResult": {
+      "type": "object",
+      "properties": {
+        "attributeIds": {
+          "$ref": "#/$defs/AttributeIds"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "attributeIds"
+      ]
+    },
+    "CreateZoneCategoriesParameters": {
+      "type": "object",
+      "properties": {
+        "zoneCategoryDataArray": {
+          "type": "array",
+          "description": "Array of data to create new Zone Categories.",
+          "items": {
+            "type": "object",
+            "description": "Data to create a Zone Category.",
+            "properties": {
+              "attributeId": {
+                "description": "Indentifier of the existing Zone Category to overwrite, ignored if overwriteExisting is false.",
+                "$ref": "#/$defs/AttributeId"
+              },
+              "index": {
+                "type": "string",
+                "description": "Index of the existing Zone Category to overwrite, ignored if overwriteExisting is false."
+              },
+              "name": {
+                "type": "string",
+                "description": "Name. If overwriteExisting is true, then the existing Zone Category with the given name will be overwritten."
+              },
+              "categoryCode": {
+                "type": "string",
+                "description": "Code of the Zone Category."
+              },
+              "color": {
+                "$ref": "#/$defs/ColorRGB"
+              },
+              "stampName": {
+                "type": "string",
+                "description": "Document name of the zone stamp library part (GSM) to use, e.g. the value shown as StampDocumentName in an Attribute Manager XML export. Only used together with stampMainGuid/stampRevGuid; ignored otherwise."
+              },
+              "stampMainGuid": {
+                "type": "string",
+                "description": "Main GUID of the zone stamp library part to use, e.g. the value shown as MainGuid in an Attribute Manager XML export (can be copied from an existing Zone Category obtained another way). If omitted, the stamp is copied from the Zone Category being overwritten, or from the project's first Zone Category when creating a new one."
+              },
+              "stampRevGuid": {
+                "type": "string",
+                "description": "Revision GUID of the zone stamp library part to use, e.g. the value shown as RevGuid in an Attribute Manager XML export. Required together with stampMainGuid."
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "name"
+            ]
+          }
+        },
+        "overwriteExisting": {
+          "type": "boolean",
+          "description": "Overwrite the Zone Category if exists with the same name, or if index is given with the same index. The default is false."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "zoneCategoryDataArray"
+      ]
+    },
+    "CreateZoneCategoriesResult": {
+      "type": "object",
+      "properties": {
+        "attributeIds": {
+          "$ref": "#/$defs/AttributeIds"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "attributeIds"
+      ]
+    },
+    "CreateMEPSystemsParameters": {
+      "type": "object",
+      "properties": {
+        "mepSystemDataArray": {
+          "type": "array",
+          "description": "Array of data to create new MEP Systems.",
+          "items": {
+            "$ref": "#/$defs/MEPSystemDataArrayItem"
+          }
+        },
+        "overwriteExisting": {
+          "type": "boolean",
+          "description": "Overwrite the MEP System if exists with the same name, or if index is given with the same index. The default is false."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "mepSystemDataArray"
+      ]
+    },
+    "CreateMEPSystemsResult": {
+      "type": "object",
+      "properties": {
+        "attributeIds": {
+          "$ref": "#/$defs/AttributeIds"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "attributeIds"
+      ]
+    },
+    "CreatePenTablesParameters": {
+      "type": "object",
+      "properties": {
+        "penTableDataArray": {
+          "type": "array",
+          "description": "Array of data to create new Pen Tables.",
+          "items": {
+            "type": "object",
+            "description": "Data to create a Pen Table.",
+            "properties": {
+              "attributeId": {
+                "description": "Indentifier of the existing Pen Table to overwrite, ignored if overwriteExisting is false.",
+                "$ref": "#/$defs/AttributeId"
+              },
+              "index": {
+                "type": "string",
+                "description": "Index of the existing Pen Table to overwrite, ignored if overwriteExisting is false."
+              },
+              "name": {
+                "type": "string",
+                "description": "Name. If overwriteExisting is true, then the existing Pen Table with the given name will be overwritten."
+              },
+              "isActiveForModel": {
+                "type": "boolean",
+                "description": "Make this the active Pen Table for the model window. Defaults to false for a new Pen Table, or to the current value when overwriting an existing one."
+              },
+              "isActiveForLayout": {
+                "type": "boolean",
+                "description": "Make this the active Pen Table for layouts. Defaults to false for a new Pen Table, or to the current value when overwriting an existing one."
+              },
+              "sourceAttributeId": {
+                "description": "Identifier of the Pen Table whose 255 pens are used as the starting point, before the pens listed in the pens array are applied on top. Defaults to the Pen Table being overwritten itself (so unlisted pens keep their current color/width/description), or an arbitrary existing Pen Table in the project when creating a brand new one (or a plain black, 0.1 mm pen for all 255 if the project has no Pen Table at all yet).",
+                "$ref": "#/$defs/AttributeIdArrayItem"
+              },
+              "pens": {
+                "type": "array",
+                "description": "The pens to set in the Pen Table, on top of the 255 pens copied from sourceAttributeId (or the current Pen Table, or an arbitrary existing one - see sourceAttributeId). Only list the pens you actually want to change.",
+                "items": {
+                  "$ref": "#/$defs/PenData"
+                }
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "name"
+            ]
+          }
+        },
+        "overwriteExisting": {
+          "type": "boolean",
+          "description": "Overwrite the Pen Table if exists with the same name, or if index is given with the same index. The default is false."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "penTableDataArray"
+      ]
+    },
+    "CreatePenTablesResult": {
+      "type": "object",
+      "properties": {
+        "attributeIds": {
+          "$ref": "#/$defs/AttributeIds"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "attributeIds"
+      ]
+    },
+    "CreateProfilesParameters": {
+      "type": "object",
+      "properties": {
+        "profileDataArray": {
+          "type": "array",
+          "description": "Array of data to create new Profiles.",
+          "items": {
+            "type": "object",
+            "description": "Data to create or modify a Profile. Its geometry (the cross-section shape) comes from sourceAttributeId (an existing Profile's geometry, copied), from newSkins (AC27+ only, caller-supplied polygon geometry), or both combined. When creating a brand-new Profile (overwriteExisting false, or true but no existing match), at least one of the two must be given. When overwriteExisting targets an existing Profile, both are optional - the existing Profile's own current geometry is preserved by default (e.g. to change only wallType, or to add newSkins on top of the unchanged existing shape). skinOverrides and newSkins' edgeOverrides target skins/edges by the identifiers/indices GetProfiles reports.",
+            "properties": {
+              "attributeId": {
+                "description": "Indentifier of the existing Profile to overwrite, ignored if overwriteExisting is false.",
+                "$ref": "#/$defs/AttributeId"
+              },
+              "index": {
+                "type": "string",
+                "description": "Index of the existing Profile to overwrite, ignored if overwriteExisting is false."
+              },
+              "name": {
+                "type": "string",
+                "description": "Name. If overwriteExisting is true, then the existing Profile with the given name will be overwritten."
+              },
+              "sourceAttributeId": {
+                "description": "Identifier of an existing Profile whose geometry (cross-section shape) will be copied as the starting point. Optional if newSkins is given: omit it to build the Profile's geometry entirely from newSkins instead of copying anything (AC27+ only).",
+                "$ref": "#/$defs/AttributeIdArrayItem"
+              },
+              "wallType": {
+                "type": "boolean",
+                "description": "Profile available for walls. Defaults to the source Profile's value."
+              },
+              "beamType": {
+                "type": "boolean",
+                "description": "Profile available for beams. Defaults to the source Profile's value."
+              },
+              "coluType": {
+                "type": "boolean",
+                "description": "Profile available for columns. Defaults to the source Profile's value."
+              },
+              "handrailType": {
+                "type": "boolean",
+                "description": "Profile available for handrails. Defaults to the source Profile's value."
+              },
+              "otherGDLObjectType": {
+                "type": "boolean",
+                "description": "Profile available for other GDL based objects. Defaults to the source Profile's value."
+              },
+              "skinOverrides": {
+                "type": "array",
+                "description": "Modifications to apply to specific skins of the copied geometry, e.g. to change a skin's building material without rebuilding the profile's shape. Each skinId comes from a prior GetProfiles call's skins[].skinId on the source Profile (or, when overwriteExisting is true, on the Profile being overwritten).",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "skinId": {
+                      "type": "string",
+                      "description": "Identifies which skin to modify, from GetProfiles' skins[].skinId."
+                    },
+                    "buildingMaterialId": {
+                      "$ref": "#/$defs/AttributeIdArrayItem"
+                    },
+                    "surfaceId": {
+                      "$ref": "#/$defs/AttributeIdArrayItem"
+                    },
+                    "fillId": {
+                      "$ref": "#/$defs/AttributeIdArrayItem"
+                    },
+                    "contourPen": {
+                      "type": "integer"
+                    },
+                    "contourLineTypeId": {
+                      "$ref": "#/$defs/AttributeIdArrayItem"
+                    },
+                    "isCore": {
+                      "type": "boolean"
+                    },
+                    "isFinish": {
+                      "type": "boolean"
+                    },
+                    "visibleCutEndLines": {
+                      "type": "boolean"
+                    },
+                    "cutEndLinePen": {
+                      "type": "integer"
+                    },
+                    "cutEndLineTypeId": {
+                      "$ref": "#/$defs/AttributeIdArrayItem"
+                    },
+                    "edgeOverrides": {
+                      "type": "array",
+                      "description": "Modifications to specific edges of this skin, targeted by their position (0-based) in GetProfiles' skins[].edges.",
+                      "items": {
+                        "$ref": "#/$defs/ProfileEdgeOverride"
+                      }
+                    }
+                  },
+                  "additionalProperties": false,
+                  "required": [
+                    "skinId"
+                  ]
+                }
+              },
+              "newSkins": {
+                "type": "array",
+                "description": "AC27+ only. Adds brand-new skins built from caller-supplied polygon geometry, instead of (or in addition to) whatever was copied from sourceAttributeId. Combine with sourceAttributeId to add skins to a copied Profile, or omit sourceAttributeId to build a Profile's geometry entirely from newSkins.",
+                "items": {
+                  "$ref": "#/$defs/ProfileSkinData"
+                }
+              },
+              "replaceSkins": {
+                "type": "boolean",
+                "description": "AC27+ only. When overwriteExisting targets an existing Profile, discard every one of its existing skins (and any sourceAttributeId geometry given alongside it) before applying newSkins, instead of adding newSkins on top of the preserved existing geometry. Use this to fully replace a Profile's cross-section with a caller-authored shape while keeping its guid and scalar fields (wallType etc.) - e.g. to sync a Profile's geometry from another project, where sourceAttributeId can't be used because it only resolves within the same file. Also discards any existing profileModifiers, since those are tied to the specific geometry being replaced. Ignored when creating a brand-new Profile (there is nothing to discard yet)."
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "name"
+            ]
+          }
+        },
+        "overwriteExisting": {
+          "type": "boolean",
+          "description": "Overwrite the Profile if exists with the same name, or if index is given with the same index. The default is false."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "profileDataArray"
+      ]
+    },
+    "CreateProfilesResult": {
+      "type": "object",
+      "properties": {
+        "attributeIds": {
+          "$ref": "#/$defs/AttributeIds"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "attributeIds"
+      ]
+    },
     "CreateBuildingMaterialsParameters": {
       "type": "object",
       "properties": {
@@ -7654,6 +9928,18 @@
               "embodiedCarbon": {
                 "type": "number",
                 "description": "Embodied Carbon."
+              },
+              "showUncutLines": {
+                "type": "boolean",
+                "description": "Show Contours in Model Views."
+              },
+              "collisionDetection": {
+                "type": "boolean",
+                "description": "Whether the Building Material participates in collision detection."
+              },
+              "cutFillOrientation": {
+                "type": "string",
+                "description": "ProjectOrigin, ElementOrigin, or FitToSkin. Orientation of the cut fill."
               }
             },
             "additionalProperties": false,
@@ -7870,18 +10156,7 @@
             },
             "additionalProperties": false,
             "required": [
-              "name",
-              "materialType",
-              "ambientReflection",
-              "diffuseReflection",
-              "specularReflection",
-              "transparency",
-              "shine",
-              "transparencyAttenuation",
-              "emissionAttenuation",
-              "surfaceColor",
-              "specularColor",
-              "emissionColor"
+              "name"
             ]
           }
         },
@@ -7957,6 +10232,356 @@
       "additionalProperties": false,
       "required": [
         "layerCombinations"
+      ]
+    },
+    "GetLinesParameters": {
+      "type": "object",
+      "properties": {
+        "attributeIds": {
+          "$ref": "#/$defs/AttributeIds"
+        },
+        "fields": {
+          "type": "array",
+          "description": "Names of the fields to return for each Line. If omitted, every field is returned. Requesting only the fields you need avoids fetching dashItems/lineItems, which can be large.",
+          "items": {
+            "$ref": "#/$defs/LineAttributeField"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "attributeIds"
+      ]
+    },
+    "GetLinesResult": {
+      "type": "object",
+      "properties": {
+        "lines": {
+          "type": "array",
+          "description": "A list of lines or errors.",
+          "items": {
+            "$ref": "#/$defs/LineAttributeOrError"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "lines"
+      ]
+    },
+    "GetFillsParameters": {
+      "type": "object",
+      "properties": {
+        "attributeIds": {
+          "$ref": "#/$defs/AttributeIds"
+        },
+        "fields": {
+          "type": "array",
+          "description": "Names of the fields to return for each Fill. If omitted, every field is returned. Requesting only the fields you need avoids fetching lineItems/symbolLines/symbolArcs/symbolHotspots, which can be large.",
+          "items": {
+            "$ref": "#/$defs/FillAttributeField"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "attributeIds"
+      ]
+    },
+    "GetFillsResult": {
+      "type": "object",
+      "properties": {
+        "fills": {
+          "type": "array",
+          "description": "A list of fills or errors.",
+          "items": {
+            "$ref": "#/$defs/FillAttributeOrError"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "fills"
+      ]
+    },
+    "GetZoneCategoriesParameters": {
+      "type": "object",
+      "properties": {
+        "attributeIds": {
+          "$ref": "#/$defs/AttributeIds"
+        },
+        "fields": {
+          "type": "array",
+          "description": "Names of the fields to return for each Zone Category. If omitted, every field is returned.",
+          "items": {
+            "$ref": "#/$defs/ZoneCategoryAttributeField"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "attributeIds"
+      ]
+    },
+    "GetZoneCategoriesResult": {
+      "type": "object",
+      "properties": {
+        "zoneCategories": {
+          "type": "array",
+          "description": "A list of zone categories or errors.",
+          "items": {
+            "$ref": "#/$defs/ZoneCategoryAttributeOrError"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "zoneCategories"
+      ]
+    },
+    "GetMEPSystemsParameters": {
+      "type": "object",
+      "properties": {
+        "attributeIds": {
+          "$ref": "#/$defs/AttributeIds"
+        },
+        "fields": {
+          "type": "array",
+          "description": "Names of the fields to return for each MEP System. If omitted, every field is returned.",
+          "items": {
+            "$ref": "#/$defs/MEPSystemAttributeField"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "attributeIds"
+      ]
+    },
+    "GetMEPSystemsResult": {
+      "type": "object",
+      "properties": {
+        "mepSystems": {
+          "type": "array",
+          "description": "A list of MEP systems or errors.",
+          "items": {
+            "$ref": "#/$defs/MEPSystemAttributeOrError"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "mepSystems"
+      ]
+    },
+    "GetPenTablesParameters": {
+      "type": "object",
+      "properties": {
+        "attributeIds": {
+          "$ref": "#/$defs/AttributeIds"
+        },
+        "fields": {
+          "type": "array",
+          "description": "Names of the fields to return for each Pen Table. If omitted, every field is returned. Requesting only the fields you need avoids fetching the 255-element pens array.",
+          "items": {
+            "$ref": "#/$defs/PenTableAttributeField"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "attributeIds"
+      ]
+    },
+    "GetPenTablesResult": {
+      "type": "object",
+      "properties": {
+        "penTables": {
+          "type": "array",
+          "description": "A list of pen tables or errors.",
+          "items": {
+            "$ref": "#/$defs/PenTableAttributeOrError"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "penTables"
+      ]
+    },
+    "GetProfilesParameters": {
+      "type": "object",
+      "properties": {
+        "attributeIds": {
+          "$ref": "#/$defs/AttributeIds"
+        },
+        "fields": {
+          "type": "array",
+          "description": "Names of the fields to return for each Profile. If omitted, every field is returned. Note the raw cross-section vector geometry itself is not exposed; width/height/minimumWidth/minimumHeight/widthStretchable/heightStretchable/hasCoreSkin/profileModifiers are derived measurements matching what the Profile Editor shows, computed from the profile's internal stretch/parameter data.",
+          "items": {
+            "$ref": "#/$defs/ProfileAttributeField"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "attributeIds"
+      ]
+    },
+    "GetProfilesResult": {
+      "type": "object",
+      "properties": {
+        "profiles": {
+          "type": "array",
+          "description": "A list of profiles or errors.",
+          "items": {
+            "$ref": "#/$defs/ProfileAttributeOrError"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "profiles"
+      ]
+    },
+    "GetCompositesParameters": {
+      "type": "object",
+      "properties": {
+        "attributeIds": {
+          "$ref": "#/$defs/AttributeIds"
+        },
+        "fields": {
+          "type": "array",
+          "description": "Names of the fields to return for each Composite. If omitted, every field is returned.",
+          "items": {
+            "$ref": "#/$defs/CompositeAttributeField"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "attributeIds"
+      ]
+    },
+    "GetCompositesResult": {
+      "type": "object",
+      "properties": {
+        "composites": {
+          "type": "array",
+          "description": "A list of composites or errors.",
+          "items": {
+            "$ref": "#/$defs/CompositeAttributeOrError"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "composites"
+      ]
+    },
+    "GetSurfacesParameters": {
+      "type": "object",
+      "properties": {
+        "attributeIds": {
+          "$ref": "#/$defs/AttributeIds"
+        },
+        "fields": {
+          "type": "array",
+          "description": "Names of the fields to return for each Surface. If omitted, every field is returned.",
+          "items": {
+            "$ref": "#/$defs/SurfaceAttributeField"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "attributeIds"
+      ]
+    },
+    "GetSurfacesResult": {
+      "type": "object",
+      "properties": {
+        "surfaces": {
+          "type": "array",
+          "description": "A list of surfaces or errors.",
+          "items": {
+            "$ref": "#/$defs/SurfaceAttributeOrError"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "surfaces"
+      ]
+    },
+    "GetLayersParameters": {
+      "type": "object",
+      "properties": {
+        "attributeIds": {
+          "$ref": "#/$defs/AttributeIds"
+        },
+        "fields": {
+          "type": "array",
+          "description": "Names of the fields to return for each Layer. If omitted, every field is returned.",
+          "items": {
+            "$ref": "#/$defs/LayerAttributeField"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "attributeIds"
+      ]
+    },
+    "GetLayersResult": {
+      "type": "object",
+      "properties": {
+        "layers": {
+          "type": "array",
+          "description": "A list of layers or errors.",
+          "items": {
+            "$ref": "#/$defs/LayerAttributeOrError"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "layers"
+      ]
+    },
+    "GetBuildingMaterialsParameters": {
+      "type": "object",
+      "properties": {
+        "attributeIds": {
+          "$ref": "#/$defs/AttributeIds"
+        },
+        "fields": {
+          "type": "array",
+          "description": "Names of the fields to return for each Building Material. If omitted, every field is returned.",
+          "items": {
+            "$ref": "#/$defs/BuildingMaterialAttributeField"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "attributeIds"
+      ]
+    },
+    "GetBuildingMaterialsResult": {
+      "type": "object",
+      "properties": {
+        "buildingMaterials": {
+          "type": "array",
+          "description": "A list of building materials or errors.",
+          "items": {
+            "$ref": "#/$defs/BuildingMaterialAttributeOrError"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "buildingMaterials"
       ]
     },
     "IFCFileOperationParameters": {
@@ -8430,7 +11055,7 @@
         "databases"
       ]
     },
-    "CreateLayoutsParameters": {
+    "CreateLayoutParameters": {
       "type": "object",
       "properties": {
         "layoutsData": {
@@ -8445,7 +11070,7 @@
         "layoutsData"
       ]
     },
-    "CreateLayoutsResult": {
+    "CreateLayoutResult": {
       "type": "object",
       "properties": {
         "databases": {
@@ -8457,7 +11082,7 @@
         "databases"
       ]
     },
-    "CreateSubsetsParameters": {
+    "CreateLayoutSubsetParameters": {
       "type": "object",
       "properties": {
         "subsetsData": {
@@ -8472,16 +11097,19 @@
         "subsetsData"
       ]
     },
-    "CreateSubsetsResult": {
+    "CreateLayoutSubsetResult": {
       "type": "object",
       "properties": {
-        "executionResults": {
-          "$ref": "#/$defs/ExecutionResults"
+        "navigatorItems": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/NavigatorItemIdOrError"
+          }
         }
       },
       "additionalProperties": false,
       "required": [
-        "executionResults"
+        "navigatorItems"
       ]
     },
     "CreateDrawingsParameters": {
@@ -8510,6 +11138,142 @@
       "required": [
         "elements"
       ]
+    },
+    "GetLayoutSettingsParameters": {
+      "type": "object",
+      "properties": {
+        "layoutDatabaseIds": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "databaseId": {
+                "$ref": "#/$defs/DatabaseId"
+              },
+              "navigatorItemId": {
+                "$ref": "#/$defs/NavigatorItemId"
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "layoutDatabaseIds"
+      ]
+    },
+    "GetLayoutSettingsResult": {
+      "type": "object",
+      "properties": {
+        "layoutSettings": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "layoutName": {
+                "type": "string"
+              },
+              "horizontalSize": {
+                "type": "number"
+              },
+              "verticalSize": {
+                "type": "number"
+              },
+              "leftMargin": {
+                "type": "number"
+              },
+              "topMargin": {
+                "type": "number"
+              },
+              "rightMargin": {
+                "type": "number"
+              },
+              "bottomMargin": {
+                "type": "number"
+              },
+              "customLayoutNumber": {
+                "type": "string"
+              },
+              "customLayoutNumbering": {
+                "type": "boolean"
+              },
+              "doNotIncludeInNumbering": {
+                "type": "boolean"
+              },
+              "displayMasterLayoutBelow": {
+                "type": "boolean"
+              },
+              "customData": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/LayoutCustomData"
+                }
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "layoutSettings"
+      ]
+    },
+    "SetLayoutSettingsParameters": {
+      "type": "object",
+      "properties": {
+        "layoutsData": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/LayoutSettingsData"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "layoutsData"
+      ]
+    },
+    "SetLayoutSettingsResult": {
+      "type": "object",
+      "properties": {
+        "executionResults": {
+          "$ref": "#/$defs/ExecutionResults"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "executionResults"
+      ]
+    },
+    "GetLayoutCustomSchemeResult": {
+      "type": "object",
+      "properties": {
+        "customScheme": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "customSchemeKey": {
+                "type": "string"
+              },
+              "customSchemeName": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "customSchemeKey",
+              "customSchemeName"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "customScheme"
+      ],
+      "additionalProperties": false
     },
     "GetModelViewOptionsResult": {
       "type": "object",
@@ -8606,6 +11370,9 @@
     "GetView2DTransformationsParameters": {
       "type": "object",
       "properties": {
+        "navigatorItemIds": {
+          "$ref": "#/$defs/NavigatorItemIds"
+        },
         "databases": {
           "$ref": "#/$defs/Databases"
         }
@@ -8626,6 +11393,138 @@
       "additionalProperties": false,
       "required": [
         "transformations"
+      ]
+    },
+    "SetViewRotationParameters": {
+      "type": "object",
+      "properties": {
+        "navigatorItemIdsWithRotation": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "navigatorItemId": {
+                "$ref": "#/$defs/NavigatorItemId"
+              },
+              "rotation": {
+                "type": "number",
+                "description": "View rotation angle in radians."
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "navigatorItemId",
+              "rotation"
+            ]
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "navigatorItemIdsWithRotation"
+      ]
+    },
+    "SetViewRotationResult": {
+      "type": "object",
+      "properties": {
+        "executionResults": {
+          "$ref": "#/$defs/ExecutionResults"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "executionResults"
+      ]
+    },
+    "CloneProjectMapItemToViewMapParameters": {
+      "type": "object",
+      "properties": {
+        "viewsData": {
+          "type": "array",
+          "description": "Array of views to clone from the Project Map to the View Map.",
+          "items": {
+            "$ref": "#/$defs/ViewCloneData"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "viewsData"
+      ]
+    },
+    "CloneProjectMapItemToViewMapResult": {
+      "type": "object",
+      "properties": {
+        "navigatorItems": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/NavigatorItemIdOrError"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "navigatorItems"
+      ]
+    },
+    "CreateViewsInViewMapParameters": {
+      "type": "object",
+      "properties": {
+        "viewsData": {
+          "type": "array",
+          "description": "Array of views to create as independent (non-clone) items in the View Map.",
+          "items": {
+            "$ref": "#/$defs/ViewData"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "viewsData"
+      ]
+    },
+    "CreateViewsInViewMapResult": {
+      "type": "object",
+      "properties": {
+        "navigatorItems": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/NavigatorItemIdOrError"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "navigatorItems"
+      ]
+    },
+    "CreateViewMapFolderParameters": {
+      "type": "object",
+      "properties": {
+        "folderName": {
+          "type": "string",
+          "description": "Name of the new folder to create in the View Map."
+        },
+        "parentNavigatorItemId": {
+          "$ref": "#/$defs/NavigatorItemId",
+          "description": "Navigator item ID of the parent View Map folder. Optional; defaults to the View Map root."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "folderName"
+      ]
+    },
+    "CreateViewMapFolderResult": {
+      "type": "object",
+      "properties": {
+        "navigatorItemId": {
+          "$ref": "#/$defs/NavigatorItemId"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "navigatorItemId"
       ]
     },
     "Set3DCutPlanesParameters": {
@@ -8708,6 +11607,92 @@
       "additionalProperties": false,
       "required": [
         "elements"
+      ]
+    },
+    "MoveNavigatorItemParameters": {
+      "type": "object",
+      "properties": {
+        "navigatorItemIdToMove": {
+          "$ref": "#/$defs/NavigatorItemId"
+        },
+        "parentNavigatorItemId": {
+          "$ref": "#/$defs/NavigatorItemId"
+        },
+        "previousNavigatorItemId": {
+          "$ref": "#/$defs/NavigatorItemId"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "navigatorItemIdToMove",
+        "parentNavigatorItemId"
+      ]
+    },
+    "MoveNavigatorItemResult": {
+      "$ref": "#/$defs/ExecutionResult"
+    },
+    "RenameNavigatorItemParameters": {
+      "type": "object",
+      "properties": {
+        "navigatorItemId": {
+          "$ref": "#/$defs/NavigatorItemId"
+        },
+        "newName": {
+          "type": "string"
+        },
+        "newId": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "navigatorItemId"
+      ]
+    },
+    "RenameNavigatorItemResult": {
+      "$ref": "#/$defs/ExecutionResult"
+    },
+    "DeleteNavigatorItemsParameters": {
+      "type": "object",
+      "properties": {
+        "navigatorItemIds": {
+          "$ref": "#/$defs/NavigatorItemIds"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "navigatorItemIds"
+      ]
+    },
+    "DeleteNavigatorItemsResult": {
+      "type": "object",
+      "properties": {
+        "executionResults": {
+          "$ref": "#/$defs/ExecutionResults"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "executionResults"
+      ]
+    },
+    "GetNavigatorItemTreeParameters": {
+      "type": "object",
+      "properties": {
+        "navigatorMapId": {
+          "type": "string",
+          "enum": [
+            "PublicViewMap",
+            "ProjectMap",
+            "LayoutBook",
+            "PublisherSets"
+          ],
+          "description": "The navigator map to retrieve."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "navigatorMapId"
       ]
     },
     "CreateIssueParameters": {
@@ -9240,14 +12225,7 @@
                 "description": "The identifier of the element."
               },
               "type": {
-                "type": "string",
-                "description": "The type of the associated design option.",
-                "enum": [
-                  "NotExistingElement",
-                  "MissingDesignOption",
-                  "NotLinkedToAnyDesignOption",
-                  "LinkedToDesignOption"
-                ]
+                "$ref": "#/$defs/DesignOptionLinkType"
               },
               "designOption": {
                 "$ref": "#/$defs/DesignOptionDetails"
@@ -9473,6 +12451,176 @@
         "executionResults"
       ]
     },
+    "CreateSolidElementLinksParameters": {
+      "type": "object",
+      "properties": {
+        "solidLinks": {
+          "type": "array",
+          "description": "List of solid element operation links to create.",
+          "items": {
+            "$ref": "#/$defs/SolidLinkData"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "solidLinks"
+      ]
+    },
+    "CreateSolidElementLinksResult": {
+      "type": "object",
+      "properties": {
+        "executionResults": {
+          "$ref": "#/$defs/ExecutionResults"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "executionResults"
+      ]
+    },
+    "RemoveSolidElementLinksParameters": {
+      "type": "object",
+      "properties": {
+        "solidLinks": {
+          "type": "array",
+          "description": "List of solid element operation links to remove.",
+          "items": {
+            "$ref": "#/$defs/SolidLinkReference"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "solidLinks"
+      ]
+    },
+    "RemoveSolidElementLinksResult": {
+      "type": "object",
+      "properties": {
+        "executionResults": {
+          "$ref": "#/$defs/ExecutionResults"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "executionResults"
+      ]
+    },
+    "GetSolidElementLinksParameters": {
+      "type": "object",
+      "properties": {
+        "elements": {
+          "$ref": "#/$defs/Elements",
+          "description": "Elements to query. Returns all solid links where each element is a target or an operator."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elements"
+      ]
+    },
+    "GetSolidElementLinksResult": {
+      "type": "object",
+      "properties": {
+        "solidLinks": {
+          "type": "array",
+          "description": "For each input element, the solid links where it acts as target and where it acts as operator.",
+          "items": {
+            "$ref": "#/$defs/SolidLinksOfElement"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "solidLinks"
+      ]
+    },
+    "ShowScriptUIParameters": {
+      "type": "object",
+      "properties": {
+        "htmlContent": {
+          "type": "string",
+          "description": "The full HTML document to display in the Script UI palette.",
+          "minLength": 1
+        },
+        "width": {
+          "type": "integer",
+          "description": "Optional palette client width in pixels. Leave unset to keep the current size.",
+          "minimum": 1
+        },
+        "height": {
+          "type": "integer",
+          "description": "Optional palette client height in pixels. Leave unset to keep the current size.",
+          "minimum": 1
+        },
+        "title": {
+          "type": "string",
+          "description": "Optional palette window title. Leave unset to keep the current title.",
+          "minLength": 1
+        },
+        "resizable": {
+          "type": "boolean",
+          "description": "Whether the user can drag-resize the palette. Defaults to true."
+        },
+        "zoomEnabled": {
+          "type": "boolean",
+          "description": "Whether Ctrl+scroll/pinch zooming is allowed in the page. Defaults to true."
+        },
+        "zoomLevel": {
+          "type": "number",
+          "description": "Optional initial zoom level (1.0 = 100%). Leave unset to keep the current zoom."
+        },
+        "scrollBarsVisible": {
+          "type": "boolean",
+          "description": "Whether the browser's own scrollbars are shown. Defaults to true."
+        },
+        "contextMenuEnabled": {
+          "type": "boolean",
+          "description": "Whether right-click shows the browser's context menu (e.g. Inspect Element). Defaults to true."
+        },
+        "navigationDisabled": {
+          "type": "boolean",
+          "description": "Prevents the page from navigating away (e.g. clicking a link to another site). Defaults to false."
+        },
+        "allowSelfSignedCertificates": {
+          "type": "boolean",
+          "description": "Only relevant if htmlContent links to a remote https:// resource with a self-signed certificate. Defaults to false."
+        },
+        "clearCookies": {
+          "type": "boolean",
+          "description": "Deletes all browser cookies before loading htmlContent. Defaults to false."
+        },
+        "autoHeight": {
+          "type": "boolean",
+          "description": "Automatically resizes the palette's height to fit the page content as it changes. Defaults to false."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "htmlContent"
+      ]
+    },
+    "ShowScriptUIResult": {
+      "$ref": "#/$defs/ExecutionResult"
+    },
+    "GetScriptUIResultResult": {
+      "type": "object",
+      "properties": {
+        "hasResult": {
+          "type": "boolean",
+          "description": "True if the Script UI page has submitted a result since the last call."
+        },
+        "result": {
+          "type": "string",
+          "description": "The submitted content (as passed to window.ACAPI.SubmitResult). Only present when hasResult is true."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "hasResult"
+      ]
+    },
     "GenerateDocumentationParameters": {
       "type": "object",
       "properties": {
@@ -9551,6 +12699,10 @@
             "BottomCenter",
             "BottomRight"
           ]
+        },
+        "floorIndex": {
+          "type": "integer",
+          "description": "Optional floor index. If omitted, derived from the coordinate's z value."
         }
       },
       "additionalProperties": false,
@@ -9598,6 +12750,10 @@
         },
         "holes": {
           "$ref": "#/$defs/Holes2D"
+        },
+        "floorIndex": {
+          "type": "integer",
+          "description": "Optional floor index. If omitted, derived from level."
         }
       },
       "additionalProperties": false,
@@ -9664,6 +12820,10 @@
         },
         "dimensions": {
           "$ref": "#/$defs/Dimensions3D"
+        },
+        "floorIndex": {
+          "type": "integer",
+          "description": "Optional floor index. If omitted, derived from the coordinate's z value."
         }
       },
       "additionalProperties": false,
@@ -9691,13 +12851,8 @@
           "description": "The height of the skirt."
         },
         "ridges": {
-          "type": "string",
-          "description": "How ridges between mesh facets are displayed in 3D: 'AllSharp' shows all ridges, 'AllSmooth' hides them, 'UserDefined' shows only ridges along user-defined level lines (the drawing-set look for contour-line topography).",
-          "enum": [
-            "AllSharp",
-            "AllSmooth",
-            "UserDefined"
-          ]
+          "$ref": "#/$defs/MeshRidges",
+          "description": "How ridges between mesh facets are displayed in 3D: 'AllSharp' shows all ridges, 'AllSmooth' hides them, 'UserDefined' shows only ridges along user-defined level lines (the drawing-set look for contour-line topography)."
         },
         "showLines": {
           "type": "boolean",
@@ -9737,20 +12892,7 @@
           "type": "array",
           "description": "The leveling sublines inside the polygon of the mesh.",
           "items": {
-            "type": "object",
-            "properties": {
-              "coordinates": {
-                "type": "array",
-                "description": "The 3D coordinates of the leveling subline of the mesh.",
-                "items": {
-                  "$ref": "#/$defs/Coordinate3D"
-                }
-              }
-            },
-            "additionalProperties": false,
-            "required": [
-              "coordinates"
-            ]
+            "$ref": "#/$defs/MeshSubline"
           },
           "minItems": 1
         }
@@ -9811,6 +12953,10 @@
         "endCoordinate": {
           "$ref": "#/$defs/Coordinate2D"
         },
+        "floorIndex": {
+          "type": "integer",
+          "description": "Optional floor index. If omitted, derived from zCoordinate."
+        },
         "zCoordinate": {
           "type": "number"
         },
@@ -9868,8 +13014,13 @@
         "endCoordinate": {
           "$ref": "#/$defs/Coordinate2D"
         },
+        "floorIndex": {
+          "type": "integer",
+          "description": "Story index (as returned by GetStories). When provided, zCoordinate is interpreted as bottomOffset relative to the floor. Takes priority over zCoordinate for floor assignment."
+        },
         "zCoordinate": {
-          "type": "number"
+          "type": "number",
+          "description": "Absolute Z when floorIndex is absent; bottomOffset relative to the floor when floorIndex is provided."
         },
         "height": {
           "type": "number",
@@ -9881,6 +13032,10 @@
         },
         "offset": {
           "type": "number"
+        },
+        "arcAngle": {
+          "type": "number",
+          "description": "Arc angle in radians; non-zero creates a curved wall (begCoordinate/endCoordinate are the chord endpoints)."
         },
         "referenceLineLocation": {
           "type": "string",
@@ -9910,7 +13065,6 @@
       "required": [
         "begCoordinate",
         "endCoordinate",
-        "zCoordinate",
         "height",
         "thickness"
       ]
@@ -9930,6 +13084,14 @@
         "begCoordinate": {
           "$ref": "#/$defs/Coordinate2D",
           "description": "The begin coordinate of leader line. Optional parameter, but either begCoordinate or parentElementId must be provided."
+        },
+        "midCoordinate": {
+          "$ref": "#/$defs/Coordinate2D",
+          "description": "The mid coordinate of leader line. Optional parameter."
+        },
+        "endCoordinate": {
+          "$ref": "#/$defs/Coordinate2D",
+          "description": "The end coordinate of leader line. Optional parameter."
         },
         "floorInd": {
           "type": "number",
@@ -9982,14 +13144,55 @@
           "type": "string",
           "minLength": 1
         },
+        "masterNavigatorItemId": {
+          "$ref": "#/$defs/NavigatorItemId"
+        },
         "layoutName": {
           "type": "string",
           "minLength": 1
+        },
+        "parentNavigatorItemId": {
+          "$ref": "#/$defs/NavigatorItemId"
+        },
+        "layoutParameters": {
+          "type": "object",
+          "properties": {
+            "horizontalSize": {
+              "type": "number"
+            },
+            "verticalSize": {
+              "type": "number"
+            },
+            "leftMargin": {
+              "type": "number"
+            },
+            "topMargin": {
+              "type": "number"
+            },
+            "rightMargin": {
+              "type": "number"
+            },
+            "bottomMargin": {
+              "type": "number"
+            },
+            "customLayoutNumber": {
+              "type": "string"
+            },
+            "customLayoutNumbering": {
+              "type": "boolean"
+            },
+            "doNotIncludeInNumbering": {
+              "type": "boolean"
+            },
+            "displayMasterLayoutBelow": {
+              "type": "boolean"
+            }
+          },
+          "additionalProperties": false
         }
       },
       "additionalProperties": false,
       "required": [
-        "masterLayoutName",
         "layoutName"
       ]
     },
@@ -10008,6 +13211,37 @@
         },
         "customNumber": {
           "type": "string"
+        },
+        "numberingStyle": {
+          "type": "string",
+          "enum": [
+            "Undefined",
+            "abc",
+            "ABC",
+            "1",
+            "01",
+            "001",
+            "0001",
+            "noID"
+          ]
+        },
+        "startAt": {
+          "type": "integer"
+        },
+        "continueNumbering": {
+          "type": "boolean"
+        },
+        "useUpperPrefix": {
+          "type": "boolean"
+        },
+        "includeToIDSequence": {
+          "type": "boolean"
+        },
+        "customNumbering": {
+          "type": "boolean"
+        },
+        "addOwnPrefix": {
+          "type": "boolean"
         }
       },
       "additionalProperties": false,
@@ -10034,6 +13268,13 @@
         "scale": {
           "type": "number",
           "exclusiveMinimum": 0.0
+        },
+        "clipPolygon": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Coordinate2D"
+          },
+          "minItems": 3
         }
       },
       "additionalProperties": false,
@@ -10132,16 +13373,122 @@
           "$ref": "#/$defs/Coordinate3D"
         },
         "size": {
-          "$ref": "#/$defs/Dimensions3D"
+          "$ref": "#/$defs/Dimensions3D",
+          "description": "Builds a simple axis-aligned box of this size. Mutually exclusive with `body` - give exactly one of the two."
+        },
+        "body": {
+          "$ref": "#/$defs/MorphBody",
+          "description": "Builds arbitrary geometry (any number of faces, holes, per-face materials, edge display overrides) instead of a simple box. Mutually exclusive with `size` - give exactly one of the two."
         },
         "buildingMaterialId": {
           "$ref": "#/$defs/AttributeId"
+        },
+        "xAxis": {
+          "$ref": "#/$defs/Coordinate3D"
+        },
+        "yAxis": {
+          "$ref": "#/$defs/Coordinate3D"
+        },
+        "zAxis": {
+          "$ref": "#/$defs/Coordinate3D"
+        },
+        "surfaceId": {
+          "$ref": "#/$defs/AttributeId"
+        },
+        "castShadow": {
+          "type": "boolean"
+        },
+        "receiveShadow": {
+          "type": "boolean"
+        },
+        "isAutoOnStoryVisibility": {
+          "type": "boolean"
+        },
+        "showContour": {
+          "$ref": "#/$defs/StoryVisibility"
+        },
+        "showFill": {
+          "$ref": "#/$defs/StoryVisibility"
+        },
+        "linkToSettings": {
+          "$ref": "#/$defs/LinkToSettings"
+        },
+        "displayOption": {
+          "$ref": "#/$defs/DisplayOption"
+        },
+        "viewDepthLimitation": {
+          "$ref": "#/$defs/ViewDepthLimitation"
+        },
+        "cutFillPen": {
+          "type": "integer"
+        },
+        "cutFillBackgroundPen": {
+          "type": "integer"
+        },
+        "cutLineType": {
+          "$ref": "#/$defs/AttributeId"
+        },
+        "cutLinePen": {
+          "type": "integer"
+        },
+        "uncutLineType": {
+          "$ref": "#/$defs/AttributeId"
+        },
+        "uncutLinePen": {
+          "type": "integer"
+        },
+        "overheadLineType": {
+          "$ref": "#/$defs/AttributeId"
+        },
+        "overheadLinePen": {
+          "type": "integer"
+        },
+        "useCoverFillType": {
+          "type": "boolean"
+        },
+        "outlineContourDisplay": {
+          "type": "boolean"
+        },
+        "coverFillType": {
+          "$ref": "#/$defs/AttributeId"
+        },
+        "coverFillPen": {
+          "type": "integer"
+        },
+        "coverFillBGPen": {
+          "type": "integer"
+        },
+        "use3DHatching": {
+          "type": "boolean"
+        },
+        "coverFillOrientation": {
+          "$ref": "#/$defs/CoverFillOrientation"
+        },
+        "useDistortedCoverFill": {
+          "type": "boolean"
+        },
+        "textureProjectionType": {
+          "$ref": "#/$defs/TextureProjectionType"
+        },
+        "textureProjectionCoords": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Coordinate3D"
+          },
+          "minItems": 4,
+          "maxItems": 4
+        },
+        "level": {
+          "type": "number"
+        },
+        "floorIndex": {
+          "type": "integer",
+          "description": "Optional floor index. If omitted, derived from the basePoint's z value."
         }
       },
       "additionalProperties": false,
       "required": [
-        "basePoint",
-        "size"
+        "basePoint"
       ]
     },
     "RoofData": {
@@ -10149,6 +13496,10 @@
       "properties": {
         "level": {
           "type": "number"
+        },
+        "floorIndex": {
+          "type": "integer",
+          "description": "Optional floor index. If omitted, derived from level."
         },
         "thickness": {
           "type": "number",
@@ -10333,6 +13684,31 @@
     },
     "SectionData": {
       "type": "object",
+      "properties": {
+        "startCoordinate": {
+          "$ref": "#/$defs/Coordinate2D"
+        },
+        "endCoordinate": {
+          "$ref": "#/$defs/Coordinate2D"
+        },
+        "depth": {
+          "type": "number"
+        },
+        "name": {
+          "type": "string"
+        },
+        "floorIndex": {
+          "type": "integer"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "startCoordinate",
+        "endCoordinate"
+      ]
+    },
+    "StairData": {
+      "type": "object",
       "description": "The parameters of the new Stair.",
       "properties": {
         "baseLinePoints": {
@@ -10346,6 +13722,10 @@
         "zCoordinate": {
           "type": "number",
           "description": "The Z coordinate (absolute elevation) of the stair base."
+        },
+        "floorIndex": {
+          "type": "integer",
+          "description": "Optional floor index. If omitted, derived from zCoordinate."
         },
         "totalHeight": {
           "type": "number",
@@ -10392,6 +13772,10 @@
         },
         "dimensions": {
           "$ref": "#/$defs/Dimensions3D"
+        },
+        "floorIndex": {
+          "type": "integer",
+          "description": "Optional floor index. If omitted, derived from the coordinate's z value."
         }
       },
       "additionalProperties": false,
@@ -10445,6 +13829,145 @@
         "text"
       ]
     },
+    "LayoutSettingsData": {
+      "type": "object",
+      "properties": {
+        "layoutDatabaseId": {
+          "$ref": "#/$defs/DatabaseId"
+        },
+        "layoutNavigatorItemId": {
+          "$ref": "#/$defs/NavigatorItemId"
+        },
+        "layoutName": {
+          "type": "string"
+        },
+        "horizontalSize": {
+          "type": "number"
+        },
+        "verticalSize": {
+          "type": "number"
+        },
+        "leftMargin": {
+          "type": "number"
+        },
+        "topMargin": {
+          "type": "number"
+        },
+        "rightMargin": {
+          "type": "number"
+        },
+        "bottomMargin": {
+          "type": "number"
+        },
+        "customLayoutNumber": {
+          "type": "string"
+        },
+        "customLayoutNumbering": {
+          "type": "boolean"
+        },
+        "doNotIncludeInNumbering": {
+          "type": "boolean"
+        },
+        "showMasterBelow": {
+          "type": "boolean"
+        },
+        "customData": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/LayoutCustomDataToSet"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "ViewCloneData": {
+      "type": "object",
+      "properties": {
+        "navigatorItemId": {
+          "$ref": "#/$defs/NavigatorItemId",
+          "description": "Navigator item ID of the Project Map viewpoint to clone."
+        },
+        "parentNavigatorItemId": {
+          "$ref": "#/$defs/NavigatorItemId",
+          "description": "Navigator item ID of the View Map folder to place the clone in. Optional; defaults to the View Map root."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "navigatorItemId"
+      ]
+    },
+    "ViewData": {
+      "type": "object",
+      "properties": {
+        "navigatorItemId": {
+          "$ref": "#/$defs/NavigatorItemId",
+          "description": "Source navigator item whose database and settings are copied."
+        },
+        "parentNavigatorItemId": {
+          "$ref": "#/$defs/NavigatorItemId",
+          "description": "View Map folder to place the new view in. Optional; defaults to View Map root."
+        },
+        "name": {
+          "type": "string",
+          "description": "Name for the new view. Optional; defaults to the source item name."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "navigatorItemId"
+      ]
+    },
+    "MEPSystemDataArrayItem": {
+      "type": "object",
+      "description": "Data to create an MEP System.",
+      "properties": {
+        "attributeId": {
+          "description": "Indentifier of the existing MEP System to overwrite, ignored if overwriteExisting is false.",
+          "$ref": "#/$defs/AttributeId"
+        },
+        "index": {
+          "type": "string",
+          "description": "Index of the existing MEP System to overwrite, ignored if overwriteExisting is false."
+        },
+        "name": {
+          "type": "string",
+          "description": "Name. If overwriteExisting is true, then the existing MEP System with the given name will be overwritten."
+        },
+        "domain": {
+          "type": "string",
+          "description": "Ventilation, Piping, or CableCarrier. Only elements belonging to the same domain can use this system."
+        },
+        "contourPen": {
+          "type": "integer",
+          "description": "The index of the contour pen [1..255]."
+        },
+        "fillPen": {
+          "type": "integer",
+          "description": "The index of the fill (foreground) pen [1..255]."
+        },
+        "fillBackgroundPen": {
+          "type": "integer",
+          "description": "The index of the background pen [0..255]. 0 means transparent background."
+        },
+        "centerLinePen": {
+          "type": "integer",
+          "description": "The index of the center line pen [1..255]."
+        },
+        "fillId": {
+          "description": "Identifier of the fill pattern attribute.",
+          "$ref": "#/$defs/AttributeIdArrayItem"
+        },
+        "centerLineTypeId": {
+          "description": "Identifier of the center line type attribute.",
+          "$ref": "#/$defs/AttributeIdArrayItem"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "name"
+      ]
+    },
     "WallWithDetails": {
       "type": "object",
       "properties": {
@@ -10456,6 +13979,10 @@
         },
         "endCoordinate": {
           "$ref": "#/$defs/Coordinate2D"
+        },
+        "arcAngle": {
+          "type": "number",
+          "description": "Arc angle in radians; non-zero makes the wall curved (begCoordinate/endCoordinate are the chord endpoints)."
         },
         "height": {
           "type": "number",
@@ -10680,6 +14207,109 @@
         },
         "buildingMaterialId": {
           "$ref": "#/$defs/AttributeId"
+        },
+        "body": {
+          "$ref": "#/$defs/MorphBody",
+          "description": "When given, discards the Morph's ENTIRE existing geometry and rebuilds it from this (mirrors CreateProfiles' replaceSkins) - not a partial edit."
+        },
+        "xAxis": {
+          "$ref": "#/$defs/Coordinate3D",
+          "description": "Replaces the rotation part of the placement transform outright. Give all three of xAxis/yAxis/zAxis together. If rotationDegreesZ is also given in the same call, it is applied first and this then overwrites its result."
+        },
+        "yAxis": {
+          "$ref": "#/$defs/Coordinate3D"
+        },
+        "zAxis": {
+          "$ref": "#/$defs/Coordinate3D"
+        },
+        "surfaceId": {
+          "$ref": "#/$defs/AttributeId"
+        },
+        "castShadow": {
+          "type": "boolean"
+        },
+        "receiveShadow": {
+          "type": "boolean"
+        },
+        "isAutoOnStoryVisibility": {
+          "type": "boolean"
+        },
+        "showContour": {
+          "$ref": "#/$defs/StoryVisibility"
+        },
+        "showFill": {
+          "$ref": "#/$defs/StoryVisibility"
+        },
+        "linkToSettings": {
+          "$ref": "#/$defs/LinkToSettings"
+        },
+        "displayOption": {
+          "$ref": "#/$defs/DisplayOption"
+        },
+        "viewDepthLimitation": {
+          "$ref": "#/$defs/ViewDepthLimitation"
+        },
+        "cutFillPen": {
+          "type": "integer"
+        },
+        "cutFillBackgroundPen": {
+          "type": "integer"
+        },
+        "cutLineType": {
+          "$ref": "#/$defs/AttributeId"
+        },
+        "cutLinePen": {
+          "type": "integer"
+        },
+        "uncutLineType": {
+          "$ref": "#/$defs/AttributeId"
+        },
+        "uncutLinePen": {
+          "type": "integer"
+        },
+        "overheadLineType": {
+          "$ref": "#/$defs/AttributeId"
+        },
+        "overheadLinePen": {
+          "type": "integer"
+        },
+        "useCoverFillType": {
+          "type": "boolean"
+        },
+        "outlineContourDisplay": {
+          "type": "boolean"
+        },
+        "coverFillType": {
+          "$ref": "#/$defs/AttributeId"
+        },
+        "coverFillPen": {
+          "type": "integer"
+        },
+        "coverFillBGPen": {
+          "type": "integer"
+        },
+        "use3DHatching": {
+          "type": "boolean"
+        },
+        "coverFillOrientation": {
+          "$ref": "#/$defs/CoverFillOrientation"
+        },
+        "useDistortedCoverFill": {
+          "type": "boolean"
+        },
+        "textureProjectionType": {
+          "$ref": "#/$defs/TextureProjectionType"
+        },
+        "textureProjectionCoords": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Coordinate3D"
+          },
+          "minItems": 4,
+          "maxItems": 4
+        },
+        "level": {
+          "type": "number"
         }
       },
       "additionalProperties": false,
@@ -10756,6 +14386,88 @@
         "elementId"
       ]
     },
+    "MeshWithDetails": {
+      "type": "object",
+      "properties": {
+        "elementId": {
+          "$ref": "#/$defs/ElementId"
+        },
+        "meshData": {
+          "$ref": "#/$defs/MeshModificationData"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elementId",
+        "meshData"
+      ]
+    },
+    "MeshModificationData": {
+      "type": "object",
+      "description": "The fields to modify on the Mesh. Only provided fields are changed; omitted fields are left as-is.",
+      "properties": {
+        "floorIndex": {
+          "type": "integer"
+        },
+        "level": {
+          "type": "number",
+          "description": "The Z reference level of coordinates."
+        },
+        "skirtType": {
+          "$ref": "#/$defs/MeshSkirtType"
+        },
+        "skirtLevel": {
+          "type": "number",
+          "description": "The height of the skirt."
+        },
+        "ridges": {
+          "$ref": "#/$defs/MeshRidges",
+          "description": "How ridges between mesh facets are displayed in 3D."
+        },
+        "showLines": {
+          "type": "boolean",
+          "description": "Whether to show secondary mesh lines on plan."
+        },
+        "contourPen": {
+          "type": "integer",
+          "description": "Pen attribute index for the mesh contour line."
+        },
+        "levelPen": {
+          "type": "integer",
+          "description": "Pen attribute index for the mesh level lines."
+        },
+        "lineTypeIndex": {
+          "type": "integer",
+          "description": "Line type attribute index for the mesh contour."
+        },
+        "polygonCoordinates": {
+          "type": "array",
+          "description": "The 3D coordinates of the outline polygon of the mesh. Replaces the existing boundary entirely.",
+          "items": {
+            "$ref": "#/$defs/Coordinate3D"
+          },
+          "minItems": 3
+        },
+        "polygonArcs": {
+          "type": "array",
+          "description": "Polygon outline arcs of the mesh.",
+          "items": {
+            "$ref": "#/$defs/PolyArc"
+          }
+        },
+        "holes": {
+          "$ref": "#/$defs/Holes3D"
+        },
+        "sublines": {
+          "type": "array",
+          "description": "The leveling sublines inside the polygon of the mesh. Replaces existing sublines entirely.",
+          "items": {
+            "$ref": "#/$defs/MeshSubline"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
     "WallStructureType": {
       "type": "string",
       "enum": [
@@ -10776,6 +14488,147 @@
       "enum": [
         "Basic",
         "Composite"
+      ]
+    },
+    "FillAttributeField": {
+      "type": "string",
+      "enum": [
+        "subType",
+        "scaleWithPlan",
+        "useForWalls",
+        "useForDraft",
+        "useForCover",
+        "horizontalSpacing",
+        "verticalSpacing",
+        "angle",
+        "bitPattern",
+        "gradientStart",
+        "gradientEnd",
+        "percent",
+        "texture",
+        "lineItems",
+        "symbolLines",
+        "symbolArcs",
+        "symbolHotspots"
+      ]
+    },
+    "ZoneCategoryAttributeField": {
+      "type": "string",
+      "enum": [
+        "categoryCode",
+        "color",
+        "stampName",
+        "stampMainGuid",
+        "stampRevGuid"
+      ]
+    },
+    "MEPSystemAttributeField": {
+      "type": "string",
+      "enum": [
+        "domain",
+        "contourPen",
+        "fillPen",
+        "fillBackgroundPen",
+        "centerLinePen",
+        "fillId",
+        "centerLineTypeId"
+      ]
+    },
+    "PenTableAttributeField": {
+      "type": "string",
+      "enum": [
+        "isActiveForModel",
+        "isActiveForLayout",
+        "pens"
+      ]
+    },
+    "ProfileAttributeField": {
+      "type": "string",
+      "enum": [
+        "wallType",
+        "beamType",
+        "coluType",
+        "handrailType",
+        "otherGDLObjectType",
+        "useWith",
+        "width",
+        "height",
+        "minimumWidth",
+        "minimumHeight",
+        "widthStretchable",
+        "heightStretchable",
+        "hasCoreSkin",
+        "profileModifiers",
+        "skins",
+        "skinOutlines"
+      ]
+    },
+    "CompositeAttributeField": {
+      "type": "string",
+      "enum": [
+        "useWith",
+        "skins",
+        "separators"
+      ]
+    },
+    "SurfaceAttributeField": {
+      "type": "string",
+      "enum": [
+        "materialType",
+        "ambientReflection",
+        "diffuseReflection",
+        "specularReflection",
+        "transparency",
+        "shine",
+        "transparencyAttenuation",
+        "emissionAttenuation",
+        "surfaceColor",
+        "specularColor",
+        "emissionColor",
+        "fillId",
+        "texture"
+      ]
+    },
+    "LayerAttributeField": {
+      "type": "string",
+      "enum": [
+        "isHidden",
+        "isLocked",
+        "isWireframe",
+        "intersectionGroupNr"
+      ]
+    },
+    "BuildingMaterialAttributeField": {
+      "type": "string",
+      "enum": [
+        "id",
+        "manufacturer",
+        "description",
+        "connPriority",
+        "cutFillIndex",
+        "cutFillPen",
+        "cutFillBackgroundPen",
+        "cutSurfaceIndex",
+        "cutFillOrientation",
+        "thermalConductivity",
+        "density",
+        "heatCapacity",
+        "embodiedEnergy",
+        "embodiedCarbon",
+        "showUncutLines",
+        "collisionDetection"
+      ]
+    },
+    "LineAttributeField": {
+      "type": "string",
+      "enum": [
+        "scaleWithPlan",
+        "defineScale",
+        "lineType",
+        "period",
+        "height",
+        "dashItems",
+        "lineItems"
       ]
     },
     "CoordinateWitnessPoint": {
@@ -10840,6 +14693,134 @@
       "additionalProperties": false,
       "required": [
         "elementId"
+      ]
+    },
+    "FavoriteRename": {
+      "type": "object",
+      "properties": {
+        "oldName": {
+          "type": "string"
+        },
+        "newName": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "oldName",
+        "newName"
+      ]
+    },
+    "PropertyExpressionUpdate": {
+      "type": "object",
+      "properties": {
+        "propertyId": {
+          "$ref": "#/$defs/PropertyId"
+        },
+        "expressions": {
+          "type": "array",
+          "description": "The new expression strings for the property.",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "propertyId",
+        "expressions"
+      ]
+    },
+    "FavoritesFromElementUpdate": {
+      "type": "object",
+      "description": "The identifier of the element and the name of the existing Favorite to update from it.",
+      "properties": {
+        "elementId": {
+          "$ref": "#/$defs/ElementId"
+        },
+        "favorite": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elementId",
+        "favorite"
+      ]
+    },
+    "SolidLinkReference": {
+      "type": "object",
+      "properties": {
+        "targetId": {
+          "$ref": "#/$defs/ElementId"
+        },
+        "operatorId": {
+          "$ref": "#/$defs/ElementId"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "targetId",
+        "operatorId"
+      ]
+    },
+    "SolidLinksOfElement": {
+      "type": "object",
+      "properties": {
+        "solidLinksWithTheGivenTarget": {
+          "type": "array",
+          "description": "Links where the given element is the target (being cut or modified).",
+          "items": {
+            "type": "object",
+            "properties": {
+              "operatorId": {
+                "$ref": "#/$defs/ElementId"
+              },
+              "operation": {
+                "$ref": "#/$defs/SolidOperationType"
+              },
+              "linkFlags": {
+                "$ref": "#/$defs/SolidLinkFlags"
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "operatorId",
+              "operation",
+              "linkFlags"
+            ]
+          }
+        },
+        "solidLinksWithTheGivenOperator": {
+          "type": "array",
+          "description": "Links where the given element is the operator (performing the cut).",
+          "items": {
+            "type": "object",
+            "properties": {
+              "targetId": {
+                "$ref": "#/$defs/ElementId"
+              },
+              "operation": {
+                "$ref": "#/$defs/SolidOperationType"
+              },
+              "linkFlags": {
+                "$ref": "#/$defs/SolidLinkFlags"
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "targetId",
+              "operation",
+              "linkFlags"
+            ]
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "solidLinksWithTheGivenTarget",
+        "solidLinksWithTheGivenOperator"
       ]
     },
     "ProjectInfoFieldData": {
@@ -11042,6 +15023,10 @@
         },
         "databaseId": {
           "$ref": "#/$defs/DatabaseId"
+        },
+        "storyIndex": {
+          "type": "integer",
+          "description": "Story index to activate. Only valid when windowType is 'FloorPlan'. As returned by GetStories."
         }
       },
       "additionalProperties": false,
@@ -11077,6 +15062,460 @@
         "xMax",
         "yMax"
       ]
+    },
+    "LinkToSettings": {
+      "type": "object",
+      "description": "Mode of linking the Morph to its home story.",
+      "properties": {
+        "homeStoryDifference": {
+          "type": "integer",
+          "description": "Difference of the home story from the current story."
+        },
+        "newCreationMode": {
+          "type": "boolean",
+          "description": "If true, the story link is relative to the current story (homeStoryDifference is used); if false, the element's absolute floor index is used instead."
+        }
+      },
+      "additionalProperties": false
+    },
+    "DisplayOption": {
+      "type": "string",
+      "description": "Floor plan display option.",
+      "enum": [
+        "Standard",
+        "StandardWithAbstract",
+        "CutOnly",
+        "OutLinesOnly",
+        "AbstractAll",
+        "CutAll"
+      ]
+    },
+    "ViewDepthLimitation": {
+      "type": "string",
+      "description": "Floor plan view depth limitation.",
+      "enum": [
+        "ToFloorPlanRange",
+        "ToAbsoluteLimit",
+        "EntireElement"
+      ]
+    },
+    "TextureProjectionType": {
+      "type": "string",
+      "description": "Projection type of the 3D texture.",
+      "enum": [
+        "Invalid",
+        "Planar",
+        "Default",
+        "Cylindric",
+        "Spheric",
+        "Box"
+      ]
+    },
+    "CoverFillOrientation": {
+      "type": "object",
+      "description": "Orientation/distortion of the floor plan cover fill.",
+      "properties": {
+        "type": {
+          "$ref": "#/$defs/CoverFillOrientationType"
+        },
+        "origo": {
+          "$ref": "#/$defs/Coordinate2D",
+          "description": "Origin of the fill relative to the project origin."
+        },
+        "matrix00": {
+          "type": "number",
+          "description": "X component of the primary distortion (direction) vector - the cosine of the fill angle, if not distorted."
+        },
+        "matrix10": {
+          "type": "number",
+          "description": "Y component of the primary distortion (direction) vector - the sine of the fill angle, if not distorted."
+        },
+        "matrix01": {
+          "type": "number",
+          "description": "X component of the secondary distortion vector - the cosine of the normal vector's angle, if not distorted."
+        },
+        "matrix11": {
+          "type": "number",
+          "description": "Y component of the secondary distortion vector - the sine of the normal vector's angle, if not distorted."
+        },
+        "innerRadius": {
+          "type": "number",
+          "description": "Radius for circular fill distortion (type Centered only)."
+        }
+      },
+      "additionalProperties": false
+    },
+    "CoverFillOrientationType": {
+      "type": "string",
+      "enum": [
+        "Global",
+        "Rotated",
+        "Distorted",
+        "Centered"
+      ]
+    },
+    "MorphPolygon": {
+      "type": "object",
+      "properties": {
+        "vertexIds": {
+          "type": "array",
+          "description": "Counterclockwise outer-loop vertex indices for this face.",
+          "items": {
+            "type": "integer"
+          },
+          "minItems": 3
+        },
+        "holes": {
+          "type": "array",
+          "description": "Optional hole loops cut out of this face, each a clockwise list of vertex indices.",
+          "items": {
+            "$ref": "#/$defs/MorphPolygonHole"
+          }
+        },
+        "surfaceId": {
+          "$ref": "#/$defs/AttributeId",
+          "description": "Optional per-face Surface (render material) override. Falls back to the Morph's own default surface when omitted. Named surfaceId, not buildingMaterialId - confirmed live that Archicad's per-face body override is a Surface index, not a building material (a Morph's building material is always a single whole-volume property, element.morph.buildingMaterial, exposed as the sibling 'buildingMaterialId' field on MorphDetails/CreateMorphs/ModifyMorphs - never per-face). Version-dependent write bug, isolated live: silently lost on Create on Archicad 25 (presumably 26 too - same pre-2700 API_OverriddenAttribute shape, though Archicad 26 itself could not be installed to confirm live), confirmed fixed and working correctly from Archicad 27 onward (27 and 29 both verified). No SDK/build available locally to check Archicad 28."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "vertexIds"
+      ]
+    },
+    "MorphPolygonHole": {
+      "type": "object",
+      "properties": {
+        "vertexIds": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          },
+          "minItems": 3
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "vertexIds"
+      ]
+    },
+    "DesignOptionLinkType": {
+      "type": "string",
+      "description": "The type of the associated design option.",
+      "enum": [
+        "NotExistingElement",
+        "MissingDesignOption",
+        "NotLinkedToAnyDesignOption",
+        "LinkedToDesignOption"
+      ]
+    },
+    "MeshRidges": {
+      "type": "string",
+      "description": "How ridges between mesh facets are displayed in 3D.",
+      "enum": [
+        "AllSharp",
+        "AllSmooth",
+        "UserDefined"
+      ]
+    },
+    "MeshSubline": {
+      "type": "object",
+      "properties": {
+        "coordinates": {
+          "type": "array",
+          "description": "The 3D coordinates of the leveling subline of the mesh.",
+          "items": {
+            "$ref": "#/$defs/Coordinate3D"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "coordinates"
+      ]
+    },
+    "LineSymbolItemData": {
+      "type": "object",
+      "properties": {
+        "itemType": {
+          "type": "string",
+          "description": "Separator, CenterDot, CenterLine, Dot, RightAngle, Parallel, Line, Circle, or Arc."
+        },
+        "centerOffset": {
+          "type": "number",
+          "description": "Vertical distance from the origin. Used for Separator, CenterDot, and CenterLine item types."
+        },
+        "length": {
+          "type": "number",
+          "description": "Length of the item. Used for CenterLine, RightAngle, and Parallel item types."
+        },
+        "begPos": {
+          "description": "Beginning position. Used for Dot, RightAngle, Parallel, Line, Circle, and Arc item types.",
+          "$ref": "#/$defs/Coordinate2D"
+        },
+        "endPos": {
+          "description": "End position. Used for Line item type only.",
+          "$ref": "#/$defs/Coordinate2D"
+        },
+        "radius": {
+          "type": "number",
+          "description": "Radius. Used for Circle and Arc item types."
+        },
+        "beginAngle": {
+          "type": "number",
+          "description": "Beginning angle in radians, measured from the vertical axis. Used for Arc item type only."
+        },
+        "endAngle": {
+          "type": "number",
+          "description": "End angle in radians, measured from the vertical axis. Used for Arc item type only."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "itemType"
+      ]
+    },
+    "FillSubType": {
+      "type": "string",
+      "enum": [
+        "Vector",
+        "Solid",
+        "Empty",
+        "Symbol",
+        "LinearGradient",
+        "RadialGradient"
+      ]
+    },
+    "MEPSystemDomain": {
+      "type": "string",
+      "enum": [
+        "Ventilation",
+        "Piping",
+        "CableCarrier"
+      ]
+    },
+    "ProfileUseWith": {
+      "type": "string",
+      "enum": [
+        "Wall",
+        "Beam",
+        "Column",
+        "Handrail",
+        "Other"
+      ]
+    },
+    "PenData": {
+      "type": "object",
+      "properties": {
+        "index": {
+          "type": "integer",
+          "description": "Index of the pen [1..255]."
+        },
+        "color": {
+          "$ref": "#/$defs/ColorRGB"
+        },
+        "width": {
+          "type": "number",
+          "description": "Thickness of the pen defined in paper millimeters."
+        },
+        "description": {
+          "type": "string",
+          "description": "Textual description of the pen."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "index"
+      ]
+    },
+    "BoundingBox2D": {
+      "type": "object",
+      "description": "Bounding box of the drawing on the layout.",
+      "properties": {
+        "xMin": {
+          "type": "number"
+        },
+        "yMin": {
+          "type": "number"
+        },
+        "xMax": {
+          "type": "number"
+        },
+        "yMax": {
+          "type": "number"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "xMin",
+        "yMin",
+        "xMax",
+        "yMax"
+      ]
+    },
+    "ProfileSkinData": {
+      "type": "object",
+      "description": "One new skin (hatch). Its shape is one or more closed polygon contours: the first is the outer boundary, any further ones are holes cut out of it - the same polygon+holes convention as e.g. CreateSlabs' polygonCoordinates/polygonArcs/holes, just expressed as a list of contours instead of a separate holes array.",
+      "properties": {
+        "contours": {
+          "type": "array",
+          "description": "Closed polygon contours forming this skin's cross-section, in the Profile's local coordinate system. Each contour is closed automatically - do not repeat its first vertex at the end.",
+          "items": {
+            "$ref": "#/$defs/ProfileSkinContour"
+          },
+          "minItems": 1
+        },
+        "buildingMaterialId": {
+          "$ref": "#/$defs/AttributeIdArrayItem"
+        },
+        "surfaceId": {
+          "$ref": "#/$defs/AttributeIdArrayItem"
+        },
+        "fillId": {
+          "$ref": "#/$defs/AttributeIdArrayItem"
+        },
+        "contourPen": {
+          "type": "integer"
+        },
+        "contourLineTypeId": {
+          "$ref": "#/$defs/AttributeIdArrayItem"
+        },
+        "isCore": {
+          "type": "boolean"
+        },
+        "isFinish": {
+          "type": "boolean"
+        },
+        "visibleCutEndLines": {
+          "type": "boolean"
+        },
+        "cutEndLinePen": {
+          "type": "integer"
+        },
+        "cutEndLineTypeId": {
+          "$ref": "#/$defs/AttributeIdArrayItem"
+        },
+        "edgeOverrides": {
+          "type": "array",
+          "description": "Per-edge pen/visibility/line type, targeted by 0-based edge index. Edge indices follow the same order as this skin's contours/polygonCoordinates: the outer contour's edges first (one edge per vertex, wrapping around), then each hole's, in the order the contours were given. Verify exact indices for a created skin via a follow-up GetProfiles call's skins[].edges before relying on them.",
+          "items": {
+            "$ref": "#/$defs/ProfileEdgeOverride"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "contours"
+      ]
+    },
+    "ProfileSkinContour": {
+      "type": "object",
+      "properties": {
+        "polygonCoordinates": {
+          "type": "array",
+          "description": "The 2D coordinates of this contour.",
+          "items": {
+            "$ref": "#/$defs/Coordinate2D"
+          },
+          "minItems": 3
+        },
+        "polygonArcs": {
+          "type": "array",
+          "description": "Optional arcs along this contour's edges. begIndex/endIndex are 0-based positions within this contour's own polygonCoordinates.",
+          "items": {
+            "$ref": "#/$defs/PolyArc"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "polygonCoordinates"
+      ]
+    },
+    "ProfileEdgeOverride": {
+      "type": "object",
+      "properties": {
+        "edgeIndex": {
+          "type": "integer"
+        },
+        "pen": {
+          "type": "integer"
+        },
+        "isVisibleLine": {
+          "type": "boolean"
+        },
+        "lineTypeId": {
+          "$ref": "#/$defs/AttributeIdArrayItem"
+        },
+        "buildingMaterialId": {
+          "$ref": "#/$defs/AttributeIdArrayItem"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "edgeIndex"
+      ]
+    },
+    "SolidLinkData": {
+      "type": "object",
+      "properties": {
+        "targetId": {
+          "$ref": "#/$defs/ElementId",
+          "description": "The element to be cut or modified."
+        },
+        "operatorId": {
+          "$ref": "#/$defs/ElementId",
+          "description": "The element performing the operation."
+        },
+        "operation": {
+          "$ref": "#/$defs/SolidOperationType"
+        },
+        "linkFlags": {
+          "$ref": "#/$defs/SolidLinkFlags"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "targetId",
+        "operatorId",
+        "operation"
+      ]
+    },
+    "LayoutCustomData": {
+      "type": "object",
+      "properties": {
+        "customSchemeKey": {
+          "type": "string"
+        },
+        "customSchemeName": {
+          "type": "string"
+        },
+        "customSchemeValue": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "customSchemeKey",
+        "customSchemeValue"
+      ],
+      "additionalProperties": false
+    },
+    "LayoutCustomDataToSet": {
+      "type": "object",
+      "properties": {
+        "customSchemeKey": {
+          "type": "string"
+        },
+        "customSchemeName": {
+          "type": "string"
+        },
+        "customSchemeValue": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "customSchemeValue"
+      ],
+      "additionalProperties": false
     }
   }
 }

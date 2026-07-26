@@ -24,6 +24,23 @@ AttributeType: TypeAlias = Literal[
 ]
 
 
+class LineDashItem(TypedDict):
+    dash: float
+    gap: float
+
+
+class ProfileModifier(TypedDict):
+    """A stretchable edge-offset parameter of the profile, as named by the profile's author in the Profile Editor. Its value is a live geometric measurement matching what the Profile Editor's dimension shows."""
+    name: NotRequired[str]
+    value: NotRequired[float]
+
+
+class OutlineArc(TypedDict):
+    begIndex: int
+    endIndex: int
+    arcAngle: float
+
+
 Guid: TypeAlias = str
 
 
@@ -60,12 +77,16 @@ class GDLParameterDetails(TypedDict):
 class SetGDLParameterByNameDetails(TypedDict):
     """Details of a GDL parameter."""
     name: str
+    index1: NotRequired[int]
+    index2: NotRequired[int]
     value: Any
 
 
 class SetGDLParameterByIndexDetails(TypedDict):
     """Details of a GDL parameter."""
     index: int
+    index1: NotRequired[int]
+    index2: NotRequired[int]
     value: Any
 
 
@@ -364,6 +385,8 @@ class PropertyDetails(TypedDict):
     propertyValueType: Literal["Undefined", "Integer", "Real", "String", "Boolean", "Guid"]
     propertyMeasureType: Literal["Undefined", "Default", "Length", "Area", "Volume", "Angle"]
     propertyIsEditable: bool
+    isExpressionBased: bool
+    expressions: NotRequired[list[str]]
 
 
 class PropertyValue(TypedDict):
@@ -771,6 +794,7 @@ class PolylineDetails(TypedDict):
 
 class CurtainWallDetails(TypedDict):
     height: NotRequired[float]
+    flipped: NotRequired[bool]
     angle: NotRequired[float]
 
 
@@ -815,18 +839,20 @@ class CurtainWallFrameDetails(TypedDict):
 MeshSkirtType: TypeAlias = Literal["SurfaceOnlyWithoutSkirt", "WithSkirt", "SolidBodyWithSkirt"]
 
 
-class Subline(TypedDict):
-    coordinates: list[Coordinate3D]
+class StoryVisibility(TypedDict):
+    """Per-story visibility settings (API_StoryVisibility): the home story, plus how many stories above/below also show this element."""
+    showOnHome: NotRequired[bool]
+    showAllAbove: NotRequired[bool]
+    showAllBelow: NotRequired[bool]
+    showRelAbove: NotRequired[int]
+    showRelBelow: NotRequired[int]
 
 
-class MeshDetails(TypedDict):
-    level: float
-    skirtType: MeshSkirtType
-    skirtLevel: float
-    polygonCoordinates: list[Coordinate3D]
-    polygonArcs: NotRequired[list[PolyArc]]
-    holes: NotRequired[Holes3D]
-    sublines: NotRequired[list[Subline]]
+class EdgeOverride(TypedDict):
+    vertexIds: list[int]
+    hidden: NotRequired[bool]
+    smooth: NotRequired[bool]
+    silhouetteOnly: NotRequired[bool]
 
 
 class NotYetSupportedElementTypeDetails(TypedDict):
@@ -926,6 +952,7 @@ class StoryParameters(TypedDict):
     floorId: int
     dispOnSections: bool
     level: float
+    height: NotRequired[float]
     name: str
 
 
@@ -977,7 +1004,12 @@ class ZoneSettings(TypedDict):
     fixedStampAngle: NotRequired[bool]
 
 
-TypeSpecificSettings: TypeAlias = WallSettings | ZoneSettings
+class DrawingSettings(TypedDict):
+    """Modifiable settings for a Drawing element placed on a layout."""
+    clipPolygon: NotRequired[list[Coordinate2D]]
+
+
+TypeSpecificSettings: TypeAlias = WallSettings | ZoneSettings | DrawingSettings
 
 
 class PropertyGroup(TypedDict):
@@ -1073,6 +1105,21 @@ class DesignOptionCombinationId(TypedDict):
     guid: Guid
 
 
+SolidOperationType: TypeAlias = Literal[
+    "Subtraction",
+    "SubtractionUpwards",
+    "SubtractionDownwards",
+    "Intersection",
+    "Addition",
+]
+
+
+class SolidLinkFlags(TypedDict):
+    """Flags controlling the behaviour of a solid element operation link."""
+    inheritOperatorAttributes: bool
+    skipPolygonHoles: bool
+
+
 class Length(TypedDict):
     unit: LengthType
     accuracy: AccuracyType
@@ -1096,6 +1143,10 @@ class Angle(TypedDict):
     unit: AngleType
     decimals: int
     accuracy: int
+
+
+class FloorPlanPolygon(TypedDict):
+    coordinates: NotRequired[list[Coordinate2D]]
 
 
 class Details(TypedDict):
@@ -1155,9 +1206,24 @@ class User(TypedDict):
     userName: str
 
 
+class LayoutDatabaseId(TypedDict):
+    databaseId: NotRequired[DatabaseId]
+    navigatorItemId: NotRequired[NavigatorItemId]
+
+
+class CustomSchemeItem(TypedDict):
+    customSchemeKey: str
+    customSchemeName: str
+
+
 class ModelViewOption(TypedDict):
     """Represents the model view options."""
     name: str
+
+
+class NavigatorItemIdsWithRotationItem(TypedDict):
+    navigatorItemId: NavigatorItemId
+    rotation: float
 
 
 class CutPlane(TypedDict):
@@ -1203,6 +1269,7 @@ class ColumnData(TypedDict):
             "BottomRight",
         ]
     ]
+    floorIndex: NotRequired[int]
 
 
 class SlabData(TypedDict):
@@ -1213,6 +1280,7 @@ class SlabData(TypedDict):
     polygonCoordinates: list[Coordinate2D]
     polygonArcs: NotRequired[list[PolyArc]]
     holes: NotRequired[Holes2D]
+    floorIndex: NotRequired[int]
 
 
 class PolylineData(TypedDict):
@@ -1231,28 +1299,13 @@ class ObjectData(TypedDict):
     libraryPartName: str
     coordinates: Coordinate3D
     dimensions: NotRequired[Dimensions3D]
-
-
-class MeshData(TypedDict):
-    """The parameters of the new Mesh."""
     floorIndex: NotRequired[int]
-    level: NotRequired[float]
-    skirtType: NotRequired[MeshSkirtType]
-    skirtLevel: NotRequired[float]
-    ridges: NotRequired[Literal["AllSharp", "AllSmooth", "UserDefined"]]
-    showLines: NotRequired[bool]
-    contourPen: NotRequired[int]
-    levelPen: NotRequired[int]
-    lineTypeIndex: NotRequired[int]
-    polygonCoordinates: list[Coordinate3D]
-    polygonArcs: NotRequired[list[PolyArc]]
-    holes: NotRequired[Holes3D]
-    sublines: NotRequired[list[Subline]]
 
 
 class BeamData(TypedDict):
     begCoordinate: Coordinate2D
     endCoordinate: Coordinate2D
+    floorIndex: NotRequired[int]
     zCoordinate: float
     offset: NotRequired[float]
     slantAngle: NotRequired[float]
@@ -1285,9 +1338,25 @@ class WorksheetData(TypedDict):
     referenceId: str
 
 
+class LayoutParameters(TypedDict):
+    horizontalSize: NotRequired[float]
+    verticalSize: NotRequired[float]
+    leftMargin: NotRequired[float]
+    topMargin: NotRequired[float]
+    rightMargin: NotRequired[float]
+    bottomMargin: NotRequired[float]
+    customLayoutNumber: NotRequired[str]
+    customLayoutNumbering: NotRequired[bool]
+    doNotIncludeInNumbering: NotRequired[bool]
+    displayMasterLayoutBelow: NotRequired[bool]
+
+
 class LayoutData(TypedDict):
-    masterLayoutName: str
+    masterLayoutName: NotRequired[str]
+    masterNavigatorItemId: NotRequired[NavigatorItemId]
     layoutName: str
+    parentNavigatorItemId: NotRequired[NavigatorItemId]
+    layoutParameters: NotRequired[LayoutParameters]
 
 
 class SubsetData(TypedDict):
@@ -1295,6 +1364,13 @@ class SubsetData(TypedDict):
     parentNavigatorItemId: NotRequired[NavigatorItemId]
     ownPrefix: NotRequired[str]
     customNumber: NotRequired[str]
+    numberingStyle: NotRequired[Literal["Undefined", "abc", "ABC", "1", "01", "001", "0001", "noID"]]
+    startAt: NotRequired[int]
+    continueNumbering: NotRequired[bool]
+    useUpperPrefix: NotRequired[bool]
+    includeToIDSequence: NotRequired[bool]
+    customNumbering: NotRequired[bool]
+    addOwnPrefix: NotRequired[bool]
 
 
 class DrawingData(TypedDict):
@@ -1303,6 +1379,7 @@ class DrawingData(TypedDict):
     name: str
     position: Coordinate2D
     scale: NotRequired[float]
+    clipPolygon: NotRequired[list[Coordinate2D]]
 
 
 class Level(TypedDict):
@@ -1311,9 +1388,18 @@ class Level(TypedDict):
 
 
 class SectionData(TypedDict):
+    startCoordinate: Coordinate2D
+    endCoordinate: Coordinate2D
+    depth: NotRequired[float]
+    name: NotRequired[str]
+    floorIndex: NotRequired[int]
+
+
+class StairData(TypedDict):
     """The parameters of the new Stair."""
     baseLinePoints: list[Coordinate2D]
     zCoordinate: float
+    floorIndex: NotRequired[int]
     totalHeight: NotRequired[float]
     flightWidth: NotRequired[float]
     stepNum: NotRequired[int]
@@ -1326,6 +1412,7 @@ class LampData(TypedDict):
     libraryPartName: str
     coordinates: Coordinate3D
     dimensions: NotRequired[Dimensions3D]
+    floorIndex: NotRequired[int]
 
 
 class TextData(TypedDict):
@@ -1339,6 +1426,17 @@ class TextData(TypedDict):
     floorIndex: NotRequired[int]
 
 
+class ViewCloneData(TypedDict):
+    navigatorItemId: NavigatorItemId
+    parentNavigatorItemId: NotRequired[NavigatorItemId]
+
+
+class ViewData(TypedDict):
+    navigatorItemId: NavigatorItemId
+    parentNavigatorItemId: NotRequired[NavigatorItemId]
+    name: NotRequired[str]
+
+
 WallStructureType: TypeAlias = Literal["Basic", "Composite", "Profile"]
 
 
@@ -1346,6 +1444,128 @@ SlabStructureType: TypeAlias = Literal["Basic", "Composite"]
 
 
 RoofStructureType: TypeAlias = Literal["Basic", "Composite"]
+
+
+FillAttributeField: TypeAlias = Literal[
+    "subType",
+    "scaleWithPlan",
+    "useForWalls",
+    "useForDraft",
+    "useForCover",
+    "horizontalSpacing",
+    "verticalSpacing",
+    "angle",
+    "bitPattern",
+    "gradientStart",
+    "gradientEnd",
+    "percent",
+    "texture",
+    "lineItems",
+    "symbolLines",
+    "symbolArcs",
+    "symbolHotspots",
+]
+
+
+ZoneCategoryAttributeField: TypeAlias = Literal["categoryCode", "color", "stampName", "stampMainGuid", "stampRevGuid"]
+
+
+MEPSystemAttributeField: TypeAlias = Literal[
+    "domain",
+    "contourPen",
+    "fillPen",
+    "fillBackgroundPen",
+    "centerLinePen",
+    "fillId",
+    "centerLineTypeId",
+]
+
+
+PenTableAttributeField: TypeAlias = Literal["isActiveForModel", "isActiveForLayout", "pens"]
+
+
+ProfileAttributeField: TypeAlias = Literal[
+    "wallType",
+    "beamType",
+    "coluType",
+    "handrailType",
+    "otherGDLObjectType",
+    "useWith",
+    "width",
+    "height",
+    "minimumWidth",
+    "minimumHeight",
+    "widthStretchable",
+    "heightStretchable",
+    "hasCoreSkin",
+    "profileModifiers",
+    "skins",
+    "skinOutlines",
+]
+
+
+CompositeAttributeField: TypeAlias = Literal["useWith", "skins", "separators"]
+
+
+SurfaceAttributeField: TypeAlias = Literal[
+    "materialType",
+    "ambientReflection",
+    "diffuseReflection",
+    "specularReflection",
+    "transparency",
+    "shine",
+    "transparencyAttenuation",
+    "emissionAttenuation",
+    "surfaceColor",
+    "specularColor",
+    "emissionColor",
+    "fillId",
+    "texture",
+]
+
+
+LayerAttributeField: TypeAlias = Literal["isHidden", "isLocked", "isWireframe", "intersectionGroupNr"]
+
+
+BuildingMaterialAttributeField: TypeAlias = Literal[
+    "id",
+    "manufacturer",
+    "description",
+    "connPriority",
+    "cutFillIndex",
+    "cutFillPen",
+    "cutFillBackgroundPen",
+    "cutSurfaceIndex",
+    "cutFillOrientation",
+    "thermalConductivity",
+    "density",
+    "heatCapacity",
+    "embodiedEnergy",
+    "embodiedCarbon",
+    "showUncutLines",
+    "collisionDetection",
+]
+
+
+LineAttributeField: TypeAlias = Literal[
+    "scaleWithPlan",
+    "defineScale",
+    "lineType",
+    "period",
+    "height",
+    "dashItems",
+    "lineItems",
+]
+
+
+class FavoriteRename(TypedDict):
+    oldName: str
+    newName: str
+
+
+class PropertyExpressionUpdate(TypedDict):
+    propertyId: PropertyId
+    expressions: list[str]
 
 
 class ProjectInfoFieldData(TypedDict):
@@ -1389,6 +1609,7 @@ class SurveyPoint(TypedDict):
 class DatabaseIdAndWindowType(TypedDict):
     windowType: WindowType
     databaseId: NotRequired[DatabaseId]
+    storyIndex: NotRequired[int]
 
 
 class Zoom(TypedDict):
@@ -1397,6 +1618,102 @@ class Zoom(TypedDict):
     yMin: float
     xMax: float
     yMax: float
+
+
+class LinkToSettings(TypedDict):
+    """Mode of linking the Morph to its home story."""
+    homeStoryDifference: NotRequired[int]
+    newCreationMode: NotRequired[bool]
+
+
+DisplayOption: TypeAlias = Literal[
+    "Standard",
+    "StandardWithAbstract",
+    "CutOnly",
+    "OutLinesOnly",
+    "AbstractAll",
+    "CutAll",
+]
+
+
+ViewDepthLimitation: TypeAlias = Literal["ToFloorPlanRange", "ToAbsoluteLimit", "EntireElement"]
+
+
+TextureProjectionType: TypeAlias = Literal["Invalid", "Planar", "Default", "Cylindric", "Spheric", "Box"]
+
+
+CoverFillOrientationType: TypeAlias = Literal["Global", "Rotated", "Distorted", "Centered"]
+
+
+class MorphPolygonHole(TypedDict):
+    vertexIds: list[int]
+
+
+DesignOptionLinkType: TypeAlias = Literal[
+    "NotExistingElement",
+    "MissingDesignOption",
+    "NotLinkedToAnyDesignOption",
+    "LinkedToDesignOption",
+]
+
+
+MeshRidges: TypeAlias = Literal["AllSharp", "AllSmooth", "UserDefined"]
+
+
+class MeshSubline(TypedDict):
+    coordinates: list[Coordinate3D]
+
+
+class LineSymbolItemData(TypedDict):
+    itemType: str
+    centerOffset: NotRequired[float]
+    length: NotRequired[float]
+    begPos: NotRequired[Coordinate2D]
+    endPos: NotRequired[Coordinate2D]
+    radius: NotRequired[float]
+    beginAngle: NotRequired[float]
+    endAngle: NotRequired[float]
+
+
+FillSubType: TypeAlias = Literal["Vector", "Solid", "Empty", "Symbol", "LinearGradient", "RadialGradient"]
+
+
+MEPSystemDomain: TypeAlias = Literal["Ventilation", "Piping", "CableCarrier"]
+
+
+ProfileUseWith: TypeAlias = Literal["Wall", "Beam", "Column", "Handrail", "Other"]
+
+
+class PenData(TypedDict):
+    index: int
+    color: NotRequired[ColorRGB]
+    width: NotRequired[float]
+    description: NotRequired[str]
+
+
+class BoundingBox2D(TypedDict):
+    """Bounding box of the drawing on the layout."""
+    xMin: float
+    yMin: float
+    xMax: float
+    yMax: float
+
+
+class ProfileSkinContour(TypedDict):
+    polygonCoordinates: list[Coordinate2D]
+    polygonArcs: NotRequired[list[PolyArc]]
+
+
+class LayoutCustomData(TypedDict):
+    customSchemeKey: str
+    customSchemeName: NotRequired[str]
+    customSchemeValue: str
+
+
+class LayoutCustomDataToSet(TypedDict):
+    customSchemeKey: NotRequired[str]
+    customSchemeName: NotRequired[str]
+    customSchemeValue: str
 
 
 class ElementId(TypedDict):
@@ -1453,6 +1770,98 @@ class LayerCombinationAttribute(TypedDict):
 
 
 LayerCombinationAttributeOrError: TypeAlias = LayerCombinationAttribute | ErrorItem
+
+
+class LineSymbolItem(TypedDict):
+    itemType: str
+    centerOffset: float
+    length: float
+    begPos: Coordinate2D
+    endPos: Coordinate2D
+    radius: float
+    beginAngle: float
+    endAngle: float
+
+
+class FillLineItem(TypedDict):
+    frequency: float
+    direction: float
+    offsetLine: float
+    offset: Coordinate2D
+    lineLengths: NotRequired[list[float]]
+
+
+class FillSymbolLine(TypedDict):
+    begin: Coordinate2D
+    end: Coordinate2D
+
+
+class FillSymbolArc(TypedDict):
+    begin: Coordinate2D
+    origin: Coordinate2D
+    angle: float
+
+
+class ZoneCategoryAttribute(TypedDict):
+    """A zone category attribute."""
+    attributeId: AttributeId
+    index: int
+    name: str
+    categoryCode: NotRequired[str]
+    color: NotRequired[ColorRGB]
+    stampName: NotRequired[str]
+    stampMainGuid: NotRequired[str]
+    stampRevGuid: NotRequired[str]
+
+
+ZoneCategoryAttributeOrError: TypeAlias = ZoneCategoryAttribute | ErrorItem
+
+
+class PenTablePen(TypedDict):
+    index: int
+    color: ColorRGB
+    width: float
+    description: str
+
+
+class LayerAttribute(TypedDict):
+    """A layer attribute."""
+    attributeId: AttributeId
+    index: int
+    name: str
+    isHidden: NotRequired[bool]
+    isLocked: NotRequired[bool]
+    isWireframe: NotRequired[bool]
+    intersectionGroupNr: NotRequired[int]
+
+
+LayerAttributeOrError: TypeAlias = LayerAttribute | ErrorItem
+
+
+class BuildingMaterialAttribute(TypedDict):
+    """A building material attribute."""
+    attributeId: AttributeId
+    index: int
+    name: str
+    id: NotRequired[str]
+    manufacturer: NotRequired[str]
+    description: NotRequired[str]
+    connPriority: NotRequired[int]
+    cutFillIndex: NotRequired[int]
+    cutFillPen: NotRequired[int]
+    cutFillBackgroundPen: NotRequired[int]
+    cutSurfaceIndex: NotRequired[int]
+    cutFillOrientation: NotRequired[Literal["ProjectOrigin", "ElementOrigin", "FitToSkin"]]
+    thermalConductivity: NotRequired[float]
+    density: NotRequired[float]
+    heatCapacity: NotRequired[float]
+    embodiedEnergy: NotRequired[float]
+    embodiedCarbon: NotRequired[float]
+    showUncutLines: NotRequired[bool]
+    collisionDetection: NotRequired[bool]
+
+
+BuildingMaterialAttributeOrError: TypeAlias = BuildingMaterialAttribute | ErrorItem
 
 
 SetGDLParameterArray: TypeAlias = list[SetGDLParameterDetails]
@@ -1619,6 +2028,12 @@ class ViewSettings(TypedDict):
     saveZoom: NotRequired[bool]
     ignoreSavedZoom: NotRequired[bool]
     zoom: NotRequired[Zoom]
+    rotation: NotRequired[float]
+    structureDisplay: NotRequired[Literal["EntireStructure", "CoreOnly", "WithoutFinishes", "StructureOnly"]]
+    renovationFilterGuid: NotRequired[Guid]
+    d3styleName: NotRequired[str]
+    renderingSceneName: NotRequired[str]
+    usePhotoRendering: NotRequired[bool]
 
 
 ViewSettingsOrError: TypeAlias = ViewSettings | ErrorItem
@@ -1637,6 +2052,7 @@ class WallDetails(TypedDict):
     begCoordinate: Coordinate2D
     endCoordinate: Coordinate2D
     zCoordinate: float
+    flipped: NotRequired[bool]
     height: float
     bottomOffset: float
     offset: float
@@ -1723,6 +2139,43 @@ class ZoneDetails(TypedDict):
     polygonArcs: NotRequired[list[PolyArc]]
     holes: NotRequired[Holes2D]
     zCoordinate: float
+
+
+class MeshDetails(TypedDict):
+    floorIndex: NotRequired[int]
+    level: float
+    skirtType: MeshSkirtType
+    skirtLevel: float
+    ridges: NotRequired[MeshRidges]
+    showLines: NotRequired[bool]
+    contourPen: NotRequired[int]
+    levelPen: NotRequired[int]
+    lineTypeIndex: NotRequired[int]
+    polygonCoordinates: list[Coordinate3D]
+    polygonArcs: NotRequired[list[PolyArc]]
+    holes: NotRequired[Holes3D]
+    sublines: NotRequired[list[MeshSubline]]
+
+
+class DrawingDetails(TypedDict):
+    pos: Coordinate2D
+    angle: float
+    ratio: float
+    drawingScale: float
+    modelOffset: Coordinate2D
+    isCutWithFrame: bool
+    bounds: BoundingBox2D
+    clipPolygon: NotRequired[list[Coordinate2D]]
+
+
+class LabelDetails(TypedDict):
+    libPart: LibPartDetails
+    ownerElementId: NotRequired[ElementId]
+    ownerElementType: NotRequired[ElementType]
+    begCoordinate: Coordinate2D
+    midCoordinate: Coordinate2D
+    endCoordinate: Coordinate2D
+    hasLeaderLine: bool
 
 
 class PropertyDefinition(TypedDict):
@@ -1832,6 +2285,13 @@ class FavoritesFromElement(TypedDict):
     """The identifier of the element and the name of the new favorite."""
     elementId: ElementId
     favorite: str
+    folder: NotRequired[list[str]]
+
+
+class FavoritesToApplyItem(TypedDict):
+    """The identifier of the element and the name of the Favorite to apply to it."""
+    elementId: ElementId
+    favorite: str
 
 
 class LayerDataArrayItem(TypedDict):
@@ -1853,6 +2313,56 @@ class LayerCombinationDataArrayItem(TypedDict):
     layers: LayersOfLayerCombination
 
 
+class LineDataArrayItem(TypedDict):
+    """Data to create a Line."""
+    attributeId: NotRequired[AttributeId]
+    index: NotRequired[str]
+    name: str
+    scaleWithPlan: NotRequired[bool]
+    defineScale: NotRequired[float]
+    lineType: NotRequired[str]
+    period: NotRequired[float]
+    height: NotRequired[float]
+    dashItems: NotRequired[list[LineDashItem]]
+    lineItems: NotRequired[list[LineSymbolItemData]]
+
+
+class FillDataArrayItem(TypedDict):
+    """Data to create a Fill."""
+    attributeId: NotRequired[AttributeId]
+    index: NotRequired[str]
+    name: str
+    subType: NotRequired[str]
+    scaleWithPlan: NotRequired[bool]
+    useForWalls: NotRequired[bool]
+    useForDraft: NotRequired[bool]
+    useForCover: NotRequired[bool]
+    horizontalSpacing: NotRequired[float]
+    verticalSpacing: NotRequired[float]
+    angle: NotRequired[float]
+    bitPattern: NotRequired[str]
+    gradientStart: NotRequired[Coordinate2D]
+    gradientEnd: NotRequired[Coordinate2D]
+    percent: NotRequired[float]
+    texture: NotRequired[Texture]
+    lineItems: NotRequired[list[FillLineItem]]
+    symbolLines: NotRequired[list[FillSymbolLine]]
+    symbolArcs: NotRequired[list[FillSymbolArc]]
+    symbolHotspots: NotRequired[list[Coordinate2D]]
+
+
+class ZoneCategoryDataArrayItem(TypedDict):
+    """Data to create a Zone Category."""
+    attributeId: NotRequired[AttributeId]
+    index: NotRequired[str]
+    name: str
+    categoryCode: NotRequired[str]
+    color: NotRequired[ColorRGB]
+    stampName: NotRequired[str]
+    stampMainGuid: NotRequired[str]
+    stampRevGuid: NotRequired[str]
+
+
 class BuildingMaterialDataArrayItem(TypedDict):
     """Data to create a Building Material."""
     attributeId: NotRequired[AttributeId]
@@ -1871,11 +2381,29 @@ class BuildingMaterialDataArrayItem(TypedDict):
     heatCapacity: NotRequired[float]
     embodiedEnergy: NotRequired[float]
     embodiedCarbon: NotRequired[float]
+    showUncutLines: NotRequired[bool]
+    collisionDetection: NotRequired[bool]
+    cutFillOrientation: NotRequired[str]
 
 
 class Conflict(TypedDict):
     elementId: ElementId
     user: User
+
+
+class LayoutSetting(TypedDict):
+    layoutName: NotRequired[str]
+    horizontalSize: NotRequired[float]
+    verticalSize: NotRequired[float]
+    leftMargin: NotRequired[float]
+    topMargin: NotRequired[float]
+    rightMargin: NotRequired[float]
+    bottomMargin: NotRequired[float]
+    customLayoutNumber: NotRequired[str]
+    customLayoutNumbering: NotRequired[bool]
+    doNotIncludeInNumbering: NotRequired[bool]
+    displayMasterLayoutBelow: NotRequired[bool]
+    customData: NotRequired[list[LayoutCustomData]]
 
 
 class NavigatorItemIdsWithViewSetting(TypedDict):
@@ -1902,12 +2430,7 @@ class DesignOptionSet(TypedDict):
 
 class DesignOptionForElement(TypedDict):
     elementId: ElementId
-    type: Literal[
-        "NotExistingElement",
-        "MissingDesignOption",
-        "NotLinkedToAnyDesignOption",
-        "LinkedToDesignOption",
-    ]
+    type: DesignOptionLinkType
     designOption: NotRequired[DesignOptionDetails]
 
 
@@ -1926,6 +2449,23 @@ class DesignOptionAndSetPair(TypedDict):
     setName: str
 
 
+class MeshData(TypedDict):
+    """The parameters of the new Mesh."""
+    floorIndex: NotRequired[int]
+    level: NotRequired[float]
+    skirtType: NotRequired[MeshSkirtType]
+    skirtLevel: NotRequired[float]
+    ridges: NotRequired[MeshRidges]
+    showLines: NotRequired[bool]
+    contourPen: NotRequired[int]
+    levelPen: NotRequired[int]
+    lineTypeIndex: NotRequired[int]
+    polygonCoordinates: list[Coordinate3D]
+    polygonArcs: NotRequired[list[PolyArc]]
+    holes: NotRequired[Holes3D]
+    sublines: NotRequired[list[MeshSubline]]
+
+
 class ZoneData(TypedDict):
     """The parameters of the new Zone."""
     floorIndex: NotRequired[float]
@@ -1941,10 +2481,12 @@ class ZoneData(TypedDict):
 class WallData(TypedDict):
     begCoordinate: Coordinate2D
     endCoordinate: Coordinate2D
-    zCoordinate: float
+    floorIndex: NotRequired[int]
+    zCoordinate: NotRequired[float]
     height: float
     thickness: float
     offset: NotRequired[float]
+    arcAngle: NotRequired[float]
     referenceLineLocation: NotRequired[
         Literal["Outside", "Center", "Inside", "CoreOutside", "CoreCenter", "CoreInside"]
     ]
@@ -1959,6 +2501,8 @@ class LabelData(TypedDict):
     parentElementId: NotRequired[ElementId]
     text: NotRequired[str]
     begCoordinate: NotRequired[Coordinate2D]
+    midCoordinate: NotRequired[Coordinate2D]
+    endCoordinate: NotRequired[Coordinate2D]
     floorInd: NotRequired[float]
 
 
@@ -1986,14 +2530,9 @@ class DoorData(TypedDict):
     favoriteName: NotRequired[str]
 
 
-class MorphData(TypedDict):
-    basePoint: Coordinate3D
-    size: Dimensions3D
-    buildingMaterialId: NotRequired[AttributeId]
-
-
 class RoofData(TypedDict):
     level: float
+    floorIndex: NotRequired[int]
     thickness: NotRequired[float]
     polygonCoordinates: list[Coordinate2D]
     polygonArcs: NotRequired[list[PolyArc]]
@@ -2038,10 +2577,28 @@ class WallThicknessDimensionData(TypedDict):
     direction: Coordinate2D
 
 
+class LayoutSettingsData(TypedDict):
+    layoutDatabaseId: NotRequired[DatabaseId]
+    layoutNavigatorItemId: NotRequired[NavigatorItemId]
+    layoutName: NotRequired[str]
+    horizontalSize: NotRequired[float]
+    verticalSize: NotRequired[float]
+    leftMargin: NotRequired[float]
+    topMargin: NotRequired[float]
+    rightMargin: NotRequired[float]
+    bottomMargin: NotRequired[float]
+    customLayoutNumber: NotRequired[str]
+    customLayoutNumbering: NotRequired[bool]
+    doNotIncludeInNumbering: NotRequired[bool]
+    showMasterBelow: NotRequired[bool]
+    customData: NotRequired[list[LayoutCustomDataToSet]]
+
+
 class WallWithDetails(TypedDict):
     elementId: ElementId
     begCoordinate: NotRequired[Coordinate2D]
     endCoordinate: NotRequired[Coordinate2D]
+    arcAngle: NotRequired[float]
     height: NotRequired[float]
     thickness: NotRequired[float]
     bottomOffset: NotRequired[float]
@@ -2106,13 +2663,6 @@ class DoorWithDetails(TypedDict):
     oSide: NotRequired[bool]
 
 
-class MorphWithDetails(TypedDict):
-    elementId: ElementId
-    translation: NotRequired[Coordinate3D]
-    rotationDegreesZ: NotRequired[float]
-    buildingMaterialId: NotRequired[AttributeId]
-
-
 class RoofWithDetails(TypedDict):
     elementId: ElementId
     level: NotRequired[float]
@@ -2125,6 +2675,23 @@ class RoofWithDetails(TypedDict):
     polygonOutline: NotRequired[list[Coordinate2D]]
     polygonArcs: NotRequired[list[PolyArc]]
     holes: NotRequired[Holes2D]
+
+
+class MeshModificationData(TypedDict):
+    """The fields to modify on the Mesh. Only provided fields are changed; omitted fields are left as-is."""
+    floorIndex: NotRequired[int]
+    level: NotRequired[float]
+    skirtType: NotRequired[MeshSkirtType]
+    skirtLevel: NotRequired[float]
+    ridges: NotRequired[MeshRidges]
+    showLines: NotRequired[bool]
+    contourPen: NotRequired[int]
+    levelPen: NotRequired[int]
+    lineTypeIndex: NotRequired[int]
+    polygonCoordinates: NotRequired[list[Coordinate3D]]
+    polygonArcs: NotRequired[list[PolyArc]]
+    holes: NotRequired[Holes3D]
+    sublines: NotRequired[list[MeshSubline]]
 
 
 class CoordinateWitnessPoint(TypedDict):
@@ -2147,6 +2714,34 @@ class AssociativeWitnessPoint(TypedDict):
     nodeId: NotRequired[float]
 
 
+class FavoritesFromElementUpdate(TypedDict):
+    """The identifier of the element and the name of the existing Favorite to update from it."""
+    elementId: ElementId
+    favorite: str
+
+
+class SolidLinkReference(TypedDict):
+    targetId: ElementId
+    operatorId: ElementId
+
+
+class SolidLinksWithTheGivenTargetItem(TypedDict):
+    operatorId: ElementId
+    operation: SolidOperationType
+    linkFlags: SolidLinkFlags
+
+
+class SolidLinksWithTheGivenOperatorItem(TypedDict):
+    targetId: ElementId
+    operation: SolidOperationType
+    linkFlags: SolidLinkFlags
+
+
+class SolidLinksOfElement(TypedDict):
+    solidLinksWithTheGivenTarget: list[SolidLinksWithTheGivenTargetItem]
+    solidLinksWithTheGivenOperator: list[SolidLinksWithTheGivenOperatorItem]
+
+
 class DesignOptionCombinationDetails(TypedDict):
     designOptionCombinationId: GuidId
     name: str
@@ -2158,12 +2753,155 @@ class DesignOptionCombinationData(TypedDict):
     activeDesignOptions: list[DesignOptionIdArrayItem]
 
 
+class CoverFillOrientation(TypedDict):
+    """Orientation/distortion of the floor plan cover fill."""
+    type: NotRequired[CoverFillOrientationType]
+    origo: NotRequired[Coordinate2D]
+    matrix00: NotRequired[float]
+    matrix10: NotRequired[float]
+    matrix01: NotRequired[float]
+    matrix11: NotRequired[float]
+    innerRadius: NotRequired[float]
+
+
+class MorphPolygon(TypedDict):
+    vertexIds: list[int]
+    holes: NotRequired[list[MorphPolygonHole]]
+    surfaceId: NotRequired[AttributeId]
+
+
+class SolidLinkData(TypedDict):
+    targetId: ElementId
+    operatorId: ElementId
+    operation: SolidOperationType
+    linkFlags: NotRequired[SolidLinkFlags]
+
+
 class ElementIdArrayItem(TypedDict):
     elementId: ElementId
 
 
 class AttributeIdArrayItem(TypedDict):
     attributeId: AttributeId
+
+
+class LineAttribute(TypedDict):
+    """A line attribute."""
+    attributeId: AttributeId
+    index: int
+    name: str
+    scaleWithPlan: NotRequired[bool]
+    defineScale: NotRequired[float]
+    lineType: NotRequired[Literal["Solid", "Dashed", "Symbol"]]
+    period: NotRequired[float]
+    height: NotRequired[float]
+    dashItems: NotRequired[list[LineDashItem]]
+    lineItems: NotRequired[list[LineSymbolItem]]
+
+
+LineAttributeOrError: TypeAlias = LineAttribute | ErrorItem
+
+
+class FillAttribute(TypedDict):
+    """A fill attribute."""
+    attributeId: AttributeId
+    index: int
+    name: str
+    subType: NotRequired[FillSubType]
+    scaleWithPlan: NotRequired[bool]
+    useForWalls: NotRequired[bool]
+    useForDraft: NotRequired[bool]
+    useForCover: NotRequired[bool]
+    horizontalSpacing: NotRequired[float]
+    verticalSpacing: NotRequired[float]
+    angle: NotRequired[float]
+    bitPattern: NotRequired[str]
+    gradientStart: NotRequired[Coordinate2D]
+    gradientEnd: NotRequired[Coordinate2D]
+    percent: NotRequired[float]
+    texture: NotRequired[Texture]
+    lineItems: NotRequired[list[FillLineItem]]
+    symbolLines: NotRequired[list[FillSymbolLine]]
+    symbolArcs: NotRequired[list[FillSymbolArc]]
+    symbolHotspots: NotRequired[list[Coordinate2D]]
+
+
+FillAttributeOrError: TypeAlias = FillAttribute | ErrorItem
+
+
+class MEPSystemAttribute(TypedDict):
+    """An MEP system attribute."""
+    attributeId: AttributeId
+    index: int
+    name: str
+    domain: NotRequired[list[MEPSystemDomain]]
+    contourPen: NotRequired[int]
+    fillPen: NotRequired[int]
+    fillBackgroundPen: NotRequired[int]
+    centerLinePen: NotRequired[int]
+    fillId: NotRequired[AttributeIdArrayItem]
+    centerLineTypeId: NotRequired[AttributeIdArrayItem]
+
+
+MEPSystemAttributeOrError: TypeAlias = MEPSystemAttribute | ErrorItem
+
+
+class PenTableAttribute(TypedDict):
+    """A pen table attribute."""
+    attributeId: AttributeId
+    index: int
+    name: str
+    isActiveForModel: NotRequired[bool]
+    isActiveForLayout: NotRequired[bool]
+    pens: NotRequired[list[PenTablePen]]
+
+
+PenTableAttributeOrError: TypeAlias = PenTableAttribute | ErrorItem
+
+
+class ProfileEdge(TypedDict):
+    """One edge of a profile skin's outline."""
+    buildingMaterialId: NotRequired[AttributeIdArrayItem]
+    pen: NotRequired[int]
+    lineTypeId: NotRequired[AttributeIdArrayItem]
+    isVisibleLine: NotRequired[bool]
+    isCutEndLine: NotRequired[bool]
+    isInnerLine: NotRequired[bool]
+
+
+class CompositeSkin(TypedDict):
+    type: Literal["Core", "Finish", "Other"]
+    buildingMaterialId: NotRequired[AttributeIdArrayItem]
+    framePen: int
+    thickness: float
+
+
+class CompositeSeparator(TypedDict):
+    lineTypeId: NotRequired[AttributeIdArrayItem]
+    linePen: int
+
+
+class SurfaceAttribute(TypedDict):
+    """A surface attribute."""
+    attributeId: AttributeId
+    index: int
+    name: str
+    materialType: NotRequired[SurfaceType]
+    ambientReflection: NotRequired[float]
+    diffuseReflection: NotRequired[float]
+    specularReflection: NotRequired[float]
+    transparency: NotRequired[float]
+    shine: NotRequired[float]
+    transparencyAttenuation: NotRequired[float]
+    emissionAttenuation: NotRequired[float]
+    surfaceColor: NotRequired[ColorRGB]
+    specularColor: NotRequired[ColorRGB]
+    emissionColor: NotRequired[ColorRGB]
+    fillId: NotRequired[AttributeIdArrayItem]
+    texture: NotRequired[Texture]
+
+
+SurfaceAttributeOrError: TypeAlias = SurfaceAttribute | ErrorItem
 
 
 NavigatorItemIdOrDatabaseIdAndWindowType: TypeAlias = NavigatorItemIdArrayItem | DatabaseIdAndWindowType
@@ -2182,6 +2920,9 @@ NavigatorItemIds: TypeAlias = list[NavigatorItemIdArrayItem]
 """A list of navigator item identifiers."""
 
 
+NavigatorItemIdOrError: TypeAlias = NavigatorItemIdArrayItem | ErrorItem
+
+
 Databases: TypeAlias = list[DatabaseIdArrayItem]
 """A list of Archicad databases."""
 
@@ -2192,6 +2933,53 @@ class CurtainWallPanelDetails(TypedDict):
     segmentIndex: float
     className: str
     frames: list[ElementIdArrayItem]
+
+
+class MorphBody(TypedDict):
+    """A Morph's full body geometry: an indexed vertex list plus one entry per face (polygon). Shared shape between GetDetailsOfElements' output and CreateMorphs/ModifyMorphs' input - what Get reports is what Create/Modify accept back. There is no fillet/chamfer operation in the Archicad API - a caller wanting rounded geometry must supply the already-tessellated facets here; edgeOverrides only controls how an existing straight edge is DISPLAYED (hidden/visible/smooth-shaded), not its shape."""
+    bodyType: NotRequired[Literal["Solid", "Surface"]]
+    isClosed: NotRequired[bool]
+    edgeDefault: NotRequired[Literal["HardVisible", "HardHidden", "SoftHidden"]]
+    vertices: list[Coordinate3D]
+    polygons: list[MorphPolygon]
+    edgeOverrides: NotRequired[list[EdgeOverride]]
+
+
+class MorphDetails(TypedDict):
+    origin: Coordinate3D
+    xAxis: NotRequired[Coordinate3D]
+    yAxis: NotRequired[Coordinate3D]
+    zAxis: NotRequired[Coordinate3D]
+    buildingMaterialId: NotRequired[AttributeId]
+    surfaceId: NotRequired[AttributeId]
+    body: MorphBody
+    castShadow: NotRequired[bool]
+    receiveShadow: NotRequired[bool]
+    isAutoOnStoryVisibility: NotRequired[bool]
+    showContour: NotRequired[StoryVisibility]
+    showFill: NotRequired[StoryVisibility]
+    linkToSettings: NotRequired[LinkToSettings]
+    displayOption: NotRequired[DisplayOption]
+    viewDepthLimitation: NotRequired[ViewDepthLimitation]
+    cutFillPen: NotRequired[int]
+    cutFillBackgroundPen: NotRequired[int]
+    cutLineType: NotRequired[AttributeId]
+    cutLinePen: NotRequired[int]
+    uncutLineType: NotRequired[AttributeId]
+    uncutLinePen: NotRequired[int]
+    overheadLineType: NotRequired[AttributeId]
+    overheadLinePen: NotRequired[int]
+    useCoverFillType: NotRequired[bool]
+    outlineContourDisplay: NotRequired[bool]
+    coverFillType: NotRequired[AttributeId]
+    coverFillPen: NotRequired[int]
+    coverFillBGPen: NotRequired[int]
+    use3DHatching: NotRequired[bool]
+    coverFillOrientation: NotRequired[CoverFillOrientation]
+    useDistortedCoverFill: NotRequired[bool]
+    textureProjectionType: NotRequired[TextureProjectionType]
+    textureProjectionCoords: NotRequired[list[Coordinate3D]]
+    level: NotRequired[float]
 
 
 TypeSpecificDetails: TypeAlias = (
@@ -2209,6 +2997,9 @@ TypeSpecificDetails: TypeAlias = (
     | CurtainWallPanelDetails
     | CurtainWallFrameDetails
     | MeshDetails
+    | MorphDetails
+    | DrawingDetails
+    | LabelDetails
     | NotYetSupportedElementTypeDetails
 )
 
@@ -2253,6 +3044,23 @@ class DetailsOfElement(TypedDict):
     layerIndex: float
     drawIndex: float
     details: TypeSpecificDetails
+    floorPlanPolygons: NotRequired[list[FloorPlanPolygon]]
+
+
+class AttributesToDeleteItem(TypedDict):
+    attributeType: AttributeType
+    attributeId: AttributeIdArrayItem
+
+
+class PenTableDataArrayItem(TypedDict):
+    """Data to create a Pen Table."""
+    attributeId: NotRequired[AttributeId]
+    index: NotRequired[str]
+    name: str
+    isActiveForModel: NotRequired[bool]
+    isActiveForLayout: NotRequired[bool]
+    sourceAttributeId: NotRequired[AttributeIdArrayItem]
+    pens: NotRequired[list[PenData]]
 
 
 class Skin(TypedDict):
@@ -2284,19 +3092,58 @@ class SurfaceDataArrayItem(TypedDict):
     attributeId: NotRequired[AttributeId]
     index: NotRequired[str]
     name: str
-    materialType: SurfaceType
-    ambientReflection: float
-    diffuseReflection: float
-    specularReflection: float
-    transparency: float
-    shine: float
-    transparencyAttenuation: float
-    emissionAttenuation: float
-    surfaceColor: ColorRGB
-    specularColor: ColorRGB
-    emissionColor: ColorRGB
+    materialType: NotRequired[SurfaceType]
+    ambientReflection: NotRequired[float]
+    diffuseReflection: NotRequired[float]
+    specularReflection: NotRequired[float]
+    transparency: NotRequired[float]
+    shine: NotRequired[float]
+    transparencyAttenuation: NotRequired[float]
+    emissionAttenuation: NotRequired[float]
+    surfaceColor: NotRequired[ColorRGB]
+    specularColor: NotRequired[ColorRGB]
+    emissionColor: NotRequired[ColorRGB]
     fillId: NotRequired[AttributeIdArrayItem]
     texture: NotRequired[Texture]
+
+
+class MorphData(TypedDict):
+    basePoint: Coordinate3D
+    size: NotRequired[Dimensions3D]
+    body: NotRequired[MorphBody]
+    buildingMaterialId: NotRequired[AttributeId]
+    xAxis: NotRequired[Coordinate3D]
+    yAxis: NotRequired[Coordinate3D]
+    zAxis: NotRequired[Coordinate3D]
+    surfaceId: NotRequired[AttributeId]
+    castShadow: NotRequired[bool]
+    receiveShadow: NotRequired[bool]
+    isAutoOnStoryVisibility: NotRequired[bool]
+    showContour: NotRequired[StoryVisibility]
+    showFill: NotRequired[StoryVisibility]
+    linkToSettings: NotRequired[LinkToSettings]
+    displayOption: NotRequired[DisplayOption]
+    viewDepthLimitation: NotRequired[ViewDepthLimitation]
+    cutFillPen: NotRequired[int]
+    cutFillBackgroundPen: NotRequired[int]
+    cutLineType: NotRequired[AttributeId]
+    cutLinePen: NotRequired[int]
+    uncutLineType: NotRequired[AttributeId]
+    uncutLinePen: NotRequired[int]
+    overheadLineType: NotRequired[AttributeId]
+    overheadLinePen: NotRequired[int]
+    useCoverFillType: NotRequired[bool]
+    outlineContourDisplay: NotRequired[bool]
+    coverFillType: NotRequired[AttributeId]
+    coverFillPen: NotRequired[int]
+    coverFillBGPen: NotRequired[int]
+    use3DHatching: NotRequired[bool]
+    coverFillOrientation: NotRequired[CoverFillOrientation]
+    useDistortedCoverFill: NotRequired[bool]
+    textureProjectionType: NotRequired[TextureProjectionType]
+    textureProjectionCoords: NotRequired[list[Coordinate3D]]
+    level: NotRequired[float]
+    floorIndex: NotRequired[int]
 
 
 class AssociativeDimensionData(TypedDict):
@@ -2306,12 +3153,110 @@ class AssociativeDimensionData(TypedDict):
     witnessPoints: list[AssociativeWitnessPoint]
 
 
+class MEPSystemDataArrayItem(TypedDict):
+    """Data to create an MEP System."""
+    attributeId: NotRequired[AttributeId]
+    index: NotRequired[str]
+    name: str
+    domain: NotRequired[str]
+    contourPen: NotRequired[int]
+    fillPen: NotRequired[int]
+    fillBackgroundPen: NotRequired[int]
+    centerLinePen: NotRequired[int]
+    fillId: NotRequired[AttributeIdArrayItem]
+    centerLineTypeId: NotRequired[AttributeIdArrayItem]
+
+
+class MorphWithDetails(TypedDict):
+    elementId: ElementId
+    translation: NotRequired[Coordinate3D]
+    rotationDegreesZ: NotRequired[float]
+    buildingMaterialId: NotRequired[AttributeId]
+    body: NotRequired[MorphBody]
+    xAxis: NotRequired[Coordinate3D]
+    yAxis: NotRequired[Coordinate3D]
+    zAxis: NotRequired[Coordinate3D]
+    surfaceId: NotRequired[AttributeId]
+    castShadow: NotRequired[bool]
+    receiveShadow: NotRequired[bool]
+    isAutoOnStoryVisibility: NotRequired[bool]
+    showContour: NotRequired[StoryVisibility]
+    showFill: NotRequired[StoryVisibility]
+    linkToSettings: NotRequired[LinkToSettings]
+    displayOption: NotRequired[DisplayOption]
+    viewDepthLimitation: NotRequired[ViewDepthLimitation]
+    cutFillPen: NotRequired[int]
+    cutFillBackgroundPen: NotRequired[int]
+    cutLineType: NotRequired[AttributeId]
+    cutLinePen: NotRequired[int]
+    uncutLineType: NotRequired[AttributeId]
+    uncutLinePen: NotRequired[int]
+    overheadLineType: NotRequired[AttributeId]
+    overheadLinePen: NotRequired[int]
+    useCoverFillType: NotRequired[bool]
+    outlineContourDisplay: NotRequired[bool]
+    coverFillType: NotRequired[AttributeId]
+    coverFillPen: NotRequired[int]
+    coverFillBGPen: NotRequired[int]
+    use3DHatching: NotRequired[bool]
+    coverFillOrientation: NotRequired[CoverFillOrientation]
+    useDistortedCoverFill: NotRequired[bool]
+    textureProjectionType: NotRequired[TextureProjectionType]
+    textureProjectionCoords: NotRequired[list[Coordinate3D]]
+    level: NotRequired[float]
+
+
+class MeshWithDetails(TypedDict):
+    elementId: ElementId
+    meshData: MeshModificationData
+
+
+class ProfileEdgeOverride(TypedDict):
+    edgeIndex: int
+    pen: NotRequired[int]
+    isVisibleLine: NotRequired[bool]
+    lineTypeId: NotRequired[AttributeIdArrayItem]
+    buildingMaterialId: NotRequired[AttributeIdArrayItem]
+
+
 Elements: TypeAlias = list[ElementIdArrayItem]
 """A list of elements."""
 
 
 AttributeIds: TypeAlias = list[AttributeIdArrayItem]
 """A list of attributes."""
+
+
+class ProfileSkin(TypedDict):
+    """One skin (hatch) of the profile's cross-section."""
+    skinId: NotRequired[str]
+    buildingMaterialId: NotRequired[AttributeIdArrayItem]
+    surfaceId: NotRequired[AttributeIdArrayItem]
+    fillId: NotRequired[AttributeIdArrayItem]
+    contourPen: NotRequired[int]
+    contourLineTypeId: NotRequired[AttributeIdArrayItem]
+    isCore: NotRequired[bool]
+    isFinish: NotRequired[bool]
+    visibleCutEndLines: NotRequired[bool]
+    cutEndLinePen: NotRequired[int]
+    cutEndLineTypeId: NotRequired[AttributeIdArrayItem]
+    edges: NotRequired[list[ProfileEdge]]
+    outlineCoords: NotRequired[list[Coordinate2D]]
+    outlineSubPolyEnds: NotRequired[list[int]]
+    outlineArcs: NotRequired[list[OutlineArc]]
+
+
+class CompositeAttribute(TypedDict):
+    """A composite attribute."""
+    attributeId: AttributeId
+    index: int
+    name: str
+    useWith: NotRequired[list[str]]
+    skins: NotRequired[list[CompositeSkin]]
+    separators: NotRequired[list[CompositeSeparator]]
+
+
+CompositeAttributeOrError: TypeAlias = CompositeAttribute | ErrorItem
 
 
 class ElementsWithExecutionResults(TypedDict):
@@ -2372,6 +3317,78 @@ class Subelement(TypedDict):
     railingBalusters: NotRequired[Elements]
     beamSegments: NotRequired[Elements]
     columnSegments: NotRequired[Elements]
+
+
+class SkinOverride(TypedDict):
+    skinId: str
+    buildingMaterialId: NotRequired[AttributeIdArrayItem]
+    surfaceId: NotRequired[AttributeIdArrayItem]
+    fillId: NotRequired[AttributeIdArrayItem]
+    contourPen: NotRequired[int]
+    contourLineTypeId: NotRequired[AttributeIdArrayItem]
+    isCore: NotRequired[bool]
+    isFinish: NotRequired[bool]
+    visibleCutEndLines: NotRequired[bool]
+    cutEndLinePen: NotRequired[int]
+    cutEndLineTypeId: NotRequired[AttributeIdArrayItem]
+    edgeOverrides: NotRequired[list[ProfileEdgeOverride]]
+
+
+class ProfileSkinData(TypedDict):
+    """One new skin (hatch). Its shape is one or more closed polygon contours: the first is the outer boundary, any further ones are holes cut out of it - the same polygon+holes convention as e.g. CreateSlabs' polygonCoordinates/polygonArcs/holes, just expressed as a list of contours instead of a separate holes array."""
+    contours: list[ProfileSkinContour]
+    buildingMaterialId: NotRequired[AttributeIdArrayItem]
+    surfaceId: NotRequired[AttributeIdArrayItem]
+    fillId: NotRequired[AttributeIdArrayItem]
+    contourPen: NotRequired[int]
+    contourLineTypeId: NotRequired[AttributeIdArrayItem]
+    isCore: NotRequired[bool]
+    isFinish: NotRequired[bool]
+    visibleCutEndLines: NotRequired[bool]
+    cutEndLinePen: NotRequired[int]
+    cutEndLineTypeId: NotRequired[AttributeIdArrayItem]
+    edgeOverrides: NotRequired[list[ProfileEdgeOverride]]
+
+
+class ProfileAttribute(TypedDict):
+    """A profile attribute."""
+    attributeId: AttributeId
+    index: int
+    name: str
+    wallType: NotRequired[bool]
+    beamType: NotRequired[bool]
+    coluType: NotRequired[bool]
+    handrailType: NotRequired[bool]
+    otherGDLObjectType: NotRequired[bool]
+    useWith: NotRequired[list[ProfileUseWith]]
+    width: NotRequired[float]
+    height: NotRequired[float]
+    minimumWidth: NotRequired[float]
+    minimumHeight: NotRequired[float]
+    widthStretchable: NotRequired[bool]
+    heightStretchable: NotRequired[bool]
+    hasCoreSkin: NotRequired[bool]
+    profileModifiers: NotRequired[list[ProfileModifier]]
+    skins: NotRequired[list[ProfileSkin]]
+
+
+ProfileAttributeOrError: TypeAlias = ProfileAttribute | ErrorItem
+
+
+class ProfileDataArrayItem(TypedDict):
+    """Data to create or modify a Profile. Its geometry (the cross-section shape) comes from sourceAttributeId (an existing Profile's geometry, copied), from newSkins (AC27+ only, caller-supplied polygon geometry), or both combined. When creating a brand-new Profile (overwriteExisting false, or true but no existing match), at least one of the two must be given. When overwriteExisting targets an existing Profile, both are optional - the existing Profile's own current geometry is preserved by default (e.g. to change only wallType, or to add newSkins on top of the unchanged existing shape). skinOverrides and newSkins' edgeOverrides target skins/edges by the identifiers/indices GetProfiles reports."""
+    attributeId: NotRequired[AttributeId]
+    index: NotRequired[str]
+    name: str
+    sourceAttributeId: NotRequired[AttributeIdArrayItem]
+    wallType: NotRequired[bool]
+    beamType: NotRequired[bool]
+    coluType: NotRequired[bool]
+    handrailType: NotRequired[bool]
+    otherGDLObjectType: NotRequired[bool]
+    skinOverrides: NotRequired[list[SkinOverride]]
+    newSkins: NotRequired[list[ProfileSkinData]]
+    replaceSkins: NotRequired[bool]
 
 
 class Hotlink(TypedDict):

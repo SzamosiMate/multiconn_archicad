@@ -18,6 +18,12 @@
         "version": "1.1.2"
     },
     {
+        "name": "ApplyFavoritesToElements",
+        "group": "Favorites Commands",
+        "description": "Apply the given favorites to existing elements. Only settings-type parameters are changed - geometry (position, floor, and dimensions such as a Wall's height) is left untouched, so applying a Favorite never moves or resizes the target element. By default settings, classifications, categories and properties are all applied; each can be opted out of individually.",
+        "version": "1.5.4"
+    },
+    {
         "name": "AttachElementsToIssue",
         "group": "Issue Management Commands",
         "description": "Attaches elements to the specified issue.",
@@ -34,6 +40,12 @@
         "group": "Application Commands",
         "description": "Changes the current (active) window to the given window.",
         "version": "1.3.1"
+    },
+    {
+        "name": "CloneProjectMapItemToViewMap",
+        "group": "Navigator Commands",
+        "description": "Clones Project Map viewpoints into the View Map, optionally into a specified folder.",
+        "version": "1.1.7"
     },
     {
         "name": "CloseProject",
@@ -132,6 +144,12 @@
         "version": "1.1.2"
     },
     {
+        "name": "CreateFills",
+        "group": "Attribute Commands",
+        "description": "Creates or overwrites Fill attributes based on the given parameters.",
+        "version": "1.5.4"
+    },
+    {
         "name": "CreateGroups",
         "group": "Element grouping Commands",
         "description": "Creates groups of the passed elements",
@@ -168,10 +186,28 @@
         "version": "1.0.3"
     },
     {
-        "name": "CreateLayouts",
+        "name": "CreateLayout",
         "group": "Navigator Commands",
         "description": "Creates Layouts and their backing master layouts.",
         "version": "1.4.0"
+    },
+    {
+        "name": "CreateLayoutSubset",
+        "group": "Navigator Commands",
+        "description": "Creates Layout Book subsets.",
+        "version": "1.4.0"
+    },
+    {
+        "name": "CreateLines",
+        "group": "Attribute Commands",
+        "description": "Creates or overwrites Line attributes based on the given parameters.",
+        "version": "1.5.4"
+    },
+    {
+        "name": "CreateMEPSystems",
+        "group": "Attribute Commands",
+        "description": "Creates or overwrites MEP System attributes based on the given parameters.",
+        "version": "1.5.4"
     },
     {
         "name": "CreateMeshes",
@@ -198,10 +234,22 @@
         "version": "1.4.0"
     },
     {
+        "name": "CreatePenTables",
+        "group": "Attribute Commands",
+        "description": "Creates or overwrites Pen Table attributes based on the given parameters.",
+        "version": "1.5.4"
+    },
+    {
         "name": "CreatePolylines",
         "group": "Element Commands",
         "description": "Creates Polyline elements based on the given parameters.",
         "version": "1.1.5"
+    },
+    {
+        "name": "CreateProfiles",
+        "group": "Attribute Commands",
+        "description": "Creates or overwrites Profile attributes as a copy of an existing Profile's geometry, based on the given parameters.",
+        "version": "1.5.4"
     },
     {
         "name": "CreateProjectInfoFields",
@@ -240,16 +288,16 @@
         "version": "1.0.3"
     },
     {
+        "name": "CreateSolidElementLinks",
+        "group": "Solid Element Operation Commands",
+        "description": "Creates solid element operation links between target and operator elements.",
+        "version": "1.5.4"
+    },
+    {
         "name": "CreateStairs",
         "group": "Element Commands",
         "description": "Creates Stair elements based on the given baseline and parameters.",
         "version": "1.5.0"
-    },
-    {
-        "name": "CreateSubsets",
-        "group": "Navigator Commands",
-        "description": "Creates Layout Book subsets.",
-        "version": "1.4.0"
     },
     {
         "name": "CreateSurfaces",
@@ -262,6 +310,18 @@
         "group": "Element Commands",
         "description": "Creates standalone Text elements based on the given parameters.",
         "version": "1.5.0"
+    },
+    {
+        "name": "CreateViewMapFolder",
+        "group": "Navigator Commands",
+        "description": "Creates a new folder in the View Map.",
+        "version": "1.1.7"
+    },
+    {
+        "name": "CreateViewsInViewMap",
+        "group": "Navigator Commands",
+        "description": "Creates independent (non-clone) navigator views in the View Map by copying database and settings from source items.",
+        "version": "1.1.7"
     },
     {
         "name": "CreateWallThicknessDimensions",
@@ -288,10 +348,22 @@
         "version": "1.4.0"
     },
     {
+        "name": "CreateZoneCategories",
+        "group": "Attribute Commands",
+        "description": "Creates or overwrites Zone Category attributes based on the given parameters.",
+        "version": "1.5.4"
+    },
+    {
         "name": "CreateZones",
         "group": "Element Commands",
         "description": "Creates Zone elements based on the given parameters.",
         "version": "1.1.8"
+    },
+    {
+        "name": "DeleteAttributes",
+        "group": "Attribute Commands",
+        "description": "Deletes the given attributes.",
+        "version": "1.5.4"
     },
     {
         "name": "DeleteClassificationItems",
@@ -312,10 +384,28 @@
         "version": "1.2.1"
     },
     {
+        "name": "DeleteFavorites",
+        "group": "Favorites Commands",
+        "description": "Delete existing favorites.",
+        "version": "1.5.4"
+    },
+    {
         "name": "DeleteIssue",
         "group": "Issue Management Commands",
         "description": "Deletes the specified issue.",
         "version": "1.0.2"
+    },
+    {
+        "name": "DeleteNavigatorItems",
+        "group": "Navigator Commands",
+        "description": "Deletes navigator items from the navigator tree.",
+        "version": "1.1.7"
+    },
+    {
+        "name": "DeleteProjectInfoFields",
+        "group": "Project Commands",
+        "description": "Deletes one or more custom project info fields. Hardcoded fields cannot be deleted.",
+        "version": "1.5.4"
     },
     {
         "name": "DeletePropertyDefinitions",
@@ -414,6 +504,12 @@
         "version": "0.1.3"
     },
     {
+        "name": "GetBuildingMaterials",
+        "group": "Attribute Commands",
+        "description": "Returns the details of the given Building Material attributes.",
+        "version": "1.5.4"
+    },
+    {
         "name": "GetCalculationUnits",
         "group": "Project Commands",
         "description": "Gets the project calculation units.",
@@ -436,6 +532,12 @@
         "group": "Issue Management Commands",
         "description": "Retrieves comments information from the specified issue.",
         "version": "1.0.6"
+    },
+    {
+        "name": "GetComposites",
+        "group": "Attribute Commands",
+        "description": "Returns the details of the given Composite attributes.",
+        "version": "1.5.4"
     },
     {
         "name": "GetConnectedElements",
@@ -546,6 +648,12 @@
         "version": "1.2.2"
     },
     {
+        "name": "GetFills",
+        "group": "Attribute Commands",
+        "description": "Returns the details of the given Fill attributes.",
+        "version": "1.5.4"
+    },
+    {
         "name": "GetGDLParametersOfElements",
         "group": "Element Commands",
         "description": "Gets all the GDL parameters (name, type, value) of the given elements.",
@@ -594,16 +702,64 @@
         "version": "1.2.4"
     },
     {
+        "name": "GetLayers",
+        "group": "Attribute Commands",
+        "description": "Returns the details of the given Layer attributes.",
+        "version": "1.5.4"
+    },
+    {
+        "name": "GetLayoutCustomScheme",
+        "group": "Navigator Commands",
+        "description": "Gets the Layout Info Panel custom field definitions (name and key) from Book Settings.",
+        "version": "1.1.7"
+    },
+    {
+        "name": "GetLayoutSettings",
+        "group": "Navigator Commands",
+        "description": "Gets settings of layouts, including Layout Info Panel custom data fields.",
+        "version": "1.1.7"
+    },
+    {
         "name": "GetLibraries",
         "group": "Library Commands",
         "description": "Gets the list of loaded libraries.",
         "version": "1.0.1"
     },
     {
+        "name": "GetLines",
+        "group": "Attribute Commands",
+        "description": "Returns the details of the given Line attributes.",
+        "version": "1.5.4"
+    },
+    {
+        "name": "GetMEPSystems",
+        "group": "Attribute Commands",
+        "description": "Returns the details of the given MEP System attributes.",
+        "version": "1.5.4"
+    },
+    {
         "name": "GetModelViewOptions",
         "group": "Navigator Commands",
         "description": "Gets all model view options",
         "version": "1.1.4"
+    },
+    {
+        "name": "GetNavigatorItemTree",
+        "group": "Navigator Commands",
+        "description": "Returns the full navigator item tree for the specified map.",
+        "version": "1.1.7"
+    },
+    {
+        "name": "GetPenTables",
+        "group": "Attribute Commands",
+        "description": "Returns the details of the given Pen Table attributes.",
+        "version": "1.5.4"
+    },
+    {
+        "name": "GetProfiles",
+        "group": "Attribute Commands",
+        "description": "Returns the details of the given Profile attributes.",
+        "version": "1.5.4"
     },
     {
         "name": "GetProjectInfo",
@@ -654,10 +810,22 @@
         "version": "1.2.7"
     },
     {
+        "name": "GetScriptUIResult",
+        "group": "Script UI Commands",
+        "description": "Retrieves and clears the result last submitted from the Script UI palette's page (via window.ACAPI.SubmitResult), if any.",
+        "version": "1.5.4"
+    },
+    {
         "name": "GetSelectedElements",
         "group": "Element Commands",
         "description": "Gets the list of the currently selected elements.",
         "version": "0.1.0"
+    },
+    {
+        "name": "GetSolidElementLinks",
+        "group": "Solid Element Operation Commands",
+        "description": "Returns solid element operation links for each queried element, grouped by role (target or operator).",
+        "version": "1.5.4"
     },
     {
         "name": "GetStories",
@@ -670,6 +838,12 @@
         "group": "Element Commands",
         "description": "Gets the subelements of the given hierarchical elements.",
         "version": "1.0.6"
+    },
+    {
+        "name": "GetSurfaces",
+        "group": "Attribute Commands",
+        "description": "Returns the details of the given Surface attributes.",
+        "version": "1.5.4"
     },
     {
         "name": "GetView2DTransformations",
@@ -688,6 +862,12 @@
         "group": "Element Commands",
         "description": "Gets the boundaries of the given Zone (connected elements, neighbour zones, etc.).",
         "version": "1.2.3"
+    },
+    {
+        "name": "GetZoneCategories",
+        "group": "Attribute Commands",
+        "description": "Returns the details of the given Zone Category attributes.",
+        "version": "1.5.4"
     },
     {
         "name": "HighlightElements",
@@ -738,6 +918,12 @@
         "version": "1.4.0"
     },
     {
+        "name": "ModifyMeshes",
+        "group": "Element Commands",
+        "description": "Modifies the attributes of Mesh elements based on the given parameters.",
+        "version": "1.5.4"
+    },
+    {
         "name": "ModifyMorphs",
         "group": "Element Commands",
         "description": "Modifies Morph elements based on the given parameters.",
@@ -786,6 +972,12 @@
         "version": "1.5.1"
     },
     {
+        "name": "MoveNavigatorItem",
+        "group": "Navigator Commands",
+        "description": "Moves a navigator item to a new parent in the navigator tree.",
+        "version": "1.1.7"
+    },
+    {
         "name": "OpenProject",
         "group": "Project Commands",
         "description": "Opens the given project.",
@@ -832,6 +1024,24 @@
         "group": "Element Commands",
         "description": "Removes an element notification client.",
         "version": "1.2.8"
+    },
+    {
+        "name": "RemoveSolidElementLinks",
+        "group": "Solid Element Operation Commands",
+        "description": "Removes solid element operation links between target and operator elements.",
+        "version": "1.5.4"
+    },
+    {
+        "name": "RenameFavorites",
+        "group": "Favorites Commands",
+        "description": "Rename existing favorites.",
+        "version": "1.5.4"
+    },
+    {
+        "name": "RenameNavigatorItem",
+        "group": "Navigator Commands",
+        "description": "Renames a navigator item or changes its ID.",
+        "version": "1.1.7"
     },
     {
         "name": "ReserveElements",
@@ -894,6 +1104,12 @@
         "version": "1.2.9"
     },
     {
+        "name": "SetLayoutSettings",
+        "group": "Navigator Commands",
+        "description": "Sets settings of layouts, including Layout Info Panel custom data fields.",
+        "version": "1.1.7"
+    },
+    {
         "name": "SetProjectInfoField",
         "group": "Project Commands",
         "description": "Sets the value of a project info field.",
@@ -918,10 +1134,22 @@
         "version": "1.1.5"
     },
     {
+        "name": "SetViewRotation",
+        "group": "Navigator Commands",
+        "description": "Set the rotation angle of 2D views via their floor plan database.",
+        "version": "1.1.7"
+    },
+    {
         "name": "SetViewSettings",
         "group": "Navigator Commands",
         "description": "Sets the view settings of navigator items",
         "version": "1.1.4"
+    },
+    {
+        "name": "ShowScriptUI",
+        "group": "Script UI Commands",
+        "description": "Shows the given HTML content in a native Archicad palette (a tkinter alternative for Python scripts).",
+        "version": "1.5.4"
     },
     {
         "name": "TeamworkReceive",
@@ -946,5 +1174,23 @@
         "group": "Navigator Commands",
         "description": "Performs a drawing update on the given elements.",
         "version": "1.1.4"
+    },
+    {
+        "name": "UpdateFavoritesFromElements",
+        "group": "Favorites Commands",
+        "description": "Update existing favorites from the given elements.",
+        "version": "1.5.4"
+    },
+    {
+        "name": "UpdatePropertyDefinitions",
+        "group": "Property Commands",
+        "description": "Updates the expression(s) of existing expression-based Custom Property Definitions.",
+        "version": "1.5.4"
+    },
+    {
+        "name": "UpdateZones",
+        "group": "Element Commands",
+        "description": "Updates all Zones (recalculates their geometry, updates their Zone Stamps and the connected elements).",
+        "version": "1.5.4"
     }
 ]

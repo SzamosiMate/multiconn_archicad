@@ -55,6 +55,8 @@ from multiconn_archicad.models.tapir.commands import (
     SetGDLParametersOfElementsResult,
     UnlockElementsParameters,
     UnlockElementsResult,
+    UpdateZonesParameters,
+    UpdateZonesResult,
 )
 from multiconn_archicad.models.tapir.types import (
     BoundingBox3DArrayItem,
@@ -843,4 +845,42 @@ class ElementCommands:
             "UnlockElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = TypeAdapter(UnlockElementsResult).validate_python(response_dict)
+        return validated_response
+
+    def update_zones(
+        self,
+        keep_stamp_position: None | bool = None,
+        undo_top_trim: None | bool = None,
+        undo_bottom_trim: None | bool = None,
+    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+        """
+        Updates all Zones (recalculates their geometry, updates their Zone Stamps and the
+        connected elements).
+
+        Args:
+            keep_stamp_position (None | bool): Keep the position of the Zone Stamps. The default
+                is true.
+            undo_top_trim (None | bool): Undo the trimming of the top of the Zones. The default
+                is false.
+            undo_bottom_trim (None | bool): Undo the trimming of the bottom of the Zones. The
+                default is false.
+
+        Returns:
+            FailedExecutionResult | SuccessfulExecutionResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "keepStampPosition": keep_stamp_position,
+            "undoTopTrim": undo_top_trim,
+            "undoBottomTrim": undo_bottom_trim,
+        }
+        validated_params = UpdateZonesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "UpdateZones", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = TypeAdapter(UpdateZonesResult).validate_python(response_dict)
         return validated_response

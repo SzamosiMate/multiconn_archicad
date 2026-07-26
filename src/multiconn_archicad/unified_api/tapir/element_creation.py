@@ -62,8 +62,8 @@ from multiconn_archicad.models.tapir.types import (
     OpeningData,
     PolylineData,
     RoofData,
-    SectionData,
     SlabData,
+    StairData,
     TextData,
     WallData,
     WallThicknessDimensionData,
@@ -435,12 +435,12 @@ class ElementCreationCommands:
         validated_response = CreateSlabsResult.model_validate(response_dict)
         return validated_response.elements
 
-    def create_stairs(self, stairs_data: list[SectionData]) -> list[ElementIdArrayItem]:
+    def create_stairs(self, stairs_data: list[StairData]) -> list[ElementIdArrayItem]:
         """
         Creates Stair elements based on the given baseline and parameters.
 
         Args:
-            stairs_data (list[SectionData]): Array of data to create Stair elements.
+            stairs_data (list[StairData]): Array of data to create Stair elements.
 
         Returns:
             list[ElementIdArrayItem]: A list of elements.
