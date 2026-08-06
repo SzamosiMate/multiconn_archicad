@@ -2111,14 +2111,14 @@
         "description": "Creates or overwrites MEP System attributes based on the given parameters.",
         "version": "1.5.4",
         "source": "tapir",
-        "method_code": "def create_mep_systems(\n    self,\n    mep_system_data_array: list[MEPSystemDataArrayItem],\n    overwrite_existing: None | bool = None\n) -> list[AttributeIdArrayItem]:\n    \"\"\"\n    Creates or overwrites MEP System attributes based on the given parameters.\n\n    Args:\n        mep_system_data_array (list[MEPSystemDataArrayItem]): Array of data to create new\n            MEP Systems.\n        overwrite_existing (None | bool): Overwrite the MEP System if exists with the same\n            name, or if index is given with the same index. The default is false.\n\n    Returns:\n        list[AttributeIdArrayItem]: A list of attributes.\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    params_dict = {\n            'mepSystemDataArray': mep_system_data_array,\n            'overwriteExisting': overwrite_existing,\n        }\n    validated_params = CreateMEPSystemsParameters(**params_dict)\n    response_dict = self._core.post_tapir_command(\n        \"CreateMEPSystems\",\n        validated_params.model_dump(mode='json', by_alias=True, exclude_none=True)\n    )\n    validated_response = CreateMEPSystemsResult.model_validate(response_dict)\n    return validated_response.attributeIds",
+        "method_code": "def create_mep_systems(\n    self,\n    mep_system_data_array: list[MEPSystemData],\n    overwrite_existing: None | bool = None\n) -> list[AttributeIdArrayItem]:\n    \"\"\"\n    Creates or overwrites MEP System attributes based on the given parameters.\n\n    Args:\n        mep_system_data_array (list[MEPSystemData]): Array of data to create new MEP\n            Systems.\n        overwrite_existing (None | bool): Overwrite the MEP System if exists with the same\n            name, or if index is given with the same index. The default is false.\n\n    Returns:\n        list[AttributeIdArrayItem]: A list of attributes.\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    params_dict = {\n            'mepSystemDataArray': mep_system_data_array,\n            'overwriteExisting': overwrite_existing,\n        }\n    validated_params = CreateMEPSystemsParameters(**params_dict)\n    response_dict = self._core.post_tapir_command(\n        \"CreateMEPSystems\",\n        validated_params.model_dump(mode='json', by_alias=True, exclude_none=True)\n    )\n    validated_response = CreateMEPSystemsResult.model_validate(response_dict)\n    return validated_response.attributeIds",
         "command_model_dependencies": [
           "CreateMEPSystemsParameters",
           "CreateMEPSystemsResult"
         ],
         "type_model_dependencies": [
           "AttributeIdArrayItem",
-          "MEPSystemDataArrayItem"
+          "MEPSystemData"
         ],
         "alias_property_name": "attributeIds"
       },

@@ -84,7 +84,7 @@ from multiconn_archicad.models.tapir.types import (
     LineDataArrayItem,
     MEPSystemAttribute,
     MEPSystemAttributeField,
-    MEPSystemDataArrayItem,
+    MEPSystemData,
     PenTableAttribute,
     PenTableAttributeField,
     PenTableDataArrayItem,
@@ -292,14 +292,14 @@ class AttributeCommands:
         return validated_response.attributeIds
 
     def create_mep_systems(
-        self, mep_system_data_array: list[MEPSystemDataArrayItem], overwrite_existing: None | bool = None
+        self, mep_system_data_array: list[MEPSystemData], overwrite_existing: None | bool = None
     ) -> list[AttributeIdArrayItem]:
         """
         Creates or overwrites MEP System attributes based on the given parameters.
 
         Args:
-            mep_system_data_array (list[MEPSystemDataArrayItem]): Array of data to create new
-                MEP Systems.
+            mep_system_data_array (list[MEPSystemData]): Array of data to create new MEP
+                Systems.
             overwrite_existing (None | bool): Overwrite the MEP System if exists with the same
                 name, or if index is given with the same index. The default is false.
 

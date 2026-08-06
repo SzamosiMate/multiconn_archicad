@@ -123,7 +123,7 @@ from .types import (
     LineDataArrayItem,
     MEPSystemAttribute,
     MEPSystemAttributeField,
-    MEPSystemDataArrayItem,
+    MEPSystemData,
     MeshData,
     MeshWithDetails,
     Method,
@@ -2213,7 +2213,7 @@ class CreateZoneCategoriesResult(APIModel):
 
 class CreateMEPSystemsParameters(APIModel):
     mepSystemDataArray: Annotated[
-        list[MEPSystemDataArrayItem],
+        list[MEPSystemData],
         Field(description="Array of data to create new MEP Systems."),
     ]
     overwriteExisting: Annotated[
