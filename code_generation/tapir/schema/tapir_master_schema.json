@@ -960,16 +960,19 @@
         }
       ]
     },
+    "CompositeSkinType": {
+      "type": "string",
+      "enum": [
+        "Core",
+        "Finish",
+        "Other"
+      ]
+    },
     "CompositeSkin": {
       "type": "object",
       "properties": {
         "type": {
-          "type": "string",
-          "enum": [
-            "Core",
-            "Finish",
-            "Other"
-          ]
+          "$ref": "#/$defs/CompositeSkinType"
         },
         "buildingMaterialId": {
           "$ref": "#/$defs/AttributeIdArrayItem"
@@ -9620,7 +9623,7 @@
           "type": "array",
           "description": "Array of data to create new MEP Systems.",
           "items": {
-            "$ref": "#/$defs/MEPSystemDataArrayItem"
+            "$ref": "#/$defs/MEPSystemData"
           }
         },
         "overwriteExisting": {
@@ -13918,7 +13921,7 @@
         "navigatorItemId"
       ]
     },
-    "MEPSystemDataArrayItem": {
+    "MEPSystemData": {
       "type": "object",
       "description": "Data to create an MEP System.",
       "properties": {

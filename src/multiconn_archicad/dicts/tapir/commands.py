@@ -116,7 +116,7 @@ from .types import (
     LineDataArrayItem,
     MEPSystemAttributeField,
     MEPSystemAttributeOrError,
-    MEPSystemDataArrayItem,
+    MEPSystemData,
     MeshData,
     MeshWithDetails,
     ModelViewOption,
@@ -1568,7 +1568,7 @@ class CreateZoneCategoriesResult(TypedDict):
 
 
 class CreateMEPSystemsParameters(TypedDict):
-    mepSystemDataArray: list[MEPSystemDataArrayItem]
+    mepSystemDataArray: list[MEPSystemData]
     overwriteExisting: NotRequired[bool]
 
 

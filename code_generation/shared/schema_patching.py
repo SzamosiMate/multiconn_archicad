@@ -164,7 +164,7 @@ def apply_permanent_patches(master_defs: dict[str, Any]):
         "SetLayoutSettingsParameters": ("layoutsData", "LayoutSettingsData"),
         "CloneProjectMapItemToViewMapParameters": ("viewsData", "ViewCloneData"),
         "CreateViewsInViewMapParameters": ("viewsData", "ViewData"),
-        "CreateMEPSystemsParameters": ("mepSystemDataArray", "MEPSystemDataArrayItem"),
+        "CreateMEPSystemsParameters": ("mepSystemDataArray", "MEPSystemData"),
     }
 
     for parent_model, (field_name, new_model_name) in creation_data_types.items():
@@ -213,6 +213,7 @@ def apply_temporary_patches(master_defs: dict[str, Any]):
     extract_inline_enum(master_defs, "GetPenTablesParameters", ["fields", "items"], "PenTableAttributeField")
     extract_inline_enum(master_defs, "GetProfilesParameters", ["fields", "items"], "ProfileAttributeField")
     extract_inline_enum(master_defs, "GetCompositesParameters", ["fields", "items"], "CompositeAttributeField")
+    extract_inline_enum(master_defs, "CompositeSkin", ["type"], "CompositeSkinType")
     extract_inline_enum(master_defs, "GetSurfacesParameters", ["fields", "items"], "SurfaceAttributeField")
     extract_inline_enum(master_defs, "GetLayersParameters", ["fields", "items"], "LayerAttributeField")
     extract_inline_enum(master_defs, "GetBuildingMaterialsParameters", ["fields", "items"], "BuildingMaterialAttributeField")

@@ -41,6 +41,9 @@ class OutlineArc(TypedDict):
     arcAngle: float
 
 
+CompositeSkinType: TypeAlias = Literal["Core", "Finish", "Other"]
+
+
 Guid: TypeAlias = str
 
 
@@ -2870,7 +2873,7 @@ class ProfileEdge(TypedDict):
 
 
 class CompositeSkin(TypedDict):
-    type: Literal["Core", "Finish", "Other"]
+    type: CompositeSkinType
     buildingMaterialId: NotRequired[AttributeIdArrayItem]
     framePen: int
     thickness: float
@@ -3153,7 +3156,7 @@ class AssociativeDimensionData(TypedDict):
     witnessPoints: list[AssociativeWitnessPoint]
 
 
-class MEPSystemDataArrayItem(TypedDict):
+class MEPSystemData(TypedDict):
     """Data to create an MEP System."""
     attributeId: NotRequired[AttributeId]
     index: NotRequired[str]

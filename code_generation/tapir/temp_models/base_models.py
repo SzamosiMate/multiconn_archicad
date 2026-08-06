@@ -78,7 +78,7 @@ class OutlineArc(APIModel):
     arcAngle: float
 
 
-class Type(Enum):
+class CompositeSkinType(Enum):
     Core = "Core"
     Finish = "Finish"
     Other = "Other"
@@ -6511,7 +6511,7 @@ class ProfileEdge(APIModel):
 
 
 class CompositeSkin(APIModel):
-    type: Type
+    type: CompositeSkinType
     buildingMaterialId: AttributeIdArrayItem | None = None
     framePen: int
     thickness: float
@@ -7398,7 +7398,7 @@ class AssociativeDimensionData(APIModel):
     witnessPoints: Annotated[list[AssociativeWitnessPoint], Field(min_length=2)]
 
 
-class MEPSystemDataArrayItem(APIModel):
+class MEPSystemData(APIModel):
     """
     Data to create an MEP System.
     """
@@ -8011,7 +8011,7 @@ class CreateZoneCategoriesResult(APIModel):
 
 class CreateMEPSystemsParameters(APIModel):
     mepSystemDataArray: Annotated[
-        list[MEPSystemDataArrayItem],
+        list[MEPSystemData],
         Field(description="Array of data to create new MEP Systems."),
     ]
     overwriteExisting: Annotated[
