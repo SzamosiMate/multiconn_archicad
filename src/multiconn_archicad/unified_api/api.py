@@ -39,6 +39,8 @@ from .tapir.teamwork import TeamworkCommands as TapirTeamworkCommands
 if TYPE_CHECKING:
     from multiconn_archicad.core.core_commands import CoreCommands
 
+SUPPORTED_TAPIR_VERSION = "1.5.5"
+
 
 class TapirApi:
     """A container for all command groups of the Archicad Tapir API."""

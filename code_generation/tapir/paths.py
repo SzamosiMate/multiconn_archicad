@@ -1,9 +1,6 @@
 import pathlib
 
 class TapirApiPaths:
-    # --- Source URLs ---
-    COMMAND_DEFS_URL = "https://raw.githubusercontent.com/ENZYME-APD/tapir-archicad-automation/refs/heads/main/docs/archicad-addon/command_definitions.js"
-    COMMON_SCHEMA_URL = "https://raw.githubusercontent.com/ENZYME-APD/tapir-archicad-automation/refs/heads/main/docs/archicad-addon/common_schema_definitions.js"
 
     CODE_GEN_DIR = pathlib.Path(__file__).resolve().parent.parent
     PROJECT_ROOT = CODE_GEN_DIR.parent
@@ -43,6 +40,20 @@ class TapirApiPaths:
     # --- Tests ---
     TESTS_DIR = PROJECT_ROOT / "tests" / "generated"
     GENERATED_TESTS_OUTPUT = TESTS_DIR / "test_generated_tapir_models.py"
+
+    @property
+    def tapir_version(self) -> str:
+        """Reads the pinned version from the text file."""
+        version_file = self.PROJECT_ROOT / "TAPIR_VERSION"
+        return version_file.read_text().strip() if version_file.exists() else "main"
+
+    @property
+    def COMMAND_DEFS_URL(self) -> str:
+        return f"https://raw.githubusercontent.com/ENZYME-APD/tapir-archicad-automation/refs/tags/{self.tapir_version}/docs/archicad-addon/command_definitions.js"
+
+    @property
+    def COMMON_SCHEMA_URL(self) -> str:
+        return f"https://raw.githubusercontent.com/ENZYME-APD/tapir-archicad-automation/refs/tags/{self.tapir_version}/docs/archicad-addon/common_schema_definitions.js"
 
     @classmethod
     def create_directories(cls):
