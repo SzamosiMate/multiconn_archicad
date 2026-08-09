@@ -4,6 +4,8 @@ import pathlib
 import sys
 import textwrap
 
+from code_generation.tapir.paths import tapir_paths
+
 
 def clean_group_name(group: str) -> str:
     """
@@ -155,6 +157,7 @@ class FileAssembler:
             "if TYPE_CHECKING:",
             "    from multiconn_archicad.core.core_commands import CoreCommands",
             "",
+            f'SUPPORTED_TAPIR_VERSION = "{tapir_paths.tapir_version}"',
             "",
             container_classes[0],
             "",

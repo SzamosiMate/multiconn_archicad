@@ -4,7 +4,7 @@ from multiconn_archicad.utilities.network_utils import is_port_listening
 from multiconn_archicad.utilities.thread_utils import EXECUTOR
 from multiconn_archicad.core.core_commands import CoreCommands
 from multiconn_archicad.standard_connection import StandardConnection
-from multiconn_archicad.unified_api.api import UnifiedApi
+from multiconn_archicad.unified_api.api import UnifiedApi, SUPPORTED_TAPIR_VERSION
 from multiconn_archicad.conn_header import ConnHeader, Status
 from multiconn_archicad.basic_types import Port
 from multiconn_archicad.actions import (
@@ -97,6 +97,11 @@ class MultiConn:
     @property
     def unified(self) -> UnifiedApi | type[UnifiedApi]:
         return self._primary.unified if self._primary else UnifiedApi
+
+    @property
+    def supported_tapir_version(self) -> str:
+        """Returns the Tapir API version this library was generated against."""
+        return SUPPORTED_TAPIR_VERSION
 
     def __repr__(self) -> str:
         attrs = {name: getattr(self, name) for name in ["pending", "active", "failed", "primary", "dialog_handler"]}
