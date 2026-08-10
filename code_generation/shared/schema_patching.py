@@ -165,6 +165,21 @@ def apply_permanent_patches(master_defs: dict[str, Any]):
         "CloneProjectMapItemToViewMapParameters": ("viewsData", "ViewCloneData"),
         "CreateViewsInViewMapParameters": ("viewsData", "ViewData"),
         "CreateMEPSystemsParameters": ("mepSystemDataArray", "MEPSystemData"),
+        # 2D drafting elements (Tapir 1.5.6)
+        "CreateArcsParameters": ("arcsData", "ArcData"),
+        "CreateCirclesParameters": ("circlesData", "CircleData"),
+        "CreateHatchesParameters": ("hatchesData", "HatchData"),
+        "CreateHotspotsParameters": ("hotspotsData", "HotspotData"),
+        "CreateLineElementsParameters": ("linesData", "LineElementData"),
+        "CreateSplinesParameters": ("splinesData", "SplineData"),
+        # Keynotes (Tapir 1.5.6)
+        "CreateKeynoteFoldersParameters": ("foldersData", "KeynoteFolderData"),
+        "CreateKeynoteItemsParameters": ("itemsData", "KeynoteItemData"),
+        "CreateKeynoteLabelsParameters": ("labelsData", "KeynoteLabelData"),
+        # MEP (Tapir 1.5.6)
+        "CreateMEPElementsParameters": ("elementsData", "MEPElementData"),
+        "ConnectMEPElementsParameters": ("connectionsData", "MEPConnectionData"),
+        "CreateMEPRoutingElementsParameters": ("routingElementsData", "MEPRoutingElementData"),
     }
 
     for parent_model, (field_name, new_model_name) in creation_data_types.items():
@@ -180,6 +195,12 @@ def apply_permanent_patches(master_defs: dict[str, Any]):
         "ModifyMorphsParameters": ("morphsWithDetails", "MorphWithDetails"),
         "ModifyRoofsParameters": ("roofsWithDetails", "RoofWithDetails"),
         "ModifyMeshesParameters": ("meshesData", "MeshWithDetails"),
+        # Tapir 1.5.7 added full Object/Lamp support, 1.5.6 keynotes and MEP
+        "ModifyObjectsParameters": ("objectsWithDetails", "ObjectWithDetails"),
+        "ModifyLampsParameters": ("lampsWithDetails", "LampWithDetails"),
+        "ModifyKeynoteFoldersParameters": ("foldersData", "KeynoteFolderModificationData"),
+        "ModifyKeynoteItemsParameters": ("itemsData", "KeynoteItemModificationData"),
+        "ModifyMEPRoutingElementsParameters": ("routingElementsData", "MEPRoutingElementModificationData"),
     }
 
     for parent_model, (field_name, new_model_name) in element_modification_datatypes.items():
@@ -360,6 +381,56 @@ def apply_temporary_patches(master_defs: dict[str, Any]):
 
     # --- Solid element operation links (create side; Remove/Get variants are extracted above) ---
     extract_inline_schema(master_defs, "CreateSolidElementLinksParameters", ["solidLinks", "items"], "SolidLinkData")
+
+    # --- Tapir 1.5.7: Object/Lamp repeat the story visibility and home story link objects ---
+    for parent in ("ObjectDetails", "ObjectData", "ObjectWithDetails", "LampData", "LampWithDetails"):
+        replace_inline_schema_with_ref(master_defs, parent, ["visibility"], "StoryVisibility")
+        replace_inline_schema_with_ref(master_defs, parent, ["linkToSettings"], "LinkToSettings")
+
+    # --- Create payloads repeat the enums of their Details counterparts ---
+    extract_inline_enum(master_defs, "BeamDetails", ["anchorPoint"], "BeamAnchorPoint")
+    replace_inline_schema_with_ref(master_defs, "BeamData", ["anchorPoint"], "BeamAnchorPoint")
+    extract_inline_enum(master_defs, "ColumnDetails", ["coreAnchor"], "ColumnCoreAnchor")
+    replace_inline_schema_with_ref(master_defs, "ColumnData", ["coreAnchor"], "ColumnCoreAnchor")
+    extract_inline_enum(master_defs, "SlabDetails", ["referencePlaneLocation"], "SlabReferencePlaneLocation")
+    replace_inline_schema_with_ref(master_defs, "SlabData", ["referencePlaneLocation"], "SlabReferencePlaneLocation")
+    extract_inline_enum(master_defs, "WallDetails", ["referenceLineLocation"], "WallReferenceLineLocation")
+    replace_inline_schema_with_ref(master_defs, "WallData", ["referenceLineLocation"], "WallReferenceLineLocation")
+    extract_inline_enum(master_defs, "BeamDetails", ["holes", "items", "type"], "BeamHoleType")
+    extract_inline_enum(master_defs, "HatchOrientation", ["type"], "HatchOrientationType")
+
+    # --- MEP enums (Tapir 1.5.6/1.5.7) ---
+    extract_inline_enum(master_defs, "GetMEPElementsParameters", ["elementTypes", "items"], "MEPElementType")
+    extract_inline_enum(master_defs, "MEPElementData", ["type"], "MEPElementCreationType")
+    replace_inline_schema_with_ref(master_defs, "MEPElementData", ["domain"], "MEPSystemDomain")
+    replace_inline_schema_with_ref(master_defs, "MEPRoutingElementData", ["domain"], "MEPSystemDomain")
+    # GetMEPPreferenceTables accepts only two of the three domains, so it keeps its own enum
+    extract_inline_enum(master_defs, "GetMEPPreferenceTablesParameters", ["domain"], "MEPPreferenceTableDomain")
+    extract_inline_enum(master_defs, "MEPRoutingElementData", ["crossSectionShape"], "MEPCrossSectionShape")
+    replace_inline_schema_with_ref(
+        master_defs, "MEPRoutingElementModificationData", ["crossSectionShape"], "MEPCrossSectionShape"
+    )
+
+    # --- GetRelationsOfElements returns a union of per-element-type relation objects ---
+    _, element_relations, _ = _require_target(master_defs, "ElementRelationsOrError", [])
+    relation_variants = [
+        "WallRelations", "BeamRelations", "BeamSegmentRelations",
+        "ZoneRelationsOfElement", "OpeningRelationsOfElement", "RoofOrShellRelationsOfElement",
+    ]
+    for index, variant_name in enumerate(relation_variants):
+        branch = element_relations["oneOf"][index]
+        if "$ref" in branch:
+            continue
+        master_defs[variant_name] = branch
+        element_relations["oneOf"][index] = {"$ref": f"#/$defs/{variant_name}"}
+
+    # --- Tapir 1.5.6/1.5.7: name the remaining new inline result and payload objects ---
+    extract_inline_schema(master_defs, "ChangeDrawingLinkParameters", ["drawingsWithNewLinks", "items"], "DrawingWithNewLink")
+    extract_inline_schema(master_defs, "GetMEPElementsResult", ["elements", "items"], "MEPElement")
+    extract_inline_schema(master_defs, "GetMEPPreferenceTablesResult", ["tables", "items"], "MEPPreferenceTable")
+    extract_inline_schema(
+        master_defs, "GetMEPDistributionSystemsResult", ["distributionSystems", "items"], "MEPDistributionSystem"
+    )
 
     # --- Layout custom data (Get and Set sides have different required lists) ---
     extract_inline_schema(
