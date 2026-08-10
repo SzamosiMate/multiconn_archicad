@@ -12,6 +12,7 @@ KNOWN_XFAILURES = {}
 
 SCHEMAS_TO_PATCH = {
     "GetHotlinksResult",
+    "GetKeynoteTreeResult",
     "GetDetailsOfElementsResult",
     "CreateClassificationItemsParameters",
     "CreateClassificationSystemsParameters"
@@ -52,6 +53,14 @@ def patch_schema_definitions(definitions: dict, model_name_to_test: str) -> dict
         if "Hotlink" in patched_defs and "properties" in patched_defs["Hotlink"]:
             patched_defs["Hotlink"]["properties"].pop("children", None)
             print(f"    - Applied patch to 'Hotlink' schema for {model_name_to_test} test (removed recursion).")
+
+    if model_name_to_test == "GetKeynoteTreeResult":
+        if "KeynoteFolderDetails" in patched_defs and "properties" in patched_defs["KeynoteFolderDetails"]:
+            # subFolders recurses into KeynoteFolderDetails, but unlike the 'children' cases it is
+            # required - dropping it would make the generated data fail the TypedDict check. Bound
+            # the recursion to an always-empty array instead.
+            patched_defs["KeynoteFolderDetails"]["properties"]["subFolders"] = {"type": "array", "maxItems": 0}
+            print(f"    - Applied patch to 'KeynoteFolderDetails' schema for {model_name_to_test} test (bounded recursion).")
 
     if model_name_to_test == "GetDetailsOfElementsResult":
         if "TypeSpecificDetails" in patched_defs:
