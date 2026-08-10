@@ -174,228 +174,14 @@
                 "source": "tapir"
             }
         ],
-        "Element Commands": [
-            {
-                "name": "ChangeSelectionOfElements",
-                "group": "Element Commands",
-                "description": "Adds/removes a number of elements to/from the current selection.",
-                "version": "1.0.7",
-                "source": "tapir"
-            },
-            {
-                "name": "DeleteElements",
-                "group": "Element Commands",
-                "description": "Deletes elements.",
-                "version": "1.2.1",
-                "source": "tapir"
-            },
-            {
-                "name": "FilterElements",
-                "group": "Element Commands",
-                "description": "Tests an elements by the given criterias.",
-                "version": "1.0.7",
-                "source": "tapir"
-            },
-            {
-                "name": "Get3DBoundingBoxes",
-                "group": "Element Commands",
-                "description": "Get the 3D bounding box of elements. The bounding box is calculated from the global origin in the 3D view. The output is the array of the bounding boxes respective to the input array of elements.",
-                "version": "1.1.2",
-                "source": "tapir"
-            },
-            {
-                "name": "GetAllElements",
-                "group": "Element Commands",
-                "description": "Returns the identifier of all elements on the plan. Use the optional filter parameter for filtering.",
-                "version": "1.0.7",
-                "source": "tapir"
-            },
-            {
-                "name": "GetCollisions",
-                "group": "Element Commands",
-                "description": "Detect collisions between the given two groups of elements.",
-                "version": "1.2.2",
-                "source": "tapir"
-            },
-            {
-                "name": "GetConnectedElements",
-                "group": "Element Commands",
-                "description": "Gets connected elements of the given elements.",
-                "version": "1.1.4",
-                "source": "tapir"
-            },
-            {
-                "name": "GetDetailsOfElements",
-                "group": "Element Commands",
-                "description": "Gets the details of the given elements (geometry parameters etc).",
-                "version": "1.0.7",
-                "source": "tapir"
-            },
-            {
-                "name": "GetDimensionData",
-                "group": "Element Commands",
-                "description": "Gets witness point data (coordinates, measured values) from existing dimension chains.",
-                "version": "1.5.0",
-                "source": "tapir"
-            },
-            {
-                "name": "GetElementPreviewImage",
-                "group": "Element Commands",
-                "description": "Returns the preview image of the given element.",
-                "version": "1.2.7",
-                "source": "tapir"
-            },
-            {
-                "name": "GetElementsByType",
-                "group": "Element Commands",
-                "description": "Returns the identifier of every element of the given type on the plan. It works for any type. Use the optional filter parameter for filtering.",
-                "version": "1.0.7",
-                "source": "tapir"
-            },
-            {
-                "name": "GetGDLParametersOfElements",
-                "group": "Element Commands",
-                "description": "Gets all the GDL parameters (name, type, value) of the given elements.",
-                "version": "1.0.8",
-                "source": "tapir"
-            },
-            {
-                "name": "GetRoomImage",
-                "group": "Element Commands",
-                "description": "Returns the room image of the given zone.",
-                "version": "1.2.7",
-                "source": "tapir"
-            },
-            {
-                "name": "GetSelectedElements",
-                "group": "Element Commands",
-                "description": "Gets the list of the currently selected elements.",
-                "version": "0.1.0",
-                "source": "tapir"
-            },
-            {
-                "name": "GetSubelementsOfHierarchicalElements",
-                "group": "Element Commands",
-                "description": "Gets the subelements of the given hierarchical elements.",
-                "version": "1.0.6",
-                "source": "tapir"
-            },
-            {
-                "name": "GetZoneBoundaries",
-                "group": "Element Commands",
-                "description": "Gets the boundaries of the given Zone (connected elements, neighbour zones, etc.).",
-                "version": "1.2.3",
-                "source": "tapir"
-            },
-            {
-                "name": "HighlightElements",
-                "group": "Element Commands",
-                "description": "Highlights the elements given in the elements array. In case of empty elements array removes all previously set highlights.",
-                "version": "1.0.3",
-                "source": "tapir"
-            },
-            {
-                "name": "LockElements",
-                "group": "Element Commands",
-                "description": "Locks the given elements. Manual lock, not teamwork!",
-                "version": "1.5.2",
-                "source": "tapir"
-            },
-            {
-                "name": "MoveElements",
-                "group": "Element Commands",
-                "description": "Moves elements with a given vector.",
-                "version": "1.0.2",
-                "source": "tapir"
-            },
-            {
-                "name": "RemoveElementNotificationClient",
-                "group": "Element Commands",
-                "description": "Removes an element notification client.",
-                "version": "1.2.8",
-                "source": "tapir"
-            },
-            {
-                "name": "RotateElements",
-                "group": "Element Commands",
-                "description": "Rotates elements around a reference point.",
-                "version": "1.5.3",
-                "source": "tapir"
-            },
-            {
-                "name": "SetDetailsOfElements",
-                "group": "Element Commands",
-                "description": "Sets the details of the given elements (floor, layer, order etc).",
-                "version": "1.0.7",
-                "source": "tapir"
-            },
-            {
-                "name": "SetElementNotificationClient",
-                "group": "Element Commands",
-                "description": "Sets up a new notification client to receive element events.",
-                "version": "1.2.8",
-                "source": "tapir"
-            },
-            {
-                "name": "SetGDLParametersOfElements",
-                "group": "Element Commands",
-                "description": "Sets the given GDL parameters of the given elements.",
-                "version": "1.0.8",
-                "source": "tapir"
-            },
-            {
-                "name": "UnlockElements",
-                "group": "Element Commands",
-                "description": "Unlocks the given elements. Manual lock, not teamwork!",
-                "version": "1.5.2",
-                "source": "tapir"
-            },
-            {
-                "name": "UpdateZones",
-                "group": "Element Commands",
-                "description": "Updates all Zones (recalculates their geometry, updates their Zone Stamps and the connected elements).",
-                "version": "1.5.4",
-                "source": "tapir"
-            }
-        ],
-        "Application Commands": [
-            {
-                "name": "ChangeWindow",
-                "group": "Application Commands",
-                "description": "Changes the current (active) window to the given window.",
-                "version": "1.3.1",
-                "source": "tapir"
-            },
-            {
-                "name": "GetAddOnVersion",
-                "group": "Application Commands",
-                "description": "Retrieves the version of the Tapir Additional JSON Commands Add-On.",
-                "version": "0.1.0",
-                "source": "tapir"
-            },
-            {
-                "name": "GetArchicadLocation",
-                "group": "Application Commands",
-                "description": "Retrieves the location of the currently running Archicad executable.",
-                "version": "0.1.0",
-                "source": "tapir"
-            },
-            {
-                "name": "GetCurrentWindowType",
-                "group": "Application Commands",
-                "description": "Returns the type of the current (active) window.",
-                "version": "1.0.7",
-                "source": "tapir"
-            },
-            {
-                "name": "QuitArchicad",
-                "group": "Application Commands",
-                "description": "Performs a quit operation on the currently running Archicad instance.",
-                "version": "0.1.0",
-                "source": "tapir"
-            }
-        ],
         "Navigator Commands": [
+            {
+                "name": "ChangeDrawingLink",
+                "group": "Navigator Commands",
+                "description": "Relinks a Drawing to a different source navigator item. Archicad has no in-place relink API, so this recreates the Drawing against the new source and deletes the original - the returned elementId is a NEW guid, not the input one. The Drawing Title marker's own position is not preserved (undocumented Archicad limitation).",
+                "version": "1.5.7",
+                "source": "tapir"
+            },
             {
                 "name": "CloneProjectMapItemToViewMap",
                 "group": "Navigator Commands",
@@ -579,6 +365,255 @@
                 "source": "tapir"
             }
         ],
+        "Element Commands": [
+            {
+                "name": "ChangeSelectionOfElements",
+                "group": "Element Commands",
+                "description": "Adds/removes a number of elements to/from the current selection.",
+                "version": "1.0.7",
+                "source": "tapir"
+            },
+            {
+                "name": "DeleteElements",
+                "group": "Element Commands",
+                "description": "Deletes elements.",
+                "version": "1.2.1",
+                "source": "tapir"
+            },
+            {
+                "name": "FilterElements",
+                "group": "Element Commands",
+                "description": "Tests an elements by the given criterias.",
+                "version": "1.0.7",
+                "source": "tapir"
+            },
+            {
+                "name": "Get3DBoundingBoxes",
+                "group": "Element Commands",
+                "description": "Get the 3D bounding box of elements. The bounding box is calculated from the global origin in the 3D view. The output is the array of the bounding boxes respective to the input array of elements.",
+                "version": "1.1.2",
+                "source": "tapir"
+            },
+            {
+                "name": "GetAllElements",
+                "group": "Element Commands",
+                "description": "Returns the identifier of all elements on the plan. Use the optional filter parameter for filtering.",
+                "version": "1.0.7",
+                "source": "tapir"
+            },
+            {
+                "name": "GetCollisions",
+                "group": "Element Commands",
+                "description": "Detect collisions between the given two groups of elements.",
+                "version": "1.2.2",
+                "source": "tapir"
+            },
+            {
+                "name": "GetConnectedElements",
+                "group": "Element Commands",
+                "description": "Gets connected elements of the given elements.",
+                "version": "1.1.4",
+                "source": "tapir"
+            },
+            {
+                "name": "GetDetailsOfElements",
+                "group": "Element Commands",
+                "description": "Gets the details of the given elements (geometry parameters etc).",
+                "version": "1.0.7",
+                "source": "tapir"
+            },
+            {
+                "name": "GetDimensionData",
+                "group": "Element Commands",
+                "description": "Gets witness point data (coordinates, measured values) from existing dimension chains.",
+                "version": "1.5.0",
+                "source": "tapir"
+            },
+            {
+                "name": "GetElementPreviewImage",
+                "group": "Element Commands",
+                "description": "Returns the preview image of the given element.",
+                "version": "1.2.7",
+                "source": "tapir"
+            },
+            {
+                "name": "GetElementsByType",
+                "group": "Element Commands",
+                "description": "Returns the identifier of every element of the given type on the plan. It works for any type. Use the optional filter parameter for filtering.",
+                "version": "1.0.7",
+                "source": "tapir"
+            },
+            {
+                "name": "GetGDLParametersOfElements",
+                "group": "Element Commands",
+                "description": "Gets all the GDL parameters (name, type, value) of the given elements.",
+                "version": "1.0.8",
+                "source": "tapir"
+            },
+            {
+                "name": "GetRelationsOfElements",
+                "group": "Element Commands",
+                "description": "Gets the type-specific relations of the given elements: endpoint and reference line connections of walls, beams and beam segments, boundary elements and boundary sections of zones, the zones on the two sides of windows, doors, skylights and curtain wall panels, and the zones connected to roofs and shells. Available from Archicad 26.",
+                "version": "1.5.7",
+                "source": "tapir"
+            },
+            {
+                "name": "GetRoomImage",
+                "group": "Element Commands",
+                "description": "Returns the room image of the given zone.",
+                "version": "1.2.7",
+                "source": "tapir"
+            },
+            {
+                "name": "GetSelectedElements",
+                "group": "Element Commands",
+                "description": "Gets the list of the currently selected elements.",
+                "version": "0.1.0",
+                "source": "tapir"
+            },
+            {
+                "name": "GetSubelementsOfHierarchicalElements",
+                "group": "Element Commands",
+                "description": "Gets the subelements of the given hierarchical elements.",
+                "version": "1.0.6",
+                "source": "tapir"
+            },
+            {
+                "name": "GetZoneBoundaries",
+                "group": "Element Commands",
+                "description": "Gets the boundaries of the given Zone (connected elements, neighbour zones, etc.).",
+                "version": "1.2.3",
+                "source": "tapir"
+            },
+            {
+                "name": "HighlightElements",
+                "group": "Element Commands",
+                "description": "Highlights the elements given in the elements array. In case of empty elements array removes all previously set highlights.",
+                "version": "1.0.3",
+                "source": "tapir"
+            },
+            {
+                "name": "LockElements",
+                "group": "Element Commands",
+                "description": "Locks the given elements. Manual lock, not teamwork!",
+                "version": "1.5.2",
+                "source": "tapir"
+            },
+            {
+                "name": "MoveElements",
+                "group": "Element Commands",
+                "description": "Moves elements with a given vector.",
+                "version": "1.0.2",
+                "source": "tapir"
+            },
+            {
+                "name": "RemoveElementNotificationClient",
+                "group": "Element Commands",
+                "description": "Removes an element notification client.",
+                "version": "1.2.8",
+                "source": "tapir"
+            },
+            {
+                "name": "RotateElements",
+                "group": "Element Commands",
+                "description": "Rotates elements around a reference point.",
+                "version": "1.5.3",
+                "source": "tapir"
+            },
+            {
+                "name": "SetDetailsOfElements",
+                "group": "Element Commands",
+                "description": "Sets the details of the given elements (floor, layer, order etc).",
+                "version": "1.0.7",
+                "source": "tapir"
+            },
+            {
+                "name": "SetElementNotificationClient",
+                "group": "Element Commands",
+                "description": "Sets up a new notification client to receive element events.",
+                "version": "1.2.8",
+                "source": "tapir"
+            },
+            {
+                "name": "SetGDLParametersOfElements",
+                "group": "Element Commands",
+                "description": "Sets the given GDL parameters of the given elements.",
+                "version": "1.5.7",
+                "source": "tapir"
+            },
+            {
+                "name": "UnlockElements",
+                "group": "Element Commands",
+                "description": "Unlocks the given elements. Manual lock, not teamwork!",
+                "version": "1.5.2",
+                "source": "tapir"
+            },
+            {
+                "name": "UpdateZones",
+                "group": "Element Commands",
+                "description": "Updates all Zones (recalculates their geometry, updates their Zone Stamps and the connected elements).",
+                "version": "1.5.4",
+                "source": "tapir"
+            }
+        ],
+        "Application Commands": [
+            {
+                "name": "ChangeWindow",
+                "group": "Application Commands",
+                "description": "Changes the current (active) window to the given window.",
+                "version": "1.3.1",
+                "source": "tapir"
+            },
+            {
+                "name": "GetAddOnVersion",
+                "group": "Application Commands",
+                "description": "Retrieves the version of the Tapir Additional JSON Commands Add-On.",
+                "version": "0.1.0",
+                "source": "tapir"
+            },
+            {
+                "name": "GetArchicadLocation",
+                "group": "Application Commands",
+                "description": "Retrieves the location of the currently running Archicad executable.",
+                "version": "0.1.0",
+                "source": "tapir"
+            },
+            {
+                "name": "GetCurrentWindowType",
+                "group": "Application Commands",
+                "description": "Returns the type of the current (active) window.",
+                "version": "1.0.7",
+                "source": "tapir"
+            },
+            {
+                "name": "GetSpecialFolders",
+                "group": "Application Commands",
+                "description": "Retrieves the filesystem paths of the special folders of the running Archicad (preferences, cache, data, temporary, application, defaults, templates, help, embedded project library, etc.).",
+                "version": "1.5.6",
+                "source": "tapir"
+            },
+            {
+                "name": "GetUserGSID",
+                "group": "Application Commands",
+                "description": "Get the current registered User-GSID and OrganizationsID. Requires Archicad 27 or later.",
+                "version": "1.5.6",
+                "source": "tapir"
+            },
+            {
+                "name": "QuitArchicad",
+                "group": "Application Commands",
+                "description": "Performs a quit operation on the currently running Archicad instance.",
+                "version": "0.1.0",
+                "source": "tapir"
+            },
+            {
+                "name": "ShowAlert",
+                "group": "Application Commands",
+                "description": "Display a dialog with up to three buttons.",
+                "version": "1.5.6",
+                "source": "tapir"
+            }
+        ],
         "Project Commands": [
             {
                 "name": "CloseProject",
@@ -693,7 +728,79 @@
                 "source": "tapir"
             }
         ],
+        "MEP Commands": [
+            {
+                "name": "ConnectMEPElements",
+                "group": "MEP Commands",
+                "description": "Connects MEP routing elements to other MEP elements or routes. Merges routes, splits routes or creates branch elements as needed. Available from Archicad 28.",
+                "version": "1.5.6",
+                "source": "tapir"
+            },
+            {
+                "name": "CreateMEPElements",
+                "group": "MEP Commands",
+                "description": "Creates MEP elements (Terminal, Accessory, Equipment or Fitting) at the given positions. Available from Archicad 28.",
+                "version": "1.5.6",
+                "source": "tapir"
+            },
+            {
+                "name": "CreateMEPRoutingElements",
+                "group": "MEP Commands",
+                "description": "Creates MEP routing elements (duct, pipe or cable carrier routes) along the given polylines with optional cross section data and MEP system. Available from Archicad 28.",
+                "version": "1.5.6",
+                "source": "tapir"
+            },
+            {
+                "name": "GetMEPDistributionSystems",
+                "group": "MEP Commands",
+                "description": "Retrieves the MEP distribution systems of the project with their domain, MEP system attribute and member elements. Available from Archicad 28.",
+                "version": "1.5.6",
+                "source": "tapir"
+            },
+            {
+                "name": "GetMEPElements",
+                "group": "MEP Commands",
+                "description": "Retrieves the MEP (Mechanical, Electrical, Plumbing) elements of the project, optionally filtered by type and domain. MEP elements are ordinary elements, so the generic element commands work on them as well (for example they can be deleted with the DeleteElements command). Available from Archicad 28.",
+                "version": "1.5.6",
+                "source": "tapir"
+            },
+            {
+                "name": "GetMEPPorts",
+                "group": "MEP Commands",
+                "description": "Retrieves the ports of the given MEP elements including position, shape, size and connection status. Available from Archicad 28.",
+                "version": "1.5.6",
+                "source": "tapir"
+            },
+            {
+                "name": "GetMEPPreferenceTables",
+                "group": "MEP Commands",
+                "description": "Gets the circular cross section preference tables (referenceId, diameter, description) of the Piping or Ventilation domain. Available from Archicad 28.",
+                "version": "1.5.7",
+                "source": "tapir"
+            },
+            {
+                "name": "GetMEPRoutingElements",
+                "group": "MEP Commands",
+                "description": "Retrieves the details of the given MEP routing elements: domain, MEP system, route polyline, segments with cross section data and nodes. Available from Archicad 28.",
+                "version": "1.5.6",
+                "source": "tapir"
+            },
+            {
+                "name": "ModifyMEPRoutingElements",
+                "group": "MEP Commands",
+                "description": "Modifies the given MEP routing elements: MEP system, cross section data of all segments and node positions. Available from Archicad 28.",
+                "version": "1.5.6",
+                "source": "tapir"
+            }
+        ],
         "Element Creation Commands": [
+            {
+                "name": "CreateArcs",
+                "group": "Element Creation Commands",
+                "description": "Creates Arc elements based on the given parameters.",
+                "version": "1.5.7",
+                "source": "tapir"
+            },
             {
                 "name": "CreateAssociativeDimensions",
                 "group": "Element Creation Commands",
@@ -716,6 +823,13 @@
                 "source": "tapir"
             },
             {
+                "name": "CreateCircles",
+                "group": "Element Creation Commands",
+                "description": "Creates Circle elements based on the given parameters.",
+                "version": "1.5.7",
+                "source": "tapir"
+            },
+            {
                 "name": "CreateColumns",
                 "group": "Element Creation Commands",
                 "description": "Creates Column elements based on the given parameters.",
@@ -730,6 +844,20 @@
                 "source": "tapir"
             },
             {
+                "name": "CreateHatches",
+                "group": "Element Creation Commands",
+                "description": "Creates Hatch elements based on the given parameters.",
+                "version": "1.5.7",
+                "source": "tapir"
+            },
+            {
+                "name": "CreateHotspots",
+                "group": "Element Creation Commands",
+                "description": "Creates Hotspot elements based on the given parameters.",
+                "version": "1.5.7",
+                "source": "tapir"
+            },
+            {
                 "name": "CreateLabels",
                 "group": "Element Creation Commands",
                 "description": "Creates Label elements based on the given parameters.",
@@ -740,7 +868,14 @@
                 "name": "CreateLamps",
                 "group": "Element Creation Commands",
                 "description": "Creates Lamp elements based on the given parameters.",
-                "version": "1.5.0",
+                "version": "1.5.7",
+                "source": "tapir"
+            },
+            {
+                "name": "CreateLineElements",
+                "group": "Element Creation Commands",
+                "description": "Creates Line elements based on the given parameters.",
+                "version": "1.5.7",
                 "source": "tapir"
             },
             {
@@ -761,7 +896,7 @@
                 "name": "CreateObjects",
                 "group": "Element Creation Commands",
                 "description": "Creates Object elements based on the given parameters.",
-                "version": "1.0.3",
+                "version": "1.5.7",
                 "source": "tapir"
             },
             {
@@ -781,7 +916,7 @@
             {
                 "name": "CreateRoofs",
                 "group": "Element Creation Commands",
-                "description": "Creates multi-plane Roof elements based on footprint, level and roof profile data.",
+                "description": "Creates Roof elements based on footprint, level and roof profile data. Creates a multi-plane roof by default; pass 'pivotLine' (and optionally 'angle') to create a single-plane roof instead.",
                 "version": "1.4.0",
                 "source": "tapir"
             },
@@ -790,6 +925,13 @@
                 "group": "Element Creation Commands",
                 "description": "Creates Slab elements based on the given parameters.",
                 "version": "1.0.3",
+                "source": "tapir"
+            },
+            {
+                "name": "CreateSplines",
+                "group": "Element Creation Commands",
+                "description": "Creates Spline elements based on the given parameters.",
+                "version": "1.5.7",
                 "source": "tapir"
             },
             {
@@ -1142,6 +1284,99 @@
                 "description": "Creates groups of the passed elements",
                 "version": "1.4.0",
                 "source": "tapir"
+            },
+            {
+                "name": "GetElementsOfGroups",
+                "group": "Element grouping Commands",
+                "description": "Gets the elements directly contained by each given group.",
+                "version": "1.5.6",
+                "source": "tapir"
+            },
+            {
+                "name": "GetGroupsOfElements",
+                "group": "Element grouping Commands",
+                "description": "Gets the identifier of the group that directly contains each given element. Returns an error for elements that are not part of any group.",
+                "version": "1.5.6",
+                "source": "tapir"
+            },
+            {
+                "name": "GetSuspendGroupsMode",
+                "group": "Element grouping Commands",
+                "description": "Gets the current state of the Suspend Groups mode.",
+                "version": "1.5.6",
+                "source": "tapir"
+            },
+            {
+                "name": "SetSuspendGroupsMode",
+                "group": "Element grouping Commands",
+                "description": "Turns the Suspend Groups mode on or off. Suspend groups to perform operations on elements that are part of a group; remember to restore the previous state afterwards.",
+                "version": "1.5.6",
+                "source": "tapir"
+            }
+        ],
+        "Keynote Commands": [
+            {
+                "name": "CreateKeynoteFolders",
+                "group": "Keynote Commands",
+                "description": "Creates keynote folders under the given parent folders (or under the root folder). Available from Archicad 28.",
+                "version": "1.5.6",
+                "source": "tapir"
+            },
+            {
+                "name": "CreateKeynoteItems",
+                "group": "Keynote Commands",
+                "description": "Creates keynote items in the given parent folders (or in the root folder). Available from Archicad 28.",
+                "version": "1.5.6",
+                "source": "tapir"
+            },
+            {
+                "name": "CreateKeynoteLabels",
+                "group": "Keynote Commands",
+                "description": "Creates Label elements that reference the given keynote items via autotext. Available from Archicad 28.",
+                "version": "1.5.6",
+                "source": "tapir"
+            },
+            {
+                "name": "DeleteKeynoteFolders",
+                "group": "Keynote Commands",
+                "description": "Deletes the given keynote folders including their content. Available from Archicad 28.",
+                "version": "1.5.6",
+                "source": "tapir"
+            },
+            {
+                "name": "DeleteKeynoteItems",
+                "group": "Keynote Commands",
+                "description": "Deletes the given keynote items. Available from Archicad 28.",
+                "version": "1.5.6",
+                "source": "tapir"
+            },
+            {
+                "name": "GetKeynoteAutoTexts",
+                "group": "Keynote Commands",
+                "description": "Retrieves the autotext tokens of the given keynote items. The tokens can be used as label text content to reference the fields of a keynote item. Available from Archicad 28.",
+                "version": "1.5.6",
+                "source": "tapir"
+            },
+            {
+                "name": "GetKeynoteTree",
+                "group": "Keynote Commands",
+                "description": "Retrieves the whole keynote folder and item hierarchy. The technical root folder is not included in the output; the top-level folders and items are returned directly. Available from Archicad 28.",
+                "version": "1.5.6",
+                "source": "tapir"
+            },
+            {
+                "name": "ModifyKeynoteFolders",
+                "group": "Keynote Commands",
+                "description": "Modifies the key, title or reference of the given keynote folders. Available from Archicad 28.",
+                "version": "1.5.6",
+                "source": "tapir"
+            },
+            {
+                "name": "ModifyKeynoteItems",
+                "group": "Keynote Commands",
+                "description": "Modifies the key, title, description or reference of the given keynote items. Available from Archicad 28.",
+                "version": "1.5.6",
+                "source": "tapir"
             }
         ],
         "Property Commands": [
@@ -1352,6 +1587,13 @@
                 "source": "tapir"
             },
             {
+                "name": "ModifyLamps",
+                "group": "Element Modification Commands",
+                "description": "Modifies Lamp elements based on the given parameters.",
+                "version": "1.5.7",
+                "source": "tapir"
+            },
+            {
                 "name": "ModifyMeshes",
                 "group": "Element Modification Commands",
                 "description": "Modifies the attributes of Mesh elements based on the given parameters.",
@@ -1363,6 +1605,13 @@
                 "group": "Element Modification Commands",
                 "description": "Modifies Morph elements based on the given parameters.",
                 "version": "1.4.0",
+                "source": "tapir"
+            },
+            {
+                "name": "ModifyObjects",
+                "group": "Element Modification Commands",
+                "description": "Modifies Object elements based on the given parameters.",
+                "version": "1.5.7",
                 "source": "tapir"
             },
             {

@@ -27,7 +27,9 @@ from .tapir.element_modification import ElementModificationCommands as TapirElem
 from .tapir.favorites import FavoritesCommands as TapirFavoritesCommands
 from .tapir.ifc import IfcCommands as TapirIfcCommands
 from .tapir.issue_management import IssueManagementCommands as TapirIssueManagementCommands
+from .tapir.keynote import KeynoteCommands as TapirKeynoteCommands
 from .tapir.library import LibraryCommands as TapirLibraryCommands
+from .tapir.mep import MepCommands as TapirMepCommands
 from .tapir.navigator import NavigatorCommands as TapirNavigatorCommands
 from .tapir.project import ProjectCommands as TapirProjectCommands
 from .tapir.property import PropertyCommands as TapirPropertyCommands
@@ -55,7 +57,9 @@ class TapirApi:
         self.favorites = TapirFavoritesCommands(core)
         self.ifc = TapirIfcCommands(core)
         self.issue_management = TapirIssueManagementCommands(core)
+        self.keynote = TapirKeynoteCommands(core)
         self.library = TapirLibraryCommands(core)
+        self.mep = TapirMepCommands(core)
         self.navigator = TapirNavigatorCommands(core)
         self.project = TapirProjectCommands(core)
         self.property = TapirPropertyCommands(core)

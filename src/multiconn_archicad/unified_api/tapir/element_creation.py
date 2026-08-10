@@ -6,20 +6,30 @@ from typing import TYPE_CHECKING
 from pydantic import TypeAdapter
 
 from multiconn_archicad.models.tapir.commands import (
+    CreateArcsParameters,
+    CreateArcsResult,
     CreateAssociativeDimensionsOnSectionParameters,
     CreateAssociativeDimensionsOnSectionResult,
     CreateAssociativeDimensionsParameters,
     CreateAssociativeDimensionsResult,
     CreateBeamsParameters,
     CreateBeamsResult,
+    CreateCirclesParameters,
+    CreateCirclesResult,
     CreateColumnsParameters,
     CreateColumnsResult,
     CreateDoorsParameters,
     CreateDoorsResult,
+    CreateHatchesParameters,
+    CreateHatchesResult,
+    CreateHotspotsParameters,
+    CreateHotspotsResult,
     CreateLabelsParameters,
     CreateLabelsResult,
     CreateLampsParameters,
     CreateLampsResult,
+    CreateLineElementsParameters,
+    CreateLineElementsResult,
     CreateMeshesParameters,
     CreateMeshesResult,
     CreateMorphsParameters,
@@ -34,6 +44,8 @@ from multiconn_archicad.models.tapir.commands import (
     CreateRoofsResult,
     CreateSlabsParameters,
     CreateSlabsResult,
+    CreateSplinesParameters,
+    CreateSplinesResult,
     CreateStairsParameters,
     CreateStairsResult,
     CreateTextsParameters,
@@ -48,14 +60,19 @@ from multiconn_archicad.models.tapir.commands import (
     CreateZonesResult,
 )
 from multiconn_archicad.models.tapir.types import (
+    ArcData,
     AssociativeDimensionData,
     AssociativeDimensionOnSectionData,
     BeamData,
+    CircleData,
     ColumnData,
     DoorData,
     ElementIdArrayItem,
+    HatchData,
+    HotspotData,
     LabelData,
     LampData,
+    LineElementData,
     MeshData,
     MorphData,
     ObjectData,
@@ -63,6 +80,7 @@ from multiconn_archicad.models.tapir.types import (
     PolylineData,
     RoofData,
     SlabData,
+    SplineData,
     StairData,
     TextData,
     WallData,
@@ -78,6 +96,31 @@ if TYPE_CHECKING:
 class ElementCreationCommands:
     def __init__(self, core: CoreCommands):
         self._core = core
+
+    def create_arcs(self, arcs_data: list[ArcData]) -> list[ElementIdArrayItem]:
+        """
+        Creates Arc elements based on the given parameters.
+
+        Args:
+            arcs_data (list[ArcData]): Array of data to create Arcs.
+
+        Returns:
+            list[ElementIdArrayItem]: A list of elements.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "arcsData": arcs_data,
+        }
+        validated_params = CreateArcsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "CreateArcs", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = CreateArcsResult.model_validate(response_dict)
+        return validated_response.elements
 
     def create_associative_dimensions(
         self, dimensions_data: list[AssociativeDimensionData]
@@ -160,6 +203,31 @@ class ElementCreationCommands:
         validated_response = CreateBeamsResult.model_validate(response_dict)
         return validated_response.elements
 
+    def create_circles(self, circles_data: list[CircleData]) -> list[ElementIdArrayItem]:
+        """
+        Creates Circle elements based on the given parameters.
+
+        Args:
+            circles_data (list[CircleData]): Array of data to create Circles.
+
+        Returns:
+            list[ElementIdArrayItem]: A list of elements.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "circlesData": circles_data,
+        }
+        validated_params = CreateCirclesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "CreateCircles", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = CreateCirclesResult.model_validate(response_dict)
+        return validated_response.elements
+
     def create_columns(self, columns_data: list[ColumnData]) -> list[ElementIdArrayItem]:
         """
         Creates Column elements based on the given parameters.
@@ -210,6 +278,56 @@ class ElementCreationCommands:
         validated_response = CreateDoorsResult.model_validate(response_dict)
         return validated_response.elements
 
+    def create_hatches(self, hatches_data: list[HatchData]) -> list[ElementIdArrayItem]:
+        """
+        Creates Hatch elements based on the given parameters.
+
+        Args:
+            hatches_data (list[HatchData]): Array of data to create Hatches.
+
+        Returns:
+            list[ElementIdArrayItem]: A list of elements.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "hatchesData": hatches_data,
+        }
+        validated_params = CreateHatchesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "CreateHatches", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = CreateHatchesResult.model_validate(response_dict)
+        return validated_response.elements
+
+    def create_hotspots(self, hotspots_data: list[HotspotData]) -> list[ElementIdArrayItem]:
+        """
+        Creates Hotspot elements based on the given parameters.
+
+        Args:
+            hotspots_data (list[HotspotData]): Array of data to create Hotspots.
+
+        Returns:
+            list[ElementIdArrayItem]: A list of elements.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "hotspotsData": hotspots_data,
+        }
+        validated_params = CreateHotspotsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "CreateHotspots", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = CreateHotspotsResult.model_validate(response_dict)
+        return validated_response.elements
+
     def create_labels(self, labels_data: list[LabelData]) -> list[ElementIdArrayItem]:
         """
         Creates Label elements based on the given parameters.
@@ -258,6 +376,31 @@ class ElementCreationCommands:
             "CreateLamps", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = CreateLampsResult.model_validate(response_dict)
+        return validated_response.elements
+
+    def create_line_elements(self, lines_data: list[LineElementData]) -> list[ElementIdArrayItem]:
+        """
+        Creates Line elements based on the given parameters.
+
+        Args:
+            lines_data (list[LineElementData]): Array of data to create Lines.
+
+        Returns:
+            list[ElementIdArrayItem]: A list of elements.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "linesData": lines_data,
+        }
+        validated_params = CreateLineElementsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "CreateLineElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = CreateLineElementsResult.model_validate(response_dict)
         return validated_response.elements
 
     def create_meshes(self, meshes_data: list[MeshData]) -> list[ElementIdArrayItem]:
@@ -387,7 +530,9 @@ class ElementCreationCommands:
 
     def create_roofs(self, roofs_data: list[RoofData]) -> list[ElementIdArrayItem]:
         """
-        Creates multi-plane Roof elements based on footprint, level and roof profile data.
+        Creates Roof elements based on footprint, level and roof profile data. Creates a multi-
+        plane roof by default; pass 'pivotLine' (and optionally 'angle') to create a single-
+        plane roof instead.
 
         Args:
             roofs_data (list[RoofData])
@@ -433,6 +578,33 @@ class ElementCreationCommands:
             "CreateSlabs", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = CreateSlabsResult.model_validate(response_dict)
+        return validated_response.elements
+
+    def create_splines(self, splines_data: list[SplineData]) -> list[ElementIdArrayItem]:
+        """
+        Creates Spline elements based on the given parameters.
+
+        Args:
+            splines_data (list[SplineData]): Array of data to create Splines. Only auto-smoothed
+                curves are supported (bezier handle positions are calculated automatically by
+                Archicad from the point positions).
+
+        Returns:
+            list[ElementIdArrayItem]: A list of elements.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "splinesData": splines_data,
+        }
+        validated_params = CreateSplinesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "CreateSplines", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = CreateSplinesResult.model_validate(response_dict)
         return validated_response.elements
 
     def create_stairs(self, stairs_data: list[StairData]) -> list[ElementIdArrayItem]:

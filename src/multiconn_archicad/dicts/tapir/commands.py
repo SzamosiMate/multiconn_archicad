@@ -8,6 +8,7 @@ from typing_extensions import NotRequired
 from .types import (
     ActiveDesignOptionsInCombination,
     Angle,
+    ArcData,
     Area,
     AssociativeDimensionData,
     AssociativeDimensionOnSectionData,
@@ -23,6 +24,7 @@ from .types import (
     BuildingMaterialAttributeOrError,
     BuildingMaterialDataArrayItem,
     BuildingMaterialPhysicalPropertiesList,
+    CircleData,
     ClassificationItemIds,
     ClassificationSystemIds,
     ClassificationSystemsWithItems,
@@ -56,6 +58,7 @@ from .types import (
     DoorData,
     DoorWithDetails,
     DrawingData,
+    DrawingWithNewLink,
     Element,
     ElementClassifications,
     ElementClassificationsOrErrors,
@@ -66,7 +69,10 @@ from .types import (
     ElementIFCPropertiesOrErrors,
     ElementIFCTypesOrErrors,
     ElementId,
+    ElementIdOrError,
+    ElementIdsOrErrors,
     ElementPropertyValues,
+    ElementRelationsOrError,
     ElementType,
     Elements,
     ElementsByIFCIds,
@@ -76,6 +82,7 @@ from .types import (
     ElementsWithGDLParameter,
     ElementsWithMoveVector,
     ElementsWithRotation,
+    ElementsWrapperOrError,
     ExecutionResult,
     ExecutionResults,
     FavoriteRename,
@@ -88,15 +95,31 @@ from .types import (
     FillAttributeOrError,
     FillDataArrayItem,
     GDLParameterList,
+    GroupIdArrayItem,
     GroupIdOrError,
+    HatchData,
     Hotlinks,
+    HotspotData,
     Issue,
     IssueCommentStatus,
     IssueElementType,
     IssueId,
     Issues,
+    KeynoteAutoTextTokensOrErrors,
+    KeynoteFolderData,
+    KeynoteFolderDetails,
+    KeynoteFolderIdArrayItem,
+    KeynoteFolderIdsOrErrors,
+    KeynoteFolderModificationData,
+    KeynoteItemData,
+    KeynoteItemDetails,
+    KeynoteItemIdArrayItem,
+    KeynoteItemIdsOrErrors,
+    KeynoteItemModificationData,
+    KeynoteLabelData,
     LabelData,
     LampData,
+    LampWithDetails,
     LayerAttributeField,
     LayerAttributeOrError,
     LayerCombinationAttributeOrError,
@@ -114,6 +137,19 @@ from .types import (
     LineAttributeField,
     LineAttributeOrError,
     LineDataArrayItem,
+    LineElementData,
+    MEPConnectionData,
+    MEPConnectionResultsOrErrors,
+    MEPDistributionSystem,
+    MEPElement,
+    MEPElementData,
+    MEPElementPortsOrErrors,
+    MEPElementType,
+    MEPPreferenceTable,
+    MEPPreferenceTableDomain,
+    MEPRoutingElementData,
+    MEPRoutingElementDetailsOrErrors,
+    MEPRoutingElementModificationData,
     MEPSystemAttributeField,
     MEPSystemAttributeOrError,
     MEPSystemData,
@@ -130,6 +166,7 @@ from .types import (
     NavigatorItemIdsWithViewSetting,
     NewClassificationItems,
     ObjectData,
+    ObjectWithDetails,
     OpeningData,
     PenTableAttributeField,
     PenTableAttributeOrError,
@@ -163,6 +200,9 @@ from .types import (
     SolidLinkData,
     SolidLinkReference,
     SolidLinksOfElement,
+    SpecialFolderPathsOrErrors,
+    SpecialFolderType,
+    SplineData,
     StairData,
     StoriesParameters,
     StoriesSettings,
@@ -209,6 +249,33 @@ class GetCurrentWindowTypeResult(TypedDict):
 
 
 ChangeWindowResult: TypeAlias = ExecutionResult
+
+
+class GetUserGSIDResult(TypedDict):
+    userId: str
+    organizationIds: NotRequired[list[str]]
+
+
+class ShowAlertParameters(TypedDict):
+    alertType: Literal["information", "warning", "error"]
+    title: str
+    message: str
+    subMessage: NotRequired[str]
+    button1: str
+    button2: NotRequired[str]
+    button3: NotRequired[str]
+
+
+class ShowAlertResult(TypedDict):
+    clickedButton: int
+
+
+class GetSpecialFoldersParameters(TypedDict):
+    folderTypes: list[SpecialFolderType]
+
+
+class GetSpecialFoldersResult(TypedDict):
+    folderPaths: SpecialFolderPathsOrErrors
 
 
 class GetProjectInfoResult(TypedDict):
@@ -369,6 +436,14 @@ class ModifyMeshesResult(TypedDict):
     executionResults: ExecutionResults
 
 
+class ModifyObjectsResult(TypedDict):
+    executionResults: ExecutionResults
+
+
+class ModifyLampsResult(TypedDict):
+    executionResults: ExecutionResults
+
+
 class GetElementPreviewImageResult(TypedDict):
     previewImage: str
 
@@ -398,6 +473,26 @@ RemoveElementNotificationClientResult: TypeAlias = ExecutionResult
 
 class CreateGroupsResult(TypedDict):
     groupGuids: list[GroupIdOrError]
+
+
+class GetGroupsOfElementsResult(TypedDict):
+    groupGuids: list[GroupIdOrError]
+
+
+class GetElementsOfGroupsParameters(TypedDict):
+    groups: list[GroupIdArrayItem]
+
+
+class GetSuspendGroupsModeResult(TypedDict):
+    suspendGroups: bool
+
+
+class SetSuspendGroupsModeParameters(TypedDict):
+    suspendGroups: bool
+
+
+class SetSuspendGroupsModeResult(TypedDict):
+    executionResult: ExecutionResult
 
 
 class GetFavoritesByTypeParameters(TypedDict):
@@ -787,6 +882,26 @@ class MoveDesignOptionsToAnotherSetResult(TypedDict):
     executionResults: ExecutionResults
 
 
+class ModifyKeynoteFoldersResult(TypedDict):
+    executionResults: ExecutionResults
+
+
+class ModifyKeynoteItemsResult(TypedDict):
+    executionResults: ExecutionResults
+
+
+class DeleteKeynoteFoldersResult(TypedDict):
+    executionResults: ExecutionResults
+
+
+class DeleteKeynoteItemsResult(TypedDict):
+    executionResults: ExecutionResults
+
+
+class ModifyMEPRoutingElementsResult(TypedDict):
+    executionResults: ExecutionResults
+
+
 class CreateSolidElementLinksResult(TypedDict):
     executionResults: ExecutionResults
 
@@ -879,20 +994,8 @@ class SetGDLParametersOfElementsParameters(TypedDict):
     elementsWithGDLParameters: list[ElementsWithGDLParameter]
 
 
-class CreateColumnsParameters(TypedDict):
-    columnsData: list[ColumnData]
-
-
-class CreateBeamsParameters(TypedDict):
-    beamsData: list[BeamData]
-
-
 class CreateStairsParameters(TypedDict):
     stairsData: list[StairData]
-
-
-class CreateSlabsParameters(TypedDict):
-    slabsData: list[SlabData]
 
 
 class GetDimensionDataParameters(TypedDict):
@@ -903,12 +1006,8 @@ class CreatePolylinesParameters(TypedDict):
     polylinesData: list[PolylineData]
 
 
-class CreateObjectsParameters(TypedDict):
-    objectsData: list[ObjectData]
-
-
-class CreateLampsParameters(TypedDict):
-    lampsData: list[LampData]
+class CreateHotspotsParameters(TypedDict):
+    hotspotsData: list[HotspotData]
 
 
 class CreateTextsParameters(TypedDict):
@@ -1131,6 +1230,48 @@ class MoveDesignOptionsToAnotherSetParameters(TypedDict):
     designOptionAndSetPairs: list[DesignOptionAndSetPair]
 
 
+class GetKeynoteTreeResult(TypedDict):
+    foldersInRoot: list[KeynoteFolderDetails]
+    itemsInRoot: list[KeynoteItemDetails]
+
+
+class GetKeynoteAutoTextsParameters(TypedDict):
+    keynoteItems: list[KeynoteItemIdArrayItem]
+
+
+class GetKeynoteAutoTextsResult(TypedDict):
+    autoTexts: KeynoteAutoTextTokensOrErrors
+
+
+class CreateKeynoteFoldersResult(TypedDict):
+    keynoteFolderIdsOrErrors: KeynoteFolderIdsOrErrors
+
+
+class CreateKeynoteItemsResult(TypedDict):
+    keynoteItemIdsOrErrors: KeynoteItemIdsOrErrors
+
+
+class DeleteKeynoteFoldersParameters(TypedDict):
+    keynoteFolderIds: list[KeynoteFolderIdArrayItem]
+
+
+class DeleteKeynoteItemsParameters(TypedDict):
+    keynoteItemIds: list[KeynoteItemIdArrayItem]
+
+
+class GetMEPElementsParameters(TypedDict):
+    elementTypes: NotRequired[list[MEPElementType]]
+    domains: NotRequired[list[Literal["Ventilation", "Piping", "CableCarrier"]]]
+
+
+class GetMEPPreferenceTablesParameters(TypedDict):
+    domain: MEPPreferenceTableDomain
+
+
+class GetMEPPreferenceTablesResult(TypedDict):
+    tables: list[MEPPreferenceTable]
+
+
 ChangeWindowParameters: TypeAlias = NavigatorItemIdOrDatabaseIdAndWindowType
 
 
@@ -1145,12 +1286,20 @@ class GetAllElementsParameters(TypedDict):
     databases: NotRequired[Databases]
 
 
-class GetDetailsOfElementsResult(TypedDict):
-    detailsOfElements: list[DetailsOfElement]
+class CreateColumnsParameters(TypedDict):
+    columnsData: list[ColumnData]
 
 
 class CreateWallsParameters(TypedDict):
     wallsData: list[WallData]
+
+
+class CreateBeamsParameters(TypedDict):
+    beamsData: list[BeamData]
+
+
+class CreateSlabsParameters(TypedDict):
+    slabsData: list[SlabData]
 
 
 class CreateWindowsParameters(TypedDict):
@@ -1183,6 +1332,34 @@ class GetDimensionDataResult(TypedDict):
 
 class CreateZonesParameters(TypedDict):
     zonesData: list[ZoneData]
+
+
+class CreateLineElementsParameters(TypedDict):
+    linesData: list[LineElementData]
+
+
+class CreateArcsParameters(TypedDict):
+    arcsData: list[ArcData]
+
+
+class CreateCirclesParameters(TypedDict):
+    circlesData: list[CircleData]
+
+
+class CreateHatchesParameters(TypedDict):
+    hatchesData: list[HatchData]
+
+
+class CreateSplinesParameters(TypedDict):
+    splinesData: list[SplineData]
+
+
+class CreateObjectsParameters(TypedDict):
+    objectsData: list[ObjectData]
+
+
+class CreateLampsParameters(TypedDict):
+    lampsData: list[LampData]
 
 
 class CreateMeshesParameters(TypedDict):
@@ -1219,6 +1396,14 @@ class ModifyDoorsParameters(TypedDict):
 
 class ModifyRoofsParameters(TypedDict):
     roofsWithDetails: list[RoofWithDetails]
+
+
+class ModifyObjectsParameters(TypedDict):
+    objectsWithDetails: list[ObjectWithDetails]
+
+
+class ModifyLampsParameters(TypedDict):
+    lampsWithDetails: list[LampWithDetails]
 
 
 class CreateGroupsParameters(TypedDict):
@@ -1310,6 +1495,14 @@ class CreateLayoutSubsetResult(TypedDict):
     navigatorItems: list[NavigatorItemIdOrError]
 
 
+class ChangeDrawingLinkParameters(TypedDict):
+    drawingsWithNewLinks: list[DrawingWithNewLink]
+
+
+class ChangeDrawingLinkResult(TypedDict):
+    elements: list[ElementIdOrError]
+
+
 class SetLayoutSettingsParameters(TypedDict):
     layoutsData: list[LayoutSettingsData]
 
@@ -1345,6 +1538,70 @@ class GetDesignOptionCombinationsResult(TypedDict):
 
 class CreateDesignOptionCombinationsParameters(TypedDict):
     designOptionCombinations: list[DesignOptionCombinationData]
+
+
+class CreateKeynoteFoldersParameters(TypedDict):
+    foldersData: list[KeynoteFolderData]
+
+
+class CreateKeynoteItemsParameters(TypedDict):
+    itemsData: list[KeynoteItemData]
+
+
+class ModifyKeynoteFoldersParameters(TypedDict):
+    foldersData: list[KeynoteFolderModificationData]
+
+
+class ModifyKeynoteItemsParameters(TypedDict):
+    itemsData: list[KeynoteItemModificationData]
+
+
+class CreateKeynoteLabelsParameters(TypedDict):
+    labelsData: list[KeynoteLabelData]
+
+
+class CreateKeynoteLabelsResult(TypedDict):
+    elements: ElementIdsOrErrors
+
+
+class GetMEPElementsResult(TypedDict):
+    elements: list[MEPElement]
+
+
+class GetMEPRoutingElementsResult(TypedDict):
+    routingElements: MEPRoutingElementDetailsOrErrors
+
+
+class GetMEPPortsResult(TypedDict):
+    elementPorts: MEPElementPortsOrErrors
+
+
+class CreateMEPRoutingElementsParameters(TypedDict):
+    routingElementsData: list[MEPRoutingElementData]
+
+
+class CreateMEPRoutingElementsResult(TypedDict):
+    elements: ElementIdsOrErrors
+
+
+class CreateMEPElementsParameters(TypedDict):
+    elementsData: list[MEPElementData]
+
+
+class CreateMEPElementsResult(TypedDict):
+    elements: ElementIdsOrErrors
+
+
+class ModifyMEPRoutingElementsParameters(TypedDict):
+    routingElementsData: list[MEPRoutingElementModificationData]
+
+
+class ConnectMEPElementsParameters(TypedDict):
+    connectionsData: list[MEPConnectionData]
+
+
+class ConnectMEPElementsResult(TypedDict):
+    connectionResults: MEPConnectionResultsOrErrors
 
 
 class CreateSolidElementLinksParameters(TypedDict):
@@ -1387,6 +1644,10 @@ class GetDetailsOfElementsParameters(TypedDict):
     elements: Elements
 
 
+class GetDetailsOfElementsResult(TypedDict):
+    detailsOfElements: list[DetailsOfElement]
+
+
 class Get3DBoundingBoxesParameters(TypedDict):
     elements: Elements
 
@@ -1405,6 +1666,11 @@ class GetConnectedElementsParameters(TypedDict):
 
 
 GetConnectedElementsResult: TypeAlias = ConnectedElementsOrError
+
+
+class GetRelationsOfElementsParameters(TypedDict):
+    elements: Elements
+    otherElementType: NotRequired[ElementType]
 
 
 class GetCollisionsParameters(TypedDict):
@@ -1504,6 +1770,30 @@ class CreatePolylinesResult(TypedDict):
     elements: Elements
 
 
+class CreateLineElementsResult(TypedDict):
+    elements: Elements
+
+
+class CreateArcsResult(TypedDict):
+    elements: Elements
+
+
+class CreateCirclesResult(TypedDict):
+    elements: Elements
+
+
+class CreateHotspotsResult(TypedDict):
+    elements: Elements
+
+
+class CreateHatchesResult(TypedDict):
+    elements: Elements
+
+
+class CreateSplinesResult(TypedDict):
+    elements: Elements
+
+
 class CreateObjectsResult(TypedDict):
     elements: Elements
 
@@ -1530,6 +1820,14 @@ class ModifyMorphsParameters(TypedDict):
 
 class ModifyMeshesParameters(TypedDict):
     meshesData: list[MeshWithDetails]
+
+
+class GetGroupsOfElementsParameters(TypedDict):
+    elements: Elements
+
+
+class GetElementsOfGroupsResult(TypedDict):
+    elementsOfGroups: list[ElementsWrapperOrError]
 
 
 class GetPropertyValuesOfElementsParameters(TypedDict):
@@ -1721,8 +2019,20 @@ class GetDesignOptionForElementsParameters(TypedDict):
     elements: Elements
 
 
+class GetMEPRoutingElementsParameters(TypedDict):
+    elements: Elements
+
+
+class GetMEPPortsParameters(TypedDict):
+    elements: Elements
+
+
 class GetSolidElementLinksParameters(TypedDict):
     elements: Elements
+
+
+class GetRelationsOfElementsResult(TypedDict):
+    relations: list[ElementRelationsOrError]
 
 
 class CreateProfilesParameters(TypedDict):
@@ -1732,6 +2042,10 @@ class CreateProfilesParameters(TypedDict):
 
 class GetProfilesResult(TypedDict):
     profiles: list[ProfileAttributeOrError]
+
+
+class GetMEPDistributionSystemsResult(TypedDict):
+    distributionSystems: list[MEPDistributionSystem]
 
 
 class GetHotlinksResult(TypedDict):
