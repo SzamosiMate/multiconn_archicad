@@ -388,10 +388,31 @@
                 "source": "tapir"
             },
             {
+                "name": "GetSpecialFolders",
+                "group": "Application Commands",
+                "description": "Retrieves the filesystem paths of the special folders of the running Archicad (preferences, cache, data, temporary, application, defaults, templates, help, embedded project library, etc.).",
+                "version": "1.5.6",
+                "source": "tapir"
+            },
+            {
+                "name": "GetUserGSID",
+                "group": "Application Commands",
+                "description": "Get the current registered User-GSID and OrganizationsID. Requires Archicad 27 or later.",
+                "version": "1.5.6",
+                "source": "tapir"
+            },
+            {
                 "name": "QuitArchicad",
                 "group": "Application Commands",
                 "description": "Performs a quit operation on the currently running Archicad instance.",
                 "version": "0.1.0",
+                "source": "tapir"
+            },
+            {
+                "name": "ShowAlert",
+                "group": "Application Commands",
+                "description": "Display a dialog with up to three buttons.",
+                "version": "1.5.6",
                 "source": "tapir"
             }
         ],
@@ -693,7 +714,72 @@
                 "source": "tapir"
             }
         ],
+        "MEP Commands": [
+            {
+                "name": "ConnectMEPElements",
+                "group": "MEP Commands",
+                "description": "Connects MEP routing elements to other MEP elements or routes. Merges routes, splits routes or creates branch elements as needed. Available from Archicad 28.",
+                "version": "1.5.6",
+                "source": "tapir"
+            },
+            {
+                "name": "CreateMEPElements",
+                "group": "MEP Commands",
+                "description": "Creates MEP elements (Terminal, Accessory, Equipment or Fitting) at the given positions. Available from Archicad 28.",
+                "version": "1.5.6",
+                "source": "tapir"
+            },
+            {
+                "name": "CreateMEPRoutingElements",
+                "group": "MEP Commands",
+                "description": "Creates MEP routing elements (duct, pipe or cable carrier routes) along the given polylines with optional cross section data and MEP system. Available from Archicad 28.",
+                "version": "1.5.6",
+                "source": "tapir"
+            },
+            {
+                "name": "GetMEPDistributionSystems",
+                "group": "MEP Commands",
+                "description": "Retrieves the MEP distribution systems of the project with their domain, MEP system attribute and member elements. Available from Archicad 28.",
+                "version": "1.5.6",
+                "source": "tapir"
+            },
+            {
+                "name": "GetMEPElements",
+                "group": "MEP Commands",
+                "description": "Retrieves the MEP (Mechanical, Electrical, Plumbing) elements of the project, optionally filtered by type and domain. MEP elements are ordinary elements, so the generic element commands work on them as well (for example they can be deleted with the DeleteElements command). Available from Archicad 28.",
+                "version": "1.5.6",
+                "source": "tapir"
+            },
+            {
+                "name": "GetMEPPorts",
+                "group": "MEP Commands",
+                "description": "Retrieves the ports of the given MEP elements including position, shape, size and connection status. Available from Archicad 28.",
+                "version": "1.5.6",
+                "source": "tapir"
+            },
+            {
+                "name": "GetMEPRoutingElements",
+                "group": "MEP Commands",
+                "description": "Retrieves the details of the given MEP routing elements: domain, MEP system, route polyline, segments with cross section data and nodes. Available from Archicad 28.",
+                "version": "1.5.6",
+                "source": "tapir"
+            },
+            {
+                "name": "ModifyMEPRoutingElements",
+                "group": "MEP Commands",
+                "description": "Modifies the given MEP routing elements: MEP system, cross section data of all segments and node positions. Available from Archicad 28.",
+                "version": "1.5.6",
+                "source": "tapir"
+            }
+        ],
         "Element Creation Commands": [
+            {
+                "name": "CreateArcs",
+                "group": "Element Creation Commands",
+                "description": "Creates Arc elements based on the given parameters.",
+                "version": "1.5.7",
+                "source": "tapir"
+            },
             {
                 "name": "CreateAssociativeDimensions",
                 "group": "Element Creation Commands",
@@ -716,6 +802,13 @@
                 "source": "tapir"
             },
             {
+                "name": "CreateCircles",
+                "group": "Element Creation Commands",
+                "description": "Creates Circle elements based on the given parameters.",
+                "version": "1.5.7",
+                "source": "tapir"
+            },
+            {
                 "name": "CreateColumns",
                 "group": "Element Creation Commands",
                 "description": "Creates Column elements based on the given parameters.",
@@ -730,6 +823,20 @@
                 "source": "tapir"
             },
             {
+                "name": "CreateHatches",
+                "group": "Element Creation Commands",
+                "description": "Creates Hatch elements based on the given parameters.",
+                "version": "1.5.7",
+                "source": "tapir"
+            },
+            {
+                "name": "CreateHotspots",
+                "group": "Element Creation Commands",
+                "description": "Creates Hotspot elements based on the given parameters.",
+                "version": "1.5.7",
+                "source": "tapir"
+            },
+            {
                 "name": "CreateLabels",
                 "group": "Element Creation Commands",
                 "description": "Creates Label elements based on the given parameters.",
@@ -741,6 +848,13 @@
                 "group": "Element Creation Commands",
                 "description": "Creates Lamp elements based on the given parameters.",
                 "version": "1.5.0",
+                "source": "tapir"
+            },
+            {
+                "name": "CreateLineElements",
+                "group": "Element Creation Commands",
+                "description": "Creates Line elements based on the given parameters.",
+                "version": "1.5.7",
                 "source": "tapir"
             },
             {
@@ -781,7 +895,7 @@
             {
                 "name": "CreateRoofs",
                 "group": "Element Creation Commands",
-                "description": "Creates multi-plane Roof elements based on footprint, level and roof profile data.",
+                "description": "Creates Roof elements based on footprint, level and roof profile data. Creates a multi-plane roof by default; pass 'pivotLine' (and optionally 'angle') to create a single-plane roof instead.",
                 "version": "1.4.0",
                 "source": "tapir"
             },
@@ -790,6 +904,13 @@
                 "group": "Element Creation Commands",
                 "description": "Creates Slab elements based on the given parameters.",
                 "version": "1.0.3",
+                "source": "tapir"
+            },
+            {
+                "name": "CreateSplines",
+                "group": "Element Creation Commands",
+                "description": "Creates Spline elements based on the given parameters.",
+                "version": "1.5.7",
                 "source": "tapir"
             },
             {
@@ -1141,6 +1262,99 @@
                 "group": "Element grouping Commands",
                 "description": "Creates groups of the passed elements",
                 "version": "1.4.0",
+                "source": "tapir"
+            },
+            {
+                "name": "GetElementsOfGroups",
+                "group": "Element grouping Commands",
+                "description": "Gets the elements directly contained by each given group.",
+                "version": "1.5.6",
+                "source": "tapir"
+            },
+            {
+                "name": "GetGroupsOfElements",
+                "group": "Element grouping Commands",
+                "description": "Gets the identifier of the group that directly contains each given element. Returns an error for elements that are not part of any group.",
+                "version": "1.5.6",
+                "source": "tapir"
+            },
+            {
+                "name": "GetSuspendGroupsMode",
+                "group": "Element grouping Commands",
+                "description": "Gets the current state of the Suspend Groups mode.",
+                "version": "1.5.6",
+                "source": "tapir"
+            },
+            {
+                "name": "SetSuspendGroupsMode",
+                "group": "Element grouping Commands",
+                "description": "Turns the Suspend Groups mode on or off. Suspend groups to perform operations on elements that are part of a group; remember to restore the previous state afterwards.",
+                "version": "1.5.6",
+                "source": "tapir"
+            }
+        ],
+        "Keynote Commands": [
+            {
+                "name": "CreateKeynoteFolders",
+                "group": "Keynote Commands",
+                "description": "Creates keynote folders under the given parent folders (or under the root folder). Available from Archicad 28.",
+                "version": "1.5.6",
+                "source": "tapir"
+            },
+            {
+                "name": "CreateKeynoteItems",
+                "group": "Keynote Commands",
+                "description": "Creates keynote items in the given parent folders (or in the root folder). Available from Archicad 28.",
+                "version": "1.5.6",
+                "source": "tapir"
+            },
+            {
+                "name": "CreateKeynoteLabels",
+                "group": "Keynote Commands",
+                "description": "Creates Label elements that reference the given keynote items via autotext. Available from Archicad 28.",
+                "version": "1.5.6",
+                "source": "tapir"
+            },
+            {
+                "name": "DeleteKeynoteFolders",
+                "group": "Keynote Commands",
+                "description": "Deletes the given keynote folders including their content. Available from Archicad 28.",
+                "version": "1.5.6",
+                "source": "tapir"
+            },
+            {
+                "name": "DeleteKeynoteItems",
+                "group": "Keynote Commands",
+                "description": "Deletes the given keynote items. Available from Archicad 28.",
+                "version": "1.5.6",
+                "source": "tapir"
+            },
+            {
+                "name": "GetKeynoteAutoTexts",
+                "group": "Keynote Commands",
+                "description": "Retrieves the autotext tokens of the given keynote items. The tokens can be used as label text content to reference the fields of a keynote item. Available from Archicad 28.",
+                "version": "1.5.6",
+                "source": "tapir"
+            },
+            {
+                "name": "GetKeynoteTree",
+                "group": "Keynote Commands",
+                "description": "Retrieves the whole keynote folder and item hierarchy. The technical root folder is not included in the output; the top-level folders and items are returned directly. Available from Archicad 28.",
+                "version": "1.5.6",
+                "source": "tapir"
+            },
+            {
+                "name": "ModifyKeynoteFolders",
+                "group": "Keynote Commands",
+                "description": "Modifies the key, title or reference of the given keynote folders. Available from Archicad 28.",
+                "version": "1.5.6",
+                "source": "tapir"
+            },
+            {
+                "name": "ModifyKeynoteItems",
+                "group": "Keynote Commands",
+                "description": "Modifies the key, title, description or reference of the given keynote items. Available from Archicad 28.",
+                "version": "1.5.6",
                 "source": "tapir"
             }
         ],

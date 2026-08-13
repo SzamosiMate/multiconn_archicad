@@ -64,40 +64,40 @@ from multiconn_archicad.models.tapir.types import (
     AttributesToDeleteItem,
     BuildingMaterialAttribute,
     BuildingMaterialAttributeField,
-    BuildingMaterialDataArrayItem,
+    BuildingMaterialData,
     BuildingMaterialPhysicalPropertiesArrayItem,
     CompositeAttribute,
     CompositeAttributeField,
-    CompositeDataArrayItem,
+    CompositeData,
     ErrorItem,
     FailedExecutionResult,
     FillAttribute,
     FillAttributeField,
-    FillDataArrayItem,
+    FillData,
     LayerAttribute,
     LayerAttributeField,
     LayerCombinationAttribute,
     LayerCombinationDataArrayItem,
-    LayerDataArrayItem,
+    LayerData,
     LineAttribute,
     LineAttributeField,
-    LineDataArrayItem,
+    LineData,
     MEPSystemAttribute,
     MEPSystemAttributeField,
     MEPSystemData,
     PenTableAttribute,
     PenTableAttributeField,
-    PenTableDataArrayItem,
+    PenTableData,
     ProfileAttribute,
     ProfileAttributeField,
-    ProfileDataArrayItem,
+    ProfileData,
     SuccessfulExecutionResult,
     SurfaceAttribute,
     SurfaceAttributeField,
-    SurfaceDataArrayItem,
+    SurfaceData,
     ZoneCategoryAttribute,
     ZoneCategoryAttributeField,
-    ZoneCategoryDataArrayItem,
+    ZoneCategoryData,
 )
 
 if TYPE_CHECKING:
@@ -109,14 +109,14 @@ class AttributeCommands:
         self._core = core
 
     def create_building_materials(
-        self, building_material_data_array: list[BuildingMaterialDataArrayItem], overwrite_existing: None | bool = None
+        self, building_material_data_array: list[BuildingMaterialData], overwrite_existing: None | bool = None
     ) -> list[AttributeIdArrayItem]:
         """
         Creates or overwrites Building Material attributes based on the given parameters.
 
         Args:
-            building_material_data_array (list[BuildingMaterialDataArrayItem]): Array of data to
-                create new Building Materials.
+            building_material_data_array (list[BuildingMaterialData]): Array of data to create
+                new Building Materials.
             overwrite_existing (None | bool): Overwrite the Building Material if exists with the
                 same name, or if index is given with the same index. The default is false.
 
@@ -140,14 +140,13 @@ class AttributeCommands:
         return validated_response.attributeIds
 
     def create_composites(
-        self, composite_data_array: list[CompositeDataArrayItem], overwrite_existing: None | bool = None
+        self, composite_data_array: list[CompositeData], overwrite_existing: None | bool = None
     ) -> list[AttributeIdArrayItem]:
         """
         Creates or overwrites Composite attributes based on the given parameters.
 
         Args:
-            composite_data_array (list[CompositeDataArrayItem]): Array of data to create
-                Composites.
+            composite_data_array (list[CompositeData]): Array of data to create Composites.
             overwrite_existing (None | bool): Overwrite the Composite if exists with the same
                 name, or if index is given with the same index. The default is false.
 
@@ -171,13 +170,13 @@ class AttributeCommands:
         return validated_response.attributeIds
 
     def create_fills(
-        self, fill_data_array: list[FillDataArrayItem], overwrite_existing: None | bool = None
+        self, fill_data_array: list[FillData], overwrite_existing: None | bool = None
     ) -> list[AttributeIdArrayItem]:
         """
         Creates or overwrites Fill attributes based on the given parameters.
 
         Args:
-            fill_data_array (list[FillDataArrayItem]): Array of data to create new Fills.
+            fill_data_array (list[FillData]): Array of data to create new Fills.
             overwrite_existing (None | bool): Overwrite the Fill if exists with the same name,
                 or if index is given with the same index. The default is false.
 
@@ -232,13 +231,13 @@ class AttributeCommands:
         return validated_response.attributeIds
 
     def create_layers(
-        self, layer_data_array: list[LayerDataArrayItem], overwrite_existing: None | bool = None
+        self, layer_data_array: list[LayerData], overwrite_existing: None | bool = None
     ) -> list[AttributeIdArrayItem]:
         """
         Creates or overwrites Layer attributes based on the given parameters.
 
         Args:
-            layer_data_array (list[LayerDataArrayItem]): Array of data to create new Layers.
+            layer_data_array (list[LayerData]): Array of data to create new Layers.
             overwrite_existing (None | bool): Overwrite the Layer if exists with the same name,
                 or if index is given with the same index. The default is false.
 
@@ -262,13 +261,13 @@ class AttributeCommands:
         return validated_response.attributeIds
 
     def create_lines(
-        self, line_data_array: list[LineDataArrayItem], overwrite_existing: None | bool = None
+        self, line_data_array: list[LineData], overwrite_existing: None | bool = None
     ) -> list[AttributeIdArrayItem]:
         """
         Creates or overwrites Line attributes based on the given parameters.
 
         Args:
-            line_data_array (list[LineDataArrayItem]): Array of data to create new Lines.
+            line_data_array (list[LineData]): Array of data to create new Lines.
             overwrite_existing (None | bool): Overwrite the Line if exists with the same name,
                 or if index is given with the same index. The default is false.
 
@@ -323,14 +322,13 @@ class AttributeCommands:
         return validated_response.attributeIds
 
     def create_pen_tables(
-        self, pen_table_data_array: list[PenTableDataArrayItem], overwrite_existing: None | bool = None
+        self, pen_table_data_array: list[PenTableData], overwrite_existing: None | bool = None
     ) -> list[AttributeIdArrayItem]:
         """
         Creates or overwrites Pen Table attributes based on the given parameters.
 
         Args:
-            pen_table_data_array (list[PenTableDataArrayItem]): Array of data to create new Pen
-                Tables.
+            pen_table_data_array (list[PenTableData]): Array of data to create new Pen Tables.
             overwrite_existing (None | bool): Overwrite the Pen Table if exists with the same
                 name, or if index is given with the same index. The default is false.
 
@@ -354,15 +352,14 @@ class AttributeCommands:
         return validated_response.attributeIds
 
     def create_profiles(
-        self, profile_data_array: list[ProfileDataArrayItem], overwrite_existing: None | bool = None
+        self, profile_data_array: list[ProfileData], overwrite_existing: None | bool = None
     ) -> list[AttributeIdArrayItem]:
         """
         Creates or overwrites Profile attributes as a copy of an existing Profile's geometry,
         based on the given parameters.
 
         Args:
-            profile_data_array (list[ProfileDataArrayItem]): Array of data to create new
-                Profiles.
+            profile_data_array (list[ProfileData]): Array of data to create new Profiles.
             overwrite_existing (None | bool): Overwrite the Profile if exists with the same
                 name, or if index is given with the same index. The default is false.
 
@@ -386,14 +383,13 @@ class AttributeCommands:
         return validated_response.attributeIds
 
     def create_surfaces(
-        self, surface_data_array: list[SurfaceDataArrayItem], overwrite_existing: None | bool = None
+        self, surface_data_array: list[SurfaceData], overwrite_existing: None | bool = None
     ) -> list[AttributeIdArrayItem]:
         """
         Creates or overwrites Surface attributes based on the given parameters.
 
         Args:
-            surface_data_array (list[SurfaceDataArrayItem]): Array of data to create new
-                surfaces.
+            surface_data_array (list[SurfaceData]): Array of data to create new surfaces.
             overwrite_existing (None | bool): Overwrite the Surface if exists with the same
                 name, or if index is given with the same index. The default is false.
 
@@ -417,14 +413,14 @@ class AttributeCommands:
         return validated_response.attributeIds
 
     def create_zone_categories(
-        self, zone_category_data_array: list[ZoneCategoryDataArrayItem], overwrite_existing: None | bool = None
+        self, zone_category_data_array: list[ZoneCategoryData], overwrite_existing: None | bool = None
     ) -> list[AttributeIdArrayItem]:
         """
         Creates or overwrites Zone Category attributes based on the given parameters.
 
         Args:
-            zone_category_data_array (list[ZoneCategoryDataArrayItem]): Array of data to create
-                new Zone Categories.
+            zone_category_data_array (list[ZoneCategoryData]): Array of data to create new Zone
+                Categories.
             overwrite_existing (None | bool): Overwrite the Zone Category if exists with the
                 same name, or if index is given with the same index. The default is false.
 

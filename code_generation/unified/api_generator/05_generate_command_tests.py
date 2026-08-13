@@ -37,6 +37,8 @@ def patch_recursive_schemas(definitions: dict, model_name_to_test: str, source: 
         patched_defs["Hotlink"]["properties"].pop("children", None)
     if "ClassificationItemDetails" in patched_defs and "properties" in patched_defs["ClassificationItemDetails"]:
         patched_defs["ClassificationItemDetails"]["properties"].pop("children", None)
+    if "KeynoteFolderDetails" in patched_defs and "properties" in patched_defs["KeynoteFolderDetails"]:
+        patched_defs["KeynoteFolderDetails"]["properties"]["subFolders"] = {"type": "array", "maxItems": 0}
 
     # Official recursive types
     if "NavigatorItem" in patched_defs and "properties" in patched_defs["NavigatorItem"]:
