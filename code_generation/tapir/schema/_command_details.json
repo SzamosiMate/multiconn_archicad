@@ -54,6 +54,18 @@
         "version": "1.3.1"
     },
     {
+        "name": "ConnectMEPElements",
+        "group": "MEP Commands",
+        "description": "Connects MEP routing elements to other MEP elements or routes. Merges routes, splits routes or creates branch elements as needed. Available from Archicad 28.",
+        "version": "1.5.6"
+    },
+    {
+        "name": "CreateArcs",
+        "group": "Element Commands",
+        "description": "Creates Arc elements based on the given parameters.",
+        "version": "1.5.7"
+    },
+    {
         "name": "CreateAssociativeDimensions",
         "group": "Element Commands",
         "description": "Creates associative linear dimensions from explicit witness point references.",
@@ -76,6 +88,12 @@
         "group": "Attribute Commands",
         "description": "Creates or overwrites Building Material attributes based on the given parameters.",
         "version": "1.0.1"
+    },
+    {
+        "name": "CreateCircles",
+        "group": "Element Commands",
+        "description": "Creates Circle elements based on the given parameters.",
+        "version": "1.5.7"
     },
     {
         "name": "CreateClassificationItems",
@@ -156,10 +174,40 @@
         "version": "1.4.0"
     },
     {
+        "name": "CreateHatches",
+        "group": "Element Commands",
+        "description": "Creates Hatch elements based on the given parameters.",
+        "version": "1.5.7"
+    },
+    {
+        "name": "CreateHotspots",
+        "group": "Element Commands",
+        "description": "Creates Hotspot elements based on the given parameters.",
+        "version": "1.5.7"
+    },
+    {
         "name": "CreateIssue",
         "group": "Issue Management Commands",
         "description": "Creates a new issue.",
         "version": "1.0.2"
+    },
+    {
+        "name": "CreateKeynoteFolders",
+        "group": "Keynote Commands",
+        "description": "Creates keynote folders under the given parent folders (or under the root folder). Available from Archicad 28.",
+        "version": "1.5.6"
+    },
+    {
+        "name": "CreateKeynoteItems",
+        "group": "Keynote Commands",
+        "description": "Creates keynote items in the given parent folders (or in the root folder). Available from Archicad 28.",
+        "version": "1.5.6"
+    },
+    {
+        "name": "CreateKeynoteLabels",
+        "group": "Keynote Commands",
+        "description": "Creates Label elements that reference the given keynote items via autotext. Available from Archicad 28.",
+        "version": "1.5.6"
     },
     {
         "name": "CreateLabels",
@@ -198,10 +246,28 @@
         "version": "1.4.0"
     },
     {
+        "name": "CreateLineElements",
+        "group": "Element Commands",
+        "description": "Creates Line elements based on the given parameters.",
+        "version": "1.5.7"
+    },
+    {
         "name": "CreateLines",
         "group": "Attribute Commands",
         "description": "Creates or overwrites Line attributes based on the given parameters.",
         "version": "1.5.4"
+    },
+    {
+        "name": "CreateMEPElements",
+        "group": "MEP Commands",
+        "description": "Creates MEP elements (Terminal, Accessory, Equipment or Fitting) at the given positions. Available from Archicad 28.",
+        "version": "1.5.6"
+    },
+    {
+        "name": "CreateMEPRoutingElements",
+        "group": "MEP Commands",
+        "description": "Creates MEP routing elements (duct, pipe or cable carrier routes) along the given polylines with optional cross section data and MEP system. Available from Archicad 28.",
+        "version": "1.5.6"
     },
     {
         "name": "CreateMEPSystems",
@@ -272,7 +338,7 @@
     {
         "name": "CreateRoofs",
         "group": "Element Commands",
-        "description": "Creates multi-plane Roof elements based on footprint, level and roof profile data.",
+        "description": "Creates Roof elements based on footprint, level and roof profile data. Creates a multi-plane roof by default; pass 'pivotLine' (and optionally 'angle') to create a single-plane roof instead.",
         "version": "1.4.0"
     },
     {
@@ -292,6 +358,12 @@
         "group": "Solid Element Operation Commands",
         "description": "Creates solid element operation links between target and operator elements.",
         "version": "1.5.4"
+    },
+    {
+        "name": "CreateSplines",
+        "group": "Element Commands",
+        "description": "Creates Spline elements based on the given parameters.",
+        "version": "1.5.7"
     },
     {
         "name": "CreateStairs",
@@ -394,6 +466,18 @@
         "group": "Issue Management Commands",
         "description": "Deletes the specified issue.",
         "version": "1.0.2"
+    },
+    {
+        "name": "DeleteKeynoteFolders",
+        "group": "Keynote Commands",
+        "description": "Deletes the given keynote folders including their content. Available from Archicad 28.",
+        "version": "1.5.6"
+    },
+    {
+        "name": "DeleteKeynoteItems",
+        "group": "Keynote Commands",
+        "description": "Deletes the given keynote items. Available from Archicad 28.",
+        "version": "1.5.6"
     },
     {
         "name": "DeleteNavigatorItems",
@@ -636,6 +720,12 @@
         "version": "1.5.1"
     },
     {
+        "name": "GetElementsOfGroups",
+        "group": "Element grouping Commands",
+        "description": "Gets the elements directly contained by each given group.",
+        "version": "1.5.6"
+    },
+    {
         "name": "GetFavoritePreviewImage",
         "group": "Favorites Commands",
         "description": "Returns the preview image of the given favorite.",
@@ -666,6 +756,12 @@
         "version": "1.1.6"
     },
     {
+        "name": "GetGroupsOfElements",
+        "group": "Element grouping Commands",
+        "description": "Gets the identifier of the group that directly contains each given element. Returns an error for elements that are not part of any group.",
+        "version": "1.5.6"
+    },
+    {
         "name": "GetHotlinks",
         "group": "Project Commands",
         "description": "Gets the file system locations (path) of the hotlink modules. The hotlinks can have tree hierarchy in the project.",
@@ -694,6 +790,18 @@
         "group": "Issue Management Commands",
         "description": "Retrieves information about existing issues.",
         "version": "1.0.2"
+    },
+    {
+        "name": "GetKeynoteAutoTexts",
+        "group": "Keynote Commands",
+        "description": "Retrieves the autotext tokens of the given keynote items. The tokens can be used as label text content to reference the fields of a keynote item. Available from Archicad 28.",
+        "version": "1.5.6"
+    },
+    {
+        "name": "GetKeynoteTree",
+        "group": "Keynote Commands",
+        "description": "Retrieves the whole keynote folder and item hierarchy. The technical root folder is not included in the output; the top-level folders and items are returned directly. Available from Archicad 28.",
+        "version": "1.5.6"
     },
     {
         "name": "GetLayerCombinations",
@@ -730,6 +838,30 @@
         "group": "Attribute Commands",
         "description": "Returns the details of the given Line attributes.",
         "version": "1.5.4"
+    },
+    {
+        "name": "GetMEPDistributionSystems",
+        "group": "MEP Commands",
+        "description": "Retrieves the MEP distribution systems of the project with their domain, MEP system attribute and member elements. Available from Archicad 28.",
+        "version": "1.5.6"
+    },
+    {
+        "name": "GetMEPElements",
+        "group": "MEP Commands",
+        "description": "Retrieves the MEP (Mechanical, Electrical, Plumbing) elements of the project, optionally filtered by type and domain. MEP elements are ordinary elements, so the generic element commands work on them as well (for example they can be deleted with the DeleteElements command). Available from Archicad 28.",
+        "version": "1.5.6"
+    },
+    {
+        "name": "GetMEPPorts",
+        "group": "MEP Commands",
+        "description": "Retrieves the ports of the given MEP elements including position, shape, size and connection status. Available from Archicad 28.",
+        "version": "1.5.6"
+    },
+    {
+        "name": "GetMEPRoutingElements",
+        "group": "MEP Commands",
+        "description": "Retrieves the details of the given MEP routing elements: domain, MEP system, route polyline, segments with cross section data and nodes. Available from Archicad 28.",
+        "version": "1.5.6"
     },
     {
         "name": "GetMEPSystems",
@@ -828,6 +960,12 @@
         "version": "1.5.4"
     },
     {
+        "name": "GetSpecialFolders",
+        "group": "Application Commands",
+        "description": "Retrieves the filesystem paths of the special folders of the running Archicad (preferences, cache, data, temporary, application, defaults, templates, help, embedded project library, etc.).",
+        "version": "1.5.6"
+    },
+    {
         "name": "GetStories",
         "group": "Project Commands",
         "description": "Retrieves information about the story sructure of the currently loaded project.",
@@ -844,6 +982,18 @@
         "group": "Attribute Commands",
         "description": "Returns the details of the given Surface attributes.",
         "version": "1.5.4"
+    },
+    {
+        "name": "GetSuspendGroupsMode",
+        "group": "Element grouping Commands",
+        "description": "Gets the current state of the Suspend Groups mode.",
+        "version": "1.5.6"
+    },
+    {
+        "name": "GetUserGSID",
+        "group": "Application Commands",
+        "description": "Get the current registered User-GSID and OrganizationsID. Requires Archicad 27 or later.",
+        "version": "1.5.6"
     },
     {
         "name": "GetView2DTransformations",
@@ -916,6 +1066,24 @@
         "group": "Element Commands",
         "description": "Modifies Door elements based on the given parameters.",
         "version": "1.4.0"
+    },
+    {
+        "name": "ModifyKeynoteFolders",
+        "group": "Keynote Commands",
+        "description": "Modifies the key, title or reference of the given keynote folders. Available from Archicad 28.",
+        "version": "1.5.6"
+    },
+    {
+        "name": "ModifyKeynoteItems",
+        "group": "Keynote Commands",
+        "description": "Modifies the key, title, description or reference of the given keynote items. Available from Archicad 28.",
+        "version": "1.5.6"
+    },
+    {
+        "name": "ModifyMEPRoutingElements",
+        "group": "MEP Commands",
+        "description": "Modifies the given MEP routing elements: MEP system, cross section data of all segments and node positions. Available from Archicad 28.",
+        "version": "1.5.6"
     },
     {
         "name": "ModifyMeshes",
@@ -1134,6 +1302,12 @@
         "version": "1.1.5"
     },
     {
+        "name": "SetSuspendGroupsMode",
+        "group": "Element grouping Commands",
+        "description": "Turns the Suspend Groups mode on or off. Suspend groups to perform operations on elements that are part of a group; remember to restore the previous state afterwards.",
+        "version": "1.5.6"
+    },
+    {
         "name": "SetViewRotation",
         "group": "Navigator Commands",
         "description": "Set the rotation angle of 2D views via their floor plan database.",
@@ -1144,6 +1318,12 @@
         "group": "Navigator Commands",
         "description": "Sets the view settings of navigator items",
         "version": "1.1.4"
+    },
+    {
+        "name": "ShowAlert",
+        "group": "Application Commands",
+        "description": "Display a dialog with up to three buttons.",
+        "version": "1.5.6"
     },
     {
         "name": "ShowScriptUI",

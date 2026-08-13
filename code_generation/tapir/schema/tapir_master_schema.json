@@ -22,6 +22,250 @@
         "elementId"
       ]
     },
+    "ElementIdOrError": {
+      "type": "object",
+      "description": "An element identifier or an error.",
+      "oneOf": [
+        {
+          "$ref": "#/$defs/ElementIdArrayItem"
+        },
+        {
+          "$ref": "#/$defs/ErrorItem"
+        }
+      ]
+    },
+    "ElementIdsOrErrors": {
+      "type": "array",
+      "description": "A list of element identifiers or errors.",
+      "items": {
+        "$ref": "#/$defs/ElementIdOrError"
+      }
+    },
+    "MEPRoutingSegmentDetails": {
+      "type": "object",
+      "description": "The details of an MEP routing segment.",
+      "properties": {
+        "elementId": {
+          "$ref": "#/$defs/ElementId"
+        },
+        "crossSectionWidth": {
+          "type": "number"
+        },
+        "crossSectionHeight": {
+          "type": "number"
+        },
+        "crossSectionShape": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elementId",
+        "crossSectionWidth",
+        "crossSectionHeight",
+        "crossSectionShape"
+      ]
+    },
+    "MEPRoutingNodeDetails": {
+      "type": "object",
+      "description": "The details of an MEP routing node.",
+      "properties": {
+        "elementId": {
+          "$ref": "#/$defs/ElementId"
+        },
+        "position": {
+          "$ref": "#/$defs/Coordinate3D"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elementId",
+        "position"
+      ]
+    },
+    "MEPRoutingElementDetails": {
+      "type": "object",
+      "description": "The details of an MEP routing element.",
+      "properties": {
+        "domain": {
+          "$ref": "#/$defs/MEPSystemDomain"
+        },
+        "mepSystemId": {
+          "$ref": "#/$defs/AttributeId"
+        },
+        "polyline": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Coordinate3D"
+          }
+        },
+        "segments": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/MEPRoutingSegmentDetails"
+          }
+        },
+        "nodes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/MEPRoutingNodeDetails"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "domain",
+        "mepSystemId",
+        "polyline",
+        "segments",
+        "nodes"
+      ]
+    },
+    "MEPRoutingElementDetailsOrError": {
+      "type": "object",
+      "description": "The details of an MEP routing element or an error.",
+      "oneOf": [
+        {
+          "$ref": "#/$defs/MEPRoutingElementDetails"
+        },
+        {
+          "$ref": "#/$defs/ErrorItem"
+        }
+      ]
+    },
+    "MEPRoutingElementDetailsOrErrors": {
+      "type": "array",
+      "description": "A list of MEP routing element details or errors.",
+      "items": {
+        "$ref": "#/$defs/MEPRoutingElementDetailsOrError"
+      }
+    },
+    "MEPPortDetails": {
+      "type": "object",
+      "description": "The details of a port of an MEP element.",
+      "properties": {
+        "portId": {
+          "$ref": "#/$defs/Guid"
+        },
+        "name": {
+          "type": "string"
+        },
+        "position": {
+          "$ref": "#/$defs/Coordinate3D"
+        },
+        "direction": {
+          "$ref": "#/$defs/Coordinate3D"
+        },
+        "shape": {
+          "type": "string"
+        },
+        "width": {
+          "type": "number"
+        },
+        "height": {
+          "type": "number"
+        },
+        "domain": {
+          "$ref": "#/$defs/MEPSystemDomain"
+        },
+        "mepSystemId": {
+          "$ref": "#/$defs/AttributeId"
+        },
+        "isPhysicallyConnected": {
+          "type": "boolean"
+        },
+        "connectedPortId": {
+          "$ref": "#/$defs/Guid"
+        },
+        "connectedElementId": {
+          "$ref": "#/$defs/ElementId"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "portId",
+        "name",
+        "position",
+        "direction",
+        "shape",
+        "width",
+        "height",
+        "domain",
+        "mepSystemId",
+        "isPhysicallyConnected"
+      ]
+    },
+    "MEPElementPorts": {
+      "type": "object",
+      "description": "The ports of an MEP element.",
+      "properties": {
+        "ports": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/MEPPortDetails"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "ports"
+      ]
+    },
+    "MEPElementPortsOrError": {
+      "type": "object",
+      "description": "The ports of an MEP element or an error.",
+      "oneOf": [
+        {
+          "$ref": "#/$defs/MEPElementPorts"
+        },
+        {
+          "$ref": "#/$defs/ErrorItem"
+        }
+      ]
+    },
+    "MEPElementPortsOrErrors": {
+      "type": "array",
+      "description": "A list of MEP element ports or errors.",
+      "items": {
+        "$ref": "#/$defs/MEPElementPortsOrError"
+      }
+    },
+    "MEPConnectionResult": {
+      "type": "object",
+      "description": "The result of connecting an MEP routing element: the routing element deleted by merging, the routing element created by splitting and the branch element created by the connection.",
+      "properties": {
+        "deletedRoutingElementId": {
+          "$ref": "#/$defs/ElementId"
+        },
+        "splitRoutingElementId": {
+          "$ref": "#/$defs/ElementId"
+        },
+        "createdBranchId": {
+          "$ref": "#/$defs/ElementId"
+        }
+      },
+      "additionalProperties": false,
+      "required": []
+    },
+    "MEPConnectionResultOrError": {
+      "type": "object",
+      "description": "The result of an MEP connection or an error.",
+      "oneOf": [
+        {
+          "$ref": "#/$defs/MEPConnectionResult"
+        },
+        {
+          "$ref": "#/$defs/ErrorItem"
+        }
+      ]
+    },
+    "MEPConnectionResultsOrErrors": {
+      "type": "array",
+      "description": "A list of MEP connection results or errors.",
+      "items": {
+        "$ref": "#/$defs/MEPConnectionResultOrError"
+      }
+    },
     "ElementId": {
       "type": "object",
       "description": "The identifier of an element.",
@@ -110,6 +354,214 @@
       "additionalProperties": false,
       "required": [
         "guid"
+      ]
+    },
+    "KeynoteFolderId": {
+      "type": "object",
+      "description": "The identifier of a keynote folder.",
+      "properties": {
+        "guid": {
+          "$ref": "#/$defs/Guid"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "guid"
+      ]
+    },
+    "KeynoteItemId": {
+      "type": "object",
+      "description": "The identifier of a keynote item.",
+      "properties": {
+        "guid": {
+          "$ref": "#/$defs/Guid"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "guid"
+      ]
+    },
+    "KeynoteFolderIdArrayItem": {
+      "type": "object",
+      "properties": {
+        "keynoteFolderId": {
+          "$ref": "#/$defs/KeynoteFolderId"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "keynoteFolderId"
+      ]
+    },
+    "KeynoteItemIdArrayItem": {
+      "type": "object",
+      "properties": {
+        "keynoteItemId": {
+          "$ref": "#/$defs/KeynoteItemId"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "keynoteItemId"
+      ]
+    },
+    "KeynoteFolderIdOrError": {
+      "type": "object",
+      "description": "A keynote folder identifier or an error.",
+      "oneOf": [
+        {
+          "$ref": "#/$defs/KeynoteFolderIdArrayItem"
+        },
+        {
+          "$ref": "#/$defs/ErrorItem"
+        }
+      ]
+    },
+    "KeynoteFolderIdsOrErrors": {
+      "type": "array",
+      "description": "A list of keynote folder identifiers or errors.",
+      "items": {
+        "$ref": "#/$defs/KeynoteFolderIdOrError"
+      }
+    },
+    "KeynoteItemIdOrError": {
+      "type": "object",
+      "description": "A keynote item identifier or an error.",
+      "oneOf": [
+        {
+          "$ref": "#/$defs/KeynoteItemIdArrayItem"
+        },
+        {
+          "$ref": "#/$defs/ErrorItem"
+        }
+      ]
+    },
+    "KeynoteItemIdsOrErrors": {
+      "type": "array",
+      "description": "A list of keynote item identifiers or errors.",
+      "items": {
+        "$ref": "#/$defs/KeynoteItemIdOrError"
+      }
+    },
+    "KeynoteAutoTextTokens": {
+      "type": "object",
+      "description": "The autotext tokens of a keynote item. A token can be used as the text content of a label to reference the field of the keynote item.",
+      "properties": {
+        "keyToken": {
+          "type": "string"
+        },
+        "titleToken": {
+          "type": "string"
+        },
+        "descriptionToken": {
+          "type": "string"
+        },
+        "referenceToken": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "keyToken",
+        "titleToken",
+        "descriptionToken",
+        "referenceToken"
+      ]
+    },
+    "KeynoteAutoTextTokensOrError": {
+      "type": "object",
+      "description": "The autotext tokens of a keynote item or an error.",
+      "oneOf": [
+        {
+          "$ref": "#/$defs/KeynoteAutoTextTokens"
+        },
+        {
+          "$ref": "#/$defs/ErrorItem"
+        }
+      ]
+    },
+    "KeynoteAutoTextTokensOrErrors": {
+      "type": "array",
+      "description": "A list of keynote autotext tokens or errors.",
+      "items": {
+        "$ref": "#/$defs/KeynoteAutoTextTokensOrError"
+      }
+    },
+    "KeynoteItemDetails": {
+      "type": "object",
+      "description": "The details of a keynote item.",
+      "properties": {
+        "keynoteItemId": {
+          "$ref": "#/$defs/KeynoteItemId"
+        },
+        "key": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "reference": {
+          "type": "string"
+        },
+        "uiText": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "keynoteItemId",
+        "key",
+        "title",
+        "description",
+        "reference",
+        "uiText"
+      ]
+    },
+    "KeynoteFolderDetails": {
+      "type": "object",
+      "description": "The details of a keynote folder, including its subfolders and items recursively.",
+      "properties": {
+        "keynoteFolderId": {
+          "$ref": "#/$defs/KeynoteFolderId"
+        },
+        "key": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "reference": {
+          "type": "string"
+        },
+        "uiText": {
+          "type": "string"
+        },
+        "subFolders": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/KeynoteFolderDetails"
+          }
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/KeynoteItemDetails"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "keynoteFolderId",
+        "key",
+        "title",
+        "reference",
+        "uiText",
+        "subFolders",
+        "items"
       ]
     },
     "DesignOptionId": {
@@ -958,14 +1410,6 @@
         {
           "$ref": "#/$defs/ErrorItem"
         }
-      ]
-    },
-    "CompositeSkinType": {
-      "type": "string",
-      "enum": [
-        "Core",
-        "Finish",
-        "Other"
       ]
     },
     "CompositeSkin": {
@@ -4236,6 +4680,208 @@
             "$ref": "#/$defs/PolyArc"
           }
         },
+        "roomSeparator": {
+          "type": "boolean",
+          "description": "Is this a zone boundary line?"
+        },
+        "linePenIndex": {
+          "type": "integer"
+        },
+        "lineTypeId": {
+          "$ref": "#/$defs/AttributeId"
+        },
+        "zCoordinate": {
+          "type": "number"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "coordinates",
+        "zCoordinate"
+      ]
+    },
+    "LineDetails": {
+      "type": "object",
+      "properties": {
+        "begCoordinate": {
+          "$ref": "#/$defs/Coordinate2D"
+        },
+        "endCoordinate": {
+          "$ref": "#/$defs/Coordinate2D"
+        },
+        "roomSeparator": {
+          "type": "boolean",
+          "description": "Is this a zone boundary line?"
+        },
+        "linePenIndex": {
+          "type": "integer"
+        },
+        "lineTypeId": {
+          "$ref": "#/$defs/AttributeId"
+        },
+        "zCoordinate": {
+          "type": "number"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "begCoordinate",
+        "endCoordinate",
+        "zCoordinate"
+      ]
+    },
+    "ArcDetails": {
+      "type": "object",
+      "description": "Geometry of an Arc or Circle element. begAngle/endAngle are only present for Arc (a Circle spans the full 0-2*PI range implicitly).",
+      "properties": {
+        "origin": {
+          "$ref": "#/$defs/Coordinate2D"
+        },
+        "radius": {
+          "type": "number"
+        },
+        "angle": {
+          "type": "number",
+          "description": "0.0, or the angle of the 'a' axis in radians."
+        },
+        "ratio": {
+          "type": "number",
+          "description": "1.0, or 'a/b' of the ellipse."
+        },
+        "begAngle": {
+          "type": "number",
+          "description": "Beginning angle of the arc in radians. Only present for Arc, not Circle."
+        },
+        "endAngle": {
+          "type": "number",
+          "description": "End angle of the arc in radians. Only present for Arc, not Circle."
+        },
+        "reflected": {
+          "type": "boolean"
+        },
+        "roomSeparator": {
+          "type": "boolean",
+          "description": "Is this a zone boundary line?"
+        },
+        "linePenIndex": {
+          "type": "integer"
+        },
+        "lineTypeId": {
+          "$ref": "#/$defs/AttributeId"
+        },
+        "zCoordinate": {
+          "type": "number"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "origin",
+        "radius",
+        "angle",
+        "ratio",
+        "reflected",
+        "zCoordinate"
+      ]
+    },
+    "HotspotDetails": {
+      "type": "object",
+      "properties": {
+        "position": {
+          "$ref": "#/$defs/Coordinate2D"
+        },
+        "height": {
+          "type": "number",
+          "description": "Z coordinate of the hotspot (can come from a GDL script)."
+        },
+        "penIndex": {
+          "type": "integer"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "position",
+        "height"
+      ]
+    },
+    "SplineDetails": {
+      "type": "object",
+      "description": "Geometry of a Spline element. Geometry is read-only: Archicad's own API does not support modifying Spline geometry via ACAPI_Element_Change. The settings fields (roomSeparator/linePenIndex/lineTypeId) ARE modifiable via SET.",
+      "properties": {
+        "coordinates": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Coordinate2D"
+          }
+        },
+        "closed": {
+          "type": "boolean",
+          "description": "Is this a closed curve?"
+        },
+        "roomSeparator": {
+          "type": "boolean",
+          "description": "Is this a zone boundary line?"
+        },
+        "linePenIndex": {
+          "type": "integer"
+        },
+        "lineTypeId": {
+          "$ref": "#/$defs/AttributeId"
+        },
+        "zCoordinate": {
+          "type": "number"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "coordinates",
+        "closed",
+        "zCoordinate"
+      ]
+    },
+    "HatchDetails": {
+      "type": "object",
+      "properties": {
+        "coordinates": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Coordinate2D"
+          }
+        },
+        "arcs": {
+          "type": "array",
+          "description": "The arcs of the hatch outline.",
+          "items": {
+            "$ref": "#/$defs/PolyArc"
+          }
+        },
+        "holes": {
+          "$ref": "#/$defs/Holes2D"
+        },
+        "contourPenIndex": {
+          "type": "integer"
+        },
+        "fillPenIndex": {
+          "type": "integer"
+        },
+        "fillBackgroundPenIndex": {
+          "type": "integer"
+        },
+        "fillId": {
+          "$ref": "#/$defs/AttributeId",
+          "description": "The fill attribute used, if the hatch's type is a plain fill hatch."
+        },
+        "buildingMaterialId": {
+          "$ref": "#/$defs/AttributeId",
+          "description": "The building material attribute used, if the hatch's type is a building material hatch."
+        },
+        "roomSpecial": {
+          "type": "integer",
+          "description": "Special area percent in a room (negative means OFF)."
+        },
+        "showArea": {
+          "type": "boolean",
+          "description": "True if the area text is shown."
+        },
         "zCoordinate": {
           "type": "number"
         }
@@ -4870,6 +5516,44 @@
             "$ref": "#/$defs/Coordinate2D"
           },
           "minItems": 3
+        },
+        "nameType": {
+          "type": "string",
+          "enum": [
+            "ViewOrSourceFileName",
+            "ViewIdAndName",
+            "CustomName"
+          ],
+          "description": "How the drawing's title name is assembled (Identification tabpage of the Drawing Settings dialog)."
+        },
+        "customName": {
+          "type": "string",
+          "description": "The drawing's custom title name. Present only when nameType is CustomName."
+        },
+        "numberingType": {
+          "type": "string",
+          "enum": [
+            "ByLayout",
+            "ByViewId",
+            "CustomNumber"
+          ],
+          "description": "How the drawing's title ID is assigned (Identification tabpage of the Drawing Settings dialog)."
+        },
+        "customNumber": {
+          "type": "string",
+          "description": "The drawing's custom title ID. Present only when numberingType is CustomNumber."
+        },
+        "isInNumbering": {
+          "type": "boolean",
+          "description": "Whether the drawing is included in the automatic drawing numbering sequence."
+        },
+        "titleLibraryPartIndex": {
+          "type": "number",
+          "description": "Library part index of the drawing title (API_DrawingTitle::libInd). A negative/invalid index means no title object is instantiated; setting it to a valid index (e.g. copied from another drawing) makes Archicad create the title's own placed element."
+        },
+        "titleElementId": {
+          "$ref": "#/$defs/ElementId",
+          "description": "Id of the drawing title, itself a placed GDL object element (font/pen/size aside, its own settings are reachable like any other element, e.g. with GetGDLParametersOfElements/SetGDLParametersOfElements). Absent if the drawing has no title object."
         }
       },
       "additionalProperties": false,
@@ -4880,7 +5564,11 @@
         "drawingScale",
         "modelOffset",
         "isCutWithFrame",
-        "bounds"
+        "bounds",
+        "nameType",
+        "numberingType",
+        "isInNumbering",
+        "titleLibraryPartIndex"
       ]
     },
     "LabelDetails": {
@@ -5442,6 +6130,176 @@
       "additionalProperties": false,
       "required": []
     },
+    "LineSettings": {
+      "type": "object",
+      "description": "Settings for modifying a Line.",
+      "properties": {
+        "begCoordinate": {
+          "$ref": "#/$defs/Coordinate2D"
+        },
+        "endCoordinate": {
+          "$ref": "#/$defs/Coordinate2D"
+        },
+        "roomSeparator": {
+          "type": "boolean"
+        },
+        "linePenIndex": {
+          "type": "integer"
+        },
+        "lineTypeId": {
+          "$ref": "#/$defs/AttributeId"
+        }
+      },
+      "additionalProperties": false,
+      "required": []
+    },
+    "ArcSettings": {
+      "type": "object",
+      "description": "Settings for modifying an Arc or Circle. begAngle/endAngle are only applied to Arc, ignored for Circle.",
+      "properties": {
+        "origin": {
+          "$ref": "#/$defs/Coordinate2D"
+        },
+        "radius": {
+          "type": "number"
+        },
+        "angle": {
+          "type": "number"
+        },
+        "ratio": {
+          "type": "number"
+        },
+        "begAngle": {
+          "type": "number"
+        },
+        "endAngle": {
+          "type": "number"
+        },
+        "reflected": {
+          "type": "boolean"
+        },
+        "roomSeparator": {
+          "type": "boolean"
+        },
+        "linePenIndex": {
+          "type": "integer"
+        },
+        "lineTypeId": {
+          "$ref": "#/$defs/AttributeId"
+        }
+      },
+      "additionalProperties": false,
+      "required": []
+    },
+    "HotspotSettings": {
+      "type": "object",
+      "description": "Settings for modifying a Hotspot.",
+      "properties": {
+        "position": {
+          "$ref": "#/$defs/Coordinate2D"
+        },
+        "height": {
+          "type": "number"
+        },
+        "penIndex": {
+          "type": "integer"
+        }
+      },
+      "additionalProperties": false,
+      "required": []
+    },
+    "SplineSettings": {
+      "type": "object",
+      "description": "Settings for modifying a Spline. Only these settings fields are modifiable - Archicad's own API does not support changing Spline geometry (coordinates/closed) via ACAPI_Element_Change.",
+      "properties": {
+        "roomSeparator": {
+          "type": "boolean"
+        },
+        "linePenIndex": {
+          "type": "integer"
+        },
+        "lineTypeId": {
+          "$ref": "#/$defs/AttributeId"
+        }
+      },
+      "additionalProperties": false,
+      "required": []
+    },
+    "PolylineSettings": {
+      "type": "object",
+      "description": "Settings for modifying a Polyline. Setting coordinates replaces the entire polygon (single contour, no holes) and may change the number of vertices.",
+      "properties": {
+        "coordinates": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Coordinate2D"
+          },
+          "minItems": 2
+        },
+        "arcs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/PolyArc"
+          }
+        },
+        "roomSeparator": {
+          "type": "boolean"
+        },
+        "linePenIndex": {
+          "type": "integer"
+        },
+        "lineTypeId": {
+          "$ref": "#/$defs/AttributeId"
+        }
+      },
+      "additionalProperties": false,
+      "required": []
+    },
+    "HatchSettings": {
+      "type": "object",
+      "description": "Settings for modifying a Hatch. Setting coordinates replaces the entire polygon (outline plus optional holes) and may change the number of vertices.",
+      "properties": {
+        "coordinates": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Coordinate2D"
+          },
+          "minItems": 3
+        },
+        "arcs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/PolyArc"
+          }
+        },
+        "holes": {
+          "$ref": "#/$defs/Holes2D"
+        },
+        "contourPenIndex": {
+          "type": "integer"
+        },
+        "fillPenIndex": {
+          "type": "integer"
+        },
+        "fillBackgroundPenIndex": {
+          "type": "integer"
+        },
+        "fillId": {
+          "$ref": "#/$defs/AttributeId"
+        },
+        "buildingMaterialId": {
+          "$ref": "#/$defs/AttributeId"
+        },
+        "roomSpecial": {
+          "type": "integer"
+        },
+        "showArea": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false,
+      "required": []
+    },
     "DrawingSettings": {
       "description": "Modifiable settings for a Drawing element placed on a layout.",
       "type": "object",
@@ -5453,6 +6311,28 @@
             "$ref": "#/$defs/Coordinate2D"
           },
           "minItems": 3
+        },
+        "nameType": {
+          "$ref": "#/$defs/DrawingNameType"
+        },
+        "customName": {
+          "type": "string",
+          "description": "The drawing's custom title name. Only used when nameType is CustomName."
+        },
+        "numberingType": {
+          "$ref": "#/$defs/DrawingNumberingType"
+        },
+        "customNumber": {
+          "type": "string",
+          "description": "The drawing's custom title ID. Only used when numberingType is CustomNumber."
+        },
+        "isInNumbering": {
+          "type": "boolean",
+          "description": "Whether the drawing is included in the automatic drawing numbering sequence."
+        },
+        "titleLibraryPartIndex": {
+          "type": "number",
+          "description": "Library part index of the drawing title (API_DrawingTitle::libInd). A negative/invalid index means no title object is instantiated; setting it to a valid index (e.g. copied from another drawing) makes Archicad create the title's own placed element."
         }
       },
       "additionalProperties": false
@@ -5466,6 +6346,24 @@
         },
         {
           "$ref": "#/$defs/ZoneSettings"
+        },
+        {
+          "$ref": "#/$defs/LineSettings"
+        },
+        {
+          "$ref": "#/$defs/ArcSettings"
+        },
+        {
+          "$ref": "#/$defs/HotspotSettings"
+        },
+        {
+          "$ref": "#/$defs/SplineSettings"
+        },
+        {
+          "$ref": "#/$defs/PolylineSettings"
+        },
+        {
+          "$ref": "#/$defs/HatchSettings"
         },
         {
           "$ref": "#/$defs/DrawingSettings"
@@ -5995,6 +6893,31 @@
         "groupId"
       ]
     },
+    "ElementsWrapper": {
+      "type": "object",
+      "description": "A list of elements wrapped in an object.",
+      "properties": {
+        "elements": {
+          "$ref": "#/$defs/Elements"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elements"
+      ]
+    },
+    "ElementsWrapperOrError": {
+      "type": "object",
+      "description": "A list of elements or an error.",
+      "oneOf": [
+        {
+          "$ref": "#/$defs/ElementsWrapper"
+        },
+        {
+          "$ref": "#/$defs/ErrorItem"
+        }
+      ]
+    },
     "GroupIdOrError": {
       "type": "object",
       "description": "A groupId or an error.",
@@ -6147,6 +7070,59 @@
         "skipPolygonHoles"
       ]
     },
+    "SpecialFolderType": {
+      "type": "string",
+      "description": "The type of a special folder of the running Archicad.",
+      "enum": [
+        "ApplicationPrefs",
+        "GraphisoftPrefs",
+        "GraphisoftHome",
+        "Cache",
+        "Data",
+        "UserDocuments",
+        "Temporary",
+        "Application",
+        "Defaults",
+        "WebObjects",
+        "Templates",
+        "Help",
+        "EmbeddedProjectLibrary",
+        "EmbeddedProjectLibraryHotlink",
+        "ProjectPreviews"
+      ]
+    },
+    "SpecialFolderPath": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "The path of the special folder in the filesystem."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "path"
+      ]
+    },
+    "SpecialFolderPathOrError": {
+      "type": "object",
+      "description": "The path of a special folder or an error.",
+      "oneOf": [
+        {
+          "$ref": "#/$defs/SpecialFolderPath"
+        },
+        {
+          "$ref": "#/$defs/ErrorItem"
+        }
+      ]
+    },
+    "SpecialFolderPathsOrErrors": {
+      "type": "array",
+      "description": "A list of special folder paths or errors.",
+      "items": {
+        "$ref": "#/$defs/SpecialFolderPathOrError"
+      }
+    },
     "GetAddOnVersionResult": {
       "type": "object",
       "properties": {
@@ -6195,6 +7171,112 @@
     },
     "ChangeWindowResult": {
       "$ref": "#/$defs/ExecutionResult"
+    },
+    "GetUserGSIDResult": {
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "The stable GSID User ID of the logged-in user."
+        },
+        "organizationIds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "The list of organization IDs the user belongs to. Empty if not part of any organization or if the information cannot be retrieved."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "userId"
+      ]
+    },
+    "ShowAlertParameters": {
+      "type": "object",
+      "properties": {
+        "alertType": {
+          "type": "string",
+          "enum": [
+            "information",
+            "warning",
+            "error"
+          ],
+          "description": "The type of the alert dialog."
+        },
+        "title": {
+          "type": "string",
+          "description": "The title of the alert dialog."
+        },
+        "message": {
+          "type": "string",
+          "description": "The main message text."
+        },
+        "subMessage": {
+          "type": "string",
+          "description": "Optional smaller sub-message text below the main message."
+        },
+        "button1": {
+          "type": "string",
+          "description": "Label for the first (default) button."
+        },
+        "button2": {
+          "type": "string",
+          "description": "Label for the second button (e.g. Cancel)."
+        },
+        "button3": {
+          "type": "string",
+          "description": "Label for the optional third button."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "alertType",
+        "title",
+        "message",
+        "button1"
+      ]
+    },
+    "ShowAlertResult": {
+      "type": "object",
+      "properties": {
+        "clickedButton": {
+          "type": "integer",
+          "description": "Index of the button the user clicked: 1 = button1, 2 = button2, 3 = button3."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "clickedButton"
+      ]
+    },
+    "GetSpecialFoldersParameters": {
+      "type": "object",
+      "properties": {
+        "folderTypes": {
+          "type": "array",
+          "description": "The types of the special folders to retrieve.",
+          "items": {
+            "$ref": "#/$defs/SpecialFolderType"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "folderTypes"
+      ]
+    },
+    "GetSpecialFoldersResult": {
+      "type": "object",
+      "properties": {
+        "folderPaths": {
+          "$ref": "#/$defs/SpecialFolderPathsOrErrors"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "folderPaths"
+      ]
     },
     "GetProjectInfoResult": {
       "type": "object",
@@ -7829,6 +8911,174 @@
         "elements"
       ]
     },
+    "CreateLineElementsParameters": {
+      "type": "object",
+      "properties": {
+        "linesData": {
+          "type": "array",
+          "description": "Array of data to create Lines.",
+          "items": {
+            "$ref": "#/$defs/LineElementData"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "linesData"
+      ]
+    },
+    "CreateLineElementsResult": {
+      "type": "object",
+      "properties": {
+        "elements": {
+          "$ref": "#/$defs/Elements"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elements"
+      ]
+    },
+    "CreateArcsParameters": {
+      "type": "object",
+      "properties": {
+        "arcsData": {
+          "type": "array",
+          "description": "Array of data to create Arcs.",
+          "items": {
+            "$ref": "#/$defs/ArcData"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "arcsData"
+      ]
+    },
+    "CreateArcsResult": {
+      "type": "object",
+      "properties": {
+        "elements": {
+          "$ref": "#/$defs/Elements"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elements"
+      ]
+    },
+    "CreateCirclesParameters": {
+      "type": "object",
+      "properties": {
+        "circlesData": {
+          "type": "array",
+          "description": "Array of data to create Circles.",
+          "items": {
+            "$ref": "#/$defs/CircleData"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "circlesData"
+      ]
+    },
+    "CreateCirclesResult": {
+      "type": "object",
+      "properties": {
+        "elements": {
+          "$ref": "#/$defs/Elements"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elements"
+      ]
+    },
+    "CreateHotspotsParameters": {
+      "type": "object",
+      "properties": {
+        "hotspotsData": {
+          "type": "array",
+          "description": "Array of data to create Hotspots.",
+          "items": {
+            "$ref": "#/$defs/HotspotData"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "hotspotsData"
+      ]
+    },
+    "CreateHotspotsResult": {
+      "type": "object",
+      "properties": {
+        "elements": {
+          "$ref": "#/$defs/Elements"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elements"
+      ]
+    },
+    "CreateHatchesParameters": {
+      "type": "object",
+      "properties": {
+        "hatchesData": {
+          "type": "array",
+          "description": "Array of data to create Hatches.",
+          "items": {
+            "$ref": "#/$defs/HatchData"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "hatchesData"
+      ]
+    },
+    "CreateHatchesResult": {
+      "type": "object",
+      "properties": {
+        "elements": {
+          "$ref": "#/$defs/Elements"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elements"
+      ]
+    },
+    "CreateSplinesParameters": {
+      "type": "object",
+      "properties": {
+        "splinesData": {
+          "type": "array",
+          "description": "Array of data to create Splines. Only auto-smoothed curves are supported (bezier handle positions are calculated automatically by Archicad from the point positions).",
+          "items": {
+            "$ref": "#/$defs/SplineData"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "splinesData"
+      ]
+    },
+    "CreateSplinesResult": {
+      "type": "object",
+      "properties": {
+        "elements": {
+          "$ref": "#/$defs/Elements"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elements"
+      ]
+    },
     "CreateObjectsParameters": {
       "type": "object",
       "properties": {
@@ -8398,6 +9648,104 @@
       "additionalProperties": false,
       "required": [
         "groupGuids"
+      ]
+    },
+    "GetGroupsOfElementsParameters": {
+      "type": "object",
+      "properties": {
+        "elements": {
+          "$ref": "#/$defs/Elements"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elements"
+      ]
+    },
+    "GetGroupsOfElementsResult": {
+      "type": "object",
+      "properties": {
+        "groupGuids": {
+          "type": "array",
+          "description": "The identifier of the group that directly contains each given element, or an error for elements that are not part of any group.",
+          "items": {
+            "$ref": "#/$defs/GroupIdOrError"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "groupGuids"
+      ]
+    },
+    "GetElementsOfGroupsParameters": {
+      "type": "object",
+      "properties": {
+        "groups": {
+          "type": "array",
+          "description": "The groups to get the elements of.",
+          "items": {
+            "$ref": "#/$defs/GroupIdArrayItem"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "groups"
+      ]
+    },
+    "GetElementsOfGroupsResult": {
+      "type": "object",
+      "properties": {
+        "elementsOfGroups": {
+          "type": "array",
+          "description": "The elements directly contained by each given group, or an error.",
+          "items": {
+            "$ref": "#/$defs/ElementsWrapperOrError"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elementsOfGroups"
+      ]
+    },
+    "GetSuspendGroupsModeResult": {
+      "type": "object",
+      "properties": {
+        "suspendGroups": {
+          "type": "boolean",
+          "description": "True if the Suspend Groups mode is currently on."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "suspendGroups"
+      ]
+    },
+    "SetSuspendGroupsModeParameters": {
+      "type": "object",
+      "properties": {
+        "suspendGroups": {
+          "type": "boolean",
+          "description": "Turn the Suspend Groups mode on or off."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "suspendGroups"
+      ]
+    },
+    "SetSuspendGroupsModeResult": {
+      "type": "object",
+      "properties": {
+        "executionResult": {
+          "$ref": "#/$defs/ExecutionResult"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "executionResult"
       ]
     },
     "GetFavoritesByTypeParameters": {
@@ -9215,42 +10563,7 @@
           "type": "array",
           "description": "Array of data to create new Layers.",
           "items": {
-            "type": "object",
-            "description": "Data to create a Layer.",
-            "properties": {
-              "attributeId": {
-                "description": "Indentifier of the existing Layer to overwrite, ignored if overwriteExisting is false.",
-                "$ref": "#/$defs/AttributeId"
-              },
-              "index": {
-                "type": "string",
-                "description": "Index of the existing Layer to overwrite, ignored if overwriteExisting is false."
-              },
-              "name": {
-                "type": "string",
-                "description": "Name. If overwriteExisting is true, then the existing Layer with the given name will be overwritten."
-              },
-              "isHidden": {
-                "type": "boolean",
-                "description": "Hide/Show."
-              },
-              "isLocked": {
-                "type": "boolean",
-                "description": "Lock/Unlock."
-              },
-              "isWireframe": {
-                "type": "boolean",
-                "description": "Force the model to wireframe."
-              },
-              "intersectionGroupNr": {
-                "type": "integer",
-                "description": "Intersection group. Elements on layers having the same group will be intersected."
-              }
-            },
-            "additionalProperties": false,
-            "required": [
-              "name"
-            ]
+            "$ref": "#/$defs/LayerData"
           }
         },
         "overwriteExisting": {
@@ -9337,60 +10650,7 @@
           "type": "array",
           "description": "Array of data to create new Lines.",
           "items": {
-            "type": "object",
-            "description": "Data to create a Line.",
-            "properties": {
-              "attributeId": {
-                "description": "Indentifier of the existing Line to overwrite, ignored if overwriteExisting is false.",
-                "$ref": "#/$defs/AttributeId"
-              },
-              "index": {
-                "type": "string",
-                "description": "Index of the existing Line to overwrite, ignored if overwriteExisting is false."
-              },
-              "name": {
-                "type": "string",
-                "description": "Name. If overwriteExisting is true, then the existing Line with the given name will be overwritten."
-              },
-              "scaleWithPlan": {
-                "type": "boolean",
-                "description": "If true, the line type parameters are defined in meters at the given defineScale and scale on printout with the actual plan scale. If false (default), the parameters are fixed values in millimeters as the line will appear on the printout."
-              },
-              "defineScale": {
-                "type": "number",
-                "description": "The floor plan scale the line type is defined with. Only used if scaleWithPlan is true."
-              },
-              "lineType": {
-                "type": "string",
-                "description": "Solid, Dashed, or Symbol. Defaults to Solid."
-              },
-              "period": {
-                "type": "number",
-                "description": "The length of one period (Dashed and Symbol line types)."
-              },
-              "height": {
-                "type": "number",
-                "description": "The height of the symbol line (Symbol line type only)."
-              },
-              "dashItems": {
-                "type": "array",
-                "description": "Dash-gap pairs describing one period (Dashed line type only).",
-                "items": {
-                  "$ref": "#/$defs/LineDashItem"
-                }
-              },
-              "lineItems": {
-                "type": "array",
-                "description": "Symbol items describing one period (Symbol line type only).",
-                "items": {
-                  "$ref": "#/$defs/LineSymbolItemData"
-                }
-              }
-            },
-            "additionalProperties": false,
-            "required": [
-              "name"
-            ]
+            "$ref": "#/$defs/LineData"
           }
         },
         "overwriteExisting": {
@@ -9422,106 +10682,7 @@
           "type": "array",
           "description": "Array of data to create new Fills.",
           "items": {
-            "type": "object",
-            "description": "Data to create a Fill.",
-            "properties": {
-              "attributeId": {
-                "description": "Indentifier of the existing Fill to overwrite, ignored if overwriteExisting is false.",
-                "$ref": "#/$defs/AttributeId"
-              },
-              "index": {
-                "type": "string",
-                "description": "Index of the existing Fill to overwrite, ignored if overwriteExisting is false."
-              },
-              "name": {
-                "type": "string",
-                "description": "Name. If overwriteExisting is true, then the existing Fill with the given name will be overwritten."
-              },
-              "subType": {
-                "type": "string",
-                "description": "Vector, Solid, Empty, Symbol, LinearGradient, RadialGradient, or Image. Defaults to Vector. Only one Solid and one Empty fill may exist. Image fills use the texture field's name to reference the image library part."
-              },
-              "scaleWithPlan": {
-                "type": "boolean",
-                "description": "The fill is scale dependent."
-              },
-              "useForWalls": {
-                "type": "boolean",
-                "description": "This fill can be used for cut fills."
-              },
-              "useForDraft": {
-                "type": "boolean",
-                "description": "This fill can be used for drafting fills."
-              },
-              "useForCover": {
-                "type": "boolean",
-                "description": "This fill can be used for cover fills."
-              },
-              "horizontalSpacing": {
-                "type": "number",
-                "description": "The fill's spacing factor in the X direction (Vector fills)."
-              },
-              "verticalSpacing": {
-                "type": "number",
-                "description": "The fill's spacing factor in the Y direction (Vector fills)."
-              },
-              "angle": {
-                "type": "number",
-                "description": "The angle of the fill in radians (Vector, Symbol, and gradient fills)."
-              },
-              "bitPattern": {
-                "type": "string",
-                "description": "16 hex characters (8 bytes) describing the fill's bitmap pattern, one line of the pattern per byte, matching the Pattern field of the Attribute Manager XML export."
-              },
-              "gradientStart": {
-                "description": "Gradient start point (LinearGradient/RadialGradient fills only).",
-                "$ref": "#/$defs/Coordinate2D"
-              },
-              "gradientEnd": {
-                "description": "Gradient end point (LinearGradient/RadialGradient fills only).",
-                "$ref": "#/$defs/Coordinate2D"
-              },
-              "percent": {
-                "type": "number",
-                "description": "Translucency percentage [0..1] (gradient and some Solid fills)."
-              },
-              "texture": {
-                "description": "Texture parameters (Image and gradient fills). Only name, rotationAngle, xSize, ySize, mirrorX, and mirrorY are used for Fills.",
-                "$ref": "#/$defs/Texture"
-              },
-              "lineItems": {
-                "type": "array",
-                "description": "Vectorial fill line items (Vector fills only).",
-                "items": {
-                  "$ref": "#/$defs/FillLineItem"
-                }
-              },
-              "symbolLines": {
-                "type": "array",
-                "description": "Line items of the fill's repeating symbol pattern (Symbol fills only).",
-                "items": {
-                  "$ref": "#/$defs/FillSymbolLine"
-                }
-              },
-              "symbolArcs": {
-                "type": "array",
-                "description": "Arc items of the fill's repeating symbol pattern (Symbol fills only).",
-                "items": {
-                  "$ref": "#/$defs/FillSymbolArc"
-                }
-              },
-              "symbolHotspots": {
-                "type": "array",
-                "description": "Hotspot coordinates of the fill's repeating symbol pattern (Symbol fills only).",
-                "items": {
-                  "$ref": "#/$defs/Coordinate2D"
-                }
-              }
-            },
-            "additionalProperties": false,
-            "required": [
-              "name"
-            ]
+            "$ref": "#/$defs/FillData"
           }
         },
         "overwriteExisting": {
@@ -9553,45 +10714,7 @@
           "type": "array",
           "description": "Array of data to create new Zone Categories.",
           "items": {
-            "type": "object",
-            "description": "Data to create a Zone Category.",
-            "properties": {
-              "attributeId": {
-                "description": "Indentifier of the existing Zone Category to overwrite, ignored if overwriteExisting is false.",
-                "$ref": "#/$defs/AttributeId"
-              },
-              "index": {
-                "type": "string",
-                "description": "Index of the existing Zone Category to overwrite, ignored if overwriteExisting is false."
-              },
-              "name": {
-                "type": "string",
-                "description": "Name. If overwriteExisting is true, then the existing Zone Category with the given name will be overwritten."
-              },
-              "categoryCode": {
-                "type": "string",
-                "description": "Code of the Zone Category."
-              },
-              "color": {
-                "$ref": "#/$defs/ColorRGB"
-              },
-              "stampName": {
-                "type": "string",
-                "description": "Document name of the zone stamp library part (GSM) to use, e.g. the value shown as StampDocumentName in an Attribute Manager XML export. Only used together with stampMainGuid/stampRevGuid; ignored otherwise."
-              },
-              "stampMainGuid": {
-                "type": "string",
-                "description": "Main GUID of the zone stamp library part to use, e.g. the value shown as MainGuid in an Attribute Manager XML export (can be copied from an existing Zone Category obtained another way). If omitted, the stamp is copied from the Zone Category being overwritten, or from the project's first Zone Category when creating a new one."
-              },
-              "stampRevGuid": {
-                "type": "string",
-                "description": "Revision GUID of the zone stamp library part to use, e.g. the value shown as RevGuid in an Attribute Manager XML export. Required together with stampMainGuid."
-              }
-            },
-            "additionalProperties": false,
-            "required": [
-              "name"
-            ]
+            "$ref": "#/$defs/ZoneCategoryData"
           }
         },
         "overwriteExisting": {
@@ -9655,45 +10778,7 @@
           "type": "array",
           "description": "Array of data to create new Pen Tables.",
           "items": {
-            "type": "object",
-            "description": "Data to create a Pen Table.",
-            "properties": {
-              "attributeId": {
-                "description": "Indentifier of the existing Pen Table to overwrite, ignored if overwriteExisting is false.",
-                "$ref": "#/$defs/AttributeId"
-              },
-              "index": {
-                "type": "string",
-                "description": "Index of the existing Pen Table to overwrite, ignored if overwriteExisting is false."
-              },
-              "name": {
-                "type": "string",
-                "description": "Name. If overwriteExisting is true, then the existing Pen Table with the given name will be overwritten."
-              },
-              "isActiveForModel": {
-                "type": "boolean",
-                "description": "Make this the active Pen Table for the model window. Defaults to false for a new Pen Table, or to the current value when overwriting an existing one."
-              },
-              "isActiveForLayout": {
-                "type": "boolean",
-                "description": "Make this the active Pen Table for layouts. Defaults to false for a new Pen Table, or to the current value when overwriting an existing one."
-              },
-              "sourceAttributeId": {
-                "description": "Identifier of the Pen Table whose 255 pens are used as the starting point, before the pens listed in the pens array are applied on top. Defaults to the Pen Table being overwritten itself (so unlisted pens keep their current color/width/description), or an arbitrary existing Pen Table in the project when creating a brand new one (or a plain black, 0.1 mm pen for all 255 if the project has no Pen Table at all yet).",
-                "$ref": "#/$defs/AttributeIdArrayItem"
-              },
-              "pens": {
-                "type": "array",
-                "description": "The pens to set in the Pen Table, on top of the 255 pens copied from sourceAttributeId (or the current Pen Table, or an arbitrary existing one - see sourceAttributeId). Only list the pens you actually want to change.",
-                "items": {
-                  "$ref": "#/$defs/PenData"
-                }
-              }
-            },
-            "additionalProperties": false,
-            "required": [
-              "name"
-            ]
+            "$ref": "#/$defs/PenTableData"
           }
         },
         "overwriteExisting": {
@@ -9725,115 +10810,7 @@
           "type": "array",
           "description": "Array of data to create new Profiles.",
           "items": {
-            "type": "object",
-            "description": "Data to create or modify a Profile. Its geometry (the cross-section shape) comes from sourceAttributeId (an existing Profile's geometry, copied), from newSkins (AC27+ only, caller-supplied polygon geometry), or both combined. When creating a brand-new Profile (overwriteExisting false, or true but no existing match), at least one of the two must be given. When overwriteExisting targets an existing Profile, both are optional - the existing Profile's own current geometry is preserved by default (e.g. to change only wallType, or to add newSkins on top of the unchanged existing shape). skinOverrides and newSkins' edgeOverrides target skins/edges by the identifiers/indices GetProfiles reports.",
-            "properties": {
-              "attributeId": {
-                "description": "Indentifier of the existing Profile to overwrite, ignored if overwriteExisting is false.",
-                "$ref": "#/$defs/AttributeId"
-              },
-              "index": {
-                "type": "string",
-                "description": "Index of the existing Profile to overwrite, ignored if overwriteExisting is false."
-              },
-              "name": {
-                "type": "string",
-                "description": "Name. If overwriteExisting is true, then the existing Profile with the given name will be overwritten."
-              },
-              "sourceAttributeId": {
-                "description": "Identifier of an existing Profile whose geometry (cross-section shape) will be copied as the starting point. Optional if newSkins is given: omit it to build the Profile's geometry entirely from newSkins instead of copying anything (AC27+ only).",
-                "$ref": "#/$defs/AttributeIdArrayItem"
-              },
-              "wallType": {
-                "type": "boolean",
-                "description": "Profile available for walls. Defaults to the source Profile's value."
-              },
-              "beamType": {
-                "type": "boolean",
-                "description": "Profile available for beams. Defaults to the source Profile's value."
-              },
-              "coluType": {
-                "type": "boolean",
-                "description": "Profile available for columns. Defaults to the source Profile's value."
-              },
-              "handrailType": {
-                "type": "boolean",
-                "description": "Profile available for handrails. Defaults to the source Profile's value."
-              },
-              "otherGDLObjectType": {
-                "type": "boolean",
-                "description": "Profile available for other GDL based objects. Defaults to the source Profile's value."
-              },
-              "skinOverrides": {
-                "type": "array",
-                "description": "Modifications to apply to specific skins of the copied geometry, e.g. to change a skin's building material without rebuilding the profile's shape. Each skinId comes from a prior GetProfiles call's skins[].skinId on the source Profile (or, when overwriteExisting is true, on the Profile being overwritten).",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "skinId": {
-                      "type": "string",
-                      "description": "Identifies which skin to modify, from GetProfiles' skins[].skinId."
-                    },
-                    "buildingMaterialId": {
-                      "$ref": "#/$defs/AttributeIdArrayItem"
-                    },
-                    "surfaceId": {
-                      "$ref": "#/$defs/AttributeIdArrayItem"
-                    },
-                    "fillId": {
-                      "$ref": "#/$defs/AttributeIdArrayItem"
-                    },
-                    "contourPen": {
-                      "type": "integer"
-                    },
-                    "contourLineTypeId": {
-                      "$ref": "#/$defs/AttributeIdArrayItem"
-                    },
-                    "isCore": {
-                      "type": "boolean"
-                    },
-                    "isFinish": {
-                      "type": "boolean"
-                    },
-                    "visibleCutEndLines": {
-                      "type": "boolean"
-                    },
-                    "cutEndLinePen": {
-                      "type": "integer"
-                    },
-                    "cutEndLineTypeId": {
-                      "$ref": "#/$defs/AttributeIdArrayItem"
-                    },
-                    "edgeOverrides": {
-                      "type": "array",
-                      "description": "Modifications to specific edges of this skin, targeted by their position (0-based) in GetProfiles' skins[].edges.",
-                      "items": {
-                        "$ref": "#/$defs/ProfileEdgeOverride"
-                      }
-                    }
-                  },
-                  "additionalProperties": false,
-                  "required": [
-                    "skinId"
-                  ]
-                }
-              },
-              "newSkins": {
-                "type": "array",
-                "description": "AC27+ only. Adds brand-new skins built from caller-supplied polygon geometry, instead of (or in addition to) whatever was copied from sourceAttributeId. Combine with sourceAttributeId to add skins to a copied Profile, or omit sourceAttributeId to build a Profile's geometry entirely from newSkins.",
-                "items": {
-                  "$ref": "#/$defs/ProfileSkinData"
-                }
-              },
-              "replaceSkins": {
-                "type": "boolean",
-                "description": "AC27+ only. When overwriteExisting targets an existing Profile, discard every one of its existing skins (and any sourceAttributeId geometry given alongside it) before applying newSkins, instead of adding newSkins on top of the preserved existing geometry. Use this to fully replace a Profile's cross-section with a caller-authored shape while keeping its guid and scalar fields (wallType etc.) - e.g. to sync a Profile's geometry from another project, where sourceAttributeId can't be used because it only resolves within the same file. Also discards any existing profileModifiers, since those are tied to the specific geometry being replaced. Ignored when creating a brand-new Profile (there is nothing to discard yet)."
-              }
-            },
-            "additionalProperties": false,
-            "required": [
-              "name"
-            ]
+            "$ref": "#/$defs/ProfileData"
           }
         },
         "overwriteExisting": {
@@ -9865,90 +10842,7 @@
           "type": "array",
           "description": "Array of data to create new Building Materials.",
           "items": {
-            "type": "object",
-            "description": "Data to create a Building Material.",
-            "properties": {
-              "attributeId": {
-                "description": "Indentifier of the existing Building Material to overwrite, ignored if overwriteExisting is false.",
-                "$ref": "#/$defs/AttributeId"
-              },
-              "index": {
-                "type": "string",
-                "description": "Index of the existing Building Material to overwrite, ignored if overwriteExisting is false."
-              },
-              "name": {
-                "type": "string",
-                "description": "Name. If overwriteExisting is true, then the existing Building Material with the given name will be overwritten."
-              },
-              "id": {
-                "type": "string",
-                "description": "Identifier."
-              },
-              "manufacturer": {
-                "type": "string",
-                "description": "Manufacturer."
-              },
-              "description": {
-                "type": "string",
-                "description": "Decription."
-              },
-              "connPriority": {
-                "type": "integer",
-                "description": "Intersection priority."
-              },
-              "cutFillIndex": {
-                "type": "integer",
-                "description": "Index of the Cut Fill."
-              },
-              "cutFillPen": {
-                "type": "integer",
-                "description": "Cut Fill Foreground Pen."
-              },
-              "cutFillBackgroundPen": {
-                "type": "integer",
-                "description": "Cut Fill Background Pen."
-              },
-              "cutSurfaceIndex": {
-                "type": "integer",
-                "description": "Index of the Cut Surface."
-              },
-              "thermalConductivity": {
-                "type": "number",
-                "description": "Thermal Conductivity."
-              },
-              "density": {
-                "type": "number",
-                "description": "Density."
-              },
-              "heatCapacity": {
-                "type": "number",
-                "description": "Heat Capacity."
-              },
-              "embodiedEnergy": {
-                "type": "number",
-                "description": "Embodied Energy."
-              },
-              "embodiedCarbon": {
-                "type": "number",
-                "description": "Embodied Carbon."
-              },
-              "showUncutLines": {
-                "type": "boolean",
-                "description": "Show Contours in Model Views."
-              },
-              "collisionDetection": {
-                "type": "boolean",
-                "description": "Whether the Building Material participates in collision detection."
-              },
-              "cutFillOrientation": {
-                "type": "string",
-                "description": "ProjectOrigin, ElementOrigin, or FitToSkin. Orientation of the cut fill."
-              }
-            },
-            "additionalProperties": false,
-            "required": [
-              "name"
-            ]
+            "$ref": "#/$defs/BuildingMaterialData"
           }
         },
         "overwriteExisting": {
@@ -9980,90 +10874,7 @@
           "type": "array",
           "description": "Array of data to create Composites.",
           "items": {
-            "type": "object",
-            "description": "Data to create a Composite.",
-            "properties": {
-              "attributeId": {
-                "description": "Indentifier of the existing Composite to overwrite, ignored if overwriteExisting is false.",
-                "$ref": "#/$defs/AttributeId"
-              },
-              "index": {
-                "type": "string",
-                "description": "Index of the existing Composite to overwrite, ignored if overwriteExisting is false."
-              },
-              "name": {
-                "type": "string",
-                "description": "Name. If overwriteExisting is true, then the existing Composite with the given name will be overwritten."
-              },
-              "useWith": {
-                "type": "array",
-                "description": "Array of types the composite can used with.",
-                "items": {
-                  "type": "string",
-                  "description": "Element type (Wall, Slab, Roof, or Shell)"
-                }
-              },
-              "skins": {
-                "type": "array",
-                "description": "Array of skin data.",
-                "items": {
-                  "type": "object",
-                  "description": "Data to represent a skin.",
-                  "properties": {
-                    "type": {
-                      "type": "string",
-                      "description": "Skin type (Core, Finish, or Other)"
-                    },
-                    "buildingMaterialId": {
-                      "$ref": "#/$defs/AttributeIdArrayItem"
-                    },
-                    "framePen": {
-                      "type": "integer",
-                      "description": "Skin frame pen index."
-                    },
-                    "thickness": {
-                      "type": "number",
-                      "description": "Skin thickness (in meters)."
-                    }
-                  },
-                  "additionalProperties": false,
-                  "required": [
-                    "type",
-                    "buildingMaterialId",
-                    "framePen",
-                    "thickness"
-                  ]
-                }
-              },
-              "separators": {
-                "type": "array",
-                "description": "Array of skin separator data. The number of items must be the number of skins plus one.",
-                "items": {
-                  "type": "object",
-                  "description": "Data to represent a skin separator.",
-                  "properties": {
-                    "lineTypeId": {
-                      "$ref": "#/$defs/AttributeIdArrayItem"
-                    },
-                    "linePen": {
-                      "type": "integer",
-                      "description": "Separator line pen index."
-                    }
-                  },
-                  "additionalProperties": false,
-                  "required": [
-                    "lineTypeId",
-                    "linePen"
-                  ]
-                }
-              }
-            },
-            "additionalProperties": false,
-            "required": [
-              "name",
-              "skins",
-              "separators"
-            ]
+            "$ref": "#/$defs/CompositeData"
           }
         },
         "overwriteExisting": {
@@ -10095,72 +10906,7 @@
           "type": "array",
           "description": "Array of data to create new surfaces.",
           "items": {
-            "type": "object",
-            "description": "Data to create a surface.",
-            "properties": {
-              "attributeId": {
-                "description": "Indentifier of the existing Surface to overwrite, ignored if overwriteExisting is false.",
-                "$ref": "#/$defs/AttributeId"
-              },
-              "index": {
-                "type": "string",
-                "description": "Index of the existing surface to overwrite, ignored if overwriteExisting is false."
-              },
-              "name": {
-                "type": "string",
-                "description": "Name. If overwriteExisting is true, then the existing surface with the given name will be overwritten."
-              },
-              "materialType": {
-                "$ref": "#/$defs/SurfaceType"
-              },
-              "ambientReflection": {
-                "type": "number",
-                "description": "Ambient percentage [0..100]."
-              },
-              "diffuseReflection": {
-                "type": "number",
-                "description": "Diffuse percentage [0..100]."
-              },
-              "specularReflection": {
-                "type": "number",
-                "description": "Specular percentage [0..100]."
-              },
-              "transparency": {
-                "type": "number",
-                "description": "Transparency percentage [0..100]."
-              },
-              "shine": {
-                "type": "number",
-                "description": "The shininess factor multiplied by 100 [0..10000]."
-              },
-              "transparencyAttenuation": {
-                "type": "number",
-                "description": "Transparency attenuation multiplied by 100 [0..10000]."
-              },
-              "emissionAttenuation": {
-                "type": "number",
-                "description": "Emission attenuation multiplied by 100 [0..10000]."
-              },
-              "surfaceColor": {
-                "$ref": "#/$defs/ColorRGB"
-              },
-              "specularColor": {
-                "$ref": "#/$defs/ColorRGB"
-              },
-              "emissionColor": {
-                "$ref": "#/$defs/ColorRGB"
-              },
-              "fillId": {
-                "$ref": "#/$defs/AttributeIdArrayItem"
-              },
-              "texture": {
-                "$ref": "#/$defs/Texture"
-              }
-            },
-            "additionalProperties": false,
-            "required": [
-              "name"
-            ]
+            "$ref": "#/$defs/SurfaceData"
           }
         },
         "overwriteExisting": {
@@ -12454,6 +13200,483 @@
         "executionResults"
       ]
     },
+    "GetKeynoteTreeResult": {
+      "type": "object",
+      "properties": {
+        "foldersInRoot": {
+          "type": "array",
+          "description": "The top-level keynote folders with their content recursively. The technical root folder itself is not included.",
+          "items": {
+            "$ref": "#/$defs/KeynoteFolderDetails"
+          }
+        },
+        "itemsInRoot": {
+          "type": "array",
+          "description": "The keynote items located directly in the technical root folder.",
+          "items": {
+            "$ref": "#/$defs/KeynoteItemDetails"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "foldersInRoot",
+        "itemsInRoot"
+      ]
+    },
+    "GetKeynoteAutoTextsParameters": {
+      "type": "object",
+      "properties": {
+        "keynoteItems": {
+          "type": "array",
+          "description": "The keynote items to get the autotext tokens for.",
+          "items": {
+            "$ref": "#/$defs/KeynoteItemIdArrayItem"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "keynoteItems"
+      ]
+    },
+    "GetKeynoteAutoTextsResult": {
+      "type": "object",
+      "properties": {
+        "autoTexts": {
+          "$ref": "#/$defs/KeynoteAutoTextTokensOrErrors"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "autoTexts"
+      ]
+    },
+    "CreateKeynoteFoldersParameters": {
+      "type": "object",
+      "properties": {
+        "foldersData": {
+          "type": "array",
+          "description": "Array of data to create keynote folders.",
+          "items": {
+            "$ref": "#/$defs/KeynoteFolderData"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "foldersData"
+      ]
+    },
+    "CreateKeynoteFoldersResult": {
+      "type": "object",
+      "properties": {
+        "keynoteFolderIdsOrErrors": {
+          "$ref": "#/$defs/KeynoteFolderIdsOrErrors"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "keynoteFolderIdsOrErrors"
+      ]
+    },
+    "CreateKeynoteItemsParameters": {
+      "type": "object",
+      "properties": {
+        "itemsData": {
+          "type": "array",
+          "description": "Array of data to create keynote items.",
+          "items": {
+            "$ref": "#/$defs/KeynoteItemData"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "itemsData"
+      ]
+    },
+    "CreateKeynoteItemsResult": {
+      "type": "object",
+      "properties": {
+        "keynoteItemIdsOrErrors": {
+          "$ref": "#/$defs/KeynoteItemIdsOrErrors"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "keynoteItemIdsOrErrors"
+      ]
+    },
+    "ModifyKeynoteFoldersParameters": {
+      "type": "object",
+      "properties": {
+        "foldersData": {
+          "type": "array",
+          "description": "Array of data to modify keynote folders. Only provided fields are changed.",
+          "items": {
+            "$ref": "#/$defs/KeynoteFolderModificationData"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "foldersData"
+      ]
+    },
+    "ModifyKeynoteFoldersResult": {
+      "type": "object",
+      "properties": {
+        "executionResults": {
+          "$ref": "#/$defs/ExecutionResults"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "executionResults"
+      ]
+    },
+    "ModifyKeynoteItemsParameters": {
+      "type": "object",
+      "properties": {
+        "itemsData": {
+          "type": "array",
+          "description": "Array of data to modify keynote items. Only provided fields are changed.",
+          "items": {
+            "$ref": "#/$defs/KeynoteItemModificationData"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "itemsData"
+      ]
+    },
+    "ModifyKeynoteItemsResult": {
+      "type": "object",
+      "properties": {
+        "executionResults": {
+          "$ref": "#/$defs/ExecutionResults"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "executionResults"
+      ]
+    },
+    "DeleteKeynoteFoldersParameters": {
+      "type": "object",
+      "properties": {
+        "keynoteFolderIds": {
+          "type": "array",
+          "description": "The keynote folders to delete.",
+          "items": {
+            "$ref": "#/$defs/KeynoteFolderIdArrayItem"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "keynoteFolderIds"
+      ]
+    },
+    "DeleteKeynoteFoldersResult": {
+      "type": "object",
+      "properties": {
+        "executionResults": {
+          "$ref": "#/$defs/ExecutionResults"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "executionResults"
+      ]
+    },
+    "DeleteKeynoteItemsParameters": {
+      "type": "object",
+      "properties": {
+        "keynoteItemIds": {
+          "type": "array",
+          "description": "The keynote items to delete.",
+          "items": {
+            "$ref": "#/$defs/KeynoteItemIdArrayItem"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "keynoteItemIds"
+      ]
+    },
+    "DeleteKeynoteItemsResult": {
+      "type": "object",
+      "properties": {
+        "executionResults": {
+          "$ref": "#/$defs/ExecutionResults"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "executionResults"
+      ]
+    },
+    "CreateKeynoteLabelsParameters": {
+      "type": "object",
+      "properties": {
+        "labelsData": {
+          "type": "array",
+          "description": "Array of data to create keynote labels.",
+          "items": {
+            "$ref": "#/$defs/KeynoteLabelData"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "labelsData"
+      ]
+    },
+    "CreateKeynoteLabelsResult": {
+      "type": "object",
+      "properties": {
+        "elements": {
+          "$ref": "#/$defs/ElementIdsOrErrors"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elements"
+      ]
+    },
+    "GetMEPElementsParameters": {
+      "type": "object",
+      "properties": {
+        "elementTypes": {
+          "type": "array",
+          "description": "Optional filter for the MEP element types.",
+          "items": {
+            "$ref": "#/$defs/MEPElementType"
+          }
+        },
+        "domains": {
+          "type": "array",
+          "description": "Optional filter for the MEP domains.",
+          "items": {
+            "$ref": "#/$defs/MEPDomains"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": []
+    },
+    "GetMEPElementsResult": {
+      "type": "object",
+      "properties": {
+        "elements": {
+          "type": "array",
+          "description": "The MEP elements.",
+          "items": {
+            "$ref": "#/$defs/MEPElement"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elements"
+      ]
+    },
+    "GetMEPRoutingElementsParameters": {
+      "type": "object",
+      "properties": {
+        "elements": {
+          "$ref": "#/$defs/Elements"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elements"
+      ]
+    },
+    "GetMEPRoutingElementsResult": {
+      "type": "object",
+      "properties": {
+        "routingElements": {
+          "$ref": "#/$defs/MEPRoutingElementDetailsOrErrors"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "routingElements"
+      ]
+    },
+    "GetMEPPortsParameters": {
+      "type": "object",
+      "properties": {
+        "elements": {
+          "$ref": "#/$defs/Elements"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elements"
+      ]
+    },
+    "GetMEPPortsResult": {
+      "type": "object",
+      "properties": {
+        "elementPorts": {
+          "$ref": "#/$defs/MEPElementPortsOrErrors"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elementPorts"
+      ]
+    },
+    "GetMEPDistributionSystemsResult": {
+      "type": "object",
+      "properties": {
+        "distributionSystems": {
+          "type": "array",
+          "description": "The distribution systems of the project.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "domain": {
+                "$ref": "#/$defs/MEPSystemDomain"
+              },
+              "mepSystemId": {
+                "$ref": "#/$defs/AttributeId"
+              },
+              "elements": {
+                "$ref": "#/$defs/Elements"
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "domain",
+              "elements"
+            ]
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "distributionSystems"
+      ]
+    },
+    "CreateMEPRoutingElementsParameters": {
+      "type": "object",
+      "properties": {
+        "routingElementsData": {
+          "type": "array",
+          "description": "Array of data to create MEP routing elements.",
+          "items": {
+            "$ref": "#/$defs/MEPRoutingElementData"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "routingElementsData"
+      ]
+    },
+    "CreateMEPRoutingElementsResult": {
+      "type": "object",
+      "properties": {
+        "elements": {
+          "$ref": "#/$defs/ElementIdsOrErrors"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elements"
+      ]
+    },
+    "CreateMEPElementsParameters": {
+      "type": "object",
+      "properties": {
+        "elementsData": {
+          "type": "array",
+          "description": "Array of data to create MEP elements.",
+          "items": {
+            "$ref": "#/$defs/MEPElementData"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elementsData"
+      ]
+    },
+    "CreateMEPElementsResult": {
+      "type": "object",
+      "properties": {
+        "elements": {
+          "$ref": "#/$defs/ElementIdsOrErrors"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elements"
+      ]
+    },
+    "ModifyMEPRoutingElementsParameters": {
+      "type": "object",
+      "properties": {
+        "routingElementsData": {
+          "type": "array",
+          "description": "Array of data to modify MEP routing elements. Only provided fields are changed.",
+          "items": {
+            "$ref": "#/$defs/MEPRoutingElementModificationData"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "routingElementsData"
+      ]
+    },
+    "ModifyMEPRoutingElementsResult": {
+      "type": "object",
+      "properties": {
+        "executionResults": {
+          "$ref": "#/$defs/ExecutionResults"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "executionResults"
+      ]
+    },
+    "ConnectMEPElementsParameters": {
+      "type": "object",
+      "properties": {
+        "connectionsData": {
+          "type": "array",
+          "description": "Array of connections to create.",
+          "items": {
+            "$ref": "#/$defs/MEPConnectionData"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "connectionsData"
+      ]
+    },
+    "ConnectMEPElementsResult": {
+      "type": "object",
+      "properties": {
+        "connectionResults": {
+          "$ref": "#/$defs/MEPConnectionResultsOrErrors"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "connectionResults"
+      ]
+    },
     "CreateSolidElementLinksParameters": {
       "type": "object",
       "properties": {
@@ -12788,6 +14011,10 @@
         "penWeightMm": {
           "type": "number",
           "description": "Optional pen weight override in mm."
+        },
+        "roomSeparator": {
+          "type": "boolean",
+          "description": "Is this a zone boundary line? Optional, defaults to false."
         },
         "coordinates": {
           "type": "array",
@@ -13524,6 +14751,28 @@
         "holes": {
           "$ref": "#/$defs/Holes2D"
         },
+        "pivotLine": {
+          "type": "object",
+          "description": "If given, a single-plane roof is created instead of a multi-plane roof: one plane tilted along this pivot line. The plane rises on the left side of the line direction (begCoordinate towards endCoordinate); flip the line to tilt towards the other side.",
+          "properties": {
+            "begCoordinate": {
+              "$ref": "#/$defs/Coordinate2D"
+            },
+            "endCoordinate": {
+              "$ref": "#/$defs/Coordinate2D"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "begCoordinate",
+            "endCoordinate"
+          ]
+        },
+        "angle": {
+          "type": "number",
+          "description": "Slope angle of the single-plane roof in radians. Only valid together with 'pivotLine'.",
+          "exclusiveMinimum": 0.0
+        },
         "eavesOverhang": {
           "type": "number"
         },
@@ -13938,7 +15187,7 @@
           "description": "Name. If overwriteExisting is true, then the existing MEP System with the given name will be overwritten."
         },
         "domain": {
-          "type": "string",
+          "$ref": "#/$defs/MEPSystemDomain",
           "description": "Ventilation, Piping, or CableCarrier. Only elements belonging to the same domain can use this system."
         },
         "contourPen": {
@@ -13964,6 +15213,1046 @@
         "centerLineTypeId": {
           "description": "Identifier of the center line type attribute.",
           "$ref": "#/$defs/AttributeIdArrayItem"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "name"
+      ]
+    },
+    "ArcData": {
+      "type": "object",
+      "description": "The parameters of the new Arc.",
+      "properties": {
+        "floorInd": {
+          "type": "number",
+          "description": "The identifier of the floor. Optional parameter, by default the current floor is used."
+        },
+        "layerIndex": {
+          "type": "integer",
+          "description": "Layer attribute index to place the arc on. Optional parameter, by default the current layer is used."
+        },
+        "origin": {
+          "$ref": "#/$defs/Coordinate2D"
+        },
+        "radius": {
+          "type": "number"
+        },
+        "begAngle": {
+          "type": "number",
+          "description": "Beginning angle of the arc in radians."
+        },
+        "endAngle": {
+          "type": "number",
+          "description": "End angle of the arc in radians."
+        },
+        "roomSeparator": {
+          "type": "boolean",
+          "description": "Is this a zone boundary line? Optional, defaults to false."
+        },
+        "linePenIndex": {
+          "type": "integer",
+          "description": "Optional pen index. By default the current pen is used."
+        },
+        "lineTypeId": {
+          "$ref": "#/$defs/AttributeId",
+          "description": "Optional line type attribute. By default the current line type is used."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "origin",
+        "radius",
+        "begAngle",
+        "endAngle"
+      ]
+    },
+    "CircleData": {
+      "type": "object",
+      "description": "The parameters of the new Circle.",
+      "properties": {
+        "floorInd": {
+          "type": "number",
+          "description": "The identifier of the floor. Optional parameter, by default the current floor is used."
+        },
+        "layerIndex": {
+          "type": "integer",
+          "description": "Layer attribute index to place the circle on. Optional parameter, by default the current layer is used."
+        },
+        "origin": {
+          "$ref": "#/$defs/Coordinate2D"
+        },
+        "radius": {
+          "type": "number"
+        },
+        "roomSeparator": {
+          "type": "boolean",
+          "description": "Is this a zone boundary line? Optional, defaults to false."
+        },
+        "linePenIndex": {
+          "type": "integer",
+          "description": "Optional pen index. By default the current pen is used."
+        },
+        "lineTypeId": {
+          "$ref": "#/$defs/AttributeId",
+          "description": "Optional line type attribute. By default the current line type is used."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "origin",
+        "radius"
+      ]
+    },
+    "HatchData": {
+      "type": "object",
+      "description": "The parameters of the new Hatch.",
+      "properties": {
+        "floorInd": {
+          "type": "number",
+          "description": "The identifier of the floor. Optional parameter, by default the current floor is used."
+        },
+        "layerIndex": {
+          "type": "integer",
+          "description": "Layer attribute index to place the hatch on. Optional parameter, by default the current layer is used."
+        },
+        "coordinates": {
+          "type": "array",
+          "description": "The 2D coordinates of the hatch outline (single contour, no holes). Do not repeat the first point at the end.",
+          "items": {
+            "$ref": "#/$defs/Coordinate2D"
+          },
+          "minItems": 3
+        },
+        "arcs": {
+          "type": "array",
+          "description": "The arcs of the hatch outline.",
+          "items": {
+            "$ref": "#/$defs/PolyArc"
+          }
+        },
+        "contourPenIndex": {
+          "type": "integer",
+          "description": "Optional pen index for the contour. By default the current pen is used."
+        },
+        "fillPenIndex": {
+          "type": "integer",
+          "description": "Optional pen index for the fill. By default the current pen is used."
+        },
+        "fillBackgroundPenIndex": {
+          "type": "integer"
+        },
+        "fillId": {
+          "$ref": "#/$defs/AttributeId",
+          "description": "Optional fill attribute. By default the current fill is used."
+        },
+        "buildingMaterialId": {
+          "$ref": "#/$defs/AttributeId"
+        },
+        "roomSpecial": {
+          "type": "integer",
+          "description": "Special area percent in a room (negative means OFF)."
+        },
+        "showArea": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "coordinates"
+      ]
+    },
+    "HotspotData": {
+      "type": "object",
+      "description": "The parameters of the new Hotspot.",
+      "properties": {
+        "floorInd": {
+          "type": "number",
+          "description": "The identifier of the floor. Optional parameter, by default the current floor is used."
+        },
+        "layerIndex": {
+          "type": "integer",
+          "description": "Layer attribute index to place the hotspot on. Optional parameter, by default the current layer is used."
+        },
+        "position": {
+          "$ref": "#/$defs/Coordinate2D"
+        },
+        "height": {
+          "type": "number"
+        },
+        "penIndex": {
+          "type": "integer",
+          "description": "Optional pen index. By default the current pen is used."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "position"
+      ]
+    },
+    "LineElementData": {
+      "type": "object",
+      "description": "The parameters of the new Line.",
+      "properties": {
+        "floorInd": {
+          "type": "number",
+          "description": "The identifier of the floor. Optional parameter, by default the current floor is used."
+        },
+        "layerIndex": {
+          "type": "integer",
+          "description": "Layer attribute index to place the line on. Optional parameter, by default the current layer is used."
+        },
+        "begCoordinate": {
+          "$ref": "#/$defs/Coordinate2D"
+        },
+        "endCoordinate": {
+          "$ref": "#/$defs/Coordinate2D"
+        },
+        "roomSeparator": {
+          "type": "boolean",
+          "description": "Is this a zone boundary line? Optional, defaults to false."
+        },
+        "linePenIndex": {
+          "type": "integer",
+          "description": "Optional pen index. By default the current pen is used."
+        },
+        "lineTypeId": {
+          "$ref": "#/$defs/AttributeId",
+          "description": "Optional line type attribute. By default the current line type is used."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "begCoordinate",
+        "endCoordinate"
+      ]
+    },
+    "SplineData": {
+      "type": "object",
+      "description": "The parameters of the new Spline.",
+      "properties": {
+        "floorInd": {
+          "type": "number",
+          "description": "The identifier of the floor. Optional parameter, by default the current floor is used."
+        },
+        "layerIndex": {
+          "type": "integer",
+          "description": "Layer attribute index to place the spline on. Optional parameter, by default the current layer is used."
+        },
+        "coordinates": {
+          "type": "array",
+          "description": "The 2D coordinates of the spline points. Do not repeat the first point at the end even for a closed spline.",
+          "items": {
+            "$ref": "#/$defs/Coordinate2D"
+          },
+          "minItems": 3
+        },
+        "closed": {
+          "type": "boolean",
+          "description": "Is this a closed curve? Optional, defaults to false."
+        },
+        "roomSeparator": {
+          "type": "boolean",
+          "description": "Is this a zone boundary line? Optional, defaults to false."
+        },
+        "linePenIndex": {
+          "type": "integer",
+          "description": "Optional pen index. By default the current pen is used."
+        },
+        "lineTypeId": {
+          "$ref": "#/$defs/AttributeId",
+          "description": "Optional line type attribute. By default the current line type is used."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "coordinates"
+      ]
+    },
+    "KeynoteFolderData": {
+      "type": "object",
+      "properties": {
+        "parentFolderId": {
+          "$ref": "#/$defs/KeynoteFolderId",
+          "description": "The parent folder. Optional; defaults to the root folder."
+        },
+        "key": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "key",
+        "title"
+      ]
+    },
+    "KeynoteItemData": {
+      "type": "object",
+      "properties": {
+        "parentFolderId": {
+          "$ref": "#/$defs/KeynoteFolderId",
+          "description": "The parent folder. Optional; defaults to the root folder."
+        },
+        "key": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "reference": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "key"
+      ]
+    },
+    "KeynoteLabelData": {
+      "type": "object",
+      "properties": {
+        "keynoteItemId": {
+          "$ref": "#/$defs/KeynoteItemId"
+        },
+        "position": {
+          "$ref": "#/$defs/Coordinate2D",
+          "description": "The reference point of the label."
+        },
+        "contentFields": {
+          "type": "array",
+          "description": "The keynote fields to include in the label text as autotext. Optional; defaults to all fields.",
+          "items": {
+            "type": "string",
+            "enum": [
+              "Key",
+              "Title",
+              "Description",
+              "Reference"
+            ]
+          },
+          "minItems": 1
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "keynoteItemId",
+        "position"
+      ]
+    },
+    "MEPElementData": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "$ref": "#/$defs/MEPComponentType"
+        },
+        "domain": {
+          "$ref": "#/$defs/MEPSystemDomain",
+          "description": "The MEP domain of the element. Required for all types except Equipment."
+        },
+        "position": {
+          "$ref": "#/$defs/Coordinate3D"
+        },
+        "orientationDirection": {
+          "$ref": "#/$defs/Coordinate3D",
+          "description": "Optional direction vector of the orientation. Defaults to (1, 0, 0)."
+        },
+        "orientationRotation": {
+          "$ref": "#/$defs/Coordinate3D",
+          "description": "Optional rotation vector of the orientation. Defaults to (0, 1, 0)."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "position"
+      ]
+    },
+    "MEPConnectionData": {
+      "type": "object",
+      "properties": {
+        "routingElementId": {
+          "$ref": "#/$defs/ElementId",
+          "description": "The routing element to connect."
+        },
+        "connectToId": {
+          "$ref": "#/$defs/ElementId",
+          "description": "The MEP element or routing element to connect to."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "routingElementId",
+        "connectToId"
+      ]
+    },
+    "MEPRoutingElementData": {
+      "type": "object",
+      "properties": {
+        "domain": {
+          "$ref": "#/$defs/MEPSystemDomain"
+        },
+        "nodeCoordinates": {
+          "type": "array",
+          "description": "The corner points of the route polyline.",
+          "items": {
+            "$ref": "#/$defs/Coordinate3D"
+          },
+          "minItems": 2
+        },
+        "crossSectionWidth": {
+          "type": "number",
+          "description": "Optional cross section width applied to all segments."
+        },
+        "crossSectionHeight": {
+          "type": "number",
+          "description": "Optional cross section height applied to all segments."
+        },
+        "crossSectionShape": {
+          "$ref": "#/$defs/MEPCrossSectionShape"
+        },
+        "crossSectionReferenceId": {
+          "type": "integer",
+          "description": "Optional cross section reference id of the segment preference table (used for circular cross sections)."
+        },
+        "mepSystemId": {
+          "$ref": "#/$defs/AttributeId",
+          "description": "Optional MEP system attribute."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "domain",
+        "nodeCoordinates"
+      ]
+    },
+    "LineData": {
+      "type": "object",
+      "description": "Data to create a Line.",
+      "properties": {
+        "attributeId": {
+          "description": "Indentifier of the existing Line to overwrite, ignored if overwriteExisting is false.",
+          "$ref": "#/$defs/AttributeId"
+        },
+        "index": {
+          "type": "string",
+          "description": "Index of the existing Line to overwrite, ignored if overwriteExisting is false."
+        },
+        "name": {
+          "type": "string",
+          "description": "Name. If overwriteExisting is true, then the existing Line with the given name will be overwritten."
+        },
+        "scaleWithPlan": {
+          "type": "boolean",
+          "description": "If true, the line type parameters are defined in meters at the given defineScale and scale on printout with the actual plan scale. If false (default), the parameters are fixed values in millimeters as the line will appear on the printout."
+        },
+        "defineScale": {
+          "type": "number",
+          "description": "The floor plan scale the line type is defined with. Only used if scaleWithPlan is true."
+        },
+        "lineType": {
+          "type": "string",
+          "description": "Solid, Dashed, or Symbol. Defaults to Solid."
+        },
+        "period": {
+          "type": "number",
+          "description": "The length of one period (Dashed and Symbol line types)."
+        },
+        "height": {
+          "type": "number",
+          "description": "The height of the symbol line (Symbol line type only)."
+        },
+        "dashItems": {
+          "type": "array",
+          "description": "Dash-gap pairs describing one period (Dashed line type only).",
+          "items": {
+            "$ref": "#/$defs/LineDashItem"
+          }
+        },
+        "lineItems": {
+          "type": "array",
+          "description": "Symbol items describing one period (Symbol line type only).",
+          "items": {
+            "$ref": "#/$defs/LineSymbolItemData"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "name"
+      ]
+    },
+    "FillData": {
+      "type": "object",
+      "description": "Data to create a Fill.",
+      "properties": {
+        "attributeId": {
+          "description": "Indentifier of the existing Fill to overwrite, ignored if overwriteExisting is false.",
+          "$ref": "#/$defs/AttributeId"
+        },
+        "index": {
+          "type": "string",
+          "description": "Index of the existing Fill to overwrite, ignored if overwriteExisting is false."
+        },
+        "name": {
+          "type": "string",
+          "description": "Name. If overwriteExisting is true, then the existing Fill with the given name will be overwritten."
+        },
+        "subType": {
+          "type": "string",
+          "description": "Vector, Solid, Empty, Symbol, LinearGradient, RadialGradient, or Image. Defaults to Vector. Only one Solid and one Empty fill may exist. Image fills use the texture field's name to reference the image library part."
+        },
+        "scaleWithPlan": {
+          "type": "boolean",
+          "description": "The fill is scale dependent."
+        },
+        "useForWalls": {
+          "type": "boolean",
+          "description": "This fill can be used for cut fills."
+        },
+        "useForDraft": {
+          "type": "boolean",
+          "description": "This fill can be used for drafting fills."
+        },
+        "useForCover": {
+          "type": "boolean",
+          "description": "This fill can be used for cover fills."
+        },
+        "horizontalSpacing": {
+          "type": "number",
+          "description": "The fill's spacing factor in the X direction (Vector fills)."
+        },
+        "verticalSpacing": {
+          "type": "number",
+          "description": "The fill's spacing factor in the Y direction (Vector fills)."
+        },
+        "angle": {
+          "type": "number",
+          "description": "The angle of the fill in radians (Vector, Symbol, and gradient fills)."
+        },
+        "bitPattern": {
+          "type": "string",
+          "description": "16 hex characters (8 bytes) describing the fill's bitmap pattern, one line of the pattern per byte, matching the Pattern field of the Attribute Manager XML export."
+        },
+        "gradientStart": {
+          "description": "Gradient start point (LinearGradient/RadialGradient fills only).",
+          "$ref": "#/$defs/Coordinate2D"
+        },
+        "gradientEnd": {
+          "description": "Gradient end point (LinearGradient/RadialGradient fills only).",
+          "$ref": "#/$defs/Coordinate2D"
+        },
+        "percent": {
+          "type": "number",
+          "description": "Translucency percentage [0..1] (gradient and some Solid fills)."
+        },
+        "texture": {
+          "description": "Texture parameters (Image and gradient fills). Only name, rotationAngle, xSize, ySize, mirrorX, and mirrorY are used for Fills.",
+          "$ref": "#/$defs/Texture"
+        },
+        "lineItems": {
+          "type": "array",
+          "description": "Vectorial fill line items (Vector fills only).",
+          "items": {
+            "$ref": "#/$defs/FillLineItem"
+          }
+        },
+        "symbolLines": {
+          "type": "array",
+          "description": "Line items of the fill's repeating symbol pattern (Symbol fills only).",
+          "items": {
+            "$ref": "#/$defs/FillSymbolLine"
+          }
+        },
+        "symbolArcs": {
+          "type": "array",
+          "description": "Arc items of the fill's repeating symbol pattern (Symbol fills only).",
+          "items": {
+            "$ref": "#/$defs/FillSymbolArc"
+          }
+        },
+        "symbolHotspots": {
+          "type": "array",
+          "description": "Hotspot coordinates of the fill's repeating symbol pattern (Symbol fills only).",
+          "items": {
+            "$ref": "#/$defs/Coordinate2D"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "name"
+      ]
+    },
+    "ZoneCategoryData": {
+      "type": "object",
+      "description": "Data to create a Zone Category.",
+      "properties": {
+        "attributeId": {
+          "description": "Indentifier of the existing Zone Category to overwrite, ignored if overwriteExisting is false.",
+          "$ref": "#/$defs/AttributeId"
+        },
+        "index": {
+          "type": "string",
+          "description": "Index of the existing Zone Category to overwrite, ignored if overwriteExisting is false."
+        },
+        "name": {
+          "type": "string",
+          "description": "Name. If overwriteExisting is true, then the existing Zone Category with the given name will be overwritten."
+        },
+        "categoryCode": {
+          "type": "string",
+          "description": "Code of the Zone Category."
+        },
+        "color": {
+          "$ref": "#/$defs/ColorRGB"
+        },
+        "stampName": {
+          "type": "string",
+          "description": "Document name of the zone stamp library part (GSM) to use, e.g. the value shown as StampDocumentName in an Attribute Manager XML export. Only used together with stampMainGuid/stampRevGuid; ignored otherwise."
+        },
+        "stampMainGuid": {
+          "type": "string",
+          "description": "Main GUID of the zone stamp library part to use, e.g. the value shown as MainGuid in an Attribute Manager XML export (can be copied from an existing Zone Category obtained another way). If omitted, the stamp is copied from the Zone Category being overwritten, or from the project's first Zone Category when creating a new one."
+        },
+        "stampRevGuid": {
+          "type": "string",
+          "description": "Revision GUID of the zone stamp library part to use, e.g. the value shown as RevGuid in an Attribute Manager XML export. Required together with stampMainGuid."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "name"
+      ]
+    },
+    "PenTableData": {
+      "type": "object",
+      "description": "Data to create a Pen Table.",
+      "properties": {
+        "attributeId": {
+          "description": "Indentifier of the existing Pen Table to overwrite, ignored if overwriteExisting is false.",
+          "$ref": "#/$defs/AttributeId"
+        },
+        "index": {
+          "type": "string",
+          "description": "Index of the existing Pen Table to overwrite, ignored if overwriteExisting is false."
+        },
+        "name": {
+          "type": "string",
+          "description": "Name. If overwriteExisting is true, then the existing Pen Table with the given name will be overwritten."
+        },
+        "isActiveForModel": {
+          "type": "boolean",
+          "description": "Make this the active Pen Table for the model window. Defaults to false for a new Pen Table, or to the current value when overwriting an existing one."
+        },
+        "isActiveForLayout": {
+          "type": "boolean",
+          "description": "Make this the active Pen Table for layouts. Defaults to false for a new Pen Table, or to the current value when overwriting an existing one."
+        },
+        "sourceAttributeId": {
+          "description": "Identifier of the Pen Table whose 255 pens are used as the starting point, before the pens listed in the pens array are applied on top. Defaults to the Pen Table being overwritten itself (so unlisted pens keep their current color/width/description), or an arbitrary existing Pen Table in the project when creating a brand new one (or a plain black, 0.1 mm pen for all 255 if the project has no Pen Table at all yet).",
+          "$ref": "#/$defs/AttributeIdArrayItem"
+        },
+        "pens": {
+          "type": "array",
+          "description": "The pens to set in the Pen Table, on top of the 255 pens copied from sourceAttributeId (or the current Pen Table, or an arbitrary existing one - see sourceAttributeId). Only list the pens you actually want to change.",
+          "items": {
+            "$ref": "#/$defs/PenData"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "name"
+      ]
+    },
+    "ProfileData": {
+      "type": "object",
+      "description": "Data to create or modify a Profile. Its geometry (the cross-section shape) comes from sourceAttributeId (an existing Profile's geometry, copied), from newSkins (AC27+ only, caller-supplied polygon geometry), or both combined. When creating a brand-new Profile (overwriteExisting false, or true but no existing match), at least one of the two must be given. When overwriteExisting targets an existing Profile, both are optional - the existing Profile's own current geometry is preserved by default (e.g. to change only wallType, or to add newSkins on top of the unchanged existing shape). skinOverrides and newSkins' edgeOverrides target skins/edges by the identifiers/indices GetProfiles reports.",
+      "properties": {
+        "attributeId": {
+          "description": "Indentifier of the existing Profile to overwrite, ignored if overwriteExisting is false.",
+          "$ref": "#/$defs/AttributeId"
+        },
+        "index": {
+          "type": "string",
+          "description": "Index of the existing Profile to overwrite, ignored if overwriteExisting is false."
+        },
+        "name": {
+          "type": "string",
+          "description": "Name. If overwriteExisting is true, then the existing Profile with the given name will be overwritten."
+        },
+        "sourceAttributeId": {
+          "description": "Identifier of an existing Profile whose geometry (cross-section shape) will be copied as the starting point. Optional if newSkins is given: omit it to build the Profile's geometry entirely from newSkins instead of copying anything (AC27+ only).",
+          "$ref": "#/$defs/AttributeIdArrayItem"
+        },
+        "wallType": {
+          "type": "boolean",
+          "description": "Profile available for walls. Defaults to the source Profile's value."
+        },
+        "beamType": {
+          "type": "boolean",
+          "description": "Profile available for beams. Defaults to the source Profile's value."
+        },
+        "coluType": {
+          "type": "boolean",
+          "description": "Profile available for columns. Defaults to the source Profile's value."
+        },
+        "handrailType": {
+          "type": "boolean",
+          "description": "Profile available for handrails. Defaults to the source Profile's value."
+        },
+        "otherGDLObjectType": {
+          "type": "boolean",
+          "description": "Profile available for other GDL based objects. Defaults to the source Profile's value."
+        },
+        "skinOverrides": {
+          "type": "array",
+          "description": "Modifications to apply to specific skins of the copied geometry, e.g. to change a skin's building material without rebuilding the profile's shape. Each skinId comes from a prior GetProfiles call's skins[].skinId on the source Profile (or, when overwriteExisting is true, on the Profile being overwritten).",
+          "items": {
+            "type": "object",
+            "properties": {
+              "skinId": {
+                "type": "string",
+                "description": "Identifies which skin to modify, from GetProfiles' skins[].skinId."
+              },
+              "buildingMaterialId": {
+                "$ref": "#/$defs/AttributeIdArrayItem"
+              },
+              "surfaceId": {
+                "$ref": "#/$defs/AttributeIdArrayItem"
+              },
+              "fillId": {
+                "$ref": "#/$defs/AttributeIdArrayItem"
+              },
+              "contourPen": {
+                "type": "integer"
+              },
+              "contourLineTypeId": {
+                "$ref": "#/$defs/AttributeIdArrayItem"
+              },
+              "isCore": {
+                "type": "boolean"
+              },
+              "isFinish": {
+                "type": "boolean"
+              },
+              "visibleCutEndLines": {
+                "type": "boolean"
+              },
+              "cutEndLinePen": {
+                "type": "integer"
+              },
+              "cutEndLineTypeId": {
+                "$ref": "#/$defs/AttributeIdArrayItem"
+              },
+              "edgeOverrides": {
+                "type": "array",
+                "description": "Modifications to specific edges of this skin, targeted by their position (0-based) in GetProfiles' skins[].edges.",
+                "items": {
+                  "$ref": "#/$defs/ProfileEdgeOverride"
+                }
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "skinId"
+            ]
+          }
+        },
+        "newSkins": {
+          "type": "array",
+          "description": "AC27+ only. Adds brand-new skins built from caller-supplied polygon geometry, instead of (or in addition to) whatever was copied from sourceAttributeId. Combine with sourceAttributeId to add skins to a copied Profile, or omit sourceAttributeId to build a Profile's geometry entirely from newSkins.",
+          "items": {
+            "$ref": "#/$defs/ProfileSkinData"
+          }
+        },
+        "replaceSkins": {
+          "type": "boolean",
+          "description": "AC27+ only. When overwriteExisting targets an existing Profile, discard every one of its existing skins (and any sourceAttributeId geometry given alongside it) before applying newSkins, instead of adding newSkins on top of the preserved existing geometry. Use this to fully replace a Profile's cross-section with a caller-authored shape while keeping its guid and scalar fields (wallType etc.) - e.g. to sync a Profile's geometry from another project, where sourceAttributeId can't be used because it only resolves within the same file. Also discards any existing profileModifiers, since those are tied to the specific geometry being replaced. Ignored when creating a brand-new Profile (there is nothing to discard yet)."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "name"
+      ]
+    },
+    "CompositeData": {
+      "type": "object",
+      "description": "Data to create a Composite.",
+      "properties": {
+        "attributeId": {
+          "description": "Indentifier of the existing Composite to overwrite, ignored if overwriteExisting is false.",
+          "$ref": "#/$defs/AttributeId"
+        },
+        "index": {
+          "type": "string",
+          "description": "Index of the existing Composite to overwrite, ignored if overwriteExisting is false."
+        },
+        "name": {
+          "type": "string",
+          "description": "Name. If overwriteExisting is true, then the existing Composite with the given name will be overwritten."
+        },
+        "useWith": {
+          "type": "array",
+          "description": "Array of types the composite can used with.",
+          "items": {
+            "type": "string",
+            "description": "Element type (Wall, Slab, Roof, or Shell)"
+          }
+        },
+        "skins": {
+          "type": "array",
+          "description": "Array of skin data.",
+          "items": {
+            "type": "object",
+            "description": "Data to represent a skin.",
+            "properties": {
+              "type": {
+                "type": "string",
+                "description": "Skin type (Core, Finish, or Other)"
+              },
+              "buildingMaterialId": {
+                "$ref": "#/$defs/AttributeIdArrayItem"
+              },
+              "framePen": {
+                "type": "integer",
+                "description": "Skin frame pen index."
+              },
+              "thickness": {
+                "type": "number",
+                "description": "Skin thickness (in meters)."
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "type",
+              "buildingMaterialId",
+              "framePen",
+              "thickness"
+            ]
+          }
+        },
+        "separators": {
+          "type": "array",
+          "description": "Array of skin separator data. The number of items must be the number of skins plus one.",
+          "items": {
+            "type": "object",
+            "description": "Data to represent a skin separator.",
+            "properties": {
+              "lineTypeId": {
+                "$ref": "#/$defs/AttributeIdArrayItem"
+              },
+              "linePen": {
+                "type": "integer",
+                "description": "Separator line pen index."
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "lineTypeId",
+              "linePen"
+            ]
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "skins",
+        "separators"
+      ]
+    },
+    "SurfaceData": {
+      "type": "object",
+      "description": "Data to create a surface.",
+      "properties": {
+        "attributeId": {
+          "description": "Indentifier of the existing Surface to overwrite, ignored if overwriteExisting is false.",
+          "$ref": "#/$defs/AttributeId"
+        },
+        "index": {
+          "type": "string",
+          "description": "Index of the existing surface to overwrite, ignored if overwriteExisting is false."
+        },
+        "name": {
+          "type": "string",
+          "description": "Name. If overwriteExisting is true, then the existing surface with the given name will be overwritten."
+        },
+        "materialType": {
+          "$ref": "#/$defs/SurfaceType"
+        },
+        "ambientReflection": {
+          "type": "number",
+          "description": "Ambient percentage [0..100]."
+        },
+        "diffuseReflection": {
+          "type": "number",
+          "description": "Diffuse percentage [0..100]."
+        },
+        "specularReflection": {
+          "type": "number",
+          "description": "Specular percentage [0..100]."
+        },
+        "transparency": {
+          "type": "number",
+          "description": "Transparency percentage [0..100]."
+        },
+        "shine": {
+          "type": "number",
+          "description": "The shininess factor multiplied by 100 [0..10000]."
+        },
+        "transparencyAttenuation": {
+          "type": "number",
+          "description": "Transparency attenuation multiplied by 100 [0..10000]."
+        },
+        "emissionAttenuation": {
+          "type": "number",
+          "description": "Emission attenuation multiplied by 100 [0..10000]."
+        },
+        "surfaceColor": {
+          "$ref": "#/$defs/ColorRGB"
+        },
+        "specularColor": {
+          "$ref": "#/$defs/ColorRGB"
+        },
+        "emissionColor": {
+          "$ref": "#/$defs/ColorRGB"
+        },
+        "fillId": {
+          "$ref": "#/$defs/AttributeIdArrayItem"
+        },
+        "texture": {
+          "$ref": "#/$defs/Texture"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "name"
+      ]
+    },
+    "LayerData": {
+      "type": "object",
+      "description": "Data to create a Layer.",
+      "properties": {
+        "attributeId": {
+          "description": "Indentifier of the existing Layer to overwrite, ignored if overwriteExisting is false.",
+          "$ref": "#/$defs/AttributeId"
+        },
+        "index": {
+          "type": "string",
+          "description": "Index of the existing Layer to overwrite, ignored if overwriteExisting is false."
+        },
+        "name": {
+          "type": "string",
+          "description": "Name. If overwriteExisting is true, then the existing Layer with the given name will be overwritten."
+        },
+        "isHidden": {
+          "type": "boolean",
+          "description": "Hide/Show."
+        },
+        "isLocked": {
+          "type": "boolean",
+          "description": "Lock/Unlock."
+        },
+        "isWireframe": {
+          "type": "boolean",
+          "description": "Force the model to wireframe."
+        },
+        "intersectionGroupNr": {
+          "type": "integer",
+          "description": "Intersection group. Elements on layers having the same group will be intersected."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "name"
+      ]
+    },
+    "BuildingMaterialData": {
+      "type": "object",
+      "description": "Data to create a Building Material.",
+      "properties": {
+        "attributeId": {
+          "description": "Indentifier of the existing Building Material to overwrite, ignored if overwriteExisting is false.",
+          "$ref": "#/$defs/AttributeId"
+        },
+        "index": {
+          "type": "string",
+          "description": "Index of the existing Building Material to overwrite, ignored if overwriteExisting is false."
+        },
+        "name": {
+          "type": "string",
+          "description": "Name. If overwriteExisting is true, then the existing Building Material with the given name will be overwritten."
+        },
+        "id": {
+          "type": "string",
+          "description": "Identifier."
+        },
+        "manufacturer": {
+          "type": "string",
+          "description": "Manufacturer."
+        },
+        "description": {
+          "type": "string",
+          "description": "Decription."
+        },
+        "connPriority": {
+          "type": "integer",
+          "description": "Intersection priority."
+        },
+        "cutFillIndex": {
+          "type": "integer",
+          "description": "Index of the Cut Fill."
+        },
+        "cutFillPen": {
+          "type": "integer",
+          "description": "Cut Fill Foreground Pen."
+        },
+        "cutFillBackgroundPen": {
+          "type": "integer",
+          "description": "Cut Fill Background Pen."
+        },
+        "cutSurfaceIndex": {
+          "type": "integer",
+          "description": "Index of the Cut Surface."
+        },
+        "thermalConductivity": {
+          "type": "number",
+          "description": "Thermal Conductivity."
+        },
+        "density": {
+          "type": "number",
+          "description": "Density."
+        },
+        "heatCapacity": {
+          "type": "number",
+          "description": "Heat Capacity."
+        },
+        "embodiedEnergy": {
+          "type": "number",
+          "description": "Embodied Energy."
+        },
+        "embodiedCarbon": {
+          "type": "number",
+          "description": "Embodied Carbon."
+        },
+        "showUncutLines": {
+          "type": "boolean",
+          "description": "Show Contours in Model Views."
+        },
+        "collisionDetection": {
+          "type": "boolean",
+          "description": "Whether the Building Material participates in collision detection."
+        },
+        "cutFillOrientation": {
+          "type": "string",
+          "description": "ProjectOrigin, ElementOrigin, or FitToSkin. Orientation of the cut fill."
         }
       },
       "additionalProperties": false,
@@ -14405,6 +16694,85 @@
         "meshData"
       ]
     },
+    "KeynoteFolderModificationData": {
+      "type": "object",
+      "properties": {
+        "keynoteFolderId": {
+          "$ref": "#/$defs/KeynoteFolderId"
+        },
+        "key": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "reference": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "keynoteFolderId"
+      ]
+    },
+    "KeynoteItemModificationData": {
+      "type": "object",
+      "properties": {
+        "keynoteItemId": {
+          "$ref": "#/$defs/KeynoteItemId"
+        },
+        "key": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "reference": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "keynoteItemId"
+      ]
+    },
+    "MEPRoutingElementModificationData": {
+      "type": "object",
+      "properties": {
+        "elementId": {
+          "$ref": "#/$defs/ElementId"
+        },
+        "mepSystemId": {
+          "$ref": "#/$defs/AttributeId"
+        },
+        "crossSectionWidth": {
+          "type": "number",
+          "description": "New cross section width applied to all segments."
+        },
+        "crossSectionHeight": {
+          "type": "number",
+          "description": "New cross section height applied to all segments."
+        },
+        "crossSectionShape": {
+          "$ref": "#/$defs/MEPCrossSectionShape",
+          "description": "New cross section shape applied to all segments."
+        },
+        "nodePositions": {
+          "type": "array",
+          "description": "New positions of the routing nodes. The size must match the number of nodes of the route.",
+          "items": {
+            "$ref": "#/$defs/Coordinate3D"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elementId"
+      ]
+    },
     "MeshModificationData": {
       "type": "object",
       "description": "The fields to modify on the Mesh. Only provided fields are changed; omitted fields are left as-is.",
@@ -14572,6 +16940,14 @@
         "useWith",
         "skins",
         "separators"
+      ]
+    },
+    "CompositeSkinType": {
+      "type": "string",
+      "enum": [
+        "Core",
+        "Finish",
+        "Other"
       ]
     },
     "SurfaceAttributeField": {
@@ -15277,35 +17653,6 @@
         "itemType"
       ]
     },
-    "FillSubType": {
-      "type": "string",
-      "enum": [
-        "Vector",
-        "Solid",
-        "Empty",
-        "Symbol",
-        "LinearGradient",
-        "RadialGradient"
-      ]
-    },
-    "MEPSystemDomain": {
-      "type": "string",
-      "enum": [
-        "Ventilation",
-        "Piping",
-        "CableCarrier"
-      ]
-    },
-    "ProfileUseWith": {
-      "type": "string",
-      "enum": [
-        "Wall",
-        "Beam",
-        "Column",
-        "Handrail",
-        "Other"
-      ]
-    },
     "PenData": {
       "type": "object",
       "properties": {
@@ -15328,31 +17675,6 @@
       "additionalProperties": false,
       "required": [
         "index"
-      ]
-    },
-    "BoundingBox2D": {
-      "type": "object",
-      "description": "Bounding box of the drawing on the layout.",
-      "properties": {
-        "xMin": {
-          "type": "number"
-        },
-        "yMin": {
-          "type": "number"
-        },
-        "xMax": {
-          "type": "number"
-        },
-        "yMax": {
-          "type": "number"
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "xMin",
-        "yMin",
-        "xMax",
-        "yMax"
       ]
     },
     "ProfileSkinData": {
@@ -15410,30 +17732,6 @@
         "contours"
       ]
     },
-    "ProfileSkinContour": {
-      "type": "object",
-      "properties": {
-        "polygonCoordinates": {
-          "type": "array",
-          "description": "The 2D coordinates of this contour.",
-          "items": {
-            "$ref": "#/$defs/Coordinate2D"
-          },
-          "minItems": 3
-        },
-        "polygonArcs": {
-          "type": "array",
-          "description": "Optional arcs along this contour's edges. begIndex/endIndex are 0-based positions within this contour's own polygonCoordinates.",
-          "items": {
-            "$ref": "#/$defs/PolyArc"
-          }
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "polygonCoordinates"
-      ]
-    },
     "ProfileEdgeOverride": {
       "type": "object",
       "properties": {
@@ -15456,6 +17754,84 @@
       "additionalProperties": false,
       "required": [
         "edgeIndex"
+      ]
+    },
+    "FillSubType": {
+      "type": "string",
+      "enum": [
+        "Vector",
+        "Solid",
+        "Empty",
+        "Symbol",
+        "LinearGradient",
+        "RadialGradient"
+      ]
+    },
+    "MEPSystemDomain": {
+      "type": "string",
+      "enum": [
+        "Ventilation",
+        "Piping",
+        "CableCarrier"
+      ]
+    },
+    "ProfileUseWith": {
+      "type": "string",
+      "enum": [
+        "Wall",
+        "Beam",
+        "Column",
+        "Handrail",
+        "Other"
+      ]
+    },
+    "BoundingBox2D": {
+      "type": "object",
+      "description": "Bounding box of the drawing on the layout.",
+      "properties": {
+        "xMin": {
+          "type": "number"
+        },
+        "yMin": {
+          "type": "number"
+        },
+        "xMax": {
+          "type": "number"
+        },
+        "yMax": {
+          "type": "number"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "xMin",
+        "yMin",
+        "xMax",
+        "yMax"
+      ]
+    },
+    "ProfileSkinContour": {
+      "type": "object",
+      "properties": {
+        "polygonCoordinates": {
+          "type": "array",
+          "description": "The 2D coordinates of this contour.",
+          "items": {
+            "$ref": "#/$defs/Coordinate2D"
+          },
+          "minItems": 3
+        },
+        "polygonArcs": {
+          "type": "array",
+          "description": "Optional arcs along this contour's edges. begIndex/endIndex are 0-based positions within this contour's own polygonCoordinates.",
+          "items": {
+            "$ref": "#/$defs/PolyArc"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "polygonCoordinates"
       ]
     },
     "SolidLinkData": {
@@ -15519,6 +17895,89 @@
         "customSchemeValue"
       ],
       "additionalProperties": false
+    },
+    "MEPElementType": {
+      "type": "string",
+      "enum": [
+        "RoutingElement",
+        "RigidSegment",
+        "Elbow",
+        "Transition",
+        "Branch",
+        "Terminal",
+        "Accessory",
+        "Equipment",
+        "Fitting",
+        "FlexibleSegment",
+        "TakeOff"
+      ]
+    },
+    "MEPDomains": {
+      "type": "string",
+      "enum": [
+        "Ventilation",
+        "Piping",
+        "CableCarrier"
+      ]
+    },
+    "MEPElement": {
+      "type": "object",
+      "properties": {
+        "elementId": {
+          "$ref": "#/$defs/ElementId"
+        },
+        "type": {
+          "$ref": "#/$defs/MEPElementType",
+          "description": "The type of the MEP element."
+        },
+        "domain": {
+          "type": "string",
+          "description": "The MEP domain of the element. Empty for domain-independent elements (e.g. Equipment)."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elementId",
+        "type",
+        "domain"
+      ]
+    },
+    "DrawingNameType": {
+      "type": "string",
+      "enum": [
+        "ViewOrSourceFileName",
+        "ViewIdAndName",
+        "CustomName"
+      ],
+      "description": "How the drawing's title name is assembled (Identification tabpage of the Drawing Settings dialog)."
+    },
+    "DrawingNumberingType": {
+      "type": "string",
+      "enum": [
+        "ByLayout",
+        "ByViewId",
+        "CustomNumber"
+      ],
+      "description": "How the drawing's title ID is assigned (Identification tabpage of the Drawing Settings dialog)."
+    },
+    "MEPCrossSectionShape": {
+      "type": "string",
+      "description": "Optional cross section shape applied to all segments.",
+      "enum": [
+        "Rectangular",
+        "Circular",
+        "Oval",
+        "UShape"
+      ]
+    },
+    "MEPComponentType": {
+      "type": "string",
+      "enum": [
+        "Terminal",
+        "Accessory",
+        "Equipment",
+        "Fitting"
+      ]
     }
   }
 }

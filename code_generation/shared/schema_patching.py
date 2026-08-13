@@ -165,6 +165,27 @@ def apply_permanent_patches(master_defs: dict[str, Any]):
         "CloneProjectMapItemToViewMapParameters": ("viewsData", "ViewCloneData"),
         "CreateViewsInViewMapParameters": ("viewsData", "ViewData"),
         "CreateMEPSystemsParameters": ("mepSystemDataArray", "MEPSystemData"),
+        "CreateArcsParameters": ("arcsData", "ArcData"),
+        "CreateCirclesParameters": ("circlesData", "CircleData"),
+        "CreateHatchesParameters": ("hatchesData", "HatchData"),
+        "CreateHotspotsParameters": ("hotspotsData", "HotspotData"),
+        "CreateLineElementsParameters": ("linesData", "LineElementData"),
+        "CreateSplinesParameters": ("splinesData", "SplineData"),
+        "CreateKeynoteFoldersParameters": ("foldersData", "KeynoteFolderData"),
+        "CreateKeynoteItemsParameters": ("itemsData", "KeynoteItemData"),
+        "CreateKeynoteLabelsParameters": ("labelsData", "KeynoteLabelData"),
+        "CreateMEPElementsParameters": ("elementsData", "MEPElementData"),
+        "ConnectMEPElementsParameters": ("connectionsData", "MEPConnectionData"),
+        "CreateMEPRoutingElementsParameters": ("routingElementsData", "MEPRoutingElementData"),
+        "CreateLinesParameters": ("lineDataArray", "LineData"),
+        "CreateFillsParameters": ("fillDataArray", "FillData"),
+        "CreateZoneCategoriesParameters": ("zoneCategoryDataArray", "ZoneCategoryData"),
+        "CreatePenTablesParameters": ("penTableDataArray", "PenTableData"),
+        "CreateProfilesParameters": ("profileDataArray", "ProfileData"),
+        "CreateCompositesParameters": ("compositeDataArray", "CompositeData"),
+        "CreateSurfacesParameters": ("surfaceDataArray", "SurfaceData"),
+        "CreateLayersParameters": ("layerDataArray", "LayerData"),
+        "CreateBuildingMaterialsParameters": ("buildingMaterialDataArray", "BuildingMaterialData"),
     }
 
     for parent_model, (field_name, new_model_name) in creation_data_types.items():
@@ -180,6 +201,9 @@ def apply_permanent_patches(master_defs: dict[str, Any]):
         "ModifyMorphsParameters": ("morphsWithDetails", "MorphWithDetails"),
         "ModifyRoofsParameters": ("roofsWithDetails", "RoofWithDetails"),
         "ModifyMeshesParameters": ("meshesData", "MeshWithDetails"),
+        "ModifyKeynoteFoldersParameters": ("foldersData", "KeynoteFolderModificationData"),
+        "ModifyKeynoteItemsParameters": ("itemsData", "KeynoteItemModificationData"),
+        "ModifyMEPRoutingElementsParameters": ("routingElementsData", "MEPRoutingElementModificationData"),
     }
 
     for parent_model, (field_name, new_model_name) in element_modification_datatypes.items():
@@ -316,20 +340,19 @@ def apply_temporary_patches(master_defs: dict[str, Any]):
     replace_inline_schema_with_ref(master_defs, "MeshModificationData", ["sublines", "items"], "MeshSubline")
 
     # --- Line/Fill attribute creation sub-schemas (Tapir 1.5.4 attribute commands) ---
-    replace_inline_schema_with_ref(
-        master_defs, "CreateLinesParameters", ["lineDataArray", "items", "dashItems", "items"], "LineDashItem"
-    )
+    # note - executes with already extracted objects lineDataArray -> LineData, fillDataArray -> FillData etc
+    replace_inline_schema_with_ref(master_defs, "LineData", ["dashItems", "items"], "LineDashItem")
+    extract_inline_schema(master_defs, "LineData", ["lineItems", "items"], "LineSymbolItemData")
+    replace_inline_schema_with_ref(master_defs, "FillData", ["lineItems", "items"], "FillLineItem")
+    replace_inline_schema_with_ref(master_defs, "FillData", ["symbolLines", "items"], "FillSymbolLine")
+    replace_inline_schema_with_ref(master_defs, "FillData", ["symbolArcs", "items"], "FillSymbolArc")
+    extract_inline_schema(master_defs, "PenTableData", ["pens", "items"], "PenData")
+    extract_inline_schema(master_defs, "ProfileData", ["newSkins", "items"], "ProfileSkinData")
     extract_inline_schema(
-        master_defs, "CreateLinesParameters", ["lineDataArray", "items", "lineItems", "items"], "LineSymbolItemData"
-    )
-    replace_inline_schema_with_ref(
-        master_defs, "CreateFillsParameters", ["fillDataArray", "items", "lineItems", "items"], "FillLineItem"
-    )
-    replace_inline_schema_with_ref(
-        master_defs, "CreateFillsParameters", ["fillDataArray", "items", "symbolLines", "items"], "FillSymbolLine"
-    )
-    replace_inline_schema_with_ref(
-        master_defs, "CreateFillsParameters", ["fillDataArray", "items", "symbolArcs", "items"], "FillSymbolArc"
+        master_defs,
+        "ProfileData",
+        ["skinOverrides", "items", "edgeOverrides", "items"],
+        "ProfileEdgeOverride",
     )
 
     # --- Attribute detail enums ---
@@ -337,25 +360,10 @@ def apply_temporary_patches(master_defs: dict[str, Any]):
     extract_inline_enum(master_defs, "MEPSystemAttribute", ["domain", "items"], "MEPSystemDomain")
     extract_inline_enum(master_defs, "ProfileAttribute", ["useWith", "items"], "ProfileUseWith")
 
-    # --- Pen table pens ---
-    extract_inline_schema(
-        master_defs, "CreatePenTablesParameters", ["penTableDataArray", "items", "pens", "items"], "PenData"
-    )
-
     # --- Drawing bounds ---
     extract_inline_schema(master_defs, "DrawingDetails", ["bounds"], "BoundingBox2D")
 
-    # --- Profile skins ---
-    extract_inline_schema(
-        master_defs, "CreateProfilesParameters", ["profileDataArray", "items", "newSkins", "items"], "ProfileSkinData"
-    )
     extract_inline_schema(master_defs, "ProfileSkinData", ["contours", "items"], "ProfileSkinContour")
-    extract_inline_schema(
-        master_defs,
-        "CreateProfilesParameters",
-        ["profileDataArray", "items", "skinOverrides", "items", "edgeOverrides", "items"],
-        "ProfileEdgeOverride",
-    )
     replace_inline_schema_with_ref(master_defs, "ProfileSkinData", ["edgeOverrides", "items"], "ProfileEdgeOverride")
 
     # --- Solid element operation links (create side; Remove/Get variants are extracted above) ---
@@ -369,3 +377,62 @@ def apply_temporary_patches(master_defs: dict[str, Any]):
 
     # --- remove malformed Export Favorites result ---
     master_defs.pop("ExportFavoritesResult", None)
+
+    # --- MEP enums/schemas (Tapir 1.5.6) ---
+    extract_inline_enum(master_defs, "GetMEPElementsParameters", ["elementTypes", "items"], "MEPElementType")
+    extract_inline_enum(master_defs, "GetMEPElementsParameters", ["domains", "items"], "MEPDomains")
+    extract_inline_schema(master_defs, "GetMEPElementsResult", ["elements", "items"], "MEPElement")
+
+
+    # --- DrawingSettings title name and numbering enums ---
+    extract_inline_enum(master_defs, "DrawingSettings", ["nameType"], "DrawingNameType")
+    extract_inline_enum(master_defs, "DrawingSettings", ["numberingType"], "DrawingNumberingType")
+
+    # --- MEP Routing Cross Section Shape enum ---
+    extract_inline_enum(
+        master_defs, "MEPRoutingElementData", ["crossSectionShape"], "MEPCrossSectionShape"
+    )
+    replace_inline_schema_with_ref(
+        master_defs,
+        "MEPRoutingElementModificationData",
+        ["crossSectionShape"],
+        "MEPCrossSectionShape",
+        preserve_description=True,
+    )
+
+    # --- Unify MEP Domain schemas to point to MEPSystemDomain ---
+    replace_inline_schema_with_ref(
+        master_defs, "MEPRoutingElementDetails", ["domain"], "MEPSystemDomain", preserve_description=True
+    )
+    replace_inline_schema_with_ref(
+        master_defs, "MEPPortDetails", ["domain"], "MEPSystemDomain", preserve_description=True
+    )
+    replace_inline_schema_with_ref(
+        master_defs, "GetMEPElementsParameters", ["domains", "items"], "MEPSystemDomain", preserve_description=True
+    )
+    replace_inline_schema_with_ref(
+        master_defs,
+        "GetMEPDistributionSystemsResult",
+        ["distributionSystems", "items", "domain"],
+        "MEPSystemDomain",
+        preserve_description=True,
+    )
+    replace_inline_schema_with_ref(
+        master_defs, "MEPSystemData", ["domain"], "MEPSystemDomain", preserve_description=True
+    )
+    replace_inline_schema_with_ref(
+        master_defs, "MEPElementData", ["domain"], "MEPSystemDomain", preserve_description=True
+    )
+    replace_inline_schema_with_ref(
+        master_defs, "MEPRoutingElementData", ["domain"], "MEPSystemDomain", preserve_description=True
+    )
+
+    # --- Extract 4-value discrete MEP element type enum ---
+    extract_inline_enum(
+        master_defs, "MEPElementData", ["type"], "MEPComponentType"
+    )
+
+    # --- Point MEPElement.type to the broad 11-value MEPElementType ---
+    replace_inline_schema_with_ref(
+        master_defs, "MEPElement", ["type"], "MEPElementType", preserve_description=True
+    )

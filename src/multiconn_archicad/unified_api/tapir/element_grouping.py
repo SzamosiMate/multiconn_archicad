@@ -5,8 +5,26 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 from pydantic import TypeAdapter
 
-from multiconn_archicad.models.tapir.commands import CreateGroupsParameters, CreateGroupsResult
-from multiconn_archicad.models.tapir.types import ElementGroupParameters, ErrorItem, GroupIdArrayItem
+from multiconn_archicad.models.tapir.commands import (
+    CreateGroupsParameters,
+    CreateGroupsResult,
+    GetElementsOfGroupsParameters,
+    GetElementsOfGroupsResult,
+    GetGroupsOfElementsParameters,
+    GetGroupsOfElementsResult,
+    GetSuspendGroupsModeResult,
+    SetSuspendGroupsModeParameters,
+    SetSuspendGroupsModeResult,
+)
+from multiconn_archicad.models.tapir.types import (
+    ElementGroupParameters,
+    ElementIdArrayItem,
+    ElementsWrapper,
+    ErrorItem,
+    FailedExecutionResult,
+    GroupIdArrayItem,
+    SuccessfulExecutionResult,
+)
 
 if TYPE_CHECKING:
     from multiconn_archicad.core.core_commands import CoreCommands
@@ -40,3 +58,99 @@ class ElementGroupingCommands:
         )
         validated_response = CreateGroupsResult.model_validate(response_dict)
         return validated_response.groupGuids
+
+    def get_elements_of_groups(self, groups: list[GroupIdArrayItem]) -> list[ElementsWrapper | ErrorItem]:
+        """
+        Gets the elements directly contained by each given group.
+
+        Args:
+            groups (list[GroupIdArrayItem]): The groups to get the elements of.
+
+        Returns:
+            list[ElementsWrapper | ErrorItem]: The elements directly contained by each given
+                group, or an error.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "groups": groups,
+        }
+        validated_params = GetElementsOfGroupsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetElementsOfGroups", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetElementsOfGroupsResult.model_validate(response_dict)
+        return validated_response.elementsOfGroups
+
+    def get_groups_of_elements(self, elements: list[ElementIdArrayItem]) -> list[ErrorItem | GroupIdArrayItem]:
+        """
+        Gets the identifier of the group that directly contains each given element. Returns an
+        error for elements that are not part of any group.
+
+        Args:
+            elements (list[ElementIdArrayItem]): A list of elements.
+
+        Returns:
+            list[ErrorItem | GroupIdArrayItem]: The identifier of the group that directly
+                contains each given element, or an error for elements that are not part of any
+                group.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elements": elements,
+        }
+        validated_params = GetGroupsOfElementsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetGroupsOfElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetGroupsOfElementsResult.model_validate(response_dict)
+        return validated_response.groupGuids
+
+    def get_suspend_groups_mode(self) -> bool:
+        """
+        Gets the current state of the Suspend Groups mode.
+
+        Returns:
+            bool: True if the Suspend Groups mode is currently on.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        response_dict = self._core.post_tapir_command("GetSuspendGroupsMode")
+        validated_response = GetSuspendGroupsModeResult.model_validate(response_dict)
+        return validated_response.suspendGroups
+
+    def set_suspend_groups_mode(self, suspend_groups: bool) -> FailedExecutionResult | SuccessfulExecutionResult:
+        """
+        Turns the Suspend Groups mode on or off. Suspend groups to perform operations on
+        elements that are part of a group; remember to restore the previous state afterwards.
+
+        Args:
+            suspend_groups (bool): Turn the Suspend Groups mode on or off.
+
+        Returns:
+            FailedExecutionResult | SuccessfulExecutionResult: The result of the execution.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "suspendGroups": suspend_groups,
+        }
+        validated_params = SetSuspendGroupsModeParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "SetSuspendGroupsMode", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = SetSuspendGroupsModeResult.model_validate(response_dict)
+        return validated_response.executionResult

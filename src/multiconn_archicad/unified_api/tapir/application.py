@@ -11,12 +11,21 @@ from multiconn_archicad.models.tapir.commands import (
     GetAddOnVersionResult,
     GetArchicadLocationResult,
     GetCurrentWindowTypeResult,
+    GetSpecialFoldersParameters,
+    GetSpecialFoldersResult,
+    GetUserGSIDResult,
     QuitArchicadResult,
+    ShowAlertParameters,
+    ShowAlertResult,
 )
 from multiconn_archicad.models.tapir.types import (
+    AlertType,
     DatabaseIdAndWindowType,
+    ErrorItem,
     FailedExecutionResult,
     NavigatorItemIdArrayItem,
+    SpecialFolderPath,
+    SpecialFolderType,
     SuccessfulExecutionResult,
     WindowType,
 )
@@ -102,6 +111,50 @@ class ApplicationCommands:
         validated_response = GetCurrentWindowTypeResult.model_validate(response_dict)
         return validated_response.currentWindowType
 
+    def get_special_folders(self, folder_types: list[SpecialFolderType]) -> list[ErrorItem | SpecialFolderPath]:
+        """
+        Retrieves the filesystem paths of the special folders of the running Archicad
+        (preferences, cache, data, temporary, application, defaults, templates, help, embedded
+        project library, etc.).
+
+        Args:
+            folder_types (list[SpecialFolderType]): The types of the special folders to
+                retrieve.
+
+        Returns:
+            list[ErrorItem | SpecialFolderPath]: A list of special folder paths or errors.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "folderTypes": folder_types,
+        }
+        validated_params = GetSpecialFoldersParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetSpecialFolders", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetSpecialFoldersResult.model_validate(response_dict)
+        return validated_response.folderPaths
+
+    def get_user_gsid(self) -> GetUserGSIDResult:
+        """
+        Get the current registered User-GSID and OrganizationsID. Requires Archicad 27 or later.
+
+        Returns:
+            GetUserGSIDResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        response_dict = self._core.post_tapir_command("GetUserGSID")
+        validated_response = GetUserGSIDResult.model_validate(response_dict)
+        return validated_response
+
     def quit_archicad(self) -> FailedExecutionResult | SuccessfulExecutionResult:
         """
         Performs a quit operation on the currently running Archicad instance.
@@ -117,3 +170,49 @@ class ApplicationCommands:
         response_dict = self._core.post_tapir_command("QuitArchicad")
         validated_response = TypeAdapter(QuitArchicadResult).validate_python(response_dict)
         return validated_response
+
+    def show_alert(
+        self,
+        alert_type: AlertType,
+        title: str,
+        message: str,
+        button_1: str,
+        sub_message: None | str = None,
+        button_2: None | str = None,
+        button_3: None | str = None,
+    ) -> int:
+        """
+        Display a dialog with up to three buttons.
+
+        Args:
+            alert_type (AlertType): The type of the alert dialog.
+            title (str): The title of the alert dialog.
+            message (str): The main message text.
+            button_1 (str): Label for the first (default) button.
+            sub_message (None | str): Optional smaller sub-message text below the main message.
+            button_2 (None | str): Label for the second button (e.g. Cancel).
+            button_3 (None | str): Label for the optional third button.
+
+        Returns:
+            int: Index of the button the user clicked: 1 = button1, 2 = button2, 3 = button3.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "alertType": alert_type,
+            "title": title,
+            "message": message,
+            "subMessage": sub_message,
+            "button1": button_1,
+            "button2": button_2,
+            "button3": button_3,
+        }
+        validated_params = ShowAlertParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "ShowAlert", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = ShowAlertResult.model_validate(response_dict)
+        return validated_response.clickedButton
