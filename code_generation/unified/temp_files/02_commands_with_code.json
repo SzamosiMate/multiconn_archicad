@@ -418,594 +418,25 @@
         "alias_property_name": "executionResults"
       }
     ],
-    "Element Commands": [
-      {
-        "name": "ChangeSelectionOfElements",
-        "group": "Element Commands",
-        "description": "Adds/removes a number of elements to/from the current selection.",
-        "version": "1.0.7",
-        "source": "tapir",
-        "method_code": "def change_selection_of_elements(\n    self,\n    add_elements_to_selection: None | list[ElementIdArrayItem] = None,\n    remove_elements_from_selection: None | list[ElementIdArrayItem] = None\n) -> ChangeSelectionOfElementsResult:\n    \"\"\"\n    Adds/removes a number of elements to/from the current selection.\n\n    Args:\n        add_elements_to_selection (None | list[ElementIdArrayItem]): A list of elements.\n        remove_elements_from_selection (None | list[ElementIdArrayItem]): A list of\n            elements.\n\n    Returns:\n        ChangeSelectionOfElementsResult\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    params_dict = {\n            'addElementsToSelection': add_elements_to_selection,\n            'removeElementsFromSelection': remove_elements_from_selection,\n        }\n    validated_params = ChangeSelectionOfElementsParameters(**params_dict)\n    response_dict = self._core.post_tapir_command(\n        \"ChangeSelectionOfElements\",\n        validated_params.model_dump(mode='json', by_alias=True, exclude_none=True)\n    )\n    validated_response = ChangeSelectionOfElementsResult.model_validate(response_dict)\n    return validated_response",
-        "command_model_dependencies": [
-          "ChangeSelectionOfElementsParameters",
-          "ChangeSelectionOfElementsResult"
-        ],
-        "type_model_dependencies": [
-          "ElementIdArrayItem"
-        ],
-        "alias_property_name": null
-      },
-      {
-        "name": "DeleteElements",
-        "group": "Element Commands",
-        "description": "Deletes elements.",
-        "version": "1.2.1",
-        "source": "tapir",
-        "method_code": "def delete_elements(\n    self,\n    elements: list[ElementIdArrayItem]\n) -> FailedExecutionResult | SuccessfulExecutionResult:\n    \"\"\"\n    Deletes elements.\n\n    Args:\n        elements (list[ElementIdArrayItem]): A list of elements.\n\n    Returns:\n        FailedExecutionResult | SuccessfulExecutionResult\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    params_dict = {\n            'elements': elements,\n        }\n    validated_params = DeleteElementsParameters(**params_dict)\n    response_dict = self._core.post_tapir_command(\n        \"DeleteElements\",\n        validated_params.model_dump(mode='json', by_alias=True, exclude_none=True)\n    )\n    validated_response = TypeAdapter(DeleteElementsResult).validate_python(response_dict)\n    return validated_response",
-        "command_model_dependencies": [
-          "DeleteElementsParameters",
-          "DeleteElementsResult"
-        ],
-        "type_model_dependencies": [
-          "ElementIdArrayItem",
-          "FailedExecutionResult",
-          "SuccessfulExecutionResult"
-        ],
-        "alias_property_name": null
-      },
-      {
-        "name": "FilterElements",
-        "group": "Element Commands",
-        "description": "Tests an elements by the given criterias.",
-        "version": "1.0.7",
-        "source": "tapir",
-        "method_code": "def filter_elements(\n    self,\n    elements: list[ElementIdArrayItem],\n    filters: None | list[ElementFilter] = None\n) -> list[ElementIdArrayItem]:\n    \"\"\"\n    Tests an elements by the given criterias.\n\n    Args:\n        elements (list[ElementIdArrayItem]): A list of elements.\n        filters (None | list[ElementFilter])\n\n    Returns:\n        list[ElementIdArrayItem]: A list of elements.\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    params_dict = {\n            'elements': elements,\n            'filters': filters,\n        }\n    validated_params = FilterElementsParameters(**params_dict)\n    response_dict = self._core.post_tapir_command(\n        \"FilterElements\",\n        validated_params.model_dump(mode='json', by_alias=True, exclude_none=True)\n    )\n    validated_response = FilterElementsResult.model_validate(response_dict)\n    return validated_response.elements",
-        "command_model_dependencies": [
-          "FilterElementsParameters",
-          "FilterElementsResult"
-        ],
-        "type_model_dependencies": [
-          "ElementFilter",
-          "ElementIdArrayItem"
-        ],
-        "alias_property_name": "elements"
-      },
-      {
-        "name": "Get3DBoundingBoxes",
-        "group": "Element Commands",
-        "description": "Get the 3D bounding box of elements. The bounding box is calculated from the global origin in the 3D view. The output is the array of the bounding boxes respective to the input array of elements.",
-        "version": "1.1.2",
-        "source": "tapir",
-        "method_code": "def get_3d_bounding_boxes(\n    self,\n    elements: list[ElementIdArrayItem]\n) -> list[BoundingBox3DArrayItem | ErrorItem]:\n    \"\"\"\n    Get the 3D bounding box of elements. The bounding box is calculated from the global\n    origin in the 3D view. The output is the array of the bounding boxes respective to the\n    input array of elements.\n\n    Args:\n        elements (list[ElementIdArrayItem]): A list of elements.\n\n    Returns:\n        list[BoundingBox3DArrayItem | ErrorItem]: A list of 3D bounding boxes.\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    params_dict = {\n            'elements': elements,\n        }\n    validated_params = Get3DBoundingBoxesParameters(**params_dict)\n    response_dict = self._core.post_tapir_command(\n        \"Get3DBoundingBoxes\",\n        validated_params.model_dump(mode='json', by_alias=True, exclude_none=True)\n    )\n    validated_response = Get3DBoundingBoxesResult.model_validate(response_dict)\n    return validated_response.boundingBoxes3D",
-        "command_model_dependencies": [
-          "Get3DBoundingBoxesParameters",
-          "Get3DBoundingBoxesResult"
-        ],
-        "type_model_dependencies": [
-          "BoundingBox3DArrayItem",
-          "ElementIdArrayItem",
-          "ErrorItem"
-        ],
-        "alias_property_name": "boundingBoxes3D"
-      },
-      {
-        "name": "GetAllElements",
-        "group": "Element Commands",
-        "description": "Returns the identifier of all elements on the plan. Use the optional filter parameter for filtering.",
-        "version": "1.0.7",
-        "source": "tapir",
-        "method_code": "def get_all_elements(\n    self,\n    filters: None | list[ElementFilter] = None,\n    databases: None | list[DatabaseIdArrayItem] = None\n) -> ElementsWithExecutionResults | ErrorItem:\n    \"\"\"\n    Returns the identifier of all elements on the plan. Use the optional filter parameter\n    for filtering.\n\n    Args:\n        filters (None | list[ElementFilter])\n        databases (None | list[DatabaseIdArrayItem]): A list of Archicad databases.\n\n    Returns:\n        ElementsWithExecutionResults | ErrorItem\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    params_dict = {\n            'filters': filters,\n            'databases': databases,\n        }\n    validated_params = GetAllElementsParameters(**params_dict)\n    response_dict = self._core.post_tapir_command(\n        \"GetAllElements\",\n        validated_params.model_dump(mode='json', by_alias=True, exclude_none=True)\n    )\n    validated_response = TypeAdapter(GetAllElementsResult).validate_python(response_dict)\n    return validated_response",
-        "command_model_dependencies": [
-          "GetAllElementsParameters",
-          "GetAllElementsResult"
-        ],
-        "type_model_dependencies": [
-          "DatabaseIdArrayItem",
-          "ElementFilter",
-          "ElementsWithExecutionResults",
-          "ErrorItem"
-        ],
-        "alias_property_name": null
-      },
-      {
-        "name": "GetCollisions",
-        "group": "Element Commands",
-        "description": "Detect collisions between the given two groups of elements.",
-        "version": "1.2.2",
-        "source": "tapir",
-        "method_code": "def get_collisions(\n    self,\n    elements_group_1: list[ElementIdArrayItem],\n    elements_group_2: list[ElementIdArrayItem],\n    settings: None | Settings = None\n) -> list[Collision]:\n    \"\"\"\n    Detect collisions between the given two groups of elements.\n\n    Args:\n        elements_group_1 (list[ElementIdArrayItem]): A list of elements.\n        elements_group_2 (list[ElementIdArrayItem]): A list of elements.\n        settings (None | Settings)\n\n    Returns:\n        list[Collision]\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    params_dict = {\n            'elementsGroup1': elements_group_1,\n            'elementsGroup2': elements_group_2,\n            'settings': settings,\n        }\n    validated_params = GetCollisionsParameters(**params_dict)\n    response_dict = self._core.post_tapir_command(\n        \"GetCollisions\",\n        validated_params.model_dump(mode='json', by_alias=True, exclude_none=True)\n    )\n    validated_response = GetCollisionsResult.model_validate(response_dict)\n    return validated_response.collisions",
-        "command_model_dependencies": [
-          "GetCollisionsParameters",
-          "GetCollisionsResult"
-        ],
-        "type_model_dependencies": [
-          "Collision",
-          "ElementIdArrayItem",
-          "Settings"
-        ],
-        "alias_property_name": "collisions"
-      },
-      {
-        "name": "GetConnectedElements",
-        "group": "Element Commands",
-        "description": "Gets connected elements of the given elements.",
-        "version": "1.1.4",
-        "source": "tapir",
-        "method_code": "def get_connected_elements(\n    self,\n    elements: list[ElementIdArrayItem],\n    connected_element_type: ElementType\n) -> ConnectedElementsWrapper | ErrorItem:\n    \"\"\"\n    Gets connected elements of the given elements.\n\n    Args:\n        elements (list[ElementIdArrayItem]): A list of elements.\n        connected_element_type (ElementType)\n\n    Returns:\n        ConnectedElementsWrapper | ErrorItem\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    params_dict = {\n            'elements': elements,\n            'connectedElementType': connected_element_type,\n        }\n    validated_params = GetConnectedElementsParameters(**params_dict)\n    response_dict = self._core.post_tapir_command(\n        \"GetConnectedElements\",\n        validated_params.model_dump(mode='json', by_alias=True, exclude_none=True)\n    )\n    validated_response = TypeAdapter(GetConnectedElementsResult).validate_python(response_dict)\n    return validated_response",
-        "command_model_dependencies": [
-          "GetConnectedElementsParameters",
-          "GetConnectedElementsResult"
-        ],
-        "type_model_dependencies": [
-          "ConnectedElementsWrapper",
-          "ElementIdArrayItem",
-          "ElementType",
-          "ErrorItem"
-        ],
-        "alias_property_name": null
-      },
-      {
-        "name": "GetDetailsOfElements",
-        "group": "Element Commands",
-        "description": "Gets the details of the given elements (geometry parameters etc).",
-        "version": "1.0.7",
-        "source": "tapir",
-        "method_code": "def get_details_of_elements(\n    self,\n    elements: list[ElementIdArrayItem]\n) -> list[DetailsOfElement]:\n    \"\"\"\n    Gets the details of the given elements (geometry parameters etc).\n\n    Args:\n        elements (list[ElementIdArrayItem]): A list of elements.\n\n    Returns:\n        list[DetailsOfElement]\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    params_dict = {\n            'elements': elements,\n        }\n    validated_params = GetDetailsOfElementsParameters(**params_dict)\n    response_dict = self._core.post_tapir_command(\n        \"GetDetailsOfElements\",\n        validated_params.model_dump(mode='json', by_alias=True, exclude_none=True)\n    )\n    validated_response = GetDetailsOfElementsResult.model_validate(response_dict)\n    return validated_response.detailsOfElements",
-        "command_model_dependencies": [
-          "GetDetailsOfElementsParameters",
-          "GetDetailsOfElementsResult"
-        ],
-        "type_model_dependencies": [
-          "DetailsOfElement",
-          "ElementIdArrayItem"
-        ],
-        "alias_property_name": "detailsOfElements"
-      },
-      {
-        "name": "GetDimensionData",
-        "group": "Element Commands",
-        "description": "Gets witness point data (coordinates, measured values) from existing dimension chains.",
-        "version": "1.5.0",
-        "source": "tapir",
-        "method_code": "def get_dimension_data(\n    self,\n    elements: list[Element]\n) -> list[DimensionData | ErrorItem]:\n    \"\"\"\n    Gets witness point data (coordinates, measured values) from existing dimension chains.\n\n    Args:\n        elements (list[Element]): The identifier of the dimension elements.\n\n    Returns:\n        list[DimensionData | ErrorItem]\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    params_dict = {\n            'elements': elements,\n        }\n    validated_params = GetDimensionDataParameters(**params_dict)\n    response_dict = self._core.post_tapir_command(\n        \"GetDimensionData\",\n        validated_params.model_dump(mode='json', by_alias=True, exclude_none=True)\n    )\n    validated_response = GetDimensionDataResult.model_validate(response_dict)\n    return validated_response.dimensionsData",
-        "command_model_dependencies": [
-          "GetDimensionDataParameters",
-          "GetDimensionDataResult"
-        ],
-        "type_model_dependencies": [
-          "DimensionData",
-          "Element",
-          "ErrorItem"
-        ],
-        "alias_property_name": "dimensionsData"
-      },
-      {
-        "name": "GetElementPreviewImage",
-        "group": "Element Commands",
-        "description": "Returns the preview image of the given element.",
-        "version": "1.2.7",
-        "source": "tapir",
-        "method_code": "def get_element_preview_image(\n    self,\n    element_id: ElementId,\n    image_type: ImageType | None = None,\n    format: Format | None = None,\n    width: None | int = None,\n    height: None | int = None\n) -> str:\n    \"\"\"\n    Returns the preview image of the given element.\n\n    Args:\n        element_id (ElementId)\n        image_type (ImageType | None): The type of the preview image. Default is 3D.\n        format (Format | None): The image format. Default is png.\n        width (None | int): The width of the preview image in pixels. Default is 128.\n        height (None | int): The height of the preview image in pixels. Default is 128.\n\n    Returns:\n        str: The base64 encoded preview image.\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    params_dict = {\n            'elementId': element_id,\n            'imageType': image_type,\n            'format': format,\n            'width': width,\n            'height': height,\n        }\n    validated_params = GetElementPreviewImageParameters(**params_dict)\n    response_dict = self._core.post_tapir_command(\n        \"GetElementPreviewImage\",\n        validated_params.model_dump(mode='json', by_alias=True, exclude_none=True)\n    )\n    validated_response = GetElementPreviewImageResult.model_validate(response_dict)\n    return validated_response.previewImage",
-        "command_model_dependencies": [
-          "GetElementPreviewImageParameters",
-          "GetElementPreviewImageResult"
-        ],
-        "type_model_dependencies": [
-          "ElementId",
-          "Format",
-          "ImageType"
-        ],
-        "alias_property_name": "previewImage"
-      },
-      {
-        "name": "GetElementsByType",
-        "group": "Element Commands",
-        "description": "Returns the identifier of every element of the given type on the plan. It works for any type. Use the optional filter parameter for filtering.",
-        "version": "1.0.7",
-        "source": "tapir",
-        "method_code": "def get_elements_by_type(\n    self,\n    element_type: ElementType,\n    filters: None | list[ElementFilter] = None,\n    databases: None | list[DatabaseIdArrayItem] = None\n) -> ElementsWithExecutionResults | ErrorItem:\n    \"\"\"\n    Returns the identifier of every element of the given type on the plan. It works for any\n    type. Use the optional filter parameter for filtering.\n\n    Args:\n        element_type (ElementType)\n        filters (None | list[ElementFilter])\n        databases (None | list[DatabaseIdArrayItem]): A list of Archicad databases.\n\n    Returns:\n        ElementsWithExecutionResults | ErrorItem\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    params_dict = {\n            'elementType': element_type,\n            'filters': filters,\n            'databases': databases,\n        }\n    validated_params = GetElementsByTypeParameters(**params_dict)\n    response_dict = self._core.post_tapir_command(\n        \"GetElementsByType\",\n        validated_params.model_dump(mode='json', by_alias=True, exclude_none=True)\n    )\n    validated_response = TypeAdapter(GetElementsByTypeResult).validate_python(response_dict)\n    return validated_response",
-        "command_model_dependencies": [
-          "GetElementsByTypeParameters",
-          "GetElementsByTypeResult"
-        ],
-        "type_model_dependencies": [
-          "DatabaseIdArrayItem",
-          "ElementFilter",
-          "ElementType",
-          "ElementsWithExecutionResults",
-          "ErrorItem"
-        ],
-        "alias_property_name": null
-      },
-      {
-        "name": "GetGDLParametersOfElements",
-        "group": "Element Commands",
-        "description": "Gets all the GDL parameters (name, type, value) of the given elements.",
-        "version": "1.0.8",
-        "source": "tapir",
-        "method_code": "def get_gdl_parameters_of_elements(\n    self,\n    elements: list[ElementIdArrayItem]\n) -> list[GDLParameterList]:\n    \"\"\"\n    Gets all the GDL parameters (name, type, value) of the given elements.\n\n    Args:\n        elements (list[ElementIdArrayItem]): A list of elements.\n\n    Returns:\n        list[GDLParameterList]: The GDL parameters of elements.\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    params_dict = {\n            'elements': elements,\n        }\n    validated_params = GetGDLParametersOfElementsParameters(**params_dict)\n    response_dict = self._core.post_tapir_command(\n        \"GetGDLParametersOfElements\",\n        validated_params.model_dump(mode='json', by_alias=True, exclude_none=True)\n    )\n    validated_response = GetGDLParametersOfElementsResult.model_validate(response_dict)\n    return validated_response.gdlParametersOfElements",
-        "command_model_dependencies": [
-          "GetGDLParametersOfElementsParameters",
-          "GetGDLParametersOfElementsResult"
-        ],
-        "type_model_dependencies": [
-          "ElementIdArrayItem",
-          "GDLParameterList"
-        ],
-        "alias_property_name": "gdlParametersOfElements"
-      },
-      {
-        "name": "GetRoomImage",
-        "group": "Element Commands",
-        "description": "Returns the room image of the given zone.",
-        "version": "1.2.7",
-        "source": "tapir",
-        "method_code": "def get_room_image(\n    self,\n    zone_id: ElementId,\n    format: Format | None = None,\n    width: None | int = None,\n    height: None | int = None,\n    offset: None | float = None,\n    scale: None | float = None,\n    background_color: ColorRGB | None = None\n) -> str:\n    \"\"\"\n    Returns the room image of the given zone.\n\n    Args:\n        zone_id (ElementId)\n        format (Format | None): The image format. Default is png.\n        width (None | int): The width of the preview image in pixels. Default is 256.\n        height (None | int): The height of the preview image in pixels. Default is 256.\n        offset (None | float): Offset of the clip polygon from the edge of the zone. Default\n            is 0.001.\n        scale (None | float): Scale of the view (e.g. 0.005 for 1:200). Default is 0.005.\n        background_color (ColorRGB | None): Background color of the generated image. Default\n            is white (1.0, 1.0, 1.0).\n\n    Returns:\n        str: The base64 encoded room image.\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    params_dict = {\n            'zoneId': zone_id,\n            'format': format,\n            'width': width,\n            'height': height,\n            'offset': offset,\n            'scale': scale,\n            'backgroundColor': background_color,\n        }\n    validated_params = GetRoomImageParameters(**params_dict)\n    response_dict = self._core.post_tapir_command(\n        \"GetRoomImage\",\n        validated_params.model_dump(mode='json', by_alias=True, exclude_none=True)\n    )\n    validated_response = GetRoomImageResult.model_validate(response_dict)\n    return validated_response.roomImage",
-        "command_model_dependencies": [
-          "GetRoomImageParameters",
-          "GetRoomImageResult"
-        ],
-        "type_model_dependencies": [
-          "ColorRGB",
-          "ElementId",
-          "Format"
-        ],
-        "alias_property_name": "roomImage"
-      },
-      {
-        "name": "GetSelectedElements",
-        "group": "Element Commands",
-        "description": "Gets the list of the currently selected elements.",
-        "version": "0.1.0",
-        "source": "tapir",
-        "method_code": "def get_selected_elements(self) -> list[ElementIdArrayItem]:\n    \"\"\"\n    Gets the list of the currently selected elements.\n\n    Returns:\n        list[ElementIdArrayItem]: A list of elements.\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    response_dict = self._core.post_tapir_command(\n        \"GetSelectedElements\"\n    )\n    validated_response = GetSelectedElementsResult.model_validate(response_dict)\n    return validated_response.elements",
-        "command_model_dependencies": [
-          "GetSelectedElementsResult"
-        ],
-        "type_model_dependencies": [
-          "ElementIdArrayItem"
-        ],
-        "alias_property_name": "elements"
-      },
-      {
-        "name": "GetSubelementsOfHierarchicalElements",
-        "group": "Element Commands",
-        "description": "Gets the subelements of the given hierarchical elements.",
-        "version": "1.0.6",
-        "source": "tapir",
-        "method_code": "def get_subelements_of_hierarchical_elements(\n    self,\n    elements: list[ElementIdArrayItem]\n) -> list[Subelement]:\n    \"\"\"\n    Gets the subelements of the given hierarchical elements.\n\n    Args:\n        elements (list[ElementIdArrayItem]): A list of elements.\n\n    Returns:\n        list[Subelement]\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    params_dict = {\n            'elements': elements,\n        }\n    validated_params = GetSubelementsOfHierarchicalElementsParameters(**params_dict)\n    response_dict = self._core.post_tapir_command(\n        \"GetSubelementsOfHierarchicalElements\",\n        validated_params.model_dump(mode='json', by_alias=True, exclude_none=True)\n    )\n    validated_response = GetSubelementsOfHierarchicalElementsResult.model_validate(response_dict)\n    return validated_response.subelements",
-        "command_model_dependencies": [
-          "GetSubelementsOfHierarchicalElementsParameters",
-          "GetSubelementsOfHierarchicalElementsResult"
-        ],
-        "type_model_dependencies": [
-          "ElementIdArrayItem",
-          "Subelement"
-        ],
-        "alias_property_name": "subelements"
-      },
-      {
-        "name": "GetZoneBoundaries",
-        "group": "Element Commands",
-        "description": "Gets the boundaries of the given Zone (connected elements, neighbour zones, etc.).",
-        "version": "1.2.3",
-        "source": "tapir",
-        "method_code": "def get_zone_boundaries(\n    self,\n    zone_element_id: ElementId\n) -> ErrorItem | ZoneBoundariesWrapper:\n    \"\"\"\n    Gets the boundaries of the given Zone (connected elements, neighbour zones, etc.).\n\n    Args:\n        zone_element_id (ElementId)\n\n    Returns:\n        ErrorItem | ZoneBoundariesWrapper\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    params_dict = {\n            'zoneElementId': zone_element_id,\n        }\n    validated_params = GetZoneBoundariesParameters(**params_dict)\n    response_dict = self._core.post_tapir_command(\n        \"GetZoneBoundaries\",\n        validated_params.model_dump(mode='json', by_alias=True, exclude_none=True)\n    )\n    validated_response = TypeAdapter(GetZoneBoundariesResult).validate_python(response_dict)\n    return validated_response",
-        "command_model_dependencies": [
-          "GetZoneBoundariesParameters",
-          "GetZoneBoundariesResult"
-        ],
-        "type_model_dependencies": [
-          "ElementId",
-          "ErrorItem",
-          "ZoneBoundariesWrapper"
-        ],
-        "alias_property_name": null
-      },
-      {
-        "name": "HighlightElements",
-        "group": "Element Commands",
-        "description": "Highlights the elements given in the elements array. In case of empty elements array removes all previously set highlights.",
-        "version": "1.0.3",
-        "source": "tapir",
-        "method_code": "def highlight_elements(\n    self,\n    elements: list[ElementIdArrayItem],\n    highlighted_colors: list[list[int]],\n    wireframe_3d: None | bool = None,\n    non_highlighted_color: None | list[int] = None\n) -> FailedExecutionResult | SuccessfulExecutionResult:\n    \"\"\"\n    Highlights the elements given in the elements array. In case of empty elements array\n    removes all previously set highlights.\n\n    Args:\n        elements (list[ElementIdArrayItem]): A list of elements.\n        highlighted_colors (list[list[int]]): A list of colors to highlight elements.\n        wireframe_3d (None | bool): Optional parameter. Switch non highlighted elements in\n            the 3D window to wireframe.\n        non_highlighted_color (None | list[int]): Optional parameter. Color of the non\n            highlighted elements as an [r, g, b, a] array. Each component must be in the\n            0-255 range.\n\n    Returns:\n        FailedExecutionResult | SuccessfulExecutionResult\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    params_dict = {\n            'elements': elements,\n            'highlightedColors': highlighted_colors,\n            'wireframe3D': wireframe_3d,\n            'nonHighlightedColor': non_highlighted_color,\n        }\n    validated_params = HighlightElementsParameters(**params_dict)\n    response_dict = self._core.post_tapir_command(\n        \"HighlightElements\",\n        validated_params.model_dump(mode='json', by_alias=True, exclude_none=True)\n    )\n    validated_response = TypeAdapter(HighlightElementsResult).validate_python(response_dict)\n    return validated_response",
-        "command_model_dependencies": [
-          "HighlightElementsParameters",
-          "HighlightElementsResult"
-        ],
-        "type_model_dependencies": [
-          "ElementIdArrayItem",
-          "FailedExecutionResult",
-          "SuccessfulExecutionResult"
-        ],
-        "alias_property_name": null
-      },
-      {
-        "name": "LockElements",
-        "group": "Element Commands",
-        "description": "Locks the given elements. Manual lock, not teamwork!",
-        "version": "1.5.2",
-        "source": "tapir",
-        "method_code": "def lock_elements(\n    self,\n    elements: list[ElementIdArrayItem]\n) -> FailedExecutionResult | SuccessfulExecutionResult:\n    \"\"\"\n    Locks the given elements. Manual lock, not teamwork!\n\n    Args:\n        elements (list[ElementIdArrayItem]): A list of elements.\n\n    Returns:\n        FailedExecutionResult | SuccessfulExecutionResult\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    params_dict = {\n            'elements': elements,\n        }\n    validated_params = LockElementsParameters(**params_dict)\n    response_dict = self._core.post_tapir_command(\n        \"LockElements\",\n        validated_params.model_dump(mode='json', by_alias=True, exclude_none=True)\n    )\n    validated_response = TypeAdapter(LockElementsResult).validate_python(response_dict)\n    return validated_response",
-        "command_model_dependencies": [
-          "LockElementsParameters",
-          "LockElementsResult"
-        ],
-        "type_model_dependencies": [
-          "ElementIdArrayItem",
-          "FailedExecutionResult",
-          "SuccessfulExecutionResult"
-        ],
-        "alias_property_name": null
-      },
-      {
-        "name": "MoveElements",
-        "group": "Element Commands",
-        "description": "Moves elements with a given vector.",
-        "version": "1.0.2",
-        "source": "tapir",
-        "method_code": "def move_elements(\n    self,\n    elements_with_move_vectors: list[ElementsWithMoveVector]\n) -> list[FailedExecutionResult | SuccessfulExecutionResult]:\n    \"\"\"\n    Moves elements with a given vector.\n\n    Args:\n        elements_with_move_vectors (list[ElementsWithMoveVector]): The elements with move\n            vector pairs.\n\n    Returns:\n        list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution\n            results.\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    params_dict = {\n            'elementsWithMoveVectors': elements_with_move_vectors,\n        }\n    validated_params = MoveElementsParameters(**params_dict)\n    response_dict = self._core.post_tapir_command(\n        \"MoveElements\",\n        validated_params.model_dump(mode='json', by_alias=True, exclude_none=True)\n    )\n    validated_response = MoveElementsResult.model_validate(response_dict)\n    return validated_response.executionResults",
-        "command_model_dependencies": [
-          "MoveElementsParameters",
-          "MoveElementsResult"
-        ],
-        "type_model_dependencies": [
-          "ElementsWithMoveVector",
-          "FailedExecutionResult",
-          "SuccessfulExecutionResult"
-        ],
-        "alias_property_name": "executionResults"
-      },
-      {
-        "name": "RemoveElementNotificationClient",
-        "group": "Element Commands",
-        "description": "Removes an element notification client.",
-        "version": "1.2.8",
-        "source": "tapir",
-        "method_code": "def remove_element_notification_client(\n    self,\n    port: int,\n    host: None | str = None\n) -> FailedExecutionResult | SuccessfulExecutionResult:\n    \"\"\"\n    Removes an element notification client.\n\n    Args:\n        port (int): The port number of the notification client.\n        host (None | str): The host address of the notification client. If not provided,\n            localhost is used.\n\n    Returns:\n        FailedExecutionResult | SuccessfulExecutionResult\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    params_dict = {\n            'host': host,\n            'port': port,\n        }\n    validated_params = RemoveElementNotificationClientParameters(**params_dict)\n    response_dict = self._core.post_tapir_command(\n        \"RemoveElementNotificationClient\",\n        validated_params.model_dump(mode='json', by_alias=True, exclude_none=True)\n    )\n    validated_response = TypeAdapter(RemoveElementNotificationClientResult).validate_python(response_dict)\n    return validated_response",
-        "command_model_dependencies": [
-          "RemoveElementNotificationClientParameters",
-          "RemoveElementNotificationClientResult"
-        ],
-        "type_model_dependencies": [
-          "FailedExecutionResult",
-          "SuccessfulExecutionResult"
-        ],
-        "alias_property_name": null
-      },
-      {
-        "name": "RotateElements",
-        "group": "Element Commands",
-        "description": "Rotates elements around a reference point.",
-        "version": "1.5.3",
-        "source": "tapir",
-        "method_code": "def rotate_elements(\n    self,\n    elements_with_rotations: list[ElementsWithRotation]\n) -> list[FailedExecutionResult | SuccessfulExecutionResult]:\n    \"\"\"\n    Rotates elements around a reference point.\n\n    Args:\n        elements_with_rotations (list[ElementsWithRotation]): The elements with rotation\n            settings.\n\n    Returns:\n        list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution\n            results.\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    params_dict = {\n            'elementsWithRotations': elements_with_rotations,\n        }\n    validated_params = RotateElementsParameters(**params_dict)\n    response_dict = self._core.post_tapir_command(\n        \"RotateElements\",\n        validated_params.model_dump(mode='json', by_alias=True, exclude_none=True)\n    )\n    validated_response = RotateElementsResult.model_validate(response_dict)\n    return validated_response.executionResults",
-        "command_model_dependencies": [
-          "RotateElementsParameters",
-          "RotateElementsResult"
-        ],
-        "type_model_dependencies": [
-          "ElementsWithRotation",
-          "FailedExecutionResult",
-          "SuccessfulExecutionResult"
-        ],
-        "alias_property_name": "executionResults"
-      },
-      {
-        "name": "SetDetailsOfElements",
-        "group": "Element Commands",
-        "description": "Sets the details of the given elements (floor, layer, order etc).",
-        "version": "1.0.7",
-        "source": "tapir",
-        "method_code": "def set_details_of_elements(\n    self,\n    elements_with_details: list[ElementsWithDetail]\n) -> list[FailedExecutionResult | SuccessfulExecutionResult]:\n    \"\"\"\n    Sets the details of the given elements (floor, layer, order etc).\n\n    Args:\n        elements_with_details (list[ElementsWithDetail]): The elements with parameters.\n\n    Returns:\n        list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution\n            results.\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    params_dict = {\n            'elementsWithDetails': elements_with_details,\n        }\n    validated_params = SetDetailsOfElementsParameters(**params_dict)\n    response_dict = self._core.post_tapir_command(\n        \"SetDetailsOfElements\",\n        validated_params.model_dump(mode='json', by_alias=True, exclude_none=True)\n    )\n    validated_response = SetDetailsOfElementsResult.model_validate(response_dict)\n    return validated_response.executionResults",
-        "command_model_dependencies": [
-          "SetDetailsOfElementsParameters",
-          "SetDetailsOfElementsResult"
-        ],
-        "type_model_dependencies": [
-          "ElementsWithDetail",
-          "FailedExecutionResult",
-          "SuccessfulExecutionResult"
-        ],
-        "alias_property_name": "executionResults"
-      },
-      {
-        "name": "SetElementNotificationClient",
-        "group": "Element Commands",
-        "description": "Sets up a new notification client to receive element events.",
-        "version": "1.2.8",
-        "source": "tapir",
-        "method_code": "def set_element_notification_client(\n    self,\n    port: int,\n    host: None | str = None,\n    notify_on_new_element: None | bool = None,\n    notify_on_modification_of_an_element: None | bool = None,\n    notify_on_reservation_changes: None | bool = None\n) -> FailedExecutionResult | SuccessfulExecutionResult:\n    \"\"\"\n    Sets up a new notification client to receive element events.\n\n    Args:\n        port (int): The port number of the notification client.\n        host (None | str): The host address of the notification client. If not provided,\n            localhost is used.\n        notify_on_new_element (None | bool): Notify on creation of a new element. Optional\n            parameter, by default true.\n        notify_on_modification_of_an_element (None | bool): Notify on modification/deletion\n            of an element. Optional parameter, by default true.\n        notify_on_reservation_changes (None | bool): Notify on reservation changes of an\n            element. Optional parameter, by default true.\n\n    Returns:\n        FailedExecutionResult | SuccessfulExecutionResult\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    params_dict = {\n            'host': host,\n            'port': port,\n            'notifyOnNewElement': notify_on_new_element,\n            'notifyOnModificationOfAnElement': notify_on_modification_of_an_element,\n            'notifyOnReservationChanges': notify_on_reservation_changes,\n        }\n    validated_params = SetElementNotificationClientParameters(**params_dict)\n    response_dict = self._core.post_tapir_command(\n        \"SetElementNotificationClient\",\n        validated_params.model_dump(mode='json', by_alias=True, exclude_none=True)\n    )\n    validated_response = TypeAdapter(SetElementNotificationClientResult).validate_python(response_dict)\n    return validated_response",
-        "command_model_dependencies": [
-          "SetElementNotificationClientParameters",
-          "SetElementNotificationClientResult"
-        ],
-        "type_model_dependencies": [
-          "FailedExecutionResult",
-          "SuccessfulExecutionResult"
-        ],
-        "alias_property_name": null
-      },
-      {
-        "name": "SetGDLParametersOfElements",
-        "group": "Element Commands",
-        "description": "Sets the given GDL parameters of the given elements.",
-        "version": "1.0.8",
-        "source": "tapir",
-        "method_code": "def set_gdl_parameters_of_elements(\n    self,\n    elements_with_gdl_parameters: list[ElementsWithGDLParameter]\n) -> list[FailedExecutionResult | SuccessfulExecutionResult]:\n    \"\"\"\n    Sets the given GDL parameters of the given elements.\n\n    Args:\n        elements_with_gdl_parameters (list[ElementsWithGDLParameter]): The elements with GDL\n            parameters dictionary pairs.\n\n    Returns:\n        list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution\n            results.\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    params_dict = {\n            'elementsWithGDLParameters': elements_with_gdl_parameters,\n        }\n    validated_params = SetGDLParametersOfElementsParameters(**params_dict)\n    response_dict = self._core.post_tapir_command(\n        \"SetGDLParametersOfElements\",\n        validated_params.model_dump(mode='json', by_alias=True, exclude_none=True)\n    )\n    validated_response = SetGDLParametersOfElementsResult.model_validate(response_dict)\n    return validated_response.executionResults",
-        "command_model_dependencies": [
-          "SetGDLParametersOfElementsParameters",
-          "SetGDLParametersOfElementsResult"
-        ],
-        "type_model_dependencies": [
-          "ElementsWithGDLParameter",
-          "FailedExecutionResult",
-          "SuccessfulExecutionResult"
-        ],
-        "alias_property_name": "executionResults"
-      },
-      {
-        "name": "UnlockElements",
-        "group": "Element Commands",
-        "description": "Unlocks the given elements. Manual lock, not teamwork!",
-        "version": "1.5.2",
-        "source": "tapir",
-        "method_code": "def unlock_elements(\n    self,\n    elements: list[ElementIdArrayItem]\n) -> FailedExecutionResult | SuccessfulExecutionResult:\n    \"\"\"\n    Unlocks the given elements. Manual lock, not teamwork!\n\n    Args:\n        elements (list[ElementIdArrayItem]): A list of elements.\n\n    Returns:\n        FailedExecutionResult | SuccessfulExecutionResult\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    params_dict = {\n            'elements': elements,\n        }\n    validated_params = UnlockElementsParameters(**params_dict)\n    response_dict = self._core.post_tapir_command(\n        \"UnlockElements\",\n        validated_params.model_dump(mode='json', by_alias=True, exclude_none=True)\n    )\n    validated_response = TypeAdapter(UnlockElementsResult).validate_python(response_dict)\n    return validated_response",
-        "command_model_dependencies": [
-          "UnlockElementsParameters",
-          "UnlockElementsResult"
-        ],
-        "type_model_dependencies": [
-          "ElementIdArrayItem",
-          "FailedExecutionResult",
-          "SuccessfulExecutionResult"
-        ],
-        "alias_property_name": null
-      },
-      {
-        "name": "UpdateZones",
-        "group": "Element Commands",
-        "description": "Updates all Zones (recalculates their geometry, updates their Zone Stamps and the connected elements).",
-        "version": "1.5.4",
-        "source": "tapir",
-        "method_code": "def update_zones(\n    self,\n    keep_stamp_position: None | bool = None,\n    undo_top_trim: None | bool = None,\n    undo_bottom_trim: None | bool = None\n) -> FailedExecutionResult | SuccessfulExecutionResult:\n    \"\"\"\n    Updates all Zones (recalculates their geometry, updates their Zone Stamps and the\n    connected elements).\n\n    Args:\n        keep_stamp_position (None | bool): Keep the position of the Zone Stamps. The default\n            is true.\n        undo_top_trim (None | bool): Undo the trimming of the top of the Zones. The default\n            is false.\n        undo_bottom_trim (None | bool): Undo the trimming of the bottom of the Zones. The\n            default is false.\n\n    Returns:\n        FailedExecutionResult | SuccessfulExecutionResult\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    params_dict = {\n            'keepStampPosition': keep_stamp_position,\n            'undoTopTrim': undo_top_trim,\n            'undoBottomTrim': undo_bottom_trim,\n        }\n    validated_params = UpdateZonesParameters(**params_dict)\n    response_dict = self._core.post_tapir_command(\n        \"UpdateZones\",\n        validated_params.model_dump(mode='json', by_alias=True, exclude_none=True)\n    )\n    validated_response = TypeAdapter(UpdateZonesResult).validate_python(response_dict)\n    return validated_response",
-        "command_model_dependencies": [
-          "UpdateZonesParameters",
-          "UpdateZonesResult"
-        ],
-        "type_model_dependencies": [
-          "FailedExecutionResult",
-          "SuccessfulExecutionResult"
-        ],
-        "alias_property_name": null
-      }
-    ],
-    "Application Commands": [
-      {
-        "name": "ChangeWindow",
-        "group": "Application Commands",
-        "description": "Changes the current (active) window to the given window.",
-        "version": "1.3.1",
-        "source": "tapir",
-        "method_code": "def change_window(\n    self,\n    parameters: NavigatorItemIdArrayItem | DatabaseIdAndWindowType\n) -> FailedExecutionResult | SuccessfulExecutionResult:\n    \"\"\"\n    Changes the current (active) window to the given window.\n\n    Args:\n        parameters (NavigatorItemIdArrayItem | DatabaseIdAndWindowType): Union model\n            configuration parameters.\n\n    Returns:\n        FailedExecutionResult | SuccessfulExecutionResult\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    validated_params = TypeAdapter(ChangeWindowParameters).validate_python(parameters)\n    response_dict = self._core.post_tapir_command(\n        \"ChangeWindow\",\n        validated_params.model_dump(mode='json', by_alias=True, exclude_none=True)\n    )\n    validated_response = TypeAdapter(ChangeWindowResult).validate_python(response_dict)\n    return validated_response",
-        "command_model_dependencies": [
-          "ChangeWindowParameters",
-          "ChangeWindowResult"
-        ],
-        "type_model_dependencies": [
-          "DatabaseIdAndWindowType",
-          "FailedExecutionResult",
-          "NavigatorItemIdArrayItem",
-          "SuccessfulExecutionResult"
-        ],
-        "alias_property_name": null
-      },
-      {
-        "name": "GetAddOnVersion",
-        "group": "Application Commands",
-        "description": "Retrieves the version of the Tapir Additional JSON Commands Add-On.",
-        "version": "0.1.0",
-        "source": "tapir",
-        "method_code": "def get_add_on_version(self) -> str:\n    \"\"\"\n    Retrieves the version of the Tapir Additional JSON Commands Add-On.\n\n    Returns:\n        str: Version number in the form of \"1.1.1\".\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    response_dict = self._core.post_tapir_command(\n        \"GetAddOnVersion\"\n    )\n    validated_response = GetAddOnVersionResult.model_validate(response_dict)\n    return validated_response.version",
-        "command_model_dependencies": [
-          "GetAddOnVersionResult"
-        ],
-        "type_model_dependencies": [],
-        "alias_property_name": "version"
-      },
-      {
-        "name": "GetArchicadLocation",
-        "group": "Application Commands",
-        "description": "Retrieves the location of the currently running Archicad executable.",
-        "version": "0.1.0",
-        "source": "tapir",
-        "method_code": "def get_archicad_location(self) -> str:\n    \"\"\"\n    Retrieves the location of the currently running Archicad executable.\n\n    Returns:\n        str: The location of the Archicad executable in the filesystem.\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    response_dict = self._core.post_tapir_command(\n        \"GetArchicadLocation\"\n    )\n    validated_response = GetArchicadLocationResult.model_validate(response_dict)\n    return validated_response.archicadLocation",
-        "command_model_dependencies": [
-          "GetArchicadLocationResult"
-        ],
-        "type_model_dependencies": [],
-        "alias_property_name": "archicadLocation"
-      },
-      {
-        "name": "GetCurrentWindowType",
-        "group": "Application Commands",
-        "description": "Returns the type of the current (active) window.",
-        "version": "1.0.7",
-        "source": "tapir",
-        "method_code": "def get_current_window_type(self) -> WindowType:\n    \"\"\"\n    Returns the type of the current (active) window.\n\n    Returns:\n        WindowType\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    response_dict = self._core.post_tapir_command(\n        \"GetCurrentWindowType\"\n    )\n    validated_response = GetCurrentWindowTypeResult.model_validate(response_dict)\n    return validated_response.currentWindowType",
-        "command_model_dependencies": [
-          "GetCurrentWindowTypeResult"
-        ],
-        "type_model_dependencies": [
-          "WindowType"
-        ],
-        "alias_property_name": "currentWindowType"
-      },
-      {
-        "name": "GetSpecialFolders",
-        "group": "Application Commands",
-        "description": "Retrieves the filesystem paths of the special folders of the running Archicad (preferences, cache, data, temporary, application, defaults, templates, help, embedded project library, etc.).",
-        "version": "1.5.6",
-        "source": "tapir",
-        "method_code": "def get_special_folders(\n    self,\n    folder_types: list[SpecialFolderType]\n) -> list[ErrorItem | SpecialFolderPath]:\n    \"\"\"\n    Retrieves the filesystem paths of the special folders of the running Archicad\n    (preferences, cache, data, temporary, application, defaults, templates, help, embedded\n    project library, etc.).\n\n    Args:\n        folder_types (list[SpecialFolderType]): The types of the special folders to\n            retrieve.\n\n    Returns:\n        list[ErrorItem | SpecialFolderPath]: A list of special folder paths or errors.\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    params_dict = {\n            'folderTypes': folder_types,\n        }\n    validated_params = GetSpecialFoldersParameters(**params_dict)\n    response_dict = self._core.post_tapir_command(\n        \"GetSpecialFolders\",\n        validated_params.model_dump(mode='json', by_alias=True, exclude_none=True)\n    )\n    validated_response = GetSpecialFoldersResult.model_validate(response_dict)\n    return validated_response.folderPaths",
-        "command_model_dependencies": [
-          "GetSpecialFoldersParameters",
-          "GetSpecialFoldersResult"
-        ],
-        "type_model_dependencies": [
-          "ErrorItem",
-          "SpecialFolderPath",
-          "SpecialFolderType"
-        ],
-        "alias_property_name": "folderPaths"
-      },
-      {
-        "name": "GetUserGSID",
-        "group": "Application Commands",
-        "description": "Get the current registered User-GSID and OrganizationsID. Requires Archicad 27 or later.",
-        "version": "1.5.6",
-        "source": "tapir",
-        "method_code": "def get_user_gsid(self) -> GetUserGSIDResult:\n    \"\"\"\n    Get the current registered User-GSID and OrganizationsID. Requires Archicad 27 or later.\n\n    Returns:\n        GetUserGSIDResult\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    response_dict = self._core.post_tapir_command(\n        \"GetUserGSID\"\n    )\n    validated_response = GetUserGSIDResult.model_validate(response_dict)\n    return validated_response",
-        "command_model_dependencies": [
-          "GetUserGSIDResult"
-        ],
-        "type_model_dependencies": [],
-        "alias_property_name": null
-      },
-      {
-        "name": "QuitArchicad",
-        "group": "Application Commands",
-        "description": "Performs a quit operation on the currently running Archicad instance.",
-        "version": "0.1.0",
-        "source": "tapir",
-        "method_code": "def quit_archicad(self) -> FailedExecutionResult | SuccessfulExecutionResult:\n    \"\"\"\n    Performs a quit operation on the currently running Archicad instance.\n\n    Returns:\n        FailedExecutionResult | SuccessfulExecutionResult\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    response_dict = self._core.post_tapir_command(\n        \"QuitArchicad\"\n    )\n    validated_response = TypeAdapter(QuitArchicadResult).validate_python(response_dict)\n    return validated_response",
-        "command_model_dependencies": [
-          "QuitArchicadResult"
-        ],
-        "type_model_dependencies": [
-          "FailedExecutionResult",
-          "SuccessfulExecutionResult"
-        ],
-        "alias_property_name": null
-      },
-      {
-        "name": "ShowAlert",
-        "group": "Application Commands",
-        "description": "Display a dialog with up to three buttons.",
-        "version": "1.5.6",
-        "source": "tapir",
-        "method_code": "def show_alert(\n    self,\n    alert_type: AlertType,\n    title: str,\n    message: str,\n    button_1: str,\n    sub_message: None | str = None,\n    button_2: None | str = None,\n    button_3: None | str = None\n) -> int:\n    \"\"\"\n    Display a dialog with up to three buttons.\n\n    Args:\n        alert_type (AlertType): The type of the alert dialog.\n        title (str): The title of the alert dialog.\n        message (str): The main message text.\n        button_1 (str): Label for the first (default) button.\n        sub_message (None | str): Optional smaller sub-message text below the main message.\n        button_2 (None | str): Label for the second button (e.g. Cancel).\n        button_3 (None | str): Label for the optional third button.\n\n    Returns:\n        int: Index of the button the user clicked: 1 = button1, 2 = button2, 3 = button3.\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    params_dict = {\n            'alertType': alert_type,\n            'title': title,\n            'message': message,\n            'subMessage': sub_message,\n            'button1': button_1,\n            'button2': button_2,\n            'button3': button_3,\n        }\n    validated_params = ShowAlertParameters(**params_dict)\n    response_dict = self._core.post_tapir_command(\n        \"ShowAlert\",\n        validated_params.model_dump(mode='json', by_alias=True, exclude_none=True)\n    )\n    validated_response = ShowAlertResult.model_validate(response_dict)\n    return validated_response.clickedButton",
-        "command_model_dependencies": [
-          "ShowAlertParameters",
-          "ShowAlertResult"
-        ],
-        "type_model_dependencies": [
-          "AlertType"
-        ],
-        "alias_property_name": "clickedButton"
-      }
-    ],
     "Navigator Commands": [
+      {
+        "name": "ChangeDrawingLink",
+        "group": "Navigator Commands",
+        "description": "Relinks a Drawing to a different source navigator item. Archicad has no in-place relink API, so this recreates the Drawing against the new source and deletes the original - the returned elementId is a NEW guid, not the input one. The Drawing Title marker's own position is not preserved (undocumented Archicad limitation).",
+        "version": "1.5.7",
+        "source": "tapir",
+        "method_code": "def change_drawing_link(\n    self,\n    drawings_with_new_links: list[DrawingsWithNewLink]\n) -> list[ElementIdArrayItem | ErrorItem]:\n    \"\"\"\n    Relinks a Drawing to a different source navigator item. Archicad has no in-place relink\n    API, so this recreates the Drawing against the new source and deletes the original - the\n    returned elementId is a NEW guid, not the input one. The Drawing Title marker's own\n    position is not preserved (undocumented Archicad limitation).\n\n    Args:\n        drawings_with_new_links (list[DrawingsWithNewLink])\n\n    Returns:\n        list[ElementIdArrayItem | ErrorItem]: One result per input item. On success,\n            elementId is the NEW Drawing's identifier - relinking necessarily replaces the\n            element, it cannot keep the original guid.\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    params_dict = {\n            'drawingsWithNewLinks': drawings_with_new_links,\n        }\n    validated_params = ChangeDrawingLinkParameters(**params_dict)\n    response_dict = self._core.post_tapir_command(\n        \"ChangeDrawingLink\",\n        validated_params.model_dump(mode='json', by_alias=True, exclude_none=True)\n    )\n    validated_response = ChangeDrawingLinkResult.model_validate(response_dict)\n    return validated_response.elements",
+        "command_model_dependencies": [
+          "ChangeDrawingLinkParameters",
+          "ChangeDrawingLinkResult"
+        ],
+        "type_model_dependencies": [
+          "DrawingsWithNewLink",
+          "ElementIdArrayItem",
+          "ErrorItem"
+        ],
+        "alias_property_name": "elements"
+      },
       {
         "name": "CloneProjectMapItemToViewMap",
         "group": "Navigator Commands",
@@ -1455,6 +886,617 @@
         "alias_property_name": null
       }
     ],
+    "Element Commands": [
+      {
+        "name": "ChangeSelectionOfElements",
+        "group": "Element Commands",
+        "description": "Adds/removes a number of elements to/from the current selection.",
+        "version": "1.0.7",
+        "source": "tapir",
+        "method_code": "def change_selection_of_elements(\n    self,\n    add_elements_to_selection: None | list[ElementIdArrayItem] = None,\n    remove_elements_from_selection: None | list[ElementIdArrayItem] = None\n) -> ChangeSelectionOfElementsResult:\n    \"\"\"\n    Adds/removes a number of elements to/from the current selection.\n\n    Args:\n        add_elements_to_selection (None | list[ElementIdArrayItem]): A list of elements.\n        remove_elements_from_selection (None | list[ElementIdArrayItem]): A list of\n            elements.\n\n    Returns:\n        ChangeSelectionOfElementsResult\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    params_dict = {\n            'addElementsToSelection': add_elements_to_selection,\n            'removeElementsFromSelection': remove_elements_from_selection,\n        }\n    validated_params = ChangeSelectionOfElementsParameters(**params_dict)\n    response_dict = self._core.post_tapir_command(\n        \"ChangeSelectionOfElements\",\n        validated_params.model_dump(mode='json', by_alias=True, exclude_none=True)\n    )\n    validated_response = ChangeSelectionOfElementsResult.model_validate(response_dict)\n    return validated_response",
+        "command_model_dependencies": [
+          "ChangeSelectionOfElementsParameters",
+          "ChangeSelectionOfElementsResult"
+        ],
+        "type_model_dependencies": [
+          "ElementIdArrayItem"
+        ],
+        "alias_property_name": null
+      },
+      {
+        "name": "DeleteElements",
+        "group": "Element Commands",
+        "description": "Deletes elements.",
+        "version": "1.2.1",
+        "source": "tapir",
+        "method_code": "def delete_elements(\n    self,\n    elements: list[ElementIdArrayItem]\n) -> FailedExecutionResult | SuccessfulExecutionResult:\n    \"\"\"\n    Deletes elements.\n\n    Args:\n        elements (list[ElementIdArrayItem]): A list of elements.\n\n    Returns:\n        FailedExecutionResult | SuccessfulExecutionResult\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    params_dict = {\n            'elements': elements,\n        }\n    validated_params = DeleteElementsParameters(**params_dict)\n    response_dict = self._core.post_tapir_command(\n        \"DeleteElements\",\n        validated_params.model_dump(mode='json', by_alias=True, exclude_none=True)\n    )\n    validated_response = TypeAdapter(DeleteElementsResult).validate_python(response_dict)\n    return validated_response",
+        "command_model_dependencies": [
+          "DeleteElementsParameters",
+          "DeleteElementsResult"
+        ],
+        "type_model_dependencies": [
+          "ElementIdArrayItem",
+          "FailedExecutionResult",
+          "SuccessfulExecutionResult"
+        ],
+        "alias_property_name": null
+      },
+      {
+        "name": "FilterElements",
+        "group": "Element Commands",
+        "description": "Tests an elements by the given criterias.",
+        "version": "1.0.7",
+        "source": "tapir",
+        "method_code": "def filter_elements(\n    self,\n    elements: list[ElementIdArrayItem],\n    filters: None | list[ElementFilter] = None\n) -> list[ElementIdArrayItem]:\n    \"\"\"\n    Tests an elements by the given criterias.\n\n    Args:\n        elements (list[ElementIdArrayItem]): A list of elements.\n        filters (None | list[ElementFilter])\n\n    Returns:\n        list[ElementIdArrayItem]: A list of elements.\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    params_dict = {\n            'elements': elements,\n            'filters': filters,\n        }\n    validated_params = FilterElementsParameters(**params_dict)\n    response_dict = self._core.post_tapir_command(\n        \"FilterElements\",\n        validated_params.model_dump(mode='json', by_alias=True, exclude_none=True)\n    )\n    validated_response = FilterElementsResult.model_validate(response_dict)\n    return validated_response.elements",
+        "command_model_dependencies": [
+          "FilterElementsParameters",
+          "FilterElementsResult"
+        ],
+        "type_model_dependencies": [
+          "ElementFilter",
+          "ElementIdArrayItem"
+        ],
+        "alias_property_name": "elements"
+      },
+      {
+        "name": "Get3DBoundingBoxes",
+        "group": "Element Commands",
+        "description": "Get the 3D bounding box of elements. The bounding box is calculated from the global origin in the 3D view. The output is the array of the bounding boxes respective to the input array of elements.",
+        "version": "1.1.2",
+        "source": "tapir",
+        "method_code": "def get_3d_bounding_boxes(\n    self,\n    elements: list[ElementIdArrayItem]\n) -> list[BoundingBox3DArrayItem | ErrorItem]:\n    \"\"\"\n    Get the 3D bounding box of elements. The bounding box is calculated from the global\n    origin in the 3D view. The output is the array of the bounding boxes respective to the\n    input array of elements.\n\n    Args:\n        elements (list[ElementIdArrayItem]): A list of elements.\n\n    Returns:\n        list[BoundingBox3DArrayItem | ErrorItem]: A list of 3D bounding boxes.\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    params_dict = {\n            'elements': elements,\n        }\n    validated_params = Get3DBoundingBoxesParameters(**params_dict)\n    response_dict = self._core.post_tapir_command(\n        \"Get3DBoundingBoxes\",\n        validated_params.model_dump(mode='json', by_alias=True, exclude_none=True)\n    )\n    validated_response = Get3DBoundingBoxesResult.model_validate(response_dict)\n    return validated_response.boundingBoxes3D",
+        "command_model_dependencies": [
+          "Get3DBoundingBoxesParameters",
+          "Get3DBoundingBoxesResult"
+        ],
+        "type_model_dependencies": [
+          "BoundingBox3DArrayItem",
+          "ElementIdArrayItem",
+          "ErrorItem"
+        ],
+        "alias_property_name": "boundingBoxes3D"
+      },
+      {
+        "name": "GetAllElements",
+        "group": "Element Commands",
+        "description": "Returns the identifier of all elements on the plan. Use the optional filter parameter for filtering.",
+        "version": "1.0.7",
+        "source": "tapir",
+        "method_code": "def get_all_elements(\n    self,\n    filters: None | list[ElementFilter] = None,\n    databases: None | list[DatabaseIdArrayItem] = None\n) -> ElementsWithExecutionResults | ErrorItem:\n    \"\"\"\n    Returns the identifier of all elements on the plan. Use the optional filter parameter\n    for filtering.\n\n    Args:\n        filters (None | list[ElementFilter])\n        databases (None | list[DatabaseIdArrayItem]): A list of Archicad databases.\n\n    Returns:\n        ElementsWithExecutionResults | ErrorItem\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    params_dict = {\n            'filters': filters,\n            'databases': databases,\n        }\n    validated_params = GetAllElementsParameters(**params_dict)\n    response_dict = self._core.post_tapir_command(\n        \"GetAllElements\",\n        validated_params.model_dump(mode='json', by_alias=True, exclude_none=True)\n    )\n    validated_response = TypeAdapter(GetAllElementsResult).validate_python(response_dict)\n    return validated_response",
+        "command_model_dependencies": [
+          "GetAllElementsParameters",
+          "GetAllElementsResult"
+        ],
+        "type_model_dependencies": [
+          "DatabaseIdArrayItem",
+          "ElementFilter",
+          "ElementsWithExecutionResults",
+          "ErrorItem"
+        ],
+        "alias_property_name": null
+      },
+      {
+        "name": "GetCollisions",
+        "group": "Element Commands",
+        "description": "Detect collisions between the given two groups of elements.",
+        "version": "1.2.2",
+        "source": "tapir",
+        "method_code": "def get_collisions(\n    self,\n    elements_group_1: list[ElementIdArrayItem],\n    elements_group_2: list[ElementIdArrayItem],\n    settings: None | Settings = None\n) -> list[Collision]:\n    \"\"\"\n    Detect collisions between the given two groups of elements.\n\n    Args:\n        elements_group_1 (list[ElementIdArrayItem]): A list of elements.\n        elements_group_2 (list[ElementIdArrayItem]): A list of elements.\n        settings (None | Settings)\n\n    Returns:\n        list[Collision]\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    params_dict = {\n            'elementsGroup1': elements_group_1,\n            'elementsGroup2': elements_group_2,\n            'settings': settings,\n        }\n    validated_params = GetCollisionsParameters(**params_dict)\n    response_dict = self._core.post_tapir_command(\n        \"GetCollisions\",\n        validated_params.model_dump(mode='json', by_alias=True, exclude_none=True)\n    )\n    validated_response = GetCollisionsResult.model_validate(response_dict)\n    return validated_response.collisions",
+        "command_model_dependencies": [
+          "GetCollisionsParameters",
+          "GetCollisionsResult"
+        ],
+        "type_model_dependencies": [
+          "Collision",
+          "ElementIdArrayItem",
+          "Settings"
+        ],
+        "alias_property_name": "collisions"
+      },
+      {
+        "name": "GetConnectedElements",
+        "group": "Element Commands",
+        "description": "Gets connected elements of the given elements.",
+        "version": "1.1.4",
+        "source": "tapir",
+        "method_code": "def get_connected_elements(\n    self,\n    elements: list[ElementIdArrayItem],\n    connected_element_type: ElementType\n) -> ConnectedElementsWrapper | ErrorItem:\n    \"\"\"\n    Gets connected elements of the given elements.\n\n    Args:\n        elements (list[ElementIdArrayItem]): A list of elements.\n        connected_element_type (ElementType)\n\n    Returns:\n        ConnectedElementsWrapper | ErrorItem\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    params_dict = {\n            'elements': elements,\n            'connectedElementType': connected_element_type,\n        }\n    validated_params = GetConnectedElementsParameters(**params_dict)\n    response_dict = self._core.post_tapir_command(\n        \"GetConnectedElements\",\n        validated_params.model_dump(mode='json', by_alias=True, exclude_none=True)\n    )\n    validated_response = TypeAdapter(GetConnectedElementsResult).validate_python(response_dict)\n    return validated_response",
+        "command_model_dependencies": [
+          "GetConnectedElementsParameters",
+          "GetConnectedElementsResult"
+        ],
+        "type_model_dependencies": [
+          "ConnectedElementsWrapper",
+          "ElementIdArrayItem",
+          "ElementType",
+          "ErrorItem"
+        ],
+        "alias_property_name": null
+      },
+      {
+        "name": "GetDetailsOfElements",
+        "group": "Element Commands",
+        "description": "Gets the details of the given elements (geometry parameters etc).",
+        "version": "1.0.7",
+        "source": "tapir",
+        "method_code": "def get_details_of_elements(\n    self,\n    elements: list[ElementIdArrayItem]\n) -> list[DetailsOfElement]:\n    \"\"\"\n    Gets the details of the given elements (geometry parameters etc).\n\n    Args:\n        elements (list[ElementIdArrayItem]): A list of elements.\n\n    Returns:\n        list[DetailsOfElement]\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    params_dict = {\n            'elements': elements,\n        }\n    validated_params = GetDetailsOfElementsParameters(**params_dict)\n    response_dict = self._core.post_tapir_command(\n        \"GetDetailsOfElements\",\n        validated_params.model_dump(mode='json', by_alias=True, exclude_none=True)\n    )\n    validated_response = GetDetailsOfElementsResult.model_validate(response_dict)\n    return validated_response.detailsOfElements",
+        "command_model_dependencies": [
+          "GetDetailsOfElementsParameters",
+          "GetDetailsOfElementsResult"
+        ],
+        "type_model_dependencies": [
+          "DetailsOfElement",
+          "ElementIdArrayItem"
+        ],
+        "alias_property_name": "detailsOfElements"
+      },
+      {
+        "name": "GetDimensionData",
+        "group": "Element Commands",
+        "description": "Gets witness point data (coordinates, measured values) from existing dimension chains.",
+        "version": "1.5.0",
+        "source": "tapir",
+        "method_code": "def get_dimension_data(\n    self,\n    elements: list[Element]\n) -> list[DimensionData | ErrorItem]:\n    \"\"\"\n    Gets witness point data (coordinates, measured values) from existing dimension chains.\n\n    Args:\n        elements (list[Element]): The identifier of the dimension elements.\n\n    Returns:\n        list[DimensionData | ErrorItem]\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    params_dict = {\n            'elements': elements,\n        }\n    validated_params = GetDimensionDataParameters(**params_dict)\n    response_dict = self._core.post_tapir_command(\n        \"GetDimensionData\",\n        validated_params.model_dump(mode='json', by_alias=True, exclude_none=True)\n    )\n    validated_response = GetDimensionDataResult.model_validate(response_dict)\n    return validated_response.dimensionsData",
+        "command_model_dependencies": [
+          "GetDimensionDataParameters",
+          "GetDimensionDataResult"
+        ],
+        "type_model_dependencies": [
+          "DimensionData",
+          "Element",
+          "ErrorItem"
+        ],
+        "alias_property_name": "dimensionsData"
+      },
+      {
+        "name": "GetElementPreviewImage",
+        "group": "Element Commands",
+        "description": "Returns the preview image of the given element.",
+        "version": "1.2.7",
+        "source": "tapir",
+        "method_code": "def get_element_preview_image(\n    self,\n    element_id: ElementId,\n    image_type: ImageType | None = None,\n    format: Format | None = None,\n    width: None | int = None,\n    height: None | int = None\n) -> str:\n    \"\"\"\n    Returns the preview image of the given element.\n\n    Args:\n        element_id (ElementId)\n        image_type (ImageType | None): The type of the preview image. Default is 3D.\n        format (Format | None): The image format. Default is png.\n        width (None | int): The width of the preview image in pixels. Default is 128.\n        height (None | int): The height of the preview image in pixels. Default is 128.\n\n    Returns:\n        str: The base64 encoded preview image.\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    params_dict = {\n            'elementId': element_id,\n            'imageType': image_type,\n            'format': format,\n            'width': width,\n            'height': height,\n        }\n    validated_params = GetElementPreviewImageParameters(**params_dict)\n    response_dict = self._core.post_tapir_command(\n        \"GetElementPreviewImage\",\n        validated_params.model_dump(mode='json', by_alias=True, exclude_none=True)\n    )\n    validated_response = GetElementPreviewImageResult.model_validate(response_dict)\n    return validated_response.previewImage",
+        "command_model_dependencies": [
+          "GetElementPreviewImageParameters",
+          "GetElementPreviewImageResult"
+        ],
+        "type_model_dependencies": [
+          "ElementId",
+          "Format",
+          "ImageType"
+        ],
+        "alias_property_name": "previewImage"
+      },
+      {
+        "name": "GetElementsByType",
+        "group": "Element Commands",
+        "description": "Returns the identifier of every element of the given type on the plan. It works for any type. Use the optional filter parameter for filtering.",
+        "version": "1.0.7",
+        "source": "tapir",
+        "method_code": "def get_elements_by_type(\n    self,\n    element_type: ElementType,\n    filters: None | list[ElementFilter] = None,\n    databases: None | list[DatabaseIdArrayItem] = None\n) -> ElementsWithExecutionResults | ErrorItem:\n    \"\"\"\n    Returns the identifier of every element of the given type on the plan. It works for any\n    type. Use the optional filter parameter for filtering.\n\n    Args:\n        element_type (ElementType)\n        filters (None | list[ElementFilter])\n        databases (None | list[DatabaseIdArrayItem]): A list of Archicad databases.\n\n    Returns:\n        ElementsWithExecutionResults | ErrorItem\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    params_dict = {\n            'elementType': element_type,\n            'filters': filters,\n            'databases': databases,\n        }\n    validated_params = GetElementsByTypeParameters(**params_dict)\n    response_dict = self._core.post_tapir_command(\n        \"GetElementsByType\",\n        validated_params.model_dump(mode='json', by_alias=True, exclude_none=True)\n    )\n    validated_response = TypeAdapter(GetElementsByTypeResult).validate_python(response_dict)\n    return validated_response",
+        "command_model_dependencies": [
+          "GetElementsByTypeParameters",
+          "GetElementsByTypeResult"
+        ],
+        "type_model_dependencies": [
+          "DatabaseIdArrayItem",
+          "ElementFilter",
+          "ElementType",
+          "ElementsWithExecutionResults",
+          "ErrorItem"
+        ],
+        "alias_property_name": null
+      },
+      {
+        "name": "GetGDLParametersOfElements",
+        "group": "Element Commands",
+        "description": "Gets all the GDL parameters (name, type, value) of the given elements.",
+        "version": "1.0.8",
+        "source": "tapir",
+        "method_code": "def get_gdl_parameters_of_elements(\n    self,\n    elements: list[ElementIdArrayItem]\n) -> list[GDLParameterList]:\n    \"\"\"\n    Gets all the GDL parameters (name, type, value) of the given elements.\n\n    Args:\n        elements (list[ElementIdArrayItem]): A list of elements.\n\n    Returns:\n        list[GDLParameterList]: The GDL parameters of elements.\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    params_dict = {\n            'elements': elements,\n        }\n    validated_params = GetGDLParametersOfElementsParameters(**params_dict)\n    response_dict = self._core.post_tapir_command(\n        \"GetGDLParametersOfElements\",\n        validated_params.model_dump(mode='json', by_alias=True, exclude_none=True)\n    )\n    validated_response = GetGDLParametersOfElementsResult.model_validate(response_dict)\n    return validated_response.gdlParametersOfElements",
+        "command_model_dependencies": [
+          "GetGDLParametersOfElementsParameters",
+          "GetGDLParametersOfElementsResult"
+        ],
+        "type_model_dependencies": [
+          "ElementIdArrayItem",
+          "GDLParameterList"
+        ],
+        "alias_property_name": "gdlParametersOfElements"
+      },
+      {
+        "name": "GetRelationsOfElements",
+        "group": "Element Commands",
+        "description": "Gets the type-specific relations of the given elements: endpoint and reference line connections of walls, beams and beam segments, boundary elements and boundary sections of zones, the zones on the two sides of windows, doors, skylights and curtain wall panels, and the zones connected to roofs and shells. Available from Archicad 26.",
+        "version": "1.5.7",
+        "source": "tapir",
+        "method_code": "def get_relations_of_elements(\n    self,\n    elements: list[ElementIdArrayItem],\n    other_element_type: ElementType | None = None\n) -> list[BeamRelations | BeamSegmentRelations | ErrorItem | OpeningRelationsOfElement | RoofOrShellRelationsOfElement | WallRelations | ZoneRelationsOfElement]:\n    \"\"\"\n    Gets the type-specific relations of the given elements: endpoint and reference line\n    connections of walls, beams and beam segments, boundary elements and boundary sections\n    of zones, the zones on the two sides of windows, doors, skylights and curtain wall\n    panels, and the zones connected to roofs and shells. Available from Archicad 26.\n\n    Args:\n        elements (list[ElementIdArrayItem]): A list of elements.\n        other_element_type (ElementType | None): Optional filter: only relations to elements\n            of this type are returned.\n\n    Returns:\n        list[BeamRelations | BeamSegmentRelations | ErrorItem | OpeningRelationsOfElement |\n            RoofOrShellRelationsOfElement | WallRelations | ZoneRelationsOfElement]: Type-\n            specific relations of each element, aligned with the input.\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    params_dict = {\n            'elements': elements,\n            'otherElementType': other_element_type,\n        }\n    validated_params = GetRelationsOfElementsParameters(**params_dict)\n    response_dict = self._core.post_tapir_command(\n        \"GetRelationsOfElements\",\n        validated_params.model_dump(mode='json', by_alias=True, exclude_none=True)\n    )\n    validated_response = GetRelationsOfElementsResult.model_validate(response_dict)\n    return validated_response.relations",
+        "command_model_dependencies": [
+          "GetRelationsOfElementsParameters",
+          "GetRelationsOfElementsResult"
+        ],
+        "type_model_dependencies": [
+          "BeamRelations",
+          "BeamSegmentRelations",
+          "ElementIdArrayItem",
+          "ElementType",
+          "ErrorItem",
+          "OpeningRelationsOfElement",
+          "RoofOrShellRelationsOfElement",
+          "WallRelations",
+          "ZoneRelationsOfElement"
+        ],
+        "alias_property_name": "relations"
+      },
+      {
+        "name": "GetRoomImage",
+        "group": "Element Commands",
+        "description": "Returns the room image of the given zone.",
+        "version": "1.2.7",
+        "source": "tapir",
+        "method_code": "def get_room_image(\n    self,\n    zone_id: ElementId,\n    format: Format | None = None,\n    width: None | int = None,\n    height: None | int = None,\n    offset: None | float = None,\n    scale: None | float = None,\n    background_color: ColorRGB | None = None\n) -> str:\n    \"\"\"\n    Returns the room image of the given zone.\n\n    Args:\n        zone_id (ElementId)\n        format (Format | None): The image format. Default is png.\n        width (None | int): The width of the preview image in pixels. Default is 256.\n        height (None | int): The height of the preview image in pixels. Default is 256.\n        offset (None | float): Offset of the clip polygon from the edge of the zone. Default\n            is 0.001.\n        scale (None | float): Scale of the view (e.g. 0.005 for 1:200). Default is 0.005.\n        background_color (ColorRGB | None): Background color of the generated image. Default\n            is white (1.0, 1.0, 1.0).\n\n    Returns:\n        str: The base64 encoded room image.\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    params_dict = {\n            'zoneId': zone_id,\n            'format': format,\n            'width': width,\n            'height': height,\n            'offset': offset,\n            'scale': scale,\n            'backgroundColor': background_color,\n        }\n    validated_params = GetRoomImageParameters(**params_dict)\n    response_dict = self._core.post_tapir_command(\n        \"GetRoomImage\",\n        validated_params.model_dump(mode='json', by_alias=True, exclude_none=True)\n    )\n    validated_response = GetRoomImageResult.model_validate(response_dict)\n    return validated_response.roomImage",
+        "command_model_dependencies": [
+          "GetRoomImageParameters",
+          "GetRoomImageResult"
+        ],
+        "type_model_dependencies": [
+          "ColorRGB",
+          "ElementId",
+          "Format"
+        ],
+        "alias_property_name": "roomImage"
+      },
+      {
+        "name": "GetSelectedElements",
+        "group": "Element Commands",
+        "description": "Gets the list of the currently selected elements.",
+        "version": "0.1.0",
+        "source": "tapir",
+        "method_code": "def get_selected_elements(self) -> list[ElementIdArrayItem]:\n    \"\"\"\n    Gets the list of the currently selected elements.\n\n    Returns:\n        list[ElementIdArrayItem]: A list of elements.\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    response_dict = self._core.post_tapir_command(\n        \"GetSelectedElements\"\n    )\n    validated_response = GetSelectedElementsResult.model_validate(response_dict)\n    return validated_response.elements",
+        "command_model_dependencies": [
+          "GetSelectedElementsResult"
+        ],
+        "type_model_dependencies": [
+          "ElementIdArrayItem"
+        ],
+        "alias_property_name": "elements"
+      },
+      {
+        "name": "GetSubelementsOfHierarchicalElements",
+        "group": "Element Commands",
+        "description": "Gets the subelements of the given hierarchical elements.",
+        "version": "1.0.6",
+        "source": "tapir",
+        "method_code": "def get_subelements_of_hierarchical_elements(\n    self,\n    elements: list[ElementIdArrayItem]\n) -> list[Subelement]:\n    \"\"\"\n    Gets the subelements of the given hierarchical elements.\n\n    Args:\n        elements (list[ElementIdArrayItem]): A list of elements.\n\n    Returns:\n        list[Subelement]\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    params_dict = {\n            'elements': elements,\n        }\n    validated_params = GetSubelementsOfHierarchicalElementsParameters(**params_dict)\n    response_dict = self._core.post_tapir_command(\n        \"GetSubelementsOfHierarchicalElements\",\n        validated_params.model_dump(mode='json', by_alias=True, exclude_none=True)\n    )\n    validated_response = GetSubelementsOfHierarchicalElementsResult.model_validate(response_dict)\n    return validated_response.subelements",
+        "command_model_dependencies": [
+          "GetSubelementsOfHierarchicalElementsParameters",
+          "GetSubelementsOfHierarchicalElementsResult"
+        ],
+        "type_model_dependencies": [
+          "ElementIdArrayItem",
+          "Subelement"
+        ],
+        "alias_property_name": "subelements"
+      },
+      {
+        "name": "GetZoneBoundaries",
+        "group": "Element Commands",
+        "description": "Gets the boundaries of the given Zone (connected elements, neighbour zones, etc.).",
+        "version": "1.2.3",
+        "source": "tapir",
+        "method_code": "def get_zone_boundaries(\n    self,\n    zone_element_id: ElementId\n) -> ErrorItem | ZoneBoundariesWrapper:\n    \"\"\"\n    Gets the boundaries of the given Zone (connected elements, neighbour zones, etc.).\n\n    Args:\n        zone_element_id (ElementId)\n\n    Returns:\n        ErrorItem | ZoneBoundariesWrapper\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    params_dict = {\n            'zoneElementId': zone_element_id,\n        }\n    validated_params = GetZoneBoundariesParameters(**params_dict)\n    response_dict = self._core.post_tapir_command(\n        \"GetZoneBoundaries\",\n        validated_params.model_dump(mode='json', by_alias=True, exclude_none=True)\n    )\n    validated_response = TypeAdapter(GetZoneBoundariesResult).validate_python(response_dict)\n    return validated_response",
+        "command_model_dependencies": [
+          "GetZoneBoundariesParameters",
+          "GetZoneBoundariesResult"
+        ],
+        "type_model_dependencies": [
+          "ElementId",
+          "ErrorItem",
+          "ZoneBoundariesWrapper"
+        ],
+        "alias_property_name": null
+      },
+      {
+        "name": "HighlightElements",
+        "group": "Element Commands",
+        "description": "Highlights the elements given in the elements array. In case of empty elements array removes all previously set highlights.",
+        "version": "1.0.3",
+        "source": "tapir",
+        "method_code": "def highlight_elements(\n    self,\n    elements: list[ElementIdArrayItem],\n    highlighted_colors: list[list[int]],\n    wireframe_3d: None | bool = None,\n    non_highlighted_color: None | list[int] = None\n) -> FailedExecutionResult | SuccessfulExecutionResult:\n    \"\"\"\n    Highlights the elements given in the elements array. In case of empty elements array\n    removes all previously set highlights.\n\n    Args:\n        elements (list[ElementIdArrayItem]): A list of elements.\n        highlighted_colors (list[list[int]]): A list of colors to highlight elements.\n        wireframe_3d (None | bool): Optional parameter. Switch non highlighted elements in\n            the 3D window to wireframe.\n        non_highlighted_color (None | list[int]): Optional parameter. Color of the non\n            highlighted elements as an [r, g, b, a] array. Each component must be in the\n            0-255 range.\n\n    Returns:\n        FailedExecutionResult | SuccessfulExecutionResult\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    params_dict = {\n            'elements': elements,\n            'highlightedColors': highlighted_colors,\n            'wireframe3D': wireframe_3d,\n            'nonHighlightedColor': non_highlighted_color,\n        }\n    validated_params = HighlightElementsParameters(**params_dict)\n    response_dict = self._core.post_tapir_command(\n        \"HighlightElements\",\n        validated_params.model_dump(mode='json', by_alias=True, exclude_none=True)\n    )\n    validated_response = TypeAdapter(HighlightElementsResult).validate_python(response_dict)\n    return validated_response",
+        "command_model_dependencies": [
+          "HighlightElementsParameters",
+          "HighlightElementsResult"
+        ],
+        "type_model_dependencies": [
+          "ElementIdArrayItem",
+          "FailedExecutionResult",
+          "SuccessfulExecutionResult"
+        ],
+        "alias_property_name": null
+      },
+      {
+        "name": "LockElements",
+        "group": "Element Commands",
+        "description": "Locks the given elements. Manual lock, not teamwork!",
+        "version": "1.5.2",
+        "source": "tapir",
+        "method_code": "def lock_elements(\n    self,\n    elements: list[ElementIdArrayItem]\n) -> FailedExecutionResult | SuccessfulExecutionResult:\n    \"\"\"\n    Locks the given elements. Manual lock, not teamwork!\n\n    Args:\n        elements (list[ElementIdArrayItem]): A list of elements.\n\n    Returns:\n        FailedExecutionResult | SuccessfulExecutionResult\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    params_dict = {\n            'elements': elements,\n        }\n    validated_params = LockElementsParameters(**params_dict)\n    response_dict = self._core.post_tapir_command(\n        \"LockElements\",\n        validated_params.model_dump(mode='json', by_alias=True, exclude_none=True)\n    )\n    validated_response = TypeAdapter(LockElementsResult).validate_python(response_dict)\n    return validated_response",
+        "command_model_dependencies": [
+          "LockElementsParameters",
+          "LockElementsResult"
+        ],
+        "type_model_dependencies": [
+          "ElementIdArrayItem",
+          "FailedExecutionResult",
+          "SuccessfulExecutionResult"
+        ],
+        "alias_property_name": null
+      },
+      {
+        "name": "MoveElements",
+        "group": "Element Commands",
+        "description": "Moves elements with a given vector.",
+        "version": "1.0.2",
+        "source": "tapir",
+        "method_code": "def move_elements(\n    self,\n    elements_with_move_vectors: list[ElementsWithMoveVector]\n) -> list[FailedExecutionResult | SuccessfulExecutionResult]:\n    \"\"\"\n    Moves elements with a given vector.\n\n    Args:\n        elements_with_move_vectors (list[ElementsWithMoveVector]): The elements with move\n            vector pairs.\n\n    Returns:\n        list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution\n            results.\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    params_dict = {\n            'elementsWithMoveVectors': elements_with_move_vectors,\n        }\n    validated_params = MoveElementsParameters(**params_dict)\n    response_dict = self._core.post_tapir_command(\n        \"MoveElements\",\n        validated_params.model_dump(mode='json', by_alias=True, exclude_none=True)\n    )\n    validated_response = MoveElementsResult.model_validate(response_dict)\n    return validated_response.executionResults",
+        "command_model_dependencies": [
+          "MoveElementsParameters",
+          "MoveElementsResult"
+        ],
+        "type_model_dependencies": [
+          "ElementsWithMoveVector",
+          "FailedExecutionResult",
+          "SuccessfulExecutionResult"
+        ],
+        "alias_property_name": "executionResults"
+      },
+      {
+        "name": "RemoveElementNotificationClient",
+        "group": "Element Commands",
+        "description": "Removes an element notification client.",
+        "version": "1.2.8",
+        "source": "tapir",
+        "method_code": "def remove_element_notification_client(\n    self,\n    port: int,\n    host: None | str = None\n) -> FailedExecutionResult | SuccessfulExecutionResult:\n    \"\"\"\n    Removes an element notification client.\n\n    Args:\n        port (int): The port number of the notification client.\n        host (None | str): The host address of the notification client. If not provided,\n            localhost is used.\n\n    Returns:\n        FailedExecutionResult | SuccessfulExecutionResult\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    params_dict = {\n            'host': host,\n            'port': port,\n        }\n    validated_params = RemoveElementNotificationClientParameters(**params_dict)\n    response_dict = self._core.post_tapir_command(\n        \"RemoveElementNotificationClient\",\n        validated_params.model_dump(mode='json', by_alias=True, exclude_none=True)\n    )\n    validated_response = TypeAdapter(RemoveElementNotificationClientResult).validate_python(response_dict)\n    return validated_response",
+        "command_model_dependencies": [
+          "RemoveElementNotificationClientParameters",
+          "RemoveElementNotificationClientResult"
+        ],
+        "type_model_dependencies": [
+          "FailedExecutionResult",
+          "SuccessfulExecutionResult"
+        ],
+        "alias_property_name": null
+      },
+      {
+        "name": "RotateElements",
+        "group": "Element Commands",
+        "description": "Rotates elements around a reference point.",
+        "version": "1.5.3",
+        "source": "tapir",
+        "method_code": "def rotate_elements(\n    self,\n    elements_with_rotations: list[ElementsWithRotation]\n) -> list[FailedExecutionResult | SuccessfulExecutionResult]:\n    \"\"\"\n    Rotates elements around a reference point.\n\n    Args:\n        elements_with_rotations (list[ElementsWithRotation]): The elements with rotation\n            settings.\n\n    Returns:\n        list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution\n            results.\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    params_dict = {\n            'elementsWithRotations': elements_with_rotations,\n        }\n    validated_params = RotateElementsParameters(**params_dict)\n    response_dict = self._core.post_tapir_command(\n        \"RotateElements\",\n        validated_params.model_dump(mode='json', by_alias=True, exclude_none=True)\n    )\n    validated_response = RotateElementsResult.model_validate(response_dict)\n    return validated_response.executionResults",
+        "command_model_dependencies": [
+          "RotateElementsParameters",
+          "RotateElementsResult"
+        ],
+        "type_model_dependencies": [
+          "ElementsWithRotation",
+          "FailedExecutionResult",
+          "SuccessfulExecutionResult"
+        ],
+        "alias_property_name": "executionResults"
+      },
+      {
+        "name": "SetDetailsOfElements",
+        "group": "Element Commands",
+        "description": "Sets the details of the given elements (floor, layer, order etc).",
+        "version": "1.0.7",
+        "source": "tapir",
+        "method_code": "def set_details_of_elements(\n    self,\n    elements_with_details: list[ElementsWithDetail]\n) -> list[FailedExecutionResult | SuccessfulExecutionResult]:\n    \"\"\"\n    Sets the details of the given elements (floor, layer, order etc).\n\n    Args:\n        elements_with_details (list[ElementsWithDetail]): The elements with parameters.\n\n    Returns:\n        list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution\n            results.\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    params_dict = {\n            'elementsWithDetails': elements_with_details,\n        }\n    validated_params = SetDetailsOfElementsParameters(**params_dict)\n    response_dict = self._core.post_tapir_command(\n        \"SetDetailsOfElements\",\n        validated_params.model_dump(mode='json', by_alias=True, exclude_none=True)\n    )\n    validated_response = SetDetailsOfElementsResult.model_validate(response_dict)\n    return validated_response.executionResults",
+        "command_model_dependencies": [
+          "SetDetailsOfElementsParameters",
+          "SetDetailsOfElementsResult"
+        ],
+        "type_model_dependencies": [
+          "ElementsWithDetail",
+          "FailedExecutionResult",
+          "SuccessfulExecutionResult"
+        ],
+        "alias_property_name": "executionResults"
+      },
+      {
+        "name": "SetElementNotificationClient",
+        "group": "Element Commands",
+        "description": "Sets up a new notification client to receive element events.",
+        "version": "1.2.8",
+        "source": "tapir",
+        "method_code": "def set_element_notification_client(\n    self,\n    port: int,\n    host: None | str = None,\n    notify_on_new_element: None | bool = None,\n    notify_on_modification_of_an_element: None | bool = None,\n    notify_on_reservation_changes: None | bool = None\n) -> FailedExecutionResult | SuccessfulExecutionResult:\n    \"\"\"\n    Sets up a new notification client to receive element events.\n\n    Args:\n        port (int): The port number of the notification client.\n        host (None | str): The host address of the notification client. If not provided,\n            localhost is used.\n        notify_on_new_element (None | bool): Notify on creation of a new element. Optional\n            parameter, by default true.\n        notify_on_modification_of_an_element (None | bool): Notify on modification/deletion\n            of an element. Optional parameter, by default true.\n        notify_on_reservation_changes (None | bool): Notify on reservation changes of an\n            element. Optional parameter, by default true.\n\n    Returns:\n        FailedExecutionResult | SuccessfulExecutionResult\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    params_dict = {\n            'host': host,\n            'port': port,\n            'notifyOnNewElement': notify_on_new_element,\n            'notifyOnModificationOfAnElement': notify_on_modification_of_an_element,\n            'notifyOnReservationChanges': notify_on_reservation_changes,\n        }\n    validated_params = SetElementNotificationClientParameters(**params_dict)\n    response_dict = self._core.post_tapir_command(\n        \"SetElementNotificationClient\",\n        validated_params.model_dump(mode='json', by_alias=True, exclude_none=True)\n    )\n    validated_response = TypeAdapter(SetElementNotificationClientResult).validate_python(response_dict)\n    return validated_response",
+        "command_model_dependencies": [
+          "SetElementNotificationClientParameters",
+          "SetElementNotificationClientResult"
+        ],
+        "type_model_dependencies": [
+          "FailedExecutionResult",
+          "SuccessfulExecutionResult"
+        ],
+        "alias_property_name": null
+      },
+      {
+        "name": "SetGDLParametersOfElements",
+        "group": "Element Commands",
+        "description": "Sets the given GDL parameters of the given elements.",
+        "version": "1.5.7",
+        "source": "tapir",
+        "method_code": "def set_gdl_parameters_of_elements(\n    self,\n    elements_with_gdl_parameters: list[ElementsWithGDLParameter]\n) -> list[FailedExecutionResult | SuccessfulExecutionResult]:\n    \"\"\"\n    Sets the given GDL parameters of the given elements.\n\n    Args:\n        elements_with_gdl_parameters (list[ElementsWithGDLParameter]): The elements with GDL\n            parameters dictionary pairs.\n\n    Returns:\n        list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution\n            results.\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    params_dict = {\n            'elementsWithGDLParameters': elements_with_gdl_parameters,\n        }\n    validated_params = SetGDLParametersOfElementsParameters(**params_dict)\n    response_dict = self._core.post_tapir_command(\n        \"SetGDLParametersOfElements\",\n        validated_params.model_dump(mode='json', by_alias=True, exclude_none=True)\n    )\n    validated_response = SetGDLParametersOfElementsResult.model_validate(response_dict)\n    return validated_response.executionResults",
+        "command_model_dependencies": [
+          "SetGDLParametersOfElementsParameters",
+          "SetGDLParametersOfElementsResult"
+        ],
+        "type_model_dependencies": [
+          "ElementsWithGDLParameter",
+          "FailedExecutionResult",
+          "SuccessfulExecutionResult"
+        ],
+        "alias_property_name": "executionResults"
+      },
+      {
+        "name": "UnlockElements",
+        "group": "Element Commands",
+        "description": "Unlocks the given elements. Manual lock, not teamwork!",
+        "version": "1.5.2",
+        "source": "tapir",
+        "method_code": "def unlock_elements(\n    self,\n    elements: list[ElementIdArrayItem]\n) -> FailedExecutionResult | SuccessfulExecutionResult:\n    \"\"\"\n    Unlocks the given elements. Manual lock, not teamwork!\n\n    Args:\n        elements (list[ElementIdArrayItem]): A list of elements.\n\n    Returns:\n        FailedExecutionResult | SuccessfulExecutionResult\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    params_dict = {\n            'elements': elements,\n        }\n    validated_params = UnlockElementsParameters(**params_dict)\n    response_dict = self._core.post_tapir_command(\n        \"UnlockElements\",\n        validated_params.model_dump(mode='json', by_alias=True, exclude_none=True)\n    )\n    validated_response = TypeAdapter(UnlockElementsResult).validate_python(response_dict)\n    return validated_response",
+        "command_model_dependencies": [
+          "UnlockElementsParameters",
+          "UnlockElementsResult"
+        ],
+        "type_model_dependencies": [
+          "ElementIdArrayItem",
+          "FailedExecutionResult",
+          "SuccessfulExecutionResult"
+        ],
+        "alias_property_name": null
+      },
+      {
+        "name": "UpdateZones",
+        "group": "Element Commands",
+        "description": "Updates all Zones (recalculates their geometry, updates their Zone Stamps and the connected elements).",
+        "version": "1.5.4",
+        "source": "tapir",
+        "method_code": "def update_zones(\n    self,\n    keep_stamp_position: None | bool = None,\n    undo_top_trim: None | bool = None,\n    undo_bottom_trim: None | bool = None\n) -> FailedExecutionResult | SuccessfulExecutionResult:\n    \"\"\"\n    Updates all Zones (recalculates their geometry, updates their Zone Stamps and the\n    connected elements).\n\n    Args:\n        keep_stamp_position (None | bool): Keep the position of the Zone Stamps. The default\n            is true.\n        undo_top_trim (None | bool): Undo the trimming of the top of the Zones. The default\n            is false.\n        undo_bottom_trim (None | bool): Undo the trimming of the bottom of the Zones. The\n            default is false.\n\n    Returns:\n        FailedExecutionResult | SuccessfulExecutionResult\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    params_dict = {\n            'keepStampPosition': keep_stamp_position,\n            'undoTopTrim': undo_top_trim,\n            'undoBottomTrim': undo_bottom_trim,\n        }\n    validated_params = UpdateZonesParameters(**params_dict)\n    response_dict = self._core.post_tapir_command(\n        \"UpdateZones\",\n        validated_params.model_dump(mode='json', by_alias=True, exclude_none=True)\n    )\n    validated_response = TypeAdapter(UpdateZonesResult).validate_python(response_dict)\n    return validated_response",
+        "command_model_dependencies": [
+          "UpdateZonesParameters",
+          "UpdateZonesResult"
+        ],
+        "type_model_dependencies": [
+          "FailedExecutionResult",
+          "SuccessfulExecutionResult"
+        ],
+        "alias_property_name": null
+      }
+    ],
+    "Application Commands": [
+      {
+        "name": "ChangeWindow",
+        "group": "Application Commands",
+        "description": "Changes the current (active) window to the given window.",
+        "version": "1.3.1",
+        "source": "tapir",
+        "method_code": "def change_window(\n    self,\n    parameters: NavigatorItemIdArrayItem | DatabaseIdAndWindowType\n) -> FailedExecutionResult | SuccessfulExecutionResult:\n    \"\"\"\n    Changes the current (active) window to the given window.\n\n    Args:\n        parameters (NavigatorItemIdArrayItem | DatabaseIdAndWindowType): Union model\n            configuration parameters.\n\n    Returns:\n        FailedExecutionResult | SuccessfulExecutionResult\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    validated_params = TypeAdapter(ChangeWindowParameters).validate_python(parameters)\n    response_dict = self._core.post_tapir_command(\n        \"ChangeWindow\",\n        validated_params.model_dump(mode='json', by_alias=True, exclude_none=True)\n    )\n    validated_response = TypeAdapter(ChangeWindowResult).validate_python(response_dict)\n    return validated_response",
+        "command_model_dependencies": [
+          "ChangeWindowParameters",
+          "ChangeWindowResult"
+        ],
+        "type_model_dependencies": [
+          "DatabaseIdAndWindowType",
+          "FailedExecutionResult",
+          "NavigatorItemIdArrayItem",
+          "SuccessfulExecutionResult"
+        ],
+        "alias_property_name": null
+      },
+      {
+        "name": "GetAddOnVersion",
+        "group": "Application Commands",
+        "description": "Retrieves the version of the Tapir Additional JSON Commands Add-On.",
+        "version": "0.1.0",
+        "source": "tapir",
+        "method_code": "def get_add_on_version(self) -> str:\n    \"\"\"\n    Retrieves the version of the Tapir Additional JSON Commands Add-On.\n\n    Returns:\n        str: Version number in the form of \"1.1.1\".\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    response_dict = self._core.post_tapir_command(\n        \"GetAddOnVersion\"\n    )\n    validated_response = GetAddOnVersionResult.model_validate(response_dict)\n    return validated_response.version",
+        "command_model_dependencies": [
+          "GetAddOnVersionResult"
+        ],
+        "type_model_dependencies": [],
+        "alias_property_name": "version"
+      },
+      {
+        "name": "GetArchicadLocation",
+        "group": "Application Commands",
+        "description": "Retrieves the location of the currently running Archicad executable.",
+        "version": "0.1.0",
+        "source": "tapir",
+        "method_code": "def get_archicad_location(self) -> str:\n    \"\"\"\n    Retrieves the location of the currently running Archicad executable.\n\n    Returns:\n        str: The location of the Archicad executable in the filesystem.\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    response_dict = self._core.post_tapir_command(\n        \"GetArchicadLocation\"\n    )\n    validated_response = GetArchicadLocationResult.model_validate(response_dict)\n    return validated_response.archicadLocation",
+        "command_model_dependencies": [
+          "GetArchicadLocationResult"
+        ],
+        "type_model_dependencies": [],
+        "alias_property_name": "archicadLocation"
+      },
+      {
+        "name": "GetCurrentWindowType",
+        "group": "Application Commands",
+        "description": "Returns the type of the current (active) window.",
+        "version": "1.0.7",
+        "source": "tapir",
+        "method_code": "def get_current_window_type(self) -> WindowType:\n    \"\"\"\n    Returns the type of the current (active) window.\n\n    Returns:\n        WindowType\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    response_dict = self._core.post_tapir_command(\n        \"GetCurrentWindowType\"\n    )\n    validated_response = GetCurrentWindowTypeResult.model_validate(response_dict)\n    return validated_response.currentWindowType",
+        "command_model_dependencies": [
+          "GetCurrentWindowTypeResult"
+        ],
+        "type_model_dependencies": [
+          "WindowType"
+        ],
+        "alias_property_name": "currentWindowType"
+      },
+      {
+        "name": "GetSpecialFolders",
+        "group": "Application Commands",
+        "description": "Retrieves the filesystem paths of the special folders of the running Archicad (preferences, cache, data, temporary, application, defaults, templates, help, embedded project library, etc.).",
+        "version": "1.5.6",
+        "source": "tapir",
+        "method_code": "def get_special_folders(\n    self,\n    folder_types: list[SpecialFolderType]\n) -> list[ErrorItem | SpecialFolderPath]:\n    \"\"\"\n    Retrieves the filesystem paths of the special folders of the running Archicad\n    (preferences, cache, data, temporary, application, defaults, templates, help, embedded\n    project library, etc.).\n\n    Args:\n        folder_types (list[SpecialFolderType]): The types of the special folders to\n            retrieve.\n\n    Returns:\n        list[ErrorItem | SpecialFolderPath]: A list of special folder paths or errors.\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    params_dict = {\n            'folderTypes': folder_types,\n        }\n    validated_params = GetSpecialFoldersParameters(**params_dict)\n    response_dict = self._core.post_tapir_command(\n        \"GetSpecialFolders\",\n        validated_params.model_dump(mode='json', by_alias=True, exclude_none=True)\n    )\n    validated_response = GetSpecialFoldersResult.model_validate(response_dict)\n    return validated_response.folderPaths",
+        "command_model_dependencies": [
+          "GetSpecialFoldersParameters",
+          "GetSpecialFoldersResult"
+        ],
+        "type_model_dependencies": [
+          "ErrorItem",
+          "SpecialFolderPath",
+          "SpecialFolderType"
+        ],
+        "alias_property_name": "folderPaths"
+      },
+      {
+        "name": "GetUserGSID",
+        "group": "Application Commands",
+        "description": "Get the current registered User-GSID and OrganizationsID. Requires Archicad 27 or later.",
+        "version": "1.5.6",
+        "source": "tapir",
+        "method_code": "def get_user_gsid(self) -> GetUserGSIDResult:\n    \"\"\"\n    Get the current registered User-GSID and OrganizationsID. Requires Archicad 27 or later.\n\n    Returns:\n        GetUserGSIDResult\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    response_dict = self._core.post_tapir_command(\n        \"GetUserGSID\"\n    )\n    validated_response = GetUserGSIDResult.model_validate(response_dict)\n    return validated_response",
+        "command_model_dependencies": [
+          "GetUserGSIDResult"
+        ],
+        "type_model_dependencies": [],
+        "alias_property_name": null
+      },
+      {
+        "name": "QuitArchicad",
+        "group": "Application Commands",
+        "description": "Performs a quit operation on the currently running Archicad instance.",
+        "version": "0.1.0",
+        "source": "tapir",
+        "method_code": "def quit_archicad(self) -> FailedExecutionResult | SuccessfulExecutionResult:\n    \"\"\"\n    Performs a quit operation on the currently running Archicad instance.\n\n    Returns:\n        FailedExecutionResult | SuccessfulExecutionResult\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    response_dict = self._core.post_tapir_command(\n        \"QuitArchicad\"\n    )\n    validated_response = TypeAdapter(QuitArchicadResult).validate_python(response_dict)\n    return validated_response",
+        "command_model_dependencies": [
+          "QuitArchicadResult"
+        ],
+        "type_model_dependencies": [
+          "FailedExecutionResult",
+          "SuccessfulExecutionResult"
+        ],
+        "alias_property_name": null
+      },
+      {
+        "name": "ShowAlert",
+        "group": "Application Commands",
+        "description": "Display a dialog with up to three buttons.",
+        "version": "1.5.6",
+        "source": "tapir",
+        "method_code": "def show_alert(\n    self,\n    alert_type: AlertType,\n    title: str,\n    message: str,\n    button_1: str,\n    sub_message: None | str = None,\n    button_2: None | str = None,\n    button_3: None | str = None\n) -> int:\n    \"\"\"\n    Display a dialog with up to three buttons.\n\n    Args:\n        alert_type (AlertType): The type of the alert dialog.\n        title (str): The title of the alert dialog.\n        message (str): The main message text.\n        button_1 (str): Label for the first (default) button.\n        sub_message (None | str): Optional smaller sub-message text below the main message.\n        button_2 (None | str): Label for the second button (e.g. Cancel).\n        button_3 (None | str): Label for the optional third button.\n\n    Returns:\n        int: Index of the button the user clicked: 1 = button1, 2 = button2, 3 = button3.\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    params_dict = {\n            'alertType': alert_type,\n            'title': title,\n            'message': message,\n            'subMessage': sub_message,\n            'button1': button_1,\n            'button2': button_2,\n            'button3': button_3,\n        }\n    validated_params = ShowAlertParameters(**params_dict)\n    response_dict = self._core.post_tapir_command(\n        \"ShowAlert\",\n        validated_params.model_dump(mode='json', by_alias=True, exclude_none=True)\n    )\n    validated_response = ShowAlertResult.model_validate(response_dict)\n    return validated_response.clickedButton",
+        "command_model_dependencies": [
+          "ShowAlertParameters",
+          "ShowAlertResult"
+        ],
+        "type_model_dependencies": [
+          "AlertType"
+        ],
+        "alias_property_name": "clickedButton"
+      }
+    ],
     "Project Commands": [
       {
         "name": "CloseProject",
@@ -1768,12 +1810,12 @@
         "description": "Retrieves the MEP distribution systems of the project with their domain, MEP system attribute and member elements. Available from Archicad 28.",
         "version": "1.5.6",
         "source": "tapir",
-        "method_code": "def get_mep_distribution_systems(self) -> list[DistributionSystem]:\n    \"\"\"\n    Retrieves the MEP distribution systems of the project with their domain, MEP system\n    attribute and member elements. Available from Archicad 28.\n\n    Returns:\n        list[DistributionSystem]: The distribution systems of the project.\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    response_dict = self._core.post_tapir_command(\n        \"GetMEPDistributionSystems\"\n    )\n    validated_response = GetMEPDistributionSystemsResult.model_validate(response_dict)\n    return validated_response.distributionSystems",
+        "method_code": "def get_mep_distribution_systems(self) -> list[MEPDistributionSystem]:\n    \"\"\"\n    Retrieves the MEP distribution systems of the project with their domain, MEP system\n    attribute and member elements. Available from Archicad 28.\n\n    Returns:\n        list[MEPDistributionSystem]: The distribution systems of the project.\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    response_dict = self._core.post_tapir_command(\n        \"GetMEPDistributionSystems\"\n    )\n    validated_response = GetMEPDistributionSystemsResult.model_validate(response_dict)\n    return validated_response.distributionSystems",
         "command_model_dependencies": [
           "GetMEPDistributionSystemsResult"
         ],
         "type_model_dependencies": [
-          "DistributionSystem"
+          "MEPDistributionSystem"
         ],
         "alias_property_name": "distributionSystems"
       },
@@ -1812,6 +1854,23 @@
           "MEPElementPorts"
         ],
         "alias_property_name": "elementPorts"
+      },
+      {
+        "name": "GetMEPPreferenceTables",
+        "group": "MEP Commands",
+        "description": "Gets the circular cross section preference tables (referenceId, diameter, description) of the Piping or Ventilation domain. Available from Archicad 28.",
+        "version": "1.5.7",
+        "source": "tapir",
+        "method_code": "def get_mep_preference_tables(\n    self,\n    domain: MEPPreferenceTableDomain\n) -> list[MEPPreferenceTable]:\n    \"\"\"\n    Gets the circular cross section preference tables (referenceId, diameter, description)\n    of the Piping or Ventilation domain. Available from Archicad 28.\n\n    Args:\n        domain (MEPPreferenceTableDomain)\n\n    Returns:\n        list[MEPPreferenceTable]: The circular segment preference tables of the domain.\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    params_dict = {\n            'domain': domain,\n        }\n    validated_params = GetMEPPreferenceTablesParameters(**params_dict)\n    response_dict = self._core.post_tapir_command(\n        \"GetMEPPreferenceTables\",\n        validated_params.model_dump(mode='json', by_alias=True, exclude_none=True)\n    )\n    validated_response = GetMEPPreferenceTablesResult.model_validate(response_dict)\n    return validated_response.tables",
+        "command_model_dependencies": [
+          "GetMEPPreferenceTablesParameters",
+          "GetMEPPreferenceTablesResult"
+        ],
+        "type_model_dependencies": [
+          "MEPPreferenceTable",
+          "MEPPreferenceTableDomain"
+        ],
+        "alias_property_name": "tables"
       },
       {
         "name": "GetMEPRoutingElements",
@@ -2025,7 +2084,7 @@
         "name": "CreateLamps",
         "group": "Element Creation Commands",
         "description": "Creates Lamp elements based on the given parameters.",
-        "version": "1.5.0",
+        "version": "1.5.7",
         "source": "tapir",
         "method_code": "def create_lamps(\n    self,\n    lamps_data: list[LampData]\n) -> list[ElementIdArrayItem]:\n    \"\"\"\n    Creates Lamp elements based on the given parameters.\n\n    Args:\n        lamps_data (list[LampData]): Array of data to create Lamps.\n\n    Returns:\n        list[ElementIdArrayItem]: A list of elements.\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    params_dict = {\n            'lampsData': lamps_data,\n        }\n    validated_params = CreateLampsParameters(**params_dict)\n    response_dict = self._core.post_tapir_command(\n        \"CreateLamps\",\n        validated_params.model_dump(mode='json', by_alias=True, exclude_none=True)\n    )\n    validated_response = CreateLampsResult.model_validate(response_dict)\n    return validated_response.elements",
         "command_model_dependencies": [
@@ -2093,7 +2152,7 @@
         "name": "CreateObjects",
         "group": "Element Creation Commands",
         "description": "Creates Object elements based on the given parameters.",
-        "version": "1.0.3",
+        "version": "1.5.7",
         "source": "tapir",
         "method_code": "def create_objects(\n    self,\n    objects_data: list[ObjectData]\n) -> list[ElementIdArrayItem]:\n    \"\"\"\n    Creates Object elements based on the given parameters.\n\n    Args:\n        objects_data (list[ObjectData]): Array of data to create Objects.\n\n    Returns:\n        list[ElementIdArrayItem]: A list of elements.\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    params_dict = {\n            'objectsData': objects_data,\n        }\n    validated_params = CreateObjectsParameters(**params_dict)\n    response_dict = self._core.post_tapir_command(\n        \"CreateObjects\",\n        validated_params.model_dump(mode='json', by_alias=True, exclude_none=True)\n    )\n    validated_response = CreateObjectsResult.model_validate(response_dict)\n    return validated_response.elements",
         "command_model_dependencies": [
@@ -3786,6 +3845,24 @@
         "alias_property_name": "executionResults"
       },
       {
+        "name": "ModifyLamps",
+        "group": "Element Modification Commands",
+        "description": "Modifies Lamp elements based on the given parameters.",
+        "version": "1.5.7",
+        "source": "tapir",
+        "method_code": "def modify_lamps(\n    self,\n    lamps_with_details: list[LampWithDetails]\n) -> list[FailedExecutionResult | SuccessfulExecutionResult]:\n    \"\"\"\n    Modifies Lamp elements based on the given parameters.\n\n    Args:\n        lamps_with_details (list[LampWithDetails]): Array of elements to modify, with the\n            fields to change. Only provided fields are changed; omitted fields are left as-\n            is.\n\n    Returns:\n        list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution\n            results.\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    params_dict = {\n            'lampsWithDetails': lamps_with_details,\n        }\n    validated_params = ModifyLampsParameters(**params_dict)\n    response_dict = self._core.post_tapir_command(\n        \"ModifyLamps\",\n        validated_params.model_dump(mode='json', by_alias=True, exclude_none=True)\n    )\n    validated_response = ModifyLampsResult.model_validate(response_dict)\n    return validated_response.executionResults",
+        "command_model_dependencies": [
+          "ModifyLampsParameters",
+          "ModifyLampsResult"
+        ],
+        "type_model_dependencies": [
+          "FailedExecutionResult",
+          "LampWithDetails",
+          "SuccessfulExecutionResult"
+        ],
+        "alias_property_name": "executionResults"
+      },
+      {
         "name": "ModifyMeshes",
         "group": "Element Modification Commands",
         "description": "Modifies the attributes of Mesh elements based on the given parameters.",
@@ -3817,6 +3894,24 @@
         "type_model_dependencies": [
           "FailedExecutionResult",
           "MorphWithDetails",
+          "SuccessfulExecutionResult"
+        ],
+        "alias_property_name": "executionResults"
+      },
+      {
+        "name": "ModifyObjects",
+        "group": "Element Modification Commands",
+        "description": "Modifies Object elements based on the given parameters.",
+        "version": "1.5.7",
+        "source": "tapir",
+        "method_code": "def modify_objects(\n    self,\n    objects_with_details: list[ObjectWithDetails]\n) -> list[FailedExecutionResult | SuccessfulExecutionResult]:\n    \"\"\"\n    Modifies Object elements based on the given parameters.\n\n    Args:\n        objects_with_details (list[ObjectWithDetails]): Array of elements to modify, with\n            the fields to change. Only provided fields are changed; omitted fields are left\n            as-is.\n\n    Returns:\n        list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution\n            results.\n\n    Raises:\n        ArchicadAPIError: If the API returns an error response.\n        RequestError: If there is a network or connection error.\n        pydantic.ValidationError: If the parameters, or the API Response fail validation.\n    \"\"\"\n    params_dict = {\n            'objectsWithDetails': objects_with_details,\n        }\n    validated_params = ModifyObjectsParameters(**params_dict)\n    response_dict = self._core.post_tapir_command(\n        \"ModifyObjects\",\n        validated_params.model_dump(mode='json', by_alias=True, exclude_none=True)\n    )\n    validated_response = ModifyObjectsResult.model_validate(response_dict)\n    return validated_response.executionResults",
+        "command_model_dependencies": [
+          "ModifyObjectsParameters",
+          "ModifyObjectsResult"
+        ],
+        "type_model_dependencies": [
+          "FailedExecutionResult",
+          "ObjectWithDetails",
           "SuccessfulExecutionResult"
         ],
         "alias_property_name": "executionResults"

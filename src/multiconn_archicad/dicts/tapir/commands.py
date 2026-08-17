@@ -54,11 +54,11 @@ from .types import (
     DetailData,
     DetailsOfElement,
     DimensionDataOrError,
-    DistributionSystem,
     DocumentRevision,
     DoorData,
     DoorWithDetails,
     DrawingData,
+    DrawingsWithNewLink,
     Element,
     ElementClassifications,
     ElementClassificationsOrErrors,
@@ -69,8 +69,10 @@ from .types import (
     ElementIFCPropertiesOrErrors,
     ElementIFCTypesOrErrors,
     ElementId,
+    ElementIdOrError,
     ElementIdsOrErrors,
     ElementPropertyValues,
+    ElementRelationsOrError,
     ElementType,
     Elements,
     ElementsByIFCIds,
@@ -117,6 +119,7 @@ from .types import (
     KeynoteLabelData,
     LabelData,
     LampData,
+    LampWithDetails,
     LayerAttributeField,
     LayerAttributeOrError,
     LayerCombinationAttributeOrError,
@@ -137,11 +140,14 @@ from .types import (
     LineElementData,
     MEPConnectionData,
     MEPConnectionResultsOrErrors,
+    MEPDistributionSystem,
     MEPDomains,
     MEPElement,
     MEPElementData,
     MEPElementPortsOrErrors,
     MEPElementType,
+    MEPPreferenceTable,
+    MEPPreferenceTableDomain,
     MEPRoutingElementData,
     MEPRoutingElementDetailsOrErrors,
     MEPRoutingElementModificationData,
@@ -161,6 +167,7 @@ from .types import (
     NavigatorItemIdsWithViewSetting,
     NewClassificationItems,
     ObjectData,
+    ObjectWithDetails,
     OpeningData,
     PenTableAttributeField,
     PenTableAttributeOrError,
@@ -427,6 +434,14 @@ class ModifyRoofsResult(TypedDict):
 
 
 class ModifyMeshesResult(TypedDict):
+    executionResults: ExecutionResults
+
+
+class ModifyObjectsResult(TypedDict):
+    executionResults: ExecutionResults
+
+
+class ModifyLampsResult(TypedDict):
     executionResults: ExecutionResults
 
 
@@ -1008,14 +1023,6 @@ class CreateHotspotsParameters(TypedDict):
     hotspotsData: list[HotspotData]
 
 
-class CreateObjectsParameters(TypedDict):
-    objectsData: list[ObjectData]
-
-
-class CreateLampsParameters(TypedDict):
-    lampsData: list[LampData]
-
-
 class CreateTextsParameters(TypedDict):
     textsData: list[TextData]
 
@@ -1139,6 +1146,10 @@ class CreateDrawingsParameters(TypedDict):
     drawingsData: list[DrawingData]
 
 
+class ChangeDrawingLinkParameters(TypedDict):
+    drawingsWithNewLinks: list[DrawingsWithNewLink]
+
+
 class GetLayoutSettingsResult(TypedDict):
     layoutSettings: list[LayoutSetting]
 
@@ -1245,6 +1256,10 @@ class GetMEPElementsParameters(TypedDict):
     domains: NotRequired[list[MEPDomains]]
 
 
+class GetMEPPreferenceTablesParameters(TypedDict):
+    domain: MEPPreferenceTableDomain
+
+
 ChangeWindowParameters: TypeAlias = NavigatorItemIdOrDatabaseIdAndWindowType
 
 
@@ -1319,6 +1334,14 @@ class CreateSplinesParameters(TypedDict):
     splinesData: list[SplineData]
 
 
+class CreateObjectsParameters(TypedDict):
+    objectsData: list[ObjectData]
+
+
+class CreateLampsParameters(TypedDict):
+    lampsData: list[LampData]
+
+
 class CreateMeshesParameters(TypedDict):
     meshesData: list[MeshData]
 
@@ -1353,6 +1376,14 @@ class ModifyDoorsParameters(TypedDict):
 
 class ModifyRoofsParameters(TypedDict):
     roofsWithDetails: list[RoofWithDetails]
+
+
+class ModifyObjectsParameters(TypedDict):
+    objectsWithDetails: list[ObjectWithDetails]
+
+
+class ModifyLampsParameters(TypedDict):
+    lampsWithDetails: list[LampWithDetails]
 
 
 class CreateGroupsParameters(TypedDict):
@@ -1452,6 +1483,10 @@ class CreateLayoutResult(TypedDict):
 
 class CreateLayoutSubsetResult(TypedDict):
     navigatorItems: list[NavigatorItemIdOrError]
+
+
+class ChangeDrawingLinkResult(TypedDict):
+    elements: list[ElementIdOrError]
 
 
 class SetLayoutSettingsParameters(TypedDict):
@@ -1555,6 +1590,10 @@ class ConnectMEPElementsResult(TypedDict):
     connectionResults: MEPConnectionResultsOrErrors
 
 
+class GetMEPPreferenceTablesResult(TypedDict):
+    tables: list[MEPPreferenceTable]
+
+
 class CreateSolidElementLinksParameters(TypedDict):
     solidLinks: list[SolidLinkData]
 
@@ -1613,6 +1652,11 @@ class GetConnectedElementsParameters(TypedDict):
 
 
 GetConnectedElementsResult: TypeAlias = ConnectedElementsOrError
+
+
+class GetRelationsOfElementsParameters(TypedDict):
+    elements: Elements
+    otherElementType: NotRequired[ElementType]
 
 
 class GetCollisionsParameters(TypedDict):
@@ -1984,16 +2028,20 @@ class GetMEPPortsParameters(TypedDict):
     elements: Elements
 
 
-class GetMEPDistributionSystemsResult(TypedDict):
-    distributionSystems: list[DistributionSystem]
-
-
 class GetSolidElementLinksParameters(TypedDict):
     elements: Elements
 
 
+class GetRelationsOfElementsResult(TypedDict):
+    relations: list[ElementRelationsOrError]
+
+
 class GetProfilesResult(TypedDict):
     profiles: list[ProfileAttributeOrError]
+
+
+class GetMEPDistributionSystemsResult(TypedDict):
+    distributionSystems: list[MEPDistributionSystem]
 
 
 class CreateProfilesParameters(TypedDict):

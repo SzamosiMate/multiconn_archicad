@@ -200,6 +200,8 @@ def apply_permanent_patches(master_defs: dict[str, Any]):
         "ModifyDoorsParameters": ("doorsWithDetails", "DoorWithDetails"),
         "ModifyMorphsParameters": ("morphsWithDetails", "MorphWithDetails"),
         "ModifyRoofsParameters": ("roofsWithDetails", "RoofWithDetails"),
+        "ModifyObjectsParameters": ("objectsWithDetails", "ObjectWithDetails"),
+        "ModifyLampsParameters": ("lampsWithDetails", "LampWithDetails"),
         "ModifyMeshesParameters": ("meshesData", "MeshWithDetails"),
         "ModifyKeynoteFoldersParameters": ("foldersData", "KeynoteFolderModificationData"),
         "ModifyKeynoteItemsParameters": ("itemsData", "KeynoteItemModificationData"),
@@ -417,6 +419,9 @@ def apply_temporary_patches(master_defs: dict[str, Any]):
         "MEPSystemDomain",
         preserve_description=True,
     )
+    extract_inline_schema(
+        master_defs, "GetMEPDistributionSystemsResult", ["distributionSystems", "items"], "MEPDistributionSystem"
+    )
     replace_inline_schema_with_ref(
         master_defs, "MEPSystemData", ["domain"], "MEPSystemDomain", preserve_description=True
     )
@@ -427,6 +432,11 @@ def apply_temporary_patches(master_defs: dict[str, Any]):
         master_defs, "MEPRoutingElementData", ["domain"], "MEPSystemDomain", preserve_description=True
     )
 
+    # GetMEPPreferenceTables accepts only two of the three domains, so it keeps its own enum
+    extract_inline_enum(master_defs, "GetMEPPreferenceTablesParameters", ["domain"], "MEPPreferenceTableDomain")
+    extract_inline_schema(master_defs, "GetMEPPreferenceTablesResult", ["tables", "items"], "MEPPreferenceTable")
+    extract_inline_schema(master_defs, "MEPPreferenceTable", ["rows", "items"], "MEPPreferenceRow")
+
     # --- Extract 4-value discrete MEP element type enum ---
     extract_inline_enum(
         master_defs, "MEPElementData", ["type"], "MEPComponentType"
@@ -436,3 +446,21 @@ def apply_temporary_patches(master_defs: dict[str, Any]):
     replace_inline_schema_with_ref(
         master_defs, "MEPElement", ["type"], "MEPElementType", preserve_description=True
     )
+
+    # --- Tapir 1.5.7: Object/Lamp repeat the story visibility and home story link objects ---
+    for parent in ("ObjectDetails", "ObjectData", "ObjectWithDetails", "LampData", "LampWithDetails"):
+        replace_inline_schema_with_ref(master_defs, parent, ["visibility"], "StoryVisibility")
+        replace_inline_schema_with_ref(master_defs, parent, ["linkToSettings"], "LinkToSettings")
+
+    # --- GetRelationsOfElements returns a union of per-element-type relation objects ---
+    _, element_relations, _ = _require_target(master_defs, "ElementRelationsOrError", [])
+    relation_variants = [
+        "WallRelations", "BeamRelations", "BeamSegmentRelations",
+        "ZoneRelationsOfElement", "OpeningRelationsOfElement", "RoofOrShellRelationsOfElement",
+    ]
+    for index, variant_name in enumerate(relation_variants):
+        branch = element_relations["oneOf"][index]
+        if "$ref" in branch:
+            continue
+        master_defs[variant_name] = branch
+        element_relations["oneOf"][index] = {"$ref": f"#/$defs/{variant_name}"}

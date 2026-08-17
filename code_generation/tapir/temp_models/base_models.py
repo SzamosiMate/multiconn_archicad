@@ -95,8 +95,23 @@ class CutFillOrientation(Enum):
 
 
 class PossibleNumericValue(APIModel):
-    value: Annotated[float, Field(description="The numeric value.")]
+    value: Annotated[
+        float | None,
+        Field(
+            description="The numeric value. Present for all flags except 'Step', which instead carries stepBegin/stepValue."
+        ),
+    ] = None
     flag: Annotated[str | None, Field(description="The flag.")] = None
+    stepBegin: Annotated[
+        float | None,
+        Field(
+            description="Only present when flag is 'Step': the value is stepBegin + n*stepValue for n >= 0."
+        ),
+    ] = None
+    stepValue: Annotated[
+        float | None,
+        Field(description="Only present when flag is 'Step' - see stepBegin."),
+    ] = None
     description: Annotated[
         str | None, Field(description="The description of the value.")
     ] = None
@@ -109,6 +124,8 @@ class Flag(Enum):
     Child = "Child"
     Unique = "Unique"
     Fixed = "Fixed"
+    BoldName = "BoldName"
+    Open = "Open"
 
 
 class GDLParameterDetails(APIModel):
@@ -137,6 +154,12 @@ class GDLParameterDetails(APIModel):
     possibleValues: list[str] | list[PossibleNumericValue] | None = None
     canHaveCustomValue: Annotated[
         bool | None, Field(description="The parameter can have a custom value.")
+    ] = None
+    itemDescriptions: Annotated[
+        list[str] | None,
+        Field(
+            description="Per-item text labels for an array-type parameter (API_AddParType.arrayDescriptions), one per array element in dim1xdim2 order. Only present when the library part defines them."
+        ),
     ] = None
 
 
@@ -2279,6 +2302,20 @@ class ModifyMeshesResult(APIModel):
     ]
 
 
+class ModifyObjectsResult(APIModel):
+    executionResults: Annotated[
+        list[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
+
+
+class ModifyLampsResult(APIModel):
+    executionResults: Annotated[
+        list[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
+
+
 class ImageType(Enum):
     """
     The type of the preview image. Default is 3D.
@@ -3476,23 +3513,6 @@ class PolylineData(APIModel):
     ] = None
 
 
-class ObjectData(APIModel):
-    """
-    The parameters of the new Object.
-    """
-    libraryPartName: Annotated[
-        str, Field(description="The name of the library part to use.")
-    ]
-    coordinates: Coordinate3D
-    dimensions: Dimensions3D | None = None
-    floorIndex: Annotated[
-        int | None,
-        Field(
-            description="Optional floor index. If omitted, derived from the coordinate's z value."
-        ),
-    ] = None
-
-
 class AnchorPoint(Enum):
     """
     Optional anchor point of the beam cross section on a 3x3 grid.
@@ -3686,23 +3706,6 @@ class StairData(APIModel):
     ] = None
     treadDepth: Annotated[
         float | None, Field(description="Depth (going) of each tread.", gt=0.0)
-    ] = None
-
-
-class LampData(APIModel):
-    """
-    The parameters of the new Lamp.
-    """
-    libraryPartName: Annotated[
-        str, Field(description="The name of the lamp library part to use.")
-    ]
-    coordinates: Coordinate3D
-    dimensions: Dimensions3D | None = None
-    floorIndex: Annotated[
-        int | None,
-        Field(
-            description="Optional floor index. If omitted, derived from the coordinate's z value."
-        ),
     ] = None
 
 
@@ -4339,6 +4342,21 @@ class MEPCrossSectionShape(Enum):
     UShape = "UShape"
 
 
+class MEPPreferenceTableDomain(Enum):
+    """
+    The MEP domain of the segment preference tables.
+    """
+
+    Piping = "Piping"
+    Ventilation = "Ventilation"
+
+
+class MEPPreferenceRow(APIModel):
+    referenceId: int
+    diameter: float
+    description: str | None = None
+
+
 class MEPComponentType(Enum):
     Terminal = "Terminal"
     Accessory = "Accessory"
@@ -4927,12 +4945,87 @@ class LibPartBasedElementDetails(APIModel):
 
 
 class ObjectDetails(APIModel):
+    """
+    Shared shape for Object and Lamp elements (both use the same API_ObjectType struct). lightColor/lightIsOn only apply to Lamps. Per the Archicad SDK's own remarks, per-story visibility (visibility.showRelAbove/showRelBelow) and visibility.linkToSettings.newCreationMode were 'not extended' for Object/Lamp the way they were for other element types - still settable here for schema symmetry, but Archicad may silently ignore them.
+    """
     libPart: LibPartDetails
     ownerElementId: ElementId | None = None
     ownerElementType: ElementType | None = None
     origin: Coordinate3D
     dimensions: Coordinate3D
     angle: float
+    pen: int | None = None
+    lineTypeId: AttributeId | None = None
+    surfaceId: Annotated[
+        AttributeId | None,
+        Field(description="Material/Surface override (API_ObjectType.mat)."),
+    ] = None
+    sectionFillId: AttributeId | None = None
+    sectionFillPen: int | None = None
+    sectionFillBackgroundPen: int | None = None
+    sectionContourPen: int | None = None
+    useObjectPens: Annotated[
+        bool | None,
+        Field(description="Use the pen defined in the library part instead of 'pen'."),
+    ] = None
+    useObjectLineTypes: Annotated[
+        bool | None,
+        Field(
+            description="Use the line type defined in the library part instead of 'lineTypeId'."
+        ),
+    ] = None
+    useObjectMaterials: Annotated[
+        bool | None,
+        Field(
+            description="Use the materials defined in the library part instead of 'surfaceId'."
+        ),
+    ] = None
+    useObjectSectionAttributes: Annotated[
+        bool | None,
+        Field(
+            description="Use the section attributes defined in the library part instead of 'sectionFillId'/'sectionFillPen'/'sectionFillBackgroundPen'/'sectionContourPen'."
+        ),
+    ] = None
+    reflected: bool | None = None
+    useFixSize: Annotated[
+        bool | None,
+        Field(
+            description="Use the A/B (dimensions.x/dimensions.y) values as fixed sizes."
+        ),
+    ] = None
+    fixPoint: Annotated[
+        int | None,
+        Field(
+            description="0-based index of the hotspot to keep fixed when the object is resized (raw API_ObjectType.fixPoint value, not 1-based)."
+        ),
+    ] = None
+    offset: Annotated[
+        Coordinate2D | None,
+        Field(
+            description="Offset of the symbol's origin from the insertion point. Reported accurately here, but confirmed live that Archicad silently discards this value through both Create and Modify (always reports the library part's own default hotspot offset regardless of what is sent) - same class of read-only-in-practice field as Morph's bodyType/edgeType/level."
+        ),
+    ] = None
+    useFixedAngle: Annotated[
+        bool | None,
+        Field(
+            description="Use a fixed rotation angle (API_ObjectType.fixedAngle - stored as Int32 in the API despite being boolean in practice). Reported accurately here, but confirmed live that Archicad silently discards this value through both Create and Modify."
+        ),
+    ] = None
+    isAutoOnStoryVisibility: Annotated[
+        bool | None,
+        Field(
+            description="Recalculate per-story visibility automatically from the object's vertical extent ('All Relevant Stories')."
+        ),
+    ] = None
+    lightColor: Annotated[
+        ColorRGB | None,
+        Field(
+            description="Lamp only. Reported accurately here, but confirmed live that Archicad silently discards this value through both Create and Modify (always reports the library part's own default light color). lightIsOn (the on/off state) does not have this problem."
+        ),
+    ] = None
+    lightIsOn: Annotated[bool | None, Field(description="Lamp only.")] = None
+    visibility: StoryVisibility | None = None
+    linkToSettings: LinkToSettings | None = None
 
 
 class WindowDoorDetails(APIModel):
@@ -5174,6 +5267,12 @@ class DrawingDetails(APIModel):
             min_length=3,
         ),
     ] = None
+    navigatorItemId: Annotated[
+        NavigatorItemId,
+        Field(
+            description="The identifier of the navigator item (view/layout) this Drawing was created from. Read-only: Archicad only lets this be set at creation time (see CreateDrawings) - it cannot be changed afterwards to relink the Drawing to a different source."
+        ),
+    ]
     nameType: Annotated[
         NameType,
         Field(
@@ -5300,6 +5399,26 @@ class DrawingSettings(APIModel):
     """
     Modifiable settings for a Drawing element placed on a layout.
     """
+    pos: Annotated[
+        Coordinate2D | None,
+        Field(description="Position of the drawing's reference point on the layout."),
+    ] = None
+    angle: Annotated[
+        float | None, Field(description="Rotation angle of the drawing in radians.")
+    ] = None
+    ratio: Annotated[
+        float | None,
+        Field(
+            description="Scale ratio applied to the drawing relative to its source view."
+        ),
+    ] = None
+    drawingScale: Annotated[
+        float | None, Field(description="The nominal scale of the drawing.")
+    ] = None
+    modelOffset: Annotated[
+        Coordinate2D | None,
+        Field(description="Offset of the model origin within the drawing."),
+    ] = None
     clipPolygon: Annotated[
         list[Coordinate2D] | None,
         Field(
@@ -5430,6 +5549,76 @@ class DesignOptionDetails(APIModel):
     id: Annotated[str, Field(description="The string id of the design option.")]
     ownerSetName: Annotated[
         str, Field(description="The name of the owner design option set.")
+    ]
+
+
+class ConnectionItem(APIModel):
+    """
+    An element connected with its beginning or end point.
+    """
+    elementId: ElementId
+    connectedWithBeginPoint: Annotated[
+        bool,
+        Field(
+            description="True if the element is connected with its beginning point, false if it is connected with its end point."
+        ),
+    ]
+
+
+class EndpointConnections(APIModel):
+    """
+    The connections of a wall, beam or beam segment.
+    """
+    connectedToBeginPoint: Annotated[
+        list[ConnectionItem],
+        Field(description="Elements connected to the beginning point of the element."),
+    ]
+    connectedToEndPoint: Annotated[
+        list[ConnectionItem],
+        Field(description="Elements connected to the end point of the element."),
+    ]
+    connectedWithReferenceLineToEndPoints: Annotated[
+        list[ConnectionItem],
+        Field(
+            description="Elements connected with their reference line to the beginning or end point of the element."
+        ),
+    ]
+    connectedToReferenceLine: Annotated[
+        list[ConnectionItem],
+        Field(
+            description="Elements connected to the reference line of the element, not at its endpoints."
+        ),
+    ]
+    crossingReferenceLine: Annotated[
+        list[ConnectionItem],
+        Field(
+            description="Elements whose reference line intersects the reference line of the element."
+        ),
+    ]
+
+
+class ZoneBoundaryPart(APIModel):
+    """
+    Section of a wall, beam or curtain wall segment related to a zone.
+    """
+    elementId: ElementId
+    roomEdgeIndex: Annotated[
+        int | None,
+        Field(
+            description="Index of the zone polygon edge adjacent to the element (not present for beams)."
+        ),
+    ] = None
+    begDistance: Annotated[
+        float,
+        Field(
+            description="Beginning distance of the section from the beginning point of the element."
+        ),
+    ]
+    endDistance: Annotated[
+        float,
+        Field(
+            description="End distance of the section from the beginning point of the element."
+        ),
     ]
 
 
@@ -5617,18 +5806,6 @@ class CreatePolylinesParameters(APIModel):
 class CreateHotspotsParameters(APIModel):
     hotspotsData: Annotated[
         list[HotspotData], Field(description="Array of data to create Hotspots.")
-    ]
-
-
-class CreateObjectsParameters(APIModel):
-    objectsData: Annotated[
-        list[ObjectData], Field(description="Array of data to create Objects.")
-    ]
-
-
-class CreateLampsParameters(APIModel):
-    lampsData: Annotated[
-        list[LampData], Field(description="Array of data to create Lamps.")
     ]
 
 
@@ -5918,6 +6095,19 @@ class CreateDrawingsParameters(APIModel):
     drawingsData: list[DrawingData]
 
 
+class DrawingsWithNewLink(APIModel):
+    """
+    An existing Drawing and the navigator item it should be relinked to.
+    """
+    elementId: ElementId
+    navigatorItemId: NavigatorItemId
+    layoutDatabaseId: DatabaseId
+
+
+class ChangeDrawingLinkParameters(APIModel):
+    drawingsWithNewLinks: list[DrawingsWithNewLink]
+
+
 class LayoutSetting(APIModel):
     layoutName: str | None = None
     horizontalSize: float | None = None
@@ -6146,6 +6336,65 @@ class GetMEPElementsParameters(APIModel):
     domains: Annotated[
         list[MEPDomains] | None,
         Field(description="Optional filter for the MEP domains."),
+    ] = None
+
+
+class GetMEPPreferenceTablesParameters(APIModel):
+    domain: MEPPreferenceTableDomain
+
+
+class ObjectData(APIModel):
+    """
+    The parameters of the new Object.
+    """
+    libraryPartName: Annotated[
+        str, Field(description="The name of the library part to use.")
+    ]
+    coordinates: Coordinate3D
+    dimensions: Dimensions3D | None = None
+    angle: float | None = None
+    pen: int | None = None
+    lineTypeId: AttributeId | None = None
+    surfaceId: Annotated[
+        AttributeId | None,
+        Field(description="Material/Surface override (API_ObjectType.mat)."),
+    ] = None
+    sectionFillId: AttributeId | None = None
+    sectionFillPen: int | None = None
+    sectionFillBackgroundPen: int | None = None
+    sectionContourPen: int | None = None
+    useObjectPens: bool | None = None
+    useObjectLineTypes: bool | None = None
+    useObjectMaterials: bool | None = None
+    useObjectSectionAttributes: bool | None = None
+    reflected: bool | None = None
+    useFixSize: bool | None = None
+    fixPoint: Annotated[
+        int | None,
+        Field(
+            description="0-based index of the hotspot to keep fixed (raw API_ObjectType.fixPoint value, not 1-based)."
+        ),
+    ] = None
+    offset: Annotated[
+        Coordinate2D | None,
+        Field(
+            description="Offset of the symbol's origin from the insertion point. Reported accurately on Get, but confirmed live that Archicad silently discards this value through both Create and Modify (Get always reports the library part's own default hotspot offset regardless of what is sent) - same class of read-only-in-practice field as Morph's bodyType/edgeType/level."
+        ),
+    ] = None
+    useFixedAngle: Annotated[
+        bool | None,
+        Field(
+            description="Use a fixed rotation angle. Reported accurately on Get, but confirmed live that Archicad silently discards this value through both Create and Modify."
+        ),
+    ] = None
+    isAutoOnStoryVisibility: bool | None = None
+    visibility: StoryVisibility | None = None
+    linkToSettings: LinkToSettings | None = None
+    floorIndex: Annotated[
+        int | None,
+        Field(
+            description="Optional floor index. If omitted, derived from the coordinate's z value."
+        ),
     ] = None
 
 
@@ -6398,6 +6647,68 @@ class WallThicknessDimensionData(APIModel):
     wallId: ElementId
     referencePoint: Coordinate2D
     direction: Coordinate2D
+
+
+class LampData(APIModel):
+    """
+    The parameters of the new Lamp.
+    """
+    libraryPartName: Annotated[
+        str, Field(description="The name of the lamp library part to use.")
+    ]
+    coordinates: Coordinate3D
+    dimensions: Dimensions3D | None = None
+    angle: float | None = None
+    pen: int | None = None
+    lineTypeId: AttributeId | None = None
+    surfaceId: Annotated[
+        AttributeId | None,
+        Field(description="Material/Surface override (API_ObjectType.mat)."),
+    ] = None
+    sectionFillId: AttributeId | None = None
+    sectionFillPen: int | None = None
+    sectionFillBackgroundPen: int | None = None
+    sectionContourPen: int | None = None
+    useObjectPens: bool | None = None
+    useObjectLineTypes: bool | None = None
+    useObjectMaterials: bool | None = None
+    useObjectSectionAttributes: bool | None = None
+    reflected: bool | None = None
+    useFixSize: bool | None = None
+    fixPoint: Annotated[
+        int | None,
+        Field(
+            description="0-based index of the hotspot to keep fixed (raw API_ObjectType.fixPoint value, not 1-based)."
+        ),
+    ] = None
+    offset: Annotated[
+        Coordinate2D | None,
+        Field(
+            description="Offset of the symbol's origin from the insertion point. Reported accurately on Get, but confirmed live that Archicad silently discards this value through both Create and Modify (Get always reports the library part's own default hotspot offset regardless of what is sent) - same class of read-only-in-practice field as Morph's bodyType/edgeType/level."
+        ),
+    ] = None
+    useFixedAngle: Annotated[
+        bool | None,
+        Field(
+            description="Use a fixed rotation angle. Reported accurately on Get, but confirmed live that Archicad silently discards this value through both Create and Modify."
+        ),
+    ] = None
+    isAutoOnStoryVisibility: bool | None = None
+    visibility: StoryVisibility | None = None
+    linkToSettings: LinkToSettings | None = None
+    lightColor: Annotated[
+        ColorRGB | None,
+        Field(
+            description="Reported accurately on Get, but confirmed live that Archicad silently discards this value through both Create and Modify (Get always reports the library part's own default light color). lightIsOn (the on/off state, as opposed to the color) does not have this problem."
+        ),
+    ] = None
+    lightIsOn: bool | None = None
+    floorIndex: Annotated[
+        int | None,
+        Field(
+            description="Optional floor index. If omitted, derived from the coordinate's z value."
+        ),
+    ] = None
 
 
 class LayoutSettingsData(APIModel):
@@ -7130,6 +7441,101 @@ class RoofWithDetails(APIModel):
     ] = None
 
 
+class ObjectWithDetails(APIModel):
+    elementId: ElementId
+    coordinates: Coordinate3D | None = None
+    dimensions: Dimensions3D | None = None
+    angle: float | None = None
+    pen: int | None = None
+    lineTypeId: AttributeId | None = None
+    surfaceId: Annotated[
+        AttributeId | None,
+        Field(description="Material/Surface override (API_ObjectType.mat)."),
+    ] = None
+    sectionFillId: AttributeId | None = None
+    sectionFillPen: int | None = None
+    sectionFillBackgroundPen: int | None = None
+    sectionContourPen: int | None = None
+    useObjectPens: bool | None = None
+    useObjectLineTypes: bool | None = None
+    useObjectMaterials: bool | None = None
+    useObjectSectionAttributes: bool | None = None
+    reflected: bool | None = None
+    useFixSize: bool | None = None
+    fixPoint: Annotated[
+        int | None,
+        Field(
+            description="0-based index of the hotspot to keep fixed (raw API_ObjectType.fixPoint value, not 1-based)."
+        ),
+    ] = None
+    offset: Annotated[
+        Coordinate2D | None,
+        Field(
+            description="Offset of the symbol's origin from the insertion point. Reported accurately on Get, but confirmed live that Archicad silently discards this value through both Create and Modify (Get always reports the library part's own default hotspot offset regardless of what is sent) - same class of read-only-in-practice field as Morph's bodyType/edgeType/level."
+        ),
+    ] = None
+    useFixedAngle: Annotated[
+        bool | None,
+        Field(
+            description="Use a fixed rotation angle. Reported accurately on Get, but confirmed live that Archicad silently discards this value through both Create and Modify."
+        ),
+    ] = None
+    isAutoOnStoryVisibility: bool | None = None
+    visibility: StoryVisibility | None = None
+    linkToSettings: LinkToSettings | None = None
+
+
+class LampWithDetails(APIModel):
+    elementId: ElementId
+    coordinates: Coordinate3D | None = None
+    dimensions: Dimensions3D | None = None
+    angle: float | None = None
+    pen: int | None = None
+    lineTypeId: AttributeId | None = None
+    surfaceId: Annotated[
+        AttributeId | None,
+        Field(description="Material/Surface override (API_ObjectType.mat)."),
+    ] = None
+    sectionFillId: AttributeId | None = None
+    sectionFillPen: int | None = None
+    sectionFillBackgroundPen: int | None = None
+    sectionContourPen: int | None = None
+    useObjectPens: bool | None = None
+    useObjectLineTypes: bool | None = None
+    useObjectMaterials: bool | None = None
+    useObjectSectionAttributes: bool | None = None
+    reflected: bool | None = None
+    useFixSize: bool | None = None
+    fixPoint: Annotated[
+        int | None,
+        Field(
+            description="0-based index of the hotspot to keep fixed (raw API_ObjectType.fixPoint value, not 1-based)."
+        ),
+    ] = None
+    offset: Annotated[
+        Coordinate2D | None,
+        Field(
+            description="Offset of the symbol's origin from the insertion point. Reported accurately on Get, but confirmed live that Archicad silently discards this value through both Create and Modify (Get always reports the library part's own default hotspot offset regardless of what is sent) - same class of read-only-in-practice field as Morph's bodyType/edgeType/level."
+        ),
+    ] = None
+    useFixedAngle: Annotated[
+        bool | None,
+        Field(
+            description="Use a fixed rotation angle. Reported accurately on Get, but confirmed live that Archicad silently discards this value through both Create and Modify."
+        ),
+    ] = None
+    isAutoOnStoryVisibility: bool | None = None
+    visibility: StoryVisibility | None = None
+    linkToSettings: LinkToSettings | None = None
+    lightColor: Annotated[
+        ColorRGB | None,
+        Field(
+            description="Reported accurately on Get, but confirmed live that Archicad silently discards this value through both Create and Modify (Get always reports the library part's own default light color). lightIsOn (the on/off state, as opposed to the color) does not have this problem."
+        ),
+    ] = None
+    lightIsOn: bool | None = None
+
+
 class KeynoteFolderModificationData(APIModel):
     keynoteFolderId: KeynoteFolderId
     key: str | None = None
@@ -7387,6 +7793,44 @@ class MEPElement(APIModel):
             description="The MEP domain of the element. Empty for domain-independent elements (e.g. Equipment)."
         ),
     ]
+
+
+class MEPPreferenceTable(APIModel):
+    guid: str
+    rows: list[MEPPreferenceRow]
+
+
+class WallRelations(APIModel):
+    """
+    Relations of a wall.
+    """
+    wallConnections: EndpointConnections
+
+
+class BeamRelations(APIModel):
+    """
+    Relations of a beam.
+    """
+    beamConnections: EndpointConnections
+
+
+class BeamSegmentRelations(APIModel):
+    """
+    Relations of a beam segment.
+    """
+    beamSegmentConnections: EndpointConnections
+
+
+class OpeningRelations(APIModel):
+    fromRoom: ElementId | None = None
+    toRoom: ElementId | None = None
+
+
+class OpeningRelationsOfElement(APIModel):
+    """
+    Relations of a curtain wall panel, skylight, window or door: the zones on the two sides of the opening.
+    """
+    openingRelations: OpeningRelations
 
 
 class ElementIdArrayItem(APIModel):
@@ -7974,6 +8418,18 @@ class CreateSplinesParameters(APIModel):
     ]
 
 
+class CreateObjectsParameters(APIModel):
+    objectsData: Annotated[
+        list[ObjectData], Field(description="Array of data to create Objects.")
+    ]
+
+
+class CreateLampsParameters(APIModel):
+    lampsData: Annotated[
+        list[LampData], Field(description="Array of data to create Lamps.")
+    ]
+
+
 class CreateMeshesParameters(APIModel):
     meshesData: Annotated[
         list[MeshData], Field(description="Array of data to create Meshes.")
@@ -8012,6 +8468,24 @@ class ModifyDoorsParameters(APIModel):
 
 class ModifyRoofsParameters(APIModel):
     roofsWithDetails: list[RoofWithDetails]
+
+
+class ModifyObjectsParameters(APIModel):
+    objectsWithDetails: Annotated[
+        list[ObjectWithDetails],
+        Field(
+            description="Array of elements to modify, with the fields to change. Only provided fields are changed; omitted fields are left as-is."
+        ),
+    ]
+
+
+class ModifyLampsParameters(APIModel):
+    lampsWithDetails: Annotated[
+        list[LampWithDetails],
+        Field(
+            description="Array of elements to modify, with the fields to change. Only provided fields are changed; omitted fields are left as-is."
+        ),
+    ]
 
 
 class CreateGroupsParameters(APIModel):
@@ -8209,6 +8683,15 @@ class CreateLayoutSubsetResult(APIModel):
     navigatorItems: list[NavigatorItemIdArrayItem | ErrorItem]
 
 
+class ChangeDrawingLinkResult(APIModel):
+    elements: Annotated[
+        list[ElementIdArrayItem | ErrorItem],
+        Field(
+            description="One result per input item. On success, elementId is the NEW Drawing's identifier - relinking necessarily replaces the element, it cannot keep the original guid."
+        ),
+    ]
+
+
 class SetLayoutSettingsParameters(APIModel):
     layoutsData: list[LayoutSettingsData]
 
@@ -8370,6 +8853,13 @@ class ConnectMEPElementsResult(APIModel):
     connectionResults: Annotated[
         list[MEPConnectionResult | ErrorItem],
         Field(description="A list of MEP connection results or errors."),
+    ]
+
+
+class GetMEPPreferenceTablesResult(APIModel):
+    tables: Annotated[
+        list[MEPPreferenceTable],
+        Field(description="The circular segment preference tables of the domain."),
     ]
 
 
@@ -8827,6 +9317,38 @@ class ElementsWrapper(APIModel):
     ]
 
 
+class ElementsOfElementType(APIModel):
+    """
+    Elements of a given type.
+    """
+    elementType: ElementType
+    elements: Annotated[
+        list[ElementIdArrayItem], Field(description="A list of elements.")
+    ]
+
+
+class ZoneRelations(APIModel):
+    """
+    The relations of a zone: the related elements grouped by type and the boundary sections of walls, beams and curtain wall segments.
+    """
+    elementsGroupedByType: Annotated[
+        list[ElementsOfElementType],
+        Field(description="The elements related to the zone, grouped by element type."),
+    ]
+    wallParts: Annotated[
+        list[ZoneBoundaryPart],
+        Field(description="Sections of walls that border the zone."),
+    ]
+    beamParts: Annotated[
+        list[ZoneBoundaryPart],
+        Field(description="Sections of beams related to the zone."),
+    ]
+    curtainWallSegmentParts: Annotated[
+        list[ZoneBoundaryPart],
+        Field(description="Sections of curtain wall segments that border the zone."),
+    ]
+
+
 class GetSelectedElementsResult(APIModel):
     elements: Annotated[
         list[ElementIdArrayItem], Field(description="A list of elements.")
@@ -8978,6 +9500,18 @@ class GetConnectedElementsParameters(APIModel):
 
 
 GetConnectedElementsResult: TypeAlias = ConnectedElementsWrapper | ErrorItem
+
+
+class GetRelationsOfElementsParameters(APIModel):
+    elements: Annotated[
+        list[ElementIdArrayItem], Field(description="A list of elements.")
+    ]
+    otherElementType: Annotated[
+        ElementType | None,
+        Field(
+            description="Optional filter: only relations to elements of this type are returned."
+        ),
+    ] = None
 
 
 class GetCollisionsParameters(APIModel):
@@ -9612,21 +10146,6 @@ class GetMEPPortsParameters(APIModel):
     ]
 
 
-class DistributionSystem(APIModel):
-    domain: MEPSystemDomain
-    mepSystemId: AttributeId | None = None
-    elements: Annotated[
-        list[ElementIdArrayItem], Field(description="A list of elements.")
-    ]
-
-
-class GetMEPDistributionSystemsResult(APIModel):
-    distributionSystems: Annotated[
-        list[DistributionSystem],
-        Field(description="The distribution systems of the project."),
-    ]
-
-
 class GetSolidElementLinksParameters(APIModel):
     elements: Annotated[
         list[ElementIdArrayItem],
@@ -9690,6 +10209,34 @@ class ProfileSkinData(APIModel):
     ] = None
 
 
+class MEPDistributionSystem(APIModel):
+    domain: MEPSystemDomain
+    mepSystemId: AttributeId | None = None
+    elements: Annotated[
+        list[ElementIdArrayItem], Field(description="A list of elements.")
+    ]
+
+
+class ZoneRelationsOfElement(APIModel):
+    """
+    Relations of a zone.
+    """
+    zoneRelations: ZoneRelations
+
+
+class RoofOrShellRelations(APIModel):
+    connectedRooms: Annotated[
+        list[ElementIdArrayItem], Field(description="A list of elements.")
+    ]
+
+
+class RoofOrShellRelationsOfElement(APIModel):
+    """
+    Relations of a roof or shell: the connected zones.
+    """
+    roofOrShellRelations: RoofOrShellRelations
+
+
 class ProfileAttribute(APIModel):
     """
     A profile attribute.
@@ -9719,10 +10266,34 @@ class ProfileAttribute(APIModel):
     ] = None
 
 
+class GetRelationsOfElementsResult(APIModel):
+    relations: Annotated[
+        list[
+            WallRelations
+            | BeamRelations
+            | BeamSegmentRelations
+            | ZoneRelationsOfElement
+            | OpeningRelationsOfElement
+            | RoofOrShellRelationsOfElement
+            | ErrorItem
+        ],
+        Field(
+            description="Type-specific relations of each element, aligned with the input."
+        ),
+    ]
+
+
 class GetProfilesResult(APIModel):
     profiles: Annotated[
         list[ProfileAttribute | ErrorItem],
         Field(description="A list of profiles or errors."),
+    ]
+
+
+class GetMEPDistributionSystemsResult(APIModel):
+    distributionSystems: Annotated[
+        list[MEPDistributionSystem],
+        Field(description="The distribution systems of the project."),
     ]
 
 
