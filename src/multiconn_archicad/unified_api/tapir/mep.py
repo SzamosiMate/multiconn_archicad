@@ -17,23 +17,27 @@ from multiconn_archicad.models.tapir.commands import (
     GetMEPElementsResult,
     GetMEPPortsParameters,
     GetMEPPortsResult,
+    GetMEPPreferenceTablesParameters,
+    GetMEPPreferenceTablesResult,
     GetMEPRoutingElementsParameters,
     GetMEPRoutingElementsResult,
     ModifyMEPRoutingElementsParameters,
     ModifyMEPRoutingElementsResult,
 )
 from multiconn_archicad.models.tapir.types import (
-    DistributionSystem,
     ElementIdArrayItem,
     ErrorItem,
     FailedExecutionResult,
     MEPConnectionData,
     MEPConnectionResult,
+    MEPDistributionSystem,
     MEPDomains,
     MEPElement,
     MEPElementData,
     MEPElementPorts,
     MEPElementType,
+    MEPPreferenceTable,
+    MEPPreferenceTableDomain,
     MEPRoutingElementData,
     MEPRoutingElementDetails,
     MEPRoutingElementModificationData,
@@ -129,13 +133,13 @@ class MepCommands:
         validated_response = CreateMEPRoutingElementsResult.model_validate(response_dict)
         return validated_response.elements
 
-    def get_mep_distribution_systems(self) -> list[DistributionSystem]:
+    def get_mep_distribution_systems(self) -> list[MEPDistributionSystem]:
         """
         Retrieves the MEP distribution systems of the project with their domain, MEP system
         attribute and member elements. Available from Archicad 28.
 
         Returns:
-            list[DistributionSystem]: The distribution systems of the project.
+            list[MEPDistributionSystem]: The distribution systems of the project.
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -204,6 +208,32 @@ class MepCommands:
         )
         validated_response = GetMEPPortsResult.model_validate(response_dict)
         return validated_response.elementPorts
+
+    def get_mep_preference_tables(self, domain: MEPPreferenceTableDomain) -> list[MEPPreferenceTable]:
+        """
+        Gets the circular cross section preference tables (referenceId, diameter, description)
+        of the Piping or Ventilation domain. Available from Archicad 28.
+
+        Args:
+            domain (MEPPreferenceTableDomain)
+
+        Returns:
+            list[MEPPreferenceTable]: The circular segment preference tables of the domain.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "domain": domain,
+        }
+        validated_params = GetMEPPreferenceTablesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetMEPPreferenceTables", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetMEPPreferenceTablesResult.model_validate(response_dict)
+        return validated_response.tables
 
     def get_mep_routing_elements(
         self, elements: list[ElementIdArrayItem]

@@ -12,10 +12,14 @@ from multiconn_archicad.models.tapir.commands import (
     ModifyColumnsResult,
     ModifyDoorsParameters,
     ModifyDoorsResult,
+    ModifyLampsParameters,
+    ModifyLampsResult,
     ModifyMeshesParameters,
     ModifyMeshesResult,
     ModifyMorphsParameters,
     ModifyMorphsResult,
+    ModifyObjectsParameters,
+    ModifyObjectsResult,
     ModifyRoofsParameters,
     ModifyRoofsResult,
     ModifySlabsParameters,
@@ -30,8 +34,10 @@ from multiconn_archicad.models.tapir.types import (
     ColumnWithDetails,
     DoorWithDetails,
     FailedExecutionResult,
+    LampWithDetails,
     MeshWithDetails,
     MorphWithDetails,
+    ObjectWithDetails,
     RoofWithDetails,
     SlabWithDetails,
     SuccessfulExecutionResult,
@@ -131,6 +137,36 @@ class ElementModificationCommands:
         validated_response = ModifyDoorsResult.model_validate(response_dict)
         return validated_response.executionResults
 
+    def modify_lamps(
+        self, lamps_with_details: list[LampWithDetails]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Modifies Lamp elements based on the given parameters.
+
+        Args:
+            lamps_with_details (list[LampWithDetails]): Array of elements to modify, with the
+                fields to change. Only provided fields are changed; omitted fields are left as-
+                is.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "lampsWithDetails": lamps_with_details,
+        }
+        validated_params = ModifyLampsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "ModifyLamps", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = ModifyLampsResult.model_validate(response_dict)
+        return validated_response.executionResults
+
     def modify_meshes(
         self, meshes_data: list[MeshWithDetails]
     ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
@@ -185,6 +221,36 @@ class ElementModificationCommands:
             "ModifyMorphs", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = ModifyMorphsResult.model_validate(response_dict)
+        return validated_response.executionResults
+
+    def modify_objects(
+        self, objects_with_details: list[ObjectWithDetails]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Modifies Object elements based on the given parameters.
+
+        Args:
+            objects_with_details (list[ObjectWithDetails]): Array of elements to modify, with
+                the fields to change. Only provided fields are changed; omitted fields are left
+                as-is.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "objectsWithDetails": objects_with_details,
+        }
+        validated_params = ModifyObjectsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "ModifyObjects", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = ModifyObjectsResult.model_validate(response_dict)
         return validated_response.executionResults
 
     def modify_roofs(

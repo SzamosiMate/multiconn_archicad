@@ -41,7 +41,7 @@ from .tapir.teamwork import TeamworkCommands as TapirTeamworkCommands
 if TYPE_CHECKING:
     from multiconn_archicad.core.core_commands import CoreCommands
 
-SUPPORTED_TAPIR_VERSION = "1.5.6"
+SUPPORTED_TAPIR_VERSION = "1.5.7"
 
 
 class TapirApi:
