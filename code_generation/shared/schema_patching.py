@@ -201,6 +201,9 @@ def apply_permanent_patches(master_defs: dict[str, Any]):
         "ModifyMorphsParameters": ("morphsWithDetails", "MorphWithDetails"),
         "ModifyRoofsParameters": ("roofsWithDetails", "RoofWithDetails"),
         "ModifyMeshesParameters": ("meshesData", "MeshWithDetails"),
+        # Tapir 1.5.7 added full Object/Lamp support
+        "ModifyObjectsParameters": ("objectsWithDetails", "ObjectWithDetails"),
+        "ModifyLampsParameters": ("lampsWithDetails", "LampWithDetails"),
         "ModifyKeynoteFoldersParameters": ("foldersData", "KeynoteFolderModificationData"),
         "ModifyKeynoteItemsParameters": ("itemsData", "KeynoteItemModificationData"),
         "ModifyMEPRoutingElementsParameters": ("routingElementsData", "MEPRoutingElementModificationData"),
@@ -374,6 +377,35 @@ def apply_temporary_patches(master_defs: dict[str, Any]):
         master_defs, "GetLayoutSettingsResult", ["layoutSettings", "items", "customData", "items"], "LayoutCustomData"
     )
     extract_inline_schema(master_defs, "LayoutSettingsData", ["customData", "items"], "LayoutCustomDataToSet")
+
+    # --- Tapir 1.5.7: Object/Lamp repeat the story visibility and home story link objects ---
+    for parent in ("ObjectDetails", "ObjectData", "ObjectWithDetails", "LampData", "LampWithDetails"):
+        replace_inline_schema_with_ref(master_defs, parent, ["visibility"], "StoryVisibility")
+        replace_inline_schema_with_ref(master_defs, parent, ["linkToSettings"], "LinkToSettings")
+
+    # --- Tapir 1.5.7: ChangeDrawingLink payload ---
+    extract_inline_schema(
+        master_defs, "ChangeDrawingLinkParameters", ["drawingsWithNewLinks", "items"], "DrawingWithNewLink"
+    )
+
+    # --- Tapir 1.5.7: MEP preference tables ---
+    # This command accepts only two of the three MEPSystemDomain values, so it keeps its own enum.
+    extract_inline_enum(master_defs, "GetMEPPreferenceTablesParameters", ["domain"], "MEPPreferenceTableDomain")
+    extract_inline_schema(master_defs, "GetMEPPreferenceTablesResult", ["tables", "items"], "MEPPreferenceTable")
+    extract_inline_schema(master_defs, "MEPPreferenceTable", ["rows", "items"], "MEPPreferenceTableRow")
+
+    # --- Tapir 1.5.7: GetRelationsOfElements returns a union of per-element-type relations ---
+    _, element_relations, _ = _require_target(master_defs, "ElementRelationsOrError", [])
+    relation_variants = [
+        "WallRelations", "BeamRelations", "BeamSegmentRelations",
+        "ZoneRelationsOfElement", "OpeningRelationsOfElement", "RoofOrShellRelationsOfElement",
+    ]
+    for index, variant_name in enumerate(relation_variants):
+        branch = element_relations["oneOf"][index]
+        if "$ref" in branch:
+            continue
+        master_defs[variant_name] = branch
+        element_relations["oneOf"][index] = {"$ref": f"#/$defs/{variant_name}"}
 
     # --- remove malformed Export Favorites result ---
     master_defs.pop("ExportFavoritesResult", None)
