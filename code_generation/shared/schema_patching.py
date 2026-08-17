@@ -377,6 +377,40 @@ def apply_temporary_patches(master_defs: dict[str, Any]):
     )
     extract_inline_schema(master_defs, "LayoutSettingsData", ["customData", "items"], "LayoutCustomDataToSet")
 
+    # --- Tapir 1.5.8: Data/Details/WithDetails now all carry the same enums inline ---
+    extract_inline_enum(master_defs, "BeamDetails", ["anchorPoint"], "BeamAnchorPoint")
+    for parent in ("BeamData", "BeamWithDetails"):
+        replace_inline_schema_with_ref(master_defs, parent, ["anchorPoint"], "BeamAnchorPoint")
+    extract_inline_enum(master_defs, "ColumnDetails", ["coreAnchor"], "ColumnCoreAnchor")
+    for parent in ("ColumnData", "ColumnWithDetails"):
+        replace_inline_schema_with_ref(master_defs, parent, ["coreAnchor"], "ColumnCoreAnchor")
+    extract_inline_enum(master_defs, "SlabDetails", ["referencePlaneLocation"], "SlabReferencePlaneLocation")
+    for parent in ("SlabData", "SlabWithDetails"):
+        replace_inline_schema_with_ref(master_defs, parent, ["referencePlaneLocation"], "SlabReferencePlaneLocation")
+    extract_inline_enum(master_defs, "WallDetails", ["referenceLineLocation"], "WallReferenceLineLocation")
+    for parent in ("WallData", "WallWithDetails"):
+        replace_inline_schema_with_ref(master_defs, parent, ["referenceLineLocation"], "WallReferenceLineLocation")
+    extract_inline_enum(master_defs, "WallDetails", ["zoneRel"], "WallZoneRelation")
+    replace_inline_schema_with_ref(master_defs, "WallWithDetails", ["zoneRel"], "WallZoneRelation")
+
+    # Beam holes: same item shape and same discriminator in both models
+    extract_inline_schema(master_defs, "BeamDetails", ["holes", "items"], "BeamHole")
+    extract_inline_enum(master_defs, "BeamHole", ["type"], "BeamHoleType")
+    replace_inline_schema_with_ref(master_defs, "BeamWithDetails", ["holes", "items"], "BeamHole")
+    extract_inline_enum(master_defs, "HatchOrientation", ["type"], "HatchOrientationType")
+
+    # geometryType and profileType are NOT shared: the modification models accept fewer
+    # values than the read models (no Polygonal / no Poly), so they keep separate enums.
+    extract_inline_enum(master_defs, "WallDetails", ["geometryType"], "WallGeometryType")
+    extract_inline_enum(master_defs, "WallWithDetails", ["geometryType"], "WallModificationGeometryType")
+    extract_inline_enum(master_defs, "WallDetails", ["profileType"], "WallProfileType")
+    extract_inline_enum(master_defs, "WallWithDetails", ["profileType"], "WallModificationProfileType")
+
+    # --- Tapir 1.5.8: CreateInteriorElevations payload ---
+    extract_inline_schema(
+        master_defs, "CreateInteriorElevationsParameters", ["interiorElevationsData", "items"], "InteriorElevationData"
+    )
+
     # --- remove malformed Export Favorites result ---
     master_defs.pop("ExportFavoritesResult", None)
 
