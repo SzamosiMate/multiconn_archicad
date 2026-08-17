@@ -30,6 +30,12 @@
         "version": "1.0.6"
     },
     {
+        "name": "ChangeDrawingLink",
+        "group": "Navigator Commands",
+        "description": "Relinks a Drawing to a different source navigator item. Archicad has no in-place relink API, so this recreates the Drawing against the new source and deletes the original - the returned elementId is a NEW guid, not the input one. The Drawing Title marker's own position is not preserved (undocumented Archicad limitation).",
+        "version": "1.5.7"
+    },
+    {
         "name": "ChangeSelectionOfElements",
         "group": "Element Commands",
         "description": "Adds/removes a number of elements to/from the current selection.",
@@ -219,7 +225,7 @@
         "name": "CreateLamps",
         "group": "Element Commands",
         "description": "Creates Lamp elements based on the given parameters.",
-        "version": "1.5.0"
+        "version": "1.5.7"
     },
     {
         "name": "CreateLayerCombinations",
@@ -291,7 +297,7 @@
         "name": "CreateObjects",
         "group": "Element Commands",
         "description": "Creates Object elements based on the given parameters.",
-        "version": "1.0.3"
+        "version": "1.5.7"
     },
     {
         "name": "CreateOpenings",
@@ -858,6 +864,12 @@
         "version": "1.5.6"
     },
     {
+        "name": "GetMEPPreferenceTables",
+        "group": "MEP Commands",
+        "description": "Gets the circular cross section preference tables (referenceId, diameter, description) of the Piping or Ventilation domain. Available from Archicad 28.",
+        "version": "1.5.7"
+    },
+    {
         "name": "GetMEPRoutingElements",
         "group": "MEP Commands",
         "description": "Retrieves the details of the given MEP routing elements: domain, MEP system, route polyline, segments with cross section data and nodes. Available from Archicad 28.",
@@ -916,6 +928,12 @@
         "group": "Property Commands",
         "description": "Returns the property values of the elements for the given property. It works for subelements of hierarchal elements also.",
         "version": "1.0.6"
+    },
+    {
+        "name": "GetRelationsOfElements",
+        "group": "Element Commands",
+        "description": "Gets the type-specific relations of the given elements: endpoint and reference line connections of walls, beams and beam segments, boundary elements and boundary sections of zones, the zones on the two sides of windows, doors, skylights and curtain wall panels, and the zones connected to roofs and shells. Available from Archicad 26.",
+        "version": "1.5.7"
     },
     {
         "name": "GetRevisionChanges",
@@ -1080,6 +1098,12 @@
         "version": "1.5.6"
     },
     {
+        "name": "ModifyLamps",
+        "group": "Element Commands",
+        "description": "Modifies Lamp elements based on the given parameters.",
+        "version": "1.5.7"
+    },
+    {
         "name": "ModifyMEPRoutingElements",
         "group": "MEP Commands",
         "description": "Modifies the given MEP routing elements: MEP system, cross section data of all segments and node positions. Available from Archicad 28.",
@@ -1096,6 +1120,12 @@
         "group": "Element Commands",
         "description": "Modifies Morph elements based on the given parameters.",
         "version": "1.4.0"
+    },
+    {
+        "name": "ModifyObjects",
+        "group": "Element Commands",
+        "description": "Modifies Object elements based on the given parameters.",
+        "version": "1.5.7"
     },
     {
         "name": "ModifyRoofs",
@@ -1263,7 +1293,7 @@
         "name": "SetGDLParametersOfElements",
         "group": "Element Commands",
         "description": "Sets the given GDL parameters of the given elements.",
-        "version": "1.0.8"
+        "version": "1.5.7"
     },
     {
         "name": "SetGeoLocation",

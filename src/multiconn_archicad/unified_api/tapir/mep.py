@@ -17,6 +17,8 @@ from multiconn_archicad.models.tapir.commands import (
     GetMEPElementsResult,
     GetMEPPortsParameters,
     GetMEPPortsResult,
+    GetMEPPreferenceTablesParameters,
+    GetMEPPreferenceTablesResult,
     GetMEPRoutingElementsParameters,
     GetMEPRoutingElementsResult,
     ModifyMEPRoutingElementsParameters,
@@ -34,6 +36,8 @@ from multiconn_archicad.models.tapir.types import (
     MEPElementData,
     MEPElementPorts,
     MEPElementType,
+    MEPPreferenceTable,
+    MEPPreferenceTableDomain,
     MEPRoutingElementData,
     MEPRoutingElementDetails,
     MEPRoutingElementModificationData,
@@ -204,6 +208,32 @@ class MepCommands:
         )
         validated_response = GetMEPPortsResult.model_validate(response_dict)
         return validated_response.elementPorts
+
+    def get_mep_preference_tables(self, domain: MEPPreferenceTableDomain) -> list[MEPPreferenceTable]:
+        """
+        Gets the circular cross section preference tables (referenceId, diameter, description)
+        of the Piping or Ventilation domain. Available from Archicad 28.
+
+        Args:
+            domain (MEPPreferenceTableDomain)
+
+        Returns:
+            list[MEPPreferenceTable]: The circular segment preference tables of the domain.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "domain": domain,
+        }
+        validated_params = GetMEPPreferenceTablesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetMEPPreferenceTables", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetMEPPreferenceTablesResult.model_validate(response_dict)
+        return validated_response.tables
 
     def get_mep_routing_elements(
         self, elements: list[ElementIdArrayItem]

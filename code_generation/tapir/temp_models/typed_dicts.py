@@ -67,8 +67,10 @@ The possible string values of a GDL parameter.
 
 
 class PossibleNumericValue(TypedDict):
-    value: float
+    value: NotRequired[float]
     flag: NotRequired[str]
+    stepBegin: NotRequired[float]
+    stepValue: NotRequired[float]
     description: NotRequired[str]
 
 
@@ -92,10 +94,20 @@ class GDLParameterDetails(TypedDict):
     valueDescription: NotRequired[str]
     isLocked: bool
     flags: list[
-        Literal["Hidden", "HiddenFromScript", "Disabled", "Child", "Unique", "Fixed"]
+        Literal[
+            "Hidden",
+            "HiddenFromScript",
+            "Disabled",
+            "Child",
+            "Unique",
+            "Fixed",
+            "BoldName",
+            "Open",
+        ]
     ]
     possibleValues: NotRequired[PossibleStringValues | PossibleNumericValues]
     canHaveCustomValue: NotRequired[bool]
+    itemDescriptions: NotRequired[list[str]]
 
 
 class SetGDLParameterByNameDetails(TypedDict):
@@ -1651,6 +1663,14 @@ class ModifyMeshesResult(TypedDict):
     executionResults: ExecutionResults
 
 
+class ModifyObjectsResult(TypedDict):
+    executionResults: ExecutionResults
+
+
+class ModifyLampsResult(TypedDict):
+    executionResults: ExecutionResults
+
+
 class GetElementPreviewImageResult(TypedDict):
     previewImage: str
 
@@ -2284,16 +2304,6 @@ class PolylineData(TypedDict):
     arcs: NotRequired[list[PolyArc]]
 
 
-class ObjectData(TypedDict):
-    """
-    The parameters of the new Object.
-    """
-    libraryPartName: str
-    coordinates: Coordinate3D
-    dimensions: NotRequired[Dimensions3D]
-    floorIndex: NotRequired[int]
-
-
 class BeamData(TypedDict):
     begCoordinate: Coordinate2D
     endCoordinate: Coordinate2D
@@ -2409,16 +2419,6 @@ class StairData(TypedDict):
     stepNum: NotRequired[int]
     riserHeight: NotRequired[float]
     treadDepth: NotRequired[float]
-
-
-class LampData(TypedDict):
-    """
-    The parameters of the new Lamp.
-    """
-    libraryPartName: str
-    coordinates: Coordinate3D
-    dimensions: NotRequired[Dimensions3D]
-    floorIndex: NotRequired[int]
 
 
 class TextData(TypedDict):
@@ -2756,6 +2756,15 @@ class LayoutCustomDataToSet(TypedDict):
     customSchemeKey: NotRequired[str]
     customSchemeName: NotRequired[str]
     customSchemeValue: str
+
+
+MEPPreferenceTableDomain: TypeAlias = Literal["Piping", "Ventilation"]
+
+
+class MEPPreferenceTableRow(TypedDict):
+    referenceId: int
+    diameter: float
+    description: NotRequired[str]
 
 
 MEPElementType: TypeAlias = Literal[
@@ -3324,12 +3333,36 @@ class LibPartBasedElementDetails(TypedDict):
 
 
 class ObjectDetails(TypedDict):
+    """
+    Shared shape for Object and Lamp elements (both use the same API_ObjectType struct). lightColor/lightIsOn only apply to Lamps. Per the Archicad SDK's own remarks, per-story visibility (visibility.showRelAbove/showRelBelow) and visibility.linkToSettings.newCreationMode were 'not extended' for Object/Lamp the way they were for other element types - still settable here for schema symmetry, but Archicad may silently ignore them.
+    """
     libPart: LibPartDetails
     ownerElementId: NotRequired[ElementId]
     ownerElementType: NotRequired[ElementType]
     origin: Coordinate3D
     dimensions: Coordinate3D
     angle: float
+    pen: NotRequired[int]
+    lineTypeId: NotRequired[AttributeId]
+    surfaceId: NotRequired[AttributeId]
+    sectionFillId: NotRequired[AttributeId]
+    sectionFillPen: NotRequired[int]
+    sectionFillBackgroundPen: NotRequired[int]
+    sectionContourPen: NotRequired[int]
+    useObjectPens: NotRequired[bool]
+    useObjectLineTypes: NotRequired[bool]
+    useObjectMaterials: NotRequired[bool]
+    useObjectSectionAttributes: NotRequired[bool]
+    reflected: NotRequired[bool]
+    useFixSize: NotRequired[bool]
+    fixPoint: NotRequired[int]
+    offset: NotRequired[Coordinate2D]
+    useFixedAngle: NotRequired[bool]
+    isAutoOnStoryVisibility: NotRequired[bool]
+    lightColor: NotRequired[ColorRGB]
+    lightIsOn: NotRequired[bool]
+    visibility: NotRequired[StoryVisibility]
+    linkToSettings: NotRequired[LinkToSettings]
 
 
 class WindowDoorDetails(TypedDict):
@@ -3445,6 +3478,7 @@ class DrawingDetails(TypedDict):
     isCutWithFrame: bool
     bounds: BoundingBox2D
     clipPolygon: NotRequired[list[Coordinate2D]]
+    navigatorItemId: NavigatorItemId
     nameType: Literal["ViewOrSourceFileName", "ViewIdAndName", "CustomName"]
     customName: NotRequired[str]
     numberingType: Literal["ByLayout", "ByViewId", "CustomNumber"]
@@ -3531,6 +3565,11 @@ class DrawingSettings(TypedDict):
     """
     Modifiable settings for a Drawing element placed on a layout.
     """
+    pos: NotRequired[Coordinate2D]
+    angle: NotRequired[float]
+    ratio: NotRequired[float]
+    drawingScale: NotRequired[float]
+    modelOffset: NotRequired[Coordinate2D]
     clipPolygon: NotRequired[list[Coordinate2D]]
     nameType: NotRequired[DrawingNameType]
     customName: NotRequired[str]
@@ -3629,6 +3668,35 @@ class DesignOptionDetails(TypedDict):
     name: str
     id: str
     ownerSetName: str
+
+
+class ConnectionItem(TypedDict):
+    """
+    An element connected with its beginning or end point.
+    """
+    elementId: ElementId
+    connectedWithBeginPoint: bool
+
+
+class EndpointConnections(TypedDict):
+    """
+    The connections of a wall, beam or beam segment.
+    """
+    connectedToBeginPoint: list[ConnectionItem]
+    connectedToEndPoint: list[ConnectionItem]
+    connectedWithReferenceLineToEndPoints: list[ConnectionItem]
+    connectedToReferenceLine: list[ConnectionItem]
+    crossingReferenceLine: list[ConnectionItem]
+
+
+class ZoneBoundaryPart(TypedDict):
+    """
+    Section of a wall, beam or curtain wall segment related to a zone.
+    """
+    elementId: ElementId
+    roomEdgeIndex: NotRequired[int]
+    begDistance: float
+    endDistance: float
 
 
 class GetProjectInfoFieldsResult(TypedDict):
@@ -3753,14 +3821,6 @@ class CreatePolylinesParameters(TypedDict):
 
 class CreateHotspotsParameters(TypedDict):
     hotspotsData: list[HotspotData]
-
-
-class CreateObjectsParameters(TypedDict):
-    objectsData: list[ObjectData]
-
-
-class CreateLampsParameters(TypedDict):
-    lampsData: list[LampData]
 
 
 class CreateTextsParameters(TypedDict):
@@ -4082,6 +4142,40 @@ class GetMEPElementsParameters(TypedDict):
     domains: NotRequired[list[MEPDomains]]
 
 
+class GetMEPPreferenceTablesParameters(TypedDict):
+    domain: MEPPreferenceTableDomain
+
+
+class ObjectData(TypedDict):
+    """
+    The parameters of the new Object.
+    """
+    libraryPartName: str
+    coordinates: Coordinate3D
+    dimensions: NotRequired[Dimensions3D]
+    angle: NotRequired[float]
+    pen: NotRequired[int]
+    lineTypeId: NotRequired[AttributeId]
+    surfaceId: NotRequired[AttributeId]
+    sectionFillId: NotRequired[AttributeId]
+    sectionFillPen: NotRequired[int]
+    sectionFillBackgroundPen: NotRequired[int]
+    sectionContourPen: NotRequired[int]
+    useObjectPens: NotRequired[bool]
+    useObjectLineTypes: NotRequired[bool]
+    useObjectMaterials: NotRequired[bool]
+    useObjectSectionAttributes: NotRequired[bool]
+    reflected: NotRequired[bool]
+    useFixSize: NotRequired[bool]
+    fixPoint: NotRequired[int]
+    offset: NotRequired[Coordinate2D]
+    useFixedAngle: NotRequired[bool]
+    isAutoOnStoryVisibility: NotRequired[bool]
+    visibility: NotRequired[StoryVisibility]
+    linkToSettings: NotRequired[LinkToSettings]
+    floorIndex: NotRequired[int]
+
+
 class MeshData(TypedDict):
     """
     The parameters of the new Mesh.
@@ -4218,6 +4312,38 @@ class WallThicknessDimensionData(TypedDict):
     wallId: ElementId
     referencePoint: Coordinate2D
     direction: Coordinate2D
+
+
+class LampData(TypedDict):
+    """
+    The parameters of the new Lamp.
+    """
+    libraryPartName: str
+    coordinates: Coordinate3D
+    dimensions: NotRequired[Dimensions3D]
+    angle: NotRequired[float]
+    pen: NotRequired[int]
+    lineTypeId: NotRequired[AttributeId]
+    surfaceId: NotRequired[AttributeId]
+    sectionFillId: NotRequired[AttributeId]
+    sectionFillPen: NotRequired[int]
+    sectionFillBackgroundPen: NotRequired[int]
+    sectionContourPen: NotRequired[int]
+    useObjectPens: NotRequired[bool]
+    useObjectLineTypes: NotRequired[bool]
+    useObjectMaterials: NotRequired[bool]
+    useObjectSectionAttributes: NotRequired[bool]
+    reflected: NotRequired[bool]
+    useFixSize: NotRequired[bool]
+    fixPoint: NotRequired[int]
+    offset: NotRequired[Coordinate2D]
+    useFixedAngle: NotRequired[bool]
+    isAutoOnStoryVisibility: NotRequired[bool]
+    visibility: NotRequired[StoryVisibility]
+    linkToSettings: NotRequired[LinkToSettings]
+    lightColor: NotRequired[ColorRGB]
+    lightIsOn: NotRequired[bool]
+    floorIndex: NotRequired[int]
 
 
 class LayoutSettingsData(TypedDict):
@@ -4530,6 +4656,60 @@ class RoofWithDetails(TypedDict):
     holes: NotRequired[Holes2D]
 
 
+class ObjectWithDetails(TypedDict):
+    elementId: ElementId
+    coordinates: NotRequired[Coordinate3D]
+    dimensions: NotRequired[Dimensions3D]
+    angle: NotRequired[float]
+    pen: NotRequired[int]
+    lineTypeId: NotRequired[AttributeId]
+    surfaceId: NotRequired[AttributeId]
+    sectionFillId: NotRequired[AttributeId]
+    sectionFillPen: NotRequired[int]
+    sectionFillBackgroundPen: NotRequired[int]
+    sectionContourPen: NotRequired[int]
+    useObjectPens: NotRequired[bool]
+    useObjectLineTypes: NotRequired[bool]
+    useObjectMaterials: NotRequired[bool]
+    useObjectSectionAttributes: NotRequired[bool]
+    reflected: NotRequired[bool]
+    useFixSize: NotRequired[bool]
+    fixPoint: NotRequired[int]
+    offset: NotRequired[Coordinate2D]
+    useFixedAngle: NotRequired[bool]
+    isAutoOnStoryVisibility: NotRequired[bool]
+    visibility: NotRequired[StoryVisibility]
+    linkToSettings: NotRequired[LinkToSettings]
+
+
+class LampWithDetails(TypedDict):
+    elementId: ElementId
+    coordinates: NotRequired[Coordinate3D]
+    dimensions: NotRequired[Dimensions3D]
+    angle: NotRequired[float]
+    pen: NotRequired[int]
+    lineTypeId: NotRequired[AttributeId]
+    surfaceId: NotRequired[AttributeId]
+    sectionFillId: NotRequired[AttributeId]
+    sectionFillPen: NotRequired[int]
+    sectionFillBackgroundPen: NotRequired[int]
+    sectionContourPen: NotRequired[int]
+    useObjectPens: NotRequired[bool]
+    useObjectLineTypes: NotRequired[bool]
+    useObjectMaterials: NotRequired[bool]
+    useObjectSectionAttributes: NotRequired[bool]
+    reflected: NotRequired[bool]
+    useFixSize: NotRequired[bool]
+    fixPoint: NotRequired[int]
+    offset: NotRequired[Coordinate2D]
+    useFixedAngle: NotRequired[bool]
+    isAutoOnStoryVisibility: NotRequired[bool]
+    visibility: NotRequired[StoryVisibility]
+    linkToSettings: NotRequired[LinkToSettings]
+    lightColor: NotRequired[ColorRGB]
+    lightIsOn: NotRequired[bool]
+
+
 class KeynoteFolderModificationData(TypedDict):
     keynoteFolderId: KeynoteFolderId
     key: NotRequired[str]
@@ -4658,6 +4838,53 @@ class SolidLinkData(TypedDict):
     operatorId: ElementId
     operation: SolidOperationType
     linkFlags: NotRequired[SolidLinkFlags]
+
+
+class DrawingWithNewLink(TypedDict):
+    """
+    An existing Drawing and the navigator item it should be relinked to.
+    """
+    elementId: ElementId
+    navigatorItemId: NavigatorItemId
+    layoutDatabaseId: DatabaseId
+
+
+class MEPPreferenceTable(TypedDict):
+    guid: str
+    rows: list[MEPPreferenceTableRow]
+
+
+class WallRelations(TypedDict):
+    """
+    Relations of a wall.
+    """
+    wallConnections: EndpointConnections
+
+
+class BeamRelations(TypedDict):
+    """
+    Relations of a beam.
+    """
+    beamConnections: EndpointConnections
+
+
+class BeamSegmentRelations(TypedDict):
+    """
+    Relations of a beam segment.
+    """
+    beamSegmentConnections: EndpointConnections
+
+
+class OpeningRelations(TypedDict):
+    fromRoom: NotRequired[ElementId]
+    toRoom: NotRequired[ElementId]
+
+
+class OpeningRelationsOfElement(TypedDict):
+    """
+    Relations of a curtain wall panel, skylight, window or door: the zones on the two sides of the opening.
+    """
+    openingRelations: OpeningRelations
 
 
 class MEPElement(TypedDict):
@@ -5145,6 +5372,14 @@ class CreateSplinesParameters(TypedDict):
     splinesData: list[SplineData]
 
 
+class CreateObjectsParameters(TypedDict):
+    objectsData: list[ObjectData]
+
+
+class CreateLampsParameters(TypedDict):
+    lampsData: list[LampData]
+
+
 class CreateMeshesParameters(TypedDict):
     meshesData: list[MeshData]
 
@@ -5179,6 +5414,14 @@ class ModifyDoorsParameters(TypedDict):
 
 class ModifyRoofsParameters(TypedDict):
     roofsWithDetails: list[RoofWithDetails]
+
+
+class ModifyObjectsParameters(TypedDict):
+    objectsWithDetails: list[ObjectWithDetails]
+
+
+class ModifyLampsParameters(TypedDict):
+    lampsWithDetails: list[LampWithDetails]
 
 
 class CreateGroupsParameters(TypedDict):
@@ -5285,6 +5528,14 @@ class CreateLayoutSubsetResult(TypedDict):
     navigatorItems: list[NavigatorItemIdOrError]
 
 
+class ChangeDrawingLinkParameters(TypedDict):
+    drawingsWithNewLinks: list[DrawingWithNewLink]
+
+
+class ChangeDrawingLinkResult(TypedDict):
+    elements: list[ElementIdOrError]
+
+
 class SetLayoutSettingsParameters(TypedDict):
     layoutsData: list[LayoutSettingsData]
 
@@ -5384,6 +5635,10 @@ class ConnectMEPElementsParameters(TypedDict):
 
 class ConnectMEPElementsResult(TypedDict):
     connectionResults: MEPConnectionResultsOrErrors
+
+
+class GetMEPPreferenceTablesResult(TypedDict):
+    tables: list[MEPPreferenceTable]
 
 
 class CreateSolidElementLinksParameters(TypedDict):
@@ -5670,6 +5925,24 @@ class ElementsWrapper(TypedDict):
 ElementsWrapperOrError: TypeAlias = ElementsWrapper | ErrorItem
 
 
+class ElementsOfElementType(TypedDict):
+    """
+    Elements of a given type.
+    """
+    elementType: ElementType
+    elements: Elements
+
+
+class ZoneRelations(TypedDict):
+    """
+    The relations of a zone: the related elements grouped by type and the boundary sections of walls, beams and curtain wall segments.
+    """
+    elementsGroupedByType: list[ElementsOfElementType]
+    wallParts: list[ZoneBoundaryPart]
+    beamParts: list[ZoneBoundaryPart]
+    curtainWallSegmentParts: list[ZoneBoundaryPart]
+
+
 class GetSelectedElementsResult(TypedDict):
     elements: Elements
 
@@ -5749,6 +6022,11 @@ class GetConnectedElementsParameters(TypedDict):
 
 
 GetConnectedElementsResult: TypeAlias = ConnectedElementsOrError
+
+
+class GetRelationsOfElementsParameters(TypedDict):
+    elements: Elements
+    otherElementType: NotRequired[ElementType]
 
 
 class GetCollisionsParameters(TypedDict):
@@ -6167,6 +6445,24 @@ class ProfileSkinData(TypedDict):
     edgeOverrides: NotRequired[list[ProfileEdgeOverride]]
 
 
+class ZoneRelationsOfElement(TypedDict):
+    """
+    Relations of a zone.
+    """
+    zoneRelations: ZoneRelations
+
+
+class RoofOrShellRelations(TypedDict):
+    connectedRooms: Elements
+
+
+class RoofOrShellRelationsOfElement(TypedDict):
+    """
+    Relations of a roof or shell: the connected zones.
+    """
+    roofOrShellRelations: RoofOrShellRelations
+
+
 class ProfileAttribute(TypedDict):
     """
     A profile attribute.
@@ -6192,6 +6488,21 @@ class ProfileAttribute(TypedDict):
 
 
 ProfileAttributeOrError: TypeAlias = ProfileAttribute | ErrorItem
+
+
+ElementRelationsOrError: TypeAlias = (
+    WallRelations
+    | BeamRelations
+    | BeamSegmentRelations
+    | ZoneRelationsOfElement
+    | OpeningRelationsOfElement
+    | RoofOrShellRelationsOfElement
+    | ErrorItem
+)
+
+
+class GetRelationsOfElementsResult(TypedDict):
+    relations: list[ElementRelationsOrError]
 
 
 class GetProfilesResult(TypedDict):

@@ -30,6 +30,8 @@ from multiconn_archicad.models.tapir.commands import (
     GetElementsByTypeResult,
     GetGDLParametersOfElementsParameters,
     GetGDLParametersOfElementsResult,
+    GetRelationsOfElementsParameters,
+    GetRelationsOfElementsResult,
     GetRoomImageParameters,
     GetRoomImageResult,
     GetSelectedElementsResult,
@@ -59,6 +61,8 @@ from multiconn_archicad.models.tapir.commands import (
     UpdateZonesResult,
 )
 from multiconn_archicad.models.tapir.types import (
+    BeamRelations,
+    BeamSegmentRelations,
     BoundingBox3DArrayItem,
     Collision,
     ColorRGB,
@@ -81,10 +85,14 @@ from multiconn_archicad.models.tapir.types import (
     Format,
     GDLParameterList,
     ImageType,
+    OpeningRelationsOfElement,
+    RoofOrShellRelationsOfElement,
     Settings,
     Subelement,
     SuccessfulExecutionResult,
+    WallRelations,
     ZoneBoundariesWrapper,
+    ZoneRelationsOfElement,
 )
 
 if TYPE_CHECKING:
@@ -450,6 +458,49 @@ class ElementCommands:
         )
         validated_response = GetGDLParametersOfElementsResult.model_validate(response_dict)
         return validated_response.gdlParametersOfElements
+
+    def get_relations_of_elements(
+        self, elements: list[ElementIdArrayItem], other_element_type: ElementType | None = None
+    ) -> list[
+        BeamRelations
+        | BeamSegmentRelations
+        | ErrorItem
+        | OpeningRelationsOfElement
+        | RoofOrShellRelationsOfElement
+        | WallRelations
+        | ZoneRelationsOfElement
+    ]:
+        """
+        Gets the type-specific relations of the given elements: endpoint and reference line
+        connections of walls, beams and beam segments, boundary elements and boundary sections
+        of zones, the zones on the two sides of windows, doors, skylights and curtain wall
+        panels, and the zones connected to roofs and shells. Available from Archicad 26.
+
+        Args:
+            elements (list[ElementIdArrayItem]): A list of elements.
+            other_element_type (ElementType | None): Optional filter: only relations to elements
+                of this type are returned.
+
+        Returns:
+            list[BeamRelations | BeamSegmentRelations | ErrorItem | OpeningRelationsOfElement |
+                RoofOrShellRelationsOfElement | WallRelations | ZoneRelationsOfElement]: Type-
+                specific relations of each element, aligned with the input.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elements": elements,
+            "otherElementType": other_element_type,
+        }
+        validated_params = GetRelationsOfElementsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetRelationsOfElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetRelationsOfElementsResult.model_validate(response_dict)
+        return validated_response.relations
 
     def get_room_image(
         self,

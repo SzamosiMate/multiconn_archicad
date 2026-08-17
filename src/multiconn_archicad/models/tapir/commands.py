@@ -21,6 +21,8 @@ from .types import (
     AttributeType,
     AttributesToDeleteItem,
     BeamData,
+    BeamRelations,
+    BeamSegmentRelations,
     BeamWithDetails,
     BoundingBox3DArrayItem,
     BuildingMaterialAttribute,
@@ -63,6 +65,7 @@ from .types import (
     DoorData,
     DoorWithDetails,
     DrawingData,
+    DrawingWithNewLink,
     Element,
     ElementClassification,
     ElementClassificationItemArray,
@@ -121,6 +124,7 @@ from .types import (
     KeynoteLabelData,
     LabelData,
     LampData,
+    LampWithDetails,
     LayerAttribute,
     LayerAttributeField,
     LayerCombinationAttribute,
@@ -146,6 +150,8 @@ from .types import (
     MEPElementData,
     MEPElementPorts,
     MEPElementType,
+    MEPPreferenceTable,
+    MEPPreferenceTableDomain,
     MEPRoutingElementData,
     MEPRoutingElementDetails,
     MEPRoutingElementModificationData,
@@ -165,7 +171,9 @@ from .types import (
     NavigatorMapId,
     NewClassificationItem,
     ObjectData,
+    ObjectWithDetails,
     OpeningData,
+    OpeningRelationsOfElement,
     PenTableAttribute,
     PenTableAttributeField,
     PenTableData,
@@ -188,6 +196,7 @@ from .types import (
     RevisionChangesArrayItem,
     RevisionIssue,
     RoofData,
+    RoofOrShellRelationsOfElement,
     RoofWithDetails,
     SectionData,
     Settings,
@@ -218,6 +227,7 @@ from .types import (
     ViewTransformations,
     Volume,
     WallData,
+    WallRelations,
     WallThicknessDimensionData,
     WallWithDetails,
     WindowData,
@@ -229,6 +239,7 @@ from .types import (
     ZoneCategoryAttributeField,
     ZoneCategoryData,
     ZoneData,
+    ZoneRelationsOfElement,
 )
 
 
@@ -549,6 +560,20 @@ class ModifyRoofsResult(APIModel):
 
 
 class ModifyMeshesResult(APIModel):
+    executionResults: Annotated[
+        list[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
+
+
+class ModifyObjectsResult(APIModel):
+    executionResults: Annotated[
+        list[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
+
+
+class ModifyLampsResult(APIModel):
     executionResults: Annotated[
         list[SuccessfulExecutionResult | FailedExecutionResult],
         Field(description="A list of execution results."),
@@ -1449,14 +1474,6 @@ class CreateHotspotsParameters(APIModel):
     hotspotsData: Annotated[list[HotspotData], Field(description="Array of data to create Hotspots.")]
 
 
-class CreateObjectsParameters(APIModel):
-    objectsData: Annotated[list[ObjectData], Field(description="Array of data to create Objects.")]
-
-
-class CreateLampsParameters(APIModel):
-    lampsData: Annotated[list[LampData], Field(description="Array of data to create Lamps.")]
-
-
 class CreateTextsParameters(APIModel):
     textsData: Annotated[list[TextData], Field(description="Array of data to create Texts.")]
 
@@ -1815,6 +1832,10 @@ class GetMEPElementsParameters(APIModel):
     ] = None
 
 
+class GetMEPPreferenceTablesParameters(APIModel):
+    domain: MEPPreferenceTableDomain
+
+
 ChangeWindowParameters: TypeAlias = NavigatorItemIdArrayItem | DatabaseIdAndWindowType
 
 
@@ -1900,6 +1921,14 @@ class CreateSplinesParameters(APIModel):
     ]
 
 
+class CreateObjectsParameters(APIModel):
+    objectsData: Annotated[list[ObjectData], Field(description="Array of data to create Objects.")]
+
+
+class CreateLampsParameters(APIModel):
+    lampsData: Annotated[list[LampData], Field(description="Array of data to create Lamps.")]
+
+
 class CreateMeshesParameters(APIModel):
     meshesData: Annotated[list[MeshData], Field(description="Array of data to create Meshes.")]
 
@@ -1934,6 +1963,24 @@ class ModifyDoorsParameters(APIModel):
 
 class ModifyRoofsParameters(APIModel):
     roofsWithDetails: list[RoofWithDetails]
+
+
+class ModifyObjectsParameters(APIModel):
+    objectsWithDetails: Annotated[
+        list[ObjectWithDetails],
+        Field(
+            description="Array of elements to modify, with the fields to change. Only provided fields are changed; omitted fields are left as-is."
+        ),
+    ]
+
+
+class ModifyLampsParameters(APIModel):
+    lampsWithDetails: Annotated[
+        list[LampWithDetails],
+        Field(
+            description="Array of elements to modify, with the fields to change. Only provided fields are changed; omitted fields are left as-is."
+        ),
+    ]
 
 
 class CreateGroupsParameters(APIModel):
@@ -2102,6 +2149,19 @@ class CreateLayoutSubsetResult(APIModel):
     navigatorItems: list[NavigatorItemIdArrayItem | ErrorItem]
 
 
+class ChangeDrawingLinkParameters(APIModel):
+    drawingsWithNewLinks: list[DrawingWithNewLink]
+
+
+class ChangeDrawingLinkResult(APIModel):
+    elements: Annotated[
+        list[ElementIdArrayItem | ErrorItem],
+        Field(
+            description="One result per input item. On success, elementId is the NEW Drawing's identifier - relinking necessarily replaces the element, it cannot keep the original guid."
+        ),
+    ]
+
+
 class SetLayoutSettingsParameters(APIModel):
     layoutsData: list[LayoutSettingsData]
 
@@ -2254,6 +2314,13 @@ class ConnectMEPElementsResult(APIModel):
     ]
 
 
+class GetMEPPreferenceTablesResult(APIModel):
+    tables: Annotated[
+        list[MEPPreferenceTable],
+        Field(description="The circular segment preference tables of the domain."),
+    ]
+
+
 class CreateSolidElementLinksParameters(APIModel):
     solidLinks: Annotated[
         list[SolidLinkData],
@@ -2325,6 +2392,14 @@ class GetConnectedElementsParameters(APIModel):
 
 
 GetConnectedElementsResult: TypeAlias = ConnectedElementsWrapper | ErrorItem
+
+
+class GetRelationsOfElementsParameters(APIModel):
+    elements: Annotated[list[ElementIdArrayItem], Field(description="A list of elements.")]
+    otherElementType: Annotated[
+        ElementType | None,
+        Field(description="Optional filter: only relations to elements of this type are returned."),
+    ] = None
 
 
 class GetCollisionsParameters(APIModel):
@@ -2792,6 +2867,21 @@ class GetSolidElementLinksParameters(APIModel):
     elements: Annotated[
         list[ElementIdArrayItem],
         Field(description="Elements to query. Returns all solid links where each element is a target or an operator."),
+    ]
+
+
+class GetRelationsOfElementsResult(APIModel):
+    relations: Annotated[
+        list[
+            WallRelations
+            | BeamRelations
+            | BeamSegmentRelations
+            | ZoneRelationsOfElement
+            | OpeningRelationsOfElement
+            | RoofOrShellRelationsOfElement
+            | ErrorItem
+        ],
+        Field(description="Type-specific relations of each element, aligned with the input."),
     ]
 
 

@@ -6,6 +6,8 @@ from typing import TYPE_CHECKING
 from pydantic import TypeAdapter
 
 from multiconn_archicad.models.tapir.commands import (
+    ChangeDrawingLinkParameters,
+    ChangeDrawingLinkResult,
     CloneProjectMapItemToViewMapParameters,
     CloneProjectMapItemToViewMapResult,
     CreateDetailsParameters,
@@ -61,6 +63,7 @@ from multiconn_archicad.models.tapir.types import (
     DatabaseIdArrayItem,
     DetailData,
     DrawingData,
+    DrawingWithNewLink,
     ElementIdArrayItem,
     ErrorItem,
     FailedExecutionResult,
@@ -91,6 +94,38 @@ if TYPE_CHECKING:
 class NavigatorCommands:
     def __init__(self, core: CoreCommands):
         self._core = core
+
+    def change_drawing_link(
+        self, drawings_with_new_links: list[DrawingWithNewLink]
+    ) -> list[ElementIdArrayItem | ErrorItem]:
+        """
+        Relinks a Drawing to a different source navigator item. Archicad has no in-place relink
+        API, so this recreates the Drawing against the new source and deletes the original - the
+        returned elementId is a NEW guid, not the input one. The Drawing Title marker's own
+        position is not preserved (undocumented Archicad limitation).
+
+        Args:
+            drawings_with_new_links (list[DrawingWithNewLink])
+
+        Returns:
+            list[ElementIdArrayItem | ErrorItem]: One result per input item. On success,
+                elementId is the NEW Drawing's identifier - relinking necessarily replaces the
+                element, it cannot keep the original guid.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "drawingsWithNewLinks": drawings_with_new_links,
+        }
+        validated_params = ChangeDrawingLinkParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "ChangeDrawingLink", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = ChangeDrawingLinkResult.model_validate(response_dict)
+        return validated_response.elements
 
     def clone_project_map_item_to_view_map(
         self, views_data: list[ViewCloneData]
