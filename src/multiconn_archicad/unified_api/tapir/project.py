@@ -357,7 +357,8 @@ class ProjectCommands:
 
         Args:
             project_info_id (str): The id of the project info field.
-            project_info_value (str): The new value of the project info field.
+            project_info_value (str): The new value of the project info field. An empty string
+                clears the field.
 
         Raises:
             ArchicadAPIError: If the API returns an error response.

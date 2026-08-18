@@ -69,7 +69,7 @@
         "name": "CreateArcs",
         "group": "Element Commands",
         "description": "Creates Arc elements based on the given parameters.",
-        "version": "1.5.7"
+        "version": "1.5.6"
     },
     {
         "name": "CreateAssociativeDimensions",
@@ -99,7 +99,7 @@
         "name": "CreateCircles",
         "group": "Element Commands",
         "description": "Creates Circle elements based on the given parameters.",
-        "version": "1.5.7"
+        "version": "1.5.6"
     },
     {
         "name": "CreateClassificationItems",
@@ -183,13 +183,19 @@
         "name": "CreateHatches",
         "group": "Element Commands",
         "description": "Creates Hatch elements based on the given parameters.",
-        "version": "1.5.7"
+        "version": "1.5.6"
     },
     {
         "name": "CreateHotspots",
         "group": "Element Commands",
         "description": "Creates Hotspot elements based on the given parameters.",
-        "version": "1.5.7"
+        "version": "1.5.6"
+    },
+    {
+        "name": "CreateInteriorElevations",
+        "group": "Navigator Commands",
+        "description": "Creates Interior Elevation elements on the floor plan. Every consecutive pair of the given points becomes one segment, each with its own viewpoint - feed it the corner points of a room to get an interior elevation of that room.",
+        "version": "1.5.8"
     },
     {
         "name": "CreateIssue",
@@ -255,7 +261,7 @@
         "name": "CreateLineElements",
         "group": "Element Commands",
         "description": "Creates Line elements based on the given parameters.",
-        "version": "1.5.7"
+        "version": "1.5.6"
     },
     {
         "name": "CreateLines",
@@ -369,7 +375,7 @@
         "name": "CreateSplines",
         "group": "Element Commands",
         "description": "Creates Spline elements based on the given parameters.",
-        "version": "1.5.7"
+        "version": "1.5.6"
     },
     {
         "name": "CreateStairs",
@@ -632,7 +638,7 @@
     {
         "name": "GetConnectedElements",
         "group": "Element Commands",
-        "description": "Gets connected elements of the given elements.",
+        "description": "Gets the elements hosted by (connected to) the given owner elements, filtered to the given element type: for example the Windows or Doors of a Wall, the frames, panels, junctions and accessories of a Curtain Wall, the risers, treads and structures of a Stair, or the posts, rails and panels of a Railing.",
         "version": "1.1.4"
     },
     {
@@ -681,7 +687,7 @@
         "name": "GetDetailsOfElements",
         "group": "Element Commands",
         "description": "Gets the details of the given elements (geometry parameters etc).",
-        "version": "1.0.7"
+        "version": "1.5.7"
     },
     {
         "name": "GetDimensionData",
@@ -753,7 +759,7 @@
         "name": "GetGDLParametersOfElements",
         "group": "Element Commands",
         "description": "Gets all the GDL parameters (name, type, value) of the given elements.",
-        "version": "1.0.8"
+        "version": "1.5.7"
     },
     {
         "name": "GetGeoLocation",
@@ -964,6 +970,12 @@
         "group": "Script UI Commands",
         "description": "Retrieves and clears the result last submitted from the Script UI palette's page (via window.ACAPI.SubmitResult), if any.",
         "version": "1.5.4"
+    },
+    {
+        "name": "GetSectionElements",
+        "group": "Element Commands",
+        "description": "Gets the elements drawn in the given section, elevation or interior elevation databases, each with the owner element it was generated from. This is the only command that returns raw section element identifiers - every other listing command converts them to their owner - so it is the way to obtain the sectionElementId that CreateAssociativeDimensionsOnSection requires.",
+        "version": "1.5.8"
     },
     {
         "name": "GetSelectedElements",

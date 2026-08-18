@@ -14,6 +14,7 @@ from .types import (
     AssociativeDimensionOnSectionData,
     AttributeHeadersOrError,
     AttributeIds,
+    AttributeIdsOrErrors,
     AttributePropertyValues,
     AttributeType,
     AttributesToDeleteItem,
@@ -40,6 +41,7 @@ from .types import (
     ConnectedElementsOrError,
     CustomSchemeItem,
     CutPlane,
+    DatabaseIdsOrErrors,
     Databases,
     DesignOptionAndSetPair,
     DesignOptionCombinationData,
@@ -100,6 +102,7 @@ from .types import (
     HatchData,
     Hotlinks,
     HotspotData,
+    InteriorElevationData,
     Issue,
     IssueCommentStatus,
     IssueElementType,
@@ -194,6 +197,7 @@ from .types import (
     RoofData,
     RoofWithDetails,
     SectionData,
+    SectionElement,
     Settings,
     SkippedSampleItem,
     SlabData,
@@ -968,6 +972,11 @@ class SetDetailsOfElementsParameters(TypedDict):
     elementsWithDetails: list[ElementsWithDetail]
 
 
+class GetSectionElementsResult(TypedDict):
+    sectionElements: list[SectionElement]
+    executionResultForDatabases: NotRequired[ExecutionResults]
+
+
 class GetZoneBoundariesParameters(TypedDict):
     zoneElementId: ElementId
 
@@ -995,20 +1004,8 @@ class SetGDLParametersOfElementsParameters(TypedDict):
     elementsWithGDLParameters: list[ElementsWithGDLParameter]
 
 
-class CreateColumnsParameters(TypedDict):
-    columnsData: list[ColumnData]
-
-
-class CreateBeamsParameters(TypedDict):
-    beamsData: list[BeamData]
-
-
 class CreateStairsParameters(TypedDict):
     stairsData: list[StairData]
-
-
-class CreateSlabsParameters(TypedDict):
-    slabsData: list[SlabData]
 
 
 class GetDimensionDataParameters(TypedDict):
@@ -1178,6 +1175,10 @@ class CreateSectionsParameters(TypedDict):
     sectionsData: list[SectionData]
 
 
+class CreateInteriorElevationsParameters(TypedDict):
+    interiorElevationsData: list[InteriorElevationData]
+
+
 class GetIssuesResult(TypedDict):
     issues: list[Issue]
 
@@ -1274,36 +1275,100 @@ class GetAllElementsParameters(TypedDict):
     databases: NotRequired[Databases]
 
 
-class GetDetailsOfElementsResult(TypedDict):
-    detailsOfElements: list[DetailsOfElement]
+class GetSectionElementsParameters(TypedDict):
+    databases: NotRequired[Databases]
+
+
+class CreateColumnsParameters(TypedDict):
+    columnsData: list[ColumnData]
+
+
+class CreateColumnsResult(TypedDict):
+    elements: ElementIdsOrErrors
 
 
 class CreateWallsParameters(TypedDict):
     wallsData: list[WallData]
 
 
+class CreateWallsResult(TypedDict):
+    elements: ElementIdsOrErrors
+
+
+class CreateBeamsParameters(TypedDict):
+    beamsData: list[BeamData]
+
+
+class CreateBeamsResult(TypedDict):
+    elements: ElementIdsOrErrors
+
+
+class CreateStairsResult(TypedDict):
+    elements: ElementIdsOrErrors
+
+
+class CreateSlabsParameters(TypedDict):
+    slabsData: list[SlabData]
+
+
+class CreateSlabsResult(TypedDict):
+    elements: ElementIdsOrErrors
+
+
 class CreateWindowsParameters(TypedDict):
     windowsData: list[WindowData]
+
+
+class CreateWindowsResult(TypedDict):
+    elements: ElementIdsOrErrors
 
 
 class CreateDoorsParameters(TypedDict):
     doorsData: list[DoorData]
 
 
+class CreateDoorsResult(TypedDict):
+    elements: ElementIdsOrErrors
+
+
 class CreateOpeningsParameters(TypedDict):
     openingsData: list[OpeningData]
+
+
+class CreateOpeningsResult(TypedDict):
+    elements: ElementIdsOrErrors
+
+
+class CreateMorphsResult(TypedDict):
+    elements: ElementIdsOrErrors
 
 
 class CreateRoofsParameters(TypedDict):
     roofsData: list[RoofData]
 
 
+class CreateRoofsResult(TypedDict):
+    elements: ElementIdsOrErrors
+
+
+class CreateAssociativeDimensionsResult(TypedDict):
+    elements: ElementIdsOrErrors
+
+
 class CreateAssociativeDimensionsOnSectionParameters(TypedDict):
     dimensionsData: list[AssociativeDimensionOnSectionData]
 
 
+class CreateAssociativeDimensionsOnSectionResult(TypedDict):
+    elements: ElementIdsOrErrors
+
+
 class CreateWallThicknessDimensionsParameters(TypedDict):
     dimensionsData: list[WallThicknessDimensionData]
+
+
+class CreateWallThicknessDimensionsResult(TypedDict):
+    elements: ElementIdsOrErrors
 
 
 class GetDimensionDataResult(TypedDict):
@@ -1314,52 +1379,96 @@ class CreateZonesParameters(TypedDict):
     zonesData: list[ZoneData]
 
 
+class CreateZonesResult(TypedDict):
+    elements: ElementIdsOrErrors
+
+
+class CreatePolylinesResult(TypedDict):
+    elements: ElementIdsOrErrors
+
+
 class CreateLineElementsParameters(TypedDict):
     linesData: list[LineElementData]
+
+
+class CreateLineElementsResult(TypedDict):
+    elements: ElementIdsOrErrors
 
 
 class CreateArcsParameters(TypedDict):
     arcsData: list[ArcData]
 
 
+class CreateArcsResult(TypedDict):
+    elements: ElementIdsOrErrors
+
+
 class CreateCirclesParameters(TypedDict):
     circlesData: list[CircleData]
+
+
+class CreateCirclesResult(TypedDict):
+    elements: ElementIdsOrErrors
+
+
+class CreateHotspotsResult(TypedDict):
+    elements: ElementIdsOrErrors
 
 
 class CreateHatchesParameters(TypedDict):
     hatchesData: list[HatchData]
 
 
+class CreateHatchesResult(TypedDict):
+    elements: ElementIdsOrErrors
+
+
 class CreateSplinesParameters(TypedDict):
     splinesData: list[SplineData]
+
+
+class CreateSplinesResult(TypedDict):
+    elements: ElementIdsOrErrors
 
 
 class CreateObjectsParameters(TypedDict):
     objectsData: list[ObjectData]
 
 
+class CreateObjectsResult(TypedDict):
+    elements: ElementIdsOrErrors
+
+
 class CreateLampsParameters(TypedDict):
     lampsData: list[LampData]
+
+
+class CreateLampsResult(TypedDict):
+    elements: ElementIdsOrErrors
 
 
 class CreateMeshesParameters(TypedDict):
     meshesData: list[MeshData]
 
 
+class CreateMeshesResult(TypedDict):
+    elements: ElementIdsOrErrors
+
+
 class CreateLabelsParameters(TypedDict):
     labelsData: list[LabelData]
 
 
+class CreateLabelsResult(TypedDict):
+    elements: ElementIdsOrErrors
+
+
+class CreateTextsResult(TypedDict):
+    elements: ElementIdsOrErrors
+
+
 class ModifyWallsParameters(TypedDict):
     wallsWithDetails: list[WallWithDetails]
-
-
-class ModifyBeamsParameters(TypedDict):
-    beamsWithDetails: list[BeamWithDetails]
-
-
-class ModifySlabsParameters(TypedDict):
-    slabsWithDetails: list[SlabWithDetails]
 
 
 class ModifyColumnsParameters(TypedDict):
@@ -1403,9 +1512,21 @@ class CreateLayersParameters(TypedDict):
     overwriteExisting: NotRequired[bool]
 
 
+class CreateLayersResult(TypedDict):
+    attributeIds: AttributeIdsOrErrors
+
+
+class CreateLayerCombinationsResult(TypedDict):
+    attributeIds: AttributeIdsOrErrors
+
+
 class CreateLinesParameters(TypedDict):
     lineDataArray: list[LineData]
     overwriteExisting: NotRequired[bool]
+
+
+class CreateLinesResult(TypedDict):
+    attributeIds: AttributeIdsOrErrors
 
 
 class CreateFillsParameters(TypedDict):
@@ -1413,14 +1534,46 @@ class CreateFillsParameters(TypedDict):
     overwriteExisting: NotRequired[bool]
 
 
+class CreateFillsResult(TypedDict):
+    attributeIds: AttributeIdsOrErrors
+
+
 class CreateZoneCategoriesParameters(TypedDict):
     zoneCategoryDataArray: list[ZoneCategoryData]
     overwriteExisting: NotRequired[bool]
 
 
+class CreateZoneCategoriesResult(TypedDict):
+    attributeIds: AttributeIdsOrErrors
+
+
+class CreateMEPSystemsResult(TypedDict):
+    attributeIds: AttributeIdsOrErrors
+
+
+class CreatePenTablesResult(TypedDict):
+    attributeIds: AttributeIdsOrErrors
+
+
+class CreateProfilesResult(TypedDict):
+    attributeIds: AttributeIdsOrErrors
+
+
 class CreateBuildingMaterialsParameters(TypedDict):
     buildingMaterialDataArray: list[BuildingMaterialData]
     overwriteExisting: NotRequired[bool]
+
+
+class CreateBuildingMaterialsResult(TypedDict):
+    attributeIds: AttributeIdsOrErrors
+
+
+class CreateCompositesResult(TypedDict):
+    attributeIds: AttributeIdsOrErrors
+
+
+class CreateSurfacesResult(TypedDict):
+    attributeIds: AttributeIdsOrErrors
 
 
 class GetBuildingMaterialPhysicalPropertiesResult(TypedDict):
@@ -1470,19 +1623,23 @@ class GetDatabaseIdFromNavigatorItemIdResult(TypedDict):
 
 
 class CreateDetailsResult(TypedDict):
-    databases: Databases
+    databases: DatabaseIdsOrErrors
 
 
 class CreateWorksheetsResult(TypedDict):
-    databases: Databases
+    databases: DatabaseIdsOrErrors
 
 
 class CreateLayoutResult(TypedDict):
-    databases: Databases
+    databases: DatabaseIdsOrErrors
 
 
 class CreateLayoutSubsetResult(TypedDict):
     navigatorItems: list[NavigatorItemIdOrError]
+
+
+class CreateDrawingsResult(TypedDict):
+    elements: ElementIdsOrErrors
 
 
 class ChangeDrawingLinkResult(TypedDict):
@@ -1508,6 +1665,14 @@ class CloneProjectMapItemToViewMapResult(TypedDict):
 
 class CreateViewsInViewMapResult(TypedDict):
     navigatorItems: list[NavigatorItemIdOrError]
+
+
+class CreateSectionsResult(TypedDict):
+    elements: ElementIdsOrErrors
+
+
+class CreateInteriorElevationsResult(TypedDict):
+    elements: ElementIdsOrErrors
 
 
 class DeleteNavigatorItemsParameters(TypedDict):
@@ -1634,6 +1799,10 @@ class GetDetailsOfElementsParameters(TypedDict):
     elements: Elements
 
 
+class GetDetailsOfElementsResult(TypedDict):
+    detailsOfElements: list[DetailsOfElement]
+
+
 class Get3DBoundingBoxesParameters(TypedDict):
     elements: Elements
 
@@ -1688,116 +1857,20 @@ class GetGDLParametersOfElementsParameters(TypedDict):
     elements: Elements
 
 
-class CreateColumnsResult(TypedDict):
-    elements: Elements
-
-
-class CreateWallsResult(TypedDict):
-    elements: Elements
-
-
-class CreateBeamsResult(TypedDict):
-    elements: Elements
-
-
-class CreateStairsResult(TypedDict):
-    elements: Elements
-
-
-class CreateSlabsResult(TypedDict):
-    elements: Elements
-
-
-class CreateWindowsResult(TypedDict):
-    elements: Elements
-
-
-class CreateDoorsResult(TypedDict):
-    elements: Elements
-
-
-class CreateOpeningsResult(TypedDict):
-    elements: Elements
-
-
 class CreateMorphsParameters(TypedDict):
     morphsData: list[MorphData]
-
-
-class CreateMorphsResult(TypedDict):
-    elements: Elements
-
-
-class CreateRoofsResult(TypedDict):
-    elements: Elements
 
 
 class CreateAssociativeDimensionsParameters(TypedDict):
     dimensionsData: list[AssociativeDimensionData]
 
 
-class CreateAssociativeDimensionsResult(TypedDict):
-    elements: Elements
+class ModifyBeamsParameters(TypedDict):
+    beamsWithDetails: list[BeamWithDetails]
 
 
-class CreateAssociativeDimensionsOnSectionResult(TypedDict):
-    elements: Elements
-
-
-class CreateWallThicknessDimensionsResult(TypedDict):
-    elements: Elements
-
-
-class CreateZonesResult(TypedDict):
-    elements: Elements
-
-
-class CreatePolylinesResult(TypedDict):
-    elements: Elements
-
-
-class CreateLineElementsResult(TypedDict):
-    elements: Elements
-
-
-class CreateArcsResult(TypedDict):
-    elements: Elements
-
-
-class CreateCirclesResult(TypedDict):
-    elements: Elements
-
-
-class CreateHotspotsResult(TypedDict):
-    elements: Elements
-
-
-class CreateHatchesResult(TypedDict):
-    elements: Elements
-
-
-class CreateSplinesResult(TypedDict):
-    elements: Elements
-
-
-class CreateObjectsResult(TypedDict):
-    elements: Elements
-
-
-class CreateLampsResult(TypedDict):
-    elements: Elements
-
-
-class CreateMeshesResult(TypedDict):
-    elements: Elements
-
-
-class CreateLabelsResult(TypedDict):
-    elements: Elements
-
-
-class CreateTextsResult(TypedDict):
-    elements: Elements
+class ModifySlabsParameters(TypedDict):
+    slabsWithDetails: list[SlabWithDetails]
 
 
 class ModifyMorphsParameters(TypedDict):
@@ -1831,33 +1904,9 @@ class GetClassificationsOfElementsParameters(TypedDict):
     classificationSystemIds: ClassificationSystemIds
 
 
-class CreateLayersResult(TypedDict):
-    attributeIds: AttributeIds
-
-
-class CreateLayerCombinationsResult(TypedDict):
-    attributeIds: AttributeIds
-
-
-class CreateLinesResult(TypedDict):
-    attributeIds: AttributeIds
-
-
-class CreateFillsResult(TypedDict):
-    attributeIds: AttributeIds
-
-
-class CreateZoneCategoriesResult(TypedDict):
-    attributeIds: AttributeIds
-
-
 class CreateMEPSystemsParameters(TypedDict):
     mepSystemDataArray: list[MEPSystemData]
     overwriteExisting: NotRequired[bool]
-
-
-class CreateMEPSystemsResult(TypedDict):
-    attributeIds: AttributeIds
 
 
 class CreatePenTablesParameters(TypedDict):
@@ -1865,34 +1914,14 @@ class CreatePenTablesParameters(TypedDict):
     overwriteExisting: NotRequired[bool]
 
 
-class CreatePenTablesResult(TypedDict):
-    attributeIds: AttributeIds
-
-
-class CreateProfilesResult(TypedDict):
-    attributeIds: AttributeIds
-
-
-class CreateBuildingMaterialsResult(TypedDict):
-    attributeIds: AttributeIds
-
-
 class CreateCompositesParameters(TypedDict):
     compositeDataArray: list[CompositeData]
     overwriteExisting: NotRequired[bool]
 
 
-class CreateCompositesResult(TypedDict):
-    attributeIds: AttributeIds
-
-
 class CreateSurfacesParameters(TypedDict):
     surfaceDataArray: list[SurfaceData]
     overwriteExisting: NotRequired[bool]
-
-
-class CreateSurfacesResult(TypedDict):
-    attributeIds: AttributeIds
 
 
 class GetBuildingMaterialPhysicalPropertiesParameters(TypedDict):
@@ -1981,16 +2010,8 @@ class UpdateDrawingsParameters(TypedDict):
     elements: Elements
 
 
-class CreateDrawingsResult(TypedDict):
-    elements: Elements
-
-
 class FitInWindowParameters(TypedDict):
     elements: NotRequired[Elements]
-
-
-class CreateSectionsResult(TypedDict):
-    elements: Elements
 
 
 class AttachElementsToIssueParameters(TypedDict):
