@@ -14,6 +14,8 @@ from multiconn_archicad.models.tapir.commands import (
     CreateDetailsResult,
     CreateDrawingsParameters,
     CreateDrawingsResult,
+    CreateInteriorElevationsParameters,
+    CreateInteriorElevationsResult,
     CreateLayoutParameters,
     CreateLayoutResult,
     CreateLayoutSubsetParameters,
@@ -67,6 +69,7 @@ from multiconn_archicad.models.tapir.types import (
     ElementIdArrayItem,
     ErrorItem,
     FailedExecutionResult,
+    InteriorElevationData,
     LayoutData,
     LayoutDatabaseId,
     LayoutSetting,
@@ -155,7 +158,7 @@ class NavigatorCommands:
         validated_response = CloneProjectMapItemToViewMapResult.model_validate(response_dict)
         return validated_response.navigatorItems
 
-    def create_details(self, details_data: list[DetailData]) -> list[DatabaseIdArrayItem]:
+    def create_details(self, details_data: list[DetailData]) -> list[DatabaseIdArrayItem | ErrorItem]:
         """
         Creates independent Detail databases.
 
@@ -163,7 +166,8 @@ class NavigatorCommands:
             details_data (list[DetailData])
 
         Returns:
-            list[DatabaseIdArrayItem]: A list of Archicad databases.
+            list[DatabaseIdArrayItem | ErrorItem]: A list of Archicad database identifiers or
+                errors.
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -180,7 +184,7 @@ class NavigatorCommands:
         validated_response = CreateDetailsResult.model_validate(response_dict)
         return validated_response.databases
 
-    def create_drawings(self, drawings_data: list[DrawingData]) -> list[ElementIdArrayItem]:
+    def create_drawings(self, drawings_data: list[DrawingData]) -> list[ElementIdArrayItem | ErrorItem]:
         """
         Creates Drawing elements on the specified or active layout from navigator items.
 
@@ -188,7 +192,7 @@ class NavigatorCommands:
             drawings_data (list[DrawingData])
 
         Returns:
-            list[ElementIdArrayItem]: A list of elements.
+            list[ElementIdArrayItem | ErrorItem]: A list of element identifiers or errors.
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -205,7 +209,37 @@ class NavigatorCommands:
         validated_response = CreateDrawingsResult.model_validate(response_dict)
         return validated_response.elements
 
-    def create_layout(self, layouts_data: list[LayoutData]) -> list[DatabaseIdArrayItem]:
+    def create_interior_elevations(
+        self, interior_elevations_data: list[InteriorElevationData]
+    ) -> list[ElementIdArrayItem | ErrorItem]:
+        """
+        Creates Interior Elevation elements on the floor plan. Every consecutive pair of the
+        given points becomes one segment, each with its own viewpoint - feed it the corner
+        points of a room to get an interior elevation of that room.
+
+        Args:
+            interior_elevations_data (list[InteriorElevationData]): Array of data to create
+                Interior Elevation elements.
+
+        Returns:
+            list[ElementIdArrayItem | ErrorItem]: A list of element identifiers or errors.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "interiorElevationsData": interior_elevations_data,
+        }
+        validated_params = CreateInteriorElevationsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "CreateInteriorElevations", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = CreateInteriorElevationsResult.model_validate(response_dict)
+        return validated_response.elements
+
+    def create_layout(self, layouts_data: list[LayoutData]) -> list[DatabaseIdArrayItem | ErrorItem]:
         """
         Creates Layouts and their backing master layouts.
 
@@ -213,7 +247,8 @@ class NavigatorCommands:
             layouts_data (list[LayoutData])
 
         Returns:
-            list[DatabaseIdArrayItem]: A list of Archicad databases.
+            list[DatabaseIdArrayItem | ErrorItem]: A list of Archicad database identifiers or
+                errors.
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -255,7 +290,7 @@ class NavigatorCommands:
         validated_response = CreateLayoutSubsetResult.model_validate(response_dict)
         return validated_response.navigatorItems
 
-    def create_sections(self, sections_data: list[SectionData]) -> list[ElementIdArrayItem]:
+    def create_sections(self, sections_data: list[SectionData]) -> list[ElementIdArrayItem | ErrorItem]:
         """
         Creates Section elements on the floor plan.
 
@@ -263,7 +298,7 @@ class NavigatorCommands:
             sections_data (list[SectionData])
 
         Returns:
-            list[ElementIdArrayItem]: A list of elements.
+            list[ElementIdArrayItem | ErrorItem]: A list of element identifiers or errors.
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -337,7 +372,7 @@ class NavigatorCommands:
         validated_response = CreateViewsInViewMapResult.model_validate(response_dict)
         return validated_response.navigatorItems
 
-    def create_worksheets(self, worksheets_data: list[WorksheetData]) -> list[DatabaseIdArrayItem]:
+    def create_worksheets(self, worksheets_data: list[WorksheetData]) -> list[DatabaseIdArrayItem | ErrorItem]:
         """
         Creates independent Worksheet databases.
 
@@ -345,7 +380,8 @@ class NavigatorCommands:
             worksheets_data (list[WorksheetData])
 
         Returns:
-            list[DatabaseIdArrayItem]: A list of Archicad databases.
+            list[DatabaseIdArrayItem | ErrorItem]: A list of Archicad database identifiers or
+                errors.
 
         Raises:
             ArchicadAPIError: If the API returns an error response.

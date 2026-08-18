@@ -68,6 +68,7 @@ from multiconn_archicad.models.tapir.types import (
     ColumnData,
     DoorData,
     ElementIdArrayItem,
+    ErrorItem,
     HatchData,
     HotspotData,
     LabelData,
@@ -97,7 +98,7 @@ class ElementCreationCommands:
     def __init__(self, core: CoreCommands):
         self._core = core
 
-    def create_arcs(self, arcs_data: list[ArcData]) -> list[ElementIdArrayItem]:
+    def create_arcs(self, arcs_data: list[ArcData]) -> list[ElementIdArrayItem | ErrorItem]:
         """
         Creates Arc elements based on the given parameters.
 
@@ -105,7 +106,7 @@ class ElementCreationCommands:
             arcs_data (list[ArcData]): Array of data to create Arcs.
 
         Returns:
-            list[ElementIdArrayItem]: A list of elements.
+            list[ElementIdArrayItem | ErrorItem]: A list of element identifiers or errors.
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -124,7 +125,7 @@ class ElementCreationCommands:
 
     def create_associative_dimensions(
         self, dimensions_data: list[AssociativeDimensionData]
-    ) -> list[ElementIdArrayItem]:
+    ) -> list[ElementIdArrayItem | ErrorItem]:
         """
         Creates associative linear dimensions from explicit witness point references.
 
@@ -132,7 +133,7 @@ class ElementCreationCommands:
             dimensions_data (list[AssociativeDimensionData])
 
         Returns:
-            list[ElementIdArrayItem]: A list of elements.
+            list[ElementIdArrayItem | ErrorItem]: A list of element identifiers or errors.
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -151,7 +152,7 @@ class ElementCreationCommands:
 
     def create_associative_dimensions_on_section(
         self, dimensions_data: list[AssociativeDimensionOnSectionData]
-    ) -> list[ElementIdArrayItem]:
+    ) -> list[ElementIdArrayItem | ErrorItem]:
         """
         Creates associative linear dimensions on section elements using common wall, slab, beam,
         column and opening presets.
@@ -160,7 +161,7 @@ class ElementCreationCommands:
             dimensions_data (list[AssociativeDimensionOnSectionData])
 
         Returns:
-            list[ElementIdArrayItem]: A list of elements.
+            list[ElementIdArrayItem | ErrorItem]: A list of element identifiers or errors.
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -178,7 +179,7 @@ class ElementCreationCommands:
         validated_response = CreateAssociativeDimensionsOnSectionResult.model_validate(response_dict)
         return validated_response.elements
 
-    def create_beams(self, beams_data: list[BeamData]) -> list[ElementIdArrayItem]:
+    def create_beams(self, beams_data: list[BeamData]) -> list[ElementIdArrayItem | ErrorItem]:
         """
         Creates Beam elements based on the given parameters.
 
@@ -186,7 +187,7 @@ class ElementCreationCommands:
             beams_data (list[BeamData])
 
         Returns:
-            list[ElementIdArrayItem]: A list of elements.
+            list[ElementIdArrayItem | ErrorItem]: A list of element identifiers or errors.
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -203,7 +204,7 @@ class ElementCreationCommands:
         validated_response = CreateBeamsResult.model_validate(response_dict)
         return validated_response.elements
 
-    def create_circles(self, circles_data: list[CircleData]) -> list[ElementIdArrayItem]:
+    def create_circles(self, circles_data: list[CircleData]) -> list[ElementIdArrayItem | ErrorItem]:
         """
         Creates Circle elements based on the given parameters.
 
@@ -211,7 +212,7 @@ class ElementCreationCommands:
             circles_data (list[CircleData]): Array of data to create Circles.
 
         Returns:
-            list[ElementIdArrayItem]: A list of elements.
+            list[ElementIdArrayItem | ErrorItem]: A list of element identifiers or errors.
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -228,7 +229,7 @@ class ElementCreationCommands:
         validated_response = CreateCirclesResult.model_validate(response_dict)
         return validated_response.elements
 
-    def create_columns(self, columns_data: list[ColumnData]) -> list[ElementIdArrayItem]:
+    def create_columns(self, columns_data: list[ColumnData]) -> list[ElementIdArrayItem | ErrorItem]:
         """
         Creates Column elements based on the given parameters.
 
@@ -236,7 +237,7 @@ class ElementCreationCommands:
             columns_data (list[ColumnData]): Array of data to create Columns.
 
         Returns:
-            list[ElementIdArrayItem]: A list of elements.
+            list[ElementIdArrayItem | ErrorItem]: A list of element identifiers or errors.
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -253,7 +254,7 @@ class ElementCreationCommands:
         validated_response = CreateColumnsResult.model_validate(response_dict)
         return validated_response.elements
 
-    def create_doors(self, doors_data: list[DoorData]) -> list[ElementIdArrayItem]:
+    def create_doors(self, doors_data: list[DoorData]) -> list[ElementIdArrayItem | ErrorItem]:
         """
         Creates Door elements in host walls based on the given parameters.
 
@@ -261,7 +262,7 @@ class ElementCreationCommands:
             doors_data (list[DoorData])
 
         Returns:
-            list[ElementIdArrayItem]: A list of elements.
+            list[ElementIdArrayItem | ErrorItem]: A list of element identifiers or errors.
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -278,7 +279,7 @@ class ElementCreationCommands:
         validated_response = CreateDoorsResult.model_validate(response_dict)
         return validated_response.elements
 
-    def create_hatches(self, hatches_data: list[HatchData]) -> list[ElementIdArrayItem]:
+    def create_hatches(self, hatches_data: list[HatchData]) -> list[ElementIdArrayItem | ErrorItem]:
         """
         Creates Hatch elements based on the given parameters.
 
@@ -286,7 +287,7 @@ class ElementCreationCommands:
             hatches_data (list[HatchData]): Array of data to create Hatches.
 
         Returns:
-            list[ElementIdArrayItem]: A list of elements.
+            list[ElementIdArrayItem | ErrorItem]: A list of element identifiers or errors.
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -303,7 +304,7 @@ class ElementCreationCommands:
         validated_response = CreateHatchesResult.model_validate(response_dict)
         return validated_response.elements
 
-    def create_hotspots(self, hotspots_data: list[HotspotData]) -> list[ElementIdArrayItem]:
+    def create_hotspots(self, hotspots_data: list[HotspotData]) -> list[ElementIdArrayItem | ErrorItem]:
         """
         Creates Hotspot elements based on the given parameters.
 
@@ -311,7 +312,7 @@ class ElementCreationCommands:
             hotspots_data (list[HotspotData]): Array of data to create Hotspots.
 
         Returns:
-            list[ElementIdArrayItem]: A list of elements.
+            list[ElementIdArrayItem | ErrorItem]: A list of element identifiers or errors.
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -328,7 +329,7 @@ class ElementCreationCommands:
         validated_response = CreateHotspotsResult.model_validate(response_dict)
         return validated_response.elements
 
-    def create_labels(self, labels_data: list[LabelData]) -> list[ElementIdArrayItem]:
+    def create_labels(self, labels_data: list[LabelData]) -> list[ElementIdArrayItem | ErrorItem]:
         """
         Creates Label elements based on the given parameters.
 
@@ -336,7 +337,7 @@ class ElementCreationCommands:
             labels_data (list[LabelData]): Array of data to create Labels.
 
         Returns:
-            list[ElementIdArrayItem]: A list of elements.
+            list[ElementIdArrayItem | ErrorItem]: A list of element identifiers or errors.
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -353,7 +354,7 @@ class ElementCreationCommands:
         validated_response = CreateLabelsResult.model_validate(response_dict)
         return validated_response.elements
 
-    def create_lamps(self, lamps_data: list[LampData]) -> list[ElementIdArrayItem]:
+    def create_lamps(self, lamps_data: list[LampData]) -> list[ElementIdArrayItem | ErrorItem]:
         """
         Creates Lamp elements based on the given parameters.
 
@@ -361,7 +362,7 @@ class ElementCreationCommands:
             lamps_data (list[LampData]): Array of data to create Lamps.
 
         Returns:
-            list[ElementIdArrayItem]: A list of elements.
+            list[ElementIdArrayItem | ErrorItem]: A list of element identifiers or errors.
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -378,7 +379,7 @@ class ElementCreationCommands:
         validated_response = CreateLampsResult.model_validate(response_dict)
         return validated_response.elements
 
-    def create_line_elements(self, lines_data: list[LineElementData]) -> list[ElementIdArrayItem]:
+    def create_line_elements(self, lines_data: list[LineElementData]) -> list[ElementIdArrayItem | ErrorItem]:
         """
         Creates Line elements based on the given parameters.
 
@@ -386,7 +387,7 @@ class ElementCreationCommands:
             lines_data (list[LineElementData]): Array of data to create Lines.
 
         Returns:
-            list[ElementIdArrayItem]: A list of elements.
+            list[ElementIdArrayItem | ErrorItem]: A list of element identifiers or errors.
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -403,7 +404,7 @@ class ElementCreationCommands:
         validated_response = CreateLineElementsResult.model_validate(response_dict)
         return validated_response.elements
 
-    def create_meshes(self, meshes_data: list[MeshData]) -> list[ElementIdArrayItem]:
+    def create_meshes(self, meshes_data: list[MeshData]) -> list[ElementIdArrayItem | ErrorItem]:
         """
         Creates Mesh elements based on the given parameters.
 
@@ -411,7 +412,7 @@ class ElementCreationCommands:
             meshes_data (list[MeshData]): Array of data to create Meshes.
 
         Returns:
-            list[ElementIdArrayItem]: A list of elements.
+            list[ElementIdArrayItem | ErrorItem]: A list of element identifiers or errors.
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -428,7 +429,7 @@ class ElementCreationCommands:
         validated_response = CreateMeshesResult.model_validate(response_dict)
         return validated_response.elements
 
-    def create_morphs(self, morphs_data: list[MorphData]) -> list[ElementIdArrayItem]:
+    def create_morphs(self, morphs_data: list[MorphData]) -> list[ElementIdArrayItem | ErrorItem]:
         """
         Creates Morph elements from simple box definitions.
 
@@ -436,7 +437,7 @@ class ElementCreationCommands:
             morphs_data (list[MorphData])
 
         Returns:
-            list[ElementIdArrayItem]: A list of elements.
+            list[ElementIdArrayItem | ErrorItem]: A list of element identifiers or errors.
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -453,7 +454,7 @@ class ElementCreationCommands:
         validated_response = CreateMorphsResult.model_validate(response_dict)
         return validated_response.elements
 
-    def create_objects(self, objects_data: list[ObjectData]) -> list[ElementIdArrayItem]:
+    def create_objects(self, objects_data: list[ObjectData]) -> list[ElementIdArrayItem | ErrorItem]:
         """
         Creates Object elements based on the given parameters.
 
@@ -461,7 +462,7 @@ class ElementCreationCommands:
             objects_data (list[ObjectData]): Array of data to create Objects.
 
         Returns:
-            list[ElementIdArrayItem]: A list of elements.
+            list[ElementIdArrayItem | ErrorItem]: A list of element identifiers or errors.
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -478,7 +479,7 @@ class ElementCreationCommands:
         validated_response = CreateObjectsResult.model_validate(response_dict)
         return validated_response.elements
 
-    def create_openings(self, openings_data: list[OpeningData]) -> list[ElementIdArrayItem]:
+    def create_openings(self, openings_data: list[OpeningData]) -> list[ElementIdArrayItem | ErrorItem]:
         """
         Creates Opening elements in the given host elements.
 
@@ -486,7 +487,7 @@ class ElementCreationCommands:
             openings_data (list[OpeningData])
 
         Returns:
-            list[ElementIdArrayItem]: A list of elements.
+            list[ElementIdArrayItem | ErrorItem]: A list of element identifiers or errors.
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -503,7 +504,7 @@ class ElementCreationCommands:
         validated_response = CreateOpeningsResult.model_validate(response_dict)
         return validated_response.elements
 
-    def create_polylines(self, polylines_data: list[PolylineData]) -> list[ElementIdArrayItem]:
+    def create_polylines(self, polylines_data: list[PolylineData]) -> list[ElementIdArrayItem | ErrorItem]:
         """
         Creates Polyline elements based on the given parameters.
 
@@ -511,7 +512,7 @@ class ElementCreationCommands:
             polylines_data (list[PolylineData]): Array of data to create Polylines.
 
         Returns:
-            list[ElementIdArrayItem]: A list of elements.
+            list[ElementIdArrayItem | ErrorItem]: A list of element identifiers or errors.
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -528,7 +529,7 @@ class ElementCreationCommands:
         validated_response = CreatePolylinesResult.model_validate(response_dict)
         return validated_response.elements
 
-    def create_roofs(self, roofs_data: list[RoofData]) -> list[ElementIdArrayItem]:
+    def create_roofs(self, roofs_data: list[RoofData]) -> list[ElementIdArrayItem | ErrorItem]:
         """
         Creates Roof elements based on footprint, level and roof profile data. Creates a multi-
         plane roof by default; pass 'pivotLine' (and optionally 'angle') to create a single-
@@ -538,7 +539,7 @@ class ElementCreationCommands:
             roofs_data (list[RoofData])
 
         Returns:
-            list[ElementIdArrayItem]: A list of elements.
+            list[ElementIdArrayItem | ErrorItem]: A list of element identifiers or errors.
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -555,7 +556,7 @@ class ElementCreationCommands:
         validated_response = CreateRoofsResult.model_validate(response_dict)
         return validated_response.elements
 
-    def create_slabs(self, slabs_data: list[SlabData]) -> list[ElementIdArrayItem]:
+    def create_slabs(self, slabs_data: list[SlabData]) -> list[ElementIdArrayItem | ErrorItem]:
         """
         Creates Slab elements based on the given parameters.
 
@@ -563,7 +564,7 @@ class ElementCreationCommands:
             slabs_data (list[SlabData]): Array of data to create Slabs.
 
         Returns:
-            list[ElementIdArrayItem]: A list of elements.
+            list[ElementIdArrayItem | ErrorItem]: A list of element identifiers or errors.
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -580,7 +581,7 @@ class ElementCreationCommands:
         validated_response = CreateSlabsResult.model_validate(response_dict)
         return validated_response.elements
 
-    def create_splines(self, splines_data: list[SplineData]) -> list[ElementIdArrayItem]:
+    def create_splines(self, splines_data: list[SplineData]) -> list[ElementIdArrayItem | ErrorItem]:
         """
         Creates Spline elements based on the given parameters.
 
@@ -590,7 +591,7 @@ class ElementCreationCommands:
                 Archicad from the point positions).
 
         Returns:
-            list[ElementIdArrayItem]: A list of elements.
+            list[ElementIdArrayItem | ErrorItem]: A list of element identifiers or errors.
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -607,7 +608,7 @@ class ElementCreationCommands:
         validated_response = CreateSplinesResult.model_validate(response_dict)
         return validated_response.elements
 
-    def create_stairs(self, stairs_data: list[StairData]) -> list[ElementIdArrayItem]:
+    def create_stairs(self, stairs_data: list[StairData]) -> list[ElementIdArrayItem | ErrorItem]:
         """
         Creates Stair elements based on the given baseline and parameters.
 
@@ -615,7 +616,7 @@ class ElementCreationCommands:
             stairs_data (list[StairData]): Array of data to create Stair elements.
 
         Returns:
-            list[ElementIdArrayItem]: A list of elements.
+            list[ElementIdArrayItem | ErrorItem]: A list of element identifiers or errors.
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -632,7 +633,7 @@ class ElementCreationCommands:
         validated_response = CreateStairsResult.model_validate(response_dict)
         return validated_response.elements
 
-    def create_texts(self, texts_data: list[TextData]) -> list[ElementIdArrayItem]:
+    def create_texts(self, texts_data: list[TextData]) -> list[ElementIdArrayItem | ErrorItem]:
         """
         Creates standalone Text elements based on the given parameters.
 
@@ -640,7 +641,7 @@ class ElementCreationCommands:
             texts_data (list[TextData]): Array of data to create Texts.
 
         Returns:
-            list[ElementIdArrayItem]: A list of elements.
+            list[ElementIdArrayItem | ErrorItem]: A list of element identifiers or errors.
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -659,7 +660,7 @@ class ElementCreationCommands:
 
     def create_wall_thickness_dimensions(
         self, dimensions_data: list[WallThicknessDimensionData]
-    ) -> list[ElementIdArrayItem]:
+    ) -> list[ElementIdArrayItem | ErrorItem]:
         """
         Creates associative wall thickness dimensions for the given walls.
 
@@ -667,7 +668,7 @@ class ElementCreationCommands:
             dimensions_data (list[WallThicknessDimensionData])
 
         Returns:
-            list[ElementIdArrayItem]: A list of elements.
+            list[ElementIdArrayItem | ErrorItem]: A list of element identifiers or errors.
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -684,7 +685,7 @@ class ElementCreationCommands:
         validated_response = CreateWallThicknessDimensionsResult.model_validate(response_dict)
         return validated_response.elements
 
-    def create_walls(self, walls_data: list[WallData]) -> list[ElementIdArrayItem]:
+    def create_walls(self, walls_data: list[WallData]) -> list[ElementIdArrayItem | ErrorItem]:
         """
         Creates Wall elements based on the given parameters.
 
@@ -692,7 +693,7 @@ class ElementCreationCommands:
             walls_data (list[WallData])
 
         Returns:
-            list[ElementIdArrayItem]: A list of elements.
+            list[ElementIdArrayItem | ErrorItem]: A list of element identifiers or errors.
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -709,7 +710,7 @@ class ElementCreationCommands:
         validated_response = CreateWallsResult.model_validate(response_dict)
         return validated_response.elements
 
-    def create_windows(self, windows_data: list[WindowData]) -> list[ElementIdArrayItem]:
+    def create_windows(self, windows_data: list[WindowData]) -> list[ElementIdArrayItem | ErrorItem]:
         """
         Creates Window elements in host walls based on the given parameters.
 
@@ -717,7 +718,7 @@ class ElementCreationCommands:
             windows_data (list[WindowData])
 
         Returns:
-            list[ElementIdArrayItem]: A list of elements.
+            list[ElementIdArrayItem | ErrorItem]: A list of element identifiers or errors.
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -734,7 +735,7 @@ class ElementCreationCommands:
         validated_response = CreateWindowsResult.model_validate(response_dict)
         return validated_response.elements
 
-    def create_zones(self, zones_data: list[ZoneData]) -> list[ElementIdArrayItem]:
+    def create_zones(self, zones_data: list[ZoneData]) -> list[ElementIdArrayItem | ErrorItem]:
         """
         Creates Zone elements based on the given parameters.
 
@@ -742,7 +743,7 @@ class ElementCreationCommands:
             zones_data (list[ZoneData]): Array of data to create Zones.
 
         Returns:
-            list[ElementIdArrayItem]: A list of elements.
+            list[ElementIdArrayItem | ErrorItem]: A list of element identifiers or errors.
 
         Raises:
             ArchicadAPIError: If the API returns an error response.

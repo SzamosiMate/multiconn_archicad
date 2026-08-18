@@ -34,6 +34,8 @@ from multiconn_archicad.models.tapir.commands import (
     GetRelationsOfElementsResult,
     GetRoomImageParameters,
     GetRoomImageResult,
+    GetSectionElementsParameters,
+    GetSectionElementsResult,
     GetSelectedElementsResult,
     GetSubelementsOfHierarchicalElementsParameters,
     GetSubelementsOfHierarchicalElementsResult,
@@ -284,11 +286,17 @@ class ElementCommands:
         self, elements: list[ElementIdArrayItem], connected_element_type: ElementType
     ) -> ConnectedElementsWrapper | ErrorItem:
         """
-        Gets connected elements of the given elements.
+        Gets the elements hosted by (connected to) the given owner elements, filtered to the
+        given element type: for example the Windows or Doors of a Wall, the frames, panels,
+        junctions and accessories of a Curtain Wall, the risers, treads and structures of a
+        Stair, or the posts, rails and panels of a Railing.
 
         Args:
-            elements (list[ElementIdArrayItem]): A list of elements.
-            connected_element_type (ElementType)
+            elements (list[ElementIdArrayItem]): The owner (host) elements whose connected
+                elements are collected, e.g. Walls, Curtain Walls, Stairs or Railings.
+            connected_element_type (ElementType): The type of the connected elements to collect,
+                e.g. Window or Door for a Wall owner, or a subelement type of a Curtain Wall,
+                Stair or Railing owner.
 
         Returns:
             ConnectedElementsWrapper | ErrorItem
@@ -549,6 +557,37 @@ class ElementCommands:
         )
         validated_response = GetRoomImageResult.model_validate(response_dict)
         return validated_response.roomImage
+
+    def get_section_elements(self, databases: None | list[DatabaseIdArrayItem] = None) -> GetSectionElementsResult:
+        """
+        Gets the elements drawn in the given section, elevation or interior elevation databases,
+        each with the owner element it was generated from. This is the only command that returns
+        raw section element identifiers - every other listing command converts them to their
+        owner - so it is the way to obtain the sectionElementId that
+        CreateAssociativeDimensionsOnSection requires.
+
+        Args:
+            databases (None | list[DatabaseIdArrayItem]): The section, elevation or interior
+                elevation databases to list the section elements of. If omitted, the current
+                database is used.
+
+        Returns:
+            GetSectionElementsResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "databases": databases,
+        }
+        validated_params = GetSectionElementsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetSectionElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetSectionElementsResult.model_validate(response_dict)
+        return validated_response
 
     def get_selected_elements(self) -> list[ElementIdArrayItem]:
         """

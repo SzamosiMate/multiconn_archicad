@@ -110,7 +110,7 @@ class AttributeCommands:
 
     def create_building_materials(
         self, building_material_data_array: list[BuildingMaterialData], overwrite_existing: None | bool = None
-    ) -> list[AttributeIdArrayItem]:
+    ) -> list[AttributeIdArrayItem | ErrorItem]:
         """
         Creates or overwrites Building Material attributes based on the given parameters.
 
@@ -121,7 +121,7 @@ class AttributeCommands:
                 same name, or if index is given with the same index. The default is false.
 
         Returns:
-            list[AttributeIdArrayItem]: A list of attributes.
+            list[AttributeIdArrayItem | ErrorItem]: A list of attribute identifiers or errors.
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -141,7 +141,7 @@ class AttributeCommands:
 
     def create_composites(
         self, composite_data_array: list[CompositeData], overwrite_existing: None | bool = None
-    ) -> list[AttributeIdArrayItem]:
+    ) -> list[AttributeIdArrayItem | ErrorItem]:
         """
         Creates or overwrites Composite attributes based on the given parameters.
 
@@ -151,7 +151,7 @@ class AttributeCommands:
                 name, or if index is given with the same index. The default is false.
 
         Returns:
-            list[AttributeIdArrayItem]: A list of attributes.
+            list[AttributeIdArrayItem | ErrorItem]: A list of attribute identifiers or errors.
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -171,7 +171,7 @@ class AttributeCommands:
 
     def create_fills(
         self, fill_data_array: list[FillData], overwrite_existing: None | bool = None
-    ) -> list[AttributeIdArrayItem]:
+    ) -> list[AttributeIdArrayItem | ErrorItem]:
         """
         Creates or overwrites Fill attributes based on the given parameters.
 
@@ -181,7 +181,7 @@ class AttributeCommands:
                 or if index is given with the same index. The default is false.
 
         Returns:
-            list[AttributeIdArrayItem]: A list of attributes.
+            list[AttributeIdArrayItem | ErrorItem]: A list of attribute identifiers or errors.
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -201,7 +201,7 @@ class AttributeCommands:
 
     def create_layer_combinations(
         self, layer_combination_data_array: list[LayerCombinationDataArrayItem], overwrite_existing: None | bool = None
-    ) -> list[AttributeIdArrayItem]:
+    ) -> list[AttributeIdArrayItem | ErrorItem]:
         """
         Creates or overwrites Layer Combination attributes based on the given parameters.
 
@@ -212,7 +212,7 @@ class AttributeCommands:
                 same guid/index/name. The default is false.
 
         Returns:
-            list[AttributeIdArrayItem]: A list of attributes.
+            list[AttributeIdArrayItem | ErrorItem]: A list of attribute identifiers or errors.
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -232,7 +232,7 @@ class AttributeCommands:
 
     def create_layers(
         self, layer_data_array: list[LayerData], overwrite_existing: None | bool = None
-    ) -> list[AttributeIdArrayItem]:
+    ) -> list[AttributeIdArrayItem | ErrorItem]:
         """
         Creates or overwrites Layer attributes based on the given parameters.
 
@@ -242,7 +242,7 @@ class AttributeCommands:
                 or if index is given with the same index. The default is false.
 
         Returns:
-            list[AttributeIdArrayItem]: A list of attributes.
+            list[AttributeIdArrayItem | ErrorItem]: A list of attribute identifiers or errors.
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -262,7 +262,7 @@ class AttributeCommands:
 
     def create_lines(
         self, line_data_array: list[LineData], overwrite_existing: None | bool = None
-    ) -> list[AttributeIdArrayItem]:
+    ) -> list[AttributeIdArrayItem | ErrorItem]:
         """
         Creates or overwrites Line attributes based on the given parameters.
 
@@ -272,7 +272,7 @@ class AttributeCommands:
                 or if index is given with the same index. The default is false.
 
         Returns:
-            list[AttributeIdArrayItem]: A list of attributes.
+            list[AttributeIdArrayItem | ErrorItem]: A list of attribute identifiers or errors.
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -292,7 +292,7 @@ class AttributeCommands:
 
     def create_mep_systems(
         self, mep_system_data_array: list[MEPSystemData], overwrite_existing: None | bool = None
-    ) -> list[AttributeIdArrayItem]:
+    ) -> list[AttributeIdArrayItem | ErrorItem]:
         """
         Creates or overwrites MEP System attributes based on the given parameters.
 
@@ -303,7 +303,7 @@ class AttributeCommands:
                 name, or if index is given with the same index. The default is false.
 
         Returns:
-            list[AttributeIdArrayItem]: A list of attributes.
+            list[AttributeIdArrayItem | ErrorItem]: A list of attribute identifiers or errors.
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -323,7 +323,7 @@ class AttributeCommands:
 
     def create_pen_tables(
         self, pen_table_data_array: list[PenTableData], overwrite_existing: None | bool = None
-    ) -> list[AttributeIdArrayItem]:
+    ) -> list[AttributeIdArrayItem | ErrorItem]:
         """
         Creates or overwrites Pen Table attributes based on the given parameters.
 
@@ -333,7 +333,7 @@ class AttributeCommands:
                 name, or if index is given with the same index. The default is false.
 
         Returns:
-            list[AttributeIdArrayItem]: A list of attributes.
+            list[AttributeIdArrayItem | ErrorItem]: A list of attribute identifiers or errors.
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -353,7 +353,7 @@ class AttributeCommands:
 
     def create_profiles(
         self, profile_data_array: list[ProfileData], overwrite_existing: None | bool = None
-    ) -> list[AttributeIdArrayItem]:
+    ) -> list[AttributeIdArrayItem | ErrorItem]:
         """
         Creates or overwrites Profile attributes as a copy of an existing Profile's geometry,
         based on the given parameters.
@@ -364,7 +364,7 @@ class AttributeCommands:
                 name, or if index is given with the same index. The default is false.
 
         Returns:
-            list[AttributeIdArrayItem]: A list of attributes.
+            list[AttributeIdArrayItem | ErrorItem]: A list of attribute identifiers or errors.
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -384,7 +384,7 @@ class AttributeCommands:
 
     def create_surfaces(
         self, surface_data_array: list[SurfaceData], overwrite_existing: None | bool = None
-    ) -> list[AttributeIdArrayItem]:
+    ) -> list[AttributeIdArrayItem | ErrorItem]:
         """
         Creates or overwrites Surface attributes based on the given parameters.
 
@@ -394,7 +394,7 @@ class AttributeCommands:
                 name, or if index is given with the same index. The default is false.
 
         Returns:
-            list[AttributeIdArrayItem]: A list of attributes.
+            list[AttributeIdArrayItem | ErrorItem]: A list of attribute identifiers or errors.
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -414,7 +414,7 @@ class AttributeCommands:
 
     def create_zone_categories(
         self, zone_category_data_array: list[ZoneCategoryData], overwrite_existing: None | bool = None
-    ) -> list[AttributeIdArrayItem]:
+    ) -> list[AttributeIdArrayItem | ErrorItem]:
         """
         Creates or overwrites Zone Category attributes based on the given parameters.
 
@@ -425,7 +425,7 @@ class AttributeCommands:
                 same name, or if index is given with the same index. The default is false.
 
         Returns:
-            list[AttributeIdArrayItem]: A list of attributes.
+            list[AttributeIdArrayItem | ErrorItem]: A list of attribute identifiers or errors.
 
         Raises:
             ArchicadAPIError: If the API returns an error response.

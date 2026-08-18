@@ -120,8 +120,14 @@ class GDLParameterDetails(APIModel):
     displayName: Annotated[str, Field(description="The display name of the parameter.")]
     index: Annotated[int, Field(description="The index of the parameter.")]
     type: Annotated[str, Field(description="The type of the parameter.")]
-    dimension1: Annotated[int, Field(description="The 1st dimension of array (in case of array value).")]
-    dimension2: Annotated[int, Field(description="The 2nd dimension of array (in case of array value).")]
+    dimension1: Annotated[
+        int | None,
+        Field(description="The 1st dimension of array (in case of array value)."),
+    ] = None
+    dimension2: Annotated[
+        int | None,
+        Field(description="The 2nd dimension of array (in case of array value)."),
+    ] = None
     value: Annotated[Any, Field(description="The value of the parameter.")]
     valueDescription: Annotated[str | None, Field(description="The value description for numeric parameter.")] = None
     isLocked: Annotated[
@@ -974,31 +980,10 @@ class Hole3D(APIModel):
     polygonArcs: Annotated[list[PolyArc] | None, Field(description="Polygon outline arcs of the hole.")] = None
 
 
-class GeometryType(Enum):
+class BeamShape(Enum):
     Straight = "Straight"
-    Trapezoid = "Trapezoid"
-    Polygonal = "Polygonal"
-
-
-class BeamDetails(APIModel):
-    begCoordinate: Coordinate2D
-    endCoordinate: Coordinate2D
-    zCoordinate: float
-    level: Annotated[float, Field(description="base height of the beam relative to the floor level")]
-    offset: Annotated[float, Field(description="beam ref.line offset from the center")]
-    slantAngle: Annotated[float, Field(description="The slant angle of the beam in radians.")]
-    arcAngle: Annotated[
-        float,
-        Field(description="The arc angle of the (horizontally) curved beam in radians."),
-    ]
-    verticalCurveHeight: Annotated[float, Field(description="The height of the vertical curve of the beam.")]
-
-
-class ColumnDetails(APIModel):
-    origin: Coordinate2D
-    zCoordinate: float
-    height: Annotated[float, Field(description="height relative to bottom")]
-    bottomOffset: Annotated[float, Field(description="base level of the column relative to the floor level")]
+    HorizontallyCurved = "HorizontallyCurved"
+    VerticallyCurved = "VerticallyCurved"
 
 
 class HotspotDetails(APIModel):
@@ -1102,6 +1087,10 @@ class EdgeDefault(Enum):
     HardVisible = "HardVisible"
     HardHidden = "HardHidden"
     SoftHidden = "SoftHidden"
+
+
+class WireEdge(APIModel):
+    vertexIds: Annotated[list[int], Field(max_length=2, min_length=2)]
 
 
 class EdgeOverride(APIModel):
@@ -1472,6 +1461,28 @@ class SpecialFolderPath(APIModel):
     path: Annotated[str, Field(description="The path of the special folder in the filesystem.")]
 
 
+class TransformationType(Enum):
+    Global = "Global"
+    Rotated = "Rotated"
+    Distorted = "Distorted"
+
+
+class CoverFillTransformation(APIModel):
+    """Orientation and distortion parameters of a cover fill."""
+    origin: Annotated[
+        Coordinate2D,
+        Field(description="The origin of the fill relative to the center of the element."),
+    ]
+    xAxis: Annotated[Coordinate2D, Field(description="Primary distortion (direction) vector.")]
+    yAxis: Annotated[Coordinate2D, Field(description="Secondary distortion (direction) vector.")]
+
+
+class OverriddenPen(APIModel):
+    """A pen index that may override the one inherited from the element's structure. On Archicad versions where the underlying element does not support this override, 'overridden' is always false."""
+    overridden: Annotated[bool, Field(description="True if the pen is overridden on the element level.")]
+    penIndex: int | None = None
+
+
 class AlertType(Enum):
     """The type of the alert dialog."""
     information = "information"
@@ -1697,86 +1708,14 @@ class Coordinates(APIModel):
     z: Annotated[float, Field(description="Z value of the coordinate.")]
 
 
-class CoreAnchor(Enum):
-    """Optional anchor point of the column core on a 3x3 grid."""
-    TopLeft = "TopLeft"
-    TopCenter = "TopCenter"
-    TopRight = "TopRight"
-    MiddleLeft = "MiddleLeft"
-    Center = "Center"
-    MiddleRight = "MiddleRight"
-    BottomLeft = "BottomLeft"
-    BottomCenter = "BottomCenter"
-    BottomRight = "BottomRight"
-
-
-class ColumnData(APIModel):
-    """The parameters of the new Column."""
-    coordinates: Annotated[Coordinates, Field(description="3D coordinate.")]
-    height: Annotated[float | None, Field(description="Optional column height.", gt=0.0)] = None
-    axisRotationAngle: Annotated[float | None, Field(description="Optional column rotation angle in radians.")] = None
-    width: Annotated[
-        float | None,
-        Field(
-            description="Cross section width of the column. Applied to all segments.",
-            gt=0.0,
-        ),
-    ] = None
-    depth: Annotated[
-        float | None,
-        Field(
-            description="Cross section depth (height) of the column. Applied to all segments. Only effective for rectangular columns.",
-            gt=0.0,
-        ),
-    ] = None
-    coreAnchor: Annotated[
-        CoreAnchor | None,
-        Field(description="Optional anchor point of the column core on a 3x3 grid."),
-    ] = None
-    floorIndex: Annotated[
-        int | None,
-        Field(description="Optional floor index. If omitted, derived from the coordinate's z value."),
-    ] = None
-
-
-class ReferencePlaneLocation(Enum):
-    """Optional location of the slab reference plane. For a basic (homogeneous) slab only 'Top' or 'Bottom' are valid."""
-    Top = "Top"
-    CoreTop = "CoreTop"
-    CoreBottom = "CoreBottom"
-    Bottom = "Bottom"
-
-
-class SlabData(APIModel):
-    """The parameters of the new Slab."""
-    level: Annotated[
-        float,
-        Field(description="The Z coordinate value of the reference line of the slab."),
-    ]
-    thickness: Annotated[float | None, Field(description="Optional slab thickness.", gt=0.0)] = None
-    referencePlaneLocation: Annotated[
-        ReferencePlaneLocation | None,
-        Field(
-            description="Optional location of the slab reference plane. For a basic (homogeneous) slab only 'Top' or 'Bottom' are valid."
-        ),
-    ] = None
-    polygonCoordinates: Annotated[
-        list[Coordinate2D],
-        Field(description="The 2D coordinates of the edge of the slab.", min_length=3),
-    ]
-    polygonArcs: Annotated[list[PolyArc] | None, Field(description="Polygon outline arcs of the slab.")] = None
-    holes: Annotated[
-        list[Hole2D] | None,
-        Field(description="A list of 2D holes in an element defined by closed polylines"),
-    ] = None
-    floorIndex: Annotated[
-        int | None,
-        Field(description="Optional floor index. If omitted, derived from level."),
-    ] = None
-
-
 class PolylineData(APIModel):
     """The parameters of the new Polyline."""
+    favoriteName: Annotated[
+        str | None,
+        Field(
+            description="Optional name of a favorite to base the new element on. Its settings are applied first, then the explicitly given fields override them."
+        ),
+    ] = None
     floorInd: Annotated[
         float | None,
         Field(description="The identifier of the floor. Optional parameter, by default the current floor is used."),
@@ -1807,60 +1746,6 @@ class PolylineData(APIModel):
         Field(description="The 2D coordinates of the polyline.", min_length=2),
     ]
     arcs: Annotated[list[PolyArc] | None, Field(description="The arcs of the polyline.")] = None
-
-
-class AnchorPoint(Enum):
-    """Optional anchor point of the beam cross section on a 3x3 grid."""
-    TopLeft = "TopLeft"
-    TopCenter = "TopCenter"
-    TopRight = "TopRight"
-    MiddleLeft = "MiddleLeft"
-    Center = "Center"
-    MiddleRight = "MiddleRight"
-    BottomLeft = "BottomLeft"
-    BottomCenter = "BottomCenter"
-    BottomRight = "BottomRight"
-
-
-class BeamData(APIModel):
-    begCoordinate: Coordinate2D
-    endCoordinate: Coordinate2D
-    floorIndex: Annotated[
-        int | None,
-        Field(description="Optional floor index. If omitted, derived from zCoordinate."),
-    ] = None
-    zCoordinate: float
-    offset: float | None = None
-    slantAngle: float | None = None
-    arcAngle: float | None = None
-    verticalCurveHeight: float | None = None
-    width: Annotated[
-        float | None,
-        Field(
-            description="Cross section width of the beam. Applied to all segments.",
-            gt=0.0,
-        ),
-    ] = None
-    height: Annotated[
-        float | None,
-        Field(
-            description="Cross section height of the beam. Applied to all segments.",
-            gt=0.0,
-        ),
-    ] = None
-    anchorPoint: Annotated[
-        AnchorPoint | None,
-        Field(description="Optional anchor point of the beam cross section on a 3x3 grid."),
-    ] = None
-
-
-class ReferenceLineLocation(Enum):
-    Outside = "Outside"
-    Center = "Center"
-    Inside = "Inside"
-    CoreOutside = "CoreOutside"
-    CoreCenter = "CoreCenter"
-    CoreInside = "CoreInside"
 
 
 class DetailData(APIModel):
@@ -1960,6 +1845,12 @@ class SectionData(APIModel):
 
 class StairData(APIModel):
     """The parameters of the new Stair."""
+    favoriteName: Annotated[
+        str | None,
+        Field(
+            description="Optional name of a favorite to base the new element on. Its settings are applied first, then the explicitly given fields override them."
+        ),
+    ] = None
     baseLinePoints: Annotated[
         list[Coordinate2D],
         Field(
@@ -1992,6 +1883,12 @@ class Justification(Enum):
 
 class TextData(APIModel):
     """The parameters of the new Text element."""
+    favoriteName: Annotated[
+        str | None,
+        Field(
+            description="Optional name of a favorite to base the new element on. Its settings are applied first, then the explicitly given fields override them."
+        ),
+    ] = None
     coordinate: Annotated[
         Coordinate3D,
         Field(
@@ -2042,6 +1939,12 @@ class ViewData(APIModel):
 
 class HotspotData(APIModel):
     """The parameters of the new Hotspot."""
+    favoriteName: Annotated[
+        str | None,
+        Field(
+            description="Optional name of a favorite to base the new element on. Its settings are applied first, then the explicitly given fields override them."
+        ),
+    ] = None
     floorInd: Annotated[
         float | None,
         Field(description="The identifier of the floor. Optional parameter, by default the current floor is used."),
@@ -2484,6 +2387,119 @@ class LayoutCustomDataToSet(APIModel):
     customSchemeValue: str
 
 
+class BeamAnchorPoint(Enum):
+    TopLeft = "TopLeft"
+    TopCenter = "TopCenter"
+    TopRight = "TopRight"
+    MiddleLeft = "MiddleLeft"
+    Center = "Center"
+    MiddleRight = "MiddleRight"
+    BottomLeft = "BottomLeft"
+    BottomCenter = "BottomCenter"
+    BottomRight = "BottomRight"
+
+
+class ColumnCoreAnchor(Enum):
+    TopLeft = "TopLeft"
+    TopCenter = "TopCenter"
+    TopRight = "TopRight"
+    MiddleLeft = "MiddleLeft"
+    Center = "Center"
+    MiddleRight = "MiddleRight"
+    BottomLeft = "BottomLeft"
+    BottomCenter = "BottomCenter"
+    BottomRight = "BottomRight"
+
+
+class SlabReferencePlaneLocation(Enum):
+    Top = "Top"
+    CoreTop = "CoreTop"
+    CoreBottom = "CoreBottom"
+    Bottom = "Bottom"
+
+
+class WallReferenceLineLocation(Enum):
+    """The Core* values only have an effect on a Composite or Profile wall (structureType) - a Basic wall has no core skin, and Archicad falls back to the nearest non-core equivalent (e.g. CoreCenter becomes Center)."""
+    Outside = "Outside"
+    Center = "Center"
+    Inside = "Inside"
+    CoreOutside = "CoreOutside"
+    CoreCenter = "CoreCenter"
+    CoreInside = "CoreInside"
+
+
+class WallZoneRelation(Enum):
+    Boundary = "Boundary"
+    ReduceArea = "ReduceArea"
+    None_ = "None"
+    SubtractFromZone = "SubtractFromZone"
+
+
+class BeamHoleType(Enum):
+    Rectangular = "Rectangular"
+    Circular = "Circular"
+
+
+class HatchOrientationType(Enum):
+    Global = "Global"
+    Rotated = "Rotated"
+    Distorted = "Distorted"
+    Centered = "Centered"
+
+
+class WallGeometryType(Enum):
+    Straight = "Straight"
+    Trapezoid = "Trapezoid"
+    Polygonal = "Polygonal"
+
+
+class WallModificationGeometryType(Enum):
+    """The wall's plan outline shape (Polygonal is not settable here, read-only via GetDetailsOfElements). This is unrelated to slantAlpha/slantBeta - see profileType for the cross section shape those depend on."""
+    Straight = "Straight"
+    Trapezoid = "Trapezoid"
+
+
+class WallProfileType(Enum):
+    """Cross section shape of the wall, distinct from geometryType (which is the plan outline). Only Normal/Slanted/Trapez are settable via ModifyWalls - Poly needs a profile attribute wired through a separate mechanism. slantAlpha/slantBeta only have an effect once this is Slanted or Trapez."""
+    Normal = "Normal"
+    Slanted = "Slanted"
+    Trapez = "Trapez"
+    Poly = "Poly"
+
+
+class WallModificationProfileType(Enum):
+    """Cross section shape of the wall, distinct from geometryType (which is the plan outline). slantAlpha/slantBeta only have an effect once this is set to Slanted."""
+    Normal = "Normal"
+    Slanted = "Slanted"
+    Trapez = "Trapez"
+
+
+class InteriorElevationData(APIModel):
+    nodeCoordinates: Annotated[
+        list[Coordinate2D],
+        Field(
+            description="The corner points of the connected segment chain. Each consecutive pair of points becomes one segment, so a room with four walls needs five points to be closed, or four to be left open.",
+            min_length=2,
+        ),
+    ]
+    depth: Annotated[
+        float | None,
+        Field(
+            description="How far each segment looks. Applied to every segment. Defaults to 1.0.",
+            gt=0.0,
+        ),
+    ] = None
+    name: Annotated[
+        str | None,
+        Field(description="Name of the interior elevation. Each segment is named after it."),
+    ] = None
+    id: Annotated[str | None, Field(description="ID string of the interior elevation.")] = None
+    floorIndex: Annotated[
+        int | None,
+        Field(description="The story to place the interior elevation on. Defaults to the current story."),
+    ] = None
+
+
 class MEPElementType(Enum):
     RoutingElement = "RoutingElement"
     RigidSegment = "RigidSegment"
@@ -2924,60 +2940,6 @@ class ViewTransformations(APIModel):
     rotation: Annotated[float, Field(description="The orientation in radian.")]
 
 
-class WallDetails(APIModel):
-    geometryType: GeometryType
-    begCoordinate: Coordinate2D
-    endCoordinate: Coordinate2D
-    zCoordinate: float
-    flipped: bool | None = None
-    height: Annotated[float, Field(description="height relative to bottom")]
-    bottomOffset: Annotated[float, Field(description="base level of the wall relative to the floor level")]
-    offset: Annotated[float, Field(description="wall's base line's offset from ref. line")]
-    arcAngle: Annotated[float | None, Field(description="The arc angle of the curved wall in radians.")] = None
-    begThickness: Annotated[
-        float | None,
-        Field(description="Thickness at the beginning of wall, it will return 0 for poly wall type"),
-    ] = None
-    endThickness: Annotated[
-        float | None,
-        Field(description="Thickness at the end of wall, it will return 0 for poly wall type"),
-    ] = None
-    polygonOutline: Annotated[
-        list[Coordinate2D] | None,
-        Field(description="Polygon outline in case of polygonal wall"),
-    ] = None
-    polygonArcs: Annotated[
-        list[PolyArc] | None,
-        Field(description="Polygon arcs in case of polygonal wall"),
-    ] = None
-    structureType: WallStructureType | None = None
-    buildingMaterialId: AttributeId | None = None
-    compositeId: AttributeId | None = None
-    profileId: AttributeId | None = None
-
-
-class SlabDetails(APIModel):
-    thickness: Annotated[float, Field(description="Thickness of the slab.")]
-    level: Annotated[
-        float,
-        Field(description="Distance of the reference level of the slab from the floor level."),
-    ]
-    offsetFromTop: Annotated[
-        float,
-        Field(description="Vertical distance between the reference level and the top of the slab."),
-    ]
-    zCoordinate: float
-    polygonOutline: Annotated[list[Coordinate2D], Field(description="Polygon outline of the slab.")]
-    polygonArcs: Annotated[list[PolyArc] | None, Field(description="Polygon outline arcs of the slab.")] = None
-    holes: Annotated[
-        list[Hole2D],
-        Field(description="A list of 2D holes in an element defined by closed polylines"),
-    ]
-    structureType: SlabStructureType | None = None
-    buildingMaterialId: AttributeId | None = None
-    compositeId: AttributeId | None = None
-
-
 class LinkData(APIModel):
     """The marker link data"""
     referredView: Annotated[
@@ -3307,7 +3269,7 @@ class DrawingDetails(APIModel):
 
 
 class LabelDetails(APIModel):
-    libPart: LibPartDetails
+    libPart: LibPartDetails | None = None
     ownerElementId: ElementId | None = None
     ownerElementType: ElementType | None = None
     begCoordinate: Coordinate2D
@@ -3545,6 +3507,56 @@ class ZoneBoundaryPart(APIModel):
     ]
 
 
+class CoverFill(APIModel):
+    """Floor plan cover fill settings of a Column or Beam."""
+    use: Annotated[bool, Field(description="Whether the cover fill is shown on the floor plan.")]
+    useFromSurface: Annotated[
+        bool,
+        Field(description="Whether the fill is taken from the top surface material of the element."),
+    ]
+    orientationComesFrom3D: Annotated[
+        bool,
+        Field(description="Whether the cover fill orientation comes from the 3D view of the element."),
+    ]
+    fillId: AttributeId
+    foregroundPen: int
+    backgroundPen: int
+    transformationType: TransformationType
+    transformation: CoverFillTransformation
+
+
+class HatchOrientation(APIModel):
+    """Orientation and distortion parameters of a fill."""
+    type: HatchOrientationType
+    origin: Annotated[
+        Coordinate2D,
+        Field(description="The origin of the fill relative to the project origin."),
+    ]
+    matrix00: Annotated[
+        float,
+        Field(description="X component of the primary distortion (direction) vector."),
+    ]
+    matrix10: Annotated[
+        float,
+        Field(description="Y component of the primary distortion (direction) vector."),
+    ]
+    matrix01: Annotated[float, Field(description="X component of the secondary distortion vector.")]
+    matrix11: Annotated[float, Field(description="Y component of the secondary distortion vector.")]
+    innerRadius: Annotated[
+        float,
+        Field(description="Radius for circular fill distortion, used when type is Centered."),
+    ]
+
+
+class OverriddenMaterial(APIModel):
+    """A surface material that may override the one inherited from the element's structure (building material, composite or profile)."""
+    overridden: Annotated[
+        bool,
+        Field(description="True if the material is overridden on the element level."),
+    ]
+    attributeId: AttributeId | None = None
+
+
 class Details(APIModel):
     """Details of an element."""
     floorIndex: float | None = None
@@ -3570,6 +3582,27 @@ class Details(APIModel):
 class ElementsWithDetail(APIModel):
     elementId: ElementId
     details: Annotated[Details, Field(description="Details of an element.")]
+
+
+class SectionElement(APIModel):
+    sectionElementId: Annotated[
+        ElementId,
+        Field(
+            description="The identifier of the section element itself, accepted by CreateAssociativeDimensionsOnSection as sectionElementId."
+        ),
+    ]
+    ownerElementId: Annotated[
+        ElementId,
+        Field(
+            description="The identifier of the owner element the section element was generated from - this is what every other listing command returns."
+        ),
+    ]
+    ownerElementType: Annotated[
+        ElementType | None,
+        Field(
+            description="The type of the owner element. Only present when the owner's header is readable from the section database."
+        ),
+    ] = None
 
 
 class Collision(APIModel):
@@ -3743,6 +3776,91 @@ class DesignOptionAndSetPair(APIModel):
     setName: str
 
 
+class ColumnData(APIModel):
+    """The parameters of the new Column."""
+    favoriteName: Annotated[
+        str | None,
+        Field(
+            description="Optional name of a favorite to base the new element on. Its settings are applied first, then the explicitly given fields override them."
+        ),
+    ] = None
+    coordinates: Annotated[Coordinates, Field(description="3D coordinate.")]
+    height: Annotated[float | None, Field(description="Optional column height.", gt=0.0)] = None
+    axisRotationAngle: Annotated[float | None, Field(description="Optional column rotation angle in radians.")] = None
+    width: Annotated[
+        float | None,
+        Field(
+            description="Cross section width of the column. Applied to all segments.",
+            gt=0.0,
+        ),
+    ] = None
+    depth: Annotated[
+        float | None,
+        Field(
+            description="Cross section depth (height) of the column. Applied to all segments. Only effective for rectangular columns.",
+            gt=0.0,
+        ),
+    ] = None
+    coreAnchor: ColumnCoreAnchor | None = None
+    circleBased: Annotated[
+        bool | None,
+        Field(
+            description="True for a round column cross section, false for rectangular. Ignored if profileId is also given. Applied to all segments."
+        ),
+    ] = None
+    isWidthAndHeightLinked: Annotated[
+        bool | None,
+        Field(
+            description="When true (the default), Archicad keeps width and depth equal and setting one changes the other - set to false to give width/depth independent values. Applied to all segments."
+        ),
+    ] = None
+    buildingMaterialId: Annotated[
+        AttributeId | None,
+        Field(
+            description="Cross section building material (round or rectangular, per circleBased). Applied to all segments."
+        ),
+    ] = None
+    profileId: Annotated[
+        AttributeId | None,
+        Field(
+            description="Switches the cross section to this custom extruded profile (circleBased becomes false). Applied to all segments."
+        ),
+    ] = None
+    floorIndex: Annotated[
+        int | None,
+        Field(description="Optional floor index. If omitted, derived from the coordinate's z value."),
+    ] = None
+
+
+class SlabData(APIModel):
+    """The parameters of the new Slab."""
+    favoriteName: Annotated[
+        str | None,
+        Field(
+            description="Optional name of a favorite to base the new element on. Its settings are applied first, then the explicitly given fields override them."
+        ),
+    ] = None
+    level: Annotated[
+        float,
+        Field(description="The Z coordinate value of the reference line of the slab."),
+    ]
+    thickness: Annotated[float | None, Field(description="Optional slab thickness.", gt=0.0)] = None
+    referencePlaneLocation: SlabReferencePlaneLocation | None = None
+    polygonCoordinates: Annotated[
+        list[Coordinate2D],
+        Field(description="The 2D coordinates of the edge of the slab.", min_length=3),
+    ]
+    polygonArcs: Annotated[list[PolyArc] | None, Field(description="Polygon outline arcs of the slab.")] = None
+    holes: Annotated[
+        list[Hole2D] | None,
+        Field(description="A list of 2D holes in an element defined by closed polylines"),
+    ] = None
+    floorIndex: Annotated[
+        int | None,
+        Field(description="Optional floor index. If omitted, derived from level."),
+    ] = None
+
+
 class ObjectData(APIModel):
     """The parameters of the new Object."""
     libraryPartName: Annotated[str, Field(description="The name of the library part to use.")]
@@ -3790,10 +3908,22 @@ class ObjectData(APIModel):
         int | None,
         Field(description="Optional floor index. If omitted, derived from the coordinate's z value."),
     ] = None
+    favoriteName: Annotated[
+        str | None,
+        Field(
+            description="Optional name of a favorite to base the new element on. Its settings are applied first, then the explicitly given fields override them."
+        ),
+    ] = None
 
 
 class MeshData(APIModel):
     """The parameters of the new Mesh."""
+    favoriteName: Annotated[
+        str | None,
+        Field(
+            description="Optional name of a favorite to base the new element on. Its settings are applied first, then the explicitly given fields override them."
+        ),
+    ] = None
     floorIndex: int | None = None
     level: Annotated[float | None, Field(description="The Z reference level of coordinates.")] = None
     skirtType: MeshSkirtType | None = None
@@ -3845,6 +3975,12 @@ class MeshData(APIModel):
 
 class ZoneData(APIModel):
     """The parameters of the new Zone."""
+    favoriteName: Annotated[
+        str | None,
+        Field(
+            description="Optional name of a favorite to base the new element on. Its settings are applied first, then the explicitly given fields override them."
+        ),
+    ] = None
     floorIndex: float | None = None
     name: Annotated[str, Field(description="Name of the zone.")]
     numberStr: Annotated[str, Field(description="Zone number.")]
@@ -3870,7 +4006,75 @@ class ZoneData(APIModel):
     ]
 
 
+class BeamData(APIModel):
+    favoriteName: Annotated[
+        str | None,
+        Field(
+            description="Optional name of a favorite to base the new element on. Its settings are applied first, then the explicitly given fields override them."
+        ),
+    ] = None
+    begCoordinate: Coordinate2D
+    endCoordinate: Coordinate2D
+    floorIndex: Annotated[
+        int | None,
+        Field(description="Optional floor index. If omitted, derived from zCoordinate."),
+    ] = None
+    zCoordinate: float
+    offset: float | None = None
+    slantAngle: Annotated[
+        float | None,
+        Field(
+            description="Slant angle in radians. A non-zero value also switches the beam to slanted, unless isSlanted is given explicitly."
+        ),
+    ] = None
+    isSlanted: Annotated[
+        bool | None,
+        Field(description="Optional explicit slanted state. By default it is derived from slantAngle."),
+    ] = None
+    profileAngle: Annotated[
+        float | None,
+        Field(description="Rotation angle of the profile around the beam's center line, in radians."),
+    ] = None
+    arcAngle: float | None = None
+    verticalCurveHeight: float | None = None
+    width: Annotated[
+        float | None,
+        Field(
+            description="Cross section width of the beam. Applied to all segments.",
+            gt=0.0,
+        ),
+    ] = None
+    height: Annotated[
+        float | None,
+        Field(
+            description="Cross section height of the beam. Applied to all segments.",
+            gt=0.0,
+        ),
+    ] = None
+    anchorPoint: BeamAnchorPoint | None = None
+    isWidthAndHeightLinked: Annotated[
+        bool | None,
+        Field(
+            description="When true (the default), Archicad keeps width and height equal and setting one changes the other - set to false to give width/height independent values. Applied to all segments."
+        ),
+    ] = None
+    buildingMaterialId: Annotated[
+        AttributeId | None,
+        Field(description="Cross section building material. Applied to all segments."),
+    ] = None
+    profileId: Annotated[
+        AttributeId | None,
+        Field(description="Switches the cross section to this custom extruded profile. Applied to all segments."),
+    ] = None
+
+
 class WallData(APIModel):
+    favoriteName: Annotated[
+        str | None,
+        Field(
+            description="Optional name of a favorite to base the new element on. Its settings are applied first, then the explicitly given fields override them."
+        ),
+    ] = None
     begCoordinate: Coordinate2D
     endCoordinate: Coordinate2D
     floorIndex: Annotated[
@@ -3894,7 +4098,7 @@ class WallData(APIModel):
             description="Arc angle in radians; non-zero creates a curved wall (begCoordinate/endCoordinate are the chord endpoints)."
         ),
     ] = None
-    referenceLineLocation: ReferenceLineLocation | None = None
+    referenceLineLocation: WallReferenceLineLocation | None = None
     structureType: WallStructureType | None = None
     buildingMaterialId: AttributeId | None = None
     compositeId: AttributeId | None = None
@@ -3903,6 +4107,12 @@ class WallData(APIModel):
 
 class LabelData(APIModel):
     """The parameters of the new Label."""
+    favoriteName: Annotated[
+        str | None,
+        Field(
+            description="Optional name of a favorite to base the new element on. Its settings are applied first, then the explicitly given fields override them."
+        ),
+    ] = None
     parentElementId: Annotated[
         ElementId | None,
         Field(description="The parent element if the label is an associative label."),
@@ -4075,6 +4285,12 @@ class LampData(APIModel):
         int | None,
         Field(description="Optional floor index. If omitted, derived from the coordinate's z value."),
     ] = None
+    favoriteName: Annotated[
+        str | None,
+        Field(
+            description="Optional name of a favorite to base the new element on. Its settings are applied first, then the explicitly given fields override them."
+        ),
+    ] = None
 
 
 class LayoutSettingsData(APIModel):
@@ -4096,6 +4312,12 @@ class LayoutSettingsData(APIModel):
 
 class ArcData(APIModel):
     """The parameters of the new Arc."""
+    favoriteName: Annotated[
+        str | None,
+        Field(
+            description="Optional name of a favorite to base the new element on. Its settings are applied first, then the explicitly given fields override them."
+        ),
+    ] = None
     floorInd: Annotated[
         float | None,
         Field(description="The identifier of the floor. Optional parameter, by default the current floor is used."),
@@ -4126,6 +4348,12 @@ class ArcData(APIModel):
 
 class CircleData(APIModel):
     """The parameters of the new Circle."""
+    favoriteName: Annotated[
+        str | None,
+        Field(
+            description="Optional name of a favorite to base the new element on. Its settings are applied first, then the explicitly given fields override them."
+        ),
+    ] = None
     floorInd: Annotated[
         float | None,
         Field(description="The identifier of the floor. Optional parameter, by default the current floor is used."),
@@ -4154,6 +4382,12 @@ class CircleData(APIModel):
 
 class HatchData(APIModel):
     """The parameters of the new Hatch."""
+    favoriteName: Annotated[
+        str | None,
+        Field(
+            description="Optional name of a favorite to base the new element on. Its settings are applied first, then the explicitly given fields override them."
+        ),
+    ] = None
     floorInd: Annotated[
         float | None,
         Field(description="The identifier of the floor. Optional parameter, by default the current floor is used."),
@@ -4195,6 +4429,12 @@ class HatchData(APIModel):
 
 class LineElementData(APIModel):
     """The parameters of the new Line."""
+    favoriteName: Annotated[
+        str | None,
+        Field(
+            description="Optional name of a favorite to base the new element on. Its settings are applied first, then the explicitly given fields override them."
+        ),
+    ] = None
     floorInd: Annotated[
         float | None,
         Field(description="The identifier of the floor. Optional parameter, by default the current floor is used."),
@@ -4223,6 +4463,12 @@ class LineElementData(APIModel):
 
 class SplineData(APIModel):
     """The parameters of the new Spline."""
+    favoriteName: Annotated[
+        str | None,
+        Field(
+            description="Optional name of a favorite to base the new element on. Its settings are applied first, then the explicitly given fields override them."
+        ),
+    ] = None
     floorInd: Annotated[
         float | None,
         Field(description="The identifier of the floor. Optional parameter, by default the current floor is used."),
@@ -4575,6 +4821,7 @@ class BuildingMaterialData(APIModel):
 
 class WallWithDetails(APIModel):
     elementId: ElementId
+    geometryType: WallModificationGeometryType | None = None
     begCoordinate: Coordinate2D | None = None
     endCoordinate: Coordinate2D | None = None
     arcAngle: Annotated[
@@ -4583,7 +4830,13 @@ class WallWithDetails(APIModel):
             description="Arc angle in radians; non-zero makes the wall curved (begCoordinate/endCoordinate are the chord endpoints)."
         ),
     ] = None
-    height: Annotated[float | None, Field(gt=0.0)] = None
+    height: Annotated[
+        float | None,
+        Field(
+            description="Sets relativeTopStory to 0 (explicit height). Do not combine with relativeTopStory in the same call - whichever is applied last wins, and Archicad recomputes the actual height from the story elevations once relativeTopStory is non-zero.",
+            gt=0.0,
+        ),
+    ] = None
     thickness: Annotated[float | None, Field(gt=0.0)] = None
     bottomOffset: float | None = None
     offset: float | None = None
@@ -4591,41 +4844,113 @@ class WallWithDetails(APIModel):
     buildingMaterialId: AttributeId | None = None
     compositeId: AttributeId | None = None
     profileId: AttributeId | None = None
-
-
-class BeamWithDetails(APIModel):
-    elementId: ElementId
-    begCoordinate: Coordinate2D | None = None
-    endCoordinate: Coordinate2D | None = None
-    level: float | None = None
-    offset: float | None = None
-    slantAngle: float | None = None
-    arcAngle: float | None = None
-    verticalCurveHeight: float | None = None
-
-
-class SlabWithDetails(APIModel):
-    elementId: ElementId
-    zCoordinate: float | None = None
-    thickness: Annotated[float | None, Field(gt=0.0)] = None
-    structureType: SlabStructureType | None = None
-    buildingMaterialId: AttributeId | None = None
-    compositeId: AttributeId | None = None
-    polygonOutline: Annotated[list[Coordinate2D] | None, Field(min_length=3)] = None
-    polygonArcs: list[PolyArc] | None = None
-    holes: Annotated[
-        list[Hole2D] | None,
-        Field(description="A list of 2D holes in an element defined by closed polylines"),
+    referenceLineLocation: WallReferenceLineLocation | None = None
+    profileType: WallModificationProfileType | None = None
+    slantAlpha: Annotated[
+        float | None,
+        Field(description="Only has an effect once profileType is set to Slanted or Trapez."),
     ] = None
+    slantBeta: Annotated[
+        float | None,
+        Field(description="Only has an effect once profileType is set to Slanted or Trapez."),
+    ] = None
+    topOffset: Annotated[
+        float | None,
+        Field(description="Only has an effect when relativeTopStory is non-zero."),
+    ] = None
+    relativeTopStory: Annotated[
+        float | None,
+        Field(
+            description="Non-zero links the wall's top to another story instead of an explicit height - do not set together with 'height' in the same call, see the note on 'height' above."
+        ),
+    ] = None
+    zoneRel: WallZoneRelation | None = None
+    visibility: StoryVisibility | None = None
+    isAutoOnStoryVisibility: Annotated[
+        bool | None,
+        Field(
+            description="When true (the default on a new wall), Archicad recomputes 'visibility' automatically from the wall's vertical extent and ignores any value set for it. Setting 'visibility' without also setting this field turns it off automatically."
+        ),
+    ] = None
+    referenceMaterial: OverriddenMaterial | None = None
+    oppositeMaterial: OverriddenMaterial | None = None
+    sideMaterial: OverriddenMaterial | None = None
+    cutFillPen: OverriddenPen | None = None
+    cutFillBackgroundPen: OverriddenPen | None = None
 
 
 class ColumnWithDetails(APIModel):
     elementId: ElementId
     origin: Coordinate2D | None = None
     zCoordinate: float | None = None
-    height: Annotated[float | None, Field(gt=0.0)] = None
+    height: Annotated[
+        float | None,
+        Field(
+            description="Sets relativeTopStory to 0 (explicit height). Do not combine with relativeTopStory in the same call - see the note on relativeTopStory below.",
+            gt=0.0,
+        ),
+    ] = None
     bottomOffset: float | None = None
     axisRotationAngle: float | None = None
+    coreAnchor: ColumnCoreAnchor | None = None
+    isSlanted: bool | None = None
+    slantAngle: float | None = None
+    slantDirectionAngle: float | None = None
+    isFlipped: Annotated[
+        bool | None,
+        Field(
+            description="Has no visible effect on a circular column (circleBased cross section) - Archicad ignores it there."
+        ),
+    ] = None
+    wrapping: bool | None = None
+    topOffset: float | None = None
+    relativeTopStory: Annotated[
+        float | None,
+        Field(
+            description="Non-zero links the column's top to another story instead of an explicit height - do not set together with 'height' in the same call, see the note on 'height' above."
+        ),
+    ] = None
+    width: Annotated[
+        float | None,
+        Field(
+            description="Cross section width of the column. Applied to all segments.",
+            gt=0.0,
+        ),
+    ] = None
+    depth: Annotated[
+        float | None,
+        Field(
+            description="Cross section depth (height) of the column. Applied to all segments.",
+            gt=0.0,
+        ),
+    ] = None
+    isWidthAndHeightLinked: Annotated[
+        bool | None,
+        Field(
+            description="When true, Archicad keeps width and depth equal and setting one changes the other - set to false first to give width/depth independent values. Applied to all segments."
+        ),
+    ] = None
+    circleBased: Annotated[
+        bool | None,
+        Field(
+            description="True for a round column cross section, false for rectangular. Ignored once profileId switches the column to a custom profile shape. Applied to all segments."
+        ),
+    ] = None
+    buildingMaterialId: Annotated[
+        AttributeId | None,
+        Field(
+            description="Cross section building material (round or rectangular, per circleBased). Applied to all segments."
+        ),
+    ] = None
+    profileId: Annotated[
+        AttributeId | None,
+        Field(
+            description="Switches the cross section to this custom extruded profile (circleBased becomes false). Applied to all segments."
+        ),
+    ] = None
+    cutFillPen: OverriddenPen | None = None
+    cutFillBackgroundPen: OverriddenPen | None = None
+    coverFill: CoverFill | None = None
 
 
 class WindowWithDetails(APIModel):
@@ -4949,6 +5274,12 @@ class MorphPolygon(APIModel):
             min_length=3,
         ),
     ]
+    filled: Annotated[
+        bool | None,
+        Field(
+            description="Defaults to true. Set to false to create only this loop's edges (a wireframe outline, e.g. a bare rectangle with no surface fill) without an actual face - holes/surfaceId are ignored in that case, since there is no fill for them to apply to."
+        ),
+    ] = None
     holes: Annotated[
         list[MorphPolygonHole] | None,
         Field(description="Optional hole loops cut out of this face, each a clockwise list of vertex indices."),
@@ -4966,6 +5297,16 @@ class SolidLinkData(APIModel):
     operatorId: Annotated[ElementId, Field(description="The element performing the operation.")]
     operation: SolidOperationType
     linkFlags: SolidLinkFlags | None = None
+
+
+class BeamHole(APIModel):
+    holeId: float
+    type: BeamHoleType
+    showContour: bool | None = None
+    centerX: float
+    centerZ: float
+    width: float
+    height: float | None = None
 
 
 class MEPElement(APIModel):
@@ -5195,6 +5536,175 @@ class ElementsByIFCId(APIModel):
     ]
 
 
+class WallDetails(APIModel):
+    geometryType: WallGeometryType
+    begCoordinate: Coordinate2D
+    endCoordinate: Coordinate2D
+    zCoordinate: float
+    flipped: bool | None = None
+    height: Annotated[float, Field(description="height relative to bottom")]
+    bottomOffset: Annotated[float, Field(description="base level of the wall relative to the floor level")]
+    offset: Annotated[float, Field(description="wall's base line's offset from ref. line")]
+    arcAngle: Annotated[float | None, Field(description="The arc angle of the curved wall in radians.")] = None
+    begThickness: Annotated[
+        float | None,
+        Field(description="Thickness at the beginning of wall, it will return 0 for poly wall type"),
+    ] = None
+    endThickness: Annotated[
+        float | None,
+        Field(description="Thickness at the end of wall, it will return 0 for poly wall type"),
+    ] = None
+    polygonOutline: Annotated[
+        list[Coordinate2D] | None,
+        Field(description="Polygon outline in case of polygonal wall"),
+    ] = None
+    polygonArcs: Annotated[
+        list[PolyArc] | None,
+        Field(description="Polygon arcs in case of polygonal wall"),
+    ] = None
+    structureType: WallStructureType | None = None
+    buildingMaterialId: AttributeId | None = None
+    compositeId: AttributeId | None = None
+    profileId: AttributeId | None = None
+    referenceLineLocation: WallReferenceLineLocation | None = None
+    profileType: WallProfileType | None = None
+    slantAlpha: Annotated[
+        float | None,
+        Field(description="Only has an effect once profileType is set to Slanted or Trapez."),
+    ] = None
+    slantBeta: Annotated[
+        float | None,
+        Field(description="Only has an effect once profileType is set to Slanted or Trapez."),
+    ] = None
+    topOffset: Annotated[
+        float | None,
+        Field(description="Only has an effect when relativeTopStory is non-zero."),
+    ] = None
+    relativeTopStory: Annotated[
+        float | None,
+        Field(
+            description="Non-zero links the wall's top to another story instead of an explicit height - do not set together with 'height' via ModifyWalls in the same call."
+        ),
+    ] = None
+    zoneRel: WallZoneRelation | None = None
+    visibility: StoryVisibility | None = None
+    isAutoOnStoryVisibility: Annotated[
+        bool | None,
+        Field(
+            description="When true (the default on a new wall), Archicad recomputes 'visibility' automatically from the wall's vertical extent and ignores any value set for it."
+        ),
+    ] = None
+    referenceMaterial: OverriddenMaterial | None = None
+    oppositeMaterial: OverriddenMaterial | None = None
+    sideMaterial: OverriddenMaterial | None = None
+    cutFillPen: OverriddenPen | None = None
+    cutFillBackgroundPen: OverriddenPen | None = None
+
+
+class BeamDetails(APIModel):
+    begCoordinate: Coordinate2D
+    endCoordinate: Coordinate2D
+    zCoordinate: float
+    level: Annotated[float, Field(description="base height of the beam relative to the floor level")]
+    offset: Annotated[float, Field(description="beam ref.line offset from the center")]
+    slantAngle: Annotated[float, Field(description="The slant angle of the beam in radians.")]
+    arcAngle: Annotated[
+        float,
+        Field(description="The arc angle of the (horizontally) curved beam in radians."),
+    ]
+    verticalCurveHeight: Annotated[float, Field(description="The height of the vertical curve of the beam.")]
+    beamShape: BeamShape | None = None
+    isSlanted: bool | None = None
+    isFlipped: bool | None = None
+    profileAngle: float | None = None
+    anchorPoint: BeamAnchorPoint | None = None
+    cutFillPen: OverriddenPen | None = None
+    cutFillBackgroundPen: OverriddenPen | None = None
+    coverFill: CoverFill | None = None
+    holes: list[BeamHole] | None = None
+    width: Annotated[
+        float | None,
+        Field(description="Cross section width of the beam (all segments)."),
+    ] = None
+    height: Annotated[
+        float | None,
+        Field(description="Cross section height of the beam (all segments)."),
+    ] = None
+    isWidthAndHeightLinked: Annotated[
+        bool | None,
+        Field(
+            description="When true, Archicad keeps width and height equal - set to false via ModifyBeams/CreateBeams to give them independent values."
+        ),
+    ] = None
+    buildingMaterialId: Annotated[
+        AttributeId | None,
+        Field(description="Present when the cross section uses a building material rather than a custom profile."),
+    ] = None
+    profileId: Annotated[
+        AttributeId | None,
+        Field(
+            description="Present when the cross section uses a custom extruded profile rather than a building material."
+        ),
+    ] = None
+
+
+class ColumnDetails(APIModel):
+    origin: Coordinate2D
+    zCoordinate: float
+    height: Annotated[float, Field(description="height relative to bottom")]
+    bottomOffset: Annotated[float, Field(description="base level of the column relative to the floor level")]
+    axisRotationAngle: float | None = None
+    coreAnchor: ColumnCoreAnchor | None = None
+    isSlanted: bool | None = None
+    slantAngle: float | None = None
+    slantDirectionAngle: float | None = None
+    isFlipped: Annotated[
+        bool | None,
+        Field(
+            description="Has no visible effect on a circular column (circleBased cross section) - Archicad ignores it there."
+        ),
+    ] = None
+    wrapping: bool | None = None
+    topOffset: float | None = None
+    relativeTopStory: Annotated[
+        float | None,
+        Field(
+            description="Non-zero links the column's top to another story instead of an explicit height - do not set together with 'height' via ModifyColumns in the same call."
+        ),
+    ] = None
+    cutFillPen: OverriddenPen | None = None
+    cutFillBackgroundPen: OverriddenPen | None = None
+    coverFill: CoverFill | None = None
+    width: Annotated[
+        float | None,
+        Field(description="Cross section width of the column (all segments)."),
+    ] = None
+    depth: Annotated[
+        float | None,
+        Field(description="Cross section depth (height) of the column (all segments)."),
+    ] = None
+    circleBased: Annotated[
+        bool | None,
+        Field(description="True for a round column cross section, false for rectangular."),
+    ] = None
+    isWidthAndHeightLinked: Annotated[
+        bool | None,
+        Field(
+            description="When true, Archicad keeps width and depth equal - set to false via ModifyColumns/CreateColumns to give them independent values."
+        ),
+    ] = None
+    buildingMaterialId: Annotated[
+        AttributeId | None,
+        Field(description="Present when the cross section uses a building material rather than a custom profile."),
+    ] = None
+    profileId: Annotated[
+        AttributeId | None,
+        Field(
+            description="Present when the cross section uses a custom extruded profile rather than a building material."
+        ),
+    ] = None
+
+
 class CurtainWallPanelDetails(APIModel):
     polygonCoordinates: Annotated[
         list[Coordinate3D],
@@ -5238,17 +5748,22 @@ class MorphBody(APIModel):
     vertices: Annotated[
         list[Coordinate3D],
         Field(
-            description="Flat, indexed vertex list, local to the Morph's own placement (not world coordinates).",
-            min_length=4,
+            description="Flat, indexed vertex list, local to the Morph's own placement (not world coordinates). A Solid body needs at least 4 (a tetrahedron, the minimum closed volume); a Surface body has no closedness requirement at all - the minimum is 2 vertices joined by a single wireEdge (a lone vertex with no edge at all is rejected by Archicad itself, confirmed live) - enforced with a bodyType-aware error message, not by this minItems floor alone.",
+            min_length=2,
         ),
     ]
     polygons: Annotated[
-        list[MorphPolygon],
+        list[MorphPolygon] | None,
         Field(
-            description="One entry per face. Each face is a closed loop of vertex indices (into `vertices`), counterclockwise as seen from outside the body.",
-            min_length=4,
+            description="One entry per face loop (into `vertices`), counterclockwise as seen from outside the body. Optional - a body made entirely of wireEdges (see below) needs none. Set \"filled\": false on an entry to create only that loop's edges (e.g. the outline of a pyramid's side faces) without an actual filled face."
         ),
-    ]
+    ] = None
+    wireEdges: Annotated[
+        list[WireEdge] | None,
+        Field(
+            description='Standalone edges that belong to no face at all (e.g. a bare rectangle outline, or a pyramid with a filled base but wireframe-only sides - set "filled": false on a polygons entry for a whole closed loop like that instead, this is for individual edges not already covered by any polygon loop). Reported accurately by GetDetailsOfElements (every edge with zero adjacent faces); accepted back by CreateMorphs/ModifyMorphs. Identifies an edge by the (unordered) pair of vertex indices it connects - reuses whatever edge already exists between those two vertices if the polygons above happen to share it.'
+        ),
+    ] = None
     edgeOverrides: Annotated[
         list[EdgeOverride] | None,
         Field(
@@ -5394,42 +5909,17 @@ class DimensionData(APIModel):
     witnessPoints: list[CoordinateWitnessPoint] | None = None
 
 
-class DetailsOfElement(APIModel):
-    """Details of an element."""
-    type: ElementType
-    id: str
-    floorIndex: float
-    layerIndex: float
-    drawIndex: float
-    details: Annotated[
-        WallDetails
-        | BeamDetails
-        | SlabDetails
-        | ColumnDetails
-        | DetailWorksheetDetails
-        | WindowDoorDetails
-        | LibPartBasedElementDetails
-        | PolylineDetails
-        | ZoneDetails
-        | CurtainWallDetails
-        | CurtainWallSegmentDetails
-        | CurtainWallPanelDetails
-        | CurtainWallFrameDetails
-        | MeshDetails
-        | MorphDetails
-        | DrawingDetails
-        | LabelDetails
-        | NotYetSupportedElementTypeDetails,
-        Field(
-            description="Represents the complete type-specific details of an element. Used as output from GET requests"
-        ),
+class FloorFill(APIModel):
+    """Floor plan cover fill settings of a Slab."""
+    use: Annotated[bool, Field(description="Whether the cover fill is shown on the floor plan.")]
+    foregroundPen: int
+    backgroundPen: int
+    fillId: AttributeId
+    use3DHatching: Annotated[
+        bool,
+        Field(description="Use Vectorial 3D Hatch patterns in Floor Plan view, taken from the top side material."),
     ]
-    floorPlanPolygons: Annotated[
-        list[FloorPlanPolygon] | None,
-        Field(
-            description="Cut-fill polygons as drawn on the floor plan (wall joins resolved by ArchiCAD). Available for elements with a cut-fill representation (walls, columns, beams). Absent when the element has no cut fill or when the floor plan database is not accessible."
-        ),
-    ] = None
+    orientation: HatchOrientation
 
 
 class AttributesToDeleteItem(APIModel):
@@ -5663,6 +6153,81 @@ class SurfaceData(APIModel):
     texture: Texture | None = None
 
 
+class BeamWithDetails(APIModel):
+    elementId: ElementId
+    begCoordinate: Coordinate2D | None = None
+    endCoordinate: Coordinate2D | None = None
+    level: float | None = None
+    offset: float | None = None
+    slantAngle: float | None = None
+    arcAngle: float | None = None
+    verticalCurveHeight: float | None = None
+    beamShape: BeamShape | None = None
+    isSlanted: bool | None = None
+    isFlipped: bool | None = None
+    profileAngle: float | None = None
+    anchorPoint: BeamAnchorPoint | None = None
+    width: Annotated[
+        float | None,
+        Field(
+            description="Cross section width of the beam. Applied to all segments.",
+            gt=0.0,
+        ),
+    ] = None
+    height: Annotated[
+        float | None,
+        Field(
+            description="Cross section height of the beam. Applied to all segments.",
+            gt=0.0,
+        ),
+    ] = None
+    isWidthAndHeightLinked: Annotated[
+        bool | None,
+        Field(
+            description="When true, Archicad keeps width and height equal and setting one changes the other - set to false first to give width/height independent values. Applied to all segments."
+        ),
+    ] = None
+    buildingMaterialId: Annotated[
+        AttributeId | None,
+        Field(description="Cross section building material. Applied to all segments."),
+    ] = None
+    profileId: Annotated[
+        AttributeId | None,
+        Field(description="Switches the cross section to this custom extruded profile. Applied to all segments."),
+    ] = None
+    holes: Annotated[
+        list[BeamHole] | None,
+        Field(description="Replaces all holes currently placed on the beam."),
+    ] = None
+    cutFillPen: OverriddenPen | None = None
+    cutFillBackgroundPen: OverriddenPen | None = None
+    coverFill: CoverFill | None = None
+
+
+class SlabWithDetails(APIModel):
+    elementId: ElementId
+    zCoordinate: float | None = None
+    thickness: Annotated[float | None, Field(gt=0.0)] = None
+    structureType: SlabStructureType | None = None
+    buildingMaterialId: AttributeId | None = None
+    compositeId: AttributeId | None = None
+    referencePlaneLocation: SlabReferencePlaneLocation | None = None
+    polygonOutline: Annotated[list[Coordinate2D] | None, Field(min_length=3)] = None
+    polygonArcs: list[PolyArc] | None = None
+    holes: Annotated[
+        list[Hole2D] | None,
+        Field(
+            description="Can be given on its own, without polygonOutline, to add/remove/clear holes in place (an empty array clears all holes) - the slab's current outline is reused unchanged."
+        ),
+    ] = None
+    topMaterial: OverriddenMaterial | None = None
+    sideMaterial: OverriddenMaterial | None = None
+    bottomMaterial: OverriddenMaterial | None = None
+    cutFillPen: OverriddenPen | None = None
+    cutFillBackgroundPen: OverriddenPen | None = None
+    floorFill: FloorFill | None = None
+
+
 class MorphWithDetails(APIModel):
     elementId: ElementId
     translation: Coordinate3D | None = None
@@ -5774,6 +6339,35 @@ class CompositeAttribute(APIModel):
     separators: list[CompositeSeparator] | None = None
 
 
+class SlabDetails(APIModel):
+    thickness: Annotated[float, Field(description="Thickness of the slab.")]
+    level: Annotated[
+        float,
+        Field(description="Distance of the reference level of the slab from the floor level."),
+    ]
+    offsetFromTop: Annotated[
+        float,
+        Field(description="Vertical distance between the reference level and the top of the slab."),
+    ]
+    zCoordinate: float
+    polygonOutline: Annotated[list[Coordinate2D], Field(description="Polygon outline of the slab.")]
+    polygonArcs: Annotated[list[PolyArc] | None, Field(description="Polygon outline arcs of the slab.")] = None
+    holes: Annotated[
+        list[Hole2D],
+        Field(description="A list of 2D holes in an element defined by closed polylines"),
+    ]
+    structureType: SlabStructureType | None = None
+    buildingMaterialId: AttributeId | None = None
+    compositeId: AttributeId | None = None
+    referencePlaneLocation: SlabReferencePlaneLocation | None = None
+    topMaterial: OverriddenMaterial | None = None
+    sideMaterial: OverriddenMaterial | None = None
+    bottomMaterial: OverriddenMaterial | None = None
+    cutFillPen: OverriddenPen | None = None
+    cutFillBackgroundPen: OverriddenPen | None = None
+    floorFill: FloorFill | None = None
+
+
 class ElementsWithExecutionResults(APIModel):
     """The response of the GetElementsByType command."""
     elements: Annotated[list[ElementIdArrayItem], Field(description="A list of elements.")]
@@ -5826,6 +6420,45 @@ class ZoneRelations(APIModel):
         list[ZoneBoundaryPart],
         Field(description="Sections of curtain wall segments that border the zone."),
     ]
+
+
+class DetailsOfElement(APIModel):
+    """Details of an element."""
+    type: ElementType
+    id: str
+    floorIndex: float
+    layerIndex: float
+    drawIndex: float
+    details: Annotated[
+        WallDetails
+        | BeamDetails
+        | SlabDetails
+        | ColumnDetails
+        | DetailWorksheetDetails
+        | WindowDoorDetails
+        | LibPartBasedElementDetails
+        | ObjectDetails
+        | PolylineDetails
+        | ZoneDetails
+        | CurtainWallDetails
+        | CurtainWallSegmentDetails
+        | CurtainWallPanelDetails
+        | CurtainWallFrameDetails
+        | MeshDetails
+        | MorphDetails
+        | DrawingDetails
+        | LabelDetails
+        | NotYetSupportedElementTypeDetails,
+        Field(
+            description="Represents the complete type-specific details of an element. Used as output from GET requests"
+        ),
+    ]
+    floorPlanPolygons: Annotated[
+        list[FloorPlanPolygon] | None,
+        Field(
+            description="Cut-fill polygons as drawn on the floor plan (wall joins resolved by ArchiCAD). Available for elements with a cut-fill representation (walls, columns, beams). Absent when the element has no cut fill or when the floor plan database is not accessible."
+        ),
+    ] = None
 
 
 class Subelement(APIModel):
