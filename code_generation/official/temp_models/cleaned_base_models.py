@@ -96,16 +96,16 @@ class AttributeType(Enum):
     The type of an attribute.
     """
 
-    BuildingMaterial = "BuildingMaterial"
-    Composite = "Composite"
-    Fill = "Fill"
-    Layer = "Layer"
-    LayerCombination = "LayerCombination"
-    Line = "Line"
-    PenTable = "PenTable"
-    Profile = "Profile"
-    Surface = "Surface"
-    ZoneCategory = "ZoneCategory"
+    BUILDING_MATERIAL = "BuildingMaterial"
+    COMPOSITE = "Composite"
+    FILL = "Fill"
+    LAYER = "Layer"
+    LAYER_COMBINATION = "LayerCombination"
+    LINE = "Line"
+    PEN_TABLE = "PenTable"
+    PROFILE = "Profile"
+    SURFACE = "Surface"
+    ZONE_CATEGORY = "ZoneCategory"
 
 
 AttributeFolderName: TypeAlias = str
@@ -127,8 +127,8 @@ class AppearanceType(Enum):
     The appearance type of a line or fill attribute.
     """
 
-    ScaleWithPlan = "ScaleWithPlan"
-    ScaleIndependent = "ScaleIndependent"
+    SCALE_WITH_PLAN = "ScaleWithPlan"
+    SCALE_INDEPENDENT = "ScaleIndependent"
 
 
 class FillTypeId(Enum):
@@ -136,13 +136,13 @@ class FillTypeId(Enum):
     The filling type of a fill attribute.
     """
 
-    Vector = "Vector"
-    Symbol = "Symbol"
-    Solid = "Solid"
-    Empty = "Empty"
-    LinearGradient = "LinearGradient"
-    RadialGradient = "RadialGradient"
-    Image = "Image"
+    VECTOR = "Vector"
+    SYMBOL = "Symbol"
+    SOLID = "Solid"
+    EMPTY = "Empty"
+    LINEAR_GRADIENT = "LinearGradient"
+    RADIAL_GRADIENT = "RadialGradient"
+    IMAGE = "Image"
 
 
 class MaterialTypeId(Enum):
@@ -150,14 +150,14 @@ class MaterialTypeId(Enum):
     The material type of a surface attribute.
     """
 
-    General = "General"
-    Simple = "Simple"
-    Matte = "Matte"
-    Metal = "Metal"
-    Plastic = "Plastic"
-    Glass = "Glass"
-    Glowing = "Glowing"
-    Constant = "Constant"
+    GENERAL = "General"
+    SIMPLE = "Simple"
+    MATTE = "Matte"
+    METAL = "Metal"
+    PLASTIC = "Plastic"
+    GLASS = "Glass"
+    GLOWING = "Glowing"
+    CONSTANT = "Constant"
 
 
 class ProfileModifier(APIModel):
@@ -184,9 +184,9 @@ class LineType(Enum):
     The type of a line attribute.
     """
 
-    SolidLine = "SolidLine"
-    DashedLine = "DashedLine"
-    SymbolLine = "SymbolLine"
+    SOLID_LINE = "SolidLine"
+    DASHED_LINE = "DashedLine"
+    SYMBOL_LINE = "SymbolLine"
 
 
 class LineItemType(Enum):
@@ -194,16 +194,16 @@ class LineItemType(Enum):
     The type of a line item.
     """
 
-    IllegalItemType = "IllegalItemType"
-    SeparatorItemType = "SeparatorItemType"
-    CenterDotItemType = "CenterDotItemType"
-    CenterLineItemType = "CenterLineItemType"
-    DotItemType = "DotItemType"
-    RightAngleItemType = "RightAngleItemType"
-    ParallelItemType = "ParallelItemType"
-    LineItemType = "LineItemType"
-    CircItemType = "CircItemType"
-    ArcItemType = "ArcItemType"
+    ILLEGAL_ITEM_TYPE = "IllegalItemType"
+    SEPARATOR_ITEM_TYPE = "SeparatorItemType"
+    CENTER_DOT_ITEM_TYPE = "CenterDotItemType"
+    CENTER_LINE_ITEM_TYPE = "CenterLineItemType"
+    DOT_ITEM_TYPE = "DotItemType"
+    RIGHT_ANGLE_ITEM_TYPE = "RightAngleItemType"
+    PARALLEL_ITEM_TYPE = "ParallelItemType"
+    LINE_ITEM_TYPE = "LineItemType"
+    CIRC_ITEM_TYPE = "CircItemType"
+    ARC_ITEM_TYPE = "ArcItemType"
 
 
 class DashItem(APIModel):
@@ -234,32 +234,32 @@ class NavigatorItemType(Enum):
     The type of a navigator item. The 'UndefinedItem' type is used when the actual type of the navigator item cannot be retrieved from Archicad.
     """
 
-    UndefinedItem = "UndefinedItem"
-    ProjectMapRootItem = "ProjectMapRootItem"
-    StoryItem = "StoryItem"
-    SectionItem = "SectionItem"
-    ElevationItem = "ElevationItem"
-    InteriorElevationItem = "InteriorElevationItem"
-    WorksheetItem = "WorksheetItem"
-    DetailItem = "DetailItem"
-    DocumentFrom3DItem = "DocumentFrom3DItem"
-    Perspective3DItem = "Perspective3DItem"
-    Axonometry3DItem = "Axonometry3DItem"
-    CameraSetItem = "CameraSetItem"
-    CameraItem = "CameraItem"
-    ScheduleItem = "ScheduleItem"
-    ProjectIndexItem = "ProjectIndexItem"
-    TextListItem = "TextListItem"
-    GraphicListItem = "GraphicListItem"
-    InfoItem = "InfoItem"
-    HelpItem = "HelpItem"
-    FolderItem = "FolderItem"
-    LayoutBookRootItem = "LayoutBookRootItem"
-    SubsetItem = "SubsetItem"
-    LayoutItem = "LayoutItem"
-    DrawingItem = "DrawingItem"
-    MasterFolderItem = "MasterFolderItem"
-    MasterLayoutItem = "MasterLayoutItem"
+    UNDEFINED_ITEM = "UndefinedItem"
+    PROJECT_MAP_ROOT_ITEM = "ProjectMapRootItem"
+    STORY_ITEM = "StoryItem"
+    SECTION_ITEM = "SectionItem"
+    ELEVATION_ITEM = "ElevationItem"
+    INTERIOR_ELEVATION_ITEM = "InteriorElevationItem"
+    WORKSHEET_ITEM = "WorksheetItem"
+    DETAIL_ITEM = "DetailItem"
+    DOCUMENT_FROM3_D_ITEM = "DocumentFrom3DItem"
+    PERSPECTIVE3_D_ITEM = "Perspective3DItem"
+    AXONOMETRY3_D_ITEM = "Axonometry3DItem"
+    CAMERA_SET_ITEM = "CameraSetItem"
+    CAMERA_ITEM = "CameraItem"
+    SCHEDULE_ITEM = "ScheduleItem"
+    PROJECT_INDEX_ITEM = "ProjectIndexItem"
+    TEXT_LIST_ITEM = "TextListItem"
+    GRAPHIC_LIST_ITEM = "GraphicListItem"
+    INFO_ITEM = "InfoItem"
+    HELP_ITEM = "HelpItem"
+    FOLDER_ITEM = "FolderItem"
+    LAYOUT_BOOK_ROOT_ITEM = "LayoutBookRootItem"
+    SUBSET_ITEM = "SubsetItem"
+    LAYOUT_ITEM = "LayoutItem"
+    DRAWING_ITEM = "DrawingItem"
+    MASTER_FOLDER_ITEM = "MasterFolderItem"
+    MASTER_LAYOUT_ITEM = "MasterLayoutItem"
 
 
 class NavigatorItemMapType(Enum):
@@ -267,10 +267,10 @@ class NavigatorItemMapType(Enum):
     The type of the navigator item tree.
     """
 
-    ProjectMap = "ProjectMap"
-    ViewMap = "ViewMap"
-    MyViewMap = "MyViewMap"
-    LayoutBook = "LayoutBook"
+    PROJECT_MAP = "ProjectMap"
+    VIEW_MAP = "ViewMap"
+    MY_VIEW_MAP = "MyViewMap"
+    LAYOUT_BOOK = "LayoutBook"
 
 
 class PublisherSetId(APIModel):
@@ -321,8 +321,8 @@ class PropertyType(Enum):
     The type of a property group or a property definition.
     """
 
-    UserDefined = "UserDefined"
-    BuiltIn = "BuiltIn"
+    USER_DEFINED = "UserDefined"
+    BUILT_IN = "BuiltIn"
 
 
 class NormalNumberPropertyValue(APIModel):
@@ -470,24 +470,24 @@ class NormalAngleListPropertyValue(APIModel):
 
 
 class PropertyValueType(Enum):
-    number = "number"
-    integer = "integer"
-    string = "string"
-    boolean = "boolean"
-    length = "length"
-    area = "area"
-    volume = "volume"
-    angle = "angle"
-    numberList = "numberList"
-    integerList = "integerList"
-    stringList = "stringList"
-    booleanList = "booleanList"
-    lengthList = "lengthList"
-    areaList = "areaList"
-    volumeList = "volumeList"
-    angleList = "angleList"
-    singleEnum = "singleEnum"
-    multiEnum = "multiEnum"
+    NUMBER = "number"
+    INTEGER = "integer"
+    STRING = "string"
+    BOOLEAN = "boolean"
+    LENGTH = "length"
+    AREA = "area"
+    VOLUME = "volume"
+    ANGLE = "angle"
+    NUMBER_LIST = "numberList"
+    INTEGER_LIST = "integerList"
+    STRING_LIST = "stringList"
+    BOOLEAN_LIST = "booleanList"
+    LENGTH_LIST = "lengthList"
+    AREA_LIST = "areaList"
+    VOLUME_LIST = "volumeList"
+    ANGLE_LIST = "angleList"
+    SINGLE_ENUM = "singleEnum"
+    MULTI_ENUM = "multiEnum"
 
 
 class UserUndefinedPropertyValue(APIModel):
@@ -606,24 +606,24 @@ class ElementType(Enum):
     The type of an element.
     """
 
-    Wall = "Wall"
-    Column = "Column"
-    Beam = "Beam"
-    Window = "Window"
-    Door = "Door"
-    Object = "Object"
-    Lamp = "Lamp"
-    Slab = "Slab"
-    Roof = "Roof"
-    Mesh = "Mesh"
-    Zone = "Zone"
-    CurtainWall = "CurtainWall"
-    Shell = "Shell"
-    Skylight = "Skylight"
-    Morph = "Morph"
-    Stair = "Stair"
-    Railing = "Railing"
-    Opening = "Opening"
+    WALL = "Wall"
+    COLUMN = "Column"
+    BEAM = "Beam"
+    WINDOW = "Window"
+    DOOR = "Door"
+    OBJECT = "Object"
+    LAMP = "Lamp"
+    SLAB = "Slab"
+    ROOF = "Roof"
+    MESH = "Mesh"
+    ZONE = "Zone"
+    CURTAIN_WALL = "CurtainWall"
+    SHELL = "Shell"
+    SKYLIGHT = "Skylight"
+    MORPH = "Morph"
+    STAIR = "Stair"
+    RAILING = "Railing"
+    OPENING = "Opening"
 
 
 class TypeOfElement(APIModel):
@@ -750,14 +750,14 @@ class NumberingStyle(Enum):
     A supported numbering style.
     """
 
-    Undefined = "Undefined"
-    abc = "abc"
-    ABC = "ABC"
-    field_1 = "1"
-    field_01 = "01"
-    field_001 = "001"
-    field_0001 = "0001"
-    noID = "noID"
+    UNDEFINED = "Undefined"
+    ABC = "abc"
+    abc_1 = "ABC"
+    FIELD_1 = "1"
+    FIELD_01 = "01"
+    FIELD_001 = "001"
+    FIELD_0001 = "0001"
+    NO_ID = "noID"
 
 
 class Subset(APIModel):

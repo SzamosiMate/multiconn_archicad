@@ -11,30 +11,30 @@ from multiconn_archicad.models.base import APIModel
 
 class SurfaceType(Enum):
     """The type of a surface material."""
-    General = "General"
-    Simple = "Simple"
-    Matte = "Matte"
-    Metal = "Metal"
-    Plastic = "Plastic"
-    Glass = "Glass"
-    Glowing = "Glowing"
-    Constant = "Constant"
+    GENERAL = "General"
+    SIMPLE = "Simple"
+    MATTE = "Matte"
+    METAL = "Metal"
+    PLASTIC = "Plastic"
+    GLASS = "Glass"
+    GLOWING = "Glowing"
+    CONSTANT = "Constant"
 
 
 class AttributeType(Enum):
     """The type of an attribute."""
-    Layer = "Layer"
-    Line = "Line"
-    Fill = "Fill"
-    Composite = "Composite"
-    Surface = "Surface"
-    LayerCombination = "LayerCombination"
-    ZoneCategory = "ZoneCategory"
-    Profile = "Profile"
-    PenTable = "PenTable"
-    MEPSystem = "MEPSystem"
-    OperationProfile = "OperationProfile"
-    BuildingMaterial = "BuildingMaterial"
+    LAYER = "Layer"
+    LINE = "Line"
+    FILL = "Fill"
+    COMPOSITE = "Composite"
+    SURFACE = "Surface"
+    LAYER_COMBINATION = "LayerCombination"
+    ZONE_CATEGORY = "ZoneCategory"
+    PROFILE = "Profile"
+    PEN_TABLE = "PenTable"
+    MEP_SYSTEM = "MEPSystem"
+    OPERATION_PROFILE = "OperationProfile"
+    BUILDING_MATERIAL = "BuildingMaterial"
 
 
 class KeynoteAutoTextTokens(APIModel):
@@ -46,9 +46,9 @@ class KeynoteAutoTextTokens(APIModel):
 
 
 class LineType(Enum):
-    Solid = "Solid"
-    Dashed = "Dashed"
-    Symbol = "Symbol"
+    SOLID = "Solid"
+    DASHED = "Dashed"
+    SYMBOL = "Symbol"
 
 
 class LineDashItem(APIModel):
@@ -79,9 +79,9 @@ class OutlineArc(APIModel):
 
 
 class CutFillOrientation(Enum):
-    ProjectOrigin = "ProjectOrigin"
-    ElementOrigin = "ElementOrigin"
-    FitToSkin = "FitToSkin"
+    PROJECT_ORIGIN = "ProjectOrigin"
+    ELEMENT_ORIGIN = "ElementOrigin"
+    FIT_TO_SKIN = "FitToSkin"
 
 
 class PossibleNumericValue(APIModel):
@@ -104,14 +104,14 @@ class PossibleNumericValue(APIModel):
 
 
 class Flag(Enum):
-    Hidden = "Hidden"
-    HiddenFromScript = "HiddenFromScript"
-    Disabled = "Disabled"
-    Child = "Child"
-    Unique = "Unique"
-    Fixed = "Fixed"
-    BoldName = "BoldName"
-    Open = "Open"
+    HIDDEN = "Hidden"
+    HIDDEN_FROM_SCRIPT = "HiddenFromScript"
+    DISABLED = "Disabled"
+    CHILD = "Child"
+    UNIQUE = "Unique"
+    FIXED = "Fixed"
+    BOLD_NAME = "BoldName"
+    OPEN = "Open"
 
 
 class GDLParameterDetails(APIModel):
@@ -314,174 +314,174 @@ class FailedExecutionResult(APIModel):
 
 class ElementType(Enum):
     """The type of an element."""
-    Wall = "Wall"
-    Column = "Column"
-    Beam = "Beam"
-    Window = "Window"
-    Door = "Door"
-    Object = "Object"
-    Lamp = "Lamp"
-    Slab = "Slab"
-    Roof = "Roof"
-    Mesh = "Mesh"
-    Dimension = "Dimension"
-    RadialDimension = "RadialDimension"
-    LevelDimension = "LevelDimension"
-    AngleDimension = "AngleDimension"
-    Text = "Text"
-    Label = "Label"
-    Zone = "Zone"
-    Hatch = "Hatch"
-    Line = "Line"
-    PolyLine = "PolyLine"
-    Arc = "Arc"
-    Circle = "Circle"
-    Spline = "Spline"
-    Hotspot = "Hotspot"
-    CutPlane = "CutPlane"
-    Camera = "Camera"
-    CamSet = "CamSet"
-    Group = "Group"
-    SectElem = "SectElem"
-    Drawing = "Drawing"
-    Picture = "Picture"
-    Detail = "Detail"
-    Elevation = "Elevation"
-    InteriorElevation = "InteriorElevation"
-    Worksheet = "Worksheet"
-    Hotlink = "Hotlink"
-    CurtainWall = "CurtainWall"
-    CurtainWallSegment = "CurtainWallSegment"
-    CurtainWallFrame = "CurtainWallFrame"
-    CurtainWallPanel = "CurtainWallPanel"
-    CurtainWallJunction = "CurtainWallJunction"
-    CurtainWallAccessory = "CurtainWallAccessory"
-    Shell = "Shell"
-    Skylight = "Skylight"
-    Morph = "Morph"
-    ChangeMarker = "ChangeMarker"
-    Stair = "Stair"
-    Riser = "Riser"
-    Tread = "Tread"
-    StairStructure = "StairStructure"
-    Railing = "Railing"
-    RailingToprail = "RailingToprail"
-    RailingHandrail = "RailingHandrail"
-    RailingRail = "RailingRail"
-    RailingPost = "RailingPost"
-    RailingInnerPost = "RailingInnerPost"
-    RailingBaluster = "RailingBaluster"
-    RailingPanel = "RailingPanel"
-    RailingSegment = "RailingSegment"
-    RailingNode = "RailingNode"
-    RailingBalusterSet = "RailingBalusterSet"
-    RailingPattern = "RailingPattern"
-    RailingToprailEnd = "RailingToprailEnd"
-    RailingHandrailEnd = "RailingHandrailEnd"
-    RailingRailEnd = "RailingRailEnd"
-    RailingToprailConnection = "RailingToprailConnection"
-    RailingHandrailConnection = "RailingHandrailConnection"
-    RailingRailConnection = "RailingRailConnection"
-    RailingEndFinish = "RailingEndFinish"
-    BeamSegment = "BeamSegment"
-    ColumnSegment = "ColumnSegment"
-    Opening = "Opening"
-    Unknown = "Unknown"
+    WALL = "Wall"
+    COLUMN = "Column"
+    BEAM = "Beam"
+    WINDOW = "Window"
+    DOOR = "Door"
+    OBJECT = "Object"
+    LAMP = "Lamp"
+    SLAB = "Slab"
+    ROOF = "Roof"
+    MESH = "Mesh"
+    DIMENSION = "Dimension"
+    RADIAL_DIMENSION = "RadialDimension"
+    LEVEL_DIMENSION = "LevelDimension"
+    ANGLE_DIMENSION = "AngleDimension"
+    TEXT = "Text"
+    LABEL = "Label"
+    ZONE = "Zone"
+    HATCH = "Hatch"
+    LINE = "Line"
+    POLY_LINE = "PolyLine"
+    ARC = "Arc"
+    CIRCLE = "Circle"
+    SPLINE = "Spline"
+    HOTSPOT = "Hotspot"
+    CUT_PLANE = "CutPlane"
+    CAMERA = "Camera"
+    CAM_SET = "CamSet"
+    GROUP = "Group"
+    SECT_ELEM = "SectElem"
+    DRAWING = "Drawing"
+    PICTURE = "Picture"
+    DETAIL = "Detail"
+    ELEVATION = "Elevation"
+    INTERIOR_ELEVATION = "InteriorElevation"
+    WORKSHEET = "Worksheet"
+    HOTLINK = "Hotlink"
+    CURTAIN_WALL = "CurtainWall"
+    CURTAIN_WALL_SEGMENT = "CurtainWallSegment"
+    CURTAIN_WALL_FRAME = "CurtainWallFrame"
+    CURTAIN_WALL_PANEL = "CurtainWallPanel"
+    CURTAIN_WALL_JUNCTION = "CurtainWallJunction"
+    CURTAIN_WALL_ACCESSORY = "CurtainWallAccessory"
+    SHELL = "Shell"
+    SKYLIGHT = "Skylight"
+    MORPH = "Morph"
+    CHANGE_MARKER = "ChangeMarker"
+    STAIR = "Stair"
+    RISER = "Riser"
+    TREAD = "Tread"
+    STAIR_STRUCTURE = "StairStructure"
+    RAILING = "Railing"
+    RAILING_TOPRAIL = "RailingToprail"
+    RAILING_HANDRAIL = "RailingHandrail"
+    RAILING_RAIL = "RailingRail"
+    RAILING_POST = "RailingPost"
+    RAILING_INNER_POST = "RailingInnerPost"
+    RAILING_BALUSTER = "RailingBaluster"
+    RAILING_PANEL = "RailingPanel"
+    RAILING_SEGMENT = "RailingSegment"
+    RAILING_NODE = "RailingNode"
+    RAILING_BALUSTER_SET = "RailingBalusterSet"
+    RAILING_PATTERN = "RailingPattern"
+    RAILING_TOPRAIL_END = "RailingToprailEnd"
+    RAILING_HANDRAIL_END = "RailingHandrailEnd"
+    RAILING_RAIL_END = "RailingRailEnd"
+    RAILING_TOPRAIL_CONNECTION = "RailingToprailConnection"
+    RAILING_HANDRAIL_CONNECTION = "RailingHandrailConnection"
+    RAILING_RAIL_CONNECTION = "RailingRailConnection"
+    RAILING_END_FINISH = "RailingEndFinish"
+    BEAM_SEGMENT = "BeamSegment"
+    COLUMN_SEGMENT = "ColumnSegment"
+    OPENING = "Opening"
+    UNKNOWN = "Unknown"
 
 
 class ElementFilter(Enum):
     """A filter type for an element."""
-    IsEditable = "IsEditable"
-    IsVisibleByLayer = "IsVisibleByLayer"
-    IsVisibleByRenovation = "IsVisibleByRenovation"
-    IsVisibleByStructureDisplay = "IsVisibleByStructureDisplay"
-    IsVisibleIn3D = "IsVisibleIn3D"
-    OnActualFloor = "OnActualFloor"
-    OnActualLayout = "OnActualLayout"
-    InMyWorkspace = "InMyWorkspace"
-    IsIndependent = "IsIndependent"
-    InCroppedView = "InCroppedView"
-    HasAccessRight = "HasAccessRight"
-    IsOverriddenByRenovation = "IsOverriddenByRenovation"
-    IncludeSubElemObjects = "IncludeSubElemObjects"
+    IS_EDITABLE = "IsEditable"
+    IS_VISIBLE_BY_LAYER = "IsVisibleByLayer"
+    IS_VISIBLE_BY_RENOVATION = "IsVisibleByRenovation"
+    IS_VISIBLE_BY_STRUCTURE_DISPLAY = "IsVisibleByStructureDisplay"
+    IS_VISIBLE_IN3_D = "IsVisibleIn3D"
+    ON_ACTUAL_FLOOR = "OnActualFloor"
+    ON_ACTUAL_LAYOUT = "OnActualLayout"
+    IN_MY_WORKSPACE = "InMyWorkspace"
+    IS_INDEPENDENT = "IsIndependent"
+    IN_CROPPED_VIEW = "InCroppedView"
+    HAS_ACCESS_RIGHT = "HasAccessRight"
+    IS_OVERRIDDEN_BY_RENOVATION = "IsOverriddenByRenovation"
+    INCLUDE_SUB_ELEM_OBJECTS = "IncludeSubElemObjects"
 
 
 class WindowType(Enum):
     """The type of a window."""
-    FloorPlan = "FloorPlan"
-    Section = "Section"
-    Details = "Details"
-    field_3DModel = "3DModel"
-    Layout = "Layout"
-    Drawing = "Drawing"
-    CustomText = "CustomText"
-    CustomDraw = "CustomDraw"
-    MasterLayout = "MasterLayout"
-    Elevation = "Elevation"
-    InteriorElevation = "InteriorElevation"
-    Worksheet = "Worksheet"
-    Report = "Report"
-    field_3DDocument = "3DDocument"
-    External3D = "External3D"
-    Movie3D = "Movie3D"
-    MovieRendering = "MovieRendering"
-    Rendering = "Rendering"
-    ModelCompare = "ModelCompare"
-    Interactive_Schedule = "Interactive Schedule"
-    Unknown = "Unknown"
+    FLOOR_PLAN = "FloorPlan"
+    SECTION = "Section"
+    DETAILS = "Details"
+    FIELD_3_D_MODEL = "3DModel"
+    LAYOUT = "Layout"
+    DRAWING = "Drawing"
+    CUSTOM_TEXT = "CustomText"
+    CUSTOM_DRAW = "CustomDraw"
+    MASTER_LAYOUT = "MasterLayout"
+    ELEVATION = "Elevation"
+    INTERIOR_ELEVATION = "InteriorElevation"
+    WORKSHEET = "Worksheet"
+    REPORT = "Report"
+    FIELD_3_D_DOCUMENT = "3DDocument"
+    EXTERNAL3_D = "External3D"
+    MOVIE3_D = "Movie3D"
+    MOVIE_RENDERING = "MovieRendering"
+    RENDERING = "Rendering"
+    MODEL_COMPARE = "ModelCompare"
+    INTERACTIVE_SCHEDULE = "Interactive Schedule"
+    UNKNOWN = "Unknown"
 
 
 class LengthType(Enum):
     """The type of the length measurement unit."""
-    Meter = "Meter"
-    Decimeter = "Decimeter"
-    Centimeter = "Centimeter"
-    Millimeter = "Millimeter"
-    FootFracInch = "FootFracInch"
-    FootDecInch = "FootDecInch"
-    DecFoot = "DecFoot"
-    FracInch = "FracInch"
-    DecInch = "DecInch"
+    METER = "Meter"
+    DECIMETER = "Decimeter"
+    CENTIMETER = "Centimeter"
+    MILLIMETER = "Millimeter"
+    FOOT_FRAC_INCH = "FootFracInch"
+    FOOT_DEC_INCH = "FootDecInch"
+    DEC_FOOT = "DecFoot"
+    FRAC_INCH = "FracInch"
+    DEC_INCH = "DecInch"
 
 
 class AreaType(Enum):
     """The type of the area measurement unit."""
-    SquareMeter = "SquareMeter"
-    SquareCentimeter = "SquareCentimeter"
-    SquareMillimeter = "SquareMillimeter"
-    SquareFoot = "SquareFoot"
-    SquareInch = "SquareInch"
+    SQUARE_METER = "SquareMeter"
+    SQUARE_CENTIMETER = "SquareCentimeter"
+    SQUARE_MILLIMETER = "SquareMillimeter"
+    SQUARE_FOOT = "SquareFoot"
+    SQUARE_INCH = "SquareInch"
 
 
 class VolumeType(Enum):
     """The type of the volume measurement unit."""
-    CubicMeter = "CubicMeter"
-    Liter = "Liter"
-    CubicCentimeter = "CubicCentimeter"
-    CubicMillimeter = "CubicMillimeter"
-    CubicFoot = "CubicFoot"
-    CubicInch = "CubicInch"
-    CubicYard = "CubicYard"
-    Gallon = "Gallon"
+    CUBIC_METER = "CubicMeter"
+    LITER = "Liter"
+    CUBIC_CENTIMETER = "CubicCentimeter"
+    CUBIC_MILLIMETER = "CubicMillimeter"
+    CUBIC_FOOT = "CubicFoot"
+    CUBIC_INCH = "CubicInch"
+    CUBIC_YARD = "CubicYard"
+    GALLON = "Gallon"
 
 
 class AngleType(Enum):
     """The type of the angle measurement unit."""
-    DecimalDegree = "DecimalDegree"
-    DegreeMinSec = "DegreeMinSec"
-    Grad = "Grad"
-    Radian = "Radian"
-    Surveyors = "Surveyors"
+    DECIMAL_DEGREE = "DecimalDegree"
+    DEGREE_MIN_SEC = "DegreeMinSec"
+    GRAD = "Grad"
+    RADIAN = "Radian"
+    SURVEYORS = "Surveyors"
 
 
 class AccuracyType(Enum):
     """Methods for rounding decimal values."""
-    Off = "Off"
-    ShowSmall5 = "ShowSmall5"
-    ShowSmall25 = "ShowSmall25"
-    ShowSmall1 = "ShowSmall1"
-    ShowSmall01 = "ShowSmall01"
-    InchCaseFractions = "InchCaseFractions"
+    OFF = "Off"
+    SHOW_SMALL5 = "ShowSmall5"
+    SHOW_SMALL25 = "ShowSmall25"
+    SHOW_SMALL1 = "ShowSmall1"
+    SHOW_SMALL01 = "ShowSmall01"
+    INCH_CASE_FRACTIONS = "InchCaseFractions"
 
 
 class IssueId(APIModel):
@@ -500,18 +500,18 @@ class IssueIdArrayItem(APIModel):
 
 class IssueElementType(Enum):
     """The attachment type of an element component of an issue."""
-    Creation = "Creation"
-    Highlight = "Highlight"
-    Deletion = "Deletion"
-    Modification = "Modification"
+    CREATION = "Creation"
+    HIGHLIGHT = "Highlight"
+    DELETION = "Deletion"
+    MODIFICATION = "Modification"
 
 
 class IssueCommentStatus(Enum):
     """The status of an issue comment."""
-    Error = "Error"
-    Warning = "Warning"
-    Info = "Info"
-    Unknown = "Unknown"
+    ERROR = "Error"
+    WARNING = "Warning"
+    INFO = "Info"
+    UNKNOWN = "Unknown"
 
 
 class PropertyGroupId(APIModel):
@@ -545,35 +545,35 @@ class PropertyIdArrayItem(APIModel):
 
 
 class PropertyType(Enum):
-    StaticBuiltIn = "StaticBuiltIn"
-    DynamicBuiltIn = "DynamicBuiltIn"
-    Custom = "Custom"
+    STATIC_BUILT_IN = "StaticBuiltIn"
+    DYNAMIC_BUILT_IN = "DynamicBuiltIn"
+    CUSTOM = "Custom"
 
 
 class PropertyCollectionType(Enum):
-    Undefined = "Undefined"
-    Single = "Single"
-    List = "List"
-    SingleChoiceEnumeration = "SingleChoiceEnumeration"
-    MultipleChoiceEnumeration = "MultipleChoiceEnumeration"
+    UNDEFINED = "Undefined"
+    SINGLE = "Single"
+    LIST = "List"
+    SINGLE_CHOICE_ENUMERATION = "SingleChoiceEnumeration"
+    MULTIPLE_CHOICE_ENUMERATION = "MultipleChoiceEnumeration"
 
 
 class PropertyValueType(Enum):
-    Undefined = "Undefined"
-    Integer = "Integer"
-    Real = "Real"
-    String = "String"
-    Boolean = "Boolean"
-    Guid = "Guid"
+    UNDEFINED = "Undefined"
+    INTEGER = "Integer"
+    REAL = "Real"
+    STRING = "String"
+    BOOLEAN = "Boolean"
+    GUID = "Guid"
 
 
 class PropertyMeasureType(Enum):
-    Undefined = "Undefined"
-    Default = "Default"
-    Length = "Length"
-    Area = "Area"
-    Volume = "Volume"
-    Angle = "Angle"
+    UNDEFINED = "Undefined"
+    DEFAULT = "Default"
+    LENGTH = "Length"
+    AREA = "Area"
+    VOLUME = "Volume"
+    ANGLE = "Angle"
 
 
 class PropertyDetails(APIModel):
@@ -617,24 +617,24 @@ class PropertyValuesArrayItem(APIModel):
 
 
 class PropertyDataType(Enum):
-    number = "number"
-    integer = "integer"
-    string = "string"
-    boolean = "boolean"
-    length = "length"
-    area = "area"
-    volume = "volume"
-    angle = "angle"
-    numberList = "numberList"
-    integerList = "integerList"
-    stringList = "stringList"
-    booleanList = "booleanList"
-    lengthList = "lengthList"
-    areaList = "areaList"
-    volumeList = "volumeList"
-    angleList = "angleList"
-    singleEnum = "singleEnum"
-    multiEnum = "multiEnum"
+    NUMBER = "number"
+    INTEGER = "integer"
+    STRING = "string"
+    BOOLEAN = "boolean"
+    LENGTH = "length"
+    AREA = "area"
+    VOLUME = "volume"
+    ANGLE = "angle"
+    NUMBER_LIST = "numberList"
+    INTEGER_LIST = "integerList"
+    STRING_LIST = "stringList"
+    BOOLEAN_LIST = "booleanList"
+    LENGTH_LIST = "lengthList"
+    AREA_LIST = "areaList"
+    VOLUME_LIST = "volumeList"
+    ANGLE_LIST = "angleList"
+    SINGLE_ENUM = "singleEnum"
+    MULTI_ENUM = "multiEnum"
 
 
 class DisplayValueEnumId(APIModel):
@@ -956,10 +956,10 @@ class DatabaseId(APIModel):
 
 class StructureDisplay(Enum):
     """Structure display mode. One of EntireStructure, CoreOnly, WithoutFinishes, StructureOnly."""
-    EntireStructure = "EntireStructure"
-    CoreOnly = "CoreOnly"
-    WithoutFinishes = "WithoutFinishes"
-    StructureOnly = "StructureOnly"
+    ENTIRE_STRUCTURE = "EntireStructure"
+    CORE_ONLY = "CoreOnly"
+    WITHOUT_FINISHES = "WithoutFinishes"
+    STRUCTURE_ONLY = "StructureOnly"
 
 
 class Hole2D(APIModel):
@@ -981,9 +981,9 @@ class Hole3D(APIModel):
 
 
 class BeamShape(Enum):
-    Straight = "Straight"
-    HorizontallyCurved = "HorizontallyCurved"
-    VerticallyCurved = "VerticallyCurved"
+    STRAIGHT = "Straight"
+    HORIZONTALLY_CURVED = "HorizontallyCurved"
+    VERTICALLY_CURVED = "VerticallyCurved"
 
 
 class HotspotDetails(APIModel):
@@ -1016,11 +1016,11 @@ class CurtainWallSegmentDetails(APIModel):
 
 class CurtainWallFrameType(Enum):
     """Enumeration of available curtain wall frame types."""
-    Deleted = "Deleted"
-    Division = "Division"
-    Corner = "Corner"
-    Boundary = "Boundary"
-    Custom = "Custom"
+    DELETED = "Deleted"
+    DIVISION = "Division"
+    CORNER = "Corner"
+    BOUNDARY = "Boundary"
+    CUSTOM = "Custom"
 
 
 class PanelConnectionHole(APIModel):
@@ -1056,9 +1056,9 @@ class CurtainWallFrameDetails(APIModel):
 
 class MeshSkirtType(Enum):
     """The type of the skirt structure."""
-    SurfaceOnlyWithoutSkirt = "SurfaceOnlyWithoutSkirt"
-    WithSkirt = "WithSkirt"
-    SolidBodyWithSkirt = "SolidBodyWithSkirt"
+    SURFACE_ONLY_WITHOUT_SKIRT = "SurfaceOnlyWithoutSkirt"
+    WITH_SKIRT = "WithSkirt"
+    SOLID_BODY_WITH_SKIRT = "SolidBodyWithSkirt"
 
 
 class StoryVisibility(APIModel):
@@ -1078,15 +1078,15 @@ class StoryVisibility(APIModel):
 
 class BodyType(Enum):
     """Whether the body is a closed solid or an open surface shell. Reported accurately on Get; on Create/Modify this is set on the element but a confirmed Archicad SDK bug means it may not take effect (bodyType has been observed always coming back Solid regardless of what was requested - see edgeOverrides' note)."""
-    Solid = "Solid"
-    Surface = "Surface"
+    SOLID = "Solid"
+    SURFACE = "Surface"
 
 
 class EdgeDefault(Enum):
     """Default display status for every edge that has no entry in edgeOverrides. Reported accurately on Get; on Create/Modify this is set on the element but does not take effect due to the same confirmed Archicad SDK bug as edgeOverrides (element.morph.edgeType is silently discarded by ACAPI_Element_Create/Change)."""
-    HardVisible = "HardVisible"
-    HardHidden = "HardHidden"
-    SoftHidden = "SoftHidden"
+    HARD_VISIBLE = "HardVisible"
+    HARD_HIDDEN = "HardHidden"
+    SOFT_HIDDEN = "SoftHidden"
 
 
 class WireEdge(APIModel):
@@ -1110,16 +1110,16 @@ class EdgeOverride(APIModel):
 
 class NameType(Enum):
     """How the drawing's title name is assembled (Identification tabpage of the Drawing Settings dialog)."""
-    ViewOrSourceFileName = "ViewOrSourceFileName"
-    ViewIdAndName = "ViewIdAndName"
-    CustomName = "CustomName"
+    VIEW_OR_SOURCE_FILE_NAME = "ViewOrSourceFileName"
+    VIEW_ID_AND_NAME = "ViewIdAndName"
+    CUSTOM_NAME = "CustomName"
 
 
 class NumberingType(Enum):
     """How the drawing's title ID is assigned (Identification tabpage of the Drawing Settings dialog)."""
-    ByLayout = "ByLayout"
-    ByViewId = "ByViewId"
-    CustomNumber = "CustomNumber"
+    BY_LAYOUT = "ByLayout"
+    BY_VIEW_ID = "ByViewId"
+    CUSTOM_NUMBER = "CustomNumber"
 
 
 class NotYetSupportedElementTypeDetails(APIModel):
@@ -1206,8 +1206,8 @@ class LayoutInfo(APIModel):
 
 
 class Status(Enum):
-    Actual = "Actual"
-    Issued = "Issued"
+    ACTUAL = "Actual"
+    ISSUED = "Issued"
 
 
 class Change(APIModel):
@@ -1369,22 +1369,22 @@ class ProjectInfoField(APIModel):
 
 class LibraryPartType(Enum):
     """Enumeration of available library part types. 'Unknown' is the schema-valid catch-all returned for any libpart whose typeID is not one of the named values (rare ACAPI sentinels and any future SDK subtype)."""
-    Spec = "Spec"
-    Window = "Window"
-    Door = "Door"
-    Object = "Object"
-    Lamp = "Lamp"
-    Room = "Room"
-    Property = "Property"
-    PlanSign = "PlanSign"
-    Label = "Label"
-    Macro = "Macro"
-    Pict = "Pict"
-    Picture = "Picture"
-    ListScheme = "ListScheme"
-    Skylight = "Skylight"
-    OpeningSymbol = "OpeningSymbol"
-    Unknown = "Unknown"
+    SPEC = "Spec"
+    WINDOW = "Window"
+    DOOR = "Door"
+    OBJECT = "Object"
+    LAMP = "Lamp"
+    ROOM = "Room"
+    PROPERTY = "Property"
+    PLAN_SIGN = "PlanSign"
+    LABEL = "Label"
+    MACRO = "Macro"
+    PICT = "Pict"
+    PICTURE = "Picture"
+    LIST_SCHEME = "ListScheme"
+    SKYLIGHT = "Skylight"
+    OPENING_SYMBOL = "OpeningSymbol"
+    UNKNOWN = "Unknown"
 
 
 class FavoritesWrapper(APIModel):
@@ -1419,11 +1419,11 @@ class DesignOptionCombinationId(APIModel):
 
 class SolidOperationType(Enum):
     """The type of solid element operation."""
-    Subtraction = "Subtraction"
-    SubtractionUpwards = "SubtractionUpwards"
-    SubtractionDownwards = "SubtractionDownwards"
-    Intersection = "Intersection"
-    Addition = "Addition"
+    SUBTRACTION = "Subtraction"
+    SUBTRACTION_UPWARDS = "SubtractionUpwards"
+    SUBTRACTION_DOWNWARDS = "SubtractionDownwards"
+    INTERSECTION = "Intersection"
+    ADDITION = "Addition"
 
 
 class SolidLinkFlags(APIModel):
@@ -1440,21 +1440,21 @@ class SolidLinkFlags(APIModel):
 
 class SpecialFolderType(Enum):
     """The type of a special folder of the running Archicad."""
-    ApplicationPrefs = "ApplicationPrefs"
-    GraphisoftPrefs = "GraphisoftPrefs"
-    GraphisoftHome = "GraphisoftHome"
-    Cache = "Cache"
-    Data = "Data"
-    UserDocuments = "UserDocuments"
-    Temporary = "Temporary"
-    Application = "Application"
-    Defaults = "Defaults"
-    WebObjects = "WebObjects"
-    Templates = "Templates"
-    Help = "Help"
-    EmbeddedProjectLibrary = "EmbeddedProjectLibrary"
-    EmbeddedProjectLibraryHotlink = "EmbeddedProjectLibraryHotlink"
-    ProjectPreviews = "ProjectPreviews"
+    APPLICATION_PREFS = "ApplicationPrefs"
+    GRAPHISOFT_PREFS = "GraphisoftPrefs"
+    GRAPHISOFT_HOME = "GraphisoftHome"
+    CACHE = "Cache"
+    DATA = "Data"
+    USER_DOCUMENTS = "UserDocuments"
+    TEMPORARY = "Temporary"
+    APPLICATION = "Application"
+    DEFAULTS = "Defaults"
+    WEB_OBJECTS = "WebObjects"
+    TEMPLATES = "Templates"
+    HELP = "Help"
+    EMBEDDED_PROJECT_LIBRARY = "EmbeddedProjectLibrary"
+    EMBEDDED_PROJECT_LIBRARY_HOTLINK = "EmbeddedProjectLibraryHotlink"
+    PROJECT_PREVIEWS = "ProjectPreviews"
 
 
 class SpecialFolderPath(APIModel):
@@ -1462,9 +1462,9 @@ class SpecialFolderPath(APIModel):
 
 
 class TransformationType(Enum):
-    Global = "Global"
-    Rotated = "Rotated"
-    Distorted = "Distorted"
+    GLOBAL = "Global"
+    ROTATED = "Rotated"
+    DISTORTED = "Distorted"
 
 
 class CoverFillTransformation(APIModel):
@@ -1485,9 +1485,9 @@ class OverriddenPen(APIModel):
 
 class AlertType(Enum):
     """The type of the alert dialog."""
-    information = "information"
-    warning = "warning"
-    error = "error"
+    INFORMATION = "information"
+    WARNING = "warning"
+    ERROR = "error"
 
 
 class Length(APIModel):
@@ -1517,9 +1517,9 @@ class Angle(APIModel):
 
 class PrintArea(Enum):
     """The area to print. The default is 'currentView'."""
-    currentView = "currentView"
-    entireDrawing = "entireDrawing"
-    marquee = "marquee"
+    CURRENT_VIEW = "currentView"
+    ENTIRE_DRAWING = "entireDrawing"
+    MARQUEE = "marquee"
 
 
 class FloorPlanPolygon(APIModel):
@@ -1566,38 +1566,38 @@ class Rotation(APIModel):
 
 class ImageType(Enum):
     """The type of the preview image. Default is 3D."""
-    field_2D = "2D"
-    Section = "Section"
-    field_3D = "3D"
+    FIELD_2_D = "2D"
+    SECTION = "Section"
+    FIELD_3_D = "3D"
 
 
 class Format(Enum):
     """The image format. Default is png."""
-    png = "png"
-    jpg = "jpg"
+    PNG = "png"
+    JPG = "jpg"
 
 
 class ConflictPolicy(Enum):
     """How to resolve name conflicts. Default Overwrite."""
-    Error = "Error"
-    Skip = "Skip"
-    Overwrite = "Overwrite"
-    Append = "Append"
+    ERROR = "Error"
+    SKIP = "Skip"
+    OVERWRITE = "Overwrite"
+    APPEND = "Append"
 
 
 class Method(Enum):
     """The file operation method to use."""
-    save = "save"
-    merge = "merge"
-    open = "open"
+    SAVE = "save"
+    MERGE = "merge"
+    OPEN = "open"
 
 
 class FileType(Enum):
     """The type of the IFC file. The default is 'ifc'."""
-    ifc = "ifc"
-    ifcxml = "ifcxml"
-    ifczip = "ifczip"
-    ifcxmlzip = "ifcxmlzip"
+    IFC = "ifc"
+    IFCXML = "ifcxml"
+    IFCZIP = "ifczip"
+    IFCXMLZIP = "ifcxmlzip"
 
 
 class Library(APIModel):
@@ -1682,10 +1682,10 @@ class CutPlane(APIModel):
 
 class NavigatorMapId(Enum):
     """The navigator map to retrieve."""
-    PublicViewMap = "PublicViewMap"
-    ProjectMap = "ProjectMap"
-    LayoutBook = "LayoutBook"
-    PublisherSets = "PublisherSets"
+    PUBLIC_VIEW_MAP = "PublicViewMap"
+    PROJECT_MAP = "ProjectMap"
+    LAYOUT_BOOK = "LayoutBook"
+    PUBLISHER_SETS = "PublisherSets"
 
 
 class Comment(APIModel):
@@ -1780,14 +1780,14 @@ class LayoutData(APIModel):
 
 
 class NumberingStyle(Enum):
-    Undefined = "Undefined"
-    abc = "abc"
-    ABC = "ABC"
-    field_1 = "1"
-    field_01 = "01"
-    field_001 = "001"
-    field_0001 = "0001"
-    noID = "noID"
+    UNDEFINED = "Undefined"
+    ABC = "abc"
+    abc_1 = "ABC"
+    FIELD_1 = "1"
+    FIELD_01 = "01"
+    FIELD_001 = "001"
+    FIELD_0001 = "0001"
+    NO_ID = "noID"
 
 
 class SubsetData(APIModel):
@@ -1825,14 +1825,14 @@ class Level(APIModel):
 
 
 class Preset(Enum):
-    WallCompositeFaces = "WallCompositeFaces"
-    WallSkinBorders = "WallSkinBorders"
-    SlabCompositeFaces = "SlabCompositeFaces"
-    SlabSkinBorders = "SlabSkinBorders"
-    BeamOrColumnRefLineEndPoints = "BeamOrColumnRefLineEndPoints"
-    BeamOrColumnBoundingBoxCorners = "BeamOrColumnBoundingBoxCorners"
-    DoorWindowWallHoleCorners = "DoorWindowWallHoleCorners"
-    DoorWindowModelHotspots = "DoorWindowModelHotspots"
+    WALL_COMPOSITE_FACES = "WallCompositeFaces"
+    WALL_SKIN_BORDERS = "WallSkinBorders"
+    SLAB_COMPOSITE_FACES = "SlabCompositeFaces"
+    SLAB_SKIN_BORDERS = "SlabSkinBorders"
+    BEAM_OR_COLUMN_REF_LINE_END_POINTS = "BeamOrColumnRefLineEndPoints"
+    BEAM_OR_COLUMN_BOUNDING_BOX_CORNERS = "BeamOrColumnBoundingBoxCorners"
+    DOOR_WINDOW_WALL_HOLE_CORNERS = "DoorWindowWallHoleCorners"
+    DOOR_WINDOW_MODEL_HOTSPOTS = "DoorWindowModelHotspots"
 
 
 class SectionData(APIModel):
@@ -1875,10 +1875,10 @@ class StairData(APIModel):
 
 class Justification(Enum):
     """Optional text justification."""
-    Left = "Left"
-    Center = "Center"
-    Right = "Right"
-    Full = "Full"
+    LEFT = "Left"
+    CENTER = "Center"
+    RIGHT = "Right"
+    FULL = "Full"
 
 
 class TextData(APIModel):
@@ -1964,161 +1964,161 @@ class HotspotData(APIModel):
 
 
 class ContentField(Enum):
-    Key = "Key"
-    Title = "Title"
-    Description = "Description"
-    Reference = "Reference"
+    KEY = "Key"
+    TITLE = "Title"
+    DESCRIPTION = "Description"
+    REFERENCE = "Reference"
 
 
 class WallStructureType(Enum):
-    Basic = "Basic"
-    Composite = "Composite"
-    Profile = "Profile"
+    BASIC = "Basic"
+    COMPOSITE = "Composite"
+    PROFILE = "Profile"
 
 
 class SlabStructureType(Enum):
-    Basic = "Basic"
-    Composite = "Composite"
+    BASIC = "Basic"
+    COMPOSITE = "Composite"
 
 
 class RoofStructureType(Enum):
-    Basic = "Basic"
-    Composite = "Composite"
+    BASIC = "Basic"
+    COMPOSITE = "Composite"
 
 
 class FillAttributeField(Enum):
-    subType = "subType"
-    scaleWithPlan = "scaleWithPlan"
-    useForWalls = "useForWalls"
-    useForDraft = "useForDraft"
-    useForCover = "useForCover"
-    horizontalSpacing = "horizontalSpacing"
-    verticalSpacing = "verticalSpacing"
-    angle = "angle"
-    bitPattern = "bitPattern"
-    gradientStart = "gradientStart"
-    gradientEnd = "gradientEnd"
-    percent = "percent"
-    texture = "texture"
-    lineItems = "lineItems"
-    symbolLines = "symbolLines"
-    symbolArcs = "symbolArcs"
-    symbolHotspots = "symbolHotspots"
+    SUB_TYPE = "subType"
+    SCALE_WITH_PLAN = "scaleWithPlan"
+    USE_FOR_WALLS = "useForWalls"
+    USE_FOR_DRAFT = "useForDraft"
+    USE_FOR_COVER = "useForCover"
+    HORIZONTAL_SPACING = "horizontalSpacing"
+    VERTICAL_SPACING = "verticalSpacing"
+    ANGLE = "angle"
+    BIT_PATTERN = "bitPattern"
+    GRADIENT_START = "gradientStart"
+    GRADIENT_END = "gradientEnd"
+    PERCENT = "percent"
+    TEXTURE = "texture"
+    LINE_ITEMS = "lineItems"
+    SYMBOL_LINES = "symbolLines"
+    SYMBOL_ARCS = "symbolArcs"
+    SYMBOL_HOTSPOTS = "symbolHotspots"
 
 
 class ZoneCategoryAttributeField(Enum):
-    categoryCode = "categoryCode"
-    color = "color"
-    stampName = "stampName"
-    stampMainGuid = "stampMainGuid"
-    stampRevGuid = "stampRevGuid"
+    CATEGORY_CODE = "categoryCode"
+    COLOR = "color"
+    STAMP_NAME = "stampName"
+    STAMP_MAIN_GUID = "stampMainGuid"
+    STAMP_REV_GUID = "stampRevGuid"
 
 
 class MEPSystemAttributeField(Enum):
-    domain = "domain"
-    contourPen = "contourPen"
-    fillPen = "fillPen"
-    fillBackgroundPen = "fillBackgroundPen"
-    centerLinePen = "centerLinePen"
-    fillId = "fillId"
-    centerLineTypeId = "centerLineTypeId"
+    DOMAIN = "domain"
+    CONTOUR_PEN = "contourPen"
+    FILL_PEN = "fillPen"
+    FILL_BACKGROUND_PEN = "fillBackgroundPen"
+    CENTER_LINE_PEN = "centerLinePen"
+    FILL_ID = "fillId"
+    CENTER_LINE_TYPE_ID = "centerLineTypeId"
 
 
 class PenTableAttributeField(Enum):
-    isActiveForModel = "isActiveForModel"
-    isActiveForLayout = "isActiveForLayout"
-    pens = "pens"
+    IS_ACTIVE_FOR_MODEL = "isActiveForModel"
+    IS_ACTIVE_FOR_LAYOUT = "isActiveForLayout"
+    PENS = "pens"
 
 
 class ProfileAttributeField(Enum):
-    wallType = "wallType"
-    beamType = "beamType"
-    coluType = "coluType"
-    handrailType = "handrailType"
-    otherGDLObjectType = "otherGDLObjectType"
-    useWith = "useWith"
-    width = "width"
-    height = "height"
-    minimumWidth = "minimumWidth"
-    minimumHeight = "minimumHeight"
-    widthStretchable = "widthStretchable"
-    heightStretchable = "heightStretchable"
-    hasCoreSkin = "hasCoreSkin"
-    profileModifiers = "profileModifiers"
-    skins = "skins"
-    skinOutlines = "skinOutlines"
+    WALL_TYPE = "wallType"
+    BEAM_TYPE = "beamType"
+    COLU_TYPE = "coluType"
+    HANDRAIL_TYPE = "handrailType"
+    OTHER_GDL_OBJECT_TYPE = "otherGDLObjectType"
+    USE_WITH = "useWith"
+    WIDTH = "width"
+    HEIGHT = "height"
+    MINIMUM_WIDTH = "minimumWidth"
+    MINIMUM_HEIGHT = "minimumHeight"
+    WIDTH_STRETCHABLE = "widthStretchable"
+    HEIGHT_STRETCHABLE = "heightStretchable"
+    HAS_CORE_SKIN = "hasCoreSkin"
+    PROFILE_MODIFIERS = "profileModifiers"
+    SKINS = "skins"
+    SKIN_OUTLINES = "skinOutlines"
 
 
 class CompositeAttributeField(Enum):
-    useWith = "useWith"
-    skins = "skins"
-    separators = "separators"
+    USE_WITH = "useWith"
+    SKINS = "skins"
+    SEPARATORS = "separators"
 
 
 class CompositeSkinType(Enum):
-    Core = "Core"
-    Finish = "Finish"
-    Other = "Other"
+    CORE = "Core"
+    FINISH = "Finish"
+    OTHER = "Other"
 
 
 class SurfaceAttributeField(Enum):
-    materialType = "materialType"
-    ambientReflection = "ambientReflection"
-    diffuseReflection = "diffuseReflection"
-    specularReflection = "specularReflection"
-    transparency = "transparency"
-    shine = "shine"
-    transparencyAttenuation = "transparencyAttenuation"
-    emissionAttenuation = "emissionAttenuation"
-    surfaceColor = "surfaceColor"
-    specularColor = "specularColor"
-    emissionColor = "emissionColor"
-    fillId = "fillId"
-    texture = "texture"
+    MATERIAL_TYPE = "materialType"
+    AMBIENT_REFLECTION = "ambientReflection"
+    DIFFUSE_REFLECTION = "diffuseReflection"
+    SPECULAR_REFLECTION = "specularReflection"
+    TRANSPARENCY = "transparency"
+    SHINE = "shine"
+    TRANSPARENCY_ATTENUATION = "transparencyAttenuation"
+    EMISSION_ATTENUATION = "emissionAttenuation"
+    SURFACE_COLOR = "surfaceColor"
+    SPECULAR_COLOR = "specularColor"
+    EMISSION_COLOR = "emissionColor"
+    FILL_ID = "fillId"
+    TEXTURE = "texture"
 
 
 class LayerAttributeField(Enum):
-    isHidden = "isHidden"
-    isLocked = "isLocked"
-    isWireframe = "isWireframe"
-    intersectionGroupNr = "intersectionGroupNr"
+    IS_HIDDEN = "isHidden"
+    IS_LOCKED = "isLocked"
+    IS_WIREFRAME = "isWireframe"
+    INTERSECTION_GROUP_NR = "intersectionGroupNr"
 
 
 class BuildingMaterialAttributeField(Enum):
-    id = "id"
-    manufacturer = "manufacturer"
-    description = "description"
-    connPriority = "connPriority"
-    cutFillIndex = "cutFillIndex"
-    cutFillPen = "cutFillPen"
-    cutFillBackgroundPen = "cutFillBackgroundPen"
-    cutSurfaceIndex = "cutSurfaceIndex"
-    cutFillOrientation = "cutFillOrientation"
-    thermalConductivity = "thermalConductivity"
-    density = "density"
-    heatCapacity = "heatCapacity"
-    embodiedEnergy = "embodiedEnergy"
-    embodiedCarbon = "embodiedCarbon"
-    showUncutLines = "showUncutLines"
-    collisionDetection = "collisionDetection"
+    ID = "id"
+    MANUFACTURER = "manufacturer"
+    DESCRIPTION = "description"
+    CONN_PRIORITY = "connPriority"
+    CUT_FILL_INDEX = "cutFillIndex"
+    CUT_FILL_PEN = "cutFillPen"
+    CUT_FILL_BACKGROUND_PEN = "cutFillBackgroundPen"
+    CUT_SURFACE_INDEX = "cutSurfaceIndex"
+    CUT_FILL_ORIENTATION = "cutFillOrientation"
+    THERMAL_CONDUCTIVITY = "thermalConductivity"
+    DENSITY = "density"
+    HEAT_CAPACITY = "heatCapacity"
+    EMBODIED_ENERGY = "embodiedEnergy"
+    EMBODIED_CARBON = "embodiedCarbon"
+    SHOW_UNCUT_LINES = "showUncutLines"
+    COLLISION_DETECTION = "collisionDetection"
 
 
 class LineAttributeField(Enum):
-    scaleWithPlan = "scaleWithPlan"
-    defineScale = "defineScale"
-    lineType = "lineType"
-    period = "period"
-    height = "height"
-    dashItems = "dashItems"
-    lineItems = "lineItems"
+    SCALE_WITH_PLAN = "scaleWithPlan"
+    DEFINE_SCALE = "defineScale"
+    LINE_TYPE = "lineType"
+    PERIOD = "period"
+    HEIGHT = "height"
+    DASH_ITEMS = "dashItems"
+    LINE_ITEMS = "lineItems"
 
 
 class WitnessForm(Enum):
-    None_ = "None"
-    Small = "Small"
-    Large = "Large"
-    Fix = "Fix"
-    Unknown = "Unknown"
+    NONE = "None"
+    SMALL = "Small"
+    LARGE = "Large"
+    FIX = "Fix"
+    UNKNOWN = "Unknown"
 
 
 class FavoriteRename(APIModel):
@@ -2229,36 +2229,36 @@ class LinkToSettings(APIModel):
 
 class DisplayOption(Enum):
     """Floor plan display option."""
-    Standard = "Standard"
-    StandardWithAbstract = "StandardWithAbstract"
-    CutOnly = "CutOnly"
-    OutLinesOnly = "OutLinesOnly"
-    AbstractAll = "AbstractAll"
-    CutAll = "CutAll"
+    STANDARD = "Standard"
+    STANDARD_WITH_ABSTRACT = "StandardWithAbstract"
+    CUT_ONLY = "CutOnly"
+    OUT_LINES_ONLY = "OutLinesOnly"
+    ABSTRACT_ALL = "AbstractAll"
+    CUT_ALL = "CutAll"
 
 
 class ViewDepthLimitation(Enum):
     """Floor plan view depth limitation."""
-    ToFloorPlanRange = "ToFloorPlanRange"
-    ToAbsoluteLimit = "ToAbsoluteLimit"
-    EntireElement = "EntireElement"
+    TO_FLOOR_PLAN_RANGE = "ToFloorPlanRange"
+    TO_ABSOLUTE_LIMIT = "ToAbsoluteLimit"
+    ENTIRE_ELEMENT = "EntireElement"
 
 
 class TextureProjectionType(Enum):
     """Projection type of the 3D texture."""
-    Invalid = "Invalid"
-    Planar = "Planar"
-    Default = "Default"
-    Cylindric = "Cylindric"
-    Spheric = "Spheric"
-    Box = "Box"
+    INVALID = "Invalid"
+    PLANAR = "Planar"
+    DEFAULT = "Default"
+    CYLINDRIC = "Cylindric"
+    SPHERIC = "Spheric"
+    BOX = "Box"
 
 
 class CoverFillOrientationType(Enum):
-    Global = "Global"
-    Rotated = "Rotated"
-    Distorted = "Distorted"
-    Centered = "Centered"
+    GLOBAL = "Global"
+    ROTATED = "Rotated"
+    DISTORTED = "Distorted"
+    CENTERED = "Centered"
 
 
 class MorphPolygonHole(APIModel):
@@ -2267,17 +2267,17 @@ class MorphPolygonHole(APIModel):
 
 class DesignOptionLinkType(Enum):
     """The type of the associated design option."""
-    NotExistingElement = "NotExistingElement"
-    MissingDesignOption = "MissingDesignOption"
-    NotLinkedToAnyDesignOption = "NotLinkedToAnyDesignOption"
-    LinkedToDesignOption = "LinkedToDesignOption"
+    NOT_EXISTING_ELEMENT = "NotExistingElement"
+    MISSING_DESIGN_OPTION = "MissingDesignOption"
+    NOT_LINKED_TO_ANY_DESIGN_OPTION = "NotLinkedToAnyDesignOption"
+    LINKED_TO_DESIGN_OPTION = "LinkedToDesignOption"
 
 
 class MeshRidges(Enum):
     """How ridges between mesh facets are displayed in 3D."""
-    AllSharp = "AllSharp"
-    AllSmooth = "AllSmooth"
-    UserDefined = "UserDefined"
+    ALL_SHARP = "AllSharp"
+    ALL_SMOOTH = "AllSmooth"
+    USER_DEFINED = "UserDefined"
 
 
 class MeshSubline(APIModel):
@@ -2332,26 +2332,26 @@ class PenData(APIModel):
 
 
 class FillSubType(Enum):
-    Vector = "Vector"
-    Solid = "Solid"
-    Empty = "Empty"
-    Symbol = "Symbol"
-    LinearGradient = "LinearGradient"
-    RadialGradient = "RadialGradient"
+    VECTOR = "Vector"
+    SOLID = "Solid"
+    EMPTY = "Empty"
+    SYMBOL = "Symbol"
+    LINEAR_GRADIENT = "LinearGradient"
+    RADIAL_GRADIENT = "RadialGradient"
 
 
 class MEPSystemDomain(Enum):
-    Ventilation = "Ventilation"
-    Piping = "Piping"
-    CableCarrier = "CableCarrier"
+    VENTILATION = "Ventilation"
+    PIPING = "Piping"
+    CABLE_CARRIER = "CableCarrier"
 
 
 class ProfileUseWith(Enum):
-    Wall = "Wall"
-    Beam = "Beam"
-    Column = "Column"
-    Handrail = "Handrail"
-    Other = "Other"
+    WALL = "Wall"
+    BEAM = "Beam"
+    COLUMN = "Column"
+    HANDRAIL = "Handrail"
+    OTHER = "Other"
 
 
 class BoundingBox2D(APIModel):
@@ -2388,90 +2388,90 @@ class LayoutCustomDataToSet(APIModel):
 
 
 class BeamAnchorPoint(Enum):
-    TopLeft = "TopLeft"
-    TopCenter = "TopCenter"
-    TopRight = "TopRight"
-    MiddleLeft = "MiddleLeft"
-    Center = "Center"
-    MiddleRight = "MiddleRight"
-    BottomLeft = "BottomLeft"
-    BottomCenter = "BottomCenter"
-    BottomRight = "BottomRight"
+    TOP_LEFT = "TopLeft"
+    TOP_CENTER = "TopCenter"
+    TOP_RIGHT = "TopRight"
+    MIDDLE_LEFT = "MiddleLeft"
+    CENTER = "Center"
+    MIDDLE_RIGHT = "MiddleRight"
+    BOTTOM_LEFT = "BottomLeft"
+    BOTTOM_CENTER = "BottomCenter"
+    BOTTOM_RIGHT = "BottomRight"
 
 
 class ColumnCoreAnchor(Enum):
-    TopLeft = "TopLeft"
-    TopCenter = "TopCenter"
-    TopRight = "TopRight"
-    MiddleLeft = "MiddleLeft"
-    Center = "Center"
-    MiddleRight = "MiddleRight"
-    BottomLeft = "BottomLeft"
-    BottomCenter = "BottomCenter"
-    BottomRight = "BottomRight"
+    TOP_LEFT = "TopLeft"
+    TOP_CENTER = "TopCenter"
+    TOP_RIGHT = "TopRight"
+    MIDDLE_LEFT = "MiddleLeft"
+    CENTER = "Center"
+    MIDDLE_RIGHT = "MiddleRight"
+    BOTTOM_LEFT = "BottomLeft"
+    BOTTOM_CENTER = "BottomCenter"
+    BOTTOM_RIGHT = "BottomRight"
 
 
 class SlabReferencePlaneLocation(Enum):
-    Top = "Top"
-    CoreTop = "CoreTop"
-    CoreBottom = "CoreBottom"
-    Bottom = "Bottom"
+    TOP = "Top"
+    CORE_TOP = "CoreTop"
+    CORE_BOTTOM = "CoreBottom"
+    BOTTOM = "Bottom"
 
 
 class WallReferenceLineLocation(Enum):
     """The Core* values only have an effect on a Composite or Profile wall (structureType) - a Basic wall has no core skin, and Archicad falls back to the nearest non-core equivalent (e.g. CoreCenter becomes Center)."""
-    Outside = "Outside"
-    Center = "Center"
-    Inside = "Inside"
-    CoreOutside = "CoreOutside"
-    CoreCenter = "CoreCenter"
-    CoreInside = "CoreInside"
+    OUTSIDE = "Outside"
+    CENTER = "Center"
+    INSIDE = "Inside"
+    CORE_OUTSIDE = "CoreOutside"
+    CORE_CENTER = "CoreCenter"
+    CORE_INSIDE = "CoreInside"
 
 
 class WallZoneRelation(Enum):
-    Boundary = "Boundary"
-    ReduceArea = "ReduceArea"
-    None_ = "None"
-    SubtractFromZone = "SubtractFromZone"
+    BOUNDARY = "Boundary"
+    REDUCE_AREA = "ReduceArea"
+    NONE = "None"
+    SUBTRACT_FROM_ZONE = "SubtractFromZone"
 
 
 class BeamHoleType(Enum):
-    Rectangular = "Rectangular"
-    Circular = "Circular"
+    RECTANGULAR = "Rectangular"
+    CIRCULAR = "Circular"
 
 
 class HatchOrientationType(Enum):
-    Global = "Global"
-    Rotated = "Rotated"
-    Distorted = "Distorted"
-    Centered = "Centered"
+    GLOBAL = "Global"
+    ROTATED = "Rotated"
+    DISTORTED = "Distorted"
+    CENTERED = "Centered"
 
 
 class WallGeometryType(Enum):
-    Straight = "Straight"
-    Trapezoid = "Trapezoid"
-    Polygonal = "Polygonal"
+    STRAIGHT = "Straight"
+    TRAPEZOID = "Trapezoid"
+    POLYGONAL = "Polygonal"
 
 
 class WallModificationGeometryType(Enum):
     """The wall's plan outline shape (Polygonal is not settable here, read-only via GetDetailsOfElements). This is unrelated to slantAlpha/slantBeta - see profileType for the cross section shape those depend on."""
-    Straight = "Straight"
-    Trapezoid = "Trapezoid"
+    STRAIGHT = "Straight"
+    TRAPEZOID = "Trapezoid"
 
 
 class WallProfileType(Enum):
     """Cross section shape of the wall, distinct from geometryType (which is the plan outline). Only Normal/Slanted/Trapez are settable via ModifyWalls - Poly needs a profile attribute wired through a separate mechanism. slantAlpha/slantBeta only have an effect once this is Slanted or Trapez."""
-    Normal = "Normal"
-    Slanted = "Slanted"
-    Trapez = "Trapez"
-    Poly = "Poly"
+    NORMAL = "Normal"
+    SLANTED = "Slanted"
+    TRAPEZ = "Trapez"
+    POLY = "Poly"
 
 
 class WallModificationProfileType(Enum):
     """Cross section shape of the wall, distinct from geometryType (which is the plan outline). slantAlpha/slantBeta only have an effect once this is set to Slanted."""
-    Normal = "Normal"
-    Slanted = "Slanted"
-    Trapez = "Trapez"
+    NORMAL = "Normal"
+    SLANTED = "Slanted"
+    TRAPEZ = "Trapez"
 
 
 class InteriorElevationData(APIModel):
@@ -2501,51 +2501,51 @@ class InteriorElevationData(APIModel):
 
 
 class MEPElementType(Enum):
-    RoutingElement = "RoutingElement"
-    RigidSegment = "RigidSegment"
-    Elbow = "Elbow"
-    Transition = "Transition"
-    Branch = "Branch"
-    Terminal = "Terminal"
-    Accessory = "Accessory"
-    Equipment = "Equipment"
-    Fitting = "Fitting"
-    FlexibleSegment = "FlexibleSegment"
-    TakeOff = "TakeOff"
+    ROUTING_ELEMENT = "RoutingElement"
+    RIGID_SEGMENT = "RigidSegment"
+    ELBOW = "Elbow"
+    TRANSITION = "Transition"
+    BRANCH = "Branch"
+    TERMINAL = "Terminal"
+    ACCESSORY = "Accessory"
+    EQUIPMENT = "Equipment"
+    FITTING = "Fitting"
+    FLEXIBLE_SEGMENT = "FlexibleSegment"
+    TAKE_OFF = "TakeOff"
 
 
 class MEPDomains(Enum):
-    Ventilation = "Ventilation"
-    Piping = "Piping"
-    CableCarrier = "CableCarrier"
+    VENTILATION = "Ventilation"
+    PIPING = "Piping"
+    CABLE_CARRIER = "CableCarrier"
 
 
 class DrawingNameType(Enum):
     """How the drawing's title name is assembled (Identification tabpage of the Drawing Settings dialog)."""
-    ViewOrSourceFileName = "ViewOrSourceFileName"
-    ViewIdAndName = "ViewIdAndName"
-    CustomName = "CustomName"
+    VIEW_OR_SOURCE_FILE_NAME = "ViewOrSourceFileName"
+    VIEW_ID_AND_NAME = "ViewIdAndName"
+    CUSTOM_NAME = "CustomName"
 
 
 class DrawingNumberingType(Enum):
     """How the drawing's title ID is assigned (Identification tabpage of the Drawing Settings dialog)."""
-    ByLayout = "ByLayout"
-    ByViewId = "ByViewId"
-    CustomNumber = "CustomNumber"
+    BY_LAYOUT = "ByLayout"
+    BY_VIEW_ID = "ByViewId"
+    CUSTOM_NUMBER = "CustomNumber"
 
 
 class MEPCrossSectionShape(Enum):
     """Optional cross section shape applied to all segments."""
-    Rectangular = "Rectangular"
-    Circular = "Circular"
-    Oval = "Oval"
-    UShape = "UShape"
+    RECTANGULAR = "Rectangular"
+    CIRCULAR = "Circular"
+    OVAL = "Oval"
+    U_SHAPE = "UShape"
 
 
 class MEPPreferenceTableDomain(Enum):
     """The MEP domain of the segment preference tables."""
-    Piping = "Piping"
-    Ventilation = "Ventilation"
+    PIPING = "Piping"
+    VENTILATION = "Ventilation"
 
 
 class MEPPreferenceRow(APIModel):
@@ -2555,10 +2555,10 @@ class MEPPreferenceRow(APIModel):
 
 
 class MEPComponentType(Enum):
-    Terminal = "Terminal"
-    Accessory = "Accessory"
-    Equipment = "Equipment"
-    Fitting = "Fitting"
+    TERMINAL = "Terminal"
+    ACCESSORY = "Accessory"
+    EQUIPMENT = "Equipment"
+    FITTING = "Fitting"
 
 
 class ElementId(APIModel):
