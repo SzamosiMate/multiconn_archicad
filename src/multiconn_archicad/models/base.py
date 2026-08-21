@@ -1,10 +1,14 @@
 from typing import Any
 from pydantic import BaseModel, ConfigDict
+from .config import _Registry
 
-class APIModel(BaseModel):
+_bases = _Registry.mixins + (BaseModel,)
+
+class APIModel(*_bases):
     """A custom base model for the Unified API"""
+
     model_config = ConfigDict(
-        extra="forbid",
+        extra="ignore",
         populate_by_name=True,
         serialize_by_alias=True,
     )
@@ -34,3 +38,8 @@ class APIModel(BaseModel):
             exclude_none=exclude_none,
             **kwargs,
         )
+
+# =====================================================================
+# LOCK CONFIGURATION
+# =====================================================================
+_Registry.locked = True

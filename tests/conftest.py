@@ -6,13 +6,13 @@ from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
 import concurrent.futures
 from pathlib import Path
 from typing import Dict, Any, Callable
-
 import pytest
 
-# Import modules for configuration patching
 import multiconn_archicad.multi_conn as multi_conn
 import multiconn_archicad.utilities.cli_parser as cli_parser
 from multiconn_archicad.basic_types import Port
+from multiconn_archicad.models import config
+from multiconn_archicad.models.mixins import _MODEL_KEYS_CACHE
 
 FIXTURES_DIR = Path(__file__).parent / "fixtures"
 
@@ -212,3 +212,28 @@ def pytest_sessionstart(session):
         print(" before executing the test suite to prevent socket-routing test interference.")
         print("=" * 80 + "\n")
         sys.exit(1)
+
+
+@pytest.fixture
+def clean_models():
+    """
+    Ensures that the models package is completely unimported and reset
+    before and after the test runs.
+    """
+
+    def _unload():
+        config._Registry.locked = False
+        config._Registry.mixins = ()
+        _MODEL_KEYS_CACHE.clear()
+
+        # Pop all multiconn_archicad model modules EXCEPT config
+        to_delete = [
+            name for name in sys.modules
+            if name.startswith("multiconn_archicad.models") and not name.endswith(".config")
+        ]
+        for mod in to_delete:
+            del sys.modules[mod]
+
+    _unload()
+    yield
+    _unload()
