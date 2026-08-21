@@ -19,6 +19,7 @@
 - **Thread-Safe Architecture**: Built on a synchronous threading model using `httpx` for maximum stability and performance.
 - **Lazy Metadata Evaluation**: Initializes instantly by offloading heavy API discovery (Project info, versioning) to background threads.
 - **UI Mode Support**: Prevent GUI freezes in plugins by using non-blocking placeholders.
+- **Add-On Version Reporting**: Every header reports the Tapir Add-On version of its instance, to compare against the version the package was generated against.
 
 ## Installation
 
@@ -64,6 +65,28 @@ info = conn.primary.product_info
 if isinstance(info, PendingResponse):
     print("Still fetching data...")
 ```
+
+### 4. Add-On Version Reporting
+
+Generated models are pinned to one Tapir release (`SUPPORTED_TAPIR_VERSION`), while the Add-On
+ships on its own schedule. Each header reports the version of the instance it is connected to, so
+a mismatch can be detected before it surfaces as a validation error:
+
+```python
+from multiconn_archicad import MultiConn
+from multiconn_archicad.conn_header import is_tapir_version_initialized
+
+conn = MultiConn()
+installed = conn.primary.tapir_version
+
+if not is_tapir_version_initialized(installed):
+    print(f"No Tapir Add-On on this instance: {installed.message}")
+elif installed.version != conn.supported_tapir_version:
+    print(f"Tapir {installed.version} installed, models generated against {conn.supported_tapir_version}.")
+```
+
+An instance without a working Add-On yields an `APIResponseError` here instead of raising, so
+discovery keeps working.
 
 ---
 

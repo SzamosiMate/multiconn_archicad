@@ -12,6 +12,7 @@ from multiconn_archicad import (
     TeamworkProjectID,
     APIResponseError,
     ArchicadLocation,
+    TapirVersion,
 )
 
 pytestmark = pytest.mark.unit
@@ -381,6 +382,25 @@ def test_archicad_location_from_dict():
     data_dict = {"archicadLocation": "/path/to/archicad"}
     location = ArchicadLocation.from_dict(data_dict)
     assert location.archicadLocation == "/path/to/archicad"
+
+
+# Tests for TapirVersion class
+
+
+def test_tapir_version_from_api_response():
+    api_response = {"version": "1.5.8"}
+    tapir_version = TapirVersion.from_api_response(api_response)
+    assert tapir_version.version == "1.5.8"
+
+
+def test_tapir_version_to_dict():
+    tapir_version = TapirVersion(version="1.5.8")
+    assert tapir_version.to_dict() == {"version": "1.5.8"}
+
+
+def test_tapir_version_from_dict():
+    tapir_version = TapirVersion.from_dict({"version": "1.5.8"})
+    assert tapir_version.version == "1.5.8"
 
 
 # Tests for APIResponseError class

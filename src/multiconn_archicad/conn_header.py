@@ -13,7 +13,8 @@ from multiconn_archicad.basic_types import (
     PendingResponse,
     ProductInfo,
     Port,
-    ArchicadLocation
+    ArchicadLocation,
+    TapirVersion
 )
 from multiconn_archicad.errors import RequestError, ArchicadAPIError, HeaderUnassignedError
 from multiconn_archicad.standard_connection import StandardConnection
@@ -57,6 +58,7 @@ class ConnHeader:
         self._product_info: ProductInfo | APIResponseError = PendingResponse()
         self._archicad_id: ArchiCadID | APIResponseError  = PendingResponse()
         self._archicad_location: ArchicadLocation | APIResponseError  = PendingResponse()
+        self._tapir_version: TapirVersion | APIResponseError = PendingResponse()
         if initialize and port:
             self.refresh_metadata()
 
@@ -122,12 +124,19 @@ class ConnHeader:
         self._sync_if_needed()
         return self._archicad_location
 
+    @property
+    def tapir_version(self) -> TapirVersion | APIResponseError:
+        """The Tapir Add-On version reported by this instance."""
+        self._sync_if_needed()
+        return self._tapir_version
+
     def to_dict(self) -> dict[str, Any]:
         return {
             "port": self.port,
             "productInfo": self.product_info.to_dict(),
             "archicadId": self.archicad_id.to_dict(),
             "archicadLocation": self.archicad_location.to_dict(),
+            "tapirVersion": self.tapir_version.to_dict(),
         }
 
     @classmethod
@@ -137,6 +146,8 @@ class ConnHeader:
         instance._product_info = ProductInfo.from_dict(data["productInfo"])
         instance._archicad_id = ArchiCadID.from_dict(data["archicadId"])
         instance._archicad_location = ArchicadLocation.from_dict(data["archicadLocation"])
+        if "tapirVersion" in data:  # absent in headers serialized before this field existed
+            instance._tapir_version = TapirVersion.from_dict(data["tapirVersion"])
         return instance
 
     def __eq__(self, other: Any) -> bool:
@@ -155,14 +166,14 @@ class ConnHeader:
     def __repr__(self) -> str:
         attrs = {
             name: getattr(self, name)
-            for name in ["port", "_status", "product_info", "archicad_id", "archicad_location"]
+            for name in ["port", "_status", "product_info", "archicad_id", "archicad_location", "tapir_version"]
         }
         return f"{self.__class__.__name__}({attrs})"
 
     def __str__(self) -> str:
         attrs = {
             name: getattr(self, name)
-            for name in ["port", "_status", "product_info", "archicad_id", "archicad_location"]
+            for name in ["port", "_status", "product_info", "archicad_id", "archicad_location", "tapir_version"]
         }
         return f"{self.__class__.__name__}(\n{pformat(attrs, width=200, indent=4)})"
 
@@ -175,28 +186,33 @@ class ConnHeader:
     def _fetch_worker(self,  my_token: object) -> None | tuple[
         ProductInfo | APIResponseError,
         ArchiCadID | APIResponseError,
-        ArchicadLocation | APIResponseError
+        ArchicadLocation | APIResponseError,
+        TapirVersion | APIResponseError
     ]:
         product_info = self.get_product_info(timeout=5.0)
         archicad_id = self.get_archicad_id(timeout=5.0)
         archicad_location = self.get_archicad_location(timeout=5.0)
+        tapir_version = self.get_tapir_version(timeout=5.0)
 
         if self._fetch_token is not my_token or self._is_cancelled:
             return None
 
-        self._assign_metadata(product_info, archicad_id, archicad_location)
-        return product_info, archicad_id, archicad_location
+        self._assign_metadata(product_info, archicad_id, archicad_location, tapir_version)
+        return product_info, archicad_id, archicad_location, tapir_version
 
     def _assign_metadata(self,
                         product_info: ProductInfo | APIResponseError,
                         archicad_id: ArchiCadID | APIResponseError,
-                        archicad_location: ArchicadLocation| APIResponseError) -> None:
+                        archicad_location: ArchicadLocation| APIResponseError,
+                        tapir_version: TapirVersion | APIResponseError) -> None:
         if isinstance(self._product_info, APIResponseError) or isinstance(product_info, ProductInfo):
             self._product_info = product_info
         if isinstance(self._archicad_id, APIResponseError) or isinstance(archicad_id, ArchiCadID):
             self._archicad_id = archicad_id
         if isinstance(self._archicad_location, APIResponseError) or isinstance(archicad_location, ArchicadLocation):
             self._archicad_location = archicad_location
+        if isinstance(self._tapir_version, APIResponseError) or isinstance(tapir_version, TapirVersion):
+            self._tapir_version = tapir_version
 
     def connect(self) -> None:
         """Public method to wait for metadata and establish standard API connection."""
@@ -292,6 +308,15 @@ class ConnHeader:
         except (KeyError, TypeError) as e:
             return APIResponseError(code=None, message=f"Malformed API response: missing key {e}")
 
+    def get_tapir_version(self, timeout: float) -> TapirVersion | APIResponseError:
+        try:
+            result = self.core.post_tapir_command(command="GetAddOnVersion", timeout=timeout)
+            return TapirVersion.from_api_response(result)
+        except (RequestError, ArchicadAPIError) as e:
+            return APIResponseError.from_exception(e)
+        except (KeyError, TypeError) as e:
+            return APIResponseError(code=None, message=f"Malformed API response: missing key {e}")
+
 
 class ValidatedHeader(ConnHeader):
     product_info: ProductInfo
@@ -317,3 +342,7 @@ def is_id_initialized(archicad_id: ArchiCadID | APIResponseError) -> TypeGuard[A
 
 def is_location_initialized(archicad_location: ArchicadLocation | APIResponseError) -> TypeGuard[ArchicadLocation]:
     return isinstance(archicad_location, ArchicadLocation)
+
+
+def is_tapir_version_initialized(tapir_version: TapirVersion | APIResponseError) -> TypeGuard[TapirVersion]:
+    return isinstance(tapir_version, TapirVersion)

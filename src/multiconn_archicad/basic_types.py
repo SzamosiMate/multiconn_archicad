@@ -62,6 +62,15 @@ class ArchicadLocation(BaseModel):
 
 
 @dataclass
+class TapirVersion(BaseModel):
+    version: str
+
+    @classmethod
+    def from_api_response(cls, response: dict) -> Self:
+        return cls(response["version"])
+
+
+@dataclass
 class APIResponseError(BaseModel):
     code: int | None
     message: str

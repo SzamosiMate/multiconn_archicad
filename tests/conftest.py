@@ -40,6 +40,7 @@ class ServerController:
         self._default_responses = {
             "API.GetProductInfo": "get_product_info_AC27_INT.json",
             "GetArchicadLocation": "get_archicad_location_win.json",
+            "GetAddOnVersion": "get_add_on_version.json",
             "API.IsAlive": "is_alive_true.json",
         }
         self.responses: Dict[str, str] = {}

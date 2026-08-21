@@ -1,0 +1,8 @@
+{
+    "succeeded": true,
+    "result": {
+        "addOnCommandResponse": {
+                "version": "1.5.8"
+        }
+    }
+}

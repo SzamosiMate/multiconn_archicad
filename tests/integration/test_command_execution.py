@@ -2,7 +2,8 @@ import pytest
 import time
 from unittest.mock import MagicMock
 
-from multiconn_archicad import MultiConn, Port, ConnHeader
+from multiconn_archicad import MultiConn, Port, ConnHeader, TapirVersion, APIResponseError
+from multiconn_archicad.basic_types import PendingResponse
 from multiconn_archicad.errors import StandardAPIError, TapirCommandError, CommandTimeoutError
 
 pytestmark = [
@@ -118,3 +119,72 @@ def test_command_timeout_error_is_raised(archicad_api):
     # ACT & ASSERT
     with pytest.raises(CommandTimeoutError):
         conn.core.post_command("Test.Timeout", timeout=0.1)
+
+def test_header_exposes_tapir_version(archicad_api):
+    """
+    Verifies that the Tapir Add-On version of the connected instance is fetched
+    as part of the header metadata, so it can be compared against
+    SUPPORTED_TAPIR_VERSION.
+    """
+    # ARRANGE
+    archicad_api.set_response("GetProjectInfo", "get_project_info_solo.json")
+
+    # ACT
+    conn = MultiConn()
+
+    # ASSERT
+    assert conn.primary.tapir_version == TapirVersion(version="1.5.8")
+
+
+def test_header_survives_missing_tapir_add_on(archicad_api):
+    """
+    Verifies that an instance without a working Tapir Add-On still yields a
+    usable header: the version degrades to an APIResponseError instead of
+    raising. (An old Archicad without Tapir must not break discovery.)
+    """
+    # ARRANGE
+    archicad_api.set_response("GetProjectInfo", "get_project_info_solo.json")
+    archicad_api.set_response("GetAddOnVersion", "tapir_command_error.json")
+
+    # ACT
+    conn = MultiConn()
+
+    # ASSERT
+    assert isinstance(conn.primary.tapir_version, APIResponseError)
+    assert conn.primary.tapir_version.code == 5678
+
+
+def test_tapir_version_survives_header_serialization(archicad_api):
+    """
+    Verifies that the version is part of the serialized header, so headers
+    restored with from_dict carry it too.
+    """
+    # ARRANGE
+    archicad_api.set_response("GetProjectInfo", "get_project_info_solo.json")
+    conn = MultiConn()
+
+    # ACT
+    restored = ConnHeader.from_dict(conn.primary.to_dict())
+
+    # ASSERT
+    assert restored.tapir_version == TapirVersion(version="1.5.8")
+
+
+def test_header_restored_without_tapir_version(archicad_api):
+    """
+    Verifies that headers serialized before the version was part of the payload
+    can still be restored, since from_dict consumes saved data.
+    """
+    # ARRANGE
+    saved_data = {
+        "port": 19723,
+        "productInfo": {"version": 27, "build": 3001, "lang": "INT"},
+        "archicadId": {"projectPath": "C:\\path\\to\\project.pln", "projectName": "My Test Project.pln"},
+        "archicadLocation": {"archicadLocation": "C:\\Archicad\\ARCHICAD.exe"},
+    }
+
+    # ACT
+    header = ConnHeader.from_dict(saved_data)
+
+    # ASSERT
+    assert isinstance(header.tapir_version, PendingResponse)
