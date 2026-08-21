@@ -13,6 +13,7 @@
 ## Features
 
 - **Unified High-Level API**: Modern, Pydantic-validated interface for both Official and Tapir APIs.
+- **Dynamic Model Configuration**: Configurable Pydantic mixins for strict validation (MCP / AI agents), immutability, and data cleaning.
 - **Multi-instance Management**: Seamlessly execute commands across one, several, or all open Archicad projects.
 - **Project Automation**: Programmatically find, open, and switch between solo and teamwork projects.
 - **Thread-Safe Architecture**: Built on a synchronous threading model using `httpx` for maximum stability and performance.
@@ -72,11 +73,11 @@ if isinstance(info, PendingResponse):
 
 The library provides three distinct namespaces for interacting with Archicad, each suited for different needs. 
 
-*   **`unified`**: A high-level, type-safe and pythonic interface that unifies both the Official and Tapir APIs into a single, easy-to-use framework
+*   **`unified`**: A high-level, type-safe and pythonic interface that unifies both the Official and Tapir APIs into a single, easy-to-use framework.
 *   **`core`**: A low-level interface for sending raw JSON commands.
 *   **`standard`**: The official ArchiCAD python wrapper.
 
-By incorporating the 3 namespaces to a common framework it is possible to freely mix them, allowing you to reuse codes of different styles.
+By incorporating the 3 namespaces into a common framework it is possible to freely mix them, allowing you to reuse code of different styles.
 
 #### Example: Using two namespaces together
 ```python
@@ -90,6 +91,8 @@ def run(conn: MultiConn | ConnHeader) -> dict[str, Any]:
     }
     return conn.core.post_tapir_command('HighlightElements', command_parameters)
 ```
+
+---
 
 ### 1. The `unified` Namespace (Recommended)
 
@@ -112,7 +115,7 @@ from multiconn_archicad.models.official import types as official_types
 conn = MultiConn()
 assert conn.primary, "No running Archicad instance found."
 
-# Create a shortcut to the official_commands commands for convenience
+# Create a shortcut to the official commands for convenience
 official_commands = conn.primary.unified.official
 
 # 1. Get identifiers for all elements
@@ -141,6 +144,95 @@ property_values_for_elements = [
 
 print(f"Retrieved Element IDs for {len(property_values_for_elements)} elements.")
 ```
+
+### Model Configuration & Mixins (Unified API)
+
+By default, all `unified` Pydantic models use **lenient parsing (`extra="ignore"`)**. This ensures forward compatibility so that newly added fields from Tapir/Archicad updates will not break your application or data pipelines.
+
+For workflows that require custom validation, immutability, or extra functionality, you can configure `APIModel` behavior at import time using `configure()`.
+
+#### How to Configure
+
+`configure()` **must** be called before importing any model classes (`commands`, `types`, etc.). If called after models are already imported and compiled, it will raise a `RuntimeError` to prevent silent configuration drift.
+
+```python
+from multiconn_archicad.models.config import configure
+from multiconn_archicad.models.mixins import (
+    StrictValidationMixin,
+    FrozenMixin,
+    StripWhitespaceMixin,
+    OmitDefaultsMixin,
+)
+
+# Configure the base models for your application
+configure(StrictValidationMixin, StripWhitespaceMixin)
+
+# Now safely import model classes (this locks the configuration)
+from multiconn_archicad.models.tapir.commands import CreateBeamsParameters
+from multiconn_archicad.models.tapir.types import Coordinate2D
+```
+
+#### Built-in Mixins
+
+The library includes several common mixins out-of-the-box:
+
+| Mixin | Purpose | Common Use Case |
+| :--- | :--- | :--- |
+| **`StrictValidationMixin`** | Forbids unexpected/extra fields on models. Raises `ValueError` on extra input keys. | **MCP Servers / LLM Tool Calling** to catch hallucinated parameters. |
+| **`FrozenMixin`** | Sets `frozen=True` on all models, making them immutable and hashable. | Thread safety, using models in `set()` or as `dict` keys. |
+| **`StripWhitespaceMixin`** | Automatically strips leading and trailing whitespace from all string fields. | Cleaning up messy user-entered BIM data. |
+| **`OmitDefaultsMixin`** | Excludes fields with default/None values from `.model_dump()` and `.model_dump_json()`. | Minimizing HTTP payload sizes. |
+
+#### Creating Custom Mixins
+
+The built-in mixins are just examples—**you can freely define and combine your own custom mixins**. Any class inheriting from Pydantic's `BaseModel` can be injected to add custom methods, validators, or attributes across the entire model catalog:
+
+```python
+from typing import Any
+from pydantic import BaseModel, PrivateAttr
+from multiconn_archicad.models.config import configure
+from multiconn_archicad.models.mixins import StrictValidationMixin
+
+# 1. Define a custom mixin (e.g., track fields modified after instantiation)
+class DirtyTrackingMixin(BaseModel):
+    _dirty_fields: set[str] = PrivateAttr(default_factory=set)
+
+    def __setattr__(self, name: str, value: Any) -> None:
+        if getattr(self, name, object()) != value:
+            self._dirty_fields.add(name)
+        super().__setattr__(name, value)
+
+    def get_changes(self) -> dict[str, Any]:
+        """Returns only the fields that were modified."""
+        return self.model_dump(include=self._dirty_fields)
+
+# 2. Combine built-in and custom mixins together
+configure(StrictValidationMixin, DirtyTrackingMixin)
+
+# 3. Import models — all generated models now inherit both mixins
+from multiconn_archicad.models.tapir.types import WallData, Coordinate2D
+
+wall = WallData(
+    begCoordinate=Coordinate2D(x=0, y=0),
+    endCoordinate=Coordinate2D(x=10, y=0),
+    zCoordinate=0.0,
+    height=3.0,
+    thickness=0.3,
+)
+wall.height = 3.5
+print(wall.get_changes())  # {'height': 3.5}
+```
+
+#### Strict Mode & Bypasses
+
+When using `StrictValidationMixin`:
+1. **Context-based lenient bypass:** You can still parse raw API responses leniently by passing `context={"ignore_extra_keys": True}`:
+   ```python
+   data = Coordinate2D.model_validate(api_json, context={"ignore_extra_keys": True})
+   ```
+2. **Intentional dynamic models:** Models that explicitly require arbitrary keys (e.g., `AddOnCommandParameters`, `AddOnCommandResponse`) retain `extra="allow"` and are never blocked by strict mode.
+
+---
 
 ### 2. The `core` Namespace (Low-Level)
 
@@ -193,9 +285,13 @@ incorrect_params = {
 highlight_elements(conn, incorrect_params) # <-- STATIC ERROR!
 ```
 
+---
+
 ### 3. The `standard` Namespace (Legacy)
 
-This namespace provides direct access to Archicad's official Python wrapper. It is maintained for backward compatibility with older scripts but is not recommended for new projects, as the `unified` API incorporates all it's features, and covers the Tapir commands as well.
+This namespace provides direct access to Archicad's official Python wrapper. It is maintained for backward compatibility with older scripts but is not recommended for new projects, as the `unified` API incorporates all its features and covers Tapir commands as well.
+
+---
 
 ### Running Commands
 
@@ -245,6 +341,8 @@ elements = {
 }
 ```
 
+---
+
 ### Connection Management
 
 MultiConn tracks every open Archicad instance. You can access these via specific filters:
@@ -256,7 +354,6 @@ MultiConn tracks every open Archicad instance. You can access these via specific
 #### Example: Parallel Execution
 ```python
 from multiconn_archicad import MultiConn, Port
-
 
 conn = MultiConn()
 
@@ -272,6 +369,8 @@ conn.refresh.closed_ports()
 # Quit an Archicad instance
 conn.quit.from_headers(conn.open_port_headers[Port(19735)])
 ```
+
+---
 
 ### Project Management
 
@@ -380,7 +479,7 @@ Note: Passwords are not stored in serialized connection headers for security rea
 
 ```python
 import json
-from multiconn_archicad import ConnHeader
+from multiconn_archicad import ConnHeader, TeamworkCredentials, TeamworkProjectID
 
 with open('conn_header.json', 'r') as f:
     header_dict = json.load(f)
@@ -394,6 +493,8 @@ if isinstance(conn_header.archicad_id, TeamworkProjectID):
     # Use the credentials when opening the project
     port = conn.open_project.with_teamwork_credentials(conn_header, credentials)
 ```
+
+---
 
 ### Error Handling
 
@@ -437,6 +538,8 @@ except APIErrorBase as e:
      print(f"An API error occurred: Code={e.code}, Message='{e.message}'")
 
 ```
+
+---
 
 ## Contributing
 
