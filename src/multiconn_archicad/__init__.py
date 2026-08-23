@@ -19,7 +19,6 @@ from .basic_types import (
     ArchicadLocation,
     Port,
     APIResponseError,
-    FromAPIResponse,
 )
 from .standard_connection import StandardConnection
 from .core.core_commands import CoreCommands
@@ -51,7 +50,6 @@ __all__ = [
     "ConnHeader",
     "ArchiCadID",
     "APIResponseError",
-    "FromAPIResponse",
     "ProductInfo",
     "Port",
     "StandardConnection",

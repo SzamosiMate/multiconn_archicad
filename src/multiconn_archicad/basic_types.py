@@ -1,8 +1,22 @@
-from dataclasses import dataclass, asdict
-from typing import Self, Protocol, Type, Any, TypeVar, Union, ClassVar, cast
+from __future__ import annotations
+
+from abc import ABC, abstractmethod
+from typing import Annotated, Any, ClassVar, Literal, Self, TypeVar, Union
 import re
 from urllib.parse import unquote
-from abc import ABC, abstractmethod
+
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    SecretStr,
+    field_validator,
+    field_serializer,
+    model_validator,
+    Discriminator,
+    GetCoreSchemaHandler,
+)
+from pydantic_core import core_schema
 
 from multiconn_archicad.errors import APIErrorBase
 from multiconn_archicad.utilities.platform_utils import is_using_mac, double_quote, single_quote
@@ -11,154 +25,134 @@ JsonType = Union[str, int, float, bool, None, list["JsonType"], dict[str, "JsonT
 
 
 class Port(int):
-    def __new__(cls, value):
-        if not (19723 <= value < 19744):
-            raise ValueError(f"Port value must be between 19723 and 19744, got {value}.")
-        return int.__new__(cls, value)
+    """Port constraint for Archicad JSON API (19723 <= port < 19744)."""
 
+    MIN_PORT: ClassVar[int] = 19723
+    MAX_PORT: ClassVar[int] = 19744
 
-class FromAPIResponse(Protocol):
+    def __new__(cls, value: int | str) -> Self:
+        int_val = int(value)
+        if not (cls.MIN_PORT <= int_val < cls.MAX_PORT):
+            raise ValueError(f"Port value must be between {cls.MIN_PORT} and {cls.MAX_PORT}, got {int_val}.")
+        return super().__new__(cls, int_val)
+
     @classmethod
-    def from_api_response(cls, response: dict) -> Self: ...
+    def __get_pydantic_core_schema__(
+        cls, source_type: Any, handler: GetCoreSchemaHandler
+    ) -> core_schema.CoreSchema:
+        return core_schema.chain_schema([
+            core_schema.int_schema(ge=cls.MIN_PORT, lt=cls.MAX_PORT),
+            core_schema.no_info_plain_validator_function(cls),
+        ])
 
 
-@dataclass
-class BaseModel:
-    """Base class providing common functionality for data models"""
+class HeaderInfoBase(BaseModel):
+    """Base class providing common configuration and backward-compatible helper methods."""
 
-    def to_dict(self) -> dict[str, JsonType]:
-        """Convert the instance to a dictionary suitable for JSON serialization."""
-        return asdict(self)
+    model_config = ConfigDict(populate_by_name=True, extra="ignore")
+
+    def to_dict(self) -> dict[str, Any]:
+        return self.model_dump()
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> Self:
-        """Create an instance from a dictionary."""
-        return cls(**data)
-
-
-@dataclass
-class ProductInfo(BaseModel):
-    version: int
-    build: int
-    lang: str
+        return cls.model_validate(data)
 
     @classmethod
-    def from_api_response(cls, response: dict) -> Self:
-        return cls(
-            response["version"],
-            response["buildNumber"],
-            response["languageCode"],
-        )
+    def from_api_response(cls, response: dict[str, Any]) -> Self:
+        return cls.model_validate(response)
 
 
-@dataclass
-class ArchicadLocation(BaseModel):
+class ProductInfo(HeaderInfoBase):
+    version: int
+    build: int = Field(alias="buildNumber")
+    lang: str = Field(alias="languageCode")
+
+
+class ArchicadLocation(HeaderInfoBase):
     archicadLocation: str
 
+    @field_validator("archicadLocation", mode="after")
     @classmethod
-    def from_api_response(cls, response: dict) -> Self:
-        location = response["archicadLocation"]
-        return cls(f"{location}/Contents/MacOS/ARCHICAD" if is_using_mac() else location)
+    def _normalize_mac_path(cls, v: str) -> str:
+        if is_using_mac() and not v.endswith("/Contents/MacOS/ARCHICAD"):
+            return f"{v}/Contents/MacOS/ARCHICAD"
+        return v
 
 
-@dataclass
-class APIResponseError(BaseModel):
-    code: int | None
+class APIResponseError(HeaderInfoBase):
+    code: int | None = None
     message: str
 
     @classmethod
-    def from_exception(cls, response: APIErrorBase) -> Self:
+    def from_exception(cls, exc: APIErrorBase | Exception) -> Self:
         return cls(
-            code=response.code,
-            message=response.message,
-        )
-
-    @classmethod
-    def from_api_response(cls, response: dict) -> Self:
-        return cls(
-            code=response["code"],
-            message=response["message"],
+            code=getattr(exc, "code", None),
+            message=getattr(exc, "message", str(exc)),
         )
 
 
-@dataclass
 class PendingResponse(APIResponseError):
     code: int | None = None
     message: str = "Identifying..."
 
 
-@dataclass
-class TeamworkCredentials(BaseModel):
+class TeamworkCredentials(HeaderInfoBase):
     username: str
-    password: str | None
+    password: SecretStr | None = None
 
-    def __repr__(self) -> str:
-        attrs = vars(self).copy()
-        attrs["password"] = "*" * len(self.password) if self.password else None
-        str_repr = ", ".join(f"{k}={v!r}" for k, v in attrs.items())
-        return f"{self.__class__.__name__}({str_repr})"
-
-    def __str__(self) -> str:
-        return self.__repr__()
-
-    def to_dict(self) -> dict[str, JsonType]:
-        return self.__dict__.copy() | {"password": None}
+    @field_serializer("password", when_used="always")
+    def _serialize_password(self, password: SecretStr | None) -> None:
+        return None
 
 
-class ArchiCadID(ABC):
-    _ID_type_registry: ClassVar[dict[str, Type[Self]]] = {}
+def get_project_type(v: Any) -> str | None:
+    """Extracts discriminator tag from serialized dict or raw Tapir API response."""
+    if isinstance(v, dict):
+        if "project_type" in v:
+            return v["project_type"]
+        if "isUntitled" in v and "isTeamwork" in v:
+            if v["isUntitled"]:
+                return "untitled"
+            if v["isTeamwork"]:
+                return "teamwork"
+            return "solo"
+        return None
+    return getattr(v, "project_type", None)
+
+
+class ArchiCadID(HeaderInfoBase, ABC):
     projectName: str = "Untitled"
 
-    @classmethod
-    def register_subclass(cls, subclass: Type[Self]) -> Type[Self]:
-        cls._ID_type_registry[subclass.__name__] = subclass
-        return subclass
-
-    @classmethod
-    def from_api_response(cls, response: dict) -> "ArchiCadID":
-        if response["isUntitled"]:
-            return cls._ID_type_registry["UntitledProjectID"]()
-        elif not response["isTeamwork"]:
-            solo_project_id_cls = cast(Type[SoloProjectID], cls._ID_type_registry["SoloProjectID"])
-            return solo_project_id_cls(
-                projectPath=response["projectPath"],
-                projectName=response["projectName"],
-            )
-        else:
-            teamwork_project_id_cls = cast(Type[TeamworkProjectID], cls._ID_type_registry["TeamworkProjectID"])
-            return teamwork_project_id_cls.from_project_location(
-                project_location=response["projectLocation"],
-                project_name=response["projectName"],
-            )
-
     @abstractmethod
-    def to_dict(self) -> dict[str, JsonType]: ...
+    def get_project_location(self, teamwork_credentials: TeamworkCredentials | None = None) -> str | None: ...
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> Self:
-        for id_type in cls._ID_type_registry.values():
-            try:
-                return id_type.from_dict(data)
-            except (KeyError, AttributeError, TypeError):
-                pass
-        raise AttributeError(f"can not instantiate ArchiCadID from {data}")
+    def __get_pydantic_core_schema__(
+        cls, source_type: Any, handler: GetCoreSchemaHandler
+    ) -> core_schema.CoreSchema:
+        if source_type.__name__ == "ArchiCadID" and "UntitledProjectID" in globals():
+            return core_schema.tagged_union_schema(
+                choices={
+                    "untitled": handler.generate_schema(globals()["UntitledProjectID"]),
+                    "solo": handler.generate_schema(globals()["SoloProjectID"]),
+                    "teamwork": handler.generate_schema(globals()["TeamworkProjectID"]),
+                },
+                discriminator=get_project_type,
+            )
+        return handler(source_type)
 
-    @abstractmethod
-    def get_project_location(self, _: TeamworkCredentials | None = None) -> str | None: ...
 
-
-@ArchiCadID.register_subclass
-@dataclass
-class UntitledProjectID(BaseModel, ArchiCadID):
+class UntitledProjectID(ArchiCadID):
+    project_type: Literal["untitled"] = "untitled"
     projectName: str = "Untitled"
 
     def get_project_location(self, _: TeamworkCredentials | None = None) -> None:
         return None
 
 
-@ArchiCadID.register_subclass
-@dataclass
-class SoloProjectID(BaseModel, ArchiCadID):
+class SoloProjectID(ArchiCadID):
+    project_type: Literal["solo"] = "solo"
     projectPath: str
     projectName: str
 
@@ -169,49 +163,59 @@ class SoloProjectID(BaseModel, ArchiCadID):
         return self.projectPath
 
 
-@ArchiCadID.register_subclass
-@dataclass
-class TeamworkProjectID(BaseModel, ArchiCadID):
+class TeamworkProjectID(ArchiCadID):
+    project_type: Literal["teamwork"] = "teamwork"
     projectPath: str
     serverAddress: str
     teamworkCredentials: TeamworkCredentials
     projectName: str
 
+    @model_validator(mode="before")
+    @classmethod
+    def _parse_project_location(cls, data: Any) -> Any:
+        """Parses raw projectLocation URL into address, path, and credentials."""
+        if isinstance(data, dict) and "projectLocation" in data:
+            match = cls.match_project_location(data.pop("projectLocation"))
+            data.setdefault("serverAddress", match.group("serverAddress"))
+            data.setdefault("projectPath", match.group("projectPath"))
+            data.setdefault(
+                "teamworkCredentials",
+                TeamworkCredentials(
+                    username=match.group("username"),
+                    password=match.group("password"),
+                ),
+            )
+        return data
+
     def __eq__(self, other: Any) -> bool:
         if isinstance(other, TeamworkProjectID):
-            if (
+            return (
                 self.projectPath == other.projectPath
                 and self.serverAddress == other.serverAddress
                 and self.projectName == other.projectName
-            ):
-                return True
+            )
         return False
 
     def get_project_location(self, teamwork_credentials: TeamworkCredentials | None = None) -> str:
-        teamwork_credentials = teamwork_credentials if teamwork_credentials else self.teamworkCredentials
-        if not teamwork_credentials.password:
+        creds = teamwork_credentials or self.teamworkCredentials
+        if not creds.password:
             raise ValueError("Missing password in teamwork credentials.")
-        else:
-            return (
-                f"teamwork://{single_quote(teamwork_credentials.username)}:{single_quote(teamwork_credentials.password)}@"
-                f"{double_quote(self.serverAddress)}/{double_quote(self.projectPath)}"
-            )
+        raw_password = (
+            creds.password.get_secret_value()
+            if isinstance(creds.password, SecretStr)
+            else creds.password
+        )
+        return (
+            f"teamwork://{single_quote(creds.username)}:{single_quote(raw_password)}@"
+            f"{double_quote(self.serverAddress)}/{double_quote(self.projectPath)}"
+        )
 
     @classmethod
     def from_project_location(cls, project_location: str, project_name: str) -> Self:
-        match = cls.match_project_location(project_location)
-        return cls(
-            serverAddress=match.group("serverAddress"),
-            projectPath=match.group("projectPath"),
-            teamworkCredentials=TeamworkCredentials(
-                username=match.group("username"),
-                password=match.group("password"),
-            ),
-            projectName=project_name,
-        )
+        return cls.model_validate({"projectLocation": project_location, "projectName": project_name})
 
     @staticmethod
-    def match_project_location(project_location: str) -> re.Match:
+    def match_project_location(project_location: str) -> re.Match[str]:
         project_location = unquote(unquote(project_location))
         pattern = re.compile(
             r"teamwork://(?P<username>[^:]+):(?P<password>[^@]+)@(?P<serverAddress>https?://[^/]+)/(?P<projectPath>.*)?"
@@ -219,23 +223,18 @@ class TeamworkProjectID(BaseModel, ArchiCadID):
         match = pattern.match(project_location)
         if not match:
             raise ValueError(
-                f"Could not recognize projectLocation format:/n({project_location})/n Please, contact developer"
+                f"Could not recognize projectLocation format:\n({project_location})\nPlease, contact developer"
             )
         return match
 
-    def to_dict(self) -> dict[str, JsonType]:
-        return asdict(self) | {"teamworkCredentials": self.teamworkCredentials.to_dict()}
 
-    @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> Self:
-        return cls(**data | {"teamworkCredentials": TeamworkCredentials.from_dict(data["teamworkCredentials"])})
+ArchiCadID.model_rebuild(force=True)
+T = TypeVar("T", bound=HeaderInfoBase)
 
 
-T = TypeVar("T", bound=FromAPIResponse)
-
-
-async def create_object_or_error_from_response(result: dict, class_to_create: Type[T]) -> T | APIResponseError:
-    if result["succeeded"]:
-        return class_to_create.from_api_response(result)
-    else:
-        return APIResponseError.from_api_response(result)
+def create_object_or_error_from_response(
+    result: dict[str, Any], class_to_create: type[T]
+) -> T | APIResponseError:
+    if result.get("succeeded", True):
+        return class_to_create.model_validate(result)
+    return APIResponseError.model_validate(result)
