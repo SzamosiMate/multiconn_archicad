@@ -6,6 +6,9 @@ from typing import Self, Any, TypeGuard
 from pprint import pformat
 import logging
 
+from pydantic import GetCoreSchemaHandler, ValidationError
+from pydantic_core import core_schema
+
 from multiconn_archicad.core.core_commands import CoreCommands
 from multiconn_archicad.basic_types import (
     ArchiCadID,
@@ -38,10 +41,10 @@ class Status(Enum):
 
 
 class ConnHeader:
-    def __init__(self, port: Port, initialize: bool = True, ui_mode: bool = False):
+    def __init__(self, port: Port | None = None, initialize: bool = True, ui_mode: bool = False):
 
         self._port: Port | None = port
-        self._status: Status = Status.PENDING
+        self._status: Status = Status.PENDING if port else Status.UNASSIGNED
         self._ui_mode: bool = ui_mode
         self._is_cancelled: bool = False
 
@@ -122,22 +125,56 @@ class ConnHeader:
         self._sync_if_needed()
         return self._archicad_location
 
-    def to_dict(self) -> dict[str, Any]:
+    def model_dump(self) -> dict[str, Any]:
+        """Serialize connection header. Requires the header to be fully initialized."""
+        if not is_header_fully_initialized(self):
+            raise ValueError(
+                f"Cannot serialize ConnHeader on port {self.port}: Header is not fully initialized "
+                f"(status={self._status.value})."
+            )
         return {
-            "port": self.port,
-            "productInfo": self.product_info.to_dict(),
-            "archicadId": self.archicad_id.to_dict(),
-            "archicadLocation": self.archicad_location.to_dict(),
+            "productInfo": self._product_info.model_dump(),
+            "archicadId": self._archicad_id.model_dump(),
+            "archicadLocation": self._archicad_location.model_dump(),
         }
 
+    to_dict = model_dump
+
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> Self:
-        instance = cls(initialize=False, port=Port(data["port"]))
-        instance._status = Status.UNASSIGNED
-        instance._product_info = ProductInfo.from_dict(data["productInfo"])
-        instance._archicad_id = ArchiCadID.from_dict(data["archicadId"])
-        instance._archicad_location = ArchicadLocation.from_dict(data["archicadLocation"])
+    def model_validate(cls, data: Any) -> Self:
+        """Validate and construct a ConnHeader from serialized snapshot data."""
+        if isinstance(data, cls):
+            return data
+        if not isinstance(data, dict):
+            raise ValueError(f"Expected {cls.__name__} instance or dict, got {type(data).__name__}")
+
+        instance = cls(initialize=False)
+        instance._product_info = ProductInfo.model_validate(data["productInfo"])
+        instance._archicad_id = ArchiCadID.model_validate(data["archicadId"])
+        instance._archicad_location = ArchicadLocation.model_validate(data["archicadLocation"])
         return instance
+
+    from_dict = model_validate
+
+    @classmethod
+    def __get_pydantic_core_schema__(cls, source_type: Any, handler: GetCoreSchemaHandler) -> core_schema.CoreSchema:
+        """Enables Pydantic V2 to serialize/deserialize ConnHeader controllers."""
+
+        return core_schema.json_or_python_schema(
+            json_schema=core_schema.chain_schema([
+                core_schema.dict_schema(),
+                core_schema.no_info_plain_validator_function(cls.model_validate),
+            ]),
+            python_schema=core_schema.chain_schema([
+                core_schema.no_info_plain_validator_function(cls.model_validate),
+                core_schema.is_instance_schema(cls),
+            ]),
+            serialization=core_schema.plain_serializer_function_ser_schema(
+                lambda instance: instance.model_dump(),
+                when_used="always",
+            ),
+        )
+
 
     def __eq__(self, other: Any) -> bool:
         if self is other:
@@ -268,29 +305,29 @@ class ConnHeader:
     def get_product_info(self, timeout: float) -> ProductInfo | APIResponseError:
         try:
             result = self.core.post_command(command="API.GetProductInfo", timeout=timeout)
-            return ProductInfo.from_api_response(result)
+            return ProductInfo.model_validate(result)
         except (RequestError, ArchicadAPIError) as e:
             return APIResponseError.from_exception(e)
-        except (KeyError, TypeError) as e:
-            return APIResponseError(code=None, message=f"Malformed API response: missing key {e}")
+        except (KeyError, TypeError, ValidationError) as e:
+            return APIResponseError(code=None, message=f"Malformed API response: {e}")
 
     def get_archicad_id(self, timeout: float) -> ArchiCadID | APIResponseError:
         try:
             result = self.core.post_tapir_command(command="GetProjectInfo", timeout=timeout)
-            return ArchiCadID.from_api_response(result)
+            return ArchiCadID.model_validate(result)
         except (RequestError, ArchicadAPIError) as e:
             return APIResponseError.from_exception(e)
-        except (KeyError, TypeError) as e:
-            return APIResponseError(code=None, message=f"Malformed API response: missing key {e}")
+        except (KeyError, TypeError, ValidationError) as e:
+            return APIResponseError(code=None, message=f"Malformed API response: {e}")
 
     def get_archicad_location(self, timeout: float) -> ArchicadLocation | APIResponseError:
         try:
             result = self.core.post_tapir_command(command="GetArchicadLocation", timeout=timeout)
-            return ArchicadLocation.from_api_response(result)
+            return ArchicadLocation.model_validate(result)
         except (RequestError, ArchicadAPIError) as e:
             return APIResponseError.from_exception(e)
-        except (KeyError, TypeError) as e:
-            return APIResponseError(code=None, message=f"Malformed API response: missing key {e}")
+        except (KeyError, TypeError, ValidationError) as e:
+            return APIResponseError(code=None, message=f"Malformed API response: {e}")
 
 
 class ValidatedHeader(ConnHeader):
