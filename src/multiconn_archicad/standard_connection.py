@@ -25,7 +25,7 @@ class StandardConnection:
         return f"{self.__class__.__name__}(_request={self._request.full_url})"
 
     def connect(self, product_info: ProductInfo) -> None:
-        v = _Versioning(product_info.version, product_info.build, self._request)
+        v = _Versioning(product_info.version, product_info.buildNumber, self._request)
         self.commands = v.commands
         self.types = v.types
         self.utilities = v.utilities

@@ -107,9 +107,8 @@ def test_open_project_calls_dependencies_correctly(
     # Prepare a header to open
     header_to_open = ConnHeader.from_dict(
         {
-            "port": 19723,  # This port is just a placeholder in the saved data
-            "productInfo": {"version": 27, "build": 3001, "lang": "INT"},
-            "archicadId": {"projectPath": "C:\\path\\to\\project.pln", "projectName": "My Test Project.pln"},
+            "productInfo": {"version": 27, "buildNumber": 3001, "languageCode": "INT"},
+            "archicadId": {"project_type": "solo", "projectPath": "C:\\path\\to\\project.pln", "projectName": "My Test Project.pln"},
             "archicadLocation": {"archicadLocation": "C:\\Archicad\\ARCHICAD.exe"},
         }
     )
