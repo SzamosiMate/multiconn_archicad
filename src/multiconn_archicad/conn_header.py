@@ -53,9 +53,9 @@ class ConnHeader:
         self._unpacked_future: Future | None = None
         self._auto_connect: bool = False
 
-        self._core: CoreCommands | None = CoreCommands(port)
-        self._standard: StandardConnection | None = StandardConnection(port)
-        self._unified: UnifiedApi | None = UnifiedApi(self.core)
+        self._core: CoreCommands | None = CoreCommands(port) if port else None
+        self._standard: StandardConnection | None = StandardConnection(port) if port else None
+        self._unified: UnifiedApi | None = UnifiedApi(self.core) if self._core else None
 
         self._product_info: ProductInfo | APIResponseError = PendingResponse()
         self._archicad_id: ArchiCadID | APIResponseError  = PendingResponse()
