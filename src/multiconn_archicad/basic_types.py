@@ -1,19 +1,17 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Annotated, Any, ClassVar, Literal, Self, TypeVar, Union
+from typing import Any, ClassVar, Literal, Self, Union
 import re
 from urllib.parse import unquote
 
 from pydantic import (
     BaseModel,
     ConfigDict,
-    Field,
     SecretStr,
     field_validator,
     field_serializer,
     model_validator,
-    Discriminator,
     GetCoreSchemaHandler,
 )
 from pydantic_core import core_schema
@@ -65,8 +63,8 @@ class HeaderInfoBase(BaseModel):
 
 class ProductInfo(HeaderInfoBase):
     version: int
-    build: int = Field(alias="buildNumber")
-    lang: str = Field(alias="languageCode")
+    buildNumber: int
+    languageCode: str
 
 
 class ArchicadLocation(HeaderInfoBase):
@@ -175,6 +173,7 @@ class TeamworkProjectID(ArchiCadID):
     def _parse_project_location(cls, data: Any) -> Any:
         """Parses raw projectLocation URL into address, path, and credentials."""
         if isinstance(data, dict) and "projectLocation" in data:
+            data = dict(data)
             match = cls.match_project_location(data.pop("projectLocation"))
             data.setdefault("serverAddress", match.group("serverAddress"))
             data.setdefault("projectPath", match.group("projectPath"))
@@ -229,12 +228,3 @@ class TeamworkProjectID(ArchiCadID):
 
 
 ArchiCadID.model_rebuild(force=True)
-T = TypeVar("T", bound=HeaderInfoBase)
-
-
-def create_object_or_error_from_response(
-    result: dict[str, Any], class_to_create: type[T]
-) -> T | APIResponseError:
-    if result.get("succeeded", True):
-        return class_to_create.model_validate(result)
-    return APIResponseError.model_validate(result)

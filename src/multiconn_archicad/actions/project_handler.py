@@ -40,13 +40,6 @@ class FindArchicad:
         return None
 
 
-@dataclass
-class ProjectParams:
-    conn_header: ValidatedHeader
-    teamwork_credentials: TeamworkCredentials | None
-    demo: bool
-
-
 @auto_decorate_methods(log_exceptions)
 class SwitchProject:
     def __init__(self, multi_conn: MultiConn):
@@ -55,7 +48,7 @@ class SwitchProject:
     def from_header(self, original_port: Port, new_header: ConnHeader) -> ConnHeader:
         if not isinstance(new_header.archicad_id, SoloProjectID):
             raise ProjectNotFoundError("Can only open solo projects in an open Archicad window")
-        return self._execute_action(original_port, os.fspath(new_header.archicad_id))
+        return self._execute_action(original_port, os.fspath(new_header.archicad_id.get_project_location()))
 
     def from_path(self, original_port: Port, new_path: str | os.PathLike[str]) -> ConnHeader:
         return self._execute_action(original_port, os.fspath(new_path))
@@ -86,6 +79,11 @@ class SwitchProject:
             except StandardAPIError:
                 pass
 
+@dataclass
+class ProjectParams:
+    conn_header: ConnHeader
+    teamwork_credentials: TeamworkCredentials | None
+    demo: bool
 
 @auto_decorate_methods(log_exceptions)
 class OpenProject:
@@ -94,19 +92,13 @@ class OpenProject:
         self.process: subprocess.Popen
 
     def from_header(self, conn_header: ConnHeader, demo: bool = False) -> Port | None:
-        if is_header_fully_initialized(conn_header):
-            project_params = ProjectParams(conn_header, None, demo)
-        else:
-            raise NotFullyInitializedError(f"Cannot open project from partially initializer header {conn_header}")
+        project_params = ProjectParams(conn_header, None, demo)
         return self._execute_action(project_params)
 
     def with_teamwork_credentials(
         self, conn_header: ConnHeader, teamwork_credentials: TeamworkCredentials, demo: bool = False
     ) -> Port | None:
-        if is_header_fully_initialized(conn_header):
-            project_params = ProjectParams(conn_header, teamwork_credentials, demo)
-        else:
-            raise NotFullyInitializedError(f"Cannot open project from partially initializer header {conn_header}")
+        project_params = ProjectParams(conn_header, teamwork_credentials, demo)
         return self._execute_action(project_params)
 
     def _execute_action(self, project_params: ProjectParams) -> Port | None:
@@ -121,6 +113,8 @@ class OpenProject:
         return port
 
     def _check_input(self, project_params: ProjectParams) -> None:
+        if not is_header_fully_initialized(project_params.conn_header):
+            raise NotFullyInitializedError(f"Cannot open project from partially initializer header {project_params.conn_header}")
         if isinstance(project_params.conn_header.archicad_id, TeamworkProjectID):
             if project_params.teamwork_credentials:
                 assert project_params.teamwork_credentials.password, "You must supply a valid password!"

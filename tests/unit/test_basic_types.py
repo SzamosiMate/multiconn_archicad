@@ -70,30 +70,30 @@ def test_product_info_from_api_response():
     api_response = {"version": 26, "buildNumber": 3001, "languageCode": "en"}
     product_info = ProductInfo.from_api_response(api_response)
     assert product_info.version == 26
-    assert product_info.build == 3001
-    assert product_info.lang == "en"
+    assert product_info.buildNumber == 3001
+    assert product_info.languageCode == "en"
 
 
 def test_product_info_to_dict():
-    product_info = ProductInfo(version=26, build=3001, lang="en")
-    expected_dict = {"version": 26, "build": 3001, "lang": "en"}
+    product_info = ProductInfo(version=26, buildNumber=3001, languageCode="en")
+    expected_dict = {"version": 26, "buildNumber": 3001, "languageCode": "en"}
     assert product_info.to_dict() == expected_dict
     assert product_info.model_dump() == expected_dict
 
 
 def test_product_info_from_dict():
-    data_dict = {"version": 26, "build": 3001, "lang": "en"}
+    data_dict = {"version": 26, "buildNumber": 3001, "languageCode": "en"}
     product_info = ProductInfo.from_dict(data_dict)
     assert product_info.version == 26
-    assert product_info.build == 3001
-    assert product_info.lang == "en"
+    assert product_info.buildNumber == 3001
+    assert product_info.languageCode == "en"
 
 
 def test_product_info_alias_construction():
     product_info = ProductInfo(version=27, buildNumber=4000, languageCode="INT")
     assert product_info.version == 27
-    assert product_info.build == 4000
-    assert product_info.lang == "INT"
+    assert product_info.buildNumber == 4000
+    assert product_info.languageCode == "INT"
 
 
 # -------------------------------------------------------------------------
