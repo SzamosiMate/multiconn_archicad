@@ -1,10 +1,11 @@
 from pprint import pformat
 
+from multiconn_archicad.constants import DEFAULT_PORT_RANGE, DEFAULT_HOST, SUPPORTED_TAPIR_VERSION
 from multiconn_archicad.utilities.network_utils import is_port_listening
 from multiconn_archicad.utilities.thread_utils import EXECUTOR
 from multiconn_archicad.core.core_commands import CoreCommands
 from multiconn_archicad.standard_connection import StandardConnection
-from multiconn_archicad.unified_api.api import UnifiedApi, SUPPORTED_TAPIR_VERSION
+from multiconn_archicad.unified_api.api import UnifiedApi
 from multiconn_archicad.conn_header import ConnHeader, Status
 from multiconn_archicad.basic_types import Port
 from multiconn_archicad.actions import (
@@ -25,13 +26,13 @@ log = logging.getLogger(__name__)
 
 
 class MultiConn:
-    _port_range: list[Port] = [Port(port) for port in range(19723, 19744)]
+    _port_range: list[Port] = [Port(port) for port in DEFAULT_PORT_RANGE]
 
     def __init__(
         self,
         dialog_handler: DialogHandlerBase = EmptyDialogHandler(),
         port: Port | None = None,
-        host: str = "http://127.0.0.1",
+        host: str = DEFAULT_HOST,
         ui_mode: bool = False,
     ) -> None:
         cli_args = get_cli_args_once()

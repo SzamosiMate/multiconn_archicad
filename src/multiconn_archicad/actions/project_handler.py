@@ -15,7 +15,7 @@ from multiconn_archicad.errors import (
 from multiconn_archicad.utilities.platform_utils import escape_spaces_in_path, is_using_mac
 from multiconn_archicad.utilities.exception_logging import auto_decorate_methods, log_exceptions
 from multiconn_archicad.basic_types import Port, TeamworkCredentials, TeamworkProjectID, SoloProjectID
-from multiconn_archicad.conn_header import ConnHeader, is_header_fully_initialized, ValidatedHeader
+from multiconn_archicad.conn_header import ConnHeader, has_project_identity
 
 if TYPE_CHECKING:
     from multiconn_archicad.multi_conn import MultiConn
@@ -33,7 +33,7 @@ class FindArchicad:
         return self._execute_action(header)
 
     def _execute_action(self, conn_header: ConnHeader) -> Port | None:
-        if is_header_fully_initialized(conn_header):
+        if has_project_identity(conn_header):
             for port, header in self.multi_conn.open_port_headers.items():
                 if header == conn_header:
                     return port
@@ -113,7 +113,7 @@ class OpenProject:
         return port
 
     def _check_input(self, project_params: ProjectParams) -> None:
-        if not is_header_fully_initialized(project_params.conn_header):
+        if not has_project_identity(project_params.conn_header):
             raise NotFullyInitializedError(f"Cannot open project from partially initializer header {project_params.conn_header}")
         if isinstance(project_params.conn_header.archicad_id, TeamworkProjectID):
             if project_params.teamwork_credentials:
