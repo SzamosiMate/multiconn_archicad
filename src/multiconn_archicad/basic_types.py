@@ -15,9 +15,11 @@ from pydantic import (
     GetCoreSchemaHandler,
 )
 from pydantic_core import core_schema
+from packaging.version import Version, InvalidVersion
 
 from multiconn_archicad.errors import APIErrorBase
 from multiconn_archicad.utilities.platform_utils import is_using_mac, double_quote, single_quote
+from multiconn_archicad.constants import SUPPORTED_TAPIR_VERSION
 
 JsonType = Union[str, int, float, bool, None, list["JsonType"], dict[str, "JsonType"]]
 
@@ -228,3 +230,48 @@ class TeamworkProjectID(ArchiCadID):
 
 
 ArchiCadID.model_rebuild(force=True)
+
+
+class TapirInfo(HeaderInfoBase):
+    """ Represents the Tapir Add-On state on an Archicad instance. """
+    version: str | None
+    is_installed: bool = False
+    requiredVersion: str  = SUPPORTED_TAPIR_VERSION
+
+    @model_validator(mode="after")
+    def _infer_installed_state(self) -> Self:
+        """If a version string is present, mark as installed automatically."""
+        if self.version is not None:
+            self.is_installed = True
+        return self
+
+    @classmethod
+    def not_installed(cls) -> Self:
+        """Factory method representing an Archicad instance without the Tapir add-on."""
+        return cls(version=None, is_installed=False)
+
+    @property
+    def is_supported(self) -> bool:
+        """Checks if Tapir is installed and meets the library's required baseline."""
+        if not self.is_installed or self.version is None:
+            return False
+        if self.requiredVersion is None:
+            return True
+        try:
+            return Version(self.version) >= Version(self.requiredVersion)
+        except InvalidVersion:
+            return False
+
+    def is_at_least(self, min_version: str) -> bool:
+        """Checks if Tapir is installed and at least a specific target version."""
+        if self.version is None:
+            return False
+        try:
+            return Version(self.version) >= Version(min_version)
+        except InvalidVersion:
+            return False
+
+    def __repr__(self) -> str:
+        if not self.is_installed:
+            return "TapirInfo(not_installed)"
+        return f"TapirInfo(version={self.version!r}, supported={self.is_supported})"

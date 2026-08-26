@@ -76,12 +76,11 @@ def print_test():
 
 
 if __name__ == "__main__":
+    connect_and_run_ac_command_oneliner()
+    connect_and_run_ac_command()
+    connect_and_run_core_command()
+    quit_and_reopen_project()
+    switch_random_port()
+    cycle_primary()
+    print_test()
 
-
-    core = MultiConn().primary.core
-    MEP_systems = core.post_tapir_command('GetAttributesByType', {'attributeType': "MEPSystem"})
-    MEP_systems_attributes = [
-        {k: v for k, v in item.items() if k not in ("index", "name")}
-        for item in MEP_systems["attributes"]
-    ]
-    print(core.post_command('API.DeleteAttributes', {"attributeIds": MEP_systems_attributes}))

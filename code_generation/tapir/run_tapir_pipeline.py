@@ -10,6 +10,10 @@ import importlib
 import argparse
 import re
 from code_generation.tapir.paths import tapir_paths
+from multiconn_archicad.constants import SUPPORTED_TAPIR_VERSION
+
+
+CONSTANTS_FILE = getattr(tapir_paths, "CONSTANTS_FILE", project_root / "multiconn_archicad" / "constants.py")
 
 
 # Sequence of modules to execute
@@ -26,11 +30,12 @@ STEPS = [
 
 
 def run_pipeline() -> None:
-    tapir_version = save_tapir_version()
+    tapir_version = resolve_and_sync_tapir_version()
     update_readme_badge(tapir_version)
 
     print("==================================================")
     print("🔥 Starting Master Tapir Generation Pipeline 🔥")
+    print(f"📌 Target Tapir Version: {tapir_version}")
     print("==================================================")
 
     pipeline_start = time.time()
@@ -42,20 +47,45 @@ def run_pipeline() -> None:
     print("==================================================")
 
 
-def save_tapir_version() -> str:
+def resolve_and_sync_tapir_version() -> str:
+    """
+    Parses CLI argument --tapir-version.
+    - If passed: Updates SUPPORTED_TAPIR_VERSION in constants.py.
+    - If omitted: Reads current SUPPORTED_TAPIR_VERSION from constants.py.
+    """
     parser = argparse.ArgumentParser(description="Tapir API Code Generation Pipeline")
     parser.add_argument(
         "--tapir-version",
         type=str,
-        required=True,
-        help="Required: The Tapir tag/commit to pin against (e.g., 'v1.5.0'). Use 'main' for bleeding edge."
+        default=None,
+        help="Optional: New Tapir version to pin against (e.g. '1.5.8'). Defaults to constants.py."
     )
-    args = parser.parse_args()
+    args, _ = parser.parse_known_args()
 
-    version_file = tapir_paths.PROJECT_ROOT / "TAPIR_VERSION"
-    version_file.write_text(args.tapir_version, encoding="utf-8")
-    print(f"📌 Pinned Tapir generation to version: {args.tapir_version}")
-    return args.tapir_version
+    if args.tapir_version:
+        version = args.tapir_version.strip()
+        update_constants_file(version)
+        print(f"📌 Updated constants.py to Tapir version: {version}")
+        return version
+
+    print(f"📌 Using existing Tapir version from constants.py: {SUPPORTED_TAPIR_VERSION}")
+    return SUPPORTED_TAPIR_VERSION
+
+
+def update_constants_file(version: str) -> None:
+    """Writes the new version directly into constants.py."""
+    if not CONSTANTS_FILE.exists():
+        raise FileNotFoundError(f"Could not find constants.py at: {CONSTANTS_FILE}")
+
+    content = CONSTANTS_FILE.read_text(encoding="utf-8")
+
+    # Matches: SUPPORTED_TAPIR_VERSION = "..."
+    pattern = r'(SUPPORTED_TAPIR_VERSION\s*=\s*["\'])([^"\']+)(["\'])'
+    new_content = re.sub(pattern, rf'\g<1>{version}\g<3>', content)
+
+    if content != new_content:
+        CONSTANTS_FILE.write_text(new_content, encoding="utf-8")
+        print(f"📝 Synced {CONSTANTS_FILE.name} with version {version}")
 
 
 def update_readme_badge(version: str) -> None:
@@ -66,7 +96,7 @@ def update_readme_badge(version: str) -> None:
 
     content = readme_path.read_text(encoding="utf-8")
 
-    # Matches: https://img.shields.io/badge/Tapir_Add--On-v1.2.3-blue
+    # Matches: https://img.shields.io/badge/Tapir_Add--On-1.5.8-blue
     pattern = r"(https://img\.shields\.io/badge/Tapir_Add--On-)([^-]+)(-blue)"
     new_content = re.sub(pattern, rf"\g<1>{version}\g<3>", content)
 
@@ -95,5 +125,4 @@ def run_pipeline_steps() -> None:
             sys.exit(1)
 
 
-if __name__ == "__main__":
-    run_pipeline()
+if __n

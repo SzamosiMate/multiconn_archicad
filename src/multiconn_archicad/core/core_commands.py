@@ -5,13 +5,16 @@ import httpx
 import logging
 import asyncio
 
+from multiconn_archicad.constants import DEFAULT_HOST
 from multiconn_archicad.errors import (
     CommandTimeoutError,
     APIConnectionError,
     InvalidResponseFormatError,
     RequestError,
     StandardAPIError,
+    StandardCommandUnavailable,
     TapirCommandError,
+    AddOnCommandUnavailable,
 )
 from multiconn_archicad.basic_types import Port
 from multiconn_archicad.utilities.cli_parser import get_cli_args_once
@@ -24,7 +27,7 @@ log = logging.getLogger(__name__)
 
 
 class CoreCommands:
-    def __init__(self, port: Port | None = None, host: str = "http://127.0.0.1"):
+    def __init__(self, port: Port | None = None, host: str = DEFAULT_HOST):
         cli_args = get_cli_args_once()
         self.port: Port | None = port if port else (Port(cli_args.port)) if cli_args.port else None
         self.url: str = f"{cli_args.host if cli_args.host else host}:{self.port}"
@@ -50,10 +53,16 @@ class CoreCommands:
             log.debug(f"response: {json.dumps(response, indent=4)}")
         else:
             log.warning(f"response: {response}")
-            raise StandardAPIError(
-                message=response.get("error", {}).get("message", "no message"),
-                code=response.get("error", {}).get("code", None),
-            )
+            message = response.get("error", {}).get("message", "no message")
+            code = response.get("error", {}).get("code", None)
+            print(f"code: {code} type: {type(code)}")
+            code = int(code) if isinstance(code, (str, int)) else None
+            if code == 2002:
+                raise StandardCommandUnavailable(message=message)
+            elif code == 4010:
+                raise AddOnCommandUnavailable(message=message)
+            else:
+                raise StandardAPIError(code=code, message=message)
         return response
 
     def post_tapir_command(

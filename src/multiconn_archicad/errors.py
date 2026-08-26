@@ -16,8 +16,8 @@ class APIErrorBase(MulticonnArchicadError):
 
     def __init__(self, message: str, code: int | None = None):
         super().__init__(message)
-        self.code = code
-        self.message = message
+        self.code: int = code
+        self.message: str = message
 
     def __str__(self):
         return f"error: {{code={self.code}, message='{self.message}}}'"
@@ -69,6 +69,22 @@ class StandardAPIError(ArchicadAPIError):
     """Raised when the ArchiCAD API indicates a failure in the response body."""
 
     pass
+
+
+class StandardCommandUnavailable(StandardAPIError):
+    """Raised when the ArchicadAPI receives an unknown command"""
+    def __init__(self, message: str):
+        super().__init__(message)
+        self.code: int = 2002
+        self.message: str = message
+
+
+class AddOnCommandUnavailable(StandardAPIError):
+    """Raised when the ArchicadAPI receives an unknown Add-on command"""
+    def __init__(self, message: str):
+        super().__init__(message)
+        self.code: int = 4010
+        self.message: str = message
 
 
 class TapirCommandError(ArchicadAPIError):
