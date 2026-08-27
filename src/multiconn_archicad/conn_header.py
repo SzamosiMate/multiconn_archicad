@@ -385,7 +385,7 @@ class SessionReadyHeader(ProjectIdentityHeader):
 
 def has_project_identity(header: ConnHeader) -> TypeGuard[ProjectIdentityHeader]:
     """Validates that the header has full project identity data for serialization/launch."""
-    return (
+    return bool(
         isinstance(header.product_info, ProductInfo)
         and isinstance(header.archicad_id, (SoloProjectID, TeamworkProjectID))
         and isinstance(header.archicad_location, ArchicadLocation)
@@ -394,17 +394,21 @@ def has_project_identity(header: ConnHeader) -> TypeGuard[ProjectIdentityHeader]
 
 def is_session_ready(header: ConnHeader) -> TypeGuard[SessionReadyHeader]:
     """Validates that Archicad is live on a port and all background tasks have finished."""
-    return (
-            has_project_identity(header)
-            and header.port is not None
-            and header.status == Status.ACTIVE
-            and isinstance(header.tapir_info, TapirInfo)
+    return bool(
+        has_project_identity(header)
+        and header.port is not None
+        and header.status == Status.ACTIVE
+        and isinstance(header.tapir_info, TapirInfo)
     )
 
 
 def is_tapir_session_ready(header: ConnHeader) -> TypeGuard[SessionReadyHeader]:
     """Validates that Archicad is live on a port and the Tapir API version meets requirements"""
-    return is_session_ready(header) and header.tapir_info.is_installed and header.tapir_info.is_supported
+    return bool(
+        is_session_ready(header)
+        and header.tapir_info.is_installed
+        and header.tapir_info.is_supported
+    )
 
 
 def is_product_info_initialized(product_info: ProductInfo | APIResponseError) -> TypeGuard[ProductInfo]:
@@ -417,6 +421,11 @@ def is_id_initialized(archicad_id: ArchiCadID | APIResponseError) -> TypeGuard[A
 
 def is_location_initialized(archicad_location: ArchicadLocation | APIResponseError) -> TypeGuard[ArchicadLocation]:
     return isinstance(archicad_location, ArchicadLocation)
+
+
+def is_tapir_info_initialized(tapir_info: TapirInfo | APIResponseError) -> TypeGuard[TapirInfo]:
+    return isinstance(tapir_info, TapirInfo)
+
 
 def is_header_fully_initialized(header: ConnHeader) -> TypeGuard[ValidatedHeader]:
     """Deprecated: Use has_project_identity instead."""
