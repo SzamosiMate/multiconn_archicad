@@ -2,7 +2,6 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 import subprocess
 import time
-import psutil
 import os
 from dataclasses import dataclass
 
@@ -14,6 +13,7 @@ from multiconn_archicad.errors import (
 )
 from multiconn_archicad.utilities.platform_utils import escape_spaces_in_path, is_using_mac
 from multiconn_archicad.utilities.exception_logging import auto_decorate_methods, log_exceptions
+from multiconn_archicad.utilities.process_utils import find_port_by_pid
 from multiconn_archicad.basic_types import Port, TeamworkCredentials, TeamworkProjectID, SoloProjectID
 from multiconn_archicad.conn_header import ConnHeader, has_project_identity
 
@@ -79,11 +79,13 @@ class SwitchProject:
             except StandardAPIError:
                 pass
 
+
 @dataclass
 class ProjectParams:
     conn_header: ConnHeader
     teamwork_credentials: TeamworkCredentials | None
     demo: bool
+
 
 @auto_decorate_methods(log_exceptions)
 class OpenProject:
@@ -142,14 +144,8 @@ class OpenProject:
             text=True,
         )
 
-    def _find_archicad_port(self):
-        psutil_process = psutil.Process(self.process.pid)
-
-        while True:
-            connections = psutil_process.net_connections(kind="inet")
-            for conn in connections:
-                if conn.status == psutil.CONN_LISTEN:
-                    if conn.laddr.port in self.multi_conn.port_range:
-                        log.debug(f"Detected Archicad listening on port {conn.laddr.port}")
-                        return conn.laddr.port
-            time.sleep(1)
+    def _find_archicad_port(self) -> int:
+        port = find_port_by_pid(self.process.pid, self.multi_conn.port_range, timeout=None, poll_interval=1.0)
+        if port is None:
+            raise RuntimeError(f"Archicad process (PID {self.process.pid}) terminated without opening a port.")
+        return port
