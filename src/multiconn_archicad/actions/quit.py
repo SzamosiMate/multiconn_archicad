@@ -1,43 +1,17 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
-import psutil
+import logging
 
 from multiconn_archicad.conn_header import ConnHeader
 from multiconn_archicad.errors import RequestError, ArchicadAPIError
+from multiconn_archicad.utilities.process_utils import find_pid_by_port, terminate_process
 
 if TYPE_CHECKING:
     from multiconn_archicad.multi_conn import MultiConn
     from multiconn_archicad.basic_types import Port
 
-import logging
-
 log = logging.getLogger(__name__)
-
-
-def _find_process_using_port(port: int) -> int | None:
-    """Find the PID of the process using the specified port."""
-    for conn in psutil.net_connections(kind="inet"):
-        if conn.laddr.port == port and conn.status == psutil.CONN_LISTEN:
-            return conn.pid
-    return None
-
-
-def _kill_process(pid: int) -> None:
-    """Kill the process with the given PID."""
-    try:
-        p = psutil.Process(pid)
-        p.terminate()  # Graceful termination
-        try:
-            p.wait(timeout=3)
-            log.info(f"Process with PID {pid} terminated successfully.")
-        except psutil.TimeoutExpired:  # Force termination
-            log.warning(f"Process {pid} did not terminate in time. Force killing.")
-            p.kill()
-    except psutil.NoSuchProcess:
-        log.info(f"No process found with PID {pid}. Already terminated?")
-    except Exception as e:
-        log.error(f"Error killing process PID {pid}: {e}", exc_info=True)
 
 
 class QuitAndDisconnect:
@@ -77,8 +51,8 @@ class QuitAndDisconnect:
             except (RequestError, ArchicadAPIError) as e:
                 log.error(f"Failed to gracefully quit Archicad: error: {e}")
                 if force_after:
-                    if process := _find_process_using_port(conn_header.port):
-                        _kill_process(process)
+                    if process := find_pid_by_port(conn_header.port):
+                        terminate_process(process, graceful_timeout=force_after)
                     else:
                         log.warning(f"Could not find process listening on port {conn_header.port} to force kill.")
                     quit_successful = True

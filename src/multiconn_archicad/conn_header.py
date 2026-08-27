@@ -23,12 +23,13 @@ from multiconn_archicad.basic_types import (
     ArchicadLocation,
     TapirInfo,
     SoloProjectID,
-    TeamworkProjectID
+    TeamworkProjectID,
 )
 from multiconn_archicad.errors import RequestError, ArchicadAPIError, HeaderUnassignedError, AddOnCommandUnavailable
 from multiconn_archicad.standard_connection import StandardConnection
 from multiconn_archicad.unified_api.api import UnifiedApi
 from multiconn_archicad.utilities.thread_utils import EXECUTOR
+from multiconn_archicad.utilities.ram_monitor import RamMonitor
 
 
 log = logging.getLogger(__name__)
@@ -57,12 +58,22 @@ class HeaderMetadata:
 
 
 class ConnHeader:
-    def __init__(self, port: Port | None = None, initialize: bool = True, ui_mode: bool = False):
-
+    def __init__(
+        self,
+        port: Port | None = None,
+        initialize: bool = True,
+        ui_mode: bool = False,
+        initial_peak_ram_bytes: int | None = None,
+    ):
         self._port: Port | None = port
         self._status: Status = Status.PENDING if port else Status.UNASSIGNED
         self._ui_mode: bool = ui_mode
         self._is_cancelled: bool = False
+
+        self._ram_monitor = RamMonitor(
+            port_getter=lambda: self._port,
+            initial_peak_bytes=initial_peak_ram_bytes,
+        )
 
         self._fetch_token: object | None = None
         self.init_future: Future | None = None
@@ -74,8 +85,8 @@ class ConnHeader:
         self._unified: UnifiedApi | None = UnifiedApi(self.core) if self._core else None
 
         self._product_info: ProductInfo | APIResponseError = PendingResponse()
-        self._archicad_id: ArchiCadID | APIResponseError  = PendingResponse()
-        self._archicad_location: ArchicadLocation | APIResponseError  = PendingResponse()
+        self._archicad_id: ArchiCadID | APIResponseError = PendingResponse()
+        self._archicad_location: ArchicadLocation | APIResponseError = PendingResponse()
         self._tapir_info: TapirInfo | APIResponseError = PendingResponse()
 
         if initialize and port:
@@ -93,6 +104,7 @@ class ConnHeader:
     @port.setter
     def port(self, port: Port | None) -> None:
         self._port = port
+        self._ram_monitor.reset_process()
         if port:
             self._core = CoreCommands(port)
             self._standard = StandardConnection(port)
@@ -106,6 +118,20 @@ class ConnHeader:
                     self._status = Status.PENDING
         else:
             self.unassign()
+
+    @property
+    def ram_monitor(self) -> RamMonitor:
+        """Process RAM telemetry and background tracking controller."""
+        return self._ram_monitor
+
+    @property
+    def peak_archicad_ram_bytes(self) -> int | None:
+        """The maximum observed RSS memory usage in bytes for this project."""
+        return self._ram_monitor.peak_bytes
+
+    @peak_archicad_ram_bytes.setter
+    def peak_archicad_ram_bytes(self, value: int | None) -> None:
+        self._ram_monitor.peak_bytes = value
 
     @property
     def core(self) -> CoreCommands:
@@ -159,8 +185,8 @@ class ConnHeader:
             "productInfo": self._product_info.model_dump(),
             "archicadId": self._archicad_id.model_dump(),
             "archicadLocation": self._archicad_location.model_dump(),
+            "peakArchicadRamBytes": self.peak_archicad_ram_bytes,
         }
-
 
     @classmethod
     def from_dict(cls, data: Any) -> Self:
@@ -174,13 +200,12 @@ class ConnHeader:
         instance._product_info = ProductInfo.model_validate(data["productInfo"])
         instance._archicad_id = ArchiCadID.model_validate(data["archicadId"])
         instance._archicad_location = ArchicadLocation.model_validate(data["archicadLocation"])
+        instance.peak_archicad_ram_bytes = data.get("peakArchicadRamBytes")
         return instance
-
 
     @classmethod
     def __get_pydantic_core_schema__(cls, source_type: Any, handler: GetCoreSchemaHandler) -> core_schema.CoreSchema:
         """Enables Pydantic V2 to serialize/deserialize ConnHeader controllers."""
-
         return core_schema.json_or_python_schema(
             json_schema=core_schema.chain_schema([
                 core_schema.dict_schema(),
@@ -195,7 +220,6 @@ class ConnHeader:
                 when_used="always",
             ),
         )
-
 
     def __eq__(self, other: Any) -> bool:
         if self is other:
@@ -213,14 +237,30 @@ class ConnHeader:
     def __repr__(self) -> str:
         attrs = {
             name: getattr(self, name)
-            for name in ["port", "_status", "product_info", "archicad_id", "archicad_location", "tapir_info"]
+            for name in [
+                "port",
+                "_status",
+                "product_info",
+                "archicad_id",
+                "archicad_location",
+                "tapir_info",
+                "peak_archicad_ram_bytes",
+            ]
         }
         return f"{self.__class__.__name__}({attrs})"
 
     def __str__(self) -> str:
         attrs = {
             name: getattr(self, name)
-            for name in ["port", "_status", "product_info", "archicad_id", "archicad_location", "tapir_info"]
+            for name in [
+                "port",
+                "_status",
+                "product_info",
+                "archicad_id",
+                "archicad_location",
+                "tapir_info",
+                "peak_archicad_ram_bytes",
+            ]
         }
         return f"{self.__class__.__name__}(\n{pformat(attrs, width=200, indent=4)})"
 
@@ -265,6 +305,7 @@ class ConnHeader:
 
     def unassign(self) -> None:
         self.cancel()
+        self._ram_monitor.reset_process()
         self._status = Status.UNASSIGNED
         self._port = None
         self._core = None
@@ -275,21 +316,23 @@ class ConnHeader:
         self._is_cancelled = True
 
     def sync_from_master_future(self, master_future: Future) -> None:
-        """ Links this header to a master future."""
+        """Links this header to a master future."""
         self.init_future = master_future
         self._auto_connect = True
 
     def _sync_if_needed(self):
         """Safely unpacks the future when data is needed or ready."""
-        if (not self.init_future or
-            self.init_future is self._unpacked_future or
-            threading.current_thread().name.startswith("MultiConnWorker")):
+        if (
+            not self.init_future
+            or self.init_future is self._unpacked_future
+            or threading.current_thread().name.startswith("MultiConnWorker")
+        ):
             return
 
-        if self._ui_mode: # UI Mode: Only unpack if the background thread is already done (non-blocking)
+        if self._ui_mode:  # UI Mode: Only unpack if background thread is done
             if self.init_future.done():
                 self._unpack_future()
-        else: # Standard Mode: Safely block and wait for the data
+        else:  # Standard Mode: Safely block and wait for data
             self._unpack_future()
 
     def _unpack_future(self) -> None:
@@ -374,8 +417,10 @@ class ProjectIdentityHeader(ConnHeader):
     archicad_id: SoloProjectID | TeamworkProjectID
     archicad_location: ArchicadLocation
 
+
 # Deprecation Alias
 ValidatedHeader = ProjectIdentityHeader
+
 
 class SessionReadyHeader(ProjectIdentityHeader):
     """Guaranteed to be active, connected to a port, with Tapir polled."""
