@@ -16,7 +16,7 @@ from multiconn_archicad.utilities.platform_utils import escape_spaces_in_path, i
 from multiconn_archicad.utilities.exception_logging import auto_decorate_methods, log_exceptions
 from multiconn_archicad.utilities.process_utils import find_port_by_pid
 from multiconn_archicad.basic_types import Port, TeamworkCredentials, TeamworkProjectID, SoloProjectID
-from multiconn_archicad.conn_header import ConnHeader, has_project_identity
+from multiconn_archicad.conn_header import ConnHeader, has_project_identity, ProjectIdentityHeader
 
 if TYPE_CHECKING:
     from multiconn_archicad.multi_conn import MultiConn
@@ -88,6 +88,13 @@ class ProjectParams:
     demo: bool
 
 
+@dataclass
+class ProjectIdentityParams:
+    conn_header: ProjectIdentityHeader
+    teamwork_credentials: TeamworkCredentials | None
+    demo: bool
+
+
 @auto_decorate_methods(log_exceptions)
 class OpenProject:
     def __init__(self, multi_conn: MultiConn):
@@ -105,31 +112,33 @@ class OpenProject:
         return self._execute_action(project_params)
 
     def _execute_action(self, project_params: ProjectParams) -> Port | None:
-        self._check_input(project_params)
-        self._check_ram_advisory(project_params)
-        self._open_project(project_params)
-        port = self._activate_and_attach_header(project_params.conn_header)
+        identity_params = self._check_input(project_params)
+        self._check_ram_advisory(identity_params)
+        self._open_project(identity_params)
+        port = self._activate_and_attach_header(identity_params.conn_header)
         log.info(
-            f"Successfully opened project '{project_params.conn_header.archicad_id.projectName}' "
+            f"Successfully opened project '{identity_params.conn_header.archicad_id.projectName}' "
             f"on port {port} (Process PID: {self.process.pid})"
         )
         return port
 
-    def _check_input(self, project_params: ProjectParams) -> None:
-        if not has_project_identity(project_params.conn_header):
-            raise NotFullyInitializedError(f"Cannot open project from partially initializer header {project_params.conn_header}")
-        if isinstance(project_params.conn_header.archicad_id, TeamworkProjectID):
+    def _check_input(self, project_params: ProjectParams) -> ProjectIdentityParams:
+        header = project_params.conn_header
+        if not has_project_identity(header):
+            raise NotFullyInitializedError(f"Cannot open project from partially initializer header {header}")
+        if isinstance(header.archicad_id, TeamworkProjectID):
             if project_params.teamwork_credentials:
                 assert project_params.teamwork_credentials.password, "You must supply a valid password!"
             else:
-                assert project_params.conn_header.archicad_id.teamworkCredentials.password, (
+                assert header.archicad_id.teamworkCredentials.password, (
                     "You must supply a valid password!"
                 )
-        port = self.multi_conn.find_archicad.from_header(project_params.conn_header)
+        port = self.multi_conn.find_archicad.from_header(header)
         if port:
             raise ProjectAlreadyOpenError(f"Project is already open at port: {port}")
+        return ProjectIdentityParams(header, project_params.teamwork_credentials, project_params.demo)
 
-    def _check_ram_advisory(self, project_params: ProjectParams) -> None:
+    def _check_ram_advisory(self, project_params: ProjectIdentityParams) -> None:
         """Non-blocking diagnostic warning for capacity visibility."""
         historical_peak = project_params.conn_header.peak_archicad_ram_bytes
         if historical_peak is not None:
@@ -144,11 +153,11 @@ class OpenProject:
             except Exception as e:
                 log.debug(f"Failed to check available system RAM: {e}")
 
-    def _open_project(self, project_params: ProjectParams) -> None:
+    def _open_project(self, project_params: ProjectIdentityParams) -> None:
         self._start_process(project_params)
         self.multi_conn.dialog_handler.start(self.process)
 
-    def _start_process(self, project_params: ProjectParams) -> None:
+    def _start_process(self, project_params: ProjectIdentityParams) -> None:
         log.info(f"opening project: {project_params.conn_header.archicad_id.projectName}")
         demo_flag = " -demo" if project_params.demo else ""
         self.process = subprocess.Popen(
