@@ -268,6 +268,7 @@ class ConnHeader:
         self.init_future = EXECUTOR.submit(self._fetch_worker, self._fetch_token)
 
     def _fetch_worker(self, my_token: object) -> HeaderMetadata | None:
+        self._ram_monitor.get_current_rss()
         metadata = HeaderMetadata(
             product_info=self.get_product_info(timeout=5.0),
             archicad_id=self.get_archicad_id(timeout=5.0),
