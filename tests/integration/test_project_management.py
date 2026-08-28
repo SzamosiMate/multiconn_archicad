@@ -69,7 +69,7 @@ def test_switch_project_success(archicad_api):
 
 
 @patch("multiconn_archicad.actions.project_handler.subprocess.Popen")
-@patch("multiconn_archicad.actions.project_handler.psutil.Process")
+@patch("multiconn_archicad.utilities.process_utils.psutil.Process")
 @patch("multiconn_archicad.actions.refresh")
 @patch("multiconn_archicad.multi_conn.get_cli_args_once")
 def test_open_project_calls_dependencies_correctly(
@@ -79,7 +79,7 @@ def test_open_project_calls_dependencies_correctly(
     Verifies that open_project calls Popen and psutil correctly without
     actually starting a process. (Test Case Plan 5.3)
     """
-    archicad_api.set_response("GetProjectInfo", "get_project_info_solo.json")  # Fixes the warning!
+    archicad_api.set_response("GetProjectInfo", "get_project_info_solo.json")
 
     # Mock the CLI args...
     mock_get_cli_args.return_value.port = None
@@ -95,6 +95,7 @@ def test_open_project_calls_dependencies_correctly(
 
     # Configure mock for psutil
     mock_psutil_instance = MagicMock()
+    mock_psutil_instance.memory_info.return_value.rss = 1_073_741_824  # Avoid MagicMock comparison errors in RamMonitor
 
     new_port = Port(archicad_api.server_port)
     mock_conn_obj = MagicMock()

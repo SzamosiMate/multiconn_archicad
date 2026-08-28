@@ -16,7 +16,7 @@ class APIErrorBase(MulticonnArchicadError):
 
     def __init__(self, message: str, code: int | None = None):
         super().__init__(message)
-        self.code: int = code
+        self.code: int | None = code
         self.message: str = message
 
     def __str__(self):
