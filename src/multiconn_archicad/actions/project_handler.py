@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING
 import subprocess
 import time
 import os
+import psutil
 from dataclasses import dataclass
 
 from multiconn_archicad.errors import (
@@ -105,9 +106,9 @@ class OpenProject:
 
     def _execute_action(self, project_params: ProjectParams) -> Port | None:
         self._check_input(project_params)
+        self._check_ram_advisory(project_params)
         self._open_project(project_params)
-        port = Port(self._find_archicad_port())
-        self.multi_conn.open_port_headers.update({port: ConnHeader(port)})
+        port = self._activate_and_attach_header(project_params.conn_header)
         log.info(
             f"Successfully opened project '{project_params.conn_header.archicad_id.projectName}' "
             f"on port {port} (Process PID: {self.process.pid})"
@@ -128,6 +129,21 @@ class OpenProject:
         if port:
             raise ProjectAlreadyOpenError(f"Project is already open at port: {port}")
 
+    def _check_ram_advisory(self, project_params: ProjectParams) -> None:
+        """Non-blocking diagnostic warning for capacity visibility."""
+        historical_peak = project_params.conn_header.peak_archicad_ram_bytes
+        if historical_peak is not None:
+            try:
+                available_ram = psutil.virtual_memory().available
+                if historical_peak > available_ram:
+                    log.warning(
+                        f"Opening project '{project_params.conn_header.archicad_id.projectName}' with historical "
+                        f"peak RAM of {historical_peak / (1024**3):.2f} GB, but system currently has only "
+                        f"{available_ram / (1024**3):.2f} GB available."
+                    )
+            except Exception as e:
+                log.debug(f"Failed to check available system RAM: {e}")
+
     def _open_project(self, project_params: ProjectParams) -> None:
         self._start_process(project_params)
         self.multi_conn.dialog_handler.start(self.process)
@@ -143,6 +159,13 @@ class OpenProject:
             shell=is_using_mac(),
             text=True,
         )
+
+    def _activate_and_attach_header(self, header: ConnHeader) -> Port:
+        port = Port(self._find_archicad_port())
+        header.port = port
+        header.refresh_metadata()
+        self.multi_conn.open_port_headers[port] = header
+        return port
 
     def _find_archicad_port(self) -> int:
         port = find_port_by_pid(self.process.pid, self.multi_conn.port_range, timeout=None, poll_interval=1.0)
