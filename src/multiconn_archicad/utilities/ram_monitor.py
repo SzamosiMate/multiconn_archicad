@@ -49,8 +49,10 @@ class RamMonitor:
 
     @property
     def peak_bytes(self) -> int | None:
-        """The highest observed RSS memory usage in bytes."""
-        return self._peak.get()
+        val = self._peak.get()
+        if val is None:
+            return self.get_current_rss()
+        return val
 
     @peak_bytes.setter
     def peak_bytes(self, value: int | None) -> None:
@@ -133,7 +135,7 @@ class RamMonitor:
         self._cached_pid = None
 
     @contextmanager
-    def track_peak_ram(self, interval_s: float = 1.0) -> Iterator[None]:
+    def track(self, interval_s: float = 1.0) -> Iterator[None]:
         """Context manager to track peak RAM during an enclosed block of work."""
         self.start(interval_s=interval_s)
         try:
