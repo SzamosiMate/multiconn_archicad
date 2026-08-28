@@ -138,6 +138,7 @@ def archicad_api(monkeypatch):
     Starts the synchronous mock server on a background thread within the Archicad port range,
     and patches the library configuration.
     """
+    assert_no_running_archicad()
     controller = ServerController()
 
     valid_ports = range(19723, 19745)
@@ -191,7 +192,7 @@ def fuzz_threads():
         sys.setswitchinterval(original_interval)
 
 
-def pytest_sessionstart(session):
+def assert_no_running_archicad():
     """
     Pre-flight guard to ensure no real Archicad instances or lingering processes
     are listening on the standard port range (19723-19743) that can interfere with the tests.
