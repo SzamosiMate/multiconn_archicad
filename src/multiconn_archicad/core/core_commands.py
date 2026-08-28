@@ -55,7 +55,6 @@ class CoreCommands:
             log.warning(f"response: {response}")
             message = response.get("error", {}).get("message", "no message")
             code = response.get("error", {}).get("code", None)
-            print(f"code: {code} type: {type(code)}")
             code = int(code) if isinstance(code, (str, int)) else None
             if code == 2002:
                 raise StandardCommandUnavailable(message=message)

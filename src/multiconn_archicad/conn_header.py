@@ -451,12 +451,13 @@ def is_session_ready(header: ConnHeader) -> TypeGuard[SessionReadyHeader]:
     )
 
 
-def is_tapir_session_ready(header: ConnHeader) -> TypeGuard[SessionReadyHeader]:
+def is_tapir_session_ready(header: ConnHeader, min_version: str | None = None) -> TypeGuard[SessionReadyHeader]:
     """Validates that Archicad is live on a port and the Tapir API version meets requirements"""
+    tapir_meets_requirements = header.tapir_info.is_at_least(min_version) if min_version else header.tapir_info.is_supported
     return bool(
         is_session_ready(header)
         and header.tapir_info.is_installed
-        and header.tapir_info.is_supported
+        and tapir_meets_requirements
     )
 
 
