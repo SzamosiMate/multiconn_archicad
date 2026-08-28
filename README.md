@@ -370,6 +370,34 @@ conn.refresh.closed_ports()
 conn.quit.from_headers(conn.open_port_headers[Port(19735)])
 ```
 
+### Readiness & Type Guards
+
+Use type guards to safely verify connection and compatibility states before executing operations:
+
+```python
+from multiconn_archicad import (
+    has_project_identity,
+    is_session_ready,
+    is_tapir_session_ready,
+)
+
+# 1. Verify project identity (safe to serialize or reopen)
+if has_project_identity(header):
+    conn.open_project.from_header(header)
+
+# 2. Verify active connection to Archicad
+if is_session_ready(header):
+    header.unified.official.element_listing.get_all_elements()
+
+# 3. Verify Tapir is installed, and it's version is at least UnifiedAPI's
+if is_tapir_session_ready(header): 
+    header.unified.tapir.elements.get_all_elements()
+
+# 4. Enforce a specific Tapir version if you know the commands you want to use
+if is_tapir_session_ready(header, min_version="1.2.4"):
+    header.unified.tapir.elements.get_all_elements()
+```
+
 ---
 
 ### Project Management
@@ -493,7 +521,21 @@ if isinstance(conn_header.archicad_id, TeamworkProjectID):
     # Use the credentials when opening the project
     port = conn.open_project.with_teamwork_credentials(conn_header, credentials)
 ```
+### Process RAM Telemetry & Monitoring
 
+`ConnHeader` includes a `RamMonitor` controller to track process memory usage. It allows the orchestrator to make a decision weather to open up a new project or wait for more resources.
+
+```python
+# Query live RSS and peak memory
+rss_bytes = header.ram_monitor.current_bytes
+peak_bytes = header.peak_archicad_ram_bytes
+
+# Track peak memory spike during an intensive operation
+with header.ram_monitor.track(interval_s=0.1):
+    header.unified.tapir.elements.create_elements(...)
+
+print(f"Peak RAM: {header.peak_archicad_ram_bytes / (1024**3):.2f} GB")
+```
 ---
 
 ### Error Handling
