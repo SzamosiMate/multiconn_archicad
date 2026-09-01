@@ -10,6 +10,9 @@ from dataclasses import dataclass
 from pydantic import GetCoreSchemaHandler, ValidationError
 from pydantic_core import core_schema
 
+from pydantic import GetCoreSchemaHandler, ValidationError
+from pydantic_core import core_schema
+
 from multiconn_archicad.core.core_commands import CoreCommands
 from multiconn_archicad.basic_types import (
     ArchiCadID,
