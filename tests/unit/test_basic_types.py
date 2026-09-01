@@ -574,3 +574,16 @@ def test_tapir_info_repr():
 
     not_installed = TapirInfo.not_installed()
     assert repr(not_installed) == "TapirInfo(not_installed)"
+
+def test_tapir_info_version_comparisons():
+
+    exact = TapirInfo(version=SUPPORTED_TAPIR_VERSION)
+    assert (exact.is_exact_match, exact.is_newer, exact.is_older) == (True, False, False)
+    newer = TapirInfo(version="99.0.0")
+    assert (newer.is_exact_match, newer.is_newer, newer.is_older) == (False, True, False)
+    older = TapirInfo(version="0.0.1")
+    assert (older.is_exact_match, older.is_newer, older.is_older) == (False, False, True)
+
+    # Invalid & not installed
+    for info in [TapirInfo(version="invalid"), TapirInfo.not_installed()]:
+        assert (info.is_exact_match, info.is_newer, info.is_older) == (False, False, False)
