@@ -4,6 +4,7 @@ from abc import ABC, abstractmethod
 from typing import Any, ClassVar, Literal, Self, Union
 import re
 from urllib.parse import unquote
+from dataclasses import dataclass
 
 from pydantic import (
     BaseModel,
@@ -232,6 +233,12 @@ class TeamworkProjectID(ArchiCadID):
 ArchiCadID.model_rebuild(force=True)
 
 
+@dataclass
+class VersionPair:
+    self: Version
+    other: Version
+
+
 class TapirInfo(HeaderInfoBase):
     """ Represents the Tapir Add-On state on an Archicad instance. """
     version: str | None
@@ -253,25 +260,59 @@ class TapirInfo(HeaderInfoBase):
     @property
     def is_supported(self) -> bool:
         """Checks if Tapir is installed and meets the library's required baseline."""
-        if not self.is_installed or self.version is None:
+        if versions:= self._ensure_version():
+            return versions.self >= versions.other
+        else:
             return False
-        if self.requiredVersion is None:
-            return True
-        try:
-            return Version(self.version) >= Version(self.requiredVersion)
-        except InvalidVersion:
+
+    @property
+    def is_newer(self) -> bool:
+        """Checks if Tapir is newer than the library's required baseline."""
+        if versions:= self._ensure_version():
+            return versions.self > versions.other
+        else:
             return False
+
+    @property
+    def is_older(self) -> bool:
+        """Checks if Tapir is older than the library's required baseline."""
+        if versions:= self._ensure_version():
+            return versions.self < versions.other
+        else:
+            return False
+
+    @property
+    def is_exact_match(self) -> bool:
+        """Checks if Tapir exactly matches the library's required version."""
+        if versions := self._ensure_version():
+            return versions.self == versions.other
+        return False
 
     def is_at_least(self, min_version: str) -> bool:
         """Checks if Tapir is installed and at least a specific target version."""
-        if self.version is None:
-            return False
-        try:
-            return Version(self.version) >= Version(min_version)
-        except InvalidVersion:
+        if versions:= self._ensure_version(min_version):
+            return versions.self >= versions.other
+        else:
             return False
 
     def __repr__(self) -> str:
         if not self.is_installed:
             return "TapirInfo(not_installed)"
         return f"TapirInfo(version={self.version!r}, supported={self.is_supported})"
+
+    def _ensure_version(self, other: str | None = None) -> VersionPair | None:
+        if not self.is_installed or self.version is None:
+            return None
+        other = other if other else self.requiredVersion
+        if not other:
+            return None
+        try:
+            return VersionPair(
+                self=Version(self.version),
+                other=Version(other)
+            )
+        except InvalidVersion:
+            return None
+
+
+
