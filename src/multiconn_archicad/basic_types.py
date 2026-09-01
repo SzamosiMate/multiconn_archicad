@@ -20,7 +20,7 @@ from packaging.version import Version, InvalidVersion
 
 from multiconn_archicad.errors import APIErrorBase
 from multiconn_archicad.utilities.platform_utils import is_using_mac, double_quote, single_quote
-from multiconn_archicad.constants import SUPPORTED_TAPIR_VERSION
+from multiconn_archicad.constants import SUPPORTED_TAPIR_VERSION, DEFAULT_PORT_RANGE
 
 JsonType = Union[str, int, float, bool, None, list["JsonType"], dict[str, "JsonType"]]
 
@@ -28,13 +28,13 @@ JsonType = Union[str, int, float, bool, None, list["JsonType"], dict[str, "JsonT
 class Port(int):
     """Port constraint for Archicad JSON API (19723 <= port < 19744)."""
 
-    MIN_PORT: ClassVar[int] = 19723
-    MAX_PORT: ClassVar[int] = 19744
+    min_port: ClassVar[int] = DEFAULT_PORT_RANGE.start
+    max_port: ClassVar[int] = DEFAULT_PORT_RANGE.stop
 
     def __new__(cls, value: int | str) -> Self:
         int_val = int(value)
-        if not (cls.MIN_PORT <= int_val < cls.MAX_PORT):
-            raise ValueError(f"Port value must be between {cls.MIN_PORT} and {cls.MAX_PORT}, got {int_val}.")
+        if int_val not in DEFAULT_PORT_RANGE:
+            raise ValueError(f"Port value must be between {cls.min_port} and {cls.max_port}, got {int_val}.")
         return super().__new__(cls, int_val)
 
     @classmethod
@@ -42,7 +42,7 @@ class Port(int):
         cls, source_type: Any, handler: GetCoreSchemaHandler
     ) -> core_schema.CoreSchema:
         return core_schema.chain_schema([
-            core_schema.int_schema(ge=cls.MIN_PORT, lt=cls.MAX_PORT),
+            core_schema.int_schema(ge=cls.min_port, lt=cls.max_port),
             core_schema.no_info_plain_validator_function(cls),
         ])
 
