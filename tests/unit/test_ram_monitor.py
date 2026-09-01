@@ -1,5 +1,6 @@
 import time
 from unittest.mock import patch, MagicMock
+import threading
 
 from multiconn_archicad.basic_types import Port, ProductInfo, SoloProjectID, ArchicadLocation
 from multiconn_archicad.conn_header import ConnHeader
@@ -144,14 +145,27 @@ def test_track_context_manager_records_highest_spike():
     port = Port(19723)
     monitor = RamMonitor(port_getter=lambda: port)
 
+    all_samples_polled = threading.Event()
+    samples = [1_000_000, 3_000_000, 7_000_000, 4_000_000]
+    sample_iter = iter(samples)
+
+    def mock_rss(pid):
+        try:
+            val = next(sample_iter)
+            if val == 4_000_000:
+                all_samples_polled.set()
+            return val
+        except StopIteration:
+            return 4_000_000
+
     with patch("multiconn_archicad.utilities.ram_monitor.find_pid_by_port", return_value=12345):
         with patch(
             "multiconn_archicad.utilities.ram_monitor.get_process_rss_bytes",
-            side_effect=[1_000_000, 3_000_000, 7_000_000, 4_000_000],
+            side_effect=mock_rss,
         ):
-            with monitor.track(interval_s=0.02):
+            with monitor.track(interval_s=0.01):
                 assert monitor.is_polling
-                time.sleep(0.08)
+                assert all_samples_polled.wait(timeout=3.0), "Background polling did not consume all samples in time"
 
             assert not monitor.is_polling
             assert monitor.peak_bytes == 7_000_000
