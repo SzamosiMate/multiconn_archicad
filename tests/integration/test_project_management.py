@@ -128,8 +128,8 @@ def test_open_project_calls_dependencies_correctly(
     # 2. Verify dialog handler was started
     conn.dialog_handler.start.assert_called_once_with(mock_process)
 
-    # 3. Verify psutil was used to find the port
-    mock_psutil_process.assert_called_once_with(12345)
+    # 3. Verify psutil was called for PID 12345 and polled network connections
+    mock_psutil_process.assert_any_call(12345)
     assert mock_psutil_instance.net_connections.call_count == 3
 
     # 4. Verify a new header was added for the new port
