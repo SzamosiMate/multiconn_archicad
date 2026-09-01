@@ -2,9 +2,13 @@ from __future__ import annotations
 from concurrent.futures import Future, CancelledError
 import threading
 from enum import Enum
-from typing import Self, Any, TypeGuard
+from typing import Self, Any, TypeGuard, Callable
 from pprint import pformat
 import logging
+import warnings
+from dataclasses import dataclass
+from pydantic import GetCoreSchemaHandler, ValidationError
+from pydantic_core import core_schema
 
 from pydantic import GetCoreSchemaHandler, ValidationError
 from pydantic_core import core_schema
@@ -16,9 +20,12 @@ from multiconn_archicad.basic_types import (
     PendingResponse,
     ProductInfo,
     Port,
-    ArchicadLocation
+    ArchicadLocation,
+    TapirInfo,
+    SoloProjectID,
+    TeamworkProjectID
 )
-from multiconn_archicad.errors import RequestError, ArchicadAPIError, HeaderUnassignedError
+from multiconn_archicad.errors import RequestError, ArchicadAPIError, HeaderUnassignedError, AddOnCommandUnavailable
 from multiconn_archicad.standard_connection import StandardConnection
 from multiconn_archicad.unified_api.api import UnifiedApi
 from multiconn_archicad.utilities.thread_utils import EXECUTOR
@@ -38,6 +45,15 @@ class Status(Enum):
 
     def __str__(self) -> str:
         return self.__repr__()
+
+
+@dataclass(frozen=True)
+class HeaderMetadata:
+    """Bundle containing all polled metadata from an Archicad instance."""
+    product_info: ProductInfo | APIResponseError
+    archicad_id: ArchiCadID | APIResponseError
+    archicad_location: ArchicadLocation | APIResponseError
+    tapir_info: TapirInfo | APIResponseError
 
 
 class ConnHeader:
@@ -60,6 +76,8 @@ class ConnHeader:
         self._product_info: ProductInfo | APIResponseError = PendingResponse()
         self._archicad_id: ArchiCadID | APIResponseError  = PendingResponse()
         self._archicad_location: ArchicadLocation | APIResponseError  = PendingResponse()
+        self._tapir_info: TapirInfo | APIResponseError = PendingResponse()
+
         if initialize and port:
             self.refresh_metadata()
 
@@ -125,9 +143,14 @@ class ConnHeader:
         self._sync_if_needed()
         return self._archicad_location
 
-    def model_dump(self) -> dict[str, Any]:
+    @property
+    def tapir_info(self) -> TapirInfo | APIResponseError:
+        self._sync_if_needed()
+        return self._tapir_info
+
+    def to_dict(self) -> dict[str, Any]:
         """Serialize connection header. Requires the header to be fully initialized."""
-        if not is_header_fully_initialized(self):
+        if not has_project_identity(self):
             raise ValueError(
                 f"Cannot serialize ConnHeader on port {self.port}: Header is not fully initialized "
                 f"(status={self._status.value})."
@@ -138,10 +161,9 @@ class ConnHeader:
             "archicadLocation": self._archicad_location.model_dump(),
         }
 
-    to_dict = model_dump
 
     @classmethod
-    def model_validate(cls, data: Any) -> Self:
+    def from_dict(cls, data: Any) -> Self:
         """Validate and construct a ConnHeader from serialized snapshot data."""
         if isinstance(data, cls):
             return data
@@ -154,7 +176,6 @@ class ConnHeader:
         instance._archicad_location = ArchicadLocation.model_validate(data["archicadLocation"])
         return instance
 
-    from_dict = model_validate
 
     @classmethod
     def __get_pydantic_core_schema__(cls, source_type: Any, handler: GetCoreSchemaHandler) -> core_schema.CoreSchema:
@@ -163,14 +184,14 @@ class ConnHeader:
         return core_schema.json_or_python_schema(
             json_schema=core_schema.chain_schema([
                 core_schema.dict_schema(),
-                core_schema.no_info_plain_validator_function(cls.model_validate),
+                core_schema.no_info_plain_validator_function(cls.from_dict),
             ]),
             python_schema=core_schema.chain_schema([
-                core_schema.no_info_plain_validator_function(cls.model_validate),
+                core_schema.no_info_plain_validator_function(cls.from_dict),
                 core_schema.is_instance_schema(cls),
             ]),
             serialization=core_schema.plain_serializer_function_ser_schema(
-                lambda instance: instance.model_dump(),
+                lambda instance: instance.to_dict(),
                 when_used="always",
             ),
         )
@@ -180,7 +201,7 @@ class ConnHeader:
         if self is other:
             return True
         if isinstance(other, ConnHeader):
-            if is_header_fully_initialized(self) and is_header_fully_initialized(other):
+            if has_project_identity(self) and has_project_identity(other):
                 if (
                     self.product_info == other.product_info
                     and self.archicad_id == other.archicad_id
@@ -192,14 +213,14 @@ class ConnHeader:
     def __repr__(self) -> str:
         attrs = {
             name: getattr(self, name)
-            for name in ["port", "_status", "product_info", "archicad_id", "archicad_location"]
+            for name in ["port", "_status", "product_info", "archicad_id", "archicad_location", "tapir_info"]
         }
         return f"{self.__class__.__name__}({attrs})"
 
     def __str__(self) -> str:
         attrs = {
             name: getattr(self, name)
-            for name in ["port", "_status", "product_info", "archicad_id", "archicad_location"]
+            for name in ["port", "_status", "product_info", "archicad_id", "archicad_location", "tapir_info"]
         }
         return f"{self.__class__.__name__}(\n{pformat(attrs, width=200, indent=4)})"
 
@@ -209,31 +230,29 @@ class ConnHeader:
         self._fetch_token = object()
         self.init_future = EXECUTOR.submit(self._fetch_worker, self._fetch_token)
 
-    def _fetch_worker(self,  my_token: object) -> None | tuple[
-        ProductInfo | APIResponseError,
-        ArchiCadID | APIResponseError,
-        ArchicadLocation | APIResponseError
-    ]:
-        product_info = self.get_product_info(timeout=5.0)
-        archicad_id = self.get_archicad_id(timeout=5.0)
-        archicad_location = self.get_archicad_location(timeout=5.0)
+    def _fetch_worker(self, my_token: object) -> HeaderMetadata | None:
+        metadata = HeaderMetadata(
+            product_info=self.get_product_info(timeout=5.0),
+            archicad_id=self.get_archicad_id(timeout=5.0),
+            archicad_location=self.get_archicad_location(timeout=5.0),
+            tapir_info=self.get_tapir_info(timeout=5.0),
+        )
 
         if self._fetch_token is not my_token or self._is_cancelled:
             return None
 
-        self._assign_metadata(product_info, archicad_id, archicad_location)
-        return product_info, archicad_id, archicad_location
+        self._assign_metadata(metadata)
+        return metadata
 
-    def _assign_metadata(self,
-                        product_info: ProductInfo | APIResponseError,
-                        archicad_id: ArchiCadID | APIResponseError,
-                        archicad_location: ArchicadLocation| APIResponseError) -> None:
-        if isinstance(self._product_info, APIResponseError) or isinstance(product_info, ProductInfo):
-            self._product_info = product_info
-        if isinstance(self._archicad_id, APIResponseError) or isinstance(archicad_id, ArchiCadID):
-            self._archicad_id = archicad_id
-        if isinstance(self._archicad_location, APIResponseError) or isinstance(archicad_location, ArchicadLocation):
-            self._archicad_location = archicad_location
+    def _assign_metadata(self, metadata: HeaderMetadata) -> None:
+        if isinstance(self._product_info, APIResponseError) or isinstance(metadata.product_info, ProductInfo):
+            self._product_info = metadata.product_info
+        if isinstance(self._archicad_id, APIResponseError) or isinstance(metadata.archicad_id, ArchiCadID):
+            self._archicad_id = metadata.archicad_id
+        if isinstance(self._archicad_location, APIResponseError) or isinstance(metadata.archicad_location, ArchicadLocation):
+            self._archicad_location = metadata.archicad_location
+        if isinstance(self._tapir_info, APIResponseError) or isinstance(metadata.tapir_info, TapirInfo):
+            self._tapir_info = metadata.tapir_info
 
     def connect(self) -> None:
         """Public method to wait for metadata and establish standard API connection."""
@@ -278,7 +297,7 @@ class ConnHeader:
         try:
             res = self.init_future.result()
             if res and self.init_future is not self._unpacked_future:
-                self._assign_metadata(*res)
+                self._assign_metadata(res)
                 self._unpacked_future = self.init_future
 
                 if self._auto_connect and self._status == Status.PENDING:
@@ -302,45 +321,96 @@ class ConnHeader:
         else:
             self._status = Status.FAILED
 
-    def get_product_info(self, timeout: float) -> ProductInfo | APIResponseError:
+    def _execute_api_fetch[T](
+        self,
+        command_fn: Callable[[], Any],
+        validator_fn: Callable[[Any], T],
+        fallbacks: dict[type[Exception], Callable[[], T]] | None = None,
+    ) -> T | APIResponseError:
+        """Centralized executor handling timeouts, API errors, and validation errors."""
         try:
-            result = self.core.post_command(command="API.GetProductInfo", timeout=timeout)
-            return ProductInfo.model_validate(result)
-        except (RequestError, ArchicadAPIError) as e:
-            return APIResponseError.from_exception(e)
-        except (KeyError, TypeError, ValidationError) as e:
-            return APIResponseError(code=None, message=f"Malformed API response: {e}")
+            raw_result = command_fn()
+            return validator_fn(raw_result)
+        except Exception as e:
+            if fallbacks:
+                for exc_type, fallback_factory in fallbacks.items():
+                    if isinstance(e, exc_type):
+                        return fallback_factory()
+            if isinstance(e, (RequestError, ArchicadAPIError)):
+                return APIResponseError.from_exception(e)
+            if isinstance(e, (KeyError, TypeError, ValidationError)):
+                return APIResponseError(code=None, message=f"Malformed API response: {e}")
+            raise
+
+    def get_product_info(self, timeout: float) -> ProductInfo | APIResponseError:
+        return self._execute_api_fetch(
+            lambda: self.core.post_command("API.GetProductInfo", timeout=timeout),
+            ProductInfo.model_validate,
+        )
 
     def get_archicad_id(self, timeout: float) -> ArchiCadID | APIResponseError:
-        try:
-            result = self.core.post_tapir_command(command="GetProjectInfo", timeout=timeout)
-            return ArchiCadID.model_validate(result)
-        except (RequestError, ArchicadAPIError) as e:
-            return APIResponseError.from_exception(e)
-        except (KeyError, TypeError, ValidationError) as e:
-            return APIResponseError(code=None, message=f"Malformed API response: {e}")
+        return self._execute_api_fetch(
+            lambda: self.core.post_tapir_command("GetProjectInfo", timeout=timeout),
+            ArchiCadID.model_validate,
+        )
 
     def get_archicad_location(self, timeout: float) -> ArchicadLocation | APIResponseError:
-        try:
-            result = self.core.post_tapir_command(command="GetArchicadLocation", timeout=timeout)
-            return ArchicadLocation.model_validate(result)
-        except (RequestError, ArchicadAPIError) as e:
-            return APIResponseError.from_exception(e)
-        except (KeyError, TypeError, ValidationError) as e:
-            return APIResponseError(code=None, message=f"Malformed API response: {e}")
+        return self._execute_api_fetch(
+            lambda: self.core.post_tapir_command("GetArchicadLocation", timeout=timeout),
+            ArchicadLocation.model_validate,
+        )
+
+    def get_tapir_info(self, timeout: float) -> TapirInfo | APIResponseError:
+        return self._execute_api_fetch(
+            lambda: self.core.post_tapir_command("GetAddOnVersion", timeout=timeout),
+            TapirInfo.model_validate,
+            fallbacks={AddOnCommandUnavailable: TapirInfo.not_installed},
+        )
 
 
-class ValidatedHeader(ConnHeader):
+class ProjectIdentityHeader(ConnHeader):
+    """Guaranteed to have all metadata that is required to reopen a project"""
     product_info: ProductInfo
-    archicad_id: ArchiCadID
+    archicad_id: SoloProjectID | TeamworkProjectID
     archicad_location: ArchicadLocation
 
+# Deprecation Alias
+ValidatedHeader = ProjectIdentityHeader
 
-def is_header_fully_initialized(header: ConnHeader) -> TypeGuard[ValidatedHeader]:
-    return (
+class SessionReadyHeader(ProjectIdentityHeader):
+    """Guaranteed to be active, connected to a port, with Tapir polled."""
+    port: Port
+    tapir_info: TapirInfo
+    core: CoreCommands
+    standard: StandardConnection
+    unified: UnifiedApi
+
+
+def has_project_identity(header: ConnHeader) -> TypeGuard[ProjectIdentityHeader]:
+    """Validates that the header has full project identity data for serialization/launch."""
+    return bool(
         isinstance(header.product_info, ProductInfo)
-        and isinstance(header.archicad_id, ArchiCadID)
+        and isinstance(header.archicad_id, (SoloProjectID, TeamworkProjectID))
         and isinstance(header.archicad_location, ArchicadLocation)
+    )
+
+
+def is_session_ready(header: ConnHeader) -> TypeGuard[SessionReadyHeader]:
+    """Validates that Archicad is live on a port and all background tasks have finished."""
+    return bool(
+        has_project_identity(header)
+        and header.port is not None
+        and header.status == Status.ACTIVE
+        and isinstance(header.tapir_info, TapirInfo)
+    )
+
+
+def is_tapir_session_ready(header: ConnHeader) -> TypeGuard[SessionReadyHeader]:
+    """Validates that Archicad is live on a port and the Tapir API version meets requirements"""
+    return bool(
+        is_session_ready(header)
+        and header.tapir_info.is_installed
+        and header.tapir_info.is_supported
     )
 
 
@@ -354,3 +424,18 @@ def is_id_initialized(archicad_id: ArchiCadID | APIResponseError) -> TypeGuard[A
 
 def is_location_initialized(archicad_location: ArchicadLocation | APIResponseError) -> TypeGuard[ArchicadLocation]:
     return isinstance(archicad_location, ArchicadLocation)
+
+
+def is_tapir_info_initialized(tapir_info: TapirInfo | APIResponseError) -> TypeGuard[TapirInfo]:
+    return isinstance(tapir_info, TapirInfo)
+
+
+def is_header_fully_initialized(header: ConnHeader) -> TypeGuard[ValidatedHeader]:
+    """Deprecated: Use has_project_identity instead."""
+    warnings.warn(
+        "is_header_fully_initialized is deprecated and will be removed in a future release. "
+        "Use has_project_identity instead.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    return has_project_identity(header)

@@ -4,6 +4,7 @@ from abc import ABC, abstractmethod
 from typing import Any, ClassVar, Literal, Self, Union
 import re
 from urllib.parse import unquote
+from dataclasses import dataclass
 
 from pydantic import (
     BaseModel,
@@ -15,9 +16,11 @@ from pydantic import (
     GetCoreSchemaHandler,
 )
 from pydantic_core import core_schema
+from packaging.version import Version, InvalidVersion
 
 from multiconn_archicad.errors import APIErrorBase
 from multiconn_archicad.utilities.platform_utils import is_using_mac, double_quote, single_quote
+from multiconn_archicad.constants import SUPPORTED_TAPIR_VERSION
 
 JsonType = Union[str, int, float, bool, None, list["JsonType"], dict[str, "JsonType"]]
 
@@ -43,6 +46,8 @@ class Port(int):
             core_schema.no_info_plain_validator_function(cls),
         ])
 
+class HeaderInfoBase(BaseModel):
+    """Base class providing common configuration and backward-compatible helper methods."""
 
 class HeaderInfoBase(BaseModel):
     """Base class providing common configuration and backward-compatible helper methods."""
@@ -228,3 +233,88 @@ class TeamworkProjectID(ArchiCadID):
 
 
 ArchiCadID.model_rebuild(force=True)
+
+
+@dataclass
+class VersionPair:
+    self: Version
+    other: Version
+
+
+class TapirInfo(HeaderInfoBase):
+    """ Represents the Tapir Add-On state on an Archicad instance. """
+    version: str | None
+    is_installed: bool = False
+    requiredVersion: str  = SUPPORTED_TAPIR_VERSION
+
+    @model_validator(mode="after")
+    def _infer_installed_state(self) -> Self:
+        """If a version string is present, mark as installed automatically."""
+        if self.version is not None:
+            self.is_installed = True
+        return self
+
+    @classmethod
+    def not_installed(cls) -> Self:
+        """Factory method representing an Archicad instance without the Tapir add-on."""
+        return cls(version=None, is_installed=False)
+
+    @property
+    def is_supported(self) -> bool:
+        """Checks if Tapir is installed and meets the library's required baseline."""
+        if versions:= self._ensure_version():
+            return versions.self >= versions.other
+        else:
+            return False
+
+    @property
+    def is_newer(self) -> bool:
+        """Checks if Tapir is newer than the library's required baseline."""
+        if versions:= self._ensure_version():
+            return versions.self > versions.other
+        else:
+            return False
+
+    @property
+    def is_older(self) -> bool:
+        """Checks if Tapir is older than the library's required baseline."""
+        if versions:= self._ensure_version():
+            return versions.self < versions.other
+        else:
+            return False
+
+    @property
+    def is_exact_match(self) -> bool:
+        """Checks if Tapir exactly matches the library's required version."""
+        if versions := self._ensure_version():
+            return versions.self == versions.other
+        return False
+
+    def is_at_least(self, min_version: str) -> bool:
+        """Checks if Tapir is installed and at least a specific target version."""
+        if versions:= self._ensure_version(min_version):
+            return versions.self >= versions.other
+        else:
+            return False
+
+    def __repr__(self) -> str:
+        if not self.is_installed:
+            return "TapirInfo(not_installed)"
+        return f"TapirInfo(version={self.version!r}, supported={self.is_supported})"
+
+    def _ensure_version(self, other: str | None = None) -> VersionPair | None:
+        if not self.is_installed or self.version is None:
+            return None
+        other = other if other else self.requiredVersion
+        if not other:
+            return None
+        try:
+            return VersionPair(
+                self=Version(self.version),
+                other=Version(other)
+            )
+        except InvalidVersion:
+            return None
+
+
+

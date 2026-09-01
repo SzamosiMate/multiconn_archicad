@@ -3,6 +3,7 @@ import pytest
 from unittest.mock import patch
 from pydantic import ValidationError
 
+from multiconn_archicad.constants import SUPPORTED_TAPIR_VERSION
 from multiconn_archicad.basic_types import (
     ArchiCadID,
     UntitledProjectID,
@@ -14,6 +15,7 @@ from multiconn_archicad.basic_types import (
     APIResponseError,
     PendingResponse,
     ArchicadLocation,
+    TapirInfo,
 )
 from multiconn_archicad.errors import APIErrorBase
 
@@ -520,3 +522,68 @@ def test_archicad_id_from_dict_invalid():
     data_dict = {"invalid": "data"}
     with pytest.raises(ValidationError):
         ArchiCadID.from_dict(data_dict)
+
+
+# -------------------------------------------------------------------------
+# Tests for TapirInfo class
+# -------------------------------------------------------------------------
+
+
+def test_tapir_info_installed_inference():
+    tapir_info = TapirInfo(version="1.5.8")
+    assert tapir_info.version == "1.5.8"
+    assert tapir_info.is_installed is True
+    assert tapir_info.requiredVersion == SUPPORTED_TAPIR_VERSION
+
+
+def test_tapir_info_not_installed_factory():
+    tapir_info = TapirInfo.not_installed()
+    assert tapir_info.version is None
+    assert tapir_info.is_installed is False
+    assert tapir_info.is_supported is False
+
+
+def test_tapir_info_from_api_response():
+    api_response = {"version": "1.5.8"}
+    tapir_info = TapirInfo.from_api_response(api_response)
+    assert tapir_info.version == "1.5.8"
+    assert tapir_info.is_installed is True
+
+
+def test_tapir_info_is_supported():
+    # Baseline comparison against SUPPORTED_TAPIR_VERSION (e.g. "1.5.8")
+    assert TapirInfo(version=SUPPORTED_TAPIR_VERSION).is_supported is True
+    assert TapirInfo(version="99.0.0").is_supported is True
+    assert TapirInfo(version="0.0.1").is_supported is False
+    assert TapirInfo(version="invalid-version-string").is_supported is False
+    assert TapirInfo.not_installed().is_supported is False
+
+
+def test_tapir_info_is_at_least():
+    tapir_info = TapirInfo(version="1.5.8")
+    assert tapir_info.is_at_least("1.5.0") is True
+    assert tapir_info.is_at_least("1.5.8") is True
+    assert tapir_info.is_at_least("2.0.0") is False
+    assert tapir_info.is_at_least("unparseable") is False
+    assert TapirInfo.not_installed().is_at_least("1.0.0") is False
+
+
+def test_tapir_info_repr():
+    installed = TapirInfo(version="1.5.8")
+    assert repr(installed) == "TapirInfo(version='1.5.8', supported=True)"
+
+    not_installed = TapirInfo.not_installed()
+    assert repr(not_installed) == "TapirInfo(not_installed)"
+
+def test_tapir_info_version_comparisons():
+
+    exact = TapirInfo(version=SUPPORTED_TAPIR_VERSION)
+    assert (exact.is_exact_match, exact.is_newer, exact.is_older) == (True, False, False)
+    newer = TapirInfo(version="99.0.0")
+    assert (newer.is_exact_match, newer.is_newer, newer.is_older) == (False, True, False)
+    older = TapirInfo(version="0.0.1")
+    assert (older.is_exact_match, older.is_newer, older.is_older) == (False, False, True)
+
+    # Invalid & not installed
+    for info in [TapirInfo(version="invalid"), TapirInfo.not_installed()]:
+        assert (info.is_exact_match, info.is_newer, info.is_older) == (False, False, False)
