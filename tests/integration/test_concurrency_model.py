@@ -1,6 +1,5 @@
+import threading
 import pytest
-import time
-import os
 
 from multiconn_archicad import MultiConn
 from multiconn_archicad.conn_header import Status
@@ -12,18 +11,14 @@ pytestmark = [
     pytest.mark.integration,
 ]
 
-IS_CI = os.getenv("GITHUB_ACTIONS") == "true"
-
 
 @pytest.fixture
 def slow_archicad_api(archicad_api):
     """
-    Wraps the mock server handlers with a 0.2s delay for the metadata endpoints
-    to simulate network latency and test lazy evaluation/blocking.
+    Wraps the mock server handlers with dynamic routing to simulate metadata endpoints.
     """
 
-    def slow_handler(payload: dict) -> dict:
-        time.sleep(0.2)
+    def passthrough_handler(payload: dict) -> dict:
         command = payload.get("command")
 
         # Unwrap Tapir add-on command name if necessary
@@ -37,56 +32,77 @@ def slow_archicad_api(archicad_api):
             response_dict = {"succeeded": True, "result": {}}
         return response_dict
 
-    # Register the slow handler for the endpoints hit during init
-    archicad_api.set_handler("API.GetProductInfo", slow_handler)
-    archicad_api.set_handler("GetProjectInfo", slow_handler)
-    archicad_api.set_handler("GetArchicadLocation", slow_handler)
+    # Register handlers for the metadata endpoints hit during init
+    archicad_api.set_handler("API.GetProductInfo", passthrough_handler)
+    archicad_api.set_handler("GetProjectInfo", passthrough_handler)
+    archicad_api.set_handler("GetArchicadLocation", passthrough_handler)
 
     yield archicad_api
 
 
 def test_fast_initialization_despite_slow_server(slow_archicad_api):
     """
-    Test Case 1: Prove MultiConn() returns control to the user immediately.
+    Test Case 1: Prove MultiConn() returns control to the user immediately
+    without waiting for background server requests to complete.
     """
-    # ARRANGE
+    server_entered = threading.Event()
+    unblock_server = threading.Event()
+
+    def blocking_handler(payload: dict) -> dict:
+        server_entered.set()
+        unblock_server.wait(timeout=5.0)
+        return slow_archicad_api.get_response_data("API.GetProductInfo") or {"succeeded": True, "result": {}}
+
+    slow_archicad_api.set_handler("API.GetProductInfo", blocking_handler)
     slow_archicad_api.set_response("GetProjectInfo", "get_project_info_solo.json")
 
-    # ACT
-    start_time = time.time()
-    conn = MultiConn()
-    duration = time.time() - start_time
+    try:
+        # MultiConn constructor must return immediately even while the server request is blocked
+        conn = MultiConn()
+        assert conn.primary is not None
 
-    # ASSERT
-    assert duration < 0.1, f"Initialization blocked the thread, took {duration:.2f}s"
-    assert conn.primary is not None
+        # Verify the background fetch was started and reached the server
+        assert server_entered.wait(timeout=5.0), "Background fetch did not start as expected"
+
+        # Verify the future is still in flight because the server has not responded
+        assert not conn.primary.init_future.done()
+    finally:
+        unblock_server.set()
 
 
 def test_ui_mode_returns_pending_immediately(slow_archicad_api):
     """
-    Test Case 2: Prove ui_mode=True prevents thread freezing and uses placeholders.
+    Test Case 2: Prove ui_mode=True prevents thread freezing and uses placeholders
+    while requests are in flight, then resolves once the background task finishes.
     """
-    # ARRANGE
+    server_entered = threading.Event()
+    unblock_server = threading.Event()
+
+    def blocking_handler(payload: dict) -> dict:
+        server_entered.set()
+        unblock_server.wait(timeout=5.0)
+        return slow_archicad_api.get_response_data("API.GetProductInfo") or {"succeeded": True, "result": {}}
+
+    slow_archicad_api.set_handler("API.GetProductInfo", blocking_handler)
     slow_archicad_api.set_response("GetProjectInfo", "get_project_info_solo.json")
 
-    # ACT
-    conn = MultiConn(ui_mode=True)
+    try:
+        conn = MultiConn(ui_mode=True)
+        assert server_entered.wait(timeout=5.0)
 
-    start_time = time.time()
-    product_info = conn.primary.product_info
-    status = conn.primary.status
-    duration = time.time() - start_time
+        # In UI mode, while the future is still running, property access returns PendingResponse immediately
+        product_info = conn.primary.product_info
+        status = conn.primary.status
 
-    # ASSERT 1 (Instant)
-    assert duration < 0.1, f"UI Mode blocked the thread, took {duration:.2f}s"
+        assert isinstance(product_info, PendingResponse)
+        assert status == Status.PENDING
+    finally:
+        unblock_server.set()
 
-    # ASSERT 2 (Placeholders)
-    assert isinstance(product_info, PendingResponse)
-    assert status == Status.PENDING
+    # Wait for the future to finish
+    conn.primary.init_future.result(timeout=5.0)
 
-    # ASSERT 3 (Resolution)
-    time.sleep(3.0 if IS_CI else 1.0)
-
+    # Now UI mode unpacks the resolved data
     assert isinstance(conn.primary.product_info, ProductInfo)
     assert conn.primary.status == Status.ACTIVE
 
@@ -95,21 +111,42 @@ def test_default_mode_blocks_and_waits(slow_archicad_api):
     """
     Test Case 3: Prove ui_mode=False blocks the caller's thread until the background fetch finishes.
     """
-    # ARRANGE
+    server_entered = threading.Event()
+    unblock_server = threading.Event()
+
+    def blocking_handler(payload: dict) -> dict:
+        server_entered.set()
+        unblock_server.wait(timeout=5.0)
+        return slow_archicad_api.get_response_data("API.GetProductInfo") or {"succeeded": True, "result": {}}
+
+    slow_archicad_api.set_handler("API.GetProductInfo", blocking_handler)
     slow_archicad_api.set_response("GetProjectInfo", "get_project_info_solo.json")
 
-    # ACT
     conn = MultiConn(ui_mode=False)
+    assert server_entered.wait(timeout=5.0)
 
-    start_time = time.time()
-    product_info = conn.primary.product_info
-    duration = time.time() - start_time
+    caller_resolved = threading.Event()
+    resolved_product_info = None
 
-    # ASSERT 1 (Blocking): 3 sequentially fetched endpoints at 0.2s each = 0.6s
-    assert 0.6 <= duration < 2.0 if IS_CI else 0.7, f"Blocking duration was {duration:.2f}s, expected[0.6, 0.8)"
+    def caller_thread():
+        nonlocal resolved_product_info
+        resolved_product_info = conn.primary.product_info
+        caller_resolved.set()
 
-    # ASSERT 2 (Final Data)
-    assert isinstance(product_info, ProductInfo)
+    t = threading.Thread(target=caller_thread)
+    t.start()
+
+    try:
+        # Verify caller thread is blocked waiting (caller_resolved is not yet set)
+        assert not caller_resolved.is_set()
+        assert t.is_alive()
+    finally:
+        # Unblock the server response
+        unblock_server.set()
+
+    t.join(timeout=5.0)
+    assert caller_resolved.is_set()
+    assert isinstance(resolved_product_info, ProductInfo)
 
 
 def test_auto_connect_vs_manual_connect(slow_archicad_api):
@@ -117,25 +154,21 @@ def test_auto_connect_vs_manual_connect(slow_archicad_api):
     Test Case 4: Prove that conn.primary automatically connects when data is ready,
     while headers in the pool wait.
     """
-    # ARRANGE
     slow_archicad_api.set_response("GetProjectInfo", "get_project_info_solo.json")
 
-    # ACT
     conn = MultiConn()
 
-    # Block until fetch finishes (accessing product_info triggers the wait,
-    # ensuring the background threads are done before we check statuses)
+    # Block until fetch finishes
     _ = conn.primary.product_info
 
-    # ASSERT 1
+    # Primary auto-connects
     assert conn.primary.status == Status.ACTIVE
 
-    # ASSERT 2
+    # Pooled header remains pending until connect() is explicitly called
     port = slow_archicad_api.server_port
     pool_header = conn.open_port_headers[port]
     assert pool_header.status == Status.PENDING
 
-    # ASSERT 3
     pool_header.connect()
     assert pool_header.status == Status.ACTIVE
 
@@ -146,20 +179,17 @@ def test_vanilla_archicad_no_addon_scenario(slow_archicad_api):
     commands fail, the connection gracefully survives and becomes active.
     """
 
-    # ARRANGE
     def fail_project_info_handler(payload: dict) -> dict:
-        time.sleep(0.2)
         return {"succeeded": False, "error": {"code": 1}}
 
     slow_archicad_api.set_handler("GetProjectInfo", fail_project_info_handler)
 
-    # ACT
     conn = MultiConn()
 
     # Block to wait for background fetch
     _ = conn.primary.product_info
 
-    # ASSERT
+    # Primary should still be ACTIVE despite Tapir command failure
     assert conn.primary.status == Status.ACTIVE
     assert isinstance(conn.primary.archicad_id, APIResponseError)
 
@@ -168,39 +198,30 @@ def test_primary_shared_metadata_and_independence(slow_archicad_api):
     """
     Test Case 6: Prove the link and the detachment logic between primary and pool headers.
     """
-    # ARRANGE
     slow_archicad_api.set_response("GetProjectInfo", "get_project_info_solo.json")
 
-    # STEP 1 (Link)
     conn = MultiConn()
     port = slow_archicad_api.server_port
     pool_header = conn.open_port_headers[port]
 
-    # ASSERTION 1 (Update this!)
-    # We no longer assert 'is', we just assert they both have active Futures
     assert conn.primary.init_future is not None
     assert pool_header.init_future is not None
 
-    # STEP 2 (Shared Result)
     _ = conn.primary.product_info  # Wait for fetch to finish
 
-    # ASSERTION 2
     assert conn.primary.product_info is pool_header.product_info
 
-    # STEP 3 (Detachment)
     def v28_handler(payload: dict) -> dict:
-        time.sleep(0.2)
         return {"succeeded": True, "result": {"version": 28, "buildNumber": 3001, "languageCode": "INT"}}
 
     slow_archicad_api.set_handler("API.GetProductInfo", v28_handler)
 
     conn.primary.refresh_metadata()
 
-    # ASSERTION 3 (New Future)
+    # Refresh creates a new independent future on the primary
     assert conn.primary.init_future is not pool_header.init_future
 
-    # ASSERTION 4 (Independence)
-    _ = conn.primary.product_info  # Block and wait for the new fetch to finish
+    _ = conn.primary.product_info  # Wait for new fetch to finish
     assert conn.primary.product_info.version == 28
     assert pool_header.product_info.version == 27
 
@@ -208,53 +229,47 @@ def test_primary_shared_metadata_and_independence(slow_archicad_api):
 def test_stress_multiple_connections_performance(slow_archicad_api, monkeypatch):
     """
     STRESS TEST: Simulates a fully saturated environment (all 21 Archicad ports open).
-    Proves that the ThreadPool processes them in parallel and does not degrade linearly.
+    Proves that the ThreadPool processes them concurrently in parallel.
     """
     from multiconn_archicad.basic_types import Port
     import httpx
 
-    # 1. Restore the full 21-port range
-    full_range =[Port(p) for p in range(19723, 19744)]
+    # 1. Restore full port range
+    full_range = [Port(p) for p in range(19723, 19744)]
+    num_ports = len(full_range)
     monkeypatch.setattr("multiconn_archicad.multi_conn.MultiConn._port_range", full_range)
 
-    # 2. Mock the TCP knock so MultiConn thinks all 21 ports are actively listening
+    # 2. Mock TCP check so all ports appear active
     monkeypatch.setattr("multiconn_archicad.multi_conn.is_port_listening", lambda url, port: True)
 
-    # 3. ROUTING FIX: Silently redirect all httpx requests to the single mock server!
+    # 3. Route all httpx requests to mock server
     mock_url = f"http://127.0.0.1:{slow_archicad_api.server_port}"
     original_post = httpx.Client.post
 
     def routed_post(self_client, url, *args, **kwargs):
-        # Ignore the port CoreCommands thinks it's hitting, and force the mock port
         return original_post(self_client, mock_url, *args, **kwargs)
 
     monkeypatch.setattr(httpx.Client, "post", routed_post)
 
-    # ACT 1: Initialization
-    start_time = time.perf_counter()
+    # 4. Use a Barrier to prove all 21 ports are executing concurrently.
+    # If the thread pool degraded to sequential execution, the barrier would time out on the 1st request.
+    barrier = threading.Barrier(num_ports)
+
+    def concurrent_handler(payload: dict) -> dict:
+        command = payload.get("command")
+        if command == "API.GetProductInfo":
+            barrier.wait(timeout=10.0)
+        return slow_archicad_api.get_response_data("API.GetProductInfo") or {"succeeded": True, "result": {}}
+
+    slow_archicad_api.set_handler("API.GetProductInfo", concurrent_handler)
+    slow_archicad_api.set_response("GetProjectInfo", "get_project_info_solo.json")
+
     conn = MultiConn(ui_mode=False)
-    init_duration = time.perf_counter() - start_time
+    assert len(conn.open_port_headers) == num_ports
 
-    # ASSERT 1: The TCP knock and thread spawning must remain lightning fast (< 0.2s)
-    assert init_duration < 3.0 if IS_CI else 0.2, f"Init bottlenecked with 21 ports! Took {init_duration:.2f}s"
-    assert len(conn.open_port_headers) == 21  # 21 ports in range
-
-    # ACT 2: Data Fetching
-    fetch_start = time.perf_counter()
-
-    # Trigger the sync tollbooth on the primary
+    # Trigger resolution
     _ = conn.primary.product_info
-
-    # Trigger the sync tollbooth on the last port to ensure everything finished
     _ = conn.open_port_headers[Port(19743)].product_info
 
-    fetch_duration = time.perf_counter() - fetch_start
-
-    # ASSERT 2: The Parallelism Proof
-    # 21 parallel batches of 3 sequential requests (0.2s * 3 = 0.6s total expected)
-    # Allowed threshold is < 1.5s to account for OS thread scheduling overhead
-    assert 0.6 <= fetch_duration < 6.0 if IS_CI else 1.5, f"Parallel fetch failed or bottlenecked! Took {fetch_duration:.2f}s"
-
-    # Ensure they resolved correctly
     assert conn.primary.status == Status.ACTIVE
     assert conn.open_port_headers[Port(19743)].status == Status.PENDING
