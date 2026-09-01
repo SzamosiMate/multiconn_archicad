@@ -362,24 +362,45 @@ def test_teamwork_project_id_from_dict():
 # -------------------------------------------------------------------------
 # Tests for ArchicadLocation class
 # -------------------------------------------------------------------------
-@pytest.mark.parametrize("is_mac,expected_suffix", [(True, "/Contents/MacOS/ARCHICAD"), (False, "")])
-def test_archicad_location_from_api_response(is_mac, expected_suffix):
+@pytest.mark.parametrize("is_mac,expected_path", [
+    (True, "/Applications/ARCHICAD/Contents/MacOS/ARCHICAD"),
+    (False, "/Applications/ARCHICAD"),
+])
+def test_archicad_location_from_api_response(is_mac, expected_path):
     with patch("multiconn_archicad.basic_types.is_using_mac", return_value=is_mac):
         api_response = {"archicadLocation": "/Applications/ARCHICAD"}
         location = ArchicadLocation.from_api_response(api_response)
-        assert location.archicadLocation == f"/Applications/ARCHICAD{expected_suffix}"
+        assert location.archicadLocation == expected_path
 
 
-def test_archicad_location_to_dict():
-    location = ArchicadLocation(archicadLocation="/path/to/archicad")
-    expected_dict = {"archicadLocation": "/path/to/archicad"}
-    assert location.to_dict() == expected_dict
+@pytest.mark.parametrize("is_mac,expected_path", [
+    (True, "/path/to/archicad/Contents/MacOS/ARCHICAD"),
+    (False, "/path/to/archicad"),
+])
+def test_archicad_location_to_dict(is_mac, expected_path):
+    with patch("multiconn_archicad.basic_types.is_using_mac", return_value=is_mac):
+        location = ArchicadLocation(archicadLocation="/path/to/archicad")
+        assert location.to_dict() == {"archicadLocation": expected_path}
+        assert location.model_dump() == {"archicadLocation": expected_path}
 
 
-def test_archicad_location_from_dict():
-    data_dict = {"archicadLocation": "/path/to/archicad"}
-    location = ArchicadLocation.from_dict(data_dict)
-    assert location.archicadLocation == "/path/to/archicad"
+@pytest.mark.parametrize("is_mac,expected_path", [
+    (True, "/path/to/archicad/Contents/MacOS/ARCHICAD"),
+    (False, "/path/to/archicad"),
+])
+def test_archicad_location_from_dict(is_mac, expected_path):
+    with patch("multiconn_archicad.basic_types.is_using_mac", return_value=is_mac):
+        data_dict = {"archicadLocation": "/path/to/archicad"}
+        location = ArchicadLocation.from_dict(data_dict)
+        assert location.archicadLocation == expected_path
+
+
+def test_archicad_location_mac_already_normalized():
+    """Ensure it doesn't double-append /Contents/MacOS/ARCHICAD on Mac."""
+    with patch("multiconn_archicad.basic_types.is_using_mac", return_value=True):
+        path = "/Applications/ARCHICAD/Contents/MacOS/ARCHICAD"
+        location = ArchicadLocation(archicadLocation=path)
+        assert location.archicadLocation == path
 
 
 # -------------------------------------------------------------------------
