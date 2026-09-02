@@ -25,10 +25,10 @@ def test_lock_enforcement_in_isolated_process():
     code = """
 import multiconn_archicad.models.tapir.commands
 from multiconn_archicad.models.config import configure
-from multiconn_archicad.models.mixins import StrictValidationMixin
+from multiconn_archicad.models.mixins import ForbidExtrasMixin
 
 # This must raise RuntimeError and exit with an error code
-configure(StrictValidationMixin)
+configure(ForbidExtrasMixin)
 """
     result = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True)
     assert result.returncode != 0

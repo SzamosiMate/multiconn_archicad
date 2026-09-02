@@ -155,17 +155,19 @@ For workflows that require custom validation, immutability, or extra functionali
 
 `configure()` **must** be called before importing any model classes (`commands`, `types`, etc.). If called after models are already imported and compiled, it will raise a `RuntimeError` to prevent silent configuration drift.
 
+> **Configuration Precedence:** Model settings follow a strict hierarchy: **Baseline Defaults $\rightarrow$ Injected Mixins $\rightarrow$ Concrete Model Overrides** (for example, models explicitly declaring `extra="allow"` will always take precedence over mixin restrictions).
+
 ```python
 from multiconn_archicad.models.config import configure
 from multiconn_archicad.models.mixins import (
-    StrictValidationMixin,
+    ForbidExtrasMixin,
     FrozenMixin,
     StripWhitespaceMixin,
     OmitDefaultsMixin,
 )
 
 # Configure the base models for your application
-configure(StrictValidationMixin, StripWhitespaceMixin)
+configure(ForbidExtrasMixin, StripWhitespaceMixin)
 
 # Now safely import model classes (this locks the configuration)
 from multiconn_archicad.models.tapir.commands import CreateBeamsParameters
@@ -178,7 +180,9 @@ The library includes several common mixins out-of-the-box:
 
 | Mixin | Purpose | Common Use Case |
 | :--- | :--- | :--- |
-| **`StrictValidationMixin`** | Forbids unexpected/extra fields on models. Raises `ValueError` on extra input keys. | **MCP Servers / LLM Tool Calling** to catch hallucinated parameters. |
+| **`ForbidExtrasMixin`** | Forbids unexpected/extra fields on models. Raises `ValidationError` on extra input keys. | **MCP Servers / LLM Tool Calling** to catch hallucinated parameters. |
+| **`ContextualForbidExtrasMixin`** | Forbids extra fields by default, but allows context bypass (`ignore_extra_keys`). | Validating user inputs strictly while allowing loose API returns. |
+| **`StrictMixin`** | Enforces strict type validation (`strict=True`), preventing automatic type coercion. | Catching type mismatches (e.g., passing `"1"` for an `int`). |
 | **`FrozenMixin`** | Sets `frozen=True` on all models, making them immutable and hashable. | Thread safety, using models in `set()` or as `dict` keys. |
 | **`StripWhitespaceMixin`** | Automatically strips leading and trailing whitespace from all string fields. | Cleaning up messy user-entered BIM data. |
 | **`OmitDefaultsMixin`** | Excludes fields with default/None values from `.model_dump()` and `.model_dump_json()`. | Minimizing HTTP payload sizes. |
