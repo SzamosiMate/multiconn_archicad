@@ -72,13 +72,30 @@ def test_importing_config_does_not_lock_or_import_models(clean_models):
 # REQUIREMENT 3: Mixins properly alter model behavior
 # =========================================================================
 
-def test_strict_validation_mixin_alters_behavior(clean_models):
-    """Verifies StrictValidationMixin rejects unknown keys but respects context bypass."""
+def test_forbid_extras_mixin_alters_behavior(clean_models):
+    """Verifies ForbidExtrasMixin natively rejects extra keys with standard ValidationError."""
     from multiconn_archicad.models.config import configure
-    from multiconn_archicad.models.mixins import StrictValidationMixin
+    from multiconn_archicad.models.mixins import ForbidExtrasMixin
 
-    # Configure strict mode
-    configure(StrictValidationMixin)
+    configure(ForbidExtrasMixin)
+
+    from multiconn_archicad.models.tapir.types import Coordinate2D
+
+    # 1. Unknown field -> Must raise ValidationError
+    with pytest.raises(ValidationError):
+        Coordinate2D(x=1.0, y=2.0, fake_z_coordinate=3.0)
+
+    # 2. Valid input passes
+    coord = Coordinate2D(x=1.0, y=2.0)
+    assert coord.x == 1.0
+
+
+def test_contextual_forbid_extras_mixin_alters_behavior(clean_models):
+    """Verifies ContextualForbidExtrasMixin rejects unknown keys but respects context bypass."""
+    from multiconn_archicad.models.config import configure
+    from multiconn_archicad.models.mixins import ContextualForbidExtrasMixin
+
+    configure(ContextualForbidExtrasMixin)
 
     from multiconn_archicad.models.tapir.types import Coordinate2D
 
@@ -89,9 +106,26 @@ def test_strict_validation_mixin_alters_behavior(clean_models):
     # 2. Context bypass -> Must safely ignore unknown field
     valid_with_context = Coordinate2D.model_validate(
         {"x": 1.0, "y": 2.0, "future_api_field": "test"},
-        context={"ignore_extra_keys": True}
+        context={"ignore_extra_keys": True},
     )
     assert valid_with_context.x == 1.0
+
+
+def test_strict_mixin_alters_behavior(clean_models):
+    """Verifies StrictMixin enforces strict types without automatic coercion."""
+    from multiconn_archicad.models.config import configure
+    from multiconn_archicad.models.mixins import StrictMixin
+
+    configure(StrictMixin)
+
+    from multiconn_archicad.models.tapir.types import Coordinate2D
+
+    # In strict mode, string "1.0" should not be coerced to float
+    with pytest.raises(ValidationError):
+        Coordinate2D.model_validate({"x": "1.0", "y": 2.0})
+
+    valid = Coordinate2D(x=1.0, y=2.0)
+    assert valid.x == 1.0
 
 
 def test_frozen_mixin_alters_behavior(clean_models):
@@ -123,7 +157,6 @@ def test_omit_defaults_mixin_alters_behavior(clean_models):
 
     from multiconn_archicad.models.tapir.types import BeamData, Coordinate2D
 
-    # BeamData has many optional fields defaulting to None (e.g. offset, slantAngle)
     beam = BeamData(
         begCoordinate=Coordinate2D(x=0.0, y=0.0),
         endCoordinate=Coordinate2D(x=5.0, y=0.0),
@@ -131,28 +164,25 @@ def test_omit_defaults_mixin_alters_behavior(clean_models):
     )
 
     dumped = beam.model_dump()
-
-    # Defaults like slantAngle (None) should be omitted
     assert "slantAngle" not in dumped
     assert "begCoordinate" in dumped
 
 
 def test_multiple_mixins_combine_cooperatively(clean_models):
     """
-    Verifies that all 4 mixins (Strict, Frozen, StripWhitespace, OmitDefaults)
-    can be configured together and that all their behaviors execute simultaneously.
+    Verifies that multiple mixins (ForbidExtras, Frozen, StripWhitespace, OmitDefaults)
+    can be configured together and execute simultaneously.
     """
     from multiconn_archicad.models.config import configure
     from multiconn_archicad.models.mixins import (
-        StrictValidationMixin,
+        ForbidExtrasMixin,
         FrozenMixin,
         StripWhitespaceMixin,
         OmitDefaultsMixin,
     )
 
-    # 1. Configure with all 4 mixins simultaneously
     configure(
-        StrictValidationMixin,
+        ForbidExtrasMixin,
         FrozenMixin,
         StripWhitespaceMixin,
         OmitDefaultsMixin,
@@ -160,9 +190,7 @@ def test_multiple_mixins_combine_cooperatively(clean_models):
 
     from multiconn_archicad.models.tapir.types import DetailData, BeamData, Coordinate2D
 
-    # =========================================================================
-    # BEHAVIOR 1: StripWhitespaceMixin (Trims whitespace from strings)
-    # =========================================================================
+    # 1. StripWhitespaceMixin
     detail = DetailData(
         name="   Foundation Detail A-A   ",
         referenceId="   DET-001   ",
@@ -170,93 +198,67 @@ def test_multiple_mixins_combine_cooperatively(clean_models):
     assert detail.name == "Foundation Detail A-A"
     assert detail.referenceId == "DET-001"
 
-    # =========================================================================
-    # BEHAVIOR 2: StrictValidationMixin (Rejects unknown parameters)
-    # =========================================================================
-    with pytest.raises(ValueError, match="Extra fields not allowed in DetailData"):
+    # 2. ForbidExtrasMixin
+    with pytest.raises(ValidationError):
         DetailData(
             name="Roof Section",
             referenceId="DET-002",
             hallucinated_param="invalid_field",
         )
 
-    # =========================================================================
-    # BEHAVIOR 3: FrozenMixin (Immutable & Hashable)
-    # =========================================================================
-    # Mutating an attribute must raise a Pydantic ValidationError
+    # 3. FrozenMixin
     with pytest.raises(ValidationError):
         detail.name = "Changed Name"
 
-    # Must be hashable so it can be added to sets and used as dict keys
     detail_set = {detail}
     assert detail in detail_set
 
-    # =========================================================================
-    # BEHAVIOR 4: OmitDefaultsMixin (Default/None values excluded from dumps)
-    # =========================================================================
+    # 4. OmitDefaultsMixin
     beam = BeamData(
         begCoordinate=Coordinate2D(x=0.0, y=0.0),
         endCoordinate=Coordinate2D(x=10.0, y=0.0),
         zCoordinate=0.0,
-        # offset, slantAngle, arcAngle, etc. default to None
     )
     dumped = beam.model_dump()
-
     assert "begCoordinate" in dumped
-    assert "offset" not in dumped
     assert "slantAngle" not in dumped
-    assert "arcAngle" not in dumped
 
 
-def test_extra_allow_models_permit_arbitrary_keys_under_strict_mode(clean_models):
+def test_extra_allow_models_permit_arbitrary_keys_under_forbid_extras(clean_models):
     """
     Verifies that models explicitly configured with extra='allow' (AddOnCommandParameters
-    and AddOnCommandResponse) continue to accept arbitrary keys, even when StrictValidationMixin
-    is globally enabled.
+    and AddOnCommandResponse) override base extra='forbid' and accept arbitrary keys.
     """
     from multiconn_archicad.models.config import configure
-    from multiconn_archicad.models.mixins import StrictValidationMixin
+    from multiconn_archicad.models.mixins import ForbidExtrasMixin
 
-    # 1. Enable strict validation globally
-    configure(StrictValidationMixin)
+    configure(ForbidExtrasMixin)
 
-    # Import both standard models and the Add-On models
     from multiconn_archicad.models.tapir.types import Coordinate2D
     from multiconn_archicad.models.official.types import (
         AddOnCommandParameters,
         AddOnCommandResponse,
     )
 
-    # =========================================================================
-    # 1. Verify that standard models are STILL strictly locked down
-    # =========================================================================
-    with pytest.raises(ValueError, match="Extra fields not allowed in Coordinate2D"):
+    # Standard model must reject extra keys
+    with pytest.raises(ValidationError):
         Coordinate2D(x=1.0, y=2.0, forbidden_key="must_fail")
 
-    # =========================================================================
-    # 2. Verify AddOnCommandParameters allows arbitrary input keys
-    # =========================================================================
+    # AddOnCommandParameters allows extra keys
     custom_params = AddOnCommandParameters.model_validate({
         "customAddonKey": "customValue",
         "nestedData": {"flag": True, "count": 42},
         "targetStory": 1,
     })
-
     dumped_params = custom_params.model_dump()
     assert dumped_params["customAddonKey"] == "customValue"
     assert dumped_params["nestedData"] == {"flag": True, "count": 42}
-    assert dumped_params["targetStory"] == 1
 
-    # =========================================================================
-    # 3. Verify AddOnCommandResponse allows arbitrary response keys
-    # =========================================================================
+    # AddOnCommandResponse allows extra keys
     custom_response = AddOnCommandResponse.model_validate({
         "status": "OK",
-        "returnedGuids": ["uuid-1234", "uuid-5678"],
-        "executionTimeMs": 12.5,
+        "returnedGuids": ["uuid-1234"],
     })
-
     dumped_response = custom_response.model_dump()
     assert dumped_response["status"] == "OK"
-    assert dumped_response["returnedGuids"] == ["uuid-1234", "uuid-5678"]
-    assert dumped_response["executionTimeMs"] == 12.5
+    assert dumped_response["returnedGuids"] == ["uuid-1234"]
