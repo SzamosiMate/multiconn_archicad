@@ -3,36 +3,59 @@ from pydantic import BaseModel, ConfigDict, model_validator, ValidationInfo
 
 _MODEL_KEYS_CACHE: dict[type, set[str]] = {}
 
-class StrictValidationMixin(BaseModel):
+def _get_allowed_keys(cls: type[BaseModel]) -> set[str]:
+    """Helper for context-based validation to extract and cache allowed field names and aliases."""
+    allowed_keys = _MODEL_KEYS_CACHE.get(cls)
+    if allowed_keys is None:
+        allowed_keys = set(cls.model_fields.keys())
+        for field in cls.model_fields.values():
+            if field.alias:
+                allowed_keys.add(field.alias)
+        _MODEL_KEYS_CACHE[cls] = allowed_keys
+    return allowed_keys
+
+
+class ForbidExtrasMixin(BaseModel):
     """
-    Enforces strict validation by rejecting unknown keys that can be turned off using validation context.
-    Designed for MCP Servers / LLM inputs.
+    Enforces strict schema compliance by forbidding extra/unknown fields using native Pydantic config.
+    Concrete models configured with extra='allow' (e.g. AddOnCommandParameters) will override this.
+    """
+    model_config = ConfigDict(extra="forbid")
+
+
+class ContextualForbidExtrasMixin(BaseModel):
+    """
+    Forbids extra/unknown keys by default, but allows bypassing via validation context:
+        model.model_validate(data, context={"ignore_extra_keys": True})
+
+    Useful for strictly validating user/LLM inputs while optionally allowing loose API returns.
     """
 
     @model_validator(mode="before")
     @classmethod
-    def forbid_extras_unless_api(cls, data: Any, info: ValidationInfo):
+    def forbid_extras_unless_context(cls, data: Any, info: ValidationInfo) -> Any:
         if info.context and info.context.get("ignore_extra_keys"):
             return data
         if cls.model_config.get("extra") == "allow":
             return data
 
         if isinstance(data, dict):
-            allowed_keys = _MODEL_KEYS_CACHE.get(cls)
-            if allowed_keys is None:
-                allowed_keys = set(cls.model_fields.keys())
-                for field in cls.model_fields.values():
-                    if field.alias:
-                        allowed_keys.add(field.alias)
-                _MODEL_KEYS_CACHE[cls] = allowed_keys
-
+            allowed_keys = _get_allowed_keys(cls)
             extra_keys = data.keys() - allowed_keys
             if extra_keys:
                 raise ValueError(
-                    f"Extra fields not allowed in {cls.__name__}: {', '.join(extra_keys)}"
+                    f"Extra fields not allowed in {cls.__name__}: {', '.join(sorted(extra_keys))}"
                 )
 
         return data
+
+
+class StrictMixin(BaseModel):
+    """
+    Enforces strict Pydantic type validation (`strict=True`).
+    Disallows type coercions (e.g. "123" -> 123, 1.0 -> 1, "true" -> True).
+    """
+    model_config = ConfigDict(strict=True)
 
 
 class FrozenMixin(BaseModel):
