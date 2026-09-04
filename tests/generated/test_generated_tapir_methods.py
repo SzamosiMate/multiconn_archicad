@@ -9,7 +9,7 @@ import pytest
 from pydantic import TypeAdapter
 from hypothesis import given, settings, HealthCheck
 from hypothesis_jsonschema import from_schema
-from tests.utilities import normalize_for_comparison
+from tests.helpers import normalize_for_comparison
 from multiconn_archicad.clients.unified_api.tapir.application import ApplicationCommands as TapirApplicationCommands
 from multiconn_archicad.clients.unified_api.tapir.attribute import AttributeCommands as TapirAttributeCommands
 from multiconn_archicad.clients.unified_api.tapir.classification import ClassificationCommands as TapirClassificationCommands

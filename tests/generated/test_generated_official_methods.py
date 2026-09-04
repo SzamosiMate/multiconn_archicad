@@ -9,7 +9,7 @@ import pytest
 from pydantic import TypeAdapter
 from hypothesis import given, settings, HealthCheck
 from hypothesis_jsonschema import from_schema
-from tests.utilities import normalize_for_comparison
+from tests.helpers import normalize_for_comparison
 from multiconn_archicad.clients.unified_api.official.addon import AddonCommands as OfficialAddonCommands
 from multiconn_archicad.clients.unified_api.official.attribute import AttributeCommands as OfficialAttributeCommands
 from multiconn_archicad.clients.unified_api.official.basic import BasicCommands as OfficialBasicCommands

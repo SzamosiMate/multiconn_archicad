@@ -251,7 +251,7 @@ import pytest
 from pydantic import TypeAdapter
 from hypothesis import given, settings, HealthCheck
 from hypothesis_jsonschema import from_schema
-from tests.utilities import normalize_for_comparison
+from tests.helpers import normalize_for_comparison
 {import_block}
 from multiconn_archicad.models.{source} import commands, types
 NUM_EXAMPLES = int(os.getenv("HYPOTHESIS_NUM_EXAMPLES", 1))
