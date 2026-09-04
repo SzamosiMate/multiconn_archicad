@@ -5,7 +5,7 @@ import psutil
 
 
 from multiconn_archicad import MultiConn, ConnHeader, Port
-from multiconn_archicad.basic_types import TeamworkProjectID, SoloProjectID
+from multiconn_archicad.orchestration.basic_types import TeamworkProjectID, SoloProjectID
 
 
 pytestmark = [
@@ -68,10 +68,10 @@ def test_switch_project_success(archicad_api):
     assert isinstance(new_header_state.archicad_id, TeamworkProjectID)
 
 
-@patch("multiconn_archicad.actions.project_handler.subprocess.Popen")
-@patch("multiconn_archicad.utilities.process_utils.psutil.Process")
-@patch("multiconn_archicad.actions.refresh")
-@patch("multiconn_archicad.multi_conn.get_cli_args_once")
+@patch("multiconn_archicad.orchestration.actions.project_handler.subprocess.Popen")
+@patch("multiconn_archicad.orchestration.system.process_utils.psutil.Process")
+@patch("multiconn_archicad.orchestration.actions.refresh")
+@patch("multiconn_archicad.orchestration.multi_conn.get_cli_args_once")
 def test_open_project_calls_dependencies_correctly(
     mock_get_cli_args, mock_refresh, mock_psutil_process, mock_popen, archicad_api
 ):

@@ -237,7 +237,7 @@ class TestGenerator:
             if not self._generated_tests[source]:
                 continue
             import_block = "\n".join(
-                f"from multiconn_archicad.unified_api.{source}.{module} import {class_name} as {alias}"
+                f"from multiconn_archicad.clients.unified_api.{source}.{module} import {class_name} as {alias}"
                 for module, class_name, alias in sorted(self._class_imports[source])
             )
             header = textwrap.dedent(f"""

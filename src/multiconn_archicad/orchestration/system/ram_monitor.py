@@ -6,7 +6,7 @@ from contextlib import contextmanager
 from typing import Callable, Iterator
 import psutil
 
-from multiconn_archicad.utilities.process_utils import find_pid_by_port, get_process_rss_bytes
+from multiconn_archicad.orchestration.system.process_utils import find_pid_by_port, get_process_rss_bytes
 
 log = logging.getLogger(__name__)
 

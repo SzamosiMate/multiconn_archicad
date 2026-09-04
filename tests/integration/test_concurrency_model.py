@@ -2,8 +2,8 @@ import threading
 import pytest
 
 from multiconn_archicad import MultiConn
-from multiconn_archicad.conn_header import Status
-from multiconn_archicad.basic_types import PendingResponse, ProductInfo, APIResponseError
+from multiconn_archicad.orchestration.conn_header import Status
+from multiconn_archicad.orchestration.basic_types import PendingResponse, ProductInfo, APIResponseError
 
 
 pytestmark = [
@@ -231,16 +231,16 @@ def test_stress_multiple_connections_performance(slow_archicad_api, monkeypatch)
     STRESS TEST: Simulates a fully saturated environment (all 21 Archicad ports open).
     Proves that the ThreadPool processes them concurrently in parallel.
     """
-    from multiconn_archicad.basic_types import Port
+    from multiconn_archicad.orchestration.basic_types import Port
     import httpx
 
     # 1. Restore full port range
     full_range = [Port(p) for p in range(19723, 19744)]
     num_ports = len(full_range)
-    monkeypatch.setattr("multiconn_archicad.multi_conn.MultiConn._port_range", full_range)
+    monkeypatch.setattr("multiconn_archicad.orchestration.multi_conn.MultiConn._port_range", full_range)
 
     # 2. Mock TCP check so all ports appear active
-    monkeypatch.setattr("multiconn_archicad.multi_conn.is_port_listening", lambda url, port: True)
+    monkeypatch.setattr("multiconn_archicad.orchestration.multi_conn.is_port_listening", lambda url, port: True)
 
     # 3. Route all httpx requests to mock server
     mock_url = f"http://127.0.0.1:{slow_archicad_api.server_port}"

@@ -3,13 +3,13 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 import logging
 
-from multiconn_archicad.conn_header import ConnHeader
+from multiconn_archicad.orchestration.conn_header import ConnHeader
 from multiconn_archicad.errors import RequestError, ArchicadAPIError
-from multiconn_archicad.utilities.process_utils import find_pid_by_port, terminate_process
+from multiconn_archicad.orchestration.system.process_utils import find_pid_by_port, terminate_process
 
 if TYPE_CHECKING:
-    from multiconn_archicad.multi_conn import MultiConn
-    from multiconn_archicad.basic_types import Port
+    from multiconn_archicad.orchestration.multi_conn import MultiConn
+    from multiconn_archicad.orchestration.basic_types import Port
 
 log = logging.getLogger(__name__)
 

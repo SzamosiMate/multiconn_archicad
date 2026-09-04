@@ -4,7 +4,7 @@ from unittest.mock import patch
 from pydantic import ValidationError
 
 from multiconn_archicad.constants import SUPPORTED_TAPIR_VERSION
-from multiconn_archicad.basic_types import (
+from multiconn_archicad.orchestration.basic_types import (
     ArchiCadID,
     UntitledProjectID,
     SoloProjectID,
@@ -263,8 +263,8 @@ def test_teamwork_project_id_eq_different_type(teamwork_project_id):
 
 def test_teamwork_project_id_get_project_location(teamwork_project_id):
     with (
-        patch("multiconn_archicad.basic_types.single_quote") as mock_single_quote,
-        patch("multiconn_archicad.basic_types.double_quote") as mock_double_quote,
+        patch("multiconn_archicad.orchestration.basic_types.single_quote") as mock_single_quote,
+        patch("multiconn_archicad.orchestration.basic_types.double_quote") as mock_double_quote,
     ):
         mock_single_quote.side_effect = lambda s: f"single_quoted_{s}"
         mock_double_quote.side_effect = lambda s: f"double_quoted_{s}"
@@ -280,8 +280,8 @@ def test_teamwork_project_id_get_project_location_with_provided_credentials(team
     new_credentials = TeamworkCredentials(username="new_user", password="new_secret")
 
     with (
-        patch("multiconn_archicad.basic_types.single_quote") as mock_single_quote,
-        patch("multiconn_archicad.basic_types.double_quote") as mock_double_quote,
+        patch("multiconn_archicad.orchestration.basic_types.single_quote") as mock_single_quote,
+        patch("multiconn_archicad.orchestration.basic_types.double_quote") as mock_double_quote,
     ):
         mock_single_quote.side_effect = lambda s: f"single_quoted_{s}"
         mock_double_quote.side_effect = lambda s: f"double_quoted_{s}"
@@ -369,7 +369,7 @@ def test_teamwork_project_id_from_dict():
     (False, "/Applications/ARCHICAD"),
 ])
 def test_archicad_location_from_api_response(is_mac, expected_path):
-    with patch("multiconn_archicad.basic_types.is_using_mac", return_value=is_mac):
+    with patch("multiconn_archicad.orchestration.basic_types.is_using_mac", return_value=is_mac):
         api_response = {"archicadLocation": "/Applications/ARCHICAD"}
         location = ArchicadLocation.from_api_response(api_response)
         assert location.archicadLocation == expected_path
@@ -380,7 +380,7 @@ def test_archicad_location_from_api_response(is_mac, expected_path):
     (False, "/path/to/archicad"),
 ])
 def test_archicad_location_to_dict(is_mac, expected_path):
-    with patch("multiconn_archicad.basic_types.is_using_mac", return_value=is_mac):
+    with patch("multiconn_archicad.orchestration.basic_types.is_using_mac", return_value=is_mac):
         location = ArchicadLocation(archicadLocation="/path/to/archicad")
         assert location.to_dict() == {"archicadLocation": expected_path}
         assert location.model_dump() == {"archicadLocation": expected_path}
@@ -391,7 +391,7 @@ def test_archicad_location_to_dict(is_mac, expected_path):
     (False, "/path/to/archicad"),
 ])
 def test_archicad_location_from_dict(is_mac, expected_path):
-    with patch("multiconn_archicad.basic_types.is_using_mac", return_value=is_mac):
+    with patch("multiconn_archicad.orchestration.basic_types.is_using_mac", return_value=is_mac):
         data_dict = {"archicadLocation": "/path/to/archicad"}
         location = ArchicadLocation.from_dict(data_dict)
         assert location.archicadLocation == expected_path
@@ -399,7 +399,7 @@ def test_archicad_location_from_dict(is_mac, expected_path):
 
 def test_archicad_location_mac_already_normalized():
     """Ensure it doesn't double-append /Contents/MacOS/ARCHICAD on Mac."""
-    with patch("multiconn_archicad.basic_types.is_using_mac", return_value=True):
+    with patch("multiconn_archicad.orchestration.basic_types.is_using_mac", return_value=True):
         path = "/Applications/ARCHICAD/Contents/MacOS/ARCHICAD"
         location = ArchicadLocation(archicadLocation=path)
         assert location.archicadLocation == path

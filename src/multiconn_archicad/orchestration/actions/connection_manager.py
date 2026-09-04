@@ -2,12 +2,12 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
 
-from multiconn_archicad.conn_header import is_id_initialized
+from multiconn_archicad.orchestration.conn_header import is_id_initialized
 
 if TYPE_CHECKING:
-    from multiconn_archicad.conn_header import ConnHeader
-    from multiconn_archicad.multi_conn import MultiConn
-    from multiconn_archicad.basic_types import Port
+    from multiconn_archicad.orchestration.conn_header import ConnHeader
+    from multiconn_archicad.orchestration.multi_conn import MultiConn
+    from multiconn_archicad.orchestration.basic_types import Port
 
 import logging
 

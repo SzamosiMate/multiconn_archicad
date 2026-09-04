@@ -16,8 +16,8 @@ from multiconn_archicad.errors import (
     TapirCommandError,
     AddOnCommandUnavailable,
 )
-from multiconn_archicad.basic_types import Port
-from multiconn_archicad.utilities.cli_parser import get_cli_args_once
+from multiconn_archicad.orchestration.basic_types import Port
+from multiconn_archicad.orchestration.system.cli_parser import get_cli_args_once
 
 if TYPE_CHECKING:
     from multiconn_archicad.core.literal_commands import AddonCommandType, TapirCommandType

@@ -5,7 +5,7 @@ import logging
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from .basic_types import (
+    from multiconn_archicad.orchestration.basic_types import (
         APIResponseError,
         ArchicadLocation,
         ArchiCadID,
@@ -17,7 +17,7 @@ if TYPE_CHECKING:
         TeamworkProjectID,
         UntitledProjectID,
     )
-    from .conn_header import (
+    from multiconn_archicad.orchestration.conn_header import (
         ConnHeader,
         ProjectIdentityHeader,
         SessionReadyHeader,
@@ -30,14 +30,14 @@ if TYPE_CHECKING:
         is_session_ready,
         is_tapir_session_ready,
     )
-    from .core.core_commands import CoreCommands
-    from .dialog_handlers import (
+    from multiconn_archicad.clients.core.core_commands import CoreCommands
+    from multiconn_archicad.orchestration.dialog_handlers import (
         DialogHandlerBase,
         UnhandledDialogError,
         WinDialogHandler,
         win_int_handler_factory,
     )
-    from .errors import (
+    from multiconn_archicad.errors import (
         AddOnCommandUnavailable,
         APIConnectionError,
         APIErrorBase,
@@ -53,9 +53,10 @@ if TYPE_CHECKING:
         StandardCommandUnavailable,
         TapirCommandError,
     )
-    from .multi_conn import MultiConn
-    from .standard_connection import StandardConnection
-    from .unified_api.api import UnifiedApi
+    from multiconn_archicad.orchestration.multi_conn import MultiConn
+    from multiconn_archicad.clients.standard_connection import StandardConnection
+    from multiconn_archicad.clients.unified_api.api import UnifiedApi
+
 
 __all__ = [
     "MultiConn",
