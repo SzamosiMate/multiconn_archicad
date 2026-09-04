@@ -5,39 +5,10 @@ import logging
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from .basic_types import (
-        APIResponseError,
-        ArchicadLocation,
-        ArchiCadID,
-        Port,
-        ProductInfo,
-        SoloProjectID,
-        TapirInfo,
-        TeamworkCredentials,
-        TeamworkProjectID,
-        UntitledProjectID,
-    )
-    from .conn_header import (
-        ConnHeader,
-        ProjectIdentityHeader,
-        SessionReadyHeader,
-        ValidatedHeader,
-        has_project_identity,
-        is_header_fully_initialized,
-        is_id_initialized,
-        is_location_initialized,
-        is_product_info_initialized,
-        is_session_ready,
-        is_tapir_session_ready,
-    )
-    from .core.core_commands import CoreCommands
-    from .dialog_handlers import (
-        DialogHandlerBase,
-        UnhandledDialogError,
-        WinDialogHandler,
-        win_int_handler_factory,
-    )
-    from .errors import (
+    from multiconn_archicad.clients.core.core_commands import CoreCommands
+    from multiconn_archicad.clients.standard_connection import StandardConnection
+    from multiconn_archicad.clients.unified_api.api import UnifiedApi
+    from multiconn_archicad.errors import (
         AddOnCommandUnavailable,
         APIConnectionError,
         APIErrorBase,
@@ -53,9 +24,39 @@ if TYPE_CHECKING:
         StandardCommandUnavailable,
         TapirCommandError,
     )
-    from .multi_conn import MultiConn
-    from .standard_connection import StandardConnection
-    from .unified_api.api import UnifiedApi
+    from multiconn_archicad.orchestration.basic_types import (
+        APIResponseError,
+        ArchicadLocation,
+        ArchiCadID,
+        Port,
+        ProductInfo,
+        SoloProjectID,
+        TapirInfo,
+        TeamworkCredentials,
+        TeamworkProjectID,
+        UntitledProjectID,
+    )
+    from multiconn_archicad.orchestration.conn_header import (
+        ConnHeader,
+        ProjectIdentityHeader,
+        SessionReadyHeader,
+        ValidatedHeader,
+        has_project_identity,
+        is_header_fully_initialized,
+        is_id_initialized,
+        is_location_initialized,
+        is_product_info_initialized,
+        is_session_ready,
+        is_tapir_session_ready,
+    )
+    from multiconn_archicad.orchestration.dialog_handlers import (
+        DialogHandlerBase,
+        UnhandledDialogError,
+        WinDialogHandler,
+        win_int_handler_factory,
+    )
+    from multiconn_archicad.orchestration.multi_conn import MultiConn
+
 
 __all__ = [
     "MultiConn",
@@ -104,40 +105,40 @@ __all__ = [
 ]
 
 _LAZY_IMPORTS: dict[str, str] = {
-    # .multi_conn
-    "MultiConn": ".multi_conn",
-    # .conn_header
-    "ConnHeader": ".conn_header",
-    "ProjectIdentityHeader": ".conn_header",
-    "SessionReadyHeader": ".conn_header",
-    "ValidatedHeader": ".conn_header",
-    "has_project_identity": ".conn_header",
-    "is_session_ready": ".conn_header",
-    "is_tapir_session_ready": ".conn_header",
-    "is_header_fully_initialized": ".conn_header",
-    "is_id_initialized": ".conn_header",
-    "is_location_initialized": ".conn_header",
-    "is_product_info_initialized": ".conn_header",
-    # .basic_types
-    "ArchiCadID": ".basic_types",
-    "TeamworkProjectID": ".basic_types",
-    "SoloProjectID": ".basic_types",
-    "UntitledProjectID": ".basic_types",
-    "TeamworkCredentials": ".basic_types",
-    "ProductInfo": ".basic_types",
-    "ArchicadLocation": ".basic_types",
-    "Port": ".basic_types",
-    "APIResponseError": ".basic_types",
-    "TapirInfo": ".basic_types",
-    # .standard_connection
-    "StandardConnection": ".standard_connection",
-    # .core.core_commands
-    "CoreCommands": ".core.core_commands",
-    # .dialog_handlers
-    "DialogHandlerBase": ".dialog_handlers",
-    "UnhandledDialogError": ".dialog_handlers",
-    "WinDialogHandler": ".dialog_handlers",
-    "win_int_handler_factory": ".dialog_handlers",
+    # .orchestration.multi_conn
+    "MultiConn": ".orchestration.multi_conn",
+    # .orchestration.conn_header
+    "ConnHeader": ".orchestration.conn_header",
+    "ProjectIdentityHeader": ".orchestration.conn_header",
+    "SessionReadyHeader": ".orchestration.conn_header",
+    "ValidatedHeader": ".orchestration.conn_header",
+    "has_project_identity": ".orchestration.conn_header",
+    "is_session_ready": ".orchestration.conn_header",
+    "is_tapir_session_ready": ".orchestration.conn_header",
+    "is_header_fully_initialized": ".orchestration.conn_header",
+    "is_id_initialized": ".orchestration.conn_header",
+    "is_location_initialized": ".orchestration.conn_header",
+    "is_product_info_initialized": ".orchestration.conn_header",
+    # .orchestration.basic_types
+    "ArchiCadID": ".orchestration.basic_types",
+    "TeamworkProjectID": ".orchestration.basic_types",
+    "SoloProjectID": ".orchestration.basic_types",
+    "UntitledProjectID": ".orchestration.basic_types",
+    "TeamworkCredentials": ".orchestration.basic_types",
+    "ProductInfo": ".orchestration.basic_types",
+    "ArchicadLocation": ".orchestration.basic_types",
+    "Port": ".orchestration.basic_types",
+    "APIResponseError": ".orchestration.basic_types",
+    "TapirInfo": ".orchestration.basic_types",
+    # .clients.standard_connection
+    "StandardConnection": ".clients.standard_connection",
+    # .clients.core.core_commands
+    "CoreCommands": ".clients.core.core_commands",
+    # .orchestration.dialog_handlers
+    "DialogHandlerBase": ".orchestration.dialog_handlers",
+    "UnhandledDialogError": ".orchestration.dialog_handlers",
+    "WinDialogHandler": ".orchestration.dialog_handlers",
+    "win_int_handler_factory": ".orchestration.dialog_handlers",
     # .errors
     "MulticonnArchicadError": ".errors",
     "APIErrorBase": ".errors",
@@ -153,8 +154,8 @@ _LAZY_IMPORTS: dict[str, str] = {
     "ProjectAlreadyOpenError": ".errors",
     "ProjectNotFoundError": ".errors",
     "NotFullyInitializedError": ".errors",
-    # .unified_api.api
-    "UnifiedApi": ".unified_api.api",
+    # .clients.unified_api.api
+    "UnifiedApi": ".clients.unified_api.api",
 }
 
 

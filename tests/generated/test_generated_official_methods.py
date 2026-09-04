@@ -10,18 +10,18 @@ from pydantic import TypeAdapter
 from hypothesis import given, settings, HealthCheck
 from hypothesis_jsonschema import from_schema
 from tests.utilities import normalize_for_comparison
-from multiconn_archicad.unified_api.official.addon import AddonCommands as OfficialAddonCommands
-from multiconn_archicad.unified_api.official.attribute import AttributeCommands as OfficialAttributeCommands
-from multiconn_archicad.unified_api.official.basic import BasicCommands as OfficialBasicCommands
-from multiconn_archicad.unified_api.official.classification import ClassificationCommands as OfficialClassificationCommands
-from multiconn_archicad.unified_api.official.component import ComponentCommands as OfficialComponentCommands
-from multiconn_archicad.unified_api.official.element_geometry import ElementGeometryCommands as OfficialElementGeometryCommands
-from multiconn_archicad.unified_api.official.element_listing import ElementListingCommands as OfficialElementListingCommands
-from multiconn_archicad.unified_api.official.element_relation import ElementRelationCommands as OfficialElementRelationCommands
-from multiconn_archicad.unified_api.official.layout_book import LayoutBookCommands as OfficialLayoutBookCommands
-from multiconn_archicad.unified_api.official.navigator_tree import NavigatorTreeCommands as OfficialNavigatorTreeCommands
-from multiconn_archicad.unified_api.official.property import PropertyCommands as OfficialPropertyCommands
-from multiconn_archicad.unified_api.official.view_map import ViewMapCommands as OfficialViewMapCommands
+from multiconn_archicad.clients.unified_api.official.addon import AddonCommands as OfficialAddonCommands
+from multiconn_archicad.clients.unified_api.official.attribute import AttributeCommands as OfficialAttributeCommands
+from multiconn_archicad.clients.unified_api.official.basic import BasicCommands as OfficialBasicCommands
+from multiconn_archicad.clients.unified_api.official.classification import ClassificationCommands as OfficialClassificationCommands
+from multiconn_archicad.clients.unified_api.official.component import ComponentCommands as OfficialComponentCommands
+from multiconn_archicad.clients.unified_api.official.element_geometry import ElementGeometryCommands as OfficialElementGeometryCommands
+from multiconn_archicad.clients.unified_api.official.element_listing import ElementListingCommands as OfficialElementListingCommands
+from multiconn_archicad.clients.unified_api.official.element_relation import ElementRelationCommands as OfficialElementRelationCommands
+from multiconn_archicad.clients.unified_api.official.layout_book import LayoutBookCommands as OfficialLayoutBookCommands
+from multiconn_archicad.clients.unified_api.official.navigator_tree import NavigatorTreeCommands as OfficialNavigatorTreeCommands
+from multiconn_archicad.clients.unified_api.official.property import PropertyCommands as OfficialPropertyCommands
+from multiconn_archicad.clients.unified_api.official.view_map import ViewMapCommands as OfficialViewMapCommands
 from multiconn_archicad.models.official import commands, types
 NUM_EXAMPLES = int(os.getenv("HYPOTHESIS_NUM_EXAMPLES", 1))
 settings.register_profile("ci", max_examples=NUM_EXAMPLES, suppress_health_check=[HealthCheck.too_slow], deadline=None)

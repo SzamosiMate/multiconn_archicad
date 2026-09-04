@@ -1,14 +1,14 @@
 from pprint import pformat
 
 from multiconn_archicad.constants import DEFAULT_PORT_RANGE, DEFAULT_HOST, SUPPORTED_TAPIR_VERSION
-from multiconn_archicad.utilities.network_utils import is_port_listening
-from multiconn_archicad.utilities.thread_utils import EXECUTOR
-from multiconn_archicad.core.core_commands import CoreCommands
-from multiconn_archicad.standard_connection import StandardConnection
-from multiconn_archicad.unified_api.api import UnifiedApi
-from multiconn_archicad.conn_header import ConnHeader, Status
-from multiconn_archicad.basic_types import Port
-from multiconn_archicad.actions import (
+from multiconn_archicad.orchestration.system.network_utils import is_port_listening
+from multiconn_archicad.orchestration.system.thread_utils import EXECUTOR
+from multiconn_archicad.clients.core.core_commands import CoreCommands
+from multiconn_archicad.clients.standard_connection import StandardConnection
+from multiconn_archicad.clients.unified_api.api import UnifiedApi
+from multiconn_archicad.orchestration.conn_header import ConnHeader, Status
+from multiconn_archicad.orchestration.basic_types import Port
+from multiconn_archicad.orchestration.actions import (
     Connect,
     Disconnect,
     Refresh,
@@ -17,8 +17,8 @@ from multiconn_archicad.actions import (
     OpenProject,
     SwitchProject,
 )
-from multiconn_archicad.dialog_handlers import DialogHandlerBase, EmptyDialogHandler
-from multiconn_archicad.utilities.cli_parser import get_cli_args_once
+from multiconn_archicad.orchestration.dialog_handlers import DialogHandlerBase, EmptyDialogHandler
+from multiconn_archicad.orchestration.system.cli_parser import get_cli_args_once
 
 import logging
 
