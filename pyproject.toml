@@ -25,7 +25,7 @@ dependencies = [
     "archicad>=28.3000",
     "httpx>=0.28.1",
     "psutil>=6.1.1, <8.0",
-    "pydantic>=2.11.7, <3.0",
+    "pydantic>=2.12.0, <3.0",
     "typing-extensions>=4.12.2",
 ]
 
