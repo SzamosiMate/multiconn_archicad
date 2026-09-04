@@ -7,14 +7,12 @@ from pprint import pformat
 import logging
 import warnings
 from dataclasses import dataclass
-from pydantic import GetCoreSchemaHandler, ValidationError
-from pydantic_core import core_schema
 
 from pydantic import GetCoreSchemaHandler, ValidationError
 from pydantic_core import core_schema
 
-from multiconn_archicad.core.core_commands import CoreCommands
-from multiconn_archicad.basic_types import (
+from multiconn_archicad.clients.core.core_commands import CoreCommands
+from multiconn_archicad.orchestration.basic_types import (
     ArchiCadID,
     APIResponseError,
     PendingResponse,
@@ -26,10 +24,10 @@ from multiconn_archicad.basic_types import (
     TeamworkProjectID,
 )
 from multiconn_archicad.errors import RequestError, ArchicadAPIError, HeaderUnassignedError, AddOnCommandUnavailable
-from multiconn_archicad.standard_connection import StandardConnection
-from multiconn_archicad.unified_api.api import UnifiedApi
-from multiconn_archicad.utilities.thread_utils import EXECUTOR
-from multiconn_archicad.utilities.ram_monitor import RamMonitor
+from multiconn_archicad.clients.standard_connection import StandardConnection
+from multiconn_archicad.clients.unified_api.api import UnifiedApi
+from multiconn_archicad.orchestration.system.thread_utils import EXECUTOR
+from multiconn_archicad.orchestration.system.ram_monitor import RamMonitor
 
 
 log = logging.getLogger(__name__)

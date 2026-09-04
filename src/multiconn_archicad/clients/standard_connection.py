@@ -6,7 +6,7 @@ from archicad.connection import create_request
 from archicad.releases import Commands, Types, Utilities
 
 if TYPE_CHECKING:
-    from multiconn_archicad.basic_types import ProductInfo, Port
+    from multiconn_archicad.orchestration.basic_types import ProductInfo, Port
     from urllib.request import Request
 
 

@@ -1,7 +1,7 @@
 import pytest
 
 from multiconn_archicad import MultiConn, Port
-from multiconn_archicad.conn_header import Status
+from multiconn_archicad.orchestration.conn_header import Status
 
 pytestmark = [
     pytest.mark.usefixtures("archicad_api"),
@@ -18,8 +18,8 @@ def test_no_running_archicad_and_no_port_arg(monkeypatch):
     class EmptyArgs:
         host = "http://127.0.0.1"
         port = None
-    monkeypatch.setattr("multiconn_archicad.utilities.cli_parser.get_cli_args_once", lambda: EmptyArgs())
-    monkeypatch.setattr("multiconn_archicad.multi_conn.MultiConn._port_range", [])
+    monkeypatch.setattr("multiconn_archicad.orchestration.system.cli_parser.get_cli_args_once", lambda: EmptyArgs())
+    monkeypatch.setattr("multiconn_archicad.orchestration.multi_conn.MultiConn._port_range", [])
 
     # ACT
     conn = MultiConn()
@@ -37,8 +37,8 @@ def test_init_with_invalid_port_raises_error(monkeypatch):
     class EmptyArgs:
         host = "http://127.0.0.1"
         port = None
-    monkeypatch.setattr("multiconn_archicad.utilities.cli_parser.get_cli_args_once", lambda: EmptyArgs())
-    monkeypatch.setattr("multiconn_archicad.multi_conn.MultiConn._port_range", [])
+    monkeypatch.setattr("multiconn_archicad.orchestration.system.cli_parser.get_cli_args_once", lambda: EmptyArgs())
+    monkeypatch.setattr("multiconn_archicad.orchestration.multi_conn.MultiConn._port_range", [])
 
     # ACT & ASSERT
     with pytest.raises(KeyError, match="Failed to set primary"):
