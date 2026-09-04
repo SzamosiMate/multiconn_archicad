@@ -1,5 +1,5 @@
 import pytest
-from multiconn_archicad.conn_header import (
+from multiconn_archicad.orchestration.conn_header import (
     ConnHeader,
     Status,
     has_project_identity,
@@ -7,7 +7,7 @@ from multiconn_archicad.conn_header import (
     is_tapir_session_ready,
     is_header_fully_initialized,
 )
-from multiconn_archicad.basic_types import (
+from multiconn_archicad.orchestration.basic_types import (
     ProductInfo,
     ArchicadLocation,
     SoloProjectID,

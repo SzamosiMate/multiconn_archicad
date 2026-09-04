@@ -1,8 +1,8 @@
 import pytest
 from unittest.mock import MagicMock
 
-from multiconn_archicad.conn_header import ConnHeader
-from multiconn_archicad.basic_types import TapirInfo, APIResponseError, Port
+from multiconn_archicad.orchestration.conn_header import ConnHeader
+from multiconn_archicad.orchestration.basic_types import TapirInfo, APIResponseError, Port
 from multiconn_archicad.errors import AddOnCommandUnavailable, ArchicadAPIError
 
 pytestmark = [

@@ -12,14 +12,14 @@ from multiconn_archicad.errors import (
     ProjectNotFoundError,
     StandardAPIError,
 )
-from multiconn_archicad.utilities.platform_utils import escape_spaces_in_path, is_using_mac
-from multiconn_archicad.utilities.exception_logging import auto_decorate_methods, log_exceptions
-from multiconn_archicad.utilities.process_utils import find_port_by_pid
-from multiconn_archicad.basic_types import Port, TeamworkCredentials, TeamworkProjectID, SoloProjectID
-from multiconn_archicad.conn_header import ConnHeader, has_project_identity, ProjectIdentityHeader
+from multiconn_archicad.orchestration.system.platform_utils import escape_spaces_in_path, is_using_mac
+from multiconn_archicad.orchestration.system.exception_logging import auto_decorate_methods, log_exceptions
+from multiconn_archicad.orchestration.system.process_utils import find_port_by_pid
+from multiconn_archicad.orchestration.basic_types import Port, TeamworkCredentials, TeamworkProjectID, SoloProjectID
+from multiconn_archicad.orchestration.conn_header import ConnHeader, has_project_identity, ProjectIdentityHeader
 
 if TYPE_CHECKING:
-    from multiconn_archicad.multi_conn import MultiConn
+    from multiconn_archicad.orchestration.multi_conn import MultiConn
 
 import logging
 

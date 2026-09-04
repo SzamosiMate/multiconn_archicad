@@ -96,7 +96,7 @@ class FileAssembler:
             imports_block,
             "",
             "if TYPE_CHECKING:",
-            "    from multiconn_archicad.core.core_commands import CoreCommands",
+            "    from multiconn_archicad.clients.core.core_commands import CoreCommands",
         ]
 
         init_method = textwrap.dedent("""
@@ -155,7 +155,7 @@ class FileAssembler:
             "\n".join(unique_imports),
             "",
             "if TYPE_CHECKING:",
-            "    from multiconn_archicad.core.core_commands import CoreCommands",
+            "    from multiconn_archicad.clients.core.core_commands import CoreCommands",
             "",
             f'SUPPORTED_TAPIR_VERSION = "{tapir_paths.tapir_version}"',
             "",

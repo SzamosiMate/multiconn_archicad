@@ -19,7 +19,7 @@ from pydantic_core import core_schema
 from packaging.version import Version, InvalidVersion
 
 from multiconn_archicad.errors import APIErrorBase
-from multiconn_archicad.utilities.platform_utils import is_using_mac, double_quote, single_quote
+from multiconn_archicad.orchestration.system.platform_utils import is_using_mac, double_quote, single_quote
 from multiconn_archicad.constants import SUPPORTED_TAPIR_VERSION, DEFAULT_PORT_RANGE
 
 JsonType = Union[str, int, float, bool, None, list["JsonType"], dict[str, "JsonType"]]

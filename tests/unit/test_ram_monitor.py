@@ -1,10 +1,9 @@
-import time
 from unittest.mock import patch, MagicMock
 import threading
 
-from multiconn_archicad.basic_types import Port, ProductInfo, SoloProjectID, ArchicadLocation
-from multiconn_archicad.conn_header import ConnHeader
-from multiconn_archicad.utilities.ram_monitor import AtomicPeak, RamMonitor
+from multiconn_archicad.orchestration.basic_types import Port, ProductInfo, SoloProjectID, ArchicadLocation
+from multiconn_archicad.orchestration.conn_header import ConnHeader
+from multiconn_archicad.orchestration.system.ram_monitor import AtomicPeak, RamMonitor
 
 
 def test_atomic_peak_logic():
@@ -30,8 +29,8 @@ def test_peak_bytes_lazy_self_healing_query():
     port = Port(19723)
     monitor = RamMonitor(port_getter=lambda: port)
 
-    with patch("multiconn_archicad.utilities.ram_monitor.find_pid_by_port", return_value=12345):
-        with patch("multiconn_archicad.utilities.ram_monitor.get_process_rss_bytes", return_value=2_147_483_648) as mock_rss:
+    with patch("multiconn_archicad.orchestration.system.ram_monitor.find_pid_by_port", return_value=12345):
+        with patch("multiconn_archicad.orchestration.system.ram_monitor.get_process_rss_bytes", return_value=2_147_483_648) as mock_rss:
             # 1. Initially _peak is None, so peak_bytes lazily triggers get_current_rss()
             assert monitor.peak_bytes == 2_147_483_648
             mock_rss.assert_called_once_with(12345)
@@ -68,8 +67,8 @@ def test_fetch_worker_auto_seeds_peak_ram_in_background():
     header.get_archicad_location = MagicMock(return_value=ArchicadLocation(archicadLocation="/app"))
     header.get_tapir_info = MagicMock()
 
-    with patch("multiconn_archicad.utilities.ram_monitor.find_pid_by_port", return_value=12345):
-        with patch("multiconn_archicad.utilities.ram_monitor.get_process_rss_bytes", return_value=3_221_225_472):
+    with patch("multiconn_archicad.orchestration.system.ram_monitor.find_pid_by_port", return_value=12345):
+        with patch("multiconn_archicad.orchestration.system.ram_monitor.get_process_rss_bytes", return_value=3_221_225_472):
             # Run fetch worker
             token = object()
             header._fetch_token = token
@@ -89,8 +88,8 @@ def test_to_dict_serialization_with_auto_seeded_peak_ram():
     header._archicad_id = SoloProjectID(projectPath="/path/project.pln", projectName="TestProject")
     header._archicad_location = ArchicadLocation(archicadLocation="/path/to/Archicad")
 
-    with patch("multiconn_archicad.utilities.ram_monitor.find_pid_by_port", return_value=12345):
-        with patch("multiconn_archicad.utilities.ram_monitor.get_process_rss_bytes", return_value=4_294_967_296):
+    with patch("multiconn_archicad.orchestration.system.ram_monitor.find_pid_by_port", return_value=12345):
+        with patch("multiconn_archicad.orchestration.system.ram_monitor.get_process_rss_bytes", return_value=4_294_967_296):
             # to_dict calls peak_archicad_ram_bytes, which lazily samples 4GB
             data = header.to_dict()
 
@@ -110,7 +109,7 @@ def test_from_dict_restores_historical_peak_without_process_query():
         "peakArchicadRamBytes": 8_589_934_592,  # 8 GB
     }
 
-    with patch("multiconn_archicad.utilities.ram_monitor.find_pid_by_port") as mock_find_pid:
+    with patch("multiconn_archicad.orchestration.system.ram_monitor.find_pid_by_port") as mock_find_pid:
         restored = ConnHeader.from_dict(snapshot)
 
         assert restored.port is None
@@ -158,9 +157,9 @@ def test_track_context_manager_records_highest_spike():
         except StopIteration:
             return 4_000_000
 
-    with patch("multiconn_archicad.utilities.ram_monitor.find_pid_by_port", return_value=12345):
+    with patch("multiconn_archicad.orchestration.system.ram_monitor.find_pid_by_port", return_value=12345):
         with patch(
-            "multiconn_archicad.utilities.ram_monitor.get_process_rss_bytes",
+            "multiconn_archicad.orchestration.system.ram_monitor.get_process_rss_bytes",
             side_effect=mock_rss,
         ):
             with monitor.track(interval_s=0.01):

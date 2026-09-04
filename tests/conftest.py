@@ -8,9 +8,9 @@ from pathlib import Path
 from typing import Dict, Any, Callable
 import pytest
 
-import multiconn_archicad.multi_conn as multi_conn
-import multiconn_archicad.utilities.cli_parser as cli_parser
-from multiconn_archicad.basic_types import Port
+import multiconn_archicad.orchestration.multi_conn as multi_conn
+import multiconn_archicad.orchestration.system.cli_parser as cli_parser
+from multiconn_archicad.orchestration.basic_types import Port
 from multiconn_archicad.models import config
 from multiconn_archicad.models.mixins import _MODEL_KEYS_CACHE
 
@@ -118,8 +118,8 @@ def isolate_executor(monkeypatch):
     Prevents zombie threads from previous tests from exhausting the worker pool.
     """
     executor = concurrent.futures.ThreadPoolExecutor(max_workers=25, thread_name_prefix="MultiConnWorker")
-    monkeypatch.setattr("multiconn_archicad.multi_conn.EXECUTOR", executor)
-    monkeypatch.setattr("multiconn_archicad.conn_header.EXECUTOR", executor)
+    monkeypatch.setattr("multiconn_archicad.orchestration.multi_conn.EXECUTOR", executor)
+    monkeypatch.setattr("multiconn_archicad.orchestration.conn_header.EXECUTOR", executor)
     yield
     executor.shutdown(wait=False, cancel_futures=True)
 
@@ -170,7 +170,7 @@ def archicad_api(monkeypatch):
 
     monkeypatch.setattr(multi_conn.MultiConn, "_port_range", [Port(assigned_port)])
     monkeypatch.setattr(Port, "__new__", lambda cls, value: int.__new__(cls, value))
-    monkeypatch.setattr("multiconn_archicad.utilities.cli_parser.get_cli_args_once", lambda: MockArgs())
+    monkeypatch.setattr("multiconn_archicad.orchestration.system.cli_parser.get_cli_args_once", lambda: MockArgs())
 
     yield controller
 

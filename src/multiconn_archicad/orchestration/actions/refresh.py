@@ -2,9 +2,9 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from multiconn_archicad.conn_header import ConnHeader
-    from multiconn_archicad.multi_conn import MultiConn
-    from multiconn_archicad.basic_types import Port
+    from multiconn_archicad.orchestration.conn_header import ConnHeader
+    from multiconn_archicad.orchestration.multi_conn import MultiConn
+    from multiconn_archicad.orchestration.basic_types import Port
 
 import logging
 

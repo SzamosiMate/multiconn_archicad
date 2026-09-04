@@ -1,7 +1,7 @@
 import logging
 
-from .multi_conn import MultiConn
-from .conn_header import (
+from multiconn_archicad.orchestration.multi_conn import MultiConn
+from multiconn_archicad.orchestration.conn_header import (
     ConnHeader,
     ProjectIdentityHeader,
     SessionReadyHeader,
@@ -14,7 +14,7 @@ from .conn_header import (
     is_location_initialized,
     is_product_info_initialized,
 )
-from .basic_types import (
+from multiconn_archicad.orchestration.basic_types import (
     ArchiCadID,
     TeamworkProjectID,
     SoloProjectID,
@@ -26,9 +26,9 @@ from .basic_types import (
     APIResponseError,
     TapirInfo,
 )
-from .standard_connection import StandardConnection
-from .core.core_commands import CoreCommands
-from .dialog_handlers import (
+from .clients.standard_connection import StandardConnection
+from .clients.core.core_commands import CoreCommands
+from multiconn_archicad.orchestration.dialog_handlers import (
     DialogHandlerBase,
     UnhandledDialogError,
     WinDialogHandler,
@@ -50,7 +50,7 @@ from .errors import (
     ProjectNotFoundError,
     NotFullyInitializedError,
 )
-from .unified_api.api import UnifiedApi
+from multiconn_archicad.clients.unified_api.api import UnifiedApi
 
 
 __all__ = [

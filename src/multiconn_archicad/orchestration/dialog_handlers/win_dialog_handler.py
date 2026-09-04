@@ -7,8 +7,8 @@ import re
 import time
 from typing import Callable
 
-from multiconn_archicad.dialog_handlers.win_int_handler_factory import win_int_handler_factory
-from multiconn_archicad.dialog_handlers.dialog_handler_base import DialogHandlerBase, UnhandledDialogError
+from multiconn_archicad.orchestration.dialog_handlers.win_int_handler_factory import win_int_handler_factory
+from multiconn_archicad.orchestration.dialog_handlers.dialog_handler_base import DialogHandlerBase, UnhandledDialogError
 
 import logging
 
