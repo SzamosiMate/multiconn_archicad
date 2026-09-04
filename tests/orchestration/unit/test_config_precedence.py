@@ -1,7 +1,7 @@
 from pydantic import BaseModel, ConfigDict, ValidationError
 import pytest
 
-from tests.utilities import run_in_process
+from tests.helpers import run_in_process
 
 
 # =========================================================================
