@@ -13,6 +13,7 @@ if TYPE_CHECKING:
         APIConnectionError,
         APIErrorBase,
         ArchicadAPIError,
+        BatchOperationError,
         CommandTimeoutError,
         InvalidResponseFormatError,
         MulticonnArchicadError,
@@ -91,6 +92,7 @@ __all__ = [
     "ProjectAlreadyOpenError",
     "ProjectNotFoundError",
     "NotFullyInitializedError",
+    "BatchOperationError",
     "ProjectIdentityHeader",
     "SessionReadyHeader",
     "ValidatedHeader",
@@ -154,6 +156,7 @@ _LAZY_IMPORTS: dict[str, str] = {
     "ProjectAlreadyOpenError": ".errors",
     "ProjectNotFoundError": ".errors",
     "NotFullyInitializedError": ".errors",
+    "BatchOperationError": ".errors",
     # .clients.unified_api.api
     "UnifiedApi": ".clients.unified_api.api",
 }
