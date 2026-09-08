@@ -52,6 +52,7 @@ if TYPE_CHECKING:
         StandardAPIError,
         StandardCommandUnavailable,
         TapirCommandError,
+        BatchOperationError,
     )
     from multiconn_archicad.orchestration.multi_conn import MultiConn
     from multiconn_archicad.clients.standard_connection import StandardConnection
@@ -154,6 +155,7 @@ _LAZY_IMPORTS: dict[str, str] = {
     "ProjectAlreadyOpenError": ".errors",
     "ProjectNotFoundError": ".errors",
     "NotFullyInitializedError": ".errors",
+    "BatchOperationError": ".errors",
     # .unified_api.api
     "UnifiedApi": ".unified_api.api",
 }
