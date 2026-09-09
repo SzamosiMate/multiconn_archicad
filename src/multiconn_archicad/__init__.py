@@ -92,6 +92,7 @@ __all__ = [
     "ProjectAlreadyOpenError",
     "ProjectNotFoundError",
     "NotFullyInitializedError",
+    "BatchOperationError",
     "ProjectIdentityHeader",
     "SessionReadyHeader",
     "ValidatedHeader",
