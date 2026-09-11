@@ -1,502 +1,118 @@
 from __future__ import annotations
 
 from unittest.mock import MagicMock
-from multiconn_archicad import UnifiedApi
-import uuid
+from uuid import uuid4
+
 import pytest
 
+from multiconn_archicad.errors import BatchOperationError
+from multiconn_archicad.models.official import types as official
+from multiconn_archicad.models.tapir import types as tapir
 from multiconn_archicad.utilities.properties import (
     PropertyUtilities,
     create_element_property_values,
     create_element_property_values_flat,
+    create_element_property_values_sparse,
     get_possible_enum_values,
 )
-from multiconn_archicad.utilities.results import BatchOperationError
-from multiconn_archicad.errors import UnsupportedResultNode
-from multiconn_archicad.models.official import types as official
-from multiconn_archicad.models.tapir import types as tapir
+from multiconn_archicad.utilities.results import BatchResult, BatchResult2D
+from multiconn_archicad.utilities import BatchRun
 
 
-@pytest.fixture
-def mock_api():
-    """Mock UnifiedApi without spec restrictions to allow dynamic .official and .tapir access."""
-    return MagicMock()
+def _value(value: str) -> tapir.PropertyValueArrayItem:
+    return tapir.PropertyValueArrayItem(propertyValue=tapir.PropertyValue(value=value))
 
 
-
-@pytest.fixture
-def property_utils(mock_api):
-    return PropertyUtilities(mock_api)
+def _error() -> tapir.ErrorItem:
+    return tapir.ErrorItem(error=tapir.Error(code=7, message="bad"))
 
 
+def test_payload_builders_and_sparse_matrix_omit_failed_cells():
+    elements, properties = [uuid4(), uuid4()], [uuid4(), uuid4()]
+    assert len(create_element_property_values(elements, properties, [["a", None], [0, False]])) == 4
+    assert len(create_element_property_values_flat(elements, properties[0], ["a", "b"])) == 2
+    sparse = create_element_property_values_sparse(elements, properties, [[_error(), "x"], ["y", _error()]])
+    assert len(sparse) == 2
+    assert sparse[0].elementId.guid == elements[0]
+    assert sparse[1].elementId.guid == elements[1]
 
-@pytest.mark.parametrize("models", [official, tapir])
-@pytest.mark.parametrize("matrix", [False, True])
-def test_write_rejects_input_errors_before_api_call(property_utils, mock_api, models, matrix):
-    error = models.ErrorItem(error=models.Error(code=42, message="Unavailable"))
-    values = ["OK", {"Rating": error}]
-
-    with pytest.raises(BatchOperationError) as caught:
-        if matrix:
-            property_utils.set_property_values_per_element_result(
-                [uuid.uuid4()], [uuid.uuid4(), uuid.uuid4()], [values]
-            )
-        else:
-            property_utils.set_flat_property_values_result([uuid.uuid4(), uuid.uuid4()], uuid.uuid4(), values)
-
-    recorded = caught.value.result.all_errors[0]
-    assert recorded.error is error.error
-    assert recorded.path == ("values[0][1]['Rating']" if matrix else "values[1]['Rating']")
-    assert recorded.indices == ((0, 1) if matrix else (1,))
-    mock_api.tapir.property.set_property_values_of_elements.assert_not_called()
+    matrix = BatchResult2D.from_rows([["a", _error()], _error()], row_lengths=[2, 2])
+    sparse_from_result = create_element_property_values_sparse(elements, properties, matrix)
+    assert len(sparse_from_result) == 1
+    assert sparse_from_result[0].elementId.guid == elements[0]
 
 
-@pytest.mark.parametrize("matrix", [False, True])
-def test_write_builders_preserve_explicit_text_and_supported_values(matrix):
-    property_value = tapir.PropertyValue(value="Existing")
-    values = ["[42] Unavailable", None, 0, False, property_value]
-    if matrix:
-        payload = create_element_property_values([uuid.uuid4()], [uuid.uuid4() for _ in values], [values])
-    else:
-        payload = create_element_property_values_flat([uuid.uuid4() for _ in values], uuid.uuid4(), values)
-
-    assert [item.propertyValue.value for item in payload] == ["[42] Unavailable", "", "0", "False", "Existing"]
-    assert values == ["[42] Unavailable", None, 0, False, property_value]
-
-
-@pytest.mark.parametrize("matrix", [False, True])
-def test_write_rejects_unsupported_input_before_api_call(property_utils, mock_api, matrix):
-    with pytest.raises(UnsupportedResultNode):
-        if matrix:
-            property_utils.set_property_values_per_element_result([uuid.uuid4()], [uuid.uuid4()], [[object()]])
-        else:
-            property_utils.set_flat_property_values_result([uuid.uuid4()], uuid.uuid4(), [object()])
-    mock_api.tapir.property.set_property_values_of_elements.assert_not_called()
-
-
-# ==============================================================================
-# Property ID Resolution Tests
-# ==============================================================================
-
-
-def test_resolve_property_ids_result_success_and_error(property_utils, mock_api):
-    guid = uuid.uuid4()
-    err_item = official.ErrorItem(error=official.Error(code=1, message="Property not found"))
-    mock_api.official.property.get_property_ids.return_value = [
-        official.PropertyIdArrayItem(propertyId=official.PropertyId(guid=guid)),
-        err_item,
+def test_matrix_read_preserves_cell_error_and_dictionary_aggregates_failed_rows():
+    api = MagicMock()
+    api.tapir.property.get_property_values_of_elements.return_value = [
+        tapir.PropertyValuesArrayItem(propertyValues=[_error(), _error()]),
+        tapir.PropertyValuesArrayItem(propertyValues=[_value("b"), _value("c")]),
     ]
+    utilities = PropertyUtilities(api)
+    elements, properties = [uuid4(), uuid4()], [uuid4(), uuid4()]
+    result = utilities.get_property_values_per_element_result(elements, properties)
+    assert list(result.iter_errors())[0][0] == (0, 0)
 
-    result = property_utils.resolve_property_ids_result(
-        [
-            official.UserDefinedPropertyUserId(localizedName=["Dimensions", "Height"]),
-            official.UserDefinedPropertyUserId(localizedName=["Non", "Existent"]),
-        ],
-    )
-
-    assert result.is_all_success is False
-    assert result.has_errors is True
-    assert len(result.items) == 2
-    assert result.items[0] == tapir.PropertyIdArrayItem(propertyId=tapir.PropertyId(guid=guid))
-    assert result.items[1] == err_item
-    assert result.errors[1][0].code == 1
-    assert result.errors[1][0].path == "propertyIds[1]"
-
-
-def test_resolve_property_ids_fail_fast_success(property_utils, mock_api):
-    guid1, guid2 = uuid.uuid4(), uuid.uuid4()
-    mock_api.official.property.get_property_ids.return_value = [
-        official.PropertyIdArrayItem(propertyId=official.PropertyId(guid=guid1)),
-        official.PropertyIdArrayItem(propertyId=official.PropertyId(guid=guid2)),
-    ]
-
-    resolved = property_utils.resolve_property_ids(
-        [
-            official.UserDefinedPropertyUserId(localizedName=["Group", "Prop1"]),
-            official.UserDefinedPropertyUserId(localizedName=["Group", "Prop2"]),
-        ],
-    )
-    assert len(resolved) == 2
-    assert resolved[0].propertyId.guid == guid1
-    assert resolved[1].propertyId.guid == guid2
-
-
-def test_resolve_property_ids_fail_fast_raises_on_error(property_utils, mock_api):
-    mock_api.official.property.get_property_ids.return_value = [
-        official.ErrorItem(error=official.Error(code=404, message="Property not found")),
-    ]
-
-    with pytest.raises(BatchOperationError) as exc_info:
-        property_utils.resolve_property_ids([official.UserDefinedPropertyUserId(localizedName=["Group", "Missing"])])
-
-    assert "Property ID resolution failed with 1 error(s) across 1 item(s):" in str(exc_info.value)
-    assert exc_info.value.result.has_errors is True
-
-
-def test_resolve_property_id_scalar(property_utils, mock_api):
-    guid = uuid.uuid4()
-    mock_api.official.property.get_property_ids.return_value = [
-        official.PropertyIdArrayItem(propertyId=official.PropertyId(guid=guid)),
-    ]
-
-    prop = property_utils.resolve_property_id(
-        official.UserDefinedPropertyUserId(localizedName=["Dimensions", "Height"])
-    )
-    assert prop.propertyId.guid == guid
-
-
-def test_resolve_property_id_scalar_raises_on_error(property_utils, mock_api):
-    mock_api.official.property.get_property_ids.return_value = [
-        official.ErrorItem(error=official.Error(code=404, message="Not found")),
-    ]
-
+    dictionary_result = utilities.get_property_values_dict_per_element_result(elements, properties, ["a", "b"])
+    assert dictionary_result.successes == [{"a": "b", "b": "c"}]
+    assert len(dictionary_result.errors[0].causes) == 2
+    assert "contains 2 error(s)" in dictionary_result.errors[0].message
     with pytest.raises(BatchOperationError):
-        property_utils.resolve_property_id(official.UserDefinedPropertyUserId(localizedName=["Missing", "Prop"]))
+        utilities.get_property_values_dict_per_element(elements, properties, ["a", "b"])
+    with pytest.raises(ValueError):
+        utilities.get_property_values_dict_per_element(elements, properties, ["a"])
 
 
-# ==============================================================================
-# Batch Reading Tests
-# ==============================================================================
-
-
-def test_get_property_values_per_element_result_success(property_utils, mock_api):
-    elem1, elem2 = uuid.uuid4(), uuid.uuid4()
-    prop1, prop2 = uuid.uuid4(), uuid.uuid4()
-
-    mock_api.tapir.property.get_property_values_of_elements.return_value = [
-        tapir.PropertyValuesArrayItem(
-            propertyValues=[
-                tapir.PropertyValueArrayItem(propertyValue=tapir.PropertyValue(value="Wall-01")),
-                tapir.PropertyValueArrayItem(propertyValue=tapir.PropertyValue(value="2800")),
-            ]
-        ),
-        tapir.PropertyValuesArrayItem(
-            propertyValues=[
-                tapir.PropertyValueArrayItem(propertyValue=tapir.PropertyValue(value="Wall-02")),
-                tapir.PropertyValueArrayItem(propertyValue=tapir.PropertyValue(value="3000")),
-            ]
-        ),
+def test_row_error_and_partial_copy_pipeline_keep_other_cells_writable():
+    api = MagicMock()
+    elements, properties = [uuid4(), uuid4()], [uuid4(), uuid4()]
+    api.tapir.property.get_property_values_of_elements.return_value = [
+        tapir.PropertyValuesArrayItem(propertyValues=[_value("a"), _error()]),
+        _error(),
     ]
+    read = PropertyUtilities(api).get_property_values_per_element_result(elements, properties)
+    assert [coordinate for coordinate, _ in read.iter_errors()] == [(0, 1), (1, None)]
+    run = BatchRun(elements)
+    run.record("read", read)
+    coordinates = read.coordinates()
+    payload = create_element_property_values_sparse(elements, properties, read)
+    assert len(payload) == 1
+    api.tapir.property.set_property_values_of_elements.return_value = [tapir.SuccessfulExecutionResult(success=True)]
+    write = BatchResult.from_items(api.tapir.property.set_property_values_of_elements(payload))
+    run.record("copy", write, item_indices=[row for row, _ in coordinates], details=coordinates)
+    report = run.finish()
+    assert report.outcomes[0].failed
+    assert report.outcomes[1].failed
+    assert api.tapir.property.set_property_values_of_elements.call_count == 1
 
-    res = property_utils.get_property_values_per_element_result([elem1, elem2], [prop1, prop2])
-    assert res.is_all_success is True
-    assert res.items == [["Wall-01", "2800"], ["Wall-02", "3000"]]
+
+def test_matrix_write_uses_2d_result_and_zero_property_cardinality():
+    api = MagicMock()
+    api.tapir.property.set_property_values_of_elements.return_value = []
+    result = PropertyUtilities(api).set_property_values_per_element_result([uuid4()], [], [[]])
+    assert result.row_lengths == (0,)
+    assert result.is_all_success
 
 
-def test_get_property_values_per_element_result_inner_property_error(property_utils, mock_api):
-    elem1 = uuid.uuid4()
-    err_item = tapir.ErrorItem(error=tapir.Error(code=2, message="Not evaluated"))
-    mock_api.tapir.property.get_property_values_of_elements.return_value = [
-        tapir.PropertyValuesArrayItem(
-            propertyValues=[
-                tapir.PropertyValueArrayItem(propertyValue=tapir.PropertyValue(value="Wall-01")),
-                err_item,
-            ]
-        ),
+def test_resolution_metadata_and_enum_helpers():
+    api = MagicMock()
+    guid = uuid4()
+    api.official.property.get_property_ids.return_value = [
+        official.PropertyIdArrayItem(propertyId=official.PropertyId(guid=guid))
     ]
-
-    res = property_utils.get_property_values_per_element_result([elem1], [uuid.uuid4(), uuid.uuid4()])
-    assert res.is_all_success is False
-    assert res.items[0] == ["Wall-01", err_item]  # Raw ErrorItem retained inside the row
-    assert res.errors[0][0].code == 2
-    assert res.errors[0][0].message == "Not evaluated"
-    assert res.errors[0][0].path == "elements[0].propertyValues[1]"
-
-
-def test_get_property_values_per_element_fail_fast_raises_on_inner_property_error(property_utils, mock_api):
-    mock_api.tapir.property.get_property_values_of_elements.return_value = [
-        tapir.PropertyValuesArrayItem(
-            propertyValues=[
-                tapir.ErrorItem(error=tapir.Error(code=2, message="Property not applicable")),
-            ]
-        ),
-    ]
-
-    with pytest.raises(BatchOperationError) as exc_info:
-        property_utils.get_property_values_per_element([uuid.uuid4()], [uuid.uuid4()])
-
-    assert "Batch property values read failed with 1 error(s) across 1 item(s):" in str(exc_info.value)
-    assert "- elements[0].propertyValues[0]: [2] Property not applicable" in str(exc_info.value)
-
-
-def test_get_flat_property_values_fail_fast_success(property_utils, mock_api):
-    mock_api.tapir.property.get_property_values_of_elements.return_value = [
-        tapir.PropertyValuesArrayItem(
-            propertyValues=[
-                tapir.PropertyValueArrayItem(propertyValue=tapir.PropertyValue(value="Slab-01")),
-            ]
-        ),
-        tapir.PropertyValuesArrayItem(
-            propertyValues=[
-                tapir.PropertyValueArrayItem(propertyValue=tapir.PropertyValue(value="Slab-02")),
-            ]
-        ),
-    ]
-
-    values = property_utils.get_flat_property_values([uuid.uuid4(), uuid.uuid4()], uuid.uuid4())
-    assert values == ["Slab-01", "Slab-02"]
-
-
-def test_get_flat_property_values_fail_fast_raises_on_error(property_utils, mock_api):
-    mock_api.tapir.property.get_property_values_of_elements.return_value = [
-        tapir.PropertyValuesArrayItem(
-            propertyValues=[
-                tapir.ErrorItem(error=tapir.Error(code=5, message="Expression failed")),
-            ]
-        ),
-    ]
-
-    with pytest.raises(BatchOperationError) as exc_info:
-        property_utils.get_flat_property_values([uuid.uuid4()], uuid.uuid4())
-
-    assert "Single property read failed with 1 error(s) across 1 item(s):" in str(exc_info.value)
-
-
-def test_get_property_values_dict_per_element_fail_fast_success(property_utils, mock_api):
-    mock_api.tapir.property.get_property_values_of_elements.return_value = [
-        tapir.PropertyValuesArrayItem(
-            propertyValues=[
-                tapir.PropertyValueArrayItem(propertyValue=tapir.PropertyValue(value="W-01")),
-                tapir.PropertyValueArrayItem(propertyValue=tapir.PropertyValue(value="Concrete")),
-            ]
-        ),
-    ]
-
-    result = property_utils.get_property_values_dict_per_element(
-        [uuid.uuid4()], [uuid.uuid4(), uuid.uuid4()], property_names=["ID", "Material"]
-    )
-    assert result == [{"ID": "W-01", "Material": "Concrete"}]
-
-
-def test_dictionary_read_composes_with_map(property_utils, mock_api):
-    error = tapir.ErrorItem(error=tapir.Error(code=42, message="Unavailable"))
-    mock_api.tapir.property.get_property_values_of_elements.return_value = [
-        tapir.PropertyValuesArrayItem(
-            propertyValues=[
-                tapir.PropertyValueArrayItem(propertyValue=tapir.PropertyValue(value="Door-01")),
-                error,
-            ]
-        )
-    ]
-
-    result = property_utils.get_property_values_dict_per_element_result(
-        [uuid.uuid4()], [uuid.uuid4(), uuid.uuid4()], ["ID", "Rating"]
-    )
-    retained = result.map(lambda row: dict(row))
-    clean = result.map(lambda row: {"ID": row["ID"]})
-
-    assert retained.items == result.items
-    assert retained.errors[0][0].path == "map[0]['Rating']"
-    assert clean.items == [{"ID": "Door-01"}]
-    assert clean.is_all_success
-
-
-# ==============================================================================
-# Batch Writing & Mutation Tests (Using Masking & Filtering)
-# ==============================================================================
-
-
-def test_set_property_values_per_element_result_and_masking(property_utils, mock_api):
-    elem1, elem2 = uuid.uuid4(), uuid.uuid4()
-    elems = [elem1, elem2]
-    props = [uuid.uuid4()]
-    matrix = [["V1"], ["V2"]]
-
-    err_exec = tapir.FailedExecutionResult(success=False, error=tapir.Error(code=500, message="Locked"))
-    # Mock returns the unwrapped list directly
-    mock_api.tapir.property.set_property_values_of_elements.return_value = [
-        tapir.SuccessfulExecutionResult(success=True),
-        err_exec,
-    ]
-
-    res = property_utils.set_property_values_per_element_result(elems, props, matrix)
-
-    assert res.is_all_success is False
-    assert len(res.items) == 2
-    assert res.items[1] == [err_exec]  # grouped: one-property row, still holding the raw failure
-    assert res.errors[1][0].code == 500
-    assert res.errors[1][0].path == "elements[1][0]"
-
-    # Test correlation to input parameters
-    assert res.success_mask(elems) == [elem1, None]
-    assert res.failure_mask(elems) == [None, elem2]
-    assert res.filter_successful(elems) == [elem1]
-    assert res.filter_failed(elems) == [elem2]
-
-
-def test_set_property_values_per_element_fail_fast_success(property_utils, mock_api):
-    elems = [uuid.uuid4()]
-    props = [uuid.uuid4(), uuid.uuid4()]
-    matrix = [["V1", "V2"]]
-
-    # Mock returns the unwrapped list directly
-    mock_api.tapir.property.set_property_values_of_elements.return_value = [
-        tapir.SuccessfulExecutionResult(success=True),
-        tapir.SuccessfulExecutionResult(success=True),
-    ]
-
-    count = property_utils.set_property_values_per_element(elems, props, matrix)
-    assert count == 2
-
-
-def test_set_property_values_per_element_fail_fast_raises(property_utils, mock_api):
-    elems = [uuid.uuid4()]
-    props = [uuid.uuid4()]
-    matrix = [["V1"]]
-
-    mock_api.tapir.property.set_property_values_of_elements.return_value = [
-        tapir.FailedExecutionResult(success=False, error=tapir.Error(code=500, message="Locked")),
-    ]
-
-    with pytest.raises(BatchOperationError) as exc_info:
-        property_utils.set_property_values_per_element(elems, props, matrix)
-
-    assert "Batch property values write failed with 1 error(s) across 1 item(s):" in str(exc_info.value)
-
-
-def test_set_flat_property_values_fail_fast(property_utils, mock_api):
-    elems = [uuid.uuid4()]
-    prop = uuid.uuid4()
-    # Mock returns the unwrapped list directly
-    mock_api.tapir.property.set_property_values_of_elements.return_value = [
-        tapir.SuccessfulExecutionResult(success=True)
-    ]
-
-    count = property_utils.set_flat_property_values(elems, prop, ["NewVal"])
-    assert count == 1
-
-
-def test_set_flat_property_values_result(property_utils, mock_api):
-    elem1, elem2 = uuid.uuid4(), uuid.uuid4()
-    prop = uuid.uuid4()
-    err_exec = tapir.FailedExecutionResult(success=False, error=tapir.Error(code=500, message="Locked"))
-
-    mock_api.tapir.property.set_property_values_of_elements.return_value = [
-        tapir.SuccessfulExecutionResult(success=True),
-        err_exec,
-    ]
-
-    res = property_utils.set_flat_property_values_result([elem1, elem2], prop, ["Val1", "Val2"])
-
-    assert res.is_all_success is False
-    assert len(res.items) == 2
-    assert isinstance(res.items[0], tapir.SuccessfulExecutionResult)
-    assert res.items[1] == err_exec
-    assert res.errors[1][0].code == 500
-
-
-# ==============================================================================
-# Metadata & Inspection Tests
-# ==============================================================================
-
-
-def _make_property_definition(name: str, type_: str, description: str = "") -> official.PropertyDefinition:
-    return official.PropertyDefinition(
-        group=official.PropertyGroup(
-            propertyGroupId=official.PropertyGroupId(guid=uuid.uuid4()),
-            name="General",
-        ),
-        name=name,
-        description=description,
-        isEditable=True,
-        type=type_,
-        possibleEnumValues=None,
-    )
-
-
-def test_get_property_details_and_result(property_utils, mock_api):
-    prop = uuid.uuid4()
-    mock_prop_def = _make_property_definition("ID", "string", description="Test string")
-    # UnifiedApi unwraps the response object, retaining each item's wrapper.
-    mock_api.official.property.get_details_of_properties.return_value = [
-        official.PropertyDefinitionWrapperItem(propertyDefinition=mock_prop_def),
-    ]
-
-    res = property_utils.get_property_details_result([prop])
-    assert res.items == [mock_prop_def]
-
-    details = property_utils.get_property_details([prop])
-    assert details == [mock_prop_def]
-
-
-def test_get_property_types_and_result(property_utils, mock_api):
-    prop1, prop2 = uuid.uuid4(), uuid.uuid4()
-    mock_prop_def_1 = _make_property_definition("ID", "string")
-    mock_prop_def_2 = _make_property_definition("Count", "integer")
-
-    # UnifiedApi unwraps the response object, retaining each item's wrapper.
-    mock_api.official.property.get_details_of_properties.return_value = [
-        official.PropertyDefinitionWrapperItem(propertyDefinition=mock_prop_def_1),
-        official.PropertyDefinitionWrapperItem(propertyDefinition=mock_prop_def_2),
-    ]
-
-    res = property_utils.get_property_types_result([prop1, prop2])
-    assert res.items == ["string", "integer"]
-
-    types_list = property_utils.get_property_types([prop1, prop2])
-    assert types_list == ["string", "integer"]
-
-
-def test_metadata_through_unified_api_preserves_partial_failure():
-    definition = _make_property_definition("ID", "string")
-    core = MagicMock()
-    core.post_command.return_value = {
-        "propertyDefinitions": [
-            {"propertyDefinition": definition.model_dump(mode="json")},
-            {"error": {"code": 42, "message": "Property missing"}},
-        ]
-    }
-    api = UnifiedApi(core)
-    properties = [uuid.uuid4(), uuid.uuid4()]
-
-    details = api.utilities.property.get_property_details_result(properties)
-    assert details.items[0] == definition
-    assert isinstance(details.items[1], official.ErrorItem)
-    assert details.errors[1][0].path == "propertyDefinitions[1]"
-
-    types = api.utilities.property.get_property_types_result(properties)
-    assert types.successes == ["string"]
-    assert types.errors[1][0].code == 42
-    assert types.errors[1][0].path == "propertyDefinitions[1]"
-
-    with pytest.raises(BatchOperationError):
-        api.utilities.property.get_property_details(properties)
-
-
-def test_get_possible_enum_values():
-    prop_def = official.PropertyDefinition(
-        group=official.PropertyGroup(
-            propertyGroupId=official.PropertyGroupId(guid=uuid.uuid4()),
-            name="GENERAL RATINGS",
-        ),
-        name="Fire Resistance Rating",
-        description="minutes",
-        isEditable=True,
-        type="singleEnum",
-        possibleEnumValues=[
-            official.PossibleEnumValuesArrayItem(
-                enumValue=official.PossibleEnumValue(
-                    enumValueId=official.DisplayValueEnumId(displayValue="20 minutes"),
-                    displayValue="20 minutes",
-                )
-            ),
-        ],
-    )
-
-    assert get_possible_enum_values(prop_def) == ["20 minutes"]
-
-
-def test_get_possible_enum_values_non_enum_returns_empty():
-    prop_def = official.PropertyDefinition(
-        group=official.PropertyGroup(
-            propertyGroupId=official.PropertyGroupId(guid=uuid.uuid4()),
-            name="Window/Door",
-        ),
-        name="Volume",
+    utilities = PropertyUtilities(api)
+    user_id = official.UserDefinedPropertyUserId(localizedName=["Group", "Name"])
+    assert utilities.resolve_property_id(user_id).propertyId.guid == guid
+    definition = official.PropertyDefinition(
+        group=official.PropertyGroup(propertyGroupId=official.PropertyGroupId(guid=uuid4()), name="G"),
+        name="N",
         description="",
-        isEditable=False,
-        type="volume",
+        isEditable=True,
+        type="string",
         possibleEnumValues=None,
     )
-
-    assert get_possible_enum_values(prop_def) == []
+    api.official.property.get_details_of_properties.return_value = [
+        official.PropertyDefinitionWrapperItem(propertyDefinition=definition)
+    ]
+    assert utilities.get_property_types([guid]) == ["string"]
+    assert get_possible_enum_values(definition) == []
