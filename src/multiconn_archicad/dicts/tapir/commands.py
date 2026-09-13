@@ -238,62 +238,662 @@ from .types import (
 )
 
 
-class GetAddOnVersionResult(TypedDict):
-    version: str
+class AddCommentToIssueParameters(TypedDict):
+    issueId: IssueId
+    author: NotRequired[str]
+    status: NotRequired[IssueCommentStatus]
+    text: str
 
 
-class GetArchicadLocationResult(TypedDict):
-    archicadLocation: str
+class AddFilesToEmbeddedLibraryParameters(TypedDict):
+    files: LibraryFileAdditions
 
 
-QuitArchicadResult: TypeAlias = ExecutionResult
+class AddFilesToEmbeddedLibraryResult(TypedDict):
+    executionResults: ExecutionResults
 
 
-class GetCurrentWindowTypeResult(TypedDict):
-    currentWindowType: WindowType
+class ApplyFavoritesToElementDefaultsParameters(TypedDict):
+    favorites: Favorites
 
 
-ChangeWindowResult: TypeAlias = ExecutionResult
+class ApplyFavoritesToElementDefaultsResult(TypedDict):
+    executionResults: ExecutionResults
 
 
-class GetUserGSIDResult(TypedDict):
-    userId: str
-    organizationIds: NotRequired[list[str]]
+class ApplyFavoritesToElementsParameters(TypedDict):
+    favoritesToApply: list[FavoritesToApplyItem]
+    applySettings: NotRequired[bool]
+    applyClassifications: NotRequired[bool]
+    applyCategories: NotRequired[bool]
+    applyProperties: NotRequired[bool]
 
 
-class ShowAlertParameters(TypedDict):
-    alertType: Literal["information", "warning", "error"]
-    title: str
-    message: str
-    subMessage: NotRequired[str]
-    button1: str
-    button2: NotRequired[str]
-    button3: NotRequired[str]
+class ApplyFavoritesToElementsResult(TypedDict):
+    executionResults: ExecutionResults
 
 
-class ShowAlertResult(TypedDict):
-    clickedButton: int
+class AttachElementsToIssueParameters(TypedDict):
+    issueId: IssueId
+    elements: Elements
+    type: IssueElementType
 
 
-class GetSpecialFoldersParameters(TypedDict):
-    folderTypes: list[SpecialFolderType]
+class ChangeDrawingLinkParameters(TypedDict):
+    drawingsWithNewLinks: list[DrawingsWithNewLink]
 
 
-class GetSpecialFoldersResult(TypedDict):
-    folderPaths: SpecialFolderPathsOrErrors
+class ChangeDrawingLinkResult(TypedDict):
+    elements: list[ElementIdOrError]
 
 
-class GetProjectInfoResult(TypedDict):
-    isUntitled: bool
-    isTeamwork: bool
-    projectLocation: NotRequired[str]
-    projectPath: NotRequired[str]
-    projectName: NotRequired[str]
+class ChangeSelectionOfElementsParameters(TypedDict):
+    addElementsToSelection: NotRequired[Elements]
+    removeElementsFromSelection: NotRequired[Elements]
 
 
-class SetProjectInfoFieldParameters(TypedDict):
-    projectInfoId: str
-    projectInfoValue: str
+class ChangeSelectionOfElementsResult(TypedDict):
+    executionResultsOfAddToSelection: ExecutionResults
+    executionResultsOfRemoveFromSelection: ExecutionResults
+
+
+class CloneProjectMapItemToViewMapParameters(TypedDict):
+    viewsData: list[ViewCloneData]
+
+
+class CloneProjectMapItemToViewMapResult(TypedDict):
+    navigatorItems: list[NavigatorItemIdOrError]
+
+
+class ConnectMEPElementsParameters(TypedDict):
+    connectionsData: list[MEPConnectionData]
+
+
+class ConnectMEPElementsResult(TypedDict):
+    connectionResults: MEPConnectionResultsOrErrors
+
+
+class CreateArcsParameters(TypedDict):
+    arcsData: list[ArcData]
+
+
+class CreateArcsResult(TypedDict):
+    elements: ElementIdsOrErrors
+
+
+class CreateAssociativeDimensionsOnSectionParameters(TypedDict):
+    dimensionsData: list[AssociativeDimensionOnSectionData]
+
+
+class CreateAssociativeDimensionsOnSectionResult(TypedDict):
+    elements: ElementIdsOrErrors
+
+
+class CreateAssociativeDimensionsParameters(TypedDict):
+    dimensionsData: list[AssociativeDimensionData]
+
+
+class CreateAssociativeDimensionsResult(TypedDict):
+    elements: ElementIdsOrErrors
+
+
+class CreateBeamsParameters(TypedDict):
+    beamsData: list[BeamData]
+
+
+class CreateBeamsResult(TypedDict):
+    elements: ElementIdsOrErrors
+
+
+class CreateBuildingMaterialsParameters(TypedDict):
+    buildingMaterialDataArray: list[BuildingMaterialData]
+    overwriteExisting: NotRequired[bool]
+
+
+class CreateBuildingMaterialsResult(TypedDict):
+    attributeIds: AttributeIdsOrErrors
+
+
+class CreateCirclesParameters(TypedDict):
+    circlesData: list[CircleData]
+
+
+class CreateCirclesResult(TypedDict):
+    elements: ElementIdsOrErrors
+
+
+class CreateClassificationItemsParameters(TypedDict):
+    newClassificationItems: NewClassificationItems
+
+
+class CreateClassificationItemsResult(TypedDict):
+    executionResults: ExecutionResults
+
+
+class CreateClassificationSystemsParameters(TypedDict):
+    classificationSystemsWithItems: ClassificationSystemsWithItems
+
+
+class CreateClassificationSystemsResult(TypedDict):
+    executionResults: ExecutionResults
+
+
+class CreateColumnsParameters(TypedDict):
+    columnsData: list[ColumnData]
+
+
+class CreateColumnsResult(TypedDict):
+    elements: ElementIdsOrErrors
+
+
+class CreateCompositesParameters(TypedDict):
+    compositeDataArray: list[CompositeData]
+    overwriteExisting: NotRequired[bool]
+
+
+class CreateCompositesResult(TypedDict):
+    attributeIds: AttributeIdsOrErrors
+
+
+class CreateDesignOptionCombinationsParameters(TypedDict):
+    designOptionCombinations: list[DesignOptionCombinationData]
+
+
+class CreateDesignOptionCombinationsResult(TypedDict):
+    designOptionCombinationIdsOrErrors: DesignOptionCombinationIdsOrErrors
+
+
+class CreateDesignOptionSetsParameters(TypedDict):
+    designOptionSets: list[str]
+
+
+class CreateDesignOptionSetsResult(TypedDict):
+    executionResults: ExecutionResults
+
+
+class CreateDesignOptionsParameters(TypedDict):
+    designOptions: list[DesignOptionData]
+
+
+class CreateDesignOptionsResult(TypedDict):
+    designOptionIdsOrErrors: DesignOptionIdsOrErrors
+
+
+class CreateDetailsParameters(TypedDict):
+    detailsData: list[DetailData]
+
+
+class CreateDetailsResult(TypedDict):
+    databases: DatabaseIdsOrErrors
+
+
+class CreateDoorsParameters(TypedDict):
+    doorsData: list[DoorData]
+
+
+class CreateDoorsResult(TypedDict):
+    elements: ElementIdsOrErrors
+
+
+class CreateDrawingsParameters(TypedDict):
+    drawingsData: list[DrawingData]
+
+
+class CreateDrawingsResult(TypedDict):
+    elements: ElementIdsOrErrors
+
+
+class CreateFavoritesFromElementsParameters(TypedDict):
+    favoritesFromElements: list[FavoritesFromElement]
+
+
+class CreateFavoritesFromElementsResult(TypedDict):
+    executionResults: ExecutionResults
+
+
+class CreateFillsParameters(TypedDict):
+    fillDataArray: list[FillData]
+    overwriteExisting: NotRequired[bool]
+
+
+class CreateFillsResult(TypedDict):
+    attributeIds: AttributeIdsOrErrors
+
+
+class CreateGroupsParameters(TypedDict):
+    elementGroups: list[ElementGroupParameters]
+
+
+class CreateGroupsResult(TypedDict):
+    groupGuids: list[GroupIdOrError]
+
+
+class CreateHatchesParameters(TypedDict):
+    hatchesData: list[HatchData]
+
+
+class CreateHatchesResult(TypedDict):
+    elements: ElementIdsOrErrors
+
+
+class CreateHotspotsParameters(TypedDict):
+    hotspotsData: list[HotspotData]
+
+
+class CreateHotspotsResult(TypedDict):
+    elements: ElementIdsOrErrors
+
+
+class CreateInteriorElevationsParameters(TypedDict):
+    interiorElevationsData: list[InteriorElevationData]
+
+
+class CreateInteriorElevationsResult(TypedDict):
+    elements: ElementIdsOrErrors
+
+
+class CreateIssueParameters(TypedDict):
+    name: str
+    parentIssueId: NotRequired[IssueId]
+    tagText: NotRequired[str]
+
+
+class CreateIssueResult(TypedDict):
+    issueId: IssueId
+
+
+class CreateKeynoteFoldersParameters(TypedDict):
+    foldersData: list[KeynoteFolderData]
+
+
+class CreateKeynoteFoldersResult(TypedDict):
+    keynoteFolderIdsOrErrors: KeynoteFolderIdsOrErrors
+
+
+class CreateKeynoteItemsParameters(TypedDict):
+    itemsData: list[KeynoteItemData]
+
+
+class CreateKeynoteItemsResult(TypedDict):
+    keynoteItemIdsOrErrors: KeynoteItemIdsOrErrors
+
+
+class CreateKeynoteLabelsParameters(TypedDict):
+    labelsData: list[KeynoteLabelData]
+
+
+class CreateKeynoteLabelsResult(TypedDict):
+    elements: ElementIdsOrErrors
+
+
+class CreateLabelsParameters(TypedDict):
+    labelsData: list[LabelData]
+
+
+class CreateLabelsResult(TypedDict):
+    elements: ElementIdsOrErrors
+
+
+class CreateLampsParameters(TypedDict):
+    lampsData: list[LampData]
+
+
+class CreateLampsResult(TypedDict):
+    elements: ElementIdsOrErrors
+
+
+class CreateLayerCombinationsParameters(TypedDict):
+    layerCombinationDataArray: list[LayerCombinationDataArrayItem]
+    overwriteExisting: NotRequired[bool]
+
+
+class CreateLayerCombinationsResult(TypedDict):
+    attributeIds: AttributeIdsOrErrors
+
+
+class CreateLayersParameters(TypedDict):
+    layerDataArray: list[LayerData]
+    overwriteExisting: NotRequired[bool]
+
+
+class CreateLayersResult(TypedDict):
+    attributeIds: AttributeIdsOrErrors
+
+
+class CreateLayoutParameters(TypedDict):
+    layoutsData: list[LayoutData]
+
+
+class CreateLayoutResult(TypedDict):
+    databases: DatabaseIdsOrErrors
+
+
+class CreateLayoutSubsetParameters(TypedDict):
+    subsetsData: list[SubsetData]
+
+
+class CreateLayoutSubsetResult(TypedDict):
+    navigatorItems: list[NavigatorItemIdOrError]
+
+
+class CreateLineElementsParameters(TypedDict):
+    linesData: list[LineElementData]
+
+
+class CreateLineElementsResult(TypedDict):
+    elements: ElementIdsOrErrors
+
+
+class CreateLinesParameters(TypedDict):
+    lineDataArray: list[LineData]
+    overwriteExisting: NotRequired[bool]
+
+
+class CreateLinesResult(TypedDict):
+    attributeIds: AttributeIdsOrErrors
+
+
+class CreateMEPElementsParameters(TypedDict):
+    elementsData: list[MEPElementData]
+
+
+class CreateMEPElementsResult(TypedDict):
+    elements: ElementIdsOrErrors
+
+
+class CreateMEPRoutingElementsParameters(TypedDict):
+    routingElementsData: list[MEPRoutingElementData]
+
+
+class CreateMEPRoutingElementsResult(TypedDict):
+    elements: ElementIdsOrErrors
+
+
+class CreateMEPSystemsParameters(TypedDict):
+    mepSystemDataArray: list[MEPSystemData]
+    overwriteExisting: NotRequired[bool]
+
+
+class CreateMEPSystemsResult(TypedDict):
+    attributeIds: AttributeIdsOrErrors
+
+
+class CreateMeshesParameters(TypedDict):
+    meshesData: list[MeshData]
+
+
+class CreateMeshesResult(TypedDict):
+    elements: ElementIdsOrErrors
+
+
+class CreateMorphsParameters(TypedDict):
+    morphsData: list[MorphData]
+
+
+class CreateMorphsResult(TypedDict):
+    elements: ElementIdsOrErrors
+
+
+class CreateObjectsParameters(TypedDict):
+    objectsData: list[ObjectData]
+
+
+class CreateObjectsResult(TypedDict):
+    elements: ElementIdsOrErrors
+
+
+class CreateOpeningsParameters(TypedDict):
+    openingsData: list[OpeningData]
+
+
+class CreateOpeningsResult(TypedDict):
+    elements: ElementIdsOrErrors
+
+
+class CreatePenTablesParameters(TypedDict):
+    penTableDataArray: list[PenTableData]
+    overwriteExisting: NotRequired[bool]
+
+
+class CreatePenTablesResult(TypedDict):
+    attributeIds: AttributeIdsOrErrors
+
+
+class CreatePolylinesParameters(TypedDict):
+    polylinesData: list[PolylineData]
+
+
+class CreatePolylinesResult(TypedDict):
+    elements: ElementIdsOrErrors
+
+
+class CreateProfilesParameters(TypedDict):
+    profileDataArray: list[ProfileData]
+    overwriteExisting: NotRequired[bool]
+
+
+class CreateProfilesResult(TypedDict):
+    attributeIds: AttributeIdsOrErrors
+
+
+class CreateProjectInfoFieldsParameters(TypedDict):
+    projectInfoFields: list[ProjectInfoFieldData]
+
+
+class CreateProjectInfoFieldsResult(TypedDict):
+    fields: ProjectInfoFields
+
+
+class CreatePropertyDefinitionsParameters(TypedDict):
+    propertyDefinitions: list[PropertyDefinitionArrayItem]
+
+
+class CreatePropertyDefinitionsResult(TypedDict):
+    propertyIds: PropertyIdOrErrorArray
+
+
+class CreatePropertyGroupsParameters(TypedDict):
+    propertyGroups: list[PropertyGroupArrayItem]
+
+
+class CreatePropertyGroupsResult(TypedDict):
+    propertyGroupIds: list[PropertyGroupIdArrayItem]
+
+
+class CreateRoofsParameters(TypedDict):
+    roofsData: list[RoofData]
+
+
+class CreateRoofsResult(TypedDict):
+    elements: ElementIdsOrErrors
+
+
+class CreateSectionsParameters(TypedDict):
+    sectionsData: list[SectionData]
+
+
+class CreateSectionsResult(TypedDict):
+    elements: ElementIdsOrErrors
+
+
+class CreateSlabsParameters(TypedDict):
+    slabsData: list[SlabData]
+
+
+class CreateSlabsResult(TypedDict):
+    elements: ElementIdsOrErrors
+
+
+class CreateSolidElementLinksParameters(TypedDict):
+    solidLinks: list[SolidLinkData]
+
+
+class CreateSolidElementLinksResult(TypedDict):
+    executionResults: ExecutionResults
+
+
+class CreateSplinesParameters(TypedDict):
+    splinesData: list[SplineData]
+
+
+class CreateSplinesResult(TypedDict):
+    elements: ElementIdsOrErrors
+
+
+class CreateStairsParameters(TypedDict):
+    stairsData: list[StairData]
+
+
+class CreateStairsResult(TypedDict):
+    elements: ElementIdsOrErrors
+
+
+class CreateSurfacesParameters(TypedDict):
+    surfaceDataArray: list[SurfaceData]
+    overwriteExisting: NotRequired[bool]
+
+
+class CreateSurfacesResult(TypedDict):
+    attributeIds: AttributeIdsOrErrors
+
+
+class CreateTextsParameters(TypedDict):
+    textsData: list[TextData]
+
+
+class CreateTextsResult(TypedDict):
+    elements: ElementIdsOrErrors
+
+
+class CreateViewMapFolderParameters(TypedDict):
+    folderName: str
+    parentNavigatorItemId: NotRequired[NavigatorItemId]
+
+
+class CreateViewMapFolderResult(TypedDict):
+    navigatorItemId: NavigatorItemId
+
+
+class CreateViewsInViewMapParameters(TypedDict):
+    viewsData: list[ViewData]
+
+
+class CreateViewsInViewMapResult(TypedDict):
+    navigatorItems: list[NavigatorItemIdOrError]
+
+
+class CreateWallThicknessDimensionsParameters(TypedDict):
+    dimensionsData: list[WallThicknessDimensionData]
+
+
+class CreateWallThicknessDimensionsResult(TypedDict):
+    elements: ElementIdsOrErrors
+
+
+class CreateWallsParameters(TypedDict):
+    wallsData: list[WallData]
+
+
+class CreateWallsResult(TypedDict):
+    elements: ElementIdsOrErrors
+
+
+class CreateWindowsParameters(TypedDict):
+    windowsData: list[WindowData]
+
+
+class CreateWindowsResult(TypedDict):
+    elements: ElementIdsOrErrors
+
+
+class CreateWorksheetsParameters(TypedDict):
+    worksheetsData: list[WorksheetData]
+
+
+class CreateWorksheetsResult(TypedDict):
+    databases: DatabaseIdsOrErrors
+
+
+class CreateZoneCategoriesParameters(TypedDict):
+    zoneCategoryDataArray: list[ZoneCategoryData]
+    overwriteExisting: NotRequired[bool]
+
+
+class CreateZoneCategoriesResult(TypedDict):
+    attributeIds: AttributeIdsOrErrors
+
+
+class CreateZonesParameters(TypedDict):
+    zonesData: list[ZoneData]
+
+
+class CreateZonesResult(TypedDict):
+    elements: ElementIdsOrErrors
+
+
+class DeleteAttributesParameters(TypedDict):
+    attributesToDelete: list[AttributesToDeleteItem]
+
+
+class DeleteAttributesResult(TypedDict):
+    executionResults: ExecutionResults
+
+
+class DeleteClassificationItemsParameters(TypedDict):
+    classificationItemIds: ClassificationItemIds
+
+
+class DeleteClassificationItemsResult(TypedDict):
+    executionResults: ExecutionResults
+
+
+class DeleteClassificationSystemsParameters(TypedDict):
+    classificationSystemIds: ClassificationSystemIds
+
+
+class DeleteClassificationSystemsResult(TypedDict):
+    executionResults: ExecutionResults
+
+
+class DeleteElementsParameters(TypedDict):
+    elements: Elements
+
+
+class DeleteFavoritesParameters(TypedDict):
+    favorites: Favorites
+
+
+class DeleteFavoritesResult(TypedDict):
+    executionResults: ExecutionResults
+
+
+class DeleteIssueParameters(TypedDict):
+    issueId: IssueId
+    acceptAllElements: NotRequired[bool]
+
+
+class DeleteKeynoteFoldersParameters(TypedDict):
+    keynoteFolderIds: list[KeynoteFolderIdArrayItem]
+
+
+class DeleteKeynoteFoldersResult(TypedDict):
+    executionResults: ExecutionResults
+
+
+class DeleteKeynoteItemsParameters(TypedDict):
+    keynoteItemIds: list[KeynoteItemIdArrayItem]
+
+
+class DeleteKeynoteItemsResult(TypedDict):
+    executionResults: ExecutionResults
+
+
+class DeleteNavigatorItemsParameters(TypedDict):
+    navigatorItemIds: NavigatorItemIds
+
+
+class DeleteNavigatorItemsResult(TypedDict):
+    executionResults: ExecutionResults
 
 
 class DeleteProjectInfoFieldsParameters(TypedDict):
@@ -304,32 +904,116 @@ class DeleteProjectInfoFieldsResult(TypedDict):
     executionResults: ExecutionResults
 
 
-class GetStoriesResult(TypedDict):
-    firstStory: int
-    lastStory: int
-    actStory: int
-    skipNullFloor: bool
-    stories: StoriesParameters
+class DeletePropertyDefinitionsParameters(TypedDict):
+    propertyIds: list[PropertyIdArrayItem]
 
 
-class SetStoriesParameters(TypedDict):
-    stories: StoriesSettings
+class DeletePropertyDefinitionsResult(TypedDict):
+    executionResults: ExecutionResults
 
 
-SetStoriesResult: TypeAlias = ExecutionResult
+class DeletePropertyGroupsParameters(TypedDict):
+    propertyGroupIds: list[PropertyGroupIdArrayItem]
 
 
-class OpenProjectParameters(TypedDict):
-    projectFilePath: str
+class DeletePropertyGroupsResult(TypedDict):
+    executionResults: ExecutionResults
 
 
-OpenProjectResult: TypeAlias = ExecutionResult
+class DetachElementsFromIssueParameters(TypedDict):
+    issueId: IssueId
+    elements: Elements
 
 
-CloseProjectResult: TypeAlias = ExecutionResult
+class ExportFavoritesParameters(TypedDict):
+    path: str
+    names: NotRequired[list[str]]
 
 
-SaveProjectResult: TypeAlias = ExecutionResult
+class ExportIssuesToBCFParameters(TypedDict):
+    issues: NotRequired[Issues]
+    exportPath: str
+    useExternalId: bool
+    alignBySurveyPoint: bool
+
+
+class FilterElementsParameters(TypedDict):
+    elements: Elements
+    filters: NotRequired[list[ElementFilter]]
+
+
+class FilterElementsResult(TypedDict):
+    elements: Elements
+
+
+class FitInWindowParameters(TypedDict):
+    elements: NotRequired[Elements]
+
+
+class GenerateDocumentationParameters(TypedDict):
+    destinationFolder: str
+
+
+class Get3DBoundingBoxesParameters(TypedDict):
+    elements: Elements
+
+
+class Get3DBoundingBoxesResult(TypedDict):
+    boundingBoxes3D: BoundingBoxes3D
+
+
+class GetAddOnVersionResult(TypedDict):
+    version: str
+
+
+class GetAllElementsParameters(TypedDict):
+    filters: NotRequired[list[ElementFilter]]
+    databases: NotRequired[Databases]
+
+
+GetAllElementsResult: TypeAlias = ElementsWithExecutionResultsOrError
+
+
+class GetAllPropertiesResult(TypedDict):
+    properties: list[PropertyDetails]
+
+
+class GetArchicadLocationResult(TypedDict):
+    archicadLocation: str
+
+
+class GetAttributesByTypeParameters(TypedDict):
+    attributeType: AttributeType
+
+
+GetAttributesByTypeResult: TypeAlias = AttributeHeadersOrError
+
+
+class GetAvailableLibraryPartsParameters(TypedDict):
+    filterByTypeId: NotRequired[LibraryPartType]
+
+
+class GetAvailableLibraryPartsResult(TypedDict):
+    libraryParts: list[LibraryPart]
+    skippedCount: int
+    skippedSample: NotRequired[list[SkippedSampleItem]]
+
+
+class GetBuildingMaterialPhysicalPropertiesParameters(TypedDict):
+    attributeIds: AttributeIds
+
+
+class GetBuildingMaterialPhysicalPropertiesResult(TypedDict):
+    properties: BuildingMaterialPhysicalPropertiesList
+
+
+class GetBuildingMaterialsParameters(TypedDict):
+    attributeIds: AttributeIds
+    fields: NotRequired[list[BuildingMaterialAttributeField]]
+
+
+class GetBuildingMaterialsResult(TypedDict):
+    buildingMaterials: list[BuildingMaterialAttributeOrError]
 
 
 class GetCalculationUnitsResult(TypedDict):
@@ -339,172 +1023,162 @@ class GetCalculationUnitsResult(TypedDict):
     angle: Angle
 
 
-SetGeoLocationResult: TypeAlias = ExecutionResult
+class GetClassificationsOfElementsParameters(TypedDict):
+    elements: Elements
+    classificationSystemIds: ClassificationSystemIds
 
 
-class PrintViewParameters(TypedDict):
-    grid: NotRequired[bool]
-    fixText: NotRequired[bool]
-    scale: NotRequired[int]
-    printArea: NotRequired[Literal["currentView", "entireDrawing", "marquee"]]
+class GetClassificationsOfElementsResult(TypedDict):
+    elementClassifications: ElementClassificationsOrErrors
 
 
-PrintViewResult: TypeAlias = ExecutionResult
+class GetCollisionsParameters(TypedDict):
+    elementsGroup1: Elements
+    elementsGroup2: Elements
+    settings: NotRequired[Settings]
 
 
-class RebuildViewParameters(TypedDict):
-    regenerate: NotRequired[bool]
+class GetCollisionsResult(TypedDict):
+    collisions: list[Collision]
 
 
-RebuildViewResult: TypeAlias = ExecutionResult
+class GetCommentsFromIssueParameters(TypedDict):
+    issueId: IssueId
 
 
-class ChangeSelectionOfElementsResult(TypedDict):
-    executionResultsOfAddToSelection: ExecutionResults
-    executionResultsOfRemoveFromSelection: ExecutionResults
+class GetCommentsFromIssueResult(TypedDict):
+    comments: list[Comment]
 
 
-class SetDetailsOfElementsResult(TypedDict):
-    executionResults: ExecutionResults
+class GetCompositesParameters(TypedDict):
+    attributeIds: AttributeIds
+    fields: NotRequired[list[CompositeAttributeField]]
 
 
-class Get3DBoundingBoxesResult(TypedDict):
-    boundingBoxes3D: BoundingBoxes3D
+class GetCompositesResult(TypedDict):
+    composites: list[CompositeAttributeOrError]
 
 
-class UpdateZonesParameters(TypedDict):
-    keepStampPosition: NotRequired[bool]
-    undoTopTrim: NotRequired[bool]
-    undoBottomTrim: NotRequired[bool]
+class GetConnectedElementsParameters(TypedDict):
+    elements: Elements
+    connectedElementType: ElementType
 
 
-UpdateZonesResult: TypeAlias = ExecutionResult
+GetConnectedElementsResult: TypeAlias = ConnectedElementsOrError
 
 
-HighlightElementsResult: TypeAlias = ExecutionResult
+class GetCurrentRevisionChangesOfLayoutsParameters(TypedDict):
+    layoutDatabaseIds: Databases
 
 
-class MoveElementsResult(TypedDict):
-    executionResults: ExecutionResults
+class GetCurrentRevisionChangesOfLayoutsResult(TypedDict):
+    currentRevisionChangesOfLayouts: RevisionChangesOfEntities
 
 
-class RotateElementsResult(TypedDict):
-    executionResults: ExecutionResults
+class GetCurrentWindowTypeResult(TypedDict):
+    currentWindowType: WindowType
 
 
-DeleteElementsResult: TypeAlias = ExecutionResult
+class GetDatabaseIdFromNavigatorItemIdParameters(TypedDict):
+    navigatorItemIds: NavigatorItemIds
 
 
-LockElementsResult: TypeAlias = ExecutionResult
+class GetDatabaseIdFromNavigatorItemIdResult(TypedDict):
+    databases: Databases
 
 
-UnlockElementsResult: TypeAlias = ExecutionResult
+class GetDesignOptionCombinationsResult(TypedDict):
+    designOptionCombinations: list[DesignOptionCombinationDetails]
 
 
-class SetGDLParametersOfElementsResult(TypedDict):
-    executionResults: ExecutionResults
+class GetDesignOptionForElementsParameters(TypedDict):
+    elements: Elements
 
 
-class ModifyWallsResult(TypedDict):
-    executionResults: ExecutionResults
+class GetDesignOptionForElementsResult(TypedDict):
+    designOptionForElements: list[DesignOptionForElement]
 
 
-class ModifyBeamsResult(TypedDict):
-    executionResults: ExecutionResults
+class GetDesignOptionSetsResult(TypedDict):
+    designOptionSets: list[DesignOptionSet]
 
 
-class ModifySlabsResult(TypedDict):
-    executionResults: ExecutionResults
+class GetDesignOptionsResult(TypedDict):
+    designOptions: list[DesignOptionDetails]
 
 
-class ModifyColumnsResult(TypedDict):
-    executionResults: ExecutionResults
+class GetDetailsOfElementsParameters(TypedDict):
+    elements: Elements
 
 
-class ModifyWindowsResult(TypedDict):
-    executionResults: ExecutionResults
+class GetDetailsOfElementsResult(TypedDict):
+    detailsOfElements: list[DetailsOfElement]
 
 
-class ModifyDoorsResult(TypedDict):
-    executionResults: ExecutionResults
+class GetDimensionDataParameters(TypedDict):
+    elements: list[Element]
 
 
-class ModifyMorphsResult(TypedDict):
-    executionResults: ExecutionResults
+class GetDimensionDataResult(TypedDict):
+    dimensionsData: list[DimensionDataOrError]
 
 
-class ModifyRoofsResult(TypedDict):
-    executionResults: ExecutionResults
+class GetDocumentRevisionsResult(TypedDict):
+    documentRevisions: list[DocumentRevision]
 
 
-class ModifyMeshesResult(TypedDict):
-    executionResults: ExecutionResults
-
-
-class ModifyObjectsResult(TypedDict):
-    executionResults: ExecutionResults
-
-
-class ModifyLampsResult(TypedDict):
-    executionResults: ExecutionResults
+class GetElementPreviewImageParameters(TypedDict):
+    elementId: ElementId
+    imageType: NotRequired[Literal["2D", "Section", "3D"]]
+    format: NotRequired[Literal["png", "jpg"]]
+    width: NotRequired[int]
+    height: NotRequired[int]
 
 
 class GetElementPreviewImageResult(TypedDict):
     previewImage: str
 
 
-class GetRoomImageResult(TypedDict):
-    roomImage: str
+class GetElementsAttachedToIssueParameters(TypedDict):
+    issueId: IssueId
+    type: IssueElementType
 
 
-class SetElementNotificationClientParameters(TypedDict):
-    host: NotRequired[str]
-    port: int
-    notifyOnNewElement: NotRequired[bool]
-    notifyOnModificationOfAnElement: NotRequired[bool]
-    notifyOnReservationChanges: NotRequired[bool]
+class GetElementsAttachedToIssueResult(TypedDict):
+    elements: Elements
 
 
-SetElementNotificationClientResult: TypeAlias = ExecutionResult
+class GetElementsByIFCIdsParameters(TypedDict):
+    ifcIds: list[str]
 
 
-class RemoveElementNotificationClientParameters(TypedDict):
-    host: NotRequired[str]
-    port: int
+class GetElementsByIFCIdsResult(TypedDict):
+    elementsByIFCIds: ElementsByIFCIds
 
 
-RemoveElementNotificationClientResult: TypeAlias = ExecutionResult
+class GetElementsByTypeParameters(TypedDict):
+    elementType: ElementType
+    filters: NotRequired[list[ElementFilter]]
+    databases: NotRequired[Databases]
 
 
-class CreateGroupsResult(TypedDict):
-    groupGuids: list[GroupIdOrError]
+GetElementsByTypeResult: TypeAlias = ElementsWithExecutionResultsOrError
 
 
-class GetGroupsOfElementsResult(TypedDict):
-    groupGuids: list[GroupIdOrError]
+class GetElementsOfDesignOptionsParameters(TypedDict):
+    designOptions: list[DesignOptionIdArrayItem]
+
+
+class GetElementsOfDesignOptionsResult(TypedDict):
+    elementsOfDesignOptions: list[ElementsOfDesignOptionOrError]
 
 
 class GetElementsOfGroupsParameters(TypedDict):
     groups: list[GroupIdArrayItem]
 
 
-class GetSuspendGroupsModeResult(TypedDict):
-    suspendGroups: bool
-
-
-class SetSuspendGroupsModeParameters(TypedDict):
-    suspendGroups: bool
-
-
-class SetSuspendGroupsModeResult(TypedDict):
-    executionResult: ExecutionResult
-
-
-class GetFavoritesByTypeParameters(TypedDict):
-    elementType: ElementType
-
-
-GetFavoritesByTypeResult: TypeAlias = FavoritesOrError
+class GetElementsOfGroupsResult(TypedDict):
+    elementsOfGroups: list[ElementsWrapperOrError]
 
 
 class GetFavoritePreviewImageParameters(TypedDict):
@@ -519,16 +1193,380 @@ class GetFavoritePreviewImageResult(TypedDict):
     previewImage: str
 
 
-class ApplyFavoritesToElementDefaultsParameters(TypedDict):
-    favorites: Favorites
+class GetFavoritesByTypeParameters(TypedDict):
+    elementType: ElementType
 
 
-class ApplyFavoritesToElementDefaultsResult(TypedDict):
-    executionResults: ExecutionResults
+GetFavoritesByTypeResult: TypeAlias = FavoritesOrError
 
 
-class CreateFavoritesFromElementsResult(TypedDict):
-    executionResults: ExecutionResults
+class GetFillsParameters(TypedDict):
+    attributeIds: AttributeIds
+    fields: NotRequired[list[FillAttributeField]]
+
+
+class GetFillsResult(TypedDict):
+    fills: list[FillAttributeOrError]
+
+
+class GetGDLParametersOfElementsParameters(TypedDict):
+    elements: Elements
+
+
+class GetGDLParametersOfElementsResult(TypedDict):
+    gdlParametersOfElements: list[GDLParameterList]
+
+
+class GetGeoLocationResult(TypedDict):
+    projectLocation: ProjectLocation
+    surveyPoint: SurveyPoint
+
+
+class GetGroupsOfElementsParameters(TypedDict):
+    elements: Elements
+
+
+class GetGroupsOfElementsResult(TypedDict):
+    groupGuids: list[GroupIdOrError]
+
+
+class GetHotlinksResult(TypedDict):
+    hotlinks: Hotlinks
+
+
+class GetIFCIdsOfElementsParameters(TypedDict):
+    elements: Elements
+
+
+class GetIFCIdsOfElementsResult(TypedDict):
+    elementIFCIds: ElementIFCIdsOrErrors
+
+
+class GetIFCPropertiesOfElementsParameters(TypedDict):
+    elements: Elements
+
+
+class GetIFCPropertiesOfElementsResult(TypedDict):
+    elementIFCProperties: ElementIFCPropertiesOrErrors
+
+
+class GetIFCTypeOfElementsParameters(TypedDict):
+    elements: Elements
+
+
+class GetIFCTypeOfElementsResult(TypedDict):
+    elementIFCTypes: ElementIFCTypesOrErrors
+
+
+class GetIssuesResult(TypedDict):
+    issues: list[Issue]
+
+
+class GetKeynoteAutoTextsParameters(TypedDict):
+    keynoteItems: list[KeynoteItemIdArrayItem]
+
+
+class GetKeynoteAutoTextsResult(TypedDict):
+    autoTexts: KeynoteAutoTextTokensOrErrors
+
+
+class GetKeynoteTreeResult(TypedDict):
+    foldersInRoot: list[KeynoteFolderDetails]
+    itemsInRoot: list[KeynoteItemDetails]
+
+
+class GetLayerCombinationsParameters(TypedDict):
+    attributes: AttributeIds
+
+
+class GetLayerCombinationsResult(TypedDict):
+    layerCombinations: list[LayerCombinationAttributeOrError]
+
+
+class GetLayersParameters(TypedDict):
+    attributeIds: AttributeIds
+    fields: NotRequired[list[LayerAttributeField]]
+
+
+class GetLayersResult(TypedDict):
+    layers: list[LayerAttributeOrError]
+
+
+class GetLayoutCustomSchemeResult(TypedDict):
+    customScheme: list[CustomSchemeItem]
+
+
+class GetLayoutSettingsParameters(TypedDict):
+    layoutDatabaseIds: list[LayoutDatabaseId]
+
+
+class GetLayoutSettingsResult(TypedDict):
+    layoutSettings: list[LayoutSetting]
+
+
+class GetLibrariesResult(TypedDict):
+    libraries: list[Library]
+
+
+class GetLinesParameters(TypedDict):
+    attributeIds: AttributeIds
+    fields: NotRequired[list[LineAttributeField]]
+
+
+class GetLinesResult(TypedDict):
+    lines: list[LineAttributeOrError]
+
+
+class GetMEPDistributionSystemsResult(TypedDict):
+    distributionSystems: list[MEPDistributionSystem]
+
+
+class GetMEPElementsParameters(TypedDict):
+    elementTypes: NotRequired[list[MEPElementType]]
+    domains: NotRequired[list[MEPDomains]]
+
+
+class GetMEPElementsResult(TypedDict):
+    elements: list[MEPElement]
+
+
+class GetMEPPortsParameters(TypedDict):
+    elements: Elements
+
+
+class GetMEPPortsResult(TypedDict):
+    elementPorts: MEPElementPortsOrErrors
+
+
+class GetMEPPreferenceTablesParameters(TypedDict):
+    domain: MEPPreferenceTableDomain
+
+
+class GetMEPPreferenceTablesResult(TypedDict):
+    tables: list[MEPPreferenceTable]
+
+
+class GetMEPRoutingElementsParameters(TypedDict):
+    elements: Elements
+
+
+class GetMEPRoutingElementsResult(TypedDict):
+    routingElements: MEPRoutingElementDetailsOrErrors
+
+
+class GetMEPSystemsParameters(TypedDict):
+    attributeIds: AttributeIds
+    fields: NotRequired[list[MEPSystemAttributeField]]
+
+
+class GetMEPSystemsResult(TypedDict):
+    mepSystems: list[MEPSystemAttributeOrError]
+
+
+class GetModelViewOptionsResult(TypedDict):
+    modelViewOptions: list[ModelViewOption]
+
+
+class GetNavigatorItemTreeParameters(TypedDict):
+    navigatorMapId: Literal["PublicViewMap", "ProjectMap", "LayoutBook", "PublisherSets"]
+
+
+class GetPenTablesParameters(TypedDict):
+    attributeIds: AttributeIds
+    fields: NotRequired[list[PenTableAttributeField]]
+
+
+class GetPenTablesResult(TypedDict):
+    penTables: list[PenTableAttributeOrError]
+
+
+class GetProfilesParameters(TypedDict):
+    attributeIds: AttributeIds
+    fields: NotRequired[list[ProfileAttributeField]]
+
+
+class GetProfilesResult(TypedDict):
+    profiles: list[ProfileAttributeOrError]
+
+
+class GetProjectInfoFieldsResult(TypedDict):
+    fields: ProjectInfoFields
+
+
+class GetProjectInfoResult(TypedDict):
+    isUntitled: bool
+    isTeamwork: bool
+    projectLocation: NotRequired[str]
+    projectPath: NotRequired[str]
+    projectName: NotRequired[str]
+
+
+class GetPropertyValuesOfAttributesParameters(TypedDict):
+    attributeIds: AttributeIds
+    properties: PropertyIds
+
+
+class GetPropertyValuesOfAttributesResult(TypedDict):
+    propertyValuesForAttributes: PropertyValuesOrErrorArray
+
+
+class GetPropertyValuesOfElementsParameters(TypedDict):
+    elements: Elements
+    properties: PropertyIds
+
+
+class GetPropertyValuesOfElementsResult(TypedDict):
+    propertyValuesForElements: PropertyValuesOrErrorArray
+
+
+class GetRelationsOfElementsParameters(TypedDict):
+    elements: Elements
+    otherElementType: NotRequired[ElementType]
+
+
+class GetRelationsOfElementsResult(TypedDict):
+    relations: list[ElementRelationsOrError]
+
+
+class GetRevisionChangesOfElementsParameters(TypedDict):
+    elements: Elements
+
+
+class GetRevisionChangesOfElementsResult(TypedDict):
+    revisionChangesOfElements: RevisionChangesOfEntities
+
+
+class GetRevisionChangesResult(TypedDict):
+    revisionChanges: list[RevisionChange]
+
+
+class GetRevisionIssuesResult(TypedDict):
+    revisionIssues: list[RevisionIssue]
+
+
+class GetRoomImageParameters(TypedDict):
+    zoneId: ElementId
+    format: NotRequired[Literal["png", "jpg"]]
+    width: NotRequired[int]
+    height: NotRequired[int]
+    offset: NotRequired[float]
+    scale: NotRequired[float]
+    backgroundColor: NotRequired[ColorRGB]
+
+
+class GetRoomImageResult(TypedDict):
+    roomImage: str
+
+
+class GetScriptUIResultResult(TypedDict):
+    hasResult: bool
+    result: NotRequired[str]
+
+
+class GetSectionElementsParameters(TypedDict):
+    databases: NotRequired[Databases]
+
+
+class GetSectionElementsResult(TypedDict):
+    sectionElements: list[SectionElement]
+    executionResultForDatabases: NotRequired[ExecutionResults]
+
+
+class GetSelectedElementsResult(TypedDict):
+    elements: Elements
+
+
+class GetSolidElementLinksParameters(TypedDict):
+    elements: Elements
+
+
+class GetSolidElementLinksResult(TypedDict):
+    solidLinks: list[SolidLinksOfElement]
+
+
+class GetSpecialFoldersParameters(TypedDict):
+    folderTypes: list[SpecialFolderType]
+
+
+class GetSpecialFoldersResult(TypedDict):
+    folderPaths: SpecialFolderPathsOrErrors
+
+
+class GetStoriesResult(TypedDict):
+    firstStory: int
+    lastStory: int
+    actStory: int
+    skipNullFloor: bool
+    stories: StoriesParameters
+
+
+class GetSubelementsOfHierarchicalElementsParameters(TypedDict):
+    elements: Elements
+
+
+class GetSubelementsOfHierarchicalElementsResult(TypedDict):
+    subelements: list[Subelement]
+
+
+class GetSurfacesParameters(TypedDict):
+    attributeIds: AttributeIds
+    fields: NotRequired[list[SurfaceAttributeField]]
+
+
+class GetSurfacesResult(TypedDict):
+    surfaces: list[SurfaceAttributeOrError]
+
+
+class GetSuspendGroupsModeResult(TypedDict):
+    suspendGroups: bool
+
+
+class GetUserGSIDResult(TypedDict):
+    userId: str
+    organizationIds: NotRequired[list[str]]
+
+
+class GetView2DTransformationsParameters(TypedDict):
+    navigatorItemIds: NotRequired[NavigatorItemIds]
+    databases: NotRequired[Databases]
+
+
+class GetView2DTransformationsResult(TypedDict):
+    transformations: list[ViewTransformationsOrError]
+
+
+class GetViewSettingsParameters(TypedDict):
+    navigatorItemIds: NavigatorItemIds
+
+
+class GetViewSettingsResult(TypedDict):
+    viewSettings: list[ViewSettingsOrError]
+
+
+class GetZoneBoundariesParameters(TypedDict):
+    zoneElementId: ElementId
+
+
+class GetZoneCategoriesParameters(TypedDict):
+    attributeIds: AttributeIds
+    fields: NotRequired[list[ZoneCategoryAttributeField]]
+
+
+class GetZoneCategoriesResult(TypedDict):
+    zoneCategories: list[ZoneCategoryAttributeOrError]
+
+
+class HighlightElementsParameters(TypedDict):
+    elements: Elements
+    highlightedColors: list[list[int]]
+    wireframe3D: NotRequired[bool]
+    nonHighlightedColor: NotRequired[list[int]]
+
+
+class IFCFileOperationParameters(TypedDict):
+    method: Literal["save", "merge", "open"]
+    ifcFilePath: str
+    fileType: NotRequired[Literal["ifc", "ifcxml", "ifczip", "ifcxmlzip"]]
 
 
 class ImportFavoritesParameters(TypedDict):
@@ -542,191 +1580,317 @@ class ImportFavoritesResult(TypedDict):
     firstConflictName: NotRequired[str]
 
 
-class ExportFavoritesParameters(TypedDict):
-    path: str
-    names: NotRequired[list[str]]
+class ImportIssuesFromBCFParameters(TypedDict):
+    importPath: str
+    alignBySurveyPoint: bool
 
 
-class ApplyFavoritesToElementsResult(TypedDict):
+class LockElementsParameters(TypedDict):
+    elements: Elements
+
+
+class ModifyBeamsParameters(TypedDict):
+    beamsWithDetails: list[BeamWithDetails]
+
+
+class ModifyBeamsResult(TypedDict):
     executionResults: ExecutionResults
 
 
-class UpdateFavoritesFromElementsResult(TypedDict):
+class ModifyColumnsParameters(TypedDict):
+    columnsWithDetails: list[ColumnWithDetails]
+
+
+class ModifyColumnsResult(TypedDict):
     executionResults: ExecutionResults
+
+
+class ModifyDoorsParameters(TypedDict):
+    doorsWithDetails: list[DoorWithDetails]
+
+
+class ModifyDoorsResult(TypedDict):
+    executionResults: ExecutionResults
+
+
+class ModifyKeynoteFoldersParameters(TypedDict):
+    foldersData: list[KeynoteFolderModificationData]
+
+
+class ModifyKeynoteFoldersResult(TypedDict):
+    executionResults: ExecutionResults
+
+
+class ModifyKeynoteItemsParameters(TypedDict):
+    itemsData: list[KeynoteItemModificationData]
+
+
+class ModifyKeynoteItemsResult(TypedDict):
+    executionResults: ExecutionResults
+
+
+class ModifyLampsParameters(TypedDict):
+    lampsWithDetails: list[LampWithDetails]
+
+
+class ModifyLampsResult(TypedDict):
+    executionResults: ExecutionResults
+
+
+class ModifyMEPRoutingElementsParameters(TypedDict):
+    routingElementsData: list[MEPRoutingElementModificationData]
+
+
+class ModifyMEPRoutingElementsResult(TypedDict):
+    executionResults: ExecutionResults
+
+
+class ModifyMeshesParameters(TypedDict):
+    meshesData: list[MeshWithDetails]
+
+
+class ModifyMeshesResult(TypedDict):
+    executionResults: ExecutionResults
+
+
+class ModifyMorphsParameters(TypedDict):
+    morphsWithDetails: list[MorphWithDetails]
+
+
+class ModifyMorphsResult(TypedDict):
+    executionResults: ExecutionResults
+
+
+class ModifyObjectsParameters(TypedDict):
+    objectsWithDetails: list[ObjectWithDetails]
+
+
+class ModifyObjectsResult(TypedDict):
+    executionResults: ExecutionResults
+
+
+class ModifyRoofsParameters(TypedDict):
+    roofsWithDetails: list[RoofWithDetails]
+
+
+class ModifyRoofsResult(TypedDict):
+    executionResults: ExecutionResults
+
+
+class ModifySlabsParameters(TypedDict):
+    slabsWithDetails: list[SlabWithDetails]
+
+
+class ModifySlabsResult(TypedDict):
+    executionResults: ExecutionResults
+
+
+class ModifyWallsParameters(TypedDict):
+    wallsWithDetails: list[WallWithDetails]
+
+
+class ModifyWallsResult(TypedDict):
+    executionResults: ExecutionResults
+
+
+class ModifyWindowsParameters(TypedDict):
+    windowsWithDetails: list[WindowWithDetails]
+
+
+class ModifyWindowsResult(TypedDict):
+    executionResults: ExecutionResults
+
+
+class MoveDesignOptionsToAnotherSetParameters(TypedDict):
+    designOptionAndSetPairs: list[DesignOptionAndSetPair]
+
+
+class MoveDesignOptionsToAnotherSetResult(TypedDict):
+    executionResults: ExecutionResults
+
+
+class MoveElementsParameters(TypedDict):
+    elementsWithMoveVectors: list[ElementsWithMoveVector]
+
+
+class MoveElementsResult(TypedDict):
+    executionResults: ExecutionResults
+
+
+class MoveElementsToDesignOptionsParameters(TypedDict):
+    elementDesignOptionPairs: list[ElementDesignOptionPair]
+
+
+class MoveElementsToDesignOptionsResult(TypedDict):
+    executionResults: ExecutionResults
+
+
+class MoveNavigatorItemParameters(TypedDict):
+    navigatorItemIdToMove: NavigatorItemId
+    parentNavigatorItemId: NavigatorItemId
+    previousNavigatorItemId: NotRequired[NavigatorItemId]
+
+
+ChangeWindowParameters: TypeAlias = NavigatorItemIdOrDatabaseIdAndWindowType
+
+
+class OpenProjectParameters(TypedDict):
+    projectFilePath: str
+
+
+class PrintViewParameters(TypedDict):
+    grid: NotRequired[bool]
+    fixText: NotRequired[bool]
+    scale: NotRequired[int]
+    printArea: NotRequired[Literal["currentView", "entireDrawing", "marquee"]]
+
+
+class PublishPublisherSetParameters(TypedDict):
+    publisherSetName: str
+    outputPath: NotRequired[str]
+    selectedNavigatorItemIds: NotRequired[NavigatorItemIds]
+
+
+class RebuildViewParameters(TypedDict):
+    regenerate: NotRequired[bool]
+
+
+class ReleaseElementsParameters(TypedDict):
+    elements: Elements
+
+
+class RemoveElementNotificationClientParameters(TypedDict):
+    host: NotRequired[str]
+    port: int
+
+
+class RemoveSolidElementLinksParameters(TypedDict):
+    solidLinks: list[SolidLinkReference]
+
+
+class RemoveSolidElementLinksResult(TypedDict):
+    executionResults: ExecutionResults
+
+
+class RenameFavoritesParameters(TypedDict):
+    renames: list[FavoriteRename]
 
 
 class RenameFavoritesResult(TypedDict):
     executionResults: ExecutionResults
 
 
-class DeleteFavoritesParameters(TypedDict):
-    favorites: Favorites
+class RenameNavigatorItemParameters(TypedDict):
+    navigatorItemId: NavigatorItemId
+    newName: NotRequired[str]
+    newId: NotRequired[str]
 
 
-class DeleteFavoritesResult(TypedDict):
+class ReserveElementsParameters(TypedDict):
+    elements: Elements
+
+
+class ReserveElementsResult(TypedDict):
+    executionResult: ExecutionResult
+    conflicts: NotRequired[list[Conflict]]
+
+
+class RotateElementsParameters(TypedDict):
+    elementsWithRotations: list[ElementsWithRotation]
+
+
+class RotateElementsResult(TypedDict):
     executionResults: ExecutionResults
 
 
-class GetAllPropertiesResult(TypedDict):
-    properties: list[PropertyDetails]
+class Set3DCutPlanesParameters(TypedDict):
+    cutPlanes: NotRequired[list[CutPlane]]
 
 
-class GetPropertyValuesOfElementsResult(TypedDict):
-    propertyValuesForElements: PropertyValuesOrErrorArray
+class SetActiveDesignOptionsInCombinationsParameters(TypedDict):
+    activeDesignOptionsInCombinations: list[ActiveDesignOptionsInCombination]
 
 
-class SetPropertyValuesOfElementsResult(TypedDict):
+class SetActiveDesignOptionsInCombinationsResult(TypedDict):
     executionResults: ExecutionResults
 
 
-class GetPropertyValuesOfAttributesResult(TypedDict):
-    propertyValuesForAttributes: PropertyValuesOrErrorArray
-
-
-class SetPropertyValuesOfAttributesResult(TypedDict):
-    executionResults: ExecutionResults
-
-
-class CreatePropertyGroupsParameters(TypedDict):
-    propertyGroups: list[PropertyGroupArrayItem]
-
-
-class CreatePropertyGroupsResult(TypedDict):
-    propertyGroupIds: list[PropertyGroupIdArrayItem]
-
-
-class DeletePropertyGroupsParameters(TypedDict):
-    propertyGroupIds: list[PropertyGroupIdArrayItem]
-
-
-class DeletePropertyGroupsResult(TypedDict):
-    executionResults: ExecutionResults
-
-
-class CreatePropertyDefinitionsResult(TypedDict):
-    propertyIds: PropertyIdOrErrorArray
-
-
-class DeletePropertyDefinitionsParameters(TypedDict):
-    propertyIds: list[PropertyIdArrayItem]
-
-
-class DeletePropertyDefinitionsResult(TypedDict):
-    executionResults: ExecutionResults
-
-
-class UpdatePropertyDefinitionsResult(TypedDict):
-    executionResults: ExecutionResults
-
-
-class GetClassificationsOfElementsResult(TypedDict):
-    elementClassifications: ElementClassificationsOrErrors
+class SetClassificationsOfElementsParameters(TypedDict):
+    elementClassifications: ElementClassifications
 
 
 class SetClassificationsOfElementsResult(TypedDict):
     executionResults: ExecutionResults
 
 
-class CreateClassificationSystemsParameters(TypedDict):
-    classificationSystemsWithItems: ClassificationSystemsWithItems
+class SetDetailsOfElementsParameters(TypedDict):
+    elementsWithDetails: list[ElementsWithDetail]
 
 
-class CreateClassificationSystemsResult(TypedDict):
+class SetDetailsOfElementsResult(TypedDict):
     executionResults: ExecutionResults
 
 
-class CreateClassificationItemsResult(TypedDict):
+class SetElementNotificationClientParameters(TypedDict):
+    host: NotRequired[str]
+    port: int
+    notifyOnNewElement: NotRequired[bool]
+    notifyOnModificationOfAnElement: NotRequired[bool]
+    notifyOnReservationChanges: NotRequired[bool]
+
+
+class SetGDLParametersOfElementsParameters(TypedDict):
+    elementsWithGDLParameters: list[ElementsWithGDLParameter]
+
+
+class SetGDLParametersOfElementsResult(TypedDict):
     executionResults: ExecutionResults
 
 
-class DeleteClassificationSystemsParameters(TypedDict):
-    classificationSystemIds: ClassificationSystemIds
+class SetGeoLocationParameters(TypedDict):
+    projectLocation: NotRequired[ProjectLocation]
+    surveyPoint: NotRequired[SurveyPoint]
 
 
-class DeleteClassificationSystemsResult(TypedDict):
-    executionResults: ExecutionResults
-
-
-class DeleteClassificationItemsParameters(TypedDict):
-    classificationItemIds: ClassificationItemIds
-
-
-class DeleteClassificationItemsResult(TypedDict):
-    executionResults: ExecutionResults
-
-
-class GetAttributesByTypeParameters(TypedDict):
-    attributeType: AttributeType
-
-
-class DeleteAttributesResult(TypedDict):
-    executionResults: ExecutionResults
-
-
-class IFCFileOperationParameters(TypedDict):
-    method: Literal["save", "merge", "open"]
-    ifcFilePath: str
-    fileType: NotRequired[Literal["ifc", "ifcxml", "ifczip", "ifcxmlzip"]]
-
-
-IFCFileOperationResult: TypeAlias = ExecutionResult
-
-
-class GetElementsByIFCIdsParameters(TypedDict):
-    ifcIds: list[str]
-
-
-class GetLibrariesResult(TypedDict):
-    libraries: list[Library]
-
-
-ReloadLibrariesResult: TypeAlias = ExecutionResult
-
-
-class AddFilesToEmbeddedLibraryResult(TypedDict):
-    executionResults: ExecutionResults
-
-
-class GetAvailableLibraryPartsParameters(TypedDict):
-    filterByTypeId: NotRequired[LibraryPartType]
-
-
-class GetAvailableLibraryPartsResult(TypedDict):
-    libraryParts: list[LibraryPart]
-    skippedCount: int
-    skippedSample: NotRequired[list[SkippedSampleItem]]
-
-
-TeamworkSendResult: TypeAlias = ExecutionResult
-
-
-TeamworkReceiveResult: TypeAlias = ExecutionResult
-
-
-ReleaseElementsResult: TypeAlias = ExecutionResult
-
-
-UpdateDrawingsResult: TypeAlias = ExecutionResult
-
-
-class GetLayoutSettingsParameters(TypedDict):
-    layoutDatabaseIds: list[LayoutDatabaseId]
+class SetLayoutSettingsParameters(TypedDict):
+    layoutsData: list[LayoutSettingsData]
 
 
 class SetLayoutSettingsResult(TypedDict):
     executionResults: ExecutionResults
 
 
-class GetLayoutCustomSchemeResult(TypedDict):
-    customScheme: list[CustomSchemeItem]
+class SetProjectInfoFieldParameters(TypedDict):
+    projectInfoId: str
+    projectInfoValue: str
 
 
-class GetModelViewOptionsResult(TypedDict):
-    modelViewOptions: list[ModelViewOption]
+class SetPropertyValuesOfAttributesParameters(TypedDict):
+    attributePropertyValues: AttributePropertyValues
 
 
-class SetViewSettingsResult(TypedDict):
+class SetPropertyValuesOfAttributesResult(TypedDict):
     executionResults: ExecutionResults
+
+
+class SetPropertyValuesOfElementsParameters(TypedDict):
+    elementPropertyValues: ElementPropertyValues
+
+
+class SetPropertyValuesOfElementsResult(TypedDict):
+    executionResults: ExecutionResults
+
+
+class SetStoriesParameters(TypedDict):
+    stories: StoriesSettings
+
+
+class SetSuspendGroupsModeParameters(TypedDict):
+    suspendGroups: bool
+
+
+class SetSuspendGroupsModeResult(TypedDict):
+    executionResult: ExecutionResult
 
 
 class SetViewRotationParameters(TypedDict):
@@ -737,182 +1901,26 @@ class SetViewRotationResult(TypedDict):
     executionResults: ExecutionResults
 
 
-class CreateViewMapFolderParameters(TypedDict):
-    folderName: str
-    parentNavigatorItemId: NotRequired[NavigatorItemId]
+class SetViewSettingsParameters(TypedDict):
+    navigatorItemIdsWithViewSettings: list[NavigatorItemIdsWithViewSetting]
 
 
-class CreateViewMapFolderResult(TypedDict):
-    navigatorItemId: NavigatorItemId
-
-
-class Set3DCutPlanesParameters(TypedDict):
-    cutPlanes: NotRequired[list[CutPlane]]
-
-
-Set3DCutPlanesResult: TypeAlias = ExecutionResult
-
-
-FitInWindowResult: TypeAlias = ExecutionResult
-
-
-class MoveNavigatorItemParameters(TypedDict):
-    navigatorItemIdToMove: NavigatorItemId
-    parentNavigatorItemId: NavigatorItemId
-    previousNavigatorItemId: NotRequired[NavigatorItemId]
-
-
-MoveNavigatorItemResult: TypeAlias = ExecutionResult
-
-
-class RenameNavigatorItemParameters(TypedDict):
-    navigatorItemId: NavigatorItemId
-    newName: NotRequired[str]
-    newId: NotRequired[str]
-
-
-RenameNavigatorItemResult: TypeAlias = ExecutionResult
-
-
-class DeleteNavigatorItemsResult(TypedDict):
+class SetViewSettingsResult(TypedDict):
     executionResults: ExecutionResults
 
 
-class GetNavigatorItemTreeParameters(TypedDict):
-    navigatorMapId: Literal["PublicViewMap", "ProjectMap", "LayoutBook", "PublisherSets"]
-
-
-class CreateIssueParameters(TypedDict):
-    name: str
-    parentIssueId: NotRequired[IssueId]
-    tagText: NotRequired[str]
-
-
-class CreateIssueResult(TypedDict):
-    issueId: IssueId
-
-
-class DeleteIssueParameters(TypedDict):
-    issueId: IssueId
-    acceptAllElements: NotRequired[bool]
-
-
-DeleteIssueResult: TypeAlias = ExecutionResult
-
-
-class AddCommentToIssueParameters(TypedDict):
-    issueId: IssueId
-    author: NotRequired[str]
-    status: NotRequired[IssueCommentStatus]
-    text: str
-
-
-AddCommentToIssueResult: TypeAlias = ExecutionResult
-
-
-class GetCommentsFromIssueParameters(TypedDict):
-    issueId: IssueId
-
-
-class GetCommentsFromIssueResult(TypedDict):
-    comments: list[Comment]
-
-
-AttachElementsToIssueResult: TypeAlias = ExecutionResult
-
-
-DetachElementsFromIssueResult: TypeAlias = ExecutionResult
-
-
-class GetElementsAttachedToIssueParameters(TypedDict):
-    issueId: IssueId
-    type: IssueElementType
-
-
-class ExportIssuesToBCFParameters(TypedDict):
-    issues: NotRequired[Issues]
-    exportPath: str
-    useExternalId: bool
-    alignBySurveyPoint: bool
-
-
-ExportIssuesToBCFResult: TypeAlias = ExecutionResult
-
-
-class ImportIssuesFromBCFParameters(TypedDict):
-    importPath: str
-    alignBySurveyPoint: bool
-
-
-ImportIssuesFromBCFResult: TypeAlias = ExecutionResult
-
-
-class GetRevisionIssuesResult(TypedDict):
-    revisionIssues: list[RevisionIssue]
-
-
-class GetRevisionChangesResult(TypedDict):
-    revisionChanges: list[RevisionChange]
-
-
-class GetDocumentRevisionsResult(TypedDict):
-    documentRevisions: list[DocumentRevision]
-
-
-class GetCurrentRevisionChangesOfLayoutsResult(TypedDict):
-    currentRevisionChangesOfLayouts: RevisionChangesOfEntities
-
-
-class GetRevisionChangesOfElementsResult(TypedDict):
-    revisionChangesOfElements: RevisionChangesOfEntities
-
-
-class CreateDesignOptionSetsParameters(TypedDict):
-    designOptionSets: list[str]
-
-
-class CreateDesignOptionSetsResult(TypedDict):
-    executionResults: ExecutionResults
-
-
-class SetActiveDesignOptionsInCombinationsResult(TypedDict):
-    executionResults: ExecutionResults
-
-
-class MoveElementsToDesignOptionsResult(TypedDict):
-    executionResults: ExecutionResults
-
-
-class MoveDesignOptionsToAnotherSetResult(TypedDict):
-    executionResults: ExecutionResults
-
-
-class ModifyKeynoteFoldersResult(TypedDict):
-    executionResults: ExecutionResults
-
-
-class ModifyKeynoteItemsResult(TypedDict):
-    executionResults: ExecutionResults
-
-
-class DeleteKeynoteFoldersResult(TypedDict):
-    executionResults: ExecutionResults
-
-
-class DeleteKeynoteItemsResult(TypedDict):
-    executionResults: ExecutionResults
-
-
-class ModifyMEPRoutingElementsResult(TypedDict):
-    executionResults: ExecutionResults
-
-
-class CreateSolidElementLinksResult(TypedDict):
-    executionResults: ExecutionResults
-
-
-class RemoveSolidElementLinksResult(TypedDict):
-    executionResults: ExecutionResults
+class ShowAlertParameters(TypedDict):
+    alertType: Literal["information", "warning", "error"]
+    title: str
+    message: str
+    subMessage: NotRequired[str]
+    button1: str
+    button2: NotRequired[str]
+    button3: NotRequired[str]
+
+
+class ShowAlertResult(TypedDict):
+    clickedButton: int
 
 
 class ShowScriptUIParameters(TypedDict):
@@ -931,1144 +1939,136 @@ class ShowScriptUIParameters(TypedDict):
     autoHeight: NotRequired[bool]
 
 
-ShowScriptUIResult: TypeAlias = ExecutionResult
+AddCommentToIssueResult: TypeAlias = ExecutionResult
 
 
-class GetScriptUIResultResult(TypedDict):
-    hasResult: bool
-    result: NotRequired[str]
+AttachElementsToIssueResult: TypeAlias = ExecutionResult
 
 
-class GenerateDocumentationParameters(TypedDict):
-    destinationFolder: str
+ChangeWindowResult: TypeAlias = ExecutionResult
+
+
+CloseProjectResult: TypeAlias = ExecutionResult
+
+
+DeleteElementsResult: TypeAlias = ExecutionResult
+
+
+DeleteIssueResult: TypeAlias = ExecutionResult
+
+
+DetachElementsFromIssueResult: TypeAlias = ExecutionResult
+
+
+ExportIssuesToBCFResult: TypeAlias = ExecutionResult
+
+
+FitInWindowResult: TypeAlias = ExecutionResult
 
 
 GenerateDocumentationResult: TypeAlias = ExecutionResult
 
 
-class GetProjectInfoFieldsResult(TypedDict):
-    fields: ProjectInfoFields
+HighlightElementsResult: TypeAlias = ExecutionResult
 
 
-class CreateProjectInfoFieldsParameters(TypedDict):
-    projectInfoFields: list[ProjectInfoFieldData]
+IFCFileOperationResult: TypeAlias = ExecutionResult
 
 
-class CreateProjectInfoFieldsResult(TypedDict):
-    fields: ProjectInfoFields
+ImportIssuesFromBCFResult: TypeAlias = ExecutionResult
 
 
-class GetGeoLocationResult(TypedDict):
-    projectLocation: ProjectLocation
-    surveyPoint: SurveyPoint
+LockElementsResult: TypeAlias = ExecutionResult
 
 
-class SetGeoLocationParameters(TypedDict):
-    projectLocation: NotRequired[ProjectLocation]
-    surveyPoint: NotRequired[SurveyPoint]
+MoveNavigatorItemResult: TypeAlias = ExecutionResult
 
 
-class SetDetailsOfElementsParameters(TypedDict):
-    elementsWithDetails: list[ElementsWithDetail]
+OpenProjectResult: TypeAlias = ExecutionResult
 
 
-class GetSectionElementsResult(TypedDict):
-    sectionElements: list[SectionElement]
-    executionResultForDatabases: NotRequired[ExecutionResults]
+PrintViewResult: TypeAlias = ExecutionResult
 
 
-class GetZoneBoundariesParameters(TypedDict):
-    zoneElementId: ElementId
+QuitArchicadResult: TypeAlias = ExecutionResult
 
 
-GetZoneBoundariesResult: TypeAlias = ZoneBoundariesOrError
+RebuildViewResult: TypeAlias = ExecutionResult
 
 
-class GetCollisionsResult(TypedDict):
-    collisions: list[Collision]
+ReleaseElementsResult: TypeAlias = ExecutionResult
 
 
-class MoveElementsParameters(TypedDict):
-    elementsWithMoveVectors: list[ElementsWithMoveVector]
+ReloadLibrariesResult: TypeAlias = ExecutionResult
 
 
-class RotateElementsParameters(TypedDict):
-    elementsWithRotations: list[ElementsWithRotation]
+RemoveElementNotificationClientResult: TypeAlias = ExecutionResult
 
 
-class GetGDLParametersOfElementsResult(TypedDict):
-    gdlParametersOfElements: list[GDLParameterList]
+RenameNavigatorItemResult: TypeAlias = ExecutionResult
 
 
-class SetGDLParametersOfElementsParameters(TypedDict):
-    elementsWithGDLParameters: list[ElementsWithGDLParameter]
+SaveProjectResult: TypeAlias = ExecutionResult
 
 
-class CreateStairsParameters(TypedDict):
-    stairsData: list[StairData]
+Set3DCutPlanesResult: TypeAlias = ExecutionResult
 
 
-class GetDimensionDataParameters(TypedDict):
-    elements: list[Element]
+SetElementNotificationClientResult: TypeAlias = ExecutionResult
 
 
-class CreatePolylinesParameters(TypedDict):
-    polylinesData: list[PolylineData]
+SetGeoLocationResult: TypeAlias = ExecutionResult
 
 
-class CreateHotspotsParameters(TypedDict):
-    hotspotsData: list[HotspotData]
+SetStoriesResult: TypeAlias = ExecutionResult
 
 
-class CreateTextsParameters(TypedDict):
-    textsData: list[TextData]
+ShowScriptUIResult: TypeAlias = ExecutionResult
 
 
-class GetElementPreviewImageParameters(TypedDict):
-    elementId: ElementId
-    imageType: NotRequired[Literal["2D", "Section", "3D"]]
-    format: NotRequired[Literal["png", "jpg"]]
-    width: NotRequired[int]
-    height: NotRequired[int]
+TeamworkReceiveResult: TypeAlias = ExecutionResult
 
 
-class GetRoomImageParameters(TypedDict):
-    zoneId: ElementId
-    format: NotRequired[Literal["png", "jpg"]]
-    width: NotRequired[int]
-    height: NotRequired[int]
-    offset: NotRequired[float]
-    scale: NotRequired[float]
-    backgroundColor: NotRequired[ColorRGB]
-
-
-class CreateFavoritesFromElementsParameters(TypedDict):
-    favoritesFromElements: list[FavoritesFromElement]
-
-
-class ApplyFavoritesToElementsParameters(TypedDict):
-    favoritesToApply: list[FavoritesToApplyItem]
-    applySettings: NotRequired[bool]
-    applyClassifications: NotRequired[bool]
-    applyCategories: NotRequired[bool]
-    applyProperties: NotRequired[bool]
-
-
-class RenameFavoritesParameters(TypedDict):
-    renames: list[FavoriteRename]
-
-
-class SetPropertyValuesOfElementsParameters(TypedDict):
-    elementPropertyValues: ElementPropertyValues
-
-
-class SetPropertyValuesOfAttributesParameters(TypedDict):
-    attributePropertyValues: AttributePropertyValues
-
-
-class CreatePropertyDefinitionsParameters(TypedDict):
-    propertyDefinitions: list[PropertyDefinitionArrayItem]
-
-
-class UpdatePropertyDefinitionsParameters(TypedDict):
-    propertyDefinitions: list[PropertyExpressionUpdate]
-
-
-class SetClassificationsOfElementsParameters(TypedDict):
-    elementClassifications: ElementClassifications
-
-
-class CreateClassificationItemsParameters(TypedDict):
-    newClassificationItems: NewClassificationItems
-
-
-GetAttributesByTypeResult: TypeAlias = AttributeHeadersOrError
-
-
-class CreateLayerCombinationsParameters(TypedDict):
-    layerCombinationDataArray: list[LayerCombinationDataArrayItem]
-    overwriteExisting: NotRequired[bool]
-
-
-class GetLayerCombinationsResult(TypedDict):
-    layerCombinations: list[LayerCombinationAttributeOrError]
-
-
-class GetZoneCategoriesResult(TypedDict):
-    zoneCategories: list[ZoneCategoryAttributeOrError]
-
-
-class GetLayersResult(TypedDict):
-    layers: list[LayerAttributeOrError]
-
-
-class GetBuildingMaterialsResult(TypedDict):
-    buildingMaterials: list[BuildingMaterialAttributeOrError]
-
-
-class GetIFCIdsOfElementsResult(TypedDict):
-    elementIFCIds: ElementIFCIdsOrErrors
-
-
-class GetIFCTypeOfElementsResult(TypedDict):
-    elementIFCTypes: ElementIFCTypesOrErrors
-
-
-class GetIFCPropertiesOfElementsResult(TypedDict):
-    elementIFCProperties: ElementIFCPropertiesOrErrors
-
-
-class ReserveElementsResult(TypedDict):
-    executionResult: ExecutionResult
-    conflicts: NotRequired[list[Conflict]]
-
-
-class CreateDetailsParameters(TypedDict):
-    detailsData: list[DetailData]
-
-
-class CreateWorksheetsParameters(TypedDict):
-    worksheetsData: list[WorksheetData]
-
-
-class CreateLayoutParameters(TypedDict):
-    layoutsData: list[LayoutData]
-
-
-class CreateLayoutSubsetParameters(TypedDict):
-    subsetsData: list[SubsetData]
-
-
-class CreateDrawingsParameters(TypedDict):
-    drawingsData: list[DrawingData]
-
-
-class ChangeDrawingLinkParameters(TypedDict):
-    drawingsWithNewLinks: list[DrawingsWithNewLink]
-
-
-class GetLayoutSettingsResult(TypedDict):
-    layoutSettings: list[LayoutSetting]
-
-
-class GetViewSettingsResult(TypedDict):
-    viewSettings: list[ViewSettingsOrError]
-
-
-class SetViewSettingsParameters(TypedDict):
-    navigatorItemIdsWithViewSettings: list[NavigatorItemIdsWithViewSetting]
-
-
-class GetView2DTransformationsResult(TypedDict):
-    transformations: list[ViewTransformationsOrError]
-
-
-class CloneProjectMapItemToViewMapParameters(TypedDict):
-    viewsData: list[ViewCloneData]
-
-
-class CreateViewsInViewMapParameters(TypedDict):
-    viewsData: list[ViewData]
-
-
-class CreateSectionsParameters(TypedDict):
-    sectionsData: list[SectionData]
-
-
-class CreateInteriorElevationsParameters(TypedDict):
-    interiorElevationsData: list[InteriorElevationData]
-
-
-class GetIssuesResult(TypedDict):
-    issues: list[Issue]
-
-
-class GetDesignOptionsResult(TypedDict):
-    designOptions: list[DesignOptionDetails]
-
-
-class GetDesignOptionSetsResult(TypedDict):
-    designOptionSets: list[DesignOptionSet]
-
-
-class GetElementsOfDesignOptionsParameters(TypedDict):
-    designOptions: list[DesignOptionIdArrayItem]
-
-
-class GetDesignOptionForElementsResult(TypedDict):
-    designOptionForElements: list[DesignOptionForElement]
-
-
-class CreateDesignOptionsParameters(TypedDict):
-    designOptions: list[DesignOptionData]
-
-
-class CreateDesignOptionsResult(TypedDict):
-    designOptionIdsOrErrors: DesignOptionIdsOrErrors
-
-
-class CreateDesignOptionCombinationsResult(TypedDict):
-    designOptionCombinationIdsOrErrors: DesignOptionCombinationIdsOrErrors
-
-
-class SetActiveDesignOptionsInCombinationsParameters(TypedDict):
-    activeDesignOptionsInCombinations: list[ActiveDesignOptionsInCombination]
-
-
-class MoveElementsToDesignOptionsParameters(TypedDict):
-    elementDesignOptionPairs: list[ElementDesignOptionPair]
-
-
-class MoveDesignOptionsToAnotherSetParameters(TypedDict):
-    designOptionAndSetPairs: list[DesignOptionAndSetPair]
-
-
-class GetKeynoteTreeResult(TypedDict):
-    foldersInRoot: list[KeynoteFolderDetails]
-    itemsInRoot: list[KeynoteItemDetails]
-
-
-class GetKeynoteAutoTextsParameters(TypedDict):
-    keynoteItems: list[KeynoteItemIdArrayItem]
-
-
-class GetKeynoteAutoTextsResult(TypedDict):
-    autoTexts: KeynoteAutoTextTokensOrErrors
-
-
-class CreateKeynoteFoldersResult(TypedDict):
-    keynoteFolderIdsOrErrors: KeynoteFolderIdsOrErrors
-
-
-class CreateKeynoteItemsResult(TypedDict):
-    keynoteItemIdsOrErrors: KeynoteItemIdsOrErrors
-
-
-class DeleteKeynoteFoldersParameters(TypedDict):
-    keynoteFolderIds: list[KeynoteFolderIdArrayItem]
-
-
-class DeleteKeynoteItemsParameters(TypedDict):
-    keynoteItemIds: list[KeynoteItemIdArrayItem]
-
-
-class GetMEPElementsParameters(TypedDict):
-    elementTypes: NotRequired[list[MEPElementType]]
-    domains: NotRequired[list[MEPDomains]]
-
-
-class GetMEPPreferenceTablesParameters(TypedDict):
-    domain: MEPPreferenceTableDomain
-
-
-ChangeWindowParameters: TypeAlias = NavigatorItemIdOrDatabaseIdAndWindowType
-
-
-class GetElementsByTypeParameters(TypedDict):
-    elementType: ElementType
-    filters: NotRequired[list[ElementFilter]]
-    databases: NotRequired[Databases]
-
-
-class GetAllElementsParameters(TypedDict):
-    filters: NotRequired[list[ElementFilter]]
-    databases: NotRequired[Databases]
-
-
-class GetSectionElementsParameters(TypedDict):
-    databases: NotRequired[Databases]
-
-
-class CreateColumnsParameters(TypedDict):
-    columnsData: list[ColumnData]
-
-
-class CreateColumnsResult(TypedDict):
-    elements: ElementIdsOrErrors
-
-
-class CreateWallsParameters(TypedDict):
-    wallsData: list[WallData]
-
-
-class CreateWallsResult(TypedDict):
-    elements: ElementIdsOrErrors
-
-
-class CreateBeamsParameters(TypedDict):
-    beamsData: list[BeamData]
-
-
-class CreateBeamsResult(TypedDict):
-    elements: ElementIdsOrErrors
-
-
-class CreateStairsResult(TypedDict):
-    elements: ElementIdsOrErrors
-
-
-class CreateSlabsParameters(TypedDict):
-    slabsData: list[SlabData]
-
-
-class CreateSlabsResult(TypedDict):
-    elements: ElementIdsOrErrors
-
-
-class CreateWindowsParameters(TypedDict):
-    windowsData: list[WindowData]
-
-
-class CreateWindowsResult(TypedDict):
-    elements: ElementIdsOrErrors
-
-
-class CreateDoorsParameters(TypedDict):
-    doorsData: list[DoorData]
-
-
-class CreateDoorsResult(TypedDict):
-    elements: ElementIdsOrErrors
-
-
-class CreateOpeningsParameters(TypedDict):
-    openingsData: list[OpeningData]
-
-
-class CreateOpeningsResult(TypedDict):
-    elements: ElementIdsOrErrors
-
-
-class CreateMorphsResult(TypedDict):
-    elements: ElementIdsOrErrors
-
-
-class CreateRoofsParameters(TypedDict):
-    roofsData: list[RoofData]
-
-
-class CreateRoofsResult(TypedDict):
-    elements: ElementIdsOrErrors
-
-
-class CreateAssociativeDimensionsResult(TypedDict):
-    elements: ElementIdsOrErrors
-
-
-class CreateAssociativeDimensionsOnSectionParameters(TypedDict):
-    dimensionsData: list[AssociativeDimensionOnSectionData]
-
-
-class CreateAssociativeDimensionsOnSectionResult(TypedDict):
-    elements: ElementIdsOrErrors
-
-
-class CreateWallThicknessDimensionsParameters(TypedDict):
-    dimensionsData: list[WallThicknessDimensionData]
-
-
-class CreateWallThicknessDimensionsResult(TypedDict):
-    elements: ElementIdsOrErrors
-
-
-class GetDimensionDataResult(TypedDict):
-    dimensionsData: list[DimensionDataOrError]
-
-
-class CreateZonesParameters(TypedDict):
-    zonesData: list[ZoneData]
-
-
-class CreateZonesResult(TypedDict):
-    elements: ElementIdsOrErrors
-
-
-class CreatePolylinesResult(TypedDict):
-    elements: ElementIdsOrErrors
-
-
-class CreateLineElementsParameters(TypedDict):
-    linesData: list[LineElementData]
-
-
-class CreateLineElementsResult(TypedDict):
-    elements: ElementIdsOrErrors
-
-
-class CreateArcsParameters(TypedDict):
-    arcsData: list[ArcData]
-
-
-class CreateArcsResult(TypedDict):
-    elements: ElementIdsOrErrors
-
-
-class CreateCirclesParameters(TypedDict):
-    circlesData: list[CircleData]
-
-
-class CreateCirclesResult(TypedDict):
-    elements: ElementIdsOrErrors
-
-
-class CreateHotspotsResult(TypedDict):
-    elements: ElementIdsOrErrors
-
-
-class CreateHatchesParameters(TypedDict):
-    hatchesData: list[HatchData]
-
-
-class CreateHatchesResult(TypedDict):
-    elements: ElementIdsOrErrors
-
-
-class CreateSplinesParameters(TypedDict):
-    splinesData: list[SplineData]
-
-
-class CreateSplinesResult(TypedDict):
-    elements: ElementIdsOrErrors
-
-
-class CreateObjectsParameters(TypedDict):
-    objectsData: list[ObjectData]
-
-
-class CreateObjectsResult(TypedDict):
-    elements: ElementIdsOrErrors
-
-
-class CreateLampsParameters(TypedDict):
-    lampsData: list[LampData]
-
-
-class CreateLampsResult(TypedDict):
-    elements: ElementIdsOrErrors
-
-
-class CreateMeshesParameters(TypedDict):
-    meshesData: list[MeshData]
-
-
-class CreateMeshesResult(TypedDict):
-    elements: ElementIdsOrErrors
-
-
-class CreateLabelsParameters(TypedDict):
-    labelsData: list[LabelData]
-
-
-class CreateLabelsResult(TypedDict):
-    elements: ElementIdsOrErrors
-
-
-class CreateTextsResult(TypedDict):
-    elements: ElementIdsOrErrors
-
-
-class ModifyWallsParameters(TypedDict):
-    wallsWithDetails: list[WallWithDetails]
-
-
-class ModifyColumnsParameters(TypedDict):
-    columnsWithDetails: list[ColumnWithDetails]
-
-
-class ModifyWindowsParameters(TypedDict):
-    windowsWithDetails: list[WindowWithDetails]
-
-
-class ModifyDoorsParameters(TypedDict):
-    doorsWithDetails: list[DoorWithDetails]
-
-
-class ModifyRoofsParameters(TypedDict):
-    roofsWithDetails: list[RoofWithDetails]
-
-
-class ModifyObjectsParameters(TypedDict):
-    objectsWithDetails: list[ObjectWithDetails]
-
-
-class ModifyLampsParameters(TypedDict):
-    lampsWithDetails: list[LampWithDetails]
-
-
-class CreateGroupsParameters(TypedDict):
-    elementGroups: list[ElementGroupParameters]
-
-
-class UpdateFavoritesFromElementsParameters(TypedDict):
-    favoritesFromElements: list[FavoritesFromElementUpdate]
-
-
-class DeleteAttributesParameters(TypedDict):
-    attributesToDelete: list[AttributesToDeleteItem]
-
-
-class CreateLayersParameters(TypedDict):
-    layerDataArray: list[LayerData]
-    overwriteExisting: NotRequired[bool]
-
-
-class CreateLayersResult(TypedDict):
-    attributeIds: AttributeIdsOrErrors
-
-
-class CreateLayerCombinationsResult(TypedDict):
-    attributeIds: AttributeIdsOrErrors
-
-
-class CreateLinesParameters(TypedDict):
-    lineDataArray: list[LineData]
-    overwriteExisting: NotRequired[bool]
-
-
-class CreateLinesResult(TypedDict):
-    attributeIds: AttributeIdsOrErrors
-
-
-class CreateFillsParameters(TypedDict):
-    fillDataArray: list[FillData]
-    overwriteExisting: NotRequired[bool]
-
-
-class CreateFillsResult(TypedDict):
-    attributeIds: AttributeIdsOrErrors
-
-
-class CreateZoneCategoriesParameters(TypedDict):
-    zoneCategoryDataArray: list[ZoneCategoryData]
-    overwriteExisting: NotRequired[bool]
-
-
-class CreateZoneCategoriesResult(TypedDict):
-    attributeIds: AttributeIdsOrErrors
-
-
-class CreateMEPSystemsResult(TypedDict):
-    attributeIds: AttributeIdsOrErrors
-
-
-class CreatePenTablesResult(TypedDict):
-    attributeIds: AttributeIdsOrErrors
-
-
-class CreateProfilesResult(TypedDict):
-    attributeIds: AttributeIdsOrErrors
-
-
-class CreateBuildingMaterialsParameters(TypedDict):
-    buildingMaterialDataArray: list[BuildingMaterialData]
-    overwriteExisting: NotRequired[bool]
-
-
-class CreateBuildingMaterialsResult(TypedDict):
-    attributeIds: AttributeIdsOrErrors
-
-
-class CreateCompositesResult(TypedDict):
-    attributeIds: AttributeIdsOrErrors
-
-
-class CreateSurfacesResult(TypedDict):
-    attributeIds: AttributeIdsOrErrors
-
-
-class GetBuildingMaterialPhysicalPropertiesResult(TypedDict):
-    properties: BuildingMaterialPhysicalPropertiesList
-
-
-class GetLinesResult(TypedDict):
-    lines: list[LineAttributeOrError]
-
-
-class GetFillsResult(TypedDict):
-    fills: list[FillAttributeOrError]
-
-
-class GetMEPSystemsResult(TypedDict):
-    mepSystems: list[MEPSystemAttributeOrError]
-
-
-class GetPenTablesResult(TypedDict):
-    penTables: list[PenTableAttributeOrError]
-
-
-class GetSurfacesResult(TypedDict):
-    surfaces: list[SurfaceAttributeOrError]
-
-
-class GetElementsByIFCIdsResult(TypedDict):
-    elementsByIFCIds: ElementsByIFCIds
-
-
-class AddFilesToEmbeddedLibraryParameters(TypedDict):
-    files: LibraryFileAdditions
-
-
-class PublishPublisherSetParameters(TypedDict):
-    publisherSetName: str
-    outputPath: NotRequired[str]
-    selectedNavigatorItemIds: NotRequired[NavigatorItemIds]
-
-
-class GetDatabaseIdFromNavigatorItemIdParameters(TypedDict):
-    navigatorItemIds: NavigatorItemIds
-
-
-class GetDatabaseIdFromNavigatorItemIdResult(TypedDict):
-    databases: Databases
-
-
-class CreateDetailsResult(TypedDict):
-    databases: DatabaseIdsOrErrors
-
-
-class CreateWorksheetsResult(TypedDict):
-    databases: DatabaseIdsOrErrors
-
-
-class CreateLayoutResult(TypedDict):
-    databases: DatabaseIdsOrErrors
-
-
-class CreateLayoutSubsetResult(TypedDict):
-    navigatorItems: list[NavigatorItemIdOrError]
-
-
-class CreateDrawingsResult(TypedDict):
-    elements: ElementIdsOrErrors
-
-
-class ChangeDrawingLinkResult(TypedDict):
-    elements: list[ElementIdOrError]
-
-
-class SetLayoutSettingsParameters(TypedDict):
-    layoutsData: list[LayoutSettingsData]
-
-
-class GetViewSettingsParameters(TypedDict):
-    navigatorItemIds: NavigatorItemIds
-
-
-class GetView2DTransformationsParameters(TypedDict):
-    navigatorItemIds: NotRequired[NavigatorItemIds]
-    databases: NotRequired[Databases]
-
-
-class CloneProjectMapItemToViewMapResult(TypedDict):
-    navigatorItems: list[NavigatorItemIdOrError]
-
-
-class CreateViewsInViewMapResult(TypedDict):
-    navigatorItems: list[NavigatorItemIdOrError]
-
-
-class CreateSectionsResult(TypedDict):
-    elements: ElementIdsOrErrors
-
-
-class CreateInteriorElevationsResult(TypedDict):
-    elements: ElementIdsOrErrors
-
-
-class DeleteNavigatorItemsParameters(TypedDict):
-    navigatorItemIds: NavigatorItemIds
-
-
-class GetCurrentRevisionChangesOfLayoutsParameters(TypedDict):
-    layoutDatabaseIds: Databases
-
-
-class GetDesignOptionCombinationsResult(TypedDict):
-    designOptionCombinations: list[DesignOptionCombinationDetails]
-
-
-class CreateDesignOptionCombinationsParameters(TypedDict):
-    designOptionCombinations: list[DesignOptionCombinationData]
-
-
-class CreateKeynoteFoldersParameters(TypedDict):
-    foldersData: list[KeynoteFolderData]
-
-
-class CreateKeynoteItemsParameters(TypedDict):
-    itemsData: list[KeynoteItemData]
-
-
-class ModifyKeynoteFoldersParameters(TypedDict):
-    foldersData: list[KeynoteFolderModificationData]
-
-
-class ModifyKeynoteItemsParameters(TypedDict):
-    itemsData: list[KeynoteItemModificationData]
-
-
-class CreateKeynoteLabelsParameters(TypedDict):
-    labelsData: list[KeynoteLabelData]
-
-
-class CreateKeynoteLabelsResult(TypedDict):
-    elements: ElementIdsOrErrors
-
-
-class GetMEPElementsResult(TypedDict):
-    elements: list[MEPElement]
-
-
-class GetMEPRoutingElementsResult(TypedDict):
-    routingElements: MEPRoutingElementDetailsOrErrors
-
-
-class GetMEPPortsResult(TypedDict):
-    elementPorts: MEPElementPortsOrErrors
-
-
-class CreateMEPRoutingElementsParameters(TypedDict):
-    routingElementsData: list[MEPRoutingElementData]
-
-
-class CreateMEPRoutingElementsResult(TypedDict):
-    elements: ElementIdsOrErrors
-
-
-class CreateMEPElementsParameters(TypedDict):
-    elementsData: list[MEPElementData]
-
-
-class CreateMEPElementsResult(TypedDict):
-    elements: ElementIdsOrErrors
-
-
-class ModifyMEPRoutingElementsParameters(TypedDict):
-    routingElementsData: list[MEPRoutingElementModificationData]
-
-
-class ConnectMEPElementsParameters(TypedDict):
-    connectionsData: list[MEPConnectionData]
-
-
-class ConnectMEPElementsResult(TypedDict):
-    connectionResults: MEPConnectionResultsOrErrors
-
-
-class GetMEPPreferenceTablesResult(TypedDict):
-    tables: list[MEPPreferenceTable]
-
-
-class CreateSolidElementLinksParameters(TypedDict):
-    solidLinks: list[SolidLinkData]
-
-
-class RemoveSolidElementLinksParameters(TypedDict):
-    solidLinks: list[SolidLinkReference]
-
-
-class GetSolidElementLinksResult(TypedDict):
-    solidLinks: list[SolidLinksOfElement]
-
-
-class GetSelectedElementsResult(TypedDict):
-    elements: Elements
-
-
-GetElementsByTypeResult: TypeAlias = ElementsWithExecutionResultsOrError
-
-
-GetAllElementsResult: TypeAlias = ElementsWithExecutionResultsOrError
-
-
-class ChangeSelectionOfElementsParameters(TypedDict):
-    addElementsToSelection: NotRequired[Elements]
-    removeElementsFromSelection: NotRequired[Elements]
-
-
-class FilterElementsParameters(TypedDict):
-    elements: Elements
-    filters: NotRequired[list[ElementFilter]]
-
-
-class FilterElementsResult(TypedDict):
-    elements: Elements
-
-
-class GetDetailsOfElementsParameters(TypedDict):
-    elements: Elements
-
-
-class GetDetailsOfElementsResult(TypedDict):
-    detailsOfElements: list[DetailsOfElement]
-
-
-class Get3DBoundingBoxesParameters(TypedDict):
-    elements: Elements
-
-
-class GetSubelementsOfHierarchicalElementsParameters(TypedDict):
-    elements: Elements
-
-
-class GetSubelementsOfHierarchicalElementsResult(TypedDict):
-    subelements: list[Subelement]
-
-
-class GetConnectedElementsParameters(TypedDict):
-    elements: Elements
-    connectedElementType: ElementType
-
-
-GetConnectedElementsResult: TypeAlias = ConnectedElementsOrError
-
-
-class GetRelationsOfElementsParameters(TypedDict):
-    elements: Elements
-    otherElementType: NotRequired[ElementType]
-
-
-class GetCollisionsParameters(TypedDict):
-    elementsGroup1: Elements
-    elementsGroup2: Elements
-    settings: NotRequired[Settings]
-
-
-class HighlightElementsParameters(TypedDict):
-    elements: Elements
-    highlightedColors: list[list[int]]
-    wireframe3D: NotRequired[bool]
-    nonHighlightedColor: NotRequired[list[int]]
-
-
-class DeleteElementsParameters(TypedDict):
-    elements: Elements
-
-
-class LockElementsParameters(TypedDict):
-    elements: Elements
+TeamworkSendResult: TypeAlias = ExecutionResult
 
 
 class UnlockElementsParameters(TypedDict):
     elements: Elements
 
 
-class GetGDLParametersOfElementsParameters(TypedDict):
-    elements: Elements
-
-
-class CreateMorphsParameters(TypedDict):
-    morphsData: list[MorphData]
-
-
-class CreateAssociativeDimensionsParameters(TypedDict):
-    dimensionsData: list[AssociativeDimensionData]
-
-
-class ModifyBeamsParameters(TypedDict):
-    beamsWithDetails: list[BeamWithDetails]
-
-
-class ModifySlabsParameters(TypedDict):
-    slabsWithDetails: list[SlabWithDetails]
-
-
-class ModifyMorphsParameters(TypedDict):
-    morphsWithDetails: list[MorphWithDetails]
-
-
-class ModifyMeshesParameters(TypedDict):
-    meshesData: list[MeshWithDetails]
-
-
-class GetGroupsOfElementsParameters(TypedDict):
-    elements: Elements
-
-
-class GetElementsOfGroupsResult(TypedDict):
-    elementsOfGroups: list[ElementsWrapperOrError]
-
-
-class GetPropertyValuesOfElementsParameters(TypedDict):
-    elements: Elements
-    properties: PropertyIds
-
-
-class GetPropertyValuesOfAttributesParameters(TypedDict):
-    attributeIds: AttributeIds
-    properties: PropertyIds
-
-
-class GetClassificationsOfElementsParameters(TypedDict):
-    elements: Elements
-    classificationSystemIds: ClassificationSystemIds
-
-
-class CreateMEPSystemsParameters(TypedDict):
-    mepSystemDataArray: list[MEPSystemData]
-    overwriteExisting: NotRequired[bool]
-
-
-class CreatePenTablesParameters(TypedDict):
-    penTableDataArray: list[PenTableData]
-    overwriteExisting: NotRequired[bool]
-
-
-class CreateCompositesParameters(TypedDict):
-    compositeDataArray: list[CompositeData]
-    overwriteExisting: NotRequired[bool]
-
-
-class CreateSurfacesParameters(TypedDict):
-    surfaceDataArray: list[SurfaceData]
-    overwriteExisting: NotRequired[bool]
-
-
-class GetBuildingMaterialPhysicalPropertiesParameters(TypedDict):
-    attributeIds: AttributeIds
-
-
-class GetLayerCombinationsParameters(TypedDict):
-    attributes: AttributeIds
-
-
-class GetLinesParameters(TypedDict):
-    attributeIds: AttributeIds
-    fields: NotRequired[list[LineAttributeField]]
-
-
-class GetFillsParameters(TypedDict):
-    attributeIds: AttributeIds
-    fields: NotRequired[list[FillAttributeField]]
-
-
-class GetZoneCategoriesParameters(TypedDict):
-    attributeIds: AttributeIds
-    fields: NotRequired[list[ZoneCategoryAttributeField]]
-
-
-class GetMEPSystemsParameters(TypedDict):
-    attributeIds: AttributeIds
-    fields: NotRequired[list[MEPSystemAttributeField]]
-
-
-class GetPenTablesParameters(TypedDict):
-    attributeIds: AttributeIds
-    fields: NotRequired[list[PenTableAttributeField]]
-
-
-class GetProfilesParameters(TypedDict):
-    attributeIds: AttributeIds
-    fields: NotRequired[list[ProfileAttributeField]]
-
-
-class GetCompositesParameters(TypedDict):
-    attributeIds: AttributeIds
-    fields: NotRequired[list[CompositeAttributeField]]
-
-
-class GetCompositesResult(TypedDict):
-    composites: list[CompositeAttributeOrError]
-
-
-class GetSurfacesParameters(TypedDict):
-    attributeIds: AttributeIds
-    fields: NotRequired[list[SurfaceAttributeField]]
-
-
-class GetLayersParameters(TypedDict):
-    attributeIds: AttributeIds
-    fields: NotRequired[list[LayerAttributeField]]
-
-
-class GetBuildingMaterialsParameters(TypedDict):
-    attributeIds: AttributeIds
-    fields: NotRequired[list[BuildingMaterialAttributeField]]
-
-
-class GetIFCIdsOfElementsParameters(TypedDict):
-    elements: Elements
-
-
-class GetIFCTypeOfElementsParameters(TypedDict):
-    elements: Elements
-
-
-class GetIFCPropertiesOfElementsParameters(TypedDict):
-    elements: Elements
-
-
-class ReserveElementsParameters(TypedDict):
-    elements: Elements
-
-
-class ReleaseElementsParameters(TypedDict):
-    elements: Elements
+UnlockElementsResult: TypeAlias = ExecutionResult
 
 
 class UpdateDrawingsParameters(TypedDict):
     elements: Elements
 
 
-class FitInWindowParameters(TypedDict):
-    elements: NotRequired[Elements]
+UpdateDrawingsResult: TypeAlias = ExecutionResult
 
 
-class AttachElementsToIssueParameters(TypedDict):
-    issueId: IssueId
-    elements: Elements
-    type: IssueElementType
+class UpdateFavoritesFromElementsParameters(TypedDict):
+    favoritesFromElements: list[FavoritesFromElementUpdate]
 
 
-class DetachElementsFromIssueParameters(TypedDict):
-    issueId: IssueId
-    elements: Elements
+class UpdateFavoritesFromElementsResult(TypedDict):
+    executionResults: ExecutionResults
 
 
-class GetElementsAttachedToIssueResult(TypedDict):
-    elements: Elements
+class UpdatePropertyDefinitionsParameters(TypedDict):
+    propertyDefinitions: list[PropertyExpressionUpdate]
 
 
-class GetRevisionChangesOfElementsParameters(TypedDict):
-    elements: Elements
+class UpdatePropertyDefinitionsResult(TypedDict):
+    executionResults: ExecutionResults
 
 
-class GetElementsOfDesignOptionsResult(TypedDict):
-    elementsOfDesignOptions: list[ElementsOfDesignOptionOrError]
+class UpdateZonesParameters(TypedDict):
+    keepStampPosition: NotRequired[bool]
+    undoTopTrim: NotRequired[bool]
+    undoBottomTrim: NotRequired[bool]
 
 
-class GetDesignOptionForElementsParameters(TypedDict):
-    elements: Elements
+UpdateZonesResult: TypeAlias = ExecutionResult
 
 
-class GetMEPRoutingElementsParameters(TypedDict):
-    elements: Elements
-
-
-class GetMEPPortsParameters(TypedDict):
-    elements: Elements
-
-
-class GetSolidElementLinksParameters(TypedDict):
-    elements: Elements
-
-
-class GetRelationsOfElementsResult(TypedDict):
-    relations: list[ElementRelationsOrError]
-
-
-class GetProfilesResult(TypedDict):
-    profiles: list[ProfileAttributeOrError]
-
-
-class GetMEPDistributionSystemsResult(TypedDict):
-    distributionSystems: list[MEPDistributionSystem]
-
-
-class CreateProfilesParameters(TypedDict):
-    profileDataArray: list[ProfileData]
-    overwriteExisting: NotRequired[bool]
-
-
-class GetHotlinksResult(TypedDict):
-    hotlinks: Hotlinks
+GetZoneBoundariesResult: TypeAlias = ZoneBoundariesOrError

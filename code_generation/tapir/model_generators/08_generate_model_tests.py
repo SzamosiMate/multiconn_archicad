@@ -15,7 +15,7 @@ SCHEMAS_TO_PATCH = {
     "GetKeynoteTreeResult",
     "GetDetailsOfElementsResult",
     "CreateClassificationItemsParameters",
-    "CreateClassificationSystemsParameters"
+    "CreateClassificationSystemsParameters",
 }
 
 
@@ -32,7 +32,7 @@ def collect_dependencies_recursively(
         return
     processed.add(name)
     if name not in all_definitions:
-        print(f"   ⚠️ Warning: Definition for '{name}' not found in master schema.")
+        print(f"   Warning: Definition for '{name}' not found in master schema.")
         return
     definition = all_definitions[name]
     collected_defs[name] = definition
@@ -58,7 +58,8 @@ def patch_schema_definitions(definitions: dict, model_name_to_test: str) -> dict
         if "KeynoteFolderDetails" in patched_defs and "properties" in patched_defs["KeynoteFolderDetails"]:
             patched_defs["KeynoteFolderDetails"]["properties"]["subFolders"] = {"type": "array", "maxItems": 0}
             print(
-                f"    - Applied patch to 'KeynoteFolderDetails' schema for {model_name_to_test} test (bounded recursion).")
+                f"    - Applied patch to 'KeynoteFolderDetails' schema for {model_name_to_test} test (bounded recursion)."
+            )
 
     if model_name_to_test == "GetDetailsOfElementsResult":
         if "TypeSpecificDetails" in patched_defs:
@@ -73,7 +74,9 @@ def patch_schema_definitions(definitions: dict, model_name_to_test: str) -> dict
     if model_name_to_test in ("CreateClassificationItemsParameters", "CreateClassificationSystemsParameters"):
         if "ClassificationItemDetails" in patched_defs and "properties" in patched_defs["ClassificationItemDetails"]:
             patched_defs["ClassificationItemDetails"]["properties"].pop("children", None)
-            print(f"    - Applied patch to 'ClassificationItemDetails' schema for {model_name_to_test} test (removed recursion).")
+            print(
+                f"    - Applied patch to 'ClassificationItemDetails' schema for {model_name_to_test} test (removed recursion)."
+            )
 
     return patched_defs
 
@@ -91,7 +94,7 @@ def main():
         with open(tapir_paths.COMMAND_MODELS_NAMES_OUTPUT, "r", encoding="utf-8") as f:
             command_model_names = json.load(f)
     except FileNotFoundError as e:
-        print(f"❌ Error: A required file was not found. Please run the full pipeline. ({e})")
+        print(f"Error: A required file was not found. Please run the full pipeline. ({e})")
         return
 
     output_path = tapir_paths.GENERATED_TESTS_OUTPUT
@@ -118,7 +121,7 @@ pytestmark = pytest.mark.generated
     """
 
     test_functions = []
-    print("\n⚙️  Generating tests with minimal, self-contained schemas...")
+    print("\nGenerating tests with minimal, self-contained schemas...")
     for model_name in sorted(command_model_names):
         xfail_marker = ""
         if model_name in KNOWN_XFAILURES:
@@ -169,7 +172,7 @@ def test_runtime_validation_{model_name}(data: dict):
     final_content = file_header + "".join(test_functions)
     output_path.write_text(final_content, encoding="utf-8")
 
-    print(f"\n✅ Successfully generated {len(test_functions)} tests.")
+    print(f"\nGenerated {len(test_functions)} tests.")
     print(f"   Test file created at: {output_path}")
 
 

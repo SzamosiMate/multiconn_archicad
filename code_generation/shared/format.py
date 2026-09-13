@@ -37,7 +37,7 @@ def run_ruff_formatter(paths: TapirApiPaths | OfficialApiPaths):
     for path in files:
         _remove_class_docstring_blank_lines(path)
 
-    print("✅ Successfully formatted all generated files.")
+    print("Formatted all generated files.")
 
 
 def _get_files_to_format(paths: TapirApiPaths | OfficialApiPaths) -> list[Path]:
@@ -99,11 +99,11 @@ def _run_ruff_format(file_paths: list[Path]) -> None:
         print("\n   - Ruff format stdout:")
         print(result.stdout or "   - (No output)")
     except FileNotFoundError:
-        print("\n❌ Error: 'ruff' command not found.", file=sys.stderr)
+        print("\nError: 'ruff' command not found.", file=sys.stderr)
         print("   Please ensure Ruff is installed and available in your system's PATH.", file=sys.stderr)
         sys.exit(1)
     except subprocess.CalledProcessError as e:
-        print("\n❌ Error: Ruff formatter failed.", file=sys.stderr)
+        print("\nError: Ruff formatter failed.", file=sys.stderr)
         print(f"   Return Code: {e.returncode}", file=sys.stderr)
         print("\n--- Ruff stdout ---", file=sys.stderr)
         print(e.stdout, file=sys.stderr)

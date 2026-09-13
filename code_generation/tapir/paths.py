@@ -1,7 +1,11 @@
 import pathlib
+
 from multiconn_archicad.constants import SUPPORTED_TAPIR_VERSION
 
+
 class TapirApiPaths:
+    def __init__(self, tapir_version: str = SUPPORTED_TAPIR_VERSION):
+        self.tapir_version = tapir_version
 
     CODE_GEN_DIR = pathlib.Path(__file__).resolve().parent.parent
     PROJECT_ROOT = CODE_GEN_DIR.parent
@@ -18,6 +22,7 @@ class TapirApiPaths:
     FINAL_CORE_DIR = FINAL_SRC_DIR / "core"
 
     # --- Schema & Name List Outputs (Intermediate) ---
+    UNPATCHED_SCHEMA_OUTPUT = SCHEMA_DIR / "tapir_unpatched_schema.json"
     MASTER_SCHEMA_OUTPUT = SCHEMA_DIR / "tapir_master_schema.json"
     BASE_MODEL_NAMES_OUTPUT = SCHEMA_DIR / "_base_model_names.json"
     COMMAND_MODELS_NAMES_OUTPUT = SCHEMA_DIR / "_command_model_names.json"
@@ -44,11 +49,11 @@ class TapirApiPaths:
 
     @property
     def COMMAND_DEFS_URL(self) -> str:
-        return f"https://raw.githubusercontent.com/ENZYME-APD/tapir-archicad-automation/refs/tags/{SUPPORTED_TAPIR_VERSION}/docs/archicad-addon/command_definitions.js"
+        return f"https://raw.githubusercontent.com/ENZYME-APD/tapir-archicad-automation/refs/tags/{self.tapir_version}/docs/archicad-addon/command_definitions.js"
 
     @property
     def COMMON_SCHEMA_URL(self) -> str:
-        return f"https://raw.githubusercontent.com/ENZYME-APD/tapir-archicad-automation/refs/tags/{SUPPORTED_TAPIR_VERSION}/docs/archicad-addon/common_schema_definitions.js"
+        return f"https://raw.githubusercontent.com/ENZYME-APD/tapir-archicad-automation/refs/tags/{self.tapir_version}/docs/archicad-addon/common_schema_definitions.js"
 
     @classmethod
     def create_directories(cls):
@@ -60,5 +65,25 @@ class TapirApiPaths:
         cls.FINAL_DICTS_DIR.mkdir(parents=True, exist_ok=True)
         cls.FINAL_CORE_DIR.mkdir(parents=True, exist_ok=True)
         print("Directories created successfully.\n")
+
+    def generated_outputs(self) -> tuple[pathlib.Path, ...]:
+        return (
+            self.UNPATCHED_SCHEMA_OUTPUT,
+            self.MASTER_SCHEMA_OUTPUT,
+            self.BASE_MODEL_NAMES_OUTPUT,
+            self.COMMAND_MODELS_NAMES_OUTPUT,
+            self.COMMAND_DETAILS_OUTPUT,
+            self.RAW_PYDANTIC_MODELS,
+            self.RAW_TYPED_DICTS,
+            self.CLEANED_PYDANTIC_MODELS,
+            self.CLEANED_TYPED_DICTS,
+            self.FINAL_LITERAL_COMMANDS,
+            self.FINAL_PYDANTIC_TYPES,
+            self.FINAL_PYDANTIC_COMMANDS,
+            self.FINAL_TYPED_DICT_TYPES,
+            self.FINAL_TYPED_DICT_COMMANDS,
+            self.GENERATED_TESTS_OUTPUT,
+        )
+
 
 tapir_paths = TapirApiPaths()
