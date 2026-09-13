@@ -84,13 +84,15 @@ def get_structured_command_details(commands_list: List[Dict[str, Any]]) -> List[
         group_name = command_group.get("name", "Uncategorized")
         for command in command_group.get("commands", []):
             if name := command.get("name"):
-                details.append({
-                    "name": name,
-                    "group": group_name,
-                    "description": command.get("description", ""),
-                    "version": command.get("version", "N/A"),
-                })
-    return sorted(details, key=lambda x: x['name'])
+                details.append(
+                    {
+                        "name": name,
+                        "group": group_name,
+                        "description": command.get("description", ""),
+                        "version": command.get("version", "N/A"),
+                    }
+                )
+    return sorted(details, key=lambda x: x["name"])
 
 
 def generate_literal_commands_file(tapir_commands: List[str], output_path: pathlib.Path):
@@ -113,6 +115,17 @@ TapirCommandType = Literal[
     output_path.write_text(file_content, encoding="utf-8")
 
 
+def write_master_schema(definitions: Dict[str, Any], output_path: pathlib.Path) -> None:
+    schema = {
+        "$schema": "https://json-schema.org/draft/2019-09/schema",
+        "title": "TapirMasterModels",
+        "description": "A consolidated, single-file schema for the Archicad Tapir JSON API.",
+        "$defs": definitions,
+    }
+    with open(output_path, "w", encoding="utf-8") as f:
+        json.dump(schema, f, indent=2)
+
+
 def main():
     """
     Fetches, parses, and merges schema definitions, and generates all
@@ -131,20 +144,16 @@ def main():
     master_defs = {**common_defs, **command_defs}
     print(f"Total unique definitions for master schema: {len(master_defs)}")
 
-    fix_refs_recursive(master_defs)
+    master_defs = dict(sorted(fix_refs_recursive(master_defs).items()))
+    write_master_schema(master_defs, tapir_paths.UNPATCHED_SCHEMA_OUTPUT)
+    print(f"Generated unpatched schema at: {tapir_paths.UNPATCHED_SCHEMA_OUTPUT}")
+
     apply_permanent_patches(master_defs)
     apply_temporary_patches(master_defs)
+    master_defs = dict(sorted(master_defs.items()))
 
-    master_schema = {
-        "$schema": "https://json-schema.org/draft/2019-09/schema",
-        "title": "TapirMasterModels",
-        "description": "A consolidated, single-file schema for the Archicad Tapir JSON API.",
-        "$defs": master_defs,
-    }
-
-    with open(tapir_paths.MASTER_SCHEMA_OUTPUT, "w", encoding="utf-8") as f:
-        json.dump(master_schema, f, indent=2)
-    print(f"✅ Successfully generated master schema at: {tapir_paths.MASTER_SCHEMA_OUTPUT}")
+    write_master_schema(master_defs, tapir_paths.MASTER_SCHEMA_OUTPUT)
+    print(f"Generated patched schema at: {tapir_paths.MASTER_SCHEMA_OUTPUT}")
 
     valid_command_model_names = set()
     for command_group in commands_list:
@@ -170,16 +179,16 @@ def main():
         json.dump(final_base_names, f)
     with open(tapir_paths.COMMAND_MODELS_NAMES_OUTPUT, "w") as f:
         json.dump(final_command_names, f)
-    print(f"✅ Successfully generated base and command model name lists.")
+    print("Generated base and command model name lists.")
 
     structured_command_details = get_structured_command_details(commands_list)
     with open(tapir_paths.COMMAND_DETAILS_OUTPUT, "w", encoding="utf-8") as f:
         json.dump(structured_command_details, f, indent=4)
-    print(f"✅ Successfully generated structured command details at: {tapir_paths.COMMAND_DETAILS_OUTPUT}")
+    print(f"Generated structured command details at: {tapir_paths.COMMAND_DETAILS_OUTPUT}")
 
     tapir_command_names = sorted([cmd["name"] for cmd in structured_command_details])
     generate_literal_commands_file(tapir_command_names, tapir_paths.FINAL_LITERAL_COMMANDS)
-    print(f"✅ Successfully generated literal commands at: {tapir_paths.FINAL_LITERAL_COMMANDS}")
+    print(f"Generated literal commands at: {tapir_paths.FINAL_LITERAL_COMMANDS}")
 
 
 if __name__ == "__main__":

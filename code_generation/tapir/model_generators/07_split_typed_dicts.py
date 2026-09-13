@@ -144,7 +144,7 @@ def main():
     base_file_content = "\n".join(get_header_lines()) + "\n\n\n" + "\n\n\n".join(base_blocks)
     final_base_content = remove_unused_imports(base_file_content)
     tapir_paths.FINAL_TYPED_DICT_TYPES.write_text(final_base_content + "\n", "utf-8")
-    print(f"✅ Successfully wrote {len(base_blocks)} definitions to {tapir_paths.FINAL_TYPED_DICT_TYPES}")
+    print(f"Wrote {len(base_blocks)} definitions to {tapir_paths.FINAL_TYPED_DICT_TYPES}")
 
     # --- Generate Command Models File (`commands.py`) ---
     print("\nProcessing command models...")
@@ -171,7 +171,7 @@ def main():
     final_command_content = "\n\n\n".join(file_parts)
     final_command_content_cleaned = remove_unused_imports(final_command_content)
     tapir_paths.FINAL_TYPED_DICT_COMMANDS.write_text(final_command_content_cleaned + "\n", "utf-8")
-    print(f"✅ Successfully wrote {len(command_blocks)} definitions to {tapir_paths.FINAL_TYPED_DICT_COMMANDS}")
+    print(f"Wrote {len(command_blocks)} definitions to {tapir_paths.FINAL_TYPED_DICT_COMMANDS}")
 
 
 if __name__ == "__main__":

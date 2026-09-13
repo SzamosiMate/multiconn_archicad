@@ -17,11 +17,11 @@ def main():
     content = assemble_final_file(content)
 
     tapir_paths.CLEANED_PYDANTIC_MODELS.write_text(content, encoding="utf-8")
-    print(f"✅ Successfully created final, clean models at: {tapir_paths.CLEANED_PYDANTIC_MODELS}")
+    print(f"Created final, clean models at: {tapir_paths.CLEANED_PYDANTIC_MODELS}")
 
 
 def fix_root_model_unions_to_type_alias(content: str) -> str:
-    print("⚙️  Step 2: Converting remaining `RootModel` classes to `TypeAlias`...")
+    print("Step 2: Converting remaining `RootModel` classes to `TypeAlias`...")
 
     lookahead = r"(?=\n\n+(class |[A-Z]\w+\s*[:=])|\Z)"
 
@@ -49,7 +49,7 @@ def remove_guid_pattern(code: str) -> str:
     'Annotated[UUID, Field(...)]'. This is necessary because Pydantic V2
     cannot apply a string pattern to a UUID object after validation.
     """
-    print("⚙️  Step 3: Removing conflicting 'pattern' from all UUID Fields...")
+    print("Step 3: Removing conflicting 'pattern' from all UUID Fields...")
 
     pattern = re.compile(
         # --- Group 1: Capture the part BEFORE the pattern argument ---
@@ -87,16 +87,14 @@ def remove_guid_pattern(code: str) -> str:
 
     return code
 
+
 def remove_redundant_model_configs(content: str) -> str:
     """
     Finds and removes the boilerplate `model_config` dicts as it is handled by the APIModel base model
     """
     print("    - Removing redundant `model_config` blocks...")
 
-    pattern = re.compile(
-        r"\s*model_config = ConfigDict\(\s*extra=\"forbid\",?\s*\)\s*",
-        re.MULTILINE
-    )
+    pattern = re.compile(r"\s*model_config = ConfigDict\(\s*extra=\"forbid\",?\s*\)\s*", re.MULTILINE)
 
     cleaned_content, num_replacements = pattern.subn("\n    ", content)
 
@@ -116,12 +114,16 @@ def assemble_final_file(content: str) -> str:
     body = re.sub(r"^#.*?\n\n", "", content, flags=re.DOTALL)
     body = re.sub(r"^(from|import).*\n", "", body, flags=re.MULTILINE)
 
+    pydantic_import = "from pydantic import Field"
+    if re.search(r"\bRootModel\b", body):
+        pydantic_import += ", RootModel"
+
     header = [
         "from __future__ import annotations",
         "from typing import Any, Literal, Annotated, TypeAlias",
         "from uuid import UUID",
         "from enum import Enum",
-        "from pydantic import Field, RootModel",
+        pydantic_import,
         "",
         "from multiconn_archicad.models.base import APIModel",
         "",

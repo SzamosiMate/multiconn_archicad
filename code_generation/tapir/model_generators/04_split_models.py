@@ -2,6 +2,7 @@ import json
 import re
 from code_generation.tapir.paths import tapir_paths
 
+
 def get_definition_name(block: str) -> str | None:
     """Extracts the class or TypeAlias name from a block of code."""
     match = re.search(r"^(?:class\s+(\w+)|(\w+)\s*[:=]\s*(?:TypeAlias\s*=)?)", block, re.MULTILINE)
@@ -99,6 +100,9 @@ def main():
         print(f"Error: {tapir_paths.CLEANED_PYDANTIC_MODELS} not found. Please run the cleaner script first.")
         return
 
+    rebuild_names = re.findall(r"^(\w+)\.model_rebuild\(\)\s*$", content, flags=re.MULTILINE)
+    content = re.sub(r"^\w+\.model_rebuild\(\)\s*$", "", content, flags=re.MULTILINE)
+
     definitions_in_order = [
         block.strip()
         for block in re.split(r"\n\n\n", content)
@@ -123,22 +127,30 @@ def main():
         else:
             base_model_blocks.append(block)
 
+    base_model_names = {get_definition_name(b) for b in base_model_blocks if get_definition_name(b)}
+    unknown_rebuild_names = set(rebuild_names) - base_model_names - command_names
+    if unknown_rebuild_names:
+        names = ", ".join(sorted(unknown_rebuild_names))
+        raise ValueError(f"Could not place model_rebuild calls for: {names}")
+
     print(f"Sorted models: {len(base_model_blocks)} base | {len(command_model_blocks)} command")
 
     # --- Write `types.py` (Base Models) ---
     print("\nProcessing base models (types.py)...")
     base_header_str = "\n".join(get_header_lines())
     base_body_str = "\n\n\n".join(base_model_blocks)
+    base_rebuild_calls = [f"{name}.model_rebuild()" for name in rebuild_names if name in base_model_names]
+    if base_rebuild_calls:
+        base_body_str += "\n\n\n" + "\n".join(base_rebuild_calls)
     base_content_uncleaned = base_header_str + "\n\n" + base_body_str
     final_base_content = remove_unused_imports(base_content_uncleaned)
 
     tapir_paths.FINAL_PYDANTIC_TYPES.parent.mkdir(parents=True, exist_ok=True)
     tapir_paths.FINAL_PYDANTIC_TYPES.write_text(final_base_content + "\n", "utf-8")
-    print(f"✅ Successfully wrote {len(base_model_blocks)} definitions to {tapir_paths.FINAL_PYDANTIC_TYPES}")
+    print(f"Wrote {len(base_model_blocks)} definitions to {tapir_paths.FINAL_PYDANTIC_TYPES}")
 
     # --- Write `commands.py` (Command Models) ---
     print("\nProcessing command models (commands.py)...")
-    base_model_names = {get_definition_name(b) for b in base_model_blocks if get_definition_name(b)}
     needed_imports = set()
     for block in command_model_blocks:
         needed_imports.update(find_cross_file_dependencies(block, base_model_names))
@@ -150,13 +162,16 @@ def main():
         import_block = "from .types import (\n    " + ",\n    ".join(sorted(list(needed_imports))) + ",\n)"
         file_parts.append(import_block)
     file_parts.extend(command_model_blocks)
+    command_rebuild_calls = [f"{name}.model_rebuild()" for name in rebuild_names if name in command_names]
+    if command_rebuild_calls:
+        file_parts.append("\n".join(command_rebuild_calls))
 
     command_content_uncleaned = "\n\n\n".join(file_parts)
     final_command_content = remove_unused_imports(command_content_uncleaned)
 
     tapir_paths.FINAL_PYDANTIC_COMMANDS.parent.mkdir(parents=True, exist_ok=True)
     tapir_paths.FINAL_PYDANTIC_COMMANDS.write_text(final_command_content + "\n", "utf-8")
-    print(f"✅ Successfully wrote {len(command_model_blocks)} definitions to {tapir_paths.FINAL_PYDANTIC_COMMANDS}")
+    print(f"Wrote {len(command_model_blocks)} definitions to {tapir_paths.FINAL_PYDANTIC_COMMANDS}")
 
 
 if __name__ == "__main__":

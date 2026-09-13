@@ -18,7 +18,7 @@ def main():
     content = assemble_final_file(content)
 
     tapir_paths.CLEANED_TYPED_DICTS.write_text(content, encoding="utf-8")
-    print(f"✅ Successfully created final, clean TypedDict models at: {tapir_paths.CLEANED_TYPED_DICTS}")
+    print(f"Created final, clean TypedDict models at: {tapir_paths.CLEANED_TYPED_DICTS}")
 
 
 def fix_forward_reference_aliases(content: str) -> str:
@@ -55,9 +55,9 @@ def fix_forward_reference_aliases(content: str) -> str:
 def assemble_final_file(content: str) -> str:
     """Adds standard headers and ensures consistent double-blank line separation between definitions."""
     body_lines = [
-        line for line in content.splitlines()
-        if line.strip()
-        and not line.strip().startswith(("#", "from __future__", "from typing", "###"))
+        line
+        for line in content.splitlines()
+        if line.strip() and not line.strip().startswith(("#", "from __future__", "from typing", "###"))
     ]
 
     header = [
@@ -74,8 +74,8 @@ def assemble_final_file(content: str) -> str:
 
     # Ensure consistent double-blank lines (\n\n\n) between definitions so that
     # the split scripts can identify class boundaries easily.
-    final_content = re.sub(r'\n(class |[A-Z]\w+\s*=|[A-Z]\w+\s*:\s*TypeAlias\s*=)', r'\n\n\n\1', final_content)
-    final_content = re.sub(r'\n{4,}', '\n\n\n', final_content)
+    final_content = re.sub(r"\n(class |[A-Z]\w+\s*=|[A-Z]\w+\s*:\s*TypeAlias\s*=)", r"\n\n\n\1", final_content)
+    final_content = re.sub(r"\n{4,}", "\n\n\n", final_content)
 
     return final_content.strip() + "\n"
 
