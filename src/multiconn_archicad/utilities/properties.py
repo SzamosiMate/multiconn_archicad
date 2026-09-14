@@ -14,7 +14,7 @@ from multiconn_archicad.utilities.identifiers import (
     normalize_property_ids,
     to_official_property_id,
 )
-from multiconn_archicad.utilities.results import BatchError, BatchResult, BatchResult2D, BatchSlot, extract_error
+from multiconn_archicad.utilities.results import BatchResult, BatchResult2D, extract_error
 
 if TYPE_CHECKING:
     from multiconn_archicad.clients.unified_api.api import UnifiedApi
@@ -238,20 +238,7 @@ class PropertyUtilities:
         """
         keys = _property_dict_keys(properties, property_names)
         matrix = self.get_property_values_per_element_result(elements, properties)
-        slots: list[BatchSlot[dict[str, str]]] = []
-        for row_index, row in enumerate(matrix.rows):
-            row_errors = (
-                [matrix.row_errors[row_index]]
-                if matrix.row_errors[row_index] is not None
-                else [slot.error for slot in row if slot.error is not None]
-            )
-            errors = [error for error in row_errors if error is not None]
-            if errors:
-                slots.append(BatchSlot(error=BatchError.aggregate(errors, context=f"Property row {row_index}")))
-                continue
-            values = [slot.success_value for slot in row]
-            slots.append(BatchSlot(value=dict(zip(keys, values))))
-        return BatchResult(tuple(slots))
+        return matrix.aggregate_rows().map(lambda values: dict(zip(keys, values)))
 
     def get_property_values_dict_per_element(
         self,
