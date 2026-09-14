@@ -187,14 +187,32 @@ module-level functions.
 
 ## 6. Batch Error Handling & Results
 
-`BatchResult[T]` is an immutable one-dimensional result. Each slot holds a successful value or a normalized `BatchError`; `iter_successes()` and `iter_errors()` provide its integer index. `BatchResult2D[T]` is an immutable ragged matrix. It stores the supplied length for each row, including a whole-row error. Matrix errors are located at `(row, column)` or `(row, None)`. Successful values are opaque; only the result's declared slots are interpreted as outcomes.
+`BatchResult[T]` is an immutable one-dimensional result. Each slot holds a successful value or a normalized `BatchError`; `iter_successes()` and `iter_errors()` provide its integer index. `BatchResult2D[T]` is an immutable ragged matrix with cell coordinates `(row, column)`. Successful values are opaque; only the result's declared slots are interpreted as outcomes.
+
+`BatchResult2D.items` preserves each declared row length. A whole-row failure
+appears as the same `BatchError` repeated in every cell position of that row.
+Errors expand into cell slots at construction. `iter_errors()`, `errors`, and
+`total_errors` report affected cells consistently. Whole-row failures require an
+explicit positive row length; successful empty rows are allowed.
+
+Two adapters provide row-level views using the existing 1D interface:
+* `aggregate_rows() -> BatchResult[tuple[T, ...]]`: any failed cell makes its row
+  fail with an aggregate error. An expanded whole-row error contributes one cause.
+* `row_result() -> BatchResult[tuple[T | BatchError, ...]]`: only original API row
+  failures fail the row; successful rows may contain individual cell errors.
+
+For example, `matrix.aggregate_rows().failure_indices` selects elements with any
+property failure; `matrix.row_result().failure_indices` selects original row
+failures. Neither adapter nests another result inside a successful row.
+Rebuilding from `.items` preserves cell errors but loses their whole-row origin.
 
 `map()` transforms only successful slots and lets callback exceptions propagate.
-`BatchResult2D.flatten()` returns a flat `BatchResult` in row-major order and
-retains cell errors. A whole-row error cannot be flattened and raises a
-`ValueError`. `flatten_successes()` and `coordinates()` share one filtering
-policy: they omit whole-row and cell errors, and their results are aligned by
-position. `BatchResult.successes` is a concrete list for convenient scripting.
+`BatchResult2D.flatten()` reads cells row by row, from left to right, and
+retains all cell errors, including expanded whole-row failures. `successes` and
+`success_indices` replace `flatten_successes()` and `coordinates()` and provide
+aligned values and coordinates. `failure_indices` returns failed cell coordinates.
+Recording the matrix in `BatchRun` records cell failures; record either row adapter
+instead when one failure per element is desired.
 Dictionary row failures are represented by one aggregate `BatchError` with
 code `-1`; its `causes` retain the original cell or row errors for logging.
 
@@ -215,7 +233,7 @@ read = api.utilities.property.get_property_values_per_element_result(elements, s
 run.record("read", read)
 payload = create_element_property_values_sparse(elements, target_properties, read)
 write = BatchResult.from_items(api.tapir.property.set_property_values_of_elements(payload))
-coordinates = read.coordinates()
+coordinates = read.success_indices
 run.record(
     "copy",
     write,
