@@ -37,11 +37,10 @@ def test_one_dimensional_map_skips_error_and_propagates_callback_exception():
 def test_matrix_retains_ragged_lengths_and_whole_row_error_coordinate():
     result = BatchResult2D.from_rows([["a"], error()], row_lengths=[1, 3])
     assert result.row_lengths == (1, 3)
-    assert list(result.iter_errors())[0][0] == (1, None)
-    with pytest.raises(ValueError):
-        result.flatten()
-    assert result.flatten_successes() == ["a"]
-    assert result.coordinates() == ((0, 0),)
+    assert result.failure_indices == ((1, 0), (1, 1), (1, 2))
+    assert result.flatten().total_errors == 3
+    assert result.successes == ["a"]
+    assert result.success_indices == ((0, 0),)
 
 
 def test_matrix_supports_empty_matrix_empty_rows_and_cell_errors():
@@ -50,7 +49,21 @@ def test_matrix_supports_empty_matrix_empty_rows_and_cell_errors():
     assert list(result.iter_errors())[0][0] == (1, 0)
     assert tuple(result.iter_successes()) == (((1, 1), "ok"),)
     mixed = BatchResult2D.from_rows([[error()], error(2)], row_lengths=[1, 4])
-    assert [coordinate for coordinate, _ in mixed.iter_errors()] == [(0, 0), (1, None)]
+    assert mixed.failure_indices == ((0, 0), (1, 0), (1, 1), (1, 2), (1, 3))
+
+
+def test_items_and_error_iteration_share_expanded_cells():
+    result = BatchResult2D.from_rows([["ok", error()], error(2), []], row_lengths=[2, 3, 0])
+    items = result.items
+    assert tuple(map(len, items)) == (2, 3, 0)
+    assert items[0][0] == "ok"
+    assert items[0][1] is result.rows[0][1].error
+    assert all(item is result.row_errors[1] for item in items[1])
+    assert items[2] == ()
+    assert result.failure_indices == ((0, 1), (1, 0), (1, 1), (1, 2))
+    rebuilt = BatchResult2D.from_rows(items)
+    assert rebuilt.total_errors == 4
+    assert rebuilt.items == items
 
 
 def test_matrix_map_and_flatten_share_row_major_filtering():
@@ -59,8 +72,8 @@ def test_matrix_map_and_flatten_share_row_major_filtering():
     flat = mapped.flatten()
     assert flat.successes == ["A", "B"]
     assert flat.failure_indices == (1,)
-    assert mapped.flatten_successes() == ["A", "B"]
-    assert mapped.coordinates() == ((0, 0), (1, 0))
+    assert mapped.successes == ["A", "B"]
+    assert mapped.success_indices == ((0, 0), (1, 0))
     with pytest.raises(ZeroDivisionError):
         BatchResult2D.from_rows([["a"]], row_lengths=[1]).map(lambda _: 1 / 0)
 
@@ -72,6 +85,34 @@ def test_batch_run_records_one_dimensional_errors_and_preserves_repeated_step_na
     run.record("write", BatchResult.from_items(["ok", error(2)]), item_indices=[1, 0])
     assert run.report.failed_indices == (0, 1)
     assert {failure.step.index for outcome in run.outcomes for failure in outcome.failures} == {0, 1}
+
+
+def test_row_views_distinguish_partial_cells_from_original_row_errors():
+    matrix = BatchResult2D[str].from_rows([["a", "b"], ["c", error()], error(2), []], row_lengths=[2, 2, 3, 0])
+    aggregate = matrix.aggregate_rows()
+    original = matrix.row_result()
+    assert aggregate.failure_indices == (1, 2)
+    assert aggregate.successes == [("a", "b"), ()]
+    assert original.failure_indices == (2,)
+    assert original.success_indices == (0, 1, 3)
+    assert original.items[1] == matrix.items[1]
+    assert original.errors[0] is matrix.row_errors[2]
+    assert aggregate.errors[1].causes == (matrix.row_errors[2],)
+    mapped = matrix.map(str.upper)
+    assert mapped.row_result().errors[0] is original.errors[0]
+    assert mapped.aggregate_rows().successes == [("A", "B"), ()]
+    run = BatchRun(range(4))
+    run.record("cells", matrix)
+    assert len(run.report.outcomes[2].failures) == 3
+    row_run = BatchRun(range(4))
+    row_run.record("rows", aggregate)
+    assert len(row_run.report.outcomes[2].failures) == 1
+
+
+@pytest.mark.parametrize("lengths", [None, [0]])
+def test_whole_row_errors_require_known_positive_lengths(lengths):
+    with pytest.raises(ValueError, match="positive row length"):
+        BatchResult2D.from_rows([error()], row_lengths=lengths)
 
 
 def test_batch_run_dataclass_normalizes_original_items_and_hides_internal_state():

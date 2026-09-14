@@ -14,7 +14,7 @@ T = TypeVar("T")
 U = TypeVar("U")
 ErrorType: TypeAlias = tapir.Error | official.Error
 ValueCoordinate: TypeAlias = tuple[int, int]
-ErrorCoordinate: TypeAlias = tuple[int, int | None]
+ErrorCoordinate: TypeAlias = ValueCoordinate
 _MISSING = object()
 ERROR_CONTAINER_MODELS = (
     tapir.FailedExecutionResult,
@@ -195,10 +195,13 @@ class BatchResult2D(Generic[T]):
         for row_index, (row, length, row_error) in enumerate(zip(self.rows, self.row_lengths, self.row_errors)):
             if length < 0:
                 raise ValueError("row lengths must be non-negative.")
-            if row_error is None and len(row) != length:
-                raise ValueError("A successful row must contain exactly row_length slots.")
-            if row_error and row:
-                raise ValueError("A failed row cannot contain cell slots.")
+            if len(row) != length:
+                raise ValueError("A row must contain exactly row_length slots.")
+            if row_error is not None:
+                if length == 0:
+                    raise ValueError("A whole-row error requires a positive row length.")
+                if any(slot.error is not row_error for slot in row):
+                    raise ValueError("Every cell of a failed row must reference its original row error.")
 
     @classmethod
     def from_rows(
@@ -219,7 +222,9 @@ class BatchResult2D(Generic[T]):
         for row_index, (raw_row, expected_length) in enumerate(zip(raw_rows, row_lengths)):
             row_failure = normalize_error(raw_row)
             if row_failure:
-                rows.append(())
+                if expected_length <= 0:
+                    raise ValueError("A whole-row error requires an explicit positive row length.")
+                rows.append(tuple(BatchSlot(error=row_failure) for _ in range(expected_length)))
                 row_errors.append(row_failure)
                 continue
             if not isinstance(raw_row, Sequence) or isinstance(raw_row, (str, bytes)):
@@ -240,9 +245,7 @@ class BatchResult2D(Generic[T]):
 
     @property
     def has_errors(self) -> bool:
-        return any(error is not None for error in self.row_errors) or any(
-            slot.error is not None for row in self.rows for slot in row
-        )
+        return any(slot.error is not None for row in self.rows for slot in row)
 
     @property
     def is_all_success(self) -> bool:
@@ -254,10 +257,6 @@ class BatchResult2D(Generic[T]):
 
     def iter_errors(self) -> Iterator[tuple[ErrorCoordinate, BatchError]]:
         for row_index, row in enumerate(self.rows):
-            row_error = self.row_errors[row_index]
-            if row_error is not None:
-                yield (row_index, None), row_error
-                continue
             for cell_index, slot in enumerate(row):
                 if slot.error is not None:
                     yield (row_index, cell_index), slot.error
@@ -276,8 +275,29 @@ class BatchResult2D(Generic[T]):
 
     @property
     def items(self) -> tuple[tuple[T | BatchError, ...], ...]:
+        """Preserve row lengths, repeating a whole-row error at every cell position."""
         return tuple(
             tuple(slot.error if slot.error is not None else slot.success_value for slot in row) for row in self.rows
+        )
+
+    def aggregate_rows(self) -> BatchResult[tuple[T, ...]]:
+        """Return complete rows, replacing any failed row with one aggregate error."""
+        slots: list[BatchSlot[tuple[T, ...]]] = []
+        for index, (row, row_error) in enumerate(zip(self.rows, self.row_errors)):
+            errors = [row_error] if row_error is not None else [slot.error for slot in row if slot.error is not None]
+            if errors:
+                slots.append(BatchSlot(error=BatchError.aggregate(errors, context=f"Row {index}")))
+            else:
+                slots.append(BatchSlot(value=tuple(slot.success_value for slot in row)))
+        return BatchResult(tuple(slots))
+
+    def row_result(self) -> BatchResult[tuple[T | BatchError, ...]]:
+        """Expose original row failures; successful rows may contain cell errors."""
+        return BatchResult(
+            tuple(
+                BatchSlot(error=error) if error is not None else BatchSlot(value=items)
+                for items, error in zip(self.items, self.row_errors)
+            )
         )
 
     def map(self, fn: Callable[[T], U]) -> BatchResult2D[U]:
@@ -295,8 +315,6 @@ class BatchResult2D(Generic[T]):
 
     def _iter_flattened_cells(self, *, successes_only: bool) -> Iterator[tuple[ValueCoordinate, BatchSlot[T]]]:
         """Yield cells using one shared filtering policy for all flatten helpers."""
-        if not successes_only and any(error is not None for error in self.row_errors):
-            raise ValueError("Cannot flatten a matrix containing whole-row errors.")
         for row_index, row in enumerate(self.rows):
             for cell_index, slot in enumerate(row):
                 if successes_only and slot.error is not None:
@@ -304,16 +322,22 @@ class BatchResult2D(Generic[T]):
                 yield (row_index, cell_index), slot
 
     def flatten(self) -> BatchResult[T]:
-        """Flatten successful rows into one row-major result, retaining cell errors."""
+        """Flatten cells row by row, from left to right, retaining errors."""
         return BatchResult(tuple(slot for _, slot in self._iter_flattened_cells(successes_only=False)))
 
-    def flatten_successes(self) -> list[T]:
-        """Return successful cells in row-major order, omitting failed rows and cells."""
+    @property
+    def successes(self) -> list[T]:
+        """Return successful cells row by row, from left to right, skipping errors."""
         return [slot.success_value for _, slot in self._iter_flattened_cells(successes_only=True)]
 
-    def coordinates(self) -> tuple[ValueCoordinate, ...]:
-        """Return coordinates corresponding exactly to :meth:`flatten_successes`."""
+    @property
+    def success_indices(self) -> tuple[ValueCoordinate, ...]:
+        """Return coordinates corresponding exactly to successful values."""
         return tuple(coordinate for coordinate, _ in self._iter_flattened_cells(successes_only=True))
+
+    @property
+    def failure_indices(self) -> tuple[ValueCoordinate, ...]:
+        return tuple(coordinate for coordinate, _ in self.iter_errors())
 
     def raise_for_errors(self, operation_name: str = "Batch operation") -> None:
         if self.has_errors:

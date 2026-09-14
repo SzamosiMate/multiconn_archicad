@@ -71,10 +71,10 @@ def test_row_error_and_partial_copy_pipeline_keep_other_cells_writable():
         _error(),
     ]
     read = PropertyUtilities(api).get_property_values_per_element_result(elements, properties)
-    assert [coordinate for coordinate, _ in read.iter_errors()] == [(0, 1), (1, None)]
+    assert read.failure_indices == ((0, 1), (1, 0), (1, 1))
     run = BatchRun(elements)
     run.record("read", read)
-    coordinates = read.coordinates()
+    coordinates = read.success_indices
     payload = create_element_property_values_sparse(elements, properties, read)
     assert len(payload) == 1
     api.tapir.property.set_property_values_of_elements.return_value = [tapir.SuccessfulExecutionResult(success=True)]
