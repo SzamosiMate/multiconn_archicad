@@ -32,6 +32,10 @@ class AddFilesToEmbeddedLibraryResult(TypedDict):
     executionResults: ExecutionResults
 
 
+class AddLibrariesParameters(TypedDict):
+    libraries: list[LibraryLocation]
+
+
 class Angle(TypedDict):
     unit: AngleType
     decimals: int
@@ -131,7 +135,8 @@ class AssociativeDimensionData(TypedDict):
 
 
 class AssociativeDimensionOnSectionData(TypedDict):
-    sectionElementId: ElementId
+    sectionElementId: NotRequired[ElementId]
+    sectionElementIds: NotRequired[list[ElementId]]
     referencePoint: Coordinate2D
     preset: Literal[
         "WallCompositeFaces",
@@ -170,6 +175,7 @@ class AttributeHeader(TypedDict):
     attributeId: AttributeId
     index: float
     name: str
+    modificationTime: int
 
 
 AttributeHeaders: TypeAlias = list[AttributeHeader]
@@ -236,6 +242,18 @@ AttributeType: TypeAlias = Literal[
 class AttributesToDeleteItem(TypedDict):
     attributeType: AttributeType
     attributeId: AttributeIdArrayItem
+
+
+class AutoTextKey(TypedDict):
+    name: str
+    key: str
+
+
+AutoTextKeyValue: TypeAlias = str
+
+
+class AutoTextName(TypedDict):
+    name: str
 
 
 class AutomaticZoneGeometry(TypedDict):
@@ -500,6 +518,14 @@ class ChangeDrawingLinkParameters(TypedDict):
 
 class ChangeDrawingLinkResult(TypedDict):
     elements: list[ElementIdOrError]
+
+
+class ChangeHotlinkInstancesParameters(TypedDict):
+    hotlinkInstances: list[HotlinkInstanceChange]
+
+
+class ChangeHotlinkInstancesResult(TypedDict):
+    executionResults: ExecutionResults
 
 
 class ChangeSelectionOfElementsParameters(TypedDict):
@@ -820,6 +846,12 @@ class CoordinateWitnessPoint(TypedDict):
     witnessForm: NotRequired[Literal["None", "Small", "Large", "Fix", "Unknown"]]
     witnessVal: NotRequired[float]
     baseElementId: NotRequired[ElementId]
+    line: NotRequired[bool]
+    inIndex: NotRequired[int]
+    special: NotRequired[int]
+    nodeType: NotRequired[int]
+    nodeStatus: NotRequired[int]
+    nodeId: NotRequired[float]
 
 
 class Coordinates(TypedDict):
@@ -1033,6 +1065,22 @@ class CreateHatchesParameters(TypedDict):
 
 class CreateHatchesResult(TypedDict):
     elements: ElementIdsOrErrors
+
+
+class CreateHotlinkInstancesParameters(TypedDict):
+    hotlinkInstances: list[HotlinkInstanceCreation]
+
+
+class CreateHotlinkInstancesResult(TypedDict):
+    elements: ElementIdsOrErrors
+
+
+class CreateHotlinkNodesParameters(TypedDict):
+    hotlinkNodes: list[HotlinkNode]
+
+
+class CreateHotlinkNodesResult(TypedDict):
+    hotlinkNodes: list[HotlinkNodeCreatedOrError]
 
 
 class CreateHotspotsParameters(TypedDict):
@@ -1665,13 +1713,14 @@ class Details(TypedDict):
 
 class DetailsOfElement(TypedDict):
     """
-    Details of an element.
+    Details of an element. When the optional fields filter is given in the input, only the requested fields are present; the required list below applies to unfiltered requests.
     """
     type: ElementType
     id: str
     floorIndex: float
     layerIndex: float
     drawIndex: float
+    hotlinkId: NotRequired[ElementId]
     details: TypeSpecificDetails
     floorPlanPolygons: NotRequired[list[FloorPlanPolygon]]
 
@@ -1764,6 +1813,8 @@ class DoorWithDetails(TypedDict):
     reflected: NotRequired[bool]
     refSide: NotRequired[bool]
     oSide: NotRequired[bool]
+    reveal: NotRequired[bool]
+    revealDepthOffset: NotRequired[float]
 
 
 class DrawingData(TypedDict):
@@ -1866,6 +1917,18 @@ class ElementDesignOptionPair(TypedDict):
     designOptionId: DesignOptionId
 
 
+ElementDetailsField: TypeAlias = Literal[
+    "type",
+    "id",
+    "floorIndex",
+    "layerIndex",
+    "drawIndex",
+    "details",
+    "floorPlanPolygons",
+    "hotlinkId",
+]
+
+
 ElementFilter: TypeAlias = Literal[
     "IsEditable",
     "IsVisibleByLayer",
@@ -1937,6 +2000,11 @@ class ElementIdArrayItem(TypedDict):
     elementId: ElementId
 
 
+class ElementPair(TypedDict):
+    elementId: ElementId
+    trimmingElementId: ElementId
+
+
 class ElementPropertyValue(TypedDict):
     """
     A property value with the identifiers of the property and its owner element.
@@ -1950,6 +2018,14 @@ ElementPropertyValues: TypeAlias = list[ElementPropertyValue]
 """
 A list of element property values.
 """
+
+
+class ElementTrims(TypedDict):
+    """
+    The trims of one element: the roofs and shells trimming it, and the elements it trims.
+    """
+    trimmedBy: list[TrimmedByItem]
+    trims: Elements
 
 
 ElementType: TypeAlias = Literal[
@@ -2112,6 +2188,7 @@ class EnumValue(TypedDict):
     The description of an enumeration value.
     """
     enumValueId: NotRequired[EnumValueId]
+    guid: NotRequired[Guid]
     displayValue: str
     nonLocalizedValue: NotRequired[str]
 
@@ -2126,6 +2203,24 @@ class EnumValueIdArrayItem(TypedDict):
 EnumValueIds: TypeAlias = list[EnumValueIdArrayItem]
 """
 A list of enumeration identifiers.
+"""
+
+
+class EnumValueToAdd(TypedDict):
+    """
+    The description of an enumeration value.
+    """
+    displayValue: str
+    nonLocalizedValue: NotRequired[str]
+
+
+class EnumValuesToAddItem(TypedDict):
+    enumValue: EnumValueToAdd
+
+
+EnumValuesToAdd: TypeAlias = list[EnumValuesToAddItem]
+"""
+Enumeration values to add to a property.
 """
 
 
@@ -2150,6 +2245,15 @@ AttributeIdOrError: TypeAlias = AttributeIdArrayItem | ErrorItem
 AttributeIdsOrErrors: TypeAlias = list[AttributeIdOrError]
 """
 A list of attribute identifiers or errors.
+"""
+
+
+AutoTextNameOrError: TypeAlias = AutoTextName | ErrorItem
+
+
+AutoTextNamesOrErrors: TypeAlias = list[AutoTextNameOrError]
+"""
+One result per input key, in the same order.
 """
 
 
@@ -2255,6 +2359,9 @@ ElementIdsOrErrors: TypeAlias = list[ElementIdOrError]
 """
 A list of element identifiers or errors.
 """
+
+
+ElementTrimsOrError: TypeAlias = ElementTrims | ErrorItem
 
 
 ElementsOfDesignOptionOrError: TypeAlias = ElementsOfDesignOption | ErrorItem
@@ -2571,6 +2678,22 @@ class GetAttributesByTypeParameters(TypedDict):
 GetAttributesByTypeResult: TypeAlias = AttributeHeadersOrError
 
 
+class GetAutoTextKeysParameters(TypedDict):
+    elementId: NotRequired[ElementId]
+
+
+class GetAutoTextKeysResult(TypedDict):
+    autoTextKeys: list[AutoTextKey]
+
+
+class GetAutoTextNameParameters(TypedDict):
+    keys: list[AutoTextKeyValue]
+
+
+class GetAutoTextNameResult(TypedDict):
+    autoTextNames: AutoTextNamesOrErrors
+
+
 class GetAvailableLibraryPartsParameters(TypedDict):
     filterByTypeId: NotRequired[LibraryPartType]
 
@@ -2691,6 +2814,7 @@ class GetDesignOptionsResult(TypedDict):
 
 class GetDetailsOfElementsParameters(TypedDict):
     elements: Elements
+    fields: NotRequired[list[ElementDetailsField]]
 
 
 class GetDetailsOfElementsResult(TypedDict):
@@ -2719,6 +2843,14 @@ class GetElementPreviewImageParameters(TypedDict):
 
 class GetElementPreviewImageResult(TypedDict):
     previewImage: str
+
+
+class GetElementTrimsParameters(TypedDict):
+    elements: Elements
+
+
+class GetElementTrimsResult(TypedDict):
+    elementTrims: list[ElementTrimsOrError]
 
 
 class GetElementsAttachedToIssueParameters(TypedDict):
@@ -2953,6 +3085,11 @@ class GetNavigatorItemTreeParameters(TypedDict):
     navigatorMapId: Literal[
         "PublicViewMap", "ProjectMap", "LayoutBook", "PublisherSets"
     ]
+    publisherSetName: NotRequired[str]
+
+
+class GetNavigatorItemTreeResult(TypedDict):
+    navigatorItemTree: NavigatorItem
 
 
 class GetPenTablesParameters(TypedDict):
@@ -2962,6 +3099,14 @@ class GetPenTablesParameters(TypedDict):
 
 class GetPenTablesResult(TypedDict):
     penTables: list[PenTableAttributeOrError]
+
+
+class GetPointFromUserParameters(TypedDict):
+    prompt: NotRequired[str]
+
+
+class GetPointFromUserResult(TypedDict):
+    position: Coordinate3D
 
 
 class GetProfilesParameters(TypedDict):
@@ -3128,7 +3273,8 @@ class GetViewSettingsResult(TypedDict):
 
 
 class GetZoneBoundariesParameters(TypedDict):
-    zoneElementId: ElementId
+    zoneElementId: NotRequired[ElementId]
+    zones: NotRequired[Elements]
 
 
 class GetZoneCategoriesParameters(TypedDict):
@@ -3255,12 +3401,25 @@ class HighlightElementsParameters(TypedDict):
     nonHighlightedColor: NotRequired[list[int]]
 
 
-class Hole2D(TypedDict):
+class Hole2DWithLegacyCoordinates(TypedDict):
     """
-    A 2D hole in an element defined by closed polylines
+    A 2D hole in an element defined by closed polylines. The outline is given in 'polygonOutline'; 'polygonCoordinates' is accepted as a legacy alias.
     """
     polygonOutline: NotRequired[list[Coordinate2D]]
+    polygonCoordinates: list[Coordinate2D]
     polygonArcs: NotRequired[list[PolyArc]]
+
+
+class Hole2DWithOutline(TypedDict):
+    """
+    A 2D hole in an element defined by closed polylines. The outline is given in 'polygonOutline'; 'polygonCoordinates' is accepted as a legacy alias.
+    """
+    polygonOutline: list[Coordinate2D]
+    polygonCoordinates: NotRequired[list[Coordinate2D]]
+    polygonArcs: NotRequired[list[PolyArc]]
+
+
+Hole2D: TypeAlias = Hole2DWithOutline | Hole2DWithLegacyCoordinates
 
 
 class Hole3D(TypedDict):
@@ -3288,7 +3447,90 @@ class Hotlink(TypedDict):
     The details of a hotlink node.
     """
     location: str
+    hotlinkNodeId: NotRequired[HotlinkNodeId]
+    name: NotRequired[str]
+    type: NotRequired[HotlinkType]
     children: NotRequired[Hotlinks]
+
+
+class HotlinkDetails(TypedDict):
+    """
+    Details of a placed hotlink instance: which node it comes from and where it sits.
+    """
+    hotlinkType: HotlinkType
+    hotlinkNodeId: HotlinkNodeId
+    origin: Coordinate3D
+    rotationAngle: float
+    mirrored: bool
+    floorDifference: NotRequired[int]
+    skipNested: NotRequired[bool]
+    suspendFixAngle: NotRequired[bool]
+    ignoreTopFloorLinks: NotRequired[bool]
+    relinkWallOpenings: NotRequired[bool]
+    adjustLevelDiffs: NotRequired[bool]
+
+
+class HotlinkInstanceChange(TypedDict):
+    elementId: ElementId
+    origin: NotRequired[HotlinkOrigin]
+    rotationAngle: NotRequired[float]
+    mirrored: NotRequired[bool]
+    floorDifference: NotRequired[int]
+    skipNested: NotRequired[bool]
+    suspendFixAngle: NotRequired[bool]
+    ignoreTopFloorLinks: NotRequired[bool]
+    relinkWallOpenings: NotRequired[bool]
+    adjustLevelDiffs: NotRequired[bool]
+    layerIndex: NotRequired[int]
+
+
+class HotlinkInstanceCreation(TypedDict):
+    hotlinkNodeId: HotlinkNodeId
+    origin: HotlinkOrigin
+    rotationAngle: NotRequired[float]
+    mirrored: NotRequired[bool]
+    floorIndex: NotRequired[int]
+    floorDifference: NotRequired[int]
+    layerIndex: NotRequired[int]
+    skipNested: NotRequired[bool]
+    suspendFixAngle: NotRequired[bool]
+    ignoreTopFloorLinks: NotRequired[bool]
+    relinkWallOpenings: NotRequired[bool]
+    adjustLevelDiffs: NotRequired[bool]
+
+
+class HotlinkNode(TypedDict):
+    sourceLocation: str
+    name: NotRequired[str]
+    storyRangeType: NotRequired[Literal["AllStories", "SingleStory"]]
+    refFloorIndex: NotRequired[int]
+
+
+class HotlinkNodeCreated(TypedDict):
+    hotlinkNodeId: HotlinkNodeId
+    existing: bool
+
+
+HotlinkNodeCreatedOrError: TypeAlias = HotlinkNodeCreated | ErrorItem
+
+
+class HotlinkNodeId(TypedDict):
+    """
+    The identifier of a hotlink node - the reference to a module source file, which instances are placed from.
+    """
+    guid: Guid
+
+
+class HotlinkOrigin(TypedDict):
+    """
+    Where a hotlink instance's origin lands, in the project's coordinates. z is optional: CreateHotlinkInstances places at 0 when it is omitted, ChangeHotlinkInstances keeps the instance's current z.
+    """
+    x: float
+    y: float
+    z: NotRequired[float]
+
+
+HotlinkType: TypeAlias = Literal["Module", "XRef"]
 
 
 Hotlinks: TypeAlias = list[Hotlink]
@@ -3388,6 +3630,9 @@ Issues: TypeAlias = list[IssueIdArrayItem]
 """
 A list of Issues.
 """
+
+
+Justification: TypeAlias = Literal["Left", "Center", "Right", "Full"]
 
 
 class KeynoteAutoTextTokens(TypedDict):
@@ -3511,13 +3756,56 @@ class KeynoteLabelData(TypedDict):
     ]
 
 
+LabelArrowType: TypeAlias = Literal[
+    "EmptyCircle",
+    "CrossCircle",
+    "FullCircle",
+    "SlashLine15",
+    "OpenArrow15",
+    "ClosedArrow15",
+    "FullArrow15",
+    "SlashLine30",
+    "OpenArrow30",
+    "ClosedArrow30",
+    "FullArrow30",
+    "SlashLine45",
+    "OpenArrow45",
+    "ClosedArrow45",
+    "FullArrow45",
+    "SlashLine60",
+    "OpenArrow60",
+    "ClosedArrow60",
+    "FullArrow60",
+    "SlashLine90",
+    "PepitaCircle",
+    "BandArrow",
+    "HalfArrowCcw15",
+    "HalfArrowCw15",
+    "HalfArrowCcw30",
+    "HalfArrowCw30",
+    "HalfArrowCcw45",
+    "HalfArrowCw45",
+    "HalfArrowCcw60",
+    "HalfArrowCw60",
+    "SlashLine75",
+]
+
+
+LabelClass: TypeAlias = Literal["Text", "Symbol"]
+
+
 class LabelData(TypedDict):
     """
     The parameters of the new Label.
     """
     favoriteName: NotRequired[str]
     parentElementId: NotRequired[ElementId]
+    labelClass: NotRequired[LabelClass]
     text: NotRequired[str]
+    runs: NotRequired[list[TextRunDetails]]
+    style: NotRequired[TextStyleSettableDetails]
+    symbolStyle: NotRequired[LabelSymbolStyleSettableDetails]
+    leaderLine: NotRequired[LabelLeaderLineSettableDetails]
     begCoordinate: NotRequired[Coordinate2D]
     midCoordinate: NotRequired[Coordinate2D]
     endCoordinate: NotRequired[Coordinate2D]
@@ -3532,6 +3820,86 @@ class LabelDetails(TypedDict):
     midCoordinate: Coordinate2D
     endCoordinate: Coordinate2D
     hasLeaderLine: bool
+    labelClass: LabelClass
+    leaderLine: LabelLeaderLineDetails
+    style: NotRequired[TextStyleDetails]
+    symbolStyle: NotRequired[LabelSymbolStyleSettableDetails]
+    text: NotRequired[str]
+    paragraphCount: NotRequired[int]
+    runs: NotRequired[list[TextRunDetails]]
+
+
+LabelLeaderLineAnchorPoint: TypeAlias = Literal["Middle", "Top", "Bottom", "Underlined"]
+
+
+class LabelLeaderLineDetails(TypedDict):
+    """
+    Full readable leader-line/frame state of a Label: every field of LabelLeaderLineSettableDetails plus the leader line's coordinates.
+    """
+    penIndex: NotRequired[int]
+    lineTypeId: NotRequired[AttributeId]
+    contourOffset: NotRequired[float]
+    framed: NotRequired[bool]
+    hasLeaderLine: NotRequired[bool]
+    anchorPoint: NotRequired[LabelLeaderLineAnchorPoint]
+    leaderShape: NotRequired[Literal["Segmented", "Splinear", "SquareRoot"]]
+    squareRootAngle: NotRequired[float]
+    arrowType: NotRequired[LabelArrowType]
+    arrowVisible: NotRequired[bool]
+    arrowPenIndex: NotRequired[int]
+    arrowSize: NotRequired[float]
+    hideWithBaseElem: NotRequired[bool]
+    begCoordinate: NotRequired[Coordinate2D]
+    midCoordinate: NotRequired[Coordinate2D]
+    endCoordinate: NotRequired[Coordinate2D]
+
+
+class LabelLeaderLineSettableDetails(TypedDict):
+    """
+    Every user-configurable leader-line/frame setting of a Label (top-level API_LabelType fields, shared by both Text and Symbol label classes). Shared by CreateLabels ('leaderLine'), ModifyLabels ('leaderLine'), and the Get response.
+    """
+    penIndex: NotRequired[int]
+    lineTypeId: NotRequired[AttributeId]
+    contourOffset: NotRequired[float]
+    framed: NotRequired[bool]
+    hasLeaderLine: NotRequired[bool]
+    anchorPoint: NotRequired[LabelLeaderLineAnchorPoint]
+    leaderShape: NotRequired[Literal["Segmented", "Splinear", "SquareRoot"]]
+    squareRootAngle: NotRequired[float]
+    arrowType: NotRequired[LabelArrowType]
+    arrowVisible: NotRequired[bool]
+    arrowPenIndex: NotRequired[int]
+    arrowSize: NotRequired[float]
+    hideWithBaseElem: NotRequired[bool]
+
+
+class LabelSymbolStyleSettableDetails(TypedDict):
+    """
+    Every user-configurable style setting specific to a Symbol-class Label (top-level API_LabelType fields documented as 'for symbol labels only'). Shared by CreateLabels ('symbolStyle'), ModifyLabels ('symbolStyle'), and the Get response.
+    """
+    textWay: NotRequired[SymbolLabelTextDirection]
+    fontIndex: NotRequired[int]
+    bold: NotRequired[bool]
+    italic: NotRequired[bool]
+    underline: NotRequired[bool]
+    flipEnabled: NotRequired[bool]
+    nonBreaking: NotRequired[bool]
+    textSize: NotRequired[float]
+    useBackgroundFill: NotRequired[bool]
+    backgroundFillPenIndex: NotRequired[int]
+    effectStrikeout: NotRequired[bool]
+    effectSuperscript: NotRequired[bool]
+    effectSubscript: NotRequired[bool]
+    effectProtected: NotRequired[bool]
+
+
+class LabelsWithDetail(TypedDict):
+    elementId: ElementId
+    text: NotRequired[str]
+    runs: NotRequired[list[TextRunDetails]]
+    style: NotRequired[TextStyleSettableDetails]
+    symbolStyle: NotRequired[LabelSymbolStyleSettableDetails]
+    leaderLine: NotRequired[LabelLeaderLineSettableDetails]
 
 
 class LampData(TypedDict):
@@ -3820,6 +4188,10 @@ LibraryFileAdditions: TypeAlias = list[LibraryFileAddition]
 """
 A list of library file additions to the embedded library
 """
+
+
+class LibraryLocation(TypedDict):
+    path: str
 
 
 class LibraryPart(TypedDict):
@@ -4327,6 +4699,14 @@ class ModifyKeynoteItemsResult(TypedDict):
     executionResults: ExecutionResults
 
 
+class ModifyLabelsParameters(TypedDict):
+    labelsWithDetails: list[LabelsWithDetail]
+
+
+class ModifyLabelsResult(TypedDict):
+    executionResults: ExecutionResults
+
+
 class ModifyLampsParameters(TypedDict):
     lampsWithDetails: list[LampWithDetails]
 
@@ -4380,6 +4760,14 @@ class ModifySlabsParameters(TypedDict):
 
 
 class ModifySlabsResult(TypedDict):
+    executionResults: ExecutionResults
+
+
+class ModifyTextsParameters(TypedDict):
+    textsWithDetails: list[TextsWithDetail]
+
+
+class ModifyTextsResult(TypedDict):
     executionResults: ExecutionResults
 
 
@@ -4577,6 +4965,25 @@ class MoveVector(TypedDict):
     z: float
 
 
+class NavigatorItem(TypedDict):
+    """
+    A navigator item and the subtree below it.
+    """
+    navigatorItemId: NavigatorItemId
+    type: NavigatorItemType
+    name: str
+    prefix: str
+    uiId: str
+    customUiId: bool
+    customName: bool
+    isIndependent: bool
+    children: NotRequired[list[NavigatorItemArrayItem]]
+
+
+class NavigatorItemArrayItem(TypedDict):
+    navigatorItem: NavigatorItem
+
+
 class NavigatorItemId(TypedDict):
     """
     The identifier of a navigator item.
@@ -4613,6 +5020,37 @@ class NavigatorItemIdsWithRotationItem(TypedDict):
 class NavigatorItemIdsWithViewSetting(TypedDict):
     navigatorItemId: NavigatorItemId
     viewSettings: ViewSettings
+
+
+NavigatorItemType: TypeAlias = Literal[
+    "UndefinedItem",
+    "ProjectItem",
+    "StoryItem",
+    "SectionItem",
+    "DetailDrawingItem",
+    "PerspectiveItem",
+    "AxonometryItem",
+    "ListItem",
+    "ScheduleItem",
+    "TocItem",
+    "CameraItem",
+    "CameraSetItem",
+    "InfoItem",
+    "HelpItem",
+    "LayoutItem",
+    "MasterLayoutItem",
+    "BookItem",
+    "MasterFolderItem",
+    "SubSetItem",
+    "TextListItem",
+    "ElevationItem",
+    "InteriorElevationItem",
+    "WorksheetDrawingItem",
+    "DocumentFrom3DItem",
+    "FolderItem",
+    "DrawingItem",
+    "UnknownItem",
+]
 
 
 class NewClassificationItem(TypedDict):
@@ -5059,6 +5497,12 @@ class PossibleEnumValue(TypedDict):
     enumValue: EnumValue
 
 
+PossibleEnumValues: TypeAlias = list[PossibleEnumValue]
+"""
+The possible enum values of the property when the property type is enumeration.
+"""
+
+
 class PossibleNumericValue(TypedDict):
     value: NotRequired[float]
     flag: NotRequired[str]
@@ -5281,7 +5725,7 @@ class PropertyDefinition(TypedDict):
     type: PropertyDataType
     isEditable: bool
     defaultValue: NotRequired[PropertyDefaultValue]
-    possibleEnumValues: NotRequired[list[PossibleEnumValue]]
+    possibleEnumValues: NotRequired[PossibleEnumValues]
     availability: list[ClassificationItemIdArrayItem]
     group: Group
 
@@ -5297,6 +5741,7 @@ class PropertyDetails(TypedDict):
     """
     The details of the property.
     """
+    possibleEnumValues: NotRequired[PossibleEnumValues]
     propertyId: PropertyId
     propertyType: Literal["StaticBuiltIn", "DynamicBuiltIn", "Custom"]
     propertyGroupName: str
@@ -5321,7 +5766,8 @@ class PropertyDetails(TypedDict):
 
 class PropertyExpressionUpdate(TypedDict):
     propertyId: PropertyId
-    expressions: list[str]
+    expressions: NotRequired[list[str]]
+    possibleEnumValues: NotRequired[EnumValuesToAdd]
 
 
 class PropertyGroup(TypedDict):
@@ -5440,6 +5886,14 @@ class RemoveElementNotificationClientParameters(TypedDict):
     port: int
 
 
+class RemoveElementTrimsParameters(TypedDict):
+    elementPairs: list[ElementPair]
+
+
+class RemoveElementTrimsResult(TypedDict):
+    executionResults: ExecutionResults
+
+
 class RemoveSolidElementLinksParameters(TypedDict):
     solidLinks: list[SolidLinkReference]
 
@@ -5537,6 +5991,37 @@ class RoofData(TypedDict):
     compositeId: NotRequired[AttributeId]
 
 
+class RoofDetails(TypedDict):
+    roofClass: Literal["SinglePlane", "MultiPlane"]
+    structureType: RoofStructureType
+    thickness: float
+    level: float
+    zCoordinate: float
+    buildingMaterialId: NotRequired[AttributeId]
+    compositeId: NotRequired[AttributeId]
+    angle: NotRequired[float]
+    pivotLine: NotRequired[RoofDetailsPivotLine]
+    eavesOverhang: NotRequired[float]
+    levels: NotRequired[list[RoofDetailsLevel]]
+    pivotPolygonOutline: NotRequired[list[Coordinate2D]]
+    polygonOutline: list[Coordinate2D]
+    polygonArcs: NotRequired[list[PolyArc]]
+    holes: NotRequired[Holes2D]
+
+
+class RoofDetailsLevel(TypedDict):
+    height: float
+    angle: float
+
+
+class RoofDetailsPivotLine(TypedDict):
+    """
+    Single-plane: the pivot line the plane rotates about.
+    """
+    begin: Coordinate2D
+    end: Coordinate2D
+
+
 class RoofOrShellRelations(TypedDict):
     connectedRooms: Elements
 
@@ -5580,6 +6065,11 @@ class Rotation(TypedDict):
     beginPoint: Coordinate2D
     endPoint: Coordinate2D
     origin: Coordinate2D
+
+
+class SaveAsModuleFileParameters(TypedDict):
+    moduleFilePath: str
+    elements: NotRequired[Elements]
 
 
 class SectionData(TypedDict):
@@ -5690,6 +6180,10 @@ class SetLayoutSettingsParameters(TypedDict):
 
 class SetLayoutSettingsResult(TypedDict):
     executionResults: ExecutionResults
+
+
+class SetLibrariesParameters(TypedDict):
+    libraries: list[LibraryLocation]
 
 
 class SetProjectInfoFieldParameters(TypedDict):
@@ -5994,6 +6488,7 @@ class StairData(TypedDict):
     stepNum: NotRequired[int]
     riserHeight: NotRequired[float]
     treadDepth: NotRequired[float]
+    finishVisible: NotRequired[bool]
 
 
 class StoryParameters(TypedDict):
@@ -6018,6 +6513,7 @@ class StorySettings(TypedDict):
     """
     Contains the configurable settings for creating or modifying a story. Used as input in API requests.
     """
+    index: NotRequired[int]
     dispOnSections: bool
     level: float
     name: str
@@ -6102,6 +6598,9 @@ ExecutionResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
 AddCommentToIssueResult: TypeAlias = ExecutionResult
 
 
+AddLibrariesResult: TypeAlias = ExecutionResult
+
+
 AttachElementsToIssueResult: TypeAlias = ExecutionResult
 
 
@@ -6174,6 +6673,9 @@ RemoveElementNotificationClientResult: TypeAlias = ExecutionResult
 RenameNavigatorItemResult: TypeAlias = ExecutionResult
 
 
+SaveAsModuleFileResult: TypeAlias = ExecutionResult
+
+
 SaveProjectResult: TypeAlias = ExecutionResult
 
 
@@ -6184,6 +6686,9 @@ SetElementNotificationClientResult: TypeAlias = ExecutionResult
 
 
 SetGeoLocationResult: TypeAlias = ExecutionResult
+
+
+SetLibrariesResult: TypeAlias = ExecutionResult
 
 
 SetStoriesResult: TypeAlias = ExecutionResult
@@ -6272,24 +6777,188 @@ class SurveyPointPosition(TypedDict):
     elevation: float
 
 
+SymbolLabelTextDirection: TypeAlias = Literal[
+    "Parallel", "Horizontal", "Vertical", "General"
+]
+
+
 TeamworkReceiveResult: TypeAlias = ExecutionResult
 
 
 TeamworkSendResult: TypeAlias = ExecutionResult
 
 
-class TextData(TypedDict):
+TextBoxAnchor: TypeAlias = Literal[
+    "LeftTop",
+    "MiddleTop",
+    "RightTop",
+    "LeftMiddle",
+    "MiddleMiddle",
+    "RightMiddle",
+    "LeftBottom",
+    "MiddleBottom",
+    "RightBottom",
+]
+
+
+class TextDataWithRuns(TypedDict):
+    """
+    The parameters of the new Text element.
+    """
+    favoriteName: NotRequired[str]
+    coordinate: Coordinate3D
+    text: NotRequired[str]
+    runs: list[TextRunDetails]
+    height: NotRequired[float]
+    pen: NotRequired[int]
+    angle: NotRequired[float]
+    justification: NotRequired[Justification]
+    style: NotRequired[TextStyleSettableDetails]
+    floorIndex: NotRequired[int]
+
+
+class TextDataWithText(TypedDict):
     """
     The parameters of the new Text element.
     """
     favoriteName: NotRequired[str]
     coordinate: Coordinate3D
     text: str
+    runs: NotRequired[list[TextRunDetails]]
     height: NotRequired[float]
     pen: NotRequired[int]
     angle: NotRequired[float]
-    justification: NotRequired[Literal["Left", "Center", "Right", "Full"]]
+    justification: NotRequired[Justification]
+    style: NotRequired[TextStyleSettableDetails]
     floorIndex: NotRequired[int]
+
+
+TextData: TypeAlias = TextDataWithText | TextDataWithRuns
+
+
+class TextDetails(TypedDict):
+    text: str
+    position: Coordinate2D
+    angle: float
+    height: float
+    pen: int
+    justification: Justification
+    zCoordinate: float
+    style: TextStyleDetails
+    paragraphCount: int
+    runs: NotRequired[list[TextRunDetails]]
+
+
+class TextRunDetails(TypedDict):
+    """
+    One monostyle run of text (API_RunType). Concatenating 'text' across all runs in order gives the full content; a newline character starts a new line.
+    """
+    text: str
+    penIndex: NotRequired[int]
+    fontIndex: NotRequired[int]
+    bold: NotRequired[bool]
+    italic: NotRequired[bool]
+    underline: NotRequired[bool]
+    heightOverride: NotRequired[float]
+    effectStrikeout: NotRequired[bool]
+    effectSuperscript: NotRequired[bool]
+    effectSubscript: NotRequired[bool]
+    effectProtected: NotRequired[bool]
+
+
+class TextSettings(TypedDict):
+    """
+    Settings for modifying a Text element or a text-type Label. For Labels only the text field is applied. Setting text replaces the whole content (any per-run formatting of the old content is dropped) and switches the element to automatic width, matching the behavior of CreateTexts/CreateLabels.
+    """
+    text: NotRequired[str]
+    position: NotRequired[Coordinate2D]
+    angle: NotRequired[float]
+    height: NotRequired[float]
+    justification: NotRequired[Justification]
+
+
+class TextStyleDetails(TypedDict):
+    """
+    Full readable style state of a Text or text-class Label: every field of TextStyleSettableDetails plus the read-only ones (lineCount, boxWidth, boxHeight).
+    """
+    penIndex: NotRequired[int]
+    fontIndex: NotRequired[int]
+    bold: NotRequired[bool]
+    italic: NotRequired[bool]
+    underline: NotRequired[bool]
+    justification: NotRequired[Justification]
+    height: NotRequired[float]
+    spacing: NotRequired[float]
+    angle: NotRequired[float]
+    effectStrikeout: NotRequired[bool]
+    effectSuperscript: NotRequired[bool]
+    effectSubscript: NotRequired[bool]
+    effectProtected: NotRequired[bool]
+    widthFactor: NotRequired[float]
+    charSpaceFactor: NotRequired[float]
+    fixedSize: NotRequired[bool]
+    usedContour: NotRequired[bool]
+    usedFill: NotRequired[bool]
+    contourPenIndex: NotRequired[int]
+    fillPenIndex: NotRequired[int]
+    anchor: NotRequired[TextBoxAnchor]
+    fixedAngle: NotRequired[bool]
+    contourOffset: NotRequired[float]
+    flipEnabled: NotRequired[bool]
+    textFrameShape: NotRequired[
+        Literal["Rectangle", "Circle", "RoundedRectangle", "Pill"]
+    ]
+    textFrameSizeFixed: NotRequired[bool]
+    textFrameFixedWidth: NotRequired[float]
+    textFrameFixedHeight: NotRequired[float]
+    lineCount: NotRequired[int]
+    boxWidth: NotRequired[float]
+    boxHeight: NotRequired[float]
+
+
+class TextStyleSettableDetails(TypedDict):
+    """
+    Every user-configurable style setting of a Text or a text-class Label (API_TextType). Shared by CreateTexts/CreateLabels ('style'), ModifyTexts/ModifyLabels ('style'), and the Get response.
+    """
+    penIndex: NotRequired[int]
+    fontIndex: NotRequired[int]
+    bold: NotRequired[bool]
+    italic: NotRequired[bool]
+    underline: NotRequired[bool]
+    justification: NotRequired[Justification]
+    height: NotRequired[float]
+    spacing: NotRequired[float]
+    angle: NotRequired[float]
+    effectStrikeout: NotRequired[bool]
+    effectSuperscript: NotRequired[bool]
+    effectSubscript: NotRequired[bool]
+    effectProtected: NotRequired[bool]
+    widthFactor: NotRequired[float]
+    charSpaceFactor: NotRequired[float]
+    fixedSize: NotRequired[bool]
+    usedContour: NotRequired[bool]
+    usedFill: NotRequired[bool]
+    contourPenIndex: NotRequired[int]
+    fillPenIndex: NotRequired[int]
+    anchor: NotRequired[TextBoxAnchor]
+    fixedAngle: NotRequired[bool]
+    contourOffset: NotRequired[float]
+    flipEnabled: NotRequired[bool]
+    textFrameShape: NotRequired[
+        Literal["Rectangle", "Circle", "RoundedRectangle", "Pill"]
+    ]
+    textFrameSizeFixed: NotRequired[bool]
+    textFrameFixedWidth: NotRequired[float]
+    textFrameFixedHeight: NotRequired[float]
+
+
+class TextsWithDetail(TypedDict):
+    elementId: ElementId
+    coordinate: NotRequired[Coordinate3D]
+    floorIndex: NotRequired[int]
+    text: NotRequired[str]
+    runs: NotRequired[list[TextRunDetails]]
+    style: NotRequired[TextStyleSettableDetails]
 
 
 class Texture(TypedDict):
@@ -6315,6 +6984,23 @@ class Texture(TypedDict):
 TextureProjectionType: TypeAlias = Literal[
     "Invalid", "Planar", "Default", "Cylindric", "Spheric", "Box"
 ]
+
+
+class TrimElementsParameters(TypedDict):
+    elements: Elements
+    trimmingElement: NotRequired[ElementId]
+    trimType: NotRequired[TrimType]
+
+
+TrimElementsResult: TypeAlias = ExecutionResult
+
+
+TrimType: TypeAlias = Literal["KeepInside", "KeepOutside", "KeepAll", "No"]
+
+
+class TrimmedByItem(TypedDict):
+    elementId: ElementId
+    trimType: TrimType
 
 
 class UnlockElementsParameters(TypedDict):
@@ -6656,6 +7342,8 @@ class WindowWithDetails(TypedDict):
     reflected: NotRequired[bool]
     refSide: NotRequired[bool]
     oSide: NotRequired[bool]
+    reveal: NotRequired[bool]
+    revealDepthOffset: NotRequired[float]
 
 
 class WireEdge(TypedDict):
@@ -6667,6 +7355,10 @@ class WorksheetData(TypedDict):
     referenceId: str
 
 
+class ZoneBoundariesOfZonesWrapper(TypedDict):
+    zoneBoundariesOfZones: list[ZoneBoundariesOrError]
+
+
 class ZoneBoundariesWrapper(TypedDict):
     zoneBoundaries: list[ZoneBoundary]
 
@@ -6674,7 +7366,9 @@ class ZoneBoundariesWrapper(TypedDict):
 ZoneBoundariesOrError: TypeAlias = ZoneBoundariesWrapper | ErrorItem
 
 
-GetZoneBoundariesResult: TypeAlias = ZoneBoundariesOrError
+GetZoneBoundariesResult: TypeAlias = (
+    ZoneBoundariesOrError | ZoneBoundariesOfZonesWrapper
+)
 
 
 class ZoneBoundary(TypedDict):
@@ -6764,9 +7458,11 @@ class ZoneDetails(TypedDict):
 
 
 TypeSpecificDetails: TypeAlias = (
-    WallDetails
+    HotlinkDetails
+    | WallDetails
     | BeamDetails
     | SlabDetails
+    | RoofDetails
     | ColumnDetails
     | DetailWorksheetDetails
     | WindowDoorDetails
@@ -6782,6 +7478,7 @@ TypeSpecificDetails: TypeAlias = (
     | MorphDetails
     | DrawingDetails
     | LabelDetails
+    | TextDetails
     | NotYetSupportedElementTypeDetails
 )
 
@@ -6833,6 +7530,7 @@ TypeSpecificSettings: TypeAlias = (
     | PolylineSettings
     | HatchSettings
     | DrawingSettings
+    | TextSettings
 )
 
 

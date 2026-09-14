@@ -1,3 +1,4 @@
+from copy import deepcopy
 from typing import Any, Optional
 
 
@@ -126,6 +127,36 @@ def replace_inline_schema_with_ref(
             container["properties"][key] = new_schema
 
 
+def name_required_variants(defs: dict[str, Any], parent_name: str, path: list[str], variant_names: list[str]):
+    """Name conditional required-field variants so generators do not invent numeric suffixes."""
+    _, target_schema, _ = _require_target(defs, parent_name, path)
+    union_keys = [key for key in ("oneOf", "anyOf") if key in target_schema]
+    if len(union_keys) != 1:
+        raise ValueError(f"Expected exactly one conditional union at '{parent_name}' / {path}, found {union_keys}.")
+
+    union_key = union_keys[0]
+    variants = target_schema[union_key]
+    if not isinstance(variants, list) or len(variants) != len(variant_names):
+        raise ValueError(
+            f"Expected {len(variant_names)} variants at '{parent_name}' / {path}, found "
+            f"{len(variants) if isinstance(variants, list) else type(variants).__name__}."
+        )
+
+    common_schema = {key: deepcopy(value) for key, value in target_schema.items() if key != union_key}
+    common_required = common_schema.pop("required", [])
+    for variant, variant_name in zip(variants, variant_names):
+        if not isinstance(variant, dict) or set(variant) != {"required"} or not isinstance(variant["required"], list):
+            raise ValueError(
+                f"Expected a required-only variant at '{parent_name}' / {path}, found {variant!r}."
+            )
+        named_variant = deepcopy(common_schema)
+        named_variant["required"] = list(dict.fromkeys([*common_required, *variant["required"]]))
+        defs[variant_name] = named_variant
+
+    target_schema.clear()
+    target_schema[union_key] = [{"$ref": f"#/$defs/{name}"} for name in variant_names]
+
+
 def apply_permanent_patches(master_defs: dict[str, Any]):
     """
     Patches that are required permanently due to limitations in code generators
@@ -216,6 +247,11 @@ def apply_permanent_patches(master_defs: dict[str, Any]):
     extract_inline_schema(master_defs, "MeshWithDetails", ["meshData"], "MeshModificationData")
 
     extract_inline_schema(master_defs,"RevisionCustomSchemeData",["items"],"RevisionCustomSchemeEntry")
+
+    # --- Preserve stable public names for deliberate conditional object schemas ---
+    name_required_variants(master_defs, "Hole2D", [], ["Hole2DWithOutline", "Hole2DWithLegacyCoordinates"])
+    name_required_variants(master_defs, "TextData", [], ["TextDataWithText", "TextDataWithRuns"])
+
 
 def apply_temporary_patches(master_defs: dict[str, Any]):
     """
@@ -351,12 +387,7 @@ def apply_temporary_patches(master_defs: dict[str, Any]):
     replace_inline_schema_with_ref(master_defs, "FillData", ["symbolArcs", "items"], "FillSymbolArc")
     extract_inline_schema(master_defs, "PenTableData", ["pens", "items"], "PenData")
     extract_inline_schema(master_defs, "ProfileData", ["newSkins", "items"], "ProfileSkinData")
-    extract_inline_schema(
-        master_defs,
-        "ProfileData",
-        ["skinOverrides", "items", "edgeOverrides", "items"],
-        "ProfileEdgeOverride",
-    )
+    extract_inline_schema(master_defs, "ProfileData", ["skinOverrides", "items", "edgeOverrides", "items"], "ProfileEdgeOverride",)
 
     # --- Attribute detail enums ---
     extract_inline_enum(master_defs, "FillAttribute", ["subType"], "FillSubType")
@@ -447,25 +478,11 @@ def apply_temporary_patches(master_defs: dict[str, Any]):
     replace_inline_schema_with_ref(
         master_defs, "GetMEPElementsParameters", ["domains", "items"], "MEPSystemDomain", preserve_description=True
     )
-    replace_inline_schema_with_ref(
-        master_defs,
-        "GetMEPDistributionSystemsResult",
-        ["distributionSystems", "items", "domain"],
-        "MEPSystemDomain",
-        preserve_description=True,
-    )
-    extract_inline_schema(
-        master_defs, "GetMEPDistributionSystemsResult", ["distributionSystems", "items"], "MEPDistributionSystem"
-    )
-    replace_inline_schema_with_ref(
-        master_defs, "MEPSystemData", ["domain"], "MEPSystemDomain", preserve_description=True
-    )
-    replace_inline_schema_with_ref(
-        master_defs, "MEPElementData", ["domain"], "MEPSystemDomain", preserve_description=True
-    )
-    replace_inline_schema_with_ref(
-        master_defs, "MEPRoutingElementData", ["domain"], "MEPSystemDomain", preserve_description=True
-    )
+    replace_inline_schema_with_ref(master_defs,"GetMEPDistributionSystemsResult",["distributionSystems", "items", "domain"],"MEPSystemDomain", preserve_description=True)
+    extract_inline_schema(master_defs, "GetMEPDistributionSystemsResult", ["distributionSystems", "items"], "MEPDistributionSystem")
+    replace_inline_schema_with_ref(master_defs, "MEPSystemData", ["domain"], "MEPSystemDomain", preserve_description=True)
+    replace_inline_schema_with_ref(master_defs, "MEPElementData", ["domain"], "MEPSystemDomain", preserve_description=True)
+    replace_inline_schema_with_ref(master_defs, "MEPRoutingElementData", ["domain"], "MEPSystemDomain", preserve_description=True)
 
     # GetMEPPreferenceTables accepts only two of the three domains, so it keeps its own enum
     extract_inline_enum(master_defs, "GetMEPPreferenceTablesParameters", ["domain"], "MEPPreferenceTableDomain")
@@ -499,3 +516,39 @@ def apply_temporary_patches(master_defs: dict[str, Any]):
             continue
         master_defs[variant_name] = branch
         element_relations["oneOf"][index] = {"$ref": f"#/$defs/{variant_name}"}
+
+    # --- Tapir 1.5.9: stabilize new inline command and result schemas ---
+    extract_inline_schema(master_defs, "ChangeHotlinkInstancesParameters", ["hotlinkInstances", "items"], "HotlinkInstanceChange")
+    extract_inline_schema(master_defs, "CreateHotlinkInstancesParameters", ["hotlinkInstances", "items"], "HotlinkInstanceCreation")
+    extract_inline_schema(master_defs, "GetLibrariesResult", ["libraries", "items"], "Library")
+    extract_inline_schema(master_defs, "AddLibrariesParameters", ["libraries", "items"], "LibraryLocation")
+    replace_inline_schema_with_ref(master_defs, "SetLibrariesParameters", ["libraries", "items"], "LibraryLocation")
+    extract_inline_schema(master_defs, "PossibleEnumValues", ["items", "enumValue"], "EnumValue")
+    extract_inline_schema(master_defs, "EnumValuesToAdd", ["items", "enumValue"], "EnumValueToAdd")
+    extract_inline_schema(master_defs, "RoofData", ["pivotLine"], "PivotLine")
+    extract_inline_schema(master_defs, "RoofData", ["levels", "items"], "Level")
+    extract_inline_schema(master_defs, "RoofDetails", ["pivotLine"], "RoofDetailsPivotLine")
+    extract_inline_schema(master_defs, "RoofDetails", ["levels", "items"], "RoofDetailsLevel")
+    replace_inline_schema_with_ref(master_defs, "RoofWithDetails", ["levels", "items"], "Level")
+    extract_inline_enum(master_defs, "ElementTrims", ["trimmedBy", "items", "trimType"], "TrimType")
+    replace_inline_schema_with_ref(master_defs, "TrimElementsParameters", ["trimType"], "TrimType")
+    extract_inline_enum(master_defs, "Hotlink", ["type"], "HotlinkType")
+    replace_inline_schema_with_ref(master_defs, "HotlinkDetails", ["hotlinkType"], "HotlinkType")
+    extract_inline_enum(master_defs, "NavigatorItem", ["type"], "NavigatorItemType")
+
+    # --- Tapir 1.5.9: share repeated enums and give inline types domain-specific names ---
+    extract_inline_enum(master_defs, "TextDataWithText", ["justification"], "Justification")
+    replace_inline_schema_with_ref(master_defs, "TextDataWithRuns", ["justification"], "Justification")
+    replace_inline_schema_with_ref(master_defs, "TextDetails", ["justification"], "Justification")
+    replace_inline_schema_with_ref(master_defs, "TextSettings", ["justification"], "Justification")
+    replace_inline_schema_with_ref(master_defs, "TextStyleDetails", ["justification"], "Justification")
+    replace_inline_schema_with_ref(master_defs, "TextStyleSettableDetails", ["justification"], "Justification")
+    extract_inline_enum(master_defs, "LabelData", ["labelClass"], "LabelClass")
+    replace_inline_schema_with_ref(master_defs, "LabelDetails", ["labelClass"], "LabelClass")
+    extract_inline_enum(master_defs, "TextStyleDetails", ["anchor"], "TextBoxAnchor")
+    replace_inline_schema_with_ref(master_defs, "TextStyleSettableDetails", ["anchor"], "TextBoxAnchor")
+    extract_inline_enum(master_defs, "LabelLeaderLineDetails", ["anchorPoint"], "LabelLeaderLineAnchorPoint")
+    replace_inline_schema_with_ref(master_defs, "LabelLeaderLineSettableDetails", ["anchorPoint"], "LabelLeaderLineAnchorPoint")
+    extract_inline_schema(master_defs, "GetAutoTextNameParameters", ["keys", "items"], "AutoTextKeyValue")
+    replace_inline_schema_with_ref(master_defs, "RoofDetails", ["structureType"], "RoofStructureType")
+    extract_inline_enum(master_defs, "LabelSymbolStyleSettableDetails", ["textWay"], "SymbolLabelTextDirection")

@@ -1,3 +1,4 @@
+import json
 import re
 from code_generation.tapir.paths import tapir_paths
 
@@ -12,6 +13,7 @@ def main():
 
     # Apply the necessary cleaning steps.
     content = fix_root_model_unions_to_type_alias(content)
+    content = restore_collapsed_named_unions(content)
     content = remove_guid_pattern(content)
     content = remove_redundant_model_configs(content)
     content = assemble_final_file(content)
@@ -40,6 +42,34 @@ def fix_root_model_unions_to_type_alias(content: str) -> str:
     content, num_replacements = pattern.subn(replacer, content)
 
     print(f"    - Converted {num_replacements} models to TypeAlias.")
+    return content
+
+
+def restore_collapsed_named_unions(content: str) -> str:
+    """Restore public aliases that datamodel-codegen collapses into their use sites."""
+    schema = json.loads(tapir_paths.MASTER_SCHEMA_OUTPUT.read_text(encoding="utf-8"))
+    existing_names = set(re.findall(r"^(?:class\s+)?([A-Z]\w+)\s*(?:\(|:\s*TypeAlias\s*=)", content, re.MULTILINE))
+    aliases = []
+
+    for name, definition in schema.get("$defs", {}).items():
+        if name in existing_names or not isinstance(definition, dict):
+            continue
+        union_keys = [key for key in ("oneOf", "anyOf") if key in definition]
+        if len(union_keys) != 1 or set(definition) != {union_keys[0]}:
+            continue
+        variants = definition[union_keys[0]]
+        if not isinstance(variants, list) or not variants:
+            continue
+        refs = [variant.get("$ref") for variant in variants if isinstance(variant, dict) and set(variant) == {"$ref"}]
+        if len(refs) != len(variants) or not all(isinstance(ref, str) and ref.startswith("#/$defs/") for ref in refs):
+            continue
+        aliases.append(f"{name}: TypeAlias = {' | '.join(ref.rsplit('/', 1)[-1] for ref in refs)}")
+
+    if aliases:
+        print(f"    - Restored {len(aliases)} collapsed named union aliases.")
+        content = content.rstrip() + "\n\n\n" + "\n\n\n".join(aliases) + "\n"
+    else:
+        print("    - No collapsed named union aliases needed restoring.")
     return content
 
 

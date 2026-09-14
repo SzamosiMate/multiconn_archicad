@@ -39,6 +39,7 @@ from multiconn_archicad.models.tapir.commands import (
     GetLayoutSettingsResult,
     GetModelViewOptionsResult,
     GetNavigatorItemTreeParameters,
+    GetNavigatorItemTreeResult,
     GetView2DTransformationsParameters,
     GetView2DTransformationsResult,
     GetViewSettingsParameters,
@@ -75,6 +76,7 @@ from multiconn_archicad.models.tapir.types import (
     LayoutSetting,
     LayoutSettingsData,
     ModelViewOption,
+    NavigatorItem,
     NavigatorItemId,
     NavigatorItemIdArrayItem,
     NavigatorItemIdsWithRotationItem,
@@ -540,12 +542,20 @@ class NavigatorCommands:
         validated_response = GetModelViewOptionsResult.model_validate(response_dict)
         return validated_response.modelViewOptions
 
-    def get_navigator_item_tree(self, navigator_map_id: NavigatorMapId) -> None:
+    def get_navigator_item_tree(
+        self, navigator_map_id: NavigatorMapId, publisher_set_name: None | str = None
+    ) -> NavigatorItem:
         """
         Returns the full navigator item tree for the specified map.
 
         Args:
             navigator_map_id (NavigatorMapId): The navigator map to retrieve.
+            publisher_set_name (None | str): The name of the publisher set to retrieve. Used
+                only when navigatorMapId is PublisherSets. Without it the first publisher set is
+                returned.
+
+        Returns:
+            NavigatorItem
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -554,12 +564,14 @@ class NavigatorCommands:
         """
         params_dict = {
             "navigatorMapId": navigator_map_id,
+            "publisherSetName": publisher_set_name,
         }
         validated_params = GetNavigatorItemTreeParameters(**params_dict)
-        self._core.post_tapir_command(
+        response_dict = self._core.post_tapir_command(
             "GetNavigatorItemTree", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
-        return None
+        validated_response = GetNavigatorItemTreeResult.model_validate(response_dict)
+        return validated_response.navigatorItemTree
 
     def get_view_2d_transformations(
         self,

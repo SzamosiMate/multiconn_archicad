@@ -83,7 +83,8 @@ from multiconn_archicad.models.tapir.types import (
     SlabData,
     SplineData,
     StairData,
-    TextData,
+    TextDataWithRuns,
+    TextDataWithText,
     WallData,
     WallThicknessDimensionData,
     WindowData,
@@ -155,7 +156,8 @@ class ElementCreationCommands:
     ) -> list[ElementIdArrayItem | ErrorItem]:
         """
         Creates associative linear dimensions on section elements using common wall, slab, beam,
-        column and opening presets.
+        column and opening presets. The preset points of multiple section elements can be merged
+        into one continuous dimension chain via sectionElementIds.
 
         Args:
             dimensions_data (list[AssociativeDimensionOnSectionData])
@@ -633,12 +635,15 @@ class ElementCreationCommands:
         validated_response = CreateStairsResult.model_validate(response_dict)
         return validated_response.elements
 
-    def create_texts(self, texts_data: list[TextData]) -> list[ElementIdArrayItem | ErrorItem]:
+    def create_texts(
+        self, texts_data: list[TextDataWithRuns | TextDataWithText]
+    ) -> list[ElementIdArrayItem | ErrorItem]:
         """
         Creates standalone Text elements based on the given parameters.
 
         Args:
-            texts_data (list[TextData]): Array of data to create Texts.
+            texts_data (list[TextDataWithRuns | TextDataWithText]): Array of data to create
+                Texts.
 
         Returns:
             list[ElementIdArrayItem | ErrorItem]: A list of element identifiers or errors.

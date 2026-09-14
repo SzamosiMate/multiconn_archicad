@@ -8,15 +8,20 @@ from pydantic import TypeAdapter
 from multiconn_archicad.models.tapir.commands import (
     AddFilesToEmbeddedLibraryParameters,
     AddFilesToEmbeddedLibraryResult,
+    AddLibrariesParameters,
+    AddLibrariesResult,
     GetAvailableLibraryPartsParameters,
     GetAvailableLibraryPartsResult,
     GetLibrariesResult,
     ReloadLibrariesResult,
+    SetLibrariesParameters,
+    SetLibrariesResult,
 )
 from multiconn_archicad.models.tapir.types import (
     FailedExecutionResult,
     Library,
     LibraryFileAddition,
+    LibraryLocation,
     LibraryPartType,
     SuccessfulExecutionResult,
 )
@@ -57,6 +62,32 @@ class LibraryCommands:
         )
         validated_response = AddFilesToEmbeddedLibraryResult.model_validate(response_dict)
         return validated_response.executionResults
+
+    def add_libraries(self, libraries: list[LibraryLocation]) -> FailedExecutionResult | SuccessfulExecutionResult:
+        """
+        Adds the given folders to the project's local libraries, skipping any already loaded.
+
+        Args:
+            libraries (list[LibraryLocation]): Local library folders or container files, by
+                absolute path.
+
+        Returns:
+            FailedExecutionResult | SuccessfulExecutionResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "libraries": libraries,
+        }
+        validated_params = AddLibrariesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "AddLibraries", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = TypeAdapter(AddLibrariesResult).validate_python(response_dict)
+        return validated_response
 
     def get_available_library_parts(
         self, filter_by_type_id: LibraryPartType | None = None
@@ -117,4 +148,32 @@ class LibraryCommands:
         """
         response_dict = self._core.post_tapir_command("ReloadLibraries")
         validated_response = TypeAdapter(ReloadLibrariesResult).validate_python(response_dict)
+        return validated_response
+
+    def set_libraries(self, libraries: list[LibraryLocation]) -> FailedExecutionResult | SuccessfulExecutionResult:
+        """
+        Makes the given folders the project's local libraries; built-in, embedded, server and
+        web libraries are kept. Set the libraries before opening a file that needs them and the
+        missing-library dialog does not appear.
+
+        Args:
+            libraries (list[LibraryLocation]): Local library folders or container files, by
+                absolute path.
+
+        Returns:
+            FailedExecutionResult | SuccessfulExecutionResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "libraries": libraries,
+        }
+        validated_params = SetLibrariesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "SetLibraries", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = TypeAdapter(SetLibrariesResult).validate_python(response_dict)
         return validated_response

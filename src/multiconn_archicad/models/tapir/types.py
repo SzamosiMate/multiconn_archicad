@@ -143,7 +143,19 @@ class AssociativeDimensionData(APIModel):
 
 
 class AssociativeDimensionOnSectionData(APIModel):
-    sectionElementId: ElementId
+    sectionElementId: Annotated[
+        ElementId | None,
+        Field(
+            description="The identifier of a single section element. Only one of sectionElementId and sectionElementIds can be given."
+        ),
+    ] = None
+    sectionElementIds: Annotated[
+        list[ElementId] | None,
+        Field(
+            description="A list of section elements whose preset points are merged into one continuous dimension chain. Only one of sectionElementId and sectionElementIds can be given.",
+            min_length=1,
+        ),
+    ] = None
     referencePoint: Coordinate2D
     preset: Preset
     direction: Coordinate2D | None = None
@@ -167,6 +179,12 @@ class AttributeHeader(APIModel):
     attributeId: AttributeId
     index: Annotated[float, Field(description="Index of the attribute.")]
     name: Annotated[str, Field(description="Name of the attribute.")]
+    modificationTime: Annotated[
+        int,
+        Field(
+            description="The last modification time of the attribute, in seconds since 1970-01-01 00:00:00 UTC (a GSTime), the same stamp the Attribute Manager writes as ModiTime into its XML export."
+        ),
+    ]
 
 
 class AttributeHeadersWrapper(APIModel):
@@ -214,6 +232,29 @@ class AttributeType(Enum):
 class AttributesToDeleteItem(APIModel):
     attributeType: AttributeType
     attributeId: AttributeIdArrayItem
+
+
+class AutoTextKey(APIModel):
+    name: Annotated[
+        str,
+        Field(description="The autotext's name, as shown in the Insert Autotext dialog of Archicad."),
+    ]
+    key: Annotated[
+        str,
+        Field(
+            description="The autotext's key. To embed it in the content of a Text or Label element, surround it with '<' and '>', e.g. '<PROPERTY-69A58F6F-DD3B-478D-B5EF-09A16BD0C548>'."
+        ),
+    ]
+
+
+AutoTextKeyValue: TypeAlias = str
+
+
+class AutoTextName(APIModel):
+    name: Annotated[
+        str,
+        Field(description="The autotext's display name, as shown in the Insert Autotext dialog of Archicad."),
+    ]
 
 
 class AutomaticZoneGeometry(APIModel):
@@ -1048,6 +1089,36 @@ class CoordinateWitnessPoint(APIModel):
     witnessForm: WitnessForm | None = None
     witnessVal: float | None = None
     baseElementId: ElementId | None = None
+    line: Annotated[
+        bool | None,
+        Field(
+            description="True when the witness point lies on an edge of the base element rather than at a node (API_Base line)."
+        ),
+    ] = None
+    inIndex: Annotated[
+        int | None,
+        Field(description="Subindex of the base element's node (API_Neig inIndex)."),
+    ] = None
+    special: Annotated[
+        int | None,
+        Field(
+            description="Non-zero for special references such as a wall plane, a beam, window or door hole, or a mesh ridge (API_Base special)."
+        ),
+    ] = None
+    nodeType: Annotated[
+        int | None,
+        Field(description="Reserved by Archicad for section dimensions (API_Base node_typ)."),
+    ] = None
+    nodeStatus: Annotated[
+        int | None,
+        Field(description="Reserved by Archicad for section dimensions (API_Base node_status)."),
+    ] = None
+    nodeId: Annotated[
+        float | None,
+        Field(
+            description="Polygon vertex id of the base element, from its memo's vertexIDs, for elements with a polygon."
+        ),
+    ] = None
 
 
 class Coordinates(APIModel):
@@ -1385,6 +1456,7 @@ class Details(APIModel):
         | PolylineSettings
         | HatchSettings
         | DrawingSettings
+        | TextSettings
         | None,
         Field(
             description="Defines the modifiable type-specific settings for an element. Used as input for SET requests."
@@ -1393,16 +1465,24 @@ class Details(APIModel):
 
 
 class DetailsOfElement(APIModel):
-    """Details of an element."""
+    """Details of an element. When the optional fields filter is given in the input, only the requested fields are present; the required list below applies to unfiltered requests."""
     type: ElementType
     id: str
     floorIndex: float
     layerIndex: float
     drawIndex: float
+    hotlinkId: Annotated[
+        ElementId | None,
+        Field(
+            description="The hotlink instance this element belongs to. Present only for elements that came in through a placed hotlink; such elements are read-only."
+        ),
+    ] = None
     details: Annotated[
-        WallDetails
+        HotlinkDetails
+        | WallDetails
         | BeamDetails
         | SlabDetails
+        | RoofDetails
         | ColumnDetails
         | DetailWorksheetDetails
         | WindowDoorDetails
@@ -1418,6 +1498,7 @@ class DetailsOfElement(APIModel):
         | MorphDetails
         | DrawingDetails
         | LabelDetails
+        | TextDetails
         | NotYetSupportedElementTypeDetails,
         Field(
             description="Represents the complete type-specific details of an element. Used as output from GET requests"
@@ -1436,7 +1517,12 @@ class DimensionData(APIModel):
     elementId: ElementId | None = None
     direction: Coordinate2D | None = None
     dimensionLinePosition: Coordinate2D | None = None
-    witnessPoints: list[CoordinateWitnessPoint] | None = None
+    witnessPoints: Annotated[
+        list[CoordinateWitnessPoint] | None,
+        Field(
+            description="The witness points of the dimension. Besides the geometry each item carries the base element reference as CreateAssociativeDimensions takes it (API_Base: baseElementId, line, inIndex, special, nodeType, nodeStatus, nodeId): read a dimension placed by hand to learn the values an element type needs."
+        ),
+    ] = None
 
 
 class Dimensions3D(APIModel):
@@ -1516,6 +1602,11 @@ class DoorWithDetails(APIModel):
     reflected: bool | None = None
     refSide: bool | None = None
     oSide: bool | None = None
+    reveal: Annotated[bool | None, Field(description="Turn the reveal on or off.")] = None
+    revealDepthOffset: Annotated[
+        float | None,
+        Field(description="Distance the frame plane is moved across the wall thickness, along the wall normal."),
+    ] = None
 
 
 class DrawingData(APIModel):
@@ -1716,6 +1807,18 @@ class ElementDesignOptionPair(APIModel):
     ]
 
 
+class ElementDetailsField(Enum):
+    """A field of the details of an element."""
+    TYPE = "type"
+    ID = "id"
+    FLOOR_INDEX = "floorIndex"
+    LAYER_INDEX = "layerIndex"
+    DRAW_INDEX = "drawIndex"
+    DETAILS = "details"
+    FLOOR_PLAN_POLYGONS = "floorPlanPolygons"
+    HOTLINK_ID = "hotlinkId"
+
+
 class ElementFilter(Enum):
     """A filter type for an element."""
     IS_EDITABLE = "IsEditable"
@@ -1786,11 +1889,28 @@ class ElementIdArrayItem(APIModel):
     elementId: ElementId
 
 
+class ElementPair(APIModel):
+    elementId: ElementId
+    trimmingElementId: ElementId
+
+
 class ElementPropertyValue(APIModel):
     """A property value with the identifiers of the property and its owner element."""
     elementId: ElementId
     propertyId: PropertyId
     propertyValue: PropertyValue
+
+
+class ElementTrims(APIModel):
+    """The trims of one element: the roofs and shells trimming it, and the elements it trims."""
+    trimmedBy: Annotated[
+        list[TrimmedByItem],
+        Field(description="The roofs and shells trimming this element, with the trim type."),
+    ]
+    trims: Annotated[
+        list[ElementIdArrayItem],
+        Field(description="The elements this roof or shell trims."),
+    ]
 
 
 class ElementType(Enum):
@@ -1972,6 +2092,12 @@ class EnumValue(APIModel):
         DisplayValueEnumId | NonLocalizedValueEnumId | None,
         Field(description="The identifier of a property enumeration value."),
     ] = None
+    guid: Annotated[
+        UUID | None,
+        Field(
+            description="The identifier of the enumeration value, as reported by GetAllProperties. An element's stored value refers to the value by this.",
+        ),
+    ] = None
     displayValue: Annotated[str, Field(description="Displayed value of the enumeration.")]
     nonLocalizedValue: Annotated[
         str | None,
@@ -1985,6 +2111,19 @@ class EnumValueIdArrayItem(APIModel):
         DisplayValueEnumId | NonLocalizedValueEnumId,
         Field(description="The identifier of a property enumeration value."),
     ]
+
+
+class EnumValueToAdd(APIModel):
+    """The description of an enumeration value."""
+    displayValue: Annotated[str, Field(description="Displayed value of the enumeration.")]
+    nonLocalizedValue: Annotated[
+        str | None,
+        Field(description="Nonlocalized value of the enumeration if there is one."),
+    ] = None
+
+
+class EnumValuesToAddItem(APIModel):
+    enumValue: EnumValueToAdd
 
 
 class Error(APIModel):
@@ -2380,7 +2519,7 @@ class HatchDetails(APIModel):
     coordinates: list[Coordinate2D]
     arcs: Annotated[list[PolyArc] | None, Field(description="The arcs of the hatch outline.")] = None
     holes: Annotated[
-        list[Hole2D] | None,
+        list[Hole2DWithOutline | Hole2DWithLegacyCoordinates] | None,
         Field(description="A list of 2D holes in an element defined by closed polylines"),
     ] = None
     contourPenIndex: int | None = None
@@ -2437,7 +2576,7 @@ class HatchSettings(APIModel):
     coordinates: Annotated[list[Coordinate2D] | None, Field(min_length=3)] = None
     arcs: list[PolyArc] | None = None
     holes: Annotated[
-        list[Hole2D] | None,
+        list[Hole2DWithOutline | Hole2DWithLegacyCoordinates] | None,
         Field(description="A list of 2D holes in an element defined by closed polylines"),
     ] = None
     contourPenIndex: int | None = None
@@ -2452,11 +2591,28 @@ class HatchSettings(APIModel):
 HighlightedColor: TypeAlias = list[int]
 
 
-class Hole2D(APIModel):
-    """A 2D hole in an element defined by closed polylines"""
+class Hole2DWithLegacyCoordinates(APIModel):
+    """A 2D hole in an element defined by closed polylines. The outline is given in 'polygonOutline'; 'polygonCoordinates' is accepted as a legacy alias."""
     polygonOutline: Annotated[
         list[Coordinate2D] | None,
         Field(description="The 2D coordinates of the edge of the hole.", min_length=3),
+    ] = None
+    polygonCoordinates: Annotated[
+        list[Coordinate2D],
+        Field(description="Legacy alias of polygonOutline.", min_length=3),
+    ]
+    polygonArcs: Annotated[list[PolyArc] | None, Field(description="Polygon outline arcs of the hole.")] = None
+
+
+class Hole2DWithOutline(APIModel):
+    """A 2D hole in an element defined by closed polylines. The outline is given in 'polygonOutline'; 'polygonCoordinates' is accepted as a legacy alias."""
+    polygonOutline: Annotated[
+        list[Coordinate2D],
+        Field(description="The 2D coordinates of the edge of the hole.", min_length=3),
+    ]
+    polygonCoordinates: Annotated[
+        list[Coordinate2D] | None,
+        Field(description="Legacy alias of polygonOutline.", min_length=3),
     ] = None
     polygonArcs: Annotated[list[PolyArc] | None, Field(description="Polygon outline arcs of the hole.")] = None
 
@@ -2473,10 +2629,167 @@ class Hole3D(APIModel):
 class Hotlink(APIModel):
     """The details of a hotlink node."""
     location: Annotated[str, Field(description="The path of the hotlink file.")]
+    hotlinkNodeId: HotlinkNodeId | None = None
+    name: Annotated[str | None, Field(description="The display name of the hotlink node.")] = None
+    type: HotlinkType | None = None
     children: Annotated[
         list[Hotlink] | None,
         Field(description="The children of the hotlink node if it has any."),
     ] = None
+
+
+class HotlinkDetails(APIModel):
+    """Details of a placed hotlink instance: which node it comes from and where it sits."""
+    hotlinkType: HotlinkType
+    hotlinkNodeId: HotlinkNodeId
+    origin: Coordinate3D
+    rotationAngle: Annotated[
+        float,
+        Field(description="Counter-clockwise rotation about the origin, in radians."),
+    ]
+    mirrored: Annotated[bool, Field(description="True when the module's local X axis is reflected.")]
+    floorDifference: int | None = None
+    skipNested: bool | None = None
+    suspendFixAngle: bool | None = None
+    ignoreTopFloorLinks: bool | None = None
+    relinkWallOpenings: bool | None = None
+    adjustLevelDiffs: bool | None = None
+
+
+class HotlinkInstanceChange(APIModel):
+    elementId: ElementId
+    origin: HotlinkOrigin | None = None
+    rotationAngle: Annotated[
+        float | None,
+        Field(description="Rotation about the origin, counter-clockwise, in radians."),
+    ] = None
+    mirrored: Annotated[
+        bool | None,
+        Field(description="Reflect the module's local X axis before the rotation."),
+    ] = None
+    floorDifference: int | None = None
+    skipNested: bool | None = None
+    suspendFixAngle: bool | None = None
+    ignoreTopFloorLinks: bool | None = None
+    relinkWallOpenings: bool | None = None
+    adjustLevelDiffs: bool | None = None
+    layerIndex: Annotated[int | None, Field(description="Move the instance to this layer.")] = None
+
+
+class HotlinkInstanceCreation(APIModel):
+    hotlinkNodeId: Annotated[
+        HotlinkNodeId,
+        Field(
+            description="The node to place, from GetHotlinks or CreateHotlinkNodes. On Archicad 25 a node that has never been placed cannot be read, so a node created through the API can only be placed from Archicad 26 on."
+        ),
+    ]
+    origin: HotlinkOrigin
+    rotationAngle: Annotated[
+        float | None,
+        Field(description="Optional rotation about the origin, counter-clockwise, in radians. Defaults to 0."),
+    ] = None
+    mirrored: Annotated[
+        bool | None,
+        Field(description="Optional. Reflects the module's local X axis before the rotation. Defaults to false."),
+    ] = None
+    floorIndex: Annotated[
+        int | None,
+        Field(description="Optional story the instance is placed on. Defaults to the current story."),
+    ] = None
+    floorDifference: Annotated[
+        int | None,
+        Field(
+            description="Optional story offset applied to the module's stories. Defaults to the hotlink tool's current default."
+        ),
+    ] = None
+    layerIndex: Annotated[
+        int | None,
+        Field(description="Optional layer of the instance. Defaults to the hotlink tool's current default layer."),
+    ] = None
+    skipNested: Annotated[
+        bool | None,
+        Field(
+            description="Optional. Do not place hotlinks nested inside the module. Defaults to the hotlink tool's current default."
+        ),
+    ] = None
+    suspendFixAngle: Annotated[
+        bool | None,
+        Field(
+            description="Optional. Rotate fixed-angle elements with the module. Defaults to the hotlink tool's current default."
+        ),
+    ] = None
+    ignoreTopFloorLinks: Annotated[
+        bool | None,
+        Field(
+            description="Optional. Top-linked elements keep their height rather than their top story link. Defaults to the hotlink tool's current default."
+        ),
+    ] = None
+    relinkWallOpenings: Annotated[
+        bool | None,
+        Field(description="Optional. Defaults to the hotlink tool's current default."),
+    ] = None
+    adjustLevelDiffs: Annotated[
+        bool | None,
+        Field(description="Optional. Defaults to the hotlink tool's current default."),
+    ] = None
+
+
+class HotlinkNode(APIModel):
+    sourceLocation: Annotated[
+        str,
+        Field(description="Absolute path of the module source file (.mod or .pln)."),
+    ]
+    name: Annotated[
+        str | None,
+        Field(
+            description="Optional display name of the node. Defaults to the file name. Ignored when a node for the same file already exists."
+        ),
+    ] = None
+    storyRangeType: Annotated[
+        StoryRangeType | None,
+        Field(
+            description="Optional. Which stories of the source are placed: all of them, or the single reference story. Ignored when a node for the same file already exists."
+        ),
+    ] = None
+    refFloorIndex: Annotated[
+        int | None,
+        Field(
+            description="Optional index of the reference story in the source file. Defaults to 0. Ignored when a node for the same file already exists."
+        ),
+    ] = None
+
+
+class HotlinkNodeCreated(APIModel):
+    hotlinkNodeId: HotlinkNodeId
+    existing: Annotated[
+        bool,
+        Field(
+            description="True when a node for the same source file already existed and was returned instead of created."
+        ),
+    ]
+
+
+class HotlinkNodeId(APIModel):
+    """The identifier of a hotlink node - the reference to a module source file, which instances are placed from."""
+    guid: Annotated[
+        UUID,
+        Field(
+            description="A Globally Unique Identifier (or Universally Unique Identifier) in its string representation as defined in RFC 4122.",
+        ),
+    ]
+
+
+class HotlinkOrigin(APIModel):
+    """Where a hotlink instance's origin lands, in the project's coordinates. z is optional: CreateHotlinkInstances places at 0 when it is omitted, ChangeHotlinkInstances keeps the instance's current z."""
+    x: float
+    y: float
+    z: float | None = None
+
+
+class HotlinkType(Enum):
+    """Module or XRef."""
+    MODULE = "Module"
+    X_REF = "XRef"
 
 
 class HotspotData(APIModel):
@@ -2596,7 +2909,7 @@ class IssueIdArrayItem(APIModel):
 
 
 class Justification(Enum):
-    """Optional text justification."""
+    """Optional text justification. Equivalent to style.justification."""
     LEFT = "Left"
     CENTER = "Center"
     RIGHT = "Right"
@@ -2707,6 +3020,47 @@ class KeynoteLabelData(APIModel):
     ] = None
 
 
+class LabelArrowType(Enum):
+    """Arrow head shape for a Label's leader line."""
+    EMPTY_CIRCLE = "EmptyCircle"
+    CROSS_CIRCLE = "CrossCircle"
+    FULL_CIRCLE = "FullCircle"
+    SLASH_LINE15 = "SlashLine15"
+    OPEN_ARROW15 = "OpenArrow15"
+    CLOSED_ARROW15 = "ClosedArrow15"
+    FULL_ARROW15 = "FullArrow15"
+    SLASH_LINE30 = "SlashLine30"
+    OPEN_ARROW30 = "OpenArrow30"
+    CLOSED_ARROW30 = "ClosedArrow30"
+    FULL_ARROW30 = "FullArrow30"
+    SLASH_LINE45 = "SlashLine45"
+    OPEN_ARROW45 = "OpenArrow45"
+    CLOSED_ARROW45 = "ClosedArrow45"
+    FULL_ARROW45 = "FullArrow45"
+    SLASH_LINE60 = "SlashLine60"
+    OPEN_ARROW60 = "OpenArrow60"
+    CLOSED_ARROW60 = "ClosedArrow60"
+    FULL_ARROW60 = "FullArrow60"
+    SLASH_LINE90 = "SlashLine90"
+    PEPITA_CIRCLE = "PepitaCircle"
+    BAND_ARROW = "BandArrow"
+    HALF_ARROW_CCW15 = "HalfArrowCcw15"
+    HALF_ARROW_CW15 = "HalfArrowCw15"
+    HALF_ARROW_CCW30 = "HalfArrowCcw30"
+    HALF_ARROW_CW30 = "HalfArrowCw30"
+    HALF_ARROW_CCW45 = "HalfArrowCcw45"
+    HALF_ARROW_CW45 = "HalfArrowCw45"
+    HALF_ARROW_CCW60 = "HalfArrowCcw60"
+    HALF_ARROW_CW60 = "HalfArrowCw60"
+    SLASH_LINE75 = "SlashLine75"
+
+
+class LabelClass(Enum):
+    """Whether this is a textual or a symbol label. Optional; if omitted, inherits the current Label tool default (which may silently resolve to either class - explicitly setting this avoids ambiguity)."""
+    TEXT = "Text"
+    SYMBOL = "Symbol"
+
+
 class LabelData(APIModel):
     """The parameters of the new Label."""
     favoriteName: Annotated[
@@ -2719,7 +3073,30 @@ class LabelData(APIModel):
         ElementId | None,
         Field(description="The parent element if the label is an associative label."),
     ] = None
-    text: Annotated[str | None, Field(description="The text content if the label is a text label.")] = None
+    labelClass: LabelClass | None = None
+    text: Annotated[
+        str | None,
+        Field(description="The text content if the label is a text label. Ignored if 'runs' is also given."),
+    ] = None
+    runs: Annotated[
+        list[TextRunDetails] | None,
+        Field(
+            description="Multi-style text content for a text label: an array of styled runs, concatenated in order. Takes precedence over 'text' if both are given.",
+            min_length=1,
+        ),
+    ] = None
+    style: Annotated[
+        TextStyleSettableDetails | None,
+        Field(description="Style settings for a text label (font, pen, size, frame, etc). Ignored for symbol labels."),
+    ] = None
+    symbolStyle: Annotated[
+        LabelSymbolStyleSettableDetails | None,
+        Field(description="Style settings specific to a symbol label. Ignored for text labels."),
+    ] = None
+    leaderLine: Annotated[
+        LabelLeaderLineSettableDetails | None,
+        Field(description="Leader line, frame and arrow settings, shared by both label classes."),
+    ] = None
     begCoordinate: Annotated[
         Coordinate2D | None,
         Field(
@@ -2750,6 +3127,127 @@ class LabelDetails(APIModel):
     midCoordinate: Coordinate2D
     endCoordinate: Coordinate2D
     hasLeaderLine: bool
+    labelClass: LabelClass
+    leaderLine: LabelLeaderLineDetails
+    style: Annotated[
+        TextStyleDetails | None,
+        Field(description="Present only when labelClass is 'Text'."),
+    ] = None
+    symbolStyle: Annotated[
+        LabelSymbolStyleSettableDetails | None,
+        Field(description="Present only when labelClass is 'Symbol'."),
+    ] = None
+    text: Annotated[str | None, Field(description="Present only when labelClass is 'Text'.")] = None
+    paragraphCount: Annotated[
+        int | None,
+        Field(
+            description="Present only when labelClass is 'Text'. Read-only: number of paragraphs in the memo (Tapir's own Create/Modify commands always produce 1)."
+        ),
+    ] = None
+    runs: Annotated[
+        list[TextRunDetails] | None,
+        Field(
+            description="Present only when labelClass is 'Text' and the content has paragraphs (always for content Tapir created): one entry per styled run, a single run too."
+        ),
+    ] = None
+
+
+class LabelLeaderLineAnchorPoint(Enum):
+    """How the leader line connects to the label text (text-class labels only)."""
+    MIDDLE = "Middle"
+    TOP = "Top"
+    BOTTOM = "Bottom"
+    UNDERLINED = "Underlined"
+
+
+class LabelLeaderLineDetails(APIModel):
+    """Full readable leader-line/frame state of a Label: every field of LabelLeaderLineSettableDetails plus the leader line's coordinates."""
+    penIndex: Annotated[int | None, Field(description="Pen attribute index of the leader line.")] = None
+    lineTypeId: Annotated[AttributeId | None, Field(description="Line type attribute of the leader line.")] = None
+    contourOffset: Annotated[
+        float | None,
+        Field(description="Padding between the Label's frame and its content, in mm."),
+    ] = None
+    framed: Annotated[bool | None, Field(description="Put a frame around the content.")] = None
+    hasLeaderLine: Annotated[
+        bool | None,
+        Field(description="Whether the Label has a leader line (pointer line)."),
+    ] = None
+    anchorPoint: LabelLeaderLineAnchorPoint | None = None
+    leaderShape: Annotated[LeaderShape | None, Field(description="Shape of the leader line.")] = None
+    squareRootAngle: Annotated[
+        float | None,
+        Field(description="Angle in radians, used only when leaderShape is 'SquareRoot'. Valid range 1-179 degrees."),
+    ] = None
+    arrowType: LabelArrowType | None = None
+    arrowVisible: bool | None = None
+    arrowPenIndex: int | None = None
+    arrowSize: Annotated[float | None, Field(description="Arrow size in mm.")] = None
+    hideWithBaseElem: Annotated[
+        bool | None,
+        Field(description="Hide the label together with its parent element."),
+    ] = None
+    begCoordinate: Coordinate2D | None = None
+    midCoordinate: Coordinate2D | None = None
+    endCoordinate: Coordinate2D | None = None
+
+
+class LabelLeaderLineSettableDetails(APIModel):
+    """Every user-configurable leader-line/frame setting of a Label (top-level API_LabelType fields, shared by both Text and Symbol label classes). Shared by CreateLabels ('leaderLine'), ModifyLabels ('leaderLine'), and the Get response."""
+    penIndex: Annotated[int | None, Field(description="Pen attribute index of the leader line.")] = None
+    lineTypeId: Annotated[AttributeId | None, Field(description="Line type attribute of the leader line.")] = None
+    contourOffset: Annotated[
+        float | None,
+        Field(description="Padding between the Label's frame and its content, in mm."),
+    ] = None
+    framed: Annotated[bool | None, Field(description="Put a frame around the content.")] = None
+    hasLeaderLine: Annotated[
+        bool | None,
+        Field(description="Whether the Label has a leader line (pointer line)."),
+    ] = None
+    anchorPoint: LabelLeaderLineAnchorPoint | None = None
+    leaderShape: Annotated[LeaderShape | None, Field(description="Shape of the leader line.")] = None
+    squareRootAngle: Annotated[
+        float | None,
+        Field(description="Angle in radians, used only when leaderShape is 'SquareRoot'. Valid range 1-179 degrees."),
+    ] = None
+    arrowType: LabelArrowType | None = None
+    arrowVisible: bool | None = None
+    arrowPenIndex: int | None = None
+    arrowSize: Annotated[float | None, Field(description="Arrow size in mm.")] = None
+    hideWithBaseElem: Annotated[
+        bool | None,
+        Field(description="Hide the label together with its parent element."),
+    ] = None
+
+
+class LabelSymbolStyleSettableDetails(APIModel):
+    """Every user-configurable style setting specific to a Symbol-class Label (top-level API_LabelType fields documented as 'for symbol labels only'). Shared by CreateLabels ('symbolStyle'), ModifyLabels ('symbolStyle'), and the Get response."""
+    textWay: SymbolLabelTextDirection | None = None
+    fontIndex: int | None = None
+    bold: bool | None = None
+    italic: bool | None = None
+    underline: bool | None = None
+    flipEnabled: Annotated[bool | None, Field(description="'Always Readable' toggle.")] = None
+    nonBreaking: Annotated[bool | None, Field(description="'Wrap Text' turned off when true.")] = None
+    textSize: Annotated[float | None, Field(description="Character height in mm.")] = None
+    useBackgroundFill: bool | None = None
+    backgroundFillPenIndex: Annotated[int | None, Field(description="Effective only if useBackgroundFill is true.")] = (
+        None
+    )
+    effectStrikeout: bool | None = None
+    effectSuperscript: bool | None = None
+    effectSubscript: bool | None = None
+    effectProtected: bool | None = None
+
+
+class LabelsWithDetail(APIModel):
+    elementId: ElementId
+    text: str | None = None
+    runs: Annotated[list[TextRunDetails] | None, Field(min_length=1)] = None
+    style: TextStyleSettableDetails | None = None
+    symbolStyle: LabelSymbolStyleSettableDetails | None = None
+    leaderLine: LabelLeaderLineSettableDetails | None = None
 
 
 class LampData(APIModel):
@@ -3055,6 +3553,13 @@ class LayoutSettingsData(APIModel):
     customData: list[LayoutCustomDataToSet] | None = None
 
 
+class LeaderShape(Enum):
+    """Shape of the leader line."""
+    SEGMENTED = "Segmented"
+    SPLINEAR = "Splinear"
+    SQUARE_ROOT = "SquareRoot"
+
+
 class Length(APIModel):
     unit: LengthType
     accuracy: AccuracyType
@@ -3125,6 +3630,10 @@ class LibraryFileAddition(APIModel):
         LibraryPartType | None,
         Field(description="The type of the library part. By default 'Pict'."),
     ] = None
+
+
+class LibraryLocation(APIModel):
+    path: str
 
 
 class LibraryPart(APIModel):
@@ -3647,7 +4156,7 @@ class ManualZoneGeometry(APIModel):
     ]
     polygonArcs: Annotated[list[PolyArc] | None, Field(description="Polygon outline arcs of the zone.")] = None
     holes: Annotated[
-        list[Hole2D] | None,
+        list[Hole2DWithOutline | Hole2DWithLegacyCoordinates] | None,
         Field(description="A list of 2D holes in an element defined by closed polylines"),
     ] = None
 
@@ -4119,6 +4628,45 @@ class NameType(Enum):
     CUSTOM_NAME = "CustomName"
 
 
+class NavigatorItem(APIModel):
+    """A navigator item and the subtree below it."""
+    navigatorItemId: NavigatorItemId
+    type: NavigatorItemType
+    name: Annotated[str, Field(description="The name of the navigator item.")]
+    prefix: Annotated[
+        str,
+        Field(description="The floor number for story items, an empty string for every other item type."),
+    ]
+    uiId: Annotated[
+        str,
+        Field(description="The identifier shown next to the name on the navigator."),
+    ]
+    customUiId: Annotated[
+        bool,
+        Field(
+            description='True when the identifier was typed by hand instead of being inherited from the Project Map source - the View Settings ID "Custom" radio button.'
+        ),
+    ]
+    customName: Annotated[
+        bool,
+        Field(
+            description='True when the name was typed by hand instead of being inherited from the Project Map source - the View Settings name "Custom" radio button.'
+        ),
+    ]
+    isIndependent: Annotated[
+        bool,
+        Field(description="True when the item is independent, that is when its link to the Project Map is broken."),
+    ]
+    children: Annotated[
+        list[NavigatorItemArrayItem] | None,
+        Field(description="The children of the navigator item. Missing when the item has no children."),
+    ] = None
+
+
+class NavigatorItemArrayItem(APIModel):
+    navigatorItem: NavigatorItem
+
+
 class NavigatorItemId(APIModel):
     """The identifier of a navigator item."""
     guid: Annotated[
@@ -4141,6 +4689,37 @@ class NavigatorItemIdsWithRotationItem(APIModel):
 class NavigatorItemIdsWithViewSetting(APIModel):
     navigatorItemId: NavigatorItemId
     viewSettings: ViewSettings
+
+
+class NavigatorItemType(Enum):
+    """The type of the navigator item."""
+    UNDEFINED_ITEM = "UndefinedItem"
+    PROJECT_ITEM = "ProjectItem"
+    STORY_ITEM = "StoryItem"
+    SECTION_ITEM = "SectionItem"
+    DETAIL_DRAWING_ITEM = "DetailDrawingItem"
+    PERSPECTIVE_ITEM = "PerspectiveItem"
+    AXONOMETRY_ITEM = "AxonometryItem"
+    LIST_ITEM = "ListItem"
+    SCHEDULE_ITEM = "ScheduleItem"
+    TOC_ITEM = "TocItem"
+    CAMERA_ITEM = "CameraItem"
+    CAMERA_SET_ITEM = "CameraSetItem"
+    INFO_ITEM = "InfoItem"
+    HELP_ITEM = "HelpItem"
+    LAYOUT_ITEM = "LayoutItem"
+    MASTER_LAYOUT_ITEM = "MasterLayoutItem"
+    BOOK_ITEM = "BookItem"
+    MASTER_FOLDER_ITEM = "MasterFolderItem"
+    SUB_SET_ITEM = "SubSetItem"
+    TEXT_LIST_ITEM = "TextListItem"
+    ELEVATION_ITEM = "ElevationItem"
+    INTERIOR_ELEVATION_ITEM = "InteriorElevationItem"
+    WORKSHEET_DRAWING_ITEM = "WorksheetDrawingItem"
+    DOCUMENT_FROM3_D_ITEM = "DocumentFrom3DItem"
+    FOLDER_ITEM = "FolderItem"
+    DRAWING_ITEM = "DrawingItem"
+    UNKNOWN_ITEM = "UnknownItem"
 
 
 class NavigatorMapId(Enum):
@@ -4705,7 +5284,7 @@ class PolylineSettings(APIModel):
 
 
 class PossibleEnumValue(APIModel):
-    enumValue: Annotated[EnumValue, Field(description="The description of an enumeration value.")]
+    enumValue: EnumValue
 
 
 class PossibleNumericValue(APIModel):
@@ -5048,6 +5627,10 @@ class PropertyDefinitionArrayItem(APIModel):
 
 class PropertyDetails(APIModel):
     """The details of the property."""
+    possibleEnumValues: Annotated[
+        list[PossibleEnumValue] | None,
+        Field(description="The possible enum values of the property when the property type is enumeration."),
+    ] = None
     propertyId: PropertyId
     propertyType: PropertyType
     propertyGroupName: str
@@ -5071,9 +5654,18 @@ class PropertyDetails(APIModel):
 class PropertyExpressionUpdate(APIModel):
     propertyId: PropertyId
     expressions: Annotated[
-        list[str],
-        Field(description="The new expression strings for the property.", min_length=1),
-    ]
+        list[str] | None,
+        Field(
+            description="The new expression strings for the property. Only for expression-based properties.",
+            min_length=1,
+        ),
+    ] = None
+    possibleEnumValues: Annotated[
+        list[EnumValuesToAddItem] | None,
+        Field(
+            description="The enum values to add to an enumeration property. Values already on the property keep their identifier, so element values assigned to them survive; values not listed here are kept as well."
+        ),
+    ] = None
 
 
 class PropertyGroup(APIModel):
@@ -5215,6 +5807,11 @@ class RevisionIssueId(APIModel):
     ]
 
 
+class RoofClass(Enum):
+    SINGLE_PLANE = "SinglePlane"
+    MULTI_PLANE = "MultiPlane"
+
+
 class RoofData(APIModel):
     level: float
     floorIndex: Annotated[
@@ -5225,15 +5822,10 @@ class RoofData(APIModel):
     polygonCoordinates: Annotated[list[Coordinate2D], Field(min_length=3)]
     polygonArcs: list[PolyArc] | None = None
     holes: Annotated[
-        list[Hole2D] | None,
+        list[Hole2DWithOutline | Hole2DWithLegacyCoordinates] | None,
         Field(description="A list of 2D holes in an element defined by closed polylines"),
     ] = None
-    pivotLine: Annotated[
-        PivotLine | None,
-        Field(
-            description="If given, a single-plane roof is created instead of a multi-plane roof: one plane tilted along this pivot line. The plane rises on the left side of the line direction (begCoordinate towards endCoordinate); flip the line to tilt towards the other side."
-        ),
-    ] = None
+    pivotLine: PivotLine | None = None
     angle: Annotated[
         float | None,
         Field(
@@ -5246,6 +5838,59 @@ class RoofData(APIModel):
     structureType: RoofStructureType | None = None
     buildingMaterialId: AttributeId | None = None
     compositeId: AttributeId | None = None
+
+
+class RoofDetails(APIModel):
+    roofClass: RoofClass
+    structureType: RoofStructureType
+    thickness: float
+    level: Annotated[
+        float,
+        Field(
+            description="Height of the pivot line (single-plane) or the pivot polygon (multi-plane) above the floor level."
+        ),
+    ]
+    zCoordinate: float
+    buildingMaterialId: AttributeId | None = None
+    compositeId: AttributeId | None = None
+    angle: Annotated[float | None, Field(description="Single-plane: the slope in radians.")] = None
+    pivotLine: RoofDetailsPivotLine | None = None
+    eavesOverhang: Annotated[
+        float | None,
+        Field(description="Multi-plane: the eaves overhang beyond the pivot polygon."),
+    ] = None
+    levels: Annotated[
+        list[RoofDetailsLevel] | None,
+        Field(
+            description="Multi-plane: the roof levels, each with its height above the previous and its slope in radians."
+        ),
+    ] = None
+    pivotPolygonOutline: Annotated[
+        list[Coordinate2D] | None,
+        Field(
+            description="Multi-plane: the pivot polygon the planes rise from. Arcs are not carried; a curved pivot edge comes back as its end points."
+        ),
+    ] = None
+    polygonOutline: Annotated[
+        list[Coordinate2D],
+        Field(description="The roof's polygon: the plane roof's outline, the multi-plane roof's contour."),
+    ]
+    polygonArcs: list[PolyArc] | None = None
+    holes: Annotated[
+        list[Hole2DWithOutline | Hole2DWithLegacyCoordinates] | None,
+        Field(description="A list of 2D holes in an element defined by closed polylines"),
+    ] = None
+
+
+class RoofDetailsLevel(APIModel):
+    height: float
+    angle: float
+
+
+class RoofDetailsPivotLine(APIModel):
+    """Single-plane: the pivot line the plane rotates about."""
+    begin: Coordinate2D
+    end: Coordinate2D
 
 
 class RoofOrShellRelations(APIModel):
@@ -5274,7 +5919,7 @@ class RoofWithDetails(APIModel):
     polygonOutline: Annotated[list[Coordinate2D] | None, Field(min_length=3)] = None
     polygonArcs: list[PolyArc] | None = None
     holes: Annotated[
-        list[Hole2D] | None,
+        list[Hole2DWithOutline | Hole2DWithLegacyCoordinates] | None,
         Field(description="A list of 2D holes in an element defined by closed polylines"),
     ] = None
 
@@ -5444,7 +6089,7 @@ class SlabData(APIModel):
     ]
     polygonArcs: Annotated[list[PolyArc] | None, Field(description="Polygon outline arcs of the slab.")] = None
     holes: Annotated[
-        list[Hole2D] | None,
+        list[Hole2DWithOutline | Hole2DWithLegacyCoordinates] | None,
         Field(description="A list of 2D holes in an element defined by closed polylines"),
     ] = None
     floorIndex: Annotated[
@@ -5467,7 +6112,7 @@ class SlabDetails(APIModel):
     polygonOutline: Annotated[list[Coordinate2D], Field(description="Polygon outline of the slab.")]
     polygonArcs: Annotated[list[PolyArc] | None, Field(description="Polygon outline arcs of the slab.")] = None
     holes: Annotated[
-        list[Hole2D],
+        list[Hole2DWithOutline | Hole2DWithLegacyCoordinates],
         Field(description="A list of 2D holes in an element defined by closed polylines"),
     ]
     structureType: SlabStructureType | None = None
@@ -5502,10 +6147,16 @@ class SlabWithDetails(APIModel):
     buildingMaterialId: AttributeId | None = None
     compositeId: AttributeId | None = None
     referencePlaneLocation: SlabReferencePlaneLocation | None = None
-    polygonOutline: Annotated[list[Coordinate2D] | None, Field(min_length=3)] = None
+    polygonOutline: Annotated[
+        list[Coordinate2D] | None,
+        Field(
+            description="Replaces the slab's entire polygon, including its holes - resend the holes field too to keep them, otherwise they are removed.",
+            min_length=3,
+        ),
+    ] = None
     polygonArcs: list[PolyArc] | None = None
     holes: Annotated[
-        list[Hole2D] | None,
+        list[Hole2DWithOutline | Hole2DWithLegacyCoordinates] | None,
         Field(
             description="Can be given on its own, without polygonOutline, to add/remove/clear holes in place (an empty array clears all holes) - the slab's current outline is reused unchanged."
         ),
@@ -5685,6 +6336,12 @@ class StairData(APIModel):
     stepNum: Annotated[int | None, Field(description="Number of risers (steps).", ge=1)] = None
     riserHeight: Annotated[float | None, Field(description="Height of each riser.", gt=0.0)] = None
     treadDepth: Annotated[float | None, Field(description="Depth (going) of each tread.", gt=0.0)] = None
+    finishVisible: Annotated[
+        bool | None,
+        Field(
+            description="Optional. If false, the tread/riser finishes are hidden and only the stair structure (e.g. a monolith) is modeled."
+        ),
+    ] = None
 
 
 class Status(Enum):
@@ -5710,8 +6367,20 @@ class StoryParameters(APIModel):
     name: Annotated[str, Field(description="The name of the story.")]
 
 
+class StoryRangeType(Enum):
+    """Optional. Which stories of the source are placed: all of them, or the single reference story. Ignored when a node for the same file already exists."""
+    ALL_STORIES = "AllStories"
+    SINGLE_STORY = "SingleStory"
+
+
 class StorySettings(APIModel):
     """Contains the configurable settings for creating or modifying a story. Used as input in API requests."""
+    index: Annotated[
+        int | None,
+        Field(
+            description="The story index. Optional. The stories are matched to the existing ones positionally, from the bottom up. Giving the index of any of them pins the numbering of the whole list, so stories below the existing structure - basements with negative indices - can be requested as well. When given for more than one story, the indices must be consecutive."
+        ),
+    ] = None
     dispOnSections: Annotated[
         bool,
         Field(description="Story level lines should appear on sections and elevations."),
@@ -5909,7 +6578,28 @@ class SurveyPointPosition(APIModel):
     ]
 
 
-class TextData(APIModel):
+class SymbolLabelTextDirection(Enum):
+    """Direction of the symbol label's text."""
+    PARALLEL = "Parallel"
+    HORIZONTAL = "Horizontal"
+    VERTICAL = "Vertical"
+    GENERAL = "General"
+
+
+class TextBoxAnchor(Enum):
+    """Anchor point of the text box."""
+    LEFT_TOP = "LeftTop"
+    MIDDLE_TOP = "MiddleTop"
+    RIGHT_TOP = "RightTop"
+    LEFT_MIDDLE = "LeftMiddle"
+    MIDDLE_MIDDLE = "MiddleMiddle"
+    RIGHT_MIDDLE = "RightMiddle"
+    LEFT_BOTTOM = "LeftBottom"
+    MIDDLE_BOTTOM = "MiddleBottom"
+    RIGHT_BOTTOM = "RightBottom"
+
+
+class TextDataWithRuns(APIModel):
     """The parameters of the new Text element."""
     favoriteName: Annotated[
         str | None,
@@ -5923,18 +6613,355 @@ class TextData(APIModel):
             description="The placement position of the text. The z value is used to determine the floor when floorIndex is omitted."
         ),
     ]
-    text: Annotated[str, Field(description="The text content. Newlines create multiple lines.")]
+    text: Annotated[
+        str | None,
+        Field(description="The text content. Newlines create multiple lines. Ignored if 'runs' is also given."),
+    ] = None
+    runs: Annotated[
+        list[TextRunDetails],
+        Field(
+            description="Multi-style text content: an array of styled runs, concatenated in order. Takes precedence over 'text' if both are given.",
+            min_length=1,
+        ),
+    ]
     height: Annotated[
         float | None,
-        Field(description="The character height in millimeters. Optional; defaults to the Text tool default."),
+        Field(
+            description="The character height in millimeters. Optional; defaults to the Text tool default. Equivalent to style.height."
+        ),
     ] = None
-    pen: Annotated[int | None, Field(description="Optional pen attribute index.")] = None
-    angle: Annotated[float | None, Field(description="Optional rotation angle in radians.")] = None
-    justification: Annotated[Justification | None, Field(description="Optional text justification.")] = None
+    pen: Annotated[
+        int | None,
+        Field(description="Optional pen attribute index. Equivalent to style.penIndex."),
+    ] = None
+    angle: Annotated[
+        float | None,
+        Field(description="Optional rotation angle in radians. Equivalent to style.angle."),
+    ] = None
+    justification: Justification | None = None
+    style: Annotated[
+        TextStyleSettableDetails | None,
+        Field(
+            description="Full style settings (font, effects, frame, anchor, etc). height/pen/angle/justification above take precedence over the same fields here if both are given."
+        ),
+    ] = None
     floorIndex: Annotated[
         int | None,
         Field(description="Optional floor index. If omitted, derived from the coordinate's z value."),
     ] = None
+
+
+class TextDataWithText(APIModel):
+    """The parameters of the new Text element."""
+    favoriteName: Annotated[
+        str | None,
+        Field(
+            description="Optional name of a favorite to base the new element on. Its settings are applied first, then the explicitly given fields override them."
+        ),
+    ] = None
+    coordinate: Annotated[
+        Coordinate3D,
+        Field(
+            description="The placement position of the text. The z value is used to determine the floor when floorIndex is omitted."
+        ),
+    ]
+    text: Annotated[
+        str,
+        Field(description="The text content. Newlines create multiple lines. Ignored if 'runs' is also given."),
+    ]
+    runs: Annotated[
+        list[TextRunDetails] | None,
+        Field(
+            description="Multi-style text content: an array of styled runs, concatenated in order. Takes precedence over 'text' if both are given.",
+            min_length=1,
+        ),
+    ] = None
+    height: Annotated[
+        float | None,
+        Field(
+            description="The character height in millimeters. Optional; defaults to the Text tool default. Equivalent to style.height."
+        ),
+    ] = None
+    pen: Annotated[
+        int | None,
+        Field(description="Optional pen attribute index. Equivalent to style.penIndex."),
+    ] = None
+    angle: Annotated[
+        float | None,
+        Field(description="Optional rotation angle in radians. Equivalent to style.angle."),
+    ] = None
+    justification: Justification | None = None
+    style: Annotated[
+        TextStyleSettableDetails | None,
+        Field(
+            description="Full style settings (font, effects, frame, anchor, etc). height/pen/angle/justification above take precedence over the same fields here if both are given."
+        ),
+    ] = None
+    floorIndex: Annotated[
+        int | None,
+        Field(description="Optional floor index. If omitted, derived from the coordinate's z value."),
+    ] = None
+
+
+class TextDetails(APIModel):
+    text: Annotated[str, Field(description="The text content. Newlines separate the lines.")]
+    position: Annotated[Coordinate2D, Field(description="The placement position of the text.")]
+    angle: Annotated[float, Field(description="The rotation angle in radians (same as style.angle).")]
+    height: Annotated[
+        float,
+        Field(description="The character height in millimeters (same as style.height)."),
+    ]
+    pen: Annotated[int, Field(description="The pen attribute index (same as style.penIndex).")]
+    justification: Justification
+    zCoordinate: Annotated[float, Field(description="The level of the text's floor.")]
+    style: Annotated[
+        TextStyleDetails,
+        Field(
+            description="The full style state; the flat fields above are the subset SetDetailsOfElements takes back."
+        ),
+    ]
+    paragraphCount: Annotated[
+        int,
+        Field(
+            description="Read-only: number of paragraphs in the memo (Tapir's own Create/Modify commands always produce 1)."
+        ),
+    ]
+    runs: Annotated[
+        list[TextRunDetails] | None,
+        Field(
+            description="The styled runs of the content, present whenever the content has paragraphs (always for content Tapir created); one entry per run, a single run too, as a run may carry a pen, font, face or size of its own. Concatenating the runs' text in order gives the full content."
+        ),
+    ] = None
+
+
+class TextFrameShape(Enum):
+    """Text frame shape. Standalone Text elements only support Rectangle. Available from Archicad 28; earlier versions ignore it and read it back as Rectangle."""
+    RECTANGLE = "Rectangle"
+    CIRCLE = "Circle"
+    ROUNDED_RECTANGLE = "RoundedRectangle"
+    PILL = "Pill"
+
+
+class TextRunDetails(APIModel):
+    """One monostyle run of text (API_RunType). Concatenating 'text' across all runs in order gives the full content; a newline character starts a new line."""
+    text: Annotated[str, Field(description="The run's text content.")]
+    penIndex: Annotated[
+        int | None,
+        Field(description="Pen attribute index. Optional; defaults to the style's penIndex."),
+    ] = None
+    fontIndex: Annotated[
+        int | None,
+        Field(description="Font attribute index. Optional; defaults to the style's fontIndex."),
+    ] = None
+    bold: bool | None = None
+    italic: bool | None = None
+    underline: bool | None = None
+    heightOverride: Annotated[
+        float | None,
+        Field(description="Character height in mm for this run only. Optional; defaults to the style's height."),
+    ] = None
+    effectStrikeout: Annotated[
+        bool | None,
+        Field(description="Optional; defaults to the style's effectStrikeout."),
+    ] = None
+    effectSuperscript: Annotated[
+        bool | None,
+        Field(description="Optional; defaults to the style's effectSuperscript."),
+    ] = None
+    effectSubscript: Annotated[
+        bool | None,
+        Field(description="Optional; defaults to the style's effectSubscript."),
+    ] = None
+    effectProtected: Annotated[
+        bool | None,
+        Field(description="Optional; defaults to the style's effectProtected."),
+    ] = None
+
+
+class TextSettings(APIModel):
+    """Settings for modifying a Text element or a text-type Label. For Labels only the text field is applied. Setting text replaces the whole content (any per-run formatting of the old content is dropped) and switches the element to automatic width, matching the behavior of CreateTexts/CreateLabels."""
+    text: Annotated[
+        str | None,
+        Field(description="The new text content. Newlines create multiple lines."),
+    ] = None
+    position: Annotated[
+        Coordinate2D | None,
+        Field(description="The placement position of the text. Only applied to Text elements."),
+    ] = None
+    angle: Annotated[
+        float | None,
+        Field(description="The rotation angle in radians. Only applied to Text elements."),
+    ] = None
+    height: Annotated[
+        float | None,
+        Field(description="The character height in millimeters. Only applied to Text elements."),
+    ] = None
+    justification: Justification | None = None
+
+
+class TextStyleDetails(APIModel):
+    """Full readable style state of a Text or text-class Label: every field of TextStyleSettableDetails plus the read-only ones (lineCount, boxWidth, boxHeight)."""
+    penIndex: Annotated[int | None, Field(description="Pen attribute index.")] = None
+    fontIndex: Annotated[int | None, Field(description="Font attribute index.")] = None
+    bold: bool | None = None
+    italic: bool | None = None
+    underline: bool | None = None
+    justification: Justification | None = None
+    height: Annotated[float | None, Field(description="Character height in mm.")] = None
+    spacing: Annotated[float | None, Field(description="Line spacing factor, between -10.0 and -1.0.")] = None
+    angle: Annotated[float | None, Field(description="Rotation angle in radians.")] = None
+    effectStrikeout: bool | None = None
+    effectSuperscript: bool | None = None
+    effectSubscript: bool | None = None
+    effectProtected: Annotated[bool | None, Field(description="Protected text (autotext reference).")] = None
+    widthFactor: Annotated[
+        float | None,
+        Field(description="Width scale of the text, between 0.75 and 10.0."),
+    ] = None
+    charSpaceFactor: Annotated[
+        float | None,
+        Field(description="Character spacing scale, between 0.75 and 10.0."),
+    ] = None
+    fixedSize: Annotated[bool | None, Field(description="Size does not depend on output scale.")] = None
+    usedContour: Annotated[bool | None, Field(description="Draw the frame of the text block.")] = None
+    usedFill: Annotated[bool | None, Field(description="Draw a solid fill behind the text block.")] = None
+    contourPenIndex: Annotated[int | None, Field(description="Pen index of the text block's frame.")] = None
+    fillPenIndex: Annotated[int | None, Field(description="Pen index of the text block's background fill.")] = None
+    anchor: TextBoxAnchor | None = None
+    fixedAngle: Annotated[
+        bool | None,
+        Field(description="The rotation angle does not change when the element is rotated."),
+    ] = None
+    contourOffset: Annotated[
+        float | None,
+        Field(description="Offset of the frame/background fill from the text bounding box, in mm."),
+    ] = None
+    flipEnabled: Annotated[
+        bool | None,
+        Field(description="The text should always be readable (flips when viewed upside down)."),
+    ] = None
+    textFrameShape: Annotated[
+        TextFrameShape | None,
+        Field(
+            description="Text frame shape. Standalone Text elements only support Rectangle. Available from Archicad 28; earlier versions ignore it and read it back as Rectangle."
+        ),
+    ] = None
+    textFrameSizeFixed: Annotated[
+        bool | None,
+        Field(
+            description="Use fixedWidth/fixedHeight instead of fitting the frame to the text box. Available from Archicad 28; earlier versions ignore it and read it back as false."
+        ),
+    ] = None
+    textFrameFixedWidth: Annotated[
+        float | None,
+        Field(
+            description="Frame width in mm, when textFrameSizeFixed is true. Between 1 and 1000. Available from Archicad 28; earlier versions ignore it and read it back as 0."
+        ),
+    ] = None
+    textFrameFixedHeight: Annotated[
+        float | None,
+        Field(
+            description="Frame height in mm, when textFrameSizeFixed is true (ignored for Circle, which uses fixedWidth as diameter). Between 1 and 1000. Available from Archicad 28; earlier versions ignore it and read it back as 0."
+        ),
+    ] = None
+    lineCount: Annotated[
+        int | None,
+        Field(description="Read-only: number of text lines (API_TextType::nLine)."),
+    ] = None
+    boxWidth: Annotated[
+        float | None,
+        Field(description="Read-only: horizontal size of the text box in mm, auto-computed by Archicad."),
+    ] = None
+    boxHeight: Annotated[
+        float | None,
+        Field(description="Read-only: vertical size of the text box in mm, auto-computed by Archicad."),
+    ] = None
+
+
+class TextStyleSettableDetails(APIModel):
+    """Every user-configurable style setting of a Text or a text-class Label (API_TextType). Shared by CreateTexts/CreateLabels ('style'), ModifyTexts/ModifyLabels ('style'), and the Get response."""
+    penIndex: Annotated[int | None, Field(description="Pen attribute index.")] = None
+    fontIndex: Annotated[int | None, Field(description="Font attribute index.")] = None
+    bold: bool | None = None
+    italic: bool | None = None
+    underline: bool | None = None
+    justification: Justification | None = None
+    height: Annotated[float | None, Field(description="Character height in mm.")] = None
+    spacing: Annotated[float | None, Field(description="Line spacing factor, between -10.0 and -1.0.")] = None
+    angle: Annotated[float | None, Field(description="Rotation angle in radians.")] = None
+    effectStrikeout: bool | None = None
+    effectSuperscript: bool | None = None
+    effectSubscript: bool | None = None
+    effectProtected: Annotated[bool | None, Field(description="Protected text (autotext reference).")] = None
+    widthFactor: Annotated[
+        float | None,
+        Field(description="Width scale of the text, between 0.75 and 10.0."),
+    ] = None
+    charSpaceFactor: Annotated[
+        float | None,
+        Field(description="Character spacing scale, between 0.75 and 10.0."),
+    ] = None
+    fixedSize: Annotated[bool | None, Field(description="Size does not depend on output scale.")] = None
+    usedContour: Annotated[bool | None, Field(description="Draw the frame of the text block.")] = None
+    usedFill: Annotated[bool | None, Field(description="Draw a solid fill behind the text block.")] = None
+    contourPenIndex: Annotated[int | None, Field(description="Pen index of the text block's frame.")] = None
+    fillPenIndex: Annotated[int | None, Field(description="Pen index of the text block's background fill.")] = None
+    anchor: TextBoxAnchor | None = None
+    fixedAngle: Annotated[
+        bool | None,
+        Field(description="The rotation angle does not change when the element is rotated."),
+    ] = None
+    contourOffset: Annotated[
+        float | None,
+        Field(description="Offset of the frame/background fill from the text bounding box, in mm."),
+    ] = None
+    flipEnabled: Annotated[
+        bool | None,
+        Field(description="The text should always be readable (flips when viewed upside down)."),
+    ] = None
+    textFrameShape: Annotated[
+        TextFrameShape | None,
+        Field(
+            description="Text frame shape. Standalone Text elements only support Rectangle. Available from Archicad 28; earlier versions ignore it and read it back as Rectangle."
+        ),
+    ] = None
+    textFrameSizeFixed: Annotated[
+        bool | None,
+        Field(
+            description="Use fixedWidth/fixedHeight instead of fitting the frame to the text box. Available from Archicad 28; earlier versions ignore it and read it back as false."
+        ),
+    ] = None
+    textFrameFixedWidth: Annotated[
+        float | None,
+        Field(
+            description="Frame width in mm, when textFrameSizeFixed is true. Between 1 and 1000. Available from Archicad 28; earlier versions ignore it and read it back as 0."
+        ),
+    ] = None
+    textFrameFixedHeight: Annotated[
+        float | None,
+        Field(
+            description="Frame height in mm, when textFrameSizeFixed is true (ignored for Circle, which uses fixedWidth as diameter). Between 1 and 1000. Available from Archicad 28; earlier versions ignore it and read it back as 0."
+        ),
+    ] = None
+
+
+class TextsWithDetail(APIModel):
+    elementId: ElementId
+    coordinate: Annotated[
+        Coordinate3D | None,
+        Field(
+            description="The new placement position. As in CreateTexts, the z value selects the floor when floorIndex is omitted."
+        ),
+    ] = None
+    floorIndex: Annotated[
+        int | None,
+        Field(
+            description="Optional. Moves the text to this floor; when omitted and a coordinate is given, the floor is derived from its z value."
+        ),
+    ] = None
+    text: str | None = None
+    runs: Annotated[list[TextRunDetails] | None, Field(min_length=1)] = None
+    style: TextStyleSettableDetails | None = None
 
 
 class Texture(APIModel):
@@ -6012,6 +7039,18 @@ class TransformationType(Enum):
     GLOBAL = "Global"
     ROTATED = "Rotated"
     DISTORTED = "Distorted"
+
+
+class TrimType(Enum):
+    KEEP_INSIDE = "KeepInside"
+    KEEP_OUTSIDE = "KeepOutside"
+    KEEP_ALL = "KeepAll"
+    NO = "No"
+
+
+class TrimmedByItem(APIModel):
+    elementId: ElementId
+    trimType: TrimType
 
 
 class User(APIModel):
@@ -6449,6 +7488,11 @@ class WindowWithDetails(APIModel):
     reflected: bool | None = None
     refSide: bool | None = None
     oSide: bool | None = None
+    reveal: Annotated[bool | None, Field(description="Turn the reveal on or off.")] = None
+    revealDepthOffset: Annotated[
+        float | None,
+        Field(description="Distance the frame plane is moved across the wall thickness, along the wall normal."),
+    ] = None
 
 
 class WireEdge(APIModel):
@@ -6466,6 +7510,13 @@ class WitnessForm(Enum):
 class WorksheetData(APIModel):
     name: Annotated[str, Field(min_length=1)]
     referenceId: Annotated[str, Field(min_length=1)]
+
+
+class ZoneBoundariesOfZonesWrapper(APIModel):
+    zoneBoundariesOfZones: Annotated[
+        list[ZoneBoundariesWrapper | ErrorItem],
+        Field(description="The boundaries of each requested Zone, in the same order as the zones array of the input."),
+    ]
 
 
 class ZoneBoundariesWrapper(APIModel):
@@ -6612,7 +7663,7 @@ class ZoneDetails(APIModel):
     ]
     polygonArcs: Annotated[list[PolyArc] | None, Field(description="Polygon outline arcs of the zone.")] = None
     holes: Annotated[
-        list[Hole2D] | None,
+        list[Hole2DWithOutline | Hole2DWithLegacyCoordinates] | None,
         Field(description="A list of 2D holes in an element defined by closed polylines"),
     ] = None
     zCoordinate: float
@@ -6664,6 +7715,16 @@ class Zoom(APIModel):
     yMax: Annotated[float, Field(description="The maximum Y value of the zoom box.")]
 
 
+Hole2D: TypeAlias = Hole2DWithOutline | Hole2DWithLegacyCoordinates
+
+
+SetGDLParameterDetails: TypeAlias = SetGDLParameterByNameDetails | SetGDLParameterByIndexDetails
+
+
+TextData: TypeAlias = TextDataWithText | TextDataWithRuns
+
+
 ClassificationItemDetails.model_rebuild()
 Hotlink.model_rebuild()
 KeynoteFolderDetails.model_rebuild()
+NavigatorItem.model_rebuild()

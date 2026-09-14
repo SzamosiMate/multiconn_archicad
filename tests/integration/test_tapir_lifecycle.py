@@ -3,6 +3,7 @@ from unittest.mock import MagicMock
 
 from multiconn_archicad.conn_header import ConnHeader
 from multiconn_archicad.basic_types import TapirInfo, APIResponseError, Port
+from multiconn_archicad.constants import SUPPORTED_TAPIR_VERSION
 from multiconn_archicad.errors import AddOnCommandUnavailable, ArchicadAPIError
 
 pytestmark = [
@@ -13,12 +14,12 @@ pytestmark = [
 
 def test_get_tapir_info_success():
     header = ConnHeader(port=Port(19723), initialize=False)
-    header.core.post_tapir_command = MagicMock(return_value={"version": "1.5.8"})
+    header.core.post_tapir_command = MagicMock(return_value={"version": SUPPORTED_TAPIR_VERSION})
 
     tapir_info = header.get_tapir_info(timeout=5.0)
 
     assert isinstance(tapir_info, TapirInfo)
-    assert tapir_info.version == "1.5.8"
+    assert tapir_info.version == SUPPORTED_TAPIR_VERSION
     assert tapir_info.is_installed is True
     assert tapir_info.is_supported is True
 

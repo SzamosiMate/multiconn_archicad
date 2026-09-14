@@ -304,11 +304,12 @@ class PropertyCommands:
         self, property_definitions: list[PropertyExpressionUpdate]
     ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
         """
-        Updates the expression(s) of existing expression-based Custom Property Definitions.
+        Updates existing Custom Property Definitions: the expression(s) of an expression-based
+        property, or the possible enum values of an enumeration property.
 
         Args:
-            property_definitions (list[PropertyExpressionUpdate]): The list of expression-based
-                property definitions to update.
+            property_definitions (list[PropertyExpressionUpdate]): The property definitions to
+                update.
 
         Returns:
             list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution

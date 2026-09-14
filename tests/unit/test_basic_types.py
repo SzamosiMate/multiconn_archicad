@@ -569,8 +569,8 @@ def test_tapir_info_is_at_least():
 
 
 def test_tapir_info_repr():
-    installed = TapirInfo(version="1.5.8")
-    assert repr(installed) == "TapirInfo(version='1.5.8', supported=True)"
+    installed = TapirInfo(version=SUPPORTED_TAPIR_VERSION)
+    assert repr(installed) == f"TapirInfo(version='{SUPPORTED_TAPIR_VERSION}', supported=True)"
 
     not_installed = TapirInfo.not_installed()
     assert repr(not_installed) == "TapirInfo(not_installed)"

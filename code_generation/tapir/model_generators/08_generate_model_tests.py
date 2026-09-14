@@ -13,6 +13,7 @@ KNOWN_XFAILURES = {}
 SCHEMAS_TO_PATCH = {
     "GetHotlinksResult",
     "GetKeynoteTreeResult",
+    "GetNavigatorItemTreeResult",
     "GetDetailsOfElementsResult",
     "CreateClassificationItemsParameters",
     "CreateClassificationSystemsParameters",
@@ -60,6 +61,11 @@ def patch_schema_definitions(definitions: dict, model_name_to_test: str) -> dict
             print(
                 f"    - Applied patch to 'KeynoteFolderDetails' schema for {model_name_to_test} test (bounded recursion)."
             )
+
+    if model_name_to_test == "GetNavigatorItemTreeResult":
+        if "NavigatorItem" in patched_defs and "properties" in patched_defs["NavigatorItem"]:
+            patched_defs["NavigatorItem"]["properties"]["children"] = {"type": "array", "maxItems": 0}
+            print(f"    - Applied patch to 'NavigatorItem' schema for {model_name_to_test} test (bounded recursion).")
 
     if model_name_to_test == "GetDetailsOfElementsResult":
         if "TypeSpecificDetails" in patched_defs:

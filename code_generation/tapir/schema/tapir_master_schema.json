@@ -66,6 +66,25 @@
         "executionResults"
       ]
     },
+    "AddLibrariesParameters": {
+      "type": "object",
+      "properties": {
+        "libraries": {
+          "type": "array",
+          "description": "Local library folders or container files, by absolute path.",
+          "items": {
+            "$ref": "#/$defs/LibraryLocation"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "libraries"
+      ]
+    },
+    "AddLibrariesResult": {
+      "$ref": "#/$defs/ExecutionResult"
+    },
     "AngleType": {
       "type": "string",
       "description": "The type of the angle measurement unit.",
@@ -126,7 +145,7 @@
         },
         "applySettings": {
           "type": "boolean",
-          "description": "Whether to apply the Favorite's settings-type parameters (structure, materials, pens, etc. - never geometry). Default is true."
+          "description": "Whether to apply the Favorite's settings-type parameters (structure, materials, pens, etc. - never geometry). For the hierarchical types (Stair, Railing, Curtain Wall) the settings of the sub-elements are not applied, because they are inseparable from the Favorite's own geometry. Default is true."
         },
         "applyClassifications": {
           "type": "boolean",
@@ -342,7 +361,16 @@
       "type": "object",
       "properties": {
         "sectionElementId": {
-          "$ref": "#/$defs/ElementId"
+          "$ref": "#/$defs/ElementId",
+          "description": "The identifier of a single section element. Only one of sectionElementId and sectionElementIds can be given."
+        },
+        "sectionElementIds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ElementId"
+          },
+          "minItems": 1,
+          "description": "A list of section elements whose preset points are merged into one continuous dimension chain. Only one of sectionElementId and sectionElementIds can be given."
         },
         "referencePoint": {
           "$ref": "#/$defs/Coordinate2D"
@@ -382,7 +410,6 @@
       },
       "additionalProperties": false,
       "required": [
-        "sectionElementId",
         "referencePoint",
         "preset"
       ]
@@ -457,13 +484,18 @@
           "name": {
             "type": "string",
             "description": "Name of the attribute."
+          },
+          "modificationTime": {
+            "type": "integer",
+            "description": "The last modification time of the attribute, in seconds since 1970-01-01 00:00:00 UTC (a GSTime), the same stamp the Attribute Manager writes as ModiTime into its XML export."
           }
         },
         "additionalProperties": false,
         "required": [
           "attributeId",
           "index",
-          "name"
+          "name",
+          "modificationTime"
         ]
       }
     },
@@ -588,6 +620,42 @@
         "OperationProfile",
         "BuildingMaterial"
       ]
+    },
+    "AutoTextKeyValue": {
+      "type": "string",
+      "minLength": 1
+    },
+    "AutoTextName": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The autotext's display name, as shown in the Insert Autotext dialog of Archicad."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "name"
+      ]
+    },
+    "AutoTextNameOrError": {
+      "type": "object",
+      "description": "The display name of one autotext key, or an error.",
+      "oneOf": [
+        {
+          "$ref": "#/$defs/AutoTextName"
+        },
+        {
+          "$ref": "#/$defs/ErrorItem"
+        }
+      ]
+    },
+    "AutoTextNamesOrErrors": {
+      "type": "array",
+      "description": "One result per input key, in the same order.",
+      "items": {
+        "$ref": "#/$defs/AutoTextNameOrError"
+      }
     },
     "AutomaticZoneGeometry": {
       "type": "object",
@@ -1351,6 +1419,34 @@
       "additionalProperties": false,
       "required": [
         "elements"
+      ]
+    },
+    "ChangeHotlinkInstancesParameters": {
+      "type": "object",
+      "properties": {
+        "hotlinkInstances": {
+          "type": "array",
+          "description": "The placed hotlink instances to change. Every field but elementId is optional; a field that is omitted keeps its current value.",
+          "items": {
+            "$ref": "#/$defs/HotlinkInstanceChange"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "hotlinkInstances"
+      ]
+    },
+    "ChangeHotlinkInstancesResult": {
+      "type": "object",
+      "properties": {
+        "executionResults": {
+          "$ref": "#/$defs/ExecutionResults"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "executionResults"
       ]
     },
     "ChangeSelectionOfElementsParameters": {
@@ -2308,6 +2404,30 @@
         },
         "baseElementId": {
           "$ref": "#/$defs/ElementId"
+        },
+        "line": {
+          "type": "boolean",
+          "description": "True when the witness point lies on an edge of the base element rather than at a node (API_Base line)."
+        },
+        "inIndex": {
+          "type": "integer",
+          "description": "Subindex of the base element's node (API_Neig inIndex)."
+        },
+        "special": {
+          "type": "integer",
+          "description": "Non-zero for special references such as a wall plane, a beam, window or door hole, or a mesh ridge (API_Base special)."
+        },
+        "nodeType": {
+          "type": "integer",
+          "description": "Reserved by Archicad for section dimensions (API_Base node_typ)."
+        },
+        "nodeStatus": {
+          "type": "integer",
+          "description": "Reserved by Archicad for section dimensions (API_Base node_status)."
+        },
+        "nodeId": {
+          "type": "number",
+          "description": "Polygon vertex id of the base element, from its memo's vertexIDs, for elements with a polygon."
         }
       }
     },
@@ -3004,6 +3124,92 @@
       "additionalProperties": false,
       "required": [
         "elements"
+      ]
+    },
+    "CreateHotlinkInstancesParameters": {
+      "type": "object",
+      "properties": {
+        "hotlinkInstances": {
+          "type": "array",
+          "description": "The hotlink instances to place.",
+          "items": {
+            "$ref": "#/$defs/HotlinkInstanceCreation"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "hotlinkInstances"
+      ]
+    },
+    "CreateHotlinkInstancesResult": {
+      "type": "object",
+      "properties": {
+        "elements": {
+          "$ref": "#/$defs/ElementIdsOrErrors"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elements"
+      ]
+    },
+    "CreateHotlinkNodesParameters": {
+      "type": "object",
+      "properties": {
+        "hotlinkNodes": {
+          "type": "array",
+          "description": "The hotlink module nodes to create. A node that already points at the same source file (compared case-insensitively) is returned as it is, with existing: true, and the name and story settings asked for are ignored. On Archicad 25 a node that has not been placed yet cannot be found, so a repeated request there creates a second node.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "sourceLocation": {
+                "type": "string",
+                "description": "Absolute path of the module source file (.mod or .pln)."
+              },
+              "name": {
+                "type": "string",
+                "description": "Optional display name of the node. Defaults to the file name. Ignored when a node for the same file already exists."
+              },
+              "storyRangeType": {
+                "type": "string",
+                "description": "Optional. Which stories of the source are placed: all of them, or the single reference story. Ignored when a node for the same file already exists.",
+                "enum": [
+                  "AllStories",
+                  "SingleStory"
+                ]
+              },
+              "refFloorIndex": {
+                "type": "integer",
+                "description": "Optional index of the reference story in the source file. Defaults to 0. Ignored when a node for the same file already exists."
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "sourceLocation"
+            ]
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "hotlinkNodes"
+      ]
+    },
+    "CreateHotlinkNodesResult": {
+      "type": "object",
+      "properties": {
+        "hotlinkNodes": {
+          "type": "array",
+          "description": "One item per requested node, in order: the node guid with its existing flag, or an error.",
+          "items": {
+            "$ref": "#/$defs/HotlinkNodeCreatedOrError"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "hotlinkNodes"
       ]
     },
     "CreateHotspotsParameters": {
@@ -5163,6 +5369,7 @@
         },
         "witnessPoints": {
           "type": "array",
+          "description": "The witness points of the dimension. Besides the geometry each item carries the base element reference as CreateAssociativeDimensions takes it (API_Base: baseElementId, line, inIndex, special, nodeType, nodeStatus, nodeId): read a dimension placed by hand to learn the values an element type needs.",
           "items": {
             "$ref": "#/$defs/CoordinateWitnessPoint"
           }
@@ -5391,6 +5598,14 @@
         },
         "oSide": {
           "type": "boolean"
+        },
+        "reveal": {
+          "type": "boolean",
+          "description": "Turn the reveal on or off."
+        },
+        "revealDepthOffset": {
+          "type": "number",
+          "description": "Distance the frame plane is moved across the wall thickness, along the wall normal."
         }
       },
       "additionalProperties": false,
@@ -5659,6 +5874,20 @@
       "items": {
         "$ref": "#/$defs/ElementClassificationOrError"
       }
+    },
+    "ElementDetailsField": {
+      "type": "string",
+      "description": "A field of the details of an element.",
+      "enum": [
+        "type",
+        "id",
+        "floorIndex",
+        "layerIndex",
+        "drawIndex",
+        "details",
+        "floorPlanPolygons",
+        "hotlinkId"
+      ]
     },
     "ElementFilter": {
       "type": "string",
@@ -5956,6 +6185,53 @@
         }
       ]
     },
+    "ElementTrims": {
+      "type": "object",
+      "description": "The trims of one element: the roofs and shells trimming it, and the elements it trims.",
+      "properties": {
+        "trimmedBy": {
+          "type": "array",
+          "description": "The roofs and shells trimming this element, with the trim type.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "elementId": {
+                "$ref": "#/$defs/ElementId"
+              },
+              "trimType": {
+                "$ref": "#/$defs/TrimType"
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "elementId",
+              "trimType"
+            ]
+          }
+        },
+        "trims": {
+          "$ref": "#/$defs/Elements",
+          "description": "The elements this roof or shell trims."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "trimmedBy",
+        "trims"
+      ]
+    },
+    "ElementTrimsOrError": {
+      "type": "object",
+      "description": "The trims of one element, or an error.",
+      "oneOf": [
+        {
+          "$ref": "#/$defs/ElementTrims"
+        },
+        {
+          "$ref": "#/$defs/ErrorItem"
+        }
+      ]
+    },
     "ElementType": {
       "type": "string",
       "description": "The type of an element.",
@@ -6213,6 +6489,31 @@
         "crossingReferenceLine"
       ]
     },
+    "EnumValue": {
+      "type": "object",
+      "description": "The description of an enumeration value.",
+      "properties": {
+        "enumValueId": {
+          "$ref": "#/$defs/EnumValueId"
+        },
+        "guid": {
+          "$ref": "#/$defs/Guid",
+          "description": "The identifier of the enumeration value, as reported by GetAllProperties. An element's stored value refers to the value by this."
+        },
+        "displayValue": {
+          "type": "string",
+          "description": "Displayed value of the enumeration."
+        },
+        "nonLocalizedValue": {
+          "type": "string",
+          "description": "Nonlocalized value of the enumeration if there is one."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "displayValue"
+      ]
+    },
     "EnumValueId": {
       "type": "object",
       "description": "The identifier of a property enumeration value.",
@@ -6243,6 +6544,40 @@
       "description": "A list of enumeration identifiers.",
       "items": {
         "$ref": "#/$defs/EnumValueIdArrayItem"
+      }
+    },
+    "EnumValueToAdd": {
+      "type": "object",
+      "description": "The description of an enumeration value.",
+      "properties": {
+        "displayValue": {
+          "type": "string",
+          "description": "Displayed value of the enumeration."
+        },
+        "nonLocalizedValue": {
+          "type": "string",
+          "description": "Nonlocalized value of the enumeration if there is one."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "displayValue"
+      ]
+    },
+    "EnumValuesToAdd": {
+      "type": "array",
+      "description": "Enumeration values to add to a property.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "enumValue": {
+            "$ref": "#/$defs/EnumValueToAdd"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "enumValue"
+        ]
       }
     },
     "Error": {
@@ -7091,6 +7426,75 @@
     "GetAttributesByTypeResult": {
       "$ref": "#/$defs/AttributeHeadersOrError"
     },
+    "GetAutoTextKeysParameters": {
+      "type": "object",
+      "properties": {
+        "elementId": {
+          "$ref": "#/$defs/ElementId",
+          "description": "Optional. The element to retrieve context dependent autotext keys for (its own properties, plus the ones common to all element types, e.g. 'Element ID', 'Area'). When omitted, only the autotext keys common to all element types are returned."
+        }
+      },
+      "additionalProperties": false
+    },
+    "GetAutoTextKeysResult": {
+      "type": "object",
+      "properties": {
+        "autoTextKeys": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "The autotext's name, as shown in the Insert Autotext dialog of Archicad."
+              },
+              "key": {
+                "type": "string",
+                "description": "The autotext's key. To embed it in the content of a Text or Label element, surround it with '<' and '>', e.g. '<PROPERTY-69A58F6F-DD3B-478D-B5EF-09A16BD0C548>'."
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "name",
+              "key"
+            ]
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "autoTextKeys"
+      ]
+    },
+    "GetAutoTextNameParameters": {
+      "type": "object",
+      "properties": {
+        "keys": {
+          "type": "array",
+          "description": "Autotext keys as returned by GetAutoTextKeys or GetProjectInfoFields (without the surrounding '<' and '>'), e.g. 'PROPERTY-69A58F6F-DD3B-478D-B5EF-09A16BD0C548' or 'PROJECTNAME'.",
+          "items": {
+            "$ref": "#/$defs/AutoTextKeyValue"
+          },
+          "minItems": 1
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "keys"
+      ]
+    },
+    "GetAutoTextNameResult": {
+      "type": "object",
+      "properties": {
+        "autoTextNames": {
+          "$ref": "#/$defs/AutoTextNamesOrErrors"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "autoTextNames"
+      ]
+    },
     "GetAvailableLibraryPartsParameters": {
       "type": "object",
       "properties": {
@@ -7707,6 +8111,14 @@
       "properties": {
         "elements": {
           "$ref": "#/$defs/Elements"
+        },
+        "fields": {
+          "type": "array",
+          "description": "Optional filter for the fields to return for each element. When omitted, every field is returned. Fields not listed are not computed at all, so listing only what you need skips in particular the floorPlanPolygons extraction, which regenerates each element's 2D drawing primitives and can dominate the execution time of batch reads.",
+          "items": {
+            "$ref": "#/$defs/ElementDetailsField"
+          },
+          "minItems": 1
         }
       },
       "additionalProperties": false,
@@ -7721,7 +8133,7 @@
           "type": "array",
           "items": {
             "type": "object",
-            "description": "Details of an element.",
+            "description": "Details of an element. When the optional fields filter is given in the input, only the requested fields are present; the required list below applies to unfiltered requests.",
             "properties": {
               "type": {
                 "$ref": "#/$defs/ElementType"
@@ -7737,6 +8149,10 @@
               },
               "drawIndex": {
                 "type": "number"
+              },
+              "hotlinkId": {
+                "$ref": "#/$defs/ElementId",
+                "description": "The hotlink instance this element belongs to. Present only for elements that came in through a placed hotlink; such elements are read-only."
               },
               "details": {
                 "$ref": "#/$defs/TypeSpecificDetails"
@@ -7877,6 +8293,34 @@
       "additionalProperties": false,
       "required": [
         "previewImage"
+      ]
+    },
+    "GetElementTrimsParameters": {
+      "type": "object",
+      "properties": {
+        "elements": {
+          "$ref": "#/$defs/Elements"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elements"
+      ]
+    },
+    "GetElementTrimsResult": {
+      "type": "object",
+      "properties": {
+        "elementTrims": {
+          "type": "array",
+          "description": "One item per queried element, in order. An unknown or deleted element is an error item, so it cannot be mistaken for an element that is simply not trimmed.",
+          "items": {
+            "$ref": "#/$defs/ElementTrimsOrError"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elementTrims"
       ]
     },
     "GetElementsAttachedToIssueParameters": {
@@ -8568,44 +9012,7 @@
           "type": "array",
           "description": "A list of project libraries.",
           "items": {
-            "type": "object",
-            "description": "Library",
-            "properties": {
-              "name": {
-                "type": "string",
-                "description": "Library name."
-              },
-              "path": {
-                "type": "string",
-                "description": "A filesystem path to library location."
-              },
-              "type": {
-                "type": "string",
-                "description": "Library type."
-              },
-              "available": {
-                "type": "boolean",
-                "description": "Is library not missing."
-              },
-              "readOnly": {
-                "type": "boolean",
-                "description": "Is library not writable."
-              },
-              "twServerUrl": {
-                "type": "string",
-                "description": "URL address of the TeamWork server hosting the library."
-              },
-              "urlWebLibrary": {
-                "type": "string",
-                "description": "URL of the downloaded Internet library."
-              }
-            },
-            "additionalProperties": false,
-            "required": [
-              "name",
-              "type",
-              "path"
-            ]
+            "$ref": "#/$defs/Library"
           }
         }
       },
@@ -8850,11 +9257,28 @@
             "PublisherSets"
           ],
           "description": "The navigator map to retrieve."
+        },
+        "publisherSetName": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The name of the publisher set to retrieve. Used only when navigatorMapId is PublisherSets. Without it the first publisher set is returned."
         }
       },
       "additionalProperties": false,
       "required": [
         "navigatorMapId"
+      ]
+    },
+    "GetNavigatorItemTreeResult": {
+      "type": "object",
+      "properties": {
+        "navigatorItemTree": {
+          "$ref": "#/$defs/NavigatorItem"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "navigatorItemTree"
       ]
     },
     "GetPenTablesParameters": {
@@ -8890,6 +9314,30 @@
       "additionalProperties": false,
       "required": [
         "penTables"
+      ]
+    },
+    "GetPointFromUserParameters": {
+      "type": "object",
+      "properties": {
+        "prompt": {
+          "type": "string",
+          "description": "Shown in the control box while Archicad waits for the click. Single-byte text: the box takes a char field. Archicad's main thread waits for the click or for Escape, and every other JSON command queues behind this one until then."
+        }
+      },
+      "additionalProperties": false,
+      "required": []
+    },
+    "GetPointFromUserResult": {
+      "type": "object",
+      "properties": {
+        "position": {
+          "$ref": "#/$defs/Coordinate3D",
+          "description": "The clicked point in the project's coordinates."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "position"
       ]
     },
     "GetProfilesParameters": {
@@ -9576,16 +10024,27 @@
       "type": "object",
       "properties": {
         "zoneElementId": {
-          "$ref": "#/$defs/ElementId"
+          "$ref": "#/$defs/ElementId",
+          "description": "The identifier of a single Zone. Prefer the zones array: querying many Zones in one call is much faster than one call per Zone."
+        },
+        "zones": {
+          "$ref": "#/$defs/Elements",
+          "description": "A list of Zones. Only one of zoneElementId and zones can be given."
         }
       },
       "additionalProperties": false,
-      "required": [
-        "zoneElementId"
-      ]
+      "required": []
     },
     "GetZoneBoundariesResult": {
-      "$ref": "#/$defs/ZoneBoundariesOrError"
+      "type": "object",
+      "oneOf": [
+        {
+          "$ref": "#/$defs/ZoneBoundariesOrError"
+        },
+        {
+          "$ref": "#/$defs/ZoneBoundariesOfZonesWrapper"
+        }
+      ]
     },
     "GetZoneCategoriesParameters": {
       "type": "object",
@@ -9935,12 +10394,30 @@
       "$ref": "#/$defs/ExecutionResult"
     },
     "Hole2D": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/Hole2DWithOutline"
+        },
+        {
+          "$ref": "#/$defs/Hole2DWithLegacyCoordinates"
+        }
+      ]
+    },
+    "Hole2DWithLegacyCoordinates": {
       "type": "object",
-      "description": "A 2D hole in an element defined by closed polylines",
+      "description": "A 2D hole in an element defined by closed polylines. The outline is given in 'polygonOutline'; 'polygonCoordinates' is accepted as a legacy alias.",
       "properties": {
         "polygonOutline": {
           "type": "array",
           "description": "The 2D coordinates of the edge of the hole.",
+          "items": {
+            "$ref": "#/$defs/Coordinate2D"
+          },
+          "minItems": 3
+        },
+        "polygonCoordinates": {
+          "type": "array",
+          "description": "Legacy alias of polygonOutline.",
           "items": {
             "$ref": "#/$defs/Coordinate2D"
           },
@@ -9957,6 +10434,39 @@
       "additionalProperties": false,
       "required": [
         "polygonCoordinates"
+      ]
+    },
+    "Hole2DWithOutline": {
+      "type": "object",
+      "description": "A 2D hole in an element defined by closed polylines. The outline is given in 'polygonOutline'; 'polygonCoordinates' is accepted as a legacy alias.",
+      "properties": {
+        "polygonOutline": {
+          "type": "array",
+          "description": "The 2D coordinates of the edge of the hole.",
+          "items": {
+            "$ref": "#/$defs/Coordinate2D"
+          },
+          "minItems": 3
+        },
+        "polygonCoordinates": {
+          "type": "array",
+          "description": "Legacy alias of polygonOutline.",
+          "items": {
+            "$ref": "#/$defs/Coordinate2D"
+          },
+          "minItems": 3
+        },
+        "polygonArcs": {
+          "type": "array",
+          "description": "Polygon outline arcs of the hole.",
+          "items": {
+            "$ref": "#/$defs/PolyArc"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "polygonOutline"
       ]
     },
     "Hole3D": {
@@ -10006,6 +10516,16 @@
           "type": "string",
           "description": "The path of the hotlink file."
         },
+        "hotlinkNodeId": {
+          "$ref": "#/$defs/HotlinkNodeId"
+        },
+        "name": {
+          "type": "string",
+          "description": "The display name of the hotlink node."
+        },
+        "type": {
+          "$ref": "#/$defs/HotlinkType"
+        },
         "children": {
           "$ref": "#/$defs/Hotlinks",
           "description": "The children of the hotlink node if it has any."
@@ -10014,6 +10534,227 @@
       "additionalProperties": false,
       "required": [
         "location"
+      ]
+    },
+    "HotlinkDetails": {
+      "type": "object",
+      "description": "Details of a placed hotlink instance: which node it comes from and where it sits.",
+      "properties": {
+        "hotlinkType": {
+          "$ref": "#/$defs/HotlinkType"
+        },
+        "hotlinkNodeId": {
+          "$ref": "#/$defs/HotlinkNodeId"
+        },
+        "origin": {
+          "$ref": "#/$defs/Coordinate3D"
+        },
+        "rotationAngle": {
+          "type": "number",
+          "description": "Counter-clockwise rotation about the origin, in radians."
+        },
+        "mirrored": {
+          "type": "boolean",
+          "description": "True when the module's local X axis is reflected."
+        },
+        "floorDifference": {
+          "type": "integer"
+        },
+        "skipNested": {
+          "type": "boolean"
+        },
+        "suspendFixAngle": {
+          "type": "boolean"
+        },
+        "ignoreTopFloorLinks": {
+          "type": "boolean"
+        },
+        "relinkWallOpenings": {
+          "type": "boolean"
+        },
+        "adjustLevelDiffs": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "hotlinkType",
+        "hotlinkNodeId",
+        "origin",
+        "rotationAngle",
+        "mirrored"
+      ]
+    },
+    "HotlinkInstanceChange": {
+      "type": "object",
+      "properties": {
+        "elementId": {
+          "$ref": "#/$defs/ElementId"
+        },
+        "origin": {
+          "$ref": "#/$defs/HotlinkOrigin"
+        },
+        "rotationAngle": {
+          "type": "number",
+          "description": "Rotation about the origin, counter-clockwise, in radians."
+        },
+        "mirrored": {
+          "type": "boolean",
+          "description": "Reflect the module's local X axis before the rotation."
+        },
+        "floorDifference": {
+          "type": "integer"
+        },
+        "skipNested": {
+          "type": "boolean"
+        },
+        "suspendFixAngle": {
+          "type": "boolean"
+        },
+        "ignoreTopFloorLinks": {
+          "type": "boolean"
+        },
+        "relinkWallOpenings": {
+          "type": "boolean"
+        },
+        "adjustLevelDiffs": {
+          "type": "boolean"
+        },
+        "layerIndex": {
+          "type": "integer",
+          "description": "Move the instance to this layer."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elementId"
+      ]
+    },
+    "HotlinkInstanceCreation": {
+      "type": "object",
+      "properties": {
+        "hotlinkNodeId": {
+          "$ref": "#/$defs/HotlinkNodeId",
+          "description": "The node to place, from GetHotlinks or CreateHotlinkNodes. On Archicad 25 a node that has never been placed cannot be read, so a node created through the API can only be placed from Archicad 26 on."
+        },
+        "origin": {
+          "$ref": "#/$defs/HotlinkOrigin"
+        },
+        "rotationAngle": {
+          "type": "number",
+          "description": "Optional rotation about the origin, counter-clockwise, in radians. Defaults to 0."
+        },
+        "mirrored": {
+          "type": "boolean",
+          "description": "Optional. Reflects the module's local X axis before the rotation. Defaults to false."
+        },
+        "floorIndex": {
+          "type": "integer",
+          "description": "Optional story the instance is placed on. Defaults to the current story."
+        },
+        "floorDifference": {
+          "type": "integer",
+          "description": "Optional story offset applied to the module's stories. Defaults to the hotlink tool's current default."
+        },
+        "layerIndex": {
+          "type": "integer",
+          "description": "Optional layer of the instance. Defaults to the hotlink tool's current default layer."
+        },
+        "skipNested": {
+          "type": "boolean",
+          "description": "Optional. Do not place hotlinks nested inside the module. Defaults to the hotlink tool's current default."
+        },
+        "suspendFixAngle": {
+          "type": "boolean",
+          "description": "Optional. Rotate fixed-angle elements with the module. Defaults to the hotlink tool's current default."
+        },
+        "ignoreTopFloorLinks": {
+          "type": "boolean",
+          "description": "Optional. Top-linked elements keep their height rather than their top story link. Defaults to the hotlink tool's current default."
+        },
+        "relinkWallOpenings": {
+          "type": "boolean",
+          "description": "Optional. Defaults to the hotlink tool's current default."
+        },
+        "adjustLevelDiffs": {
+          "type": "boolean",
+          "description": "Optional. Defaults to the hotlink tool's current default."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "hotlinkNodeId",
+        "origin"
+      ]
+    },
+    "HotlinkNodeCreated": {
+      "type": "object",
+      "properties": {
+        "hotlinkNodeId": {
+          "$ref": "#/$defs/HotlinkNodeId"
+        },
+        "existing": {
+          "type": "boolean",
+          "description": "True when a node for the same source file already existed and was returned instead of created."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "hotlinkNodeId",
+        "existing"
+      ]
+    },
+    "HotlinkNodeCreatedOrError": {
+      "type": "object",
+      "description": "The created (or already existing) node's guid, or an error.",
+      "oneOf": [
+        {
+          "$ref": "#/$defs/HotlinkNodeCreated"
+        },
+        {
+          "$ref": "#/$defs/ErrorItem"
+        }
+      ]
+    },
+    "HotlinkNodeId": {
+      "type": "object",
+      "description": "The identifier of a hotlink node - the reference to a module source file, which instances are placed from.",
+      "properties": {
+        "guid": {
+          "$ref": "#/$defs/Guid"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "guid"
+      ]
+    },
+    "HotlinkOrigin": {
+      "type": "object",
+      "description": "Where a hotlink instance's origin lands, in the project's coordinates. z is optional: CreateHotlinkInstances places at 0 when it is omitted, ChangeHotlinkInstances keeps the instance's current z.",
+      "properties": {
+        "x": {
+          "type": "number"
+        },
+        "y": {
+          "type": "number"
+        },
+        "z": {
+          "type": "number"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "x",
+        "y"
+      ]
+    },
+    "HotlinkType": {
+      "type": "string",
+      "description": "Module or XRef.",
+      "enum": [
+        "Module",
+        "XRef"
       ]
     },
     "Hotlinks": {
@@ -10278,6 +11019,16 @@
       "items": {
         "$ref": "#/$defs/IssueIdArrayItem"
       }
+    },
+    "Justification": {
+      "type": "string",
+      "description": "Optional text justification. Equivalent to style.justification.",
+      "enum": [
+        "Left",
+        "Center",
+        "Right",
+        "Full"
+      ]
     },
     "KeynoteAutoTextTokens": {
       "type": "object",
@@ -10608,6 +11359,51 @@
         "position"
       ]
     },
+    "LabelArrowType": {
+      "type": "string",
+      "description": "Arrow head shape for a Label's leader line.",
+      "enum": [
+        "EmptyCircle",
+        "CrossCircle",
+        "FullCircle",
+        "SlashLine15",
+        "OpenArrow15",
+        "ClosedArrow15",
+        "FullArrow15",
+        "SlashLine30",
+        "OpenArrow30",
+        "ClosedArrow30",
+        "FullArrow30",
+        "SlashLine45",
+        "OpenArrow45",
+        "ClosedArrow45",
+        "FullArrow45",
+        "SlashLine60",
+        "OpenArrow60",
+        "ClosedArrow60",
+        "FullArrow60",
+        "SlashLine90",
+        "PepitaCircle",
+        "BandArrow",
+        "HalfArrowCcw15",
+        "HalfArrowCw15",
+        "HalfArrowCcw30",
+        "HalfArrowCw30",
+        "HalfArrowCcw45",
+        "HalfArrowCw45",
+        "HalfArrowCcw60",
+        "HalfArrowCw60",
+        "SlashLine75"
+      ]
+    },
+    "LabelClass": {
+      "type": "string",
+      "enum": [
+        "Text",
+        "Symbol"
+      ],
+      "description": "Whether this is a textual or a symbol label. Optional; if omitted, inherits the current Label tool default (which may silently resolve to either class - explicitly setting this avoids ambiguity)."
+    },
     "LabelData": {
       "type": "object",
       "description": "The parameters of the new Label.",
@@ -10620,9 +11416,32 @@
           "$ref": "#/$defs/ElementId",
           "description": "The parent element if the label is an associative label."
         },
+        "labelClass": {
+          "$ref": "#/$defs/LabelClass"
+        },
         "text": {
           "type": "string",
-          "description": "The text content if the label is a text label."
+          "description": "The text content if the label is a text label. Ignored if 'runs' is also given."
+        },
+        "runs": {
+          "type": "array",
+          "description": "Multi-style text content for a text label: an array of styled runs, concatenated in order. Takes precedence over 'text' if both are given.",
+          "items": {
+            "$ref": "#/$defs/TextRunDetails"
+          },
+          "minItems": 1
+        },
+        "style": {
+          "$ref": "#/$defs/TextStyleSettableDetails",
+          "description": "Style settings for a text label (font, pen, size, frame, etc). Ignored for symbol labels."
+        },
+        "symbolStyle": {
+          "$ref": "#/$defs/LabelSymbolStyleSettableDetails",
+          "description": "Style settings specific to a symbol label. Ignored for text labels."
+        },
+        "leaderLine": {
+          "$ref": "#/$defs/LabelLeaderLineSettableDetails",
+          "description": "Leader line, frame and arrow settings, shared by both label classes."
         },
         "begCoordinate": {
           "$ref": "#/$defs/Coordinate2D",
@@ -10667,6 +11486,35 @@
         },
         "hasLeaderLine": {
           "type": "boolean"
+        },
+        "labelClass": {
+          "$ref": "#/$defs/LabelClass"
+        },
+        "leaderLine": {
+          "$ref": "#/$defs/LabelLeaderLineDetails"
+        },
+        "style": {
+          "$ref": "#/$defs/TextStyleDetails",
+          "description": "Present only when labelClass is 'Text'."
+        },
+        "symbolStyle": {
+          "$ref": "#/$defs/LabelSymbolStyleSettableDetails",
+          "description": "Present only when labelClass is 'Symbol'."
+        },
+        "text": {
+          "type": "string",
+          "description": "Present only when labelClass is 'Text'."
+        },
+        "paragraphCount": {
+          "type": "integer",
+          "description": "Present only when labelClass is 'Text'. Read-only: number of paragraphs in the memo (Tapir's own Create/Modify commands always produce 1)."
+        },
+        "runs": {
+          "type": "array",
+          "description": "Present only when labelClass is 'Text' and the content has paragraphs (always for content Tapir created): one entry per styled run, a single run too.",
+          "items": {
+            "$ref": "#/$defs/TextRunDetails"
+          }
         }
       },
       "additionalProperties": false,
@@ -10674,8 +11522,202 @@
         "begCoordinate",
         "midCoordinate",
         "endCoordinate",
-        "hasLeaderLine"
+        "hasLeaderLine",
+        "labelClass",
+        "leaderLine"
       ]
+    },
+    "LabelLeaderLineAnchorPoint": {
+      "type": "string",
+      "enum": [
+        "Middle",
+        "Top",
+        "Bottom",
+        "Underlined"
+      ],
+      "description": "How the leader line connects to the label text (text-class labels only)."
+    },
+    "LabelLeaderLineDetails": {
+      "type": "object",
+      "description": "Full readable leader-line/frame state of a Label: every field of LabelLeaderLineSettableDetails plus the leader line's coordinates.",
+      "properties": {
+        "penIndex": {
+          "type": "integer",
+          "description": "Pen attribute index of the leader line."
+        },
+        "lineTypeId": {
+          "$ref": "#/$defs/AttributeId",
+          "description": "Line type attribute of the leader line."
+        },
+        "contourOffset": {
+          "type": "number",
+          "description": "Padding between the Label's frame and its content, in mm."
+        },
+        "framed": {
+          "type": "boolean",
+          "description": "Put a frame around the content."
+        },
+        "hasLeaderLine": {
+          "type": "boolean",
+          "description": "Whether the Label has a leader line (pointer line)."
+        },
+        "anchorPoint": {
+          "$ref": "#/$defs/LabelLeaderLineAnchorPoint"
+        },
+        "leaderShape": {
+          "type": "string",
+          "enum": [
+            "Segmented",
+            "Splinear",
+            "SquareRoot"
+          ],
+          "description": "Shape of the leader line."
+        },
+        "squareRootAngle": {
+          "type": "number",
+          "description": "Angle in radians, used only when leaderShape is 'SquareRoot'. Valid range 1-179 degrees."
+        },
+        "arrowType": {
+          "$ref": "#/$defs/LabelArrowType"
+        },
+        "arrowVisible": {
+          "type": "boolean"
+        },
+        "arrowPenIndex": {
+          "type": "integer"
+        },
+        "arrowSize": {
+          "type": "number",
+          "description": "Arrow size in mm."
+        },
+        "hideWithBaseElem": {
+          "type": "boolean",
+          "description": "Hide the label together with its parent element."
+        },
+        "begCoordinate": {
+          "$ref": "#/$defs/Coordinate2D"
+        },
+        "midCoordinate": {
+          "$ref": "#/$defs/Coordinate2D"
+        },
+        "endCoordinate": {
+          "$ref": "#/$defs/Coordinate2D"
+        }
+      },
+      "additionalProperties": false
+    },
+    "LabelLeaderLineSettableDetails": {
+      "type": "object",
+      "description": "Every user-configurable leader-line/frame setting of a Label (top-level API_LabelType fields, shared by both Text and Symbol label classes). Shared by CreateLabels ('leaderLine'), ModifyLabels ('leaderLine'), and the Get response.",
+      "properties": {
+        "penIndex": {
+          "type": "integer",
+          "description": "Pen attribute index of the leader line."
+        },
+        "lineTypeId": {
+          "$ref": "#/$defs/AttributeId",
+          "description": "Line type attribute of the leader line."
+        },
+        "contourOffset": {
+          "type": "number",
+          "description": "Padding between the Label's frame and its content, in mm."
+        },
+        "framed": {
+          "type": "boolean",
+          "description": "Put a frame around the content."
+        },
+        "hasLeaderLine": {
+          "type": "boolean",
+          "description": "Whether the Label has a leader line (pointer line)."
+        },
+        "anchorPoint": {
+          "$ref": "#/$defs/LabelLeaderLineAnchorPoint"
+        },
+        "leaderShape": {
+          "type": "string",
+          "enum": [
+            "Segmented",
+            "Splinear",
+            "SquareRoot"
+          ],
+          "description": "Shape of the leader line."
+        },
+        "squareRootAngle": {
+          "type": "number",
+          "description": "Angle in radians, used only when leaderShape is 'SquareRoot'. Valid range 1-179 degrees."
+        },
+        "arrowType": {
+          "$ref": "#/$defs/LabelArrowType"
+        },
+        "arrowVisible": {
+          "type": "boolean"
+        },
+        "arrowPenIndex": {
+          "type": "integer"
+        },
+        "arrowSize": {
+          "type": "number",
+          "description": "Arrow size in mm."
+        },
+        "hideWithBaseElem": {
+          "type": "boolean",
+          "description": "Hide the label together with its parent element."
+        }
+      },
+      "additionalProperties": false
+    },
+    "LabelSymbolStyleSettableDetails": {
+      "type": "object",
+      "description": "Every user-configurable style setting specific to a Symbol-class Label (top-level API_LabelType fields documented as 'for symbol labels only'). Shared by CreateLabels ('symbolStyle'), ModifyLabels ('symbolStyle'), and the Get response.",
+      "properties": {
+        "textWay": {
+          "$ref": "#/$defs/SymbolLabelTextDirection"
+        },
+        "fontIndex": {
+          "type": "integer"
+        },
+        "bold": {
+          "type": "boolean"
+        },
+        "italic": {
+          "type": "boolean"
+        },
+        "underline": {
+          "type": "boolean"
+        },
+        "flipEnabled": {
+          "type": "boolean",
+          "description": "'Always Readable' toggle."
+        },
+        "nonBreaking": {
+          "type": "boolean",
+          "description": "'Wrap Text' turned off when true."
+        },
+        "textSize": {
+          "type": "number",
+          "description": "Character height in mm."
+        },
+        "useBackgroundFill": {
+          "type": "boolean"
+        },
+        "backgroundFillPenIndex": {
+          "type": "integer",
+          "description": "Effective only if useBackgroundFill is true."
+        },
+        "effectStrikeout": {
+          "type": "boolean"
+        },
+        "effectSuperscript": {
+          "type": "boolean"
+        },
+        "effectSubscript": {
+          "type": "boolean"
+        },
+        "effectProtected": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
     },
     "LampData": {
       "type": "object",
@@ -11256,6 +12298,23 @@
         "DecInch"
       ]
     },
+    "Level": {
+      "type": "object",
+      "properties": {
+        "levelHeight": {
+          "type": "number"
+        },
+        "levelAngle": {
+          "type": "number",
+          "exclusiveMinimum": 0.0
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "levelHeight",
+        "levelAngle"
+      ]
+    },
     "LibPartBasedElementDetails": {
       "type": "object",
       "properties": {
@@ -11305,6 +12364,46 @@
         "guid"
       ]
     },
+    "Library": {
+      "type": "object",
+      "description": "Library",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Library name."
+        },
+        "path": {
+          "type": "string",
+          "description": "A filesystem path to library location."
+        },
+        "type": {
+          "type": "string",
+          "description": "Library type."
+        },
+        "available": {
+          "type": "boolean",
+          "description": "Is library not missing."
+        },
+        "readOnly": {
+          "type": "boolean",
+          "description": "Is library not writable."
+        },
+        "twServerUrl": {
+          "type": "string",
+          "description": "URL address of the TeamWork server hosting the library."
+        },
+        "urlWebLibrary": {
+          "type": "string",
+          "description": "URL of the downloaded Internet library."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "type",
+        "path"
+      ]
+    },
     "LibraryFileAddition": {
       "type": "object",
       "properties": {
@@ -11333,6 +12432,18 @@
       "items": {
         "$ref": "#/$defs/LibraryFileAddition"
       }
+    },
+    "LibraryLocation": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "path"
+      ]
     },
     "LibraryPartType": {
       "type": "string",
@@ -12740,6 +13851,62 @@
         "executionResults"
       ]
     },
+    "ModifyLabelsParameters": {
+      "type": "object",
+      "properties": {
+        "labelsWithDetails": {
+          "type": "array",
+          "description": "Array of Label elements to modify, with the fields to change. Only provided fields are changed; omitted fields are left as-is. The label's class (Text/Symbol) cannot be changed after creation. A change of the text, the runs, or a run-level style field (pen, font, faces, height, effects) rebuilds the content as one paragraph, which makes the label's text auto-width (word wrap off), as SetDetailsOfElements does, and on a multi-run label applies that style to every run; the other style fields leave the content as it is.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "elementId": {
+                "$ref": "#/$defs/ElementId"
+              },
+              "text": {
+                "type": "string"
+              },
+              "runs": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/TextRunDetails"
+                },
+                "minItems": 1
+              },
+              "style": {
+                "$ref": "#/$defs/TextStyleSettableDetails"
+              },
+              "symbolStyle": {
+                "$ref": "#/$defs/LabelSymbolStyleSettableDetails"
+              },
+              "leaderLine": {
+                "$ref": "#/$defs/LabelLeaderLineSettableDetails"
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "elementId"
+            ]
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "labelsWithDetails"
+      ]
+    },
+    "ModifyLabelsResult": {
+      "type": "object",
+      "properties": {
+        "executionResults": {
+          "$ref": "#/$defs/ExecutionResults"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "executionResults"
+      ]
+    },
     "ModifyLampsParameters": {
       "type": "object",
       "properties": {
@@ -12922,6 +14089,64 @@
       ]
     },
     "ModifySlabsResult": {
+      "type": "object",
+      "properties": {
+        "executionResults": {
+          "$ref": "#/$defs/ExecutionResults"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "executionResults"
+      ]
+    },
+    "ModifyTextsParameters": {
+      "type": "object",
+      "properties": {
+        "textsWithDetails": {
+          "type": "array",
+          "description": "Array of Text elements to modify, with the fields to change. Only provided fields are changed; omitted fields are left as-is. A change of the text, the runs, or a run-level style field (pen, font, faces, height, effects) rebuilds the content as one paragraph, which makes the element auto-width (word wrap off), as SetDetailsOfElements does, and on a multi-run text applies that style to every run; the other style fields leave the content as it is.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "elementId": {
+                "$ref": "#/$defs/ElementId"
+              },
+              "coordinate": {
+                "$ref": "#/$defs/Coordinate3D",
+                "description": "The new placement position. As in CreateTexts, the z value selects the floor when floorIndex is omitted."
+              },
+              "floorIndex": {
+                "type": "integer",
+                "description": "Optional. Moves the text to this floor; when omitted and a coordinate is given, the floor is derived from its z value."
+              },
+              "text": {
+                "type": "string"
+              },
+              "runs": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/TextRunDetails"
+                },
+                "minItems": 1
+              },
+              "style": {
+                "$ref": "#/$defs/TextStyleSettableDetails"
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "elementId"
+            ]
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "textsWithDetails"
+      ]
+    },
+    "ModifyTextsResult": {
       "type": "object",
       "properties": {
         "executionResults": {
@@ -13699,6 +14924,72 @@
     "MoveNavigatorItemResult": {
       "$ref": "#/$defs/ExecutionResult"
     },
+    "NavigatorItem": {
+      "type": "object",
+      "description": "A navigator item and the subtree below it.",
+      "properties": {
+        "navigatorItemId": {
+          "$ref": "#/$defs/NavigatorItemId"
+        },
+        "type": {
+          "$ref": "#/$defs/NavigatorItemType"
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the navigator item."
+        },
+        "prefix": {
+          "type": "string",
+          "description": "The floor number for story items, an empty string for every other item type."
+        },
+        "uiId": {
+          "type": "string",
+          "description": "The identifier shown next to the name on the navigator."
+        },
+        "customUiId": {
+          "type": "boolean",
+          "description": "True when the identifier was typed by hand instead of being inherited from the Project Map source - the View Settings ID \"Custom\" radio button."
+        },
+        "customName": {
+          "type": "boolean",
+          "description": "True when the name was typed by hand instead of being inherited from the Project Map source - the View Settings name \"Custom\" radio button."
+        },
+        "isIndependent": {
+          "type": "boolean",
+          "description": "True when the item is independent, that is when its link to the Project Map is broken."
+        },
+        "children": {
+          "type": "array",
+          "description": "The children of the navigator item. Missing when the item has no children.",
+          "items": {
+            "$ref": "#/$defs/NavigatorItemArrayItem"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "navigatorItemId",
+        "type",
+        "name",
+        "prefix",
+        "uiId",
+        "customUiId",
+        "customName",
+        "isIndependent"
+      ]
+    },
+    "NavigatorItemArrayItem": {
+      "type": "object",
+      "properties": {
+        "navigatorItem": {
+          "$ref": "#/$defs/NavigatorItem"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "navigatorItem"
+      ]
+    },
     "NavigatorItemId": {
       "type": "object",
       "description": "The identifier of a navigator item.",
@@ -13753,6 +15044,39 @@
       "items": {
         "$ref": "#/$defs/NavigatorItemIdArrayItem"
       }
+    },
+    "NavigatorItemType": {
+      "type": "string",
+      "description": "The type of the navigator item.",
+      "enum": [
+        "UndefinedItem",
+        "ProjectItem",
+        "StoryItem",
+        "SectionItem",
+        "DetailDrawingItem",
+        "PerspectiveItem",
+        "AxonometryItem",
+        "ListItem",
+        "ScheduleItem",
+        "TocItem",
+        "CameraItem",
+        "CameraSetItem",
+        "InfoItem",
+        "HelpItem",
+        "LayoutItem",
+        "MasterLayoutItem",
+        "BookItem",
+        "MasterFolderItem",
+        "SubSetItem",
+        "TextListItem",
+        "ElevationItem",
+        "InteriorElevationItem",
+        "WorksheetDrawingItem",
+        "DocumentFrom3DItem",
+        "FolderItem",
+        "DrawingItem",
+        "UnknownItem"
+      ]
     },
     "NewClassificationItems": {
       "type": "array",
@@ -14926,6 +16250,23 @@
         "description"
       ]
     },
+    "PivotLine": {
+      "type": "object",
+      "description": "If given, a single-plane roof is created instead of a multi-plane roof: one plane tilted along this pivot line. The plane rises on the left side of the line direction (begCoordinate towards endCoordinate); flip the line to tilt towards the other side.",
+      "properties": {
+        "begCoordinate": {
+          "$ref": "#/$defs/Coordinate2D"
+        },
+        "endCoordinate": {
+          "$ref": "#/$defs/Coordinate2D"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "begCoordinate",
+        "endCoordinate"
+      ]
+    },
     "PolyArc": {
       "type": "object",
       "description": "Representation of an arc segment of a two dimensional polygon/polyline.",
@@ -15068,6 +16409,22 @@
       },
       "additionalProperties": false,
       "required": []
+    },
+    "PossibleEnumValues": {
+      "type": "array",
+      "description": "The possible enum values of the property when the property type is enumeration.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "enumValue": {
+            "$ref": "#/$defs/EnumValue"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "enumValue"
+        ]
+      }
     },
     "PossibleNumericValues": {
       "type": "array",
@@ -15724,38 +17081,7 @@
           "$ref": "#/$defs/PropertyDefaultValue"
         },
         "possibleEnumValues": {
-          "type": "array",
-          "description": "The possible enum values of the property when the property type is enumeration.",
-          "items": {
-            "type": "object",
-            "properties": {
-              "enumValue": {
-                "type": "object",
-                "description": "The description of an enumeration value.",
-                "properties": {
-                  "enumValueId": {
-                    "$ref": "#/$defs/EnumValueId"
-                  },
-                  "displayValue": {
-                    "type": "string",
-                    "description": "Displayed value of the enumeration."
-                  },
-                  "nonLocalizedValue": {
-                    "type": "string",
-                    "description": "Nonlocalized value of the enumeration if there is one."
-                  }
-                },
-                "additionalProperties": false,
-                "required": [
-                  "displayValue"
-                ]
-              }
-            },
-            "additionalProperties": false,
-            "required": [
-              "enumValue"
-            ]
-          }
+          "$ref": "#/$defs/PossibleEnumValues"
         },
         "availability": {
           "type": "array",
@@ -15806,6 +17132,9 @@
       "type": "object",
       "description": "The details of the property.",
       "properties": {
+        "possibleEnumValues": {
+          "$ref": "#/$defs/PossibleEnumValues"
+        },
         "propertyId": {
           "$ref": "#/$defs/PropertyId"
         },
@@ -15891,17 +17220,20 @@
         },
         "expressions": {
           "type": "array",
-          "description": "The new expression strings for the property.",
+          "description": "The new expression strings for the property. Only for expression-based properties.",
           "items": {
             "type": "string"
           },
           "minItems": 1
+        },
+        "possibleEnumValues": {
+          "$ref": "#/$defs/EnumValuesToAdd",
+          "description": "The enum values to add to an enumeration property. Values already on the property keep their identifier, so element values assigned to them survive; values not listed here are kept as well."
         }
       },
       "additionalProperties": false,
       "required": [
-        "propertyId",
-        "expressions"
+        "propertyId"
       ]
     },
     "PropertyGroup": {
@@ -16176,6 +17508,47 @@
     },
     "RemoveElementNotificationClientResult": {
       "$ref": "#/$defs/ExecutionResult"
+    },
+    "RemoveElementTrimsParameters": {
+      "type": "object",
+      "properties": {
+        "elementPairs": {
+          "type": "array",
+          "description": "The trimmed element and the roof or shell trimming it, per pair.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "elementId": {
+                "$ref": "#/$defs/ElementId"
+              },
+              "trimmingElementId": {
+                "$ref": "#/$defs/ElementId"
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "elementId",
+              "trimmingElementId"
+            ]
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elementPairs"
+      ]
+    },
+    "RemoveElementTrimsResult": {
+      "type": "object",
+      "properties": {
+        "executionResults": {
+          "$ref": "#/$defs/ExecutionResults"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "executionResults"
+      ]
     },
     "RemoveSolidElementLinksParameters": {
       "type": "object",
@@ -16490,21 +17863,7 @@
           "$ref": "#/$defs/Holes2D"
         },
         "pivotLine": {
-          "type": "object",
-          "description": "If given, a single-plane roof is created instead of a multi-plane roof: one plane tilted along this pivot line. The plane rises on the left side of the line direction (begCoordinate towards endCoordinate); flip the line to tilt towards the other side.",
-          "properties": {
-            "begCoordinate": {
-              "$ref": "#/$defs/Coordinate2D"
-            },
-            "endCoordinate": {
-              "$ref": "#/$defs/Coordinate2D"
-            }
-          },
-          "additionalProperties": false,
-          "required": [
-            "begCoordinate",
-            "endCoordinate"
-          ]
+          "$ref": "#/$defs/PivotLine"
         },
         "angle": {
           "type": "number",
@@ -16519,21 +17878,7 @@
           "minItems": 1,
           "maxItems": 16,
           "items": {
-            "type": "object",
-            "properties": {
-              "levelHeight": {
-                "type": "number"
-              },
-              "levelAngle": {
-                "type": "number",
-                "exclusiveMinimum": 0.0
-              }
-            },
-            "additionalProperties": false,
-            "required": [
-              "levelHeight",
-              "levelAngle"
-            ]
+            "$ref": "#/$defs/Level"
           }
         },
         "structureType": {
@@ -16550,6 +17895,120 @@
       "required": [
         "level",
         "polygonCoordinates"
+      ]
+    },
+    "RoofDetails": {
+      "type": "object",
+      "properties": {
+        "roofClass": {
+          "type": "string",
+          "enum": [
+            "SinglePlane",
+            "MultiPlane"
+          ]
+        },
+        "structureType": {
+          "$ref": "#/$defs/RoofStructureType"
+        },
+        "thickness": {
+          "type": "number"
+        },
+        "level": {
+          "type": "number",
+          "description": "Height of the pivot line (single-plane) or the pivot polygon (multi-plane) above the floor level."
+        },
+        "zCoordinate": {
+          "type": "number"
+        },
+        "buildingMaterialId": {
+          "$ref": "#/$defs/AttributeId"
+        },
+        "compositeId": {
+          "$ref": "#/$defs/AttributeId"
+        },
+        "angle": {
+          "type": "number",
+          "description": "Single-plane: the slope in radians."
+        },
+        "pivotLine": {
+          "$ref": "#/$defs/RoofDetailsPivotLine"
+        },
+        "eavesOverhang": {
+          "type": "number",
+          "description": "Multi-plane: the eaves overhang beyond the pivot polygon."
+        },
+        "levels": {
+          "type": "array",
+          "description": "Multi-plane: the roof levels, each with its height above the previous and its slope in radians.",
+          "items": {
+            "$ref": "#/$defs/RoofDetailsLevel"
+          }
+        },
+        "pivotPolygonOutline": {
+          "type": "array",
+          "description": "Multi-plane: the pivot polygon the planes rise from. Arcs are not carried; a curved pivot edge comes back as its end points.",
+          "items": {
+            "$ref": "#/$defs/Coordinate2D"
+          }
+        },
+        "polygonOutline": {
+          "type": "array",
+          "description": "The roof's polygon: the plane roof's outline, the multi-plane roof's contour.",
+          "items": {
+            "$ref": "#/$defs/Coordinate2D"
+          }
+        },
+        "polygonArcs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/PolyArc"
+          }
+        },
+        "holes": {
+          "$ref": "#/$defs/Holes2D"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "roofClass",
+        "structureType",
+        "thickness",
+        "level",
+        "zCoordinate",
+        "polygonOutline"
+      ]
+    },
+    "RoofDetailsLevel": {
+      "type": "object",
+      "properties": {
+        "height": {
+          "type": "number"
+        },
+        "angle": {
+          "type": "number"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "height",
+        "angle"
+      ]
+    },
+    "RoofDetailsPivotLine": {
+      "type": "object",
+      "description": "Single-plane: the pivot line the plane rotates about.",
+      "properties": {
+        "begin": {
+          "$ref": "#/$defs/Coordinate2D"
+        },
+        "end": {
+          "$ref": "#/$defs/Coordinate2D"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "begin",
+        "end"
       ]
     },
     "RoofOrShellRelationsOfElement": {
@@ -16602,21 +18061,7 @@
           "minItems": 1,
           "maxItems": 16,
           "items": {
-            "type": "object",
-            "properties": {
-              "levelHeight": {
-                "type": "number"
-              },
-              "levelAngle": {
-                "type": "number",
-                "exclusiveMinimum": 0.0
-              }
-            },
-            "additionalProperties": false,
-            "required": [
-              "levelHeight",
-              "levelAngle"
-            ]
+            "$ref": "#/$defs/Level"
           }
         },
         "structureType": {
@@ -16715,6 +18160,26 @@
       "required": [
         "executionResults"
       ]
+    },
+    "SaveAsModuleFileParameters": {
+      "type": "object",
+      "properties": {
+        "moduleFilePath": {
+          "type": "string",
+          "description": "Absolute path of the .mod file to write. An existing file is overwritten. The current window must be a floor plan, section, elevation or detail."
+        },
+        "elements": {
+          "$ref": "#/$defs/Elements",
+          "description": "Optional. The elements that go into the module; omitted, the current selection does, as Save Selection as Module would. Pass GetAllElements for the whole project. Archicad 25 and 26 support the selection form only."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "moduleFilePath"
+      ]
+    },
+    "SaveAsModuleFileResult": {
+      "$ref": "#/$defs/ExecutionResult"
     },
     "SaveProjectResult": {
       "$ref": "#/$defs/ExecutionResult"
@@ -17096,6 +18561,25 @@
       "required": [
         "executionResults"
       ]
+    },
+    "SetLibrariesParameters": {
+      "type": "object",
+      "properties": {
+        "libraries": {
+          "type": "array",
+          "description": "Local library folders or container files, by absolute path.",
+          "items": {
+            "$ref": "#/$defs/LibraryLocation"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "libraries"
+      ]
+    },
+    "SetLibrariesResult": {
+      "$ref": "#/$defs/ExecutionResult"
     },
     "SetProjectInfoFieldParameters": {
       "type": "object",
@@ -17582,7 +19066,8 @@
           "items": {
             "$ref": "#/$defs/Coordinate2D"
           },
-          "minItems": 3
+          "minItems": 3,
+          "description": "Replaces the slab's entire polygon, including its holes - resend the holes field too to keep them, otherwise they are removed."
         },
         "polygonArcs": {
           "type": "array",
@@ -17946,6 +19431,10 @@
           "type": "number",
           "description": "Depth (going) of each tread.",
           "exclusiveMinimum": 0.0
+        },
+        "finishVisible": {
+          "type": "boolean",
+          "description": "Optional. If false, the tread/riser finishes are hidden and only the stair structure (e.g. a monolith) is modeled."
         }
       },
       "additionalProperties": false,
@@ -18010,6 +19499,10 @@
       "type": "object",
       "description": "Contains the configurable settings for creating or modifying a story. Used as input in API requests.",
       "properties": {
+        "index": {
+          "type": "integer",
+          "description": "The story index. Optional. The stories are matched to the existing ones positionally, from the bottom up. Giving the index of any of them pins the numbering of the whole list, so stories below the existing structure - basements with negative indices - can be requested as well. When given for more than one story, the indices must be consecutive."
+        },
         "dispOnSections": {
           "type": "boolean",
           "description": "Story level lines should appear on sections and elevations."
@@ -18337,13 +19830,48 @@
         "elevation"
       ]
     },
+    "SymbolLabelTextDirection": {
+      "type": "string",
+      "enum": [
+        "Parallel",
+        "Horizontal",
+        "Vertical",
+        "General"
+      ],
+      "description": "Direction of the symbol label's text."
+    },
     "TeamworkReceiveResult": {
       "$ref": "#/$defs/ExecutionResult"
     },
     "TeamworkSendResult": {
       "$ref": "#/$defs/ExecutionResult"
     },
+    "TextBoxAnchor": {
+      "type": "string",
+      "enum": [
+        "LeftTop",
+        "MiddleTop",
+        "RightTop",
+        "LeftMiddle",
+        "MiddleMiddle",
+        "RightMiddle",
+        "LeftBottom",
+        "MiddleBottom",
+        "RightBottom"
+      ],
+      "description": "Anchor point of the text box."
+    },
     "TextData": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/TextDataWithText"
+        },
+        {
+          "$ref": "#/$defs/TextDataWithRuns"
+        }
+      ]
+    },
+    "TextDataWithRuns": {
       "type": "object",
       "description": "The parameters of the new Text element.",
       "properties": {
@@ -18357,29 +19885,88 @@
         },
         "text": {
           "type": "string",
-          "description": "The text content. Newlines create multiple lines."
+          "description": "The text content. Newlines create multiple lines. Ignored if 'runs' is also given."
+        },
+        "runs": {
+          "type": "array",
+          "description": "Multi-style text content: an array of styled runs, concatenated in order. Takes precedence over 'text' if both are given.",
+          "items": {
+            "$ref": "#/$defs/TextRunDetails"
+          },
+          "minItems": 1
         },
         "height": {
           "type": "number",
-          "description": "The character height in millimeters. Optional; defaults to the Text tool default."
+          "description": "The character height in millimeters. Optional; defaults to the Text tool default. Equivalent to style.height."
         },
         "pen": {
           "type": "integer",
-          "description": "Optional pen attribute index."
+          "description": "Optional pen attribute index. Equivalent to style.penIndex."
         },
         "angle": {
           "type": "number",
-          "description": "Optional rotation angle in radians."
+          "description": "Optional rotation angle in radians. Equivalent to style.angle."
         },
         "justification": {
+          "$ref": "#/$defs/Justification"
+        },
+        "style": {
+          "$ref": "#/$defs/TextStyleSettableDetails",
+          "description": "Full style settings (font, effects, frame, anchor, etc). height/pen/angle/justification above take precedence over the same fields here if both are given."
+        },
+        "floorIndex": {
+          "type": "integer",
+          "description": "Optional floor index. If omitted, derived from the coordinate's z value."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "coordinate",
+        "runs"
+      ]
+    },
+    "TextDataWithText": {
+      "type": "object",
+      "description": "The parameters of the new Text element.",
+      "properties": {
+        "favoriteName": {
           "type": "string",
-          "description": "Optional text justification.",
-          "enum": [
-            "Left",
-            "Center",
-            "Right",
-            "Full"
-          ]
+          "description": "Optional name of a favorite to base the new element on. Its settings are applied first, then the explicitly given fields override them."
+        },
+        "coordinate": {
+          "$ref": "#/$defs/Coordinate3D",
+          "description": "The placement position of the text. The z value is used to determine the floor when floorIndex is omitted."
+        },
+        "text": {
+          "type": "string",
+          "description": "The text content. Newlines create multiple lines. Ignored if 'runs' is also given."
+        },
+        "runs": {
+          "type": "array",
+          "description": "Multi-style text content: an array of styled runs, concatenated in order. Takes precedence over 'text' if both are given.",
+          "items": {
+            "$ref": "#/$defs/TextRunDetails"
+          },
+          "minItems": 1
+        },
+        "height": {
+          "type": "number",
+          "description": "The character height in millimeters. Optional; defaults to the Text tool default. Equivalent to style.height."
+        },
+        "pen": {
+          "type": "integer",
+          "description": "Optional pen attribute index. Equivalent to style.penIndex."
+        },
+        "angle": {
+          "type": "number",
+          "description": "Optional rotation angle in radians. Equivalent to style.angle."
+        },
+        "justification": {
+          "$ref": "#/$defs/Justification"
+        },
+        "style": {
+          "$ref": "#/$defs/TextStyleSettableDetails",
+          "description": "Full style settings (font, effects, frame, anchor, etc). height/pen/angle/justification above take precedence over the same fields here if both are given."
         },
         "floorIndex": {
           "type": "integer",
@@ -18391,6 +19978,389 @@
         "coordinate",
         "text"
       ]
+    },
+    "TextDetails": {
+      "type": "object",
+      "properties": {
+        "text": {
+          "type": "string",
+          "description": "The text content. Newlines separate the lines."
+        },
+        "position": {
+          "$ref": "#/$defs/Coordinate2D",
+          "description": "The placement position of the text."
+        },
+        "angle": {
+          "type": "number",
+          "description": "The rotation angle in radians (same as style.angle)."
+        },
+        "height": {
+          "type": "number",
+          "description": "The character height in millimeters (same as style.height)."
+        },
+        "pen": {
+          "type": "integer",
+          "description": "The pen attribute index (same as style.penIndex)."
+        },
+        "justification": {
+          "$ref": "#/$defs/Justification"
+        },
+        "zCoordinate": {
+          "type": "number",
+          "description": "The level of the text's floor."
+        },
+        "style": {
+          "$ref": "#/$defs/TextStyleDetails",
+          "description": "The full style state; the flat fields above are the subset SetDetailsOfElements takes back."
+        },
+        "paragraphCount": {
+          "type": "integer",
+          "description": "Read-only: number of paragraphs in the memo (Tapir's own Create/Modify commands always produce 1)."
+        },
+        "runs": {
+          "type": "array",
+          "description": "The styled runs of the content, present whenever the content has paragraphs (always for content Tapir created); one entry per run, a single run too, as a run may carry a pen, font, face or size of its own. Concatenating the runs' text in order gives the full content.",
+          "items": {
+            "$ref": "#/$defs/TextRunDetails"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "text",
+        "position",
+        "angle",
+        "height",
+        "pen",
+        "justification",
+        "zCoordinate",
+        "style",
+        "paragraphCount"
+      ]
+    },
+    "TextRunDetails": {
+      "type": "object",
+      "description": "One monostyle run of text (API_RunType). Concatenating 'text' across all runs in order gives the full content; a newline character starts a new line.",
+      "properties": {
+        "text": {
+          "type": "string",
+          "description": "The run's text content."
+        },
+        "penIndex": {
+          "type": "integer",
+          "description": "Pen attribute index. Optional; defaults to the style's penIndex."
+        },
+        "fontIndex": {
+          "type": "integer",
+          "description": "Font attribute index. Optional; defaults to the style's fontIndex."
+        },
+        "bold": {
+          "type": "boolean"
+        },
+        "italic": {
+          "type": "boolean"
+        },
+        "underline": {
+          "type": "boolean"
+        },
+        "heightOverride": {
+          "type": "number",
+          "description": "Character height in mm for this run only. Optional; defaults to the style's height."
+        },
+        "effectStrikeout": {
+          "type": "boolean",
+          "description": "Optional; defaults to the style's effectStrikeout."
+        },
+        "effectSuperscript": {
+          "type": "boolean",
+          "description": "Optional; defaults to the style's effectSuperscript."
+        },
+        "effectSubscript": {
+          "type": "boolean",
+          "description": "Optional; defaults to the style's effectSubscript."
+        },
+        "effectProtected": {
+          "type": "boolean",
+          "description": "Optional; defaults to the style's effectProtected."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "text"
+      ]
+    },
+    "TextSettings": {
+      "type": "object",
+      "description": "Settings for modifying a Text element or a text-type Label. For Labels only the text field is applied. Setting text replaces the whole content (any per-run formatting of the old content is dropped) and switches the element to automatic width, matching the behavior of CreateTexts/CreateLabels.",
+      "properties": {
+        "text": {
+          "type": "string",
+          "description": "The new text content. Newlines create multiple lines."
+        },
+        "position": {
+          "$ref": "#/$defs/Coordinate2D",
+          "description": "The placement position of the text. Only applied to Text elements."
+        },
+        "angle": {
+          "type": "number",
+          "description": "The rotation angle in radians. Only applied to Text elements."
+        },
+        "height": {
+          "type": "number",
+          "description": "The character height in millimeters. Only applied to Text elements."
+        },
+        "justification": {
+          "$ref": "#/$defs/Justification"
+        }
+      },
+      "additionalProperties": false,
+      "required": []
+    },
+    "TextStyleDetails": {
+      "type": "object",
+      "description": "Full readable style state of a Text or text-class Label: every field of TextStyleSettableDetails plus the read-only ones (lineCount, boxWidth, boxHeight).",
+      "properties": {
+        "penIndex": {
+          "type": "integer",
+          "description": "Pen attribute index."
+        },
+        "fontIndex": {
+          "type": "integer",
+          "description": "Font attribute index."
+        },
+        "bold": {
+          "type": "boolean"
+        },
+        "italic": {
+          "type": "boolean"
+        },
+        "underline": {
+          "type": "boolean"
+        },
+        "justification": {
+          "$ref": "#/$defs/Justification"
+        },
+        "height": {
+          "type": "number",
+          "description": "Character height in mm."
+        },
+        "spacing": {
+          "type": "number",
+          "description": "Line spacing factor, between -10.0 and -1.0."
+        },
+        "angle": {
+          "type": "number",
+          "description": "Rotation angle in radians."
+        },
+        "effectStrikeout": {
+          "type": "boolean"
+        },
+        "effectSuperscript": {
+          "type": "boolean"
+        },
+        "effectSubscript": {
+          "type": "boolean"
+        },
+        "effectProtected": {
+          "type": "boolean",
+          "description": "Protected text (autotext reference)."
+        },
+        "widthFactor": {
+          "type": "number",
+          "description": "Width scale of the text, between 0.75 and 10.0."
+        },
+        "charSpaceFactor": {
+          "type": "number",
+          "description": "Character spacing scale, between 0.75 and 10.0."
+        },
+        "fixedSize": {
+          "type": "boolean",
+          "description": "Size does not depend on output scale."
+        },
+        "usedContour": {
+          "type": "boolean",
+          "description": "Draw the frame of the text block."
+        },
+        "usedFill": {
+          "type": "boolean",
+          "description": "Draw a solid fill behind the text block."
+        },
+        "contourPenIndex": {
+          "type": "integer",
+          "description": "Pen index of the text block's frame."
+        },
+        "fillPenIndex": {
+          "type": "integer",
+          "description": "Pen index of the text block's background fill."
+        },
+        "anchor": {
+          "$ref": "#/$defs/TextBoxAnchor"
+        },
+        "fixedAngle": {
+          "type": "boolean",
+          "description": "The rotation angle does not change when the element is rotated."
+        },
+        "contourOffset": {
+          "type": "number",
+          "description": "Offset of the frame/background fill from the text bounding box, in mm."
+        },
+        "flipEnabled": {
+          "type": "boolean",
+          "description": "The text should always be readable (flips when viewed upside down)."
+        },
+        "textFrameShape": {
+          "type": "string",
+          "enum": [
+            "Rectangle",
+            "Circle",
+            "RoundedRectangle",
+            "Pill"
+          ],
+          "description": "Text frame shape. Standalone Text elements only support Rectangle. Available from Archicad 28; earlier versions ignore it and read it back as Rectangle."
+        },
+        "textFrameSizeFixed": {
+          "type": "boolean",
+          "description": "Use fixedWidth/fixedHeight instead of fitting the frame to the text box. Available from Archicad 28; earlier versions ignore it and read it back as false."
+        },
+        "textFrameFixedWidth": {
+          "type": "number",
+          "description": "Frame width in mm, when textFrameSizeFixed is true. Between 1 and 1000. Available from Archicad 28; earlier versions ignore it and read it back as 0."
+        },
+        "textFrameFixedHeight": {
+          "type": "number",
+          "description": "Frame height in mm, when textFrameSizeFixed is true (ignored for Circle, which uses fixedWidth as diameter). Between 1 and 1000. Available from Archicad 28; earlier versions ignore it and read it back as 0."
+        },
+        "lineCount": {
+          "type": "integer",
+          "description": "Read-only: number of text lines (API_TextType::nLine)."
+        },
+        "boxWidth": {
+          "type": "number",
+          "description": "Read-only: horizontal size of the text box in mm, auto-computed by Archicad."
+        },
+        "boxHeight": {
+          "type": "number",
+          "description": "Read-only: vertical size of the text box in mm, auto-computed by Archicad."
+        }
+      },
+      "additionalProperties": false
+    },
+    "TextStyleSettableDetails": {
+      "type": "object",
+      "description": "Every user-configurable style setting of a Text or a text-class Label (API_TextType). Shared by CreateTexts/CreateLabels ('style'), ModifyTexts/ModifyLabels ('style'), and the Get response.",
+      "properties": {
+        "penIndex": {
+          "type": "integer",
+          "description": "Pen attribute index."
+        },
+        "fontIndex": {
+          "type": "integer",
+          "description": "Font attribute index."
+        },
+        "bold": {
+          "type": "boolean"
+        },
+        "italic": {
+          "type": "boolean"
+        },
+        "underline": {
+          "type": "boolean"
+        },
+        "justification": {
+          "$ref": "#/$defs/Justification"
+        },
+        "height": {
+          "type": "number",
+          "description": "Character height in mm."
+        },
+        "spacing": {
+          "type": "number",
+          "description": "Line spacing factor, between -10.0 and -1.0."
+        },
+        "angle": {
+          "type": "number",
+          "description": "Rotation angle in radians."
+        },
+        "effectStrikeout": {
+          "type": "boolean"
+        },
+        "effectSuperscript": {
+          "type": "boolean"
+        },
+        "effectSubscript": {
+          "type": "boolean"
+        },
+        "effectProtected": {
+          "type": "boolean",
+          "description": "Protected text (autotext reference)."
+        },
+        "widthFactor": {
+          "type": "number",
+          "description": "Width scale of the text, between 0.75 and 10.0."
+        },
+        "charSpaceFactor": {
+          "type": "number",
+          "description": "Character spacing scale, between 0.75 and 10.0."
+        },
+        "fixedSize": {
+          "type": "boolean",
+          "description": "Size does not depend on output scale."
+        },
+        "usedContour": {
+          "type": "boolean",
+          "description": "Draw the frame of the text block."
+        },
+        "usedFill": {
+          "type": "boolean",
+          "description": "Draw a solid fill behind the text block."
+        },
+        "contourPenIndex": {
+          "type": "integer",
+          "description": "Pen index of the text block's frame."
+        },
+        "fillPenIndex": {
+          "type": "integer",
+          "description": "Pen index of the text block's background fill."
+        },
+        "anchor": {
+          "$ref": "#/$defs/TextBoxAnchor"
+        },
+        "fixedAngle": {
+          "type": "boolean",
+          "description": "The rotation angle does not change when the element is rotated."
+        },
+        "contourOffset": {
+          "type": "number",
+          "description": "Offset of the frame/background fill from the text bounding box, in mm."
+        },
+        "flipEnabled": {
+          "type": "boolean",
+          "description": "The text should always be readable (flips when viewed upside down)."
+        },
+        "textFrameShape": {
+          "type": "string",
+          "enum": [
+            "Rectangle",
+            "Circle",
+            "RoundedRectangle",
+            "Pill"
+          ],
+          "description": "Text frame shape. Standalone Text elements only support Rectangle. Available from Archicad 28; earlier versions ignore it and read it back as Rectangle."
+        },
+        "textFrameSizeFixed": {
+          "type": "boolean",
+          "description": "Use fixedWidth/fixedHeight instead of fitting the frame to the text box. Available from Archicad 28; earlier versions ignore it and read it back as false."
+        },
+        "textFrameFixedWidth": {
+          "type": "number",
+          "description": "Frame width in mm, when textFrameSizeFixed is true. Between 1 and 1000. Available from Archicad 28; earlier versions ignore it and read it back as 0."
+        },
+        "textFrameFixedHeight": {
+          "type": "number",
+          "description": "Frame height in mm, when textFrameSizeFixed is true (ignored for Circle, which uses fixedWidth as diameter). Between 1 and 1000. Available from Archicad 28; earlier versions ignore it and read it back as 0."
+        }
+      },
+      "additionalProperties": false
     },
     "Texture": {
       "type": "object",
@@ -18470,10 +20440,45 @@
         "Box"
       ]
     },
+    "TrimElementsParameters": {
+      "type": "object",
+      "properties": {
+        "elements": {
+          "$ref": "#/$defs/Elements",
+          "description": "The construction elements to trim. Without trimmingElement the roofs and shells among them do the trimming."
+        },
+        "trimmingElement": {
+          "$ref": "#/$defs/ElementId",
+          "description": "Optional. The roof or shell that trims every element in the list."
+        },
+        "trimType": {
+          "$ref": "#/$defs/TrimType"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elements"
+      ]
+    },
+    "TrimElementsResult": {
+      "$ref": "#/$defs/ExecutionResult"
+    },
+    "TrimType": {
+      "type": "string",
+      "enum": [
+        "KeepInside",
+        "KeepOutside",
+        "KeepAll",
+        "No"
+      ]
+    },
     "TypeSpecificDetails": {
       "description": "Represents the complete type-specific details of an element. Used as output from GET requests",
       "type": "object",
       "oneOf": [
+        {
+          "$ref": "#/$defs/HotlinkDetails"
+        },
         {
           "$ref": "#/$defs/WallDetails"
         },
@@ -18482,6 +20487,9 @@
         },
         {
           "$ref": "#/$defs/SlabDetails"
+        },
+        {
+          "$ref": "#/$defs/RoofDetails"
         },
         {
           "$ref": "#/$defs/ColumnDetails"
@@ -18529,6 +20537,9 @@
           "$ref": "#/$defs/LabelDetails"
         },
         {
+          "$ref": "#/$defs/TextDetails"
+        },
+        {
           "$ref": "#/$defs/NotYetSupportedElementTypeDetails"
         }
       ]
@@ -18563,6 +20574,9 @@
         },
         {
           "$ref": "#/$defs/DrawingSettings"
+        },
+        {
+          "$ref": "#/$defs/TextSettings"
         }
       ]
     },
@@ -18628,7 +20642,7 @@
       "properties": {
         "propertyDefinitions": {
           "type": "array",
-          "description": "The list of expression-based property definitions to update.",
+          "description": "The property definitions to update.",
           "items": {
             "$ref": "#/$defs/PropertyExpressionUpdate"
           }
@@ -19430,6 +21444,14 @@
         },
         "oSide": {
           "type": "boolean"
+        },
+        "reveal": {
+          "type": "boolean",
+          "description": "Turn the reveal on or off."
+        },
+        "revealDepthOffset": {
+          "type": "number",
+          "description": "Distance the frame plane is moved across the wall thickness, along the wall normal."
         }
       },
       "additionalProperties": false,
@@ -19453,6 +21475,22 @@
       "required": [
         "name",
         "referenceId"
+      ]
+    },
+    "ZoneBoundariesOfZonesWrapper": {
+      "type": "object",
+      "properties": {
+        "zoneBoundariesOfZones": {
+          "type": "array",
+          "description": "The boundaries of each requested Zone, in the same order as the zones array of the input.",
+          "items": {
+            "$ref": "#/$defs/ZoneBoundariesOrError"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "zoneBoundariesOfZones"
       ]
     },
     "ZoneBoundariesOrError": {

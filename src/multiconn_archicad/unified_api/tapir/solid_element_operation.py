@@ -8,18 +8,29 @@ from pydantic import TypeAdapter
 from multiconn_archicad.models.tapir.commands import (
     CreateSolidElementLinksParameters,
     CreateSolidElementLinksResult,
+    GetElementTrimsParameters,
+    GetElementTrimsResult,
     GetSolidElementLinksParameters,
     GetSolidElementLinksResult,
+    RemoveElementTrimsParameters,
+    RemoveElementTrimsResult,
     RemoveSolidElementLinksParameters,
     RemoveSolidElementLinksResult,
+    TrimElementsParameters,
+    TrimElementsResult,
 )
 from multiconn_archicad.models.tapir.types import (
+    ElementId,
     ElementIdArrayItem,
+    ElementPair,
+    ElementTrims,
+    ErrorItem,
     FailedExecutionResult,
     SolidLinkData,
     SolidLinkReference,
     SolidLinksOfElement,
     SuccessfulExecutionResult,
+    TrimType,
 )
 
 if TYPE_CHECKING:
@@ -58,6 +69,34 @@ class SolidElementOperationCommands:
         validated_response = CreateSolidElementLinksResult.model_validate(response_dict)
         return validated_response.executionResults
 
+    def get_element_trims(self, elements: list[ElementIdArrayItem]) -> list[ElementTrims | ErrorItem]:
+        """
+        Which roofs and shells trim each queried element, with the trim type, and which elements
+        it trims.
+
+        Args:
+            elements (list[ElementIdArrayItem]): A list of elements.
+
+        Returns:
+            list[ElementTrims | ErrorItem]: One item per queried element, in order. An unknown
+                or deleted element is an error item, so it cannot be mistaken for an element
+                that is simply not trimmed.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elements": elements,
+        }
+        validated_params = GetElementTrimsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetElementTrims", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetElementTrimsResult.model_validate(response_dict)
+        return validated_response.elementTrims
+
     def get_solid_element_links(self, elements: list[ElementIdArrayItem]) -> list[SolidLinksOfElement]:
         """
         Returns solid element operation links for each queried element, grouped by role (target
@@ -85,6 +124,35 @@ class SolidElementOperationCommands:
         )
         validated_response = GetSolidElementLinksResult.model_validate(response_dict)
         return validated_response.solidLinks
+
+    def remove_element_trims(
+        self, element_pairs: list[ElementPair]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Removes the trim between an element and the roof or shell trimming it.
+
+        Args:
+            element_pairs (list[ElementPair]): The trimmed element and the roof or shell
+                trimming it, per pair.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elementPairs": element_pairs,
+        }
+        validated_params = RemoveElementTrimsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "RemoveElementTrims", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = RemoveElementTrimsResult.model_validate(response_dict)
+        return validated_response.executionResults
 
     def remove_solid_element_links(
         self, solid_links: list[SolidLinkReference]
@@ -114,3 +182,40 @@ class SolidElementOperationCommands:
         )
         validated_response = RemoveSolidElementLinksResult.model_validate(response_dict)
         return validated_response.executionResults
+
+    def trim_elements(
+        self,
+        elements: list[ElementIdArrayItem],
+        trimming_element: ElementId | None = None,
+        trim_type: None | TrimType = None,
+    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+        """
+        Trims construction elements with a roof or shell: the roofs and shells in the list, or
+        one given trimming element with a trim type.
+
+        Args:
+            elements (list[ElementIdArrayItem]): The construction elements to trim. Without
+                trimmingElement the roofs and shells among them do the trimming.
+            trimming_element (ElementId | None): Optional. The roof or shell that trims every
+                element in the list.
+            trim_type (None | TrimType)
+
+        Returns:
+            FailedExecutionResult | SuccessfulExecutionResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elements": elements,
+            "trimmingElement": trimming_element,
+            "trimType": trim_type,
+        }
+        validated_params = TrimElementsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "TrimElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = TypeAdapter(TrimElementsResult).validate_python(response_dict)
+        return validated_response
