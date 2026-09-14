@@ -1,6 +1,6 @@
 ---
 name: multiconn-codegen
-description: "Explicit-use only. Audit, regenerate, update, and review the generated Tapir schemas and Python models in multiconn_archicad. Use only when the user directly invokes or names multiconn-codegen; do not select it implicitly for adjacent generator work or ordinary hand-written model edits."
+description: "Explicit-use only. Audit, regenerate, update, and review the generated Tapir models and unified API in multiconn_archicad. Use only when the user directly invokes or names multiconn-codegen; do not select it implicitly for adjacent generator work or ordinary hand-written model edits."
 ---
 
 # MultiConn Tapir code generation
@@ -13,18 +13,19 @@ Treat this skill as explicit-only in every harness. Follow it only when the user
 
 ## Choose the operation
 
-Interpret the text following the skill invocation as one of three operations:
+Interpret the text following the skill invocation as one of four operations:
 
 - **`audit`:** inspect the currently generated Tapir schema and models, run the generation audit, scan the existing generated diff when present, and report findings. Keep this operation read-only unless the user also asks for repairs.
-- **`regenerate tapir`:** regenerate the currently pinned Tapir version, run the audit and reproducibility check, repair generation failures at their source, and report the result. Do not change the Tapir version.
-- **`update tapir to <version>`:** change to the requested Tapir version and perform the complete update loop: preflight, fetch, regenerate, audit, repair, repeat until clean, scan the entire diff for new problem classes, improve safeguards where appropriate, test, and report.
+- **`regenerate tapir`:** regenerate the currently pinned Tapir version, run the audit and reproducibility check, repair generation failures at their source, regenerate the unified API, run tests, and report the result. Do not change the Tapir version.
+- **`regenerate unified`:** regenerate only the unified API from the current Official and Tapir models, handle a stale generated import when necessary, run relevant tests, and report the result. Do not rerun either model pipeline.
+- **`update tapir to <version>`:** change to the requested Tapir version and perform the complete update loop: preflight, fetch, regenerate, audit, repair, repeat until clean, scan the entire diff for new problem classes, improve safeguards where appropriate, regenerate the unified API, test, and report.
 
-Examples are `$multiconn-codegen audit`, `$multiconn-codegen regenerate tapir`, and `$multiconn-codegen update tapir to 1.5.9`.
+Examples are `$multiconn-codegen audit`, `$multiconn-codegen regenerate tapir`, `$multiconn-codegen regenerate unified`, and `$multiconn-codegen update tapir to 1.5.9`.
 
 ## Prepare
 
 - For an update, determine the target Tapir version from the request. Ask for it only when it cannot be inferred. For regeneration, retain the pinned version.
-- Before changing behavior, inspect the relevant parts of `code_generation/tapir/run_tapir_pipeline.py`, `code_generation/shared/schema_patching.py`, `code_generation/shared/model_cleaner.py`, `code_generation/shared/typed_dict_cleaner.py`, and `code_generation/tapir/generation_audit.py`.
+- Before changing behavior, inspect the relevant parts of `code_generation/tapir/run_tapir_pipeline.py`, `code_generation/shared/schema_patching.py`, `code_generation/shared/model_cleaner.py`, `code_generation/shared/typed_dict_cleaner.py`, `code_generation/tapir/generation_audit.py`, and `code_generation/unified/api_generator/run_pipeline.py`.
 - Record the pre-generation Tapir version and the public definitions in `src/multiconn_archicad/models/tapir/types.py`. Use the checked-in revision as the comparison baseline, not line positions in the working file.
 - Preserve unrelated working-tree changes. Do not commit, push, or open a pull request unless requested.
 
@@ -42,14 +43,15 @@ Examples are `$multiconn-codegen audit`, `$multiconn-codegen regenerate tapir`, 
 1. Run the requested operation with the project environment's Python:
 
    ```text
-   audit:      python -m code_generation.tapir.generation_audit --strict
-   regenerate: python -m code_generation.tapir.run_tapir_pipeline --check-reproducibility
-   update:     python -m code_generation.tapir.run_tapir_pipeline --tapir-version <version> --check-reproducibility
+   audit:              python -m code_generation.tapir.generation_audit --strict
+   regenerate tapir:   python -m code_generation.tapir.run_tapir_pipeline --check-reproducibility
+   regenerate unified: python -m code_generation.unified.api_generator.run_pipeline
+   update tapir:       python -m code_generation.tapir.run_tapir_pipeline --tapir-version <version> --check-reproducibility
    ```
 
-2. For audit-only work, run the audit against the current outputs without regenerating them. For regeneration or update, let the complete pipeline and audit report all findings. Do not stop after resolving only the first audit finding.
-3. Diagnose every finding from the unpatched schema, patched schema, generator code, and generated diff. Never edit generated Python files directly.
-4. Make the smallest source change that fixes the whole class of problem, then rerun the complete pipeline. Continue until the strict audit, reproducibility check, formatter, and relevant tests pass.
+2. For audit-only work, run the audit against the current outputs without regenerating them. For Tapir regeneration or update, let the complete Tapir pipeline and audit report all findings. Do not stop after resolving only the first audit finding.
+3. Diagnose every finding from the unpatched schema, patched schema, generator code, and generated diff. Never edit generated Python files directly except for the narrowly scoped unified-generation bootstrap described below.
+4. Make the smallest source change that fixes the whole class of problem, then rerun the complete Tapir pipeline. Continue until its strict audit, reproducibility check, and formatter pass; then regenerate the unified API and run tests.
 5. If a failure requires a product or public-API decision that cannot be inferred safely, finish all independent findings and report the remaining decision instead of guessing.
 
 ### Classify schema patches
@@ -69,6 +71,15 @@ Keep each patch call on one physical line. Use a formatter-skip marker on that s
 Always inspect the generated diff for novel mistakes, even when the audit passes. Add an audit rule only when the issue is inexpensive to detect, deterministic, broadly useful, and unlikely to produce false positives. Prefer checking schema names, references, Python syntax, and unmistakable generator artifacts over judging whether a valid name is semantically ideal.
 
 An observed one-off or subjective naming concern belongs in the human report. Do not encode it as a narrow special case. Do not edit this skill automatically; suggest a skill change only when the workflow itself proved inadequate.
+
+### Regenerate the unified API and test
+
+- For `regenerate tapir` and `update tapir`, run unified generation once after the Tapir audit/repair loop is clean. Do not regenerate it after every intermediate Tapir repair.
+- For `regenerate unified`, run the unified pipeline directly against the current generated models.
+- Run `python -m code_generation.unified.api_generator.run_pipeline` with the project environment's Python.
+- If the pipeline fails because an existing file under `src/multiconn_archicad/unified_api` imports a Tapir model that the finalized Tapir pipeline renamed or removed, confirm the stale name from the traceback and generated Tapir definitions. Remove only that stale import as a temporary bootstrap edit, then immediately rerun the unified pipeline so generated output replaces the manual edit.
+- Do not remove imports speculatively. If the traceback does not prove this known stale-import case, or the retry fails for another reason, diagnose it normally.
+- Run the relevant tests only after unified generation succeeds. For Tapir regeneration or update, run the full project test suite unless the user requested a narrower scope. For standalone unified regeneration, run the generated unified-method tests and any tests covering changed generator code.
 
 ## Review the result
 
@@ -120,6 +131,7 @@ Use this structure, omitting empty detail rows but retaining every heading. Stat
 
 - Generation audit: `<result>`
 - Reproducibility: `<result>`
+- Unified API generation: `<result, including whether a stale import bootstrap was needed>`
 - Ruff: `<result>`
 - Tests: `<result>`
 - Unexpected generated diff noise: `<result>`
