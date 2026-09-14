@@ -70,7 +70,26 @@ Keep each patch call on one physical line. Use a formatter-skip marker on that s
 
 Always inspect the generated diff for novel mistakes, even when the audit passes. Add an audit rule only when the issue is inexpensive to detect, deterministic, broadly useful, and unlikely to produce false positives. Prefer checking schema names, references, Python syntax, and unmistakable generator artifacts over judging whether a valid name is semantically ideal.
 
-An observed one-off or subjective naming concern belongs in the human report. Do not encode it as a narrow special case. Do not edit this skill automatically; suggest a skill change only when the workflow itself proved inadequate.
+Do not encode a subjective judgment as a narrow deterministic special case. Resolve it in the semantic review when the schema context supports a clear answer; otherwise leave a specific question for human review.
+
+### Run an agentic semantic review
+
+After the deterministic audit passes, inspect every added or structurally changed public model in schema context. Trace its consumers, compare it with existing public types, and repair clear semantic problems at the schema-patching or generator source. This review is required even when the audit reports no errors.
+
+Known semantic error types are:
+
+- context-free or overly broad names that should include their domain or role;
+- mechanically derived names that describe an inline path rather than the represented concept;
+- duplicate types or enums that represent the same concept and should share one public definition;
+- inconsistent naming among related request, response, creation, modification, and details models;
+- inappropriate model sharing that hides meaningful required/optional or request/response differences;
+- a named public abstraction lost because the generator inlined or collapsed its wrapper;
+- a generated representation that weakens or obscures an important schema constraint such as `oneOf`, `anyOf`, or conditional required fields;
+- inconsistent Pydantic and TypedDict public surfaces.
+
+When a better name or reuse decision is clear from the schema and consumers, implement it and report the resolution. When multiple materially different choices remain plausible, preserve the best safe generated result and ask a focused human-review question.
+
+If the run exposes a deterministic failure class not covered by the audit, or a semantic failure class not covered by the list above, record it under `New patterns noticed`. State whether it should become a deterministic audit rule or a maintained semantic-review error type. A new instance of a known error type is not a new pattern.
 
 ### Regenerate the unified API and test
 
@@ -84,6 +103,12 @@ An observed one-off or subjective naming concern belongs in the human report. Do
 ## Review the result
 
 Compare public definitions structurally so ordering-only changes do not look semantic. Review added, removed, renamed, and changed definitions, and investigate unexplained generated-file movement or other diff noise.
+
+Start the report with a release-level API summary: counts and names of added, removed, and structurally changed commands and type models. Do not put these aggregate facts in the decision table.
+
+In the decision table, use one row per independently reviewable change. Do not group unrelated schema locations merely because they share a mechanical cause such as anonymous inline generation. Each row must identify the exact schema definition or property path, affected command or public-model consumers, the upstream shape or generated symptom, the chosen resolution, and its patch category. Add a short detailed note after the table whenever requiredness, union behavior, compatibility, or competing designs cannot be understood from one row.
+
+Whenever handwritten generator, cleaner, formatter, or audit behavior changes, explain the new concept in the report. Include what triggered it, its input-to-output transformation, why that layer owns the fix, affected models, and its deliberate limitations. Check relevant generator settings before adding a cleaner workaround and report why no suitable setting was used.
 
 For the new-model inventory:
 
@@ -103,17 +128,48 @@ Use this structure, omitting empty detail rows but retaining every heading. Stat
 **Result:** Ready for human review | Blocked
 **Tapir:** <old version> → <new version>
 
+### API change summary
+
+- Commands: `<counts and names added, removed, and structurally changed>`
+- Type models: `<counts and names added, removed, and structurally changed>`
+- Review decisions: `<count by patch category>`
+
 ### Generated API changes requiring review
 
-| Change | Schema source | Resolution | Patch category |
+| Change | Schema source | API consumers | Upstream/generated problem | Resolution | Patch category |
+|---|---|---|---|---|---|
+| `<one independently reviewable change>` | `<exact definition or property path>` | `<commands and public models>` | `<relevant shape, requiredness, duplication, or generated symptom>` | `<what changed and why>` | `<Permanent, Upstream-breaking, Temporary, or N/A>` |
+
+### Detailed decision notes
+
+#### `<change needing more explanation>`
+
+- Before: `<relevant upstream and generated behavior>`
+- After: `<resulting public models and behavior>`
+- Compatibility and tradeoffs: `<what the reviewer needs to know>`
+- Decision needed: `<specific confirmation, or None>`
+
+### Semantic naming review
+
+| Generated name | Schema context and consumers | Finding | Resolution |
 |---|---|---|---|
-| `<added, removed, or renamed model>` | `<definition or property path>` | `<what changed>` | `<Permanent, Upstream-breaking, Temporary, or N/A>` |
+| `<original generated name>` | `<property path and API consumers>` | `<known semantic error type>` | `<new name, shared type, separation, or focused unresolved question>` |
 
 ### Untouched new type models
 
 | Model |
 |---|
 | `<ModelName>` |
+
+### Generator and cleaner changes
+
+#### `<function or behavior, or None>`
+
+- Trigger: `<observed failure>`
+- Transformation: `<input to output behavior>`
+- Why this layer: `<why settings or schema patches were insufficient>`
+- Affected models: `<names>`
+- Scope and limitations: `<what it deliberately does not change>`
 
 ### Patch changes
 
@@ -125,7 +181,7 @@ Use this structure, omitting empty detail rows but retaining every heading. Stat
 
 ### New patterns noticed
 
-- `<subjective concern or candidate audit rule and recommended action, or None>`
+- `<new deterministic or semantic error type, its example, and whether to add an audit rule or semantic-review checklist entry; or None>`
 
 ### Verification
 
