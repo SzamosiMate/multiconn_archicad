@@ -12,6 +12,8 @@ from multiconn_archicad.models.tapir.commands import (
     ModifyColumnsResult,
     ModifyDoorsParameters,
     ModifyDoorsResult,
+    ModifyLabelsParameters,
+    ModifyLabelsResult,
     ModifyLampsParameters,
     ModifyLampsResult,
     ModifyMeshesParameters,
@@ -24,6 +26,8 @@ from multiconn_archicad.models.tapir.commands import (
     ModifyRoofsResult,
     ModifySlabsParameters,
     ModifySlabsResult,
+    ModifyTextsParameters,
+    ModifyTextsResult,
     ModifyWallsParameters,
     ModifyWallsResult,
     ModifyWindowsParameters,
@@ -34,6 +38,7 @@ from multiconn_archicad.models.tapir.types import (
     ColumnWithDetails,
     DoorWithDetails,
     FailedExecutionResult,
+    LabelsWithDetail,
     LampWithDetails,
     MeshWithDetails,
     MorphWithDetails,
@@ -41,6 +46,7 @@ from multiconn_archicad.models.tapir.types import (
     RoofWithDetails,
     SlabWithDetails,
     SuccessfulExecutionResult,
+    TextsWithDetail,
     WallWithDetails,
     WindowWithDetails,
 )
@@ -135,6 +141,41 @@ class ElementModificationCommands:
             "ModifyDoors", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = ModifyDoorsResult.model_validate(response_dict)
+        return validated_response.executionResults
+
+    def modify_labels(
+        self, labels_with_details: list[LabelsWithDetail]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Modifies Label elements based on the given parameters.
+
+        Args:
+            labels_with_details (list[LabelsWithDetail]): Array of Label elements to modify,
+                with the fields to change. Only provided fields are changed; omitted fields are
+                left as-is. The label's class (Text/Symbol) cannot be changed after creation. A
+                change of the text, the runs, or a run-level style field (pen, font, faces,
+                height, effects) rebuilds the content as one paragraph, which makes the label's
+                text auto-width (word wrap off), as SetDetailsOfElements does, and on a multi-
+                run label applies that style to every run; the other style fields leave the
+                content as it is.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "labelsWithDetails": labels_with_details,
+        }
+        validated_params = ModifyLabelsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "ModifyLabels", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = ModifyLabelsResult.model_validate(response_dict)
         return validated_response.executionResults
 
     def modify_lamps(
@@ -307,6 +348,40 @@ class ElementModificationCommands:
             "ModifySlabs", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = ModifySlabsResult.model_validate(response_dict)
+        return validated_response.executionResults
+
+    def modify_texts(
+        self, texts_with_details: list[TextsWithDetail]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Modifies standalone Text elements based on the given parameters.
+
+        Args:
+            texts_with_details (list[TextsWithDetail]): Array of Text elements to modify, with
+                the fields to change. Only provided fields are changed; omitted fields are left
+                as-is. A change of the text, the runs, or a run-level style field (pen, font,
+                faces, height, effects) rebuilds the content as one paragraph, which makes the
+                element auto-width (word wrap off), as SetDetailsOfElements does, and on a
+                multi-run text applies that style to every run; the other style fields leave the
+                content as it is.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "textsWithDetails": texts_with_details,
+        }
+        validated_params = ModifyTextsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "ModifyTexts", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = ModifyTextsResult.model_validate(response_dict)
         return validated_response.executionResults
 
     def modify_walls(

@@ -11,6 +11,8 @@ from multiconn_archicad.models.tapir.commands import (
     GetAddOnVersionResult,
     GetArchicadLocationResult,
     GetCurrentWindowTypeResult,
+    GetPointFromUserParameters,
+    GetPointFromUserResult,
     GetSpecialFoldersParameters,
     GetSpecialFoldersResult,
     GetUserGSIDResult,
@@ -20,6 +22,7 @@ from multiconn_archicad.models.tapir.commands import (
 )
 from multiconn_archicad.models.tapir.types import (
     AlertType,
+    Coordinate3D,
     DatabaseIdAndWindowType,
     ErrorItem,
     FailedExecutionResult,
@@ -110,6 +113,36 @@ class ApplicationCommands:
         response_dict = self._core.post_tapir_command("GetCurrentWindowType")
         validated_response = GetCurrentWindowTypeResult.model_validate(response_dict)
         return validated_response.currentWindowType
+
+    def get_point_from_user(self, prompt: None | str = None) -> Coordinate3D:
+        """
+        Asks the designer to click a point in the current window and returns it. Archicad waits
+        for the click or for Escape, and every other JSON command queues behind this one until
+        then; the call fails when the input is cancelled.
+
+        Args:
+            prompt (None | str): Shown in the control box while Archicad waits for the click.
+                Single-byte text: the box takes a char field. Archicad's main thread waits for
+                the click or for Escape, and every other JSON command queues behind this one
+                until then.
+
+        Returns:
+            Coordinate3D: The clicked point in the project's coordinates.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "prompt": prompt,
+        }
+        validated_params = GetPointFromUserParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetPointFromUser", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetPointFromUserResult.model_validate(response_dict)
+        return validated_response.position
 
     def get_special_folders(self, folder_types: list[SpecialFolderType]) -> list[ErrorItem | SpecialFolderPath]:
         """

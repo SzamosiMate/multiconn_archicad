@@ -89,14 +89,19 @@ class FavoritesCommands:
         """
         Apply the given favorites to existing elements. Only settings-type parameters are
         changed - geometry (position, floor, and dimensions such as a Wall's height) is left
-        untouched, so applying a Favorite never moves or resizes the target element. By default
+        untouched, so applying a Favorite never moves or resizes the target element. For the
+        hierarchical types (Stair, Railing, Curtain Wall) the settings of the sub-elements are
+        not applied, because they are inseparable from the Favorite's own geometry. By default
         settings, classifications, categories and properties are all applied; each can be opted
         out of individually.
 
         Args:
             favorites_to_apply (list[FavoritesToApplyItem])
             apply_settings (None | bool): Whether to apply the Favorite's settings-type
-                parameters (structure, materials, pens, etc. - never geometry). Default is true.
+                parameters (structure, materials, pens, etc. - never geometry). For the
+                hierarchical types (Stair, Railing, Curtain Wall) the settings of the sub-
+                elements are not applied, because they are inseparable from the Favorite's own
+                geometry. Default is true.
             apply_classifications (None | bool): Whether to apply the Favorite's
                 classifications. Default is true.
             apply_categories (None | bool): Whether to apply the Favorite's element categories

@@ -18,6 +18,9 @@ from .types import (
     AttributePropertyValues,
     AttributeType,
     AttributesToDeleteItem,
+    AutoTextKey,
+    AutoTextKeyValue,
+    AutoTextNamesOrErrors,
     BeamData,
     BeamWithDetails,
     BoundingBoxes3D,
@@ -39,6 +42,7 @@ from .types import (
     CompositeData,
     Conflict,
     ConnectedElementsOrError,
+    Coordinate3D,
     CustomSchemeItem,
     CutPlane,
     DatabaseIdsOrErrors,
@@ -65,6 +69,7 @@ from .types import (
     ElementClassifications,
     ElementClassificationsOrErrors,
     ElementDesignOptionPair,
+    ElementDetailsField,
     ElementFilter,
     ElementGroupParameters,
     ElementIFCIdsOrErrors,
@@ -73,8 +78,10 @@ from .types import (
     ElementId,
     ElementIdOrError,
     ElementIdsOrErrors,
+    ElementPair,
     ElementPropertyValues,
     ElementRelationsOrError,
+    ElementTrimsOrError,
     ElementType,
     Elements,
     ElementsByIFCIds,
@@ -100,6 +107,10 @@ from .types import (
     GroupIdArrayItem,
     GroupIdOrError,
     HatchData,
+    HotlinkInstanceChange,
+    HotlinkInstanceCreation,
+    HotlinkNode,
+    HotlinkNodeCreatedOrError,
     Hotlinks,
     HotspotData,
     InteriorElevationData,
@@ -121,6 +132,7 @@ from .types import (
     KeynoteItemModificationData,
     KeynoteLabelData,
     LabelData,
+    LabelsWithDetail,
     LampData,
     LampWithDetails,
     LayerAttributeField,
@@ -135,6 +147,7 @@ from .types import (
     Length,
     Library,
     LibraryFileAdditions,
+    LibraryLocation,
     LibraryPart,
     LibraryPartType,
     LineAttributeField,
@@ -162,6 +175,7 @@ from .types import (
     ModelViewOption,
     MorphData,
     MorphWithDetails,
+    NavigatorItem,
     NavigatorItemId,
     NavigatorItemIdOrDatabaseIdAndWindowType,
     NavigatorItemIdOrError,
@@ -218,6 +232,8 @@ from .types import (
     SurfaceData,
     SurveyPoint,
     TextData,
+    TextsWithDetail,
+    TrimType,
     ViewCloneData,
     ViewData,
     ViewSettingsOrError,
@@ -230,6 +246,7 @@ from .types import (
     WindowType,
     WindowWithDetails,
     WorksheetData,
+    ZoneBoundariesOfZonesWrapper,
     ZoneBoundariesOrError,
     ZoneCategoryAttributeField,
     ZoneCategoryAttributeOrError,
@@ -251,6 +268,10 @@ class AddFilesToEmbeddedLibraryParameters(TypedDict):
 
 class AddFilesToEmbeddedLibraryResult(TypedDict):
     executionResults: ExecutionResults
+
+
+class AddLibrariesParameters(TypedDict):
+    libraries: list[LibraryLocation]
 
 
 class ApplyFavoritesToElementDefaultsParameters(TypedDict):
@@ -285,6 +306,14 @@ class ChangeDrawingLinkParameters(TypedDict):
 
 class ChangeDrawingLinkResult(TypedDict):
     elements: list[ElementIdOrError]
+
+
+class ChangeHotlinkInstancesParameters(TypedDict):
+    hotlinkInstances: list[HotlinkInstanceChange]
+
+
+class ChangeHotlinkInstancesResult(TypedDict):
+    executionResults: ExecutionResults
 
 
 class ChangeSelectionOfElementsParameters(TypedDict):
@@ -474,6 +503,22 @@ class CreateHatchesParameters(TypedDict):
 
 class CreateHatchesResult(TypedDict):
     elements: ElementIdsOrErrors
+
+
+class CreateHotlinkInstancesParameters(TypedDict):
+    hotlinkInstances: list[HotlinkInstanceCreation]
+
+
+class CreateHotlinkInstancesResult(TypedDict):
+    elements: ElementIdsOrErrors
+
+
+class CreateHotlinkNodesParameters(TypedDict):
+    hotlinkNodes: list[HotlinkNode]
+
+
+class CreateHotlinkNodesResult(TypedDict):
+    hotlinkNodes: list[HotlinkNodeCreatedOrError]
 
 
 class CreateHotspotsParameters(TypedDict):
@@ -989,6 +1034,22 @@ class GetAttributesByTypeParameters(TypedDict):
 GetAttributesByTypeResult: TypeAlias = AttributeHeadersOrError
 
 
+class GetAutoTextKeysParameters(TypedDict):
+    elementId: NotRequired[ElementId]
+
+
+class GetAutoTextKeysResult(TypedDict):
+    autoTextKeys: list[AutoTextKey]
+
+
+class GetAutoTextNameParameters(TypedDict):
+    keys: list[AutoTextKeyValue]
+
+
+class GetAutoTextNameResult(TypedDict):
+    autoTextNames: AutoTextNamesOrErrors
+
+
 class GetAvailableLibraryPartsParameters(TypedDict):
     filterByTypeId: NotRequired[LibraryPartType]
 
@@ -1109,6 +1170,7 @@ class GetDesignOptionsResult(TypedDict):
 
 class GetDetailsOfElementsParameters(TypedDict):
     elements: Elements
+    fields: NotRequired[list[ElementDetailsField]]
 
 
 class GetDetailsOfElementsResult(TypedDict):
@@ -1137,6 +1199,14 @@ class GetElementPreviewImageParameters(TypedDict):
 
 class GetElementPreviewImageResult(TypedDict):
     previewImage: str
+
+
+class GetElementTrimsParameters(TypedDict):
+    elements: Elements
+
+
+class GetElementTrimsResult(TypedDict):
+    elementTrims: list[ElementTrimsOrError]
 
 
 class GetElementsAttachedToIssueParameters(TypedDict):
@@ -1369,6 +1439,11 @@ class GetModelViewOptionsResult(TypedDict):
 
 class GetNavigatorItemTreeParameters(TypedDict):
     navigatorMapId: Literal["PublicViewMap", "ProjectMap", "LayoutBook", "PublisherSets"]
+    publisherSetName: NotRequired[str]
+
+
+class GetNavigatorItemTreeResult(TypedDict):
+    navigatorItemTree: NavigatorItem
 
 
 class GetPenTablesParameters(TypedDict):
@@ -1378,6 +1453,14 @@ class GetPenTablesParameters(TypedDict):
 
 class GetPenTablesResult(TypedDict):
     penTables: list[PenTableAttributeOrError]
+
+
+class GetPointFromUserParameters(TypedDict):
+    prompt: NotRequired[str]
+
+
+class GetPointFromUserResult(TypedDict):
+    position: Coordinate3D
 
 
 class GetProfilesParameters(TypedDict):
@@ -1544,7 +1627,8 @@ class GetViewSettingsResult(TypedDict):
 
 
 class GetZoneBoundariesParameters(TypedDict):
-    zoneElementId: ElementId
+    zoneElementId: NotRequired[ElementId]
+    zones: NotRequired[Elements]
 
 
 class GetZoneCategoriesParameters(TypedDict):
@@ -1629,6 +1713,14 @@ class ModifyKeynoteItemsResult(TypedDict):
     executionResults: ExecutionResults
 
 
+class ModifyLabelsParameters(TypedDict):
+    labelsWithDetails: list[LabelsWithDetail]
+
+
+class ModifyLabelsResult(TypedDict):
+    executionResults: ExecutionResults
+
+
 class ModifyLampsParameters(TypedDict):
     lampsWithDetails: list[LampWithDetails]
 
@@ -1682,6 +1774,14 @@ class ModifySlabsParameters(TypedDict):
 
 
 class ModifySlabsResult(TypedDict):
+    executionResults: ExecutionResults
+
+
+class ModifyTextsParameters(TypedDict):
+    textsWithDetails: list[TextsWithDetail]
+
+
+class ModifyTextsResult(TypedDict):
     executionResults: ExecutionResults
 
 
@@ -1764,6 +1864,14 @@ class RemoveElementNotificationClientParameters(TypedDict):
     port: int
 
 
+class RemoveElementTrimsParameters(TypedDict):
+    elementPairs: list[ElementPair]
+
+
+class RemoveElementTrimsResult(TypedDict):
+    executionResults: ExecutionResults
+
+
 class RemoveSolidElementLinksParameters(TypedDict):
     solidLinks: list[SolidLinkReference]
 
@@ -1801,6 +1909,11 @@ class RotateElementsParameters(TypedDict):
 
 class RotateElementsResult(TypedDict):
     executionResults: ExecutionResults
+
+
+class SaveAsModuleFileParameters(TypedDict):
+    moduleFilePath: str
+    elements: NotRequired[Elements]
 
 
 class Set3DCutPlanesParameters(TypedDict):
@@ -1858,6 +1971,10 @@ class SetLayoutSettingsParameters(TypedDict):
 
 class SetLayoutSettingsResult(TypedDict):
     executionResults: ExecutionResults
+
+
+class SetLibrariesParameters(TypedDict):
+    libraries: list[LibraryLocation]
 
 
 class SetProjectInfoFieldParameters(TypedDict):
@@ -1942,6 +2059,9 @@ class ShowScriptUIParameters(TypedDict):
 AddCommentToIssueResult: TypeAlias = ExecutionResult
 
 
+AddLibrariesResult: TypeAlias = ExecutionResult
+
+
 AttachElementsToIssueResult: TypeAlias = ExecutionResult
 
 
@@ -2008,6 +2128,9 @@ RemoveElementNotificationClientResult: TypeAlias = ExecutionResult
 RenameNavigatorItemResult: TypeAlias = ExecutionResult
 
 
+SaveAsModuleFileResult: TypeAlias = ExecutionResult
+
+
 SaveProjectResult: TypeAlias = ExecutionResult
 
 
@@ -2020,6 +2143,9 @@ SetElementNotificationClientResult: TypeAlias = ExecutionResult
 SetGeoLocationResult: TypeAlias = ExecutionResult
 
 
+SetLibrariesResult: TypeAlias = ExecutionResult
+
+
 SetStoriesResult: TypeAlias = ExecutionResult
 
 
@@ -2030,6 +2156,15 @@ TeamworkReceiveResult: TypeAlias = ExecutionResult
 
 
 TeamworkSendResult: TypeAlias = ExecutionResult
+
+
+class TrimElementsParameters(TypedDict):
+    elements: Elements
+    trimmingElement: NotRequired[ElementId]
+    trimType: NotRequired[TrimType]
+
+
+TrimElementsResult: TypeAlias = ExecutionResult
 
 
 class UnlockElementsParameters(TypedDict):
@@ -2071,4 +2206,4 @@ class UpdateZonesParameters(TypedDict):
 UpdateZonesResult: TypeAlias = ExecutionResult
 
 
-GetZoneBoundariesResult: TypeAlias = ZoneBoundariesOrError
+GetZoneBoundariesResult: TypeAlias = ZoneBoundariesOrError | ZoneBoundariesOfZonesWrapper

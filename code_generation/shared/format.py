@@ -1,9 +1,28 @@
 import re
 import subprocess
 import sys
+import time
 from pathlib import Path
+from typing import Callable, TypeVar
 from code_generation.tapir.paths import TapirApiPaths
 from code_generation.official.paths import OfficialApiPaths
+
+
+T = TypeVar("T")
+MAX_WINDOWS_FILE_RETRIES = 5
+
+
+def _retry_windows_file_operation(operation: Callable[[], T]) -> T:
+    """Retry transient Windows file-mapping errors raised while replacing generated files."""
+    for attempt in range(MAX_WINDOWS_FILE_RETRIES):
+        try:
+            return operation()
+        except OSError as error:
+            retryable = error.errno == 22 or getattr(error, "winerror", None) == 1224
+            if not retryable or attempt == MAX_WINDOWS_FILE_RETRIES - 1:
+                raise
+            time.sleep(0.1 * (attempt + 1))
+    raise AssertionError("unreachable")
 
 
 def run_ruff_formatter(paths: TapirApiPaths | OfficialApiPaths):
@@ -54,15 +73,15 @@ def _get_files_to_format(paths: TapirApiPaths | OfficialApiPaths) -> list[Path]:
 def _collapse_multiline_docstrings(file_path: Path) -> None:
     """Collapses multiline docstrings containing a single line of text down to a single line."""
     try:
-        content = file_path.read_text(encoding="utf-8")
+        content = _retry_windows_file_operation(lambda: file_path.read_text(encoding="utf-8"))
         # Matches opening """, newline, optional indentation, single line of text, newline, indent, closing """
         pattern = re.compile(r'"""\s*\n\s*([^\n]+?)\s*\n\s*"""', re.MULTILINE)
         collapsed = pattern.sub(r'"""\1"""', content)
         if collapsed != content:
-            file_path.write_text(collapsed, encoding="utf-8")
+            _retry_windows_file_operation(lambda: file_path.write_text(collapsed, encoding="utf-8"))
             print(f"     - Collapsed docstrings in: {file_path.name}")
     except Exception as e:
-        print(f"     - Warning: Could not collapse docstrings in {file_path.name}: {e}")
+        raise RuntimeError(f"Could not collapse docstrings in {file_path.name}") from e
 
 
 def _remove_class_docstring_blank_lines(file_path: Path) -> None:
@@ -72,7 +91,7 @@ def _remove_class_docstring_blank_lines(file_path: Path) -> None:
     completely untouched.
     """
     try:
-        content = file_path.read_text(encoding="utf-8")
+        content = _retry_windows_file_operation(lambda: file_path.read_text(encoding="utf-8"))
 
         # Matches:
         # Group 1: class Header(Inheritance): \n [indent] """Docstring"""
@@ -84,29 +103,35 @@ def _remove_class_docstring_blank_lines(file_path: Path) -> None:
         cleaned = pattern.sub(r"\1\n\2", content)
 
         if cleaned != content:
-            file_path.write_text(cleaned, encoding="utf-8")
+            _retry_windows_file_operation(lambda: file_path.write_text(cleaned, encoding="utf-8"))
             print(f"     - Removed class-nested blank lines in: {file_path.name}")
     except Exception as e:
-        print(f"     - Warning: Could not strip blank lines in {file_path.name}: {e}")
+        raise RuntimeError(f"Could not strip blank lines in {file_path.name}") from e
 
 
 def _run_ruff_format(file_paths: list[Path]) -> None:
     """Invokes Ruff formatter on target Python files."""
     file_paths_str = [str(p) for p in file_paths]
     command = ["ruff", "format", *file_paths_str]
-    try:
-        result = subprocess.run(command, check=True, capture_output=True, text=True, encoding="utf-8")
-        print("\n   - Ruff format stdout:")
-        print(result.stdout or "   - (No output)")
-    except FileNotFoundError:
-        print("\nError: 'ruff' command not found.", file=sys.stderr)
-        print("   Please ensure Ruff is installed and available in your system's PATH.", file=sys.stderr)
-        sys.exit(1)
-    except subprocess.CalledProcessError as e:
-        print("\nError: Ruff formatter failed.", file=sys.stderr)
-        print(f"   Return Code: {e.returncode}", file=sys.stderr)
-        print("\n--- Ruff stdout ---", file=sys.stderr)
-        print(e.stdout, file=sys.stderr)
-        print("\n--- Ruff stderr ---", file=sys.stderr)
-        print(e.stderr, file=sys.stderr)
-        sys.exit(1)
+    for attempt in range(MAX_WINDOWS_FILE_RETRIES):
+        try:
+            result = subprocess.run(command, check=True, capture_output=True, text=True, encoding="utf-8")
+            print("\n   - Ruff format stdout:")
+            print(result.stdout or "   - (No output)")
+            return
+        except FileNotFoundError:
+            print("\nError: 'ruff' command not found.", file=sys.stderr)
+            print("   Please ensure Ruff is installed and available in your system's PATH.", file=sys.stderr)
+            sys.exit(1)
+        except subprocess.CalledProcessError as error:
+            retryable = "user-mapped section open" in error.stderr or "os error 1224" in error.stderr
+            if retryable and attempt < MAX_WINDOWS_FILE_RETRIES - 1:
+                time.sleep(0.1 * (attempt + 1))
+                continue
+            print("\nError: Ruff formatter failed.", file=sys.stderr)
+            print(f"   Return Code: {error.returncode}", file=sys.stderr)
+            print("\n--- Ruff stdout ---", file=sys.stderr)
+            print(error.stdout, file=sys.stderr)
+            print("\n--- Ruff stderr ---", file=sys.stderr)
+            print(error.stderr, file=sys.stderr)
+            sys.exit(1)

@@ -6,11 +6,21 @@ from typing import TYPE_CHECKING
 from pydantic import TypeAdapter
 
 from multiconn_archicad.models.tapir.commands import (
+    ChangeHotlinkInstancesParameters,
+    ChangeHotlinkInstancesResult,
     CloseProjectResult,
+    CreateHotlinkInstancesParameters,
+    CreateHotlinkInstancesResult,
+    CreateHotlinkNodesParameters,
+    CreateHotlinkNodesResult,
     CreateProjectInfoFieldsParameters,
     CreateProjectInfoFieldsResult,
     DeleteProjectInfoFieldsParameters,
     DeleteProjectInfoFieldsResult,
+    GetAutoTextKeysParameters,
+    GetAutoTextKeysResult,
+    GetAutoTextNameParameters,
+    GetAutoTextNameResult,
     GetCalculationUnitsResult,
     GetGeoLocationResult,
     GetHotlinksResult,
@@ -23,6 +33,8 @@ from multiconn_archicad.models.tapir.commands import (
     PrintViewResult,
     RebuildViewParameters,
     RebuildViewResult,
+    SaveAsModuleFileParameters,
+    SaveAsModuleFileResult,
     SaveProjectResult,
     SetGeoLocationParameters,
     SetGeoLocationResult,
@@ -31,8 +43,17 @@ from multiconn_archicad.models.tapir.commands import (
     SetStoriesResult,
 )
 from multiconn_archicad.models.tapir.types import (
+    AutoTextKey,
+    AutoTextName,
+    ElementId,
+    ElementIdArrayItem,
+    ErrorItem,
     FailedExecutionResult,
     Hotlink,
+    HotlinkInstanceChange,
+    HotlinkInstanceCreation,
+    HotlinkNode,
+    HotlinkNodeCreated,
     PrintArea,
     ProjectInfoField,
     ProjectInfoFieldData,
@@ -50,6 +71,37 @@ class ProjectCommands:
     def __init__(self, core: CoreCommands):
         self._core = core
 
+    def change_hotlink_instances(
+        self, hotlink_instances: list[HotlinkInstanceChange]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Moves, rotates or mirrors placed hotlink instances by changing their transformation.
+        MoveElements and RotateElements do not work on hotlink instances.
+
+        Args:
+            hotlink_instances (list[HotlinkInstanceChange]): The placed hotlink instances to
+                change. Every field but elementId is optional; a field that is omitted keeps its
+                current value.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "hotlinkInstances": hotlink_instances,
+        }
+        validated_params = ChangeHotlinkInstancesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "ChangeHotlinkInstances", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = ChangeHotlinkInstancesResult.model_validate(response_dict)
+        return validated_response.executionResults
+
     def close_project(self) -> FailedExecutionResult | SuccessfulExecutionResult:
         """
         Closes the currently opened project.
@@ -65,6 +117,65 @@ class ProjectCommands:
         response_dict = self._core.post_tapir_command("CloseProject")
         validated_response = TypeAdapter(CloseProjectResult).validate_python(response_dict)
         return validated_response
+
+    def create_hotlink_instances(
+        self, hotlink_instances: list[HotlinkInstanceCreation]
+    ) -> list[ElementIdArrayItem | ErrorItem]:
+        """
+        Places instances of hotlink module nodes at an origin, rotation and mirroring.
+
+        Args:
+            hotlink_instances (list[HotlinkInstanceCreation]): The hotlink instances to place.
+
+        Returns:
+            list[ElementIdArrayItem | ErrorItem]: A list of element identifiers or errors.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "hotlinkInstances": hotlink_instances,
+        }
+        validated_params = CreateHotlinkInstancesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "CreateHotlinkInstances", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = CreateHotlinkInstancesResult.model_validate(response_dict)
+        return validated_response.elements
+
+    def create_hotlink_nodes(self, hotlink_nodes: list[HotlinkNode]) -> list[ErrorItem | HotlinkNodeCreated]:
+        """
+        Creates hotlink module nodes from source files. A node that already points at the same
+        file is returned instead of duplicated (Archicad 26 and later; 25 cannot see an unplaced
+        node).
+
+        Args:
+            hotlink_nodes (list[HotlinkNode]): The hotlink module nodes to create. A node that
+                already points at the same source file (compared case-insensitively) is returned
+                as it is, with existing: true, and the name and story settings asked for are
+                ignored. On Archicad 25 a node that has not been placed yet cannot be found, so
+                a repeated request there creates a second node.
+
+        Returns:
+            list[ErrorItem | HotlinkNodeCreated]: One item per requested node, in order: the
+                node guid with its existing flag, or an error.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "hotlinkNodes": hotlink_nodes,
+        }
+        validated_params = CreateHotlinkNodesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "CreateHotlinkNodes", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = CreateHotlinkNodesResult.model_validate(response_dict)
+        return validated_response.hotlinkNodes
 
     def create_project_info_fields(self, project_info_fields: list[ProjectInfoFieldData]) -> list[ProjectInfoField]:
         """
@@ -120,6 +231,65 @@ class ProjectCommands:
         )
         validated_response = DeleteProjectInfoFieldsResult.model_validate(response_dict)
         return validated_response.executionResults
+
+    def get_auto_text_keys(self, element_id: ElementId | None = None) -> list[AutoTextKey]:
+        """
+        Retrieves the available autotext keys (name and embeddable key), optionally for a
+        specific element. Embed a key in a Text or Label content by surrounding it with '<' and
+        '>'.
+
+        Args:
+            element_id (ElementId | None): Optional. The element to retrieve context dependent
+                autotext keys for (its own properties, plus the ones common to all element
+                types, e.g. 'Element ID', 'Area'). When omitted, only the autotext keys common
+                to all element types are returned.
+
+        Returns:
+            list[AutoTextKey]
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elementId": element_id,
+        }
+        validated_params = GetAutoTextKeysParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetAutoTextKeys", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetAutoTextKeysResult.model_validate(response_dict)
+        return validated_response.autoTextKeys
+
+    def get_auto_text_name(self, keys: list[str]) -> list[AutoTextName | ErrorItem]:
+        """
+        Retrieves the display names of one or more autotext keys (as returned inside a '<...>'
+        embedded key), with a direct guid lookup for property-based keys instead of enumerating
+        every property definition.
+
+        Args:
+            keys (list[str]): Autotext keys as returned by GetAutoTextKeys or
+                GetProjectInfoFields (without the surrounding '<' and '>'), e.g.
+                'PROPERTY-69A58F6F-DD3B-478D-B5EF-09A16BD0C548' or 'PROJECTNAME'.
+
+        Returns:
+            list[AutoTextName | ErrorItem]: One result per input key, in the same order.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "keys": keys,
+        }
+        validated_params = GetAutoTextNameParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetAutoTextName", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetAutoTextNameResult.model_validate(response_dict)
+        return validated_response.autoTextNames
 
     def get_calculation_units(self) -> GetCalculationUnitsResult:
         """
@@ -304,6 +474,40 @@ class ProjectCommands:
             "RebuildView", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = TypeAdapter(RebuildViewResult).validate_python(response_dict)
+        return validated_response
+
+    def save_as_module_file(
+        self, module_file_path: str, elements: None | list[ElementIdArrayItem] = None
+    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+        """
+        Saves the given elements, or the current selection, as a hotlink module (.mod) file.
+
+        Args:
+            module_file_path (str): Absolute path of the .mod file to write. An existing file is
+                overwritten. The current window must be a floor plan, section, elevation or
+                detail.
+            elements (None | list[ElementIdArrayItem]): Optional. The elements that go into the
+                module; omitted, the current selection does, as Save Selection as Module would.
+                Pass GetAllElements for the whole project. Archicad 25 and 26 support the
+                selection form only.
+
+        Returns:
+            FailedExecutionResult | SuccessfulExecutionResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "moduleFilePath": module_file_path,
+            "elements": elements,
+        }
+        validated_params = SaveAsModuleFileParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "SaveAsModuleFile", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = TypeAdapter(SaveAsModuleFileResult).validate_python(response_dict)
         return validated_response
 
     def save_project(self) -> FailedExecutionResult | SuccessfulExecutionResult:

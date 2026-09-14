@@ -73,6 +73,7 @@ from multiconn_archicad.models.tapir.types import (
     DetailsOfElement,
     DimensionData,
     Element,
+    ElementDetailsField,
     ElementFilter,
     ElementId,
     ElementIdArrayItem,
@@ -93,6 +94,7 @@ from multiconn_archicad.models.tapir.types import (
     Subelement,
     SuccessfulExecutionResult,
     WallRelations,
+    ZoneBoundariesOfZonesWrapper,
     ZoneBoundariesWrapper,
     ZoneRelationsOfElement,
 )
@@ -317,12 +319,21 @@ class ElementCommands:
         validated_response = TypeAdapter(GetConnectedElementsResult).validate_python(response_dict)
         return validated_response
 
-    def get_details_of_elements(self, elements: list[ElementIdArrayItem]) -> list[DetailsOfElement]:
+    def get_details_of_elements(
+        self, elements: list[ElementIdArrayItem], fields: None | list[ElementDetailsField] = None
+    ) -> list[DetailsOfElement]:
         """
-        Gets the details of the given elements (geometry parameters etc).
+        Gets the details of the given elements (geometry parameters etc). Use the optional
+        fields parameter to return only the fields you need and skip the computation of the
+        others (for example floorPlanPolygons).
 
         Args:
             elements (list[ElementIdArrayItem]): A list of elements.
+            fields (None | list[ElementDetailsField]): Optional filter for the fields to return
+                for each element. When omitted, every field is returned. Fields not listed are
+                not computed at all, so listing only what you need skips in particular the
+                floorPlanPolygons extraction, which regenerates each element's 2D drawing
+                primitives and can dominate the execution time of batch reads.
 
         Returns:
             list[DetailsOfElement]
@@ -334,6 +345,7 @@ class ElementCommands:
         """
         params_dict = {
             "elements": elements,
+            "fields": fields,
         }
         validated_params = GetDetailsOfElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
@@ -631,15 +643,24 @@ class ElementCommands:
         validated_response = GetSubelementsOfHierarchicalElementsResult.model_validate(response_dict)
         return validated_response.subelements
 
-    def get_zone_boundaries(self, zone_element_id: ElementId) -> ErrorItem | ZoneBoundariesWrapper:
+    def get_zone_boundaries(
+        self, zone_element_id: ElementId | None = None, zones: None | list[ElementIdArrayItem] = None
+    ) -> ErrorItem | ZoneBoundariesOfZonesWrapper | ZoneBoundariesWrapper:
         """
-        Gets the boundaries of the given Zone (connected elements, neighbour zones, etc.).
+        Gets the boundaries of the given Zones (connected elements, neighbour zones, etc.).
+        Accepts either a single zoneElementId or a list of zones. Prefer the list: the expensive
+        boundary recalculation runs once per call, so querying many Zones in one call is much
+        faster than calling the command once per Zone.
 
         Args:
-            zone_element_id (ElementId)
+            zone_element_id (ElementId | None): The identifier of a single Zone. Prefer the
+                zones array: querying many Zones in one call is much faster than one call per
+                Zone.
+            zones (None | list[ElementIdArrayItem]): A list of Zones. Only one of zoneElementId
+                and zones can be given.
 
         Returns:
-            ErrorItem | ZoneBoundariesWrapper
+            ErrorItem | ZoneBoundariesOfZonesWrapper | ZoneBoundariesWrapper
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -648,6 +669,7 @@ class ElementCommands:
         """
         params_dict = {
             "zoneElementId": zone_element_id,
+            "zones": zones,
         }
         validated_params = GetZoneBoundariesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(

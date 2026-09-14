@@ -6,7 +6,10 @@ from typing import Any, Dict, List
 
 from code_generation.tapir.paths import tapir_paths
 from code_generation.official.official_commands import OFFICIAL_ADDON_COMMANDS
-from code_generation.shared.schema_patching import apply_permanent_patches, apply_temporary_patches
+from code_generation.shared.schema_patching import (
+    apply_permanent_patches,
+    apply_temporary_patches,
+)
 
 
 def apply_fixes(content: str) -> str:

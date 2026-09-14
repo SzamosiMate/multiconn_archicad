@@ -20,6 +20,9 @@ from .types import (
     AttributePropertyValue,
     AttributeType,
     AttributesToDeleteItem,
+    AutoTextKey,
+    AutoTextKeyValue,
+    AutoTextName,
     BeamData,
     BeamRelations,
     BeamSegmentRelations,
@@ -44,6 +47,7 @@ from .types import (
     Conflict,
     ConflictPolicy,
     ConnectedElementsWrapper,
+    Coordinate3D,
     CustomSchemeItem,
     CutPlane,
     DatabaseIdAndWindowType,
@@ -69,6 +73,7 @@ from .types import (
     ElementClassification,
     ElementClassificationItemArray,
     ElementDesignOptionPair,
+    ElementDetailsField,
     ElementFilter,
     ElementGroupParameters,
     ElementIFCIds,
@@ -76,7 +81,9 @@ from .types import (
     ElementIFCType,
     ElementId,
     ElementIdArrayItem,
+    ElementPair,
     ElementPropertyValue,
+    ElementTrims,
     ElementType,
     ElementsByIFCId,
     ElementsOfDesignOption,
@@ -104,6 +111,10 @@ from .types import (
     HatchData,
     HighlightedColor,
     Hotlink,
+    HotlinkInstanceChange,
+    HotlinkInstanceCreation,
+    HotlinkNode,
+    HotlinkNodeCreated,
     HotspotData,
     ImageType,
     InteriorElevationData,
@@ -123,6 +134,7 @@ from .types import (
     KeynoteItemModificationData,
     KeynoteLabelData,
     LabelData,
+    LabelsWithDetail,
     LampData,
     LampWithDetails,
     LayerAttribute,
@@ -137,6 +149,7 @@ from .types import (
     Length,
     Library,
     LibraryFileAddition,
+    LibraryLocation,
     LibraryPart,
     LibraryPartType,
     LineAttribute,
@@ -165,6 +178,7 @@ from .types import (
     ModelViewOption,
     MorphData,
     MorphWithDetails,
+    NavigatorItem,
     NavigatorItemId,
     NavigatorItemIdArrayItem,
     NavigatorItemIdsWithRotationItem,
@@ -221,7 +235,10 @@ from .types import (
     SurfaceAttributeField,
     SurfaceData,
     SurveyPoint,
-    TextData,
+    TextDataWithRuns,
+    TextDataWithText,
+    TextsWithDetail,
+    TrimType,
     User,
     ViewCloneData,
     ViewData,
@@ -236,6 +253,7 @@ from .types import (
     WindowType,
     WindowWithDetails,
     WorksheetData,
+    ZoneBoundariesOfZonesWrapper,
     ZoneBoundariesWrapper,
     ZoneCategoryAttribute,
     ZoneCategoryAttributeField,
@@ -266,6 +284,13 @@ class AddFilesToEmbeddedLibraryResult(APIModel):
     ]
 
 
+class AddLibrariesParameters(APIModel):
+    libraries: Annotated[
+        list[LibraryLocation],
+        Field(description="Local library folders or container files, by absolute path."),
+    ]
+
+
 class ApplyFavoritesToElementDefaultsParameters(APIModel):
     favorites: Annotated[list[str], Field(description="A list of favorite names")]
 
@@ -282,7 +307,7 @@ class ApplyFavoritesToElementsParameters(APIModel):
     applySettings: Annotated[
         bool | None,
         Field(
-            description="Whether to apply the Favorite's settings-type parameters (structure, materials, pens, etc. - never geometry). Default is true."
+            description="Whether to apply the Favorite's settings-type parameters (structure, materials, pens, etc. - never geometry). For the hierarchical types (Stair, Railing, Curtain Wall) the settings of the sub-elements are not applied, because they are inseparable from the Favorite's own geometry. Default is true."
         ),
     ] = None
     applyClassifications: Annotated[
@@ -322,6 +347,22 @@ class ChangeDrawingLinkResult(APIModel):
         Field(
             description="One result per input item. On success, elementId is the NEW Drawing's identifier - relinking necessarily replaces the element, it cannot keep the original guid."
         ),
+    ]
+
+
+class ChangeHotlinkInstancesParameters(APIModel):
+    hotlinkInstances: Annotated[
+        list[HotlinkInstanceChange],
+        Field(
+            description="The placed hotlink instances to change. Every field but elementId is optional; a field that is omitted keeps its current value."
+        ),
+    ]
+
+
+class ChangeHotlinkInstancesResult(APIModel):
+    executionResults: Annotated[
+        list[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
     ]
 
 
@@ -612,6 +653,36 @@ class CreateHatchesResult(APIModel):
     elements: Annotated[
         list[ElementIdArrayItem | ErrorItem],
         Field(description="A list of element identifiers or errors."),
+    ]
+
+
+class CreateHotlinkInstancesParameters(APIModel):
+    hotlinkInstances: Annotated[
+        list[HotlinkInstanceCreation],
+        Field(description="The hotlink instances to place."),
+    ]
+
+
+class CreateHotlinkInstancesResult(APIModel):
+    elements: Annotated[
+        list[ElementIdArrayItem | ErrorItem],
+        Field(description="A list of element identifiers or errors."),
+    ]
+
+
+class CreateHotlinkNodesParameters(APIModel):
+    hotlinkNodes: Annotated[
+        list[HotlinkNode],
+        Field(
+            description="The hotlink module nodes to create. A node that already points at the same source file (compared case-insensitively) is returned as it is, with existing: true, and the name and story settings asked for are ignored. On Archicad 25 a node that has not been placed yet cannot be found, so a repeated request there creates a second node."
+        ),
+    ]
+
+
+class CreateHotlinkNodesResult(APIModel):
+    hotlinkNodes: Annotated[
+        list[HotlinkNodeCreated | ErrorItem],
+        Field(description="One item per requested node, in order: the node guid with its existing flag, or an error."),
     ]
 
 
@@ -1063,7 +1134,10 @@ class CreateSurfacesResult(APIModel):
 
 
 class CreateTextsParameters(APIModel):
-    textsData: Annotated[list[TextData], Field(description="Array of data to create Texts.")]
+    textsData: Annotated[
+        list[TextDataWithText | TextDataWithRuns],
+        Field(description="Array of data to create Texts."),
+    ]
 
 
 class CreateTextsResult(APIModel):
@@ -1423,6 +1497,36 @@ class GetAttributesByTypeParameters(APIModel):
 GetAttributesByTypeResult: TypeAlias = AttributeHeadersWrapper | ErrorItem
 
 
+class GetAutoTextKeysParameters(APIModel):
+    elementId: Annotated[
+        ElementId | None,
+        Field(
+            description="Optional. The element to retrieve context dependent autotext keys for (its own properties, plus the ones common to all element types, e.g. 'Element ID', 'Area'). When omitted, only the autotext keys common to all element types are returned."
+        ),
+    ] = None
+
+
+class GetAutoTextKeysResult(APIModel):
+    autoTextKeys: list[AutoTextKey]
+
+
+class GetAutoTextNameParameters(APIModel):
+    keys: Annotated[
+        list[AutoTextKeyValue],
+        Field(
+            description="Autotext keys as returned by GetAutoTextKeys or GetProjectInfoFields (without the surrounding '<' and '>'), e.g. 'PROPERTY-69A58F6F-DD3B-478D-B5EF-09A16BD0C548' or 'PROJECTNAME'.",
+            min_length=1,
+        ),
+    ]
+
+
+class GetAutoTextNameResult(APIModel):
+    autoTextNames: Annotated[
+        list[AutoTextName | ErrorItem],
+        Field(description="One result per input key, in the same order."),
+    ]
+
+
 class GetAvailableLibraryPartsParameters(APIModel):
     filterByTypeId: Annotated[
         LibraryPartType | None,
@@ -1592,6 +1696,13 @@ class GetDesignOptionsResult(APIModel):
 
 class GetDetailsOfElementsParameters(APIModel):
     elements: Annotated[list[ElementIdArrayItem], Field(description="A list of elements.")]
+    fields: Annotated[
+        list[ElementDetailsField] | None,
+        Field(
+            description="Optional filter for the fields to return for each element. When omitted, every field is returned. Fields not listed are not computed at all, so listing only what you need skips in particular the floorPlanPolygons extraction, which regenerates each element's 2D drawing primitives and can dominate the execution time of batch reads.",
+            min_length=1,
+        ),
+    ] = None
 
 
 class GetDetailsOfElementsResult(APIModel):
@@ -1629,6 +1740,19 @@ class GetElementPreviewImageParameters(APIModel):
 
 class GetElementPreviewImageResult(APIModel):
     previewImage: Annotated[str, Field(description="The base64 encoded preview image.")]
+
+
+class GetElementTrimsParameters(APIModel):
+    elements: Annotated[list[ElementIdArrayItem], Field(description="A list of elements.")]
+
+
+class GetElementTrimsResult(APIModel):
+    elementTrims: Annotated[
+        list[ElementTrims | ErrorItem],
+        Field(
+            description="One item per queried element, in order. An unknown or deleted element is an error item, so it cannot be mistaken for an element that is simply not trimmed."
+        ),
+    ]
 
 
 class GetElementsAttachedToIssueParameters(APIModel):
@@ -1953,6 +2077,17 @@ class GetModelViewOptionsResult(APIModel):
 
 class GetNavigatorItemTreeParameters(APIModel):
     navigatorMapId: Annotated[NavigatorMapId, Field(description="The navigator map to retrieve.")]
+    publisherSetName: Annotated[
+        str | None,
+        Field(
+            description="The name of the publisher set to retrieve. Used only when navigatorMapId is PublisherSets. Without it the first publisher set is returned.",
+            min_length=1,
+        ),
+    ] = None
+
+
+class GetNavigatorItemTreeResult(APIModel):
+    navigatorItemTree: NavigatorItem
 
 
 class GetPenTablesParameters(APIModel):
@@ -1969,6 +2104,22 @@ class GetPenTablesResult(APIModel):
     penTables: Annotated[
         list[PenTableAttribute | ErrorItem],
         Field(description="A list of pen tables or errors."),
+    ]
+
+
+class GetPointFromUserParameters(APIModel):
+    prompt: Annotated[
+        str | None,
+        Field(
+            description="Shown in the control box while Archicad waits for the click. Single-byte text: the box takes a char field. Archicad's main thread waits for the click or for Escape, and every other JSON command queues behind this one until then."
+        ),
+    ] = None
+
+
+class GetPointFromUserResult(APIModel):
+    position: Annotated[
+        Coordinate3D,
+        Field(description="The clicked point in the project's coordinates."),
     ]
 
 
@@ -2259,7 +2410,16 @@ class GetViewSettingsResult(APIModel):
 
 
 class GetZoneBoundariesParameters(APIModel):
-    zoneElementId: ElementId
+    zoneElementId: Annotated[
+        ElementId | None,
+        Field(
+            description="The identifier of a single Zone. Prefer the zones array: querying many Zones in one call is much faster than one call per Zone."
+        ),
+    ] = None
+    zones: Annotated[
+        list[ElementIdArrayItem] | None,
+        Field(description="A list of Zones. Only one of zoneElementId and zones can be given."),
+    ] = None
 
 
 class GetZoneCategoriesParameters(APIModel):
@@ -2405,6 +2565,22 @@ class ModifyKeynoteItemsResult(APIModel):
     ]
 
 
+class ModifyLabelsParameters(APIModel):
+    labelsWithDetails: Annotated[
+        list[LabelsWithDetail],
+        Field(
+            description="Array of Label elements to modify, with the fields to change. Only provided fields are changed; omitted fields are left as-is. The label's class (Text/Symbol) cannot be changed after creation. A change of the text, the runs, or a run-level style field (pen, font, faces, height, effects) rebuilds the content as one paragraph, which makes the label's text auto-width (word wrap off), as SetDetailsOfElements does, and on a multi-run label applies that style to every run; the other style fields leave the content as it is."
+        ),
+    ]
+
+
+class ModifyLabelsResult(APIModel):
+    executionResults: Annotated[
+        list[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
+
+
 class ModifyLampsParameters(APIModel):
     lampsWithDetails: Annotated[
         list[LampWithDetails],
@@ -2489,6 +2665,22 @@ class ModifySlabsParameters(APIModel):
 
 
 class ModifySlabsResult(APIModel):
+    executionResults: Annotated[
+        list[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
+
+
+class ModifyTextsParameters(APIModel):
+    textsWithDetails: Annotated[
+        list[TextsWithDetail],
+        Field(
+            description="Array of Text elements to modify, with the fields to change. Only provided fields are changed; omitted fields are left as-is. A change of the text, the runs, or a run-level style field (pen, font, faces, height, effects) rebuilds the content as one paragraph, which makes the element auto-width (word wrap off), as SetDetailsOfElements does, and on a multi-run text applies that style to every run; the other style fields leave the content as it is."
+        ),
+    ]
+
+
+class ModifyTextsResult(APIModel):
     executionResults: Annotated[
         list[SuccessfulExecutionResult | FailedExecutionResult],
         Field(description="A list of execution results."),
@@ -2612,6 +2804,20 @@ class RemoveElementNotificationClientParameters(APIModel):
     port: Annotated[int, Field(description="The port number of the notification client.")]
 
 
+class RemoveElementTrimsParameters(APIModel):
+    elementPairs: Annotated[
+        list[ElementPair],
+        Field(description="The trimmed element and the roof or shell trimming it, per pair."),
+    ]
+
+
+class RemoveElementTrimsResult(APIModel):
+    executionResults: Annotated[
+        list[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
+
+
 class RemoveSolidElementLinksParameters(APIModel):
     solidLinks: Annotated[
         list[SolidLinkReference],
@@ -2667,6 +2873,21 @@ class RotateElementsResult(APIModel):
         list[SuccessfulExecutionResult | FailedExecutionResult],
         Field(description="A list of execution results."),
     ]
+
+
+class SaveAsModuleFileParameters(APIModel):
+    moduleFilePath: Annotated[
+        str,
+        Field(
+            description="Absolute path of the .mod file to write. An existing file is overwritten. The current window must be a floor plan, section, elevation or detail."
+        ),
+    ]
+    elements: Annotated[
+        list[ElementIdArrayItem] | None,
+        Field(
+            description="Optional. The elements that go into the module; omitted, the current selection does, as Save Selection as Module would. Pass GetAllElements for the whole project. Archicad 25 and 26 support the selection form only."
+        ),
+    ] = None
 
 
 class Set3DCutPlanesParameters(APIModel):
@@ -2756,6 +2977,13 @@ class SetLayoutSettingsResult(APIModel):
     executionResults: Annotated[
         list[SuccessfulExecutionResult | FailedExecutionResult],
         Field(description="A list of execution results."),
+    ]
+
+
+class SetLibrariesParameters(APIModel):
+    libraries: Annotated[
+        list[LibraryLocation],
+        Field(description="Local library folders or container files, by absolute path."),
     ]
 
 
@@ -2933,6 +3161,9 @@ class ShowScriptUIParameters(APIModel):
 AddCommentToIssueResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
 
 
+AddLibrariesResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
+
+
 AttachElementsToIssueResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
 
 
@@ -2999,6 +3230,9 @@ RemoveElementNotificationClientResult: TypeAlias = SuccessfulExecutionResult | F
 RenameNavigatorItemResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
 
 
+SaveAsModuleFileResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
+
+
 SaveProjectResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
 
 
@@ -3011,6 +3245,9 @@ SetElementNotificationClientResult: TypeAlias = SuccessfulExecutionResult | Fail
 SetGeoLocationResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
 
 
+SetLibrariesResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
+
+
 SetStoriesResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
 
 
@@ -3021,6 +3258,23 @@ TeamworkReceiveResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionRe
 
 
 TeamworkSendResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
+
+
+class TrimElementsParameters(APIModel):
+    elements: Annotated[
+        list[ElementIdArrayItem],
+        Field(
+            description="The construction elements to trim. Without trimmingElement the roofs and shells among them do the trimming."
+        ),
+    ]
+    trimmingElement: Annotated[
+        ElementId | None,
+        Field(description="Optional. The roof or shell that trims every element in the list."),
+    ] = None
+    trimType: TrimType | None = None
+
+
+TrimElementsResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
 
 
 class UnlockElementsParameters(APIModel):
@@ -3051,7 +3305,7 @@ class UpdateFavoritesFromElementsResult(APIModel):
 class UpdatePropertyDefinitionsParameters(APIModel):
     propertyDefinitions: Annotated[
         list[PropertyExpressionUpdate],
-        Field(description="The list of expression-based property definitions to update."),
+        Field(description="The property definitions to update."),
     ]
 
 
@@ -3080,7 +3334,8 @@ class UpdateZonesParameters(APIModel):
 UpdateZonesResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
 
 
-GetZoneBoundariesResult: TypeAlias = ZoneBoundariesWrapper | ErrorItem
+GetZoneBoundariesResult: TypeAlias = ZoneBoundariesOfZonesWrapper | ZoneBoundariesWrapper | ErrorItem
 
 
 GetHotlinksResult.model_rebuild()
+GetNavigatorItemTreeResult.model_rebuild()
