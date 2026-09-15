@@ -128,9 +128,20 @@ def test_slot_state_factories_and_invariants():
     assert success_slot.state is SlotState.SUCCESS
     assert success_slot.is_success
     assert not success_slot.is_error
-    assert not success_slot.is_skipped
+    assert not success_slot.is_upstream_failed
+    assert not success_slot.is_filtered
     assert success_slot.success_value == "val"
     assert success_slot.item_val() == "val"
+
+    filtered_slot = BatchSlot.filtered()
+    assert filtered_slot.state is SlotState.FILTERED
+    assert filtered_slot.is_filtered
+    assert not filtered_slot.is_success
+
+    upstream_slot = BatchSlot.upstream_failed()
+    assert upstream_slot.state is SlotState.UPSTREAM_FAILED
+    assert upstream_slot.is_upstream_failed
+    assert not upstream_slot.is_success
 
     err = BatchError(tapir.Error(code=1, message="err"))
     failure_slot = BatchSlot.failure(err)
@@ -141,20 +152,15 @@ def test_slot_state_factories_and_invariants():
     with pytest.raises(ValueError, match="has no successful value"):
         _ = failure_slot.success_value
 
-    skipped_slot = BatchSlot.skipped()
-    assert skipped_slot.state is SlotState.SKIPPED
-    assert skipped_slot.is_skipped
-    assert skipped_slot.item_val() is None
-    with pytest.raises(ValueError, match="has no successful value"):
-        _ = skipped_slot.success_value
-
     # Invariant violations
     with pytest.raises(ValueError, match="SUCCESS slot cannot contain an error"):
         BatchSlot(state=SlotState.SUCCESS, value="ok", error=err)
     with pytest.raises(ValueError, match="ERROR slot must contain a BatchError"):
         BatchSlot(state=SlotState.ERROR, error=None)
-    with pytest.raises(ValueError, match="SKIPPED slot cannot contain a value"):
-        BatchSlot(state=SlotState.SKIPPED, value="bad")
+    with pytest.raises(ValueError, match="UPSTREAM_FAILED slot cannot contain a value"):
+        BatchSlot(state=SlotState.UPSTREAM_FAILED, value="bad")
+        with pytest.raises(ValueError, match="FILTERED slot cannot contain a value"):
+            BatchSlot(state=SlotState.FILTERED, value="bad")
 
 
 def test_slot_from_raw_and_map():
@@ -169,7 +175,8 @@ def test_slot_from_raw_and_map():
     # Slot map
     assert slot_ok.map(lambda s: f"{s}!").success_value == "HELLO!"
     assert slot_err.map(lambda s: s).is_error
-    assert BatchSlot.skipped().map(lambda s: s).is_skipped
+    assert BatchSlot.filtered().map(lambda s: s).is_filtered
+    assert BatchSlot.upstream_failed().map(lambda s: s).is_upstream_failed
 
 
 # ==============================================================================
@@ -181,17 +188,18 @@ def test_batch_result_1d_project_successes():
     # Source: [OK("a"), ERROR, OK("b")]
     source = BatchResult.from_items(["a", error(1), "b"])
     assert source.success_indices == (0, 2)
-    assert source.skipped_indices == ()
+    assert source.filtered_indices == ()
+    assert source.upstream_failed_indices == ()
 
     # Project 2 items onto the 2 successes: 1 succeeds, 1 fails
     projected = source.project_successes([10, error(2)])
     assert len(projected.slots) == 3
     assert projected.slots[0].is_success and projected.slots[0].success_value == 10
-    assert projected.slots[1].is_skipped
+    assert projected.slots[1].is_upstream_failed
     assert projected.slots[2].is_error and projected.slots[2].error.code == 2
 
     assert projected.success_indices == (0,)
-    assert projected.skipped_indices == (1,)
+    assert projected.upstream_failed_indices == (1,)
     assert projected.failure_indices == (2,)
     assert projected.items == (10, None, projected.slots[2].error)
 
@@ -213,15 +221,16 @@ def test_batch_result_1d_project_rows():
     assert matrix.rows[0][0].success_value == 1
     assert matrix.rows[0][1].success_value == 2
 
-    # Row 1: Skipped (because source was error) -> [SKIPPED, SKIPPED]
-    assert matrix.rows[1][0].is_skipped
-    assert matrix.rows[1][1].is_skipped
+    # Row 1: Upstream failed (because source was error) -> [UPSTREAM_FAILED, UPSTREAM_FAILED]
+    assert matrix.rows[1][0].is_upstream_failed
+    assert matrix.rows[1][1].is_upstream_failed
+    assert matrix.rows[1].is_all_upstream_failed
 
     # Row 2: Succeeded in source, but cell (2, 0) failed in raw items -> [ERROR, 4]
     assert matrix.rows[2][0].is_error and matrix.rows[2][0].error.code == 3
     assert matrix.rows[2][1].success_value == 4
 
-    assert matrix.skipped_indices == ((1, 0), (1, 1))
+    assert matrix.upstream_failed_indices == ((1, 0), (1, 1))
     assert matrix.failure_indices == ((2, 0),)
 
     # Negative row_length & count mismatch
@@ -245,46 +254,37 @@ def test_batch_result_2d_project_successes():
     assert projected.rows[0][1].is_error and projected.rows[0][1].error.code == 2
 
     # (1, 0) -> SKIPPED (source was error), (1, 1) -> "y"
-    assert projected.rows[1][0].is_skipped
+    assert projected.rows[1][0].is_upstream_failed
     assert projected.rows[1][1].success_value == "y"
 
-    assert projected.has_skipped
-    assert projected.skipped_indices == ((1, 0),)
+    assert projected.has_upstream_failed
+    assert projected.upstream_failed_indices == ((1, 0),)
     assert projected.success_indices == ((0, 0), (1, 1))
     assert projected.failure_indices == ((0, 1),)
 
 
 def test_batch_result_2d_aggregate_rows_with_skips():
-    # Row 0: Clean success -> Success(("a", "b"))
-    # Row 1: Partial skip -> Skipped
-    # Row 2: Has error -> Failure
     slot_ok_a = BatchSlot.success("a")
     slot_ok_b = BatchSlot.success("b")
-    slot_skipped = BatchSlot.skipped()
-    slot_err = BatchSlot.failure(BatchError(tapir.Error(code=1, message="fail")))
+    slot_filtered = BatchSlot.filtered()
 
-    matrix = BatchResult2D(
-        rows=(
-            BatchRow((slot_ok_a, slot_ok_b)),
-            BatchRow((slot_ok_a, slot_skipped)),
-            BatchRow((slot_ok_a, slot_err)),
-        )
-    )
-    aggregated = matrix.aggregate_rows()
+    row_ok = BatchRow((slot_ok_a, slot_ok_b))
+    row_filtered = BatchRow((slot_filtered, slot_ok_b))
+    row_err = BatchRow((BatchSlot.from_raw(error(1)), slot_ok_b))
 
-    assert len(aggregated.slots) == 3
-    assert aggregated.slots[0].is_success and aggregated.slots[0].success_value == ("a", "b")
-    assert aggregated.slots[1].is_skipped
-    assert aggregated.slots[2].is_error and aggregated.slots[2].error.causes[0].code == 1
+    matrix = BatchResult2D((row_ok, row_filtered, row_err))
+    aggregate = matrix.aggregate_rows()
+
+    assert aggregate.slots[0].is_success
+    assert aggregate.slots[1].is_filtered
+    assert aggregate.slots[2].is_error
 
 
 def test_is_all_success_requires_no_errors_and_no_skips():
     clean = BatchResult.from_items(["a", "b"])
     assert clean.is_all_success
 
-    mixed = BatchResult((BatchSlot.success("a"), BatchSlot.skipped()))
+    mixed = BatchResult((BatchSlot.success("a"), BatchSlot.filtered()))
     assert not mixed.is_all_success
-    assert mixed.has_skipped
-    assert not mixed.has_errors
 
 

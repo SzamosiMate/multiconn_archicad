@@ -40,19 +40,33 @@ def test_batch_run_record_validation_is_atomic_and_abort_keeps_clean_items_incom
     assert isinstance(report.fatal_error, RuntimeError)
     assert report.status is BatchStatus.FAILED
     assert report.incomplete_indices == (0, 1)
-    assert report.status_counts == {"total": 2, "failed": 0, "succeeded": 0, "incomplete": 2}
+    assert report.status_counts == {
+        "total": 2,
+        "succeeded": 0,
+        "failed": 0,
+        "upstream_failed": 0,
+        "filtered": 0,
+        "incomplete": 2,
+    }
     with pytest.raises(RuntimeError):
         run.finish()
 
 
-def test_batch_run_2d_details_and_multiple_failures_are_ordered_per_outcome():
+def test_batch_run_2d_and_multiple_failures_are_ordered_per_outcome():
     run = BatchRun(["first", "second"])
     matrix = BatchResult2D.from_rows([[error(1), error(2)], ["ok"]], row_lengths=[2, 1])
-    run.record("matrix", matrix, item_indices=[1, 0], details=["row-0", "row-1"])
+    run.record("matrix", matrix, item_indices=[1, 0])
+
+    # Element 1 ("second") received row 0 (which has 2 errors)
     failures = run.outcomes[1].failures
-    assert [failure.error.code for failure in failures] == [1, 2]
-    assert [failure.source_coordinate for failure in failures] == [(0, 0), (0, 1)]
-    assert all(failure.detail == "row-0" for failure in failures)
+    assert len(failures) == 2
+    assert failures[0].error.code == 1
+    assert failures[0].source_coordinate == (0, 0)
+    assert failures[1].error.code == 2
+    assert failures[1].source_coordinate == (0, 1)
+
+    # Element 0 ("first") received row 1 (which succeeded)
+    assert run.outcomes[0].failures == ()
 
 
 def test_run_repeated_targets_and_invalid_arguments_are_atomic():
@@ -63,7 +77,7 @@ def test_run_repeated_targets_and_invalid_arguments_are_atomic():
     with pytest.raises(IndexError):
         run.record("bad", BatchResult.from_items(["a", "b"]), item_indices=[0, 2])
     with pytest.raises(ValueError):
-        run.record("bad", BatchResult.from_items(["a", "b"]), details=["only one"])
+        run.record("bad", BatchResult.from_items(["a", "b"]), item_indices=[0])
     assert run.steps == before
 
 

@@ -70,11 +70,15 @@ def normalize_error(item: Any) -> BatchError | None:
     return BatchError(error) if error is not None else None
 
 
-def _project_slot(source_slot: BatchSlot[Any], raw_iter: Iterator[Any], accessor: Callable[[Any], U] | None) -> BatchSlot[U]:
-    """If source succeeded, consume next raw item; otherwise emit a SKIPPED slot."""
+def _project_slot(
+    source_slot: BatchSlot[Any], raw_iter: Iterator[Any], accessor: Callable[[Any], U] | None
+) -> BatchSlot[U]:
+    """If source succeeded, consume next raw item; otherwise propagate failure or filter state."""
     if source_slot.is_success:
         return BatchSlot.from_raw(next(raw_iter), accessor=accessor)
-    return BatchSlot.skipped()
+    if source_slot.is_error or source_slot.is_upstream_failed:
+        return BatchSlot.upstream_failed()
+    return BatchSlot.filtered()
 
 
 def _validate_raw_count(expected: int, raw_items: Sequence[Any]) -> Iterator[Any]:
@@ -86,7 +90,8 @@ def _validate_raw_count(expected: int, raw_items: Sequence[Any]) -> Iterator[Any
 class SlotState(str, Enum):
     SUCCESS = "success"
     ERROR = "error"
-    SKIPPED = "skipped"
+    UPSTREAM_FAILED = "upstream_failed"
+    FILTERED = "filtered"
 
 
 @dataclass(frozen=True, slots=True)
@@ -105,9 +110,9 @@ class BatchSlot(Generic[T]):
             case SlotState.ERROR:
                 if self.error is None:
                     raise ValueError("An ERROR slot must contain a BatchError.")
-            case SlotState.SKIPPED:
+            case SlotState.UPSTREAM_FAILED | SlotState.FILTERED:
                 if self.value is not None or self.error is not None:
-                    raise ValueError("A SKIPPED slot cannot contain a value or error.")
+                    raise ValueError(f"A {self.state.name} slot cannot contain a value or error.")
 
     @classmethod
     def success(cls, value: T) -> BatchSlot[T]:
@@ -118,8 +123,13 @@ class BatchSlot(Generic[T]):
         return cls(state=SlotState.ERROR, error=error)
 
     @classmethod
-    def skipped(cls) -> BatchSlot[T]:
-        return cls(state=SlotState.SKIPPED)
+    def upstream_failed(cls) -> BatchSlot[T]:
+        return cls(state=SlotState.UPSTREAM_FAILED)
+
+    @classmethod
+    def filtered(cls) -> BatchSlot[T]:
+        return cls(state=SlotState.FILTERED)
+
 
     @classmethod
     def from_raw(cls, raw: Any, *, accessor: Callable[[Any], T] | None = None) -> BatchSlot[T]:
@@ -137,8 +147,13 @@ class BatchSlot(Generic[T]):
         return self.state is SlotState.ERROR
 
     @property
-    def is_skipped(self) -> bool:
-        return self.state is SlotState.SKIPPED
+    def is_upstream_failed(self) -> bool:
+        return self.state is SlotState.UPSTREAM_FAILED
+
+    @property
+    def is_filtered(self) -> bool:
+        return self.state is SlotState.FILTERED
+
 
     @property
     def success_value(self) -> T:
@@ -152,15 +167,17 @@ class BatchSlot(Generic[T]):
                 return self.success_value
             case SlotState.ERROR:
                 return self.error
-            case SlotState.SKIPPED:
+            case SlotState.UPSTREAM_FAILED | SlotState.FILTERED:
                 return None
 
     def map(self, fn: Callable[[T], U]) -> BatchSlot[U]:
         match self.state:
             case SlotState.SUCCESS:
                 return BatchSlot.success(fn(self.success_value))
-            case SlotState.SKIPPED:
-                return BatchSlot.skipped()
+            case SlotState.UPSTREAM_FAILED:
+                return BatchSlot.upstream_failed()
+            case SlotState.FILTERED:
+                return BatchSlot.filtered()
             case SlotState.ERROR:
                 return BatchSlot.failure(cast(BatchError, self.error))
 
@@ -205,9 +222,14 @@ class BatchResult(Generic[T]):
             if slot.is_error and slot.error is not None:
                 yield index, slot.error
 
-    def iter_skipped(self) -> Iterator[int]:
+    def iter_filtered(self) -> Iterator[int]:
         for index, slot in enumerate(self.slots):
-            if slot.is_skipped:
+            if slot.is_filtered:
+                yield index
+
+    def iter_upstream_failed(self) -> Iterator[int]:
+        for index, slot in enumerate(self.slots):
+            if slot.is_upstream_failed:
                 yield index
 
     @property
@@ -219,16 +241,24 @@ class BatchResult(Generic[T]):
         return tuple(index for index, _ in self.iter_errors())
 
     @property
-    def skipped_indices(self) -> tuple[int, ...]:
-        return tuple(self.iter_skipped())
+    def filtered_indices(self) -> tuple[int, ...]:
+        return tuple(self.iter_filtered())
+
+    @property
+    def upstream_failed_indices(self) -> tuple[int, ...]:
+        return tuple(self.iter_upstream_failed())
 
     @property
     def has_errors(self) -> bool:
         return any(slot.is_error for slot in self.slots)
 
     @property
-    def has_skipped(self) -> bool:
-        return any(slot.is_skipped for slot in self.slots)
+    def has_filtered(self) -> bool:
+        return any(slot.is_filtered for slot in self.slots)
+
+    @property
+    def has_upstream_failed(self) -> bool:
+        return any(slot.is_upstream_failed for slot in self.slots)
 
     @property
     def is_all_success(self) -> bool:
@@ -244,7 +274,7 @@ class BatchResult(Generic[T]):
     def project_successes(
         self, raw_items: Sequence[Any], *, accessor: Callable[[Any], U] | None = None
     ) -> BatchResult[U]:
-        """Re-inflate flat items into this 1D shape, marking unattempted slots SKIPPED."""
+        """Re-inflate flat items into this 1D shape, preserving failure and filter states."""
         raw_iter = _validate_raw_count(len(self.successes), raw_items)
         return BatchResult(tuple(_project_slot(slot, raw_iter, accessor) for slot in self.slots))
 
@@ -255,13 +285,18 @@ class BatchResult(Generic[T]):
         if row_length < 0:
             raise ValueError("row_length must be non-negative.")
         raw_iter = _validate_raw_count(len(self.successes) * row_length, raw_items)
-        projected_rows = tuple(
-            BatchRow(tuple(BatchSlot.from_raw(next(raw_iter), accessor=accessor) for _ in range(row_length)))
-            if slot.is_success
-            else BatchRow(tuple(BatchSlot.skipped() for _ in range(row_length)))
-            for slot in self.slots
-        )
-        return BatchResult2D(projected_rows)
+        projected_rows: list[BatchRow[U]] = []
+        for slot in self.slots:
+            if slot.is_success:
+                projected_rows.append(
+                    BatchRow(tuple(BatchSlot.from_raw(next(raw_iter), accessor=accessor) for _ in range(row_length)))
+                )
+            elif slot.is_upstream_failed or slot.is_error:
+                projected_rows.append(BatchRow(tuple(BatchSlot.upstream_failed() for _ in range(row_length))))
+            else:
+                projected_rows.append(BatchRow(tuple(BatchSlot.filtered() for _ in range(row_length))))
+
+        return BatchResult2D(tuple(projected_rows))
 
     def raise_for_errors(self, operation_name: str = "Batch operation") -> None:
         if self.has_errors:
@@ -324,16 +359,26 @@ class BatchRow(Generic[T]):
         return self.error is None and len(self.slots) > 0 and all(slot.is_success for slot in self.slots)
 
     @property
+    def is_all_upstream_failed(self) -> bool:
+        return len(self.slots) > 0 and all(slot.is_upstream_failed for slot in self.slots)
+
+    @property
+    def is_all_filtered(self) -> bool:
+        return len(self.slots) > 0 and all(slot.is_filtered for slot in self.slots)
+
+    @property
     def has_errors(self) -> bool:
         return self.error is not None or any(slot.is_error for slot in self.slots)
 
     @property
-    def is_skipped(self) -> bool:
-        return len(self.slots) > 0 and all(slot.is_skipped for slot in self.slots)
+    def has_upstream_failed(self) -> bool:
+        """True if any cell in this row is UPSTREAM_FAILED."""
+        return any(slot.is_upstream_failed for slot in self.slots)
 
     @property
-    def has_skipped(self) -> bool:
-        return any(slot.is_skipped for slot in self.slots)
+    def has_filtered(self) -> bool:
+        """True if any cell in this row is FILTERED."""
+        return any(slot.is_filtered for slot in self.slots)
 
     @property
     def items(self) -> tuple[T | BatchError | None, ...]:
@@ -351,7 +396,7 @@ class BatchRow(Generic[T]):
         return BatchRow(tuple(slot.map(fn) for slot in self.slots), error=self.error)
 
     def aggregate(self, context: str = "Row") -> BatchSlot[tuple[T, ...]]:
-        """Aggregate row into a single slot: failure if any error, skipped if skipped, else success tuple."""
+        """Aggregate row into a single slot."""
         errors = (
             [self.error]
             if self.error is not None
@@ -359,8 +404,10 @@ class BatchRow(Generic[T]):
         )
         if errors:
             return BatchSlot.failure(BatchError.aggregate(cast(list[BatchError], errors), context=context))
-        if any(slot.is_skipped for slot in self.slots):
-            return BatchSlot.skipped()
+        if any(slot.is_upstream_failed for slot in self.slots):
+            return BatchSlot.upstream_failed()
+        if any(slot.is_filtered for slot in self.slots):
+            return BatchSlot.filtered()
         return BatchSlot.success(self.success_values)
 
 
@@ -413,8 +460,12 @@ class BatchResult2D(Generic[T]):
         return any(row.has_errors for row in self.rows)
 
     @property
-    def has_skipped(self) -> bool:
-        return any(row.has_skipped for row in self.rows)
+    def has_filtered(self) -> bool:
+        return any(row.has_filtered for row in self.rows)
+
+    @property
+    def has_upstream_failed(self) -> bool:
+        return any(row.has_upstream_failed for row in self.rows)
 
     @property
     def is_all_success(self) -> bool:
@@ -427,6 +478,20 @@ class BatchResult2D(Generic[T]):
                     continue
                 yield (row_index, cell_index), slot
 
+    def iter_filtered(self) -> Iterator[ValueCoordinate]:
+        """Yield (row_index, cell_index) for every FILTERED cell."""
+        for row_index, row in enumerate(self.rows):
+            for cell_index, slot in enumerate(row.slots):
+                if slot.is_filtered:
+                    yield row_index, cell_index
+
+    def iter_upstream_failed(self) -> Iterator[ValueCoordinate]:
+        """Yield (row_index, cell_index) for every UPSTREAM_FAILED cell."""
+        for row_index, row in enumerate(self.rows):
+            for cell_index, slot in enumerate(row.slots):
+                if slot.is_upstream_failed:
+                    yield row_index, cell_index
+
     def iter_successes(self) -> Iterator[tuple[ValueCoordinate, T]]:
         for coordinate, slot in self._iter_flattened_cells(successes_only=True):
             yield coordinate, slot.success_value
@@ -436,12 +501,6 @@ class BatchResult2D(Generic[T]):
             for cell_index, slot in enumerate(row.slots):
                 if slot.is_error and slot.error is not None:
                     yield (row_index, cell_index), slot.error
-
-    def iter_skipped(self) -> Iterator[tuple[int, int]]:
-        for row_index, row in enumerate(self.rows):
-            for cell_index, slot in enumerate(row.slots):
-                if slot.is_skipped:
-                    yield row_index, cell_index
 
     @property
     def errors(self) -> tuple[BatchError, ...]:
@@ -472,11 +531,15 @@ class BatchResult2D(Generic[T]):
         return tuple(coordinate for coordinate, _ in self.iter_errors())
 
     @property
-    def skipped_indices(self) -> tuple[tuple[int, int], ...]:
-        return tuple(self.iter_skipped())
+    def filtered_indices(self) -> tuple[ValueCoordinate, ...]:
+        return tuple(self.iter_filtered())
+
+    @property
+    def upstream_failed_indices(self) -> tuple[ValueCoordinate, ...]:
+        return tuple(self.iter_upstream_failed())
 
     def aggregate_rows(self) -> BatchResult[tuple[T, ...]]:
-        """Return complete rows, replacing any failed row with an aggregate error, and skipped rows with SKIPPED."""
+        """Return complete rows, replacing any failed row with an aggregate error / upstream_error / filtered"""
         return BatchResult(tuple(row.aggregate(context=f"Row {index}") for index, row in enumerate(self.rows)))
 
     def row_result(self) -> BatchResult[tuple[T | BatchError | None, ...]]:
