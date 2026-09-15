@@ -1,11 +1,10 @@
-"""Outcome tracking for multi-step batch workflows."""
-
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, Generic, TypeAlias, TypeVar, cast
+from types import TracebackType
 
 from .results import BatchError, BatchResult, BatchResult2D
 
@@ -111,6 +110,24 @@ class BatchRun(Generic[T]):
         self.original_items = tuple(self.original_items)
         self._failures = [[] for _ in self.original_items]
 
+    def __enter__(self) -> BatchRun[T]:
+        self._ensure_open()
+        return self
+
+    def __exit__(
+            self, exc_type: type[BaseException] | None, exc_val: BaseException | None, exc_tb: TracebackType | None
+    ) -> bool:
+        if exc_val is not None:
+            if isinstance(exc_val, Exception):
+                self.abort(exc_val)
+                return True
+            # Do NOT suppress BaseException (e.g. KeyboardInterrupt, SystemExit)
+            return False
+
+        if not self._closed:
+            self.finish()
+        return False
+
     @property
     def steps(self) -> tuple[BatchStep[Any], ...]:
         return tuple(self._steps)
@@ -204,7 +221,7 @@ class BatchRun(Generic[T]):
         return self.report
 
     def abort(self, exception: Exception) -> BatchReport[T]:
-        self._ensure_open()
+        """Abort the run and record the terminal fatal exception."""
         self._closed = True
         self._aborted = True
         self._fatal_error = exception
