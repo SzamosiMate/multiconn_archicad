@@ -4,7 +4,7 @@ import pytest
 
 from multiconn_archicad.models.tapir import types as tapir
 from multiconn_archicad.utilities import BatchResult, BatchResult2D, BatchRun, BatchStatus
-from multiconn_archicad.utilities.results import BatchError, BatchSlot, SlotState
+from multiconn_archicad.utilities.results import BatchError, BatchSlot, SlotState, BatchRow
 
 
 def error(code: int = 1):
@@ -264,8 +264,11 @@ def test_batch_result_2d_aggregate_rows_with_skips():
     slot_err = BatchSlot.failure(BatchError(tapir.Error(code=1, message="fail")))
 
     matrix = BatchResult2D(
-        rows=((slot_ok_a, slot_ok_b), (slot_ok_a, slot_skipped), (slot_ok_a, slot_err)),
-        row_lengths=(2, 2, 2),
+        rows=(
+            BatchRow((slot_ok_a, slot_ok_b)),
+            BatchRow((slot_ok_a, slot_skipped)),
+            BatchRow((slot_ok_a, slot_err)),
+        )
     )
     aggregated = matrix.aggregate_rows()
 
