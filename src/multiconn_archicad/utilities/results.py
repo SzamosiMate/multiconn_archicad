@@ -1,10 +1,9 @@
-"""Explicit, immutable containers for partial API batch failures."""
-
 from __future__ import annotations
 
-from collections.abc import Callable, Sequence
-from dataclasses import dataclass, field
-from typing import Any, Generic, Iterator, TypeAlias, TypeVar, cast
+from collections.abc import Callable, Iterator, Sequence
+from dataclasses import dataclass
+from enum import Enum
+from typing import Any, Generic, TypeAlias, TypeVar, cast
 
 from multiconn_archicad.errors import BatchOperationError
 from multiconn_archicad.models.official import types as official
@@ -15,7 +14,7 @@ U = TypeVar("U")
 ErrorType: TypeAlias = tapir.Error | official.Error
 ValueCoordinate: TypeAlias = tuple[int, int]
 ErrorCoordinate: TypeAlias = ValueCoordinate
-_MISSING = object()
+
 ERROR_CONTAINER_MODELS = (
     tapir.FailedExecutionResult,
     tapir.ErrorItem,
@@ -71,27 +70,116 @@ def normalize_error(item: Any) -> BatchError | None:
     return BatchError(error) if error is not None else None
 
 
+def _project_slot(
+    source_slot: BatchSlot[Any], raw_iter: Iterator[Any], accessor: Callable[[Any], U] | None
+) -> BatchSlot[U]:
+    """If source succeeded, consume next raw item; otherwise propagate failure or filter state."""
+    if source_slot.is_success:
+        return BatchSlot.from_raw(next(raw_iter), accessor=accessor)
+    if source_slot.is_error or source_slot.is_upstream_failed:
+        return BatchSlot.upstream_failed()
+    return BatchSlot.filtered()
+
+
+def _validate_raw_count(expected: int, raw_items: Sequence[Any]) -> Iterator[Any]:
+    if len(raw_items) != expected:
+        raise ValueError(f"Expected {expected} items to match source, got {len(raw_items)}.")
+    return iter(raw_items)
+
+
+class SlotState(str, Enum):
+    SUCCESS = "success"
+    ERROR = "error"
+    UPSTREAM_FAILED = "upstream_failed"
+    FILTERED = "filtered"
+
+
 @dataclass(frozen=True, slots=True)
 class BatchSlot(Generic[T]):
-    """A slot has either a value or a normalized API error, never both."""
+    """An immutable slot representing a cell's outcome."""
 
-    value: T | object = _MISSING
+    state: SlotState
+    value: T | None = None
     error: BatchError | None = None
 
     def __post_init__(self) -> None:
-        if (self.value is _MISSING) == (self.error is None):
-            raise ValueError("A BatchSlot must contain exactly one of value or error.")
+        match self.state:
+            case SlotState.SUCCESS:
+                if self.error is not None:
+                    raise ValueError("A SUCCESS slot cannot contain an error.")
+            case SlotState.ERROR:
+                if self.error is None:
+                    raise ValueError("An ERROR slot must contain a BatchError.")
+            case SlotState.UPSTREAM_FAILED | SlotState.FILTERED:
+                if self.value is not None or self.error is not None:
+                    raise ValueError(f"A {self.state.name} slot cannot contain a value or error.")
 
-    @property
-    def success_value(self) -> T:
-        """Return the value, enforcing that this slot is successful."""
-        if self.error is not None or self.value is _MISSING:
-            raise ValueError("This slot does not contain a successful value.")
-        return cast(T, self.value)
+    @classmethod
+    def success(cls, value: T) -> BatchSlot[T]:
+        return cls(state=SlotState.SUCCESS, value=value)
+
+    @classmethod
+    def failure(cls, error: BatchError) -> BatchSlot[T]:
+        return cls(state=SlotState.ERROR, error=error)
+
+    @classmethod
+    def upstream_failed(cls) -> BatchSlot[T]:
+        return cls(state=SlotState.UPSTREAM_FAILED)
+
+    @classmethod
+    def filtered(cls) -> BatchSlot[T]:
+        return cls(state=SlotState.FILTERED)
+
+
+    @classmethod
+    def from_raw(cls, raw: Any, *, accessor: Callable[[Any], T] | None = None) -> BatchSlot[T]:
+        """Create a SUCCESS or ERROR slot by normalizing raw API output."""
+        if (failure := normalize_error(raw)) is not None:
+            return cls.failure(failure)
+        return cls.success(accessor(raw) if accessor else raw)
 
     @property
     def is_success(self) -> bool:
-        return self.error is None
+        return self.state is SlotState.SUCCESS
+
+    @property
+    def is_error(self) -> bool:
+        return self.state is SlotState.ERROR
+
+    @property
+    def is_upstream_failed(self) -> bool:
+        return self.state is SlotState.UPSTREAM_FAILED
+
+    @property
+    def is_filtered(self) -> bool:
+        return self.state is SlotState.FILTERED
+
+
+    @property
+    def success_value(self) -> T:
+        if self.state is not SlotState.SUCCESS:
+            raise ValueError(f"Slot in state {self.state.value!r} has no successful value.")
+        return cast(T, self.value)
+
+    def item_val(self) -> T | BatchError | None:
+        match self.state:
+            case SlotState.SUCCESS:
+                return self.success_value
+            case SlotState.ERROR:
+                return self.error
+            case SlotState.UPSTREAM_FAILED | SlotState.FILTERED:
+                return None
+
+    def map(self, fn: Callable[[T], U]) -> BatchSlot[U]:
+        match self.state:
+            case SlotState.SUCCESS:
+                return BatchSlot.success(fn(self.success_value))
+            case SlotState.UPSTREAM_FAILED:
+                return BatchSlot.upstream_failed()
+            case SlotState.FILTERED:
+                return BatchSlot.filtered()
+            case SlotState.ERROR:
+                return BatchSlot.failure(cast(BatchError, self.error))
 
 
 @dataclass(frozen=True, slots=True)
@@ -105,19 +193,16 @@ class BatchResult(Generic[T]):
 
     @classmethod
     def from_items(cls, raw_items: Sequence[Any], *, accessor: Callable[[Any], T] | None = None) -> BatchResult[T]:
-        slots: list[BatchSlot[T]] = []
-        for index, item in enumerate(raw_items):
-            failure = normalize_error(item)
-            slots.append(BatchSlot(error=failure) if failure else BatchSlot(value=accessor(item) if accessor else item))
-        return cls(tuple(slots))
+        return cls(tuple(BatchSlot.from_raw(item, accessor=accessor) for item in raw_items))
 
     @property
-    def items(self) -> tuple[T | BatchError, ...]:
-        return tuple(slot.error if slot.error is not None else slot.success_value for slot in self.slots)
+    def items(self) -> tuple[T | BatchError | None, ...]:
+        """Return values for successes, errors for failures, and None for skipped slots."""
+        return tuple(slot.item_val() for slot in self.slots)
 
     @property
     def errors(self) -> tuple[BatchError, ...]:
-        return tuple(slot.error for slot in self.slots if slot.error is not None)
+        return tuple(slot.error for slot in self.slots if slot.is_error and slot.error is not None)
 
     @property
     def all_errors(self) -> tuple[BatchError, ...]:
@@ -125,17 +210,27 @@ class BatchResult(Generic[T]):
 
     @property
     def successes(self) -> list[T]:
-        return [slot.success_value for slot in self.slots if slot.error is None]
+        return [slot.success_value for slot in self.slots if slot.is_success]
 
     def iter_successes(self) -> Iterator[tuple[int, T]]:
         for index, slot in enumerate(self.slots):
-            if slot.error is None:
+            if slot.is_success:
                 yield index, slot.success_value
 
     def iter_errors(self) -> Iterator[tuple[int, BatchError]]:
         for index, slot in enumerate(self.slots):
-            if slot.error is not None:
+            if slot.is_error and slot.error is not None:
                 yield index, slot.error
+
+    def iter_filtered(self) -> Iterator[int]:
+        for index, slot in enumerate(self.slots):
+            if slot.is_filtered:
+                yield index
+
+    def iter_upstream_failed(self) -> Iterator[int]:
+        for index, slot in enumerate(self.slots):
+            if slot.is_upstream_failed:
+                yield index
 
     @property
     def success_indices(self) -> tuple[int, ...]:
@@ -146,25 +241,62 @@ class BatchResult(Generic[T]):
         return tuple(index for index, _ in self.iter_errors())
 
     @property
+    def filtered_indices(self) -> tuple[int, ...]:
+        return tuple(self.iter_filtered())
+
+    @property
+    def upstream_failed_indices(self) -> tuple[int, ...]:
+        return tuple(self.iter_upstream_failed())
+
+    @property
     def has_errors(self) -> bool:
-        return any(slot.error is not None for slot in self.slots)
+        return any(slot.is_error for slot in self.slots)
+
+    @property
+    def has_filtered(self) -> bool:
+        return any(slot.is_filtered for slot in self.slots)
+
+    @property
+    def has_upstream_failed(self) -> bool:
+        return any(slot.is_upstream_failed for slot in self.slots)
 
     @property
     def is_all_success(self) -> bool:
-        return not self.has_errors
+        return len(self.slots) > 0 and all(slot.is_success for slot in self.slots)
 
     @property
     def total_errors(self) -> int:
         return len(self.errors)
 
     def map(self, fn: Callable[[T], U]) -> BatchResult[U]:
-        """Maps successes only; callback exceptions deliberately propagate."""
-        return BatchResult(
-            tuple(
-                BatchSlot(value=fn(slot.success_value)) if slot.error is None else BatchSlot(error=slot.error)
-                for slot in self.slots
-            )
-        )
+        return BatchResult(tuple(s.map(fn) for s in self.slots))
+
+    def project_successes(
+        self, raw_items: Sequence[Any], *, accessor: Callable[[Any], U] | None = None
+    ) -> BatchResult[U]:
+        """Re-inflate flat items into this 1D shape, preserving failure and filter states."""
+        raw_iter = _validate_raw_count(len(self.successes), raw_items)
+        return BatchResult(tuple(_project_slot(slot, raw_iter, accessor) for slot in self.slots))
+
+    def project_rows(
+        self, raw_items: Sequence[Any], row_length: int, *, accessor: Callable[[Any], U] | None = None
+    ) -> BatchResult2D[U]:
+        """Re-inflate flat items into an N x row_length matrix based on row success."""
+        if row_length < 0:
+            raise ValueError("row_length must be non-negative.")
+        raw_iter = _validate_raw_count(len(self.successes) * row_length, raw_items)
+        projected_rows: list[BatchRow[U]] = []
+        for slot in self.slots:
+            if slot.is_success:
+                projected_rows.append(
+                    BatchRow(tuple(BatchSlot.from_raw(next(raw_iter), accessor=accessor) for _ in range(row_length)))
+                )
+            elif slot.is_upstream_failed or slot.is_error:
+                projected_rows.append(BatchRow(tuple(BatchSlot.upstream_failed() for _ in range(row_length))))
+            else:
+                projected_rows.append(BatchRow(tuple(BatchSlot.filtered() for _ in range(row_length))))
+
+        return BatchResult2D(tuple(projected_rows))
 
     def raise_for_errors(self, operation_name: str = "Batch operation") -> None:
         if self.has_errors:
@@ -175,33 +307,126 @@ class BatchResult(Generic[T]):
 
 
 @dataclass(frozen=True, slots=True)
-class BatchResult2D(Generic[T]):
-    """A ragged 2D result. A whole-row API error retains its requested row length."""
+class BatchRow(Generic[T]):
+    """An immutable row container holding ordered cell slots and an optional row error."""
 
-    rows: tuple[tuple[BatchSlot[T], ...], ...]
-    row_lengths: tuple[int, ...]
-    row_errors: tuple[BatchError | None, ...] = field(default_factory=tuple)
+    slots: tuple[BatchSlot[T], ...]
+    error: BatchError | None = None
 
     def __post_init__(self) -> None:
-        object.__setattr__(self, "rows", tuple(tuple(row) for row in self.rows))
-        object.__setattr__(self, "row_lengths", tuple(self.row_lengths))
-        object.__setattr__(self, "row_errors", tuple(self.row_errors))
-        if len(self.rows) != len(self.row_lengths):
-            raise ValueError("rows and row_lengths must have the same length.")
-        if not self.row_errors:
-            object.__setattr__(self, "row_errors", (None,) * len(self.rows))
-        if len(self.row_errors) != len(self.rows):
-            raise ValueError("row_errors and rows must have the same length.")
-        for row_index, (row, length, row_error) in enumerate(zip(self.rows, self.row_lengths, self.row_errors)):
-            if length < 0:
-                raise ValueError("row lengths must be non-negative.")
-            if len(row) != length:
-                raise ValueError("A row must contain exactly row_length slots.")
-            if row_error is not None:
-                if length == 0:
-                    raise ValueError("A whole-row error requires a positive row length.")
-                if any(slot.error is not row_error for slot in row):
-                    raise ValueError("Every cell of a failed row must reference its original row error.")
+        object.__setattr__(self, "slots", tuple(self.slots))
+        if self.error is not None:
+            if len(self.slots) == 0:
+                raise ValueError("A row with a whole-row error requires a positive row length.")
+            if any(slot.error is not self.error for slot in self.slots):
+                raise ValueError("Every cell in a failed row must reference the row error.")
+
+    @classmethod
+    def from_raw(
+        cls,
+        raw_row: Any,
+        expected_len: int,
+        *,
+        accessor: Callable[[Any], T] | None = None,
+        index: int | None = None,
+    ) -> BatchRow[T]:
+        """Parse a single raw row (or whole-row API error) into slots and an optional row error."""
+        prefix = f"Row {index} " if index is not None else "Row "
+
+        if (row_error := normalize_error(raw_row)) is not None:
+            if expected_len <= 0:
+                raise ValueError(f"{prefix}has an API error and requires an explicit positive row length.")
+            return cls(tuple(BatchSlot.failure(row_error) for _ in range(expected_len)), error=row_error)
+
+        if not isinstance(raw_row, Sequence) or isinstance(raw_row, (str, bytes)):
+            raise TypeError(f"{prefix}must be a sequence or a typed API error.")
+        if len(raw_row) != expected_len:
+            raise ValueError(f"{prefix}length ({len(raw_row)}) does not match expected ({expected_len}).")
+
+        return cls(tuple(BatchSlot.from_raw(item, accessor=accessor) for item in raw_row))
+
+    def __len__(self) -> int:
+        return len(self.slots)
+
+    def __iter__(self) -> Iterator[BatchSlot[T]]:
+        return iter(self.slots)
+
+    def __getitem__(self, index: int) -> BatchSlot[T]:
+        return self.slots[index]
+
+    @property
+    def is_all_success(self) -> bool:
+        return self.error is None and len(self.slots) > 0 and all(slot.is_success for slot in self.slots)
+
+    @property
+    def is_all_upstream_failed(self) -> bool:
+        return len(self.slots) > 0 and all(slot.is_upstream_failed for slot in self.slots)
+
+    @property
+    def is_all_filtered(self) -> bool:
+        return len(self.slots) > 0 and all(slot.is_filtered for slot in self.slots)
+
+    @property
+    def has_errors(self) -> bool:
+        return self.error is not None or any(slot.is_error for slot in self.slots)
+
+    @property
+    def has_upstream_failed(self) -> bool:
+        """True if any cell in this row is UPSTREAM_FAILED."""
+        return any(slot.is_upstream_failed for slot in self.slots)
+
+    @property
+    def has_filtered(self) -> bool:
+        """True if any cell in this row is FILTERED."""
+        return any(slot.is_filtered for slot in self.slots)
+
+    @property
+    def items(self) -> tuple[T | BatchError | None, ...]:
+        return tuple(slot.item_val() for slot in self.slots)
+
+    @property
+    def success_values(self) -> tuple[T, ...]:
+        return tuple(slot.success_value for slot in self.slots if slot.is_success)
+
+    @property
+    def errors(self) -> tuple[BatchError, ...]:
+        return tuple(slot.error for slot in self.slots if slot.is_error and slot.error is not None)
+
+    def map(self, fn: Callable[[T], U]) -> BatchRow[U]:
+        return BatchRow(tuple(slot.map(fn) for slot in self.slots), error=self.error)
+
+    def aggregate(self, context: str = "Row") -> BatchSlot[tuple[T, ...]]:
+        """Aggregate row into a single slot."""
+        errors = (
+            [self.error]
+            if self.error is not None
+            else [slot.error for slot in self.slots if slot.is_error and slot.error is not None]
+        )
+        if errors:
+            return BatchSlot.failure(BatchError.aggregate(cast(list[BatchError], errors), context=context))
+        if any(slot.is_upstream_failed for slot in self.slots):
+            return BatchSlot.upstream_failed()
+        if any(slot.is_filtered for slot in self.slots):
+            return BatchSlot.filtered()
+        return BatchSlot.success(self.success_values)
+
+
+@dataclass(frozen=True, slots=True)
+class BatchResult2D(Generic[T]):
+    """A ragged or regular 2D result preserving row and cell states."""
+
+    rows: tuple[BatchRow[T], ...]
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "rows", tuple(self.rows))
+
+    @property
+    def row_lengths(self) -> tuple[int, ...]:
+        return tuple(len(row) for row in self.rows)
+
+    @property
+    def row_errors(self) -> tuple[BatchError | None, ...]:
+        return tuple(row.error for row in self.rows)
 
     @classmethod
     def from_rows(
@@ -211,45 +436,61 @@ class BatchResult2D(Generic[T]):
         row_lengths: Sequence[int] | None = None,
         accessor: Callable[[Any], T] | None = None,
     ) -> BatchResult2D[T]:
+        lengths = cls._infer_row_lengths(raw_rows, row_lengths)
+        rows = tuple(
+            BatchRow.from_raw(raw_row, length, accessor=accessor, index=idx)
+            for idx, (raw_row, length) in enumerate(zip(raw_rows, lengths))
+        )
+        return cls(rows)
+
+    @staticmethod
+    def _infer_row_lengths(raw_rows: Sequence[Any], row_lengths: Sequence[int] | None) -> tuple[int, ...]:
         if row_lengths is None:
-            row_lengths = tuple(
-                len(row) if isinstance(row, Sequence) and not isinstance(row, (str, bytes)) else 0 for row in raw_rows
+            return tuple(
+                len(row) if isinstance(row, Sequence) and not isinstance(row, (str, bytes)) else 0
+                for row in raw_rows
             )
-        if len(raw_rows) != len(row_lengths):
+        lengths = tuple(row_lengths)
+        if len(raw_rows) != len(lengths):
             raise ValueError("raw_rows and row_lengths must have the same length.")
-        rows: list[tuple[BatchSlot[T], ...]] = []
-        row_errors: list[BatchError | None] = []
-        for row_index, (raw_row, expected_length) in enumerate(zip(raw_rows, row_lengths)):
-            row_failure = normalize_error(raw_row)
-            if row_failure:
-                if expected_length <= 0:
-                    raise ValueError("A whole-row error requires an explicit positive row length.")
-                rows.append(tuple(BatchSlot(error=row_failure) for _ in range(expected_length)))
-                row_errors.append(row_failure)
-                continue
-            if not isinstance(raw_row, Sequence) or isinstance(raw_row, (str, bytes)):
-                raise TypeError(f"Row {row_index} must be a sequence or a typed API error.")
-            if len(raw_row) != expected_length:
-                raise ValueError(
-                    f"Row {row_index} length ({len(raw_row)}) does not match supplied length ({expected_length})."
-                )
-            row: list[BatchSlot[T]] = []
-            for cell_index, item in enumerate(raw_row):
-                failure = normalize_error(item)
-                row.append(
-                    BatchSlot(error=failure) if failure else BatchSlot(value=accessor(item) if accessor else item)
-                )
-            rows.append(tuple(row))
-            row_errors.append(None)
-        return cls(tuple(rows), tuple(row_lengths), tuple(row_errors))
+        return lengths
 
     @property
     def has_errors(self) -> bool:
-        return any(slot.error is not None for row in self.rows for slot in row)
+        return any(row.has_errors for row in self.rows)
+
+    @property
+    def has_filtered(self) -> bool:
+        return any(row.has_filtered for row in self.rows)
+
+    @property
+    def has_upstream_failed(self) -> bool:
+        return any(row.has_upstream_failed for row in self.rows)
 
     @property
     def is_all_success(self) -> bool:
-        return not self.has_errors
+        return len(self.rows) > 0 and all(row.is_all_success for row in self.rows)
+
+    def _iter_flattened_cells(self, *, successes_only: bool) -> Iterator[tuple[ValueCoordinate, BatchSlot[T]]]:
+        for row_index, row in enumerate(self.rows):
+            for cell_index, slot in enumerate(row.slots):
+                if successes_only and not slot.is_success:
+                    continue
+                yield (row_index, cell_index), slot
+
+    def iter_filtered(self) -> Iterator[ValueCoordinate]:
+        """Yield (row_index, cell_index) for every FILTERED cell."""
+        for row_index, row in enumerate(self.rows):
+            for cell_index, slot in enumerate(row.slots):
+                if slot.is_filtered:
+                    yield row_index, cell_index
+
+    def iter_upstream_failed(self) -> Iterator[ValueCoordinate]:
+        """Yield (row_index, cell_index) for every UPSTREAM_FAILED cell."""
+        for row_index, row in enumerate(self.rows):
+            for cell_index, slot in enumerate(row.slots):
+                if slot.is_upstream_failed:
+                    yield row_index, cell_index
 
     def iter_successes(self) -> Iterator[tuple[ValueCoordinate, T]]:
         for coordinate, slot in self._iter_flattened_cells(successes_only=True):
@@ -257,8 +498,8 @@ class BatchResult2D(Generic[T]):
 
     def iter_errors(self) -> Iterator[tuple[ErrorCoordinate, BatchError]]:
         for row_index, row in enumerate(self.rows):
-            for cell_index, slot in enumerate(row):
-                if slot.error is not None:
+            for cell_index, slot in enumerate(row.slots):
+                if slot.is_error and slot.error is not None:
                     yield (row_index, cell_index), slot.error
 
     @property
@@ -274,70 +515,58 @@ class BatchResult2D(Generic[T]):
         return len(self.errors)
 
     @property
-    def items(self) -> tuple[tuple[T | BatchError, ...], ...]:
-        """Preserve row lengths, repeating a whole-row error at every cell position."""
-        return tuple(
-            tuple(slot.error if slot.error is not None else slot.success_value for slot in row) for row in self.rows
-        )
-
-    def aggregate_rows(self) -> BatchResult[tuple[T, ...]]:
-        """Return complete rows, replacing any failed row with one aggregate error."""
-        slots: list[BatchSlot[tuple[T, ...]]] = []
-        for index, (row, row_error) in enumerate(zip(self.rows, self.row_errors)):
-            errors = [row_error] if row_error is not None else [slot.error for slot in row if slot.error is not None]
-            if errors:
-                slots.append(BatchSlot(error=BatchError.aggregate(errors, context=f"Row {index}")))
-            else:
-                slots.append(BatchSlot(value=tuple(slot.success_value for slot in row)))
-        return BatchResult(tuple(slots))
-
-    def row_result(self) -> BatchResult[tuple[T | BatchError, ...]]:
-        """Expose original row failures; successful rows may contain cell errors."""
-        return BatchResult(
-            tuple(
-                BatchSlot(error=error) if error is not None else BatchSlot(value=items)
-                for items, error in zip(self.items, self.row_errors)
-            )
-        )
-
-    def map(self, fn: Callable[[T], U]) -> BatchResult2D[U]:
-        return BatchResult2D(
-            tuple(
-                tuple(
-                    BatchSlot(value=fn(slot.success_value)) if slot.error is None else BatchSlot(error=slot.error)
-                    for slot in row
-                )
-                for row in self.rows
-            ),
-            self.row_lengths,
-            self.row_errors,
-        )
-
-    def _iter_flattened_cells(self, *, successes_only: bool) -> Iterator[tuple[ValueCoordinate, BatchSlot[T]]]:
-        """Yield cells using one shared filtering policy for all flatten helpers."""
-        for row_index, row in enumerate(self.rows):
-            for cell_index, slot in enumerate(row):
-                if successes_only and slot.error is not None:
-                    continue
-                yield (row_index, cell_index), slot
-
-    def flatten(self) -> BatchResult[T]:
-        """Flatten cells row by row, from left to right, retaining errors."""
-        return BatchResult(tuple(slot for _, slot in self._iter_flattened_cells(successes_only=False)))
+    def items(self) -> tuple[tuple[T | BatchError | None, ...], ...]:
+        return tuple(row.items for row in self.rows)
 
     @property
     def successes(self) -> list[T]:
-        """Return successful cells row by row, from left to right, skipping errors."""
         return [slot.success_value for _, slot in self._iter_flattened_cells(successes_only=True)]
 
     @property
     def success_indices(self) -> tuple[ValueCoordinate, ...]:
-        """Return coordinates corresponding exactly to successful values."""
         return tuple(coordinate for coordinate, _ in self._iter_flattened_cells(successes_only=True))
 
     @property
     def failure_indices(self) -> tuple[ValueCoordinate, ...]:
         return tuple(coordinate for coordinate, _ in self.iter_errors())
+
+    @property
+    def filtered_indices(self) -> tuple[ValueCoordinate, ...]:
+        return tuple(self.iter_filtered())
+
+    @property
+    def upstream_failed_indices(self) -> tuple[ValueCoordinate, ...]:
+        return tuple(self.iter_upstream_failed())
+
+    def aggregate_rows(self) -> BatchResult[tuple[T, ...]]:
+        """Return complete rows, replacing any failed row with an aggregate error / upstream_error / filtered"""
+        return BatchResult(tuple(row.aggregate(context=f"Row {index}") for index, row in enumerate(self.rows)))
+
+    def row_result(self) -> BatchResult[tuple[T | BatchError | None, ...]]:
+        return BatchResult(
+            tuple(
+                BatchSlot.failure(row.error) if row.error is not None else BatchSlot.success(row.items)
+                for row in self.rows
+            )
+        )
+
+    def map(self, fn: Callable[[T], U]) -> BatchResult2D[U]:
+        return BatchResult2D(tuple(row.map(fn) for row in self.rows))
+
+    def project_successes(
+        self, raw_items: Sequence[Any], *, accessor: Callable[[Any], U] | None = None
+    ) -> BatchResult2D[U]:
+        """Project raw flat items onto successful cell coordinates, marking others SKIPPED."""
+        raw_iter = _validate_raw_count(len(self.successes), raw_items)
+        projected = tuple(
+            BatchRow(tuple(_project_slot(slot, raw_iter, accessor) for slot in row.slots))
+            for row in self.rows
+        )
+        return BatchResult2D(projected)
+
+    def flatten(self) -> BatchResult[T]:
+        """Flatten cells row by row, from left to right, retaining errors."""
+        return BatchResult(tuple(slot for _, slot in self._iter_flattened_cells(successes_only=False)))
 
     def raise_for_errors(self, operation_name: str = "Batch operation") -> None:
         if self.has_errors:
