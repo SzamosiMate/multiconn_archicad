@@ -3,7 +3,8 @@ from __future__ import annotations
 import pytest
 
 from multiconn_archicad.models.tapir import types as tapir
-from multiconn_archicad.utilities import BatchReport, BatchResult, BatchResult2D, BatchRun, BatchStatus
+from multiconn_archicad.utilities import BatchResult, BatchResult2D, BatchRun, BatchStatus
+from multiconn_archicad.utilities.results import BatchError, BatchSlot, SlotState
 
 
 def error(code: int = 1):
@@ -78,15 +79,6 @@ def test_matrix_map_and_flatten_share_row_major_filtering():
         BatchResult2D.from_rows([["a"]], row_lengths=[1]).map(lambda _: 1 / 0)
 
 
-def test_batch_run_records_one_dimensional_errors_and_preserves_repeated_step_names():
-    run = BatchRun(["a", "b"])
-    first = BatchResult.from_items(["ok", error()])
-    assert run.record("write", first) is first
-    run.record("write", BatchResult.from_items(["ok", error(2)]), item_indices=[1, 0])
-    assert run.report.failed_indices == (0, 1)
-    assert {failure.step.index for outcome in run.outcomes for failure in outcome.failures} == {0, 1}
-
-
 def test_row_views_distinguish_partial_cells_from_original_row_errors():
     matrix = BatchResult2D[str].from_rows([["a", "b"], ["c", error()], error(2), []], row_lengths=[2, 2, 3, 0])
     aggregate = matrix.aggregate_rows()
@@ -115,40 +107,6 @@ def test_whole_row_errors_require_known_positive_lengths(lengths):
         BatchResult2D.from_rows([error()], row_lengths=lengths)
 
 
-def test_batch_run_dataclass_normalizes_original_items_and_hides_internal_state():
-    source = ["a"]
-    run = BatchRun(source)
-    source.append("later")
-    assert run.original_items == ("a",)
-    with pytest.raises(TypeError):
-        BatchRun(["a"], _steps=[])
-
-
-def test_batch_run_record_validation_is_atomic_and_abort_keeps_clean_items_incomplete():
-    run = BatchRun(["a", "b"])
-    with pytest.raises(ValueError):
-        run.record("short", BatchResult.from_items([error()]))
-    assert run.steps == ()
-    report = run.abort(RuntimeError("fatal"))
-    assert isinstance(report, BatchReport)
-    assert isinstance(report.fatal_error, RuntimeError)
-    assert report.status is BatchStatus.FAILED
-    assert report.incomplete_indices == (0, 1)
-    assert report.status_counts == {"total": 2, "failed": 0, "succeeded": 0, "incomplete": 2}
-    with pytest.raises(RuntimeError):
-        run.finish()
-
-
-def test_batch_run_2d_details_and_multiple_failures_are_ordered_per_outcome():
-    run = BatchRun(["first", "second"])
-    matrix = BatchResult2D.from_rows([[error(1), error(2)], ["ok"]], row_lengths=[2, 1])
-    run.record("matrix", matrix, item_indices=[1, 0], details=["row-0", "row-1"])
-    failures = run.outcomes[1].failures
-    assert [failure.error.code for failure in failures] == [1, 2]
-    assert [failure.source_coordinate for failure in failures] == [(0, 0), (0, 1)]
-    assert all(failure.detail == "row-0" for failure in failures)
-
-
 def test_finish_marks_clean_success_and_empty_run_is_clean():
     empty_report = BatchRun([]).finish()
     assert empty_report.outcomes == ()
@@ -160,42 +118,170 @@ def test_finish_marks_clean_success_and_empty_run_is_clean():
         run.record("retry", BatchResult.from_items(["ok"]))
 
 
-def test_run_repeated_targets_and_invalid_arguments_are_atomic():
-    run = BatchRun(["a", "b"])
-    run.record("repeat", BatchResult.from_items([error(), error(2)]), item_indices=[1, 1])
-    assert [failure.error.code for failure in run.outcomes[1].failures] == [1, 2]
-    before = run.steps
-    with pytest.raises(IndexError):
-        run.record("bad", BatchResult.from_items(["a", "b"]), item_indices=[0, 2])
-    with pytest.raises(ValueError):
-        run.record("bad", BatchResult.from_items(["a", "b"]), details=["only one"])
-    assert run.steps == before
+# ==============================================================================
+# New Tests: SlotState & BatchSlot
+# ==============================================================================
 
 
-def test_run_finish_and_abort_statuses_and_separate_retry():
-    run = BatchRun(["a", "b"])
-    run.record("write", BatchResult.from_items([error(), "ok"]))
-    report = run.finish()
-    assert [outcome.status for outcome in report.outcomes] == [BatchStatus.FAILED, BatchStatus.SUCCEEDED]
-    assert report.status is BatchStatus.FAILED
-    aborted = BatchRun(["a", "b"])
-    aborted.record("write", BatchResult.from_items([error(), "ok"]))
-    aborted_report = aborted.abort(RuntimeError("fatal"))
-    assert [outcome.status for outcome in aborted_report.outcomes] == [BatchStatus.FAILED, BatchStatus.INCOMPLETE]
-    assert aborted_report.status is BatchStatus.FAILED
-    with pytest.raises(RuntimeError):
-        aborted.abort(RuntimeError("again"))
-    retry = BatchRun(["a"])
-    assert retry.finish().outcomes[0].succeeded
+def test_slot_state_factories_and_invariants():
+    success_slot = BatchSlot.success("val")
+    assert success_slot.state is SlotState.SUCCESS
+    assert success_slot.is_success
+    assert not success_slot.is_error
+    assert not success_slot.is_skipped
+    assert success_slot.success_value == "val"
+    assert success_slot.item_val() == "val"
+
+    err = BatchError(tapir.Error(code=1, message="err"))
+    failure_slot = BatchSlot.failure(err)
+    assert failure_slot.state is SlotState.ERROR
+    assert failure_slot.is_error
+    assert failure_slot.error is err
+    assert failure_slot.item_val() is err
+    with pytest.raises(ValueError, match="has no successful value"):
+        _ = failure_slot.success_value
+
+    skipped_slot = BatchSlot.skipped()
+    assert skipped_slot.state is SlotState.SKIPPED
+    assert skipped_slot.is_skipped
+    assert skipped_slot.item_val() is None
+    with pytest.raises(ValueError, match="has no successful value"):
+        _ = skipped_slot.success_value
+
+    # Invariant violations
+    with pytest.raises(ValueError, match="SUCCESS slot cannot contain an error"):
+        BatchSlot(state=SlotState.SUCCESS, value="ok", error=err)
+    with pytest.raises(ValueError, match="ERROR slot must contain a BatchError"):
+        BatchSlot(state=SlotState.ERROR, error=None)
+    with pytest.raises(ValueError, match="SKIPPED slot cannot contain a value"):
+        BatchSlot(state=SlotState.SKIPPED, value="bad")
 
 
-def test_batch_run_report_is_a_snapshot_and_tracks_open_state():
-    run = BatchRun(["a"])
-    before = run.report
-    assert before.status is BatchStatus.INCOMPLETE
-    run.record("read", BatchResult.from_items([error()]))
-    after = run.report
-    assert before.outcomes[0].status is BatchStatus.INCOMPLETE
-    assert before.steps == ()
-    assert after.status is BatchStatus.FAILED
-    assert len(after.steps) == 1
+def test_slot_from_raw_and_map():
+    slot_ok = BatchSlot.from_raw("hello", accessor=str.upper)
+    assert slot_ok.is_success
+    assert slot_ok.success_value == "HELLO"
+
+    slot_err = BatchSlot.from_raw(error(5))
+    assert slot_err.is_error
+    assert slot_err.error.code == 5
+
+    # Slot map
+    assert slot_ok.map(lambda s: f"{s}!").success_value == "HELLO!"
+    assert slot_err.map(lambda s: s).is_error
+    assert BatchSlot.skipped().map(lambda s: s).is_skipped
+
+
+# ==============================================================================
+# Projection (1D & 2D)
+# ==============================================================================
+
+
+def test_batch_result_1d_project_successes():
+    # Source: [OK("a"), ERROR, OK("b")]
+    source = BatchResult.from_items(["a", error(1), "b"])
+    assert source.success_indices == (0, 2)
+    assert source.skipped_indices == ()
+
+    # Project 2 items onto the 2 successes: 1 succeeds, 1 fails
+    projected = source.project_successes([10, error(2)])
+    assert len(projected.slots) == 3
+    assert projected.slots[0].is_success and projected.slots[0].success_value == 10
+    assert projected.slots[1].is_skipped
+    assert projected.slots[2].is_error and projected.slots[2].error.code == 2
+
+    assert projected.success_indices == (0,)
+    assert projected.skipped_indices == (1,)
+    assert projected.failure_indices == (2,)
+    assert projected.items == (10, None, projected.slots[2].error)
+
+    # Length mismatch validation
+    with pytest.raises(ValueError, match="Expected 2 items"):
+        source.project_successes([10])
+
+
+def test_batch_result_1d_project_rows():
+    # Source: 3 elements [OK("a"), ERROR, OK("b")]
+    source = BatchResult.from_items(["a", error(1), "b"])
+
+    # Expand to 2 columns per successful row (2 rows * 2 = 4 items)
+    matrix = source.project_rows([1, 2, error(3), 4], row_length=2)
+    assert isinstance(matrix, BatchResult2D)
+    assert matrix.row_lengths == (2, 2, 2)
+
+    # Row 0: Succeeded -> [1, 2]
+    assert matrix.rows[0][0].success_value == 1
+    assert matrix.rows[0][1].success_value == 2
+
+    # Row 1: Skipped (because source was error) -> [SKIPPED, SKIPPED]
+    assert matrix.rows[1][0].is_skipped
+    assert matrix.rows[1][1].is_skipped
+
+    # Row 2: Succeeded in source, but cell (2, 0) failed in raw items -> [ERROR, 4]
+    assert matrix.rows[2][0].is_error and matrix.rows[2][0].error.code == 3
+    assert matrix.rows[2][1].success_value == 4
+
+    assert matrix.skipped_indices == ((1, 0), (1, 1))
+    assert matrix.failure_indices == ((2, 0),)
+
+    # Negative row_length & count mismatch
+    with pytest.raises(ValueError, match="non-negative"):
+        source.project_rows([], row_length=-1)
+    with pytest.raises(ValueError, match="Expected 4 items"):
+        source.project_rows([1, 2], row_length=2)
+
+
+def test_batch_result_2d_project_successes():
+    # 2 elements x 2 properties
+    source = BatchResult2D.from_rows([["a", "b"], [error(1), "c"]], row_lengths=[2, 2])
+    assert len(source.successes) == 3
+
+    # Project 3 raw items: ["x", error(2), "y"]
+    projected = source.project_successes(["x", error(2), "y"])
+    assert projected.row_lengths == (2, 2)
+
+    # (0, 0) -> "x", (0, 1) -> error(2)
+    assert projected.rows[0][0].success_value == "x"
+    assert projected.rows[0][1].is_error and projected.rows[0][1].error.code == 2
+
+    # (1, 0) -> SKIPPED (source was error), (1, 1) -> "y"
+    assert projected.rows[1][0].is_skipped
+    assert projected.rows[1][1].success_value == "y"
+
+    assert projected.has_skipped
+    assert projected.skipped_indices == ((1, 0),)
+    assert projected.success_indices == ((0, 0), (1, 1))
+    assert projected.failure_indices == ((0, 1),)
+
+
+def test_batch_result_2d_aggregate_rows_with_skips():
+    # Row 0: Clean success -> Success(("a", "b"))
+    # Row 1: Partial skip -> Skipped
+    # Row 2: Has error -> Failure
+    slot_ok_a = BatchSlot.success("a")
+    slot_ok_b = BatchSlot.success("b")
+    slot_skipped = BatchSlot.skipped()
+    slot_err = BatchSlot.failure(BatchError(tapir.Error(code=1, message="fail")))
+
+    matrix = BatchResult2D(
+        rows=((slot_ok_a, slot_ok_b), (slot_ok_a, slot_skipped), (slot_ok_a, slot_err)),
+        row_lengths=(2, 2, 2),
+    )
+    aggregated = matrix.aggregate_rows()
+
+    assert len(aggregated.slots) == 3
+    assert aggregated.slots[0].is_success and aggregated.slots[0].success_value == ("a", "b")
+    assert aggregated.slots[1].is_skipped
+    assert aggregated.slots[2].is_error and aggregated.slots[2].error.causes[0].code == 1
+
+
+def test_is_all_success_requires_no_errors_and_no_skips():
+    clean = BatchResult.from_items(["a", "b"])
+    assert clean.is_all_success
+
+    mixed = BatchResult((BatchSlot.success("a"), BatchSlot.skipped()))
+    assert not mixed.is_all_success
+    assert mixed.has_skipped
+    assert not mixed.has_errors
+
+
