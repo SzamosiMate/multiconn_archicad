@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import Any, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from multiconn_archicad.utilities.results import BatchResult, BatchResult2D
+    from multiconn_archicad.utilities.results import BatchResultBase
 
 
 class MulticonnArchicadError(Exception):
@@ -123,6 +123,6 @@ class NotFullyInitializedError(MulticonnArchicadError):
 class BatchOperationError(MulticonnArchicadError):
     """Raised by fail-fast utility functions when one or more batch items fail."""
 
-    def __init__(self, message: str, result: BatchResult[Any] | BatchResult2D[Any]):
+    def __init__(self, message: str, result: BatchResultBase):
         super().__init__(message)
         self.result = result

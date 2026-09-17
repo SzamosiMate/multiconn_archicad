@@ -12,12 +12,28 @@ from .batch_run import (
     BatchStatus,
     BatchStep,
 )
-from .results import BatchError, BatchResult, BatchResult2D
+from .results import (
+    BatchError,
+    BatchGrid,
+    BatchResult,
+    BatchResult2D,
+    BatchResultBase,
+    BatchRow,
+    BatchSlot,
+    RaggedBatchResult,
+    SlotState,
+)
 
 __all__ = [
     "Utilities",
+    "BatchResultBase",
     "BatchResult",
     "BatchResult2D",
+    "BatchGrid",
+    "RaggedBatchResult",
+    "BatchRow",
+    "BatchSlot",
+    "SlotState",
     "BatchError",
     "BatchOperationError",
     "BatchRun",

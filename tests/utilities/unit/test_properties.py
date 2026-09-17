@@ -8,6 +8,7 @@ import pytest
 from multiconn_archicad.errors import BatchOperationError
 from multiconn_archicad.models.official import types as official
 from multiconn_archicad.models.tapir import types as tapir
+from multiconn_archicad.utilities import BatchRun
 from multiconn_archicad.utilities.properties import (
     PropertyUtilities,
     create_element_property_values,
@@ -15,8 +16,12 @@ from multiconn_archicad.utilities.properties import (
     create_element_property_values_sparse,
     get_possible_enum_values,
 )
-from multiconn_archicad.utilities.results import BatchResult, BatchResult2D
-from multiconn_archicad.utilities import BatchRun
+from multiconn_archicad.utilities.results import (
+    BatchGrid,
+    BatchResult,
+    BatchResult2D,
+    SlotState,
+)
 
 
 def _value(value: str) -> tapir.PropertyValueArrayItem:
@@ -36,7 +41,7 @@ def test_payload_builders_and_sparse_matrix_omit_failed_cells():
     assert sparse[0].elementId.guid == elements[0]
     assert sparse[1].elementId.guid == elements[1]
 
-    matrix = BatchResult2D.from_rows([["a", _error()], _error()], width=2)
+    matrix = BatchGrid.from_rows([["a", _error()], _error()], width=2)
     sparse_from_result = create_element_property_values_sparse(elements, properties, matrix)
     assert len(sparse_from_result) == 1
     assert sparse_from_result[0].elementId.guid == elements[0]
@@ -71,10 +76,10 @@ def test_row_error_and_partial_copy_pipeline_keep_other_cells_writable():
         _error(),
     ]
     read = PropertyUtilities(api).get_property_values_per_element_result(elements, properties)
-    assert read.failure_indices == ((0, 1), (1, 0), (1, 1))
+    assert read.indices(SlotState.ERROR) == ((0, 1), (1, 0), (1, 1))
     run = BatchRun(elements)
     run.record("read", read)
-    coordinates = read.success_indices
+    coordinates = read.indices(SlotState.SUCCESS)
     payload = create_element_property_values_sparse(elements, properties, read)
     assert len(payload) == 1
     api.tapir.property.set_property_values_of_elements.return_value = [tapir.SuccessfulExecutionResult(success=True)]

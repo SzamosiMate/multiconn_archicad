@@ -6,6 +6,7 @@ import pytest
 
 from multiconn_archicad.models.tapir import types as tapir
 from multiconn_archicad.utilities import BatchRun, BatchResult, BatchReport, BatchStatus, BatchResult2D
+from multiconn_archicad.utilities.results import BatchGrid, RaggedBatchResult
 
 
 def error(code: int = 1):
@@ -17,8 +18,11 @@ def test_batch_run_records_one_dimensional_errors_and_preserves_repeated_step_na
     first = BatchResult.from_items(["ok", error()])
     assert run.record("write", first) is first
     run.record("write", BatchResult.from_items(["ok", error(2)]), item_indices=[1, 0])
-    assert run.report.failed_indices == (0, 1)
-    assert {failure.step.index for outcome in run.outcomes for failure in outcome.failures} == {0, 1}
+    report = run.report
+    assert report.indices(BatchStatus.FAILED) == (0, 1)
+    assert report.count(BatchStatus.FAILED) == 2
+    assert report.has(BatchStatus.FAILED)
+    assert {failure.step.index for _, failure in report.iter_failures()} == {0, 1}
 
 
 def test_batch_run_dataclass_normalizes_original_items_and_hides_internal_state():
@@ -39,7 +43,7 @@ def test_batch_run_record_validation_is_atomic_and_abort_keeps_clean_items_incom
     assert isinstance(report, BatchReport)
     assert isinstance(report.fatal_error, RuntimeError)
     assert report.status is BatchStatus.FAILED
-    assert report.incomplete_indices == (0, 1)
+    assert report.indices(BatchStatus.INCOMPLETE) == (0, 1)
     assert report.status_counts == {
         "total": 2,
         "succeeded": 0,
@@ -54,7 +58,7 @@ def test_batch_run_record_validation_is_atomic_and_abort_keeps_clean_items_incom
 
 def test_batch_run_2d_and_multiple_failures_are_ordered_per_outcome():
     run = BatchRun(["first", "second"])
-    matrix = BatchResult2D.from_ragged_rows([[error(1), error(2)], ["ok"]])
+    matrix = RaggedBatchResult.from_rows([[error(1), error(2)], ["ok"]])
     run.record("matrix", matrix, item_indices=[1, 0])
 
     # Element 1 ("second") received row 0 (which has 2 errors)
@@ -67,6 +71,21 @@ def test_batch_run_2d_and_multiple_failures_are_ordered_per_outcome():
 
     # Element 0 ("first") received row 1 (which succeeded)
     assert run.outcomes[0].failures == ()
+
+
+def test_batch_run_with_batch_grid():
+    run = BatchRun(["first", "second"])
+    grid = BatchGrid.from_rows([["ok", error(10)], ["ok", "ok"]], width=2)
+    run.record("grid_step", grid)
+
+    assert run.outcomes[0].failed
+    assert len(run.outcomes[0].failures) == 1
+    assert run.outcomes[0].failures[0].error.code == 10
+    assert run.outcomes[0].failures[0].source_coordinate == (0, 1)
+
+    assert not run.outcomes[1].failed
+    report = run.finish()
+    assert report.outcomes[1].succeeded
 
 
 def test_run_repeated_targets_and_invalid_arguments_are_atomic():
