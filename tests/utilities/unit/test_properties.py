@@ -92,7 +92,7 @@ def test_matrix_write_rejects_zero_properties_and_supports_zero_elements():
     utilities = PropertyUtilities(api)
 
     # 1. Zero properties (width = 0) is rejected
-    with pytest.raises(ValueError, match="width must be a positive integer"):
+    with pytest.raises(ValueError, match="At least one property must be specified."):
         utilities.set_property_values_per_element_result([uuid4()], [], [[]])
 
     # 2. Zero elements with valid properties (0 x M) is supported
