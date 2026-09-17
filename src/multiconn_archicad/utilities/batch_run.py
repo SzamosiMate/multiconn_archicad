@@ -5,7 +5,7 @@ from collections.abc import Iterator, Mapping, Sequence, Hashable
 from dataclasses import dataclass, field
 from enum import Enum
 from types import TracebackType
-from typing import Any, Generic, TypeAlias, TypeVar, overload
+from typing import Any, Generic, TypeAlias, TypeVar
 
 from multiconn_archicad.utilities.results import BatchError, BatchResult, BatchResult2D, BatchSlot, SlotState
 
@@ -237,28 +237,34 @@ class BatchRun(Generic[T]):
         if self._closed:
             raise RuntimeError("This BatchRun is closed.")
 
-    @overload
-    def record(self, name: str, result: RecordedResult) -> RecordedResult:
-        """Record a full-batch step (result length must match original_items)."""
-        ...
-
-    @overload
     def record(
-        self, name: str, result: RecordedResult, *, for_items: Sequence[T]
+        self,
+        name: str,
+        result: RecordedResult,
+        *,
+        item_indices: Sequence[int] | None = None,
+        for_items: Sequence[T] | None = None,
     ) -> RecordedResult:
-        """Record a subset step resolved via O(N) duplicate-safe FIFO matching."""
-        ...
+        """Record a batch step into the run ledger and return the result.
 
-    @overload
-    def record(
-        self, name: str, result: RecordedResult, *, item_indices: Sequence[int]
-    ) -> RecordedResult:
-        """Record a subset step resolved via direct integer index offsets."""
-        ...
+        Parameters
+        ----------
+        name : str
+            Descriptive step label (e.g. 'Read Dimensions', 'Write Properties').
+        result : RecordedResult
+            The 1D BatchResult or 2D BatchResult2D step outcome. Returned as-is.
+        item_indices : Sequence[int] | None, optional
+            Direct integer index offsets mapping step rows/slots to original items.
+            Cannot be combined with for_items.
+        for_items : Sequence[T] | None, optional
+            Subset of original items resolved via duplicate-safe FIFO matching.
+            Cannot be combined with item_indices.
 
-    def record(
-        self, name: str, result: RecordedResult, *, item_indices: Sequence[int] | None = None, for_items: Sequence[T] | None = None
-    ) -> RecordedResult:
+        Notes
+        -----
+        When both item_indices and for_items are omitted, result length must
+        match len(original_items) exactly (full-batch step).
+        """
         indices = self._validate_record_inputs(result, item_indices, for_items)
         self._steps.append(BatchStep(name, len(self._steps), result, indices))
         return result
