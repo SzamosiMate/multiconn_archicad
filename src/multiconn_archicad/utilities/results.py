@@ -3,7 +3,7 @@ from __future__ import annotations
 from collections.abc import Callable, Iterator, Sequence
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Generic, TypeAlias, TypeVar, cast, overload, Literal
+from typing import Any, Generic, TypeAlias, TypeVar, cast
 
 from multiconn_archicad.errors import BatchOperationError
 from multiconn_archicad.models.official import types as official
@@ -425,68 +425,38 @@ class BatchResult2D(Generic[T]):
     def __post_init__(self) -> None:
         object.__setattr__(self, "rows", tuple(self.rows))
 
-
-    @overload
     @classmethod
     def from_rows(
-            cls, raw_rows: Sequence[Any], *, width: int, accessor: Callable[[Any], T] | None = None
+        cls, raw_rows: Sequence[Any], *, width: int, accessor: Callable[[Any], T] | None = None
     ) -> BatchResult2D[T]:
         """Rectangular grid: every row must have length == width (or be a whole-row error)."""
-        ...
-
-    @overload
-    @classmethod
-    def from_rows(
-        cls, raw_rows: Sequence[Any], *, ragged: Literal[True], accessor: Callable[[Any], T] | None = None,
-    ) -> BatchResult2D[T]:
-        """Ragged grid: sequence lengths per row, defaulting whole-row errors to length 1."""
-        ...
-
-    @classmethod
-    def from_rows(
-        cls,
-        raw_rows: Sequence[Any],
-        *,
-        width: int | None = None,
-        ragged: bool = False,
-        accessor: Callable[[Any], T] | None = None,
-    ) -> BatchResult2D[T]:
-        cls._validate_row_data(width, ragged)
-        lengths = cls._get_rectangular_lengths(raw_rows, width) if width is not None else  cls._infer_ragged_lengths(raw_rows)
+        lengths = cls._get_rectangular_lengths(raw_rows, width)
         rows = tuple(
             BatchRow.from_raw(raw_row, length, accessor=accessor, index=idx)
             for idx, (raw_row, length) in enumerate(zip(raw_rows, lengths))
         )
         return cls(rows)
-    
-    @staticmethod
-    def _validate_row_data(width: int | None = None, ragged: bool = False) -> None:
-        if width is None and not ragged:
-            raise ValueError(
-                "BatchResult2D.from_rows requires either 'width=...' for rectangular data "
-                "or 'ragged=True' for ragged data."
-            )
-        if width is not None and ragged:
-            raise ValueError("Cannot specify both 'width' and 'ragged=True'.")
+
+    @classmethod
+    def from_ragged_rows(
+        cls, raw_rows: Sequence[Any], *, accessor: Callable[[Any], T] | None = None
+    ) -> BatchResult2D[T]:
+        """Ragged grid: sequence lengths per row, defaulting whole-row errors to length 1."""
+        lengths = tuple(len(row) if is_row_sequence(row) else 1 for row in raw_rows)
+        rows = tuple(
+            BatchRow.from_raw(raw_row, length, accessor=accessor, index=idx)
+            for idx, (raw_row, length) in enumerate(zip(raw_rows, lengths))
+        )
+        return cls(rows)
 
     @staticmethod
-    def _get_rectangular_lengths(raw_rows: Sequence[Any], width: int ) -> tuple[int, ...]:
+    def _get_rectangular_lengths(raw_rows: Sequence[Any], width: int) -> tuple[int, ...]:
         if width <= 0:
             raise ValueError("width must be a positive integer.")
         for idx, row in enumerate(raw_rows):
             if is_row_sequence(row) and len(row) != width:
                 raise ValueError(f"Row {idx} length ({len(row)}) does not match specified width ({width}).")
         return (width,) * len(raw_rows)
-
-    @staticmethod
-    def _infer_ragged_lengths(raw_rows: Sequence[Any]) -> tuple[int, ...]:
-        lengths: list[int] = []
-        for row in raw_rows:
-            if isinstance(row, Sequence) and not isinstance(row, (str, bytes)):
-                lengths.append(len(row))
-            else:
-                lengths.append(1)
-        return tuple(lengths)
 
     @property
     def row_lengths(self) -> tuple[int, ...]:

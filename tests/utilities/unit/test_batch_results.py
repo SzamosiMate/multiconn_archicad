@@ -45,12 +45,9 @@ def test_one_dimensional_map_skips_error_and_propagates_callback_exception():
 # ==============================================================================
 
 
-def test_from_rows_requires_explicit_mode():
-    with pytest.raises(ValueError, match="requires either 'width=...' .* or 'ragged=True'"):
-        BatchResult2D.from_rows([["a", "b"]])
-
-    with pytest.raises(ValueError, match="Cannot specify both 'width' and 'ragged=True'"):
-        BatchResult2D.from_rows([["a", "b"]], width=2, ragged=True)
+def test_from_rows_requires_width():
+    with pytest.raises(TypeError):
+        BatchResult2D.from_rows([["a", "b"]])  # type: ignore[call-arg]
 
 
 @pytest.mark.parametrize("invalid_width", [0, -1, -5])
@@ -80,14 +77,14 @@ def test_rectangular_mode_enforces_width_and_expands_whole_row_errors():
 
 
 def test_ragged_mode_infers_lengths_and_defaults_errors_to_one():
-    result = BatchResult2D.from_rows([["a", "b"], error(1), ["c", "d", "e"]], ragged=True)
+    result = BatchResult2D.from_ragged_rows([["a", "b"], error(1), ["c", "d", "e"]])
     assert result.row_lengths == (2, 1, 3)
     assert result.failure_indices == ((1, 0),)
     assert result.rows[1].error is not None
     assert result.rows[1].error.code == 1
 
     # 100% error data in ragged mode defaults each row to 1 slot
-    all_err_ragged = BatchResult2D.from_rows([error(1), error(2)], ragged=True)
+    all_err_ragged = BatchResult2D.from_ragged_rows([error(1), error(2)])
     assert all_err_ragged.row_lengths == (1, 1)
     assert all_err_ragged.total_errors == 2
 
@@ -98,7 +95,7 @@ def test_strings_and_bytes_rejected_as_rows(bad_row):
         BatchResult2D.from_rows([bad_row], width=len(bad_row))
 
     with pytest.raises(TypeError, match="must be a sequence or a typed API error"):
-        BatchResult2D.from_rows([bad_row], ragged=True)
+        BatchResult2D.from_ragged_rows([bad_row])
 
 
 # ==============================================================================
@@ -108,10 +105,10 @@ def test_strings_and_bytes_rejected_as_rows(bad_row):
 
 def test_matrix_supports_empty_matrix_and_empty_rows():
     assert BatchResult2D.from_rows([], width=3).items == ()
-    assert BatchResult2D.from_rows([], ragged=True).items == ()
+    assert BatchResult2D.from_ragged_rows([]).items == ()
 
     # Ragged mode supporting an empty row
-    result = BatchResult2D.from_rows([[], [error(), "ok"]], ragged=True)
+    result = BatchResult2D.from_ragged_rows([[], [error(), "ok"]])
     assert result.row_lengths == (0, 2)
     assert list(result.iter_errors())[0][0] == (1, 0)
     assert tuple(result.iter_successes()) == (((1, 1), "ok"),)
@@ -132,7 +129,7 @@ def test_items_and_error_iteration_share_expanded_cells():
 
 
 def test_matrix_map_and_flatten_share_row_major_filtering():
-    result = BatchResult2D.from_rows([["a", error()], ["b"]], ragged=True)
+    result = BatchResult2D.from_ragged_rows([["a", error()], ["b"]])
     mapped = result.map(str.upper)
     flat = mapped.flatten()
     assert flat.successes == ["A", "B"]

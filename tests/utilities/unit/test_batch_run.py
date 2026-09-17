@@ -54,7 +54,7 @@ def test_batch_run_record_validation_is_atomic_and_abort_keeps_clean_items_incom
 
 def test_batch_run_2d_and_multiple_failures_are_ordered_per_outcome():
     run = BatchRun(["first", "second"])
-    matrix = BatchResult2D.from_rows([[error(1), error(2)], ["ok"]], ragged=True)
+    matrix = BatchResult2D.from_ragged_rows([[error(1), error(2)], ["ok"]])
     run.record("matrix", matrix, item_indices=[1, 0])
 
     # Element 1 ("second") received row 0 (which has 2 errors)
