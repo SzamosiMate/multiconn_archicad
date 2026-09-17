@@ -36,7 +36,7 @@ def test_payload_builders_and_sparse_matrix_omit_failed_cells():
     assert sparse[0].elementId.guid == elements[0]
     assert sparse[1].elementId.guid == elements[1]
 
-    matrix = BatchResult2D.from_rows([["a", _error()], _error()], row_lengths=[2, 2])
+    matrix = BatchResult2D.from_rows([["a", _error()], _error()], width=2)
     sparse_from_result = create_element_property_values_sparse(elements, properties, matrix)
     assert len(sparse_from_result) == 1
     assert sparse_from_result[0].elementId.guid == elements[0]
@@ -79,19 +79,27 @@ def test_row_error_and_partial_copy_pipeline_keep_other_cells_writable():
     assert len(payload) == 1
     api.tapir.property.set_property_values_of_elements.return_value = [tapir.SuccessfulExecutionResult(success=True)]
     write = BatchResult.from_items(api.tapir.property.set_property_values_of_elements(payload))
-    run.record("copy", write, item_indices=[row for row, _ in coordinates], details=coordinates)
+    run.record("copy", write, item_indices=[row for row, _ in coordinates])
     report = run.finish()
     assert report.outcomes[0].failed
     assert report.outcomes[1].failed
     assert api.tapir.property.set_property_values_of_elements.call_count == 1
 
 
-def test_matrix_write_uses_2d_result_and_zero_property_cardinality():
+def test_matrix_write_rejects_zero_properties_and_supports_zero_elements():
     api = MagicMock()
     api.tapir.property.set_property_values_of_elements.return_value = []
-    result = PropertyUtilities(api).set_property_values_per_element_result([uuid4()], [], [[]])
-    assert result.row_lengths == (0,)
-    assert result.is_all_success
+    utilities = PropertyUtilities(api)
+
+    # 1. Zero properties (width = 0) is rejected
+    with pytest.raises(ValueError, match="width must be a positive integer"):
+        utilities.set_property_values_per_element_result([uuid4()], [], [[]])
+
+    # 2. Zero elements with valid properties (0 x M) is supported
+    prop = uuid4()
+    result = utilities.set_property_values_per_element_result([], [prop], [])
+    assert result.rows == ()
+    assert result.row_lengths == ()
 
 
 def test_resolution_metadata_and_enum_helpers():
