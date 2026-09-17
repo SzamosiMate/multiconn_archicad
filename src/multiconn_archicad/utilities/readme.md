@@ -13,8 +13,8 @@ The `utilities` subpackage provides **Level 3 Ergonomic Sugar** on top of `Unifi
 ### What Belongs in `utilities`:
 * **Idiomatic Pythonic wrappers** around repetitive Archicad JSON API interactions (e.g., context managers for resource safety).
 * **Batch unwrapping and type coercion** (turning known API response wrappers into Python primitives).
-* **Batch result containers** (`BatchResult`, `BatchResult2D`) that preserve explicit one- and two-dimensional alignment while isolating partial failures.
-* **Workflow accumulation** (`BatchRun`) that collects failures from multiple steps against the original input items.
+* **Batch result containers** (`BatchResult`, `BatchResult2D`, `BatchRow`, `BatchSlot`) that preserve explicit 1D and 2D alignment while isolating partial failures and non-executed cells.
+* **Workflow accumulation** (`BatchRun`) that acts as an atomic ledger of pipeline steps, attributing failures and terminal execution states back to original input items.
 * **Universal identifier constructors and normalizers** (e.g., GUID strings / UUIDs $\to$ typed `ElementIdArrayItem` / `PropertyIdArrayItem`).
 
 ### What Does NOT Belong in `utilities`:
@@ -69,10 +69,7 @@ Archicad JSON API is optimized for bulk operations.
 
 ### E. Public Access and Consistent Signatures
 
-Use `header.unified.utilities.property` (or `api.utilities.property` for a standalone
-`UnifiedApi`). API operations are implemented directly as methods, with no duplicate
-standalone forwarding functions. The former `operation(api, ...)` calling style is
-replaced by `api.utilities.property.operation(...)`.
+Use `header.unified.utilities.property` (or `api.utilities.property` for a standalone `UnifiedApi`).
 
 ```python
 from multiconn_archicad.utilities import Utilities, BatchResult, BatchResult2D, BatchRun
@@ -89,16 +86,7 @@ utils = Utilities(api)
 payload = create_element_property_values_flat(elements, property_id, values)
 ```
 
-The package explicitly exports `Utilities`, `BatchResult`, `BatchResult2D`,
-`BatchError`, `BatchRun`, and `BatchOperationError`. Import pure helpers directly
-from their defining modules.
-`PropertyUtilities` can be imported from the `properties` module for direct
-construction in tests.
-
-Each `UnifiedApi` owns its utilities. Changing a header's port replaces its API and
-associated utilities; previously saved API or utilities references still refer to
-the old instance. `UnifiedApi` is generated, so its utilities attachment is also
-maintained in the API generator.
+The package explicitly exports `Utilities`, `BatchResult`, `BatchResult2D`, `BatchRow`, `BatchSlot`, `SlotState`, `BatchError`, `BatchRun`, `BatchStatus`, and `BatchOperationError`. Import pure helpers directly from their defining modules.
 
 ---
 
@@ -119,10 +107,10 @@ maintained in the API generator.
 
 ```text
 src/multiconn_archicad/utilities/
-├── __init__.py           # Small public export surface
+├── __init__.py           # Public export surface
 ├── api.py                # Utilities domain-group container
 ├── readme.md             # This document
-├── results.py            # BatchResult, BatchResult2D, BatchError
+├── results.py            # BatchResult, BatchResult2D, BatchRow, BatchSlot, BatchError
 ├── batch_run.py          # BatchRun and workflow outcome records
 ├── identifiers.py        # Liberal type aliases & universal ID normalizers
 ├── properties.py         # Batch property reading, writing, and inspection
@@ -143,156 +131,186 @@ Centralizes type coercion across all utilities.
 ### `properties.py` (`PropertyUtilities` and Pure Helpers)
 
 #### Value representation and result shape
+Value reads return Tapir **display strings**, including numeric properties. They do not parse numbers or normalize units. Code performing calculations must explicitly interpret the returned text. Writes preserve `tapir.PropertyValue` instances, convert `None` to `""`, and otherwise use `str(value)`. 
 
-Value reads use Tapir **display strings**, including numeric properties. They do not
-parse numbers or normalize units. Code performing calculations must explicitly
-interpret the returned text. Writes preserve `tapir.PropertyValue` instances,
-convert `None` to `""`, and otherwise use `str(value)`; this does not perform unit
-conversion. Before conversion, payload builders reject direct typed API-error
-slots with `BatchOperationError`; other values are opaque and follow the
-conversion rules above. The sparse builder deliberately omits typed error
-cells and failed rows so that a partial matrix can be written. To intentionally
-write an error report, first format the error as a string, such as
-`f"[{error.code}] {error.message}"`.
-
-Matrix operations use one outer result slot per element and one inner slot per
-property. For two elements and three properties, the result write returns two
-rows of three execution results, while the raising setter returns `6` if all
-writes succeed. Flat operations use one result slot per element. API response
-cardinality is defined by the generated API models; utilities focus on mapping
-those responses to the declared result shape.
-
-The following resolution, read, write, and metadata operations are methods on
-`api.utilities.property`. Payload builders and `get_possible_enum_values` remain
-module-level functions.
-
-* **Resolution:**
-  * `resolve_property_ids(...) -> list[PropertyIdArrayItem]` / `resolve_property_ids_result(...) -> BatchResult`
-  * `resolve_property_id(...) -> PropertyIdArrayItem` (scalar helper)
-* **Reading (2D Engine + 1D/Dict Conveniences):**
-  * `get_property_values_per_element(...) -> list[list[str]]` / `..._result(...) -> BatchResult2D`
-  * `get_flat_property_values(...) -> list[str]` / `..._result(...) -> BatchResult`
-  * `get_property_values_dict_per_element(...) -> list[dict[str, str]]` / `..._result(...) -> BatchResult[dict[str, str]]`
-* **Writing (2D Engine + 1D Convenience):**
-  * `create_element_property_values` / `create_element_property_values_flat`: Pure dense payload builders converting primitives to CAD mutation models.
-  * `create_element_property_values_sparse`: Pure payload builder that derives coordinates from a matrix and omits failed rows/cells.
-  * `set_property_values_per_element(...) -> int` / `..._result(...) -> BatchResult2D`
-  * `set_flat_property_values(...) -> int` / `..._result(...) -> BatchResult`
-* **Inspection:**
-  * `get_property_details(...) -> list[PropertyDefinition]` / `..._result(...) -> BatchResult`
-  * `get_property_types(...) -> list[str]` / `..._result(...) -> BatchResult`
-  * `get_possible_enum_values(property_definition) -> list[str]`: Pure extractor.
+* **Dense Payload Builders:** `create_element_property_values` and `create_element_property_values_flat` reject direct typed API errors with `BatchOperationError`.
+* **Sparse Payload Builder:** `create_element_property_values_sparse` derives `(element_index, property_index)` coordinates from a matrix or `BatchResult2D` and omits failed or skipped cells/rows so that only attempted work is sent to Archicad.
 
 ---
 
-## 6. Batch Error Handling & Results
+## 6. Batch Error Handling, Results & Pipeline Orchestration
 
-`BatchResult[T]` is an immutable one-dimensional result. Each slot holds a successful value or a normalized `BatchError`; `iter_successes()` and `iter_errors()` provide its integer index. `BatchResult2D[T]` is an immutable ragged matrix with cell coordinates `(row, column)`. Successful values are opaque; only the result's declared slots are interpreted as outcomes.
+### A. The 4-State Slot Model (`SlotState` and `BatchSlot`)
+Every cell in a 1D or 2D batch operation is represented by an immutable `BatchSlot[T]`, governed by an explicit `SlotState`:
 
-`BatchResult2D.items` preserves each declared row length. A whole-row failure
-appears as the same `BatchError` repeated in every cell position of that row.
-Errors expand into cell slots at construction. `iter_errors()`, `errors`, and
-`total_errors` report affected cells consistently. Whole-row failures require an
-explicit positive row length; successful empty rows are allowed.
+* **`SlotState.SUCCESS`**: Operation completed successfully; holds `value: T`.
+* **`SlotState.ERROR`**: Direct API or execution failure; holds `error: BatchError`.
+* **`SlotState.UPSTREAM_FAILED`**: Execution was suppressed because an upstream prerequisite or dependency failed. **Retriable.**
+* **`SlotState.FILTERED`**: Execution was intentionally bypassed by domain logic (e.g. element did not meet filter criteria). **Non-retriable.**
 
-Two adapters provide row-level views using the existing 1D interface:
-* `aggregate_rows() -> BatchResult[tuple[T, ...]]`: any failed cell makes its row
-  fail with an aggregate error. An expanded whole-row error contributes one cause.
-* `row_result() -> BatchResult[tuple[T | BatchError, ...]]`: only original API row
-  failures fail the row; successful rows may contain individual cell errors.
+Convenience predicates:
+* `slot.is_success`, `slot.is_error`, `slot.is_upstream_failed`, `slot.is_filtered`.
+* `slot.is_skipped`: Returns `True` if the slot was not executed (`is_upstream_failed or is_filtered`).
 
-For example, `matrix.aggregate_rows().failure_indices` selects elements with any
-property failure; `matrix.row_result().failure_indices` selects original row
-failures. Neither adapter nests another result inside a successful row.
-Rebuilding from `.items` preserves cell errors but loses their whole-row origin.
+### B. Containers: `BatchResult`, `BatchResult2D`, and `BatchRow`
+* **`BatchSlot[T]`**: Immutable scalar cell outcome.
+* **`BatchRow[T]`**: Immutable row container holding ordered `BatchSlot[T]` cells and an optional whole-row `error: BatchError | None`. Provides row-level queries (`row.is_all_success`, `row.is_upstream_failed`, `row.is_filtered`, `row.is_skipped`, `row.aggregate()`).
+* **`BatchResult[T]`**: Immutable 1D result container of slots.
+* **`BatchResult2D[T]`**: Immutable ragged or regular 2D matrix composed of `BatchRow[T]` instances.
 
-`map()` transforms only successful slots and lets callback exceptions propagate.
-`BatchResult2D.flatten()` reads cells row by row, from left to right, and
-retains all cell errors, including expanded whole-row failures. `successes` and
-`success_indices` replace `flatten_successes()` and `coordinates()` and provide
-aligned values and coordinates. `failure_indices` returns failed cell coordinates.
-Recording the matrix in `BatchRun` records cell failures; record either row adapter
-instead when one failure per element is desired.
-Dictionary row failures are represented by one aggregate `BatchError` with
-code `-1`; its `causes` retain the original cell or row errors for logging.
+### C. Shape-Preserving Projection (`project_*`)
+Instead of manually matching coordinates, flattening lists, and maintaining parallel tracking arrays, step outputs re-inflate flat responses directly back into the exact matrix or vector shape of prior steps:
 
-```python
-result = api.utilities.property.get_flat_property_values_result(elements, property_id)
-for element_index, value in result.iter_successes():
-    print(element_index, value)
-for element_index, error in result.iter_errors():
-    print(element_index, error.code, error.message)
-```
+1. **`BatchResult.project_successes(raw_items) -> BatchResult[U]` ($1\text{D} \to 1\text{D}$):**
+   Re-inflates flat responses into this 1D shape. Consumes raw items only for `SUCCESS` slots. Slots that experienced an error or upstream failure become `UPSTREAM_FAILED`; filtered slots become `FILTERED`.
+2. **`BatchResult.project_rows(raw_items, row_length) -> BatchResult2D[U]` ($1\text{D} \to 2\text{D}$):**
+   Expands a 1D element-level result into an $N \times \text{row\_length}$ matrix. Successful slots expand into newly parsed rows; failed/blocked slots expand into `UPSTREAM_FAILED` rows; filtered slots expand into `FILTERED` rows.
+3. **`BatchResult2D.project_successes(raw_items) -> BatchResult2D[U]` ($2\text{D} \to 2\text{D}$):**
+   Re-inflates flat responses across successful cells in row-major order. Cells that failed upstream or were blocked become `UPSTREAM_FAILED`.
 
-A partial matrix copy sends only successful cells. The sparse builder derives
-the original element/property coordinates directly from the matrix:
+### D. Workflow Orchestration: `BatchRun`
+`BatchRun[T]` acts as an **atomic ledger of pipeline steps**. It does not duplicate error arrays; instead, it derives element-level outcomes directly from the step results.
 
 ```python
-run = BatchRun(elements)
-read = api.utilities.property.get_property_values_per_element_result(elements, source_properties)
-run.record("read", read)
-payload = create_element_property_values_sparse(elements, target_properties, read)
-write = BatchResult.from_items(api.tapir.property.set_property_values_of_elements(payload))
-coordinates = read.success_indices
-run.record(
-    "copy",
-    write,
-    item_indices=[row for row, _ in coordinates],
-    details=coordinates,
-)
-report = run.finish()
+with BatchRun(elements) as run:
+    # Record steps atomically
+    run.record("Step Name", step_result)
+report = run.report
 ```
 
-`BatchRun` accumulates step failures against the original items. `run.report` is an immutable snapshot that contains the item outcomes, recorded steps, overall `BatchStatus`, and optional fatal exception. Before `finish()`, error-free items are incomplete; `finish()` marks them succeeded and closes the run. `abort(exception)` closes the run with overall status `BatchStatus.FAILED`, preserves the fatal exception in `report.fatal_error`, and leaves otherwise clean items incomplete. Start a new `BatchRun` for an explicit retry; completed runs never replace or erase earlier outcomes.
+#### Context Manager Contract
+* Automatically closes and calls `finish()` when exiting cleanly.
+* On standard `Exception`, catches and calls `abort(exc)`, sets `fatal_error`, suppresses the exception, and marks in-flight elements as `INCOMPLETE`.
+* `BaseException` (e.g. `KeyboardInterrupt`, `SystemExit`) is never swallowed.
 
+#### Step Recording & Duplicate-Safe FIFO Alignment
+`run.record(name, result, *, item_indices=None, for_items=None)` records a step:
+* **Full Step (default):** When `item_indices` and `for_items` are omitted, `result` length must match `len(original_items)`.
+* **Subset by Item (`for_items`):** Resolves unhashable models (e.g. mutable Pydantic `ElementIdArrayItem`) in **$O(N)$ time** using structural fingerprinting (`repr`) and duplicate-safe FIFO queues.
+* **Subset by Index (`item_indices`):** Direct integer index mapping when caller already has index offsets.
+
+### E. Truthful Status Classification & Retry Strategy
+`BatchOutcome.status` accurately classifies why an element did or did not complete:
+
+* **`BatchStatus.SUCCEEDED`**: Completed the pipeline cleanly. If an element had some properties filtered out and the remaining succeeded, it is considered `SUCCEEDED`.
+* **`BatchStatus.FAILED`**: Produced a direct API or calculation error in one or more steps. **Retriable.**
+* **`BatchStatus.UPSTREAM_FAILED`**: Was prevented from completing because an upstream prerequisite failed. **Retriable.**
+* **`BatchStatus.FILTERED`**: 100% of the element's operations were intentionally bypassed by domain logic. **Non-retriable.**
+* **`BatchStatus.INCOMPLETE`**: Run was interrupted by a fatal exception or inspected mid-flight.
+
+A retry loop targets retriable elements without re-running intentionally filtered elements:
 ```python
-terminal_codes = {4010}  # The application decides which API errors are terminal.
-retry_items = []
-for outcome in report.outcomes:
-    if outcome.succeeded:
-        accept(outcome.original_item)
-    elif any(failure.error.code in terminal_codes for failure in outcome.failures):
-        reject(outcome.original_item, outcome.failures)
-    else:
-        retry_items.append(outcome.original_item)
-
-retry = BatchRun(retry_items)
-# Record fresh retry steps on `retry`; the completed run remains unchanged.
+retriable_elements = [
+    outcome.original_item for outcome in report.outcomes
+    if outcome.failed or outcome.upstream_failed
+]
 ```
-
-The recursive scanner, `root_key`, `items_or`, masks/filtering helpers,
-`realign`, `zip`, caught calculation errors, and retry/history replacement were
-removed. Dictionary diagnostics use one aggregate error per failed row while
-the matrix result retains cell-level detail. A future UI can show consolidated
-outcome counts first, then expandable step and coordinate-level failure details.
 
 ---
 
-## 7. Testing Strategy
+## 7. Common Pipeline Patterns in Practice
+
+### Pattern A: Paired Cell-Level 2D Copy ($N \times M \to N \times M$)
+Unreadable cells in Step 1 automatically become `UPSTREAM_FAILED` in Step 2 without manual coordinate bookkeeping:
+
+```python
+def run(self) -> ExecutionReport:
+    with BatchRun(self.elements) as run:
+        # Step 1: Read properties (N x M matrix)
+        read = run.record(
+            "Property read",
+            self.property_utilities.get_property_values_per_element_result(
+                self.elements, self.read_properties
+            ),
+        )
+
+        # Step 2: Write readable cells only (sparse builder derives coordinates)
+        payload = create_element_property_values_sparse(self.elements, self.write_properties, read)
+        raw_res = self.api.tapir.property.set_property_values_of_elements(payload) if payload else []
+
+        # Step 3: Re-inflate flat write response back into the exact N x M matrix shape
+        write = read.project_successes(raw_res)
+        run.record("Property write", write)
+
+    return ExecutionReport(run.report, planned_step_count=2)
+```
+
+### Pattern B: Dependent Multi-Read $\to$ Multi-Write ($N \times M \to N \times P$)
+Step 1 is evaluated at the element level; Step 2 writes $P$ properties for valid elements and inflates to $N \times P$:
+
+```python
+def run(self) -> ExecutionReport:
+    with BatchRun(self.elements) as run:
+        # Step 1: Read dimensions (N x 3 matrix)
+        read = run.record("Read dimensions", self.property_utilities.get_property_values_per_element_result(
+            self.elements, [self.prop_l, self.prop_w, self.prop_h]
+        ))
+
+        # Collapse cell failures into 1D element outcomes (length N)
+        valid_elements = read.aggregate_rows()
+
+        # Step 2: Compute 2 output properties (Area, Volume) for valid elements
+        payload = [
+            elem_val
+            for idx, (l, w, h) in valid_elements.iter_successes()
+            for elem_val in self._build_area_and_volume(self.elements[idx], float(l), float(w), float(h))
+        ]
+        raw_res = self.api.tapir.property.set_property_values_of_elements(payload) if payload else []
+
+        # Step 3: Re-inflate flat write response into an N x 2 matrix
+        write = valid_elements.project_rows(raw_res, row_length=2)
+        run.record("Write Area & Volume", write)
+
+    return ExecutionReport(run.report, planned_step_count=2)
+```
+
+### Pattern C: Arbitrary Python Filtering on a Subset (`for_items`)
+Step 2 runs only on a filtered subset; non-qualifying elements are recorded as `FILTERED`:
+
+```python
+def run(self) -> ExecutionReport:
+    with BatchRun(self.elements) as run:
+        # Step 1: Read properties for all elements
+        read = run.record("Read", self.property_utilities.get_property_values_per_element_result(...))
+
+        # Filter using row predicates
+        qualifying_elements = [
+            elem for elem, row in zip(self.elements, read.rows)
+            if row.is_all_success and float(row[0].success_value) > 3.0
+        ]
+
+        # Step 2: Run only for qualifying elements
+        write_res = self.property_utilities.set_property_values_per_element_result(
+            qualifying_elements, self.write_properties, qualifying_values
+        )
+
+        # Record subset step using O(N) duplicate-safe FIFO alignment
+        run.record("Property write", write_res, for_items=qualifying_elements)
+
+    return ExecutionReport(run.report, planned_step_count=2)
+```
+
+---
+
+## 8. Testing Strategy
 
 Tests run offline with real official and Tapir Pydantic models and mocked API responses:
 
 ```text
 tests/utilities/unit/
 ├── test_identifiers.py
-├── test_batch_results.py     # 1D/2D result and BatchRun contracts
-└── test_properties.py        # payloads, row aggregation, and partial-copy pipeline
+├── test_batch_results.py     # 1D/2D result, BatchRow, BatchSlot
+├── test_batch_run.py         # BatchRun
+└── test_properties.py        # payloads, row aggregation, and projection pipelines
 ```
 
-The result tests cover direct typed errors, ragged and whole-row matrix failures,
-shared flatten filtering, mapping, outcome closure, and atomic recording.
-Property tests cover dense and sparse payloads, row-atomic dictionary errors,
-and partial writes.
+The result tests cover direct typed errors, ragged and whole-row matrix failures, `BatchRow` encapsulation, 1D/2D projections, FIFO duplicate safety in `for_items`, outcome state derivation (`UPSTREAM_FAILED` vs `FILTERED`), and context manager idempotency.
 
 ---
 
-## 8. Planned Enhancements / Roadmap
-
-* **Retry support:** Provide UI guidance for starting a separate `BatchRun` from failed original items. No automatic retry loop is provided.
+## 9. Planned Enhancements / Roadmap
 
 * **`utils.property.get_available_property_ids_of_elements(elements)`**: Query Archicad's `GetAllPropertyNamesOfElements` to check property availability by Classification before executing writes.
 * **`elements.py`**: Batch selection getter/setter, element type filtering (e.g., 3D element queries).
 * **`attributes.py`**: Layer combinations and visible layer extractors.
 * **`teamwork.py`**: Context manager for safe element reservation and automatic sending.
-
----

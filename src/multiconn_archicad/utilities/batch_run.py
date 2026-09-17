@@ -5,7 +5,7 @@ from collections.abc import Iterator, Mapping, Sequence, Hashable
 from dataclasses import dataclass, field
 from enum import Enum
 from types import TracebackType
-from typing import Any, Generic, TypeAlias, TypeVar
+from typing import Any, Generic, TypeAlias, TypeVar, overload
 
 from multiconn_archicad.utilities.results import BatchError, BatchResult, BatchResult2D, BatchSlot, SlotState
 
@@ -237,10 +237,28 @@ class BatchRun(Generic[T]):
         if self._closed:
             raise RuntimeError("This BatchRun is closed.")
 
+    @overload
+    def record(self, name: str, result: RecordedResult) -> RecordedResult:
+        """Record a full-batch step (result length must match original_items)."""
+        ...
+
+    @overload
+    def record(
+        self, name: str, result: RecordedResult, *, for_items: Sequence[T]
+    ) -> RecordedResult:
+        """Record a subset step resolved via O(N) duplicate-safe FIFO matching."""
+        ...
+
+    @overload
+    def record(
+        self, name: str, result: RecordedResult, *, item_indices: Sequence[int]
+    ) -> RecordedResult:
+        """Record a subset step resolved via direct integer index offsets."""
+        ...
+
     def record(
         self, name: str, result: RecordedResult, *, item_indices: Sequence[int] | None = None, for_items: Sequence[T] | None = None
     ) -> RecordedResult:
-        """Atomically record a step into the ledger and return the result."""
         indices = self._validate_record_inputs(result, item_indices, for_items)
         self._steps.append(BatchStep(name, len(self._steps), result, indices))
         return result
