@@ -28,22 +28,53 @@ def _to_prop_value(val: Any) -> tapir.PropertyValue:
     return val if isinstance(val, tapir.PropertyValue) else tapir.PropertyValue(value="" if val is None else str(val))
 
 
-def _validate_matrix_input(
-    elements: Sequence[ElementIdLike], properties: Sequence[PropertyIdLike], values_matrix: Sequence[Sequence[Any]]
-) -> tuple[list[tapir.ElementIdArrayItem], list[tapir.PropertyIdArrayItem]]:
-    """Validate caller-owned dimensions and typed input errors for a dense write."""
-    norm_elements = normalize_element_ids(elements)
-    norm_properties = normalize_property_ids(properties)
-    if len(norm_elements) != len(values_matrix):
-        raise ValueError(f"Expected {len(norm_elements)} rows in values_matrix, got {len(values_matrix)}.")
-    expected_length = len(norm_properties)
+def _coerce_property_matrix(
+    values_matrix: Sequence[Sequence[Any]] | BatchResult2D[Any], expected_rows: int, expected_width: int,
+) -> BatchResult2D[Any]:
+    """Validate grid dimensions and coerce raw rows or BatchResult2D into a verified BatchResult2D."""
+    if expected_width <= 0:
+        raise ValueError("At least one property must be specified.")
+
+    if isinstance(values_matrix, BatchResult2D):
+        if len(values_matrix.rows) != expected_rows:
+            raise ValueError(f"Expected {expected_rows} rows in values_matrix, got {len(values_matrix.rows)}.")
+        for row_index, row in enumerate(values_matrix.rows):
+            if len(row) != expected_width:
+                raise ValueError(f"Row {row_index} contains {len(row)} values, expected {expected_width}.")
+        return values_matrix
+
+    if len(values_matrix) != expected_rows:
+        raise ValueError(f"Expected {expected_rows} rows in values_matrix, got {len(values_matrix)}.")
+
     for row_index, row in enumerate(values_matrix):
         if not isinstance(row, Sequence) or isinstance(row, (str, bytes)):
             raise TypeError(f"Row {row_index} in values_matrix must be a sequence.")
-        if len(row) != expected_length:
-            raise ValueError(f"Expected {expected_length} values per row, got {len(row)} at row {row_index}.")
-    BatchResult2D.from_rows(values_matrix, width=expected_length).raise_for_errors(
-        "Property write input"
+        if len(row) != expected_width:
+            raise ValueError(f"Expected {expected_width} values per row, got {len(row)} at row {row_index}.")
+
+    return BatchResult2D.from_rows(values_matrix, width=expected_width)
+
+
+def _validate_and_coerce_matrix(
+    elements: Sequence[ElementIdLike], properties: Sequence[PropertyIdLike],
+    values_matrix: Sequence[Sequence[Any]] | BatchResult2D[Any], *, allow_errors: bool = True,
+) -> tuple[list[tapir.ElementIdArrayItem], list[tapir.PropertyIdArrayItem], BatchResult2D[Any]]:
+    """Centralized validation of identifiers and dimensions, coercing values to a verified BatchResult2D."""
+    norm_elements = normalize_element_ids(elements)
+    norm_properties = normalize_property_ids(properties)
+    matrix = _coerce_property_matrix(values_matrix, len(norm_elements), len(norm_properties))
+    if not allow_errors:
+        matrix.raise_for_errors("Property write input")
+    return norm_elements, norm_properties, matrix
+
+
+def _validate_matrix_input(
+    elements: Sequence[ElementIdLike], properties: Sequence[PropertyIdLike],
+    values_matrix: Sequence[Sequence[Any]] | BatchResult2D[Any],
+) -> tuple[list[tapir.ElementIdArrayItem], list[tapir.PropertyIdArrayItem]]:
+    """Validate caller-owned dimensions and typed input errors for a dense write."""
+    norm_elements, norm_properties, _ = _validate_and_coerce_matrix(
+        elements, properties, values_matrix, allow_errors=False
     )
     return norm_elements, norm_properties
 
@@ -69,7 +100,8 @@ def _property_dict_keys(properties: Sequence[PropertyIdLike], property_names: Se
 
 
 def create_element_property_values(
-    elements: Sequence[ElementIdLike], properties: Sequence[PropertyIdLike], values_matrix: Sequence[Sequence[Any]]
+    elements: Sequence[ElementIdLike], properties: Sequence[PropertyIdLike],
+    values_matrix: Sequence[Sequence[Any]] | BatchResult2D[Any],
 ) -> list[tapir.ElementPropertyValue]:
     """Build an N x M payload using display strings.
 
@@ -77,16 +109,18 @@ def create_element_property_values(
     values use str(value). No numeric formatting or unit conversion is performed.
     Typed API errors are rejected before conversion.
     """
-    norm_elements, norm_props = _validate_matrix_input(elements, properties, values_matrix)
+    norm_elements, norm_props, matrix = _validate_and_coerce_matrix(
+        elements, properties, values_matrix, allow_errors=False
+    )
 
     payload: list[tapir.ElementPropertyValue] = []
-    for elem, row in zip(norm_elements, values_matrix):
-        for prop, val in zip(norm_props, row):
+    for elem_idx, row in enumerate(matrix.rows):
+        for prop_idx, slot in enumerate(row.slots):
             payload.append(
                 tapir.ElementPropertyValue(
-                    elementId=elem.elementId,
-                    propertyId=prop.propertyId,
-                    propertyValue=_to_prop_value(val),
+                    elementId=norm_elements[elem_idx].elementId,
+                    propertyId=norm_props[prop_idx].propertyId,
+                    propertyValue=_to_prop_value(slot.success_value),
                 )
             )
     return payload
@@ -110,14 +144,13 @@ def create_element_property_values_flat(
 
 
 def create_element_property_values_sparse(
-    elements: Sequence[ElementIdLike],
-    properties: Sequence[PropertyIdLike],
+    elements: Sequence[ElementIdLike], properties: Sequence[PropertyIdLike],
     values_matrix: Sequence[Sequence[Any]] | BatchResult2D[Any],
 ) -> list[tapir.ElementPropertyValue]:
     """Build a sparse payload from a matrix, omitting typed error cells and rows."""
-    norm_elements = normalize_element_ids(elements)
-    norm_props = normalize_property_ids(properties)
-    matrix = _coerce_property_matrix(values_matrix, len(norm_elements), len(norm_props))
+    norm_elements, norm_props, matrix = _validate_and_coerce_matrix(
+        elements, properties, values_matrix, allow_errors=True
+    )
 
     return [
         tapir.ElementPropertyValue(
@@ -127,33 +160,6 @@ def create_element_property_values_sparse(
         )
         for (elem_idx, prop_idx), value in matrix.iter_successes()
     ]
-
-
-def _coerce_property_matrix(
-    values_matrix: Sequence[Sequence[Any]] | BatchResult2D[Any], expected_rows: int, expected_width: int,
-) -> BatchResult2D[Any]:
-    """Validate grid dimensions and coerce raw rows or BatchResult2D into a verified BatchResult2D."""
-    if expected_width <= 0:
-        raise ValueError("At least one property must be specified.")
-
-    if isinstance(values_matrix, BatchResult2D):
-        if len(values_matrix.rows) != expected_rows:
-            raise ValueError(
-                f"Expected {expected_rows} rows in values_matrix, got {len(values_matrix.rows)}."
-            )
-        for row_index, row in enumerate(values_matrix.rows):
-            if len(row) != expected_width:
-                raise ValueError(
-                    f"Row {row_index} contains {len(row)} values, expected {expected_width}."
-                )
-        return values_matrix
-
-    if len(values_matrix) != expected_rows:
-        raise ValueError(
-            f"Expected {expected_rows} rows in values_matrix, got {len(values_matrix)}."
-        )
-
-    return BatchResult2D.from_rows(values_matrix, width=expected_width)
 
 
 def get_possible_enum_values(property_definition: official.PropertyDefinition) -> list[str]:
@@ -261,10 +267,8 @@ class PropertyUtilities:
         return res.successes
 
     def set_property_values_per_element_result(
-        self,
-        elements: Sequence[ElementIdLike],
-        properties: Sequence[PropertyIdLike],
-        values_matrix: Sequence[Sequence[Any]],
+        self, elements: Sequence[ElementIdLike], properties: Sequence[PropertyIdLike],
+        values_matrix: Sequence[Sequence[Any]] | BatchResult2D[Any],
     ) -> BatchResult2D[tapir.SuccessfulExecutionResult]:
         """Write display values, returning one execution-result row per element.
 
@@ -274,15 +278,13 @@ class PropertyUtilities:
         """
         n_props = len(properties)
         payload = create_element_property_values(elements, properties, values_matrix)
-        raw_res = self._api.tapir.property.set_property_values_of_elements(payload)
+        raw_res = self._api.tapir.property.set_property_values_of_elements(payload) if payload else []
         grouped = [raw_res[i * n_props : (i + 1) * n_props] for i in range(len(elements))]
         return BatchResult2D.from_rows(grouped, width=n_props)
 
     def set_property_values_per_element(
-        self,
-        elements: Sequence[ElementIdLike],
-        properties: Sequence[PropertyIdLike],
-        values_matrix: Sequence[Sequence[Any]],
+        self, elements: Sequence[ElementIdLike], properties: Sequence[PropertyIdLike],
+        values_matrix: Sequence[Sequence[Any]] | BatchResult2D[Any],
     ) -> int:
         """Write an N x M matrix of display values; raise on any reported failure.
 
@@ -294,11 +296,39 @@ class PropertyUtilities:
         res.raise_for_errors("Batch property values write")
         return len(elements) * len(properties)
 
+    def set_property_values_per_element_sparse_result(
+        self, elements: Sequence[ElementIdLike], properties: Sequence[PropertyIdLike],
+        values_matrix: Sequence[Sequence[Any]] | BatchResult2D[Any],
+    ) -> BatchResult2D[tapir.SuccessfulExecutionResult]:
+        """Write display values sparsely, returning one execution-result row per element.
+
+        Non-successful cells (errors, upstream failures, filtered) in values_matrix are
+        omitted from the API payload. Returned BatchResult2D projects API outcomes onto
+        attempted coordinates while propagating upstream failures and filter states.
+        """
+        norm_elements, norm_props, matrix = _validate_and_coerce_matrix(
+            elements, properties, values_matrix, allow_errors=True
+        )
+        payload = create_element_property_values_sparse(norm_elements, norm_props, matrix)
+        raw_res = self._api.tapir.property.set_property_values_of_elements(payload) if payload else []
+        return matrix.project_successes(raw_res)
+
+    def set_property_values_per_element_sparse(
+        self, elements: Sequence[ElementIdLike], properties: Sequence[PropertyIdLike],
+        values_matrix: Sequence[Sequence[Any]] | BatchResult2D[Any],
+    ) -> int:
+        """Write display values sparsely across elements; raise on any reported failure.
+
+        Returns the count of successfully written property values. Errors are
+        checked after the batch executes; successful writes are not rolled back by
+        this helper when BatchOperationError is raised. This is not an atomic write.
+        """
+        res = self.set_property_values_per_element_sparse_result(elements, properties, values_matrix)
+        res.raise_for_errors("Sparse batch property values write")
+        return len(res.successes)
+
     def set_flat_property_values_result(
-        self,
-        elements: Sequence[ElementIdLike],
-        property_id: PropertyIdLike,
-        values: Sequence[Any],
+        self, elements: Sequence[ElementIdLike], property_id: PropertyIdLike, values: Sequence[Any],
     ) -> BatchResult[tapir.SuccessfulExecutionResult]:
         """Write one property, retaining per-element success and failure results.
 
@@ -306,14 +336,11 @@ class PropertyUtilities:
         Successful writes are not rolled back by this helper on partial failure.
         """
         payload = create_element_property_values_flat(elements, property_id, values)
-        raw_res = self._api.tapir.property.set_property_values_of_elements(payload)
+        raw_res = self._api.tapir.property.set_property_values_of_elements(payload) if payload else []
         return BatchResult.from_items(raw_res)
 
     def set_flat_property_values(
-        self,
-        elements: Sequence[ElementIdLike],
-        property_id: PropertyIdLike,
-        values: Sequence[Any],
+        self, elements: Sequence[ElementIdLike], property_id: PropertyIdLike, values: Sequence[Any],
     ) -> int:
         """Write one property across elements; raise on any reported failure.
 
