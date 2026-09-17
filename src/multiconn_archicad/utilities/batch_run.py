@@ -1,16 +1,22 @@
 from __future__ import annotations
 
 from collections import deque
-from collections.abc import Iterator, Mapping, Sequence, Hashable
+from collections.abc import Hashable, Iterator, Mapping, Sequence
 from dataclasses import dataclass, field
 from enum import Enum
 from types import TracebackType
 from typing import Any, Generic, TypeAlias, TypeVar
 
-from multiconn_archicad.utilities.results import BatchError, BatchResult, BatchResult2D, BatchSlot, SlotState
+from multiconn_archicad.utilities.results import (
+    BatchError,
+    BatchResult,
+    BatchResult2D,
+    BatchResultBase,
+    SlotState,
+)
 
 T = TypeVar("T")
-BatchResultType: TypeAlias = BatchResult[Any] | BatchResult2D[Any]
+BatchResultType: TypeAlias = BatchResultBase[Any]
 RecordedResult = TypeVar("RecordedResult", bound=BatchResultType)
 
 
@@ -24,31 +30,29 @@ class BatchStatus(str, Enum):
 
 @dataclass(frozen=True, slots=True)
 class BatchStep(Generic[T]):
+    """Immutable record of one executed step in a pipeline."""
+
     name: str
     index: int
-    result: BatchResult[T] | BatchResult2D[T]
+    result: BatchResultBase[T]
     item_indices: tuple[int, ...]
 
     def iter_failures(self) -> Iterator[tuple[int, BatchFailure]]:
         """Yield (original_item_index, BatchFailure) directly from this step's result."""
-        if isinstance(self.result, BatchResult):
-            for source_idx, error in self.result.iter_errors():
-                yield self.item_indices[source_idx], BatchFailure(self, source_idx, error)
-        else:
-            for coord, error in self.result.iter_errors():
-                row_idx = coord[0]
-                yield self.item_indices[row_idx], BatchFailure(self, coord, error)
+        for coord, error in self.result.iter_errors():
+            source_idx = coord[0] if isinstance(coord, tuple) else coord
+            yield self.item_indices[source_idx], BatchFailure(self, coord, error)
 
     @property
     def slot_states_by_item(self) -> dict[int, list[SlotState]]:
         """Map original item index -> list of SlotStates in this step."""
         lookup: dict[int, list[SlotState]] = {}
-        if isinstance(self.result, BatchResult):
-            for pos, orig in enumerate(self.item_indices):
-                lookup[orig] = self.result.slots[pos].state
-        else:
+        if isinstance(self.result, BatchResult2D):
             for pos, orig in enumerate(self.item_indices):
                 lookup.setdefault(orig, []).extend(s.state for s in self.result.rows[pos].slots)
+        elif isinstance(self.result, BatchResult):
+            for pos, orig in enumerate(self.item_indices):
+                lookup.setdefault(orig, []).append(self.result.slots[pos].state)
         return lookup
 
 
@@ -185,8 +189,8 @@ class BatchRun(Generic[T]):
         return self._build_report()
 
     def failures_by_item(self) -> list[list[BatchFailure]]:
-        """Collects failures from all steps"""
-        failures_by_item = [[] for _ in self.original_items]
+        """Collects failures from all steps mapped to original items."""
+        failures_by_item: list[list[BatchFailure]] = [[] for _ in self.original_items]
         for step in self._steps:
             for orig_idx, failure in step.iter_failures():
                 failures_by_item[orig_idx].append(failure)
@@ -245,26 +249,7 @@ class BatchRun(Generic[T]):
         item_indices: Sequence[int] | None = None,
         for_items: Sequence[T] | None = None,
     ) -> RecordedResult:
-        """Record a batch step into the run ledger and return the result.
-
-        Parameters
-        ----------
-        name : str
-            Descriptive step label (e.g. 'Read Dimensions', 'Write Properties').
-        result : RecordedResult
-            The 1D BatchResult or 2D BatchResult2D step outcome. Returned as-is.
-        item_indices : Sequence[int] | None, optional
-            Direct integer index offsets mapping step rows/slots to original items.
-            Cannot be combined with for_items.
-        for_items : Sequence[T] | None, optional
-            Subset of original items resolved via duplicate-safe FIFO matching.
-            Cannot be combined with item_indices.
-
-        Notes
-        -----
-        When both item_indices and for_items are omitted, result length must
-        match len(original_items) exactly (full-batch step).
-        """
+        """Record a batch step into the run ledger and return the result."""
         indices = self._validate_record_inputs(result, item_indices, for_items)
         self._steps.append(BatchStep(name, len(self._steps), result, indices))
         return result
@@ -273,7 +258,7 @@ class BatchRun(Generic[T]):
         self, result: BatchResultType, item_indices: Sequence[int] | None, for_items: Sequence[T] | None
     ) -> tuple[int, ...]:
         self._ensure_open()
-        source_count = len(result.slots) if isinstance(result, BatchResult) else len(result.rows)
+        source_count = len(result.rows) if isinstance(result, BatchResult2D) else len(result.slots)
 
         if item_indices is not None and for_items is not None:
             raise ValueError("Specify either item_indices or for_items, not both.")
@@ -319,11 +304,13 @@ class BatchRun(Generic[T]):
         return repr(item)
 
     def finish(self) -> BatchReport[T]:
+        """Explicitly close the run and return the final report."""
         self._ensure_open()
         self._closed = True
         return self.report
 
     def abort(self, exception: Exception) -> BatchReport[T]:
+        """Abort the run with a fatal exception and return the report."""
         self._ensure_open()
         self._closed = True
         self._aborted = True

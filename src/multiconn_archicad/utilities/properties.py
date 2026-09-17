@@ -120,7 +120,7 @@ def create_element_property_values(
                 tapir.ElementPropertyValue(
                     elementId=norm_elements[elem_idx].elementId,
                     propertyId=norm_props[prop_idx].propertyId,
-                    propertyValue=_to_prop_value(slot.success_value),
+                    propertyValue=_to_prop_value(slot.value),
                 )
             )
     return payload
@@ -220,7 +220,7 @@ class PropertyUtilities:
         """
         res = self.get_property_values_per_element_result(elements, properties)
         res.raise_for_errors("Batch property values read")
-        return [[slot.success_value for slot in row] for row in res.rows]
+        return [[slot.value for slot in row] for row in res.rows]
 
     def get_flat_property_values_result(
         self, elements: Sequence[ElementIdLike], property_id: PropertyIdLike
