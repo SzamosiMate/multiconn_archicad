@@ -19,12 +19,1986 @@ class AccuracyType(Enum):
     INCH_CASE_FRACTIONS = "InchCaseFractions"
 
 
-class ActiveDesignOptionsInCombination(APIModel):
-    designOptionCombinationId: DesignOptionCombinationId
-    activeDesignOptions: Annotated[
-        list[DesignOptionIdArrayItem],
-        Field(description="The list of active design options in the combination."),
+class AngleType(Enum):
+    """The type of the angle measurement unit."""
+    DECIMAL_DEGREE = "DecimalDegree"
+    DEGREE_MIN_SEC = "DegreeMinSec"
+    GRAD = "Grad"
+    RADIAN = "Radian"
+    SURVEYORS = "Surveyors"
+
+
+class AreaType(Enum):
+    """The type of the area measurement unit."""
+    SQUARE_METER = "SquareMeter"
+    SQUARE_CENTIMETER = "SquareCentimeter"
+    SQUARE_MILLIMETER = "SquareMillimeter"
+    SQUARE_FOOT = "SquareFoot"
+    SQUARE_INCH = "SquareInch"
+
+
+class Preset(Enum):
+    WALL_COMPOSITE_FACES = "WallCompositeFaces"
+    WALL_SKIN_BORDERS = "WallSkinBorders"
+    SLAB_COMPOSITE_FACES = "SlabCompositeFaces"
+    SLAB_SKIN_BORDERS = "SlabSkinBorders"
+    BEAM_OR_COLUMN_REF_LINE_END_POINTS = "BeamOrColumnRefLineEndPoints"
+    BEAM_OR_COLUMN_BOUNDING_BOX_CORNERS = "BeamOrColumnBoundingBoxCorners"
+    DOOR_WINDOW_WALL_HOLE_CORNERS = "DoorWindowWallHoleCorners"
+    DOOR_WINDOW_MODEL_HOTSPOTS = "DoorWindowModelHotspots"
+
+
+class AttributeType(Enum):
+    """The type of an attribute."""
+    LAYER = "Layer"
+    LINE = "Line"
+    FILL = "Fill"
+    COMPOSITE = "Composite"
+    SURFACE = "Surface"
+    LAYER_COMBINATION = "LayerCombination"
+    ZONE_CATEGORY = "ZoneCategory"
+    PROFILE = "Profile"
+    PEN_TABLE = "PenTable"
+    MEP_SYSTEM = "MEPSystem"
+    OPERATION_PROFILE = "OperationProfile"
+    BUILDING_MATERIAL = "BuildingMaterial"
+
+
+AutoTextKeyValue: TypeAlias = str
+
+
+class AutoTextName(APIModel):
+    name: Annotated[
+        str,
+        Field(description="The autotext's display name, as shown in the Insert Autotext dialog of Archicad."),
     ]
+
+
+class BeamAnchorPoint(Enum):
+    TOP_LEFT = "TopLeft"
+    TOP_CENTER = "TopCenter"
+    TOP_RIGHT = "TopRight"
+    MIDDLE_LEFT = "MiddleLeft"
+    CENTER = "Center"
+    MIDDLE_RIGHT = "MiddleRight"
+    BOTTOM_LEFT = "BottomLeft"
+    BOTTOM_CENTER = "BottomCenter"
+    BOTTOM_RIGHT = "BottomRight"
+
+
+class BeamShape(Enum):
+    STRAIGHT = "Straight"
+    HORIZONTALLY_CURVED = "HorizontallyCurved"
+    VERTICALLY_CURVED = "VerticallyCurved"
+
+
+class BeamHoleType(Enum):
+    RECTANGULAR = "Rectangular"
+    CIRCULAR = "Circular"
+
+
+class BoundingBox2D(APIModel):
+    """Bounding box of the drawing on the layout."""
+    xMin: float
+    yMin: float
+    xMax: float
+    yMax: float
+
+
+class BoundingBox3D(APIModel):
+    """A 3D bounding box of an element."""
+    xMin: Annotated[float, Field(description="The minimum X value of the bounding box.")]
+    yMin: Annotated[float, Field(description="The minimum Y value of the bounding box.")]
+    zMin: Annotated[float, Field(description="The minimum Z value of the bounding box.")]
+    xMax: Annotated[float, Field(description="The maximum X value of the bounding box.")]
+    yMax: Annotated[float, Field(description="The maximum Y value of the bounding box.")]
+    zMax: Annotated[float, Field(description="The maximum Z value of the bounding box.")]
+
+
+class BoundingBox3DArrayItem(APIModel):
+    """A wrapper containing a 3D bounding box."""
+    boundingBox3D: BoundingBox3D
+
+
+class CutFillOrientation(Enum):
+    PROJECT_ORIGIN = "ProjectOrigin"
+    ELEMENT_ORIGIN = "ElementOrigin"
+    FIT_TO_SKIN = "FitToSkin"
+
+
+class BuildingMaterialAttributeField(Enum):
+    ID = "id"
+    MANUFACTURER = "manufacturer"
+    DESCRIPTION = "description"
+    CONN_PRIORITY = "connPriority"
+    CUT_FILL_INDEX = "cutFillIndex"
+    CUT_FILL_PEN = "cutFillPen"
+    CUT_FILL_BACKGROUND_PEN = "cutFillBackgroundPen"
+    CUT_SURFACE_INDEX = "cutSurfaceIndex"
+    CUT_FILL_ORIENTATION = "cutFillOrientation"
+    THERMAL_CONDUCTIVITY = "thermalConductivity"
+    DENSITY = "density"
+    HEAT_CAPACITY = "heatCapacity"
+    EMBODIED_ENERGY = "embodiedEnergy"
+    EMBODIED_CARBON = "embodiedCarbon"
+    SHOW_UNCUT_LINES = "showUncutLines"
+    COLLISION_DETECTION = "collisionDetection"
+
+
+class BuildingMaterialPhysicalProperties(APIModel):
+    """The physical properties of a single building material."""
+    thermalConductivity: Annotated[float, Field(description="Thermal Conductivity.")]
+    density: Annotated[float, Field(description="Density.")]
+    heatCapacity: Annotated[float, Field(description="Heat Capacity.")]
+    embodiedEnergy: Annotated[float, Field(description="Embodied Energy.")]
+    embodiedCarbon: Annotated[float, Field(description="Embodied Carbon.")]
+
+
+class BuildingMaterialPhysicalPropertiesArrayItem(APIModel):
+    properties: BuildingMaterialPhysicalProperties
+
+
+class ClassificationItemDetails(APIModel):
+    """The details of a classification item."""
+    id: Annotated[
+        str,
+        Field(description="The unique identifier of the classification item as specified by the user."),
+    ]
+    name: Annotated[str, Field(description="The display name of the classification item.")]
+    description: Annotated[str, Field(description="The description of the classification item.")]
+    children: Annotated[
+        list[ClassificationItemDetails] | None,
+        Field(description="A list of classification items."),
+    ] = None
+
+
+class ColorRGB(APIModel):
+    """RGB color."""
+    red: Annotated[float, Field(description="Red value between 0.0 and 1.0")]
+    green: Annotated[float, Field(description="Green value between 0.0 and 1.0")]
+    blue: Annotated[float, Field(description="Blue value between 0.0 and 1.0")]
+
+
+class ColumnCoreAnchor(Enum):
+    TOP_LEFT = "TopLeft"
+    TOP_CENTER = "TopCenter"
+    TOP_RIGHT = "TopRight"
+    MIDDLE_LEFT = "MiddleLeft"
+    CENTER = "Center"
+    MIDDLE_RIGHT = "MiddleRight"
+    BOTTOM_LEFT = "BottomLeft"
+    BOTTOM_CENTER = "BottomCenter"
+    BOTTOM_RIGHT = "BottomRight"
+
+
+class Coordinates(APIModel):
+    """3D coordinate."""
+    x: Annotated[float, Field(description="X value of the coordinate.")]
+    y: Annotated[float, Field(description="Y value of the coordinate.")]
+    z: Annotated[float, Field(description="Z value of the coordinate.")]
+
+
+class CompositeAttributeField(Enum):
+    USE_WITH = "useWith"
+    SKINS = "skins"
+    SEPARATORS = "separators"
+
+
+class CompositeSkinType(Enum):
+    CORE = "Core"
+    FINISH = "Finish"
+    OTHER = "Other"
+
+
+class Coordinate2D(APIModel):
+    """2D coordinate."""
+    x: Annotated[float, Field(description="X value of the coordinate.")]
+    y: Annotated[float, Field(description="Y value of the coordinate.")]
+
+
+class Coordinate3D(APIModel):
+    """3D coordinate."""
+    x: Annotated[float, Field(description="X value of the coordinate.")]
+    y: Annotated[float, Field(description="Y value of the coordinate.")]
+    z: Annotated[float, Field(description="Z value of the coordinate.")]
+
+
+class WitnessForm(Enum):
+    NONE = "None"
+    SMALL = "Small"
+    LARGE = "Large"
+    FIX = "Fix"
+    UNKNOWN = "Unknown"
+
+
+class TransformationType(Enum):
+    GLOBAL = "Global"
+    ROTATED = "Rotated"
+    DISTORTED = "Distorted"
+
+
+class CoverFillOrientationType(Enum):
+    GLOBAL = "Global"
+    ROTATED = "Rotated"
+    DISTORTED = "Distorted"
+    CENTERED = "Centered"
+
+
+class CoverFillTransformation(APIModel):
+    """Orientation and distortion parameters of a cover fill."""
+    origin: Annotated[
+        Coordinate2D,
+        Field(description="The origin of the fill relative to the center of the element."),
+    ]
+    xAxis: Annotated[Coordinate2D, Field(description="Primary distortion (direction) vector.")]
+    yAxis: Annotated[Coordinate2D, Field(description="Secondary distortion (direction) vector.")]
+
+
+class StoryRangeType(Enum):
+    """Optional. Which stories of the source are placed: all of them, or the single reference story. Ignored when a node for the same file already exists."""
+    ALL_STORIES = "AllStories"
+    SINGLE_STORY = "SingleStory"
+
+
+class HotlinkNode(APIModel):
+    sourceLocation: Annotated[
+        str,
+        Field(description="Absolute path of the module source file (.mod or .pln)."),
+    ]
+    name: Annotated[
+        str | None,
+        Field(
+            description="Optional display name of the node. Defaults to the file name. Ignored when a node for the same file already exists."
+        ),
+    ] = None
+    storyRangeType: Annotated[
+        StoryRangeType | None,
+        Field(
+            description="Optional. Which stories of the source are placed: all of them, or the single reference story. Ignored when a node for the same file already exists."
+        ),
+    ] = None
+    refFloorIndex: Annotated[
+        int | None,
+        Field(
+            description="Optional index of the reference story in the source file. Defaults to 0. Ignored when a node for the same file already exists."
+        ),
+    ] = None
+
+
+class CurtainWallDetails(APIModel):
+    height: float | None = None
+    flipped: bool | None = None
+    angle: Annotated[
+        float | None,
+        Field(description="The rotation angle of the curtain wall in radians."),
+    ] = None
+
+
+class PanelConnectionHole(APIModel):
+    """The parameters of the panel connection hole."""
+    d: Annotated[float, Field(description="Depth of the panel connection hole.")]
+    w: Annotated[float, Field(description="Width of the panel connection hole.")]
+
+
+class FrameContour(APIModel):
+    """The parameters of the frame contour."""
+    a1: Annotated[float, Field(description="Width1 of the frame contour.")]
+    a2: Annotated[float, Field(description="Width2 of the frame contour.")]
+    b1: Annotated[float, Field(description="Length1 of the frame contour.")]
+    b2: Annotated[float, Field(description="Length2 of the frame contour.")]
+
+
+class CurtainWallFrameType(Enum):
+    """Enumeration of available curtain wall frame types."""
+    DELETED = "Deleted"
+    DIVISION = "Division"
+    CORNER = "Corner"
+    BOUNDARY = "Boundary"
+    CUSTOM = "Custom"
+
+
+class CurtainWallSegmentDetails(APIModel):
+    begCoordinate: Coordinate3D
+    endCoordinate: Coordinate3D
+    extrusionVector: Coordinate3D
+    gridOrigin: Coordinate3D
+    gridAngle: Annotated[float, Field(description="The angle of the grid in radians.")]
+    arcOrigin: Coordinate3D | None = None
+    isNegativeArc: Annotated[bool | None, Field(description="Indicates if the arc is negative.")] = None
+
+
+class DesignOptionData(APIModel):
+    name: Annotated[str, Field(description="The name of the design option.")]
+    id: Annotated[str, Field(description="The string id of the design option.")]
+    ownerSetName: Annotated[str, Field(description="The name of the owner design option set.")]
+
+
+class DesignOptionLinkType(Enum):
+    """The type of the associated design option."""
+    NOT_EXISTING_ELEMENT = "NotExistingElement"
+    MISSING_DESIGN_OPTION = "MissingDesignOption"
+    NOT_LINKED_TO_ANY_DESIGN_OPTION = "NotLinkedToAnyDesignOption"
+    LINKED_TO_DESIGN_OPTION = "LinkedToDesignOption"
+
+
+class DetailData(APIModel):
+    name: Annotated[str, Field(min_length=1)]
+    referenceId: Annotated[str, Field(min_length=1)]
+
+
+class Dimensions3D(APIModel):
+    """Dimensions in 3D."""
+    x: Annotated[float, Field(description="X dimension.")]
+    y: Annotated[float, Field(description="Y dimension.")]
+    z: Annotated[float, Field(description="Z dimension.")]
+
+
+class DisplayOption(Enum):
+    """Floor plan display option."""
+    STANDARD = "Standard"
+    STANDARD_WITH_ABSTRACT = "StandardWithAbstract"
+    CUT_ONLY = "CutOnly"
+    OUT_LINES_ONLY = "OutLinesOnly"
+    ABSTRACT_ALL = "AbstractAll"
+    CUT_ALL = "CutAll"
+
+
+class DisplayValueEnumId(APIModel):
+    """An enumeration value identifier using the displayed value."""
+    type: Literal["displayValue"] = "displayValue"
+    displayValue: str
+
+
+class Status(Enum):
+    ACTUAL = "Actual"
+    ISSUED = "Issued"
+
+
+class Change(APIModel):
+    id: str
+
+
+class NameType(Enum):
+    """How the drawing's title name is assembled (Identification tabpage of the Drawing Settings dialog)."""
+    VIEW_OR_SOURCE_FILE_NAME = "ViewOrSourceFileName"
+    VIEW_ID_AND_NAME = "ViewIdAndName"
+    CUSTOM_NAME = "CustomName"
+
+
+class NumberingType(Enum):
+    """How the drawing's title ID is assigned (Identification tabpage of the Drawing Settings dialog)."""
+    BY_LAYOUT = "ByLayout"
+    BY_VIEW_ID = "ByViewId"
+    CUSTOM_NUMBER = "CustomNumber"
+
+
+class DrawingNameType(Enum):
+    """How the drawing's title name is assembled (Identification tabpage of the Drawing Settings dialog)."""
+    VIEW_OR_SOURCE_FILE_NAME = "ViewOrSourceFileName"
+    VIEW_ID_AND_NAME = "ViewIdAndName"
+    CUSTOM_NAME = "CustomName"
+
+
+class DrawingNumberingType(Enum):
+    """How the drawing's title ID is assigned (Identification tabpage of the Drawing Settings dialog)."""
+    BY_LAYOUT = "ByLayout"
+    BY_VIEW_ID = "ByViewId"
+    CUSTOM_NUMBER = "CustomNumber"
+
+
+class DrawingSettings(APIModel):
+    """Modifiable settings for a Drawing element placed on a layout."""
+    pos: Annotated[
+        Coordinate2D | None,
+        Field(description="Position of the drawing's reference point on the layout."),
+    ] = None
+    angle: Annotated[float | None, Field(description="Rotation angle of the drawing in radians.")] = None
+    ratio: Annotated[
+        float | None,
+        Field(description="Scale ratio applied to the drawing relative to its source view."),
+    ] = None
+    drawingScale: Annotated[float | None, Field(description="The nominal scale of the drawing.")] = None
+    modelOffset: Annotated[
+        Coordinate2D | None,
+        Field(description="Offset of the model origin within the drawing."),
+    ] = None
+    clipPolygon: Annotated[
+        list[Coordinate2D] | None,
+        Field(
+            description="Polygon (in model coordinates) used to clip the drawing view. At least 3 points. Setting this also enables polygon clipping (useDrawingPolyClip).",
+            min_length=3,
+        ),
+    ] = None
+    nameType: DrawingNameType | None = None
+    customName: Annotated[
+        str | None,
+        Field(description="The drawing's custom title name. Only used when nameType is CustomName."),
+    ] = None
+    numberingType: DrawingNumberingType | None = None
+    customNumber: Annotated[
+        str | None,
+        Field(description="The drawing's custom title ID. Only used when numberingType is CustomNumber."),
+    ] = None
+    isInNumbering: Annotated[
+        bool | None,
+        Field(description="Whether the drawing is included in the automatic drawing numbering sequence."),
+    ] = None
+    titleLibraryPartIndex: Annotated[
+        float | None,
+        Field(
+            description="Library part index of the drawing title (API_DrawingTitle::libInd). A negative/invalid index means no title object is instantiated; setting it to a valid index (e.g. copied from another drawing) makes Archicad create the title's own placed element."
+        ),
+    ] = None
+
+
+class ElementDetailsField(Enum):
+    """A field of the details of an element."""
+    TYPE = "type"
+    ID = "id"
+    FLOOR_INDEX = "floorIndex"
+    LAYER_INDEX = "layerIndex"
+    DRAW_INDEX = "drawIndex"
+    DETAILS = "details"
+    FLOOR_PLAN_POLYGONS = "floorPlanPolygons"
+    HOTLINK_ID = "hotlinkId"
+
+
+class ElementFilter(Enum):
+    """A filter type for an element."""
+    IS_EDITABLE = "IsEditable"
+    IS_VISIBLE_BY_LAYER = "IsVisibleByLayer"
+    IS_VISIBLE_BY_RENOVATION = "IsVisibleByRenovation"
+    IS_VISIBLE_BY_STRUCTURE_DISPLAY = "IsVisibleByStructureDisplay"
+    IS_VISIBLE_IN3_D = "IsVisibleIn3D"
+    ON_ACTUAL_FLOOR = "OnActualFloor"
+    ON_ACTUAL_LAYOUT = "OnActualLayout"
+    IN_MY_WORKSPACE = "InMyWorkspace"
+    IS_INDEPENDENT = "IsIndependent"
+    IN_CROPPED_VIEW = "InCroppedView"
+    HAS_ACCESS_RIGHT = "HasAccessRight"
+    IS_OVERRIDDEN_BY_RENOVATION = "IsOverriddenByRenovation"
+    INCLUDE_SUB_ELEM_OBJECTS = "IncludeSubElemObjects"
+
+
+class ElementIFCProperty(APIModel):
+    """The details of an IFC property value of an element."""
+    propertySetName: str
+    name: str
+    value: str
+
+
+class ElementType(Enum):
+    """The type of an element."""
+    WALL = "Wall"
+    COLUMN = "Column"
+    BEAM = "Beam"
+    WINDOW = "Window"
+    DOOR = "Door"
+    OBJECT = "Object"
+    LAMP = "Lamp"
+    SLAB = "Slab"
+    ROOF = "Roof"
+    MESH = "Mesh"
+    DIMENSION = "Dimension"
+    RADIAL_DIMENSION = "RadialDimension"
+    LEVEL_DIMENSION = "LevelDimension"
+    ANGLE_DIMENSION = "AngleDimension"
+    TEXT = "Text"
+    LABEL = "Label"
+    ZONE = "Zone"
+    HATCH = "Hatch"
+    LINE = "Line"
+    POLY_LINE = "PolyLine"
+    ARC = "Arc"
+    CIRCLE = "Circle"
+    SPLINE = "Spline"
+    HOTSPOT = "Hotspot"
+    CUT_PLANE = "CutPlane"
+    CAMERA = "Camera"
+    CAM_SET = "CamSet"
+    GROUP = "Group"
+    SECT_ELEM = "SectElem"
+    DRAWING = "Drawing"
+    PICTURE = "Picture"
+    DETAIL = "Detail"
+    ELEVATION = "Elevation"
+    INTERIOR_ELEVATION = "InteriorElevation"
+    WORKSHEET = "Worksheet"
+    HOTLINK = "Hotlink"
+    CURTAIN_WALL = "CurtainWall"
+    CURTAIN_WALL_SEGMENT = "CurtainWallSegment"
+    CURTAIN_WALL_FRAME = "CurtainWallFrame"
+    CURTAIN_WALL_PANEL = "CurtainWallPanel"
+    CURTAIN_WALL_JUNCTION = "CurtainWallJunction"
+    CURTAIN_WALL_ACCESSORY = "CurtainWallAccessory"
+    SHELL = "Shell"
+    SKYLIGHT = "Skylight"
+    MORPH = "Morph"
+    CHANGE_MARKER = "ChangeMarker"
+    STAIR = "Stair"
+    RISER = "Riser"
+    TREAD = "Tread"
+    STAIR_STRUCTURE = "StairStructure"
+    RAILING = "Railing"
+    RAILING_TOPRAIL = "RailingToprail"
+    RAILING_HANDRAIL = "RailingHandrail"
+    RAILING_RAIL = "RailingRail"
+    RAILING_POST = "RailingPost"
+    RAILING_INNER_POST = "RailingInnerPost"
+    RAILING_BALUSTER = "RailingBaluster"
+    RAILING_PANEL = "RailingPanel"
+    RAILING_SEGMENT = "RailingSegment"
+    RAILING_NODE = "RailingNode"
+    RAILING_BALUSTER_SET = "RailingBalusterSet"
+    RAILING_PATTERN = "RailingPattern"
+    RAILING_TOPRAIL_END = "RailingToprailEnd"
+    RAILING_HANDRAIL_END = "RailingHandrailEnd"
+    RAILING_RAIL_END = "RailingRailEnd"
+    RAILING_TOPRAIL_CONNECTION = "RailingToprailConnection"
+    RAILING_HANDRAIL_CONNECTION = "RailingHandrailConnection"
+    RAILING_RAIL_CONNECTION = "RailingRailConnection"
+    RAILING_END_FINISH = "RailingEndFinish"
+    BEAM_SEGMENT = "BeamSegment"
+    COLUMN_SEGMENT = "ColumnSegment"
+    OPENING = "Opening"
+    UNKNOWN = "Unknown"
+
+
+class EnumValueToAdd(APIModel):
+    """The description of an enumeration value."""
+    displayValue: Annotated[str, Field(description="Displayed value of the enumeration.")]
+    nonLocalizedValue: Annotated[
+        str | None,
+        Field(description="Nonlocalized value of the enumeration if there is one."),
+    ] = None
+
+
+class EnumValuesToAddItem(APIModel):
+    enumValue: EnumValueToAdd
+
+
+class Error(APIModel):
+    """The details of an error."""
+    code: Annotated[int, Field(description="The code of the error.")]
+    message: Annotated[str, Field(description="The error message.")]
+
+
+class ErrorItem(APIModel):
+    error: Error
+
+
+class ExpressionDefaultValue(APIModel):
+    """Default value of the property in case of an expression based property value."""
+    expressions: list[str]
+
+
+class FailedExecutionResult(APIModel):
+    """The result of a failed execution."""
+    success: Literal[False] = False
+    error: Annotated[Error, Field(description="The details of an execution failure.")]
+
+
+class FavoriteRename(APIModel):
+    oldName: str
+    newName: str
+
+
+class FavoritesWrapper(APIModel):
+    """The response of the GetFavoritesByType command."""
+    favorites: Annotated[list[str], Field(description="A list of favorite names")]
+
+
+class FillAttributeField(Enum):
+    SUB_TYPE = "subType"
+    SCALE_WITH_PLAN = "scaleWithPlan"
+    USE_FOR_WALLS = "useForWalls"
+    USE_FOR_DRAFT = "useForDraft"
+    USE_FOR_COVER = "useForCover"
+    HORIZONTAL_SPACING = "horizontalSpacing"
+    VERTICAL_SPACING = "verticalSpacing"
+    ANGLE = "angle"
+    BIT_PATTERN = "bitPattern"
+    GRADIENT_START = "gradientStart"
+    GRADIENT_END = "gradientEnd"
+    PERCENT = "percent"
+    TEXTURE = "texture"
+    LINE_ITEMS = "lineItems"
+    SYMBOL_LINES = "symbolLines"
+    SYMBOL_ARCS = "symbolArcs"
+    SYMBOL_HOTSPOTS = "symbolHotspots"
+
+
+class FillLineItem(APIModel):
+    frequency: float
+    direction: float
+    offsetLine: float
+    offset: Coordinate2D
+    lineLengths: list[float] | None = None
+
+
+class FillSubType(Enum):
+    VECTOR = "Vector"
+    SOLID = "Solid"
+    EMPTY = "Empty"
+    SYMBOL = "Symbol"
+    LINEAR_GRADIENT = "LinearGradient"
+    RADIAL_GRADIENT = "RadialGradient"
+
+
+class FillSymbolArc(APIModel):
+    begin: Coordinate2D
+    origin: Coordinate2D
+    angle: float
+
+
+class FillSymbolLine(APIModel):
+    begin: Coordinate2D
+    end: Coordinate2D
+
+
+class Flag(Enum):
+    HIDDEN = "Hidden"
+    HIDDEN_FROM_SCRIPT = "HiddenFromScript"
+    DISABLED = "Disabled"
+    CHILD = "Child"
+    UNIQUE = "Unique"
+    FIXED = "Fixed"
+    BOLD_NAME = "BoldName"
+    OPEN = "Open"
+
+
+class GeoReferencingParameters(APIModel):
+    crsName: Annotated[
+        str,
+        Field(description="Name by which the coordinate reference system is identified."),
+    ]
+    description: Annotated[
+        str,
+        Field(description="Informal description of this coordinate reference system."),
+    ]
+    geodeticDatum: Annotated[str, Field(description="Name by which this datum is identified.")]
+    verticalDatum: Annotated[str, Field(description="Name by which the vertical datum is identified.")]
+    mapProjection: Annotated[str, Field(description="Name by which the map projection is identified.")]
+    mapZone: Annotated[
+        str,
+        Field(description="Name by which the map zone, relating to the MapProjection, is identified."),
+    ]
+
+
+class AutoTextKey(APIModel):
+    name: Annotated[
+        str,
+        Field(description="The autotext's name, as shown in the Insert Autotext dialog of Archicad."),
+    ]
+    key: Annotated[
+        str,
+        Field(
+            description="The autotext's key. To embed it in the content of a Text or Label element, surround it with '<' and '>', e.g. '<PROPERTY-69A58F6F-DD3B-478D-B5EF-09A16BD0C548>'."
+        ),
+    ]
+
+
+class SkippedSampleItem(APIModel):
+    index: int | None = None
+    code: int | None = None
+
+
+class Area(APIModel):
+    unit: AreaType
+    accuracy: AccuracyType
+    decimals: Annotated[int, Field(description="Number of decimals to display for area values.")]
+
+
+class Angle(APIModel):
+    unit: AngleType
+    decimals: Annotated[int, Field(description="Number of decimals to display for angle values.")]
+    accuracy: Annotated[int, Field(description="Accuracy for angle values.")]
+
+
+class Settings(APIModel):
+    volumeTolerance: Annotated[
+        float,
+        Field(
+            description="Intersection body volume greater then this value will be considered as a collision. Default value is 0.001."
+        ),
+    ]
+    performSurfaceCheck: Annotated[
+        bool,
+        Field(
+            description="Enables surface collision check. If disabled the surfaceTolerance value will be ignored. By default it's false."
+        ),
+    ]
+    surfaceTolerance: Annotated[
+        float,
+        Field(
+            description="Intersection body surface area greater then this value will be considered as a collision. Default value is 0.001."
+        ),
+    ]
+
+
+class FloorPlanPolygon(APIModel):
+    coordinates: list[Coordinate2D] | None = None
+
+
+class ImageType(Enum):
+    """The type of the preview image. Default is 3D."""
+    FIELD_2_D = "2D"
+    SECTION = "Section"
+    FIELD_3_D = "3D"
+
+
+class Format(Enum):
+    """The image format. Default is png."""
+    PNG = "png"
+    JPG = "jpg"
+
+
+class CustomSchemeItem(APIModel):
+    customSchemeKey: str
+    customSchemeName: str
+
+
+class ModelViewOption(APIModel):
+    """Represents the model view options."""
+    name: str
+
+
+class NavigatorMapId(Enum):
+    """The navigator map to retrieve."""
+    PUBLIC_VIEW_MAP = "PublicViewMap"
+    PROJECT_MAP = "ProjectMap"
+    LAYOUT_BOOK = "LayoutBook"
+    PUBLISHER_SETS = "PublisherSets"
+
+
+class GuidId(APIModel):
+    """Identifier."""
+    guid: Annotated[
+        UUID,
+        Field(
+            description="A Globally Unique Identifier (or Universally Unique Identifier) in its string representation as defined in RFC 4122.",
+        ),
+    ]
+
+
+class HatchOrientationType(Enum):
+    GLOBAL = "Global"
+    ROTATED = "Rotated"
+    DISTORTED = "Distorted"
+    CENTERED = "Centered"
+
+
+HighlightedColor: TypeAlias = list[int]
+
+
+class HotlinkNodeId(APIModel):
+    """The identifier of a hotlink node - the reference to a module source file, which instances are placed from."""
+    guid: Annotated[
+        UUID,
+        Field(
+            description="A Globally Unique Identifier (or Universally Unique Identifier) in its string representation as defined in RFC 4122.",
+        ),
+    ]
+
+
+class HotlinkOrigin(APIModel):
+    """Where a hotlink instance's origin lands, in the project's coordinates. z is optional: CreateHotlinkInstances places at 0 when it is omitted, ChangeHotlinkInstances keeps the instance's current z."""
+    x: float
+    y: float
+    z: float | None = None
+
+
+class HotlinkType(Enum):
+    """Module or XRef."""
+    MODULE = "Module"
+    X_REF = "XRef"
+
+
+class HotspotData(APIModel):
+    """The parameters of the new Hotspot."""
+    favoriteName: Annotated[
+        str | None,
+        Field(
+            description="Optional name of a favorite to base the new element on. Its settings are applied first, then the explicitly given fields override them."
+        ),
+    ] = None
+    floorInd: Annotated[
+        float | None,
+        Field(description="The identifier of the floor. Optional parameter, by default the current floor is used."),
+    ] = None
+    layerIndex: Annotated[
+        int | None,
+        Field(
+            description="Layer attribute index to place the hotspot on. Optional parameter, by default the current layer is used."
+        ),
+    ] = None
+    position: Coordinate2D
+    height: float | None = None
+    penIndex: Annotated[
+        int | None,
+        Field(description="Optional pen index. By default the current pen is used."),
+    ] = None
+
+
+class HotspotDetails(APIModel):
+    position: Coordinate2D
+    height: Annotated[
+        float,
+        Field(description="Z coordinate of the hotspot (can come from a GDL script)."),
+    ]
+    penIndex: int | None = None
+
+
+class HotspotSettings(APIModel):
+    """Settings for modifying a Hotspot."""
+    position: Coordinate2D | None = None
+    height: float | None = None
+    penIndex: int | None = None
+
+
+class Method(Enum):
+    """The file operation method to use."""
+    SAVE = "save"
+    MERGE = "merge"
+    OPEN = "open"
+
+
+class FileType(Enum):
+    """The type of the IFC file. The default is 'ifc'."""
+    IFC = "ifc"
+    IFCXML = "ifcxml"
+    IFCZIP = "ifczip"
+    IFCXMLZIP = "ifcxmlzip"
+
+
+class ConflictPolicy(Enum):
+    """How to resolve name conflicts. Default Overwrite."""
+    ERROR = "Error"
+    SKIP = "Skip"
+    OVERWRITE = "Overwrite"
+    APPEND = "Append"
+
+
+class InteriorElevationData(APIModel):
+    nodeCoordinates: Annotated[
+        list[Coordinate2D],
+        Field(
+            description="The corner points of the connected segment chain. Each consecutive pair of points becomes one segment, so a room with four walls needs five points to be closed, or four to be left open.",
+            min_length=2,
+        ),
+    ]
+    depth: Annotated[
+        float | None,
+        Field(
+            description="How far each segment looks. Applied to every segment. Defaults to 1.0.",
+            gt=0.0,
+        ),
+    ] = None
+    name: Annotated[
+        str | None,
+        Field(description="Name of the interior elevation. Each segment is named after it."),
+    ] = None
+    id: Annotated[str | None, Field(description="ID string of the interior elevation.")] = None
+    floorIndex: Annotated[
+        int | None,
+        Field(description="The story to place the interior elevation on. Defaults to the current story."),
+    ] = None
+
+
+class IssueCommentStatus(Enum):
+    """The status of an issue comment."""
+    ERROR = "Error"
+    WARNING = "Warning"
+    INFO = "Info"
+    UNKNOWN = "Unknown"
+
+
+class IssueElementType(Enum):
+    """The attachment type of an element component of an issue."""
+    CREATION = "Creation"
+    HIGHLIGHT = "Highlight"
+    DELETION = "Deletion"
+    MODIFICATION = "Modification"
+
+
+class IssueId(APIModel):
+    """The identifier of an issue."""
+    guid: Annotated[
+        UUID,
+        Field(
+            description="A Globally Unique Identifier (or Universally Unique Identifier) in its string representation as defined in RFC 4122.",
+        ),
+    ]
+
+
+class IssueIdArrayItem(APIModel):
+    issueId: IssueId
+
+
+class Justification(Enum):
+    """Optional text justification. Equivalent to style.justification."""
+    LEFT = "Left"
+    CENTER = "Center"
+    RIGHT = "Right"
+    FULL = "Full"
+
+
+class KeynoteAutoTextTokens(APIModel):
+    """The autotext tokens of a keynote item. A token can be used as the text content of a label to reference the field of the keynote item."""
+    keyToken: str
+    titleToken: str
+    descriptionToken: str
+    referenceToken: str
+
+
+class KeynoteFolderId(APIModel):
+    """The identifier of a keynote folder."""
+    guid: Annotated[
+        UUID,
+        Field(
+            description="A Globally Unique Identifier (or Universally Unique Identifier) in its string representation as defined in RFC 4122.",
+        ),
+    ]
+
+
+class KeynoteFolderIdArrayItem(APIModel):
+    keynoteFolderId: KeynoteFolderId
+
+
+class KeynoteFolderModificationData(APIModel):
+    keynoteFolderId: KeynoteFolderId
+    key: str | None = None
+    title: str | None = None
+    reference: str | None = None
+
+
+class KeynoteItemData(APIModel):
+    parentFolderId: Annotated[
+        KeynoteFolderId | None,
+        Field(description="The parent folder. Optional; defaults to the root folder."),
+    ] = None
+    key: str
+    title: str | None = None
+    description: str | None = None
+    reference: str | None = None
+
+
+class KeynoteItemId(APIModel):
+    """The identifier of a keynote item."""
+    guid: Annotated[
+        UUID,
+        Field(
+            description="A Globally Unique Identifier (or Universally Unique Identifier) in its string representation as defined in RFC 4122.",
+        ),
+    ]
+
+
+class KeynoteItemIdArrayItem(APIModel):
+    keynoteItemId: KeynoteItemId
+
+
+class KeynoteItemModificationData(APIModel):
+    keynoteItemId: KeynoteItemId
+    key: str | None = None
+    title: str | None = None
+    description: str | None = None
+    reference: str | None = None
+
+
+class ContentField(Enum):
+    KEY = "Key"
+    TITLE = "Title"
+    DESCRIPTION = "Description"
+    REFERENCE = "Reference"
+
+
+class KeynoteLabelData(APIModel):
+    keynoteItemId: KeynoteItemId
+    position: Annotated[Coordinate2D, Field(description="The reference point of the label.")]
+    contentFields: Annotated[
+        list[ContentField] | None,
+        Field(
+            description="The keynote fields to include in the label text as autotext. Optional; defaults to all fields.",
+            min_length=1,
+        ),
+    ] = None
+
+
+class LabelArrowType(Enum):
+    """Arrow head shape for a Label's leader line."""
+    EMPTY_CIRCLE = "EmptyCircle"
+    CROSS_CIRCLE = "CrossCircle"
+    FULL_CIRCLE = "FullCircle"
+    SLASH_LINE15 = "SlashLine15"
+    OPEN_ARROW15 = "OpenArrow15"
+    CLOSED_ARROW15 = "ClosedArrow15"
+    FULL_ARROW15 = "FullArrow15"
+    SLASH_LINE30 = "SlashLine30"
+    OPEN_ARROW30 = "OpenArrow30"
+    CLOSED_ARROW30 = "ClosedArrow30"
+    FULL_ARROW30 = "FullArrow30"
+    SLASH_LINE45 = "SlashLine45"
+    OPEN_ARROW45 = "OpenArrow45"
+    CLOSED_ARROW45 = "ClosedArrow45"
+    FULL_ARROW45 = "FullArrow45"
+    SLASH_LINE60 = "SlashLine60"
+    OPEN_ARROW60 = "OpenArrow60"
+    CLOSED_ARROW60 = "ClosedArrow60"
+    FULL_ARROW60 = "FullArrow60"
+    SLASH_LINE90 = "SlashLine90"
+    PEPITA_CIRCLE = "PepitaCircle"
+    BAND_ARROW = "BandArrow"
+    HALF_ARROW_CCW15 = "HalfArrowCcw15"
+    HALF_ARROW_CW15 = "HalfArrowCw15"
+    HALF_ARROW_CCW30 = "HalfArrowCcw30"
+    HALF_ARROW_CW30 = "HalfArrowCw30"
+    HALF_ARROW_CCW45 = "HalfArrowCcw45"
+    HALF_ARROW_CW45 = "HalfArrowCw45"
+    HALF_ARROW_CCW60 = "HalfArrowCcw60"
+    HALF_ARROW_CW60 = "HalfArrowCw60"
+    SLASH_LINE75 = "SlashLine75"
+
+
+class LabelClass(Enum):
+    """Whether this is a textual or a symbol label. Optional; if omitted, inherits the current Label tool default (which may silently resolve to either class - explicitly setting this avoids ambiguity)."""
+    TEXT = "Text"
+    SYMBOL = "Symbol"
+
+
+class LabelLeaderLineAnchorPoint(Enum):
+    """How the leader line connects to the label text (text-class labels only)."""
+    MIDDLE = "Middle"
+    TOP = "Top"
+    BOTTOM = "Bottom"
+    UNDERLINED = "Underlined"
+
+
+class LeaderShape(Enum):
+    """Shape of the leader line."""
+    SEGMENTED = "Segmented"
+    SPLINEAR = "Splinear"
+    SQUARE_ROOT = "SquareRoot"
+
+
+class LayerAttributeField(Enum):
+    IS_HIDDEN = "isHidden"
+    IS_LOCKED = "isLocked"
+    IS_WIREFRAME = "isWireframe"
+    INTERSECTION_GROUP_NR = "intersectionGroupNr"
+
+
+class LayoutCustomData(APIModel):
+    customSchemeKey: str
+    customSchemeName: str | None = None
+    customSchemeValue: str
+
+
+class LayoutCustomDataToSet(APIModel):
+    customSchemeKey: str | None = None
+    customSchemeName: str | None = None
+    customSchemeValue: str
+
+
+class LayoutParameters(APIModel):
+    horizontalSize: float | None = None
+    verticalSize: float | None = None
+    leftMargin: float | None = None
+    topMargin: float | None = None
+    rightMargin: float | None = None
+    bottomMargin: float | None = None
+    customLayoutNumber: str | None = None
+    customLayoutNumbering: bool | None = None
+    doNotIncludeInNumbering: bool | None = None
+    displayMasterLayoutBelow: bool | None = None
+
+
+class LengthType(Enum):
+    """The type of the length measurement unit."""
+    METER = "Meter"
+    DECIMETER = "Decimeter"
+    CENTIMETER = "Centimeter"
+    MILLIMETER = "Millimeter"
+    FOOT_FRAC_INCH = "FootFracInch"
+    FOOT_DEC_INCH = "FootDecInch"
+    DEC_FOOT = "DecFoot"
+    FRAC_INCH = "FracInch"
+    DEC_INCH = "DecInch"
+
+
+class Level(APIModel):
+    levelHeight: float
+    levelAngle: Annotated[float, Field(gt=0.0)]
+
+
+class LibPartUnId(APIModel):
+    guid: Annotated[
+        UUID,
+        Field(
+            description="A Globally Unique Identifier (or Universally Unique Identifier) in its string representation as defined in RFC 4122.",
+        ),
+    ]
+
+
+class Library(APIModel):
+    """Library"""
+    name: Annotated[str, Field(description="Library name.")]
+    path: Annotated[str, Field(description="A filesystem path to library location.")]
+    type: Annotated[str, Field(description="Library type.")]
+    available: Annotated[bool | None, Field(description="Is library not missing.")] = None
+    readOnly: Annotated[bool | None, Field(description="Is library not writable.")] = None
+    twServerUrl: Annotated[
+        str | None,
+        Field(description="URL address of the TeamWork server hosting the library."),
+    ] = None
+    urlWebLibrary: Annotated[str | None, Field(description="URL of the downloaded Internet library.")] = None
+
+
+class LibraryLocation(APIModel):
+    path: str
+
+
+class LibraryPartType(Enum):
+    """Enumeration of available library part types. 'Unknown' is the schema-valid catch-all returned for any libpart whose typeID is not one of the named values (rare ACAPI sentinels and any future SDK subtype)."""
+    SPEC = "Spec"
+    WINDOW = "Window"
+    DOOR = "Door"
+    OBJECT = "Object"
+    LAMP = "Lamp"
+    ROOM = "Room"
+    PROPERTY = "Property"
+    PLAN_SIGN = "PlanSign"
+    LABEL = "Label"
+    MACRO = "Macro"
+    PICT = "Pict"
+    PICTURE = "Picture"
+    LIST_SCHEME = "ListScheme"
+    SKYLIGHT = "Skylight"
+    OPENING_SYMBOL = "OpeningSymbol"
+    UNKNOWN = "Unknown"
+
+
+class LineType(Enum):
+    SOLID = "Solid"
+    DASHED = "Dashed"
+    SYMBOL = "Symbol"
+
+
+class LineAttributeField(Enum):
+    SCALE_WITH_PLAN = "scaleWithPlan"
+    DEFINE_SCALE = "defineScale"
+    LINE_TYPE = "lineType"
+    PERIOD = "period"
+    HEIGHT = "height"
+    DASH_ITEMS = "dashItems"
+    LINE_ITEMS = "lineItems"
+
+
+class LineDashItem(APIModel):
+    dash: float
+    gap: float
+
+
+class LineSymbolItem(APIModel):
+    itemType: str
+    centerOffset: float
+    length: float
+    begPos: Coordinate2D
+    endPos: Coordinate2D
+    radius: float
+    beginAngle: float
+    endAngle: float
+
+
+class LineSymbolItemData(APIModel):
+    itemType: Annotated[
+        str,
+        Field(description="Separator, CenterDot, CenterLine, Dot, RightAngle, Parallel, Line, Circle, or Arc."),
+    ]
+    centerOffset: Annotated[
+        float | None,
+        Field(
+            description="Vertical distance from the origin. Used for Separator, CenterDot, and CenterLine item types."
+        ),
+    ] = None
+    length: Annotated[
+        float | None,
+        Field(description="Length of the item. Used for CenterLine, RightAngle, and Parallel item types."),
+    ] = None
+    begPos: Annotated[
+        Coordinate2D | None,
+        Field(description="Beginning position. Used for Dot, RightAngle, Parallel, Line, Circle, and Arc item types."),
+    ] = None
+    endPos: Annotated[
+        Coordinate2D | None,
+        Field(description="End position. Used for Line item type only."),
+    ] = None
+    radius: Annotated[float | None, Field(description="Radius. Used for Circle and Arc item types.")] = None
+    beginAngle: Annotated[
+        float | None,
+        Field(description="Beginning angle in radians, measured from the vertical axis. Used for Arc item type only."),
+    ] = None
+    endAngle: Annotated[
+        float | None,
+        Field(description="End angle in radians, measured from the vertical axis. Used for Arc item type only."),
+    ] = None
+
+
+class LinkToSettings(APIModel):
+    """Mode of linking the Morph to its home story."""
+    homeStoryDifference: Annotated[
+        int | None,
+        Field(description="Difference of the home story from the current story."),
+    ] = None
+    newCreationMode: Annotated[
+        bool | None,
+        Field(
+            description="If true, the story link is relative to the current story (homeStoryDifference is used); if false, the element's absolute floor index is used instead."
+        ),
+    ] = None
+
+
+class MEPComponentType(Enum):
+    TERMINAL = "Terminal"
+    ACCESSORY = "Accessory"
+    EQUIPMENT = "Equipment"
+    FITTING = "Fitting"
+
+
+class MEPCrossSectionShape(Enum):
+    """Optional cross section shape applied to all segments."""
+    RECTANGULAR = "Rectangular"
+    CIRCULAR = "Circular"
+    OVAL = "Oval"
+    U_SHAPE = "UShape"
+
+
+class MEPDomains(Enum):
+    VENTILATION = "Ventilation"
+    PIPING = "Piping"
+    CABLE_CARRIER = "CableCarrier"
+
+
+class MEPElementType(Enum):
+    ROUTING_ELEMENT = "RoutingElement"
+    RIGID_SEGMENT = "RigidSegment"
+    ELBOW = "Elbow"
+    TRANSITION = "Transition"
+    BRANCH = "Branch"
+    TERMINAL = "Terminal"
+    ACCESSORY = "Accessory"
+    EQUIPMENT = "Equipment"
+    FITTING = "Fitting"
+    FLEXIBLE_SEGMENT = "FlexibleSegment"
+    TAKE_OFF = "TakeOff"
+
+
+class MEPPreferenceRow(APIModel):
+    referenceId: int
+    diameter: float
+    description: str | None = None
+
+
+class MEPPreferenceTable(APIModel):
+    guid: str
+    rows: list[MEPPreferenceRow]
+
+
+class MEPPreferenceTableDomain(Enum):
+    """The MEP domain of the segment preference tables."""
+    PIPING = "Piping"
+    VENTILATION = "Ventilation"
+
+
+class MEPSystemAttributeField(Enum):
+    DOMAIN = "domain"
+    CONTOUR_PEN = "contourPen"
+    FILL_PEN = "fillPen"
+    FILL_BACKGROUND_PEN = "fillBackgroundPen"
+    CENTER_LINE_PEN = "centerLinePen"
+    FILL_ID = "fillId"
+    CENTER_LINE_TYPE_ID = "centerLineTypeId"
+
+
+class MEPSystemDomain(Enum):
+    VENTILATION = "Ventilation"
+    PIPING = "Piping"
+    CABLE_CARRIER = "CableCarrier"
+
+
+class MeshRidges(Enum):
+    """How ridges between mesh facets are displayed in 3D."""
+    ALL_SHARP = "AllSharp"
+    ALL_SMOOTH = "AllSmooth"
+    USER_DEFINED = "UserDefined"
+
+
+class MeshSkirtType(Enum):
+    """The type of the skirt structure."""
+    SURFACE_ONLY_WITHOUT_SKIRT = "SurfaceOnlyWithoutSkirt"
+    WITH_SKIRT = "WithSkirt"
+    SOLID_BODY_WITH_SKIRT = "SolidBodyWithSkirt"
+
+
+class MeshSubline(APIModel):
+    coordinates: Annotated[
+        list[Coordinate3D],
+        Field(description="The 3D coordinates of the leveling subline of the mesh."),
+    ]
+
+
+class BodyType(Enum):
+    """Whether the body is a closed solid or an open surface shell. Reported accurately on Get; on Create/Modify this is set on the element but a confirmed Archicad SDK bug means it may not take effect (bodyType has been observed always coming back Solid regardless of what was requested - see edgeOverrides' note)."""
+    SOLID = "Solid"
+    SURFACE = "Surface"
+
+
+class EdgeDefault(Enum):
+    """Default display status for every edge that has no entry in edgeOverrides. Reported accurately on Get; on Create/Modify this is set on the element but does not take effect due to the same confirmed Archicad SDK bug as edgeOverrides (element.morph.edgeType is silently discarded by ACAPI_Element_Create/Change)."""
+    HARD_VISIBLE = "HardVisible"
+    HARD_HIDDEN = "HardHidden"
+    SOFT_HIDDEN = "SoftHidden"
+
+
+class WireEdge(APIModel):
+    vertexIds: Annotated[list[int], Field(max_length=2, min_length=2)]
+
+
+class EdgeOverride(APIModel):
+    vertexIds: Annotated[list[int], Field(max_length=2, min_length=2)]
+    hidden: Annotated[bool | None, Field(description="Hide this edge's line entirely.")] = None
+    smooth: Annotated[
+        bool | None,
+        Field(
+            description="Shade the two adjacent faces smoothly across this edge instead of as a hard crease - the 'aide a la courbe' rounded-look hint. Does not change actual geometry."
+        ),
+    ] = None
+    silhouetteOnly: Annotated[
+        bool | None,
+        Field(description="Show this edge's line only where it forms a silhouette/contour from the current viewpoint."),
+    ] = None
+
+
+class MorphPolygonHole(APIModel):
+    vertexIds: Annotated[list[int], Field(min_length=3)]
+
+
+class MoveVector(APIModel):
+    """Move vector of a 3D point."""
+    x: Annotated[float, Field(description="X value of the vector.")]
+    y: Annotated[float, Field(description="Y value of the vector.")]
+    z: Annotated[float, Field(description="Z value of the vector.")]
+
+
+class NavigatorItemId(APIModel):
+    """The identifier of a navigator item."""
+    guid: Annotated[
+        UUID,
+        Field(
+            description="A Globally Unique Identifier (or Universally Unique Identifier) in its string representation as defined in RFC 4122.",
+        ),
+    ]
+
+
+class NavigatorItemIdArrayItem(APIModel):
+    navigatorItemId: NavigatorItemId
+
+
+class NavigatorItemType(Enum):
+    """The type of the navigator item."""
+    UNDEFINED_ITEM = "UndefinedItem"
+    PROJECT_ITEM = "ProjectItem"
+    STORY_ITEM = "StoryItem"
+    SECTION_ITEM = "SectionItem"
+    DETAIL_DRAWING_ITEM = "DetailDrawingItem"
+    PERSPECTIVE_ITEM = "PerspectiveItem"
+    AXONOMETRY_ITEM = "AxonometryItem"
+    LIST_ITEM = "ListItem"
+    SCHEDULE_ITEM = "ScheduleItem"
+    TOC_ITEM = "TocItem"
+    CAMERA_ITEM = "CameraItem"
+    CAMERA_SET_ITEM = "CameraSetItem"
+    INFO_ITEM = "InfoItem"
+    HELP_ITEM = "HelpItem"
+    LAYOUT_ITEM = "LayoutItem"
+    MASTER_LAYOUT_ITEM = "MasterLayoutItem"
+    BOOK_ITEM = "BookItem"
+    MASTER_FOLDER_ITEM = "MasterFolderItem"
+    SUB_SET_ITEM = "SubSetItem"
+    TEXT_LIST_ITEM = "TextListItem"
+    ELEVATION_ITEM = "ElevationItem"
+    INTERIOR_ELEVATION_ITEM = "InteriorElevationItem"
+    WORKSHEET_DRAWING_ITEM = "WorksheetDrawingItem"
+    DOCUMENT_FROM3_D_ITEM = "DocumentFrom3DItem"
+    FOLDER_ITEM = "FolderItem"
+    DRAWING_ITEM = "DrawingItem"
+    UNKNOWN_ITEM = "UnknownItem"
+
+
+class NonLocalizedValueEnumId(APIModel):
+    """An enumeration value identifier using the nonlocalized value."""
+    type: Literal["nonLocalizedValue"] = "nonLocalizedValue"
+    nonLocalizedValue: str
+
+
+class NormalAngleListPropertyValue(APIModel):
+    """An angle list property value containing angles in an array. The values are measured in SI (radians)."""
+    type: Literal["angleList"] = "angleList"
+    status: Literal["normal"] = "normal"
+    value: list[float]
+
+
+class NormalAnglePropertyValue(APIModel):
+    """An angle property value containing a real angle. The value is measured in SI (radians)."""
+    type: Literal["angle"] = "angle"
+    status: Literal["normal"] = "normal"
+    value: float
+
+
+class NormalAreaListPropertyValue(APIModel):
+    """An area list property value containing areas in an array. The values are measured in SI (square meters)."""
+    type: Literal["areaList"] = "areaList"
+    status: Literal["normal"] = "normal"
+    value: list[float]
+
+
+class NormalAreaPropertyValue(APIModel):
+    """An area property value containing a real area. The value is measured in SI (square meters)."""
+    type: Literal["area"] = "area"
+    status: Literal["normal"] = "normal"
+    value: float
+
+
+class NormalBooleanListPropertyValue(APIModel):
+    """A boolean list property value containing boolean values in an array."""
+    type: Literal["booleanList"] = "booleanList"
+    status: Literal["normal"] = "normal"
+    value: list[bool]
+
+
+class NormalBooleanPropertyValue(APIModel):
+    """A boolean property value containing a valid boolean value."""
+    type: Literal["boolean"] = "boolean"
+    status: Literal["normal"] = "normal"
+    value: bool
+
+
+class NormalIntegerListPropertyValue(APIModel):
+    """An integer list property value containing integers in an array."""
+    type: Literal["integerList"] = "integerList"
+    status: Literal["normal"] = "normal"
+    value: list[int]
+
+
+class NormalIntegerPropertyValue(APIModel):
+    """An integer property value containing a valid integer number."""
+    type: Literal["integer"] = "integer"
+    status: Literal["normal"] = "normal"
+    value: int
+
+
+class NormalLengthListPropertyValue(APIModel):
+    """A length list property value containing length values in an array. The values are measured in SI (meters)."""
+    type: Literal["lengthList"] = "lengthList"
+    status: Literal["normal"] = "normal"
+    value: list[float]
+
+
+class NormalLengthPropertyValue(APIModel):
+    """A length property value containing a real length value. The value is measured in SI (meters)."""
+    type: Literal["length"] = "length"
+    status: Literal["normal"] = "normal"
+    value: float
+
+
+class NormalNumberListPropertyValue(APIModel):
+    """A number list property value containing numbers in an array."""
+    type: Literal["numberList"] = "numberList"
+    status: Literal["normal"] = "normal"
+    value: list[float]
+
+
+class NormalNumberPropertyValue(APIModel):
+    """A number property value containing a valid numeric value."""
+    type: Literal["number"] = "number"
+    status: Literal["normal"] = "normal"
+    value: float
+
+
+class NormalStringListPropertyValue(APIModel):
+    """A string list property value containing strings in an array."""
+    type: Literal["stringList"] = "stringList"
+    status: Literal["normal"] = "normal"
+    value: list[str]
+
+
+class NormalStringPropertyValue(APIModel):
+    """A string property value containing a valid string."""
+    type: Literal["string"] = "string"
+    status: Literal["normal"] = "normal"
+    value: str
+
+
+class NormalVolumeListPropertyValue(APIModel):
+    """A volume list property value containing volumes in an array. The values are measured in SI (cubic meters)."""
+    type: Literal["volumeList"] = "volumeList"
+    status: Literal["normal"] = "normal"
+    value: list[float]
+
+
+class NormalVolumePropertyValue(APIModel):
+    """A volume property value containing a real volume. The value is measured in SI (cubic meters)."""
+    type: Literal["volume"] = "volume"
+    status: Literal["normal"] = "normal"
+    value: float
+
+
+class NotYetSupportedElementTypeDetails(APIModel):
+    error: str
+
+
+class OverriddenPen(APIModel):
+    """A pen index that may override the one inherited from the element's structure. On Archicad versions where the underlying element does not support this override, 'overridden' is always false."""
+    overridden: Annotated[bool, Field(description="True if the pen is overridden on the element level.")]
+    penIndex: int | None = None
+
+
+class PenData(APIModel):
+    index: Annotated[int, Field(description="Index of the pen [1..255].")]
+    color: ColorRGB | None = None
+    width: Annotated[
+        float | None,
+        Field(description="Thickness of the pen defined in paper millimeters."),
+    ] = None
+    description: Annotated[str | None, Field(description="Textual description of the pen.")] = None
+
+
+class PenTableAttributeField(Enum):
+    IS_ACTIVE_FOR_MODEL = "isActiveForModel"
+    IS_ACTIVE_FOR_LAYOUT = "isActiveForLayout"
+    PENS = "pens"
+
+
+class PenTablePen(APIModel):
+    index: int
+    color: ColorRGB
+    width: float
+    description: str
+
+
+class PivotLine(APIModel):
+    """If given, a single-plane roof is created instead of a multi-plane roof: one plane tilted along this pivot line. The plane rises on the left side of the line direction (begCoordinate towards endCoordinate); flip the line to tilt towards the other side."""
+    begCoordinate: Coordinate2D
+    endCoordinate: Coordinate2D
+
+
+class PolyArc(APIModel):
+    """Representation of an arc segment of a two dimensional polygon/polyline."""
+    begIndex: Annotated[int, Field(description="Node index of one end point of the arc.")]
+    endIndex: Annotated[int, Field(description="Node index of the other end point of the arc.")]
+    arcAngle: Annotated[
+        float,
+        Field(
+            description="Angle of the arc; it is positive, if the arc is on the right-hand side of the straight segment."
+        ),
+    ]
+
+
+class PolylineData(APIModel):
+    """The parameters of the new Polyline."""
+    favoriteName: Annotated[
+        str | None,
+        Field(
+            description="Optional name of a favorite to base the new element on. Its settings are applied first, then the explicitly given fields override them."
+        ),
+    ] = None
+    floorInd: Annotated[
+        float | None,
+        Field(description="The identifier of the floor. Optional parameter, by default the current floor is used."),
+    ] = None
+    layerIndex: Annotated[
+        int | None,
+        Field(
+            description="Layer attribute index to place the polyline on. Optional parameter, by default the current layer is used."
+        ),
+    ] = None
+    linePenIndex: Annotated[
+        int | None,
+        Field(description="Pen index of the polyline contour. Optional parameter, by default the current pen is used."),
+    ] = None
+    lineTypeIndex: Annotated[
+        int | None,
+        Field(
+            description="Line type attribute index of the polyline contour. Optional parameter, by default the current line type is used."
+        ),
+    ] = None
+    penWeightMm: Annotated[float | None, Field(description="Optional pen weight override in mm.")] = None
+    roomSeparator: Annotated[
+        bool | None,
+        Field(description="Is this a zone boundary line? Optional, defaults to false."),
+    ] = None
+    coordinates: Annotated[
+        list[Coordinate2D],
+        Field(description="The 2D coordinates of the polyline.", min_length=2),
+    ]
+    arcs: Annotated[list[PolyArc] | None, Field(description="The arcs of the polyline.")] = None
+
+
+class PossibleNumericValue(APIModel):
+    value: Annotated[
+        float | None,
+        Field(
+            description="The numeric value. Present for all flags except 'Step', which instead carries stepBegin/stepValue."
+        ),
+    ] = None
+    flag: Annotated[str | None, Field(description="The flag.")] = None
+    stepBegin: Annotated[
+        float | None,
+        Field(description="Only present when flag is 'Step': the value is stepBegin + n*stepValue for n >= 0."),
+    ] = None
+    stepValue: Annotated[
+        float | None,
+        Field(description="Only present when flag is 'Step' - see stepBegin."),
+    ] = None
+    description: Annotated[str | None, Field(description="The description of the value.")] = None
+
+
+class PrintArea(Enum):
+    """The area to print. The default is 'currentView'."""
+    CURRENT_VIEW = "currentView"
+    ENTIRE_DRAWING = "entireDrawing"
+    MARQUEE = "marquee"
+
+
+class ProfileAttributeField(Enum):
+    WALL_TYPE = "wallType"
+    BEAM_TYPE = "beamType"
+    COLU_TYPE = "coluType"
+    HANDRAIL_TYPE = "handrailType"
+    OTHER_GDL_OBJECT_TYPE = "otherGDLObjectType"
+    USE_WITH = "useWith"
+    WIDTH = "width"
+    HEIGHT = "height"
+    MINIMUM_WIDTH = "minimumWidth"
+    MINIMUM_HEIGHT = "minimumHeight"
+    WIDTH_STRETCHABLE = "widthStretchable"
+    HEIGHT_STRETCHABLE = "heightStretchable"
+    HAS_CORE_SKIN = "hasCoreSkin"
+    PROFILE_MODIFIERS = "profileModifiers"
+    SKINS = "skins"
+    SKIN_OUTLINES = "skinOutlines"
+
+
+class ProfileModifier(APIModel):
+    """A stretchable edge-offset parameter of the profile, as named by the profile's author in the Profile Editor. Its value is a live geometric measurement matching what the Profile Editor's dimension shows."""
+    name: Annotated[
+        str | None,
+        Field(
+            description="User-authored label, e.g. 'Largeur support'. Present only if the profile's author assigned one."
+        ),
+    ] = None
+    value: Annotated[
+        float | None,
+        Field(
+            description="Present only when the parameter's dimension anchors could be resolved to concrete positions."
+        ),
+    ] = None
+
+
+class OutlineArc(APIModel):
+    begIndex: int
+    endIndex: int
+    arcAngle: float
+
+
+class ProfileSkinContour(APIModel):
+    polygonCoordinates: Annotated[
+        list[Coordinate2D],
+        Field(description="The 2D coordinates of this contour.", min_length=3),
+    ]
+    polygonArcs: Annotated[
+        list[PolyArc] | None,
+        Field(
+            description="Optional arcs along this contour's edges. begIndex/endIndex are 0-based positions within this contour's own polygonCoordinates."
+        ),
+    ] = None
+
+
+class ProfileUseWith(Enum):
+    WALL = "Wall"
+    BEAM = "Beam"
+    COLUMN = "Column"
+    HANDRAIL = "Handrail"
+    OTHER = "Other"
+
+
+class ProjectInfoField(APIModel):
+    projectInfoId: Annotated[str, Field(description="The id of the project info field.")]
+    projectInfoName: Annotated[str, Field(description="The name of the project info field visible on UI.")]
+    projectInfoValue: Annotated[str, Field(description="The value of the project info field.")]
+
+
+class ProjectInfoFieldData(APIModel):
+    projectInfoName: Annotated[str, Field(description="Display name of the project info field.", min_length=1)]
+    projectInfoValue: Annotated[str | None, Field(description="Initial value of the project info field.")] = None
+
+
+class ProjectLocation(APIModel):
+    longitude: Annotated[float, Field(description="longitude in degrees")]
+    latitude: Annotated[float, Field(description="latitude in degrees")]
+    altitude: Annotated[float, Field(description="altitude in meters")]
+    north: Annotated[float, Field(description="north direction in radians")]
+
+
+class PropertyDataType(Enum):
+    NUMBER = "number"
+    INTEGER = "integer"
+    STRING = "string"
+    BOOLEAN = "boolean"
+    LENGTH = "length"
+    AREA = "area"
+    VOLUME = "volume"
+    ANGLE = "angle"
+    NUMBER_LIST = "numberList"
+    INTEGER_LIST = "integerList"
+    STRING_LIST = "stringList"
+    BOOLEAN_LIST = "booleanList"
+    LENGTH_LIST = "lengthList"
+    AREA_LIST = "areaList"
+    VOLUME_LIST = "volumeList"
+    ANGLE_LIST = "angleList"
+    SINGLE_ENUM = "singleEnum"
+    MULTI_ENUM = "multiEnum"
+
+
+class PropertyType(Enum):
+    STATIC_BUILT_IN = "StaticBuiltIn"
+    DYNAMIC_BUILT_IN = "DynamicBuiltIn"
+    CUSTOM = "Custom"
+
+
+class PropertyCollectionType(Enum):
+    UNDEFINED = "Undefined"
+    SINGLE = "Single"
+    LIST = "List"
+    SINGLE_CHOICE_ENUMERATION = "SingleChoiceEnumeration"
+    MULTIPLE_CHOICE_ENUMERATION = "MultipleChoiceEnumeration"
+
+
+class PropertyValueType(Enum):
+    UNDEFINED = "Undefined"
+    INTEGER = "Integer"
+    REAL = "Real"
+    STRING = "String"
+    BOOLEAN = "Boolean"
+    GUID = "Guid"
+
+
+class PropertyMeasureType(Enum):
+    UNDEFINED = "Undefined"
+    DEFAULT = "Default"
+    LENGTH = "Length"
+    AREA = "Area"
+    VOLUME = "Volume"
+    ANGLE = "Angle"
+
+
+class PropertyGroup(APIModel):
+    """Represents a property group."""
+    name: str
+    description: str | None = None
+
+
+class PropertyGroupArrayItem(APIModel):
+    """A wrapper containing a property group"""
+    propertyGroup: PropertyGroup
+
+
+class PropertyGroupId(APIModel):
+    """The identifier of a property group."""
+    guid: Annotated[
+        UUID,
+        Field(
+            description="A Globally Unique Identifier (or Universally Unique Identifier) in its string representation as defined in RFC 4122.",
+        ),
+    ]
+
+
+class PropertyGroupIdArrayItem(APIModel):
+    """A wrapper containing the property group identifier."""
+    propertyGroupId: PropertyGroupId
+
+
+class PropertyId(APIModel):
+    """The identifier of a property."""
+    guid: Annotated[
+        UUID,
+        Field(
+            description="A Globally Unique Identifier (or Universally Unique Identifier) in its string representation as defined in RFC 4122.",
+        ),
+    ]
+
+
+class PropertyIdArrayItem(APIModel):
+    """A wrapper containing the property identifier."""
+    propertyId: PropertyId
+
+
+class PropertyValue(APIModel):
+    """The display string value of a property."""
+    value: str
+
+
+class PropertyValueArrayItem(APIModel):
+    """A wrapper containing the property value."""
+    propertyValue: PropertyValue
+
+
+class PropertyValuesArrayItem(APIModel):
+    """A wrapper containing the property values."""
+    propertyValues: Annotated[
+        list[PropertyValueArrayItem | ErrorItem],
+        Field(description="A list of property values."),
+    ]
+
+
+class User(APIModel):
+    userId: float
+    userName: str
+
+
+class RevisionCustomSchemeEntry(APIModel):
+    customSchemeKey: Annotated[
+        UUID,
+        Field(
+            description="A Globally Unique Identifier (or Universally Unique Identifier) in its string representation as defined in RFC 4122.",
+        ),
+    ]
+    customSchemeValue: str
+
+
+class RevisionIssueId(APIModel):
+    """The identifier of a revision issue."""
+    guid: Annotated[
+        UUID,
+        Field(
+            description="A Globally Unique Identifier (or Universally Unique Identifier) in its string representation as defined in RFC 4122.",
+        ),
+    ]
+
+
+class RoofClass(Enum):
+    SINGLE_PLANE = "SinglePlane"
+    MULTI_PLANE = "MultiPlane"
+
+
+class RoofDetailsLevel(APIModel):
+    height: float
+    angle: float
+
+
+class RoofDetailsPivotLine(APIModel):
+    """Single-plane: the pivot line the plane rotates about."""
+    begin: Coordinate2D
+    end: Coordinate2D
+
+
+class RoofStructureType(Enum):
+    BASIC = "Basic"
+    COMPOSITE = "Composite"
+
+
+class Rotation(APIModel):
+    """Rotation parameters for an element."""
+    beginPoint: Annotated[Coordinate2D, Field(description="Starting point of the rotation arc.")]
+    endPoint: Annotated[Coordinate2D, Field(description="End point of the rotation arc.")]
+    origin: Annotated[Coordinate2D, Field(description="Center of rotation.")]
+
+
+class SectionData(APIModel):
+    startCoordinate: Coordinate2D
+    endCoordinate: Coordinate2D
+    depth: float | None = None
+    name: str | None = None
+    floorIndex: int | None = None
+
+
+class CutPlane(APIModel):
+    """Defines a 3D cut plane using the plane equation: pa*x + pb*y + pc*z + pd = 0"""
+    pa: Annotated[
+        float,
+        Field(
+            description="Coefficient of x in the plane equation. The x coordinate of the normal vector of the plane."
+        ),
+    ]
+    pb: Annotated[
+        float,
+        Field(
+            description="Coefficient of y in the plane equation. The y coordinate of the normal vector of the plane."
+        ),
+    ]
+    pc: Annotated[
+        float,
+        Field(
+            description="Coefficient of z in the plane equation. The z coordinate of the normal vector of the plane."
+        ),
+    ]
+    pd: Annotated[
+        float,
+        Field(
+            description="Constant term in the plane equation. The distance of the plane from the origin along the normal vector."
+        ),
+    ]
+
+
+class SetGDLParameterByIndexDetails(APIModel):
+    """Details of a GDL parameter."""
+    index: Annotated[int, Field(description="The index of the parameter.")]
+    index1: Annotated[
+        int | None,
+        Field(
+            description="Optional 1-based first index for changing a single item of an array parameter without resizing it. Only valid for array parameters and only together with a single (non-list) value."
+        ),
+    ] = None
+    index2: Annotated[
+        int | None,
+        Field(
+            description="Optional 1-based second index for changing a single item of a two-dimensional array parameter. Only valid together with index1. Defaults to 1."
+        ),
+    ] = None
+    value: Annotated[
+        Any,
+        Field(
+            description="The new value of the parameter. For array parameters provide a list of values for one-dimensional arrays (e.g. [1, 2, 3]) or a list of lists for two-dimensional arrays (e.g. [[11, 12], [21, 22]]); the array parameter is resized to match the given values. Alternatively provide index1 (and optionally index2) together with a single value to change one item of the array without resizing it. Within one command call whole-array (list) values are applied after all single-value changes."
+        ),
+    ]
+
+
+class SetGDLParameterByNameDetails(APIModel):
+    """Details of a GDL parameter."""
+    name: Annotated[str, Field(description="The name of the parameter.")]
+    index1: Annotated[
+        int | None,
+        Field(
+            description="Optional 1-based first index for changing a single item of an array parameter without resizing it. Only valid for array parameters and only together with a single (non-list) value."
+        ),
+    ] = None
+    index2: Annotated[
+        int | None,
+        Field(
+            description="Optional 1-based second index for changing a single item of a two-dimensional array parameter. Only valid together with index1. Defaults to 1."
+        ),
+    ] = None
+    value: Annotated[
+        Any,
+        Field(
+            description="The new value of the parameter. For array parameters provide a list of values for one-dimensional arrays (e.g. [1, 2, 3]) or a list of lists for two-dimensional arrays (e.g. [[11, 12], [21, 22]]); the array parameter is resized to match the given values. Alternatively provide index1 (and optionally index2) together with a single value to change one item of the array without resizing it. Within one command call whole-array (list) values are applied after all single-value changes."
+        ),
+    ]
+
+
+class NavigatorItemIdsWithRotationItem(APIModel):
+    navigatorItemId: NavigatorItemId
+    rotation: Annotated[float, Field(description="View rotation angle in radians.")]
 
 
 class AlertType(Enum):
@@ -34,19 +2008,3803 @@ class AlertType(Enum):
     ERROR = "error"
 
 
-class Angle(APIModel):
-    unit: AngleType
-    decimals: Annotated[int, Field(description="Number of decimals to display for angle values.")]
-    accuracy: Annotated[int, Field(description="Accuracy for angle values.")]
+class SlabReferencePlaneLocation(Enum):
+    TOP = "Top"
+    CORE_TOP = "CoreTop"
+    CORE_BOTTOM = "CoreBottom"
+    BOTTOM = "Bottom"
 
 
-class AngleType(Enum):
-    """The type of the angle measurement unit."""
-    DECIMAL_DEGREE = "DecimalDegree"
-    DEGREE_MIN_SEC = "DegreeMinSec"
-    GRAD = "Grad"
-    RADIAN = "Radian"
-    SURVEYORS = "Surveyors"
+class SlabStructureType(Enum):
+    BASIC = "Basic"
+    COMPOSITE = "Composite"
+
+
+class SolidLinkFlags(APIModel):
+    """Flags controlling the behaviour of a solid element operation link."""
+    inheritOperatorAttributes: Annotated[
+        bool,
+        Field(description="If true, the target element inherits the attributes of the operator element."),
+    ]
+    skipPolygonHoles: Annotated[
+        bool,
+        Field(description="If true, holes of the operator (roof/slab) are ignored during the operation."),
+    ]
+
+
+class SolidOperationType(Enum):
+    """The type of solid element operation."""
+    SUBTRACTION = "Subtraction"
+    SUBTRACTION_UPWARDS = "SubtractionUpwards"
+    SUBTRACTION_DOWNWARDS = "SubtractionDownwards"
+    INTERSECTION = "Intersection"
+    ADDITION = "Addition"
+
+
+class SpecialFolderPath(APIModel):
+    path: Annotated[str, Field(description="The path of the special folder in the filesystem.")]
+
+
+class SpecialFolderType(Enum):
+    """The type of a special folder of the running Archicad."""
+    APPLICATION_PREFS = "ApplicationPrefs"
+    GRAPHISOFT_PREFS = "GraphisoftPrefs"
+    GRAPHISOFT_HOME = "GraphisoftHome"
+    CACHE = "Cache"
+    DATA = "Data"
+    USER_DOCUMENTS = "UserDocuments"
+    TEMPORARY = "Temporary"
+    APPLICATION = "Application"
+    DEFAULTS = "Defaults"
+    WEB_OBJECTS = "WebObjects"
+    TEMPLATES = "Templates"
+    HELP = "Help"
+    EMBEDDED_PROJECT_LIBRARY = "EmbeddedProjectLibrary"
+    EMBEDDED_PROJECT_LIBRARY_HOTLINK = "EmbeddedProjectLibraryHotlink"
+    PROJECT_PREVIEWS = "ProjectPreviews"
+
+
+class StairData(APIModel):
+    """The parameters of the new Stair."""
+    favoriteName: Annotated[
+        str | None,
+        Field(
+            description="Optional name of a favorite to base the new element on. Its settings are applied first, then the explicitly given fields override them."
+        ),
+    ] = None
+    baseLinePoints: Annotated[
+        list[Coordinate2D],
+        Field(
+            description="2D coordinates defining the stair baseline polyline. Minimum 2 points for a straight stair, 3+ for L-shaped or U-shaped stairs.",
+            min_length=2,
+        ),
+    ]
+    zCoordinate: Annotated[
+        float,
+        Field(description="The Z coordinate (absolute elevation) of the stair base."),
+    ]
+    floorIndex: Annotated[
+        int | None,
+        Field(description="Optional floor index. If omitted, derived from zCoordinate."),
+    ] = None
+    totalHeight: Annotated[float | None, Field(description="Total height of the stair.", gt=0.0)] = None
+    flightWidth: Annotated[float | None, Field(description="Width of the stair flight.", gt=0.0)] = None
+    stepNum: Annotated[int | None, Field(description="Number of risers (steps).", ge=1)] = None
+    riserHeight: Annotated[float | None, Field(description="Height of each riser.", gt=0.0)] = None
+    treadDepth: Annotated[float | None, Field(description="Depth (going) of each tread.", gt=0.0)] = None
+    finishVisible: Annotated[
+        bool | None,
+        Field(
+            description="Optional. If false, the tread/riser finishes are hidden and only the stair structure (e.g. a monolith) is modeled."
+        ),
+    ] = None
+
+
+class StoryParameters(APIModel):
+    """Represents all parameters of a single project story, including its unique identifiers. Used in API responses."""
+    index: Annotated[int, Field(description="The story index.")]
+    floorId: Annotated[int, Field(description="Unique ID of the story.")]
+    dispOnSections: Annotated[
+        bool,
+        Field(description="Story level lines should appear on sections and elevations."),
+    ]
+    level: Annotated[float, Field(description="The story level.")]
+    height: Annotated[
+        float | None,
+        Field(
+            description="Story height, calculated as the level of the story above minus this story's level. Omitted for the topmost story, which has no story above."
+        ),
+    ] = None
+    name: Annotated[str, Field(description="The name of the story.")]
+
+
+class StorySettings(APIModel):
+    """Contains the configurable settings for creating or modifying a story. Used as input in API requests."""
+    index: Annotated[
+        int | None,
+        Field(
+            description="The story index. Optional. The stories are matched to the existing ones positionally, from the bottom up. Giving the index of any of them pins the numbering of the whole list, so stories below the existing structure - basements with negative indices - can be requested as well. When given for more than one story, the indices must be consecutive."
+        ),
+    ] = None
+    dispOnSections: Annotated[
+        bool,
+        Field(description="Story level lines should appear on sections and elevations."),
+    ]
+    level: Annotated[float, Field(description="The story level.")]
+    name: Annotated[str, Field(description="The name of the story.")]
+
+
+class StoryVisibility(APIModel):
+    """Per-story visibility settings (API_StoryVisibility): the home story, plus how many stories above/below also show this element."""
+    showOnHome: Annotated[bool | None, Field(description="Show on the home story.")] = None
+    showAllAbove: Annotated[bool | None, Field(description="Show on all stories above the home story.")] = None
+    showAllBelow: Annotated[bool | None, Field(description="Show on all stories below the home story.")] = None
+    showRelAbove: Annotated[
+        int | None,
+        Field(description="Show this many stories above the home story (ignored when showAllAbove is true)."),
+    ] = None
+    showRelBelow: Annotated[
+        int | None,
+        Field(description="Show this many stories below the home story (ignored when showAllBelow is true)."),
+    ] = None
+
+
+class NumberingStyle(Enum):
+    UNDEFINED = "Undefined"
+    ABC = "abc"
+    abc_1 = "ABC"
+    FIELD_1 = "1"
+    FIELD_01 = "01"
+    FIELD_001 = "001"
+    FIELD_0001 = "0001"
+    NO_ID = "noID"
+
+
+class SubsetData(APIModel):
+    name: Annotated[str, Field(min_length=1)]
+    parentNavigatorItemId: NavigatorItemId | None = None
+    ownPrefix: str | None = None
+    customNumber: str | None = None
+    numberingStyle: NumberingStyle | None = None
+    startAt: int | None = None
+    continueNumbering: bool | None = None
+    useUpperPrefix: bool | None = None
+    includeToIDSequence: bool | None = None
+    customNumbering: bool | None = None
+    addOwnPrefix: bool | None = None
+
+
+class SuccessfulExecutionResult(APIModel):
+    """The result of a successful execution."""
+    success: Literal[True] = True
+
+
+class SurfaceAttributeField(Enum):
+    MATERIAL_TYPE = "materialType"
+    AMBIENT_REFLECTION = "ambientReflection"
+    DIFFUSE_REFLECTION = "diffuseReflection"
+    SPECULAR_REFLECTION = "specularReflection"
+    TRANSPARENCY = "transparency"
+    SHINE = "shine"
+    TRANSPARENCY_ATTENUATION = "transparencyAttenuation"
+    EMISSION_ATTENUATION = "emissionAttenuation"
+    SURFACE_COLOR = "surfaceColor"
+    SPECULAR_COLOR = "specularColor"
+    EMISSION_COLOR = "emissionColor"
+    FILL_ID = "fillId"
+    TEXTURE = "texture"
+
+
+class SurfaceType(Enum):
+    """The type of a surface material."""
+    GENERAL = "General"
+    SIMPLE = "Simple"
+    MATTE = "Matte"
+    METAL = "Metal"
+    PLASTIC = "Plastic"
+    GLASS = "Glass"
+    GLOWING = "Glowing"
+    CONSTANT = "Constant"
+
+
+class SurveyPointPosition(APIModel):
+    eastings: Annotated[
+        float,
+        Field(
+            description="Location along the easting of the coordinate system of the target map coordinate reference system."
+        ),
+    ]
+    northings: Annotated[
+        float,
+        Field(
+            description="Location along the northing of the coordinate system of the target map coordinate reference system."
+        ),
+    ]
+    elevation: Annotated[
+        float,
+        Field(description="Orthogonal height relative to the vertical datum specified."),
+    ]
+
+
+class SymbolLabelTextDirection(Enum):
+    """Direction of the symbol label's text."""
+    PARALLEL = "Parallel"
+    HORIZONTAL = "Horizontal"
+    VERTICAL = "Vertical"
+    GENERAL = "General"
+
+
+class TextBoxAnchor(Enum):
+    """Anchor point of the text box."""
+    LEFT_TOP = "LeftTop"
+    MIDDLE_TOP = "MiddleTop"
+    RIGHT_TOP = "RightTop"
+    LEFT_MIDDLE = "LeftMiddle"
+    MIDDLE_MIDDLE = "MiddleMiddle"
+    RIGHT_MIDDLE = "RightMiddle"
+    LEFT_BOTTOM = "LeftBottom"
+    MIDDLE_BOTTOM = "MiddleBottom"
+    RIGHT_BOTTOM = "RightBottom"
+
+
+class TextRunDetails(APIModel):
+    """One monostyle run of text (API_RunType). Concatenating 'text' across all runs in order gives the full content; a newline character starts a new line."""
+    text: Annotated[str, Field(description="The run's text content.")]
+    penIndex: Annotated[
+        int | None,
+        Field(description="Pen attribute index. Optional; defaults to the style's penIndex."),
+    ] = None
+    fontIndex: Annotated[
+        int | None,
+        Field(description="Font attribute index. Optional; defaults to the style's fontIndex."),
+    ] = None
+    bold: bool | None = None
+    italic: bool | None = None
+    underline: bool | None = None
+    heightOverride: Annotated[
+        float | None,
+        Field(description="Character height in mm for this run only. Optional; defaults to the style's height."),
+    ] = None
+    effectStrikeout: Annotated[
+        bool | None,
+        Field(description="Optional; defaults to the style's effectStrikeout."),
+    ] = None
+    effectSuperscript: Annotated[
+        bool | None,
+        Field(description="Optional; defaults to the style's effectSuperscript."),
+    ] = None
+    effectSubscript: Annotated[
+        bool | None,
+        Field(description="Optional; defaults to the style's effectSubscript."),
+    ] = None
+    effectProtected: Annotated[
+        bool | None,
+        Field(description="Optional; defaults to the style's effectProtected."),
+    ] = None
+
+
+class TextSettings(APIModel):
+    """Settings for modifying a Text element or a text-type Label. For Labels only the text field is applied. Setting text replaces the whole content (any per-run formatting of the old content is dropped) and switches the element to automatic width, matching the behavior of CreateTexts/CreateLabels."""
+    text: Annotated[
+        str | None,
+        Field(description="The new text content. Newlines create multiple lines."),
+    ] = None
+    position: Annotated[
+        Coordinate2D | None,
+        Field(description="The placement position of the text. Only applied to Text elements."),
+    ] = None
+    angle: Annotated[
+        float | None,
+        Field(description="The rotation angle in radians. Only applied to Text elements."),
+    ] = None
+    height: Annotated[
+        float | None,
+        Field(description="The character height in millimeters. Only applied to Text elements."),
+    ] = None
+    justification: Justification | None = None
+
+
+class TextFrameShape(Enum):
+    """Text frame shape. Standalone Text elements only support Rectangle. Available from Archicad 28; earlier versions ignore it and read it back as Rectangle."""
+    RECTANGLE = "Rectangle"
+    CIRCLE = "Circle"
+    ROUNDED_RECTANGLE = "RoundedRectangle"
+    PILL = "Pill"
+
+
+class TextStyleDetails(APIModel):
+    """Full readable style state of a Text or text-class Label: every field of TextStyleSettableDetails plus the read-only ones (lineCount, boxWidth, boxHeight)."""
+    penIndex: Annotated[int | None, Field(description="Pen attribute index.")] = None
+    fontIndex: Annotated[int | None, Field(description="Font attribute index.")] = None
+    bold: bool | None = None
+    italic: bool | None = None
+    underline: bool | None = None
+    justification: Justification | None = None
+    height: Annotated[float | None, Field(description="Character height in mm.")] = None
+    spacing: Annotated[float | None, Field(description="Line spacing factor, between -10.0 and -1.0.")] = None
+    angle: Annotated[float | None, Field(description="Rotation angle in radians.")] = None
+    effectStrikeout: bool | None = None
+    effectSuperscript: bool | None = None
+    effectSubscript: bool | None = None
+    effectProtected: Annotated[bool | None, Field(description="Protected text (autotext reference).")] = None
+    widthFactor: Annotated[
+        float | None,
+        Field(description="Width scale of the text, between 0.75 and 10.0."),
+    ] = None
+    charSpaceFactor: Annotated[
+        float | None,
+        Field(description="Character spacing scale, between 0.75 and 10.0."),
+    ] = None
+    fixedSize: Annotated[bool | None, Field(description="Size does not depend on output scale.")] = None
+    usedContour: Annotated[bool | None, Field(description="Draw the frame of the text block.")] = None
+    usedFill: Annotated[bool | None, Field(description="Draw a solid fill behind the text block.")] = None
+    contourPenIndex: Annotated[int | None, Field(description="Pen index of the text block's frame.")] = None
+    fillPenIndex: Annotated[int | None, Field(description="Pen index of the text block's background fill.")] = None
+    anchor: TextBoxAnchor | None = None
+    fixedAngle: Annotated[
+        bool | None,
+        Field(description="The rotation angle does not change when the element is rotated."),
+    ] = None
+    contourOffset: Annotated[
+        float | None,
+        Field(description="Offset of the frame/background fill from the text bounding box, in mm."),
+    ] = None
+    flipEnabled: Annotated[
+        bool | None,
+        Field(description="The text should always be readable (flips when viewed upside down)."),
+    ] = None
+    textFrameShape: Annotated[
+        TextFrameShape | None,
+        Field(
+            description="Text frame shape. Standalone Text elements only support Rectangle. Available from Archicad 28; earlier versions ignore it and read it back as Rectangle."
+        ),
+    ] = None
+    textFrameSizeFixed: Annotated[
+        bool | None,
+        Field(
+            description="Use fixedWidth/fixedHeight instead of fitting the frame to the text box. Available from Archicad 28; earlier versions ignore it and read it back as false."
+        ),
+    ] = None
+    textFrameFixedWidth: Annotated[
+        float | None,
+        Field(
+            description="Frame width in mm, when textFrameSizeFixed is true. Between 1 and 1000. Available from Archicad 28; earlier versions ignore it and read it back as 0."
+        ),
+    ] = None
+    textFrameFixedHeight: Annotated[
+        float | None,
+        Field(
+            description="Frame height in mm, when textFrameSizeFixed is true (ignored for Circle, which uses fixedWidth as diameter). Between 1 and 1000. Available from Archicad 28; earlier versions ignore it and read it back as 0."
+        ),
+    ] = None
+    lineCount: Annotated[
+        int | None,
+        Field(description="Read-only: number of text lines (API_TextType::nLine)."),
+    ] = None
+    boxWidth: Annotated[
+        float | None,
+        Field(description="Read-only: horizontal size of the text box in mm, auto-computed by Archicad."),
+    ] = None
+    boxHeight: Annotated[
+        float | None,
+        Field(description="Read-only: vertical size of the text box in mm, auto-computed by Archicad."),
+    ] = None
+
+
+class TextStyleSettableDetails(APIModel):
+    """Every user-configurable style setting of a Text or a text-class Label (API_TextType). Shared by CreateTexts/CreateLabels ('style'), ModifyTexts/ModifyLabels ('style'), and the Get response."""
+    penIndex: Annotated[int | None, Field(description="Pen attribute index.")] = None
+    fontIndex: Annotated[int | None, Field(description="Font attribute index.")] = None
+    bold: bool | None = None
+    italic: bool | None = None
+    underline: bool | None = None
+    justification: Justification | None = None
+    height: Annotated[float | None, Field(description="Character height in mm.")] = None
+    spacing: Annotated[float | None, Field(description="Line spacing factor, between -10.0 and -1.0.")] = None
+    angle: Annotated[float | None, Field(description="Rotation angle in radians.")] = None
+    effectStrikeout: bool | None = None
+    effectSuperscript: bool | None = None
+    effectSubscript: bool | None = None
+    effectProtected: Annotated[bool | None, Field(description="Protected text (autotext reference).")] = None
+    widthFactor: Annotated[
+        float | None,
+        Field(description="Width scale of the text, between 0.75 and 10.0."),
+    ] = None
+    charSpaceFactor: Annotated[
+        float | None,
+        Field(description="Character spacing scale, between 0.75 and 10.0."),
+    ] = None
+    fixedSize: Annotated[bool | None, Field(description="Size does not depend on output scale.")] = None
+    usedContour: Annotated[bool | None, Field(description="Draw the frame of the text block.")] = None
+    usedFill: Annotated[bool | None, Field(description="Draw a solid fill behind the text block.")] = None
+    contourPenIndex: Annotated[int | None, Field(description="Pen index of the text block's frame.")] = None
+    fillPenIndex: Annotated[int | None, Field(description="Pen index of the text block's background fill.")] = None
+    anchor: TextBoxAnchor | None = None
+    fixedAngle: Annotated[
+        bool | None,
+        Field(description="The rotation angle does not change when the element is rotated."),
+    ] = None
+    contourOffset: Annotated[
+        float | None,
+        Field(description="Offset of the frame/background fill from the text bounding box, in mm."),
+    ] = None
+    flipEnabled: Annotated[
+        bool | None,
+        Field(description="The text should always be readable (flips when viewed upside down)."),
+    ] = None
+    textFrameShape: Annotated[
+        TextFrameShape | None,
+        Field(
+            description="Text frame shape. Standalone Text elements only support Rectangle. Available from Archicad 28; earlier versions ignore it and read it back as Rectangle."
+        ),
+    ] = None
+    textFrameSizeFixed: Annotated[
+        bool | None,
+        Field(
+            description="Use fixedWidth/fixedHeight instead of fitting the frame to the text box. Available from Archicad 28; earlier versions ignore it and read it back as false."
+        ),
+    ] = None
+    textFrameFixedWidth: Annotated[
+        float | None,
+        Field(
+            description="Frame width in mm, when textFrameSizeFixed is true. Between 1 and 1000. Available from Archicad 28; earlier versions ignore it and read it back as 0."
+        ),
+    ] = None
+    textFrameFixedHeight: Annotated[
+        float | None,
+        Field(
+            description="Frame height in mm, when textFrameSizeFixed is true (ignored for Circle, which uses fixedWidth as diameter). Between 1 and 1000. Available from Archicad 28; earlier versions ignore it and read it back as 0."
+        ),
+    ] = None
+
+
+class Texture(APIModel):
+    """Texture parameters"""
+    name: Annotated[
+        str,
+        Field(description="The filename of the texture in the library (without extension)."),
+    ]
+    rotationAngle: Annotated[float | None, Field(description="Rotation angle in radians.")] = None
+    xSize: Annotated[
+        float | None,
+        Field(description="X size of the picture in model space, by default 1."),
+    ] = None
+    ySize: Annotated[
+        float | None,
+        Field(description="Y size of the picture in model space, by default 1."),
+    ] = None
+    FillRectangle: Annotated[
+        bool | None,
+        Field(
+            description="True, if fit the rectangle with the picture in a central position, using the natural aspect ratio of the picture."
+        ),
+    ] = None
+    FitPicture: Annotated[
+        bool | None,
+        Field(
+            description="True, if fit the picture in the middle of the rectangle, using the natural aspect ratio of the picture."
+        ),
+    ] = None
+    mirrorX: Annotated[
+        bool | None,
+        Field(description="True, if the texture is mirrored in X direction."),
+    ] = None
+    mirrorY: Annotated[
+        bool | None,
+        Field(description="True, if the texture is mirrored in Y direction."),
+    ] = None
+    useAlphaChannel: Annotated[
+        bool | None,
+        Field(description="True, if the alpha channel of the texture is used."),
+    ] = None
+    alphaChannelChangesTransparency: Annotated[
+        bool | None,
+        Field(description="True, if the alpha channel of the texture changes the transparency."),
+    ] = None
+    alphaChannelChangesSurfaceColor: Annotated[
+        bool | None,
+        Field(description="True, if the alpha channel of the texture changes the surface color."),
+    ] = None
+    alphaChannelChangesAmbientColor: Annotated[
+        bool | None,
+        Field(description="True, if the alpha channel of the texture changes the ambient color."),
+    ] = None
+    alphaChannelChangesSpecularColor: Annotated[
+        bool | None,
+        Field(description="True, if the alpha channel of the texture changes the specular color."),
+    ] = None
+    alphaChannelChangesDiffuseColor: Annotated[
+        bool | None,
+        Field(description="True, if the alpha channel of the texture changes the diffuse color."),
+    ] = None
+
+
+class TextureProjectionType(Enum):
+    """Projection type of the 3D texture."""
+    INVALID = "Invalid"
+    PLANAR = "Planar"
+    DEFAULT = "Default"
+    CYLINDRIC = "Cylindric"
+    SPHERIC = "Spheric"
+    BOX = "Box"
+
+
+class TrimType(Enum):
+    KEEP_INSIDE = "KeepInside"
+    KEEP_OUTSIDE = "KeepOutside"
+    KEEP_ALL = "KeepAll"
+    NO = "No"
+
+
+class UserUndefinedPropertyValue(APIModel):
+    """A userUndefined value means that there is no actual number/string/etc. value, but the user deliberately set an Undefined value: this is a valid value, too."""
+    type: PropertyDataType
+    status: Literal["userUndefined"] = "userUndefined"
+
+
+class ViewCloneData(APIModel):
+    navigatorItemId: Annotated[
+        NavigatorItemId,
+        Field(description="Navigator item ID of the Project Map viewpoint to clone."),
+    ]
+    parentNavigatorItemId: Annotated[
+        NavigatorItemId | None,
+        Field(
+            description="Navigator item ID of the View Map folder to place the clone in. Optional; defaults to the View Map root."
+        ),
+    ] = None
+
+
+class ViewData(APIModel):
+    navigatorItemId: Annotated[
+        NavigatorItemId,
+        Field(description="Source navigator item whose database and settings are copied."),
+    ]
+    parentNavigatorItemId: Annotated[
+        NavigatorItemId | None,
+        Field(description="View Map folder to place the new view in. Optional; defaults to View Map root."),
+    ] = None
+    name: Annotated[
+        str | None,
+        Field(description="Name for the new view. Optional; defaults to the source item name."),
+    ] = None
+
+
+class ViewDepthLimitation(Enum):
+    """Floor plan view depth limitation."""
+    TO_FLOOR_PLAN_RANGE = "ToFloorPlanRange"
+    TO_ABSOLUTE_LIMIT = "ToAbsoluteLimit"
+    ENTIRE_ELEMENT = "EntireElement"
+
+
+class StructureDisplay(Enum):
+    """Structure display mode. One of EntireStructure, CoreOnly, WithoutFinishes, StructureOnly."""
+    ENTIRE_STRUCTURE = "EntireStructure"
+    CORE_ONLY = "CoreOnly"
+    WITHOUT_FINISHES = "WithoutFinishes"
+    STRUCTURE_ONLY = "StructureOnly"
+
+
+class VolumeType(Enum):
+    """The type of the volume measurement unit."""
+    CUBIC_METER = "CubicMeter"
+    LITER = "Liter"
+    CUBIC_CENTIMETER = "CubicCentimeter"
+    CUBIC_MILLIMETER = "CubicMillimeter"
+    CUBIC_FOOT = "CubicFoot"
+    CUBIC_INCH = "CubicInch"
+    CUBIC_YARD = "CubicYard"
+    GALLON = "Gallon"
+
+
+class WallGeometryType(Enum):
+    STRAIGHT = "Straight"
+    TRAPEZOID = "Trapezoid"
+    POLYGONAL = "Polygonal"
+
+
+class WallModificationGeometryType(Enum):
+    """The wall's plan outline shape (Polygonal is not settable here, read-only via GetDetailsOfElements). This is unrelated to slantAlpha/slantBeta - see profileType for the cross section shape those depend on."""
+    STRAIGHT = "Straight"
+    TRAPEZOID = "Trapezoid"
+
+
+class WallModificationProfileType(Enum):
+    """Cross section shape of the wall, distinct from geometryType (which is the plan outline). slantAlpha/slantBeta only have an effect once this is set to Slanted."""
+    NORMAL = "Normal"
+    SLANTED = "Slanted"
+    TRAPEZ = "Trapez"
+
+
+class WallProfileType(Enum):
+    """Cross section shape of the wall, distinct from geometryType (which is the plan outline). Only Normal/Slanted/Trapez are settable via ModifyWalls - Poly needs a profile attribute wired through a separate mechanism. slantAlpha/slantBeta only have an effect once this is Slanted or Trapez."""
+    NORMAL = "Normal"
+    SLANTED = "Slanted"
+    TRAPEZ = "Trapez"
+    POLY = "Poly"
+
+
+class WallReferenceLineLocation(Enum):
+    """The Core* values only have an effect on a Composite or Profile wall (structureType) - a Basic wall has no core skin, and Archicad falls back to the nearest non-core equivalent (e.g. CoreCenter becomes Center)."""
+    OUTSIDE = "Outside"
+    CENTER = "Center"
+    INSIDE = "Inside"
+    CORE_OUTSIDE = "CoreOutside"
+    CORE_CENTER = "CoreCenter"
+    CORE_INSIDE = "CoreInside"
+
+
+class WallSettings(APIModel):
+    """Settings for modifying a wall."""
+    begCoordinate: Coordinate2D | None = None
+    endCoordinate: Coordinate2D | None = None
+    height: Annotated[float | None, Field(description="height relative to bottom")] = None
+    bottomOffset: Annotated[
+        float | None,
+        Field(description="base level of the wall relative to the floor level"),
+    ] = None
+    offset: Annotated[float | None, Field(description="wall's base line's offset from ref. line")] = None
+    begThickness: Annotated[
+        float | None,
+        Field(description="Thickness at the beginning in case of trapezoid wall"),
+    ] = None
+    endThickness: Annotated[
+        float | None,
+        Field(description="Thickness at the end in case of trapezoid wall"),
+    ] = None
+
+
+class WallStructureType(Enum):
+    BASIC = "Basic"
+    COMPOSITE = "Composite"
+    PROFILE = "Profile"
+
+
+class WallZoneRelation(Enum):
+    BOUNDARY = "Boundary"
+    REDUCE_AREA = "ReduceArea"
+    NONE = "None"
+    SUBTRACT_FROM_ZONE = "SubtractFromZone"
+
+
+class WindowType(Enum):
+    """The type of a window."""
+    FLOOR_PLAN = "FloorPlan"
+    SECTION = "Section"
+    DETAILS = "Details"
+    FIELD_3_D_MODEL = "3DModel"
+    LAYOUT = "Layout"
+    DRAWING = "Drawing"
+    CUSTOM_TEXT = "CustomText"
+    CUSTOM_DRAW = "CustomDraw"
+    MASTER_LAYOUT = "MasterLayout"
+    ELEVATION = "Elevation"
+    INTERIOR_ELEVATION = "InteriorElevation"
+    WORKSHEET = "Worksheet"
+    REPORT = "Report"
+    FIELD_3_D_DOCUMENT = "3DDocument"
+    EXTERNAL3_D = "External3D"
+    MOVIE3_D = "Movie3D"
+    MOVIE_RENDERING = "MovieRendering"
+    RENDERING = "Rendering"
+    MODEL_COMPARE = "ModelCompare"
+    INTERACTIVE_SCHEDULE = "Interactive Schedule"
+    UNKNOWN = "Unknown"
+
+
+class WorksheetData(APIModel):
+    name: Annotated[str, Field(min_length=1)]
+    referenceId: Annotated[str, Field(min_length=1)]
+
+
+class ZoneCategoryAttributeField(Enum):
+    CATEGORY_CODE = "categoryCode"
+    COLOR = "color"
+    STAMP_NAME = "stampName"
+    STAMP_MAIN_GUID = "stampMainGuid"
+    STAMP_REV_GUID = "stampRevGuid"
+
+
+class ZoneSettings(APIModel):
+    """Settings for modifying a zone."""
+    stampPosition: Annotated[
+        Coordinate2D | None,
+        Field(description="Position of the origin of the zone stamp."),
+    ] = None
+    stampAngle: Annotated[float | None, Field(description="Rotation angle of the zone stamp in radians.")] = None
+    fixedStampAngle: Annotated[
+        bool | None,
+        Field(description="If true, the zone stamp angle remains fixed when the element is rotated."),
+    ] = None
+
+
+class Zoom(APIModel):
+    """The actual zoom parameters, rectangular region of the model."""
+    xMin: Annotated[float, Field(description="The minimum X value of the zoom box.")]
+    yMin: Annotated[float, Field(description="The minimum Y value of the zoom box.")]
+    xMax: Annotated[float, Field(description="The maximum X value of the zoom box.")]
+    yMax: Annotated[float, Field(description="The maximum Y value of the zoom box.")]
+
+
+class AttributeId(APIModel):
+    """The identifier of an attribute."""
+    guid: Annotated[
+        UUID,
+        Field(
+            description="A Globally Unique Identifier (or Universally Unique Identifier) in its string representation as defined in RFC 4122.",
+        ),
+    ]
+
+
+class AttributeIdArrayItem(APIModel):
+    attributeId: AttributeId
+
+
+class AttributePropertyValue(APIModel):
+    """A property value with the identifiers of the property and its owner attribute."""
+    attributeId: AttributeId
+    propertyId: PropertyId
+    propertyValue: PropertyValue
+
+
+class AutomaticZoneGeometry(APIModel):
+    """Automatic zone placement."""
+    referencePosition: Annotated[Coordinate2D, Field(description="Reference point to automatically find zone.")]
+
+
+class BeamData(APIModel):
+    favoriteName: Annotated[
+        str | None,
+        Field(
+            description="Optional name of a favorite to base the new element on. Its settings are applied first, then the explicitly given fields override them."
+        ),
+    ] = None
+    begCoordinate: Coordinate2D
+    endCoordinate: Coordinate2D
+    floorIndex: Annotated[
+        int | None,
+        Field(description="Optional floor index. If omitted, derived from zCoordinate."),
+    ] = None
+    zCoordinate: float
+    offset: float | None = None
+    slantAngle: Annotated[
+        float | None,
+        Field(
+            description="Slant angle in radians. A non-zero value also switches the beam to slanted, unless isSlanted is given explicitly."
+        ),
+    ] = None
+    isSlanted: Annotated[
+        bool | None,
+        Field(description="Optional explicit slanted state. By default it is derived from slantAngle."),
+    ] = None
+    profileAngle: Annotated[
+        float | None,
+        Field(description="Rotation angle of the profile around the beam's center line, in radians."),
+    ] = None
+    arcAngle: float | None = None
+    verticalCurveHeight: float | None = None
+    width: Annotated[
+        float | None,
+        Field(
+            description="Cross section width of the beam. Applied to all segments.",
+            gt=0.0,
+        ),
+    ] = None
+    height: Annotated[
+        float | None,
+        Field(
+            description="Cross section height of the beam. Applied to all segments.",
+            gt=0.0,
+        ),
+    ] = None
+    anchorPoint: BeamAnchorPoint | None = None
+    isWidthAndHeightLinked: Annotated[
+        bool | None,
+        Field(
+            description="When true (the default), Archicad keeps width and height equal and setting one changes the other - set to false to give width/height independent values. Applied to all segments."
+        ),
+    ] = None
+    buildingMaterialId: Annotated[
+        AttributeId | None,
+        Field(description="Cross section building material. Applied to all segments."),
+    ] = None
+    profileId: Annotated[
+        AttributeId | None,
+        Field(description="Switches the cross section to this custom extruded profile. Applied to all segments."),
+    ] = None
+
+
+class BeamHole(APIModel):
+    holeId: float
+    type: BeamHoleType
+    showContour: bool | None = None
+    centerX: float
+    centerZ: float
+    width: float
+    height: float | None = None
+
+
+class BuildingMaterialAttribute(APIModel):
+    """A building material attribute."""
+    attributeId: AttributeId
+    index: int
+    name: str
+    id: str | None = None
+    manufacturer: str | None = None
+    description: str | None = None
+    connPriority: int | None = None
+    cutFillIndex: int | None = None
+    cutFillPen: int | None = None
+    cutFillBackgroundPen: int | None = None
+    cutSurfaceIndex: int | None = None
+    cutFillOrientation: CutFillOrientation | None = None
+    thermalConductivity: float | None = None
+    density: float | None = None
+    heatCapacity: float | None = None
+    embodiedEnergy: float | None = None
+    embodiedCarbon: float | None = None
+    showUncutLines: bool | None = None
+    collisionDetection: bool | None = None
+
+
+class BuildingMaterialData(APIModel):
+    """Data to create a Building Material."""
+    attributeId: Annotated[
+        AttributeId | None,
+        Field(
+            description="Indentifier of the existing Building Material to overwrite, ignored if overwriteExisting is false."
+        ),
+    ] = None
+    index: Annotated[
+        str | None,
+        Field(
+            description="Index of the existing Building Material to overwrite, ignored if overwriteExisting is false."
+        ),
+    ] = None
+    name: Annotated[
+        str,
+        Field(
+            description="Name. If overwriteExisting is true, then the existing Building Material with the given name will be overwritten."
+        ),
+    ]
+    id: Annotated[str | None, Field(description="Identifier.")] = None
+    manufacturer: Annotated[str | None, Field(description="Manufacturer.")] = None
+    description: Annotated[str | None, Field(description="Decription.")] = None
+    connPriority: Annotated[int | None, Field(description="Intersection priority.")] = None
+    cutFillIndex: Annotated[int | None, Field(description="Index of the Cut Fill.")] = None
+    cutFillPen: Annotated[int | None, Field(description="Cut Fill Foreground Pen.")] = None
+    cutFillBackgroundPen: Annotated[int | None, Field(description="Cut Fill Background Pen.")] = None
+    cutSurfaceIndex: Annotated[int | None, Field(description="Index of the Cut Surface.")] = None
+    thermalConductivity: Annotated[float | None, Field(description="Thermal Conductivity.")] = None
+    density: Annotated[float | None, Field(description="Density.")] = None
+    heatCapacity: Annotated[float | None, Field(description="Heat Capacity.")] = None
+    embodiedEnergy: Annotated[float | None, Field(description="Embodied Energy.")] = None
+    embodiedCarbon: Annotated[float | None, Field(description="Embodied Carbon.")] = None
+    showUncutLines: Annotated[bool | None, Field(description="Show Contours in Model Views.")] = None
+    collisionDetection: Annotated[
+        bool | None,
+        Field(description="Whether the Building Material participates in collision detection."),
+    ] = None
+    cutFillOrientation: Annotated[
+        str | None,
+        Field(description="ProjectOrigin, ElementOrigin, or FitToSkin. Orientation of the cut fill."),
+    ] = None
+
+
+class CircleData(APIModel):
+    """The parameters of the new Circle."""
+    favoriteName: Annotated[
+        str | None,
+        Field(
+            description="Optional name of a favorite to base the new element on. Its settings are applied first, then the explicitly given fields override them."
+        ),
+    ] = None
+    floorInd: Annotated[
+        float | None,
+        Field(description="The identifier of the floor. Optional parameter, by default the current floor is used."),
+    ] = None
+    layerIndex: Annotated[
+        int | None,
+        Field(
+            description="Layer attribute index to place the circle on. Optional parameter, by default the current layer is used."
+        ),
+    ] = None
+    origin: Coordinate2D
+    radius: float
+    roomSeparator: Annotated[
+        bool | None,
+        Field(description="Is this a zone boundary line? Optional, defaults to false."),
+    ] = None
+    linePenIndex: Annotated[
+        int | None,
+        Field(description="Optional pen index. By default the current pen is used."),
+    ] = None
+    lineTypeId: Annotated[
+        AttributeId | None,
+        Field(description="Optional line type attribute. By default the current line type is used."),
+    ] = None
+
+
+class ClassificationItemId(APIModel):
+    """The identifier of a classification item."""
+    guid: Annotated[
+        UUID,
+        Field(
+            description="A Globally Unique Identifier (or Universally Unique Identifier) in its string representation as defined in RFC 4122.",
+        ),
+    ]
+
+
+class ClassificationItemIdArrayItem(APIModel):
+    classificationItemId: ClassificationItemId
+
+
+class ClassificationSystemDetails(APIModel):
+    """The details of a classification system."""
+    name: Annotated[str, Field(description="The display name of the classification system.")]
+    description: Annotated[str, Field(description="The description of the classification system.")]
+    source: Annotated[
+        str,
+        Field(description="The source of the classification system (e.g. URL to a classification system standard)."),
+    ]
+    version: Annotated[str, Field(description="The version of the classification system.")]
+    date: Annotated[
+        str,
+        Field(
+            description="The release date of the classification system's current version.",
+        ),
+    ]
+
+
+class ClassificationSystemId(APIModel):
+    """The identifier of a classification system."""
+    guid: Annotated[
+        UUID,
+        Field(
+            description="A Globally Unique Identifier (or Universally Unique Identifier) in its string representation as defined in RFC 4122.",
+        ),
+    ]
+
+
+class ClassificationSystemIdArrayItem(APIModel):
+    classificationSystemId: ClassificationSystemId
+
+
+class ClassificationSystemsWithItem(APIModel):
+    classificationSystem: ClassificationSystemDetails
+    classificationItems: Annotated[
+        list[ClassificationItemDetails],
+        Field(description="A list of classification items in the classification system."),
+    ]
+
+
+class ColumnData(APIModel):
+    """The parameters of the new Column."""
+    favoriteName: Annotated[
+        str | None,
+        Field(
+            description="Optional name of a favorite to base the new element on. Its settings are applied first, then the explicitly given fields override them."
+        ),
+    ] = None
+    coordinates: Annotated[Coordinates, Field(description="3D coordinate.")]
+    height: Annotated[float | None, Field(description="Optional column height.", gt=0.0)] = None
+    axisRotationAngle: Annotated[float | None, Field(description="Optional column rotation angle in radians.")] = None
+    width: Annotated[
+        float | None,
+        Field(
+            description="Cross section width of the column. Applied to all segments.",
+            gt=0.0,
+        ),
+    ] = None
+    depth: Annotated[
+        float | None,
+        Field(
+            description="Cross section depth (height) of the column. Applied to all segments. Only effective for rectangular columns.",
+            gt=0.0,
+        ),
+    ] = None
+    coreAnchor: ColumnCoreAnchor | None = None
+    circleBased: Annotated[
+        bool | None,
+        Field(
+            description="True for a round column cross section, false for rectangular. Ignored if profileId is also given. Applied to all segments."
+        ),
+    ] = None
+    isWidthAndHeightLinked: Annotated[
+        bool | None,
+        Field(
+            description="When true (the default), Archicad keeps width and depth equal and setting one changes the other - set to false to give width/depth independent values. Applied to all segments."
+        ),
+    ] = None
+    buildingMaterialId: Annotated[
+        AttributeId | None,
+        Field(
+            description="Cross section building material (round or rectangular, per circleBased). Applied to all segments."
+        ),
+    ] = None
+    profileId: Annotated[
+        AttributeId | None,
+        Field(
+            description="Switches the cross section to this custom extruded profile (circleBased becomes false). Applied to all segments."
+        ),
+    ] = None
+    floorIndex: Annotated[
+        int | None,
+        Field(description="Optional floor index. If omitted, derived from the coordinate's z value."),
+    ] = None
+
+
+class Skin(APIModel):
+    """Data to represent a skin."""
+    type: Annotated[str, Field(description="Skin type (Core, Finish, or Other)")]
+    buildingMaterialId: AttributeIdArrayItem
+    framePen: Annotated[int, Field(description="Skin frame pen index.")]
+    thickness: Annotated[float, Field(description="Skin thickness (in meters).")]
+
+
+class Separator(APIModel):
+    """Data to represent a skin separator."""
+    lineTypeId: AttributeIdArrayItem
+    linePen: Annotated[int, Field(description="Separator line pen index.")]
+
+
+class CompositeData(APIModel):
+    """Data to create a Composite."""
+    attributeId: Annotated[
+        AttributeId | None,
+        Field(description="Indentifier of the existing Composite to overwrite, ignored if overwriteExisting is false."),
+    ] = None
+    index: Annotated[
+        str | None,
+        Field(description="Index of the existing Composite to overwrite, ignored if overwriteExisting is false."),
+    ] = None
+    name: Annotated[
+        str,
+        Field(
+            description="Name. If overwriteExisting is true, then the existing Composite with the given name will be overwritten."
+        ),
+    ]
+    useWith: Annotated[
+        list[str] | None,
+        Field(description="Array of types the composite can used with."),
+    ] = None
+    skins: Annotated[list[Skin], Field(description="Array of skin data.")]
+    separators: Annotated[
+        list[Separator],
+        Field(description="Array of skin separator data. The number of items must be the number of skins plus one."),
+    ]
+
+
+class CompositeSeparator(APIModel):
+    lineTypeId: AttributeIdArrayItem | None = None
+    linePen: int
+
+
+class CompositeSkin(APIModel):
+    type: CompositeSkinType
+    buildingMaterialId: AttributeIdArrayItem | None = None
+    framePen: int
+    thickness: float
+
+
+class CoverFill(APIModel):
+    """Floor plan cover fill settings of a Column or Beam."""
+    use: Annotated[bool, Field(description="Whether the cover fill is shown on the floor plan.")]
+    useFromSurface: Annotated[
+        bool,
+        Field(description="Whether the fill is taken from the top surface material of the element."),
+    ]
+    orientationComesFrom3D: Annotated[
+        bool,
+        Field(description="Whether the cover fill orientation comes from the 3D view of the element."),
+    ]
+    fillId: AttributeId
+    foregroundPen: int
+    backgroundPen: int
+    transformationType: TransformationType
+    transformation: CoverFillTransformation
+
+
+class CoverFillOrientation(APIModel):
+    """Orientation/distortion of the floor plan cover fill."""
+    type: CoverFillOrientationType | None = None
+    origo: Annotated[
+        Coordinate2D | None,
+        Field(description="Origin of the fill relative to the project origin."),
+    ] = None
+    matrix00: Annotated[
+        float | None,
+        Field(
+            description="X component of the primary distortion (direction) vector - the cosine of the fill angle, if not distorted."
+        ),
+    ] = None
+    matrix10: Annotated[
+        float | None,
+        Field(
+            description="Y component of the primary distortion (direction) vector - the sine of the fill angle, if not distorted."
+        ),
+    ] = None
+    matrix01: Annotated[
+        float | None,
+        Field(
+            description="X component of the secondary distortion vector - the cosine of the normal vector's angle, if not distorted."
+        ),
+    ] = None
+    matrix11: Annotated[
+        float | None,
+        Field(
+            description="Y component of the secondary distortion vector - the sine of the normal vector's angle, if not distorted."
+        ),
+    ] = None
+    innerRadius: Annotated[
+        float | None,
+        Field(description="Radius for circular fill distortion (type Centered only)."),
+    ] = None
+
+
+class CurtainWallFrameDetails(APIModel):
+    begCoordinate: Coordinate3D
+    endCoordinate: Coordinate3D
+    orientationVector: Coordinate3D
+    panelConnectionHole: Annotated[
+        PanelConnectionHole,
+        Field(description="The parameters of the panel connection hole."),
+    ]
+    frameContour: Annotated[FrameContour, Field(description="The parameters of the frame contour.")]
+    segmentIndex: Annotated[
+        float,
+        Field(description="The index of the curtain wall segment to which this frame belongs."),
+    ]
+    className: str
+    type: CurtainWallFrameType
+
+
+class DatabaseId(APIModel):
+    """The identifier of a database"""
+    guid: Annotated[
+        UUID,
+        Field(
+            description="A Globally Unique Identifier (or Universally Unique Identifier) in its string representation as defined in RFC 4122.",
+        ),
+    ]
+
+
+class DatabaseIdAndWindowType(APIModel):
+    windowType: WindowType
+    databaseId: DatabaseId | None = None
+    storyIndex: Annotated[
+        int | None,
+        Field(
+            description="Story index to activate. Only valid when windowType is 'FloorPlan'. As returned by GetStories."
+        ),
+    ] = None
+
+
+class DatabaseIdArrayItem(APIModel):
+    databaseId: DatabaseId
+
+
+class AttributesToDeleteItem(APIModel):
+    attributeType: AttributeType
+    attributeId: AttributeIdArrayItem
+
+
+class DesignOptionCombinationId(APIModel):
+    """The identifier of a design option combination."""
+    guid: Annotated[
+        UUID,
+        Field(
+            description="A Globally Unique Identifier (or Universally Unique Identifier) in its string representation as defined in RFC 4122.",
+        ),
+    ]
+
+
+class DesignOptionCombinationIdArrayItem(APIModel):
+    designOptionCombinationId: DesignOptionCombinationId
+
+
+class DesignOptionId(APIModel):
+    """The identifier of a design option."""
+    guid: Annotated[
+        UUID,
+        Field(
+            description="A Globally Unique Identifier (or Universally Unique Identifier) in its string representation as defined in RFC 4122.",
+        ),
+    ]
+
+
+class DesignOptionIdArrayItem(APIModel):
+    designOptionId: DesignOptionId
+
+
+class DocumentRevisionId(APIModel):
+    """The identifier of a document revision."""
+    guid: Annotated[
+        UUID,
+        Field(
+            description="A Globally Unique Identifier (or Universally Unique Identifier) in its string representation as defined in RFC 4122.",
+        ),
+    ]
+
+
+class DocumentRevisionReference(APIModel):
+    """A reference to a document revision belonging to the current issue"""
+    revisionId: DocumentRevisionId
+
+
+class DrawingData(APIModel):
+    navigatorItemId: NavigatorItemId
+    layoutDatabaseId: DatabaseId | None = None
+    name: Annotated[str, Field(min_length=1)]
+    position: Coordinate2D
+    scale: Annotated[float | None, Field(gt=0.0)] = None
+    clipPolygon: Annotated[list[Coordinate2D] | None, Field(min_length=3)] = None
+
+
+class ElementId(APIModel):
+    """The identifier of an element."""
+    guid: Annotated[
+        UUID,
+        Field(
+            description="A Globally Unique Identifier (or Universally Unique Identifier) in its string representation as defined in RFC 4122.",
+        ),
+    ]
+
+
+class ElementIdArrayItem(APIModel):
+    elementId: ElementId
+
+
+class ElementPropertyValue(APIModel):
+    """A property value with the identifiers of the property and its owner element."""
+    elementId: ElementId
+    propertyId: PropertyId
+    propertyValue: PropertyValue
+
+
+class TrimmedByItem(APIModel):
+    elementId: ElementId
+    trimType: TrimType
+
+
+class ElementsByIFCId(APIModel):
+    ifcId: str
+    elements: Annotated[
+        list[ElementIdArrayItem],
+        Field(
+            description="A list of element identifiers having the given IFC identifier. If the given IFC identifier is an external identifier, the list can contain multiple elements as the IFC can be placed multiple times."
+        ),
+    ]
+
+
+class ElementsOfDesignOption(APIModel):
+    designOptionId: DesignOptionId
+    elements: Annotated[list[ElementIdArrayItem], Field(description="A list of elements.")]
+
+
+class ElementsOfElementType(APIModel):
+    """Elements of a given type."""
+    elementType: ElementType
+    elements: Annotated[list[ElementIdArrayItem], Field(description="A list of elements.")]
+
+
+class ElementsWrapper(APIModel):
+    """A list of elements wrapped in an object."""
+    elements: Annotated[list[ElementIdArrayItem], Field(description="A list of elements.")]
+
+
+class EnumValueIdArrayItem(APIModel):
+    """A wrapper containing the identifier of a property enumeration value."""
+    enumValueId: Annotated[
+        DisplayValueEnumId | NonLocalizedValueEnumId,
+        Field(description="The identifier of a property enumeration value."),
+    ]
+
+
+class FavoritesFromElementUpdate(APIModel):
+    """The identifier of the element and the name of the existing Favorite to update from it."""
+    elementId: ElementId
+    favorite: str
+
+
+class FillAttribute(APIModel):
+    """A fill attribute."""
+    attributeId: AttributeId
+    index: int
+    name: str
+    subType: FillSubType | None = None
+    scaleWithPlan: bool | None = None
+    useForWalls: bool | None = None
+    useForDraft: bool | None = None
+    useForCover: bool | None = None
+    horizontalSpacing: float | None = None
+    verticalSpacing: float | None = None
+    angle: float | None = None
+    bitPattern: str | None = None
+    gradientStart: Coordinate2D | None = None
+    gradientEnd: Coordinate2D | None = None
+    percent: float | None = None
+    texture: Texture | None = None
+    lineItems: list[FillLineItem] | None = None
+    symbolLines: list[FillSymbolLine] | None = None
+    symbolArcs: list[FillSymbolArc] | None = None
+    symbolHotspots: list[Coordinate2D] | None = None
+
+
+class FillData(APIModel):
+    """Data to create a Fill."""
+    attributeId: Annotated[
+        AttributeId | None,
+        Field(description="Indentifier of the existing Fill to overwrite, ignored if overwriteExisting is false."),
+    ] = None
+    index: Annotated[
+        str | None,
+        Field(description="Index of the existing Fill to overwrite, ignored if overwriteExisting is false."),
+    ] = None
+    name: Annotated[
+        str,
+        Field(
+            description="Name. If overwriteExisting is true, then the existing Fill with the given name will be overwritten."
+        ),
+    ]
+    subType: Annotated[
+        str | None,
+        Field(
+            description="Vector, Solid, Empty, Symbol, LinearGradient, RadialGradient, or Image. Defaults to Vector. Only one Solid and one Empty fill may exist. Image fills use the texture field's name to reference the image library part."
+        ),
+    ] = None
+    scaleWithPlan: Annotated[bool | None, Field(description="The fill is scale dependent.")] = None
+    useForWalls: Annotated[bool | None, Field(description="This fill can be used for cut fills.")] = None
+    useForDraft: Annotated[bool | None, Field(description="This fill can be used for drafting fills.")] = None
+    useForCover: Annotated[bool | None, Field(description="This fill can be used for cover fills.")] = None
+    horizontalSpacing: Annotated[
+        float | None,
+        Field(description="The fill's spacing factor in the X direction (Vector fills)."),
+    ] = None
+    verticalSpacing: Annotated[
+        float | None,
+        Field(description="The fill's spacing factor in the Y direction (Vector fills)."),
+    ] = None
+    angle: Annotated[
+        float | None,
+        Field(description="The angle of the fill in radians (Vector, Symbol, and gradient fills)."),
+    ] = None
+    bitPattern: Annotated[
+        str | None,
+        Field(
+            description="16 hex characters (8 bytes) describing the fill's bitmap pattern, one line of the pattern per byte, matching the Pattern field of the Attribute Manager XML export."
+        ),
+    ] = None
+    gradientStart: Annotated[
+        Coordinate2D | None,
+        Field(description="Gradient start point (LinearGradient/RadialGradient fills only)."),
+    ] = None
+    gradientEnd: Annotated[
+        Coordinate2D | None,
+        Field(description="Gradient end point (LinearGradient/RadialGradient fills only)."),
+    ] = None
+    percent: Annotated[
+        float | None,
+        Field(description="Translucency percentage [0..1] (gradient and some Solid fills)."),
+    ] = None
+    texture: Annotated[
+        Texture | None,
+        Field(
+            description="Texture parameters (Image and gradient fills). Only name, rotationAngle, xSize, ySize, mirrorX, and mirrorY are used for Fills."
+        ),
+    ] = None
+    lineItems: Annotated[
+        list[FillLineItem] | None,
+        Field(description="Vectorial fill line items (Vector fills only)."),
+    ] = None
+    symbolLines: Annotated[
+        list[FillSymbolLine] | None,
+        Field(description="Line items of the fill's repeating symbol pattern (Symbol fills only)."),
+    ] = None
+    symbolArcs: Annotated[
+        list[FillSymbolArc] | None,
+        Field(description="Arc items of the fill's repeating symbol pattern (Symbol fills only)."),
+    ] = None
+    symbolHotspots: Annotated[
+        list[Coordinate2D] | None,
+        Field(description="Hotspot coordinates of the fill's repeating symbol pattern (Symbol fills only)."),
+    ] = None
+
+
+class GDLParameterDetails(APIModel):
+    """Details of a GDL parameter."""
+    name: Annotated[str, Field(description="The name of the parameter.")]
+    displayName: Annotated[str, Field(description="The display name of the parameter.")]
+    index: Annotated[int, Field(description="The index of the parameter.")]
+    type: Annotated[str, Field(description="The type of the parameter.")]
+    dimension1: Annotated[
+        int | None,
+        Field(description="The 1st dimension of array (in case of array value)."),
+    ] = None
+    dimension2: Annotated[
+        int | None,
+        Field(description="The 2nd dimension of array (in case of array value)."),
+    ] = None
+    value: Annotated[Any, Field(description="The value of the parameter.")]
+    valueDescription: Annotated[str | None, Field(description="The value description for numeric parameter.")] = None
+    isLocked: Annotated[
+        bool,
+        Field(description="The parameter is locked; i.e. the user cannot modify it"),
+    ]
+    flags: Annotated[list[Flag], Field(description="The flags of the parameter.")]
+    possibleValues: list[str] | list[PossibleNumericValue] | None = None
+    canHaveCustomValue: Annotated[bool | None, Field(description="The parameter can have a custom value.")] = None
+    itemDescriptions: Annotated[
+        list[str] | None,
+        Field(
+            description="Per-item text labels for an array-type parameter (API_AddParType.arrayDescriptions), one per array element in dim1xdim2 order. Only present when the library part defines them."
+        ),
+    ] = None
+
+
+class LibraryPart(APIModel):
+    guid: str | None = None
+    index: int | None = None
+    documentName: str | None = None
+    fileName: str | None = None
+    typeId: LibraryPartType | None = None
+
+
+class Length(APIModel):
+    unit: LengthType
+    accuracy: AccuracyType
+    decimals: Annotated[int, Field(description="Number of decimals to display for length values.")]
+    roundInch: Annotated[int | None, Field(description="Fractional inches.")] = None
+
+
+class Volume(APIModel):
+    unit: VolumeType
+    accuracy: AccuracyType
+    decimals: Annotated[int, Field(description="Number of decimals to display for volume values.")]
+
+
+class Collision(APIModel):
+    elementId1: ElementId
+    elementId2: ElementId
+    hasBodyCollision: bool
+    hasClearenceCollision: bool
+
+
+class Comment(APIModel):
+    guid: Annotated[
+        UUID,
+        Field(
+            description="Comment identifier",
+        ),
+    ]
+    author: Annotated[str, Field(description="Comment author")]
+    text: Annotated[str, Field(description="Comment text")]
+    status: IssueCommentStatus
+    creaTime: Annotated[int, Field(description="Comment creation time")]
+
+
+class DesignOptionSet(APIModel):
+    designOptionSetId: Annotated[GuidId, Field(description="The guid identifier of the design option set.")]
+    name: Annotated[str, Field(description="The name of the design option set.")]
+    designOptions: Annotated[
+        list[DesignOptionIdArrayItem],
+        Field(description="The list of design options in the set."),
+    ]
+
+
+class Element(APIModel):
+    elementId: ElementId
+
+
+class Issue(APIModel):
+    issueId: IssueId
+    name: Annotated[str, Field(description="Issue name")]
+    parentIssueId: IssueId
+    creaTime: Annotated[int, Field(description="Issue creation time")]
+    modiTime: Annotated[int, Field(description="Issue modification time")]
+    tagText: Annotated[str, Field(description="Issue tag text - labels")]
+    tagTextElementId: ElementId
+    isTagTextElemVisible: Annotated[bool, Field(description="The visibility of the attached tag text element")]
+
+
+class LayoutDatabaseId(APIModel):
+    databaseId: DatabaseId | None = None
+    navigatorItemId: NavigatorItemId | None = None
+
+
+class LayoutSetting(APIModel):
+    layoutName: str | None = None
+    horizontalSize: float | None = None
+    verticalSize: float | None = None
+    leftMargin: float | None = None
+    topMargin: float | None = None
+    rightMargin: float | None = None
+    bottomMargin: float | None = None
+    customLayoutNumber: str | None = None
+    customLayoutNumbering: bool | None = None
+    doNotIncludeInNumbering: bool | None = None
+    displayMasterLayoutBelow: bool | None = None
+    customData: list[LayoutCustomData] | None = None
+
+
+class SectionElement(APIModel):
+    sectionElementId: Annotated[
+        ElementId,
+        Field(
+            description="The identifier of the section element itself, accepted by CreateAssociativeDimensionsOnSection as sectionElementId."
+        ),
+    ]
+    ownerElementId: Annotated[
+        ElementId,
+        Field(
+            description="The identifier of the owner element the section element was generated from - this is what every other listing command returns."
+        ),
+    ]
+    ownerElementType: Annotated[
+        ElementType | None,
+        Field(
+            description="The type of the owner element. Only present when the owner's header is readable from the section database."
+        ),
+    ] = None
+
+
+class Subelement(APIModel):
+    """Subelements grouped by type."""
+    cWallSegments: Annotated[list[ElementIdArrayItem] | None, Field(description="A list of elements.")] = None
+    cWallFrames: Annotated[list[ElementIdArrayItem] | None, Field(description="A list of elements.")] = None
+    cWallPanels: Annotated[list[ElementIdArrayItem] | None, Field(description="A list of elements.")] = None
+    cWallJunctions: Annotated[list[ElementIdArrayItem] | None, Field(description="A list of elements.")] = None
+    cWallAccessories: Annotated[list[ElementIdArrayItem] | None, Field(description="A list of elements.")] = None
+    stairRisers: Annotated[list[ElementIdArrayItem] | None, Field(description="A list of elements.")] = None
+    stairTreads: Annotated[list[ElementIdArrayItem] | None, Field(description="A list of elements.")] = None
+    stairStructures: Annotated[list[ElementIdArrayItem] | None, Field(description="A list of elements.")] = None
+    railingNodes: Annotated[list[ElementIdArrayItem] | None, Field(description="A list of elements.")] = None
+    railingSegments: Annotated[list[ElementIdArrayItem] | None, Field(description="A list of elements.")] = None
+    railingPosts: Annotated[list[ElementIdArrayItem] | None, Field(description="A list of elements.")] = None
+    railingRailEnds: Annotated[list[ElementIdArrayItem] | None, Field(description="A list of elements.")] = None
+    railingRailConnections: Annotated[list[ElementIdArrayItem] | None, Field(description="A list of elements.")] = None
+    railingHandrailEnds: Annotated[list[ElementIdArrayItem] | None, Field(description="A list of elements.")] = None
+    railingHandrailConnections: Annotated[list[ElementIdArrayItem] | None, Field(description="A list of elements.")] = (
+        None
+    )
+    railingToprailEnds: Annotated[list[ElementIdArrayItem] | None, Field(description="A list of elements.")] = None
+    railingToprailConnections: Annotated[list[ElementIdArrayItem] | None, Field(description="A list of elements.")] = (
+        None
+    )
+    railingRails: Annotated[list[ElementIdArrayItem] | None, Field(description="A list of elements.")] = None
+    railingToprails: Annotated[list[ElementIdArrayItem] | None, Field(description="A list of elements.")] = None
+    railingHandrails: Annotated[list[ElementIdArrayItem] | None, Field(description="A list of elements.")] = None
+    railingPatterns: Annotated[list[ElementIdArrayItem] | None, Field(description="A list of elements.")] = None
+    railingInnerPosts: Annotated[list[ElementIdArrayItem] | None, Field(description="A list of elements.")] = None
+    railingPanels: Annotated[list[ElementIdArrayItem] | None, Field(description="A list of elements.")] = None
+    railingBalusterSets: Annotated[list[ElementIdArrayItem] | None, Field(description="A list of elements.")] = None
+    railingBalusters: Annotated[list[ElementIdArrayItem] | None, Field(description="A list of elements.")] = None
+    beamSegments: Annotated[list[ElementIdArrayItem] | None, Field(description="A list of elements.")] = None
+    columnSegments: Annotated[list[ElementIdArrayItem] | None, Field(description="A list of elements.")] = None
+
+
+class GroupId(APIModel):
+    """The identifier of a group."""
+    guid: Annotated[
+        UUID,
+        Field(
+            description="A Globally Unique Identifier (or Universally Unique Identifier) in its string representation as defined in RFC 4122.",
+        ),
+    ]
+
+
+class GroupIdArrayItem(APIModel):
+    """A wrapper containing the group identifier."""
+    groupId: GroupId
+
+
+class HatchData(APIModel):
+    """The parameters of the new Hatch."""
+    favoriteName: Annotated[
+        str | None,
+        Field(
+            description="Optional name of a favorite to base the new element on. Its settings are applied first, then the explicitly given fields override them."
+        ),
+    ] = None
+    floorInd: Annotated[
+        float | None,
+        Field(description="The identifier of the floor. Optional parameter, by default the current floor is used."),
+    ] = None
+    layerIndex: Annotated[
+        int | None,
+        Field(
+            description="Layer attribute index to place the hatch on. Optional parameter, by default the current layer is used."
+        ),
+    ] = None
+    coordinates: Annotated[
+        list[Coordinate2D],
+        Field(
+            description="The 2D coordinates of the hatch outline (single contour, no holes). Do not repeat the first point at the end.",
+            min_length=3,
+        ),
+    ]
+    arcs: Annotated[list[PolyArc] | None, Field(description="The arcs of the hatch outline.")] = None
+    contourPenIndex: Annotated[
+        int | None,
+        Field(description="Optional pen index for the contour. By default the current pen is used."),
+    ] = None
+    fillPenIndex: Annotated[
+        int | None,
+        Field(description="Optional pen index for the fill. By default the current pen is used."),
+    ] = None
+    fillBackgroundPenIndex: int | None = None
+    fillId: Annotated[
+        AttributeId | None,
+        Field(description="Optional fill attribute. By default the current fill is used."),
+    ] = None
+    buildingMaterialId: AttributeId | None = None
+    roomSpecial: Annotated[
+        int | None,
+        Field(description="Special area percent in a room (negative means OFF)."),
+    ] = None
+    showArea: bool | None = None
+
+
+class HatchOrientation(APIModel):
+    """Orientation and distortion parameters of a fill."""
+    type: HatchOrientationType
+    origin: Annotated[
+        Coordinate2D,
+        Field(description="The origin of the fill relative to the project origin."),
+    ]
+    matrix00: Annotated[
+        float,
+        Field(description="X component of the primary distortion (direction) vector."),
+    ]
+    matrix10: Annotated[
+        float,
+        Field(description="Y component of the primary distortion (direction) vector."),
+    ]
+    matrix01: Annotated[float, Field(description="X component of the secondary distortion vector.")]
+    matrix11: Annotated[float, Field(description="Y component of the secondary distortion vector.")]
+    innerRadius: Annotated[
+        float,
+        Field(description="Radius for circular fill distortion, used when type is Centered."),
+    ]
+
+
+class Hole2DWithLegacyCoordinates(APIModel):
+    """A 2D hole in an element defined by closed polylines. The outline is given in 'polygonOutline'; 'polygonCoordinates' is accepted as a legacy alias."""
+    polygonOutline: Annotated[
+        list[Coordinate2D] | None,
+        Field(description="The 2D coordinates of the edge of the hole.", min_length=3),
+    ] = None
+    polygonCoordinates: Annotated[
+        list[Coordinate2D],
+        Field(description="Legacy alias of polygonOutline.", min_length=3),
+    ]
+    polygonArcs: Annotated[list[PolyArc] | None, Field(description="Polygon outline arcs of the hole.")] = None
+
+
+class Hole2DWithOutline(APIModel):
+    """A 2D hole in an element defined by closed polylines. The outline is given in 'polygonOutline'; 'polygonCoordinates' is accepted as a legacy alias."""
+    polygonOutline: Annotated[
+        list[Coordinate2D],
+        Field(description="The 2D coordinates of the edge of the hole.", min_length=3),
+    ]
+    polygonCoordinates: Annotated[
+        list[Coordinate2D] | None,
+        Field(description="Legacy alias of polygonOutline.", min_length=3),
+    ] = None
+    polygonArcs: Annotated[list[PolyArc] | None, Field(description="Polygon outline arcs of the hole.")] = None
+
+
+class Hole3D(APIModel):
+    """A 3D hole in an element defined by closed polylines"""
+    polygonCoordinates: Annotated[
+        list[Coordinate3D],
+        Field(description="The 3D coordinates of the polygon of the hole.", min_length=3),
+    ]
+    polygonArcs: Annotated[list[PolyArc] | None, Field(description="Polygon outline arcs of the hole.")] = None
+
+
+class HotlinkDetails(APIModel):
+    """Details of a placed hotlink instance: which node it comes from and where it sits."""
+    hotlinkType: HotlinkType
+    hotlinkNodeId: HotlinkNodeId
+    origin: Coordinate3D
+    rotationAngle: Annotated[
+        float,
+        Field(description="Counter-clockwise rotation about the origin, in radians."),
+    ]
+    mirrored: Annotated[bool, Field(description="True when the module's local X axis is reflected.")]
+    floorDifference: int | None = None
+    skipNested: bool | None = None
+    suspendFixAngle: bool | None = None
+    ignoreTopFloorLinks: bool | None = None
+    relinkWallOpenings: bool | None = None
+    adjustLevelDiffs: bool | None = None
+
+
+class HotlinkInstanceChange(APIModel):
+    elementId: ElementId
+    origin: HotlinkOrigin | None = None
+    rotationAngle: Annotated[
+        float | None,
+        Field(description="Rotation about the origin, counter-clockwise, in radians."),
+    ] = None
+    mirrored: Annotated[
+        bool | None,
+        Field(description="Reflect the module's local X axis before the rotation."),
+    ] = None
+    floorDifference: int | None = None
+    skipNested: bool | None = None
+    suspendFixAngle: bool | None = None
+    ignoreTopFloorLinks: bool | None = None
+    relinkWallOpenings: bool | None = None
+    adjustLevelDiffs: bool | None = None
+    layerIndex: Annotated[int | None, Field(description="Move the instance to this layer.")] = None
+
+
+class HotlinkInstanceCreation(APIModel):
+    hotlinkNodeId: Annotated[
+        HotlinkNodeId,
+        Field(
+            description="The node to place, from GetHotlinks or CreateHotlinkNodes. On Archicad 25 a node that has never been placed cannot be read, so a node created through the API can only be placed from Archicad 26 on."
+        ),
+    ]
+    origin: HotlinkOrigin
+    rotationAngle: Annotated[
+        float | None,
+        Field(description="Optional rotation about the origin, counter-clockwise, in radians. Defaults to 0."),
+    ] = None
+    mirrored: Annotated[
+        bool | None,
+        Field(description="Optional. Reflects the module's local X axis before the rotation. Defaults to false."),
+    ] = None
+    floorIndex: Annotated[
+        int | None,
+        Field(description="Optional story the instance is placed on. Defaults to the current story."),
+    ] = None
+    floorDifference: Annotated[
+        int | None,
+        Field(
+            description="Optional story offset applied to the module's stories. Defaults to the hotlink tool's current default."
+        ),
+    ] = None
+    layerIndex: Annotated[
+        int | None,
+        Field(description="Optional layer of the instance. Defaults to the hotlink tool's current default layer."),
+    ] = None
+    skipNested: Annotated[
+        bool | None,
+        Field(
+            description="Optional. Do not place hotlinks nested inside the module. Defaults to the hotlink tool's current default."
+        ),
+    ] = None
+    suspendFixAngle: Annotated[
+        bool | None,
+        Field(
+            description="Optional. Rotate fixed-angle elements with the module. Defaults to the hotlink tool's current default."
+        ),
+    ] = None
+    ignoreTopFloorLinks: Annotated[
+        bool | None,
+        Field(
+            description="Optional. Top-linked elements keep their height rather than their top story link. Defaults to the hotlink tool's current default."
+        ),
+    ] = None
+    relinkWallOpenings: Annotated[
+        bool | None,
+        Field(description="Optional. Defaults to the hotlink tool's current default."),
+    ] = None
+    adjustLevelDiffs: Annotated[
+        bool | None,
+        Field(description="Optional. Defaults to the hotlink tool's current default."),
+    ] = None
+
+
+class HotlinkNodeCreated(APIModel):
+    hotlinkNodeId: HotlinkNodeId
+    existing: Annotated[
+        bool,
+        Field(
+            description="True when a node for the same source file already existed and was returned instead of created."
+        ),
+    ]
+
+
+class KeynoteFolderData(APIModel):
+    parentFolderId: Annotated[
+        KeynoteFolderId | None,
+        Field(description="The parent folder. Optional; defaults to the root folder."),
+    ] = None
+    key: str
+    title: str
+
+
+class KeynoteItemDetails(APIModel):
+    """The details of a keynote item."""
+    keynoteItemId: KeynoteItemId
+    key: str
+    title: str
+    description: str
+    reference: str
+    uiText: str
+
+
+class LabelLeaderLineDetails(APIModel):
+    """Full readable leader-line/frame state of a Label: every field of LabelLeaderLineSettableDetails plus the leader line's coordinates."""
+    penIndex: Annotated[int | None, Field(description="Pen attribute index of the leader line.")] = None
+    lineTypeId: Annotated[AttributeId | None, Field(description="Line type attribute of the leader line.")] = None
+    contourOffset: Annotated[
+        float | None,
+        Field(description="Padding between the Label's frame and its content, in mm."),
+    ] = None
+    framed: Annotated[bool | None, Field(description="Put a frame around the content.")] = None
+    hasLeaderLine: Annotated[
+        bool | None,
+        Field(description="Whether the Label has a leader line (pointer line)."),
+    ] = None
+    anchorPoint: LabelLeaderLineAnchorPoint | None = None
+    leaderShape: Annotated[LeaderShape | None, Field(description="Shape of the leader line.")] = None
+    squareRootAngle: Annotated[
+        float | None,
+        Field(description="Angle in radians, used only when leaderShape is 'SquareRoot'. Valid range 1-179 degrees."),
+    ] = None
+    arrowType: LabelArrowType | None = None
+    arrowVisible: bool | None = None
+    arrowPenIndex: int | None = None
+    arrowSize: Annotated[float | None, Field(description="Arrow size in mm.")] = None
+    hideWithBaseElem: Annotated[
+        bool | None,
+        Field(description="Hide the label together with its parent element."),
+    ] = None
+    begCoordinate: Coordinate2D | None = None
+    midCoordinate: Coordinate2D | None = None
+    endCoordinate: Coordinate2D | None = None
+
+
+class LabelLeaderLineSettableDetails(APIModel):
+    """Every user-configurable leader-line/frame setting of a Label (top-level API_LabelType fields, shared by both Text and Symbol label classes). Shared by CreateLabels ('leaderLine'), ModifyLabels ('leaderLine'), and the Get response."""
+    penIndex: Annotated[int | None, Field(description="Pen attribute index of the leader line.")] = None
+    lineTypeId: Annotated[AttributeId | None, Field(description="Line type attribute of the leader line.")] = None
+    contourOffset: Annotated[
+        float | None,
+        Field(description="Padding between the Label's frame and its content, in mm."),
+    ] = None
+    framed: Annotated[bool | None, Field(description="Put a frame around the content.")] = None
+    hasLeaderLine: Annotated[
+        bool | None,
+        Field(description="Whether the Label has a leader line (pointer line)."),
+    ] = None
+    anchorPoint: LabelLeaderLineAnchorPoint | None = None
+    leaderShape: Annotated[LeaderShape | None, Field(description="Shape of the leader line.")] = None
+    squareRootAngle: Annotated[
+        float | None,
+        Field(description="Angle in radians, used only when leaderShape is 'SquareRoot'. Valid range 1-179 degrees."),
+    ] = None
+    arrowType: LabelArrowType | None = None
+    arrowVisible: bool | None = None
+    arrowPenIndex: int | None = None
+    arrowSize: Annotated[float | None, Field(description="Arrow size in mm.")] = None
+    hideWithBaseElem: Annotated[
+        bool | None,
+        Field(description="Hide the label together with its parent element."),
+    ] = None
+
+
+class LabelSymbolStyleSettableDetails(APIModel):
+    """Every user-configurable style setting specific to a Symbol-class Label (top-level API_LabelType fields documented as 'for symbol labels only'). Shared by CreateLabels ('symbolStyle'), ModifyLabels ('symbolStyle'), and the Get response."""
+    textWay: SymbolLabelTextDirection | None = None
+    fontIndex: int | None = None
+    bold: bool | None = None
+    italic: bool | None = None
+    underline: bool | None = None
+    flipEnabled: Annotated[bool | None, Field(description="'Always Readable' toggle.")] = None
+    nonBreaking: Annotated[bool | None, Field(description="'Wrap Text' turned off when true.")] = None
+    textSize: Annotated[float | None, Field(description="Character height in mm.")] = None
+    useBackgroundFill: bool | None = None
+    backgroundFillPenIndex: Annotated[int | None, Field(description="Effective only if useBackgroundFill is true.")] = (
+        None
+    )
+    effectStrikeout: bool | None = None
+    effectSuperscript: bool | None = None
+    effectSubscript: bool | None = None
+    effectProtected: bool | None = None
+
+
+class LampData(APIModel):
+    """The parameters of the new Lamp."""
+    libraryPartName: Annotated[str, Field(description="The name of the lamp library part to use.")]
+    coordinates: Coordinate3D
+    dimensions: Dimensions3D | None = None
+    angle: float | None = None
+    pen: int | None = None
+    lineTypeId: AttributeId | None = None
+    surfaceId: Annotated[
+        AttributeId | None,
+        Field(description="Material/Surface override (API_ObjectType.mat)."),
+    ] = None
+    sectionFillId: AttributeId | None = None
+    sectionFillPen: int | None = None
+    sectionFillBackgroundPen: int | None = None
+    sectionContourPen: int | None = None
+    useObjectPens: bool | None = None
+    useObjectLineTypes: bool | None = None
+    useObjectMaterials: bool | None = None
+    useObjectSectionAttributes: bool | None = None
+    reflected: bool | None = None
+    useFixSize: bool | None = None
+    fixPoint: Annotated[
+        int | None,
+        Field(
+            description="0-based index of the hotspot to keep fixed (raw API_ObjectType.fixPoint value, not 1-based)."
+        ),
+    ] = None
+    offset: Annotated[
+        Coordinate2D | None,
+        Field(
+            description="Offset of the symbol's origin from the insertion point. Reported accurately on Get, but confirmed live that Archicad silently discards this value through both Create and Modify (Get always reports the library part's own default hotspot offset regardless of what is sent) - same class of read-only-in-practice field as Morph's bodyType/edgeType/level."
+        ),
+    ] = None
+    useFixedAngle: Annotated[
+        bool | None,
+        Field(
+            description="Use a fixed rotation angle. Reported accurately on Get, but confirmed live that Archicad silently discards this value through both Create and Modify."
+        ),
+    ] = None
+    isAutoOnStoryVisibility: bool | None = None
+    visibility: StoryVisibility | None = None
+    linkToSettings: LinkToSettings | None = None
+    lightColor: Annotated[
+        ColorRGB | None,
+        Field(
+            description="Reported accurately on Get, but confirmed live that Archicad silently discards this value through both Create and Modify (Get always reports the library part's own default light color). lightIsOn (the on/off state, as opposed to the color) does not have this problem."
+        ),
+    ] = None
+    lightIsOn: bool | None = None
+    floorIndex: Annotated[
+        int | None,
+        Field(description="Optional floor index. If omitted, derived from the coordinate's z value."),
+    ] = None
+    favoriteName: Annotated[
+        str | None,
+        Field(
+            description="Optional name of a favorite to base the new element on. Its settings are applied first, then the explicitly given fields override them."
+        ),
+    ] = None
+
+
+class LampWithDetails(APIModel):
+    elementId: ElementId
+    coordinates: Coordinate3D | None = None
+    dimensions: Dimensions3D | None = None
+    angle: float | None = None
+    pen: int | None = None
+    lineTypeId: AttributeId | None = None
+    surfaceId: Annotated[
+        AttributeId | None,
+        Field(description="Material/Surface override (API_ObjectType.mat)."),
+    ] = None
+    sectionFillId: AttributeId | None = None
+    sectionFillPen: int | None = None
+    sectionFillBackgroundPen: int | None = None
+    sectionContourPen: int | None = None
+    useObjectPens: bool | None = None
+    useObjectLineTypes: bool | None = None
+    useObjectMaterials: bool | None = None
+    useObjectSectionAttributes: bool | None = None
+    reflected: bool | None = None
+    useFixSize: bool | None = None
+    fixPoint: Annotated[
+        int | None,
+        Field(
+            description="0-based index of the hotspot to keep fixed (raw API_ObjectType.fixPoint value, not 1-based)."
+        ),
+    ] = None
+    offset: Annotated[
+        Coordinate2D | None,
+        Field(
+            description="Offset of the symbol's origin from the insertion point. Reported accurately on Get, but confirmed live that Archicad silently discards this value through both Create and Modify (Get always reports the library part's own default hotspot offset regardless of what is sent) - same class of read-only-in-practice field as Morph's bodyType/edgeType/level."
+        ),
+    ] = None
+    useFixedAngle: Annotated[
+        bool | None,
+        Field(
+            description="Use a fixed rotation angle. Reported accurately on Get, but confirmed live that Archicad silently discards this value through both Create and Modify."
+        ),
+    ] = None
+    isAutoOnStoryVisibility: bool | None = None
+    visibility: StoryVisibility | None = None
+    linkToSettings: LinkToSettings | None = None
+    lightColor: Annotated[
+        ColorRGB | None,
+        Field(
+            description="Reported accurately on Get, but confirmed live that Archicad silently discards this value through both Create and Modify (Get always reports the library part's own default light color). lightIsOn (the on/off state, as opposed to the color) does not have this problem."
+        ),
+    ] = None
+    lightIsOn: bool | None = None
+
+
+class LayerAttribute(APIModel):
+    """A layer attribute."""
+    attributeId: AttributeId
+    index: int
+    name: str
+    isHidden: bool | None = None
+    isLocked: bool | None = None
+    isWireframe: bool | None = None
+    intersectionGroupNr: int | None = None
+
+
+class LayerData(APIModel):
+    """Data to create a Layer."""
+    attributeId: Annotated[
+        AttributeId | None,
+        Field(description="Indentifier of the existing Layer to overwrite, ignored if overwriteExisting is false."),
+    ] = None
+    index: Annotated[
+        str | None,
+        Field(description="Index of the existing Layer to overwrite, ignored if overwriteExisting is false."),
+    ] = None
+    name: Annotated[
+        str,
+        Field(
+            description="Name. If overwriteExisting is true, then the existing Layer with the given name will be overwritten."
+        ),
+    ]
+    isHidden: Annotated[bool | None, Field(description="Hide/Show.")] = None
+    isLocked: Annotated[bool | None, Field(description="Lock/Unlock.")] = None
+    isWireframe: Annotated[bool | None, Field(description="Force the model to wireframe.")] = None
+    intersectionGroupNr: Annotated[
+        int | None,
+        Field(description="Intersection group. Elements on layers having the same group will be intersected."),
+    ] = None
+
+
+class LayersOfLayerCombinationItem(APIModel):
+    attributeId: Annotated[AttributeId, Field(description="The identifier of the Layer attribute.")]
+    isHidden: Annotated[bool, Field(description="Visibility of the Layer in the Layer Combination.")]
+    isLocked: Annotated[bool, Field(description="Lock state of the Layer in the Layer Combination.")]
+    isWireframe: Annotated[
+        bool,
+        Field(description="Is wireframe mode forced for the Layer in the Layer Combination."),
+    ]
+    intersectionGroupNr: Annotated[
+        int,
+        Field(
+            description="Intersection group of the Layer in the Layer Combination. Elements on layers having the same group will be intersected."
+        ),
+    ]
+
+
+class LayoutData(APIModel):
+    masterLayoutName: Annotated[str | None, Field(min_length=1)] = None
+    masterNavigatorItemId: NavigatorItemId | None = None
+    layoutName: Annotated[str, Field(min_length=1)]
+    parentNavigatorItemId: NavigatorItemId | None = None
+    layoutParameters: LayoutParameters | None = None
+
+
+class LayoutSettingsData(APIModel):
+    layoutDatabaseId: DatabaseId | None = None
+    layoutNavigatorItemId: NavigatorItemId | None = None
+    layoutName: str | None = None
+    horizontalSize: float | None = None
+    verticalSize: float | None = None
+    leftMargin: float | None = None
+    topMargin: float | None = None
+    rightMargin: float | None = None
+    bottomMargin: float | None = None
+    customLayoutNumber: str | None = None
+    customLayoutNumbering: bool | None = None
+    doNotIncludeInNumbering: bool | None = None
+    showMasterBelow: bool | None = None
+    customData: list[LayoutCustomDataToSet] | None = None
+
+
+class LibPartDetails(APIModel):
+    name: str
+    parentUnID: LibPartUnId
+    ownUnID: LibPartUnId
+
+
+class LibraryFileAddition(APIModel):
+    inputPath: Annotated[str, Field(description="The path to the input file.")]
+    outputPath: Annotated[
+        str,
+        Field(description="The relative path to the new file inside embedded library."),
+    ]
+    type: Annotated[
+        LibraryPartType | None,
+        Field(description="The type of the library part. By default 'Pict'."),
+    ] = None
+
+
+class LineAttribute(APIModel):
+    """A line attribute."""
+    attributeId: AttributeId
+    index: int
+    name: str
+    scaleWithPlan: bool | None = None
+    defineScale: float | None = None
+    lineType: LineType | None = None
+    period: float | None = None
+    height: float | None = None
+    dashItems: list[LineDashItem] | None = None
+    lineItems: list[LineSymbolItem] | None = None
+
+
+class LineData(APIModel):
+    """Data to create a Line."""
+    attributeId: Annotated[
+        AttributeId | None,
+        Field(description="Indentifier of the existing Line to overwrite, ignored if overwriteExisting is false."),
+    ] = None
+    index: Annotated[
+        str | None,
+        Field(description="Index of the existing Line to overwrite, ignored if overwriteExisting is false."),
+    ] = None
+    name: Annotated[
+        str,
+        Field(
+            description="Name. If overwriteExisting is true, then the existing Line with the given name will be overwritten."
+        ),
+    ]
+    scaleWithPlan: Annotated[
+        bool | None,
+        Field(
+            description="If true, the line type parameters are defined in meters at the given defineScale and scale on printout with the actual plan scale. If false (default), the parameters are fixed values in millimeters as the line will appear on the printout."
+        ),
+    ] = None
+    defineScale: Annotated[
+        float | None,
+        Field(description="The floor plan scale the line type is defined with. Only used if scaleWithPlan is true."),
+    ] = None
+    lineType: Annotated[str | None, Field(description="Solid, Dashed, or Symbol. Defaults to Solid.")] = None
+    period: Annotated[
+        float | None,
+        Field(description="The length of one period (Dashed and Symbol line types)."),
+    ] = None
+    height: Annotated[
+        float | None,
+        Field(description="The height of the symbol line (Symbol line type only)."),
+    ] = None
+    dashItems: Annotated[
+        list[LineDashItem] | None,
+        Field(description="Dash-gap pairs describing one period (Dashed line type only)."),
+    ] = None
+    lineItems: Annotated[
+        list[LineSymbolItemData] | None,
+        Field(description="Symbol items describing one period (Symbol line type only)."),
+    ] = None
+
+
+class LineDetails(APIModel):
+    begCoordinate: Coordinate2D
+    endCoordinate: Coordinate2D
+    roomSeparator: Annotated[bool | None, Field(description="Is this a zone boundary line?")] = None
+    linePenIndex: int | None = None
+    lineTypeId: AttributeId | None = None
+    zCoordinate: float
+
+
+class LineElementData(APIModel):
+    """The parameters of the new Line."""
+    favoriteName: Annotated[
+        str | None,
+        Field(
+            description="Optional name of a favorite to base the new element on. Its settings are applied first, then the explicitly given fields override them."
+        ),
+    ] = None
+    floorInd: Annotated[
+        float | None,
+        Field(description="The identifier of the floor. Optional parameter, by default the current floor is used."),
+    ] = None
+    layerIndex: Annotated[
+        int | None,
+        Field(
+            description="Layer attribute index to place the line on. Optional parameter, by default the current layer is used."
+        ),
+    ] = None
+    begCoordinate: Coordinate2D
+    endCoordinate: Coordinate2D
+    roomSeparator: Annotated[
+        bool | None,
+        Field(description="Is this a zone boundary line? Optional, defaults to false."),
+    ] = None
+    linePenIndex: Annotated[
+        int | None,
+        Field(description="Optional pen index. By default the current pen is used."),
+    ] = None
+    lineTypeId: Annotated[
+        AttributeId | None,
+        Field(description="Optional line type attribute. By default the current line type is used."),
+    ] = None
+
+
+class LineSettings(APIModel):
+    """Settings for modifying a Line."""
+    begCoordinate: Coordinate2D | None = None
+    endCoordinate: Coordinate2D | None = None
+    roomSeparator: bool | None = None
+    linePenIndex: int | None = None
+    lineTypeId: AttributeId | None = None
+
+
+class MEPConnectionData(APIModel):
+    routingElementId: Annotated[ElementId, Field(description="The routing element to connect.")]
+    connectToId: Annotated[
+        ElementId,
+        Field(description="The MEP element or routing element to connect to."),
+    ]
+
+
+class MEPConnectionResult(APIModel):
+    """The result of connecting an MEP routing element: the routing element deleted by merging, the routing element created by splitting and the branch element created by the connection."""
+    deletedRoutingElementId: ElementId | None = None
+    splitRoutingElementId: ElementId | None = None
+    createdBranchId: ElementId | None = None
+
+
+class MEPDistributionSystem(APIModel):
+    domain: MEPSystemDomain
+    mepSystemId: AttributeId | None = None
+    elements: Annotated[list[ElementIdArrayItem], Field(description="A list of elements.")]
+
+
+class MEPElement(APIModel):
+    elementId: ElementId
+    type: Annotated[MEPElementType, Field(description="The type of the MEP element.")]
+    domain: Annotated[
+        str,
+        Field(description="The MEP domain of the element. Empty for domain-independent elements (e.g. Equipment)."),
+    ]
+
+
+class MEPElementData(APIModel):
+    type: MEPComponentType
+    domain: Annotated[
+        MEPSystemDomain | None,
+        Field(description="The MEP domain of the element. Required for all types except Equipment."),
+    ] = None
+    position: Coordinate3D
+    orientationDirection: Annotated[
+        Coordinate3D | None,
+        Field(description="Optional direction vector of the orientation. Defaults to (1, 0, 0)."),
+    ] = None
+    orientationRotation: Annotated[
+        Coordinate3D | None,
+        Field(description="Optional rotation vector of the orientation. Defaults to (0, 1, 0)."),
+    ] = None
+
+
+class MEPPortDetails(APIModel):
+    """The details of a port of an MEP element."""
+    portId: Annotated[
+        UUID,
+        Field(
+            description="A Globally Unique Identifier (or Universally Unique Identifier) in its string representation as defined in RFC 4122.",
+        ),
+    ]
+    name: str
+    position: Coordinate3D
+    direction: Coordinate3D
+    shape: str
+    width: float
+    height: float
+    domain: MEPSystemDomain
+    mepSystemId: AttributeId
+    isPhysicallyConnected: bool
+    connectedPortId: Annotated[
+        UUID | None,
+        Field(
+            description="A Globally Unique Identifier (or Universally Unique Identifier) in its string representation as defined in RFC 4122.",
+        ),
+    ] = None
+    connectedElementId: ElementId | None = None
+
+
+class MEPRoutingElementData(APIModel):
+    domain: MEPSystemDomain
+    nodeCoordinates: Annotated[
+        list[Coordinate3D],
+        Field(description="The corner points of the route polyline.", min_length=2),
+    ]
+    crossSectionWidth: Annotated[
+        float | None,
+        Field(description="Optional cross section width applied to all segments."),
+    ] = None
+    crossSectionHeight: Annotated[
+        float | None,
+        Field(description="Optional cross section height applied to all segments."),
+    ] = None
+    crossSectionShape: MEPCrossSectionShape | None = None
+    crossSectionReferenceId: Annotated[
+        int | None,
+        Field(
+            description="Optional cross section reference id of the segment preference table (used for circular cross sections)."
+        ),
+    ] = None
+    mepSystemId: Annotated[AttributeId | None, Field(description="Optional MEP system attribute.")] = None
+
+
+class MEPRoutingElementModificationData(APIModel):
+    elementId: ElementId
+    mepSystemId: AttributeId | None = None
+    crossSectionWidth: Annotated[
+        float | None,
+        Field(description="New cross section width applied to all segments."),
+    ] = None
+    crossSectionHeight: Annotated[
+        float | None,
+        Field(description="New cross section height applied to all segments."),
+    ] = None
+    crossSectionShape: Annotated[
+        MEPCrossSectionShape | None,
+        Field(description="New cross section shape applied to all segments."),
+    ] = None
+    nodePositions: Annotated[
+        list[Coordinate3D] | None,
+        Field(description="New positions of the routing nodes. The size must match the number of nodes of the route."),
+    ] = None
+
+
+class MEPRoutingNodeDetails(APIModel):
+    """The details of an MEP routing node."""
+    elementId: ElementId
+    position: Coordinate3D
+
+
+class MEPRoutingSegmentDetails(APIModel):
+    """The details of an MEP routing segment."""
+    elementId: ElementId
+    crossSectionWidth: float
+    crossSectionHeight: float
+    crossSectionShape: str
+
+
+class MEPSystemAttribute(APIModel):
+    """An MEP system attribute."""
+    attributeId: AttributeId
+    index: int
+    name: str
+    domain: Annotated[
+        list[MEPSystemDomain] | None,
+        Field(
+            description="The domain(s) this system belongs to. Archicad 29+ allows only one; earlier versions may report several."
+        ),
+    ] = None
+    contourPen: int | None = None
+    fillPen: int | None = None
+    fillBackgroundPen: int | None = None
+    centerLinePen: int | None = None
+    fillId: AttributeIdArrayItem | None = None
+    centerLineTypeId: AttributeIdArrayItem | None = None
+
+
+class MEPSystemData(APIModel):
+    """Data to create an MEP System."""
+    attributeId: Annotated[
+        AttributeId | None,
+        Field(
+            description="Indentifier of the existing MEP System to overwrite, ignored if overwriteExisting is false."
+        ),
+    ] = None
+    index: Annotated[
+        str | None,
+        Field(description="Index of the existing MEP System to overwrite, ignored if overwriteExisting is false."),
+    ] = None
+    name: Annotated[
+        str,
+        Field(
+            description="Name. If overwriteExisting is true, then the existing MEP System with the given name will be overwritten."
+        ),
+    ]
+    domain: Annotated[
+        MEPSystemDomain | None,
+        Field(
+            description="Ventilation, Piping, or CableCarrier. Only elements belonging to the same domain can use this system."
+        ),
+    ] = None
+    contourPen: Annotated[int | None, Field(description="The index of the contour pen [1..255].")] = None
+    fillPen: Annotated[
+        int | None,
+        Field(description="The index of the fill (foreground) pen [1..255]."),
+    ] = None
+    fillBackgroundPen: Annotated[
+        int | None,
+        Field(description="The index of the background pen [0..255]. 0 means transparent background."),
+    ] = None
+    centerLinePen: Annotated[int | None, Field(description="The index of the center line pen [1..255].")] = None
+    fillId: Annotated[
+        AttributeIdArrayItem | None,
+        Field(description="Identifier of the fill pattern attribute."),
+    ] = None
+    centerLineTypeId: Annotated[
+        AttributeIdArrayItem | None,
+        Field(description="Identifier of the center line type attribute."),
+    ] = None
+
+
+class MeshData(APIModel):
+    """The parameters of the new Mesh."""
+    favoriteName: Annotated[
+        str | None,
+        Field(
+            description="Optional name of a favorite to base the new element on. Its settings are applied first, then the explicitly given fields override them."
+        ),
+    ] = None
+    floorIndex: int | None = None
+    level: Annotated[float | None, Field(description="The Z reference level of coordinates.")] = None
+    skirtType: MeshSkirtType | None = None
+    skirtLevel: Annotated[float | None, Field(description="The height of the skirt.")] = None
+    ridges: Annotated[
+        MeshRidges | None,
+        Field(
+            description="How ridges between mesh facets are displayed in 3D: 'AllSharp' shows all ridges, 'AllSmooth' hides them, 'UserDefined' shows only ridges along user-defined level lines (the drawing-set look for contour-line topography)."
+        ),
+    ] = None
+    showLines: Annotated[
+        bool | None,
+        Field(
+            description="Whether to show secondary mesh lines (level lines other than the user-defined ones) on plan."
+        ),
+    ] = None
+    contourPen: Annotated[
+        int | None,
+        Field(description="Optional pen attribute index for the mesh's contour line."),
+    ] = None
+    levelPen: Annotated[
+        int | None,
+        Field(description="Optional pen attribute index for the mesh's level lines."),
+    ] = None
+    lineTypeIndex: Annotated[
+        int | None,
+        Field(description="Optional line type attribute index for the mesh's contour."),
+    ] = None
+    polygonCoordinates: Annotated[
+        list[Coordinate3D],
+        Field(
+            description="The 3D coordinates of the outline polygon of the mesh.",
+            min_length=3,
+        ),
+    ]
+    polygonArcs: Annotated[list[PolyArc] | None, Field(description="Polygon outline arcs of the mesh.")] = None
+    holes: Annotated[
+        list[Hole3D] | None,
+        Field(description="A list of 3D holes in an element defined by closed polylines"),
+    ] = None
+    sublines: Annotated[
+        list[MeshSubline] | None,
+        Field(
+            description="The leveling sublines inside the polygon of the mesh.",
+            min_length=1,
+        ),
+    ] = None
+
+
+class MeshDetails(APIModel):
+    floorIndex: Annotated[int | None, Field(description="The index of the story the mesh is placed on.")] = None
+    level: Annotated[float, Field(description="The Z reference level of coordinates.")]
+    skirtType: MeshSkirtType
+    skirtLevel: Annotated[float, Field(description="The height of the skirt.")]
+    ridges: MeshRidges | None = None
+    showLines: Annotated[bool | None, Field(description="Whether to show secondary mesh lines on plan.")] = None
+    contourPen: Annotated[int | None, Field(description="Pen attribute index for the mesh contour line.")] = None
+    levelPen: Annotated[int | None, Field(description="Pen attribute index for the mesh level lines.")] = None
+    lineTypeIndex: Annotated[int | None, Field(description="Line type attribute index for the mesh contour.")] = None
+    polygonCoordinates: Annotated[
+        list[Coordinate3D],
+        Field(
+            description="The 3D coordinates of the outline polygon of the mesh.",
+            min_length=3,
+        ),
+    ]
+    polygonArcs: Annotated[list[PolyArc] | None, Field(description="Polygon outline arcs of the mesh.")] = None
+    holes: Annotated[
+        list[Hole3D] | None,
+        Field(description="A list of 3D holes in an element defined by closed polylines"),
+    ] = None
+    sublines: Annotated[
+        list[MeshSubline] | None,
+        Field(
+            description="The leveling sublines inside the polygon of the mesh.",
+            min_length=1,
+        ),
+    ] = None
+
+
+class MeshModificationData(APIModel):
+    """The fields to modify on the Mesh. Only provided fields are changed; omitted fields are left as-is."""
+    floorIndex: int | None = None
+    level: Annotated[float | None, Field(description="The Z reference level of coordinates.")] = None
+    skirtType: MeshSkirtType | None = None
+    skirtLevel: Annotated[float | None, Field(description="The height of the skirt.")] = None
+    ridges: Annotated[
+        MeshRidges | None,
+        Field(description="How ridges between mesh facets are displayed in 3D."),
+    ] = None
+    showLines: Annotated[bool | None, Field(description="Whether to show secondary mesh lines on plan.")] = None
+    contourPen: Annotated[int | None, Field(description="Pen attribute index for the mesh contour line.")] = None
+    levelPen: Annotated[int | None, Field(description="Pen attribute index for the mesh level lines.")] = None
+    lineTypeIndex: Annotated[int | None, Field(description="Line type attribute index for the mesh contour.")] = None
+    polygonCoordinates: Annotated[
+        list[Coordinate3D] | None,
+        Field(
+            description="The 3D coordinates of the outline polygon of the mesh. Replaces the existing boundary entirely.",
+            min_length=3,
+        ),
+    ] = None
+    polygonArcs: Annotated[list[PolyArc] | None, Field(description="Polygon outline arcs of the mesh.")] = None
+    holes: Annotated[
+        list[Hole3D] | None,
+        Field(description="A list of 3D holes in an element defined by closed polylines"),
+    ] = None
+    sublines: Annotated[
+        list[MeshSubline] | None,
+        Field(description="The leveling sublines inside the polygon of the mesh. Replaces existing sublines entirely."),
+    ] = None
+
+
+class MeshWithDetails(APIModel):
+    elementId: ElementId
+    meshData: MeshModificationData
+
+
+class LabelsWithDetail(APIModel):
+    elementId: ElementId
+    text: str | None = None
+    runs: Annotated[list[TextRunDetails] | None, Field(min_length=1)] = None
+    style: TextStyleSettableDetails | None = None
+    symbolStyle: LabelSymbolStyleSettableDetails | None = None
+    leaderLine: LabelLeaderLineSettableDetails | None = None
+
+
+class TextsWithDetail(APIModel):
+    elementId: ElementId
+    coordinate: Annotated[
+        Coordinate3D | None,
+        Field(
+            description="The new placement position. As in CreateTexts, the z value selects the floor when floorIndex is omitted."
+        ),
+    ] = None
+    floorIndex: Annotated[
+        int | None,
+        Field(
+            description="Optional. Moves the text to this floor; when omitted and a coordinate is given, the floor is derived from its z value."
+        ),
+    ] = None
+    text: str | None = None
+    runs: Annotated[list[TextRunDetails] | None, Field(min_length=1)] = None
+    style: TextStyleSettableDetails | None = None
+
+
+class MorphPolygon(APIModel):
+    vertexIds: Annotated[
+        list[int],
+        Field(
+            description="Counterclockwise outer-loop vertex indices for this face.",
+            min_length=3,
+        ),
+    ]
+    filled: Annotated[
+        bool | None,
+        Field(
+            description="Defaults to true. Set to false to create only this loop's edges (a wireframe outline, e.g. a bare rectangle with no surface fill) without an actual face - holes/surfaceId are ignored in that case, since there is no fill for them to apply to."
+        ),
+    ] = None
+    holes: Annotated[
+        list[MorphPolygonHole] | None,
+        Field(description="Optional hole loops cut out of this face, each a clockwise list of vertex indices."),
+    ] = None
+    surfaceId: Annotated[
+        AttributeId | None,
+        Field(
+            description="Optional per-face Surface (render material) override. Falls back to the Morph's own default surface when omitted. Named surfaceId, not buildingMaterialId - confirmed live that Archicad's per-face body override is a Surface index, not a building material (a Morph's building material is always a single whole-volume property, element.morph.buildingMaterial, exposed as the sibling 'buildingMaterialId' field on MorphDetails/CreateMorphs/ModifyMorphs - never per-face). Version-dependent write bug, isolated live: silently lost on Create on Archicad 25 (presumably 26 too - same pre-2700 API_OverriddenAttribute shape, though Archicad 26 itself could not be installed to confirm live), confirmed fixed and working correctly from Archicad 27 onward (27 and 29 both verified). No SDK/build available locally to check Archicad 28."
+        ),
+    ] = None
+
+
+class DesignOptionAndSetPair(APIModel):
+    designOptionId: Annotated[
+        DesignOptionId | None,
+        Field(description="The identifier of the design option to move."),
+    ] = None
+    setName: str
+
+
+class ElementsWithMoveVector(APIModel):
+    elementId: ElementId
+    moveVector: Annotated[MoveVector, Field(description="Move vector of a 3D point.")]
+    copy_: Annotated[
+        bool | None,
+        Field(
+            alias="copy",
+            description="Optional parameter. If true, then a copy of the element will be moved. By default it's false.",
+        ),
+    ] = None
+
+
+class ElementDesignOptionPair(APIModel):
+    elementId: ElementId
+    designOptionId: Annotated[
+        DesignOptionId,
+        Field(
+            description="The identifier of the design option to move the element into. Use NULLGuid to remove the element from any design option and move it to the main model."
+        ),
+    ]
+
+
+class NewClassificationItem(APIModel):
+    classificationSystemId: ClassificationSystemId
+    classificationItemDetails: ClassificationItemDetails
+    parentClassificationItemId: Annotated[
+        ClassificationItemId | None,
+        Field(
+            description="The identifier of the parent classification item. If not specified, the new classification item will be created as a child of the root."
+        ),
+    ] = None
+    nextClassificationItemId: Annotated[
+        ClassificationItemId | None,
+        Field(
+            description="The identifier of the next sibling classification item. If not specified, the new classification item will be created as the last child of its parent."
+        ),
+    ] = None
+
+
+class NormalMultiEnumPropertyValue(APIModel):
+    """A multiple choice enumeration property value containing the IDs of the selected enum values in an array."""
+    type: Literal["multiEnum"] = "multiEnum"
+    status: Literal["normal"] = "normal"
+    value: Annotated[
+        list[EnumValueIdArrayItem],
+        Field(description="A list of enumeration identifiers."),
+    ]
+
+
+class NormalSingleEnumPropertyValue(APIModel):
+    """A single enumeration property value containing the ID of the selected enum value."""
+    type: Literal["singleEnum"] = "singleEnum"
+    status: Literal["normal"] = "normal"
+    value: Annotated[
+        DisplayValueEnumId | NonLocalizedValueEnumId,
+        Field(description="The identifier of a property enumeration value."),
+    ]
+
+
+class NotAvailablePropertyValue(APIModel):
+    """A notAvailable value means that the property is not available for the property owner (and therefore it has no property value for it)."""
+    type: PropertyDataType
+    status: Literal["notAvailable"] = "notAvailable"
+
+
+class ObjectData(APIModel):
+    """The parameters of the new Object."""
+    libraryPartName: Annotated[str, Field(description="The name of the library part to use.")]
+    coordinates: Coordinate3D
+    dimensions: Dimensions3D | None = None
+    angle: float | None = None
+    pen: int | None = None
+    lineTypeId: AttributeId | None = None
+    surfaceId: Annotated[
+        AttributeId | None,
+        Field(description="Material/Surface override (API_ObjectType.mat)."),
+    ] = None
+    sectionFillId: AttributeId | None = None
+    sectionFillPen: int | None = None
+    sectionFillBackgroundPen: int | None = None
+    sectionContourPen: int | None = None
+    useObjectPens: bool | None = None
+    useObjectLineTypes: bool | None = None
+    useObjectMaterials: bool | None = None
+    useObjectSectionAttributes: bool | None = None
+    reflected: bool | None = None
+    useFixSize: bool | None = None
+    fixPoint: Annotated[
+        int | None,
+        Field(
+            description="0-based index of the hotspot to keep fixed (raw API_ObjectType.fixPoint value, not 1-based)."
+        ),
+    ] = None
+    offset: Annotated[
+        Coordinate2D | None,
+        Field(
+            description="Offset of the symbol's origin from the insertion point. Reported accurately on Get, but confirmed live that Archicad silently discards this value through both Create and Modify (Get always reports the library part's own default hotspot offset regardless of what is sent) - same class of read-only-in-practice field as Morph's bodyType/edgeType/level."
+        ),
+    ] = None
+    useFixedAngle: Annotated[
+        bool | None,
+        Field(
+            description="Use a fixed rotation angle. Reported accurately on Get, but confirmed live that Archicad silently discards this value through both Create and Modify."
+        ),
+    ] = None
+    isAutoOnStoryVisibility: bool | None = None
+    visibility: StoryVisibility | None = None
+    linkToSettings: LinkToSettings | None = None
+    floorIndex: Annotated[
+        int | None,
+        Field(description="Optional floor index. If omitted, derived from the coordinate's z value."),
+    ] = None
+    favoriteName: Annotated[
+        str | None,
+        Field(
+            description="Optional name of a favorite to base the new element on. Its settings are applied first, then the explicitly given fields override them."
+        ),
+    ] = None
+
+
+class ObjectDetails(APIModel):
+    """Shared shape for Object and Lamp elements (both use the same API_ObjectType struct). lightColor/lightIsOn only apply to Lamps. Per the Archicad SDK's own remarks, per-story visibility (visibility.showRelAbove/showRelBelow) and visibility.linkToSettings.newCreationMode were 'not extended' for Object/Lamp the way they were for other element types - still settable here for schema symmetry, but Archicad may silently ignore them."""
+    libPart: LibPartDetails
+    ownerElementId: ElementId | None = None
+    ownerElementType: ElementType | None = None
+    origin: Coordinate3D
+    dimensions: Coordinate3D
+    angle: float
+    pen: int | None = None
+    lineTypeId: AttributeId | None = None
+    surfaceId: Annotated[
+        AttributeId | None,
+        Field(description="Material/Surface override (API_ObjectType.mat)."),
+    ] = None
+    sectionFillId: AttributeId | None = None
+    sectionFillPen: int | None = None
+    sectionFillBackgroundPen: int | None = None
+    sectionContourPen: int | None = None
+    useObjectPens: Annotated[
+        bool | None,
+        Field(description="Use the pen defined in the library part instead of 'pen'."),
+    ] = None
+    useObjectLineTypes: Annotated[
+        bool | None,
+        Field(description="Use the line type defined in the library part instead of 'lineTypeId'."),
+    ] = None
+    useObjectMaterials: Annotated[
+        bool | None,
+        Field(description="Use the materials defined in the library part instead of 'surfaceId'."),
+    ] = None
+    useObjectSectionAttributes: Annotated[
+        bool | None,
+        Field(
+            description="Use the section attributes defined in the library part instead of 'sectionFillId'/'sectionFillPen'/'sectionFillBackgroundPen'/'sectionContourPen'."
+        ),
+    ] = None
+    reflected: bool | None = None
+    useFixSize: Annotated[
+        bool | None,
+        Field(description="Use the A/B (dimensions.x/dimensions.y) values as fixed sizes."),
+    ] = None
+    fixPoint: Annotated[
+        int | None,
+        Field(
+            description="0-based index of the hotspot to keep fixed when the object is resized (raw API_ObjectType.fixPoint value, not 1-based)."
+        ),
+    ] = None
+    offset: Annotated[
+        Coordinate2D | None,
+        Field(
+            description="Offset of the symbol's origin from the insertion point. Reported accurately here, but confirmed live that Archicad silently discards this value through both Create and Modify (always reports the library part's own default hotspot offset regardless of what is sent) - same class of read-only-in-practice field as Morph's bodyType/edgeType/level."
+        ),
+    ] = None
+    useFixedAngle: Annotated[
+        bool | None,
+        Field(
+            description="Use a fixed rotation angle (API_ObjectType.fixedAngle - stored as Int32 in the API despite being boolean in practice). Reported accurately here, but confirmed live that Archicad silently discards this value through both Create and Modify."
+        ),
+    ] = None
+    isAutoOnStoryVisibility: Annotated[
+        bool | None,
+        Field(
+            description="Recalculate per-story visibility automatically from the object's vertical extent ('All Relevant Stories')."
+        ),
+    ] = None
+    lightColor: Annotated[
+        ColorRGB | None,
+        Field(
+            description="Lamp only. Reported accurately here, but confirmed live that Archicad silently discards this value through both Create and Modify (always reports the library part's own default light color). lightIsOn (the on/off state) does not have this problem."
+        ),
+    ] = None
+    lightIsOn: Annotated[bool | None, Field(description="Lamp only.")] = None
+    visibility: StoryVisibility | None = None
+    linkToSettings: LinkToSettings | None = None
+
+
+class ObjectWithDetails(APIModel):
+    elementId: ElementId
+    coordinates: Coordinate3D | None = None
+    dimensions: Dimensions3D | None = None
+    angle: float | None = None
+    pen: int | None = None
+    lineTypeId: AttributeId | None = None
+    surfaceId: Annotated[
+        AttributeId | None,
+        Field(description="Material/Surface override (API_ObjectType.mat)."),
+    ] = None
+    sectionFillId: AttributeId | None = None
+    sectionFillPen: int | None = None
+    sectionFillBackgroundPen: int | None = None
+    sectionContourPen: int | None = None
+    useObjectPens: bool | None = None
+    useObjectLineTypes: bool | None = None
+    useObjectMaterials: bool | None = None
+    useObjectSectionAttributes: bool | None = None
+    reflected: bool | None = None
+    useFixSize: bool | None = None
+    fixPoint: Annotated[
+        int | None,
+        Field(
+            description="0-based index of the hotspot to keep fixed (raw API_ObjectType.fixPoint value, not 1-based)."
+        ),
+    ] = None
+    offset: Annotated[
+        Coordinate2D | None,
+        Field(
+            description="Offset of the symbol's origin from the insertion point. Reported accurately on Get, but confirmed live that Archicad silently discards this value through both Create and Modify (Get always reports the library part's own default hotspot offset regardless of what is sent) - same class of read-only-in-practice field as Morph's bodyType/edgeType/level."
+        ),
+    ] = None
+    useFixedAngle: Annotated[
+        bool | None,
+        Field(
+            description="Use a fixed rotation angle. Reported accurately on Get, but confirmed live that Archicad silently discards this value through both Create and Modify."
+        ),
+    ] = None
+    isAutoOnStoryVisibility: bool | None = None
+    visibility: StoryVisibility | None = None
+    linkToSettings: LinkToSettings | None = None
+
+
+class OpeningData(APIModel):
+    ownerElementId: ElementId
+    basePoint: Coordinate3D
+    width: Annotated[float | None, Field(gt=0.0)] = None
+    height: Annotated[float | None, Field(gt=0.0)] = None
+
+
+class OpeningRelations(APIModel):
+    fromRoom: ElementId | None = None
+    toRoom: ElementId | None = None
+
+
+class OpeningRelationsOfElement(APIModel):
+    """Relations of a curtain wall panel, skylight, window or door: the zones on the two sides of the opening."""
+    openingRelations: OpeningRelations
+
+
+class OverriddenMaterial(APIModel):
+    """A surface material that may override the one inherited from the element's structure (building material, composite or profile)."""
+    overridden: Annotated[
+        bool,
+        Field(description="True if the material is overridden on the element level."),
+    ]
+    attributeId: AttributeId | None = None
+
+
+class PenTableAttribute(APIModel):
+    """A pen table attribute."""
+    attributeId: AttributeId
+    index: int
+    name: str
+    isActiveForModel: bool | None = None
+    isActiveForLayout: bool | None = None
+    pens: list[PenTablePen] | None = None
+
+
+class PenTableData(APIModel):
+    """Data to create a Pen Table."""
+    attributeId: Annotated[
+        AttributeId | None,
+        Field(description="Indentifier of the existing Pen Table to overwrite, ignored if overwriteExisting is false."),
+    ] = None
+    index: Annotated[
+        str | None,
+        Field(description="Index of the existing Pen Table to overwrite, ignored if overwriteExisting is false."),
+    ] = None
+    name: Annotated[
+        str,
+        Field(
+            description="Name. If overwriteExisting is true, then the existing Pen Table with the given name will be overwritten."
+        ),
+    ]
+    isActiveForModel: Annotated[
+        bool | None,
+        Field(
+            description="Make this the active Pen Table for the model window. Defaults to false for a new Pen Table, or to the current value when overwriting an existing one."
+        ),
+    ] = None
+    isActiveForLayout: Annotated[
+        bool | None,
+        Field(
+            description="Make this the active Pen Table for layouts. Defaults to false for a new Pen Table, or to the current value when overwriting an existing one."
+        ),
+    ] = None
+    sourceAttributeId: Annotated[
+        AttributeIdArrayItem | None,
+        Field(
+            description="Identifier of the Pen Table whose 255 pens are used as the starting point, before the pens listed in the pens array are applied on top. Defaults to the Pen Table being overwritten itself (so unlisted pens keep their current color/width/description), or an arbitrary existing Pen Table in the project when creating a brand new one (or a plain black, 0.1 mm pen for all 255 if the project has no Pen Table at all yet)."
+        ),
+    ] = None
+    pens: Annotated[
+        list[PenData] | None,
+        Field(
+            description="The pens to set in the Pen Table, on top of the 255 pens copied from sourceAttributeId (or the current Pen Table, or an arbitrary existing one - see sourceAttributeId). Only list the pens you actually want to change."
+        ),
+    ] = None
+
+
+class PolylineDetails(APIModel):
+    coordinates: list[Coordinate2D]
+    arcs: Annotated[list[PolyArc] | None, Field(description="The arcs of the polyline.")] = None
+    roomSeparator: Annotated[bool | None, Field(description="Is this a zone boundary line?")] = None
+    linePenIndex: int | None = None
+    lineTypeId: AttributeId | None = None
+    zCoordinate: float
+
+
+class PolylineSettings(APIModel):
+    """Settings for modifying a Polyline. Setting coordinates replaces the entire polygon (single contour, no holes) and may change the number of vertices."""
+    coordinates: Annotated[list[Coordinate2D] | None, Field(min_length=2)] = None
+    arcs: list[PolyArc] | None = None
+    roomSeparator: bool | None = None
+    linePenIndex: int | None = None
+    lineTypeId: AttributeId | None = None
+
+
+class ProfileEdge(APIModel):
+    """One edge of a profile skin's outline."""
+    buildingMaterialId: AttributeIdArrayItem | None = None
+    pen: int | None = None
+    lineTypeId: AttributeIdArrayItem | None = None
+    isVisibleLine: bool | None = None
+    isCutEndLine: bool | None = None
+    isInnerLine: bool | None = None
+
+
+class ProfileEdgeOverride(APIModel):
+    edgeIndex: int
+    pen: int | None = None
+    isVisibleLine: bool | None = None
+    lineTypeId: AttributeIdArrayItem | None = None
+    buildingMaterialId: AttributeIdArrayItem | None = None
+
+
+class ProfileSkin(APIModel):
+    """One skin (hatch) of the profile's cross-section."""
+    skinId: Annotated[
+        str | None,
+        Field(
+            description="Internal identifier of this skin, stable for the lifetime of the profile. Pass it back in CreateProfiles' skinOverrides to target this skin for modification."
+        ),
+    ] = None
+    buildingMaterialId: AttributeIdArrayItem | None = None
+    surfaceId: AttributeIdArrayItem | None = None
+    fillId: AttributeIdArrayItem | None = None
+    contourPen: int | None = None
+    contourLineTypeId: AttributeIdArrayItem | None = None
+    isCore: bool | None = None
+    isFinish: bool | None = None
+    visibleCutEndLines: bool | None = None
+    cutEndLinePen: int | None = None
+    cutEndLineTypeId: AttributeIdArrayItem | None = None
+    edges: list[ProfileEdge] | None = None
+    outlineCoords: Annotated[
+        list[Coordinate2D] | None,
+        Field(
+            description="The skin's outline polygon vertices, present only when the skinOutlines field is requested alongside skins."
+        ),
+    ] = None
+    outlineSubPolyEnds: Annotated[
+        list[int] | None,
+        Field(
+            description="Index (into outlineCoords) of the last vertex of each contour, for skins whose outline has holes or multiple contours."
+        ),
+    ] = None
+    outlineArcs: Annotated[
+        list[OutlineArc] | None,
+        Field(
+            description="Marks which consecutive outlineCoords pairs are connected by an arc instead of a straight edge."
+        ),
+    ] = None
+
+
+class ProfileSkinData(APIModel):
+    """One new skin (hatch). Its shape is one or more closed polygon contours: the first is the outer boundary, any further ones are holes cut out of it - the same polygon+holes convention as e.g. CreateSlabs' polygonCoordinates/polygonArcs/holes, just expressed as a list of contours instead of a separate holes array."""
+    contours: Annotated[
+        list[ProfileSkinContour],
+        Field(
+            description="Closed polygon contours forming this skin's cross-section, in the Profile's local coordinate system. Each contour is closed automatically - do not repeat its first vertex at the end.",
+            min_length=1,
+        ),
+    ]
+    buildingMaterialId: AttributeIdArrayItem | None = None
+    surfaceId: AttributeIdArrayItem | None = None
+    fillId: AttributeIdArrayItem | None = None
+    contourPen: int | None = None
+    contourLineTypeId: AttributeIdArrayItem | None = None
+    isCore: bool | None = None
+    isFinish: bool | None = None
+    visibleCutEndLines: bool | None = None
+    cutEndLinePen: int | None = None
+    cutEndLineTypeId: AttributeIdArrayItem | None = None
+    edgeOverrides: Annotated[
+        list[ProfileEdgeOverride] | None,
+        Field(
+            description="Per-edge pen/visibility/line type, targeted by 0-based edge index. Edge indices follow the same order as this skin's contours/polygonCoordinates: the outer contour's edges first (one edge per vertex, wrapping around), then each hole's, in the order the contours were given. Verify exact indices for a created skin via a follow-up GetProfiles call's skins[].edges before relying on them."
+        ),
+    ] = None
+
+
+class Group(APIModel):
+    """The property group defined by name or id. If both fields exists the id will be used."""
+    propertyGroupId: PropertyGroupId | None = None
+    name: str | None = None
+
+
+class PropertyExpressionUpdate(APIModel):
+    propertyId: PropertyId
+    expressions: Annotated[
+        list[str] | None,
+        Field(
+            description="The new expression strings for the property. Only for expression-based properties.",
+            min_length=1,
+        ),
+    ] = None
+    possibleEnumValues: Annotated[
+        list[EnumValuesToAddItem] | None,
+        Field(
+            description="The enum values to add to an enumeration property. Values already on the property keep their identifier, so element values assigned to them survive; values not listed here are kept as well."
+        ),
+    ] = None
+
+
+class ElementPair(APIModel):
+    elementId: ElementId
+    trimmingElementId: ElementId
+
+
+class Conflict(APIModel):
+    elementId: ElementId
+    user: User
+
+
+class RevisionIssue(APIModel):
+    revisionIssueId: RevisionIssueId
+    id: str
+    description: str
+    issueTime: str
+    issuedByUser: str
+    overrideRevisionIDOfAllIncludedLayouts: bool
+    createNewRevisionInAllIncludedLayouts: bool
+    markersVisibleSinceIndex: int | None = None
+    isIssued: bool
+    documentRevisions: Annotated[
+        list[DocumentRevisionReference] | None,
+        Field(description="All document revisions belong to the current issue."),
+    ] = None
+    customSchemeData: list[RevisionCustomSchemeEntry] | None = None
+
+
+class RoofOrShellRelations(APIModel):
+    connectedRooms: Annotated[list[ElementIdArrayItem], Field(description="A list of elements.")]
+
+
+class RoofOrShellRelationsOfElement(APIModel):
+    """Relations of a roof or shell: the connected zones."""
+    roofOrShellRelations: RoofOrShellRelations
+
+
+class ElementsWithRotation(APIModel):
+    elementId: ElementId
+    rotation: Annotated[Rotation, Field(description="Rotation parameters for an element.")]
+    copy_: Annotated[
+        bool | None,
+        Field(
+            alias="copy",
+            description="Optional parameter. If true, a copy of the element is rotated. By default it's false.",
+        ),
+    ] = None
+
+
+class ActiveDesignOptionsInCombination(APIModel):
+    designOptionCombinationId: DesignOptionCombinationId
+    activeDesignOptions: Annotated[
+        list[DesignOptionIdArrayItem],
+        Field(description="The list of active design options in the combination."),
+    ]
+
+
+class ElementsWithGDLParameter(APIModel):
+    elementId: ElementId
+    gdlParameters: Annotated[
+        list[SetGDLParameterByNameDetails | SetGDLParameterByIndexDetails],
+        Field(description="The list of GDL parameters."),
+    ]
+
+
+class SolidLinkData(APIModel):
+    targetId: Annotated[ElementId, Field(description="The element to be cut or modified.")]
+    operatorId: Annotated[ElementId, Field(description="The element performing the operation.")]
+    operation: SolidOperationType
+    linkFlags: SolidLinkFlags | None = None
+
+
+class SolidLinkReference(APIModel):
+    targetId: ElementId
+    operatorId: ElementId
+
+
+class SolidLinksWithTheGivenTargetItem(APIModel):
+    operatorId: ElementId
+    operation: SolidOperationType
+    linkFlags: SolidLinkFlags
+
+
+class SolidLinksWithTheGivenOperatorItem(APIModel):
+    targetId: ElementId
+    operation: SolidOperationType
+    linkFlags: SolidLinkFlags
+
+
+class SolidLinksOfElement(APIModel):
+    solidLinksWithTheGivenTarget: Annotated[
+        list[SolidLinksWithTheGivenTargetItem],
+        Field(description="Links where the given element is the target (being cut or modified)."),
+    ]
+    solidLinksWithTheGivenOperator: Annotated[
+        list[SolidLinksWithTheGivenOperatorItem],
+        Field(description="Links where the given element is the operator (performing the cut)."),
+    ]
+
+
+class SplineData(APIModel):
+    """The parameters of the new Spline."""
+    favoriteName: Annotated[
+        str | None,
+        Field(
+            description="Optional name of a favorite to base the new element on. Its settings are applied first, then the explicitly given fields override them."
+        ),
+    ] = None
+    floorInd: Annotated[
+        float | None,
+        Field(description="The identifier of the floor. Optional parameter, by default the current floor is used."),
+    ] = None
+    layerIndex: Annotated[
+        int | None,
+        Field(
+            description="Layer attribute index to place the spline on. Optional parameter, by default the current layer is used."
+        ),
+    ] = None
+    coordinates: Annotated[
+        list[Coordinate2D],
+        Field(
+            description="The 2D coordinates of the spline points. Do not repeat the first point at the end even for a closed spline.",
+            min_length=3,
+        ),
+    ]
+    closed: Annotated[
+        bool | None,
+        Field(description="Is this a closed curve? Optional, defaults to false."),
+    ] = None
+    roomSeparator: Annotated[
+        bool | None,
+        Field(description="Is this a zone boundary line? Optional, defaults to false."),
+    ] = None
+    linePenIndex: Annotated[
+        int | None,
+        Field(description="Optional pen index. By default the current pen is used."),
+    ] = None
+    lineTypeId: Annotated[
+        AttributeId | None,
+        Field(description="Optional line type attribute. By default the current line type is used."),
+    ] = None
+
+
+class SplineDetails(APIModel):
+    """Geometry of a Spline element. Geometry is read-only: Archicad's own API does not support modifying Spline geometry via ACAPI_Element_Change. The settings fields (roomSeparator/linePenIndex/lineTypeId) ARE modifiable via SET."""
+    coordinates: list[Coordinate2D]
+    closed: Annotated[bool, Field(description="Is this a closed curve?")]
+    roomSeparator: Annotated[bool | None, Field(description="Is this a zone boundary line?")] = None
+    linePenIndex: int | None = None
+    lineTypeId: AttributeId | None = None
+    zCoordinate: float
+
+
+class SplineSettings(APIModel):
+    """Settings for modifying a Spline. Only these settings fields are modifiable - Archicad's own API does not support changing Spline geometry (coordinates/closed) via ACAPI_Element_Change."""
+    roomSeparator: bool | None = None
+    linePenIndex: int | None = None
+    lineTypeId: AttributeId | None = None
+
+
+class SurfaceAttribute(APIModel):
+    """A surface attribute."""
+    attributeId: AttributeId
+    index: int
+    name: str
+    materialType: SurfaceType | None = None
+    ambientReflection: float | None = None
+    diffuseReflection: float | None = None
+    specularReflection: float | None = None
+    transparency: float | None = None
+    shine: float | None = None
+    transparencyAttenuation: float | None = None
+    emissionAttenuation: float | None = None
+    surfaceColor: ColorRGB | None = None
+    specularColor: ColorRGB | None = None
+    emissionColor: ColorRGB | None = None
+    fillId: AttributeIdArrayItem | None = None
+    texture: Texture | None = None
+
+
+class SurfaceData(APIModel):
+    """Data to create a surface."""
+    attributeId: Annotated[
+        AttributeId | None,
+        Field(description="Indentifier of the existing Surface to overwrite, ignored if overwriteExisting is false."),
+    ] = None
+    index: Annotated[
+        str | None,
+        Field(description="Index of the existing surface to overwrite, ignored if overwriteExisting is false."),
+    ] = None
+    name: Annotated[
+        str,
+        Field(
+            description="Name. If overwriteExisting is true, then the existing surface with the given name will be overwritten."
+        ),
+    ]
+    materialType: SurfaceType | None = None
+    ambientReflection: Annotated[float | None, Field(description="Ambient percentage [0..100].")] = None
+    diffuseReflection: Annotated[float | None, Field(description="Diffuse percentage [0..100].")] = None
+    specularReflection: Annotated[float | None, Field(description="Specular percentage [0..100].")] = None
+    transparency: Annotated[float | None, Field(description="Transparency percentage [0..100].")] = None
+    shine: Annotated[
+        float | None,
+        Field(description="The shininess factor multiplied by 100 [0..10000]."),
+    ] = None
+    transparencyAttenuation: Annotated[
+        float | None,
+        Field(description="Transparency attenuation multiplied by 100 [0..10000]."),
+    ] = None
+    emissionAttenuation: Annotated[
+        float | None,
+        Field(description="Emission attenuation multiplied by 100 [0..10000]."),
+    ] = None
+    surfaceColor: ColorRGB | None = None
+    specularColor: ColorRGB | None = None
+    emissionColor: ColorRGB | None = None
+    fillId: AttributeIdArrayItem | None = None
+    texture: Texture | None = None
+
+
+class SurveyPoint(APIModel):
+    position: SurveyPointPosition
+    geoReferencingParameters: GeoReferencingParameters
+
+
+class TextDataWithRuns(APIModel):
+    """The parameters of the new Text element."""
+    favoriteName: Annotated[
+        str | None,
+        Field(
+            description="Optional name of a favorite to base the new element on. Its settings are applied first, then the explicitly given fields override them."
+        ),
+    ] = None
+    coordinate: Annotated[
+        Coordinate3D,
+        Field(
+            description="The placement position of the text. The z value is used to determine the floor when floorIndex is omitted."
+        ),
+    ]
+    text: Annotated[
+        str | None,
+        Field(description="The text content. Newlines create multiple lines. Ignored if 'runs' is also given."),
+    ] = None
+    runs: Annotated[
+        list[TextRunDetails],
+        Field(
+            description="Multi-style text content: an array of styled runs, concatenated in order. Takes precedence over 'text' if both are given.",
+            min_length=1,
+        ),
+    ]
+    height: Annotated[
+        float | None,
+        Field(
+            description="The character height in millimeters. Optional; defaults to the Text tool default. Equivalent to style.height."
+        ),
+    ] = None
+    pen: Annotated[
+        int | None,
+        Field(description="Optional pen attribute index. Equivalent to style.penIndex."),
+    ] = None
+    angle: Annotated[
+        float | None,
+        Field(description="Optional rotation angle in radians. Equivalent to style.angle."),
+    ] = None
+    justification: Justification | None = None
+    style: Annotated[
+        TextStyleSettableDetails | None,
+        Field(
+            description="Full style settings (font, effects, frame, anchor, etc). height/pen/angle/justification above take precedence over the same fields here if both are given."
+        ),
+    ] = None
+    floorIndex: Annotated[
+        int | None,
+        Field(description="Optional floor index. If omitted, derived from the coordinate's z value."),
+    ] = None
+
+
+class TextDataWithText(APIModel):
+    """The parameters of the new Text element."""
+    favoriteName: Annotated[
+        str | None,
+        Field(
+            description="Optional name of a favorite to base the new element on. Its settings are applied first, then the explicitly given fields override them."
+        ),
+    ] = None
+    coordinate: Annotated[
+        Coordinate3D,
+        Field(
+            description="The placement position of the text. The z value is used to determine the floor when floorIndex is omitted."
+        ),
+    ]
+    text: Annotated[
+        str,
+        Field(description="The text content. Newlines create multiple lines. Ignored if 'runs' is also given."),
+    ]
+    runs: Annotated[
+        list[TextRunDetails] | None,
+        Field(
+            description="Multi-style text content: an array of styled runs, concatenated in order. Takes precedence over 'text' if both are given.",
+            min_length=1,
+        ),
+    ] = None
+    height: Annotated[
+        float | None,
+        Field(
+            description="The character height in millimeters. Optional; defaults to the Text tool default. Equivalent to style.height."
+        ),
+    ] = None
+    pen: Annotated[
+        int | None,
+        Field(description="Optional pen attribute index. Equivalent to style.penIndex."),
+    ] = None
+    angle: Annotated[
+        float | None,
+        Field(description="Optional rotation angle in radians. Equivalent to style.angle."),
+    ] = None
+    justification: Justification | None = None
+    style: Annotated[
+        TextStyleSettableDetails | None,
+        Field(
+            description="Full style settings (font, effects, frame, anchor, etc). height/pen/angle/justification above take precedence over the same fields here if both are given."
+        ),
+    ] = None
+    floorIndex: Annotated[
+        int | None,
+        Field(description="Optional floor index. If omitted, derived from the coordinate's z value."),
+    ] = None
+
+
+class TextDetails(APIModel):
+    text: Annotated[str, Field(description="The text content. Newlines separate the lines.")]
+    position: Annotated[Coordinate2D, Field(description="The placement position of the text.")]
+    angle: Annotated[float, Field(description="The rotation angle in radians (same as style.angle).")]
+    height: Annotated[
+        float,
+        Field(description="The character height in millimeters (same as style.height)."),
+    ]
+    pen: Annotated[int, Field(description="The pen attribute index (same as style.penIndex).")]
+    justification: Justification
+    zCoordinate: Annotated[float, Field(description="The level of the text's floor.")]
+    style: Annotated[
+        TextStyleDetails,
+        Field(
+            description="The full style state; the flat fields above are the subset SetDetailsOfElements takes back."
+        ),
+    ]
+    paragraphCount: Annotated[
+        int,
+        Field(
+            description="Read-only: number of paragraphs in the memo (Tapir's own Create/Modify commands always produce 1)."
+        ),
+    ]
+    runs: Annotated[
+        list[TextRunDetails] | None,
+        Field(
+            description="The styled runs of the content, present whenever the content has paragraphs (always for content Tapir created); one entry per run, a single run too, as a run may carry a pen, font, face or size of its own. Concatenating the runs' text in order gives the full content."
+        ),
+    ] = None
+
+
+class ViewSettings(APIModel):
+    """The settings of a navigator view"""
+    modelViewOptions: Annotated[
+        str | None,
+        Field(description="The name of the model view options. If empty, the view has custom model view options."),
+    ] = None
+    layerCombination: Annotated[
+        str | None,
+        Field(description="The name of the layer combination. If empty, the view has custom layer combination."),
+    ] = None
+    dimensionStyle: Annotated[
+        str | None,
+        Field(description="The name of the dimension style. If empty, the view has custom dimension style."),
+    ] = None
+    penSetName: Annotated[
+        str | None,
+        Field(description="The name of the pen set. If empty, the view has custom pen set."),
+    ] = None
+    graphicOverrideCombination: Annotated[
+        str | None,
+        Field(
+            description="The name of the graphic override combination. If empty, the view has custom graphic override combination."
+        ),
+    ] = None
+    drawingScale: Annotated[
+        int | None,
+        Field(description="The drawing scale stored on the view, if enabled."),
+    ] = None
+    saveZoom: Annotated[bool | None, Field(description="Whether the zoom box is stored in the view.")] = None
+    ignoreSavedZoom: Annotated[
+        bool | None,
+        Field(description="Whether changing to the view should ignore its stored zoom."),
+    ] = None
+    zoom: Zoom | None = None
+    rotation: Annotated[
+        float | None,
+        Field(
+            description="View rotation angle in radians. Read via GetViewSettings; use SetViewRotation to change it."
+        ),
+    ] = None
+    structureDisplay: Annotated[
+        StructureDisplay | None,
+        Field(description="Structure display mode. One of EntireStructure, CoreOnly, WithoutFinishes, StructureOnly."),
+    ] = None
+    renovationFilterGuid: Annotated[
+        UUID | None,
+        Field(
+            description="GUID of the renovation filter applied to the view.",
+        ),
+    ] = None
+    d3styleName: Annotated[str | None, Field(description="Name of the 3D style. Empty if not set.")] = None
+    renderingSceneName: Annotated[str | None, Field(description="Name of the rendering scene. Empty if not set.")] = (
+        None
+    )
+    usePhotoRendering: Annotated[bool | None, Field(description="Whether photo rendering is used for this view.")] = (
+        None
+    )
+
+
+class ViewTransformations(APIModel):
+    zoom: Zoom
+    rotation: Annotated[float, Field(description="The orientation in radian.")]
+
+
+class WallData(APIModel):
+    favoriteName: Annotated[
+        str | None,
+        Field(
+            description="Optional name of a favorite to base the new element on. Its settings are applied first, then the explicitly given fields override them."
+        ),
+    ] = None
+    begCoordinate: Coordinate2D
+    endCoordinate: Coordinate2D
+    floorIndex: Annotated[
+        int | None,
+        Field(
+            description="Story index (as returned by GetStories). When provided, zCoordinate is interpreted as bottomOffset relative to the floor. Takes priority over zCoordinate for floor assignment."
+        ),
+    ] = None
+    zCoordinate: Annotated[
+        float | None,
+        Field(
+            description="Absolute Z when floorIndex is absent; bottomOffset relative to the floor when floorIndex is provided."
+        ),
+    ] = None
+    height: Annotated[float, Field(gt=0.0)]
+    thickness: Annotated[float, Field(gt=0.0)]
+    offset: float | None = None
+    arcAngle: Annotated[
+        float | None,
+        Field(
+            description="Arc angle in radians; non-zero creates a curved wall (begCoordinate/endCoordinate are the chord endpoints)."
+        ),
+    ] = None
+    referenceLineLocation: WallReferenceLineLocation | None = None
+    structureType: WallStructureType | None = None
+    buildingMaterialId: AttributeId | None = None
+    compositeId: AttributeId | None = None
+    profileId: AttributeId | None = None
+
+
+class WallDetails(APIModel):
+    geometryType: WallGeometryType
+    begCoordinate: Coordinate2D
+    endCoordinate: Coordinate2D
+    zCoordinate: float
+    flipped: bool | None = None
+    height: Annotated[float, Field(description="height relative to bottom")]
+    bottomOffset: Annotated[float, Field(description="base level of the wall relative to the floor level")]
+    offset: Annotated[float, Field(description="wall's base line's offset from ref. line")]
+    arcAngle: Annotated[float | None, Field(description="The arc angle of the curved wall in radians.")] = None
+    begThickness: Annotated[
+        float | None,
+        Field(description="Thickness at the beginning of wall, it will return 0 for poly wall type"),
+    ] = None
+    endThickness: Annotated[
+        float | None,
+        Field(description="Thickness at the end of wall, it will return 0 for poly wall type"),
+    ] = None
+    polygonOutline: Annotated[
+        list[Coordinate2D] | None,
+        Field(description="Polygon outline in case of polygonal wall"),
+    ] = None
+    polygonArcs: Annotated[
+        list[PolyArc] | None,
+        Field(description="Polygon arcs in case of polygonal wall"),
+    ] = None
+    structureType: WallStructureType | None = None
+    buildingMaterialId: AttributeId | None = None
+    compositeId: AttributeId | None = None
+    profileId: AttributeId | None = None
+    referenceLineLocation: WallReferenceLineLocation | None = None
+    profileType: WallProfileType | None = None
+    slantAlpha: Annotated[
+        float | None,
+        Field(description="Only has an effect once profileType is set to Slanted or Trapez."),
+    ] = None
+    slantBeta: Annotated[
+        float | None,
+        Field(description="Only has an effect once profileType is set to Slanted or Trapez."),
+    ] = None
+    topOffset: Annotated[
+        float | None,
+        Field(description="Only has an effect when relativeTopStory is non-zero."),
+    ] = None
+    relativeTopStory: Annotated[
+        float | None,
+        Field(
+            description="Non-zero links the wall's top to another story instead of an explicit height - do not set together with 'height' via ModifyWalls in the same call."
+        ),
+    ] = None
+    zoneRel: WallZoneRelation | None = None
+    visibility: StoryVisibility | None = None
+    isAutoOnStoryVisibility: Annotated[
+        bool | None,
+        Field(
+            description="When true (the default on a new wall), Archicad recomputes 'visibility' automatically from the wall's vertical extent and ignores any value set for it."
+        ),
+    ] = None
+    referenceMaterial: OverriddenMaterial | None = None
+    oppositeMaterial: OverriddenMaterial | None = None
+    sideMaterial: OverriddenMaterial | None = None
+    cutFillPen: OverriddenPen | None = None
+    cutFillBackgroundPen: OverriddenPen | None = None
+
+
+class WallThicknessDimensionData(APIModel):
+    wallId: ElementId
+    referencePoint: Coordinate2D
+    direction: Coordinate2D
+
+
+class WallWithDetails(APIModel):
+    elementId: ElementId
+    geometryType: WallModificationGeometryType | None = None
+    begCoordinate: Coordinate2D | None = None
+    endCoordinate: Coordinate2D | None = None
+    arcAngle: Annotated[
+        float | None,
+        Field(
+            description="Arc angle in radians; non-zero makes the wall curved (begCoordinate/endCoordinate are the chord endpoints)."
+        ),
+    ] = None
+    height: Annotated[
+        float | None,
+        Field(
+            description="Sets relativeTopStory to 0 (explicit height). Do not combine with relativeTopStory in the same call - whichever is applied last wins, and Archicad recomputes the actual height from the story elevations once relativeTopStory is non-zero.",
+            gt=0.0,
+        ),
+    ] = None
+    thickness: Annotated[float | None, Field(gt=0.0)] = None
+    bottomOffset: float | None = None
+    offset: float | None = None
+    structureType: WallStructureType | None = None
+    buildingMaterialId: AttributeId | None = None
+    compositeId: AttributeId | None = None
+    profileId: AttributeId | None = None
+    referenceLineLocation: WallReferenceLineLocation | None = None
+    profileType: WallModificationProfileType | None = None
+    slantAlpha: Annotated[
+        float | None,
+        Field(description="Only has an effect once profileType is set to Slanted or Trapez."),
+    ] = None
+    slantBeta: Annotated[
+        float | None,
+        Field(description="Only has an effect once profileType is set to Slanted or Trapez."),
+    ] = None
+    topOffset: Annotated[
+        float | None,
+        Field(description="Only has an effect when relativeTopStory is non-zero."),
+    ] = None
+    relativeTopStory: Annotated[
+        float | None,
+        Field(
+            description="Non-zero links the wall's top to another story instead of an explicit height - do not set together with 'height' in the same call, see the note on 'height' above."
+        ),
+    ] = None
+    zoneRel: WallZoneRelation | None = None
+    visibility: StoryVisibility | None = None
+    isAutoOnStoryVisibility: Annotated[
+        bool | None,
+        Field(
+            description="When true (the default on a new wall), Archicad recomputes 'visibility' automatically from the wall's vertical extent and ignores any value set for it. Setting 'visibility' without also setting this field turns it off automatically."
+        ),
+    ] = None
+    referenceMaterial: OverriddenMaterial | None = None
+    oppositeMaterial: OverriddenMaterial | None = None
+    sideMaterial: OverriddenMaterial | None = None
+    cutFillPen: OverriddenPen | None = None
+    cutFillBackgroundPen: OverriddenPen | None = None
+
+
+class WindowData(APIModel):
+    ownerWallId: ElementId
+    centerOffset: Annotated[float, Field(ge=0.0)]
+    sillHeight: float | None = None
+    width: Annotated[float | None, Field(gt=0.0)] = None
+    height: Annotated[float | None, Field(gt=0.0)] = None
+    reflected: bool | None = None
+    refSide: bool | None = None
+    oSide: bool | None = None
+    favoriteName: Annotated[
+        str | None,
+        Field(
+            description="Optional. Name of an existing Window favorite (as returned by `GetFavoritesByType`). Applied to the Window tool defaults before the create."
+        ),
+    ] = None
+
+
+class WindowDoorDetails(APIModel):
+    libPart: LibPartDetails
+    ownerElementId: ElementId | None = None
+    ownerElementType: ElementType | None = None
+    width: Annotated[float, Field(description="Opening width.")]
+    height: Annotated[float, Field(description="Opening height.")]
+    sillHeight: Annotated[float, Field(description="Sill height (window) or threshold height (door).")]
+    centerOffset: Annotated[float, Field(description="Center offset along the owner wall reference line.")]
+    reflected: bool
+    refSide: bool
+    oSide: bool
+
+
+class WindowWithDetails(APIModel):
+    elementId: ElementId
+    width: Annotated[float | None, Field(gt=0.0)] = None
+    height: Annotated[float | None, Field(gt=0.0)] = None
+    sillHeight: float | None = None
+    centerOffset: Annotated[float | None, Field(ge=0.0)] = None
+    reflected: bool | None = None
+    refSide: bool | None = None
+    oSide: bool | None = None
+    reveal: Annotated[bool | None, Field(description="Turn the reveal on or off.")] = None
+    revealDepthOffset: Annotated[
+        float | None,
+        Field(description="Distance the frame plane is moved across the wall thickness, along the wall normal."),
+    ] = None
+
+
+class ZoneBoundary(APIModel):
+    connectedElementId: Annotated[ElementId, Field(description="The unique identifier of the connected element.")]
+    isExternal: Annotated[bool, Field(description="True if the boundary is an external one.")]
+    neighbouringZoneElementId: Annotated[
+        ElementId,
+        Field(
+            description="Returns the unique identifier of the other Zone the element connects to if the boundary is internal. Please note that this boundary does not represent the boundary of the element with the other Zone."
+        ),
+    ]
+    area: Annotated[float, Field(description="The area of the polygon of the boundary.")]
+    polygonOutline: Annotated[list[Coordinate3D], Field(description="The outline polygon of the boundary.")]
+
+
+class ZoneBoundariesWrapper(APIModel):
+    zoneBoundaries: list[ZoneBoundary]
+
+
+class ZoneBoundaryPart(APIModel):
+    """Section of a wall, beam or curtain wall segment related to a zone."""
+    elementId: ElementId
+    roomEdgeIndex: Annotated[
+        int | None,
+        Field(description="Index of the zone polygon edge adjacent to the element (not present for beams)."),
+    ] = None
+    begDistance: Annotated[
+        float,
+        Field(description="Beginning distance of the section from the beginning point of the element."),
+    ]
+    endDistance: Annotated[
+        float,
+        Field(description="End distance of the section from the beginning point of the element."),
+    ]
+
+
+class ZoneCategoryAttribute(APIModel):
+    """A zone category attribute."""
+    attributeId: AttributeId
+    index: int
+    name: str
+    categoryCode: str | None = None
+    color: ColorRGB | None = None
+    stampName: str | None = None
+    stampMainGuid: str | None = None
+    stampRevGuid: str | None = None
+
+
+class ZoneCategoryData(APIModel):
+    """Data to create a Zone Category."""
+    attributeId: Annotated[
+        AttributeId | None,
+        Field(
+            description="Indentifier of the existing Zone Category to overwrite, ignored if overwriteExisting is false."
+        ),
+    ] = None
+    index: Annotated[
+        str | None,
+        Field(description="Index of the existing Zone Category to overwrite, ignored if overwriteExisting is false."),
+    ] = None
+    name: Annotated[
+        str,
+        Field(
+            description="Name. If overwriteExisting is true, then the existing Zone Category with the given name will be overwritten."
+        ),
+    ]
+    categoryCode: Annotated[str | None, Field(description="Code of the Zone Category.")] = None
+    color: ColorRGB | None = None
+    stampName: Annotated[
+        str | None,
+        Field(
+            description="Document name of the zone stamp library part (GSM) to use, e.g. the value shown as StampDocumentName in an Attribute Manager XML export. Only used together with stampMainGuid/stampRevGuid; ignored otherwise."
+        ),
+    ] = None
+    stampMainGuid: Annotated[
+        str | None,
+        Field(
+            description="Main GUID of the zone stamp library part to use, e.g. the value shown as MainGuid in an Attribute Manager XML export (can be copied from an existing Zone Category obtained another way). If omitted, the stamp is copied from the Zone Category being overwritten, or from the project's first Zone Category when creating a new one."
+        ),
+    ] = None
+    stampRevGuid: Annotated[
+        str | None,
+        Field(
+            description="Revision GUID of the zone stamp library part to use, e.g. the value shown as RevGuid in an Attribute Manager XML export. Required together with stampMainGuid."
+        ),
+    ] = None
+
+
+class ZoneRelations(APIModel):
+    """The relations of a zone: the related elements grouped by type and the boundary sections of walls, beams and curtain wall segments."""
+    elementsGroupedByType: Annotated[
+        list[ElementsOfElementType],
+        Field(description="The elements related to the zone, grouped by element type."),
+    ]
+    wallParts: Annotated[
+        list[ZoneBoundaryPart],
+        Field(description="Sections of walls that border the zone."),
+    ]
+    beamParts: Annotated[
+        list[ZoneBoundaryPart],
+        Field(description="Sections of beams related to the zone."),
+    ]
+    curtainWallSegmentParts: Annotated[
+        list[ZoneBoundaryPart],
+        Field(description="Sections of curtain wall segments that border the zone."),
+    ]
+
+
+class ZoneRelationsOfElement(APIModel):
+    """Relations of a zone."""
+    zoneRelations: ZoneRelations
+
+
+class FavoritesToApplyItem(APIModel):
+    """The identifier of the element and the name of the Favorite to apply to it."""
+    elementId: ElementId
+    favorite: str
 
 
 class ArcData(APIModel):
@@ -120,28 +5878,6 @@ class ArcSettings(APIModel):
     lineTypeId: AttributeId | None = None
 
 
-class Area(APIModel):
-    unit: AreaType
-    accuracy: AccuracyType
-    decimals: Annotated[int, Field(description="Number of decimals to display for area values.")]
-
-
-class AreaType(Enum):
-    """The type of the area measurement unit."""
-    SQUARE_METER = "SquareMeter"
-    SQUARE_CENTIMETER = "SquareCentimeter"
-    SQUARE_MILLIMETER = "SquareMillimeter"
-    SQUARE_FOOT = "SquareFoot"
-    SQUARE_INCH = "SquareInch"
-
-
-class AssociativeDimensionData(APIModel):
-    referencePoint: Coordinate2D
-    direction: Coordinate2D
-    floorIndex: float | None = None
-    witnessPoints: Annotated[list[AssociativeWitnessPoint], Field(min_length=2)]
-
-
 class AssociativeDimensionOnSectionData(APIModel):
     sectionElementId: Annotated[
         ElementId | None,
@@ -192,177 +5928,6 @@ class AttributeHeadersWrapper(APIModel):
     attributes: Annotated[list[AttributeHeader], Field(description="Details of attributes.")]
 
 
-class AttributeId(APIModel):
-    """The identifier of an attribute."""
-    guid: Annotated[
-        UUID,
-        Field(
-            description="A Globally Unique Identifier (or Universally Unique Identifier) in its string representation as defined in RFC 4122.",
-        ),
-    ]
-
-
-class AttributeIdArrayItem(APIModel):
-    attributeId: AttributeId
-
-
-class AttributePropertyValue(APIModel):
-    """A property value with the identifiers of the property and its owner attribute."""
-    attributeId: AttributeId
-    propertyId: PropertyId
-    propertyValue: PropertyValue
-
-
-class AttributeType(Enum):
-    """The type of an attribute."""
-    LAYER = "Layer"
-    LINE = "Line"
-    FILL = "Fill"
-    COMPOSITE = "Composite"
-    SURFACE = "Surface"
-    LAYER_COMBINATION = "LayerCombination"
-    ZONE_CATEGORY = "ZoneCategory"
-    PROFILE = "Profile"
-    PEN_TABLE = "PenTable"
-    MEP_SYSTEM = "MEPSystem"
-    OPERATION_PROFILE = "OperationProfile"
-    BUILDING_MATERIAL = "BuildingMaterial"
-
-
-class AttributesToDeleteItem(APIModel):
-    attributeType: AttributeType
-    attributeId: AttributeIdArrayItem
-
-
-class AutoTextKey(APIModel):
-    name: Annotated[
-        str,
-        Field(description="The autotext's name, as shown in the Insert Autotext dialog of Archicad."),
-    ]
-    key: Annotated[
-        str,
-        Field(
-            description="The autotext's key. To embed it in the content of a Text or Label element, surround it with '<' and '>', e.g. '<PROPERTY-69A58F6F-DD3B-478D-B5EF-09A16BD0C548>'."
-        ),
-    ]
-
-
-AutoTextKeyValue: TypeAlias = str
-
-
-class AutoTextName(APIModel):
-    name: Annotated[
-        str,
-        Field(description="The autotext's display name, as shown in the Insert Autotext dialog of Archicad."),
-    ]
-
-
-class AutomaticZoneGeometry(APIModel):
-    """Automatic zone placement."""
-    referencePosition: Annotated[Coordinate2D, Field(description="Reference point to automatically find zone.")]
-
-
-class BasicDefaultValue(APIModel):
-    """Default value of the property in case of a basic property value (ie. not an expression)."""
-    basicDefaultValue: Annotated[
-        NotAvailablePropertyValue
-        | NormalNumberPropertyValue
-        | NormalIntegerPropertyValue
-        | NormalStringPropertyValue
-        | NormalBooleanPropertyValue
-        | NormalLengthPropertyValue
-        | NormalAreaPropertyValue
-        | NormalVolumePropertyValue
-        | NormalAnglePropertyValue
-        | NormalNumberListPropertyValue
-        | NormalIntegerListPropertyValue
-        | NormalStringListPropertyValue
-        | NormalBooleanListPropertyValue
-        | NormalLengthListPropertyValue
-        | NormalAreaListPropertyValue
-        | NormalVolumeListPropertyValue
-        | NormalAngleListPropertyValue
-        | NormalSingleEnumPropertyValue
-        | NormalMultiEnumPropertyValue
-        | UserUndefinedPropertyValue,
-        Field(description="A normal, userUndefined, notAvailable or notEvaluated property value."),
-    ]
-
-
-class BeamAnchorPoint(Enum):
-    TOP_LEFT = "TopLeft"
-    TOP_CENTER = "TopCenter"
-    TOP_RIGHT = "TopRight"
-    MIDDLE_LEFT = "MiddleLeft"
-    CENTER = "Center"
-    MIDDLE_RIGHT = "MiddleRight"
-    BOTTOM_LEFT = "BottomLeft"
-    BOTTOM_CENTER = "BottomCenter"
-    BOTTOM_RIGHT = "BottomRight"
-
-
-class BeamData(APIModel):
-    favoriteName: Annotated[
-        str | None,
-        Field(
-            description="Optional name of a favorite to base the new element on. Its settings are applied first, then the explicitly given fields override them."
-        ),
-    ] = None
-    begCoordinate: Coordinate2D
-    endCoordinate: Coordinate2D
-    floorIndex: Annotated[
-        int | None,
-        Field(description="Optional floor index. If omitted, derived from zCoordinate."),
-    ] = None
-    zCoordinate: float
-    offset: float | None = None
-    slantAngle: Annotated[
-        float | None,
-        Field(
-            description="Slant angle in radians. A non-zero value also switches the beam to slanted, unless isSlanted is given explicitly."
-        ),
-    ] = None
-    isSlanted: Annotated[
-        bool | None,
-        Field(description="Optional explicit slanted state. By default it is derived from slantAngle."),
-    ] = None
-    profileAngle: Annotated[
-        float | None,
-        Field(description="Rotation angle of the profile around the beam's center line, in radians."),
-    ] = None
-    arcAngle: float | None = None
-    verticalCurveHeight: float | None = None
-    width: Annotated[
-        float | None,
-        Field(
-            description="Cross section width of the beam. Applied to all segments.",
-            gt=0.0,
-        ),
-    ] = None
-    height: Annotated[
-        float | None,
-        Field(
-            description="Cross section height of the beam. Applied to all segments.",
-            gt=0.0,
-        ),
-    ] = None
-    anchorPoint: BeamAnchorPoint | None = None
-    isWidthAndHeightLinked: Annotated[
-        bool | None,
-        Field(
-            description="When true (the default), Archicad keeps width and height equal and setting one changes the other - set to false to give width/height independent values. Applied to all segments."
-        ),
-    ] = None
-    buildingMaterialId: Annotated[
-        AttributeId | None,
-        Field(description="Cross section building material. Applied to all segments."),
-    ] = None
-    profileId: Annotated[
-        AttributeId | None,
-        Field(description="Switches the cross section to this custom extruded profile. Applied to all segments."),
-    ] = None
-
-
 class BeamDetails(APIModel):
     begCoordinate: Coordinate2D
     endCoordinate: Coordinate2D
@@ -408,37 +5973,6 @@ class BeamDetails(APIModel):
             description="Present when the cross section uses a custom extruded profile rather than a building material."
         ),
     ] = None
-
-
-class BeamHole(APIModel):
-    holeId: float
-    type: BeamHoleType
-    showContour: bool | None = None
-    centerX: float
-    centerZ: float
-    width: float
-    height: float | None = None
-
-
-class BeamHoleType(Enum):
-    RECTANGULAR = "Rectangular"
-    CIRCULAR = "Circular"
-
-
-class BeamRelations(APIModel):
-    """Relations of a beam."""
-    beamConnections: EndpointConnections
-
-
-class BeamSegmentRelations(APIModel):
-    """Relations of a beam segment."""
-    beamSegmentConnections: EndpointConnections
-
-
-class BeamShape(Enum):
-    STRAIGHT = "Straight"
-    HORIZONTALLY_CURVED = "HorizontallyCurved"
-    VERTICALLY_CURVED = "VerticallyCurved"
 
 
 class BeamWithDetails(APIModel):
@@ -492,170 +6026,11 @@ class BeamWithDetails(APIModel):
     coverFill: CoverFill | None = None
 
 
-class BodyType(Enum):
-    """Whether the body is a closed solid or an open surface shell. Reported accurately on Get; on Create/Modify this is set on the element but a confirmed Archicad SDK bug means it may not take effect (bodyType has been observed always coming back Solid regardless of what was requested - see edgeOverrides' note)."""
-    SOLID = "Solid"
-    SURFACE = "Surface"
-
-
-class BoundingBox2D(APIModel):
-    """Bounding box of the drawing on the layout."""
-    xMin: float
-    yMin: float
-    xMax: float
-    yMax: float
-
-
-class BoundingBox3D(APIModel):
-    """A 3D bounding box of an element."""
-    xMin: Annotated[float, Field(description="The minimum X value of the bounding box.")]
-    yMin: Annotated[float, Field(description="The minimum Y value of the bounding box.")]
-    zMin: Annotated[float, Field(description="The minimum Z value of the bounding box.")]
-    xMax: Annotated[float, Field(description="The maximum X value of the bounding box.")]
-    yMax: Annotated[float, Field(description="The maximum Y value of the bounding box.")]
-    zMax: Annotated[float, Field(description="The maximum Z value of the bounding box.")]
-
-
-class BoundingBox3DArrayItem(APIModel):
-    """A wrapper containing a 3D bounding box."""
-    boundingBox3D: BoundingBox3D
-
-
-class BuildingMaterialAttribute(APIModel):
-    """A building material attribute."""
-    attributeId: AttributeId
-    index: int
-    name: str
-    id: str | None = None
-    manufacturer: str | None = None
-    description: str | None = None
-    connPriority: int | None = None
-    cutFillIndex: int | None = None
-    cutFillPen: int | None = None
-    cutFillBackgroundPen: int | None = None
-    cutSurfaceIndex: int | None = None
-    cutFillOrientation: CutFillOrientation | None = None
-    thermalConductivity: float | None = None
-    density: float | None = None
-    heatCapacity: float | None = None
-    embodiedEnergy: float | None = None
-    embodiedCarbon: float | None = None
-    showUncutLines: bool | None = None
-    collisionDetection: bool | None = None
-
-
-class BuildingMaterialAttributeField(Enum):
-    ID = "id"
-    MANUFACTURER = "manufacturer"
-    DESCRIPTION = "description"
-    CONN_PRIORITY = "connPriority"
-    CUT_FILL_INDEX = "cutFillIndex"
-    CUT_FILL_PEN = "cutFillPen"
-    CUT_FILL_BACKGROUND_PEN = "cutFillBackgroundPen"
-    CUT_SURFACE_INDEX = "cutSurfaceIndex"
-    CUT_FILL_ORIENTATION = "cutFillOrientation"
-    THERMAL_CONDUCTIVITY = "thermalConductivity"
-    DENSITY = "density"
-    HEAT_CAPACITY = "heatCapacity"
-    EMBODIED_ENERGY = "embodiedEnergy"
-    EMBODIED_CARBON = "embodiedCarbon"
-    SHOW_UNCUT_LINES = "showUncutLines"
-    COLLISION_DETECTION = "collisionDetection"
-
-
-class BuildingMaterialData(APIModel):
-    """Data to create a Building Material."""
-    attributeId: Annotated[
-        AttributeId | None,
-        Field(
-            description="Indentifier of the existing Building Material to overwrite, ignored if overwriteExisting is false."
-        ),
-    ] = None
-    index: Annotated[
-        str | None,
-        Field(
-            description="Index of the existing Building Material to overwrite, ignored if overwriteExisting is false."
-        ),
-    ] = None
-    name: Annotated[
-        str,
-        Field(
-            description="Name. If overwriteExisting is true, then the existing Building Material with the given name will be overwritten."
-        ),
-    ]
-    id: Annotated[str | None, Field(description="Identifier.")] = None
-    manufacturer: Annotated[str | None, Field(description="Manufacturer.")] = None
-    description: Annotated[str | None, Field(description="Decription.")] = None
-    connPriority: Annotated[int | None, Field(description="Intersection priority.")] = None
-    cutFillIndex: Annotated[int | None, Field(description="Index of the Cut Fill.")] = None
-    cutFillPen: Annotated[int | None, Field(description="Cut Fill Foreground Pen.")] = None
-    cutFillBackgroundPen: Annotated[int | None, Field(description="Cut Fill Background Pen.")] = None
-    cutSurfaceIndex: Annotated[int | None, Field(description="Index of the Cut Surface.")] = None
-    thermalConductivity: Annotated[float | None, Field(description="Thermal Conductivity.")] = None
-    density: Annotated[float | None, Field(description="Density.")] = None
-    heatCapacity: Annotated[float | None, Field(description="Heat Capacity.")] = None
-    embodiedEnergy: Annotated[float | None, Field(description="Embodied Energy.")] = None
-    embodiedCarbon: Annotated[float | None, Field(description="Embodied Carbon.")] = None
-    showUncutLines: Annotated[bool | None, Field(description="Show Contours in Model Views.")] = None
-    collisionDetection: Annotated[
-        bool | None,
-        Field(description="Whether the Building Material participates in collision detection."),
-    ] = None
-    cutFillOrientation: Annotated[
-        str | None,
-        Field(description="ProjectOrigin, ElementOrigin, or FitToSkin. Orientation of the cut fill."),
-    ] = None
-
-
-class BuildingMaterialPhysicalProperties(APIModel):
-    """The physical properties of a single building material."""
-    thermalConductivity: Annotated[float, Field(description="Thermal Conductivity.")]
-    density: Annotated[float, Field(description="Density.")]
-    heatCapacity: Annotated[float, Field(description="Heat Capacity.")]
-    embodiedEnergy: Annotated[float, Field(description="Embodied Energy.")]
-    embodiedCarbon: Annotated[float, Field(description="Embodied Carbon.")]
-
-
-class BuildingMaterialPhysicalPropertiesArrayItem(APIModel):
-    properties: BuildingMaterialPhysicalProperties
-
-
-class Change(APIModel):
-    id: str
-
-
-class CircleData(APIModel):
-    """The parameters of the new Circle."""
-    favoriteName: Annotated[
-        str | None,
-        Field(
-            description="Optional name of a favorite to base the new element on. Its settings are applied first, then the explicitly given fields override them."
-        ),
-    ] = None
-    floorInd: Annotated[
-        float | None,
-        Field(description="The identifier of the floor. Optional parameter, by default the current floor is used."),
-    ] = None
-    layerIndex: Annotated[
-        int | None,
-        Field(
-            description="Layer attribute index to place the circle on. Optional parameter, by default the current layer is used."
-        ),
-    ] = None
-    origin: Coordinate2D
-    radius: float
-    roomSeparator: Annotated[
-        bool | None,
-        Field(description="Is this a zone boundary line? Optional, defaults to false."),
-    ] = None
-    linePenIndex: Annotated[
-        int | None,
-        Field(description="Optional pen index. By default the current pen is used."),
-    ] = None
-    lineTypeId: Annotated[
-        AttributeId | None,
-        Field(description="Optional line type attribute. By default the current line type is used."),
-    ] = None
+class DrawingsWithNewLink(APIModel):
+    """An existing Drawing and the navigator item it should be relinked to."""
+    elementId: ElementId
+    navigatorItemId: NavigatorItemId
+    layoutDatabaseId: DatabaseId
 
 
 class ClassificationId(APIModel):
@@ -672,155 +6047,6 @@ class ClassificationId(APIModel):
 class ClassificationIdArrayItem(APIModel):
     """A wrapper containing the classification identifier."""
     classificationId: ClassificationId
-
-
-class ClassificationItemDetails(APIModel):
-    """The details of a classification item."""
-    id: Annotated[
-        str,
-        Field(description="The unique identifier of the classification item as specified by the user."),
-    ]
-    name: Annotated[str, Field(description="The display name of the classification item.")]
-    description: Annotated[str, Field(description="The description of the classification item.")]
-    children: Annotated[
-        list[ClassificationItemDetails] | None,
-        Field(description="A list of classification items."),
-    ] = None
-
-
-class ClassificationItemId(APIModel):
-    """The identifier of a classification item."""
-    guid: Annotated[
-        UUID,
-        Field(
-            description="A Globally Unique Identifier (or Universally Unique Identifier) in its string representation as defined in RFC 4122.",
-        ),
-    ]
-
-
-class ClassificationItemIdArrayItem(APIModel):
-    classificationItemId: ClassificationItemId
-
-
-class ClassificationSystemDetails(APIModel):
-    """The details of a classification system."""
-    name: Annotated[str, Field(description="The display name of the classification system.")]
-    description: Annotated[str, Field(description="The description of the classification system.")]
-    source: Annotated[
-        str,
-        Field(description="The source of the classification system (e.g. URL to a classification system standard)."),
-    ]
-    version: Annotated[str, Field(description="The version of the classification system.")]
-    date: Annotated[
-        str,
-        Field(
-            description="The release date of the classification system's current version.",
-        ),
-    ]
-
-
-class ClassificationSystemId(APIModel):
-    """The identifier of a classification system."""
-    guid: Annotated[
-        UUID,
-        Field(
-            description="A Globally Unique Identifier (or Universally Unique Identifier) in its string representation as defined in RFC 4122.",
-        ),
-    ]
-
-
-class ClassificationSystemIdArrayItem(APIModel):
-    classificationSystemId: ClassificationSystemId
-
-
-class ClassificationSystemsWithItem(APIModel):
-    classificationSystem: ClassificationSystemDetails
-    classificationItems: Annotated[
-        list[ClassificationItemDetails],
-        Field(description="A list of classification items in the classification system."),
-    ]
-
-
-class Collision(APIModel):
-    elementId1: ElementId
-    elementId2: ElementId
-    hasBodyCollision: bool
-    hasClearenceCollision: bool
-
-
-class ColorRGB(APIModel):
-    """RGB color."""
-    red: Annotated[float, Field(description="Red value between 0.0 and 1.0")]
-    green: Annotated[float, Field(description="Green value between 0.0 and 1.0")]
-    blue: Annotated[float, Field(description="Blue value between 0.0 and 1.0")]
-
-
-class ColumnCoreAnchor(Enum):
-    TOP_LEFT = "TopLeft"
-    TOP_CENTER = "TopCenter"
-    TOP_RIGHT = "TopRight"
-    MIDDLE_LEFT = "MiddleLeft"
-    CENTER = "Center"
-    MIDDLE_RIGHT = "MiddleRight"
-    BOTTOM_LEFT = "BottomLeft"
-    BOTTOM_CENTER = "BottomCenter"
-    BOTTOM_RIGHT = "BottomRight"
-
-
-class ColumnData(APIModel):
-    """The parameters of the new Column."""
-    favoriteName: Annotated[
-        str | None,
-        Field(
-            description="Optional name of a favorite to base the new element on. Its settings are applied first, then the explicitly given fields override them."
-        ),
-    ] = None
-    coordinates: Annotated[Coordinates, Field(description="3D coordinate.")]
-    height: Annotated[float | None, Field(description="Optional column height.", gt=0.0)] = None
-    axisRotationAngle: Annotated[float | None, Field(description="Optional column rotation angle in radians.")] = None
-    width: Annotated[
-        float | None,
-        Field(
-            description="Cross section width of the column. Applied to all segments.",
-            gt=0.0,
-        ),
-    ] = None
-    depth: Annotated[
-        float | None,
-        Field(
-            description="Cross section depth (height) of the column. Applied to all segments. Only effective for rectangular columns.",
-            gt=0.0,
-        ),
-    ] = None
-    coreAnchor: ColumnCoreAnchor | None = None
-    circleBased: Annotated[
-        bool | None,
-        Field(
-            description="True for a round column cross section, false for rectangular. Ignored if profileId is also given. Applied to all segments."
-        ),
-    ] = None
-    isWidthAndHeightLinked: Annotated[
-        bool | None,
-        Field(
-            description="When true (the default), Archicad keeps width and depth equal and setting one changes the other - set to false to give width/depth independent values. Applied to all segments."
-        ),
-    ] = None
-    buildingMaterialId: Annotated[
-        AttributeId | None,
-        Field(
-            description="Cross section building material (round or rectangular, per circleBased). Applied to all segments."
-        ),
-    ] = None
-    profileId: Annotated[
-        AttributeId | None,
-        Field(
-            description="Switches the cross section to this custom extruded profile (circleBased becomes false). Applied to all segments."
-        ),
-    ] = None
-    floorIndex: Annotated[
-        int | None,
-        Field(description="Optional floor index. If omitted, derived from the coordinate's z value."),
-    ] = None
 
 
 class ColumnDetails(APIModel):
@@ -954,19 +6180,6 @@ class ColumnWithDetails(APIModel):
     coverFill: CoverFill | None = None
 
 
-class Comment(APIModel):
-    guid: Annotated[
-        UUID,
-        Field(
-            description="Comment identifier",
-        ),
-    ]
-    author: Annotated[str, Field(description="Comment author")]
-    text: Annotated[str, Field(description="Comment text")]
-    status: IssueCommentStatus
-    creaTime: Annotated[int, Field(description="Comment creation time")]
-
-
 class CompositeAttribute(APIModel):
     """A composite attribute."""
     attributeId: AttributeId
@@ -975,70 +6188,6 @@ class CompositeAttribute(APIModel):
     useWith: list[str] | None = None
     skins: list[CompositeSkin] | None = None
     separators: list[CompositeSeparator] | None = None
-
-
-class CompositeAttributeField(Enum):
-    USE_WITH = "useWith"
-    SKINS = "skins"
-    SEPARATORS = "separators"
-
-
-class CompositeData(APIModel):
-    """Data to create a Composite."""
-    attributeId: Annotated[
-        AttributeId | None,
-        Field(description="Indentifier of the existing Composite to overwrite, ignored if overwriteExisting is false."),
-    ] = None
-    index: Annotated[
-        str | None,
-        Field(description="Index of the existing Composite to overwrite, ignored if overwriteExisting is false."),
-    ] = None
-    name: Annotated[
-        str,
-        Field(
-            description="Name. If overwriteExisting is true, then the existing Composite with the given name will be overwritten."
-        ),
-    ]
-    useWith: Annotated[
-        list[str] | None,
-        Field(description="Array of types the composite can used with."),
-    ] = None
-    skins: Annotated[list[Skin], Field(description="Array of skin data.")]
-    separators: Annotated[
-        list[Separator],
-        Field(description="Array of skin separator data. The number of items must be the number of skins plus one."),
-    ]
-
-
-class CompositeSeparator(APIModel):
-    lineTypeId: AttributeIdArrayItem | None = None
-    linePen: int
-
-
-class CompositeSkin(APIModel):
-    type: CompositeSkinType
-    buildingMaterialId: AttributeIdArrayItem | None = None
-    framePen: int
-    thickness: float
-
-
-class CompositeSkinType(Enum):
-    CORE = "Core"
-    FINISH = "Finish"
-    OTHER = "Other"
-
-
-class Conflict(APIModel):
-    elementId: ElementId
-    user: User
-
-
-class ConflictPolicy(Enum):
-    """How to resolve name conflicts. Default Overwrite."""
-    ERROR = "Error"
-    SKIP = "Skip"
-    OVERWRITE = "Overwrite"
-    APPEND = "Append"
 
 
 class ConnectedElement(APIModel):
@@ -1059,26 +6208,6 @@ class ConnectionItem(APIModel):
             description="True if the element is connected with its beginning point, false if it is connected with its end point."
         ),
     ]
-
-
-class ContentField(Enum):
-    KEY = "Key"
-    TITLE = "Title"
-    DESCRIPTION = "Description"
-    REFERENCE = "Reference"
-
-
-class Coordinate2D(APIModel):
-    """2D coordinate."""
-    x: Annotated[float, Field(description="X value of the coordinate.")]
-    y: Annotated[float, Field(description="Y value of the coordinate.")]
-
-
-class Coordinate3D(APIModel):
-    """3D coordinate."""
-    x: Annotated[float, Field(description="X value of the coordinate.")]
-    y: Annotated[float, Field(description="Y value of the coordinate.")]
-    z: Annotated[float, Field(description="Z value of the coordinate.")]
 
 
 class CoordinateWitnessPoint(APIModel):
@@ -1121,118 +6250,42 @@ class CoordinateWitnessPoint(APIModel):
     ] = None
 
 
-class Coordinates(APIModel):
-    """3D coordinate."""
-    x: Annotated[float, Field(description="X value of the coordinate.")]
-    y: Annotated[float, Field(description="Y value of the coordinate.")]
-    z: Annotated[float, Field(description="Z value of the coordinate.")]
-
-
-class CoverFill(APIModel):
-    """Floor plan cover fill settings of a Column or Beam."""
-    use: Annotated[bool, Field(description="Whether the cover fill is shown on the floor plan.")]
-    useFromSurface: Annotated[
-        bool,
-        Field(description="Whether the fill is taken from the top surface material of the element."),
-    ]
-    orientationComesFrom3D: Annotated[
-        bool,
-        Field(description="Whether the cover fill orientation comes from the 3D view of the element."),
-    ]
-    fillId: AttributeId
-    foregroundPen: int
-    backgroundPen: int
-    transformationType: TransformationType
-    transformation: CoverFillTransformation
-
-
-class CoverFillOrientation(APIModel):
-    """Orientation/distortion of the floor plan cover fill."""
-    type: CoverFillOrientationType | None = None
-    origo: Annotated[
-        Coordinate2D | None,
-        Field(description="Origin of the fill relative to the project origin."),
-    ] = None
-    matrix00: Annotated[
-        float | None,
+class FavoritesFromElement(APIModel):
+    """The identifier of the element and the name of the new favorite."""
+    elementId: ElementId
+    favorite: str
+    folder: Annotated[
+        list[str] | None,
         Field(
-            description="X component of the primary distortion (direction) vector - the cosine of the fill angle, if not distorted."
+            description="Optional folder hierarchy in the Favorites palette to place the new favorite under. Empty/omitted = root."
         ),
     ] = None
-    matrix10: Annotated[
-        float | None,
+
+
+class LayerCombinationDataArrayItem(APIModel):
+    """Data to create a Layer Combination."""
+    attributeId: Annotated[
+        AttributeId | None,
         Field(
-            description="Y component of the primary distortion (direction) vector - the sine of the fill angle, if not distorted."
+            description="Indentifier of the existing Layer Combination to overwrite, ignored if overwriteExisting is false."
         ),
     ] = None
-    matrix01: Annotated[
-        float | None,
+    index: Annotated[
+        str | None,
         Field(
-            description="X component of the secondary distortion vector - the cosine of the normal vector's angle, if not distorted."
+            description="Index of the existing Layer Combination to overwrite, ignored if overwriteExisting is false."
         ),
     ] = None
-    matrix11: Annotated[
-        float | None,
+    name: Annotated[
+        str,
         Field(
-            description="Y component of the secondary distortion vector - the sine of the normal vector's angle, if not distorted."
+            description="Name. If overwriteExisting is true, then the existing Layer Combination with the given name will be overwritten."
         ),
-    ] = None
-    innerRadius: Annotated[
-        float | None,
-        Field(description="Radius for circular fill distortion (type Centered only)."),
-    ] = None
-
-
-class CoverFillOrientationType(Enum):
-    GLOBAL = "Global"
-    ROTATED = "Rotated"
-    DISTORTED = "Distorted"
-    CENTERED = "Centered"
-
-
-class CoverFillTransformation(APIModel):
-    """Orientation and distortion parameters of a cover fill."""
-    origin: Annotated[
-        Coordinate2D,
-        Field(description="The origin of the fill relative to the center of the element."),
     ]
-    xAxis: Annotated[Coordinate2D, Field(description="Primary distortion (direction) vector.")]
-    yAxis: Annotated[Coordinate2D, Field(description="Secondary distortion (direction) vector.")]
-
-
-class CurtainWallDetails(APIModel):
-    height: float | None = None
-    flipped: bool | None = None
-    angle: Annotated[
-        float | None,
-        Field(description="The rotation angle of the curtain wall in radians."),
-    ] = None
-
-
-class CurtainWallFrameDetails(APIModel):
-    begCoordinate: Coordinate3D
-    endCoordinate: Coordinate3D
-    orientationVector: Coordinate3D
-    panelConnectionHole: Annotated[
-        PanelConnectionHole,
-        Field(description="The parameters of the panel connection hole."),
+    layers: Annotated[
+        list[LayersOfLayerCombinationItem],
+        Field(description="List of Layers included in the Layer Combination."),
     ]
-    frameContour: Annotated[FrameContour, Field(description="The parameters of the frame contour.")]
-    segmentIndex: Annotated[
-        float,
-        Field(description="The index of the curtain wall segment to which this frame belongs."),
-    ]
-    className: str
-    type: CurtainWallFrameType
-
-
-class CurtainWallFrameType(Enum):
-    """Enumeration of available curtain wall frame types."""
-    DELETED = "Deleted"
-    DIVISION = "Division"
-    CORNER = "Corner"
-    BOUNDARY = "Boundary"
-    CUSTOM = "Custom"
 
 
 class CurtainWallPanelDetails(APIModel):
@@ -1255,88 +6308,6 @@ class CurtainWallPanelDetails(APIModel):
     ]
 
 
-class CurtainWallSegmentDetails(APIModel):
-    begCoordinate: Coordinate3D
-    endCoordinate: Coordinate3D
-    extrusionVector: Coordinate3D
-    gridOrigin: Coordinate3D
-    gridAngle: Annotated[float, Field(description="The angle of the grid in radians.")]
-    arcOrigin: Coordinate3D | None = None
-    isNegativeArc: Annotated[bool | None, Field(description="Indicates if the arc is negative.")] = None
-
-
-class CustomSchemeItem(APIModel):
-    customSchemeKey: str
-    customSchemeName: str
-
-
-class CutFillOrientation(Enum):
-    PROJECT_ORIGIN = "ProjectOrigin"
-    ELEMENT_ORIGIN = "ElementOrigin"
-    FIT_TO_SKIN = "FitToSkin"
-
-
-class CutPlane(APIModel):
-    """Defines a 3D cut plane using the plane equation: pa*x + pb*y + pc*z + pd = 0"""
-    pa: Annotated[
-        float,
-        Field(
-            description="Coefficient of x in the plane equation. The x coordinate of the normal vector of the plane."
-        ),
-    ]
-    pb: Annotated[
-        float,
-        Field(
-            description="Coefficient of y in the plane equation. The y coordinate of the normal vector of the plane."
-        ),
-    ]
-    pc: Annotated[
-        float,
-        Field(
-            description="Coefficient of z in the plane equation. The z coordinate of the normal vector of the plane."
-        ),
-    ]
-    pd: Annotated[
-        float,
-        Field(
-            description="Constant term in the plane equation. The distance of the plane from the origin along the normal vector."
-        ),
-    ]
-
-
-class DatabaseId(APIModel):
-    """The identifier of a database"""
-    guid: Annotated[
-        UUID,
-        Field(
-            description="A Globally Unique Identifier (or Universally Unique Identifier) in its string representation as defined in RFC 4122.",
-        ),
-    ]
-
-
-class DatabaseIdAndWindowType(APIModel):
-    windowType: WindowType
-    databaseId: DatabaseId | None = None
-    storyIndex: Annotated[
-        int | None,
-        Field(
-            description="Story index to activate. Only valid when windowType is 'FloorPlan'. As returned by GetStories."
-        ),
-    ] = None
-
-
-class DatabaseIdArrayItem(APIModel):
-    databaseId: DatabaseId
-
-
-class DesignOptionAndSetPair(APIModel):
-    designOptionId: Annotated[
-        DesignOptionId | None,
-        Field(description="The identifier of the design option to move."),
-    ] = None
-    setName: str
-
-
 class DesignOptionCombinationData(APIModel):
     name: Annotated[str, Field(description="The name of the design option combination.")]
     activeDesignOptions: Annotated[
@@ -1357,26 +6328,6 @@ class DesignOptionCombinationDetails(APIModel):
     ] = None
 
 
-class DesignOptionCombinationId(APIModel):
-    """The identifier of a design option combination."""
-    guid: Annotated[
-        UUID,
-        Field(
-            description="A Globally Unique Identifier (or Universally Unique Identifier) in its string representation as defined in RFC 4122.",
-        ),
-    ]
-
-
-class DesignOptionCombinationIdArrayItem(APIModel):
-    designOptionCombinationId: DesignOptionCombinationId
-
-
-class DesignOptionData(APIModel):
-    name: Annotated[str, Field(description="The name of the design option.")]
-    id: Annotated[str, Field(description="The string id of the design option.")]
-    ownerSetName: Annotated[str, Field(description="The name of the owner design option set.")]
-
-
 class DesignOptionDetails(APIModel):
     designOptionId: DesignOptionId
     name: Annotated[str, Field(description="The name of the design option.")]
@@ -1384,46 +6335,20 @@ class DesignOptionDetails(APIModel):
     ownerSetName: Annotated[str, Field(description="The name of the owner design option set.")]
 
 
-class DesignOptionForElement(APIModel):
-    elementId: Annotated[ElementId, Field(description="The identifier of the element.")]
-    type: DesignOptionLinkType
-    designOption: DesignOptionDetails | None = None
-
-
-class DesignOptionId(APIModel):
-    """The identifier of a design option."""
-    guid: Annotated[
-        UUID,
-        Field(
-            description="A Globally Unique Identifier (or Universally Unique Identifier) in its string representation as defined in RFC 4122.",
-        ),
-    ]
-
-
-class DesignOptionIdArrayItem(APIModel):
-    designOptionId: DesignOptionId
-
-
-class DesignOptionLinkType(Enum):
-    """The type of the associated design option."""
-    NOT_EXISTING_ELEMENT = "NotExistingElement"
-    MISSING_DESIGN_OPTION = "MissingDesignOption"
-    NOT_LINKED_TO_ANY_DESIGN_OPTION = "NotLinkedToAnyDesignOption"
-    LINKED_TO_DESIGN_OPTION = "LinkedToDesignOption"
-
-
-class DesignOptionSet(APIModel):
-    designOptionSetId: Annotated[GuidId, Field(description="The guid identifier of the design option set.")]
-    name: Annotated[str, Field(description="The name of the design option set.")]
-    designOptions: Annotated[
-        list[DesignOptionIdArrayItem],
-        Field(description="The list of design options in the set."),
-    ]
-
-
-class DetailData(APIModel):
-    name: Annotated[str, Field(min_length=1)]
-    referenceId: Annotated[str, Field(min_length=1)]
+class LinkData(APIModel):
+    """The marker link data"""
+    referredView: Annotated[
+        ElementId | None,
+        Field(description="Guid of the referred view. Only if the marker refers to a view."),
+    ] = None
+    referredDrawing: Annotated[
+        ElementId | None,
+        Field(description="Guid of the referred drawing. Only if the marker refers to a drawing."),
+    ] = None
+    referredPMViewPoint: Annotated[
+        ElementId | None,
+        Field(description="Guid of the referred view point. Only if the marker refers to a view point."),
+    ] = None
 
 
 class DetailWorksheetDetails(APIModel):
@@ -1441,77 +6366,6 @@ class DetailWorksheetDetails(APIModel):
     linkData: Annotated[LinkData, Field(description="The marker link data")]
 
 
-class Details(APIModel):
-    """Details of an element."""
-    floorIndex: float | None = None
-    layerIndex: float | None = None
-    drawIndex: float | None = None
-    typeSpecificDetails: Annotated[
-        WallSettings
-        | ZoneSettings
-        | LineSettings
-        | ArcSettings
-        | HotspotSettings
-        | SplineSettings
-        | PolylineSettings
-        | HatchSettings
-        | DrawingSettings
-        | TextSettings
-        | None,
-        Field(
-            description="Defines the modifiable type-specific settings for an element. Used as input for SET requests."
-        ),
-    ] = None
-
-
-class DetailsOfElement(APIModel):
-    """Details of an element. When the optional fields filter is given in the input, only the requested fields are present; the required list below applies to unfiltered requests."""
-    type: ElementType
-    id: str
-    floorIndex: float
-    layerIndex: float
-    drawIndex: float
-    hotlinkId: Annotated[
-        ElementId | None,
-        Field(
-            description="The hotlink instance this element belongs to. Present only for elements that came in through a placed hotlink; such elements are read-only."
-        ),
-    ] = None
-    details: Annotated[
-        HotlinkDetails
-        | WallDetails
-        | BeamDetails
-        | SlabDetails
-        | RoofDetails
-        | ColumnDetails
-        | DetailWorksheetDetails
-        | WindowDoorDetails
-        | LibPartBasedElementDetails
-        | ObjectDetails
-        | PolylineDetails
-        | ZoneDetails
-        | CurtainWallDetails
-        | CurtainWallSegmentDetails
-        | CurtainWallPanelDetails
-        | CurtainWallFrameDetails
-        | MeshDetails
-        | MorphDetails
-        | DrawingDetails
-        | LabelDetails
-        | TextDetails
-        | NotYetSupportedElementTypeDetails,
-        Field(
-            description="Represents the complete type-specific details of an element. Used as output from GET requests"
-        ),
-    ]
-    floorPlanPolygons: Annotated[
-        list[FloorPlanPolygon] | None,
-        Field(
-            description="Cut-fill polygons as drawn on the floor plan (wall joins resolved by ArchiCAD). Available for elements with a cut-fill representation (walls, columns, beams). Absent when the element has no cut fill or when the floor plan database is not accessible."
-        ),
-    ] = None
-
-
 class DimensionData(APIModel):
     """Dimension element data including witness points and geometry."""
     elementId: ElementId | None = None
@@ -1523,57 +6377,6 @@ class DimensionData(APIModel):
             description="The witness points of the dimension. Besides the geometry each item carries the base element reference as CreateAssociativeDimensions takes it (API_Base: baseElementId, line, inIndex, special, nodeType, nodeStatus, nodeId): read a dimension placed by hand to learn the values an element type needs."
         ),
     ] = None
-
-
-class Dimensions3D(APIModel):
-    """Dimensions in 3D."""
-    x: Annotated[float, Field(description="X dimension.")]
-    y: Annotated[float, Field(description="Y dimension.")]
-    z: Annotated[float, Field(description="Z dimension.")]
-
-
-class DisplayOption(Enum):
-    """Floor plan display option."""
-    STANDARD = "Standard"
-    STANDARD_WITH_ABSTRACT = "StandardWithAbstract"
-    CUT_ONLY = "CutOnly"
-    OUT_LINES_ONLY = "OutLinesOnly"
-    ABSTRACT_ALL = "AbstractAll"
-    CUT_ALL = "CutAll"
-
-
-class DisplayValueEnumId(APIModel):
-    """An enumeration value identifier using the displayed value."""
-    type: Literal["displayValue"] = "displayValue"
-    displayValue: str
-
-
-class DocumentRevision(APIModel):
-    revisionId: DocumentRevisionId
-    id: str
-    finalId: str
-    ownerUser: str
-    status: Status
-    changes: Annotated[
-        list[Change] | None,
-        Field(description="All changes belonging to the given document revision."),
-    ] = None
-    layoutInfo: LayoutInfo
-
-
-class DocumentRevisionId(APIModel):
-    """The identifier of a document revision."""
-    guid: Annotated[
-        UUID,
-        Field(
-            description="A Globally Unique Identifier (or Universally Unique Identifier) in its string representation as defined in RFC 4122.",
-        ),
-    ]
-
-
-class DocumentRevisionReference(APIModel):
-    """A reference to a document revision belonging to the current issue"""
-    revisionId: DocumentRevisionId
 
 
 class DoorData(APIModel):
@@ -1607,15 +6410,6 @@ class DoorWithDetails(APIModel):
         float | None,
         Field(description="Distance the frame plane is moved across the wall thickness, along the wall normal."),
     ] = None
-
-
-class DrawingData(APIModel):
-    navigatorItemId: NavigatorItemId
-    layoutDatabaseId: DatabaseId | None = None
-    name: Annotated[str, Field(min_length=1)]
-    position: Coordinate2D
-    scale: Annotated[float | None, Field(gt=0.0)] = None
-    clipPolygon: Annotated[list[Coordinate2D] | None, Field(min_length=3)] = None
 
 
 class DrawingDetails(APIModel):
@@ -1691,98 +6485,6 @@ class DrawingDetails(APIModel):
     ] = None
 
 
-class DrawingNameType(Enum):
-    """How the drawing's title name is assembled (Identification tabpage of the Drawing Settings dialog)."""
-    VIEW_OR_SOURCE_FILE_NAME = "ViewOrSourceFileName"
-    VIEW_ID_AND_NAME = "ViewIdAndName"
-    CUSTOM_NAME = "CustomName"
-
-
-class DrawingNumberingType(Enum):
-    """How the drawing's title ID is assigned (Identification tabpage of the Drawing Settings dialog)."""
-    BY_LAYOUT = "ByLayout"
-    BY_VIEW_ID = "ByViewId"
-    CUSTOM_NUMBER = "CustomNumber"
-
-
-class DrawingSettings(APIModel):
-    """Modifiable settings for a Drawing element placed on a layout."""
-    pos: Annotated[
-        Coordinate2D | None,
-        Field(description="Position of the drawing's reference point on the layout."),
-    ] = None
-    angle: Annotated[float | None, Field(description="Rotation angle of the drawing in radians.")] = None
-    ratio: Annotated[
-        float | None,
-        Field(description="Scale ratio applied to the drawing relative to its source view."),
-    ] = None
-    drawingScale: Annotated[float | None, Field(description="The nominal scale of the drawing.")] = None
-    modelOffset: Annotated[
-        Coordinate2D | None,
-        Field(description="Offset of the model origin within the drawing."),
-    ] = None
-    clipPolygon: Annotated[
-        list[Coordinate2D] | None,
-        Field(
-            description="Polygon (in model coordinates) used to clip the drawing view. At least 3 points. Setting this also enables polygon clipping (useDrawingPolyClip).",
-            min_length=3,
-        ),
-    ] = None
-    nameType: DrawingNameType | None = None
-    customName: Annotated[
-        str | None,
-        Field(description="The drawing's custom title name. Only used when nameType is CustomName."),
-    ] = None
-    numberingType: DrawingNumberingType | None = None
-    customNumber: Annotated[
-        str | None,
-        Field(description="The drawing's custom title ID. Only used when numberingType is CustomNumber."),
-    ] = None
-    isInNumbering: Annotated[
-        bool | None,
-        Field(description="Whether the drawing is included in the automatic drawing numbering sequence."),
-    ] = None
-    titleLibraryPartIndex: Annotated[
-        float | None,
-        Field(
-            description="Library part index of the drawing title (API_DrawingTitle::libInd). A negative/invalid index means no title object is instantiated; setting it to a valid index (e.g. copied from another drawing) makes Archicad create the title's own placed element."
-        ),
-    ] = None
-
-
-class DrawingsWithNewLink(APIModel):
-    """An existing Drawing and the navigator item it should be relinked to."""
-    elementId: ElementId
-    navigatorItemId: NavigatorItemId
-    layoutDatabaseId: DatabaseId
-
-
-class EdgeDefault(Enum):
-    """Default display status for every edge that has no entry in edgeOverrides. Reported accurately on Get; on Create/Modify this is set on the element but does not take effect due to the same confirmed Archicad SDK bug as edgeOverrides (element.morph.edgeType is silently discarded by ACAPI_Element_Create/Change)."""
-    HARD_VISIBLE = "HardVisible"
-    HARD_HIDDEN = "HardHidden"
-    SOFT_HIDDEN = "SoftHidden"
-
-
-class EdgeOverride(APIModel):
-    vertexIds: Annotated[list[int], Field(max_length=2, min_length=2)]
-    hidden: Annotated[bool | None, Field(description="Hide this edge's line entirely.")] = None
-    smooth: Annotated[
-        bool | None,
-        Field(
-            description="Shade the two adjacent faces smoothly across this edge instead of as a hard crease - the 'aide a la courbe' rounded-look hint. Does not change actual geometry."
-        ),
-    ] = None
-    silhouetteOnly: Annotated[
-        bool | None,
-        Field(description="Show this edge's line only where it forms a silhouette/contour from the current viewpoint."),
-    ] = None
-
-
-class Element(APIModel):
-    elementId: ElementId
-
-
 class ElementClassification(APIModel):
     """The classification of an element."""
     elementId: ElementId
@@ -1795,57 +6497,6 @@ class ElementClassificationItemArray(APIModel):
         list[ClassificationIdArrayItem | ErrorItem],
         Field(description="A list of element classification identifiers or errors."),
     ]
-
-
-class ElementDesignOptionPair(APIModel):
-    elementId: ElementId
-    designOptionId: Annotated[
-        DesignOptionId,
-        Field(
-            description="The identifier of the design option to move the element into. Use NULLGuid to remove the element from any design option and move it to the main model."
-        ),
-    ]
-
-
-class ElementDetailsField(Enum):
-    """A field of the details of an element."""
-    TYPE = "type"
-    ID = "id"
-    FLOOR_INDEX = "floorIndex"
-    LAYER_INDEX = "layerIndex"
-    DRAW_INDEX = "drawIndex"
-    DETAILS = "details"
-    FLOOR_PLAN_POLYGONS = "floorPlanPolygons"
-    HOTLINK_ID = "hotlinkId"
-
-
-class ElementFilter(Enum):
-    """A filter type for an element."""
-    IS_EDITABLE = "IsEditable"
-    IS_VISIBLE_BY_LAYER = "IsVisibleByLayer"
-    IS_VISIBLE_BY_RENOVATION = "IsVisibleByRenovation"
-    IS_VISIBLE_BY_STRUCTURE_DISPLAY = "IsVisibleByStructureDisplay"
-    IS_VISIBLE_IN3_D = "IsVisibleIn3D"
-    ON_ACTUAL_FLOOR = "OnActualFloor"
-    ON_ACTUAL_LAYOUT = "OnActualLayout"
-    IN_MY_WORKSPACE = "InMyWorkspace"
-    IS_INDEPENDENT = "IsIndependent"
-    IN_CROPPED_VIEW = "InCroppedView"
-    HAS_ACCESS_RIGHT = "HasAccessRight"
-    IS_OVERRIDDEN_BY_RENOVATION = "IsOverriddenByRenovation"
-    INCLUDE_SUB_ELEM_OBJECTS = "IncludeSubElemObjects"
-
-
-class ElementGroupParameters(APIModel):
-    """The parameters for creating a single group"""
-    elements: Annotated[
-        list[ElementIdArrayItem | GroupIdArrayItem],
-        Field(description="The elements or child groups to be grouped.", min_length=2),
-    ]
-    parentGroupId: Annotated[
-        GroupId | None,
-        Field(description="Optional parent group ID to nest this group under."),
-    ] = None
 
 
 class ElementIFCIds(APIModel):
@@ -1861,44 +6512,11 @@ class ElementIFCProperties(APIModel):
     ifcProperties: list[ElementIFCProperty]
 
 
-class ElementIFCProperty(APIModel):
-    """The details of an IFC property value of an element."""
-    propertySetName: str
-    name: str
-    value: str
-
-
 class ElementIFCType(APIModel):
     """The IFC type of an element."""
     elementId: ElementId
     ifcType: str
     typeObjectIFCType: str
-
-
-class ElementId(APIModel):
-    """The identifier of an element."""
-    guid: Annotated[
-        UUID,
-        Field(
-            description="A Globally Unique Identifier (or Universally Unique Identifier) in its string representation as defined in RFC 4122.",
-        ),
-    ]
-
-
-class ElementIdArrayItem(APIModel):
-    elementId: ElementId
-
-
-class ElementPair(APIModel):
-    elementId: ElementId
-    trimmingElementId: ElementId
-
-
-class ElementPropertyValue(APIModel):
-    """A property value with the identifiers of the property and its owner element."""
-    elementId: ElementId
-    propertyId: PropertyId
-    propertyValue: PropertyValue
 
 
 class ElementTrims(APIModel):
@@ -1913,109 +6531,6 @@ class ElementTrims(APIModel):
     ]
 
 
-class ElementType(Enum):
-    """The type of an element."""
-    WALL = "Wall"
-    COLUMN = "Column"
-    BEAM = "Beam"
-    WINDOW = "Window"
-    DOOR = "Door"
-    OBJECT = "Object"
-    LAMP = "Lamp"
-    SLAB = "Slab"
-    ROOF = "Roof"
-    MESH = "Mesh"
-    DIMENSION = "Dimension"
-    RADIAL_DIMENSION = "RadialDimension"
-    LEVEL_DIMENSION = "LevelDimension"
-    ANGLE_DIMENSION = "AngleDimension"
-    TEXT = "Text"
-    LABEL = "Label"
-    ZONE = "Zone"
-    HATCH = "Hatch"
-    LINE = "Line"
-    POLY_LINE = "PolyLine"
-    ARC = "Arc"
-    CIRCLE = "Circle"
-    SPLINE = "Spline"
-    HOTSPOT = "Hotspot"
-    CUT_PLANE = "CutPlane"
-    CAMERA = "Camera"
-    CAM_SET = "CamSet"
-    GROUP = "Group"
-    SECT_ELEM = "SectElem"
-    DRAWING = "Drawing"
-    PICTURE = "Picture"
-    DETAIL = "Detail"
-    ELEVATION = "Elevation"
-    INTERIOR_ELEVATION = "InteriorElevation"
-    WORKSHEET = "Worksheet"
-    HOTLINK = "Hotlink"
-    CURTAIN_WALL = "CurtainWall"
-    CURTAIN_WALL_SEGMENT = "CurtainWallSegment"
-    CURTAIN_WALL_FRAME = "CurtainWallFrame"
-    CURTAIN_WALL_PANEL = "CurtainWallPanel"
-    CURTAIN_WALL_JUNCTION = "CurtainWallJunction"
-    CURTAIN_WALL_ACCESSORY = "CurtainWallAccessory"
-    SHELL = "Shell"
-    SKYLIGHT = "Skylight"
-    MORPH = "Morph"
-    CHANGE_MARKER = "ChangeMarker"
-    STAIR = "Stair"
-    RISER = "Riser"
-    TREAD = "Tread"
-    STAIR_STRUCTURE = "StairStructure"
-    RAILING = "Railing"
-    RAILING_TOPRAIL = "RailingToprail"
-    RAILING_HANDRAIL = "RailingHandrail"
-    RAILING_RAIL = "RailingRail"
-    RAILING_POST = "RailingPost"
-    RAILING_INNER_POST = "RailingInnerPost"
-    RAILING_BALUSTER = "RailingBaluster"
-    RAILING_PANEL = "RailingPanel"
-    RAILING_SEGMENT = "RailingSegment"
-    RAILING_NODE = "RailingNode"
-    RAILING_BALUSTER_SET = "RailingBalusterSet"
-    RAILING_PATTERN = "RailingPattern"
-    RAILING_TOPRAIL_END = "RailingToprailEnd"
-    RAILING_HANDRAIL_END = "RailingHandrailEnd"
-    RAILING_RAIL_END = "RailingRailEnd"
-    RAILING_TOPRAIL_CONNECTION = "RailingToprailConnection"
-    RAILING_HANDRAIL_CONNECTION = "RailingHandrailConnection"
-    RAILING_RAIL_CONNECTION = "RailingRailConnection"
-    RAILING_END_FINISH = "RailingEndFinish"
-    BEAM_SEGMENT = "BeamSegment"
-    COLUMN_SEGMENT = "ColumnSegment"
-    OPENING = "Opening"
-    UNKNOWN = "Unknown"
-
-
-class ElementsByIFCId(APIModel):
-    ifcId: str
-    elements: Annotated[
-        list[ElementIdArrayItem],
-        Field(
-            description="A list of element identifiers having the given IFC identifier. If the given IFC identifier is an external identifier, the list can contain multiple elements as the IFC can be placed multiple times."
-        ),
-    ]
-
-
-class ElementsOfDesignOption(APIModel):
-    designOptionId: DesignOptionId
-    elements: Annotated[list[ElementIdArrayItem], Field(description="A list of elements.")]
-
-
-class ElementsOfElementType(APIModel):
-    """Elements of a given type."""
-    elementType: ElementType
-    elements: Annotated[list[ElementIdArrayItem], Field(description="A list of elements.")]
-
-
-class ElementsWithDetail(APIModel):
-    elementId: ElementId
-    details: Annotated[Details, Field(description="Details of an element.")]
-
-
 class ElementsWithExecutionResults(APIModel):
     """The response of the GetElementsByType command."""
     elements: Annotated[list[ElementIdArrayItem], Field(description="A list of elements.")]
@@ -2023,43 +6538,6 @@ class ElementsWithExecutionResults(APIModel):
         list[SuccessfulExecutionResult | FailedExecutionResult] | None,
         Field(description="A list of execution results."),
     ] = None
-
-
-class ElementsWithGDLParameter(APIModel):
-    elementId: ElementId
-    gdlParameters: Annotated[
-        list[SetGDLParameterByNameDetails | SetGDLParameterByIndexDetails],
-        Field(description="The list of GDL parameters."),
-    ]
-
-
-class ElementsWithMoveVector(APIModel):
-    elementId: ElementId
-    moveVector: Annotated[MoveVector, Field(description="Move vector of a 3D point.")]
-    copy_: Annotated[
-        bool | None,
-        Field(
-            alias="copy",
-            description="Optional parameter. If true, then a copy of the element will be moved. By default it's false.",
-        ),
-    ] = None
-
-
-class ElementsWithRotation(APIModel):
-    elementId: ElementId
-    rotation: Annotated[Rotation, Field(description="Rotation parameters for an element.")]
-    copy_: Annotated[
-        bool | None,
-        Field(
-            alias="copy",
-            description="Optional parameter. If true, a copy of the element is rotated. By default it's false.",
-        ),
-    ] = None
-
-
-class ElementsWrapper(APIModel):
-    """A list of elements wrapped in an object."""
-    elements: Annotated[list[ElementIdArrayItem], Field(description="A list of elements.")]
 
 
 class EndpointConnections(APIModel):
@@ -2105,253 +6583,6 @@ class EnumValue(APIModel):
     ] = None
 
 
-class EnumValueIdArrayItem(APIModel):
-    """A wrapper containing the identifier of a property enumeration value."""
-    enumValueId: Annotated[
-        DisplayValueEnumId | NonLocalizedValueEnumId,
-        Field(description="The identifier of a property enumeration value."),
-    ]
-
-
-class EnumValueToAdd(APIModel):
-    """The description of an enumeration value."""
-    displayValue: Annotated[str, Field(description="Displayed value of the enumeration.")]
-    nonLocalizedValue: Annotated[
-        str | None,
-        Field(description="Nonlocalized value of the enumeration if there is one."),
-    ] = None
-
-
-class EnumValuesToAddItem(APIModel):
-    enumValue: EnumValueToAdd
-
-
-class Error(APIModel):
-    """The details of an error."""
-    code: Annotated[int, Field(description="The code of the error.")]
-    message: Annotated[str, Field(description="The error message.")]
-
-
-class ErrorItem(APIModel):
-    error: Error
-
-
-class ExpressionDefaultValue(APIModel):
-    """Default value of the property in case of an expression based property value."""
-    expressions: list[str]
-
-
-class FailedExecutionResult(APIModel):
-    """The result of a failed execution."""
-    success: Literal[False] = False
-    error: Annotated[Error, Field(description="The details of an execution failure.")]
-
-
-class FavoriteRename(APIModel):
-    oldName: str
-    newName: str
-
-
-class FavoritesFromElement(APIModel):
-    """The identifier of the element and the name of the new favorite."""
-    elementId: ElementId
-    favorite: str
-    folder: Annotated[
-        list[str] | None,
-        Field(
-            description="Optional folder hierarchy in the Favorites palette to place the new favorite under. Empty/omitted = root."
-        ),
-    ] = None
-
-
-class FavoritesFromElementUpdate(APIModel):
-    """The identifier of the element and the name of the existing Favorite to update from it."""
-    elementId: ElementId
-    favorite: str
-
-
-class FavoritesToApplyItem(APIModel):
-    """The identifier of the element and the name of the Favorite to apply to it."""
-    elementId: ElementId
-    favorite: str
-
-
-class FavoritesWrapper(APIModel):
-    """The response of the GetFavoritesByType command."""
-    favorites: Annotated[list[str], Field(description="A list of favorite names")]
-
-
-class FileType(Enum):
-    """The type of the IFC file. The default is 'ifc'."""
-    IFC = "ifc"
-    IFCXML = "ifcxml"
-    IFCZIP = "ifczip"
-    IFCXMLZIP = "ifcxmlzip"
-
-
-class FillAttribute(APIModel):
-    """A fill attribute."""
-    attributeId: AttributeId
-    index: int
-    name: str
-    subType: FillSubType | None = None
-    scaleWithPlan: bool | None = None
-    useForWalls: bool | None = None
-    useForDraft: bool | None = None
-    useForCover: bool | None = None
-    horizontalSpacing: float | None = None
-    verticalSpacing: float | None = None
-    angle: float | None = None
-    bitPattern: str | None = None
-    gradientStart: Coordinate2D | None = None
-    gradientEnd: Coordinate2D | None = None
-    percent: float | None = None
-    texture: Texture | None = None
-    lineItems: list[FillLineItem] | None = None
-    symbolLines: list[FillSymbolLine] | None = None
-    symbolArcs: list[FillSymbolArc] | None = None
-    symbolHotspots: list[Coordinate2D] | None = None
-
-
-class FillAttributeField(Enum):
-    SUB_TYPE = "subType"
-    SCALE_WITH_PLAN = "scaleWithPlan"
-    USE_FOR_WALLS = "useForWalls"
-    USE_FOR_DRAFT = "useForDraft"
-    USE_FOR_COVER = "useForCover"
-    HORIZONTAL_SPACING = "horizontalSpacing"
-    VERTICAL_SPACING = "verticalSpacing"
-    ANGLE = "angle"
-    BIT_PATTERN = "bitPattern"
-    GRADIENT_START = "gradientStart"
-    GRADIENT_END = "gradientEnd"
-    PERCENT = "percent"
-    TEXTURE = "texture"
-    LINE_ITEMS = "lineItems"
-    SYMBOL_LINES = "symbolLines"
-    SYMBOL_ARCS = "symbolArcs"
-    SYMBOL_HOTSPOTS = "symbolHotspots"
-
-
-class FillData(APIModel):
-    """Data to create a Fill."""
-    attributeId: Annotated[
-        AttributeId | None,
-        Field(description="Indentifier of the existing Fill to overwrite, ignored if overwriteExisting is false."),
-    ] = None
-    index: Annotated[
-        str | None,
-        Field(description="Index of the existing Fill to overwrite, ignored if overwriteExisting is false."),
-    ] = None
-    name: Annotated[
-        str,
-        Field(
-            description="Name. If overwriteExisting is true, then the existing Fill with the given name will be overwritten."
-        ),
-    ]
-    subType: Annotated[
-        str | None,
-        Field(
-            description="Vector, Solid, Empty, Symbol, LinearGradient, RadialGradient, or Image. Defaults to Vector. Only one Solid and one Empty fill may exist. Image fills use the texture field's name to reference the image library part."
-        ),
-    ] = None
-    scaleWithPlan: Annotated[bool | None, Field(description="The fill is scale dependent.")] = None
-    useForWalls: Annotated[bool | None, Field(description="This fill can be used for cut fills.")] = None
-    useForDraft: Annotated[bool | None, Field(description="This fill can be used for drafting fills.")] = None
-    useForCover: Annotated[bool | None, Field(description="This fill can be used for cover fills.")] = None
-    horizontalSpacing: Annotated[
-        float | None,
-        Field(description="The fill's spacing factor in the X direction (Vector fills)."),
-    ] = None
-    verticalSpacing: Annotated[
-        float | None,
-        Field(description="The fill's spacing factor in the Y direction (Vector fills)."),
-    ] = None
-    angle: Annotated[
-        float | None,
-        Field(description="The angle of the fill in radians (Vector, Symbol, and gradient fills)."),
-    ] = None
-    bitPattern: Annotated[
-        str | None,
-        Field(
-            description="16 hex characters (8 bytes) describing the fill's bitmap pattern, one line of the pattern per byte, matching the Pattern field of the Attribute Manager XML export."
-        ),
-    ] = None
-    gradientStart: Annotated[
-        Coordinate2D | None,
-        Field(description="Gradient start point (LinearGradient/RadialGradient fills only)."),
-    ] = None
-    gradientEnd: Annotated[
-        Coordinate2D | None,
-        Field(description="Gradient end point (LinearGradient/RadialGradient fills only)."),
-    ] = None
-    percent: Annotated[
-        float | None,
-        Field(description="Translucency percentage [0..1] (gradient and some Solid fills)."),
-    ] = None
-    texture: Annotated[
-        Texture | None,
-        Field(
-            description="Texture parameters (Image and gradient fills). Only name, rotationAngle, xSize, ySize, mirrorX, and mirrorY are used for Fills."
-        ),
-    ] = None
-    lineItems: Annotated[
-        list[FillLineItem] | None,
-        Field(description="Vectorial fill line items (Vector fills only)."),
-    ] = None
-    symbolLines: Annotated[
-        list[FillSymbolLine] | None,
-        Field(description="Line items of the fill's repeating symbol pattern (Symbol fills only)."),
-    ] = None
-    symbolArcs: Annotated[
-        list[FillSymbolArc] | None,
-        Field(description="Arc items of the fill's repeating symbol pattern (Symbol fills only)."),
-    ] = None
-    symbolHotspots: Annotated[
-        list[Coordinate2D] | None,
-        Field(description="Hotspot coordinates of the fill's repeating symbol pattern (Symbol fills only)."),
-    ] = None
-
-
-class FillLineItem(APIModel):
-    frequency: float
-    direction: float
-    offsetLine: float
-    offset: Coordinate2D
-    lineLengths: list[float] | None = None
-
-
-class FillSubType(Enum):
-    VECTOR = "Vector"
-    SOLID = "Solid"
-    EMPTY = "Empty"
-    SYMBOL = "Symbol"
-    LINEAR_GRADIENT = "LinearGradient"
-    RADIAL_GRADIENT = "RadialGradient"
-
-
-class FillSymbolArc(APIModel):
-    begin: Coordinate2D
-    origin: Coordinate2D
-    angle: float
-
-
-class FillSymbolLine(APIModel):
-    begin: Coordinate2D
-    end: Coordinate2D
-
-
-class Flag(Enum):
-    HIDDEN = "Hidden"
-    HIDDEN_FROM_SCRIPT = "HiddenFromScript"
-    DISABLED = "Disabled"
-    CHILD = "Child"
-    UNIQUE = "Unique"
-    FIXED = "Fixed"
-    BOLD_NAME = "BoldName"
-    OPEN = "Open"
-
-
 class FloorFill(APIModel):
     """Floor plan cover fill settings of a Slab."""
     use: Annotated[bool, Field(description="Whether the cover fill is shown on the floor plan.")]
@@ -2365,572 +6596,15 @@ class FloorFill(APIModel):
     orientation: HatchOrientation
 
 
-class FloorPlanPolygon(APIModel):
-    coordinates: list[Coordinate2D] | None = None
-
-
-class Format(Enum):
-    """The image format. Default is png."""
-    PNG = "png"
-    JPG = "jpg"
-
-
-class FrameContour(APIModel):
-    """The parameters of the frame contour."""
-    a1: Annotated[float, Field(description="Width1 of the frame contour.")]
-    a2: Annotated[float, Field(description="Width2 of the frame contour.")]
-    b1: Annotated[float, Field(description="Length1 of the frame contour.")]
-    b2: Annotated[float, Field(description="Length2 of the frame contour.")]
-
-
-class GDLParameterDetails(APIModel):
-    """Details of a GDL parameter."""
-    name: Annotated[str, Field(description="The name of the parameter.")]
-    displayName: Annotated[str, Field(description="The display name of the parameter.")]
-    index: Annotated[int, Field(description="The index of the parameter.")]
-    type: Annotated[str, Field(description="The type of the parameter.")]
-    dimension1: Annotated[
-        int | None,
-        Field(description="The 1st dimension of array (in case of array value)."),
-    ] = None
-    dimension2: Annotated[
-        int | None,
-        Field(description="The 2nd dimension of array (in case of array value)."),
-    ] = None
-    value: Annotated[Any, Field(description="The value of the parameter.")]
-    valueDescription: Annotated[str | None, Field(description="The value description for numeric parameter.")] = None
-    isLocked: Annotated[
-        bool,
-        Field(description="The parameter is locked; i.e. the user cannot modify it"),
-    ]
-    flags: Annotated[list[Flag], Field(description="The flags of the parameter.")]
-    possibleValues: list[str] | list[PossibleNumericValue] | None = None
-    canHaveCustomValue: Annotated[bool | None, Field(description="The parameter can have a custom value.")] = None
-    itemDescriptions: Annotated[
-        list[str] | None,
-        Field(
-            description="Per-item text labels for an array-type parameter (API_AddParType.arrayDescriptions), one per array element in dim1xdim2 order. Only present when the library part defines them."
-        ),
-    ] = None
-
-
 class GDLParameterList(APIModel):
     """The list of GDL parameters."""
     parameters: Annotated[list[GDLParameterDetails], Field(description="The list of GDL parameters.")]
 
 
-class GeoReferencingParameters(APIModel):
-    crsName: Annotated[
-        str,
-        Field(description="Name by which the coordinate reference system is identified."),
-    ]
-    description: Annotated[
-        str,
-        Field(description="Informal description of this coordinate reference system."),
-    ]
-    geodeticDatum: Annotated[str, Field(description="Name by which this datum is identified.")]
-    verticalDatum: Annotated[str, Field(description="Name by which the vertical datum is identified.")]
-    mapProjection: Annotated[str, Field(description="Name by which the map projection is identified.")]
-    mapZone: Annotated[
-        str,
-        Field(description="Name by which the map zone, relating to the MapProjection, is identified."),
-    ]
-
-
-class Group(APIModel):
-    """The property group defined by name or id. If both fields exists the id will be used."""
-    propertyGroupId: PropertyGroupId | None = None
-    name: str | None = None
-
-
-class GroupId(APIModel):
-    """The identifier of a group."""
-    guid: Annotated[
-        UUID,
-        Field(
-            description="A Globally Unique Identifier (or Universally Unique Identifier) in its string representation as defined in RFC 4122.",
-        ),
-    ]
-
-
-class GroupIdArrayItem(APIModel):
-    """A wrapper containing the group identifier."""
-    groupId: GroupId
-
-
-class GuidId(APIModel):
-    """Identifier."""
-    guid: Annotated[
-        UUID,
-        Field(
-            description="A Globally Unique Identifier (or Universally Unique Identifier) in its string representation as defined in RFC 4122.",
-        ),
-    ]
-
-
-class HatchData(APIModel):
-    """The parameters of the new Hatch."""
-    favoriteName: Annotated[
-        str | None,
-        Field(
-            description="Optional name of a favorite to base the new element on. Its settings are applied first, then the explicitly given fields override them."
-        ),
-    ] = None
-    floorInd: Annotated[
-        float | None,
-        Field(description="The identifier of the floor. Optional parameter, by default the current floor is used."),
-    ] = None
-    layerIndex: Annotated[
-        int | None,
-        Field(
-            description="Layer attribute index to place the hatch on. Optional parameter, by default the current layer is used."
-        ),
-    ] = None
-    coordinates: Annotated[
-        list[Coordinate2D],
-        Field(
-            description="The 2D coordinates of the hatch outline (single contour, no holes). Do not repeat the first point at the end.",
-            min_length=3,
-        ),
-    ]
-    arcs: Annotated[list[PolyArc] | None, Field(description="The arcs of the hatch outline.")] = None
-    contourPenIndex: Annotated[
-        int | None,
-        Field(description="Optional pen index for the contour. By default the current pen is used."),
-    ] = None
-    fillPenIndex: Annotated[
-        int | None,
-        Field(description="Optional pen index for the fill. By default the current pen is used."),
-    ] = None
-    fillBackgroundPenIndex: int | None = None
-    fillId: Annotated[
-        AttributeId | None,
-        Field(description="Optional fill attribute. By default the current fill is used."),
-    ] = None
-    buildingMaterialId: AttributeId | None = None
-    roomSpecial: Annotated[
-        int | None,
-        Field(description="Special area percent in a room (negative means OFF)."),
-    ] = None
-    showArea: bool | None = None
-
-
-class HatchDetails(APIModel):
-    coordinates: list[Coordinate2D]
-    arcs: Annotated[list[PolyArc] | None, Field(description="The arcs of the hatch outline.")] = None
-    holes: Annotated[
-        list[Hole2DWithOutline | Hole2DWithLegacyCoordinates] | None,
-        Field(description="A list of 2D holes in an element defined by closed polylines"),
-    ] = None
-    contourPenIndex: int | None = None
-    fillPenIndex: int | None = None
-    fillBackgroundPenIndex: int | None = None
-    fillId: Annotated[
-        AttributeId | None,
-        Field(description="The fill attribute used, if the hatch's type is a plain fill hatch."),
-    ] = None
-    buildingMaterialId: Annotated[
-        AttributeId | None,
-        Field(description="The building material attribute used, if the hatch's type is a building material hatch."),
-    ] = None
-    roomSpecial: Annotated[
-        int | None,
-        Field(description="Special area percent in a room (negative means OFF)."),
-    ] = None
-    showArea: Annotated[bool | None, Field(description="True if the area text is shown.")] = None
-    zCoordinate: float
-
-
-class HatchOrientation(APIModel):
-    """Orientation and distortion parameters of a fill."""
-    type: HatchOrientationType
-    origin: Annotated[
-        Coordinate2D,
-        Field(description="The origin of the fill relative to the project origin."),
-    ]
-    matrix00: Annotated[
-        float,
-        Field(description="X component of the primary distortion (direction) vector."),
-    ]
-    matrix10: Annotated[
-        float,
-        Field(description="Y component of the primary distortion (direction) vector."),
-    ]
-    matrix01: Annotated[float, Field(description="X component of the secondary distortion vector.")]
-    matrix11: Annotated[float, Field(description="Y component of the secondary distortion vector.")]
-    innerRadius: Annotated[
-        float,
-        Field(description="Radius for circular fill distortion, used when type is Centered."),
-    ]
-
-
-class HatchOrientationType(Enum):
-    GLOBAL = "Global"
-    ROTATED = "Rotated"
-    DISTORTED = "Distorted"
-    CENTERED = "Centered"
-
-
-class HatchSettings(APIModel):
-    """Settings for modifying a Hatch. Setting coordinates replaces the entire polygon (outline plus optional holes) and may change the number of vertices."""
-    coordinates: Annotated[list[Coordinate2D] | None, Field(min_length=3)] = None
-    arcs: list[PolyArc] | None = None
-    holes: Annotated[
-        list[Hole2DWithOutline | Hole2DWithLegacyCoordinates] | None,
-        Field(description="A list of 2D holes in an element defined by closed polylines"),
-    ] = None
-    contourPenIndex: int | None = None
-    fillPenIndex: int | None = None
-    fillBackgroundPenIndex: int | None = None
-    fillId: AttributeId | None = None
-    buildingMaterialId: AttributeId | None = None
-    roomSpecial: int | None = None
-    showArea: bool | None = None
-
-
-HighlightedColor: TypeAlias = list[int]
-
-
-class Hole2DWithLegacyCoordinates(APIModel):
-    """A 2D hole in an element defined by closed polylines. The outline is given in 'polygonOutline'; 'polygonCoordinates' is accepted as a legacy alias."""
-    polygonOutline: Annotated[
-        list[Coordinate2D] | None,
-        Field(description="The 2D coordinates of the edge of the hole.", min_length=3),
-    ] = None
-    polygonCoordinates: Annotated[
-        list[Coordinate2D],
-        Field(description="Legacy alias of polygonOutline.", min_length=3),
-    ]
-    polygonArcs: Annotated[list[PolyArc] | None, Field(description="Polygon outline arcs of the hole.")] = None
-
-
-class Hole2DWithOutline(APIModel):
-    """A 2D hole in an element defined by closed polylines. The outline is given in 'polygonOutline'; 'polygonCoordinates' is accepted as a legacy alias."""
-    polygonOutline: Annotated[
-        list[Coordinate2D],
-        Field(description="The 2D coordinates of the edge of the hole.", min_length=3),
-    ]
-    polygonCoordinates: Annotated[
-        list[Coordinate2D] | None,
-        Field(description="Legacy alias of polygonOutline.", min_length=3),
-    ] = None
-    polygonArcs: Annotated[list[PolyArc] | None, Field(description="Polygon outline arcs of the hole.")] = None
-
-
-class Hole3D(APIModel):
-    """A 3D hole in an element defined by closed polylines"""
-    polygonCoordinates: Annotated[
-        list[Coordinate3D],
-        Field(description="The 3D coordinates of the polygon of the hole.", min_length=3),
-    ]
-    polygonArcs: Annotated[list[PolyArc] | None, Field(description="Polygon outline arcs of the hole.")] = None
-
-
-class Hotlink(APIModel):
-    """The details of a hotlink node."""
-    location: Annotated[str, Field(description="The path of the hotlink file.")]
-    hotlinkNodeId: HotlinkNodeId | None = None
-    name: Annotated[str | None, Field(description="The display name of the hotlink node.")] = None
-    type: HotlinkType | None = None
-    children: Annotated[
-        list[Hotlink] | None,
-        Field(description="The children of the hotlink node if it has any."),
-    ] = None
-
-
-class HotlinkDetails(APIModel):
-    """Details of a placed hotlink instance: which node it comes from and where it sits."""
-    hotlinkType: HotlinkType
-    hotlinkNodeId: HotlinkNodeId
-    origin: Coordinate3D
-    rotationAngle: Annotated[
-        float,
-        Field(description="Counter-clockwise rotation about the origin, in radians."),
-    ]
-    mirrored: Annotated[bool, Field(description="True when the module's local X axis is reflected.")]
-    floorDifference: int | None = None
-    skipNested: bool | None = None
-    suspendFixAngle: bool | None = None
-    ignoreTopFloorLinks: bool | None = None
-    relinkWallOpenings: bool | None = None
-    adjustLevelDiffs: bool | None = None
-
-
-class HotlinkInstanceChange(APIModel):
-    elementId: ElementId
-    origin: HotlinkOrigin | None = None
-    rotationAngle: Annotated[
-        float | None,
-        Field(description="Rotation about the origin, counter-clockwise, in radians."),
-    ] = None
-    mirrored: Annotated[
-        bool | None,
-        Field(description="Reflect the module's local X axis before the rotation."),
-    ] = None
-    floorDifference: int | None = None
-    skipNested: bool | None = None
-    suspendFixAngle: bool | None = None
-    ignoreTopFloorLinks: bool | None = None
-    relinkWallOpenings: bool | None = None
-    adjustLevelDiffs: bool | None = None
-    layerIndex: Annotated[int | None, Field(description="Move the instance to this layer.")] = None
-
-
-class HotlinkInstanceCreation(APIModel):
-    hotlinkNodeId: Annotated[
-        HotlinkNodeId,
-        Field(
-            description="The node to place, from GetHotlinks or CreateHotlinkNodes. On Archicad 25 a node that has never been placed cannot be read, so a node created through the API can only be placed from Archicad 26 on."
-        ),
-    ]
-    origin: HotlinkOrigin
-    rotationAngle: Annotated[
-        float | None,
-        Field(description="Optional rotation about the origin, counter-clockwise, in radians. Defaults to 0."),
-    ] = None
-    mirrored: Annotated[
-        bool | None,
-        Field(description="Optional. Reflects the module's local X axis before the rotation. Defaults to false."),
-    ] = None
-    floorIndex: Annotated[
-        int | None,
-        Field(description="Optional story the instance is placed on. Defaults to the current story."),
-    ] = None
-    floorDifference: Annotated[
-        int | None,
-        Field(
-            description="Optional story offset applied to the module's stories. Defaults to the hotlink tool's current default."
-        ),
-    ] = None
-    layerIndex: Annotated[
-        int | None,
-        Field(description="Optional layer of the instance. Defaults to the hotlink tool's current default layer."),
-    ] = None
-    skipNested: Annotated[
-        bool | None,
-        Field(
-            description="Optional. Do not place hotlinks nested inside the module. Defaults to the hotlink tool's current default."
-        ),
-    ] = None
-    suspendFixAngle: Annotated[
-        bool | None,
-        Field(
-            description="Optional. Rotate fixed-angle elements with the module. Defaults to the hotlink tool's current default."
-        ),
-    ] = None
-    ignoreTopFloorLinks: Annotated[
-        bool | None,
-        Field(
-            description="Optional. Top-linked elements keep their height rather than their top story link. Defaults to the hotlink tool's current default."
-        ),
-    ] = None
-    relinkWallOpenings: Annotated[
-        bool | None,
-        Field(description="Optional. Defaults to the hotlink tool's current default."),
-    ] = None
-    adjustLevelDiffs: Annotated[
-        bool | None,
-        Field(description="Optional. Defaults to the hotlink tool's current default."),
-    ] = None
-
-
-class HotlinkNode(APIModel):
-    sourceLocation: Annotated[
-        str,
-        Field(description="Absolute path of the module source file (.mod or .pln)."),
-    ]
-    name: Annotated[
-        str | None,
-        Field(
-            description="Optional display name of the node. Defaults to the file name. Ignored when a node for the same file already exists."
-        ),
-    ] = None
-    storyRangeType: Annotated[
-        StoryRangeType | None,
-        Field(
-            description="Optional. Which stories of the source are placed: all of them, or the single reference story. Ignored when a node for the same file already exists."
-        ),
-    ] = None
-    refFloorIndex: Annotated[
-        int | None,
-        Field(
-            description="Optional index of the reference story in the source file. Defaults to 0. Ignored when a node for the same file already exists."
-        ),
-    ] = None
-
-
-class HotlinkNodeCreated(APIModel):
-    hotlinkNodeId: HotlinkNodeId
-    existing: Annotated[
-        bool,
-        Field(
-            description="True when a node for the same source file already existed and was returned instead of created."
-        ),
-    ]
-
-
-class HotlinkNodeId(APIModel):
-    """The identifier of a hotlink node - the reference to a module source file, which instances are placed from."""
-    guid: Annotated[
-        UUID,
-        Field(
-            description="A Globally Unique Identifier (or Universally Unique Identifier) in its string representation as defined in RFC 4122.",
-        ),
-    ]
-
-
-class HotlinkOrigin(APIModel):
-    """Where a hotlink instance's origin lands, in the project's coordinates. z is optional: CreateHotlinkInstances places at 0 when it is omitted, ChangeHotlinkInstances keeps the instance's current z."""
-    x: float
-    y: float
-    z: float | None = None
-
-
-class HotlinkType(Enum):
-    """Module or XRef."""
-    MODULE = "Module"
-    X_REF = "XRef"
-
-
-class HotspotData(APIModel):
-    """The parameters of the new Hotspot."""
-    favoriteName: Annotated[
-        str | None,
-        Field(
-            description="Optional name of a favorite to base the new element on. Its settings are applied first, then the explicitly given fields override them."
-        ),
-    ] = None
-    floorInd: Annotated[
-        float | None,
-        Field(description="The identifier of the floor. Optional parameter, by default the current floor is used."),
-    ] = None
-    layerIndex: Annotated[
-        int | None,
-        Field(
-            description="Layer attribute index to place the hotspot on. Optional parameter, by default the current layer is used."
-        ),
-    ] = None
-    position: Coordinate2D
-    height: float | None = None
-    penIndex: Annotated[
-        int | None,
-        Field(description="Optional pen index. By default the current pen is used."),
-    ] = None
-
-
-class HotspotDetails(APIModel):
-    position: Coordinate2D
-    height: Annotated[
-        float,
-        Field(description="Z coordinate of the hotspot (can come from a GDL script)."),
-    ]
-    penIndex: int | None = None
-
-
-class HotspotSettings(APIModel):
-    """Settings for modifying a Hotspot."""
-    position: Coordinate2D | None = None
-    height: float | None = None
-    penIndex: int | None = None
-
-
-class ImageType(Enum):
-    """The type of the preview image. Default is 3D."""
-    FIELD_2_D = "2D"
-    SECTION = "Section"
-    FIELD_3_D = "3D"
-
-
-class InteriorElevationData(APIModel):
-    nodeCoordinates: Annotated[
-        list[Coordinate2D],
-        Field(
-            description="The corner points of the connected segment chain. Each consecutive pair of points becomes one segment, so a room with four walls needs five points to be closed, or four to be left open.",
-            min_length=2,
-        ),
-    ]
-    depth: Annotated[
-        float | None,
-        Field(
-            description="How far each segment looks. Applied to every segment. Defaults to 1.0.",
-            gt=0.0,
-        ),
-    ] = None
-    name: Annotated[
-        str | None,
-        Field(description="Name of the interior elevation. Each segment is named after it."),
-    ] = None
-    id: Annotated[str | None, Field(description="ID string of the interior elevation.")] = None
-    floorIndex: Annotated[
-        int | None,
-        Field(description="The story to place the interior elevation on. Defaults to the current story."),
-    ] = None
-
-
-class Issue(APIModel):
-    issueId: IssueId
-    name: Annotated[str, Field(description="Issue name")]
-    parentIssueId: IssueId
-    creaTime: Annotated[int, Field(description="Issue creation time")]
-    modiTime: Annotated[int, Field(description="Issue modification time")]
-    tagText: Annotated[str, Field(description="Issue tag text - labels")]
-    tagTextElementId: ElementId
-    isTagTextElemVisible: Annotated[bool, Field(description="The visibility of the attached tag text element")]
-
-
-class IssueCommentStatus(Enum):
-    """The status of an issue comment."""
-    ERROR = "Error"
-    WARNING = "Warning"
-    INFO = "Info"
-    UNKNOWN = "Unknown"
-
-
-class IssueElementType(Enum):
-    """The attachment type of an element component of an issue."""
-    CREATION = "Creation"
-    HIGHLIGHT = "Highlight"
-    DELETION = "Deletion"
-    MODIFICATION = "Modification"
-
-
-class IssueId(APIModel):
-    """The identifier of an issue."""
-    guid: Annotated[
-        UUID,
-        Field(
-            description="A Globally Unique Identifier (or Universally Unique Identifier) in its string representation as defined in RFC 4122.",
-        ),
-    ]
-
-
-class IssueIdArrayItem(APIModel):
-    issueId: IssueId
-
-
-class Justification(Enum):
-    """Optional text justification. Equivalent to style.justification."""
-    LEFT = "Left"
-    CENTER = "Center"
-    RIGHT = "Right"
-    FULL = "Full"
-
-
-class KeynoteAutoTextTokens(APIModel):
-    """The autotext tokens of a keynote item. A token can be used as the text content of a label to reference the field of the keynote item."""
-    keyToken: str
-    titleToken: str
-    descriptionToken: str
-    referenceToken: str
-
-
-class KeynoteFolderData(APIModel):
-    parentFolderId: Annotated[
-        KeynoteFolderId | None,
-        Field(description="The parent folder. Optional; defaults to the root folder."),
-    ] = None
-    key: str
-    title: str
+class DesignOptionForElement(APIModel):
+    elementId: Annotated[ElementId, Field(description="The identifier of the element.")]
+    type: DesignOptionLinkType
+    designOption: DesignOptionDetails | None = None
 
 
 class KeynoteFolderDetails(APIModel):
@@ -2942,123 +6616,6 @@ class KeynoteFolderDetails(APIModel):
     uiText: str
     subFolders: list[KeynoteFolderDetails]
     items: list[KeynoteItemDetails]
-
-
-class KeynoteFolderId(APIModel):
-    """The identifier of a keynote folder."""
-    guid: Annotated[
-        UUID,
-        Field(
-            description="A Globally Unique Identifier (or Universally Unique Identifier) in its string representation as defined in RFC 4122.",
-        ),
-    ]
-
-
-class KeynoteFolderIdArrayItem(APIModel):
-    keynoteFolderId: KeynoteFolderId
-
-
-class KeynoteFolderModificationData(APIModel):
-    keynoteFolderId: KeynoteFolderId
-    key: str | None = None
-    title: str | None = None
-    reference: str | None = None
-
-
-class KeynoteItemData(APIModel):
-    parentFolderId: Annotated[
-        KeynoteFolderId | None,
-        Field(description="The parent folder. Optional; defaults to the root folder."),
-    ] = None
-    key: str
-    title: str | None = None
-    description: str | None = None
-    reference: str | None = None
-
-
-class KeynoteItemDetails(APIModel):
-    """The details of a keynote item."""
-    keynoteItemId: KeynoteItemId
-    key: str
-    title: str
-    description: str
-    reference: str
-    uiText: str
-
-
-class KeynoteItemId(APIModel):
-    """The identifier of a keynote item."""
-    guid: Annotated[
-        UUID,
-        Field(
-            description="A Globally Unique Identifier (or Universally Unique Identifier) in its string representation as defined in RFC 4122.",
-        ),
-    ]
-
-
-class KeynoteItemIdArrayItem(APIModel):
-    keynoteItemId: KeynoteItemId
-
-
-class KeynoteItemModificationData(APIModel):
-    keynoteItemId: KeynoteItemId
-    key: str | None = None
-    title: str | None = None
-    description: str | None = None
-    reference: str | None = None
-
-
-class KeynoteLabelData(APIModel):
-    keynoteItemId: KeynoteItemId
-    position: Annotated[Coordinate2D, Field(description="The reference point of the label.")]
-    contentFields: Annotated[
-        list[ContentField] | None,
-        Field(
-            description="The keynote fields to include in the label text as autotext. Optional; defaults to all fields.",
-            min_length=1,
-        ),
-    ] = None
-
-
-class LabelArrowType(Enum):
-    """Arrow head shape for a Label's leader line."""
-    EMPTY_CIRCLE = "EmptyCircle"
-    CROSS_CIRCLE = "CrossCircle"
-    FULL_CIRCLE = "FullCircle"
-    SLASH_LINE15 = "SlashLine15"
-    OPEN_ARROW15 = "OpenArrow15"
-    CLOSED_ARROW15 = "ClosedArrow15"
-    FULL_ARROW15 = "FullArrow15"
-    SLASH_LINE30 = "SlashLine30"
-    OPEN_ARROW30 = "OpenArrow30"
-    CLOSED_ARROW30 = "ClosedArrow30"
-    FULL_ARROW30 = "FullArrow30"
-    SLASH_LINE45 = "SlashLine45"
-    OPEN_ARROW45 = "OpenArrow45"
-    CLOSED_ARROW45 = "ClosedArrow45"
-    FULL_ARROW45 = "FullArrow45"
-    SLASH_LINE60 = "SlashLine60"
-    OPEN_ARROW60 = "OpenArrow60"
-    CLOSED_ARROW60 = "ClosedArrow60"
-    FULL_ARROW60 = "FullArrow60"
-    SLASH_LINE90 = "SlashLine90"
-    PEPITA_CIRCLE = "PepitaCircle"
-    BAND_ARROW = "BandArrow"
-    HALF_ARROW_CCW15 = "HalfArrowCcw15"
-    HALF_ARROW_CW15 = "HalfArrowCw15"
-    HALF_ARROW_CCW30 = "HalfArrowCcw30"
-    HALF_ARROW_CW30 = "HalfArrowCw30"
-    HALF_ARROW_CCW45 = "HalfArrowCcw45"
-    HALF_ARROW_CW45 = "HalfArrowCw45"
-    HALF_ARROW_CCW60 = "HalfArrowCcw60"
-    HALF_ARROW_CW60 = "HalfArrowCw60"
-    SLASH_LINE75 = "SlashLine75"
-
-
-class LabelClass(Enum):
-    """Whether this is a textual or a symbol label. Optional; if omitted, inherits the current Label tool default (which may silently resolve to either class - explicitly setting this avoids ambiguity)."""
-    TEXT = "Text"
-    SYMBOL = "Symbol"
 
 
 class LabelData(APIModel):
@@ -3152,240 +6709,6 @@ class LabelDetails(APIModel):
     ] = None
 
 
-class LabelLeaderLineAnchorPoint(Enum):
-    """How the leader line connects to the label text (text-class labels only)."""
-    MIDDLE = "Middle"
-    TOP = "Top"
-    BOTTOM = "Bottom"
-    UNDERLINED = "Underlined"
-
-
-class LabelLeaderLineDetails(APIModel):
-    """Full readable leader-line/frame state of a Label: every field of LabelLeaderLineSettableDetails plus the leader line's coordinates."""
-    penIndex: Annotated[int | None, Field(description="Pen attribute index of the leader line.")] = None
-    lineTypeId: Annotated[AttributeId | None, Field(description="Line type attribute of the leader line.")] = None
-    contourOffset: Annotated[
-        float | None,
-        Field(description="Padding between the Label's frame and its content, in mm."),
-    ] = None
-    framed: Annotated[bool | None, Field(description="Put a frame around the content.")] = None
-    hasLeaderLine: Annotated[
-        bool | None,
-        Field(description="Whether the Label has a leader line (pointer line)."),
-    ] = None
-    anchorPoint: LabelLeaderLineAnchorPoint | None = None
-    leaderShape: Annotated[LeaderShape | None, Field(description="Shape of the leader line.")] = None
-    squareRootAngle: Annotated[
-        float | None,
-        Field(description="Angle in radians, used only when leaderShape is 'SquareRoot'. Valid range 1-179 degrees."),
-    ] = None
-    arrowType: LabelArrowType | None = None
-    arrowVisible: bool | None = None
-    arrowPenIndex: int | None = None
-    arrowSize: Annotated[float | None, Field(description="Arrow size in mm.")] = None
-    hideWithBaseElem: Annotated[
-        bool | None,
-        Field(description="Hide the label together with its parent element."),
-    ] = None
-    begCoordinate: Coordinate2D | None = None
-    midCoordinate: Coordinate2D | None = None
-    endCoordinate: Coordinate2D | None = None
-
-
-class LabelLeaderLineSettableDetails(APIModel):
-    """Every user-configurable leader-line/frame setting of a Label (top-level API_LabelType fields, shared by both Text and Symbol label classes). Shared by CreateLabels ('leaderLine'), ModifyLabels ('leaderLine'), and the Get response."""
-    penIndex: Annotated[int | None, Field(description="Pen attribute index of the leader line.")] = None
-    lineTypeId: Annotated[AttributeId | None, Field(description="Line type attribute of the leader line.")] = None
-    contourOffset: Annotated[
-        float | None,
-        Field(description="Padding between the Label's frame and its content, in mm."),
-    ] = None
-    framed: Annotated[bool | None, Field(description="Put a frame around the content.")] = None
-    hasLeaderLine: Annotated[
-        bool | None,
-        Field(description="Whether the Label has a leader line (pointer line)."),
-    ] = None
-    anchorPoint: LabelLeaderLineAnchorPoint | None = None
-    leaderShape: Annotated[LeaderShape | None, Field(description="Shape of the leader line.")] = None
-    squareRootAngle: Annotated[
-        float | None,
-        Field(description="Angle in radians, used only when leaderShape is 'SquareRoot'. Valid range 1-179 degrees."),
-    ] = None
-    arrowType: LabelArrowType | None = None
-    arrowVisible: bool | None = None
-    arrowPenIndex: int | None = None
-    arrowSize: Annotated[float | None, Field(description="Arrow size in mm.")] = None
-    hideWithBaseElem: Annotated[
-        bool | None,
-        Field(description="Hide the label together with its parent element."),
-    ] = None
-
-
-class LabelSymbolStyleSettableDetails(APIModel):
-    """Every user-configurable style setting specific to a Symbol-class Label (top-level API_LabelType fields documented as 'for symbol labels only'). Shared by CreateLabels ('symbolStyle'), ModifyLabels ('symbolStyle'), and the Get response."""
-    textWay: SymbolLabelTextDirection | None = None
-    fontIndex: int | None = None
-    bold: bool | None = None
-    italic: bool | None = None
-    underline: bool | None = None
-    flipEnabled: Annotated[bool | None, Field(description="'Always Readable' toggle.")] = None
-    nonBreaking: Annotated[bool | None, Field(description="'Wrap Text' turned off when true.")] = None
-    textSize: Annotated[float | None, Field(description="Character height in mm.")] = None
-    useBackgroundFill: bool | None = None
-    backgroundFillPenIndex: Annotated[int | None, Field(description="Effective only if useBackgroundFill is true.")] = (
-        None
-    )
-    effectStrikeout: bool | None = None
-    effectSuperscript: bool | None = None
-    effectSubscript: bool | None = None
-    effectProtected: bool | None = None
-
-
-class LabelsWithDetail(APIModel):
-    elementId: ElementId
-    text: str | None = None
-    runs: Annotated[list[TextRunDetails] | None, Field(min_length=1)] = None
-    style: TextStyleSettableDetails | None = None
-    symbolStyle: LabelSymbolStyleSettableDetails | None = None
-    leaderLine: LabelLeaderLineSettableDetails | None = None
-
-
-class LampData(APIModel):
-    """The parameters of the new Lamp."""
-    libraryPartName: Annotated[str, Field(description="The name of the lamp library part to use.")]
-    coordinates: Coordinate3D
-    dimensions: Dimensions3D | None = None
-    angle: float | None = None
-    pen: int | None = None
-    lineTypeId: AttributeId | None = None
-    surfaceId: Annotated[
-        AttributeId | None,
-        Field(description="Material/Surface override (API_ObjectType.mat)."),
-    ] = None
-    sectionFillId: AttributeId | None = None
-    sectionFillPen: int | None = None
-    sectionFillBackgroundPen: int | None = None
-    sectionContourPen: int | None = None
-    useObjectPens: bool | None = None
-    useObjectLineTypes: bool | None = None
-    useObjectMaterials: bool | None = None
-    useObjectSectionAttributes: bool | None = None
-    reflected: bool | None = None
-    useFixSize: bool | None = None
-    fixPoint: Annotated[
-        int | None,
-        Field(
-            description="0-based index of the hotspot to keep fixed (raw API_ObjectType.fixPoint value, not 1-based)."
-        ),
-    ] = None
-    offset: Annotated[
-        Coordinate2D | None,
-        Field(
-            description="Offset of the symbol's origin from the insertion point. Reported accurately on Get, but confirmed live that Archicad silently discards this value through both Create and Modify (Get always reports the library part's own default hotspot offset regardless of what is sent) - same class of read-only-in-practice field as Morph's bodyType/edgeType/level."
-        ),
-    ] = None
-    useFixedAngle: Annotated[
-        bool | None,
-        Field(
-            description="Use a fixed rotation angle. Reported accurately on Get, but confirmed live that Archicad silently discards this value through both Create and Modify."
-        ),
-    ] = None
-    isAutoOnStoryVisibility: bool | None = None
-    visibility: StoryVisibility | None = None
-    linkToSettings: LinkToSettings | None = None
-    lightColor: Annotated[
-        ColorRGB | None,
-        Field(
-            description="Reported accurately on Get, but confirmed live that Archicad silently discards this value through both Create and Modify (Get always reports the library part's own default light color). lightIsOn (the on/off state, as opposed to the color) does not have this problem."
-        ),
-    ] = None
-    lightIsOn: bool | None = None
-    floorIndex: Annotated[
-        int | None,
-        Field(description="Optional floor index. If omitted, derived from the coordinate's z value."),
-    ] = None
-    favoriteName: Annotated[
-        str | None,
-        Field(
-            description="Optional name of a favorite to base the new element on. Its settings are applied first, then the explicitly given fields override them."
-        ),
-    ] = None
-
-
-class LampWithDetails(APIModel):
-    elementId: ElementId
-    coordinates: Coordinate3D | None = None
-    dimensions: Dimensions3D | None = None
-    angle: float | None = None
-    pen: int | None = None
-    lineTypeId: AttributeId | None = None
-    surfaceId: Annotated[
-        AttributeId | None,
-        Field(description="Material/Surface override (API_ObjectType.mat)."),
-    ] = None
-    sectionFillId: AttributeId | None = None
-    sectionFillPen: int | None = None
-    sectionFillBackgroundPen: int | None = None
-    sectionContourPen: int | None = None
-    useObjectPens: bool | None = None
-    useObjectLineTypes: bool | None = None
-    useObjectMaterials: bool | None = None
-    useObjectSectionAttributes: bool | None = None
-    reflected: bool | None = None
-    useFixSize: bool | None = None
-    fixPoint: Annotated[
-        int | None,
-        Field(
-            description="0-based index of the hotspot to keep fixed (raw API_ObjectType.fixPoint value, not 1-based)."
-        ),
-    ] = None
-    offset: Annotated[
-        Coordinate2D | None,
-        Field(
-            description="Offset of the symbol's origin from the insertion point. Reported accurately on Get, but confirmed live that Archicad silently discards this value through both Create and Modify (Get always reports the library part's own default hotspot offset regardless of what is sent) - same class of read-only-in-practice field as Morph's bodyType/edgeType/level."
-        ),
-    ] = None
-    useFixedAngle: Annotated[
-        bool | None,
-        Field(
-            description="Use a fixed rotation angle. Reported accurately on Get, but confirmed live that Archicad silently discards this value through both Create and Modify."
-        ),
-    ] = None
-    isAutoOnStoryVisibility: bool | None = None
-    visibility: StoryVisibility | None = None
-    linkToSettings: LinkToSettings | None = None
-    lightColor: Annotated[
-        ColorRGB | None,
-        Field(
-            description="Reported accurately on Get, but confirmed live that Archicad silently discards this value through both Create and Modify (Get always reports the library part's own default light color). lightIsOn (the on/off state, as opposed to the color) does not have this problem."
-        ),
-    ] = None
-    lightIsOn: bool | None = None
-
-
-class LayerAttribute(APIModel):
-    """A layer attribute."""
-    attributeId: AttributeId
-    index: int
-    name: str
-    isHidden: bool | None = None
-    isLocked: bool | None = None
-    isWireframe: bool | None = None
-    intersectionGroupNr: int | None = None
-
-
-class LayerAttributeField(Enum):
-    IS_HIDDEN = "isHidden"
-    IS_LOCKED = "isLocked"
-    IS_WIREFRAME = "isWireframe"
-    INTERSECTION_GROUP_NR = "intersectionGroupNr"
-
-
-class LayerCombinationAttribute(APIModel):
-    """A layer combination attribute."""
-    layerCombination: LayerCombinationAttributeDetails
-
-
 class LayerCombinationAttributeDetails(APIModel):
     """The details of the layer combination attribute."""
     attributeId: Annotated[
@@ -3403,98 +6726,6 @@ class LayerCombinationAttributeDetails(APIModel):
     ]
 
 
-class LayerCombinationDataArrayItem(APIModel):
-    """Data to create a Layer Combination."""
-    attributeId: Annotated[
-        AttributeId | None,
-        Field(
-            description="Indentifier of the existing Layer Combination to overwrite, ignored if overwriteExisting is false."
-        ),
-    ] = None
-    index: Annotated[
-        str | None,
-        Field(
-            description="Index of the existing Layer Combination to overwrite, ignored if overwriteExisting is false."
-        ),
-    ] = None
-    name: Annotated[
-        str,
-        Field(
-            description="Name. If overwriteExisting is true, then the existing Layer Combination with the given name will be overwritten."
-        ),
-    ]
-    layers: Annotated[
-        list[LayersOfLayerCombinationItem],
-        Field(description="List of Layers included in the Layer Combination."),
-    ]
-
-
-class LayerData(APIModel):
-    """Data to create a Layer."""
-    attributeId: Annotated[
-        AttributeId | None,
-        Field(description="Indentifier of the existing Layer to overwrite, ignored if overwriteExisting is false."),
-    ] = None
-    index: Annotated[
-        str | None,
-        Field(description="Index of the existing Layer to overwrite, ignored if overwriteExisting is false."),
-    ] = None
-    name: Annotated[
-        str,
-        Field(
-            description="Name. If overwriteExisting is true, then the existing Layer with the given name will be overwritten."
-        ),
-    ]
-    isHidden: Annotated[bool | None, Field(description="Hide/Show.")] = None
-    isLocked: Annotated[bool | None, Field(description="Lock/Unlock.")] = None
-    isWireframe: Annotated[bool | None, Field(description="Force the model to wireframe.")] = None
-    intersectionGroupNr: Annotated[
-        int | None,
-        Field(description="Intersection group. Elements on layers having the same group will be intersected."),
-    ] = None
-
-
-class LayersOfLayerCombinationItem(APIModel):
-    attributeId: Annotated[AttributeId, Field(description="The identifier of the Layer attribute.")]
-    isHidden: Annotated[bool, Field(description="Visibility of the Layer in the Layer Combination.")]
-    isLocked: Annotated[bool, Field(description="Lock state of the Layer in the Layer Combination.")]
-    isWireframe: Annotated[
-        bool,
-        Field(description="Is wireframe mode forced for the Layer in the Layer Combination."),
-    ]
-    intersectionGroupNr: Annotated[
-        int,
-        Field(
-            description="Intersection group of the Layer in the Layer Combination. Elements on layers having the same group will be intersected."
-        ),
-    ]
-
-
-class LayoutCustomData(APIModel):
-    customSchemeKey: str
-    customSchemeName: str | None = None
-    customSchemeValue: str
-
-
-class LayoutCustomDataToSet(APIModel):
-    customSchemeKey: str | None = None
-    customSchemeName: str | None = None
-    customSchemeValue: str
-
-
-class LayoutData(APIModel):
-    masterLayoutName: Annotated[str | None, Field(min_length=1)] = None
-    masterNavigatorItemId: NavigatorItemId | None = None
-    layoutName: Annotated[str, Field(min_length=1)]
-    parentNavigatorItemId: NavigatorItemId | None = None
-    layoutParameters: LayoutParameters | None = None
-
-
-class LayoutDatabaseId(APIModel):
-    databaseId: DatabaseId | None = None
-    navigatorItemId: NavigatorItemId | None = None
-
-
 class LayoutInfo(APIModel):
     id: str
     databaseId: DatabaseId
@@ -3508,521 +6739,15 @@ class LayoutInfo(APIModel):
     customSchemeData: list[RevisionCustomSchemeEntry] | None = None
 
 
-class LayoutParameters(APIModel):
-    horizontalSize: float | None = None
-    verticalSize: float | None = None
-    leftMargin: float | None = None
-    topMargin: float | None = None
-    rightMargin: float | None = None
-    bottomMargin: float | None = None
-    customLayoutNumber: str | None = None
-    customLayoutNumbering: bool | None = None
-    doNotIncludeInNumbering: bool | None = None
-    displayMasterLayoutBelow: bool | None = None
-
-
-class LayoutSetting(APIModel):
-    layoutName: str | None = None
-    horizontalSize: float | None = None
-    verticalSize: float | None = None
-    leftMargin: float | None = None
-    topMargin: float | None = None
-    rightMargin: float | None = None
-    bottomMargin: float | None = None
-    customLayoutNumber: str | None = None
-    customLayoutNumbering: bool | None = None
-    doNotIncludeInNumbering: bool | None = None
-    displayMasterLayoutBelow: bool | None = None
-    customData: list[LayoutCustomData] | None = None
-
-
-class LayoutSettingsData(APIModel):
-    layoutDatabaseId: DatabaseId | None = None
-    layoutNavigatorItemId: NavigatorItemId | None = None
-    layoutName: str | None = None
-    horizontalSize: float | None = None
-    verticalSize: float | None = None
-    leftMargin: float | None = None
-    topMargin: float | None = None
-    rightMargin: float | None = None
-    bottomMargin: float | None = None
-    customLayoutNumber: str | None = None
-    customLayoutNumbering: bool | None = None
-    doNotIncludeInNumbering: bool | None = None
-    showMasterBelow: bool | None = None
-    customData: list[LayoutCustomDataToSet] | None = None
-
-
-class LeaderShape(Enum):
-    """Shape of the leader line."""
-    SEGMENTED = "Segmented"
-    SPLINEAR = "Splinear"
-    SQUARE_ROOT = "SquareRoot"
-
-
-class Length(APIModel):
-    unit: LengthType
-    accuracy: AccuracyType
-    decimals: Annotated[int, Field(description="Number of decimals to display for length values.")]
-    roundInch: Annotated[int | None, Field(description="Fractional inches.")] = None
-
-
-class LengthType(Enum):
-    """The type of the length measurement unit."""
-    METER = "Meter"
-    DECIMETER = "Decimeter"
-    CENTIMETER = "Centimeter"
-    MILLIMETER = "Millimeter"
-    FOOT_FRAC_INCH = "FootFracInch"
-    FOOT_DEC_INCH = "FootDecInch"
-    DEC_FOOT = "DecFoot"
-    FRAC_INCH = "FracInch"
-    DEC_INCH = "DecInch"
-
-
-class Level(APIModel):
-    levelHeight: float
-    levelAngle: Annotated[float, Field(gt=0.0)]
-
-
 class LibPartBasedElementDetails(APIModel):
     libPart: LibPartDetails
     ownerElementId: ElementId | None = None
     ownerElementType: ElementType | None = None
 
 
-class LibPartDetails(APIModel):
-    name: str
-    parentUnID: LibPartUnId
-    ownUnID: LibPartUnId
-
-
-class LibPartUnId(APIModel):
-    guid: Annotated[
-        UUID,
-        Field(
-            description="A Globally Unique Identifier (or Universally Unique Identifier) in its string representation as defined in RFC 4122.",
-        ),
-    ]
-
-
-class Library(APIModel):
-    """Library"""
-    name: Annotated[str, Field(description="Library name.")]
-    path: Annotated[str, Field(description="A filesystem path to library location.")]
-    type: Annotated[str, Field(description="Library type.")]
-    available: Annotated[bool | None, Field(description="Is library not missing.")] = None
-    readOnly: Annotated[bool | None, Field(description="Is library not writable.")] = None
-    twServerUrl: Annotated[
-        str | None,
-        Field(description="URL address of the TeamWork server hosting the library."),
-    ] = None
-    urlWebLibrary: Annotated[str | None, Field(description="URL of the downloaded Internet library.")] = None
-
-
-class LibraryFileAddition(APIModel):
-    inputPath: Annotated[str, Field(description="The path to the input file.")]
-    outputPath: Annotated[
-        str,
-        Field(description="The relative path to the new file inside embedded library."),
-    ]
-    type: Annotated[
-        LibraryPartType | None,
-        Field(description="The type of the library part. By default 'Pict'."),
-    ] = None
-
-
-class LibraryLocation(APIModel):
-    path: str
-
-
-class LibraryPart(APIModel):
-    guid: str | None = None
-    index: int | None = None
-    documentName: str | None = None
-    fileName: str | None = None
-    typeId: LibraryPartType | None = None
-
-
-class LibraryPartType(Enum):
-    """Enumeration of available library part types. 'Unknown' is the schema-valid catch-all returned for any libpart whose typeID is not one of the named values (rare ACAPI sentinels and any future SDK subtype)."""
-    SPEC = "Spec"
-    WINDOW = "Window"
-    DOOR = "Door"
-    OBJECT = "Object"
-    LAMP = "Lamp"
-    ROOM = "Room"
-    PROPERTY = "Property"
-    PLAN_SIGN = "PlanSign"
-    LABEL = "Label"
-    MACRO = "Macro"
-    PICT = "Pict"
-    PICTURE = "Picture"
-    LIST_SCHEME = "ListScheme"
-    SKYLIGHT = "Skylight"
-    OPENING_SYMBOL = "OpeningSymbol"
-    UNKNOWN = "Unknown"
-
-
-class LineAttribute(APIModel):
-    """A line attribute."""
-    attributeId: AttributeId
-    index: int
-    name: str
-    scaleWithPlan: bool | None = None
-    defineScale: float | None = None
-    lineType: LineType | None = None
-    period: float | None = None
-    height: float | None = None
-    dashItems: list[LineDashItem] | None = None
-    lineItems: list[LineSymbolItem] | None = None
-
-
-class LineAttributeField(Enum):
-    SCALE_WITH_PLAN = "scaleWithPlan"
-    DEFINE_SCALE = "defineScale"
-    LINE_TYPE = "lineType"
-    PERIOD = "period"
-    HEIGHT = "height"
-    DASH_ITEMS = "dashItems"
-    LINE_ITEMS = "lineItems"
-
-
-class LineDashItem(APIModel):
-    dash: float
-    gap: float
-
-
-class LineData(APIModel):
-    """Data to create a Line."""
-    attributeId: Annotated[
-        AttributeId | None,
-        Field(description="Indentifier of the existing Line to overwrite, ignored if overwriteExisting is false."),
-    ] = None
-    index: Annotated[
-        str | None,
-        Field(description="Index of the existing Line to overwrite, ignored if overwriteExisting is false."),
-    ] = None
-    name: Annotated[
-        str,
-        Field(
-            description="Name. If overwriteExisting is true, then the existing Line with the given name will be overwritten."
-        ),
-    ]
-    scaleWithPlan: Annotated[
-        bool | None,
-        Field(
-            description="If true, the line type parameters are defined in meters at the given defineScale and scale on printout with the actual plan scale. If false (default), the parameters are fixed values in millimeters as the line will appear on the printout."
-        ),
-    ] = None
-    defineScale: Annotated[
-        float | None,
-        Field(description="The floor plan scale the line type is defined with. Only used if scaleWithPlan is true."),
-    ] = None
-    lineType: Annotated[str | None, Field(description="Solid, Dashed, or Symbol. Defaults to Solid.")] = None
-    period: Annotated[
-        float | None,
-        Field(description="The length of one period (Dashed and Symbol line types)."),
-    ] = None
-    height: Annotated[
-        float | None,
-        Field(description="The height of the symbol line (Symbol line type only)."),
-    ] = None
-    dashItems: Annotated[
-        list[LineDashItem] | None,
-        Field(description="Dash-gap pairs describing one period (Dashed line type only)."),
-    ] = None
-    lineItems: Annotated[
-        list[LineSymbolItemData] | None,
-        Field(description="Symbol items describing one period (Symbol line type only)."),
-    ] = None
-
-
-class LineDetails(APIModel):
-    begCoordinate: Coordinate2D
-    endCoordinate: Coordinate2D
-    roomSeparator: Annotated[bool | None, Field(description="Is this a zone boundary line?")] = None
-    linePenIndex: int | None = None
-    lineTypeId: AttributeId | None = None
-    zCoordinate: float
-
-
-class LineElementData(APIModel):
-    """The parameters of the new Line."""
-    favoriteName: Annotated[
-        str | None,
-        Field(
-            description="Optional name of a favorite to base the new element on. Its settings are applied first, then the explicitly given fields override them."
-        ),
-    ] = None
-    floorInd: Annotated[
-        float | None,
-        Field(description="The identifier of the floor. Optional parameter, by default the current floor is used."),
-    ] = None
-    layerIndex: Annotated[
-        int | None,
-        Field(
-            description="Layer attribute index to place the line on. Optional parameter, by default the current layer is used."
-        ),
-    ] = None
-    begCoordinate: Coordinate2D
-    endCoordinate: Coordinate2D
-    roomSeparator: Annotated[
-        bool | None,
-        Field(description="Is this a zone boundary line? Optional, defaults to false."),
-    ] = None
-    linePenIndex: Annotated[
-        int | None,
-        Field(description="Optional pen index. By default the current pen is used."),
-    ] = None
-    lineTypeId: Annotated[
-        AttributeId | None,
-        Field(description="Optional line type attribute. By default the current line type is used."),
-    ] = None
-
-
-class LineSettings(APIModel):
-    """Settings for modifying a Line."""
-    begCoordinate: Coordinate2D | None = None
-    endCoordinate: Coordinate2D | None = None
-    roomSeparator: bool | None = None
-    linePenIndex: int | None = None
-    lineTypeId: AttributeId | None = None
-
-
-class LineSymbolItem(APIModel):
-    itemType: str
-    centerOffset: float
-    length: float
-    begPos: Coordinate2D
-    endPos: Coordinate2D
-    radius: float
-    beginAngle: float
-    endAngle: float
-
-
-class LineSymbolItemData(APIModel):
-    itemType: Annotated[
-        str,
-        Field(description="Separator, CenterDot, CenterLine, Dot, RightAngle, Parallel, Line, Circle, or Arc."),
-    ]
-    centerOffset: Annotated[
-        float | None,
-        Field(
-            description="Vertical distance from the origin. Used for Separator, CenterDot, and CenterLine item types."
-        ),
-    ] = None
-    length: Annotated[
-        float | None,
-        Field(description="Length of the item. Used for CenterLine, RightAngle, and Parallel item types."),
-    ] = None
-    begPos: Annotated[
-        Coordinate2D | None,
-        Field(description="Beginning position. Used for Dot, RightAngle, Parallel, Line, Circle, and Arc item types."),
-    ] = None
-    endPos: Annotated[
-        Coordinate2D | None,
-        Field(description="End position. Used for Line item type only."),
-    ] = None
-    radius: Annotated[float | None, Field(description="Radius. Used for Circle and Arc item types.")] = None
-    beginAngle: Annotated[
-        float | None,
-        Field(description="Beginning angle in radians, measured from the vertical axis. Used for Arc item type only."),
-    ] = None
-    endAngle: Annotated[
-        float | None,
-        Field(description="End angle in radians, measured from the vertical axis. Used for Arc item type only."),
-    ] = None
-
-
-class LineType(Enum):
-    SOLID = "Solid"
-    DASHED = "Dashed"
-    SYMBOL = "Symbol"
-
-
-class LinkData(APIModel):
-    """The marker link data"""
-    referredView: Annotated[
-        ElementId | None,
-        Field(description="Guid of the referred view. Only if the marker refers to a view."),
-    ] = None
-    referredDrawing: Annotated[
-        ElementId | None,
-        Field(description="Guid of the referred drawing. Only if the marker refers to a drawing."),
-    ] = None
-    referredPMViewPoint: Annotated[
-        ElementId | None,
-        Field(description="Guid of the referred view point. Only if the marker refers to a view point."),
-    ] = None
-
-
-class LinkToSettings(APIModel):
-    """Mode of linking the Morph to its home story."""
-    homeStoryDifference: Annotated[
-        int | None,
-        Field(description="Difference of the home story from the current story."),
-    ] = None
-    newCreationMode: Annotated[
-        bool | None,
-        Field(
-            description="If true, the story link is relative to the current story (homeStoryDifference is used); if false, the element's absolute floor index is used instead."
-        ),
-    ] = None
-
-
-class MEPComponentType(Enum):
-    TERMINAL = "Terminal"
-    ACCESSORY = "Accessory"
-    EQUIPMENT = "Equipment"
-    FITTING = "Fitting"
-
-
-class MEPConnectionData(APIModel):
-    routingElementId: Annotated[ElementId, Field(description="The routing element to connect.")]
-    connectToId: Annotated[
-        ElementId,
-        Field(description="The MEP element or routing element to connect to."),
-    ]
-
-
-class MEPConnectionResult(APIModel):
-    """The result of connecting an MEP routing element: the routing element deleted by merging, the routing element created by splitting and the branch element created by the connection."""
-    deletedRoutingElementId: ElementId | None = None
-    splitRoutingElementId: ElementId | None = None
-    createdBranchId: ElementId | None = None
-
-
-class MEPCrossSectionShape(Enum):
-    """Optional cross section shape applied to all segments."""
-    RECTANGULAR = "Rectangular"
-    CIRCULAR = "Circular"
-    OVAL = "Oval"
-    U_SHAPE = "UShape"
-
-
-class MEPDistributionSystem(APIModel):
-    domain: MEPSystemDomain
-    mepSystemId: AttributeId | None = None
-    elements: Annotated[list[ElementIdArrayItem], Field(description="A list of elements.")]
-
-
-class MEPDomains(Enum):
-    VENTILATION = "Ventilation"
-    PIPING = "Piping"
-    CABLE_CARRIER = "CableCarrier"
-
-
-class MEPElement(APIModel):
-    elementId: ElementId
-    type: Annotated[MEPElementType, Field(description="The type of the MEP element.")]
-    domain: Annotated[
-        str,
-        Field(description="The MEP domain of the element. Empty for domain-independent elements (e.g. Equipment)."),
-    ]
-
-
-class MEPElementData(APIModel):
-    type: MEPComponentType
-    domain: Annotated[
-        MEPSystemDomain | None,
-        Field(description="The MEP domain of the element. Required for all types except Equipment."),
-    ] = None
-    position: Coordinate3D
-    orientationDirection: Annotated[
-        Coordinate3D | None,
-        Field(description="Optional direction vector of the orientation. Defaults to (1, 0, 0)."),
-    ] = None
-    orientationRotation: Annotated[
-        Coordinate3D | None,
-        Field(description="Optional rotation vector of the orientation. Defaults to (0, 1, 0)."),
-    ] = None
-
-
 class MEPElementPorts(APIModel):
     """The ports of an MEP element."""
     ports: list[MEPPortDetails]
-
-
-class MEPElementType(Enum):
-    ROUTING_ELEMENT = "RoutingElement"
-    RIGID_SEGMENT = "RigidSegment"
-    ELBOW = "Elbow"
-    TRANSITION = "Transition"
-    BRANCH = "Branch"
-    TERMINAL = "Terminal"
-    ACCESSORY = "Accessory"
-    EQUIPMENT = "Equipment"
-    FITTING = "Fitting"
-    FLEXIBLE_SEGMENT = "FlexibleSegment"
-    TAKE_OFF = "TakeOff"
-
-
-class MEPPortDetails(APIModel):
-    """The details of a port of an MEP element."""
-    portId: Annotated[
-        UUID,
-        Field(
-            description="A Globally Unique Identifier (or Universally Unique Identifier) in its string representation as defined in RFC 4122.",
-        ),
-    ]
-    name: str
-    position: Coordinate3D
-    direction: Coordinate3D
-    shape: str
-    width: float
-    height: float
-    domain: MEPSystemDomain
-    mepSystemId: AttributeId
-    isPhysicallyConnected: bool
-    connectedPortId: Annotated[
-        UUID | None,
-        Field(
-            description="A Globally Unique Identifier (or Universally Unique Identifier) in its string representation as defined in RFC 4122.",
-        ),
-    ] = None
-    connectedElementId: ElementId | None = None
-
-
-class MEPPreferenceRow(APIModel):
-    referenceId: int
-    diameter: float
-    description: str | None = None
-
-
-class MEPPreferenceTable(APIModel):
-    guid: str
-    rows: list[MEPPreferenceRow]
-
-
-class MEPPreferenceTableDomain(Enum):
-    """The MEP domain of the segment preference tables."""
-    PIPING = "Piping"
-    VENTILATION = "Ventilation"
-
-
-class MEPRoutingElementData(APIModel):
-    domain: MEPSystemDomain
-    nodeCoordinates: Annotated[
-        list[Coordinate3D],
-        Field(description="The corner points of the route polyline.", min_length=2),
-    ]
-    crossSectionWidth: Annotated[
-        float | None,
-        Field(description="Optional cross section width applied to all segments."),
-    ] = None
-    crossSectionHeight: Annotated[
-        float | None,
-        Field(description="Optional cross section height applied to all segments."),
-    ] = None
-    crossSectionShape: MEPCrossSectionShape | None = None
-    crossSectionReferenceId: Annotated[
-        int | None,
-        Field(
-            description="Optional cross section reference id of the segment preference table (used for circular cross sections)."
-        ),
-    ] = None
-    mepSystemId: Annotated[AttributeId | None, Field(description="Optional MEP system attribute.")] = None
 
 
 class MEPRoutingElementDetails(APIModel):
@@ -4032,120 +6757,6 @@ class MEPRoutingElementDetails(APIModel):
     polyline: list[Coordinate3D]
     segments: list[MEPRoutingSegmentDetails]
     nodes: list[MEPRoutingNodeDetails]
-
-
-class MEPRoutingElementModificationData(APIModel):
-    elementId: ElementId
-    mepSystemId: AttributeId | None = None
-    crossSectionWidth: Annotated[
-        float | None,
-        Field(description="New cross section width applied to all segments."),
-    ] = None
-    crossSectionHeight: Annotated[
-        float | None,
-        Field(description="New cross section height applied to all segments."),
-    ] = None
-    crossSectionShape: Annotated[
-        MEPCrossSectionShape | None,
-        Field(description="New cross section shape applied to all segments."),
-    ] = None
-    nodePositions: Annotated[
-        list[Coordinate3D] | None,
-        Field(description="New positions of the routing nodes. The size must match the number of nodes of the route."),
-    ] = None
-
-
-class MEPRoutingNodeDetails(APIModel):
-    """The details of an MEP routing node."""
-    elementId: ElementId
-    position: Coordinate3D
-
-
-class MEPRoutingSegmentDetails(APIModel):
-    """The details of an MEP routing segment."""
-    elementId: ElementId
-    crossSectionWidth: float
-    crossSectionHeight: float
-    crossSectionShape: str
-
-
-class MEPSystemAttribute(APIModel):
-    """An MEP system attribute."""
-    attributeId: AttributeId
-    index: int
-    name: str
-    domain: Annotated[
-        list[MEPSystemDomain] | None,
-        Field(
-            description="The domain(s) this system belongs to. Archicad 29+ allows only one; earlier versions may report several."
-        ),
-    ] = None
-    contourPen: int | None = None
-    fillPen: int | None = None
-    fillBackgroundPen: int | None = None
-    centerLinePen: int | None = None
-    fillId: AttributeIdArrayItem | None = None
-    centerLineTypeId: AttributeIdArrayItem | None = None
-
-
-class MEPSystemAttributeField(Enum):
-    DOMAIN = "domain"
-    CONTOUR_PEN = "contourPen"
-    FILL_PEN = "fillPen"
-    FILL_BACKGROUND_PEN = "fillBackgroundPen"
-    CENTER_LINE_PEN = "centerLinePen"
-    FILL_ID = "fillId"
-    CENTER_LINE_TYPE_ID = "centerLineTypeId"
-
-
-class MEPSystemData(APIModel):
-    """Data to create an MEP System."""
-    attributeId: Annotated[
-        AttributeId | None,
-        Field(
-            description="Indentifier of the existing MEP System to overwrite, ignored if overwriteExisting is false."
-        ),
-    ] = None
-    index: Annotated[
-        str | None,
-        Field(description="Index of the existing MEP System to overwrite, ignored if overwriteExisting is false."),
-    ] = None
-    name: Annotated[
-        str,
-        Field(
-            description="Name. If overwriteExisting is true, then the existing MEP System with the given name will be overwritten."
-        ),
-    ]
-    domain: Annotated[
-        MEPSystemDomain | None,
-        Field(
-            description="Ventilation, Piping, or CableCarrier. Only elements belonging to the same domain can use this system."
-        ),
-    ] = None
-    contourPen: Annotated[int | None, Field(description="The index of the contour pen [1..255].")] = None
-    fillPen: Annotated[
-        int | None,
-        Field(description="The index of the fill (foreground) pen [1..255]."),
-    ] = None
-    fillBackgroundPen: Annotated[
-        int | None,
-        Field(description="The index of the background pen [0..255]. 0 means transparent background."),
-    ] = None
-    centerLinePen: Annotated[int | None, Field(description="The index of the center line pen [1..255].")] = None
-    fillId: Annotated[
-        AttributeIdArrayItem | None,
-        Field(description="Identifier of the fill pattern attribute."),
-    ] = None
-    centerLineTypeId: Annotated[
-        AttributeIdArrayItem | None,
-        Field(description="Identifier of the center line type attribute."),
-    ] = None
-
-
-class MEPSystemDomain(Enum):
-    VENTILATION = "Ventilation"
-    PIPING = "Piping"
-    CABLE_CARRIER = "CableCarrier"
 
 
 class ManualZoneGeometry(APIModel):
@@ -4159,164 +6770,6 @@ class ManualZoneGeometry(APIModel):
         list[Hole2DWithOutline | Hole2DWithLegacyCoordinates] | None,
         Field(description="A list of 2D holes in an element defined by closed polylines"),
     ] = None
-
-
-class MeshData(APIModel):
-    """The parameters of the new Mesh."""
-    favoriteName: Annotated[
-        str | None,
-        Field(
-            description="Optional name of a favorite to base the new element on. Its settings are applied first, then the explicitly given fields override them."
-        ),
-    ] = None
-    floorIndex: int | None = None
-    level: Annotated[float | None, Field(description="The Z reference level of coordinates.")] = None
-    skirtType: MeshSkirtType | None = None
-    skirtLevel: Annotated[float | None, Field(description="The height of the skirt.")] = None
-    ridges: Annotated[
-        MeshRidges | None,
-        Field(
-            description="How ridges between mesh facets are displayed in 3D: 'AllSharp' shows all ridges, 'AllSmooth' hides them, 'UserDefined' shows only ridges along user-defined level lines (the drawing-set look for contour-line topography)."
-        ),
-    ] = None
-    showLines: Annotated[
-        bool | None,
-        Field(
-            description="Whether to show secondary mesh lines (level lines other than the user-defined ones) on plan."
-        ),
-    ] = None
-    contourPen: Annotated[
-        int | None,
-        Field(description="Optional pen attribute index for the mesh's contour line."),
-    ] = None
-    levelPen: Annotated[
-        int | None,
-        Field(description="Optional pen attribute index for the mesh's level lines."),
-    ] = None
-    lineTypeIndex: Annotated[
-        int | None,
-        Field(description="Optional line type attribute index for the mesh's contour."),
-    ] = None
-    polygonCoordinates: Annotated[
-        list[Coordinate3D],
-        Field(
-            description="The 3D coordinates of the outline polygon of the mesh.",
-            min_length=3,
-        ),
-    ]
-    polygonArcs: Annotated[list[PolyArc] | None, Field(description="Polygon outline arcs of the mesh.")] = None
-    holes: Annotated[
-        list[Hole3D] | None,
-        Field(description="A list of 3D holes in an element defined by closed polylines"),
-    ] = None
-    sublines: Annotated[
-        list[MeshSubline] | None,
-        Field(
-            description="The leveling sublines inside the polygon of the mesh.",
-            min_length=1,
-        ),
-    ] = None
-
-
-class MeshDetails(APIModel):
-    floorIndex: Annotated[int | None, Field(description="The index of the story the mesh is placed on.")] = None
-    level: Annotated[float, Field(description="The Z reference level of coordinates.")]
-    skirtType: MeshSkirtType
-    skirtLevel: Annotated[float, Field(description="The height of the skirt.")]
-    ridges: MeshRidges | None = None
-    showLines: Annotated[bool | None, Field(description="Whether to show secondary mesh lines on plan.")] = None
-    contourPen: Annotated[int | None, Field(description="Pen attribute index for the mesh contour line.")] = None
-    levelPen: Annotated[int | None, Field(description="Pen attribute index for the mesh level lines.")] = None
-    lineTypeIndex: Annotated[int | None, Field(description="Line type attribute index for the mesh contour.")] = None
-    polygonCoordinates: Annotated[
-        list[Coordinate3D],
-        Field(
-            description="The 3D coordinates of the outline polygon of the mesh.",
-            min_length=3,
-        ),
-    ]
-    polygonArcs: Annotated[list[PolyArc] | None, Field(description="Polygon outline arcs of the mesh.")] = None
-    holes: Annotated[
-        list[Hole3D] | None,
-        Field(description="A list of 3D holes in an element defined by closed polylines"),
-    ] = None
-    sublines: Annotated[
-        list[MeshSubline] | None,
-        Field(
-            description="The leveling sublines inside the polygon of the mesh.",
-            min_length=1,
-        ),
-    ] = None
-
-
-class MeshModificationData(APIModel):
-    """The fields to modify on the Mesh. Only provided fields are changed; omitted fields are left as-is."""
-    floorIndex: int | None = None
-    level: Annotated[float | None, Field(description="The Z reference level of coordinates.")] = None
-    skirtType: MeshSkirtType | None = None
-    skirtLevel: Annotated[float | None, Field(description="The height of the skirt.")] = None
-    ridges: Annotated[
-        MeshRidges | None,
-        Field(description="How ridges between mesh facets are displayed in 3D."),
-    ] = None
-    showLines: Annotated[bool | None, Field(description="Whether to show secondary mesh lines on plan.")] = None
-    contourPen: Annotated[int | None, Field(description="Pen attribute index for the mesh contour line.")] = None
-    levelPen: Annotated[int | None, Field(description="Pen attribute index for the mesh level lines.")] = None
-    lineTypeIndex: Annotated[int | None, Field(description="Line type attribute index for the mesh contour.")] = None
-    polygonCoordinates: Annotated[
-        list[Coordinate3D] | None,
-        Field(
-            description="The 3D coordinates of the outline polygon of the mesh. Replaces the existing boundary entirely.",
-            min_length=3,
-        ),
-    ] = None
-    polygonArcs: Annotated[list[PolyArc] | None, Field(description="Polygon outline arcs of the mesh.")] = None
-    holes: Annotated[
-        list[Hole3D] | None,
-        Field(description="A list of 3D holes in an element defined by closed polylines"),
-    ] = None
-    sublines: Annotated[
-        list[MeshSubline] | None,
-        Field(description="The leveling sublines inside the polygon of the mesh. Replaces existing sublines entirely."),
-    ] = None
-
-
-class MeshRidges(Enum):
-    """How ridges between mesh facets are displayed in 3D."""
-    ALL_SHARP = "AllSharp"
-    ALL_SMOOTH = "AllSmooth"
-    USER_DEFINED = "UserDefined"
-
-
-class MeshSkirtType(Enum):
-    """The type of the skirt structure."""
-    SURFACE_ONLY_WITHOUT_SKIRT = "SurfaceOnlyWithoutSkirt"
-    WITH_SKIRT = "WithSkirt"
-    SOLID_BODY_WITH_SKIRT = "SolidBodyWithSkirt"
-
-
-class MeshSubline(APIModel):
-    coordinates: Annotated[
-        list[Coordinate3D],
-        Field(description="The 3D coordinates of the leveling subline of the mesh."),
-    ]
-
-
-class MeshWithDetails(APIModel):
-    elementId: ElementId
-    meshData: MeshModificationData
-
-
-class Method(Enum):
-    """The file operation method to use."""
-    SAVE = "save"
-    MERGE = "merge"
-    OPEN = "open"
-
-
-class ModelViewOption(APIModel):
-    """Represents the model view options."""
-    name: str
 
 
 class MorphBody(APIModel):
@@ -4535,36 +6988,6 @@ class MorphDetails(APIModel):
     ] = None
 
 
-class MorphPolygon(APIModel):
-    vertexIds: Annotated[
-        list[int],
-        Field(
-            description="Counterclockwise outer-loop vertex indices for this face.",
-            min_length=3,
-        ),
-    ]
-    filled: Annotated[
-        bool | None,
-        Field(
-            description="Defaults to true. Set to false to create only this loop's edges (a wireframe outline, e.g. a bare rectangle with no surface fill) without an actual face - holes/surfaceId are ignored in that case, since there is no fill for them to apply to."
-        ),
-    ] = None
-    holes: Annotated[
-        list[MorphPolygonHole] | None,
-        Field(description="Optional hole loops cut out of this face, each a clockwise list of vertex indices."),
-    ] = None
-    surfaceId: Annotated[
-        AttributeId | None,
-        Field(
-            description="Optional per-face Surface (render material) override. Falls back to the Morph's own default surface when omitted. Named surfaceId, not buildingMaterialId - confirmed live that Archicad's per-face body override is a Surface index, not a building material (a Morph's building material is always a single whole-volume property, element.morph.buildingMaterial, exposed as the sibling 'buildingMaterialId' field on MorphDetails/CreateMorphs/ModifyMorphs - never per-face). Version-dependent write bug, isolated live: silently lost on Create on Archicad 25 (presumably 26 too - same pre-2700 API_OverriddenAttribute shape, though Archicad 26 itself could not be installed to confirm live), confirmed fixed and working correctly from Archicad 27 onward (27 and 29 both verified). No SDK/build available locally to check Archicad 28."
-        ),
-    ] = None
-
-
-class MorphPolygonHole(APIModel):
-    vertexIds: Annotated[list[int], Field(min_length=3)]
-
-
 class MorphWithDetails(APIModel):
     elementId: ElementId
     translation: Coordinate3D | None = None
@@ -4614,714 +7037,8 @@ class MorphWithDetails(APIModel):
     level: float | None = None
 
 
-class MoveVector(APIModel):
-    """Move vector of a 3D point."""
-    x: Annotated[float, Field(description="X value of the vector.")]
-    y: Annotated[float, Field(description="Y value of the vector.")]
-    z: Annotated[float, Field(description="Z value of the vector.")]
-
-
-class NameType(Enum):
-    """How the drawing's title name is assembled (Identification tabpage of the Drawing Settings dialog)."""
-    VIEW_OR_SOURCE_FILE_NAME = "ViewOrSourceFileName"
-    VIEW_ID_AND_NAME = "ViewIdAndName"
-    CUSTOM_NAME = "CustomName"
-
-
-class NavigatorItem(APIModel):
-    """A navigator item and the subtree below it."""
-    navigatorItemId: NavigatorItemId
-    type: NavigatorItemType
-    name: Annotated[str, Field(description="The name of the navigator item.")]
-    prefix: Annotated[
-        str,
-        Field(description="The floor number for story items, an empty string for every other item type."),
-    ]
-    uiId: Annotated[
-        str,
-        Field(description="The identifier shown next to the name on the navigator."),
-    ]
-    customUiId: Annotated[
-        bool,
-        Field(
-            description='True when the identifier was typed by hand instead of being inherited from the Project Map source - the View Settings ID "Custom" radio button.'
-        ),
-    ]
-    customName: Annotated[
-        bool,
-        Field(
-            description='True when the name was typed by hand instead of being inherited from the Project Map source - the View Settings name "Custom" radio button.'
-        ),
-    ]
-    isIndependent: Annotated[
-        bool,
-        Field(description="True when the item is independent, that is when its link to the Project Map is broken."),
-    ]
-    children: Annotated[
-        list[NavigatorItemArrayItem] | None,
-        Field(description="The children of the navigator item. Missing when the item has no children."),
-    ] = None
-
-
-class NavigatorItemArrayItem(APIModel):
-    navigatorItem: NavigatorItem
-
-
-class NavigatorItemId(APIModel):
-    """The identifier of a navigator item."""
-    guid: Annotated[
-        UUID,
-        Field(
-            description="A Globally Unique Identifier (or Universally Unique Identifier) in its string representation as defined in RFC 4122.",
-        ),
-    ]
-
-
-class NavigatorItemIdArrayItem(APIModel):
-    navigatorItemId: NavigatorItemId
-
-
-class NavigatorItemIdsWithRotationItem(APIModel):
-    navigatorItemId: NavigatorItemId
-    rotation: Annotated[float, Field(description="View rotation angle in radians.")]
-
-
-class NavigatorItemIdsWithViewSetting(APIModel):
-    navigatorItemId: NavigatorItemId
-    viewSettings: ViewSettings
-
-
-class NavigatorItemType(Enum):
-    """The type of the navigator item."""
-    UNDEFINED_ITEM = "UndefinedItem"
-    PROJECT_ITEM = "ProjectItem"
-    STORY_ITEM = "StoryItem"
-    SECTION_ITEM = "SectionItem"
-    DETAIL_DRAWING_ITEM = "DetailDrawingItem"
-    PERSPECTIVE_ITEM = "PerspectiveItem"
-    AXONOMETRY_ITEM = "AxonometryItem"
-    LIST_ITEM = "ListItem"
-    SCHEDULE_ITEM = "ScheduleItem"
-    TOC_ITEM = "TocItem"
-    CAMERA_ITEM = "CameraItem"
-    CAMERA_SET_ITEM = "CameraSetItem"
-    INFO_ITEM = "InfoItem"
-    HELP_ITEM = "HelpItem"
-    LAYOUT_ITEM = "LayoutItem"
-    MASTER_LAYOUT_ITEM = "MasterLayoutItem"
-    BOOK_ITEM = "BookItem"
-    MASTER_FOLDER_ITEM = "MasterFolderItem"
-    SUB_SET_ITEM = "SubSetItem"
-    TEXT_LIST_ITEM = "TextListItem"
-    ELEVATION_ITEM = "ElevationItem"
-    INTERIOR_ELEVATION_ITEM = "InteriorElevationItem"
-    WORKSHEET_DRAWING_ITEM = "WorksheetDrawingItem"
-    DOCUMENT_FROM3_D_ITEM = "DocumentFrom3DItem"
-    FOLDER_ITEM = "FolderItem"
-    DRAWING_ITEM = "DrawingItem"
-    UNKNOWN_ITEM = "UnknownItem"
-
-
-class NavigatorMapId(Enum):
-    """The navigator map to retrieve."""
-    PUBLIC_VIEW_MAP = "PublicViewMap"
-    PROJECT_MAP = "ProjectMap"
-    LAYOUT_BOOK = "LayoutBook"
-    PUBLISHER_SETS = "PublisherSets"
-
-
-class NewClassificationItem(APIModel):
-    classificationSystemId: ClassificationSystemId
-    classificationItemDetails: ClassificationItemDetails
-    parentClassificationItemId: Annotated[
-        ClassificationItemId | None,
-        Field(
-            description="The identifier of the parent classification item. If not specified, the new classification item will be created as a child of the root."
-        ),
-    ] = None
-    nextClassificationItemId: Annotated[
-        ClassificationItemId | None,
-        Field(
-            description="The identifier of the next sibling classification item. If not specified, the new classification item will be created as the last child of its parent."
-        ),
-    ] = None
-
-
-class NonLocalizedValueEnumId(APIModel):
-    """An enumeration value identifier using the nonlocalized value."""
-    type: Literal["nonLocalizedValue"] = "nonLocalizedValue"
-    nonLocalizedValue: str
-
-
-class NormalAngleListPropertyValue(APIModel):
-    """An angle list property value containing angles in an array. The values are measured in SI (radians)."""
-    type: Literal["angleList"] = "angleList"
-    status: Literal["normal"] = "normal"
-    value: list[float]
-
-
-class NormalAnglePropertyValue(APIModel):
-    """An angle property value containing a real angle. The value is measured in SI (radians)."""
-    type: Literal["angle"] = "angle"
-    status: Literal["normal"] = "normal"
-    value: float
-
-
-class NormalAreaListPropertyValue(APIModel):
-    """An area list property value containing areas in an array. The values are measured in SI (square meters)."""
-    type: Literal["areaList"] = "areaList"
-    status: Literal["normal"] = "normal"
-    value: list[float]
-
-
-class NormalAreaPropertyValue(APIModel):
-    """An area property value containing a real area. The value is measured in SI (square meters)."""
-    type: Literal["area"] = "area"
-    status: Literal["normal"] = "normal"
-    value: float
-
-
-class NormalBooleanListPropertyValue(APIModel):
-    """A boolean list property value containing boolean values in an array."""
-    type: Literal["booleanList"] = "booleanList"
-    status: Literal["normal"] = "normal"
-    value: list[bool]
-
-
-class NormalBooleanPropertyValue(APIModel):
-    """A boolean property value containing a valid boolean value."""
-    type: Literal["boolean"] = "boolean"
-    status: Literal["normal"] = "normal"
-    value: bool
-
-
-class NormalIntegerListPropertyValue(APIModel):
-    """An integer list property value containing integers in an array."""
-    type: Literal["integerList"] = "integerList"
-    status: Literal["normal"] = "normal"
-    value: list[int]
-
-
-class NormalIntegerPropertyValue(APIModel):
-    """An integer property value containing a valid integer number."""
-    type: Literal["integer"] = "integer"
-    status: Literal["normal"] = "normal"
-    value: int
-
-
-class NormalLengthListPropertyValue(APIModel):
-    """A length list property value containing length values in an array. The values are measured in SI (meters)."""
-    type: Literal["lengthList"] = "lengthList"
-    status: Literal["normal"] = "normal"
-    value: list[float]
-
-
-class NormalLengthPropertyValue(APIModel):
-    """A length property value containing a real length value. The value is measured in SI (meters)."""
-    type: Literal["length"] = "length"
-    status: Literal["normal"] = "normal"
-    value: float
-
-
-class NormalMultiEnumPropertyValue(APIModel):
-    """A multiple choice enumeration property value containing the IDs of the selected enum values in an array."""
-    type: Literal["multiEnum"] = "multiEnum"
-    status: Literal["normal"] = "normal"
-    value: Annotated[
-        list[EnumValueIdArrayItem],
-        Field(description="A list of enumeration identifiers."),
-    ]
-
-
-class NormalNumberListPropertyValue(APIModel):
-    """A number list property value containing numbers in an array."""
-    type: Literal["numberList"] = "numberList"
-    status: Literal["normal"] = "normal"
-    value: list[float]
-
-
-class NormalNumberPropertyValue(APIModel):
-    """A number property value containing a valid numeric value."""
-    type: Literal["number"] = "number"
-    status: Literal["normal"] = "normal"
-    value: float
-
-
-class NormalSingleEnumPropertyValue(APIModel):
-    """A single enumeration property value containing the ID of the selected enum value."""
-    type: Literal["singleEnum"] = "singleEnum"
-    status: Literal["normal"] = "normal"
-    value: Annotated[
-        DisplayValueEnumId | NonLocalizedValueEnumId,
-        Field(description="The identifier of a property enumeration value."),
-    ]
-
-
-class NormalStringListPropertyValue(APIModel):
-    """A string list property value containing strings in an array."""
-    type: Literal["stringList"] = "stringList"
-    status: Literal["normal"] = "normal"
-    value: list[str]
-
-
-class NormalStringPropertyValue(APIModel):
-    """A string property value containing a valid string."""
-    type: Literal["string"] = "string"
-    status: Literal["normal"] = "normal"
-    value: str
-
-
-class NormalVolumeListPropertyValue(APIModel):
-    """A volume list property value containing volumes in an array. The values are measured in SI (cubic meters)."""
-    type: Literal["volumeList"] = "volumeList"
-    status: Literal["normal"] = "normal"
-    value: list[float]
-
-
-class NormalVolumePropertyValue(APIModel):
-    """A volume property value containing a real volume. The value is measured in SI (cubic meters)."""
-    type: Literal["volume"] = "volume"
-    status: Literal["normal"] = "normal"
-    value: float
-
-
-class NotAvailablePropertyValue(APIModel):
-    """A notAvailable value means that the property is not available for the property owner (and therefore it has no property value for it)."""
-    type: PropertyDataType
-    status: Literal["notAvailable"] = "notAvailable"
-
-
-class NotYetSupportedElementTypeDetails(APIModel):
-    error: str
-
-
-class NumberingStyle(Enum):
-    UNDEFINED = "Undefined"
-    ABC = "abc"
-    abc_1 = "ABC"
-    FIELD_1 = "1"
-    FIELD_01 = "01"
-    FIELD_001 = "001"
-    FIELD_0001 = "0001"
-    NO_ID = "noID"
-
-
-class NumberingType(Enum):
-    """How the drawing's title ID is assigned (Identification tabpage of the Drawing Settings dialog)."""
-    BY_LAYOUT = "ByLayout"
-    BY_VIEW_ID = "ByViewId"
-    CUSTOM_NUMBER = "CustomNumber"
-
-
-class ObjectData(APIModel):
-    """The parameters of the new Object."""
-    libraryPartName: Annotated[str, Field(description="The name of the library part to use.")]
-    coordinates: Coordinate3D
-    dimensions: Dimensions3D | None = None
-    angle: float | None = None
-    pen: int | None = None
-    lineTypeId: AttributeId | None = None
-    surfaceId: Annotated[
-        AttributeId | None,
-        Field(description="Material/Surface override (API_ObjectType.mat)."),
-    ] = None
-    sectionFillId: AttributeId | None = None
-    sectionFillPen: int | None = None
-    sectionFillBackgroundPen: int | None = None
-    sectionContourPen: int | None = None
-    useObjectPens: bool | None = None
-    useObjectLineTypes: bool | None = None
-    useObjectMaterials: bool | None = None
-    useObjectSectionAttributes: bool | None = None
-    reflected: bool | None = None
-    useFixSize: bool | None = None
-    fixPoint: Annotated[
-        int | None,
-        Field(
-            description="0-based index of the hotspot to keep fixed (raw API_ObjectType.fixPoint value, not 1-based)."
-        ),
-    ] = None
-    offset: Annotated[
-        Coordinate2D | None,
-        Field(
-            description="Offset of the symbol's origin from the insertion point. Reported accurately on Get, but confirmed live that Archicad silently discards this value through both Create and Modify (Get always reports the library part's own default hotspot offset regardless of what is sent) - same class of read-only-in-practice field as Morph's bodyType/edgeType/level."
-        ),
-    ] = None
-    useFixedAngle: Annotated[
-        bool | None,
-        Field(
-            description="Use a fixed rotation angle. Reported accurately on Get, but confirmed live that Archicad silently discards this value through both Create and Modify."
-        ),
-    ] = None
-    isAutoOnStoryVisibility: bool | None = None
-    visibility: StoryVisibility | None = None
-    linkToSettings: LinkToSettings | None = None
-    floorIndex: Annotated[
-        int | None,
-        Field(description="Optional floor index. If omitted, derived from the coordinate's z value."),
-    ] = None
-    favoriteName: Annotated[
-        str | None,
-        Field(
-            description="Optional name of a favorite to base the new element on. Its settings are applied first, then the explicitly given fields override them."
-        ),
-    ] = None
-
-
-class ObjectDetails(APIModel):
-    """Shared shape for Object and Lamp elements (both use the same API_ObjectType struct). lightColor/lightIsOn only apply to Lamps. Per the Archicad SDK's own remarks, per-story visibility (visibility.showRelAbove/showRelBelow) and visibility.linkToSettings.newCreationMode were 'not extended' for Object/Lamp the way they were for other element types - still settable here for schema symmetry, but Archicad may silently ignore them."""
-    libPart: LibPartDetails
-    ownerElementId: ElementId | None = None
-    ownerElementType: ElementType | None = None
-    origin: Coordinate3D
-    dimensions: Coordinate3D
-    angle: float
-    pen: int | None = None
-    lineTypeId: AttributeId | None = None
-    surfaceId: Annotated[
-        AttributeId | None,
-        Field(description="Material/Surface override (API_ObjectType.mat)."),
-    ] = None
-    sectionFillId: AttributeId | None = None
-    sectionFillPen: int | None = None
-    sectionFillBackgroundPen: int | None = None
-    sectionContourPen: int | None = None
-    useObjectPens: Annotated[
-        bool | None,
-        Field(description="Use the pen defined in the library part instead of 'pen'."),
-    ] = None
-    useObjectLineTypes: Annotated[
-        bool | None,
-        Field(description="Use the line type defined in the library part instead of 'lineTypeId'."),
-    ] = None
-    useObjectMaterials: Annotated[
-        bool | None,
-        Field(description="Use the materials defined in the library part instead of 'surfaceId'."),
-    ] = None
-    useObjectSectionAttributes: Annotated[
-        bool | None,
-        Field(
-            description="Use the section attributes defined in the library part instead of 'sectionFillId'/'sectionFillPen'/'sectionFillBackgroundPen'/'sectionContourPen'."
-        ),
-    ] = None
-    reflected: bool | None = None
-    useFixSize: Annotated[
-        bool | None,
-        Field(description="Use the A/B (dimensions.x/dimensions.y) values as fixed sizes."),
-    ] = None
-    fixPoint: Annotated[
-        int | None,
-        Field(
-            description="0-based index of the hotspot to keep fixed when the object is resized (raw API_ObjectType.fixPoint value, not 1-based)."
-        ),
-    ] = None
-    offset: Annotated[
-        Coordinate2D | None,
-        Field(
-            description="Offset of the symbol's origin from the insertion point. Reported accurately here, but confirmed live that Archicad silently discards this value through both Create and Modify (always reports the library part's own default hotspot offset regardless of what is sent) - same class of read-only-in-practice field as Morph's bodyType/edgeType/level."
-        ),
-    ] = None
-    useFixedAngle: Annotated[
-        bool | None,
-        Field(
-            description="Use a fixed rotation angle (API_ObjectType.fixedAngle - stored as Int32 in the API despite being boolean in practice). Reported accurately here, but confirmed live that Archicad silently discards this value through both Create and Modify."
-        ),
-    ] = None
-    isAutoOnStoryVisibility: Annotated[
-        bool | None,
-        Field(
-            description="Recalculate per-story visibility automatically from the object's vertical extent ('All Relevant Stories')."
-        ),
-    ] = None
-    lightColor: Annotated[
-        ColorRGB | None,
-        Field(
-            description="Lamp only. Reported accurately here, but confirmed live that Archicad silently discards this value through both Create and Modify (always reports the library part's own default light color). lightIsOn (the on/off state) does not have this problem."
-        ),
-    ] = None
-    lightIsOn: Annotated[bool | None, Field(description="Lamp only.")] = None
-    visibility: StoryVisibility | None = None
-    linkToSettings: LinkToSettings | None = None
-
-
-class ObjectWithDetails(APIModel):
-    elementId: ElementId
-    coordinates: Coordinate3D | None = None
-    dimensions: Dimensions3D | None = None
-    angle: float | None = None
-    pen: int | None = None
-    lineTypeId: AttributeId | None = None
-    surfaceId: Annotated[
-        AttributeId | None,
-        Field(description="Material/Surface override (API_ObjectType.mat)."),
-    ] = None
-    sectionFillId: AttributeId | None = None
-    sectionFillPen: int | None = None
-    sectionFillBackgroundPen: int | None = None
-    sectionContourPen: int | None = None
-    useObjectPens: bool | None = None
-    useObjectLineTypes: bool | None = None
-    useObjectMaterials: bool | None = None
-    useObjectSectionAttributes: bool | None = None
-    reflected: bool | None = None
-    useFixSize: bool | None = None
-    fixPoint: Annotated[
-        int | None,
-        Field(
-            description="0-based index of the hotspot to keep fixed (raw API_ObjectType.fixPoint value, not 1-based)."
-        ),
-    ] = None
-    offset: Annotated[
-        Coordinate2D | None,
-        Field(
-            description="Offset of the symbol's origin from the insertion point. Reported accurately on Get, but confirmed live that Archicad silently discards this value through both Create and Modify (Get always reports the library part's own default hotspot offset regardless of what is sent) - same class of read-only-in-practice field as Morph's bodyType/edgeType/level."
-        ),
-    ] = None
-    useFixedAngle: Annotated[
-        bool | None,
-        Field(
-            description="Use a fixed rotation angle. Reported accurately on Get, but confirmed live that Archicad silently discards this value through both Create and Modify."
-        ),
-    ] = None
-    isAutoOnStoryVisibility: bool | None = None
-    visibility: StoryVisibility | None = None
-    linkToSettings: LinkToSettings | None = None
-
-
-class OpeningData(APIModel):
-    ownerElementId: ElementId
-    basePoint: Coordinate3D
-    width: Annotated[float | None, Field(gt=0.0)] = None
-    height: Annotated[float | None, Field(gt=0.0)] = None
-
-
-class OpeningRelations(APIModel):
-    fromRoom: ElementId | None = None
-    toRoom: ElementId | None = None
-
-
-class OpeningRelationsOfElement(APIModel):
-    """Relations of a curtain wall panel, skylight, window or door: the zones on the two sides of the opening."""
-    openingRelations: OpeningRelations
-
-
-class OutlineArc(APIModel):
-    begIndex: int
-    endIndex: int
-    arcAngle: float
-
-
-class OverriddenMaterial(APIModel):
-    """A surface material that may override the one inherited from the element's structure (building material, composite or profile)."""
-    overridden: Annotated[
-        bool,
-        Field(description="True if the material is overridden on the element level."),
-    ]
-    attributeId: AttributeId | None = None
-
-
-class OverriddenPen(APIModel):
-    """A pen index that may override the one inherited from the element's structure. On Archicad versions where the underlying element does not support this override, 'overridden' is always false."""
-    overridden: Annotated[bool, Field(description="True if the pen is overridden on the element level.")]
-    penIndex: int | None = None
-
-
-class PanelConnectionHole(APIModel):
-    """The parameters of the panel connection hole."""
-    d: Annotated[float, Field(description="Depth of the panel connection hole.")]
-    w: Annotated[float, Field(description="Width of the panel connection hole.")]
-
-
-class PenData(APIModel):
-    index: Annotated[int, Field(description="Index of the pen [1..255].")]
-    color: ColorRGB | None = None
-    width: Annotated[
-        float | None,
-        Field(description="Thickness of the pen defined in paper millimeters."),
-    ] = None
-    description: Annotated[str | None, Field(description="Textual description of the pen.")] = None
-
-
-class PenTableAttribute(APIModel):
-    """A pen table attribute."""
-    attributeId: AttributeId
-    index: int
-    name: str
-    isActiveForModel: bool | None = None
-    isActiveForLayout: bool | None = None
-    pens: list[PenTablePen] | None = None
-
-
-class PenTableAttributeField(Enum):
-    IS_ACTIVE_FOR_MODEL = "isActiveForModel"
-    IS_ACTIVE_FOR_LAYOUT = "isActiveForLayout"
-    PENS = "pens"
-
-
-class PenTableData(APIModel):
-    """Data to create a Pen Table."""
-    attributeId: Annotated[
-        AttributeId | None,
-        Field(description="Indentifier of the existing Pen Table to overwrite, ignored if overwriteExisting is false."),
-    ] = None
-    index: Annotated[
-        str | None,
-        Field(description="Index of the existing Pen Table to overwrite, ignored if overwriteExisting is false."),
-    ] = None
-    name: Annotated[
-        str,
-        Field(
-            description="Name. If overwriteExisting is true, then the existing Pen Table with the given name will be overwritten."
-        ),
-    ]
-    isActiveForModel: Annotated[
-        bool | None,
-        Field(
-            description="Make this the active Pen Table for the model window. Defaults to false for a new Pen Table, or to the current value when overwriting an existing one."
-        ),
-    ] = None
-    isActiveForLayout: Annotated[
-        bool | None,
-        Field(
-            description="Make this the active Pen Table for layouts. Defaults to false for a new Pen Table, or to the current value when overwriting an existing one."
-        ),
-    ] = None
-    sourceAttributeId: Annotated[
-        AttributeIdArrayItem | None,
-        Field(
-            description="Identifier of the Pen Table whose 255 pens are used as the starting point, before the pens listed in the pens array are applied on top. Defaults to the Pen Table being overwritten itself (so unlisted pens keep their current color/width/description), or an arbitrary existing Pen Table in the project when creating a brand new one (or a plain black, 0.1 mm pen for all 255 if the project has no Pen Table at all yet)."
-        ),
-    ] = None
-    pens: Annotated[
-        list[PenData] | None,
-        Field(
-            description="The pens to set in the Pen Table, on top of the 255 pens copied from sourceAttributeId (or the current Pen Table, or an arbitrary existing one - see sourceAttributeId). Only list the pens you actually want to change."
-        ),
-    ] = None
-
-
-class PenTablePen(APIModel):
-    index: int
-    color: ColorRGB
-    width: float
-    description: str
-
-
-class PivotLine(APIModel):
-    """If given, a single-plane roof is created instead of a multi-plane roof: one plane tilted along this pivot line. The plane rises on the left side of the line direction (begCoordinate towards endCoordinate); flip the line to tilt towards the other side."""
-    begCoordinate: Coordinate2D
-    endCoordinate: Coordinate2D
-
-
-class PolyArc(APIModel):
-    """Representation of an arc segment of a two dimensional polygon/polyline."""
-    begIndex: Annotated[int, Field(description="Node index of one end point of the arc.")]
-    endIndex: Annotated[int, Field(description="Node index of the other end point of the arc.")]
-    arcAngle: Annotated[
-        float,
-        Field(
-            description="Angle of the arc; it is positive, if the arc is on the right-hand side of the straight segment."
-        ),
-    ]
-
-
-class PolylineData(APIModel):
-    """The parameters of the new Polyline."""
-    favoriteName: Annotated[
-        str | None,
-        Field(
-            description="Optional name of a favorite to base the new element on. Its settings are applied first, then the explicitly given fields override them."
-        ),
-    ] = None
-    floorInd: Annotated[
-        float | None,
-        Field(description="The identifier of the floor. Optional parameter, by default the current floor is used."),
-    ] = None
-    layerIndex: Annotated[
-        int | None,
-        Field(
-            description="Layer attribute index to place the polyline on. Optional parameter, by default the current layer is used."
-        ),
-    ] = None
-    linePenIndex: Annotated[
-        int | None,
-        Field(description="Pen index of the polyline contour. Optional parameter, by default the current pen is used."),
-    ] = None
-    lineTypeIndex: Annotated[
-        int | None,
-        Field(
-            description="Line type attribute index of the polyline contour. Optional parameter, by default the current line type is used."
-        ),
-    ] = None
-    penWeightMm: Annotated[float | None, Field(description="Optional pen weight override in mm.")] = None
-    roomSeparator: Annotated[
-        bool | None,
-        Field(description="Is this a zone boundary line? Optional, defaults to false."),
-    ] = None
-    coordinates: Annotated[
-        list[Coordinate2D],
-        Field(description="The 2D coordinates of the polyline.", min_length=2),
-    ]
-    arcs: Annotated[list[PolyArc] | None, Field(description="The arcs of the polyline.")] = None
-
-
-class PolylineDetails(APIModel):
-    coordinates: list[Coordinate2D]
-    arcs: Annotated[list[PolyArc] | None, Field(description="The arcs of the polyline.")] = None
-    roomSeparator: Annotated[bool | None, Field(description="Is this a zone boundary line?")] = None
-    linePenIndex: int | None = None
-    lineTypeId: AttributeId | None = None
-    zCoordinate: float
-
-
-class PolylineSettings(APIModel):
-    """Settings for modifying a Polyline. Setting coordinates replaces the entire polygon (single contour, no holes) and may change the number of vertices."""
-    coordinates: Annotated[list[Coordinate2D] | None, Field(min_length=2)] = None
-    arcs: list[PolyArc] | None = None
-    roomSeparator: bool | None = None
-    linePenIndex: int | None = None
-    lineTypeId: AttributeId | None = None
-
-
 class PossibleEnumValue(APIModel):
     enumValue: EnumValue
-
-
-class PossibleNumericValue(APIModel):
-    value: Annotated[
-        float | None,
-        Field(
-            description="The numeric value. Present for all flags except 'Step', which instead carries stepBegin/stepValue."
-        ),
-    ] = None
-    flag: Annotated[str | None, Field(description="The flag.")] = None
-    stepBegin: Annotated[
-        float | None,
-        Field(description="Only present when flag is 'Step': the value is stepBegin + n*stepValue for n >= 0."),
-    ] = None
-    stepValue: Annotated[
-        float | None,
-        Field(description="Only present when flag is 'Step' - see stepBegin."),
-    ] = None
-    description: Annotated[str | None, Field(description="The description of the value.")] = None
-
-
-class Preset(Enum):
-    WALL_COMPOSITE_FACES = "WallCompositeFaces"
-    WALL_SKIN_BORDERS = "WallSkinBorders"
-    SLAB_COMPOSITE_FACES = "SlabCompositeFaces"
-    SLAB_SKIN_BORDERS = "SlabSkinBorders"
-    BEAM_OR_COLUMN_REF_LINE_END_POINTS = "BeamOrColumnRefLineEndPoints"
-    BEAM_OR_COLUMN_BOUNDING_BOX_CORNERS = "BeamOrColumnBoundingBoxCorners"
-    DOOR_WINDOW_WALL_HOLE_CORNERS = "DoorWindowWallHoleCorners"
-    DOOR_WINDOW_MODEL_HOTSPOTS = "DoorWindowModelHotspots"
-
-
-class PrintArea(Enum):
-    """The area to print. The default is 'currentView'."""
-    CURRENT_VIEW = "currentView"
-    ENTIRE_DRAWING = "entireDrawing"
-    MARQUEE = "marquee"
 
 
 class ProfileAttribute(APIModel):
@@ -5351,23 +7068,27 @@ class ProfileAttribute(APIModel):
     ] = None
 
 
-class ProfileAttributeField(Enum):
-    WALL_TYPE = "wallType"
-    BEAM_TYPE = "beamType"
-    COLU_TYPE = "coluType"
-    HANDRAIL_TYPE = "handrailType"
-    OTHER_GDL_OBJECT_TYPE = "otherGDLObjectType"
-    USE_WITH = "useWith"
-    WIDTH = "width"
-    HEIGHT = "height"
-    MINIMUM_WIDTH = "minimumWidth"
-    MINIMUM_HEIGHT = "minimumHeight"
-    WIDTH_STRETCHABLE = "widthStretchable"
-    HEIGHT_STRETCHABLE = "heightStretchable"
-    HAS_CORE_SKIN = "hasCoreSkin"
-    PROFILE_MODIFIERS = "profileModifiers"
-    SKINS = "skins"
-    SKIN_OUTLINES = "skinOutlines"
+class SkinOverride(APIModel):
+    skinId: Annotated[
+        str,
+        Field(description="Identifies which skin to modify, from GetProfiles' skins[].skinId."),
+    ]
+    buildingMaterialId: AttributeIdArrayItem | None = None
+    surfaceId: AttributeIdArrayItem | None = None
+    fillId: AttributeIdArrayItem | None = None
+    contourPen: int | None = None
+    contourLineTypeId: AttributeIdArrayItem | None = None
+    isCore: bool | None = None
+    isFinish: bool | None = None
+    visibleCutEndLines: bool | None = None
+    cutEndLinePen: int | None = None
+    cutEndLineTypeId: AttributeIdArrayItem | None = None
+    edgeOverrides: Annotated[
+        list[ProfileEdgeOverride] | None,
+        Field(
+            description="Modifications to specific edges of this skin, targeted by their position (0-based) in GetProfiles' skins[].edges."
+        ),
+    ] = None
 
 
 class ProfileData(APIModel):
@@ -5432,199 +7153,6 @@ class ProfileData(APIModel):
     ] = None
 
 
-class ProfileEdge(APIModel):
-    """One edge of a profile skin's outline."""
-    buildingMaterialId: AttributeIdArrayItem | None = None
-    pen: int | None = None
-    lineTypeId: AttributeIdArrayItem | None = None
-    isVisibleLine: bool | None = None
-    isCutEndLine: bool | None = None
-    isInnerLine: bool | None = None
-
-
-class ProfileEdgeOverride(APIModel):
-    edgeIndex: int
-    pen: int | None = None
-    isVisibleLine: bool | None = None
-    lineTypeId: AttributeIdArrayItem | None = None
-    buildingMaterialId: AttributeIdArrayItem | None = None
-
-
-class ProfileModifier(APIModel):
-    """A stretchable edge-offset parameter of the profile, as named by the profile's author in the Profile Editor. Its value is a live geometric measurement matching what the Profile Editor's dimension shows."""
-    name: Annotated[
-        str | None,
-        Field(
-            description="User-authored label, e.g. 'Largeur support'. Present only if the profile's author assigned one."
-        ),
-    ] = None
-    value: Annotated[
-        float | None,
-        Field(
-            description="Present only when the parameter's dimension anchors could be resolved to concrete positions."
-        ),
-    ] = None
-
-
-class ProfileSkin(APIModel):
-    """One skin (hatch) of the profile's cross-section."""
-    skinId: Annotated[
-        str | None,
-        Field(
-            description="Internal identifier of this skin, stable for the lifetime of the profile. Pass it back in CreateProfiles' skinOverrides to target this skin for modification."
-        ),
-    ] = None
-    buildingMaterialId: AttributeIdArrayItem | None = None
-    surfaceId: AttributeIdArrayItem | None = None
-    fillId: AttributeIdArrayItem | None = None
-    contourPen: int | None = None
-    contourLineTypeId: AttributeIdArrayItem | None = None
-    isCore: bool | None = None
-    isFinish: bool | None = None
-    visibleCutEndLines: bool | None = None
-    cutEndLinePen: int | None = None
-    cutEndLineTypeId: AttributeIdArrayItem | None = None
-    edges: list[ProfileEdge] | None = None
-    outlineCoords: Annotated[
-        list[Coordinate2D] | None,
-        Field(
-            description="The skin's outline polygon vertices, present only when the skinOutlines field is requested alongside skins."
-        ),
-    ] = None
-    outlineSubPolyEnds: Annotated[
-        list[int] | None,
-        Field(
-            description="Index (into outlineCoords) of the last vertex of each contour, for skins whose outline has holes or multiple contours."
-        ),
-    ] = None
-    outlineArcs: Annotated[
-        list[OutlineArc] | None,
-        Field(
-            description="Marks which consecutive outlineCoords pairs are connected by an arc instead of a straight edge."
-        ),
-    ] = None
-
-
-class ProfileSkinContour(APIModel):
-    polygonCoordinates: Annotated[
-        list[Coordinate2D],
-        Field(description="The 2D coordinates of this contour.", min_length=3),
-    ]
-    polygonArcs: Annotated[
-        list[PolyArc] | None,
-        Field(
-            description="Optional arcs along this contour's edges. begIndex/endIndex are 0-based positions within this contour's own polygonCoordinates."
-        ),
-    ] = None
-
-
-class ProfileSkinData(APIModel):
-    """One new skin (hatch). Its shape is one or more closed polygon contours: the first is the outer boundary, any further ones are holes cut out of it - the same polygon+holes convention as e.g. CreateSlabs' polygonCoordinates/polygonArcs/holes, just expressed as a list of contours instead of a separate holes array."""
-    contours: Annotated[
-        list[ProfileSkinContour],
-        Field(
-            description="Closed polygon contours forming this skin's cross-section, in the Profile's local coordinate system. Each contour is closed automatically - do not repeat its first vertex at the end.",
-            min_length=1,
-        ),
-    ]
-    buildingMaterialId: AttributeIdArrayItem | None = None
-    surfaceId: AttributeIdArrayItem | None = None
-    fillId: AttributeIdArrayItem | None = None
-    contourPen: int | None = None
-    contourLineTypeId: AttributeIdArrayItem | None = None
-    isCore: bool | None = None
-    isFinish: bool | None = None
-    visibleCutEndLines: bool | None = None
-    cutEndLinePen: int | None = None
-    cutEndLineTypeId: AttributeIdArrayItem | None = None
-    edgeOverrides: Annotated[
-        list[ProfileEdgeOverride] | None,
-        Field(
-            description="Per-edge pen/visibility/line type, targeted by 0-based edge index. Edge indices follow the same order as this skin's contours/polygonCoordinates: the outer contour's edges first (one edge per vertex, wrapping around), then each hole's, in the order the contours were given. Verify exact indices for a created skin via a follow-up GetProfiles call's skins[].edges before relying on them."
-        ),
-    ] = None
-
-
-class ProfileUseWith(Enum):
-    WALL = "Wall"
-    BEAM = "Beam"
-    COLUMN = "Column"
-    HANDRAIL = "Handrail"
-    OTHER = "Other"
-
-
-class ProjectInfoField(APIModel):
-    projectInfoId: Annotated[str, Field(description="The id of the project info field.")]
-    projectInfoName: Annotated[str, Field(description="The name of the project info field visible on UI.")]
-    projectInfoValue: Annotated[str, Field(description="The value of the project info field.")]
-
-
-class ProjectInfoFieldData(APIModel):
-    projectInfoName: Annotated[str, Field(description="Display name of the project info field.", min_length=1)]
-    projectInfoValue: Annotated[str | None, Field(description="Initial value of the project info field.")] = None
-
-
-class ProjectLocation(APIModel):
-    longitude: Annotated[float, Field(description="longitude in degrees")]
-    latitude: Annotated[float, Field(description="latitude in degrees")]
-    altitude: Annotated[float, Field(description="altitude in meters")]
-    north: Annotated[float, Field(description="north direction in radians")]
-
-
-class PropertyCollectionType(Enum):
-    UNDEFINED = "Undefined"
-    SINGLE = "Single"
-    LIST = "List"
-    SINGLE_CHOICE_ENUMERATION = "SingleChoiceEnumeration"
-    MULTIPLE_CHOICE_ENUMERATION = "MultipleChoiceEnumeration"
-
-
-class PropertyDataType(Enum):
-    NUMBER = "number"
-    INTEGER = "integer"
-    STRING = "string"
-    BOOLEAN = "boolean"
-    LENGTH = "length"
-    AREA = "area"
-    VOLUME = "volume"
-    ANGLE = "angle"
-    NUMBER_LIST = "numberList"
-    INTEGER_LIST = "integerList"
-    STRING_LIST = "stringList"
-    BOOLEAN_LIST = "booleanList"
-    LENGTH_LIST = "lengthList"
-    AREA_LIST = "areaList"
-    VOLUME_LIST = "volumeList"
-    ANGLE_LIST = "angleList"
-    SINGLE_ENUM = "singleEnum"
-    MULTI_ENUM = "multiEnum"
-
-
-class PropertyDefinition(APIModel):
-    name: str
-    description: str
-    type: PropertyDataType
-    isEditable: bool
-    defaultValue: BasicDefaultValue | ExpressionDefaultValue | None = None
-    possibleEnumValues: Annotated[
-        list[PossibleEnumValue] | None,
-        Field(description="The possible enum values of the property when the property type is enumeration."),
-    ] = None
-    availability: Annotated[
-        list[ClassificationItemIdArrayItem],
-        Field(description="The identifiers of classification items the new property is available for."),
-    ]
-    group: Annotated[
-        Group,
-        Field(description="The property group defined by name or id. If both fields exists the id will be used."),
-    ]
-
-
-class PropertyDefinitionArrayItem(APIModel):
-    """A wrapper containing a property definition"""
-    propertyDefinition: PropertyDefinition
-
-
 class PropertyDetails(APIModel):
     """The details of the property."""
     possibleEnumValues: Annotated[
@@ -5651,106 +7179,6 @@ class PropertyDetails(APIModel):
     ] = None
 
 
-class PropertyExpressionUpdate(APIModel):
-    propertyId: PropertyId
-    expressions: Annotated[
-        list[str] | None,
-        Field(
-            description="The new expression strings for the property. Only for expression-based properties.",
-            min_length=1,
-        ),
-    ] = None
-    possibleEnumValues: Annotated[
-        list[EnumValuesToAddItem] | None,
-        Field(
-            description="The enum values to add to an enumeration property. Values already on the property keep their identifier, so element values assigned to them survive; values not listed here are kept as well."
-        ),
-    ] = None
-
-
-class PropertyGroup(APIModel):
-    """Represents a property group."""
-    name: str
-    description: str | None = None
-
-
-class PropertyGroupArrayItem(APIModel):
-    """A wrapper containing a property group"""
-    propertyGroup: PropertyGroup
-
-
-class PropertyGroupId(APIModel):
-    """The identifier of a property group."""
-    guid: Annotated[
-        UUID,
-        Field(
-            description="A Globally Unique Identifier (or Universally Unique Identifier) in its string representation as defined in RFC 4122.",
-        ),
-    ]
-
-
-class PropertyGroupIdArrayItem(APIModel):
-    """A wrapper containing the property group identifier."""
-    propertyGroupId: PropertyGroupId
-
-
-class PropertyId(APIModel):
-    """The identifier of a property."""
-    guid: Annotated[
-        UUID,
-        Field(
-            description="A Globally Unique Identifier (or Universally Unique Identifier) in its string representation as defined in RFC 4122.",
-        ),
-    ]
-
-
-class PropertyIdArrayItem(APIModel):
-    """A wrapper containing the property identifier."""
-    propertyId: PropertyId
-
-
-class PropertyMeasureType(Enum):
-    UNDEFINED = "Undefined"
-    DEFAULT = "Default"
-    LENGTH = "Length"
-    AREA = "Area"
-    VOLUME = "Volume"
-    ANGLE = "Angle"
-
-
-class PropertyType(Enum):
-    STATIC_BUILT_IN = "StaticBuiltIn"
-    DYNAMIC_BUILT_IN = "DynamicBuiltIn"
-    CUSTOM = "Custom"
-
-
-class PropertyValue(APIModel):
-    """The display string value of a property."""
-    value: str
-
-
-class PropertyValueArrayItem(APIModel):
-    """A wrapper containing the property value."""
-    propertyValue: PropertyValue
-
-
-class PropertyValueType(Enum):
-    UNDEFINED = "Undefined"
-    INTEGER = "Integer"
-    REAL = "Real"
-    STRING = "String"
-    BOOLEAN = "Boolean"
-    GUID = "Guid"
-
-
-class PropertyValuesArrayItem(APIModel):
-    """A wrapper containing the property values."""
-    propertyValues: Annotated[
-        list[PropertyValueArrayItem | ErrorItem],
-        Field(description="A list of property values."),
-    ]
-
-
 class RevisionChange(APIModel):
     id: str
     description: str
@@ -5768,48 +7196,6 @@ class RevisionChange(APIModel):
 class RevisionChangesArrayItem(APIModel):
     """A wrapper containing an array of revision changes"""
     revisionChanges: list[RevisionChange] | None = None
-
-
-class RevisionCustomSchemeEntry(APIModel):
-    customSchemeKey: Annotated[
-        UUID,
-        Field(
-            description="A Globally Unique Identifier (or Universally Unique Identifier) in its string representation as defined in RFC 4122.",
-        ),
-    ]
-    customSchemeValue: str
-
-
-class RevisionIssue(APIModel):
-    revisionIssueId: RevisionIssueId
-    id: str
-    description: str
-    issueTime: str
-    issuedByUser: str
-    overrideRevisionIDOfAllIncludedLayouts: bool
-    createNewRevisionInAllIncludedLayouts: bool
-    markersVisibleSinceIndex: int | None = None
-    isIssued: bool
-    documentRevisions: Annotated[
-        list[DocumentRevisionReference] | None,
-        Field(description="All document revisions belong to the current issue."),
-    ] = None
-    customSchemeData: list[RevisionCustomSchemeEntry] | None = None
-
-
-class RevisionIssueId(APIModel):
-    """The identifier of a revision issue."""
-    guid: Annotated[
-        UUID,
-        Field(
-            description="A Globally Unique Identifier (or Universally Unique Identifier) in its string representation as defined in RFC 4122.",
-        ),
-    ]
-
-
-class RoofClass(Enum):
-    SINGLE_PLANE = "SinglePlane"
-    MULTI_PLANE = "MultiPlane"
 
 
 class RoofData(APIModel):
@@ -5882,31 +7268,6 @@ class RoofDetails(APIModel):
     ] = None
 
 
-class RoofDetailsLevel(APIModel):
-    height: float
-    angle: float
-
-
-class RoofDetailsPivotLine(APIModel):
-    """Single-plane: the pivot line the plane rotates about."""
-    begin: Coordinate2D
-    end: Coordinate2D
-
-
-class RoofOrShellRelations(APIModel):
-    connectedRooms: Annotated[list[ElementIdArrayItem], Field(description="A list of elements.")]
-
-
-class RoofOrShellRelationsOfElement(APIModel):
-    """Relations of a roof or shell: the connected zones."""
-    roofOrShellRelations: RoofOrShellRelations
-
-
-class RoofStructureType(Enum):
-    BASIC = "Basic"
-    COMPOSITE = "Composite"
-
-
 class RoofWithDetails(APIModel):
     elementId: ElementId
     level: float | None = None
@@ -5924,149 +7285,9 @@ class RoofWithDetails(APIModel):
     ] = None
 
 
-class Rotation(APIModel):
-    """Rotation parameters for an element."""
-    beginPoint: Annotated[Coordinate2D, Field(description="Starting point of the rotation arc.")]
-    endPoint: Annotated[Coordinate2D, Field(description="End point of the rotation arc.")]
-    origin: Annotated[Coordinate2D, Field(description="Center of rotation.")]
-
-
-class SectionData(APIModel):
-    startCoordinate: Coordinate2D
-    endCoordinate: Coordinate2D
-    depth: float | None = None
-    name: str | None = None
-    floorIndex: int | None = None
-
-
-class SectionElement(APIModel):
-    sectionElementId: Annotated[
-        ElementId,
-        Field(
-            description="The identifier of the section element itself, accepted by CreateAssociativeDimensionsOnSection as sectionElementId."
-        ),
-    ]
-    ownerElementId: Annotated[
-        ElementId,
-        Field(
-            description="The identifier of the owner element the section element was generated from - this is what every other listing command returns."
-        ),
-    ]
-    ownerElementType: Annotated[
-        ElementType | None,
-        Field(
-            description="The type of the owner element. Only present when the owner's header is readable from the section database."
-        ),
-    ] = None
-
-
-class Separator(APIModel):
-    """Data to represent a skin separator."""
-    lineTypeId: AttributeIdArrayItem
-    linePen: Annotated[int, Field(description="Separator line pen index.")]
-
-
-class SetGDLParameterByIndexDetails(APIModel):
-    """Details of a GDL parameter."""
-    index: Annotated[int, Field(description="The index of the parameter.")]
-    index1: Annotated[
-        int | None,
-        Field(
-            description="Optional 1-based first index for changing a single item of an array parameter without resizing it. Only valid for array parameters and only together with a single (non-list) value."
-        ),
-    ] = None
-    index2: Annotated[
-        int | None,
-        Field(
-            description="Optional 1-based second index for changing a single item of a two-dimensional array parameter. Only valid together with index1. Defaults to 1."
-        ),
-    ] = None
-    value: Annotated[
-        Any,
-        Field(
-            description="The new value of the parameter. For array parameters provide a list of values for one-dimensional arrays (e.g. [1, 2, 3]) or a list of lists for two-dimensional arrays (e.g. [[11, 12], [21, 22]]); the array parameter is resized to match the given values. Alternatively provide index1 (and optionally index2) together with a single value to change one item of the array without resizing it. Within one command call whole-array (list) values are applied after all single-value changes."
-        ),
-    ]
-
-
-class SetGDLParameterByNameDetails(APIModel):
-    """Details of a GDL parameter."""
-    name: Annotated[str, Field(description="The name of the parameter.")]
-    index1: Annotated[
-        int | None,
-        Field(
-            description="Optional 1-based first index for changing a single item of an array parameter without resizing it. Only valid for array parameters and only together with a single (non-list) value."
-        ),
-    ] = None
-    index2: Annotated[
-        int | None,
-        Field(
-            description="Optional 1-based second index for changing a single item of a two-dimensional array parameter. Only valid together with index1. Defaults to 1."
-        ),
-    ] = None
-    value: Annotated[
-        Any,
-        Field(
-            description="The new value of the parameter. For array parameters provide a list of values for one-dimensional arrays (e.g. [1, 2, 3]) or a list of lists for two-dimensional arrays (e.g. [[11, 12], [21, 22]]); the array parameter is resized to match the given values. Alternatively provide index1 (and optionally index2) together with a single value to change one item of the array without resizing it. Within one command call whole-array (list) values are applied after all single-value changes."
-        ),
-    ]
-
-
-class Settings(APIModel):
-    volumeTolerance: Annotated[
-        float,
-        Field(
-            description="Intersection body volume greater then this value will be considered as a collision. Default value is 0.001."
-        ),
-    ]
-    performSurfaceCheck: Annotated[
-        bool,
-        Field(
-            description="Enables surface collision check. If disabled the surfaceTolerance value will be ignored. By default it's false."
-        ),
-    ]
-    surfaceTolerance: Annotated[
-        float,
-        Field(
-            description="Intersection body surface area greater then this value will be considered as a collision. Default value is 0.001."
-        ),
-    ]
-
-
-class Skin(APIModel):
-    """Data to represent a skin."""
-    type: Annotated[str, Field(description="Skin type (Core, Finish, or Other)")]
-    buildingMaterialId: AttributeIdArrayItem
-    framePen: Annotated[int, Field(description="Skin frame pen index.")]
-    thickness: Annotated[float, Field(description="Skin thickness (in meters).")]
-
-
-class SkinOverride(APIModel):
-    skinId: Annotated[
-        str,
-        Field(description="Identifies which skin to modify, from GetProfiles' skins[].skinId."),
-    ]
-    buildingMaterialId: AttributeIdArrayItem | None = None
-    surfaceId: AttributeIdArrayItem | None = None
-    fillId: AttributeIdArrayItem | None = None
-    contourPen: int | None = None
-    contourLineTypeId: AttributeIdArrayItem | None = None
-    isCore: bool | None = None
-    isFinish: bool | None = None
-    visibleCutEndLines: bool | None = None
-    cutEndLinePen: int | None = None
-    cutEndLineTypeId: AttributeIdArrayItem | None = None
-    edgeOverrides: Annotated[
-        list[ProfileEdgeOverride] | None,
-        Field(
-            description="Modifications to specific edges of this skin, targeted by their position (0-based) in GetProfiles' skins[].edges."
-        ),
-    ] = None
-
-
-class SkippedSampleItem(APIModel):
-    index: int | None = None
-    code: int | None = None
+class NavigatorItemIdsWithViewSetting(APIModel):
+    navigatorItemId: NavigatorItemId
+    viewSettings: ViewSettings
 
 
 class SlabData(APIModel):
@@ -6127,18 +7348,6 @@ class SlabDetails(APIModel):
     floorFill: FloorFill | None = None
 
 
-class SlabReferencePlaneLocation(Enum):
-    TOP = "Top"
-    CORE_TOP = "CoreTop"
-    CORE_BOTTOM = "CoreBottom"
-    BOTTOM = "Bottom"
-
-
-class SlabStructureType(Enum):
-    BASIC = "Basic"
-    COMPOSITE = "Composite"
-
-
 class SlabWithDetails(APIModel):
     elementId: ElementId
     zCoordinate: float | None = None
@@ -6169,1448 +7378,9 @@ class SlabWithDetails(APIModel):
     floorFill: FloorFill | None = None
 
 
-class SolidLinkData(APIModel):
-    targetId: Annotated[ElementId, Field(description="The element to be cut or modified.")]
-    operatorId: Annotated[ElementId, Field(description="The element performing the operation.")]
-    operation: SolidOperationType
-    linkFlags: SolidLinkFlags | None = None
-
-
-class SolidLinkFlags(APIModel):
-    """Flags controlling the behaviour of a solid element operation link."""
-    inheritOperatorAttributes: Annotated[
-        bool,
-        Field(description="If true, the target element inherits the attributes of the operator element."),
-    ]
-    skipPolygonHoles: Annotated[
-        bool,
-        Field(description="If true, holes of the operator (roof/slab) are ignored during the operation."),
-    ]
-
-
-class SolidLinkReference(APIModel):
-    targetId: ElementId
-    operatorId: ElementId
-
-
-class SolidLinksOfElement(APIModel):
-    solidLinksWithTheGivenTarget: Annotated[
-        list[SolidLinksWithTheGivenTargetItem],
-        Field(description="Links where the given element is the target (being cut or modified)."),
-    ]
-    solidLinksWithTheGivenOperator: Annotated[
-        list[SolidLinksWithTheGivenOperatorItem],
-        Field(description="Links where the given element is the operator (performing the cut)."),
-    ]
-
-
-class SolidLinksWithTheGivenOperatorItem(APIModel):
-    targetId: ElementId
-    operation: SolidOperationType
-    linkFlags: SolidLinkFlags
-
-
-class SolidLinksWithTheGivenTargetItem(APIModel):
-    operatorId: ElementId
-    operation: SolidOperationType
-    linkFlags: SolidLinkFlags
-
-
-class SolidOperationType(Enum):
-    """The type of solid element operation."""
-    SUBTRACTION = "Subtraction"
-    SUBTRACTION_UPWARDS = "SubtractionUpwards"
-    SUBTRACTION_DOWNWARDS = "SubtractionDownwards"
-    INTERSECTION = "Intersection"
-    ADDITION = "Addition"
-
-
-class SpecialFolderPath(APIModel):
-    path: Annotated[str, Field(description="The path of the special folder in the filesystem.")]
-
-
-class SpecialFolderType(Enum):
-    """The type of a special folder of the running Archicad."""
-    APPLICATION_PREFS = "ApplicationPrefs"
-    GRAPHISOFT_PREFS = "GraphisoftPrefs"
-    GRAPHISOFT_HOME = "GraphisoftHome"
-    CACHE = "Cache"
-    DATA = "Data"
-    USER_DOCUMENTS = "UserDocuments"
-    TEMPORARY = "Temporary"
-    APPLICATION = "Application"
-    DEFAULTS = "Defaults"
-    WEB_OBJECTS = "WebObjects"
-    TEMPLATES = "Templates"
-    HELP = "Help"
-    EMBEDDED_PROJECT_LIBRARY = "EmbeddedProjectLibrary"
-    EMBEDDED_PROJECT_LIBRARY_HOTLINK = "EmbeddedProjectLibraryHotlink"
-    PROJECT_PREVIEWS = "ProjectPreviews"
-
-
-class SplineData(APIModel):
-    """The parameters of the new Spline."""
-    favoriteName: Annotated[
-        str | None,
-        Field(
-            description="Optional name of a favorite to base the new element on. Its settings are applied first, then the explicitly given fields override them."
-        ),
-    ] = None
-    floorInd: Annotated[
-        float | None,
-        Field(description="The identifier of the floor. Optional parameter, by default the current floor is used."),
-    ] = None
-    layerIndex: Annotated[
-        int | None,
-        Field(
-            description="Layer attribute index to place the spline on. Optional parameter, by default the current layer is used."
-        ),
-    ] = None
-    coordinates: Annotated[
-        list[Coordinate2D],
-        Field(
-            description="The 2D coordinates of the spline points. Do not repeat the first point at the end even for a closed spline.",
-            min_length=3,
-        ),
-    ]
-    closed: Annotated[
-        bool | None,
-        Field(description="Is this a closed curve? Optional, defaults to false."),
-    ] = None
-    roomSeparator: Annotated[
-        bool | None,
-        Field(description="Is this a zone boundary line? Optional, defaults to false."),
-    ] = None
-    linePenIndex: Annotated[
-        int | None,
-        Field(description="Optional pen index. By default the current pen is used."),
-    ] = None
-    lineTypeId: Annotated[
-        AttributeId | None,
-        Field(description="Optional line type attribute. By default the current line type is used."),
-    ] = None
-
-
-class SplineDetails(APIModel):
-    """Geometry of a Spline element. Geometry is read-only: Archicad's own API does not support modifying Spline geometry via ACAPI_Element_Change. The settings fields (roomSeparator/linePenIndex/lineTypeId) ARE modifiable via SET."""
-    coordinates: list[Coordinate2D]
-    closed: Annotated[bool, Field(description="Is this a closed curve?")]
-    roomSeparator: Annotated[bool | None, Field(description="Is this a zone boundary line?")] = None
-    linePenIndex: int | None = None
-    lineTypeId: AttributeId | None = None
-    zCoordinate: float
-
-
-class SplineSettings(APIModel):
-    """Settings for modifying a Spline. Only these settings fields are modifiable - Archicad's own API does not support changing Spline geometry (coordinates/closed) via ACAPI_Element_Change."""
-    roomSeparator: bool | None = None
-    linePenIndex: int | None = None
-    lineTypeId: AttributeId | None = None
-
-
-class StairData(APIModel):
-    """The parameters of the new Stair."""
-    favoriteName: Annotated[
-        str | None,
-        Field(
-            description="Optional name of a favorite to base the new element on. Its settings are applied first, then the explicitly given fields override them."
-        ),
-    ] = None
-    baseLinePoints: Annotated[
-        list[Coordinate2D],
-        Field(
-            description="2D coordinates defining the stair baseline polyline. Minimum 2 points for a straight stair, 3+ for L-shaped or U-shaped stairs.",
-            min_length=2,
-        ),
-    ]
-    zCoordinate: Annotated[
-        float,
-        Field(description="The Z coordinate (absolute elevation) of the stair base."),
-    ]
-    floorIndex: Annotated[
-        int | None,
-        Field(description="Optional floor index. If omitted, derived from zCoordinate."),
-    ] = None
-    totalHeight: Annotated[float | None, Field(description="Total height of the stair.", gt=0.0)] = None
-    flightWidth: Annotated[float | None, Field(description="Width of the stair flight.", gt=0.0)] = None
-    stepNum: Annotated[int | None, Field(description="Number of risers (steps).", ge=1)] = None
-    riserHeight: Annotated[float | None, Field(description="Height of each riser.", gt=0.0)] = None
-    treadDepth: Annotated[float | None, Field(description="Depth (going) of each tread.", gt=0.0)] = None
-    finishVisible: Annotated[
-        bool | None,
-        Field(
-            description="Optional. If false, the tread/riser finishes are hidden and only the stair structure (e.g. a monolith) is modeled."
-        ),
-    ] = None
-
-
-class Status(Enum):
-    ACTUAL = "Actual"
-    ISSUED = "Issued"
-
-
-class StoryParameters(APIModel):
-    """Represents all parameters of a single project story, including its unique identifiers. Used in API responses."""
-    index: Annotated[int, Field(description="The story index.")]
-    floorId: Annotated[int, Field(description="Unique ID of the story.")]
-    dispOnSections: Annotated[
-        bool,
-        Field(description="Story level lines should appear on sections and elevations."),
-    ]
-    level: Annotated[float, Field(description="The story level.")]
-    height: Annotated[
-        float | None,
-        Field(
-            description="Story height, calculated as the level of the story above minus this story's level. Omitted for the topmost story, which has no story above."
-        ),
-    ] = None
-    name: Annotated[str, Field(description="The name of the story.")]
-
-
-class StoryRangeType(Enum):
-    """Optional. Which stories of the source are placed: all of them, or the single reference story. Ignored when a node for the same file already exists."""
-    ALL_STORIES = "AllStories"
-    SINGLE_STORY = "SingleStory"
-
-
-class StorySettings(APIModel):
-    """Contains the configurable settings for creating or modifying a story. Used as input in API requests."""
-    index: Annotated[
-        int | None,
-        Field(
-            description="The story index. Optional. The stories are matched to the existing ones positionally, from the bottom up. Giving the index of any of them pins the numbering of the whole list, so stories below the existing structure - basements with negative indices - can be requested as well. When given for more than one story, the indices must be consecutive."
-        ),
-    ] = None
-    dispOnSections: Annotated[
-        bool,
-        Field(description="Story level lines should appear on sections and elevations."),
-    ]
-    level: Annotated[float, Field(description="The story level.")]
-    name: Annotated[str, Field(description="The name of the story.")]
-
-
-class StoryVisibility(APIModel):
-    """Per-story visibility settings (API_StoryVisibility): the home story, plus how many stories above/below also show this element."""
-    showOnHome: Annotated[bool | None, Field(description="Show on the home story.")] = None
-    showAllAbove: Annotated[bool | None, Field(description="Show on all stories above the home story.")] = None
-    showAllBelow: Annotated[bool | None, Field(description="Show on all stories below the home story.")] = None
-    showRelAbove: Annotated[
-        int | None,
-        Field(description="Show this many stories above the home story (ignored when showAllAbove is true)."),
-    ] = None
-    showRelBelow: Annotated[
-        int | None,
-        Field(description="Show this many stories below the home story (ignored when showAllBelow is true)."),
-    ] = None
-
-
-class StructureDisplay(Enum):
-    """Structure display mode. One of EntireStructure, CoreOnly, WithoutFinishes, StructureOnly."""
-    ENTIRE_STRUCTURE = "EntireStructure"
-    CORE_ONLY = "CoreOnly"
-    WITHOUT_FINISHES = "WithoutFinishes"
-    STRUCTURE_ONLY = "StructureOnly"
-
-
-class Subelement(APIModel):
-    """Subelements grouped by type."""
-    cWallSegments: Annotated[list[ElementIdArrayItem] | None, Field(description="A list of elements.")] = None
-    cWallFrames: Annotated[list[ElementIdArrayItem] | None, Field(description="A list of elements.")] = None
-    cWallPanels: Annotated[list[ElementIdArrayItem] | None, Field(description="A list of elements.")] = None
-    cWallJunctions: Annotated[list[ElementIdArrayItem] | None, Field(description="A list of elements.")] = None
-    cWallAccessories: Annotated[list[ElementIdArrayItem] | None, Field(description="A list of elements.")] = None
-    stairRisers: Annotated[list[ElementIdArrayItem] | None, Field(description="A list of elements.")] = None
-    stairTreads: Annotated[list[ElementIdArrayItem] | None, Field(description="A list of elements.")] = None
-    stairStructures: Annotated[list[ElementIdArrayItem] | None, Field(description="A list of elements.")] = None
-    railingNodes: Annotated[list[ElementIdArrayItem] | None, Field(description="A list of elements.")] = None
-    railingSegments: Annotated[list[ElementIdArrayItem] | None, Field(description="A list of elements.")] = None
-    railingPosts: Annotated[list[ElementIdArrayItem] | None, Field(description="A list of elements.")] = None
-    railingRailEnds: Annotated[list[ElementIdArrayItem] | None, Field(description="A list of elements.")] = None
-    railingRailConnections: Annotated[list[ElementIdArrayItem] | None, Field(description="A list of elements.")] = None
-    railingHandrailEnds: Annotated[list[ElementIdArrayItem] | None, Field(description="A list of elements.")] = None
-    railingHandrailConnections: Annotated[list[ElementIdArrayItem] | None, Field(description="A list of elements.")] = (
-        None
-    )
-    railingToprailEnds: Annotated[list[ElementIdArrayItem] | None, Field(description="A list of elements.")] = None
-    railingToprailConnections: Annotated[list[ElementIdArrayItem] | None, Field(description="A list of elements.")] = (
-        None
-    )
-    railingRails: Annotated[list[ElementIdArrayItem] | None, Field(description="A list of elements.")] = None
-    railingToprails: Annotated[list[ElementIdArrayItem] | None, Field(description="A list of elements.")] = None
-    railingHandrails: Annotated[list[ElementIdArrayItem] | None, Field(description="A list of elements.")] = None
-    railingPatterns: Annotated[list[ElementIdArrayItem] | None, Field(description="A list of elements.")] = None
-    railingInnerPosts: Annotated[list[ElementIdArrayItem] | None, Field(description="A list of elements.")] = None
-    railingPanels: Annotated[list[ElementIdArrayItem] | None, Field(description="A list of elements.")] = None
-    railingBalusterSets: Annotated[list[ElementIdArrayItem] | None, Field(description="A list of elements.")] = None
-    railingBalusters: Annotated[list[ElementIdArrayItem] | None, Field(description="A list of elements.")] = None
-    beamSegments: Annotated[list[ElementIdArrayItem] | None, Field(description="A list of elements.")] = None
-    columnSegments: Annotated[list[ElementIdArrayItem] | None, Field(description="A list of elements.")] = None
-
-
-class SubsetData(APIModel):
-    name: Annotated[str, Field(min_length=1)]
-    parentNavigatorItemId: NavigatorItemId | None = None
-    ownPrefix: str | None = None
-    customNumber: str | None = None
-    numberingStyle: NumberingStyle | None = None
-    startAt: int | None = None
-    continueNumbering: bool | None = None
-    useUpperPrefix: bool | None = None
-    includeToIDSequence: bool | None = None
-    customNumbering: bool | None = None
-    addOwnPrefix: bool | None = None
-
-
-class SuccessfulExecutionResult(APIModel):
-    """The result of a successful execution."""
-    success: Literal[True] = True
-
-
-class SurfaceAttribute(APIModel):
-    """A surface attribute."""
-    attributeId: AttributeId
-    index: int
-    name: str
-    materialType: SurfaceType | None = None
-    ambientReflection: float | None = None
-    diffuseReflection: float | None = None
-    specularReflection: float | None = None
-    transparency: float | None = None
-    shine: float | None = None
-    transparencyAttenuation: float | None = None
-    emissionAttenuation: float | None = None
-    surfaceColor: ColorRGB | None = None
-    specularColor: ColorRGB | None = None
-    emissionColor: ColorRGB | None = None
-    fillId: AttributeIdArrayItem | None = None
-    texture: Texture | None = None
-
-
-class SurfaceAttributeField(Enum):
-    MATERIAL_TYPE = "materialType"
-    AMBIENT_REFLECTION = "ambientReflection"
-    DIFFUSE_REFLECTION = "diffuseReflection"
-    SPECULAR_REFLECTION = "specularReflection"
-    TRANSPARENCY = "transparency"
-    SHINE = "shine"
-    TRANSPARENCY_ATTENUATION = "transparencyAttenuation"
-    EMISSION_ATTENUATION = "emissionAttenuation"
-    SURFACE_COLOR = "surfaceColor"
-    SPECULAR_COLOR = "specularColor"
-    EMISSION_COLOR = "emissionColor"
-    FILL_ID = "fillId"
-    TEXTURE = "texture"
-
-
-class SurfaceData(APIModel):
-    """Data to create a surface."""
-    attributeId: Annotated[
-        AttributeId | None,
-        Field(description="Indentifier of the existing Surface to overwrite, ignored if overwriteExisting is false."),
-    ] = None
-    index: Annotated[
-        str | None,
-        Field(description="Index of the existing surface to overwrite, ignored if overwriteExisting is false."),
-    ] = None
-    name: Annotated[
-        str,
-        Field(
-            description="Name. If overwriteExisting is true, then the existing surface with the given name will be overwritten."
-        ),
-    ]
-    materialType: SurfaceType | None = None
-    ambientReflection: Annotated[float | None, Field(description="Ambient percentage [0..100].")] = None
-    diffuseReflection: Annotated[float | None, Field(description="Diffuse percentage [0..100].")] = None
-    specularReflection: Annotated[float | None, Field(description="Specular percentage [0..100].")] = None
-    transparency: Annotated[float | None, Field(description="Transparency percentage [0..100].")] = None
-    shine: Annotated[
-        float | None,
-        Field(description="The shininess factor multiplied by 100 [0..10000]."),
-    ] = None
-    transparencyAttenuation: Annotated[
-        float | None,
-        Field(description="Transparency attenuation multiplied by 100 [0..10000]."),
-    ] = None
-    emissionAttenuation: Annotated[
-        float | None,
-        Field(description="Emission attenuation multiplied by 100 [0..10000]."),
-    ] = None
-    surfaceColor: ColorRGB | None = None
-    specularColor: ColorRGB | None = None
-    emissionColor: ColorRGB | None = None
-    fillId: AttributeIdArrayItem | None = None
-    texture: Texture | None = None
-
-
-class SurfaceType(Enum):
-    """The type of a surface material."""
-    GENERAL = "General"
-    SIMPLE = "Simple"
-    MATTE = "Matte"
-    METAL = "Metal"
-    PLASTIC = "Plastic"
-    GLASS = "Glass"
-    GLOWING = "Glowing"
-    CONSTANT = "Constant"
-
-
-class SurveyPoint(APIModel):
-    position: SurveyPointPosition
-    geoReferencingParameters: GeoReferencingParameters
-
-
-class SurveyPointPosition(APIModel):
-    eastings: Annotated[
-        float,
-        Field(
-            description="Location along the easting of the coordinate system of the target map coordinate reference system."
-        ),
-    ]
-    northings: Annotated[
-        float,
-        Field(
-            description="Location along the northing of the coordinate system of the target map coordinate reference system."
-        ),
-    ]
-    elevation: Annotated[
-        float,
-        Field(description="Orthogonal height relative to the vertical datum specified."),
-    ]
-
-
-class SymbolLabelTextDirection(Enum):
-    """Direction of the symbol label's text."""
-    PARALLEL = "Parallel"
-    HORIZONTAL = "Horizontal"
-    VERTICAL = "Vertical"
-    GENERAL = "General"
-
-
-class TextBoxAnchor(Enum):
-    """Anchor point of the text box."""
-    LEFT_TOP = "LeftTop"
-    MIDDLE_TOP = "MiddleTop"
-    RIGHT_TOP = "RightTop"
-    LEFT_MIDDLE = "LeftMiddle"
-    MIDDLE_MIDDLE = "MiddleMiddle"
-    RIGHT_MIDDLE = "RightMiddle"
-    LEFT_BOTTOM = "LeftBottom"
-    MIDDLE_BOTTOM = "MiddleBottom"
-    RIGHT_BOTTOM = "RightBottom"
-
-
-class TextDataWithRuns(APIModel):
-    """The parameters of the new Text element."""
-    favoriteName: Annotated[
-        str | None,
-        Field(
-            description="Optional name of a favorite to base the new element on. Its settings are applied first, then the explicitly given fields override them."
-        ),
-    ] = None
-    coordinate: Annotated[
-        Coordinate3D,
-        Field(
-            description="The placement position of the text. The z value is used to determine the floor when floorIndex is omitted."
-        ),
-    ]
-    text: Annotated[
-        str | None,
-        Field(description="The text content. Newlines create multiple lines. Ignored if 'runs' is also given."),
-    ] = None
-    runs: Annotated[
-        list[TextRunDetails],
-        Field(
-            description="Multi-style text content: an array of styled runs, concatenated in order. Takes precedence over 'text' if both are given.",
-            min_length=1,
-        ),
-    ]
-    height: Annotated[
-        float | None,
-        Field(
-            description="The character height in millimeters. Optional; defaults to the Text tool default. Equivalent to style.height."
-        ),
-    ] = None
-    pen: Annotated[
-        int | None,
-        Field(description="Optional pen attribute index. Equivalent to style.penIndex."),
-    ] = None
-    angle: Annotated[
-        float | None,
-        Field(description="Optional rotation angle in radians. Equivalent to style.angle."),
-    ] = None
-    justification: Justification | None = None
-    style: Annotated[
-        TextStyleSettableDetails | None,
-        Field(
-            description="Full style settings (font, effects, frame, anchor, etc). height/pen/angle/justification above take precedence over the same fields here if both are given."
-        ),
-    ] = None
-    floorIndex: Annotated[
-        int | None,
-        Field(description="Optional floor index. If omitted, derived from the coordinate's z value."),
-    ] = None
-
-
-class TextDataWithText(APIModel):
-    """The parameters of the new Text element."""
-    favoriteName: Annotated[
-        str | None,
-        Field(
-            description="Optional name of a favorite to base the new element on. Its settings are applied first, then the explicitly given fields override them."
-        ),
-    ] = None
-    coordinate: Annotated[
-        Coordinate3D,
-        Field(
-            description="The placement position of the text. The z value is used to determine the floor when floorIndex is omitted."
-        ),
-    ]
-    text: Annotated[
-        str,
-        Field(description="The text content. Newlines create multiple lines. Ignored if 'runs' is also given."),
-    ]
-    runs: Annotated[
-        list[TextRunDetails] | None,
-        Field(
-            description="Multi-style text content: an array of styled runs, concatenated in order. Takes precedence over 'text' if both are given.",
-            min_length=1,
-        ),
-    ] = None
-    height: Annotated[
-        float | None,
-        Field(
-            description="The character height in millimeters. Optional; defaults to the Text tool default. Equivalent to style.height."
-        ),
-    ] = None
-    pen: Annotated[
-        int | None,
-        Field(description="Optional pen attribute index. Equivalent to style.penIndex."),
-    ] = None
-    angle: Annotated[
-        float | None,
-        Field(description="Optional rotation angle in radians. Equivalent to style.angle."),
-    ] = None
-    justification: Justification | None = None
-    style: Annotated[
-        TextStyleSettableDetails | None,
-        Field(
-            description="Full style settings (font, effects, frame, anchor, etc). height/pen/angle/justification above take precedence over the same fields here if both are given."
-        ),
-    ] = None
-    floorIndex: Annotated[
-        int | None,
-        Field(description="Optional floor index. If omitted, derived from the coordinate's z value."),
-    ] = None
-
-
-class TextDetails(APIModel):
-    text: Annotated[str, Field(description="The text content. Newlines separate the lines.")]
-    position: Annotated[Coordinate2D, Field(description="The placement position of the text.")]
-    angle: Annotated[float, Field(description="The rotation angle in radians (same as style.angle).")]
-    height: Annotated[
-        float,
-        Field(description="The character height in millimeters (same as style.height)."),
-    ]
-    pen: Annotated[int, Field(description="The pen attribute index (same as style.penIndex).")]
-    justification: Justification
-    zCoordinate: Annotated[float, Field(description="The level of the text's floor.")]
-    style: Annotated[
-        TextStyleDetails,
-        Field(
-            description="The full style state; the flat fields above are the subset SetDetailsOfElements takes back."
-        ),
-    ]
-    paragraphCount: Annotated[
-        int,
-        Field(
-            description="Read-only: number of paragraphs in the memo (Tapir's own Create/Modify commands always produce 1)."
-        ),
-    ]
-    runs: Annotated[
-        list[TextRunDetails] | None,
-        Field(
-            description="The styled runs of the content, present whenever the content has paragraphs (always for content Tapir created); one entry per run, a single run too, as a run may carry a pen, font, face or size of its own. Concatenating the runs' text in order gives the full content."
-        ),
-    ] = None
-
-
-class TextFrameShape(Enum):
-    """Text frame shape. Standalone Text elements only support Rectangle. Available from Archicad 28; earlier versions ignore it and read it back as Rectangle."""
-    RECTANGLE = "Rectangle"
-    CIRCLE = "Circle"
-    ROUNDED_RECTANGLE = "RoundedRectangle"
-    PILL = "Pill"
-
-
-class TextRunDetails(APIModel):
-    """One monostyle run of text (API_RunType). Concatenating 'text' across all runs in order gives the full content; a newline character starts a new line."""
-    text: Annotated[str, Field(description="The run's text content.")]
-    penIndex: Annotated[
-        int | None,
-        Field(description="Pen attribute index. Optional; defaults to the style's penIndex."),
-    ] = None
-    fontIndex: Annotated[
-        int | None,
-        Field(description="Font attribute index. Optional; defaults to the style's fontIndex."),
-    ] = None
-    bold: bool | None = None
-    italic: bool | None = None
-    underline: bool | None = None
-    heightOverride: Annotated[
-        float | None,
-        Field(description="Character height in mm for this run only. Optional; defaults to the style's height."),
-    ] = None
-    effectStrikeout: Annotated[
-        bool | None,
-        Field(description="Optional; defaults to the style's effectStrikeout."),
-    ] = None
-    effectSuperscript: Annotated[
-        bool | None,
-        Field(description="Optional; defaults to the style's effectSuperscript."),
-    ] = None
-    effectSubscript: Annotated[
-        bool | None,
-        Field(description="Optional; defaults to the style's effectSubscript."),
-    ] = None
-    effectProtected: Annotated[
-        bool | None,
-        Field(description="Optional; defaults to the style's effectProtected."),
-    ] = None
-
-
-class TextSettings(APIModel):
-    """Settings for modifying a Text element or a text-type Label. For Labels only the text field is applied. Setting text replaces the whole content (any per-run formatting of the old content is dropped) and switches the element to automatic width, matching the behavior of CreateTexts/CreateLabels."""
-    text: Annotated[
-        str | None,
-        Field(description="The new text content. Newlines create multiple lines."),
-    ] = None
-    position: Annotated[
-        Coordinate2D | None,
-        Field(description="The placement position of the text. Only applied to Text elements."),
-    ] = None
-    angle: Annotated[
-        float | None,
-        Field(description="The rotation angle in radians. Only applied to Text elements."),
-    ] = None
-    height: Annotated[
-        float | None,
-        Field(description="The character height in millimeters. Only applied to Text elements."),
-    ] = None
-    justification: Justification | None = None
-
-
-class TextStyleDetails(APIModel):
-    """Full readable style state of a Text or text-class Label: every field of TextStyleSettableDetails plus the read-only ones (lineCount, boxWidth, boxHeight)."""
-    penIndex: Annotated[int | None, Field(description="Pen attribute index.")] = None
-    fontIndex: Annotated[int | None, Field(description="Font attribute index.")] = None
-    bold: bool | None = None
-    italic: bool | None = None
-    underline: bool | None = None
-    justification: Justification | None = None
-    height: Annotated[float | None, Field(description="Character height in mm.")] = None
-    spacing: Annotated[float | None, Field(description="Line spacing factor, between -10.0 and -1.0.")] = None
-    angle: Annotated[float | None, Field(description="Rotation angle in radians.")] = None
-    effectStrikeout: bool | None = None
-    effectSuperscript: bool | None = None
-    effectSubscript: bool | None = None
-    effectProtected: Annotated[bool | None, Field(description="Protected text (autotext reference).")] = None
-    widthFactor: Annotated[
-        float | None,
-        Field(description="Width scale of the text, between 0.75 and 10.0."),
-    ] = None
-    charSpaceFactor: Annotated[
-        float | None,
-        Field(description="Character spacing scale, between 0.75 and 10.0."),
-    ] = None
-    fixedSize: Annotated[bool | None, Field(description="Size does not depend on output scale.")] = None
-    usedContour: Annotated[bool | None, Field(description="Draw the frame of the text block.")] = None
-    usedFill: Annotated[bool | None, Field(description="Draw a solid fill behind the text block.")] = None
-    contourPenIndex: Annotated[int | None, Field(description="Pen index of the text block's frame.")] = None
-    fillPenIndex: Annotated[int | None, Field(description="Pen index of the text block's background fill.")] = None
-    anchor: TextBoxAnchor | None = None
-    fixedAngle: Annotated[
-        bool | None,
-        Field(description="The rotation angle does not change when the element is rotated."),
-    ] = None
-    contourOffset: Annotated[
-        float | None,
-        Field(description="Offset of the frame/background fill from the text bounding box, in mm."),
-    ] = None
-    flipEnabled: Annotated[
-        bool | None,
-        Field(description="The text should always be readable (flips when viewed upside down)."),
-    ] = None
-    textFrameShape: Annotated[
-        TextFrameShape | None,
-        Field(
-            description="Text frame shape. Standalone Text elements only support Rectangle. Available from Archicad 28; earlier versions ignore it and read it back as Rectangle."
-        ),
-    ] = None
-    textFrameSizeFixed: Annotated[
-        bool | None,
-        Field(
-            description="Use fixedWidth/fixedHeight instead of fitting the frame to the text box. Available from Archicad 28; earlier versions ignore it and read it back as false."
-        ),
-    ] = None
-    textFrameFixedWidth: Annotated[
-        float | None,
-        Field(
-            description="Frame width in mm, when textFrameSizeFixed is true. Between 1 and 1000. Available from Archicad 28; earlier versions ignore it and read it back as 0."
-        ),
-    ] = None
-    textFrameFixedHeight: Annotated[
-        float | None,
-        Field(
-            description="Frame height in mm, when textFrameSizeFixed is true (ignored for Circle, which uses fixedWidth as diameter). Between 1 and 1000. Available from Archicad 28; earlier versions ignore it and read it back as 0."
-        ),
-    ] = None
-    lineCount: Annotated[
-        int | None,
-        Field(description="Read-only: number of text lines (API_TextType::nLine)."),
-    ] = None
-    boxWidth: Annotated[
-        float | None,
-        Field(description="Read-only: horizontal size of the text box in mm, auto-computed by Archicad."),
-    ] = None
-    boxHeight: Annotated[
-        float | None,
-        Field(description="Read-only: vertical size of the text box in mm, auto-computed by Archicad."),
-    ] = None
-
-
-class TextStyleSettableDetails(APIModel):
-    """Every user-configurable style setting of a Text or a text-class Label (API_TextType). Shared by CreateTexts/CreateLabels ('style'), ModifyTexts/ModifyLabels ('style'), and the Get response."""
-    penIndex: Annotated[int | None, Field(description="Pen attribute index.")] = None
-    fontIndex: Annotated[int | None, Field(description="Font attribute index.")] = None
-    bold: bool | None = None
-    italic: bool | None = None
-    underline: bool | None = None
-    justification: Justification | None = None
-    height: Annotated[float | None, Field(description="Character height in mm.")] = None
-    spacing: Annotated[float | None, Field(description="Line spacing factor, between -10.0 and -1.0.")] = None
-    angle: Annotated[float | None, Field(description="Rotation angle in radians.")] = None
-    effectStrikeout: bool | None = None
-    effectSuperscript: bool | None = None
-    effectSubscript: bool | None = None
-    effectProtected: Annotated[bool | None, Field(description="Protected text (autotext reference).")] = None
-    widthFactor: Annotated[
-        float | None,
-        Field(description="Width scale of the text, between 0.75 and 10.0."),
-    ] = None
-    charSpaceFactor: Annotated[
-        float | None,
-        Field(description="Character spacing scale, between 0.75 and 10.0."),
-    ] = None
-    fixedSize: Annotated[bool | None, Field(description="Size does not depend on output scale.")] = None
-    usedContour: Annotated[bool | None, Field(description="Draw the frame of the text block.")] = None
-    usedFill: Annotated[bool | None, Field(description="Draw a solid fill behind the text block.")] = None
-    contourPenIndex: Annotated[int | None, Field(description="Pen index of the text block's frame.")] = None
-    fillPenIndex: Annotated[int | None, Field(description="Pen index of the text block's background fill.")] = None
-    anchor: TextBoxAnchor | None = None
-    fixedAngle: Annotated[
-        bool | None,
-        Field(description="The rotation angle does not change when the element is rotated."),
-    ] = None
-    contourOffset: Annotated[
-        float | None,
-        Field(description="Offset of the frame/background fill from the text bounding box, in mm."),
-    ] = None
-    flipEnabled: Annotated[
-        bool | None,
-        Field(description="The text should always be readable (flips when viewed upside down)."),
-    ] = None
-    textFrameShape: Annotated[
-        TextFrameShape | None,
-        Field(
-            description="Text frame shape. Standalone Text elements only support Rectangle. Available from Archicad 28; earlier versions ignore it and read it back as Rectangle."
-        ),
-    ] = None
-    textFrameSizeFixed: Annotated[
-        bool | None,
-        Field(
-            description="Use fixedWidth/fixedHeight instead of fitting the frame to the text box. Available from Archicad 28; earlier versions ignore it and read it back as false."
-        ),
-    ] = None
-    textFrameFixedWidth: Annotated[
-        float | None,
-        Field(
-            description="Frame width in mm, when textFrameSizeFixed is true. Between 1 and 1000. Available from Archicad 28; earlier versions ignore it and read it back as 0."
-        ),
-    ] = None
-    textFrameFixedHeight: Annotated[
-        float | None,
-        Field(
-            description="Frame height in mm, when textFrameSizeFixed is true (ignored for Circle, which uses fixedWidth as diameter). Between 1 and 1000. Available from Archicad 28; earlier versions ignore it and read it back as 0."
-        ),
-    ] = None
-
-
-class TextsWithDetail(APIModel):
-    elementId: ElementId
-    coordinate: Annotated[
-        Coordinate3D | None,
-        Field(
-            description="The new placement position. As in CreateTexts, the z value selects the floor when floorIndex is omitted."
-        ),
-    ] = None
-    floorIndex: Annotated[
-        int | None,
-        Field(
-            description="Optional. Moves the text to this floor; when omitted and a coordinate is given, the floor is derived from its z value."
-        ),
-    ] = None
-    text: str | None = None
-    runs: Annotated[list[TextRunDetails] | None, Field(min_length=1)] = None
-    style: TextStyleSettableDetails | None = None
-
-
-class Texture(APIModel):
-    """Texture parameters"""
-    name: Annotated[
-        str,
-        Field(description="The filename of the texture in the library (without extension)."),
-    ]
-    rotationAngle: Annotated[float | None, Field(description="Rotation angle in radians.")] = None
-    xSize: Annotated[
-        float | None,
-        Field(description="X size of the picture in model space, by default 1."),
-    ] = None
-    ySize: Annotated[
-        float | None,
-        Field(description="Y size of the picture in model space, by default 1."),
-    ] = None
-    FillRectangle: Annotated[
-        bool | None,
-        Field(
-            description="True, if fit the rectangle with the picture in a central position, using the natural aspect ratio of the picture."
-        ),
-    ] = None
-    FitPicture: Annotated[
-        bool | None,
-        Field(
-            description="True, if fit the picture in the middle of the rectangle, using the natural aspect ratio of the picture."
-        ),
-    ] = None
-    mirrorX: Annotated[
-        bool | None,
-        Field(description="True, if the texture is mirrored in X direction."),
-    ] = None
-    mirrorY: Annotated[
-        bool | None,
-        Field(description="True, if the texture is mirrored in Y direction."),
-    ] = None
-    useAlphaChannel: Annotated[
-        bool | None,
-        Field(description="True, if the alpha channel of the texture is used."),
-    ] = None
-    alphaChannelChangesTransparency: Annotated[
-        bool | None,
-        Field(description="True, if the alpha channel of the texture changes the transparency."),
-    ] = None
-    alphaChannelChangesSurfaceColor: Annotated[
-        bool | None,
-        Field(description="True, if the alpha channel of the texture changes the surface color."),
-    ] = None
-    alphaChannelChangesAmbientColor: Annotated[
-        bool | None,
-        Field(description="True, if the alpha channel of the texture changes the ambient color."),
-    ] = None
-    alphaChannelChangesSpecularColor: Annotated[
-        bool | None,
-        Field(description="True, if the alpha channel of the texture changes the specular color."),
-    ] = None
-    alphaChannelChangesDiffuseColor: Annotated[
-        bool | None,
-        Field(description="True, if the alpha channel of the texture changes the diffuse color."),
-    ] = None
-
-
-class TextureProjectionType(Enum):
-    """Projection type of the 3D texture."""
-    INVALID = "Invalid"
-    PLANAR = "Planar"
-    DEFAULT = "Default"
-    CYLINDRIC = "Cylindric"
-    SPHERIC = "Spheric"
-    BOX = "Box"
-
-
-class TransformationType(Enum):
-    GLOBAL = "Global"
-    ROTATED = "Rotated"
-    DISTORTED = "Distorted"
-
-
-class TrimType(Enum):
-    KEEP_INSIDE = "KeepInside"
-    KEEP_OUTSIDE = "KeepOutside"
-    KEEP_ALL = "KeepAll"
-    NO = "No"
-
-
-class TrimmedByItem(APIModel):
-    elementId: ElementId
-    trimType: TrimType
-
-
-class User(APIModel):
-    userId: float
-    userName: str
-
-
-class UserUndefinedPropertyValue(APIModel):
-    """A userUndefined value means that there is no actual number/string/etc. value, but the user deliberately set an Undefined value: this is a valid value, too."""
-    type: PropertyDataType
-    status: Literal["userUndefined"] = "userUndefined"
-
-
-class ViewCloneData(APIModel):
-    navigatorItemId: Annotated[
-        NavigatorItemId,
-        Field(description="Navigator item ID of the Project Map viewpoint to clone."),
-    ]
-    parentNavigatorItemId: Annotated[
-        NavigatorItemId | None,
-        Field(
-            description="Navigator item ID of the View Map folder to place the clone in. Optional; defaults to the View Map root."
-        ),
-    ] = None
-
-
-class ViewData(APIModel):
-    navigatorItemId: Annotated[
-        NavigatorItemId,
-        Field(description="Source navigator item whose database and settings are copied."),
-    ]
-    parentNavigatorItemId: Annotated[
-        NavigatorItemId | None,
-        Field(description="View Map folder to place the new view in. Optional; defaults to View Map root."),
-    ] = None
-    name: Annotated[
-        str | None,
-        Field(description="Name for the new view. Optional; defaults to the source item name."),
-    ] = None
-
-
-class ViewDepthLimitation(Enum):
-    """Floor plan view depth limitation."""
-    TO_FLOOR_PLAN_RANGE = "ToFloorPlanRange"
-    TO_ABSOLUTE_LIMIT = "ToAbsoluteLimit"
-    ENTIRE_ELEMENT = "EntireElement"
-
-
-class ViewSettings(APIModel):
-    """The settings of a navigator view"""
-    modelViewOptions: Annotated[
-        str | None,
-        Field(description="The name of the model view options. If empty, the view has custom model view options."),
-    ] = None
-    layerCombination: Annotated[
-        str | None,
-        Field(description="The name of the layer combination. If empty, the view has custom layer combination."),
-    ] = None
-    dimensionStyle: Annotated[
-        str | None,
-        Field(description="The name of the dimension style. If empty, the view has custom dimension style."),
-    ] = None
-    penSetName: Annotated[
-        str | None,
-        Field(description="The name of the pen set. If empty, the view has custom pen set."),
-    ] = None
-    graphicOverrideCombination: Annotated[
-        str | None,
-        Field(
-            description="The name of the graphic override combination. If empty, the view has custom graphic override combination."
-        ),
-    ] = None
-    drawingScale: Annotated[
-        int | None,
-        Field(description="The drawing scale stored on the view, if enabled."),
-    ] = None
-    saveZoom: Annotated[bool | None, Field(description="Whether the zoom box is stored in the view.")] = None
-    ignoreSavedZoom: Annotated[
-        bool | None,
-        Field(description="Whether changing to the view should ignore its stored zoom."),
-    ] = None
-    zoom: Zoom | None = None
-    rotation: Annotated[
-        float | None,
-        Field(
-            description="View rotation angle in radians. Read via GetViewSettings; use SetViewRotation to change it."
-        ),
-    ] = None
-    structureDisplay: Annotated[
-        StructureDisplay | None,
-        Field(description="Structure display mode. One of EntireStructure, CoreOnly, WithoutFinishes, StructureOnly."),
-    ] = None
-    renovationFilterGuid: Annotated[
-        UUID | None,
-        Field(
-            description="GUID of the renovation filter applied to the view.",
-        ),
-    ] = None
-    d3styleName: Annotated[str | None, Field(description="Name of the 3D style. Empty if not set.")] = None
-    renderingSceneName: Annotated[str | None, Field(description="Name of the rendering scene. Empty if not set.")] = (
-        None
-    )
-    usePhotoRendering: Annotated[bool | None, Field(description="Whether photo rendering is used for this view.")] = (
-        None
-    )
-
-
-class ViewTransformations(APIModel):
-    zoom: Zoom
-    rotation: Annotated[float, Field(description="The orientation in radian.")]
-
-
-class Volume(APIModel):
-    unit: VolumeType
-    accuracy: AccuracyType
-    decimals: Annotated[int, Field(description="Number of decimals to display for volume values.")]
-
-
-class VolumeType(Enum):
-    """The type of the volume measurement unit."""
-    CUBIC_METER = "CubicMeter"
-    LITER = "Liter"
-    CUBIC_CENTIMETER = "CubicCentimeter"
-    CUBIC_MILLIMETER = "CubicMillimeter"
-    CUBIC_FOOT = "CubicFoot"
-    CUBIC_INCH = "CubicInch"
-    CUBIC_YARD = "CubicYard"
-    GALLON = "Gallon"
-
-
-class WallData(APIModel):
-    favoriteName: Annotated[
-        str | None,
-        Field(
-            description="Optional name of a favorite to base the new element on. Its settings are applied first, then the explicitly given fields override them."
-        ),
-    ] = None
-    begCoordinate: Coordinate2D
-    endCoordinate: Coordinate2D
-    floorIndex: Annotated[
-        int | None,
-        Field(
-            description="Story index (as returned by GetStories). When provided, zCoordinate is interpreted as bottomOffset relative to the floor. Takes priority over zCoordinate for floor assignment."
-        ),
-    ] = None
-    zCoordinate: Annotated[
-        float | None,
-        Field(
-            description="Absolute Z when floorIndex is absent; bottomOffset relative to the floor when floorIndex is provided."
-        ),
-    ] = None
-    height: Annotated[float, Field(gt=0.0)]
-    thickness: Annotated[float, Field(gt=0.0)]
-    offset: float | None = None
-    arcAngle: Annotated[
-        float | None,
-        Field(
-            description="Arc angle in radians; non-zero creates a curved wall (begCoordinate/endCoordinate are the chord endpoints)."
-        ),
-    ] = None
-    referenceLineLocation: WallReferenceLineLocation | None = None
-    structureType: WallStructureType | None = None
-    buildingMaterialId: AttributeId | None = None
-    compositeId: AttributeId | None = None
-    profileId: AttributeId | None = None
-
-
-class WallDetails(APIModel):
-    geometryType: WallGeometryType
-    begCoordinate: Coordinate2D
-    endCoordinate: Coordinate2D
-    zCoordinate: float
-    flipped: bool | None = None
-    height: Annotated[float, Field(description="height relative to bottom")]
-    bottomOffset: Annotated[float, Field(description="base level of the wall relative to the floor level")]
-    offset: Annotated[float, Field(description="wall's base line's offset from ref. line")]
-    arcAngle: Annotated[float | None, Field(description="The arc angle of the curved wall in radians.")] = None
-    begThickness: Annotated[
-        float | None,
-        Field(description="Thickness at the beginning of wall, it will return 0 for poly wall type"),
-    ] = None
-    endThickness: Annotated[
-        float | None,
-        Field(description="Thickness at the end of wall, it will return 0 for poly wall type"),
-    ] = None
-    polygonOutline: Annotated[
-        list[Coordinate2D] | None,
-        Field(description="Polygon outline in case of polygonal wall"),
-    ] = None
-    polygonArcs: Annotated[
-        list[PolyArc] | None,
-        Field(description="Polygon arcs in case of polygonal wall"),
-    ] = None
-    structureType: WallStructureType | None = None
-    buildingMaterialId: AttributeId | None = None
-    compositeId: AttributeId | None = None
-    profileId: AttributeId | None = None
-    referenceLineLocation: WallReferenceLineLocation | None = None
-    profileType: WallProfileType | None = None
-    slantAlpha: Annotated[
-        float | None,
-        Field(description="Only has an effect once profileType is set to Slanted or Trapez."),
-    ] = None
-    slantBeta: Annotated[
-        float | None,
-        Field(description="Only has an effect once profileType is set to Slanted or Trapez."),
-    ] = None
-    topOffset: Annotated[
-        float | None,
-        Field(description="Only has an effect when relativeTopStory is non-zero."),
-    ] = None
-    relativeTopStory: Annotated[
-        float | None,
-        Field(
-            description="Non-zero links the wall's top to another story instead of an explicit height - do not set together with 'height' via ModifyWalls in the same call."
-        ),
-    ] = None
-    zoneRel: WallZoneRelation | None = None
-    visibility: StoryVisibility | None = None
-    isAutoOnStoryVisibility: Annotated[
-        bool | None,
-        Field(
-            description="When true (the default on a new wall), Archicad recomputes 'visibility' automatically from the wall's vertical extent and ignores any value set for it."
-        ),
-    ] = None
-    referenceMaterial: OverriddenMaterial | None = None
-    oppositeMaterial: OverriddenMaterial | None = None
-    sideMaterial: OverriddenMaterial | None = None
-    cutFillPen: OverriddenPen | None = None
-    cutFillBackgroundPen: OverriddenPen | None = None
-
-
-class WallGeometryType(Enum):
-    STRAIGHT = "Straight"
-    TRAPEZOID = "Trapezoid"
-    POLYGONAL = "Polygonal"
-
-
-class WallModificationGeometryType(Enum):
-    """The wall's plan outline shape (Polygonal is not settable here, read-only via GetDetailsOfElements). This is unrelated to slantAlpha/slantBeta - see profileType for the cross section shape those depend on."""
-    STRAIGHT = "Straight"
-    TRAPEZOID = "Trapezoid"
-
-
-class WallModificationProfileType(Enum):
-    """Cross section shape of the wall, distinct from geometryType (which is the plan outline). slantAlpha/slantBeta only have an effect once this is set to Slanted."""
-    NORMAL = "Normal"
-    SLANTED = "Slanted"
-    TRAPEZ = "Trapez"
-
-
-class WallProfileType(Enum):
-    """Cross section shape of the wall, distinct from geometryType (which is the plan outline). Only Normal/Slanted/Trapez are settable via ModifyWalls - Poly needs a profile attribute wired through a separate mechanism. slantAlpha/slantBeta only have an effect once this is Slanted or Trapez."""
-    NORMAL = "Normal"
-    SLANTED = "Slanted"
-    TRAPEZ = "Trapez"
-    POLY = "Poly"
-
-
-class WallReferenceLineLocation(Enum):
-    """The Core* values only have an effect on a Composite or Profile wall (structureType) - a Basic wall has no core skin, and Archicad falls back to the nearest non-core equivalent (e.g. CoreCenter becomes Center)."""
-    OUTSIDE = "Outside"
-    CENTER = "Center"
-    INSIDE = "Inside"
-    CORE_OUTSIDE = "CoreOutside"
-    CORE_CENTER = "CoreCenter"
-    CORE_INSIDE = "CoreInside"
-
-
 class WallRelations(APIModel):
     """Relations of a wall."""
     wallConnections: EndpointConnections
-
-
-class WallSettings(APIModel):
-    """Settings for modifying a wall."""
-    begCoordinate: Coordinate2D | None = None
-    endCoordinate: Coordinate2D | None = None
-    height: Annotated[float | None, Field(description="height relative to bottom")] = None
-    bottomOffset: Annotated[
-        float | None,
-        Field(description="base level of the wall relative to the floor level"),
-    ] = None
-    offset: Annotated[float | None, Field(description="wall's base line's offset from ref. line")] = None
-    begThickness: Annotated[
-        float | None,
-        Field(description="Thickness at the beginning in case of trapezoid wall"),
-    ] = None
-    endThickness: Annotated[
-        float | None,
-        Field(description="Thickness at the end in case of trapezoid wall"),
-    ] = None
-
-
-class WallStructureType(Enum):
-    BASIC = "Basic"
-    COMPOSITE = "Composite"
-    PROFILE = "Profile"
-
-
-class WallThicknessDimensionData(APIModel):
-    wallId: ElementId
-    referencePoint: Coordinate2D
-    direction: Coordinate2D
-
-
-class WallWithDetails(APIModel):
-    elementId: ElementId
-    geometryType: WallModificationGeometryType | None = None
-    begCoordinate: Coordinate2D | None = None
-    endCoordinate: Coordinate2D | None = None
-    arcAngle: Annotated[
-        float | None,
-        Field(
-            description="Arc angle in radians; non-zero makes the wall curved (begCoordinate/endCoordinate are the chord endpoints)."
-        ),
-    ] = None
-    height: Annotated[
-        float | None,
-        Field(
-            description="Sets relativeTopStory to 0 (explicit height). Do not combine with relativeTopStory in the same call - whichever is applied last wins, and Archicad recomputes the actual height from the story elevations once relativeTopStory is non-zero.",
-            gt=0.0,
-        ),
-    ] = None
-    thickness: Annotated[float | None, Field(gt=0.0)] = None
-    bottomOffset: float | None = None
-    offset: float | None = None
-    structureType: WallStructureType | None = None
-    buildingMaterialId: AttributeId | None = None
-    compositeId: AttributeId | None = None
-    profileId: AttributeId | None = None
-    referenceLineLocation: WallReferenceLineLocation | None = None
-    profileType: WallModificationProfileType | None = None
-    slantAlpha: Annotated[
-        float | None,
-        Field(description="Only has an effect once profileType is set to Slanted or Trapez."),
-    ] = None
-    slantBeta: Annotated[
-        float | None,
-        Field(description="Only has an effect once profileType is set to Slanted or Trapez."),
-    ] = None
-    topOffset: Annotated[
-        float | None,
-        Field(description="Only has an effect when relativeTopStory is non-zero."),
-    ] = None
-    relativeTopStory: Annotated[
-        float | None,
-        Field(
-            description="Non-zero links the wall's top to another story instead of an explicit height - do not set together with 'height' in the same call, see the note on 'height' above."
-        ),
-    ] = None
-    zoneRel: WallZoneRelation | None = None
-    visibility: StoryVisibility | None = None
-    isAutoOnStoryVisibility: Annotated[
-        bool | None,
-        Field(
-            description="When true (the default on a new wall), Archicad recomputes 'visibility' automatically from the wall's vertical extent and ignores any value set for it. Setting 'visibility' without also setting this field turns it off automatically."
-        ),
-    ] = None
-    referenceMaterial: OverriddenMaterial | None = None
-    oppositeMaterial: OverriddenMaterial | None = None
-    sideMaterial: OverriddenMaterial | None = None
-    cutFillPen: OverriddenPen | None = None
-    cutFillBackgroundPen: OverriddenPen | None = None
-
-
-class WallZoneRelation(Enum):
-    BOUNDARY = "Boundary"
-    REDUCE_AREA = "ReduceArea"
-    NONE = "None"
-    SUBTRACT_FROM_ZONE = "SubtractFromZone"
-
-
-class WindowData(APIModel):
-    ownerWallId: ElementId
-    centerOffset: Annotated[float, Field(ge=0.0)]
-    sillHeight: float | None = None
-    width: Annotated[float | None, Field(gt=0.0)] = None
-    height: Annotated[float | None, Field(gt=0.0)] = None
-    reflected: bool | None = None
-    refSide: bool | None = None
-    oSide: bool | None = None
-    favoriteName: Annotated[
-        str | None,
-        Field(
-            description="Optional. Name of an existing Window favorite (as returned by `GetFavoritesByType`). Applied to the Window tool defaults before the create."
-        ),
-    ] = None
-
-
-class WindowDoorDetails(APIModel):
-    libPart: LibPartDetails
-    ownerElementId: ElementId | None = None
-    ownerElementType: ElementType | None = None
-    width: Annotated[float, Field(description="Opening width.")]
-    height: Annotated[float, Field(description="Opening height.")]
-    sillHeight: Annotated[float, Field(description="Sill height (window) or threshold height (door).")]
-    centerOffset: Annotated[float, Field(description="Center offset along the owner wall reference line.")]
-    reflected: bool
-    refSide: bool
-    oSide: bool
-
-
-class WindowType(Enum):
-    """The type of a window."""
-    FLOOR_PLAN = "FloorPlan"
-    SECTION = "Section"
-    DETAILS = "Details"
-    FIELD_3_D_MODEL = "3DModel"
-    LAYOUT = "Layout"
-    DRAWING = "Drawing"
-    CUSTOM_TEXT = "CustomText"
-    CUSTOM_DRAW = "CustomDraw"
-    MASTER_LAYOUT = "MasterLayout"
-    ELEVATION = "Elevation"
-    INTERIOR_ELEVATION = "InteriorElevation"
-    WORKSHEET = "Worksheet"
-    REPORT = "Report"
-    FIELD_3_D_DOCUMENT = "3DDocument"
-    EXTERNAL3_D = "External3D"
-    MOVIE3_D = "Movie3D"
-    MOVIE_RENDERING = "MovieRendering"
-    RENDERING = "Rendering"
-    MODEL_COMPARE = "ModelCompare"
-    INTERACTIVE_SCHEDULE = "Interactive Schedule"
-    UNKNOWN = "Unknown"
-
-
-class WindowWithDetails(APIModel):
-    elementId: ElementId
-    width: Annotated[float | None, Field(gt=0.0)] = None
-    height: Annotated[float | None, Field(gt=0.0)] = None
-    sillHeight: float | None = None
-    centerOffset: Annotated[float | None, Field(ge=0.0)] = None
-    reflected: bool | None = None
-    refSide: bool | None = None
-    oSide: bool | None = None
-    reveal: Annotated[bool | None, Field(description="Turn the reveal on or off.")] = None
-    revealDepthOffset: Annotated[
-        float | None,
-        Field(description="Distance the frame plane is moved across the wall thickness, along the wall normal."),
-    ] = None
-
-
-class WireEdge(APIModel):
-    vertexIds: Annotated[list[int], Field(max_length=2, min_length=2)]
-
-
-class WitnessForm(Enum):
-    NONE = "None"
-    SMALL = "Small"
-    LARGE = "Large"
-    FIX = "Fix"
-    UNKNOWN = "Unknown"
-
-
-class WorksheetData(APIModel):
-    name: Annotated[str, Field(min_length=1)]
-    referenceId: Annotated[str, Field(min_length=1)]
-
-
-class ZoneBoundariesOfZonesWrapper(APIModel):
-    zoneBoundariesOfZones: Annotated[
-        list[ZoneBoundariesWrapper | ErrorItem],
-        Field(description="The boundaries of each requested Zone, in the same order as the zones array of the input."),
-    ]
-
-
-class ZoneBoundariesWrapper(APIModel):
-    zoneBoundaries: list[ZoneBoundary]
-
-
-class ZoneBoundary(APIModel):
-    connectedElementId: Annotated[ElementId, Field(description="The unique identifier of the connected element.")]
-    isExternal: Annotated[bool, Field(description="True if the boundary is an external one.")]
-    neighbouringZoneElementId: Annotated[
-        ElementId,
-        Field(
-            description="Returns the unique identifier of the other Zone the element connects to if the boundary is internal. Please note that this boundary does not represent the boundary of the element with the other Zone."
-        ),
-    ]
-    area: Annotated[float, Field(description="The area of the polygon of the boundary.")]
-    polygonOutline: Annotated[list[Coordinate3D], Field(description="The outline polygon of the boundary.")]
-
-
-class ZoneBoundaryPart(APIModel):
-    """Section of a wall, beam or curtain wall segment related to a zone."""
-    elementId: ElementId
-    roomEdgeIndex: Annotated[
-        int | None,
-        Field(description="Index of the zone polygon edge adjacent to the element (not present for beams)."),
-    ] = None
-    begDistance: Annotated[
-        float,
-        Field(description="Beginning distance of the section from the beginning point of the element."),
-    ]
-    endDistance: Annotated[
-        float,
-        Field(description="End distance of the section from the beginning point of the element."),
-    ]
-
-
-class ZoneCategoryAttribute(APIModel):
-    """A zone category attribute."""
-    attributeId: AttributeId
-    index: int
-    name: str
-    categoryCode: str | None = None
-    color: ColorRGB | None = None
-    stampName: str | None = None
-    stampMainGuid: str | None = None
-    stampRevGuid: str | None = None
-
-
-class ZoneCategoryAttributeField(Enum):
-    CATEGORY_CODE = "categoryCode"
-    COLOR = "color"
-    STAMP_NAME = "stampName"
-    STAMP_MAIN_GUID = "stampMainGuid"
-    STAMP_REV_GUID = "stampRevGuid"
-
-
-class ZoneCategoryData(APIModel):
-    """Data to create a Zone Category."""
-    attributeId: Annotated[
-        AttributeId | None,
-        Field(
-            description="Indentifier of the existing Zone Category to overwrite, ignored if overwriteExisting is false."
-        ),
-    ] = None
-    index: Annotated[
-        str | None,
-        Field(description="Index of the existing Zone Category to overwrite, ignored if overwriteExisting is false."),
-    ] = None
-    name: Annotated[
-        str,
-        Field(
-            description="Name. If overwriteExisting is true, then the existing Zone Category with the given name will be overwritten."
-        ),
-    ]
-    categoryCode: Annotated[str | None, Field(description="Code of the Zone Category.")] = None
-    color: ColorRGB | None = None
-    stampName: Annotated[
-        str | None,
-        Field(
-            description="Document name of the zone stamp library part (GSM) to use, e.g. the value shown as StampDocumentName in an Attribute Manager XML export. Only used together with stampMainGuid/stampRevGuid; ignored otherwise."
-        ),
-    ] = None
-    stampMainGuid: Annotated[
-        str | None,
-        Field(
-            description="Main GUID of the zone stamp library part to use, e.g. the value shown as MainGuid in an Attribute Manager XML export (can be copied from an existing Zone Category obtained another way). If omitted, the stamp is copied from the Zone Category being overwritten, or from the project's first Zone Category when creating a new one."
-        ),
-    ] = None
-    stampRevGuid: Annotated[
-        str | None,
-        Field(
-            description="Revision GUID of the zone stamp library part to use, e.g. the value shown as RevGuid in an Attribute Manager XML export. Required together with stampMainGuid."
-        ),
-    ] = None
 
 
 class ZoneData(APIModel):
@@ -7669,50 +7439,280 @@ class ZoneDetails(APIModel):
     zCoordinate: float
 
 
-class ZoneRelations(APIModel):
-    """The relations of a zone: the related elements grouped by type and the boundary sections of walls, beams and curtain wall segments."""
-    elementsGroupedByType: Annotated[
-        list[ElementsOfElementType],
-        Field(description="The elements related to the zone, grouped by element type."),
-    ]
-    wallParts: Annotated[
-        list[ZoneBoundaryPart],
-        Field(description="Sections of walls that border the zone."),
-    ]
-    beamParts: Annotated[
-        list[ZoneBoundaryPart],
-        Field(description="Sections of beams related to the zone."),
-    ]
-    curtainWallSegmentParts: Annotated[
-        list[ZoneBoundaryPart],
-        Field(description="Sections of curtain wall segments that border the zone."),
+class AssociativeDimensionData(APIModel):
+    referencePoint: Coordinate2D
+    direction: Coordinate2D
+    floorIndex: float | None = None
+    witnessPoints: Annotated[list[AssociativeWitnessPoint], Field(min_length=2)]
+
+
+class BasicDefaultValue(APIModel):
+    """Default value of the property in case of a basic property value (ie. not an expression)."""
+    basicDefaultValue: Annotated[
+        NotAvailablePropertyValue
+        | NormalNumberPropertyValue
+        | NormalIntegerPropertyValue
+        | NormalStringPropertyValue
+        | NormalBooleanPropertyValue
+        | NormalLengthPropertyValue
+        | NormalAreaPropertyValue
+        | NormalVolumePropertyValue
+        | NormalAnglePropertyValue
+        | NormalNumberListPropertyValue
+        | NormalIntegerListPropertyValue
+        | NormalStringListPropertyValue
+        | NormalBooleanListPropertyValue
+        | NormalLengthListPropertyValue
+        | NormalAreaListPropertyValue
+        | NormalVolumeListPropertyValue
+        | NormalAngleListPropertyValue
+        | NormalSingleEnumPropertyValue
+        | NormalMultiEnumPropertyValue
+        | UserUndefinedPropertyValue,
+        Field(description="A normal, userUndefined, notAvailable or notEvaluated property value."),
     ]
 
 
-class ZoneRelationsOfElement(APIModel):
-    """Relations of a zone."""
-    zoneRelations: ZoneRelations
+class BeamRelations(APIModel):
+    """Relations of a beam."""
+    beamConnections: EndpointConnections
 
 
-class ZoneSettings(APIModel):
-    """Settings for modifying a zone."""
-    stampPosition: Annotated[
-        Coordinate2D | None,
-        Field(description="Position of the origin of the zone stamp."),
+class BeamSegmentRelations(APIModel):
+    """Relations of a beam segment."""
+    beamSegmentConnections: EndpointConnections
+
+
+class DocumentRevision(APIModel):
+    revisionId: DocumentRevisionId
+    id: str
+    finalId: str
+    ownerUser: str
+    status: Status
+    changes: Annotated[
+        list[Change] | None,
+        Field(description="All changes belonging to the given document revision."),
     ] = None
-    stampAngle: Annotated[float | None, Field(description="Rotation angle of the zone stamp in radians.")] = None
-    fixedStampAngle: Annotated[
-        bool | None,
-        Field(description="If true, the zone stamp angle remains fixed when the element is rotated."),
+    layoutInfo: LayoutInfo
+
+
+class ElementGroupParameters(APIModel):
+    """The parameters for creating a single group"""
+    elements: Annotated[
+        list[ElementIdArrayItem | GroupIdArrayItem],
+        Field(description="The elements or child groups to be grouped.", min_length=2),
+    ]
+    parentGroupId: Annotated[
+        GroupId | None,
+        Field(description="Optional parent group ID to nest this group under."),
     ] = None
 
 
-class Zoom(APIModel):
-    """The actual zoom parameters, rectangular region of the model."""
-    xMin: Annotated[float, Field(description="The minimum X value of the zoom box.")]
-    yMin: Annotated[float, Field(description="The minimum Y value of the zoom box.")]
-    xMax: Annotated[float, Field(description="The maximum X value of the zoom box.")]
-    yMax: Annotated[float, Field(description="The maximum Y value of the zoom box.")]
+class HatchDetails(APIModel):
+    coordinates: list[Coordinate2D]
+    arcs: Annotated[list[PolyArc] | None, Field(description="The arcs of the hatch outline.")] = None
+    holes: Annotated[
+        list[Hole2DWithOutline | Hole2DWithLegacyCoordinates] | None,
+        Field(description="A list of 2D holes in an element defined by closed polylines"),
+    ] = None
+    contourPenIndex: int | None = None
+    fillPenIndex: int | None = None
+    fillBackgroundPenIndex: int | None = None
+    fillId: Annotated[
+        AttributeId | None,
+        Field(description="The fill attribute used, if the hatch's type is a plain fill hatch."),
+    ] = None
+    buildingMaterialId: Annotated[
+        AttributeId | None,
+        Field(description="The building material attribute used, if the hatch's type is a building material hatch."),
+    ] = None
+    roomSpecial: Annotated[
+        int | None,
+        Field(description="Special area percent in a room (negative means OFF)."),
+    ] = None
+    showArea: Annotated[bool | None, Field(description="True if the area text is shown.")] = None
+    zCoordinate: float
+
+
+class HatchSettings(APIModel):
+    """Settings for modifying a Hatch. Setting coordinates replaces the entire polygon (outline plus optional holes) and may change the number of vertices."""
+    coordinates: Annotated[list[Coordinate2D] | None, Field(min_length=3)] = None
+    arcs: list[PolyArc] | None = None
+    holes: Annotated[
+        list[Hole2DWithOutline | Hole2DWithLegacyCoordinates] | None,
+        Field(description="A list of 2D holes in an element defined by closed polylines"),
+    ] = None
+    contourPenIndex: int | None = None
+    fillPenIndex: int | None = None
+    fillBackgroundPenIndex: int | None = None
+    fillId: AttributeId | None = None
+    buildingMaterialId: AttributeId | None = None
+    roomSpecial: int | None = None
+    showArea: bool | None = None
+
+
+class LayerCombinationAttribute(APIModel):
+    """A layer combination attribute."""
+    layerCombination: LayerCombinationAttributeDetails
+
+
+class PropertyDefinition(APIModel):
+    name: str
+    description: str
+    type: PropertyDataType
+    isEditable: bool
+    defaultValue: BasicDefaultValue | ExpressionDefaultValue | None = None
+    possibleEnumValues: Annotated[
+        list[PossibleEnumValue] | None,
+        Field(description="The possible enum values of the property when the property type is enumeration."),
+    ] = None
+    availability: Annotated[
+        list[ClassificationItemIdArrayItem],
+        Field(description="The identifiers of classification items the new property is available for."),
+    ]
+    group: Annotated[
+        Group,
+        Field(description="The property group defined by name or id. If both fields exists the id will be used."),
+    ]
+
+
+class PropertyDefinitionArrayItem(APIModel):
+    """A wrapper containing a property definition"""
+    propertyDefinition: PropertyDefinition
+
+
+class ZoneBoundariesOfZonesWrapper(APIModel):
+    zoneBoundariesOfZones: Annotated[
+        list[ZoneBoundariesWrapper | ErrorItem],
+        Field(description="The boundaries of each requested Zone, in the same order as the zones array of the input."),
+    ]
+
+
+class DetailsOfElement(APIModel):
+    """Details of an element. When the optional fields filter is given in the input, only the requested fields are present; the required list below applies to unfiltered requests."""
+    type: ElementType
+    id: str
+    floorIndex: float
+    layerIndex: float
+    drawIndex: float
+    hotlinkId: Annotated[
+        ElementId | None,
+        Field(
+            description="The hotlink instance this element belongs to. Present only for elements that came in through a placed hotlink; such elements are read-only."
+        ),
+    ] = None
+    details: Annotated[
+        HotlinkDetails
+        | WallDetails
+        | BeamDetails
+        | SlabDetails
+        | RoofDetails
+        | ColumnDetails
+        | DetailWorksheetDetails
+        | WindowDoorDetails
+        | LibPartBasedElementDetails
+        | ObjectDetails
+        | PolylineDetails
+        | ZoneDetails
+        | CurtainWallDetails
+        | CurtainWallSegmentDetails
+        | CurtainWallPanelDetails
+        | CurtainWallFrameDetails
+        | MeshDetails
+        | MorphDetails
+        | DrawingDetails
+        | LabelDetails
+        | TextDetails
+        | NotYetSupportedElementTypeDetails,
+        Field(
+            description="Represents the complete type-specific details of an element. Used as output from GET requests"
+        ),
+    ]
+    floorPlanPolygons: Annotated[
+        list[FloorPlanPolygon] | None,
+        Field(
+            description="Cut-fill polygons as drawn on the floor plan (wall joins resolved by ArchiCAD). Available for elements with a cut-fill representation (walls, columns, beams). Absent when the element has no cut fill or when the floor plan database is not accessible."
+        ),
+    ] = None
+
+
+class Details(APIModel):
+    """Details of an element."""
+    floorIndex: float | None = None
+    layerIndex: float | None = None
+    drawIndex: float | None = None
+    typeSpecificDetails: Annotated[
+        WallSettings
+        | ZoneSettings
+        | LineSettings
+        | ArcSettings
+        | HotspotSettings
+        | SplineSettings
+        | PolylineSettings
+        | HatchSettings
+        | DrawingSettings
+        | TextSettings
+        | None,
+        Field(
+            description="Defines the modifiable type-specific settings for an element. Used as input for SET requests."
+        ),
+    ] = None
+
+
+class ElementsWithDetail(APIModel):
+    elementId: ElementId
+    details: Annotated[Details, Field(description="Details of an element.")]
+
+
+class Hotlink(APIModel):
+    """The details of a hotlink node."""
+    location: Annotated[str, Field(description="The path of the hotlink file.")]
+    hotlinkNodeId: HotlinkNodeId | None = None
+    name: Annotated[str | None, Field(description="The display name of the hotlink node.")] = None
+    type: HotlinkType | None = None
+    children: Annotated[
+        list[Hotlink] | None,
+        Field(description="The children of the hotlink node if it has any."),
+    ] = None
+
+
+class NavigatorItem(APIModel):
+    """A navigator item and the subtree below it."""
+    navigatorItemId: NavigatorItemId
+    type: NavigatorItemType
+    name: Annotated[str, Field(description="The name of the navigator item.")]
+    prefix: Annotated[
+        str,
+        Field(description="The floor number for story items, an empty string for every other item type."),
+    ]
+    uiId: Annotated[
+        str,
+        Field(description="The identifier shown next to the name on the navigator."),
+    ]
+    customUiId: Annotated[
+        bool,
+        Field(
+            description='True when the identifier was typed by hand instead of being inherited from the Project Map source - the View Settings ID "Custom" radio button.'
+        ),
+    ]
+    customName: Annotated[
+        bool,
+        Field(
+            description='True when the name was typed by hand instead of being inherited from the Project Map source - the View Settings name "Custom" radio button.'
+        ),
+    ]
+    isIndependent: Annotated[
+        bool,
+        Field(description="True when the item is independent, that is when its link to the Project Map is broken."),
+    ]
+    children: Annotated[
+        list[NavigatorItemArrayItem] | None,
+        Field(description="The children of the navigator item. Missing when the item has no children."),
+    ] = None
+
+
+class NavigatorItemArrayItem(APIModel):
+    navigatorItem: NavigatorItem
 
 
 Hole2D: TypeAlias = Hole2DWithOutline | Hole2DWithLegacyCoordinates
@@ -7725,6 +7725,6 @@ TextData: TypeAlias = TextDataWithText | TextDataWithRuns
 
 
 ClassificationItemDetails.model_rebuild()
-Hotlink.model_rebuild()
 KeynoteFolderDetails.model_rebuild()
+Hotlink.model_rebuild()
 NavigatorItem.model_rebuild()

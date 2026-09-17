@@ -263,411 +263,8 @@ from .types import (
 )
 
 
-class AddCommentToIssueParameters(APIModel):
-    issueId: IssueId
-    author: Annotated[str | None, Field(description="The author of the new comment.")] = None
-    status: IssueCommentStatus | None = None
-    text: Annotated[str, Field(description="Comment text to add.")]
-
-
-class AddFilesToEmbeddedLibraryParameters(APIModel):
-    files: Annotated[
-        list[LibraryFileAddition],
-        Field(description="A list of library file additions to the embedded library"),
-    ]
-
-
-class AddFilesToEmbeddedLibraryResult(APIModel):
-    executionResults: Annotated[
-        list[SuccessfulExecutionResult | FailedExecutionResult],
-        Field(description="A list of execution results."),
-    ]
-
-
-class AddLibrariesParameters(APIModel):
-    libraries: Annotated[
-        list[LibraryLocation],
-        Field(description="Local library folders or container files, by absolute path."),
-    ]
-
-
-class ApplyFavoritesToElementDefaultsParameters(APIModel):
-    favorites: Annotated[list[str], Field(description="A list of favorite names")]
-
-
-class ApplyFavoritesToElementDefaultsResult(APIModel):
-    executionResults: Annotated[
-        list[SuccessfulExecutionResult | FailedExecutionResult],
-        Field(description="A list of execution results."),
-    ]
-
-
-class ApplyFavoritesToElementsParameters(APIModel):
-    favoritesToApply: list[FavoritesToApplyItem]
-    applySettings: Annotated[
-        bool | None,
-        Field(
-            description="Whether to apply the Favorite's settings-type parameters (structure, materials, pens, etc. - never geometry). For the hierarchical types (Stair, Railing, Curtain Wall) the settings of the sub-elements are not applied, because they are inseparable from the Favorite's own geometry. Default is true."
-        ),
-    ] = None
-    applyClassifications: Annotated[
-        bool | None,
-        Field(description="Whether to apply the Favorite's classifications. Default is true."),
-    ] = None
-    applyCategories: Annotated[
-        bool | None,
-        Field(description="Whether to apply the Favorite's element categories (e.g. IFC categories). Default is true."),
-    ] = None
-    applyProperties: Annotated[
-        bool | None,
-        Field(description="Whether to apply the Favorite's property values. Default is true."),
-    ] = None
-
-
-class ApplyFavoritesToElementsResult(APIModel):
-    executionResults: Annotated[
-        list[SuccessfulExecutionResult | FailedExecutionResult],
-        Field(description="A list of execution results."),
-    ]
-
-
-class AttachElementsToIssueParameters(APIModel):
-    issueId: IssueId
-    elements: Annotated[list[ElementIdArrayItem], Field(description="A list of elements.")]
-    type: IssueElementType
-
-
-class ChangeDrawingLinkParameters(APIModel):
-    drawingsWithNewLinks: list[DrawingsWithNewLink]
-
-
-class ChangeDrawingLinkResult(APIModel):
-    elements: Annotated[
-        list[ElementIdArrayItem | ErrorItem],
-        Field(
-            description="One result per input item. On success, elementId is the NEW Drawing's identifier - relinking necessarily replaces the element, it cannot keep the original guid."
-        ),
-    ]
-
-
-class ChangeHotlinkInstancesParameters(APIModel):
-    hotlinkInstances: Annotated[
-        list[HotlinkInstanceChange],
-        Field(
-            description="The placed hotlink instances to change. Every field but elementId is optional; a field that is omitted keeps its current value."
-        ),
-    ]
-
-
-class ChangeHotlinkInstancesResult(APIModel):
-    executionResults: Annotated[
-        list[SuccessfulExecutionResult | FailedExecutionResult],
-        Field(description="A list of execution results."),
-    ]
-
-
-class ChangeSelectionOfElementsParameters(APIModel):
-    addElementsToSelection: Annotated[list[ElementIdArrayItem] | None, Field(description="A list of elements.")] = None
-    removeElementsFromSelection: Annotated[
-        list[ElementIdArrayItem] | None, Field(description="A list of elements.")
-    ] = None
-
-
-class ChangeSelectionOfElementsResult(APIModel):
-    executionResultsOfAddToSelection: Annotated[
-        list[SuccessfulExecutionResult | FailedExecutionResult],
-        Field(description="A list of execution results."),
-    ]
-    executionResultsOfRemoveFromSelection: Annotated[
-        list[SuccessfulExecutionResult | FailedExecutionResult],
-        Field(description="A list of execution results."),
-    ]
-
-
-class CloneProjectMapItemToViewMapParameters(APIModel):
-    viewsData: Annotated[
-        list[ViewCloneData],
-        Field(description="Array of views to clone from the Project Map to the View Map."),
-    ]
-
-
-class CloneProjectMapItemToViewMapResult(APIModel):
-    navigatorItems: list[NavigatorItemIdArrayItem | ErrorItem]
-
-
-class ConnectMEPElementsParameters(APIModel):
-    connectionsData: Annotated[list[MEPConnectionData], Field(description="Array of connections to create.")]
-
-
-class ConnectMEPElementsResult(APIModel):
-    connectionResults: Annotated[
-        list[MEPConnectionResult | ErrorItem],
-        Field(description="A list of MEP connection results or errors."),
-    ]
-
-
-class CreateArcsParameters(APIModel):
-    arcsData: Annotated[list[ArcData], Field(description="Array of data to create Arcs.")]
-
-
-class CreateArcsResult(APIModel):
-    elements: Annotated[
-        list[ElementIdArrayItem | ErrorItem],
-        Field(description="A list of element identifiers or errors."),
-    ]
-
-
-class CreateAssociativeDimensionsOnSectionParameters(APIModel):
-    dimensionsData: list[AssociativeDimensionOnSectionData]
-
-
-class CreateAssociativeDimensionsOnSectionResult(APIModel):
-    elements: Annotated[
-        list[ElementIdArrayItem | ErrorItem],
-        Field(description="A list of element identifiers or errors."),
-    ]
-
-
-class CreateAssociativeDimensionsParameters(APIModel):
-    dimensionsData: list[AssociativeDimensionData]
-
-
-class CreateAssociativeDimensionsResult(APIModel):
-    elements: Annotated[
-        list[ElementIdArrayItem | ErrorItem],
-        Field(description="A list of element identifiers or errors."),
-    ]
-
-
-class CreateBeamsParameters(APIModel):
-    beamsData: list[BeamData]
-
-
-class CreateBeamsResult(APIModel):
-    elements: Annotated[
-        list[ElementIdArrayItem | ErrorItem],
-        Field(description="A list of element identifiers or errors."),
-    ]
-
-
-class CreateBuildingMaterialsParameters(APIModel):
-    buildingMaterialDataArray: Annotated[
-        list[BuildingMaterialData],
-        Field(description="Array of data to create new Building Materials."),
-    ]
-    overwriteExisting: Annotated[
-        bool | None,
-        Field(
-            description="Overwrite the Building Material if exists with the same name, or if index is given with the same index. The default is false."
-        ),
-    ] = None
-
-
-class CreateBuildingMaterialsResult(APIModel):
-    attributeIds: Annotated[
-        list[AttributeIdArrayItem | ErrorItem],
-        Field(description="A list of attribute identifiers or errors."),
-    ]
-
-
-class CreateCirclesParameters(APIModel):
-    circlesData: Annotated[list[CircleData], Field(description="Array of data to create Circles.")]
-
-
-class CreateCirclesResult(APIModel):
-    elements: Annotated[
-        list[ElementIdArrayItem | ErrorItem],
-        Field(description="A list of element identifiers or errors."),
-    ]
-
-
-class CreateClassificationItemsParameters(APIModel):
-    newClassificationItems: Annotated[
-        list[NewClassificationItem],
-        Field(description="Classification systems with items."),
-    ]
-
-
-class CreateClassificationItemsResult(APIModel):
-    executionResults: Annotated[
-        list[SuccessfulExecutionResult | FailedExecutionResult],
-        Field(description="A list of execution results."),
-    ]
-
-
-class CreateClassificationSystemsParameters(APIModel):
-    classificationSystemsWithItems: Annotated[
-        list[ClassificationSystemsWithItem],
-        Field(description="Classification systems with items."),
-    ]
-
-
-class CreateClassificationSystemsResult(APIModel):
-    executionResults: Annotated[
-        list[SuccessfulExecutionResult | FailedExecutionResult],
-        Field(description="A list of execution results."),
-    ]
-
-
-class CreateColumnsParameters(APIModel):
-    columnsData: Annotated[list[ColumnData], Field(description="Array of data to create Columns.")]
-
-
-class CreateColumnsResult(APIModel):
-    elements: Annotated[
-        list[ElementIdArrayItem | ErrorItem],
-        Field(description="A list of element identifiers or errors."),
-    ]
-
-
-class CreateCompositesParameters(APIModel):
-    compositeDataArray: Annotated[list[CompositeData], Field(description="Array of data to create Composites.")]
-    overwriteExisting: Annotated[
-        bool | None,
-        Field(
-            description="Overwrite the Composite if exists with the same name, or if index is given with the same index. The default is false."
-        ),
-    ] = None
-
-
-class CreateCompositesResult(APIModel):
-    attributeIds: Annotated[
-        list[AttributeIdArrayItem | ErrorItem],
-        Field(description="A list of attribute identifiers or errors."),
-    ]
-
-
-class CreateDesignOptionCombinationsParameters(APIModel):
-    designOptionCombinations: list[DesignOptionCombinationData]
-
-
-class CreateDesignOptionCombinationsResult(APIModel):
-    designOptionCombinationIdsOrErrors: Annotated[
-        list[DesignOptionCombinationIdArrayItem | ErrorItem],
-        Field(description="A list of design option combination identifiers or errors."),
-    ]
-
-
 class CreateDesignOptionSetsParameters(APIModel):
     designOptionSets: list[str]
-
-
-class CreateDesignOptionSetsResult(APIModel):
-    executionResults: Annotated[
-        list[SuccessfulExecutionResult | FailedExecutionResult],
-        Field(description="A list of execution results."),
-    ]
-
-
-class CreateDesignOptionsParameters(APIModel):
-    designOptions: list[DesignOptionData]
-
-
-class CreateDesignOptionsResult(APIModel):
-    designOptionIdsOrErrors: Annotated[
-        list[DesignOptionIdArrayItem | ErrorItem],
-        Field(description="A list of design option identifiers or errors."),
-    ]
-
-
-class CreateDetailsParameters(APIModel):
-    detailsData: list[DetailData]
-
-
-class CreateDetailsResult(APIModel):
-    databases: Annotated[
-        list[DatabaseIdArrayItem | ErrorItem],
-        Field(description="A list of Archicad database identifiers or errors."),
-    ]
-
-
-class CreateDoorsParameters(APIModel):
-    doorsData: list[DoorData]
-
-
-class CreateDoorsResult(APIModel):
-    elements: Annotated[
-        list[ElementIdArrayItem | ErrorItem],
-        Field(description="A list of element identifiers or errors."),
-    ]
-
-
-class CreateDrawingsParameters(APIModel):
-    drawingsData: list[DrawingData]
-
-
-class CreateDrawingsResult(APIModel):
-    elements: Annotated[
-        list[ElementIdArrayItem | ErrorItem],
-        Field(description="A list of element identifiers or errors."),
-    ]
-
-
-class CreateFavoritesFromElementsParameters(APIModel):
-    favoritesFromElements: list[FavoritesFromElement]
-
-
-class CreateFavoritesFromElementsResult(APIModel):
-    executionResults: Annotated[
-        list[SuccessfulExecutionResult | FailedExecutionResult],
-        Field(description="A list of execution results."),
-    ]
-
-
-class CreateFillsParameters(APIModel):
-    fillDataArray: Annotated[list[FillData], Field(description="Array of data to create new Fills.")]
-    overwriteExisting: Annotated[
-        bool | None,
-        Field(
-            description="Overwrite the Fill if exists with the same name, or if index is given with the same index. The default is false."
-        ),
-    ] = None
-
-
-class CreateFillsResult(APIModel):
-    attributeIds: Annotated[
-        list[AttributeIdArrayItem | ErrorItem],
-        Field(description="A list of attribute identifiers or errors."),
-    ]
-
-
-class CreateGroupsParameters(APIModel):
-    elementGroups: Annotated[
-        list[ElementGroupParameters],
-        Field(description="A list of element groups to create."),
-    ]
-
-
-class CreateGroupsResult(APIModel):
-    groupGuids: Annotated[
-        list[GroupIdArrayItem | ErrorItem],
-        Field(description="The results of the group creation operations."),
-    ]
-
-
-class CreateHatchesParameters(APIModel):
-    hatchesData: Annotated[list[HatchData], Field(description="Array of data to create Hatches.")]
-
-
-class CreateHatchesResult(APIModel):
-    elements: Annotated[
-        list[ElementIdArrayItem | ErrorItem],
-        Field(description="A list of element identifiers or errors."),
-    ]
-
-
-class CreateHotlinkInstancesParameters(APIModel):
-    hotlinkInstances: Annotated[
-        list[HotlinkInstanceCreation],
-        Field(description="The hotlink instances to place."),
-    ]
-
-
-class CreateHotlinkInstancesResult(APIModel):
-    elements: Annotated[
-        list[ElementIdArrayItem | ErrorItem],
-        Field(description="A list of element identifiers or errors."),
-    ]
 
 
 class CreateHotlinkNodesParameters(APIModel):
@@ -679,676 +276,6 @@ class CreateHotlinkNodesParameters(APIModel):
     ]
 
 
-class CreateHotlinkNodesResult(APIModel):
-    hotlinkNodes: Annotated[
-        list[HotlinkNodeCreated | ErrorItem],
-        Field(description="One item per requested node, in order: the node guid with its existing flag, or an error."),
-    ]
-
-
-class CreateHotspotsParameters(APIModel):
-    hotspotsData: Annotated[list[HotspotData], Field(description="Array of data to create Hotspots.")]
-
-
-class CreateHotspotsResult(APIModel):
-    elements: Annotated[
-        list[ElementIdArrayItem | ErrorItem],
-        Field(description="A list of element identifiers or errors."),
-    ]
-
-
-class CreateInteriorElevationsParameters(APIModel):
-    interiorElevationsData: Annotated[
-        list[InteriorElevationData],
-        Field(description="Array of data to create Interior Elevation elements."),
-    ]
-
-
-class CreateInteriorElevationsResult(APIModel):
-    elements: Annotated[
-        list[ElementIdArrayItem | ErrorItem],
-        Field(description="A list of element identifiers or errors."),
-    ]
-
-
-class CreateIssueParameters(APIModel):
-    name: Annotated[str, Field(description="The name of the issue.")]
-    parentIssueId: IssueId | None = None
-    tagText: Annotated[str | None, Field(description="Tag text of the issue, optional.")] = None
-
-
-class CreateIssueResult(APIModel):
-    issueId: IssueId
-
-
-class CreateKeynoteFoldersParameters(APIModel):
-    foldersData: Annotated[
-        list[KeynoteFolderData],
-        Field(description="Array of data to create keynote folders."),
-    ]
-
-
-class CreateKeynoteFoldersResult(APIModel):
-    keynoteFolderIdsOrErrors: Annotated[
-        list[KeynoteFolderIdArrayItem | ErrorItem],
-        Field(description="A list of keynote folder identifiers or errors."),
-    ]
-
-
-class CreateKeynoteItemsParameters(APIModel):
-    itemsData: Annotated[
-        list[KeynoteItemData],
-        Field(description="Array of data to create keynote items."),
-    ]
-
-
-class CreateKeynoteItemsResult(APIModel):
-    keynoteItemIdsOrErrors: Annotated[
-        list[KeynoteItemIdArrayItem | ErrorItem],
-        Field(description="A list of keynote item identifiers or errors."),
-    ]
-
-
-class CreateKeynoteLabelsParameters(APIModel):
-    labelsData: Annotated[
-        list[KeynoteLabelData],
-        Field(description="Array of data to create keynote labels."),
-    ]
-
-
-class CreateKeynoteLabelsResult(APIModel):
-    elements: Annotated[
-        list[ElementIdArrayItem | ErrorItem],
-        Field(description="A list of element identifiers or errors."),
-    ]
-
-
-class CreateLabelsParameters(APIModel):
-    labelsData: Annotated[list[LabelData], Field(description="Array of data to create Labels.")]
-
-
-class CreateLabelsResult(APIModel):
-    elements: Annotated[
-        list[ElementIdArrayItem | ErrorItem],
-        Field(description="A list of element identifiers or errors."),
-    ]
-
-
-class CreateLampsParameters(APIModel):
-    lampsData: Annotated[list[LampData], Field(description="Array of data to create Lamps.")]
-
-
-class CreateLampsResult(APIModel):
-    elements: Annotated[
-        list[ElementIdArrayItem | ErrorItem],
-        Field(description="A list of element identifiers or errors."),
-    ]
-
-
-class CreateLayerCombinationsParameters(APIModel):
-    layerCombinationDataArray: Annotated[
-        list[LayerCombinationDataArrayItem],
-        Field(description="Array of data to create new Layer Combinations."),
-    ]
-    overwriteExisting: Annotated[
-        bool | None,
-        Field(
-            description="Overwrite the Layer Combination if exists with the same guid/index/name. The default is false."
-        ),
-    ] = None
-
-
-class CreateLayerCombinationsResult(APIModel):
-    attributeIds: Annotated[
-        list[AttributeIdArrayItem | ErrorItem],
-        Field(description="A list of attribute identifiers or errors."),
-    ]
-
-
-class CreateLayersParameters(APIModel):
-    layerDataArray: Annotated[list[LayerData], Field(description="Array of data to create new Layers.")]
-    overwriteExisting: Annotated[
-        bool | None,
-        Field(
-            description="Overwrite the Layer if exists with the same name, or if index is given with the same index. The default is false."
-        ),
-    ] = None
-
-
-class CreateLayersResult(APIModel):
-    attributeIds: Annotated[
-        list[AttributeIdArrayItem | ErrorItem],
-        Field(description="A list of attribute identifiers or errors."),
-    ]
-
-
-class CreateLayoutParameters(APIModel):
-    layoutsData: list[LayoutData]
-
-
-class CreateLayoutResult(APIModel):
-    databases: Annotated[
-        list[DatabaseIdArrayItem | ErrorItem],
-        Field(description="A list of Archicad database identifiers or errors."),
-    ]
-
-
-class CreateLayoutSubsetParameters(APIModel):
-    subsetsData: list[SubsetData]
-
-
-class CreateLayoutSubsetResult(APIModel):
-    navigatorItems: list[NavigatorItemIdArrayItem | ErrorItem]
-
-
-class CreateLineElementsParameters(APIModel):
-    linesData: Annotated[list[LineElementData], Field(description="Array of data to create Lines.")]
-
-
-class CreateLineElementsResult(APIModel):
-    elements: Annotated[
-        list[ElementIdArrayItem | ErrorItem],
-        Field(description="A list of element identifiers or errors."),
-    ]
-
-
-class CreateLinesParameters(APIModel):
-    lineDataArray: Annotated[list[LineData], Field(description="Array of data to create new Lines.")]
-    overwriteExisting: Annotated[
-        bool | None,
-        Field(
-            description="Overwrite the Line if exists with the same name, or if index is given with the same index. The default is false."
-        ),
-    ] = None
-
-
-class CreateLinesResult(APIModel):
-    attributeIds: Annotated[
-        list[AttributeIdArrayItem | ErrorItem],
-        Field(description="A list of attribute identifiers or errors."),
-    ]
-
-
-class CreateMEPElementsParameters(APIModel):
-    elementsData: Annotated[list[MEPElementData], Field(description="Array of data to create MEP elements.")]
-
-
-class CreateMEPElementsResult(APIModel):
-    elements: Annotated[
-        list[ElementIdArrayItem | ErrorItem],
-        Field(description="A list of element identifiers or errors."),
-    ]
-
-
-class CreateMEPRoutingElementsParameters(APIModel):
-    routingElementsData: Annotated[
-        list[MEPRoutingElementData],
-        Field(description="Array of data to create MEP routing elements."),
-    ]
-
-
-class CreateMEPRoutingElementsResult(APIModel):
-    elements: Annotated[
-        list[ElementIdArrayItem | ErrorItem],
-        Field(description="A list of element identifiers or errors."),
-    ]
-
-
-class CreateMEPSystemsParameters(APIModel):
-    mepSystemDataArray: Annotated[
-        list[MEPSystemData],
-        Field(description="Array of data to create new MEP Systems."),
-    ]
-    overwriteExisting: Annotated[
-        bool | None,
-        Field(
-            description="Overwrite the MEP System if exists with the same name, or if index is given with the same index. The default is false."
-        ),
-    ] = None
-
-
-class CreateMEPSystemsResult(APIModel):
-    attributeIds: Annotated[
-        list[AttributeIdArrayItem | ErrorItem],
-        Field(description="A list of attribute identifiers or errors."),
-    ]
-
-
-class CreateMeshesParameters(APIModel):
-    meshesData: Annotated[list[MeshData], Field(description="Array of data to create Meshes.")]
-
-
-class CreateMeshesResult(APIModel):
-    elements: Annotated[
-        list[ElementIdArrayItem | ErrorItem],
-        Field(description="A list of element identifiers or errors."),
-    ]
-
-
-class CreateMorphsParameters(APIModel):
-    morphsData: list[MorphData]
-
-
-class CreateMorphsResult(APIModel):
-    elements: Annotated[
-        list[ElementIdArrayItem | ErrorItem],
-        Field(description="A list of element identifiers or errors."),
-    ]
-
-
-class CreateObjectsParameters(APIModel):
-    objectsData: Annotated[list[ObjectData], Field(description="Array of data to create Objects.")]
-
-
-class CreateObjectsResult(APIModel):
-    elements: Annotated[
-        list[ElementIdArrayItem | ErrorItem],
-        Field(description="A list of element identifiers or errors."),
-    ]
-
-
-class CreateOpeningsParameters(APIModel):
-    openingsData: list[OpeningData]
-
-
-class CreateOpeningsResult(APIModel):
-    elements: Annotated[
-        list[ElementIdArrayItem | ErrorItem],
-        Field(description="A list of element identifiers or errors."),
-    ]
-
-
-class CreatePenTablesParameters(APIModel):
-    penTableDataArray: Annotated[list[PenTableData], Field(description="Array of data to create new Pen Tables.")]
-    overwriteExisting: Annotated[
-        bool | None,
-        Field(
-            description="Overwrite the Pen Table if exists with the same name, or if index is given with the same index. The default is false."
-        ),
-    ] = None
-
-
-class CreatePenTablesResult(APIModel):
-    attributeIds: Annotated[
-        list[AttributeIdArrayItem | ErrorItem],
-        Field(description="A list of attribute identifiers or errors."),
-    ]
-
-
-class CreatePolylinesParameters(APIModel):
-    polylinesData: Annotated[list[PolylineData], Field(description="Array of data to create Polylines.")]
-
-
-class CreatePolylinesResult(APIModel):
-    elements: Annotated[
-        list[ElementIdArrayItem | ErrorItem],
-        Field(description="A list of element identifiers or errors."),
-    ]
-
-
-class CreateProfilesParameters(APIModel):
-    profileDataArray: Annotated[list[ProfileData], Field(description="Array of data to create new Profiles.")]
-    overwriteExisting: Annotated[
-        bool | None,
-        Field(
-            description="Overwrite the Profile if exists with the same name, or if index is given with the same index. The default is false."
-        ),
-    ] = None
-
-
-class CreateProfilesResult(APIModel):
-    attributeIds: Annotated[
-        list[AttributeIdArrayItem | ErrorItem],
-        Field(description="A list of attribute identifiers or errors."),
-    ]
-
-
-class CreateProjectInfoFieldsParameters(APIModel):
-    projectInfoFields: Annotated[
-        list[ProjectInfoFieldData],
-        Field(description="Array of custom project info fields to create."),
-    ]
-
-
-class CreateProjectInfoFieldsResult(APIModel):
-    fields: Annotated[list[ProjectInfoField], Field(description="A list of project info fields.")]
-
-
-class CreatePropertyDefinitionsParameters(APIModel):
-    propertyDefinitions: Annotated[
-        list[PropertyDefinitionArrayItem],
-        Field(description="The parameters of the new properties."),
-    ]
-
-
-class CreatePropertyDefinitionsResult(APIModel):
-    propertyIds: Annotated[
-        list[PropertyIdArrayItem | ErrorItem],
-        Field(description="A list of property identifiers."),
-    ]
-
-
-class CreatePropertyGroupsParameters(APIModel):
-    propertyGroups: Annotated[
-        list[PropertyGroupArrayItem],
-        Field(description="The parameters of the new property groups."),
-    ]
-
-
-class CreatePropertyGroupsResult(APIModel):
-    propertyGroupIds: Annotated[
-        list[PropertyGroupIdArrayItem],
-        Field(description="The identifiers of the created property groups."),
-    ]
-
-
-class CreateRoofsParameters(APIModel):
-    roofsData: list[RoofData]
-
-
-class CreateRoofsResult(APIModel):
-    elements: Annotated[
-        list[ElementIdArrayItem | ErrorItem],
-        Field(description="A list of element identifiers or errors."),
-    ]
-
-
-class CreateSectionsParameters(APIModel):
-    sectionsData: list[SectionData]
-
-
-class CreateSectionsResult(APIModel):
-    elements: Annotated[
-        list[ElementIdArrayItem | ErrorItem],
-        Field(description="A list of element identifiers or errors."),
-    ]
-
-
-class CreateSlabsParameters(APIModel):
-    slabsData: Annotated[list[SlabData], Field(description="Array of data to create Slabs.")]
-
-
-class CreateSlabsResult(APIModel):
-    elements: Annotated[
-        list[ElementIdArrayItem | ErrorItem],
-        Field(description="A list of element identifiers or errors."),
-    ]
-
-
-class CreateSolidElementLinksParameters(APIModel):
-    solidLinks: Annotated[
-        list[SolidLinkData],
-        Field(description="List of solid element operation links to create."),
-    ]
-
-
-class CreateSolidElementLinksResult(APIModel):
-    executionResults: Annotated[
-        list[SuccessfulExecutionResult | FailedExecutionResult],
-        Field(description="A list of execution results."),
-    ]
-
-
-class CreateSplinesParameters(APIModel):
-    splinesData: Annotated[
-        list[SplineData],
-        Field(
-            description="Array of data to create Splines. Only auto-smoothed curves are supported (bezier handle positions are calculated automatically by Archicad from the point positions)."
-        ),
-    ]
-
-
-class CreateSplinesResult(APIModel):
-    elements: Annotated[
-        list[ElementIdArrayItem | ErrorItem],
-        Field(description="A list of element identifiers or errors."),
-    ]
-
-
-class CreateStairsParameters(APIModel):
-    stairsData: Annotated[list[StairData], Field(description="Array of data to create Stair elements.")]
-
-
-class CreateStairsResult(APIModel):
-    elements: Annotated[
-        list[ElementIdArrayItem | ErrorItem],
-        Field(description="A list of element identifiers or errors."),
-    ]
-
-
-class CreateSurfacesParameters(APIModel):
-    surfaceDataArray: Annotated[list[SurfaceData], Field(description="Array of data to create new surfaces.")]
-    overwriteExisting: Annotated[
-        bool | None,
-        Field(
-            description="Overwrite the Surface if exists with the same name, or if index is given with the same index. The default is false."
-        ),
-    ] = None
-
-
-class CreateSurfacesResult(APIModel):
-    attributeIds: Annotated[
-        list[AttributeIdArrayItem | ErrorItem],
-        Field(description="A list of attribute identifiers or errors."),
-    ]
-
-
-class CreateTextsParameters(APIModel):
-    textsData: Annotated[
-        list[TextDataWithText | TextDataWithRuns],
-        Field(description="Array of data to create Texts."),
-    ]
-
-
-class CreateTextsResult(APIModel):
-    elements: Annotated[
-        list[ElementIdArrayItem | ErrorItem],
-        Field(description="A list of element identifiers or errors."),
-    ]
-
-
-class CreateViewMapFolderParameters(APIModel):
-    folderName: Annotated[str, Field(description="Name of the new folder to create in the View Map.")]
-    parentNavigatorItemId: Annotated[
-        NavigatorItemId | None,
-        Field(description="Navigator item ID of the parent View Map folder. Optional; defaults to the View Map root."),
-    ] = None
-
-
-class CreateViewMapFolderResult(APIModel):
-    navigatorItemId: NavigatorItemId
-
-
-class CreateViewsInViewMapParameters(APIModel):
-    viewsData: Annotated[
-        list[ViewData],
-        Field(description="Array of views to create as independent (non-clone) items in the View Map."),
-    ]
-
-
-class CreateViewsInViewMapResult(APIModel):
-    navigatorItems: list[NavigatorItemIdArrayItem | ErrorItem]
-
-
-class CreateWallThicknessDimensionsParameters(APIModel):
-    dimensionsData: list[WallThicknessDimensionData]
-
-
-class CreateWallThicknessDimensionsResult(APIModel):
-    elements: Annotated[
-        list[ElementIdArrayItem | ErrorItem],
-        Field(description="A list of element identifiers or errors."),
-    ]
-
-
-class CreateWallsParameters(APIModel):
-    wallsData: list[WallData]
-
-
-class CreateWallsResult(APIModel):
-    elements: Annotated[
-        list[ElementIdArrayItem | ErrorItem],
-        Field(description="A list of element identifiers or errors."),
-    ]
-
-
-class CreateWindowsParameters(APIModel):
-    windowsData: list[WindowData]
-
-
-class CreateWindowsResult(APIModel):
-    elements: Annotated[
-        list[ElementIdArrayItem | ErrorItem],
-        Field(description="A list of element identifiers or errors."),
-    ]
-
-
-class CreateWorksheetsParameters(APIModel):
-    worksheetsData: list[WorksheetData]
-
-
-class CreateWorksheetsResult(APIModel):
-    databases: Annotated[
-        list[DatabaseIdArrayItem | ErrorItem],
-        Field(description="A list of Archicad database identifiers or errors."),
-    ]
-
-
-class CreateZoneCategoriesParameters(APIModel):
-    zoneCategoryDataArray: Annotated[
-        list[ZoneCategoryData],
-        Field(description="Array of data to create new Zone Categories."),
-    ]
-    overwriteExisting: Annotated[
-        bool | None,
-        Field(
-            description="Overwrite the Zone Category if exists with the same name, or if index is given with the same index. The default is false."
-        ),
-    ] = None
-
-
-class CreateZoneCategoriesResult(APIModel):
-    attributeIds: Annotated[
-        list[AttributeIdArrayItem | ErrorItem],
-        Field(description="A list of attribute identifiers or errors."),
-    ]
-
-
-class CreateZonesParameters(APIModel):
-    zonesData: Annotated[list[ZoneData], Field(description="Array of data to create Zones.")]
-
-
-class CreateZonesResult(APIModel):
-    elements: Annotated[
-        list[ElementIdArrayItem | ErrorItem],
-        Field(description="A list of element identifiers or errors."),
-    ]
-
-
-class DeleteAttributesParameters(APIModel):
-    attributesToDelete: Annotated[
-        list[AttributesToDeleteItem],
-        Field(description="Array of attributes to delete."),
-    ]
-
-
-class DeleteAttributesResult(APIModel):
-    executionResults: Annotated[
-        list[SuccessfulExecutionResult | FailedExecutionResult],
-        Field(description="A list of execution results."),
-    ]
-
-
-class DeleteClassificationItemsParameters(APIModel):
-    classificationItemIds: Annotated[
-        list[ClassificationItemIdArrayItem],
-        Field(description="A list of classification item identifiers."),
-    ]
-
-
-class DeleteClassificationItemsResult(APIModel):
-    executionResults: Annotated[
-        list[SuccessfulExecutionResult | FailedExecutionResult],
-        Field(description="A list of execution results."),
-    ]
-
-
-class DeleteClassificationSystemsParameters(APIModel):
-    classificationSystemIds: Annotated[
-        list[ClassificationSystemIdArrayItem],
-        Field(description="A list of classification system identifiers."),
-    ]
-
-
-class DeleteClassificationSystemsResult(APIModel):
-    executionResults: Annotated[
-        list[SuccessfulExecutionResult | FailedExecutionResult],
-        Field(description="A list of execution results."),
-    ]
-
-
-class DeleteElementsParameters(APIModel):
-    elements: Annotated[list[ElementIdArrayItem], Field(description="A list of elements.")]
-
-
-class DeleteFavoritesParameters(APIModel):
-    favorites: Annotated[list[str], Field(description="A list of favorite names")]
-
-
-class DeleteFavoritesResult(APIModel):
-    executionResults: Annotated[
-        list[SuccessfulExecutionResult | FailedExecutionResult],
-        Field(description="A list of execution results."),
-    ]
-
-
-class DeleteIssueParameters(APIModel):
-    issueId: IssueId
-    acceptAllElements: Annotated[
-        bool | None,
-        Field(description="Accept all creation/deletion/modification of the deleted issue. By default false."),
-    ] = None
-
-
-class DeleteKeynoteFoldersParameters(APIModel):
-    keynoteFolderIds: Annotated[
-        list[KeynoteFolderIdArrayItem],
-        Field(description="The keynote folders to delete."),
-    ]
-
-
-class DeleteKeynoteFoldersResult(APIModel):
-    executionResults: Annotated[
-        list[SuccessfulExecutionResult | FailedExecutionResult],
-        Field(description="A list of execution results."),
-    ]
-
-
-class DeleteKeynoteItemsParameters(APIModel):
-    keynoteItemIds: Annotated[list[KeynoteItemIdArrayItem], Field(description="The keynote items to delete.")]
-
-
-class DeleteKeynoteItemsResult(APIModel):
-    executionResults: Annotated[
-        list[SuccessfulExecutionResult | FailedExecutionResult],
-        Field(description="A list of execution results."),
-    ]
-
-
-class DeleteNavigatorItemsParameters(APIModel):
-    navigatorItemIds: Annotated[
-        list[NavigatorItemIdArrayItem],
-        Field(description="A list of navigator item identifiers."),
-    ]
-
-
-class DeleteNavigatorItemsResult(APIModel):
-    executionResults: Annotated[
-        list[SuccessfulExecutionResult | FailedExecutionResult],
-        Field(description="A list of execution results."),
-    ]
-
-
 class DeleteProjectInfoFieldsParameters(APIModel):
     projectInfoIds: Annotated[
         list[str],
@@ -1356,46 +283,6 @@ class DeleteProjectInfoFieldsParameters(APIModel):
             description="List of project info field ids to delete. Only custom fields (ids starting with 'autotext-') can be deleted."
         ),
     ]
-
-
-class DeleteProjectInfoFieldsResult(APIModel):
-    executionResults: Annotated[
-        list[SuccessfulExecutionResult | FailedExecutionResult],
-        Field(description="A list of execution results."),
-    ]
-
-
-class DeletePropertyDefinitionsParameters(APIModel):
-    propertyIds: Annotated[
-        list[PropertyIdArrayItem],
-        Field(description="The identifiers of properties to delete."),
-    ]
-
-
-class DeletePropertyDefinitionsResult(APIModel):
-    executionResults: Annotated[
-        list[SuccessfulExecutionResult | FailedExecutionResult],
-        Field(description="A list of execution results."),
-    ]
-
-
-class DeletePropertyGroupsParameters(APIModel):
-    propertyGroupIds: Annotated[
-        list[PropertyGroupIdArrayItem],
-        Field(description="The identifiers of property groups to delete."),
-    ]
-
-
-class DeletePropertyGroupsResult(APIModel):
-    executionResults: Annotated[
-        list[SuccessfulExecutionResult | FailedExecutionResult],
-        Field(description="A list of execution results."),
-    ]
-
-
-class DetachElementsFromIssueParameters(APIModel):
-    issueId: IssueId
-    elements: Annotated[list[ElementIdArrayItem], Field(description="A list of elements.")]
 
 
 class ExportFavoritesParameters(APIModel):
@@ -1411,35 +298,6 @@ class ExportFavoritesParameters(APIModel):
     ] = None
 
 
-class ExportIssuesToBCFParameters(APIModel):
-    issues: Annotated[
-        list[IssueIdArrayItem] | None,
-        Field(description="Leave it empty to export all issues."),
-    ] = None
-    exportPath: Annotated[str, Field(description="The os path to the bcf file, including it's name.")]
-    useExternalId: Annotated[
-        bool,
-        Field(description="Use external IFC ID or Archicad IFC ID as referenced in BCF topics."),
-    ]
-    alignBySurveyPoint: Annotated[
-        bool,
-        Field(description="Align BCF views by Archicad Survey Point or Archicad Project Origin."),
-    ]
-
-
-class FilterElementsParameters(APIModel):
-    elements: Annotated[list[ElementIdArrayItem], Field(description="A list of elements.")]
-    filters: Annotated[list[ElementFilter] | None, Field(min_length=1)] = None
-
-
-class FilterElementsResult(APIModel):
-    elements: Annotated[list[ElementIdArrayItem], Field(description="A list of elements.")]
-
-
-class FitInWindowParameters(APIModel):
-    elements: Annotated[list[ElementIdArrayItem] | None, Field(description="A list of elements.")] = None
-
-
 class GenerateDocumentationParameters(APIModel):
     destinationFolder: Annotated[
         str,
@@ -1450,34 +308,8 @@ class GenerateDocumentationParameters(APIModel):
     ]
 
 
-class Get3DBoundingBoxesParameters(APIModel):
-    elements: Annotated[list[ElementIdArrayItem], Field(description="A list of elements.")]
-
-
-class Get3DBoundingBoxesResult(APIModel):
-    boundingBoxes3D: Annotated[
-        list[BoundingBox3DArrayItem | ErrorItem],
-        Field(description="A list of 3D bounding boxes."),
-    ]
-
-
 class GetAddOnVersionResult(APIModel):
     version: Annotated[str, Field(description='Version number in the form of "1.1.1".', min_length=1)]
-
-
-class GetAllElementsParameters(APIModel):
-    filters: Annotated[list[ElementFilter] | None, Field(min_length=1)] = None
-    databases: Annotated[
-        list[DatabaseIdArrayItem] | None,
-        Field(description="A list of Archicad databases."),
-    ] = None
-
-
-GetAllElementsResult: TypeAlias = ElementsWithExecutionResults | ErrorItem
-
-
-class GetAllPropertiesResult(APIModel):
-    properties: Annotated[list[PropertyDetails], Field(description="A list of property identifiers.")]
 
 
 class GetArchicadLocationResult(APIModel):
@@ -1494,18 +326,6 @@ class GetAttributesByTypeParameters(APIModel):
     attributeType: AttributeType
 
 
-GetAttributesByTypeResult: TypeAlias = AttributeHeadersWrapper | ErrorItem
-
-
-class GetAutoTextKeysParameters(APIModel):
-    elementId: Annotated[
-        ElementId | None,
-        Field(
-            description="Optional. The element to retrieve context dependent autotext keys for (its own properties, plus the ones common to all element types, e.g. 'Element ID', 'Area'). When omitted, only the autotext keys common to all element types are returned."
-        ),
-    ] = None
-
-
 class GetAutoTextKeysResult(APIModel):
     autoTextKeys: list[AutoTextKey]
 
@@ -1520,38 +340,6 @@ class GetAutoTextNameParameters(APIModel):
     ]
 
 
-class GetAutoTextNameResult(APIModel):
-    autoTextNames: Annotated[
-        list[AutoTextName | ErrorItem],
-        Field(description="One result per input key, in the same order."),
-    ]
-
-
-class GetAvailableLibraryPartsParameters(APIModel):
-    filterByTypeId: Annotated[
-        LibraryPartType | None,
-        Field(description="Optional. Filter by libpart type (matches the value returned by LibPartTypeIdToString)."),
-    ] = None
-
-
-class GetAvailableLibraryPartsResult(APIModel):
-    libraryParts: list[LibraryPart]
-    skippedCount: Annotated[
-        int,
-        Field(
-            description="Library parts that ACAPI_LibraryPart_Get failed to read. Non-zero means the inventory is partial."
-        ),
-    ]
-    skippedSample: Annotated[
-        list[SkippedSampleItem] | None,
-        Field(description="First five failed indices with their ACAPI error code, for diagnostic."),
-    ] = None
-
-
-class GetBuildingMaterialPhysicalPropertiesParameters(APIModel):
-    attributeIds: Annotated[list[AttributeIdArrayItem], Field(description="A list of attributes.")]
-
-
 class GetBuildingMaterialPhysicalPropertiesResult(APIModel):
     properties: Annotated[
         list[BuildingMaterialPhysicalPropertiesArrayItem],
@@ -1559,253 +347,14 @@ class GetBuildingMaterialPhysicalPropertiesResult(APIModel):
     ]
 
 
-class GetBuildingMaterialsParameters(APIModel):
-    attributeIds: Annotated[list[AttributeIdArrayItem], Field(description="A list of attributes.")]
-    fields: Annotated[
-        list[BuildingMaterialAttributeField] | None,
-        Field(
-            description="Names of the fields to return for each Building Material. If omitted, every field is returned."
-        ),
-    ] = None
-
-
-class GetBuildingMaterialsResult(APIModel):
-    buildingMaterials: Annotated[
-        list[BuildingMaterialAttribute | ErrorItem],
-        Field(description="A list of building materials or errors."),
-    ]
-
-
-class GetCalculationUnitsResult(APIModel):
-    length: Length
-    area: Area
-    volume: Volume
-    angle: Angle
-
-
-class GetClassificationsOfElementsParameters(APIModel):
-    elements: Annotated[list[ElementIdArrayItem], Field(description="A list of elements.")]
-    classificationSystemIds: Annotated[
-        list[ClassificationSystemIdArrayItem],
-        Field(description="A list of classification system identifiers."),
-    ]
-
-
-class GetClassificationsOfElementsResult(APIModel):
-    elementClassifications: Annotated[
-        list[ElementClassificationItemArray | ErrorItem],
-        Field(
-            description="The list of element classification item identifiers. Order of the ids are the same as in the input. Non-existing elements or non-existing classification systems are represented by error objects."
-        ),
-    ]
-
-
-class GetCollisionsParameters(APIModel):
-    elementsGroup1: Annotated[list[ElementIdArrayItem], Field(description="A list of elements.")]
-    elementsGroup2: Annotated[list[ElementIdArrayItem], Field(description="A list of elements.")]
-    settings: Settings | None = None
-
-
-class GetCollisionsResult(APIModel):
-    collisions: list[Collision]
-
-
-class GetCommentsFromIssueParameters(APIModel):
-    issueId: IssueId
-
-
-class GetCommentsFromIssueResult(APIModel):
-    comments: Annotated[list[Comment], Field(description="A list of existing comments.")]
-
-
-class GetCompositesParameters(APIModel):
-    attributeIds: Annotated[list[AttributeIdArrayItem], Field(description="A list of attributes.")]
-    fields: Annotated[
-        list[CompositeAttributeField] | None,
-        Field(description="Names of the fields to return for each Composite. If omitted, every field is returned."),
-    ] = None
-
-
-class GetCompositesResult(APIModel):
-    composites: Annotated[
-        list[CompositeAttribute | ErrorItem],
-        Field(description="A list of composites or errors."),
-    ]
-
-
-class GetConnectedElementsParameters(APIModel):
-    elements: Annotated[
-        list[ElementIdArrayItem],
-        Field(
-            description="The owner (host) elements whose connected elements are collected, e.g. Walls, Curtain Walls, Stairs or Railings."
-        ),
-    ]
-    connectedElementType: Annotated[
-        ElementType,
-        Field(
-            description="The type of the connected elements to collect, e.g. Window or Door for a Wall owner, or a subelement type of a Curtain Wall, Stair or Railing owner."
-        ),
-    ]
-
-
-GetConnectedElementsResult: TypeAlias = ConnectedElementsWrapper | ErrorItem
-
-
-class GetCurrentRevisionChangesOfLayoutsParameters(APIModel):
-    layoutDatabaseIds: Annotated[list[DatabaseIdArrayItem], Field(description="A list of Archicad databases.")]
-
-
-class GetCurrentRevisionChangesOfLayoutsResult(APIModel):
-    currentRevisionChangesOfLayouts: RevisionChangesArrayItem | ErrorItem
-
-
-class GetCurrentWindowTypeResult(APIModel):
-    currentWindowType: WindowType
-
-
-class GetDatabaseIdFromNavigatorItemIdParameters(APIModel):
-    navigatorItemIds: Annotated[
-        list[NavigatorItemIdArrayItem],
-        Field(description="A list of navigator item identifiers."),
-    ]
-
-
-class GetDatabaseIdFromNavigatorItemIdResult(APIModel):
-    databases: Annotated[list[DatabaseIdArrayItem], Field(description="A list of Archicad databases.")]
-
-
-class GetDesignOptionCombinationsResult(APIModel):
-    designOptionCombinations: list[DesignOptionCombinationDetails]
-
-
-class GetDesignOptionForElementsParameters(APIModel):
-    elements: Annotated[list[ElementIdArrayItem], Field(description="A list of elements.")]
-
-
-class GetDesignOptionForElementsResult(APIModel):
-    designOptionForElements: list[DesignOptionForElement]
-
-
-class GetDesignOptionSetsResult(APIModel):
-    designOptionSets: list[DesignOptionSet]
-
-
-class GetDesignOptionsResult(APIModel):
-    designOptions: list[DesignOptionDetails]
-
-
-class GetDetailsOfElementsParameters(APIModel):
-    elements: Annotated[list[ElementIdArrayItem], Field(description="A list of elements.")]
-    fields: Annotated[
-        list[ElementDetailsField] | None,
-        Field(
-            description="Optional filter for the fields to return for each element. When omitted, every field is returned. Fields not listed are not computed at all, so listing only what you need skips in particular the floorPlanPolygons extraction, which regenerates each element's 2D drawing primitives and can dominate the execution time of batch reads.",
-            min_length=1,
-        ),
-    ] = None
-
-
-class GetDetailsOfElementsResult(APIModel):
-    detailsOfElements: list[DetailsOfElement]
-
-
-class GetDimensionDataParameters(APIModel):
-    elements: Annotated[list[Element], Field(description="The identifier of the dimension elements.")]
-
-
-class GetDimensionDataResult(APIModel):
-    dimensionsData: list[DimensionData | ErrorItem]
-
-
-class GetDocumentRevisionsResult(APIModel):
-    documentRevisions: list[DocumentRevision]
-
-
-class GetElementPreviewImageParameters(APIModel):
-    elementId: ElementId
-    imageType: Annotated[
-        ImageType | None,
-        Field(description="The type of the preview image. Default is 3D."),
-    ] = None
-    format: Annotated[Format | None, Field(description="The image format. Default is png.")] = None
-    width: Annotated[
-        int | None,
-        Field(description="The width of the preview image in pixels. Default is 128."),
-    ] = None
-    height: Annotated[
-        int | None,
-        Field(description="The height of the preview image in pixels. Default is 128."),
-    ] = None
-
-
 class GetElementPreviewImageResult(APIModel):
     previewImage: Annotated[str, Field(description="The base64 encoded preview image.")]
-
-
-class GetElementTrimsParameters(APIModel):
-    elements: Annotated[list[ElementIdArrayItem], Field(description="A list of elements.")]
-
-
-class GetElementTrimsResult(APIModel):
-    elementTrims: Annotated[
-        list[ElementTrims | ErrorItem],
-        Field(
-            description="One item per queried element, in order. An unknown or deleted element is an error item, so it cannot be mistaken for an element that is simply not trimmed."
-        ),
-    ]
-
-
-class GetElementsAttachedToIssueParameters(APIModel):
-    issueId: IssueId
-    type: IssueElementType
-
-
-class GetElementsAttachedToIssueResult(APIModel):
-    elements: Annotated[list[ElementIdArrayItem], Field(description="A list of elements.")]
 
 
 class GetElementsByIFCIdsParameters(APIModel):
     ifcIds: Annotated[
         list[str],
         Field(description="A list of IFC identifiers to get the corresponding elements for."),
-    ]
-
-
-class GetElementsByIFCIdsResult(APIModel):
-    elementsByIFCIds: Annotated[
-        list[ElementsByIFCId],
-        Field(description="A list of elements identified by their IFC identifiers or errors."),
-    ]
-
-
-class GetElementsByTypeParameters(APIModel):
-    elementType: ElementType
-    filters: Annotated[list[ElementFilter] | None, Field(min_length=1)] = None
-    databases: Annotated[
-        list[DatabaseIdArrayItem] | None,
-        Field(description="A list of Archicad databases."),
-    ] = None
-
-
-GetElementsByTypeResult: TypeAlias = ElementsWithExecutionResults | ErrorItem
-
-
-class GetElementsOfDesignOptionsParameters(APIModel):
-    designOptions: list[DesignOptionIdArrayItem]
-
-
-class GetElementsOfDesignOptionsResult(APIModel):
-    elementsOfDesignOptions: list[ElementsOfDesignOption | ErrorItem]
-
-
-class GetElementsOfGroupsParameters(APIModel):
-    groups: Annotated[list[GroupIdArrayItem], Field(description="The groups to get the elements of.")]
-
-
-class GetElementsOfGroupsResult(APIModel):
-    elementsOfGroups: Annotated[
-        list[ElementsWrapper | ErrorItem],
-        Field(description="The elements directly contained by each given group, or an error."),
     ]
 
 
@@ -1834,241 +383,8 @@ class GetFavoritesByTypeParameters(APIModel):
     elementType: ElementType
 
 
-GetFavoritesByTypeResult: TypeAlias = FavoritesWrapper | ErrorItem
-
-
-class GetFillsParameters(APIModel):
-    attributeIds: Annotated[list[AttributeIdArrayItem], Field(description="A list of attributes.")]
-    fields: Annotated[
-        list[FillAttributeField] | None,
-        Field(
-            description="Names of the fields to return for each Fill. If omitted, every field is returned. Requesting only the fields you need avoids fetching lineItems/symbolLines/symbolArcs/symbolHotspots, which can be large."
-        ),
-    ] = None
-
-
-class GetFillsResult(APIModel):
-    fills: Annotated[list[FillAttribute | ErrorItem], Field(description="A list of fills or errors.")]
-
-
-class GetGDLParametersOfElementsParameters(APIModel):
-    elements: Annotated[list[ElementIdArrayItem], Field(description="A list of elements.")]
-
-
-class GetGDLParametersOfElementsResult(APIModel):
-    gdlParametersOfElements: Annotated[list[GDLParameterList], Field(description="The GDL parameters of elements.")]
-
-
-class GetGeoLocationResult(APIModel):
-    projectLocation: ProjectLocation
-    surveyPoint: SurveyPoint
-
-
-class GetGroupsOfElementsParameters(APIModel):
-    elements: Annotated[list[ElementIdArrayItem], Field(description="A list of elements.")]
-
-
-class GetGroupsOfElementsResult(APIModel):
-    groupGuids: Annotated[
-        list[GroupIdArrayItem | ErrorItem],
-        Field(
-            description="The identifier of the group that directly contains each given element, or an error for elements that are not part of any group."
-        ),
-    ]
-
-
-class GetHotlinksResult(APIModel):
-    hotlinks: Annotated[list[Hotlink], Field(description="A list of hotlink nodes.")]
-
-
-class GetIFCIdsOfElementsParameters(APIModel):
-    elements: Annotated[list[ElementIdArrayItem], Field(description="A list of elements.")]
-
-
-class GetIFCIdsOfElementsResult(APIModel):
-    elementIFCIds: Annotated[
-        list[ElementIFCIds | ErrorItem],
-        Field(description="A list of the IFC identifiers of elements or errors."),
-    ]
-
-
-class GetIFCPropertiesOfElementsParameters(APIModel):
-    elements: Annotated[list[ElementIdArrayItem], Field(description="A list of elements.")]
-
-
-class GetIFCPropertiesOfElementsResult(APIModel):
-    elementIFCProperties: Annotated[
-        list[ElementIFCProperties | ErrorItem],
-        Field(description="A list of the IFC properties of elements or errors."),
-    ]
-
-
-class GetIFCTypeOfElementsParameters(APIModel):
-    elements: Annotated[list[ElementIdArrayItem], Field(description="A list of elements.")]
-
-
-class GetIFCTypeOfElementsResult(APIModel):
-    elementIFCTypes: Annotated[
-        list[ElementIFCType | ErrorItem],
-        Field(description="A list of the IFC types of elements or errors."),
-    ]
-
-
-class GetIssuesResult(APIModel):
-    issues: Annotated[list[Issue], Field(description="A list of existing issues.")]
-
-
-class GetKeynoteAutoTextsParameters(APIModel):
-    keynoteItems: Annotated[
-        list[KeynoteItemIdArrayItem],
-        Field(description="The keynote items to get the autotext tokens for."),
-    ]
-
-
-class GetKeynoteAutoTextsResult(APIModel):
-    autoTexts: Annotated[
-        list[KeynoteAutoTextTokens | ErrorItem],
-        Field(description="A list of keynote autotext tokens or errors."),
-    ]
-
-
-class GetKeynoteTreeResult(APIModel):
-    foldersInRoot: Annotated[
-        list[KeynoteFolderDetails],
-        Field(
-            description="The top-level keynote folders with their content recursively. The technical root folder itself is not included."
-        ),
-    ]
-    itemsInRoot: Annotated[
-        list[KeynoteItemDetails],
-        Field(description="The keynote items located directly in the technical root folder."),
-    ]
-
-
-class GetLayerCombinationsParameters(APIModel):
-    attributes: Annotated[list[AttributeIdArrayItem], Field(description="A list of attributes.")]
-
-
-class GetLayerCombinationsResult(APIModel):
-    layerCombinations: Annotated[
-        list[LayerCombinationAttribute | ErrorItem],
-        Field(description="A list of layer combinations."),
-    ]
-
-
-class GetLayersParameters(APIModel):
-    attributeIds: Annotated[list[AttributeIdArrayItem], Field(description="A list of attributes.")]
-    fields: Annotated[
-        list[LayerAttributeField] | None,
-        Field(description="Names of the fields to return for each Layer. If omitted, every field is returned."),
-    ] = None
-
-
-class GetLayersResult(APIModel):
-    layers: Annotated[
-        list[LayerAttribute | ErrorItem],
-        Field(description="A list of layers or errors."),
-    ]
-
-
 class GetLayoutCustomSchemeResult(APIModel):
     customScheme: list[CustomSchemeItem]
-
-
-class GetLayoutSettingsParameters(APIModel):
-    layoutDatabaseIds: list[LayoutDatabaseId]
-
-
-class GetLayoutSettingsResult(APIModel):
-    layoutSettings: list[LayoutSetting]
-
-
-class GetLibrariesResult(APIModel):
-    libraries: Annotated[list[Library], Field(description="A list of project libraries.")]
-
-
-class GetLinesParameters(APIModel):
-    attributeIds: Annotated[list[AttributeIdArrayItem], Field(description="A list of attributes.")]
-    fields: Annotated[
-        list[LineAttributeField] | None,
-        Field(
-            description="Names of the fields to return for each Line. If omitted, every field is returned. Requesting only the fields you need avoids fetching dashItems/lineItems, which can be large."
-        ),
-    ] = None
-
-
-class GetLinesResult(APIModel):
-    lines: Annotated[list[LineAttribute | ErrorItem], Field(description="A list of lines or errors.")]
-
-
-class GetMEPDistributionSystemsResult(APIModel):
-    distributionSystems: Annotated[
-        list[MEPDistributionSystem],
-        Field(description="The distribution systems of the project."),
-    ]
-
-
-class GetMEPElementsParameters(APIModel):
-    elementTypes: Annotated[
-        list[MEPElementType] | None,
-        Field(description="Optional filter for the MEP element types."),
-    ] = None
-    domains: Annotated[
-        list[MEPDomains] | None,
-        Field(description="Optional filter for the MEP domains."),
-    ] = None
-
-
-class GetMEPElementsResult(APIModel):
-    elements: Annotated[list[MEPElement], Field(description="The MEP elements.")]
-
-
-class GetMEPPortsParameters(APIModel):
-    elements: Annotated[list[ElementIdArrayItem], Field(description="A list of elements.")]
-
-
-class GetMEPPortsResult(APIModel):
-    elementPorts: Annotated[
-        list[MEPElementPorts | ErrorItem],
-        Field(description="A list of MEP element ports or errors."),
-    ]
-
-
-class GetMEPPreferenceTablesParameters(APIModel):
-    domain: MEPPreferenceTableDomain
-
-
-class GetMEPPreferenceTablesResult(APIModel):
-    tables: Annotated[
-        list[MEPPreferenceTable],
-        Field(description="The circular segment preference tables of the domain."),
-    ]
-
-
-class GetMEPRoutingElementsParameters(APIModel):
-    elements: Annotated[list[ElementIdArrayItem], Field(description="A list of elements.")]
-
-
-class GetMEPRoutingElementsResult(APIModel):
-    routingElements: Annotated[
-        list[MEPRoutingElementDetails | ErrorItem],
-        Field(description="A list of MEP routing element details or errors."),
-    ]
-
-
-class GetMEPSystemsParameters(APIModel):
-    attributeIds: Annotated[list[AttributeIdArrayItem], Field(description="A list of attributes.")]
-    fields: Annotated[
-        list[MEPSystemAttributeField] | None,
-        Field(description="Names of the fields to return for each MEP System. If omitted, every field is returned."),
-    ] = None
-
-
-class GetMEPSystemsResult(APIModel):
-    mepSystems: Annotated[
-        list[MEPSystemAttribute | ErrorItem],
-        Field(description="A list of MEP systems or errors."),
-    ]
 
 
 class GetModelViewOptionsResult(APIModel):
@@ -2086,27 +402,6 @@ class GetNavigatorItemTreeParameters(APIModel):
     ] = None
 
 
-class GetNavigatorItemTreeResult(APIModel):
-    navigatorItemTree: NavigatorItem
-
-
-class GetPenTablesParameters(APIModel):
-    attributeIds: Annotated[list[AttributeIdArrayItem], Field(description="A list of attributes.")]
-    fields: Annotated[
-        list[PenTableAttributeField] | None,
-        Field(
-            description="Names of the fields to return for each Pen Table. If omitted, every field is returned. Requesting only the fields you need avoids fetching the 255-element pens array."
-        ),
-    ] = None
-
-
-class GetPenTablesResult(APIModel):
-    penTables: Annotated[
-        list[PenTableAttribute | ErrorItem],
-        Field(description="A list of pen tables or errors."),
-    ]
-
-
 class GetPointFromUserParameters(APIModel):
     prompt: Annotated[
         str | None,
@@ -2121,27 +416,6 @@ class GetPointFromUserResult(APIModel):
         Coordinate3D,
         Field(description="The clicked point in the project's coordinates."),
     ]
-
-
-class GetProfilesParameters(APIModel):
-    attributeIds: Annotated[list[AttributeIdArrayItem], Field(description="A list of attributes.")]
-    fields: Annotated[
-        list[ProfileAttributeField] | None,
-        Field(
-            description="Names of the fields to return for each Profile. If omitted, every field is returned. Note the raw cross-section vector geometry itself is not exposed; width/height/minimumWidth/minimumHeight/widthStretchable/heightStretchable/hasCoreSkin/profileModifiers are derived measurements matching what the Profile Editor shows, computed from the profile's internal stretch/parameter data."
-        ),
-    ] = None
-
-
-class GetProfilesResult(APIModel):
-    profiles: Annotated[
-        list[ProfileAttribute | ErrorItem],
-        Field(description="A list of profiles or errors."),
-    ]
-
-
-class GetProjectInfoFieldsResult(APIModel):
-    fields: Annotated[list[ProjectInfoField], Field(description="A list of project info fields.")]
 
 
 class GetProjectInfoResult(APIModel):
@@ -2167,98 +441,6 @@ class GetProjectInfoResult(APIModel):
     projectName: Annotated[str | None, Field(description="The name of the project.", min_length=1)] = None
 
 
-class GetPropertyValuesOfAttributesParameters(APIModel):
-    attributeIds: Annotated[list[AttributeIdArrayItem], Field(description="A list of attributes.")]
-    properties: Annotated[list[PropertyIdArrayItem], Field(description="A list of property identifiers.")]
-
-
-class GetPropertyValuesOfAttributesResult(APIModel):
-    propertyValuesForAttributes: Annotated[
-        list[PropertyValuesArrayItem | ErrorItem],
-        Field(
-            description="List of property value lists. The order of the outer list is that of the given attributes. The order of the inner lists are that of the given properties."
-        ),
-    ]
-
-
-class GetPropertyValuesOfElementsParameters(APIModel):
-    elements: Annotated[list[ElementIdArrayItem], Field(description="A list of elements.")]
-    properties: Annotated[list[PropertyIdArrayItem], Field(description="A list of property identifiers.")]
-
-
-class GetPropertyValuesOfElementsResult(APIModel):
-    propertyValuesForElements: Annotated[
-        list[PropertyValuesArrayItem | ErrorItem],
-        Field(
-            description="List of property value lists. The order of the outer list is that of the given elements. The order of the inner lists are that of the given properties."
-        ),
-    ]
-
-
-class GetRelationsOfElementsParameters(APIModel):
-    elements: Annotated[list[ElementIdArrayItem], Field(description="A list of elements.")]
-    otherElementType: Annotated[
-        ElementType | None,
-        Field(description="Optional filter: only relations to elements of this type are returned."),
-    ] = None
-
-
-class GetRelationsOfElementsResult(APIModel):
-    relations: Annotated[
-        list[
-            WallRelations
-            | BeamRelations
-            | BeamSegmentRelations
-            | ZoneRelationsOfElement
-            | OpeningRelationsOfElement
-            | RoofOrShellRelationsOfElement
-            | ErrorItem
-        ],
-        Field(description="Type-specific relations of each element, aligned with the input."),
-    ]
-
-
-class GetRevisionChangesOfElementsParameters(APIModel):
-    elements: Annotated[list[ElementIdArrayItem], Field(description="A list of elements.")]
-
-
-class GetRevisionChangesOfElementsResult(APIModel):
-    revisionChangesOfElements: RevisionChangesArrayItem | ErrorItem
-
-
-class GetRevisionChangesResult(APIModel):
-    revisionChanges: list[RevisionChange]
-
-
-class GetRevisionIssuesResult(APIModel):
-    revisionIssues: list[RevisionIssue]
-
-
-class GetRoomImageParameters(APIModel):
-    zoneId: ElementId
-    format: Annotated[Format | None, Field(description="The image format. Default is png.")] = None
-    width: Annotated[
-        int | None,
-        Field(description="The width of the preview image in pixels. Default is 256."),
-    ] = None
-    height: Annotated[
-        int | None,
-        Field(description="The height of the preview image in pixels. Default is 256."),
-    ] = None
-    offset: Annotated[
-        float | None,
-        Field(description="Offset of the clip polygon from the edge of the zone. Default is 0.001."),
-    ] = None
-    scale: Annotated[
-        float | None,
-        Field(description="Scale of the view (e.g. 0.005 for 1:200). Default is 0.005."),
-    ] = None
-    backgroundColor: Annotated[
-        ColorRGB | None,
-        Field(description="Background color of the generated image. Default is white (1.0, 1.0, 1.0)."),
-    ] = None
-
-
 class GetRoomImageResult(APIModel):
     roomImage: Annotated[str, Field(description="The base64 encoded room image.")]
 
@@ -2276,99 +458,6 @@ class GetScriptUIResultResult(APIModel):
     ] = None
 
 
-class GetSectionElementsParameters(APIModel):
-    databases: Annotated[
-        list[DatabaseIdArrayItem] | None,
-        Field(
-            description="The section, elevation or interior elevation databases to list the section elements of. If omitted, the current database is used."
-        ),
-    ] = None
-
-
-class GetSectionElementsResult(APIModel):
-    sectionElements: Annotated[
-        list[SectionElement],
-        Field(
-            description="The elements drawn in the given databases, each with the owner element it was generated from."
-        ),
-    ]
-    executionResultForDatabases: Annotated[
-        list[SuccessfulExecutionResult | FailedExecutionResult] | None,
-        Field(description="A list of execution results."),
-    ] = None
-
-
-class GetSelectedElementsResult(APIModel):
-    elements: Annotated[list[ElementIdArrayItem], Field(description="A list of elements.")]
-
-
-class GetSolidElementLinksParameters(APIModel):
-    elements: Annotated[
-        list[ElementIdArrayItem],
-        Field(description="Elements to query. Returns all solid links where each element is a target or an operator."),
-    ]
-
-
-class GetSolidElementLinksResult(APIModel):
-    solidLinks: Annotated[
-        list[SolidLinksOfElement],
-        Field(
-            description="For each input element, the solid links where it acts as target and where it acts as operator."
-        ),
-    ]
-
-
-class GetSpecialFoldersParameters(APIModel):
-    folderTypes: Annotated[
-        list[SpecialFolderType],
-        Field(description="The types of the special folders to retrieve."),
-    ]
-
-
-class GetSpecialFoldersResult(APIModel):
-    folderPaths: Annotated[
-        list[SpecialFolderPath | ErrorItem],
-        Field(description="A list of special folder paths or errors."),
-    ]
-
-
-class GetStoriesResult(APIModel):
-    firstStory: Annotated[int, Field(description="First story index.")]
-    lastStory: Annotated[int, Field(description="Last story index.")]
-    actStory: Annotated[int, Field(description="Actual (currently visible in 2D) story index.")]
-    skipNullFloor: Annotated[
-        bool,
-        Field(description="Floor indices above ground-floor level may start with 1 instead of 0."),
-    ]
-    stories: Annotated[
-        list[StoryParameters],
-        Field(description="A list of project stories, each with their complete parameters."),
-    ]
-
-
-class GetSubelementsOfHierarchicalElementsParameters(APIModel):
-    elements: Annotated[list[ElementIdArrayItem], Field(description="A list of elements.")]
-
-
-class GetSubelementsOfHierarchicalElementsResult(APIModel):
-    subelements: list[Subelement]
-
-
-class GetSurfacesParameters(APIModel):
-    attributeIds: Annotated[list[AttributeIdArrayItem], Field(description="A list of attributes.")]
-    fields: Annotated[
-        list[SurfaceAttributeField] | None,
-        Field(description="Names of the fields to return for each Surface. If omitted, every field is returned."),
-    ] = None
-
-
-class GetSurfacesResult(APIModel):
-    surfaces: Annotated[
-        list[SurfaceAttribute | ErrorItem],
-        Field(description="A list of surfaces or errors."),
-    ]
-
-
 class GetSuspendGroupsModeResult(APIModel):
     suspendGroups: Annotated[bool, Field(description="True if the Suspend Groups mode is currently on.")]
 
@@ -2379,80 +468,6 @@ class GetUserGSIDResult(APIModel):
         list[str] | None,
         Field(
             description="The list of organization IDs the user belongs to. Empty if not part of any organization or if the information cannot be retrieved."
-        ),
-    ] = None
-
-
-class GetView2DTransformationsParameters(APIModel):
-    navigatorItemIds: Annotated[
-        list[NavigatorItemIdArrayItem] | None,
-        Field(description="A list of navigator item identifiers."),
-    ] = None
-    databases: Annotated[
-        list[DatabaseIdArrayItem] | None,
-        Field(description="A list of Archicad databases."),
-    ] = None
-
-
-class GetView2DTransformationsResult(APIModel):
-    transformations: list[ViewTransformations | ErrorItem]
-
-
-class GetViewSettingsParameters(APIModel):
-    navigatorItemIds: Annotated[
-        list[NavigatorItemIdArrayItem],
-        Field(description="A list of navigator item identifiers."),
-    ]
-
-
-class GetViewSettingsResult(APIModel):
-    viewSettings: list[ViewSettings | ErrorItem]
-
-
-class GetZoneBoundariesParameters(APIModel):
-    zoneElementId: Annotated[
-        ElementId | None,
-        Field(
-            description="The identifier of a single Zone. Prefer the zones array: querying many Zones in one call is much faster than one call per Zone."
-        ),
-    ] = None
-    zones: Annotated[
-        list[ElementIdArrayItem] | None,
-        Field(description="A list of Zones. Only one of zoneElementId and zones can be given."),
-    ] = None
-
-
-class GetZoneCategoriesParameters(APIModel):
-    attributeIds: Annotated[list[AttributeIdArrayItem], Field(description="A list of attributes.")]
-    fields: Annotated[
-        list[ZoneCategoryAttributeField] | None,
-        Field(description="Names of the fields to return for each Zone Category. If omitted, every field is returned."),
-    ] = None
-
-
-class GetZoneCategoriesResult(APIModel):
-    zoneCategories: Annotated[
-        list[ZoneCategoryAttribute | ErrorItem],
-        Field(description="A list of zone categories or errors."),
-    ]
-
-
-class HighlightElementsParameters(APIModel):
-    elements: Annotated[list[ElementIdArrayItem], Field(description="A list of elements.")]
-    highlightedColors: Annotated[
-        list[HighlightedColor],
-        Field(description="A list of colors to highlight elements."),
-    ]
-    wireframe3D: Annotated[
-        bool | None,
-        Field(description="Optional parameter. Switch non highlighted elements in the 3D window to wireframe."),
-    ] = None
-    nonHighlightedColor: Annotated[
-        list[int] | None,
-        Field(
-            description="Optional parameter. Color of the non highlighted elements as an [r, g, b, a] array. Each component must be in the 0-255 range.",
-            max_length=4,
-            min_length=4,
         ),
     ] = None
 
@@ -2500,54 +515,10 @@ class ImportIssuesFromBCFParameters(APIModel):
     ]
 
 
-class LockElementsParameters(APIModel):
-    elements: Annotated[list[ElementIdArrayItem], Field(description="A list of elements.")]
-
-
-class ModifyBeamsParameters(APIModel):
-    beamsWithDetails: list[BeamWithDetails]
-
-
-class ModifyBeamsResult(APIModel):
-    executionResults: Annotated[
-        list[SuccessfulExecutionResult | FailedExecutionResult],
-        Field(description="A list of execution results."),
-    ]
-
-
-class ModifyColumnsParameters(APIModel):
-    columnsWithDetails: list[ColumnWithDetails]
-
-
-class ModifyColumnsResult(APIModel):
-    executionResults: Annotated[
-        list[SuccessfulExecutionResult | FailedExecutionResult],
-        Field(description="A list of execution results."),
-    ]
-
-
-class ModifyDoorsParameters(APIModel):
-    doorsWithDetails: list[DoorWithDetails]
-
-
-class ModifyDoorsResult(APIModel):
-    executionResults: Annotated[
-        list[SuccessfulExecutionResult | FailedExecutionResult],
-        Field(description="A list of execution results."),
-    ]
-
-
 class ModifyKeynoteFoldersParameters(APIModel):
     foldersData: Annotated[
         list[KeynoteFolderModificationData],
         Field(description="Array of data to modify keynote folders. Only provided fields are changed."),
-    ]
-
-
-class ModifyKeynoteFoldersResult(APIModel):
-    executionResults: Annotated[
-        list[SuccessfulExecutionResult | FailedExecutionResult],
-        Field(description="A list of execution results."),
     ]
 
 
@@ -2556,202 +527,6 @@ class ModifyKeynoteItemsParameters(APIModel):
         list[KeynoteItemModificationData],
         Field(description="Array of data to modify keynote items. Only provided fields are changed."),
     ]
-
-
-class ModifyKeynoteItemsResult(APIModel):
-    executionResults: Annotated[
-        list[SuccessfulExecutionResult | FailedExecutionResult],
-        Field(description="A list of execution results."),
-    ]
-
-
-class ModifyLabelsParameters(APIModel):
-    labelsWithDetails: Annotated[
-        list[LabelsWithDetail],
-        Field(
-            description="Array of Label elements to modify, with the fields to change. Only provided fields are changed; omitted fields are left as-is. The label's class (Text/Symbol) cannot be changed after creation. A change of the text, the runs, or a run-level style field (pen, font, faces, height, effects) rebuilds the content as one paragraph, which makes the label's text auto-width (word wrap off), as SetDetailsOfElements does, and on a multi-run label applies that style to every run; the other style fields leave the content as it is."
-        ),
-    ]
-
-
-class ModifyLabelsResult(APIModel):
-    executionResults: Annotated[
-        list[SuccessfulExecutionResult | FailedExecutionResult],
-        Field(description="A list of execution results."),
-    ]
-
-
-class ModifyLampsParameters(APIModel):
-    lampsWithDetails: Annotated[
-        list[LampWithDetails],
-        Field(
-            description="Array of elements to modify, with the fields to change. Only provided fields are changed; omitted fields are left as-is."
-        ),
-    ]
-
-
-class ModifyLampsResult(APIModel):
-    executionResults: Annotated[
-        list[SuccessfulExecutionResult | FailedExecutionResult],
-        Field(description="A list of execution results."),
-    ]
-
-
-class ModifyMEPRoutingElementsParameters(APIModel):
-    routingElementsData: Annotated[
-        list[MEPRoutingElementModificationData],
-        Field(description="Array of data to modify MEP routing elements. Only provided fields are changed."),
-    ]
-
-
-class ModifyMEPRoutingElementsResult(APIModel):
-    executionResults: Annotated[
-        list[SuccessfulExecutionResult | FailedExecutionResult],
-        Field(description="A list of execution results."),
-    ]
-
-
-class ModifyMeshesParameters(APIModel):
-    meshesData: Annotated[list[MeshWithDetails], Field(description="Array of meshes to modify.")]
-
-
-class ModifyMeshesResult(APIModel):
-    executionResults: Annotated[
-        list[SuccessfulExecutionResult | FailedExecutionResult],
-        Field(description="A list of execution results."),
-    ]
-
-
-class ModifyMorphsParameters(APIModel):
-    morphsWithDetails: list[MorphWithDetails]
-
-
-class ModifyMorphsResult(APIModel):
-    executionResults: Annotated[
-        list[SuccessfulExecutionResult | FailedExecutionResult],
-        Field(description="A list of execution results."),
-    ]
-
-
-class ModifyObjectsParameters(APIModel):
-    objectsWithDetails: Annotated[
-        list[ObjectWithDetails],
-        Field(
-            description="Array of elements to modify, with the fields to change. Only provided fields are changed; omitted fields are left as-is."
-        ),
-    ]
-
-
-class ModifyObjectsResult(APIModel):
-    executionResults: Annotated[
-        list[SuccessfulExecutionResult | FailedExecutionResult],
-        Field(description="A list of execution results."),
-    ]
-
-
-class ModifyRoofsParameters(APIModel):
-    roofsWithDetails: list[RoofWithDetails]
-
-
-class ModifyRoofsResult(APIModel):
-    executionResults: Annotated[
-        list[SuccessfulExecutionResult | FailedExecutionResult],
-        Field(description="A list of execution results."),
-    ]
-
-
-class ModifySlabsParameters(APIModel):
-    slabsWithDetails: list[SlabWithDetails]
-
-
-class ModifySlabsResult(APIModel):
-    executionResults: Annotated[
-        list[SuccessfulExecutionResult | FailedExecutionResult],
-        Field(description="A list of execution results."),
-    ]
-
-
-class ModifyTextsParameters(APIModel):
-    textsWithDetails: Annotated[
-        list[TextsWithDetail],
-        Field(
-            description="Array of Text elements to modify, with the fields to change. Only provided fields are changed; omitted fields are left as-is. A change of the text, the runs, or a run-level style field (pen, font, faces, height, effects) rebuilds the content as one paragraph, which makes the element auto-width (word wrap off), as SetDetailsOfElements does, and on a multi-run text applies that style to every run; the other style fields leave the content as it is."
-        ),
-    ]
-
-
-class ModifyTextsResult(APIModel):
-    executionResults: Annotated[
-        list[SuccessfulExecutionResult | FailedExecutionResult],
-        Field(description="A list of execution results."),
-    ]
-
-
-class ModifyWallsParameters(APIModel):
-    wallsWithDetails: list[WallWithDetails]
-
-
-class ModifyWallsResult(APIModel):
-    executionResults: Annotated[
-        list[SuccessfulExecutionResult | FailedExecutionResult],
-        Field(description="A list of execution results."),
-    ]
-
-
-class ModifyWindowsParameters(APIModel):
-    windowsWithDetails: list[WindowWithDetails]
-
-
-class ModifyWindowsResult(APIModel):
-    executionResults: Annotated[
-        list[SuccessfulExecutionResult | FailedExecutionResult],
-        Field(description="A list of execution results."),
-    ]
-
-
-class MoveDesignOptionsToAnotherSetParameters(APIModel):
-    designOptionAndSetPairs: list[DesignOptionAndSetPair]
-
-
-class MoveDesignOptionsToAnotherSetResult(APIModel):
-    executionResults: Annotated[
-        list[SuccessfulExecutionResult | FailedExecutionResult],
-        Field(description="A list of execution results."),
-    ]
-
-
-class MoveElementsParameters(APIModel):
-    elementsWithMoveVectors: Annotated[
-        list[ElementsWithMoveVector],
-        Field(description="The elements with move vector pairs."),
-    ]
-
-
-class MoveElementsResult(APIModel):
-    executionResults: Annotated[
-        list[SuccessfulExecutionResult | FailedExecutionResult],
-        Field(description="A list of execution results."),
-    ]
-
-
-class MoveElementsToDesignOptionsParameters(APIModel):
-    elementDesignOptionPairs: list[ElementDesignOptionPair]
-
-
-class MoveElementsToDesignOptionsResult(APIModel):
-    executionResults: Annotated[
-        list[SuccessfulExecutionResult | FailedExecutionResult],
-        Field(description="A list of execution results."),
-    ]
-
-
-class MoveNavigatorItemParameters(APIModel):
-    navigatorItemIdToMove: NavigatorItemId
-    parentNavigatorItemId: NavigatorItemId
-    previousNavigatorItemId: NavigatorItemId | None = None
-
-
-ChangeWindowParameters: TypeAlias = NavigatorItemIdArrayItem | DatabaseIdAndWindowType
 
 
 class OpenProjectParameters(APIModel):
@@ -2792,10 +567,6 @@ class RebuildViewParameters(APIModel):
     ] = None
 
 
-class ReleaseElementsParameters(APIModel):
-    elements: Annotated[list[ElementIdArrayItem], Field(description="A list of elements.")]
-
-
 class RemoveElementNotificationClientParameters(APIModel):
     host: Annotated[
         str | None,
@@ -2804,43 +575,8 @@ class RemoveElementNotificationClientParameters(APIModel):
     port: Annotated[int, Field(description="The port number of the notification client.")]
 
 
-class RemoveElementTrimsParameters(APIModel):
-    elementPairs: Annotated[
-        list[ElementPair],
-        Field(description="The trimmed element and the roof or shell trimming it, per pair."),
-    ]
-
-
-class RemoveElementTrimsResult(APIModel):
-    executionResults: Annotated[
-        list[SuccessfulExecutionResult | FailedExecutionResult],
-        Field(description="A list of execution results."),
-    ]
-
-
-class RemoveSolidElementLinksParameters(APIModel):
-    solidLinks: Annotated[
-        list[SolidLinkReference],
-        Field(description="List of solid element operation links to remove."),
-    ]
-
-
-class RemoveSolidElementLinksResult(APIModel):
-    executionResults: Annotated[
-        list[SuccessfulExecutionResult | FailedExecutionResult],
-        Field(description="A list of execution results."),
-    ]
-
-
 class RenameFavoritesParameters(APIModel):
     renames: list[FavoriteRename]
-
-
-class RenameFavoritesResult(APIModel):
-    executionResults: Annotated[
-        list[SuccessfulExecutionResult | FailedExecutionResult],
-        Field(description="A list of execution results."),
-    ]
 
 
 class RenameNavigatorItemParameters(APIModel):
@@ -2849,85 +585,8 @@ class RenameNavigatorItemParameters(APIModel):
     newId: str | None = None
 
 
-class ReserveElementsParameters(APIModel):
-    elements: Annotated[list[ElementIdArrayItem], Field(description="A list of elements.")]
-
-
-class ReserveElementsResult(APIModel):
-    executionResult: Annotated[
-        SuccessfulExecutionResult | FailedExecutionResult,
-        Field(description="The result of the execution."),
-    ]
-    conflicts: list[Conflict] | None = None
-
-
-class RotateElementsParameters(APIModel):
-    elementsWithRotations: Annotated[
-        list[ElementsWithRotation],
-        Field(description="The elements with rotation settings."),
-    ]
-
-
-class RotateElementsResult(APIModel):
-    executionResults: Annotated[
-        list[SuccessfulExecutionResult | FailedExecutionResult],
-        Field(description="A list of execution results."),
-    ]
-
-
-class SaveAsModuleFileParameters(APIModel):
-    moduleFilePath: Annotated[
-        str,
-        Field(
-            description="Absolute path of the .mod file to write. An existing file is overwritten. The current window must be a floor plan, section, elevation or detail."
-        ),
-    ]
-    elements: Annotated[
-        list[ElementIdArrayItem] | None,
-        Field(
-            description="Optional. The elements that go into the module; omitted, the current selection does, as Save Selection as Module would. Pass GetAllElements for the whole project. Archicad 25 and 26 support the selection form only."
-        ),
-    ] = None
-
-
 class Set3DCutPlanesParameters(APIModel):
     cutPlanes: Annotated[list[CutPlane] | None, Field(min_length=1)] = None
-
-
-class SetActiveDesignOptionsInCombinationsParameters(APIModel):
-    activeDesignOptionsInCombinations: list[ActiveDesignOptionsInCombination]
-
-
-class SetActiveDesignOptionsInCombinationsResult(APIModel):
-    executionResults: Annotated[
-        list[SuccessfulExecutionResult | FailedExecutionResult],
-        Field(description="A list of execution results."),
-    ]
-
-
-class SetClassificationsOfElementsParameters(APIModel):
-    elementClassifications: Annotated[
-        list[ElementClassification],
-        Field(description="A list of element classification identifiers."),
-    ]
-
-
-class SetClassificationsOfElementsResult(APIModel):
-    executionResults: Annotated[
-        list[SuccessfulExecutionResult | FailedExecutionResult],
-        Field(description="A list of execution results."),
-    ]
-
-
-class SetDetailsOfElementsParameters(APIModel):
-    elementsWithDetails: Annotated[list[ElementsWithDetail], Field(description="The elements with parameters.")]
-
-
-class SetDetailsOfElementsResult(APIModel):
-    executionResults: Annotated[
-        list[SuccessfulExecutionResult | FailedExecutionResult],
-        Field(description="A list of execution results."),
-    ]
 
 
 class SetElementNotificationClientParameters(APIModel):
@@ -2950,36 +609,6 @@ class SetElementNotificationClientParameters(APIModel):
     ] = None
 
 
-class SetGDLParametersOfElementsParameters(APIModel):
-    elementsWithGDLParameters: Annotated[
-        list[ElementsWithGDLParameter],
-        Field(description="The elements with GDL parameters dictionary pairs."),
-    ]
-
-
-class SetGDLParametersOfElementsResult(APIModel):
-    executionResults: Annotated[
-        list[SuccessfulExecutionResult | FailedExecutionResult],
-        Field(description="A list of execution results."),
-    ]
-
-
-class SetGeoLocationParameters(APIModel):
-    projectLocation: ProjectLocation | None = None
-    surveyPoint: SurveyPoint | None = None
-
-
-class SetLayoutSettingsParameters(APIModel):
-    layoutsData: list[LayoutSettingsData]
-
-
-class SetLayoutSettingsResult(APIModel):
-    executionResults: Annotated[
-        list[SuccessfulExecutionResult | FailedExecutionResult],
-        Field(description="A list of execution results."),
-    ]
-
-
 class SetLibrariesParameters(APIModel):
     libraries: Annotated[
         list[LibraryLocation],
@@ -2995,72 +624,12 @@ class SetProjectInfoFieldParameters(APIModel):
     ]
 
 
-class SetPropertyValuesOfAttributesParameters(APIModel):
-    attributePropertyValues: Annotated[
-        list[AttributePropertyValue],
-        Field(description="A list of attribute property values."),
-    ]
-
-
-class SetPropertyValuesOfAttributesResult(APIModel):
-    executionResults: Annotated[
-        list[SuccessfulExecutionResult | FailedExecutionResult],
-        Field(description="A list of execution results."),
-    ]
-
-
-class SetPropertyValuesOfElementsParameters(APIModel):
-    elementPropertyValues: Annotated[
-        list[ElementPropertyValue],
-        Field(description="A list of element property values."),
-    ]
-
-
-class SetPropertyValuesOfElementsResult(APIModel):
-    executionResults: Annotated[
-        list[SuccessfulExecutionResult | FailedExecutionResult],
-        Field(description="A list of execution results."),
-    ]
-
-
-class SetStoriesParameters(APIModel):
-    stories: Annotated[
-        list[StorySettings],
-        Field(description="A list of story settings, used as input for creating or modifying multiple stories."),
-    ]
-
-
 class SetSuspendGroupsModeParameters(APIModel):
     suspendGroups: Annotated[bool, Field(description="Turn the Suspend Groups mode on or off.")]
 
 
-class SetSuspendGroupsModeResult(APIModel):
-    executionResult: Annotated[
-        SuccessfulExecutionResult | FailedExecutionResult,
-        Field(description="The result of the execution."),
-    ]
-
-
 class SetViewRotationParameters(APIModel):
     navigatorItemIdsWithRotation: list[NavigatorItemIdsWithRotationItem]
-
-
-class SetViewRotationResult(APIModel):
-    executionResults: Annotated[
-        list[SuccessfulExecutionResult | FailedExecutionResult],
-        Field(description="A list of execution results."),
-    ]
-
-
-class SetViewSettingsParameters(APIModel):
-    navigatorItemIdsWithViewSettings: list[NavigatorItemIdsWithViewSetting]
-
-
-class SetViewSettingsResult(APIModel):
-    executionResults: Annotated[
-        list[SuccessfulExecutionResult | FailedExecutionResult],
-        Field(description="A list of execution results."),
-    ]
 
 
 class ShowAlertParameters(APIModel):
@@ -3158,37 +727,980 @@ class ShowScriptUIParameters(APIModel):
     ] = None
 
 
-AddCommentToIssueResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
+class UpdateZonesParameters(APIModel):
+    keepStampPosition: Annotated[
+        bool | None,
+        Field(description="Keep the position of the Zone Stamps. The default is true."),
+    ] = None
+    undoTopTrim: Annotated[
+        bool | None,
+        Field(description="Undo the trimming of the top of the Zones. The default is false."),
+    ] = None
+    undoBottomTrim: Annotated[
+        bool | None,
+        Field(description="Undo the trimming of the bottom of the Zones. The default is false."),
+    ] = None
 
 
-AddLibrariesResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
+class AddCommentToIssueParameters(APIModel):
+    issueId: IssueId
+    author: Annotated[str | None, Field(description="The author of the new comment.")] = None
+    status: IssueCommentStatus | None = None
+    text: Annotated[str, Field(description="Comment text to add.")]
 
 
-AttachElementsToIssueResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
+class AddLibrariesParameters(APIModel):
+    libraries: Annotated[
+        list[LibraryLocation],
+        Field(description="Local library folders or container files, by absolute path."),
+    ]
 
 
-ChangeWindowResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
+class ApplyFavoritesToElementDefaultsParameters(APIModel):
+    favorites: Annotated[list[str], Field(description="A list of favorite names")]
 
 
-CloseProjectResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
+class CloneProjectMapItemToViewMapParameters(APIModel):
+    viewsData: Annotated[
+        list[ViewCloneData],
+        Field(description="Array of views to clone from the Project Map to the View Map."),
+    ]
 
 
-DeleteElementsResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
+class CloneProjectMapItemToViewMapResult(APIModel):
+    navigatorItems: list[NavigatorItemIdArrayItem | ErrorItem]
 
 
-DeleteIssueResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
+class CreateBeamsParameters(APIModel):
+    beamsData: list[BeamData]
 
 
-DetachElementsFromIssueResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
+class CreateBuildingMaterialsParameters(APIModel):
+    buildingMaterialDataArray: Annotated[
+        list[BuildingMaterialData],
+        Field(description="Array of data to create new Building Materials."),
+    ]
+    overwriteExisting: Annotated[
+        bool | None,
+        Field(
+            description="Overwrite the Building Material if exists with the same name, or if index is given with the same index. The default is false."
+        ),
+    ] = None
+
+
+class CreateBuildingMaterialsResult(APIModel):
+    attributeIds: Annotated[
+        list[AttributeIdArrayItem | ErrorItem],
+        Field(description="A list of attribute identifiers or errors."),
+    ]
+
+
+class CreateCirclesParameters(APIModel):
+    circlesData: Annotated[list[CircleData], Field(description="Array of data to create Circles.")]
+
+
+class CreateClassificationSystemsParameters(APIModel):
+    classificationSystemsWithItems: Annotated[
+        list[ClassificationSystemsWithItem],
+        Field(description="Classification systems with items."),
+    ]
+
+
+class CreateColumnsParameters(APIModel):
+    columnsData: Annotated[list[ColumnData], Field(description="Array of data to create Columns.")]
+
+
+class CreateCompositesParameters(APIModel):
+    compositeDataArray: Annotated[list[CompositeData], Field(description="Array of data to create Composites.")]
+    overwriteExisting: Annotated[
+        bool | None,
+        Field(
+            description="Overwrite the Composite if exists with the same name, or if index is given with the same index. The default is false."
+        ),
+    ] = None
+
+
+class CreateCompositesResult(APIModel):
+    attributeIds: Annotated[
+        list[AttributeIdArrayItem | ErrorItem],
+        Field(description="A list of attribute identifiers or errors."),
+    ]
+
+
+class CreateDesignOptionsParameters(APIModel):
+    designOptions: list[DesignOptionData]
+
+
+class CreateDetailsParameters(APIModel):
+    detailsData: list[DetailData]
+
+
+class CreateFillsResult(APIModel):
+    attributeIds: Annotated[
+        list[AttributeIdArrayItem | ErrorItem],
+        Field(description="A list of attribute identifiers or errors."),
+    ]
+
+
+class CreateHotspotsParameters(APIModel):
+    hotspotsData: Annotated[list[HotspotData], Field(description="Array of data to create Hotspots.")]
+
+
+class CreateInteriorElevationsParameters(APIModel):
+    interiorElevationsData: Annotated[
+        list[InteriorElevationData],
+        Field(description="Array of data to create Interior Elevation elements."),
+    ]
+
+
+class CreateIssueParameters(APIModel):
+    name: Annotated[str, Field(description="The name of the issue.")]
+    parentIssueId: IssueId | None = None
+    tagText: Annotated[str | None, Field(description="Tag text of the issue, optional.")] = None
+
+
+class CreateIssueResult(APIModel):
+    issueId: IssueId
+
+
+class CreateKeynoteFoldersResult(APIModel):
+    keynoteFolderIdsOrErrors: Annotated[
+        list[KeynoteFolderIdArrayItem | ErrorItem],
+        Field(description="A list of keynote folder identifiers or errors."),
+    ]
+
+
+class CreateKeynoteItemsParameters(APIModel):
+    itemsData: Annotated[
+        list[KeynoteItemData],
+        Field(description="Array of data to create keynote items."),
+    ]
+
+
+class CreateKeynoteItemsResult(APIModel):
+    keynoteItemIdsOrErrors: Annotated[
+        list[KeynoteItemIdArrayItem | ErrorItem],
+        Field(description="A list of keynote item identifiers or errors."),
+    ]
+
+
+class CreateKeynoteLabelsParameters(APIModel):
+    labelsData: Annotated[
+        list[KeynoteLabelData],
+        Field(description="Array of data to create keynote labels."),
+    ]
+
+
+class CreateLayerCombinationsResult(APIModel):
+    attributeIds: Annotated[
+        list[AttributeIdArrayItem | ErrorItem],
+        Field(description="A list of attribute identifiers or errors."),
+    ]
+
+
+class CreateLayersResult(APIModel):
+    attributeIds: Annotated[
+        list[AttributeIdArrayItem | ErrorItem],
+        Field(description="A list of attribute identifiers or errors."),
+    ]
+
+
+class CreateLayoutSubsetParameters(APIModel):
+    subsetsData: list[SubsetData]
+
+
+class CreateLayoutSubsetResult(APIModel):
+    navigatorItems: list[NavigatorItemIdArrayItem | ErrorItem]
+
+
+class CreateLinesResult(APIModel):
+    attributeIds: Annotated[
+        list[AttributeIdArrayItem | ErrorItem],
+        Field(description="A list of attribute identifiers or errors."),
+    ]
+
+
+class CreateMEPSystemsResult(APIModel):
+    attributeIds: Annotated[
+        list[AttributeIdArrayItem | ErrorItem],
+        Field(description="A list of attribute identifiers or errors."),
+    ]
+
+
+class CreatePenTablesResult(APIModel):
+    attributeIds: Annotated[
+        list[AttributeIdArrayItem | ErrorItem],
+        Field(description="A list of attribute identifiers or errors."),
+    ]
+
+
+class CreatePolylinesParameters(APIModel):
+    polylinesData: Annotated[list[PolylineData], Field(description="Array of data to create Polylines.")]
+
+
+class CreateProfilesResult(APIModel):
+    attributeIds: Annotated[
+        list[AttributeIdArrayItem | ErrorItem],
+        Field(description="A list of attribute identifiers or errors."),
+    ]
+
+
+class CreateProjectInfoFieldsParameters(APIModel):
+    projectInfoFields: Annotated[
+        list[ProjectInfoFieldData],
+        Field(description="Array of custom project info fields to create."),
+    ]
+
+
+class CreateProjectInfoFieldsResult(APIModel):
+    fields: Annotated[list[ProjectInfoField], Field(description="A list of project info fields.")]
+
+
+class CreatePropertyDefinitionsResult(APIModel):
+    propertyIds: Annotated[
+        list[PropertyIdArrayItem | ErrorItem],
+        Field(description="A list of property identifiers."),
+    ]
+
+
+class CreatePropertyGroupsParameters(APIModel):
+    propertyGroups: Annotated[
+        list[PropertyGroupArrayItem],
+        Field(description="The parameters of the new property groups."),
+    ]
+
+
+class CreatePropertyGroupsResult(APIModel):
+    propertyGroupIds: Annotated[
+        list[PropertyGroupIdArrayItem],
+        Field(description="The identifiers of the created property groups."),
+    ]
+
+
+class CreateSectionsParameters(APIModel):
+    sectionsData: list[SectionData]
+
+
+class CreateStairsParameters(APIModel):
+    stairsData: Annotated[list[StairData], Field(description="Array of data to create Stair elements.")]
+
+
+class CreateSurfacesResult(APIModel):
+    attributeIds: Annotated[
+        list[AttributeIdArrayItem | ErrorItem],
+        Field(description="A list of attribute identifiers or errors."),
+    ]
+
+
+class CreateViewMapFolderParameters(APIModel):
+    folderName: Annotated[str, Field(description="Name of the new folder to create in the View Map.")]
+    parentNavigatorItemId: Annotated[
+        NavigatorItemId | None,
+        Field(description="Navigator item ID of the parent View Map folder. Optional; defaults to the View Map root."),
+    ] = None
+
+
+class CreateViewMapFolderResult(APIModel):
+    navigatorItemId: NavigatorItemId
+
+
+class CreateViewsInViewMapParameters(APIModel):
+    viewsData: Annotated[
+        list[ViewData],
+        Field(description="Array of views to create as independent (non-clone) items in the View Map."),
+    ]
+
+
+class CreateViewsInViewMapResult(APIModel):
+    navigatorItems: list[NavigatorItemIdArrayItem | ErrorItem]
+
+
+class CreateWorksheetsParameters(APIModel):
+    worksheetsData: list[WorksheetData]
+
+
+class CreateZoneCategoriesResult(APIModel):
+    attributeIds: Annotated[
+        list[AttributeIdArrayItem | ErrorItem],
+        Field(description="A list of attribute identifiers or errors."),
+    ]
+
+
+class DeleteAttributesParameters(APIModel):
+    attributesToDelete: Annotated[
+        list[AttributesToDeleteItem],
+        Field(description="Array of attributes to delete."),
+    ]
+
+
+class DeleteClassificationItemsParameters(APIModel):
+    classificationItemIds: Annotated[
+        list[ClassificationItemIdArrayItem],
+        Field(description="A list of classification item identifiers."),
+    ]
+
+
+class DeleteClassificationSystemsParameters(APIModel):
+    classificationSystemIds: Annotated[
+        list[ClassificationSystemIdArrayItem],
+        Field(description="A list of classification system identifiers."),
+    ]
+
+
+class DeleteFavoritesParameters(APIModel):
+    favorites: Annotated[list[str], Field(description="A list of favorite names")]
+
+
+class DeleteIssueParameters(APIModel):
+    issueId: IssueId
+    acceptAllElements: Annotated[
+        bool | None,
+        Field(description="Accept all creation/deletion/modification of the deleted issue. By default false."),
+    ] = None
+
+
+class DeleteKeynoteFoldersParameters(APIModel):
+    keynoteFolderIds: Annotated[
+        list[KeynoteFolderIdArrayItem],
+        Field(description="The keynote folders to delete."),
+    ]
+
+
+class DeleteKeynoteItemsParameters(APIModel):
+    keynoteItemIds: Annotated[list[KeynoteItemIdArrayItem], Field(description="The keynote items to delete.")]
+
+
+class DeleteNavigatorItemsParameters(APIModel):
+    navigatorItemIds: Annotated[
+        list[NavigatorItemIdArrayItem],
+        Field(description="A list of navigator item identifiers."),
+    ]
+
+
+class DeletePropertyDefinitionsParameters(APIModel):
+    propertyIds: Annotated[
+        list[PropertyIdArrayItem],
+        Field(description="The identifiers of properties to delete."),
+    ]
+
+
+class DeletePropertyGroupsParameters(APIModel):
+    propertyGroupIds: Annotated[
+        list[PropertyGroupIdArrayItem],
+        Field(description="The identifiers of property groups to delete."),
+    ]
+
+
+class ExportIssuesToBCFParameters(APIModel):
+    issues: Annotated[
+        list[IssueIdArrayItem] | None,
+        Field(description="Leave it empty to export all issues."),
+    ] = None
+    exportPath: Annotated[str, Field(description="The os path to the bcf file, including it's name.")]
+    useExternalId: Annotated[
+        bool,
+        Field(description="Use external IFC ID or Archicad IFC ID as referenced in BCF topics."),
+    ]
+    alignBySurveyPoint: Annotated[
+        bool,
+        Field(description="Align BCF views by Archicad Survey Point or Archicad Project Origin."),
+    ]
 
 
 ExportIssuesToBCFResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
+
+
+class FilterElementsParameters(APIModel):
+    elements: Annotated[list[ElementIdArrayItem], Field(description="A list of elements.")]
+    filters: Annotated[list[ElementFilter] | None, Field(min_length=1)] = None
+
+
+class FilterElementsResult(APIModel):
+    elements: Annotated[list[ElementIdArrayItem], Field(description="A list of elements.")]
+
+
+class FitInWindowParameters(APIModel):
+    elements: Annotated[list[ElementIdArrayItem] | None, Field(description="A list of elements.")] = None
 
 
 FitInWindowResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
 
 
 GenerateDocumentationResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
+
+
+class Get3DBoundingBoxesParameters(APIModel):
+    elements: Annotated[list[ElementIdArrayItem], Field(description="A list of elements.")]
+
+
+class Get3DBoundingBoxesResult(APIModel):
+    boundingBoxes3D: Annotated[
+        list[BoundingBox3DArrayItem | ErrorItem],
+        Field(description="A list of 3D bounding boxes."),
+    ]
+
+
+class GetAllElementsParameters(APIModel):
+    filters: Annotated[list[ElementFilter] | None, Field(min_length=1)] = None
+    databases: Annotated[
+        list[DatabaseIdArrayItem] | None,
+        Field(description="A list of Archicad databases."),
+    ] = None
+
+
+class GetAutoTextKeysParameters(APIModel):
+    elementId: Annotated[
+        ElementId | None,
+        Field(
+            description="Optional. The element to retrieve context dependent autotext keys for (its own properties, plus the ones common to all element types, e.g. 'Element ID', 'Area'). When omitted, only the autotext keys common to all element types are returned."
+        ),
+    ] = None
+
+
+class GetAutoTextNameResult(APIModel):
+    autoTextNames: Annotated[
+        list[AutoTextName | ErrorItem],
+        Field(description="One result per input key, in the same order."),
+    ]
+
+
+class GetAvailableLibraryPartsParameters(APIModel):
+    filterByTypeId: Annotated[
+        LibraryPartType | None,
+        Field(description="Optional. Filter by libpart type (matches the value returned by LibPartTypeIdToString)."),
+    ] = None
+
+
+class GetAvailableLibraryPartsResult(APIModel):
+    libraryParts: list[LibraryPart]
+    skippedCount: Annotated[
+        int,
+        Field(
+            description="Library parts that ACAPI_LibraryPart_Get failed to read. Non-zero means the inventory is partial."
+        ),
+    ]
+    skippedSample: Annotated[
+        list[SkippedSampleItem] | None,
+        Field(description="First five failed indices with their ACAPI error code, for diagnostic."),
+    ] = None
+
+
+class GetBuildingMaterialPhysicalPropertiesParameters(APIModel):
+    attributeIds: Annotated[list[AttributeIdArrayItem], Field(description="A list of attributes.")]
+
+
+class GetBuildingMaterialsParameters(APIModel):
+    attributeIds: Annotated[list[AttributeIdArrayItem], Field(description="A list of attributes.")]
+    fields: Annotated[
+        list[BuildingMaterialAttributeField] | None,
+        Field(
+            description="Names of the fields to return for each Building Material. If omitted, every field is returned."
+        ),
+    ] = None
+
+
+class GetBuildingMaterialsResult(APIModel):
+    buildingMaterials: Annotated[
+        list[BuildingMaterialAttribute | ErrorItem],
+        Field(description="A list of building materials or errors."),
+    ]
+
+
+class GetCalculationUnitsResult(APIModel):
+    length: Length
+    area: Area
+    volume: Volume
+    angle: Angle
+
+
+class GetClassificationsOfElementsParameters(APIModel):
+    elements: Annotated[list[ElementIdArrayItem], Field(description="A list of elements.")]
+    classificationSystemIds: Annotated[
+        list[ClassificationSystemIdArrayItem],
+        Field(description="A list of classification system identifiers."),
+    ]
+
+
+class GetCollisionsParameters(APIModel):
+    elementsGroup1: Annotated[list[ElementIdArrayItem], Field(description="A list of elements.")]
+    elementsGroup2: Annotated[list[ElementIdArrayItem], Field(description="A list of elements.")]
+    settings: Settings | None = None
+
+
+class GetCollisionsResult(APIModel):
+    collisions: list[Collision]
+
+
+class GetCommentsFromIssueParameters(APIModel):
+    issueId: IssueId
+
+
+class GetCommentsFromIssueResult(APIModel):
+    comments: Annotated[list[Comment], Field(description="A list of existing comments.")]
+
+
+class GetCompositesParameters(APIModel):
+    attributeIds: Annotated[list[AttributeIdArrayItem], Field(description="A list of attributes.")]
+    fields: Annotated[
+        list[CompositeAttributeField] | None,
+        Field(description="Names of the fields to return for each Composite. If omitted, every field is returned."),
+    ] = None
+
+
+class GetConnectedElementsParameters(APIModel):
+    elements: Annotated[
+        list[ElementIdArrayItem],
+        Field(
+            description="The owner (host) elements whose connected elements are collected, e.g. Walls, Curtain Walls, Stairs or Railings."
+        ),
+    ]
+    connectedElementType: Annotated[
+        ElementType,
+        Field(
+            description="The type of the connected elements to collect, e.g. Window or Door for a Wall owner, or a subelement type of a Curtain Wall, Stair or Railing owner."
+        ),
+    ]
+
+
+class GetCurrentRevisionChangesOfLayoutsParameters(APIModel):
+    layoutDatabaseIds: Annotated[list[DatabaseIdArrayItem], Field(description="A list of Archicad databases.")]
+
+
+class GetCurrentWindowTypeResult(APIModel):
+    currentWindowType: WindowType
+
+
+class GetDatabaseIdFromNavigatorItemIdParameters(APIModel):
+    navigatorItemIds: Annotated[
+        list[NavigatorItemIdArrayItem],
+        Field(description="A list of navigator item identifiers."),
+    ]
+
+
+class GetDatabaseIdFromNavigatorItemIdResult(APIModel):
+    databases: Annotated[list[DatabaseIdArrayItem], Field(description="A list of Archicad databases.")]
+
+
+class GetDesignOptionForElementsParameters(APIModel):
+    elements: Annotated[list[ElementIdArrayItem], Field(description="A list of elements.")]
+
+
+class GetDesignOptionSetsResult(APIModel):
+    designOptionSets: list[DesignOptionSet]
+
+
+class GetDetailsOfElementsParameters(APIModel):
+    elements: Annotated[list[ElementIdArrayItem], Field(description="A list of elements.")]
+    fields: Annotated[
+        list[ElementDetailsField] | None,
+        Field(
+            description="Optional filter for the fields to return for each element. When omitted, every field is returned. Fields not listed are not computed at all, so listing only what you need skips in particular the floorPlanPolygons extraction, which regenerates each element's 2D drawing primitives and can dominate the execution time of batch reads.",
+            min_length=1,
+        ),
+    ] = None
+
+
+class GetDimensionDataParameters(APIModel):
+    elements: Annotated[list[Element], Field(description="The identifier of the dimension elements.")]
+
+
+class GetElementPreviewImageParameters(APIModel):
+    elementId: ElementId
+    imageType: Annotated[
+        ImageType | None,
+        Field(description="The type of the preview image. Default is 3D."),
+    ] = None
+    format: Annotated[Format | None, Field(description="The image format. Default is png.")] = None
+    width: Annotated[
+        int | None,
+        Field(description="The width of the preview image in pixels. Default is 128."),
+    ] = None
+    height: Annotated[
+        int | None,
+        Field(description="The height of the preview image in pixels. Default is 128."),
+    ] = None
+
+
+class GetElementTrimsParameters(APIModel):
+    elements: Annotated[list[ElementIdArrayItem], Field(description="A list of elements.")]
+
+
+class GetElementsAttachedToIssueParameters(APIModel):
+    issueId: IssueId
+    type: IssueElementType
+
+
+class GetElementsAttachedToIssueResult(APIModel):
+    elements: Annotated[list[ElementIdArrayItem], Field(description="A list of elements.")]
+
+
+class GetElementsByIFCIdsResult(APIModel):
+    elementsByIFCIds: Annotated[
+        list[ElementsByIFCId],
+        Field(description="A list of elements identified by their IFC identifiers or errors."),
+    ]
+
+
+class GetElementsByTypeParameters(APIModel):
+    elementType: ElementType
+    filters: Annotated[list[ElementFilter] | None, Field(min_length=1)] = None
+    databases: Annotated[
+        list[DatabaseIdArrayItem] | None,
+        Field(description="A list of Archicad databases."),
+    ] = None
+
+
+class GetElementsOfDesignOptionsParameters(APIModel):
+    designOptions: list[DesignOptionIdArrayItem]
+
+
+class GetElementsOfDesignOptionsResult(APIModel):
+    elementsOfDesignOptions: list[ElementsOfDesignOption | ErrorItem]
+
+
+class GetElementsOfGroupsResult(APIModel):
+    elementsOfGroups: Annotated[
+        list[ElementsWrapper | ErrorItem],
+        Field(description="The elements directly contained by each given group, or an error."),
+    ]
+
+
+GetFavoritesByTypeResult: TypeAlias = FavoritesWrapper | ErrorItem
+
+
+class GetFillsParameters(APIModel):
+    attributeIds: Annotated[list[AttributeIdArrayItem], Field(description="A list of attributes.")]
+    fields: Annotated[
+        list[FillAttributeField] | None,
+        Field(
+            description="Names of the fields to return for each Fill. If omitted, every field is returned. Requesting only the fields you need avoids fetching lineItems/symbolLines/symbolArcs/symbolHotspots, which can be large."
+        ),
+    ] = None
+
+
+class GetFillsResult(APIModel):
+    fills: Annotated[list[FillAttribute | ErrorItem], Field(description="A list of fills or errors.")]
+
+
+class GetGDLParametersOfElementsParameters(APIModel):
+    elements: Annotated[list[ElementIdArrayItem], Field(description="A list of elements.")]
+
+
+class GetGroupsOfElementsParameters(APIModel):
+    elements: Annotated[list[ElementIdArrayItem], Field(description="A list of elements.")]
+
+
+class GetIFCIdsOfElementsParameters(APIModel):
+    elements: Annotated[list[ElementIdArrayItem], Field(description="A list of elements.")]
+
+
+class GetIFCPropertiesOfElementsParameters(APIModel):
+    elements: Annotated[list[ElementIdArrayItem], Field(description="A list of elements.")]
+
+
+class GetIFCTypeOfElementsParameters(APIModel):
+    elements: Annotated[list[ElementIdArrayItem], Field(description="A list of elements.")]
+
+
+class GetIssuesResult(APIModel):
+    issues: Annotated[list[Issue], Field(description="A list of existing issues.")]
+
+
+class GetKeynoteAutoTextsParameters(APIModel):
+    keynoteItems: Annotated[
+        list[KeynoteItemIdArrayItem],
+        Field(description="The keynote items to get the autotext tokens for."),
+    ]
+
+
+class GetKeynoteAutoTextsResult(APIModel):
+    autoTexts: Annotated[
+        list[KeynoteAutoTextTokens | ErrorItem],
+        Field(description="A list of keynote autotext tokens or errors."),
+    ]
+
+
+class GetLayerCombinationsParameters(APIModel):
+    attributes: Annotated[list[AttributeIdArrayItem], Field(description="A list of attributes.")]
+
+
+class GetLayersParameters(APIModel):
+    attributeIds: Annotated[list[AttributeIdArrayItem], Field(description="A list of attributes.")]
+    fields: Annotated[
+        list[LayerAttributeField] | None,
+        Field(description="Names of the fields to return for each Layer. If omitted, every field is returned."),
+    ] = None
+
+
+class GetLayoutSettingsParameters(APIModel):
+    layoutDatabaseIds: list[LayoutDatabaseId]
+
+
+class GetLayoutSettingsResult(APIModel):
+    layoutSettings: list[LayoutSetting]
+
+
+class GetLibrariesResult(APIModel):
+    libraries: Annotated[list[Library], Field(description="A list of project libraries.")]
+
+
+class GetLinesParameters(APIModel):
+    attributeIds: Annotated[list[AttributeIdArrayItem], Field(description="A list of attributes.")]
+    fields: Annotated[
+        list[LineAttributeField] | None,
+        Field(
+            description="Names of the fields to return for each Line. If omitted, every field is returned. Requesting only the fields you need avoids fetching dashItems/lineItems, which can be large."
+        ),
+    ] = None
+
+
+class GetMEPElementsParameters(APIModel):
+    elementTypes: Annotated[
+        list[MEPElementType] | None,
+        Field(description="Optional filter for the MEP element types."),
+    ] = None
+    domains: Annotated[
+        list[MEPDomains] | None,
+        Field(description="Optional filter for the MEP domains."),
+    ] = None
+
+
+class GetMEPPortsParameters(APIModel):
+    elements: Annotated[list[ElementIdArrayItem], Field(description="A list of elements.")]
+
+
+class GetMEPPreferenceTablesParameters(APIModel):
+    domain: MEPPreferenceTableDomain
+
+
+class GetMEPPreferenceTablesResult(APIModel):
+    tables: Annotated[
+        list[MEPPreferenceTable],
+        Field(description="The circular segment preference tables of the domain."),
+    ]
+
+
+class GetMEPRoutingElementsParameters(APIModel):
+    elements: Annotated[list[ElementIdArrayItem], Field(description="A list of elements.")]
+
+
+class GetMEPSystemsParameters(APIModel):
+    attributeIds: Annotated[list[AttributeIdArrayItem], Field(description="A list of attributes.")]
+    fields: Annotated[
+        list[MEPSystemAttributeField] | None,
+        Field(description="Names of the fields to return for each MEP System. If omitted, every field is returned."),
+    ] = None
+
+
+class GetPenTablesParameters(APIModel):
+    attributeIds: Annotated[list[AttributeIdArrayItem], Field(description="A list of attributes.")]
+    fields: Annotated[
+        list[PenTableAttributeField] | None,
+        Field(
+            description="Names of the fields to return for each Pen Table. If omitted, every field is returned. Requesting only the fields you need avoids fetching the 255-element pens array."
+        ),
+    ] = None
+
+
+class GetProfilesParameters(APIModel):
+    attributeIds: Annotated[list[AttributeIdArrayItem], Field(description="A list of attributes.")]
+    fields: Annotated[
+        list[ProfileAttributeField] | None,
+        Field(
+            description="Names of the fields to return for each Profile. If omitted, every field is returned. Note the raw cross-section vector geometry itself is not exposed; width/height/minimumWidth/minimumHeight/widthStretchable/heightStretchable/hasCoreSkin/profileModifiers are derived measurements matching what the Profile Editor shows, computed from the profile's internal stretch/parameter data."
+        ),
+    ] = None
+
+
+class GetProjectInfoFieldsResult(APIModel):
+    fields: Annotated[list[ProjectInfoField], Field(description="A list of project info fields.")]
+
+
+class GetPropertyValuesOfAttributesParameters(APIModel):
+    attributeIds: Annotated[list[AttributeIdArrayItem], Field(description="A list of attributes.")]
+    properties: Annotated[list[PropertyIdArrayItem], Field(description="A list of property identifiers.")]
+
+
+class GetPropertyValuesOfAttributesResult(APIModel):
+    propertyValuesForAttributes: Annotated[
+        list[PropertyValuesArrayItem | ErrorItem],
+        Field(
+            description="List of property value lists. The order of the outer list is that of the given attributes. The order of the inner lists are that of the given properties."
+        ),
+    ]
+
+
+class GetPropertyValuesOfElementsParameters(APIModel):
+    elements: Annotated[list[ElementIdArrayItem], Field(description="A list of elements.")]
+    properties: Annotated[list[PropertyIdArrayItem], Field(description="A list of property identifiers.")]
+
+
+class GetPropertyValuesOfElementsResult(APIModel):
+    propertyValuesForElements: Annotated[
+        list[PropertyValuesArrayItem | ErrorItem],
+        Field(
+            description="List of property value lists. The order of the outer list is that of the given elements. The order of the inner lists are that of the given properties."
+        ),
+    ]
+
+
+class GetRelationsOfElementsParameters(APIModel):
+    elements: Annotated[list[ElementIdArrayItem], Field(description="A list of elements.")]
+    otherElementType: Annotated[
+        ElementType | None,
+        Field(description="Optional filter: only relations to elements of this type are returned."),
+    ] = None
+
+
+class GetRevisionChangesOfElementsParameters(APIModel):
+    elements: Annotated[list[ElementIdArrayItem], Field(description="A list of elements.")]
+
+
+class GetRoomImageParameters(APIModel):
+    zoneId: ElementId
+    format: Annotated[Format | None, Field(description="The image format. Default is png.")] = None
+    width: Annotated[
+        int | None,
+        Field(description="The width of the preview image in pixels. Default is 256."),
+    ] = None
+    height: Annotated[
+        int | None,
+        Field(description="The height of the preview image in pixels. Default is 256."),
+    ] = None
+    offset: Annotated[
+        float | None,
+        Field(description="Offset of the clip polygon from the edge of the zone. Default is 0.001."),
+    ] = None
+    scale: Annotated[
+        float | None,
+        Field(description="Scale of the view (e.g. 0.005 for 1:200). Default is 0.005."),
+    ] = None
+    backgroundColor: Annotated[
+        ColorRGB | None,
+        Field(description="Background color of the generated image. Default is white (1.0, 1.0, 1.0)."),
+    ] = None
+
+
+class GetSectionElementsParameters(APIModel):
+    databases: Annotated[
+        list[DatabaseIdArrayItem] | None,
+        Field(
+            description="The section, elevation or interior elevation databases to list the section elements of. If omitted, the current database is used."
+        ),
+    ] = None
+
+
+class GetSectionElementsResult(APIModel):
+    sectionElements: Annotated[
+        list[SectionElement],
+        Field(
+            description="The elements drawn in the given databases, each with the owner element it was generated from."
+        ),
+    ]
+    executionResultForDatabases: Annotated[
+        list[SuccessfulExecutionResult | FailedExecutionResult] | None,
+        Field(description="A list of execution results."),
+    ] = None
+
+
+class GetSelectedElementsResult(APIModel):
+    elements: Annotated[list[ElementIdArrayItem], Field(description="A list of elements.")]
+
+
+class GetSolidElementLinksParameters(APIModel):
+    elements: Annotated[
+        list[ElementIdArrayItem],
+        Field(description="Elements to query. Returns all solid links where each element is a target or an operator."),
+    ]
+
+
+class GetSpecialFoldersParameters(APIModel):
+    folderTypes: Annotated[
+        list[SpecialFolderType],
+        Field(description="The types of the special folders to retrieve."),
+    ]
+
+
+class GetSpecialFoldersResult(APIModel):
+    folderPaths: Annotated[
+        list[SpecialFolderPath | ErrorItem],
+        Field(description="A list of special folder paths or errors."),
+    ]
+
+
+class GetSubelementsOfHierarchicalElementsParameters(APIModel):
+    elements: Annotated[list[ElementIdArrayItem], Field(description="A list of elements.")]
+
+
+class GetSubelementsOfHierarchicalElementsResult(APIModel):
+    subelements: list[Subelement]
+
+
+class GetSurfacesParameters(APIModel):
+    attributeIds: Annotated[list[AttributeIdArrayItem], Field(description="A list of attributes.")]
+    fields: Annotated[
+        list[SurfaceAttributeField] | None,
+        Field(description="Names of the fields to return for each Surface. If omitted, every field is returned."),
+    ] = None
+
+
+class GetView2DTransformationsParameters(APIModel):
+    navigatorItemIds: Annotated[
+        list[NavigatorItemIdArrayItem] | None,
+        Field(description="A list of navigator item identifiers."),
+    ] = None
+    databases: Annotated[
+        list[DatabaseIdArrayItem] | None,
+        Field(description="A list of Archicad databases."),
+    ] = None
+
+
+class GetViewSettingsParameters(APIModel):
+    navigatorItemIds: Annotated[
+        list[NavigatorItemIdArrayItem],
+        Field(description="A list of navigator item identifiers."),
+    ]
+
+
+class GetZoneBoundariesParameters(APIModel):
+    zoneElementId: Annotated[
+        ElementId | None,
+        Field(
+            description="The identifier of a single Zone. Prefer the zones array: querying many Zones in one call is much faster than one call per Zone."
+        ),
+    ] = None
+    zones: Annotated[
+        list[ElementIdArrayItem] | None,
+        Field(description="A list of Zones. Only one of zoneElementId and zones can be given."),
+    ] = None
+
+
+class GetZoneCategoriesParameters(APIModel):
+    attributeIds: Annotated[list[AttributeIdArrayItem], Field(description="A list of attributes.")]
+    fields: Annotated[
+        list[ZoneCategoryAttributeField] | None,
+        Field(description="Names of the fields to return for each Zone Category. If omitted, every field is returned."),
+    ] = None
+
+
+class HighlightElementsParameters(APIModel):
+    elements: Annotated[list[ElementIdArrayItem], Field(description="A list of elements.")]
+    highlightedColors: Annotated[
+        list[HighlightedColor],
+        Field(description="A list of colors to highlight elements."),
+    ]
+    wireframe3D: Annotated[
+        bool | None,
+        Field(description="Optional parameter. Switch non highlighted elements in the 3D window to wireframe."),
+    ] = None
+    nonHighlightedColor: Annotated[
+        list[int] | None,
+        Field(
+            description="Optional parameter. Color of the non highlighted elements as an [r, g, b, a] array. Each component must be in the 0-255 range.",
+            max_length=4,
+            min_length=4,
+        ),
+    ] = None
 
 
 HighlightElementsResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
@@ -3200,7 +1712,203 @@ IFCFileOperationResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionR
 ImportIssuesFromBCFResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
 
 
+class LockElementsParameters(APIModel):
+    elements: Annotated[list[ElementIdArrayItem], Field(description="A list of elements.")]
+
+
 LockElementsResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
+
+
+class ModifyBeamsResult(APIModel):
+    executionResults: Annotated[
+        list[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
+
+
+class ModifyColumnsResult(APIModel):
+    executionResults: Annotated[
+        list[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
+
+
+class ModifyDoorsResult(APIModel):
+    executionResults: Annotated[
+        list[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
+
+
+class ModifyKeynoteFoldersResult(APIModel):
+    executionResults: Annotated[
+        list[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
+
+
+class ModifyKeynoteItemsResult(APIModel):
+    executionResults: Annotated[
+        list[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
+
+
+class ModifyLabelsParameters(APIModel):
+    labelsWithDetails: Annotated[
+        list[LabelsWithDetail],
+        Field(
+            description="Array of Label elements to modify, with the fields to change. Only provided fields are changed; omitted fields are left as-is. The label's class (Text/Symbol) cannot be changed after creation. A change of the text, the runs, or a run-level style field (pen, font, faces, height, effects) rebuilds the content as one paragraph, which makes the label's text auto-width (word wrap off), as SetDetailsOfElements does, and on a multi-run label applies that style to every run; the other style fields leave the content as it is."
+        ),
+    ]
+
+
+class ModifyLabelsResult(APIModel):
+    executionResults: Annotated[
+        list[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
+
+
+class ModifyLampsParameters(APIModel):
+    lampsWithDetails: Annotated[
+        list[LampWithDetails],
+        Field(
+            description="Array of elements to modify, with the fields to change. Only provided fields are changed; omitted fields are left as-is."
+        ),
+    ]
+
+
+class ModifyLampsResult(APIModel):
+    executionResults: Annotated[
+        list[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
+
+
+class ModifyMEPRoutingElementsParameters(APIModel):
+    routingElementsData: Annotated[
+        list[MEPRoutingElementModificationData],
+        Field(description="Array of data to modify MEP routing elements. Only provided fields are changed."),
+    ]
+
+
+class ModifyMEPRoutingElementsResult(APIModel):
+    executionResults: Annotated[
+        list[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
+
+
+class ModifyMeshesParameters(APIModel):
+    meshesData: Annotated[list[MeshWithDetails], Field(description="Array of meshes to modify.")]
+
+
+class ModifyMeshesResult(APIModel):
+    executionResults: Annotated[
+        list[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
+
+
+class ModifyMorphsResult(APIModel):
+    executionResults: Annotated[
+        list[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
+
+
+class ModifyObjectsResult(APIModel):
+    executionResults: Annotated[
+        list[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
+
+
+class ModifyRoofsResult(APIModel):
+    executionResults: Annotated[
+        list[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
+
+
+class ModifySlabsResult(APIModel):
+    executionResults: Annotated[
+        list[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
+
+
+class ModifyTextsParameters(APIModel):
+    textsWithDetails: Annotated[
+        list[TextsWithDetail],
+        Field(
+            description="Array of Text elements to modify, with the fields to change. Only provided fields are changed; omitted fields are left as-is. A change of the text, the runs, or a run-level style field (pen, font, faces, height, effects) rebuilds the content as one paragraph, which makes the element auto-width (word wrap off), as SetDetailsOfElements does, and on a multi-run text applies that style to every run; the other style fields leave the content as it is."
+        ),
+    ]
+
+
+class ModifyTextsResult(APIModel):
+    executionResults: Annotated[
+        list[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
+
+
+class ModifyWallsResult(APIModel):
+    executionResults: Annotated[
+        list[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
+
+
+class ModifyWindowsResult(APIModel):
+    executionResults: Annotated[
+        list[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
+
+
+class MoveDesignOptionsToAnotherSetParameters(APIModel):
+    designOptionAndSetPairs: list[DesignOptionAndSetPair]
+
+
+class MoveDesignOptionsToAnotherSetResult(APIModel):
+    executionResults: Annotated[
+        list[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
+
+
+class MoveElementsParameters(APIModel):
+    elementsWithMoveVectors: Annotated[
+        list[ElementsWithMoveVector],
+        Field(description="The elements with move vector pairs."),
+    ]
+
+
+class MoveElementsResult(APIModel):
+    executionResults: Annotated[
+        list[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
+
+
+class MoveElementsToDesignOptionsParameters(APIModel):
+    elementDesignOptionPairs: list[ElementDesignOptionPair]
+
+
+class MoveElementsToDesignOptionsResult(APIModel):
+    executionResults: Annotated[
+        list[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
+
+
+class MoveNavigatorItemParameters(APIModel):
+    navigatorItemIdToMove: NavigatorItemId
+    parentNavigatorItemId: NavigatorItemId
+    previousNavigatorItemId: NavigatorItemId | None = None
 
 
 MoveNavigatorItemResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
@@ -3218,6 +1926,10 @@ QuitArchicadResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResul
 RebuildViewResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
 
 
+class ReleaseElementsParameters(APIModel):
+    elements: Annotated[list[ElementIdArrayItem], Field(description="A list of elements.")]
+
+
 ReleaseElementsResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
 
 
@@ -3227,7 +1939,76 @@ ReloadLibrariesResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionRe
 RemoveElementNotificationClientResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
 
 
+class RemoveElementTrimsParameters(APIModel):
+    elementPairs: Annotated[
+        list[ElementPair],
+        Field(description="The trimmed element and the roof or shell trimming it, per pair."),
+    ]
+
+
+class RemoveElementTrimsResult(APIModel):
+    executionResults: Annotated[
+        list[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
+
+
+class RemoveSolidElementLinksResult(APIModel):
+    executionResults: Annotated[
+        list[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
+
+
+class RenameFavoritesResult(APIModel):
+    executionResults: Annotated[
+        list[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
+
+
 RenameNavigatorItemResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
+
+
+class ReserveElementsParameters(APIModel):
+    elements: Annotated[list[ElementIdArrayItem], Field(description="A list of elements.")]
+
+
+class ReserveElementsResult(APIModel):
+    executionResult: Annotated[
+        SuccessfulExecutionResult | FailedExecutionResult,
+        Field(description="The result of the execution."),
+    ]
+    conflicts: list[Conflict] | None = None
+
+
+class RotateElementsParameters(APIModel):
+    elementsWithRotations: Annotated[
+        list[ElementsWithRotation],
+        Field(description="The elements with rotation settings."),
+    ]
+
+
+class RotateElementsResult(APIModel):
+    executionResults: Annotated[
+        list[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
+
+
+class SaveAsModuleFileParameters(APIModel):
+    moduleFilePath: Annotated[
+        str,
+        Field(
+            description="Absolute path of the .mod file to write. An existing file is overwritten. The current window must be a floor plan, section, elevation or detail."
+        ),
+    ]
+    elements: Annotated[
+        list[ElementIdArrayItem] | None,
+        Field(
+            description="Optional. The elements that go into the module; omitted, the current selection does, as Save Selection as Module would. Pass GetAllElements for the whole project. Archicad 25 and 26 support the selection form only."
+        ),
+    ] = None
 
 
 SaveAsModuleFileResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
@@ -3239,16 +2020,115 @@ SaveProjectResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
 Set3DCutPlanesResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
 
 
+class SetActiveDesignOptionsInCombinationsParameters(APIModel):
+    activeDesignOptionsInCombinations: list[ActiveDesignOptionsInCombination]
+
+
+class SetActiveDesignOptionsInCombinationsResult(APIModel):
+    executionResults: Annotated[
+        list[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
+
+
+class SetClassificationsOfElementsResult(APIModel):
+    executionResults: Annotated[
+        list[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
+
+
+class SetDetailsOfElementsResult(APIModel):
+    executionResults: Annotated[
+        list[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
+
+
 SetElementNotificationClientResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
+
+
+class SetGDLParametersOfElementsParameters(APIModel):
+    elementsWithGDLParameters: Annotated[
+        list[ElementsWithGDLParameter],
+        Field(description="The elements with GDL parameters dictionary pairs."),
+    ]
+
+
+class SetGDLParametersOfElementsResult(APIModel):
+    executionResults: Annotated[
+        list[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
 
 
 SetGeoLocationResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
 
 
+class SetLayoutSettingsParameters(APIModel):
+    layoutsData: list[LayoutSettingsData]
+
+
+class SetLayoutSettingsResult(APIModel):
+    executionResults: Annotated[
+        list[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
+
+
 SetLibrariesResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
 
 
+class SetPropertyValuesOfAttributesParameters(APIModel):
+    attributePropertyValues: Annotated[
+        list[AttributePropertyValue],
+        Field(description="A list of attribute property values."),
+    ]
+
+
+class SetPropertyValuesOfAttributesResult(APIModel):
+    executionResults: Annotated[
+        list[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
+
+
+class SetPropertyValuesOfElementsParameters(APIModel):
+    elementPropertyValues: Annotated[
+        list[ElementPropertyValue],
+        Field(description="A list of element property values."),
+    ]
+
+
+class SetPropertyValuesOfElementsResult(APIModel):
+    executionResults: Annotated[
+        list[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
+
+
 SetStoriesResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
+
+
+class SetSuspendGroupsModeResult(APIModel):
+    executionResult: Annotated[
+        SuccessfulExecutionResult | FailedExecutionResult,
+        Field(description="The result of the execution."),
+    ]
+
+
+class SetViewRotationResult(APIModel):
+    executionResults: Annotated[
+        list[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
+
+
+class SetViewSettingsResult(APIModel):
+    executionResults: Annotated[
+        list[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
 
 
 ShowScriptUIResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
@@ -3316,25 +2196,1145 @@ class UpdatePropertyDefinitionsResult(APIModel):
     ]
 
 
-class UpdateZonesParameters(APIModel):
-    keepStampPosition: Annotated[
-        bool | None,
-        Field(description="Keep the position of the Zone Stamps. The default is true."),
-    ] = None
-    undoTopTrim: Annotated[
-        bool | None,
-        Field(description="Undo the trimming of the top of the Zones. The default is false."),
-    ] = None
-    undoBottomTrim: Annotated[
-        bool | None,
-        Field(description="Undo the trimming of the bottom of the Zones. The default is false."),
-    ] = None
-
-
 UpdateZonesResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
 
 
+AddCommentToIssueResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
+
+
+class AddFilesToEmbeddedLibraryParameters(APIModel):
+    files: Annotated[
+        list[LibraryFileAddition],
+        Field(description="A list of library file additions to the embedded library"),
+    ]
+
+
+class AddFilesToEmbeddedLibraryResult(APIModel):
+    executionResults: Annotated[
+        list[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
+
+
+AddLibrariesResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
+
+
+class ApplyFavoritesToElementDefaultsResult(APIModel):
+    executionResults: Annotated[
+        list[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
+
+
+class ApplyFavoritesToElementsParameters(APIModel):
+    favoritesToApply: list[FavoritesToApplyItem]
+    applySettings: Annotated[
+        bool | None,
+        Field(
+            description="Whether to apply the Favorite's settings-type parameters (structure, materials, pens, etc. - never geometry). For the hierarchical types (Stair, Railing, Curtain Wall) the settings of the sub-elements are not applied, because they are inseparable from the Favorite's own geometry. Default is true."
+        ),
+    ] = None
+    applyClassifications: Annotated[
+        bool | None,
+        Field(description="Whether to apply the Favorite's classifications. Default is true."),
+    ] = None
+    applyCategories: Annotated[
+        bool | None,
+        Field(description="Whether to apply the Favorite's element categories (e.g. IFC categories). Default is true."),
+    ] = None
+    applyProperties: Annotated[
+        bool | None,
+        Field(description="Whether to apply the Favorite's property values. Default is true."),
+    ] = None
+
+
+class ApplyFavoritesToElementsResult(APIModel):
+    executionResults: Annotated[
+        list[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
+
+
+class AttachElementsToIssueParameters(APIModel):
+    issueId: IssueId
+    elements: Annotated[list[ElementIdArrayItem], Field(description="A list of elements.")]
+    type: IssueElementType
+
+
+AttachElementsToIssueResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
+
+
+class ChangeDrawingLinkParameters(APIModel):
+    drawingsWithNewLinks: list[DrawingsWithNewLink]
+
+
+class ChangeDrawingLinkResult(APIModel):
+    elements: Annotated[
+        list[ElementIdArrayItem | ErrorItem],
+        Field(
+            description="One result per input item. On success, elementId is the NEW Drawing's identifier - relinking necessarily replaces the element, it cannot keep the original guid."
+        ),
+    ]
+
+
+class ChangeHotlinkInstancesParameters(APIModel):
+    hotlinkInstances: Annotated[
+        list[HotlinkInstanceChange],
+        Field(
+            description="The placed hotlink instances to change. Every field but elementId is optional; a field that is omitted keeps its current value."
+        ),
+    ]
+
+
+class ChangeHotlinkInstancesResult(APIModel):
+    executionResults: Annotated[
+        list[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
+
+
+class ChangeSelectionOfElementsParameters(APIModel):
+    addElementsToSelection: Annotated[list[ElementIdArrayItem] | None, Field(description="A list of elements.")] = None
+    removeElementsFromSelection: Annotated[
+        list[ElementIdArrayItem] | None, Field(description="A list of elements.")
+    ] = None
+
+
+class ChangeSelectionOfElementsResult(APIModel):
+    executionResultsOfAddToSelection: Annotated[
+        list[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
+    executionResultsOfRemoveFromSelection: Annotated[
+        list[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
+
+
+ChangeWindowParameters: TypeAlias = NavigatorItemIdArrayItem | DatabaseIdAndWindowType
+
+
+ChangeWindowResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
+
+
+CloseProjectResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
+
+
+class ConnectMEPElementsParameters(APIModel):
+    connectionsData: Annotated[list[MEPConnectionData], Field(description="Array of connections to create.")]
+
+
+class ConnectMEPElementsResult(APIModel):
+    connectionResults: Annotated[
+        list[MEPConnectionResult | ErrorItem],
+        Field(description="A list of MEP connection results or errors."),
+    ]
+
+
+class CreateArcsParameters(APIModel):
+    arcsData: Annotated[list[ArcData], Field(description="Array of data to create Arcs.")]
+
+
+class CreateArcsResult(APIModel):
+    elements: Annotated[
+        list[ElementIdArrayItem | ErrorItem],
+        Field(description="A list of element identifiers or errors."),
+    ]
+
+
+class CreateAssociativeDimensionsOnSectionParameters(APIModel):
+    dimensionsData: list[AssociativeDimensionOnSectionData]
+
+
+class CreateAssociativeDimensionsOnSectionResult(APIModel):
+    elements: Annotated[
+        list[ElementIdArrayItem | ErrorItem],
+        Field(description="A list of element identifiers or errors."),
+    ]
+
+
+class CreateAssociativeDimensionsResult(APIModel):
+    elements: Annotated[
+        list[ElementIdArrayItem | ErrorItem],
+        Field(description="A list of element identifiers or errors."),
+    ]
+
+
+class CreateBeamsResult(APIModel):
+    elements: Annotated[
+        list[ElementIdArrayItem | ErrorItem],
+        Field(description="A list of element identifiers or errors."),
+    ]
+
+
+class CreateCirclesResult(APIModel):
+    elements: Annotated[
+        list[ElementIdArrayItem | ErrorItem],
+        Field(description="A list of element identifiers or errors."),
+    ]
+
+
+class CreateClassificationItemsParameters(APIModel):
+    newClassificationItems: Annotated[
+        list[NewClassificationItem],
+        Field(description="Classification systems with items."),
+    ]
+
+
+class CreateClassificationItemsResult(APIModel):
+    executionResults: Annotated[
+        list[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
+
+
+class CreateClassificationSystemsResult(APIModel):
+    executionResults: Annotated[
+        list[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
+
+
+class CreateColumnsResult(APIModel):
+    elements: Annotated[
+        list[ElementIdArrayItem | ErrorItem],
+        Field(description="A list of element identifiers or errors."),
+    ]
+
+
+class CreateDesignOptionCombinationsResult(APIModel):
+    designOptionCombinationIdsOrErrors: Annotated[
+        list[DesignOptionCombinationIdArrayItem | ErrorItem],
+        Field(description="A list of design option combination identifiers or errors."),
+    ]
+
+
+class CreateDesignOptionSetsResult(APIModel):
+    executionResults: Annotated[
+        list[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
+
+
+class CreateDesignOptionsResult(APIModel):
+    designOptionIdsOrErrors: Annotated[
+        list[DesignOptionIdArrayItem | ErrorItem],
+        Field(description="A list of design option identifiers or errors."),
+    ]
+
+
+class CreateDetailsResult(APIModel):
+    databases: Annotated[
+        list[DatabaseIdArrayItem | ErrorItem],
+        Field(description="A list of Archicad database identifiers or errors."),
+    ]
+
+
+class CreateDoorsResult(APIModel):
+    elements: Annotated[
+        list[ElementIdArrayItem | ErrorItem],
+        Field(description="A list of element identifiers or errors."),
+    ]
+
+
+class CreateDrawingsParameters(APIModel):
+    drawingsData: list[DrawingData]
+
+
+class CreateDrawingsResult(APIModel):
+    elements: Annotated[
+        list[ElementIdArrayItem | ErrorItem],
+        Field(description="A list of element identifiers or errors."),
+    ]
+
+
+class CreateFavoritesFromElementsParameters(APIModel):
+    favoritesFromElements: list[FavoritesFromElement]
+
+
+class CreateFavoritesFromElementsResult(APIModel):
+    executionResults: Annotated[
+        list[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
+
+
+class CreateFillsParameters(APIModel):
+    fillDataArray: Annotated[list[FillData], Field(description="Array of data to create new Fills.")]
+    overwriteExisting: Annotated[
+        bool | None,
+        Field(
+            description="Overwrite the Fill if exists with the same name, or if index is given with the same index. The default is false."
+        ),
+    ] = None
+
+
+class CreateGroupsResult(APIModel):
+    groupGuids: Annotated[
+        list[GroupIdArrayItem | ErrorItem],
+        Field(description="The results of the group creation operations."),
+    ]
+
+
+class CreateHatchesParameters(APIModel):
+    hatchesData: Annotated[list[HatchData], Field(description="Array of data to create Hatches.")]
+
+
+class CreateHatchesResult(APIModel):
+    elements: Annotated[
+        list[ElementIdArrayItem | ErrorItem],
+        Field(description="A list of element identifiers or errors."),
+    ]
+
+
+class CreateHotlinkInstancesParameters(APIModel):
+    hotlinkInstances: Annotated[
+        list[HotlinkInstanceCreation],
+        Field(description="The hotlink instances to place."),
+    ]
+
+
+class CreateHotlinkInstancesResult(APIModel):
+    elements: Annotated[
+        list[ElementIdArrayItem | ErrorItem],
+        Field(description="A list of element identifiers or errors."),
+    ]
+
+
+class CreateHotlinkNodesResult(APIModel):
+    hotlinkNodes: Annotated[
+        list[HotlinkNodeCreated | ErrorItem],
+        Field(description="One item per requested node, in order: the node guid with its existing flag, or an error."),
+    ]
+
+
+class CreateHotspotsResult(APIModel):
+    elements: Annotated[
+        list[ElementIdArrayItem | ErrorItem],
+        Field(description="A list of element identifiers or errors."),
+    ]
+
+
+class CreateInteriorElevationsResult(APIModel):
+    elements: Annotated[
+        list[ElementIdArrayItem | ErrorItem],
+        Field(description="A list of element identifiers or errors."),
+    ]
+
+
+class CreateKeynoteFoldersParameters(APIModel):
+    foldersData: Annotated[
+        list[KeynoteFolderData],
+        Field(description="Array of data to create keynote folders."),
+    ]
+
+
+class CreateKeynoteLabelsResult(APIModel):
+    elements: Annotated[
+        list[ElementIdArrayItem | ErrorItem],
+        Field(description="A list of element identifiers or errors."),
+    ]
+
+
+class CreateLabelsResult(APIModel):
+    elements: Annotated[
+        list[ElementIdArrayItem | ErrorItem],
+        Field(description="A list of element identifiers or errors."),
+    ]
+
+
+class CreateLampsParameters(APIModel):
+    lampsData: Annotated[list[LampData], Field(description="Array of data to create Lamps.")]
+
+
+class CreateLampsResult(APIModel):
+    elements: Annotated[
+        list[ElementIdArrayItem | ErrorItem],
+        Field(description="A list of element identifiers or errors."),
+    ]
+
+
+class CreateLayerCombinationsParameters(APIModel):
+    layerCombinationDataArray: Annotated[
+        list[LayerCombinationDataArrayItem],
+        Field(description="Array of data to create new Layer Combinations."),
+    ]
+    overwriteExisting: Annotated[
+        bool | None,
+        Field(
+            description="Overwrite the Layer Combination if exists with the same guid/index/name. The default is false."
+        ),
+    ] = None
+
+
+class CreateLayersParameters(APIModel):
+    layerDataArray: Annotated[list[LayerData], Field(description="Array of data to create new Layers.")]
+    overwriteExisting: Annotated[
+        bool | None,
+        Field(
+            description="Overwrite the Layer if exists with the same name, or if index is given with the same index. The default is false."
+        ),
+    ] = None
+
+
+class CreateLayoutParameters(APIModel):
+    layoutsData: list[LayoutData]
+
+
+class CreateLayoutResult(APIModel):
+    databases: Annotated[
+        list[DatabaseIdArrayItem | ErrorItem],
+        Field(description="A list of Archicad database identifiers or errors."),
+    ]
+
+
+class CreateLineElementsParameters(APIModel):
+    linesData: Annotated[list[LineElementData], Field(description="Array of data to create Lines.")]
+
+
+class CreateLineElementsResult(APIModel):
+    elements: Annotated[
+        list[ElementIdArrayItem | ErrorItem],
+        Field(description="A list of element identifiers or errors."),
+    ]
+
+
+class CreateLinesParameters(APIModel):
+    lineDataArray: Annotated[list[LineData], Field(description="Array of data to create new Lines.")]
+    overwriteExisting: Annotated[
+        bool | None,
+        Field(
+            description="Overwrite the Line if exists with the same name, or if index is given with the same index. The default is false."
+        ),
+    ] = None
+
+
+class CreateMEPElementsParameters(APIModel):
+    elementsData: Annotated[list[MEPElementData], Field(description="Array of data to create MEP elements.")]
+
+
+class CreateMEPElementsResult(APIModel):
+    elements: Annotated[
+        list[ElementIdArrayItem | ErrorItem],
+        Field(description="A list of element identifiers or errors."),
+    ]
+
+
+class CreateMEPRoutingElementsParameters(APIModel):
+    routingElementsData: Annotated[
+        list[MEPRoutingElementData],
+        Field(description="Array of data to create MEP routing elements."),
+    ]
+
+
+class CreateMEPRoutingElementsResult(APIModel):
+    elements: Annotated[
+        list[ElementIdArrayItem | ErrorItem],
+        Field(description="A list of element identifiers or errors."),
+    ]
+
+
+class CreateMEPSystemsParameters(APIModel):
+    mepSystemDataArray: Annotated[
+        list[MEPSystemData],
+        Field(description="Array of data to create new MEP Systems."),
+    ]
+    overwriteExisting: Annotated[
+        bool | None,
+        Field(
+            description="Overwrite the MEP System if exists with the same name, or if index is given with the same index. The default is false."
+        ),
+    ] = None
+
+
+class CreateMeshesParameters(APIModel):
+    meshesData: Annotated[list[MeshData], Field(description="Array of data to create Meshes.")]
+
+
+class CreateMeshesResult(APIModel):
+    elements: Annotated[
+        list[ElementIdArrayItem | ErrorItem],
+        Field(description="A list of element identifiers or errors."),
+    ]
+
+
+class CreateMorphsResult(APIModel):
+    elements: Annotated[
+        list[ElementIdArrayItem | ErrorItem],
+        Field(description="A list of element identifiers or errors."),
+    ]
+
+
+class CreateObjectsParameters(APIModel):
+    objectsData: Annotated[list[ObjectData], Field(description="Array of data to create Objects.")]
+
+
+class CreateObjectsResult(APIModel):
+    elements: Annotated[
+        list[ElementIdArrayItem | ErrorItem],
+        Field(description="A list of element identifiers or errors."),
+    ]
+
+
+class CreateOpeningsParameters(APIModel):
+    openingsData: list[OpeningData]
+
+
+class CreateOpeningsResult(APIModel):
+    elements: Annotated[
+        list[ElementIdArrayItem | ErrorItem],
+        Field(description="A list of element identifiers or errors."),
+    ]
+
+
+class CreatePenTablesParameters(APIModel):
+    penTableDataArray: Annotated[list[PenTableData], Field(description="Array of data to create new Pen Tables.")]
+    overwriteExisting: Annotated[
+        bool | None,
+        Field(
+            description="Overwrite the Pen Table if exists with the same name, or if index is given with the same index. The default is false."
+        ),
+    ] = None
+
+
+class CreatePolylinesResult(APIModel):
+    elements: Annotated[
+        list[ElementIdArrayItem | ErrorItem],
+        Field(description="A list of element identifiers or errors."),
+    ]
+
+
+class CreateRoofsResult(APIModel):
+    elements: Annotated[
+        list[ElementIdArrayItem | ErrorItem],
+        Field(description="A list of element identifiers or errors."),
+    ]
+
+
+class CreateSectionsResult(APIModel):
+    elements: Annotated[
+        list[ElementIdArrayItem | ErrorItem],
+        Field(description="A list of element identifiers or errors."),
+    ]
+
+
+class CreateSlabsResult(APIModel):
+    elements: Annotated[
+        list[ElementIdArrayItem | ErrorItem],
+        Field(description="A list of element identifiers or errors."),
+    ]
+
+
+class CreateSolidElementLinksParameters(APIModel):
+    solidLinks: Annotated[
+        list[SolidLinkData],
+        Field(description="List of solid element operation links to create."),
+    ]
+
+
+class CreateSolidElementLinksResult(APIModel):
+    executionResults: Annotated[
+        list[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
+
+
+class CreateSplinesParameters(APIModel):
+    splinesData: Annotated[
+        list[SplineData],
+        Field(
+            description="Array of data to create Splines. Only auto-smoothed curves are supported (bezier handle positions are calculated automatically by Archicad from the point positions)."
+        ),
+    ]
+
+
+class CreateSplinesResult(APIModel):
+    elements: Annotated[
+        list[ElementIdArrayItem | ErrorItem],
+        Field(description="A list of element identifiers or errors."),
+    ]
+
+
+class CreateStairsResult(APIModel):
+    elements: Annotated[
+        list[ElementIdArrayItem | ErrorItem],
+        Field(description="A list of element identifiers or errors."),
+    ]
+
+
+class CreateSurfacesParameters(APIModel):
+    surfaceDataArray: Annotated[list[SurfaceData], Field(description="Array of data to create new surfaces.")]
+    overwriteExisting: Annotated[
+        bool | None,
+        Field(
+            description="Overwrite the Surface if exists with the same name, or if index is given with the same index. The default is false."
+        ),
+    ] = None
+
+
+class CreateTextsResult(APIModel):
+    elements: Annotated[
+        list[ElementIdArrayItem | ErrorItem],
+        Field(description="A list of element identifiers or errors."),
+    ]
+
+
+class CreateWallThicknessDimensionsParameters(APIModel):
+    dimensionsData: list[WallThicknessDimensionData]
+
+
+class CreateWallThicknessDimensionsResult(APIModel):
+    elements: Annotated[
+        list[ElementIdArrayItem | ErrorItem],
+        Field(description="A list of element identifiers or errors."),
+    ]
+
+
+class CreateWallsParameters(APIModel):
+    wallsData: list[WallData]
+
+
+class CreateWallsResult(APIModel):
+    elements: Annotated[
+        list[ElementIdArrayItem | ErrorItem],
+        Field(description="A list of element identifiers or errors."),
+    ]
+
+
+class CreateWindowsParameters(APIModel):
+    windowsData: list[WindowData]
+
+
+class CreateWindowsResult(APIModel):
+    elements: Annotated[
+        list[ElementIdArrayItem | ErrorItem],
+        Field(description="A list of element identifiers or errors."),
+    ]
+
+
+class CreateWorksheetsResult(APIModel):
+    databases: Annotated[
+        list[DatabaseIdArrayItem | ErrorItem],
+        Field(description="A list of Archicad database identifiers or errors."),
+    ]
+
+
+class CreateZoneCategoriesParameters(APIModel):
+    zoneCategoryDataArray: Annotated[
+        list[ZoneCategoryData],
+        Field(description="Array of data to create new Zone Categories."),
+    ]
+    overwriteExisting: Annotated[
+        bool | None,
+        Field(
+            description="Overwrite the Zone Category if exists with the same name, or if index is given with the same index. The default is false."
+        ),
+    ] = None
+
+
+class CreateZonesResult(APIModel):
+    elements: Annotated[
+        list[ElementIdArrayItem | ErrorItem],
+        Field(description="A list of element identifiers or errors."),
+    ]
+
+
+class DeleteAttributesResult(APIModel):
+    executionResults: Annotated[
+        list[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
+
+
+class DeleteClassificationItemsResult(APIModel):
+    executionResults: Annotated[
+        list[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
+
+
+class DeleteClassificationSystemsResult(APIModel):
+    executionResults: Annotated[
+        list[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
+
+
+class DeleteElementsParameters(APIModel):
+    elements: Annotated[list[ElementIdArrayItem], Field(description="A list of elements.")]
+
+
+DeleteElementsResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
+
+
+class DeleteFavoritesResult(APIModel):
+    executionResults: Annotated[
+        list[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
+
+
+DeleteIssueResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
+
+
+class DeleteKeynoteFoldersResult(APIModel):
+    executionResults: Annotated[
+        list[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
+
+
+class DeleteKeynoteItemsResult(APIModel):
+    executionResults: Annotated[
+        list[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
+
+
+class DeleteNavigatorItemsResult(APIModel):
+    executionResults: Annotated[
+        list[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
+
+
+class DeleteProjectInfoFieldsResult(APIModel):
+    executionResults: Annotated[
+        list[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
+
+
+class DeletePropertyDefinitionsResult(APIModel):
+    executionResults: Annotated[
+        list[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
+
+
+class DeletePropertyGroupsResult(APIModel):
+    executionResults: Annotated[
+        list[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
+
+
+class DetachElementsFromIssueParameters(APIModel):
+    issueId: IssueId
+    elements: Annotated[list[ElementIdArrayItem], Field(description="A list of elements.")]
+
+
+DetachElementsFromIssueResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
+
+
+GetAllElementsResult: TypeAlias = ElementsWithExecutionResults | ErrorItem
+
+
+class GetClassificationsOfElementsResult(APIModel):
+    elementClassifications: Annotated[
+        list[ElementClassificationItemArray | ErrorItem],
+        Field(
+            description="The list of element classification item identifiers. Order of the ids are the same as in the input. Non-existing elements or non-existing classification systems are represented by error objects."
+        ),
+    ]
+
+
+class GetCompositesResult(APIModel):
+    composites: Annotated[
+        list[CompositeAttribute | ErrorItem],
+        Field(description="A list of composites or errors."),
+    ]
+
+
+class GetDesignOptionCombinationsResult(APIModel):
+    designOptionCombinations: list[DesignOptionCombinationDetails]
+
+
+class GetDesignOptionForElementsResult(APIModel):
+    designOptionForElements: list[DesignOptionForElement]
+
+
+class GetDesignOptionsResult(APIModel):
+    designOptions: list[DesignOptionDetails]
+
+
+class GetDimensionDataResult(APIModel):
+    dimensionsData: list[DimensionData | ErrorItem]
+
+
+class GetElementTrimsResult(APIModel):
+    elementTrims: Annotated[
+        list[ElementTrims | ErrorItem],
+        Field(
+            description="One item per queried element, in order. An unknown or deleted element is an error item, so it cannot be mistaken for an element that is simply not trimmed."
+        ),
+    ]
+
+
+GetElementsByTypeResult: TypeAlias = ElementsWithExecutionResults | ErrorItem
+
+
+class GetElementsOfGroupsParameters(APIModel):
+    groups: Annotated[list[GroupIdArrayItem], Field(description="The groups to get the elements of.")]
+
+
+class GetGDLParametersOfElementsResult(APIModel):
+    gdlParametersOfElements: Annotated[list[GDLParameterList], Field(description="The GDL parameters of elements.")]
+
+
+class GetGeoLocationResult(APIModel):
+    projectLocation: ProjectLocation
+    surveyPoint: SurveyPoint
+
+
+class GetGroupsOfElementsResult(APIModel):
+    groupGuids: Annotated[
+        list[GroupIdArrayItem | ErrorItem],
+        Field(
+            description="The identifier of the group that directly contains each given element, or an error for elements that are not part of any group."
+        ),
+    ]
+
+
+class GetIFCIdsOfElementsResult(APIModel):
+    elementIFCIds: Annotated[
+        list[ElementIFCIds | ErrorItem],
+        Field(description="A list of the IFC identifiers of elements or errors."),
+    ]
+
+
+class GetIFCPropertiesOfElementsResult(APIModel):
+    elementIFCProperties: Annotated[
+        list[ElementIFCProperties | ErrorItem],
+        Field(description="A list of the IFC properties of elements or errors."),
+    ]
+
+
+class GetIFCTypeOfElementsResult(APIModel):
+    elementIFCTypes: Annotated[
+        list[ElementIFCType | ErrorItem],
+        Field(description="A list of the IFC types of elements or errors."),
+    ]
+
+
+class GetLayersResult(APIModel):
+    layers: Annotated[
+        list[LayerAttribute | ErrorItem],
+        Field(description="A list of layers or errors."),
+    ]
+
+
+class GetLinesResult(APIModel):
+    lines: Annotated[list[LineAttribute | ErrorItem], Field(description="A list of lines or errors.")]
+
+
+class GetMEPDistributionSystemsResult(APIModel):
+    distributionSystems: Annotated[
+        list[MEPDistributionSystem],
+        Field(description="The distribution systems of the project."),
+    ]
+
+
+class GetMEPElementsResult(APIModel):
+    elements: Annotated[list[MEPElement], Field(description="The MEP elements.")]
+
+
+class GetMEPSystemsResult(APIModel):
+    mepSystems: Annotated[
+        list[MEPSystemAttribute | ErrorItem],
+        Field(description="A list of MEP systems or errors."),
+    ]
+
+
+class GetPenTablesResult(APIModel):
+    penTables: Annotated[
+        list[PenTableAttribute | ErrorItem],
+        Field(description="A list of pen tables or errors."),
+    ]
+
+
+class GetRevisionIssuesResult(APIModel):
+    revisionIssues: list[RevisionIssue]
+
+
+class GetSolidElementLinksResult(APIModel):
+    solidLinks: Annotated[
+        list[SolidLinksOfElement],
+        Field(
+            description="For each input element, the solid links where it acts as target and where it acts as operator."
+        ),
+    ]
+
+
+class GetStoriesResult(APIModel):
+    firstStory: Annotated[int, Field(description="First story index.")]
+    lastStory: Annotated[int, Field(description="Last story index.")]
+    actStory: Annotated[int, Field(description="Actual (currently visible in 2D) story index.")]
+    skipNullFloor: Annotated[
+        bool,
+        Field(description="Floor indices above ground-floor level may start with 1 instead of 0."),
+    ]
+    stories: Annotated[
+        list[StoryParameters],
+        Field(description="A list of project stories, each with their complete parameters."),
+    ]
+
+
+class GetSurfacesResult(APIModel):
+    surfaces: Annotated[
+        list[SurfaceAttribute | ErrorItem],
+        Field(description="A list of surfaces or errors."),
+    ]
+
+
+class GetView2DTransformationsResult(APIModel):
+    transformations: list[ViewTransformations | ErrorItem]
+
+
+class GetViewSettingsResult(APIModel):
+    viewSettings: list[ViewSettings | ErrorItem]
+
+
+class GetZoneCategoriesResult(APIModel):
+    zoneCategories: Annotated[
+        list[ZoneCategoryAttribute | ErrorItem],
+        Field(description="A list of zone categories or errors."),
+    ]
+
+
+class ModifyBeamsParameters(APIModel):
+    beamsWithDetails: list[BeamWithDetails]
+
+
+class ModifyColumnsParameters(APIModel):
+    columnsWithDetails: list[ColumnWithDetails]
+
+
+class ModifyDoorsParameters(APIModel):
+    doorsWithDetails: list[DoorWithDetails]
+
+
+class ModifyObjectsParameters(APIModel):
+    objectsWithDetails: Annotated[
+        list[ObjectWithDetails],
+        Field(
+            description="Array of elements to modify, with the fields to change. Only provided fields are changed; omitted fields are left as-is."
+        ),
+    ]
+
+
+class ModifyWallsParameters(APIModel):
+    wallsWithDetails: list[WallWithDetails]
+
+
+class ModifyWindowsParameters(APIModel):
+    windowsWithDetails: list[WindowWithDetails]
+
+
+class RemoveSolidElementLinksParameters(APIModel):
+    solidLinks: Annotated[
+        list[SolidLinkReference],
+        Field(description="List of solid element operation links to remove."),
+    ]
+
+
+class SetClassificationsOfElementsParameters(APIModel):
+    elementClassifications: Annotated[
+        list[ElementClassification],
+        Field(description="A list of element classification identifiers."),
+    ]
+
+
+class SetGeoLocationParameters(APIModel):
+    projectLocation: ProjectLocation | None = None
+    surveyPoint: SurveyPoint | None = None
+
+
+class SetStoriesParameters(APIModel):
+    stories: Annotated[
+        list[StorySettings],
+        Field(description="A list of story settings, used as input for creating or modifying multiple stories."),
+    ]
+
+
+class SetViewSettingsParameters(APIModel):
+    navigatorItemIdsWithViewSettings: list[NavigatorItemIdsWithViewSetting]
+
+
+class CreateAssociativeDimensionsParameters(APIModel):
+    dimensionsData: list[AssociativeDimensionData]
+
+
+class CreateDesignOptionCombinationsParameters(APIModel):
+    designOptionCombinations: list[DesignOptionCombinationData]
+
+
+class CreateDoorsParameters(APIModel):
+    doorsData: list[DoorData]
+
+
+class CreateLabelsParameters(APIModel):
+    labelsData: Annotated[list[LabelData], Field(description="Array of data to create Labels.")]
+
+
+class CreateMorphsParameters(APIModel):
+    morphsData: list[MorphData]
+
+
+class CreateProfilesParameters(APIModel):
+    profileDataArray: Annotated[list[ProfileData], Field(description="Array of data to create new Profiles.")]
+    overwriteExisting: Annotated[
+        bool | None,
+        Field(
+            description="Overwrite the Profile if exists with the same name, or if index is given with the same index. The default is false."
+        ),
+    ] = None
+
+
+class CreateRoofsParameters(APIModel):
+    roofsData: list[RoofData]
+
+
+class CreateSlabsParameters(APIModel):
+    slabsData: Annotated[list[SlabData], Field(description="Array of data to create Slabs.")]
+
+
+class CreateTextsParameters(APIModel):
+    textsData: Annotated[
+        list[TextDataWithText | TextDataWithRuns],
+        Field(description="Array of data to create Texts."),
+    ]
+
+
+class CreateZonesParameters(APIModel):
+    zonesData: Annotated[list[ZoneData], Field(description="Array of data to create Zones.")]
+
+
+class GetAllPropertiesResult(APIModel):
+    properties: Annotated[list[PropertyDetails], Field(description="A list of property identifiers.")]
+
+
+GetAttributesByTypeResult: TypeAlias = AttributeHeadersWrapper | ErrorItem
+
+
+GetConnectedElementsResult: TypeAlias = ConnectedElementsWrapper | ErrorItem
+
+
+class GetCurrentRevisionChangesOfLayoutsResult(APIModel):
+    currentRevisionChangesOfLayouts: RevisionChangesArrayItem | ErrorItem
+
+
+class GetDocumentRevisionsResult(APIModel):
+    documentRevisions: list[DocumentRevision]
+
+
+class GetKeynoteTreeResult(APIModel):
+    foldersInRoot: Annotated[
+        list[KeynoteFolderDetails],
+        Field(
+            description="The top-level keynote folders with their content recursively. The technical root folder itself is not included."
+        ),
+    ]
+    itemsInRoot: Annotated[
+        list[KeynoteItemDetails],
+        Field(description="The keynote items located directly in the technical root folder."),
+    ]
+
+
+class GetMEPPortsResult(APIModel):
+    elementPorts: Annotated[
+        list[MEPElementPorts | ErrorItem],
+        Field(description="A list of MEP element ports or errors."),
+    ]
+
+
+class GetMEPRoutingElementsResult(APIModel):
+    routingElements: Annotated[
+        list[MEPRoutingElementDetails | ErrorItem],
+        Field(description="A list of MEP routing element details or errors."),
+    ]
+
+
+class GetProfilesResult(APIModel):
+    profiles: Annotated[
+        list[ProfileAttribute | ErrorItem],
+        Field(description="A list of profiles or errors."),
+    ]
+
+
+class GetRelationsOfElementsResult(APIModel):
+    relations: Annotated[
+        list[
+            WallRelations
+            | BeamRelations
+            | BeamSegmentRelations
+            | ZoneRelationsOfElement
+            | OpeningRelationsOfElement
+            | RoofOrShellRelationsOfElement
+            | ErrorItem
+        ],
+        Field(description="Type-specific relations of each element, aligned with the input."),
+    ]
+
+
+class GetRevisionChangesOfElementsResult(APIModel):
+    revisionChangesOfElements: RevisionChangesArrayItem | ErrorItem
+
+
+class GetRevisionChangesResult(APIModel):
+    revisionChanges: list[RevisionChange]
+
+
+class ModifyMorphsParameters(APIModel):
+    morphsWithDetails: list[MorphWithDetails]
+
+
+class ModifyRoofsParameters(APIModel):
+    roofsWithDetails: list[RoofWithDetails]
+
+
+class ModifySlabsParameters(APIModel):
+    slabsWithDetails: list[SlabWithDetails]
+
+
+class CreateGroupsParameters(APIModel):
+    elementGroups: Annotated[
+        list[ElementGroupParameters],
+        Field(description="A list of element groups to create."),
+    ]
+
+
+class CreatePropertyDefinitionsParameters(APIModel):
+    propertyDefinitions: Annotated[
+        list[PropertyDefinitionArrayItem],
+        Field(description="The parameters of the new properties."),
+    ]
+
+
+class GetDetailsOfElementsResult(APIModel):
+    detailsOfElements: list[DetailsOfElement]
+
+
+class GetLayerCombinationsResult(APIModel):
+    layerCombinations: Annotated[
+        list[LayerCombinationAttribute | ErrorItem],
+        Field(description="A list of layer combinations."),
+    ]
+
+
 GetZoneBoundariesResult: TypeAlias = ZoneBoundariesOfZonesWrapper | ZoneBoundariesWrapper | ErrorItem
+
+
+class SetDetailsOfElementsParameters(APIModel):
+    elementsWithDetails: Annotated[list[ElementsWithDetail], Field(description="The elements with parameters.")]
+
+
+class GetHotlinksResult(APIModel):
+    hotlinks: Annotated[list[Hotlink], Field(description="A list of hotlink nodes.")]
+
+
+class GetNavigatorItemTreeResult(APIModel):
+    navigatorItemTree: NavigatorItem
 
 
 GetHotlinksResult.model_rebuild()
