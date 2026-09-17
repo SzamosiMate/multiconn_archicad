@@ -42,7 +42,7 @@ def _validate_matrix_input(
             raise TypeError(f"Row {row_index} in values_matrix must be a sequence.")
         if len(row) != expected_length:
             raise ValueError(f"Expected {expected_length} values per row, got {len(row)} at row {row_index}.")
-    BatchResult2D.from_rows(values_matrix, row_lengths=[expected_length] * len(norm_elements)).raise_for_errors(
+    BatchResult2D.from_rows(values_matrix, width=expected_length).raise_for_errors(
         "Property write input"
     )
     return norm_elements, norm_properties
@@ -115,34 +115,45 @@ def create_element_property_values_sparse(
     values_matrix: Sequence[Sequence[Any]] | BatchResult2D[Any],
 ) -> list[tapir.ElementPropertyValue]:
     """Build a sparse payload from a matrix, omitting typed error cells and rows."""
-    normalized_elements = normalize_element_ids(elements)
-    normalized_properties = normalize_property_ids(properties)
-    rows = values_matrix.items if isinstance(values_matrix, BatchResult2D) else values_matrix
-    _validate_element_property_rows(rows, len(normalized_elements), len(normalized_properties))
+    norm_elements = normalize_element_ids(elements)
+    norm_props = normalize_property_ids(properties)
+    matrix = _coerce_property_matrix(values_matrix, len(norm_elements), len(norm_props))
 
-    matrix = values_matrix if isinstance(values_matrix, BatchResult2D) else BatchResult2D.from_rows(rows)
     return [
         tapir.ElementPropertyValue(
-            elementId=normalized_elements[element_index].elementId,
-            propertyId=normalized_properties[property_index].propertyId,
+            elementId=norm_elements[elem_idx].elementId,
+            propertyId=norm_props[prop_idx].propertyId,
             propertyValue=_to_prop_value(value),
         )
-        for (element_index, property_index), value in matrix.iter_successes()
+        for (elem_idx, prop_idx), value in matrix.iter_successes()
     ]
 
 
-def _validate_element_property_rows(rows: Sequence[Any], len_elements: int, len_properties: int) -> None:
-    if len(rows) != len_elements:
-        raise ValueError(f"Expected {len_elements} rows in values_matrix, got {len(rows)}.")
-    for row_index, raw_row in enumerate(rows):
-        if extract_error(raw_row):
-            continue
-        if not isinstance(raw_row, Sequence) or isinstance(raw_row, (str, bytes)):
-            raise TypeError(f"Row {row_index} in values_matrix must be a sequence or a typed API error.")
-        if len(raw_row) > len_properties:
+def _coerce_property_matrix(
+    values_matrix: Sequence[Sequence[Any]] | BatchResult2D[Any], expected_rows: int, expected_width: int,
+) -> BatchResult2D[Any]:
+    """Validate grid dimensions and coerce raw rows or BatchResult2D into a verified BatchResult2D."""
+    if expected_width <= 0:
+        raise ValueError("At least one property must be specified.")
+
+    if isinstance(values_matrix, BatchResult2D):
+        if len(values_matrix.rows) != expected_rows:
             raise ValueError(
-                f"Row {row_index} contains {len(raw_row)} values, but only {len_properties} properties were supplied."
+                f"Expected {expected_rows} rows in values_matrix, got {len(values_matrix.rows)}."
             )
+        for row_index, row in enumerate(values_matrix.rows):
+            if len(row) != expected_width:
+                raise ValueError(
+                    f"Row {row_index} contains {len(row)} values, expected {expected_width}."
+                )
+        return values_matrix
+
+    if len(values_matrix) != expected_rows:
+        raise ValueError(
+            f"Expected {expected_rows} rows in values_matrix, got {len(values_matrix)}."
+        )
+
+    return BatchResult2D.from_rows(values_matrix, width=expected_width)
 
 
 def get_possible_enum_values(property_definition: official.PropertyDefinition) -> list[str]:
@@ -192,9 +203,7 @@ class PropertyUtilities:
         """Read display strings: one row per element, with nested ErrorItems on failure."""
         items = self._get_raw_property_values(elements, properties)
         rows = [item if extract_error(item) else item.propertyValues for item in items]
-        return BatchResult2D.from_rows(
-            rows, row_lengths=[len(properties)] * len(elements), accessor=_extract_property_value
-        )
+        return BatchResult2D.from_rows(rows, width=len(properties), accessor=_extract_property_value)
 
     def get_property_values_per_element(
         self, elements: Sequence[ElementIdLike], properties: Sequence[PropertyIdLike]
@@ -267,7 +276,7 @@ class PropertyUtilities:
         payload = create_element_property_values(elements, properties, values_matrix)
         raw_res = self._api.tapir.property.set_property_values_of_elements(payload)
         grouped = [raw_res[i * n_props : (i + 1) * n_props] for i in range(len(elements))]
-        return BatchResult2D.from_rows(grouped, row_lengths=[n_props] * len(elements))
+        return BatchResult2D.from_rows(grouped, width=n_props)
 
     def set_property_values_per_element(
         self,
