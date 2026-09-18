@@ -13,7 +13,7 @@ The `utilities` subpackage provides **Level 3 Ergonomic Sugar** on top of `Unifi
 ### What Belongs in `utilities`:
 * **Idiomatic Pythonic wrappers** around repetitive Archicad JSON API interactions (e.g., context managers for resource safety).
 * **Batch unwrapping and type coercion** (turning known API response wrappers into Python primitives).
-* **Batch result containers** (`BatchResultBase`, `BatchResult`, `BatchResult2D`, `BatchRow`, `BatchSlot`) that preserve explicit 1D and 2D alignment while isolating partial failures and non-executed cells.
+* **Batch result containers** (`BatchResultBase`, `BatchResult`, `BatchResult2D`, `BatchGrid`, `RaggedBatchResult`, `BatchRow`, `BatchSlot`) that preserve explicit 1D and 2D alignment while isolating partial failures and non-executed cells.
 * **Workflow accumulation** (`BatchRun`) that acts as an atomic ledger of pipeline steps, attributing failures and terminal execution states back to original input items.
 * **Universal identifier constructors and normalizers** (e.g., GUID strings / UUIDs $\to$ typed `ElementIdArrayItem` / `PropertyIdArrayItem`).
 
@@ -31,7 +31,7 @@ The `utilities` subpackage provides **Level 3 Ergonomic Sugar** on top of `Unifi
 
 ### A. Bound Operations and Pure Helpers
 * API-dependent operations are methods on domain groups such as `PropertyUtilities`, bound to one `UnifiedApi`. They store only the API reference and do not cache BIM data. Payload builders, identifier normalizers, and extractors remain standalone pure functions.
-* **Classes:** API-bound utility groups, explicit result/run containers (`BatchResultBase`, `BatchResult`, `BatchResult2D`, `BatchRun`), and resource lifecycle context managers are permitted.
+* **Classes:** API-bound utility groups, explicit result/run containers (`BatchResultBase`, `BatchResult`, `BatchResult2D`, `BatchGrid`, `RaggedBatchResult`, `BatchRow`, `BatchRun`), and resource lifecycle context managers are permitted.
 * **No "Active Record" Objects:** Never wrap an Archicad element in a stateful class with instance methods (e.g., `element.get_property()`). This encourages iterative $N+1$ socket calls, severely degrading CAD performance.
 
 ### B. The Dedicated Dual-Method Convention
@@ -45,7 +45,7 @@ To serve both fast-prototyping scripts and large-scale, eager batch pipelines (e
 2. **Diagnostic Variant (`<name>_result`):**
    * **Target:** Telemetry, automated QA checkers, GUI viewers, and multi-step eager batch pipelines.
    * **Behavior:** **Retains reported partial failures.** Preserves 1:1 index alignment and stores structured `BatchError` entries. Invalid inputs, transport failures, and whole-command errors can still raise.
-   * **Return Types:** Returns `BatchResult[T]` for 1D operations and `BatchResult2D[T]` for 2D matrix operations.
+   * **Return Types:** Returns `BatchResult[T]` for 1D operations, `BatchGrid[T]` for fixed-width 2D operations (e.g., element property matrices), and `RaggedBatchResult[T]` for variable row-length collections.
 3. **Scalar Convenience (`<name>` singular):**
    * Provided where intuitive (e.g., `resolve_property_id`), simply delegating to the batch form: `self.resolve_property_ids([uid])[0]`.
 
@@ -60,10 +60,11 @@ Archicad JSON API is optimized for bulk operations.
 1. **Input Parameters:**
    * Accept liberal union types (`ElementIdLike`, `PropertyIdLike`, `PropertyUserId`) defined in `identifiers.py`.
    * Annotate collection inputs as read-only abstractions: `Sequence[T]` or `Mapping[K, V]` from `collections.abc`.
+   * Accept `BatchResult2D[Any]` or `Sequence[Sequence[Any]]` for 2D inputs.
    * **Never mutate input parameters.**
 2. **Return Types:**
    * Fail-fast queries return concrete collections (`list[T]`, `dict[K, V]`).
-   * Diagnostic variants return `BatchResult[T]` or `BatchResult2D[T]`.
+   * Diagnostic variants return concrete batch containers: `BatchResult[T]`, `BatchGrid[T]`, or `RaggedBatchResult[T]`.
 
 ### E. Public Access and Consistent Signatures
 
@@ -73,6 +74,8 @@ from multiconn_archicad.utilities import (
     BatchResultBase,
     BatchResult,
     BatchResult2D,
+    BatchGrid,
+    RaggedBatchResult,
     BatchRow,
     BatchSlot,
     SlotState,
@@ -94,7 +97,7 @@ src/multiconn_archicad/utilities/
 ├── __init__.py           # Public export surface
 ├── api.py                # Utilities domain-group container
 ├── readme.md             # This document
-├── results.py            # BatchResultBase, BatchResult, BatchResult2D, BatchRow, BatchSlot, BatchError
+├── results.py            # BatchResultBase, BatchResult, BatchResult2D, BatchGrid, RaggedBatchResult, BatchRow, BatchSlot, BatchError
 ├── batch_run.py          # BatchRun, BatchStep, BatchFailure, BatchOutcome, BatchReport
 ├── identifiers.py        # Liberal type aliases & universal ID normalizers
 ├── properties.py         # Batch property reading, writing, and inspection
@@ -115,7 +118,7 @@ Centralizes type coercion across all utilities.
 ### `properties.py` (`PropertyUtilities` and Pure Helpers)
 * Value reads return Tapir **display strings**. They do not parse numbers or normalize units.
 * Writes preserve `tapir.PropertyValue` instances, convert `None` to `""`, and otherwise use `str(value)`.
-* **High-Level Sparse Writing:** `set_property_values_per_element_sparse_result(elements, properties, values_matrix)` automatically omits non-successful cells, performs the API call, and projects outcomes back onto an $N \times M$ grid.
+* **High-Level Sparse Writing:** `set_property_values_per_element_sparse_result(elements, properties, values_matrix)` automatically omits non-successful cells, performs the API call, and projects outcomes back onto an $N \times M$ `BatchGrid`.
 
 ---
 
@@ -134,21 +137,32 @@ Predicates: `slot.is_success`, `slot.is_error`, `slot.is_upstream_failed`, `slot
 ### B. Container Hierarchy: `BatchResultBase[T]`
 All batch results inherit from `BatchResultBase[T]`, sharing a clean, state-driven inspection interface parameterized by `SlotState`.
 
-Coordinates are typed as `BatchCoordinate = int | tuple[int, int]` without generic parameter bloat:
-
 ```
                     ┌────────────────────────┐
-                    │  iter_slots(state)     │  <-- Foundational Primitive (Coord, BatchSlot[T])
+                    │    BatchResultBase     │
                     └───────────┬────────────┘
          ┌──────────────────────┼──────────────────────┐
          ▼                      ▼                      ▼
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│ State & Indices │    │ Payload Extract │    │  State Queries  │
-│                 │    │                 │    │                 │
-│ iter_indices()  │    │ iter_successes()│    │ count(state)    │
-│ indices()       │    │ iter_errors()   │    │ has(state)      │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
+  ┌─────────────┐        ┌──────────────┐        ┌───────────┐
+  │ BatchResult │        │BatchResult2D │        │ BatchRow  │
+  │    (1D)     │        │  (2D Base)   │        │           │
+  └─────────────┘        └──────┬───────┘        └───────────┘
+                     ┌──────────┴──────────┐
+                     ▼                     ▼
+              ┌─────────────┐     ┌───────────────────┐
+              │  BatchGrid  │     │ RaggedBatchResult │
+              │(Rectangular)│     │     (Ragged)      │
+              └─────────────┘     └───────────────────┘
 ```
+
+#### 2D Subclasses:
+1. **`BatchGrid[T]`:** Represents a rectangular matrix where every row has identical width (`self.width: int`).
+   * Constructed via `BatchGrid.from_rows(raw_rows, width=M)`.
+   * Enforces dimension consistency and expands whole-row API errors into $M$ error slots.
+   * Returned by all fixed-width matrix operations in `PropertyUtilities`.
+2. **`RaggedBatchResult[T]`:** Represents a 2D result where rows may have varying lengths.
+   * Constructed via `RaggedBatchResult.from_ragged_rows(raw_rows)`.
+   * Defaults whole-row errors to 1 error slot if row length cannot be inferred.
 
 #### Unified Query API:
 ```python
@@ -232,7 +246,7 @@ def run(self) -> ExecutionReport:
     with BatchRun(self.elements) as run:
         self._validate_inputs()
         if self.elements:
-            # Step 1: Read source properties (N x M matrix)
+            # Step 1: Read source properties (returns BatchGrid[str])
             read = run.record(
                 "Property read",
                 self.property_utilities.get_property_values_per_element_result(
@@ -257,7 +271,7 @@ All input properties are required to calculate derived properties:
 ```python
 def run(self) -> ExecutionReport:
     with BatchRun(self.elements) as run:
-        # Step 1: Read dimensions (N x 3 matrix)
+        # Step 1: Read dimensions (returns BatchGrid[str])
         read = run.record(
             "Read dimensions",
             self.property_utilities.get_property_values_per_element_result(
@@ -315,13 +329,15 @@ Tests run offline with real official and Tapir Pydantic models and mocked API re
 ```text
 tests/utilities/unit/
 ├── test_identifiers.py       # Coercion and GUID normalization
-├── test_batch_results.py     # BatchResultBase, BatchResult, BatchResult2D, BatchRow, BatchSlot
+├── test_batch_results.py     # BatchResultBase, BatchResult, BatchResult2D, BatchGrid, RaggedBatchResult, BatchRow, BatchSlot
 ├── test_batch_run.py         # BatchRun lifecycle, FIFO duplicate matching, atomic abort
 └── test_properties.py        # Sparse/dense builders, projection pipelines
 ```
 
 The test suite enforces that:
 * `count()` and `has()` work accurately across all 4 `SlotState`s.
+* `BatchGrid` validates rectangular row lengths and non-positive widths.
+* `RaggedBatchResult` correctly accommodates variable row lengths.
 * `run.report` remains a non-mutating snapshot during open execution.
 * Calling `finish()` or `abort()` on a closed run raises `RuntimeError`.
 * Context managers cleanly suppress `Exception` while preserving `fatal_error`.

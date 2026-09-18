@@ -14,7 +14,12 @@ from multiconn_archicad.utilities.identifiers import (
     normalize_property_ids,
     to_official_property_id,
 )
-from multiconn_archicad.utilities.results import BatchResult, BatchResult2D, extract_error
+from multiconn_archicad.utilities.results import (
+    BatchGrid,
+    BatchResult,
+    BatchResult2D,
+    extract_error,
+)
 
 if TYPE_CHECKING:
     from multiconn_archicad.clients.unified_api.api import UnifiedApi
@@ -30,8 +35,8 @@ def _to_prop_value(val: Any) -> tapir.PropertyValue:
 
 def _coerce_property_matrix(
     values_matrix: Sequence[Sequence[Any]] | BatchResult2D[Any], expected_rows: int, expected_width: int,
-) -> BatchResult2D[Any]:
-    """Validate grid dimensions and coerce raw rows or BatchResult2D into a verified BatchResult2D."""
+) -> BatchGrid[Any]:
+    """Validate grid dimensions and coerce raw rows or BatchResult2D into a verified BatchGrid."""
     if expected_width <= 0:
         raise ValueError("At least one property must be specified.")
 
@@ -41,7 +46,7 @@ def _coerce_property_matrix(
         for row_index, row in enumerate(values_matrix.rows):
             if len(row) != expected_width:
                 raise ValueError(f"Row {row_index} contains {len(row)} values, expected {expected_width}.")
-        return values_matrix
+        return values_matrix if isinstance(values_matrix, BatchGrid) else BatchGrid(values_matrix.rows, width=expected_width)
 
     if len(values_matrix) != expected_rows:
         raise ValueError(f"Expected {expected_rows} rows in values_matrix, got {len(values_matrix)}.")
@@ -52,14 +57,14 @@ def _coerce_property_matrix(
         if len(row) != expected_width:
             raise ValueError(f"Expected {expected_width} values per row, got {len(row)} at row {row_index}.")
 
-    return BatchResult2D.from_rows(values_matrix, width=expected_width)
+    return BatchGrid.from_rows(values_matrix, width=expected_width)
 
 
 def _validate_and_coerce_matrix(
     elements: Sequence[ElementIdLike], properties: Sequence[PropertyIdLike],
     values_matrix: Sequence[Sequence[Any]] | BatchResult2D[Any], *, allow_errors: bool = True,
-) -> tuple[list[tapir.ElementIdArrayItem], list[tapir.PropertyIdArrayItem], BatchResult2D[Any]]:
-    """Centralized validation of identifiers and dimensions, coercing values to a verified BatchResult2D."""
+) -> tuple[list[tapir.ElementIdArrayItem], list[tapir.PropertyIdArrayItem], BatchGrid[Any]]:
+    """Centralized validation of identifiers and dimensions, coercing values to a verified BatchGrid."""
     norm_elements = normalize_element_ids(elements)
     norm_properties = normalize_property_ids(properties)
     matrix = _coerce_property_matrix(values_matrix, len(norm_elements), len(norm_properties))
@@ -205,11 +210,11 @@ class PropertyUtilities:
 
     def get_property_values_per_element_result(
         self, elements: Sequence[ElementIdLike], properties: Sequence[PropertyIdLike]
-    ) -> BatchResult2D[str]:
+    ) -> BatchGrid[str]:
         """Read display strings: one row per element, with nested ErrorItems on failure."""
         items = self._get_raw_property_values(elements, properties)
         rows = [item if extract_error(item) else item.propertyValues for item in items]
-        return BatchResult2D.from_rows(rows, width=len(properties), accessor=_extract_property_value)
+        return BatchGrid.from_rows(rows, width=len(properties), accessor=_extract_property_value)
 
     def get_property_values_per_element(
         self, elements: Sequence[ElementIdLike], properties: Sequence[PropertyIdLike]
@@ -269,7 +274,7 @@ class PropertyUtilities:
     def set_property_values_per_element_result(
         self, elements: Sequence[ElementIdLike], properties: Sequence[PropertyIdLike],
         values_matrix: Sequence[Sequence[Any]] | BatchResult2D[Any],
-    ) -> BatchResult2D[tapir.SuccessfulExecutionResult]:
+    ) -> BatchGrid[tapir.SuccessfulExecutionResult]:
         """Write display values, returning one execution-result row per element.
 
         Each row contains one success or failure per requested property. Partial
@@ -280,7 +285,7 @@ class PropertyUtilities:
         payload = create_element_property_values(elements, properties, values_matrix)
         raw_res = self._api.tapir.property.set_property_values_of_elements(payload) if payload else []
         grouped = [raw_res[i * n_props : (i + 1) * n_props] for i in range(len(elements))]
-        return BatchResult2D.from_rows(grouped, width=n_props)
+        return BatchGrid.from_rows(grouped, width=n_props)
 
     def set_property_values_per_element(
         self, elements: Sequence[ElementIdLike], properties: Sequence[PropertyIdLike],
@@ -299,11 +304,11 @@ class PropertyUtilities:
     def set_property_values_per_element_sparse_result(
         self, elements: Sequence[ElementIdLike], properties: Sequence[PropertyIdLike],
         values_matrix: Sequence[Sequence[Any]] | BatchResult2D[Any],
-    ) -> BatchResult2D[tapir.SuccessfulExecutionResult]:
+    ) -> BatchGrid[tapir.SuccessfulExecutionResult]:
         """Write display values sparsely, returning one execution-result row per element.
 
         Non-successful cells (errors, upstream failures, filtered) in values_matrix are
-        omitted from the API payload. Returned BatchResult2D projects API outcomes onto
+        omitted from the API payload. Returned BatchGrid projects API outcomes onto
         attempted coordinates while propagating upstream failures and filter states.
         """
         norm_elements, norm_props, matrix = _validate_and_coerce_matrix(

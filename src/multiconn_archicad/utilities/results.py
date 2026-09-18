@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from collections.abc import Callable, Iterator, Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from enum import Enum
 from typing import Any, Generic, TypeAlias, TypeVar, cast
 
@@ -391,43 +391,6 @@ class BatchResult2D(BatchResultBase[T]):
 
     rows: tuple[BatchRow[T], ...]
 
-    def __post_init__(self) -> None:
-        object.__setattr__(self, "rows", tuple(self.rows))
-
-    @classmethod
-    def from_rows(
-        cls, raw_rows: Sequence[Any], *, width: int, accessor: Callable[[Any], T] | None = None
-    ) -> BatchResult2D[T]:
-        """Rectangular grid: every row must have length == width (or be a whole-row error)."""
-        lengths = cls._get_rectangular_lengths(raw_rows, width)
-        rows = tuple(
-            BatchRow.from_raw(raw_row, length, accessor=accessor, index=idx)
-            for idx, (raw_row, length) in enumerate(zip(raw_rows, lengths))
-        )
-        return cls(rows)
-
-    @classmethod
-    def from_ragged_rows(
-        cls, raw_rows: Sequence[Any], *, accessor: Callable[[Any], T] | None = None
-    ) -> BatchResult2D[T]:
-        """Ragged grid: sequence lengths per row, defaulting whole-row errors to length 1."""
-        lengths = tuple(len(row) if is_row_sequence(row) else 1 for row in raw_rows)
-        rows = tuple(
-            BatchRow.from_raw(raw_row, length, accessor=accessor, index=idx)
-            for idx, (raw_row, length) in enumerate(zip(raw_rows, lengths))
-        )
-        return cls(rows)
-
-    @staticmethod
-    def _get_rectangular_lengths(raw_rows: Sequence[Any], width: int) -> tuple[int, ...]:
-        if width <= 0:
-            raise ValueError("width must be a positive integer.")
-        for idx, row in enumerate(raw_rows):
-            if is_row_sequence(row) and len(row) != width:
-                raise ValueError(f"Row {idx} length ({len(row)}) does not match specified width ({width}).")
-        return (width,) * len(raw_rows)
-
-
     @property
     def row_lengths(self) -> tuple[int, ...]:
         return tuple(len(row) for row in self.rows)
@@ -465,19 +428,77 @@ class BatchResult2D(BatchResultBase[T]):
         )
 
     def map(self, fn: Callable[[T], U]) -> BatchResult2D[U]:
-        return BatchResult2D(tuple(row.map(fn) for row in self.rows))
+        new_rows = tuple(row.map(fn) for row in self.rows)
+        return replace(self, rows=new_rows)
 
     def project_successes(
-        self, raw_items: Sequence[Any], *, accessor: Callable[[Any], U] | None = None
+            self, raw_items: Sequence[Any], *, accessor: Callable[[Any], U] | None = None
     ) -> BatchResult2D[U]:
-        """Project raw flat items onto successful cell coordinates, marking others SKIPPED."""
         raw_iter = _validate_raw_count(self.count(SlotState.SUCCESS), raw_items)
         projected = tuple(
             BatchRow(tuple(_project_slot(slot, raw_iter, accessor) for slot in row.slots))
             for row in self.rows
         )
-        return BatchResult2D(projected)
+        return replace(self, rows=projected)
 
     def flatten(self) -> BatchResult[T]:
         """Flatten cells row by row, from left to right, retaining errors."""
         return BatchResult(tuple(slot for _, slot in self.iter_slots()))
+
+
+@dataclass(frozen=True, slots=True)
+class BatchGrid(BatchResult2D[T]):
+    """Rectangular 2D result where every row has identical width."""
+
+    width: int
+
+    def __post_init__(self) -> None:
+        if self.width <= 0:
+            raise ValueError("width must be a positive integer.")
+        for idx, row in enumerate(self.rows):
+            if len(row) != self.width:
+                raise ValueError(f"Row {idx} length ({len(row)}) does not match width ({self.width}).")
+
+    @classmethod
+    def from_rows(
+        cls, raw_rows: Sequence[Any], *, width: int, accessor: Callable[[Any], T] | None = None
+    ) -> BatchGrid[T]:
+        if width <= 0:
+            raise ValueError("width must be a positive integer.")
+        rows = tuple(
+            BatchRow.from_raw(raw_row, width, accessor=accessor, index=idx)
+            for idx, raw_row in enumerate(raw_rows)
+        )
+        return cls(rows, width=width)
+
+    def map(self, fn: Callable[[T], U]) -> BatchGrid[U]:
+        return cast(BatchGrid[U], BatchResult2D.map(self, fn))
+
+    def project_successes(
+        self, raw_items: Sequence[Any], *, accessor: Callable[[Any], U] | None = None
+    ) -> BatchGrid[U]:
+        return cast(BatchGrid[U], BatchResult2D.project_successes(self, raw_items, accessor=accessor))
+
+
+@dataclass(frozen=True, slots=True)
+class RaggedBatchResult(BatchResult2D[T]):
+    """Ragged 2D result with variable row lengths."""
+
+    @classmethod
+    def from_rows(
+        cls, raw_rows: Sequence[Any], *, accessor: Callable[[Any], T] | None = None
+    ) -> RaggedBatchResult[T]:
+        lengths = tuple(len(row) if is_row_sequence(row) else 1 for row in raw_rows)
+        rows = tuple(
+            BatchRow.from_raw(raw_row, length, accessor=accessor, index=idx)
+            for idx, (raw_row, length) in enumerate(zip(raw_rows, lengths))
+        )
+        return cls(rows)
+
+    def map(self, fn: Callable[[T], U]) -> RaggedBatchResult[U]:
+        return cast(RaggedBatchResult[U], BatchResult2D.map(self, fn))
+
+    def project_successes(
+        self, raw_items: Sequence[Any], *, accessor: Callable[[Any], U] | None = None
+    ) -> RaggedBatchResult[U]:
+        return cast(RaggedBatchResult[U], BatchResult2D.project_successes(self, raw_items, accessor=accessor))

@@ -1,6 +1,6 @@
 # Batch Pipeline Usage Patterns & Cookbook
 
-This guide details the standard pipeline design patterns for `multiconn_archicad.utilities`. It explains how to combine `BatchResult`, `BatchResult2D`, `BatchRow`, and `BatchRun` to write declarative, shape-preserving, and failure-tolerant Archicad automation scripts.
+This guide details the standard pipeline design patterns for `multiconn_archicad.utilities`. It explains how to combine `BatchResult`, `BatchGrid`, `RaggedBatchResult`, `BatchRow`, and `BatchRun` to write declarative, shape-preserving, and failure-tolerant Archicad automation scripts.
 
 ---
 
@@ -50,7 +50,8 @@ Use when copying, translating, or synchronizing $M$ independent properties acros
 ### Architectural Behavior
 * Failures are **independent per cell**. If reading Property 1 fails on an element but Property 2 succeeds, Property 2 is still written.
 * Cells that could not be read in Step 1 automatically become **`UPSTREAM_FAILED`** in Step 2.
-* The write response re-inflates directly into the exact $N \times M$ shape of the read step.
+* Step 1 returns a `BatchGrid[str]` with a fixed `width = M`.
+* The write response re-inflates directly into the exact $N \times M$ shape of the read step via `read.project_successes(raw_res)`, returning a `BatchGrid`.
 
 ```
 Read Step (N x 2)                  Sparse Payload       Raw Write        Projected Step 2 (N x 2)
@@ -68,7 +69,7 @@ def run(self) -> ExecutionReport:
         if not self.elements:
             return ExecutionReport(run.report, planned_step_count=2)
 
-        # Step 1: Read source properties (N x M matrix)
+        # Step 1: Read source properties (returns BatchGrid[str])
         read = run.record(
             "Property read",
             self.property_utilities.get_property_values_per_element_result(
@@ -80,7 +81,7 @@ def run(self) -> ExecutionReport:
         payload = create_element_property_values_sparse(self.elements, self.write_properties, read)
         raw_res = self.api.tapir.property.set_property_values_of_elements(payload) if payload else []
 
-        # Step 3: Re-inflate flat write response into exact N x M shape
+        # Step 3: Re-inflate flat write response into exact N x M BatchGrid shape
         # Unread cells automatically become UPSTREAM_FAILED
         write = read.project_successes(raw_res)
         run.record("Property write", write)
@@ -98,7 +99,7 @@ Use when calculating derived properties where **all input properties are require
 ### Architectural Behavior
 * Failures are **element-level**. If *any* input property fails to read, the calculation cannot run for that element.
 * `read.aggregate_rows()` collapses the $N \times M$ matrix into an $N \times 1$ result of tuples `BatchResult[tuple[str, ...]]`. Any cell failure turns the entire row into an aggregate error.
-* `valid_elements.project_rows(raw_res, row_length=P)` expands the 1D results into an $N \times P$ matrix. Elements that failed the read step become full rows of `UPSTREAM_FAILED`.
+* `valid_elements.project_rows(raw_res, row_length=P)` expands the 1D results into an $N \times P$ matrix (`BatchResult2D`). Elements that failed the read step become full rows of `UPSTREAM_FAILED`.
 
 ```
 Read Step (N x 3)                  aggregate_rows (N)      project_rows (N x 2)
@@ -111,7 +112,7 @@ Read Step (N x 3)                  aggregate_rows (N)      project_rows (N x 2)
 ```python
 def run(self) -> ExecutionReport:
     with BatchRun(self.elements) as run:
-        # Step 1: Read 3 dimensions per element (N x 3 matrix)
+        # Step 1: Read 3 dimensions per element (returns BatchGrid[str] with width=3)
         read = run.record(
             "Read dimensions",
             self.property_utilities.get_property_values_per_element_result(
@@ -119,7 +120,7 @@ def run(self) -> ExecutionReport:
             ),
         )
 
-        # Step 2: Aggregate to element-level validity (Length N)
+        # Step 2: Aggregate to element-level validity (BatchResult of 3-tuples)
         valid_elements = read.aggregate_rows()
 
         # Step 3: Compute calculations only for 100% valid elements
@@ -157,6 +158,8 @@ Use when business rules filter which elements are eligible for mutation (e.g. on
 Best when filtering domain models using list comprehensions:
 
 ```python
+from multiconn_archicad.utilities import SlotState
+
 def run(self) -> ExecutionReport:
     with BatchRun(self.elements) as run:
         # Step 1: Read classifications
@@ -165,7 +168,7 @@ def run(self) -> ExecutionReport:
         # Filter in Python using row properties
         qualifying_elements = [
             elem for elem, row in zip(self.elements, read.rows)
-            if row.is_all_success and float(row[0].success_value) > 200.0
+            if row.is_all(SlotState.SUCCESS) and float(row[0].value) > 200.0
         ]
 
         # Step 2: Execute mutation only on qualifying elements
@@ -184,6 +187,8 @@ def run(self) -> ExecutionReport:
 Best when iterating over indexed slots or when avoiding duplicate object resolution entirely:
 
 ```python
+from multiconn_archicad.utilities import SlotState
+
 def run(self) -> ExecutionReport:
     with BatchRun(self.elements) as run:
         read = run.record("Read", self.property_utilities.get_property_values_per_element_result(...))
@@ -191,7 +196,7 @@ def run(self) -> ExecutionReport:
         # Filter by index
         qualifying_indices = [
             idx for idx, row in enumerate(read.rows)
-            if row.is_all_success and float(row[0].success_value) > 200.0
+            if row.is_all(SlotState.SUCCESS) and float(row[0].value) > 200.0
         ]
         qualifying_elements = [self.elements[i] for i in qualifying_indices]
 
@@ -317,17 +322,17 @@ To highlight failed elements in the Archicad 3D/floor plan view:
 ```python
 from multiconn_archicad.utilities.identifiers import normalize_element_ids
 
-# Unique GUIDs of all elements that produced errors
-failed_guids = [
-    str(normalize_element_id(outcome.original_item).elementId.guid)
+# Unique element IDs of all elements that produced errors
+failed_elements = [
+    outcome.original_item
     for outcome in report.outcomes
     if outcome.failed or outcome.upstream_failed
 ]
 
 # Select in CAD
-if failed_guids:
+if failed_elements:
     api.tapir.element.change_selection_of_elements(
-        add_elements_to_selection=normalize_element_ids(failed_guids)
+        add_elements_to_selection=normalize_element_ids(failed_elements)
     )
 ```
 
