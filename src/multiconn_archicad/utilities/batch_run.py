@@ -110,35 +110,35 @@ class BatchReport(Generic[T]):
     status: BatchStatus
     fatal_error: Exception | None = None
 
-    @property
-    def failed_indices(self) -> tuple[int, ...]:
-        return tuple(outcome.index for outcome in self.outcomes if outcome.failed)
+    def count(self, status: BatchStatus | None = None) -> int:
+        """Return the total outcome count or the count for one status."""
+        if status is None:
+            return len(self.outcomes)
+        return sum(outcome.status is status for outcome in self.outcomes)
 
-    @property
-    def incomplete_indices(self) -> tuple[int, ...]:
-        return tuple(outcome.index for outcome in self.outcomes if outcome.incomplete)
+    def has(self, status: BatchStatus) -> bool:
+        """Return whether at least one outcome has the requested status."""
+        return any(outcome.status is status for outcome in self.outcomes)
 
-    @property
-    def upstream_failed_indices(self) -> tuple[int, ...]:
-        return tuple(outcome.index for outcome in self.outcomes if outcome.upstream_failed)
+    def iter_failures(self) -> Iterator[tuple[BatchOutcome[T], BatchFailure]]:
+        """Yield every direct failure together with its original-item outcome."""
+        for outcome in self.outcomes:
+            for failure in outcome.failures:
+                yield outcome, failure
 
-    @property
-    def filtered_indices(self) -> tuple[int, ...]:
-        return tuple(outcome.index for outcome in self.outcomes if outcome.filtered)
-
-    @property
-    def succeeded_indices(self) -> tuple[int, ...]:
-        return tuple(outcome.index for outcome in self.outcomes if outcome.succeeded)
+    def indices(self, status: BatchStatus) -> tuple[int, ...]:
+        """Return the original-item indices whose outcome has ``status``."""
+        return tuple(outcome.index for outcome in self.outcomes if outcome.status is status)
 
     @property
     def status_counts(self) -> Mapping[str, int]:
         return {
-            "total": len(self.outcomes),
-            "succeeded": sum(outcome.succeeded for outcome in self.outcomes),
-            "failed": sum(outcome.failed for outcome in self.outcomes),
-            "upstream_failed": sum(outcome.upstream_failed for outcome in self.outcomes),
-            "filtered": sum(outcome.filtered for outcome in self.outcomes),
-            "incomplete": sum(outcome.incomplete for outcome in self.outcomes),
+            "total": self.count(),
+            "succeeded": self.count(BatchStatus.SUCCEEDED),
+            "failed": self.count(BatchStatus.FAILED),
+            "upstream_failed": self.count(BatchStatus.UPSTREAM_FAILED),
+            "filtered": self.count(BatchStatus.FILTERED),
+            "incomplete": self.count(BatchStatus.INCOMPLETE),
         }
 
 
