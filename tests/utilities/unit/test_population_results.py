@@ -6,7 +6,7 @@ import pytest
 
 from multiconn_archicad.models.tapir import types as tapir
 from multiconn_archicad.utilities import BatchReport, BatchResult, BatchStatus, PopulationResults
-from multiconn_archicad.utilities.batch_run import reduce_population_outcomes
+from multiconn_archicad.utilities.population_results import reduce_population_outcomes
 from multiconn_archicad.utilities.results import BatchGrid, BatchRow, BatchSlot, RaggedBatchResult
 
 
