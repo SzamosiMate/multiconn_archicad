@@ -3,14 +3,14 @@
 from multiconn_archicad.errors import BatchOperationError
 
 from .api import Utilities
-from .batch_run import (
+from .population_results import (
     BatchFailure,
     BatchOutcome,
     BatchReport,
     BatchResultType,
-    BatchRun,
     BatchStatus,
     BatchStep,
+    PopulationResults,
 )
 from .results import (
     BatchError,
@@ -36,7 +36,7 @@ __all__ = [
     "SlotState",
     "BatchError",
     "BatchOperationError",
-    "BatchRun",
+    "PopulationResults",
     "BatchStep",
     "BatchFailure",
     "BatchOutcome",
