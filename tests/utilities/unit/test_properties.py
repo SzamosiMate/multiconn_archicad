@@ -8,7 +8,7 @@ import pytest
 from multiconn_archicad.errors import BatchOperationError
 from multiconn_archicad.models.official import types as official
 from multiconn_archicad.models.tapir import types as tapir
-from multiconn_archicad.utilities import BatchRun
+from multiconn_archicad.utilities import PopulationResults
 from multiconn_archicad.utilities.properties import (
     PropertyUtilities,
     create_element_property_values,
@@ -19,7 +19,6 @@ from multiconn_archicad.utilities.properties import (
 from multiconn_archicad.utilities.results import (
     BatchGrid,
     BatchResult,
-    BatchResult2D,
     SlotState,
 )
 
@@ -77,15 +76,15 @@ def test_row_error_and_partial_copy_pipeline_keep_other_cells_writable():
     ]
     read = PropertyUtilities(api).get_property_values_per_element_result(elements, properties)
     assert read.indices(SlotState.ERROR) == ((0, 1), (1, 0), (1, 1))
-    run = BatchRun(elements)
-    run.record("read", read)
+    results = PopulationResults(elements)
+    results.record("read", read)
     coordinates = read.indices(SlotState.SUCCESS)
     payload = create_element_property_values_sparse(elements, properties, read)
     assert len(payload) == 1
     api.tapir.property.set_property_values_of_elements.return_value = [tapir.SuccessfulExecutionResult(success=True)]
     write = BatchResult.from_items(api.tapir.property.set_property_values_of_elements(payload))
-    run.record("copy", write, item_indices=[row for row, _ in coordinates])
-    report = run.finish()
+    results.record("copy", write, item_indices=[row for row, _ in coordinates])
+    report = results.snapshot(completed=True)
     assert report.outcomes[0].failed
     assert report.outcomes[1].failed
     assert api.tapir.property.set_property_values_of_elements.call_count == 1

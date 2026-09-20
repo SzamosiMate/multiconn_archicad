@@ -14,13 +14,14 @@ The `utilities` subpackage provides **Level 3 Ergonomic Sugar** on top of `Unifi
 * **Idiomatic Pythonic wrappers** around repetitive Archicad JSON API interactions (e.g., context managers for resource safety).
 * **Batch unwrapping and type coercion** (turning known API response wrappers into Python primitives).
 * **Batch result containers** (`BatchResultBase`, `BatchResult`, `BatchResult2D`, `BatchGrid`, `RaggedBatchResult`, `BatchRow`, `BatchSlot`) that preserve explicit 1D and 2D alignment while isolating partial failures and non-executed cells.
-* **Workflow accumulation** (`BatchRun`) that acts as an atomic ledger of pipeline steps, attributing failures and terminal execution states back to original input items.
+* **Population result accumulation** (`PopulationResults`) that passively records pipeline steps, attributes failures to original input items, and produces immutable report snapshots.
 * **Universal identifier constructors and normalizers** (e.g., GUID strings / UUIDs $\to$ typed `ElementIdArrayItem` / `PropertyIdArrayItem`).
 
 ### What Does NOT Belong in `utilities`:
 * **Thin Pass-Through Wrappers:** Functions that merely forward already-constructed CAD models into single API endpoints without normalization, unnesting, or transformation are strictly prohibited.
 * **Domain / Business Logic:** Company-specific layer naming, property naming conventions, or pipeline rules belong in downstream applications.
-* **In-Memory Caching:** API-bound utilities do not cache CAD state. `BatchRun` is an explicit, short-lived workflow record; it is not a CAD-state cache.
+* **Execution orchestration:** Script execution, exception handling, stopping decisions, retries, timing/history, and progress events belong in downstream applications. `PopulationResults` only records facts supplied by the caller.
+* **In-Memory Caching:** API-bound utilities do not cache CAD state. `PopulationResults` is an explicit, short-lived data collection; it is not a CAD-state cache.
 * **Heavy Geometric Engines:** Zero `shapely`, CAD polygon clipping, or spatial containment routines.
 * **IFC Dependencies:** Zero dependencies on `ifcopenshell`. IFC mappings belong in downstream packages.
 * **Transport / Protocol Logic:** Low-level HTTP/socket handling belongs in `core` and `UnifiedApi`.
@@ -31,7 +32,7 @@ The `utilities` subpackage provides **Level 3 Ergonomic Sugar** on top of `Unifi
 
 ### A. Bound Operations and Pure Helpers
 * API-dependent operations are methods on domain groups such as `PropertyUtilities`, bound to one `UnifiedApi`. They store only the API reference and do not cache BIM data. Payload builders, identifier normalizers, and extractors remain standalone pure functions.
-* **Classes:** API-bound utility groups, explicit result/run containers (`BatchResultBase`, `BatchResult`, `BatchResult2D`, `BatchGrid`, `RaggedBatchResult`, `BatchRow`, `BatchRun`), and resource lifecycle context managers are permitted.
+* **Classes:** API-bound utility groups, explicit result containers (`BatchResultBase`, `BatchResult`, `BatchResult2D`, `BatchGrid`, `RaggedBatchResult`, `BatchRow`, `PopulationResults`), and resource lifecycle context managers are permitted.
 * **No "Active Record" Objects:** Never wrap an Archicad element in a stateful class with instance methods (e.g., `element.get_property()`). This encourages iterative $N+1$ socket calls, severely degrading CAD performance.
 
 ### B. The Dedicated Dual-Method Convention
@@ -80,7 +81,7 @@ from multiconn_archicad.utilities import (
     BatchSlot,
     SlotState,
     BatchError,
-    BatchRun,
+    PopulationResults,
     BatchStatus,
     BatchOperationError,
 )
@@ -98,7 +99,7 @@ src/multiconn_archicad/utilities/
 ├── api.py                # Utilities domain-group container
 ├── readme.md             # This document
 ├── results.py            # BatchResultBase, BatchResult, BatchResult2D, BatchGrid, RaggedBatchResult, BatchRow, BatchSlot, BatchError
-├── batch_run.py          # BatchRun, BatchStep, BatchFailure, BatchOutcome, BatchReport
+├── batch_run.py          # PopulationResults, report models, record mapping, and pure reducers
 ├── identifiers.py        # Liberal type aliases & universal ID normalizers
 ├── properties.py         # Batch property reading, writing, and inspection
 ├── elements.py           # Planned: selection get/set, type filtering
@@ -129,8 +130,8 @@ Every cell in a 1D or 2D batch operation is an immutable `BatchSlot[T]`:
 
 * **`SlotState.SUCCESS`**: Operation completed successfully; holds `value: T`.
 * **`SlotState.ERROR`**: Direct API or execution failure; holds `error: BatchError`.
-* **`SlotState.UPSTREAM_FAILED`**: Suppressed because an upstream dependency failed. **Retriable.**
-* **`SlotState.FILTERED`**: Intentionally bypassed by business logic. **Non-retriable.**
+* **`SlotState.UPSTREAM_FAILED`**: Suppressed because an upstream dependency failed.
+* **`SlotState.FILTERED`**: Intentionally bypassed by business logic.
 
 Predicates: `slot.is_success`, `slot.is_error`, `slot.is_upstream_failed`, `slot.is_filtered`.
 
@@ -188,29 +189,26 @@ for coord, err in res.iter_errors(): ...     # Yields (coord, BatchError)
 
 ---
 
-## 6. Workflow Orchestration: `BatchRun`
+## 6. Passive Population Reporting: `PopulationResults`
 
-`BatchRun[T]` acts as an **atomic ledger of pipeline steps**. It derives element-level outcomes directly from step results.
+`PopulationResults[T]` records ordered results and their mappings back to the original population. It does not execute work, manage a lifecycle, catch exceptions, or decide whether processing should stop.
 
 ```python
-with BatchRun(self.elements) as run:
-    run.record("Step 1", step_result)
-    run.record("Step 2", step2_result)
+population = PopulationResults(self.elements)
+population.record("Step 1", step_result)
+population.record("Step 2", step2_result)
 
-report = run.report
+# The application supplies whether its intended population processing completed.
+report = population.snapshot(completed=True)
 ```
 
-### A. Context Manager Contract & Lifecycle Rules
+### A. Snapshot and Completion Rules
 
-1. **Clean Exit (`exc is None`):** Automatically calls `run.finish()`. All processed items without errors become `SUCCEEDED`.
-2. **Standard `Exception`:** Caught automatically by `__exit__`. Calls `run.abort(exc)`, sets `fatal_error`, marks in-flight items as `INCOMPLETE`, and **suppresses the exception** so the caller can handle or present `run.report` cleanly.
-3. **`BaseException` (`KeyboardInterrupt`, `SystemExit`):** Never suppressed; immediately propagates.
-4. **`run.report` is a Non-Mutating Snapshot:**
-   * Inspecting `run.report` while the run is open returns an in-flight snapshot with `status = BatchStatus.INCOMPLETE`.
-   * It **does not close** the run; further steps can still be recorded.
-5. **Early Returns Inside `with`:**
-   * If exiting early from inside a `with` block, explicitly call `return ExecutionReport(run.finish())` to close the run.
-   * `__exit__` will safely no-op since the run is already closed.
+1. **Snapshots are immutable:** A snapshot owns tuple copies of its steps and outcomes. Recording another step does not change an earlier report.
+2. **Snapshots do not close the collection:** Callers can continue recording after any snapshot.
+3. **Completion is explicit:** `snapshot()` defaults to `completed=False`; otherwise-clean items are `INCOMPLETE`. `snapshot(completed=True)` applies the default terminal interpretation.
+4. **Completion does not mean success:** Direct failures still produce `FAILED`, and terminal slots can produce `UPSTREAM_FAILED` or `FILTERED`.
+5. **Exceptions remain application-owned:** If a script exception interrupts processing, the application may inspect `snapshot(completed=False)` and must propagate, store, or present the exception itself. `BatchReport` has no `fatal_error`.
 
 ### B. Minimal `BatchStep[T]`
 `BatchStep` holds step provenance and the result object (`result: BatchResultBase[T]`). It contains **no pass-through GUI properties**. Callers query `step.result` directly:
@@ -229,10 +227,12 @@ for original_item_idx, failure in step.iter_failures():
 `BatchOutcome.status` accurately classifies why an element did or did not complete:
 
 * **`BatchStatus.SUCCEEDED`**: Completed the pipeline cleanly.
-* **`BatchStatus.FAILED`**: Direct API or calculation error in one or more steps. **Retriable.**
-* **`BatchStatus.UPSTREAM_FAILED`**: Prevented from completing because an upstream prerequisite failed. **Retriable.**
-* **`BatchStatus.FILTERED`**: 100% of operations were intentionally bypassed by business logic. **Non-retriable.**
-* **`BatchStatus.INCOMPLETE`**: Pipeline was interrupted by a fatal exception before completion.
+* **`BatchStatus.FAILED`**: Direct API or calculation error in one or more steps.
+* **`BatchStatus.UPSTREAM_FAILED`**: Prevented from completing because an upstream prerequisite failed.
+* **`BatchStatus.FILTERED`**: All slots mapped in the terminal step were filtered, or the item was omitted from a non-empty terminal step.
+
+These statuses describe recorded facts. Retry and stopping policy belongs to the application.
+* **`BatchStatus.INCOMPLETE`**: The caller declared that intended processing of the population did not complete.
 
 ---
 
@@ -243,26 +243,23 @@ Copy independent properties across elements. Unreadable cells automatically beco
 
 ```python
 def run(self) -> ExecutionReport:
-    with BatchRun(self.elements) as run:
-        self._validate_inputs()
-        if self.elements:
-            # Step 1: Read source properties (returns BatchGrid[str])
-            read = run.record(
-                "Property read",
-                self.property_utilities.get_property_values_per_element_result(
-                    self.elements, self.read_properties
-                ),
-            )
+    population = PopulationResults(self.elements)
+    self._validate_inputs()
+    if self.elements:
+        read = population.record(
+            "Property read",
+            self.property_utilities.get_property_values_per_element_result(
+                self.elements, self.read_properties
+            ),
+        )
+        population.record(
+            "Property write",
+            self.property_utilities.set_property_values_per_element_sparse_result(
+                self.elements, self.write_properties, read
+            ),
+        )
 
-            # Step 2: Write readable cells only (sparse write handles payload + projection)
-            run.record(
-                "Property write",
-                self.property_utilities.set_property_values_per_element_sparse_result(
-                    self.elements, self.write_properties, read
-                ),
-            )
-
-    return ExecutionReport(run.report, planned_step_count=2)
+    return ExecutionReport(population.snapshot(completed=True), planned_step_count=2)
 ```
 
 ### Pattern 2: Dependent Multi-Read $\to$ Multi-Write ($N \times M \to N \times P$)
@@ -270,31 +267,22 @@ All input properties are required to calculate derived properties:
 
 ```python
 def run(self) -> ExecutionReport:
-    with BatchRun(self.elements) as run:
-        # Step 1: Read dimensions (returns BatchGrid[str])
-        read = run.record(
-            "Read dimensions",
-            self.property_utilities.get_property_values_per_element_result(
-                self.elements, [self.prop_l, self.prop_w, self.prop_h]
-            ),
-        )
-
-        # Step 2: Collapse cell failures into 1D element outcomes (length N)
-        valid_elements = read.aggregate_rows()
-
-        # Step 3: Compute calculations only for 100% valid elements
-        payload = [
-            elem_val
-            for idx, (l, w, h) in valid_elements.iter_successes()
-            for elem_val in self._build_payload(self.elements[idx], float(l), float(w), float(h))
-        ]
-        raw_res = self.api.tapir.property.set_property_values_of_elements(payload) if payload else []
-
-        # Step 4: Re-inflate flat write response into an N x 2 matrix
-        write = valid_elements.project_rows(raw_res, row_length=2)
-        run.record("Write Area & Volume", write)
-
-    return ExecutionReport(run.report, planned_step_count=2)
+    population = PopulationResults(self.elements)
+    read = population.record(
+        "Read dimensions",
+        self.property_utilities.get_property_values_per_element_result(
+            self.elements, [self.prop_l, self.prop_w, self.prop_h]
+        ),
+    )
+    valid_elements = read.aggregate_rows()
+    payload = [
+        elem_val
+        for idx, (l, w, h) in valid_elements.iter_successes()
+        for elem_val in self._build_payload(self.elements[idx], float(l), float(w), float(h))
+    ]
+    raw_res = self.api.tapir.property.set_property_values_of_elements(payload) if payload else []
+    population.record("Write Area & Volume", valid_elements.project_rows(raw_res, row_length=2))
+    return ExecutionReport(population.snapshot(completed=True), planned_step_count=2)
 ```
 
 ### Pattern 3: Conditional Domain Filtering ($N \to K$ subset)
@@ -302,22 +290,17 @@ Mutations apply only to elements meeting business criteria. Filtered elements ar
 
 ```python
 def run(self) -> ExecutionReport:
-    with BatchRun(self.elements) as run:
-        read = run.record("Read", self.property_utilities.get_property_values_per_element_result(...))
-
-        # Filter qualifying elements
-        qualifying = [
-            elem for elem, row in zip(self.elements, read.rows)
-            if row.is_all(SlotState.SUCCESS) and float(row[0].value) > 200.0
-        ]
-
-        # Step 2: Execute and record only for subset via duplicate-safe FIFO matching
-        write_res = self.property_utilities.set_property_values_per_element_result(
-            qualifying, self.write_properties, qualifying_values
-        )
-        run.record("Write", write_res, for_items=qualifying)
-
-    return ExecutionReport(run.report, planned_step_count=2)
+    population = PopulationResults(self.elements)
+    read = population.record("Read", self.property_utilities.get_property_values_per_element_result(...))
+    qualifying = [
+        elem for elem, row in zip(self.elements, read.rows)
+        if row.is_all(SlotState.SUCCESS) and float(row[0].value) > 200.0
+    ]
+    write_res = self.property_utilities.set_property_values_per_element_result(
+        qualifying, self.write_properties, qualifying_values
+    )
+    population.record("Write", write_res, for_items=qualifying)
+    return ExecutionReport(population.snapshot(completed=True), planned_step_count=2)
 ```
 
 ---
@@ -330,7 +313,7 @@ Tests run offline with real official and Tapir Pydantic models and mocked API re
 tests/utilities/unit/
 ├── test_identifiers.py       # Coercion and GUID normalization
 ├── test_batch_results.py     # BatchResultBase, BatchResult, BatchResult2D, BatchGrid, RaggedBatchResult, BatchRow, BatchSlot
-├── test_batch_run.py         # BatchRun lifecycle, FIFO duplicate matching, atomic abort
+├── test_population_results.py # Passive snapshots, outcome rules, FIFO matching, atomic records
 └── test_properties.py        # Sparse/dense builders, projection pipelines
 ```
 
@@ -338,9 +321,9 @@ The test suite enforces that:
 * `count()` and `has()` work accurately across all 4 `SlotState`s.
 * `BatchGrid` validates rectangular row lengths and non-positive widths.
 * `RaggedBatchResult` correctly accommodates variable row lengths.
-* `run.report` remains a non-mutating snapshot during open execution.
-* Calling `finish()` or `abort()` on a closed run raises `RuntimeError`.
-* Context managers cleanly suppress `Exception` while preserving `fatal_error`.
+* snapshots remain unchanged after later records and do not prevent further recording.
+* `completed=False` and `completed=True` preserve the documented default outcome rules.
+* invalid record inputs do not append partial steps, and duplicate mappings remain FIFO-safe.
 
 ---
 
