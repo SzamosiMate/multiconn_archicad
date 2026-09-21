@@ -12,6 +12,10 @@ from .population_results import (
     BatchStep,
     PopulationResults,
 )
+from .multi_population_results import (
+    MultiPopulationResults,
+    PopulationRelation,
+)
 from .results import (
     BatchError,
     BatchGrid,
@@ -43,4 +47,6 @@ __all__ = [
     "BatchReport",
     "BatchStatus",
     "BatchResultType",
+    "MultiPopulationResults",
+    "PopulationRelation",
 ]
