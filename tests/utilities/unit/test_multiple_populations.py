@@ -14,7 +14,7 @@ from multiconn_archicad.utilities import (
 )
 
 
-def test_add_population_registration() -> None:
+def test_add_population_registration_and_name_validation() -> None:
     multi = MultiPopulationResults()
     sources = multi.add_population("sources", ["s0", "s1"])
     targets = multi.add_population("targets", ["t0", "t1", "t2"])
@@ -24,31 +24,21 @@ def test_add_population_registration() -> None:
     assert multi["sources"] is sources
     assert multi["targets"] is targets
 
-
-def test_add_population_invalid_names() -> None:
-    multi = MultiPopulationResults()
-    multi.add_population("sources", ["s0"])
-
     with pytest.raises(ValueError, match="already registered"):
-        multi.add_population("sources", ["s1"])
+        multi.add_population("sources", ["duplicate"])
 
     with pytest.raises(ValueError, match="non-empty string"):
         multi.add_population("", ["s0"])
 
 
-def test_relate_validates_membership() -> None:
+def test_relate_validates_membership_and_bounds() -> None:
     multi = MultiPopulationResults()
-    sources = multi.add_population("sources", ["s0"])
+    sources = multi.add_population("sources", ["s0", "s1"])
+    targets = multi.add_population("targets", ["t0", "t1"])
     foreign = PopulationResults(["f0"])
 
     with pytest.raises(ValueError, match="must be registered"):
         multi.relate(sources, foreign, [(0, 0)])
-
-
-def test_relate_bounds_checking() -> None:
-    multi = MultiPopulationResults()
-    sources = multi.add_population("sources", ["s0", "s1"])
-    targets = multi.add_population("targets", ["t0", "t1"])
 
     with pytest.raises(IndexError, match="out of bounds"):
         multi.relate(sources, targets, [(2, 0)])  # source index 2 >= 2
@@ -75,7 +65,7 @@ def test_relate_deduplication_and_queries() -> None:
     assert matching.sources_for_target(999) == ()
 
 
-def test_project_1d_with_default_filtered() -> None:
+def test_project_1d_preserves_matches_and_configures_unmatched_targets() -> None:
     multi = MultiPopulationResults()
     sources = multi.add_population("sources", ["s0", "s1"])
     targets = multi.add_population("targets", ["t0", "t1", "t2"])
@@ -91,22 +81,13 @@ def test_project_1d_with_default_filtered() -> None:
     assert projected.slots[1].value == "val_s0"
     assert projected.slots[2].is_filtered
 
-
-def test_project_1d_custom_unmatched() -> None:
-    multi = MultiPopulationResults()
-    sources = multi.add_population("sources", ["s0"])
-    targets = multi.add_population("targets", ["t0", "t1"])
-
-    matching = multi.relate(sources, targets, [(0, 0)])
-    read = BatchResult.from_items(["A"])
-
     # Upstream failed
-    proj_upstream = matching.project(read, unmatched=SlotState.UPSTREAM_FAILED)
-    assert proj_upstream.slots[1].is_upstream_failed
+    proj_upstream = matching.project(BatchResult.from_items(["val_s0", "val_s1"]), unmatched=SlotState.UPSTREAM_FAILED)
+    assert proj_upstream.slots[2].is_upstream_failed
 
     # Fallback value slot
-    proj_custom = matching.project(read, unmatched=BatchSlot.success("DEFAULT"))
-    assert proj_custom.slots[1].value == "DEFAULT"
+    proj_custom = matching.project(BatchResult.from_items(["val_s0", "val_s1"]), unmatched=BatchSlot.success("DEFAULT"))
+    assert proj_custom.slots[2].value == "DEFAULT"
 
 
 def test_project_ambiguous_matching_raises() -> None:
@@ -122,7 +103,7 @@ def test_project_ambiguous_matching_raises() -> None:
         matching.project(read)
 
 
-def test_project_rows_2d_broadcasting() -> None:
+def test_project_rows_broadcasts_defaults_and_validates_custom_width() -> None:
     multi = MultiPopulationResults()
     sources = multi.add_population("sources", ["s0", "s1"])
     targets = multi.add_population("targets", ["t0", "t1", "t2"])
@@ -149,23 +130,14 @@ def test_project_rows_2d_broadcasting() -> None:
     assert target_grid.rows[1].is_all(SlotState.FILTERED)
     assert [s.value for s in target_grid.rows[2].slots] == ["A1", "B1"]
 
-
-def test_project_rows_custom_row() -> None:
-    multi = MultiPopulationResults()
-    sources = multi.add_population("sources", ["s0"])
-    targets = multi.add_population("targets", ["t0", "t1"])
-
-    matching = multi.relate(sources, targets, [(0, 0)])
-    grid = BatchGrid.from_rows([["A", "B"]], width=2)
-
     custom_row = BatchRow((BatchSlot.upstream_failed(), BatchSlot.upstream_failed()))
-    res = matching.project_rows(grid, default_state=custom_row)
+    res = matching.project_rows(source_grid, default_state=custom_row)
     assert res.rows[1].is_all(SlotState.UPSTREAM_FAILED)
 
     # Mismatched row width
     bad_row = BatchRow((BatchSlot.filtered(),))
     with pytest.raises(ValueError, match="does not match matrix width"):
-        matching.project_rows(grid, default_state=bad_row)
+        matching.project_rows(source_grid, default_state=bad_row)
 
 
 def test_snapshot_completed_and_immutability() -> None:

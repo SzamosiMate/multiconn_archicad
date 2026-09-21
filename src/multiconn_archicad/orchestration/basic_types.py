@@ -46,8 +46,6 @@ class Port(int):
             core_schema.no_info_plain_validator_function(cls),
         ])
 
-class HeaderInfoBase(BaseModel):
-    """Base class providing common configuration and backward-compatible helper methods."""
 
 class HeaderInfoBase(BaseModel):
     """Base class providing common configuration and backward-compatible helper methods."""
