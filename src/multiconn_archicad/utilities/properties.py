@@ -3,6 +3,7 @@ from __future__ import annotations
 from collections.abc import Sequence
 from typing import TYPE_CHECKING, Any
 
+from multiconn_archicad.errors import BatchWriteError
 from multiconn_archicad.models.official import types as official
 from multiconn_archicad.models.tapir import types as tapir
 from multiconn_archicad.utilities.identifiers import (
@@ -18,6 +19,8 @@ from multiconn_archicad.utilities.results import (
     BatchGrid,
     BatchResult,
     BatchResult2D,
+    BatchRow,
+    SlotState,
     extract_error,
 )
 
@@ -69,7 +72,7 @@ def _validate_and_coerce_matrix(
     norm_properties = normalize_property_ids(properties)
     matrix = _coerce_property_matrix(values_matrix, len(norm_elements), len(norm_properties))
     if not allow_errors:
-        matrix.raise_for_errors("Property write input")
+        matrix.require_all_success("Dense property write input")
     return norm_elements, norm_properties, matrix
 
 
@@ -290,16 +293,15 @@ class PropertyUtilities:
     def set_property_values_per_element(
         self, elements: Sequence[ElementIdLike], properties: Sequence[PropertyIdLike],
         values_matrix: Sequence[Sequence[Any]] | BatchResult2D[Any],
-    ) -> int:
+    ) -> None:
         """Write an N x M matrix of display values; raise on any reported failure.
 
-        Returns the count of written property values when all succeed. Errors are
-        checked after the batch executes; successful writes are not rolled back by
-        this helper when BatchOperationError is raised. This is not an atomic write.
+        Successful writes are not rolled back when BatchWriteError is raised.
+        This operation is not atomic.
         """
         res = self.set_property_values_per_element_result(elements, properties, values_matrix)
-        res.raise_for_errors("Batch property values write")
-        return len(elements) * len(properties)
+        if res.has(SlotState.ERROR):
+            raise BatchWriteError("Batch property values write", res)
 
     def set_property_values_per_element_sparse_result(
         self, elements: Sequence[ElementIdLike], properties: Sequence[PropertyIdLike],
@@ -321,16 +323,15 @@ class PropertyUtilities:
     def set_property_values_per_element_sparse(
         self, elements: Sequence[ElementIdLike], properties: Sequence[PropertyIdLike],
         values_matrix: Sequence[Sequence[Any]] | BatchResult2D[Any],
-    ) -> int:
+    ) -> None:
         """Write display values sparsely across elements; raise on any reported failure.
 
-        Returns the count of successfully written property values. Errors are
-        checked after the batch executes; successful writes are not rolled back by
-        this helper when BatchOperationError is raised. This is not an atomic write.
+        Successful writes are not rolled back when BatchWriteError is raised.
+        This operation is not atomic.
         """
         res = self.set_property_values_per_element_sparse_result(elements, properties, values_matrix)
-        res.raise_for_errors("Sparse batch property values write")
-        return len(res.successes)
+        if res.has(SlotState.ERROR):
+            raise BatchWriteError("Sparse batch property values write", res)
 
     def set_flat_property_values_result(
         self, elements: Sequence[ElementIdLike], property_id: PropertyIdLike, values: Sequence[Any],
@@ -344,18 +345,52 @@ class PropertyUtilities:
         raw_res = self._api.tapir.property.set_property_values_of_elements(payload) if payload else []
         return BatchResult.from_items(raw_res)
 
+    def set_flat_property_values_sparse_result(
+        self,
+        elements: Sequence[ElementIdLike],
+        property_id: PropertyIdLike,
+        values: BatchResult[Any],
+    ) -> BatchResult[tapir.SuccessfulExecutionResult]:
+        """Write one property sparsely while preserving the input result shape.
+
+        Only successful input slots are sent to Archicad. API outcomes are
+        projected back onto the original element positions; input failures become
+        upstream failures and filtered slots remain filtered.
+        """
+        matrix = BatchGrid(
+            tuple(BatchRow((slot,)) for slot in values.slots),
+            width=1,
+        )
+        return self.set_property_values_per_element_sparse_result(
+            elements, [property_id], matrix
+        ).flatten()
+
+    def set_flat_property_values_sparse(
+        self,
+        elements: Sequence[ElementIdLike],
+        property_id: PropertyIdLike,
+        values: BatchResult[Any],
+    ) -> None:
+        """Write one property sparsely; raise on any reported write failure.
+
+        Successful writes are not rolled back when BatchWriteError is raised.
+        This operation is not atomic.
+        """
+        res = self.set_flat_property_values_sparse_result(elements, property_id, values)
+        if res.has(SlotState.ERROR):
+            raise BatchWriteError("Sparse single property write", res)
+
     def set_flat_property_values(
         self, elements: Sequence[ElementIdLike], property_id: PropertyIdLike, values: Sequence[Any],
-    ) -> int:
+    ) -> None:
         """Write one property across elements; raise on any reported failure.
 
-        Returns the count of written property values when all succeed. Errors are
-        checked after the batch executes; successful writes are not rolled back by
-        this helper when BatchOperationError is raised. This is not an atomic write.
+        Successful writes are not rolled back when BatchWriteError is raised.
+        This operation is not atomic.
         """
         res = self.set_flat_property_values_result(elements, property_id, values)
-        res.raise_for_errors("Single property write")
-        return len(res.successes)
+        if res.has(SlotState.ERROR):
+            raise BatchWriteError("Single property write", res)
 
     def get_property_details_result(
         self, properties: Sequence[PropertyIdLike]

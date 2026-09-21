@@ -1,6 +1,6 @@
 """Public utility and batch-result classes."""
 
-from multiconn_archicad.errors import BatchOperationError
+from multiconn_archicad.errors import BatchNotFullySuccessfulError, BatchOperationError, BatchWriteError
 
 from .api import Utilities
 from .population_results import (
@@ -40,6 +40,8 @@ __all__ = [
     "SlotState",
     "BatchError",
     "BatchOperationError",
+    "BatchNotFullySuccessfulError",
+    "BatchWriteError",
     "PopulationResults",
     "BatchStep",
     "BatchFailure",

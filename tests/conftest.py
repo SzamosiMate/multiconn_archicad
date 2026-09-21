@@ -2,11 +2,13 @@ import json
 import sys
 import socket
 import threading
+import importlib
 from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
 import concurrent.futures
 from pathlib import Path
 from typing import Dict, Any, Callable
 import pytest
+from pydantic import BaseModel
 
 import multiconn_archicad.orchestration.multi_conn as multi_conn
 import multiconn_archicad.orchestration.system.cli_parser as cli_parser
@@ -218,9 +220,28 @@ def assert_no_running_archicad():
 @pytest.fixture
 def clean_models():
     """
-    Ensures that the models package is completely unimported and reset
-    before and after the test runs.
+    Isolate model-configuration tests and restore the normal model imports
+    before the next test runs.
     """
+
+    def _rebuild_loaded_models():
+        """Complete generated models before their modules are temporarily removed."""
+        model_modules = [
+            module
+            for name, module in sys.modules.items()
+            if name.startswith("multiconn_archicad.models") and not name.endswith(".config")
+        ]
+        for _ in range(3):
+            for module in model_modules:
+                namespace = vars(module)
+                for model in tuple(namespace.values()):
+                    if (
+                        isinstance(model, type)
+                        and issubclass(model, BaseModel)
+                        and model is not BaseModel
+                        and not getattr(model, "__pydantic_complete__", True)
+                    ):
+                        model.model_rebuild(force=True, _types_namespace=namespace)
 
     def _unload():
         config._Registry.locked = False
@@ -235,6 +256,12 @@ def clean_models():
         for mod in to_delete:
             del sys.modules[mod]
 
+    def _restore_normal_models():
+        _unload()
+        importlib.import_module("multiconn_archicad.models.tapir.commands")
+        importlib.import_module("multiconn_archicad.models.official.commands")
+
+    _rebuild_loaded_models()
     _unload()
     yield
-    _unload()
+    _restore_normal_models()
