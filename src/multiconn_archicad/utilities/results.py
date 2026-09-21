@@ -33,6 +33,11 @@ class BatchError:
     def __post_init__(self) -> None:
         object.__setattr__(self, "causes", tuple(self.causes))
 
+    @classmethod
+    def from_message(cls, message: str, *, code: int | str = 0) -> BatchError:
+        """Create a BatchError directly from a message string and optional code."""
+        return cls(tapir.Error(code=code, message=message))
+
     @property
     def code(self) -> int | str:
         return self.error.code
@@ -126,8 +131,11 @@ class BatchSlot(Generic[T]):
         return cls(state=SlotState.SUCCESS, _value=value)
 
     @classmethod
-    def failure(cls, error: BatchError) -> BatchSlot[T]:
-        return cls(state=SlotState.ERROR, _error=error)
+    def failure(cls, error: BatchError | str, *, code: int = 0) -> BatchSlot[T]:
+        if isinstance(error, BatchError):
+            return cls(state=SlotState.ERROR, _error=error)
+        else:
+            return cls(state=SlotState.ERROR, _error=BatchError.from_message(error, code=code))
 
     @classmethod
     def upstream_failed(cls) -> BatchSlot[T]:
