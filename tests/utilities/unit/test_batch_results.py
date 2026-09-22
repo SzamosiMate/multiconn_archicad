@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pytest
 
-from multiconn_archicad.errors import BatchOperationError
+from multiconn_archicad.errors import BatchNotFullySuccessfulError, BatchOperationError
 from multiconn_archicad.models.tapir import types as tapir
 from multiconn_archicad.utilities import BatchResult, BatchResult2D
 from multiconn_archicad.utilities.results import (
@@ -73,6 +73,18 @@ def test_batch_grid_invariants():
         BatchGrid((row,), width=0)
     with pytest.raises(ValueError, match=r"Row 0 length \(1\) does not match width \(2\)"):
         BatchGrid((row,), width=2)
+
+
+def test_batch_row_from_error_expands_a_message_across_the_requested_width():
+    row = BatchRow.from_error("row failed", width=2, code=-1)
+
+    assert row.error is not None
+    assert row.error.code == -1
+    assert row.error.message == "row failed"
+    assert all(slot.error is row.error for slot in row.slots)
+
+    with pytest.raises(ValueError, match="positive width"):
+        BatchRow.from_error("row failed", width=0)
 
 
 def test_rectangular_mode_enforces_width_and_expands_whole_row_errors():
@@ -387,9 +399,48 @@ def test_raise_for_errors():
     clean.raise_for_errors("Clean operation")  # Should not raise
 
     failed_1d = BatchResult.from_items(["ok", error(404)])
-    with pytest.raises(BatchOperationError, match=r"1D failed with 1 error\(s\):\n  - \[1\]: \[404\] failed"):
+    with pytest.raises(BatchOperationError) as raised:
         failed_1d.raise_for_errors("1D")
+    assert raised.value.succeeded_count == 1
+    assert raised.value.error_count == 1
+    assert str(raised.value) == (
+        "1D partially failed.\n\n"
+        "1 item succeeded.\n"
+        "1 item failed.\n\n"
+        "Errors:\n"
+        "  - [1]: [404] failed"
+    )
 
     failed_2d = BatchGrid.from_rows([["ok", error(500)]], width=2)
-    with pytest.raises(BatchOperationError, match=r"2D failed with 1 error\(s\):\n  - \[0, 1\]: \[500\] failed"):
+    with pytest.raises(BatchOperationError, match=r"(?s)2D partially failed.*\[0, 1\]: \[500\] failed"):
         failed_2d.raise_for_errors("2D")
+
+
+def test_require_all_success_reports_every_non_success_state_and_allows_empty_results():
+    BatchResult.from_items([]).require_all_success("Empty batch")
+    BatchResult.from_items(["ok"]).require_all_success("Clean batch")
+
+    result = BatchResult(
+        (
+            BatchSlot.success("ok"),
+            BatchSlot.failure("invalid", code=7),
+            BatchSlot.upstream_failed(),
+            BatchSlot.filtered(),
+        )
+    )
+
+    with pytest.raises(BatchNotFullySuccessfulError) as raised:
+        result.require_all_success("Dense input")
+
+    assert raised.value.result is result
+    assert raised.value.error_count == 1
+    assert raised.value.upstream_failed_count == 1
+    assert raised.value.filtered_count == 1
+    assert str(raised.value) == (
+        "Dense input requires every item to succeed.\n"
+        "1 item contained an error.\n"
+        "1 item was skipped because an upstream operation failed.\n"
+        "1 item was filtered intentionally.\n\n"
+        "Errors:\n"
+        "  - [1]: [7] invalid"
+    )

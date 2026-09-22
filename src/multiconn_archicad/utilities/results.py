@@ -6,7 +6,7 @@ from dataclasses import dataclass, replace
 from enum import Enum
 from typing import Any, Generic, TypeAlias, TypeVar, cast
 
-from multiconn_archicad.errors import BatchOperationError
+from multiconn_archicad.errors import BatchNotFullySuccessfulError, BatchOperationError
 from multiconn_archicad.models.official import types as official
 from multiconn_archicad.models.tapir import types as tapir
 
@@ -252,19 +252,19 @@ class BatchResultBase(ABC, Generic[T]):
         """Flat tuple of all BatchError payloads."""
         return tuple(error for _, error in self.iter_errors())
 
-    @staticmethod
-    def _format_coord(coord: Any) -> str:
-        return ", ".join(map(str, coord)) if isinstance(coord, tuple) else str(coord)
-
     def raise_for_errors(self, operation_name: str = "Batch operation") -> None:
         if self.has(SlotState.ERROR):
-            lines = "\n".join(
-                f"  - [{self._format_coord(coord)}]: {error}" for coord, error in self.iter_errors()
-            )
-            raise BatchOperationError(
-                f"{operation_name} failed with {self.count(SlotState.ERROR)} error(s):\n{lines}",
-                result=self,
-            )
+            raise BatchOperationError(operation_name, self)
+
+    def require_all_success(self, operation_name: str = "Batch operation") -> None:
+        """Raise with a state summary unless every slot succeeded.
+
+        Empty results satisfy this requirement, matching Python's ``all``
+        semantics and allowing empty batch operations.
+        """
+        if all(slot.is_success for _, slot in self.iter_slots()):
+            return
+        raise BatchNotFullySuccessfulError(operation_name, self)
 
 
 @dataclass(frozen=True, slots=True)
@@ -335,6 +335,19 @@ class BatchRow(BatchResultBase[T]):
                 raise ValueError("A row with a whole-row error requires a positive row length.")
             if any(slot.error is not self.error for slot in self.slots):
                 raise ValueError("Every cell in a failed row must reference the row error.")
+
+    @classmethod
+    def from_error(
+        cls, error: BatchError | str, *, width: int, code: int = 0
+    ) -> BatchRow[T]:
+        """Create a whole-row failure, expanding one error across every cell."""
+        if width <= 0:
+            raise ValueError("A failed row requires a positive width.")
+        batch_error = error if isinstance(error, BatchError) else BatchError.from_message(error, code=code)
+        return cls(
+            tuple(BatchSlot.failure(batch_error) for _ in range(width)),
+            error=batch_error,
+        )
 
     @classmethod
     def from_raw(

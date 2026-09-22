@@ -5,7 +5,7 @@ from uuid import uuid4
 
 import pytest
 
-from multiconn_archicad.errors import BatchOperationError
+from multiconn_archicad.errors import BatchOperationError, BatchWriteError
 from multiconn_archicad.models.official import types as official
 from multiconn_archicad.models.tapir import types as tapir
 from multiconn_archicad.utilities import PopulationResults
@@ -19,6 +19,8 @@ from multiconn_archicad.utilities.properties import (
 from multiconn_archicad.utilities.results import (
     BatchGrid,
     BatchResult,
+    BatchRow,
+    BatchSlot,
     SlotState,
 )
 
@@ -104,6 +106,114 @@ def test_matrix_write_rejects_zero_properties_and_supports_zero_elements():
     result = utilities.set_property_values_per_element_result([], [prop], [])
     assert result.rows == ()
     assert result.row_lengths == ()
+
+
+def test_sparse_flat_write_omits_unsuccessful_values_and_projects_api_results():
+    api = MagicMock()
+    utilities = PropertyUtilities(api)
+    elements = [uuid4(), uuid4(), uuid4(), uuid4()]
+    property_id = uuid4()
+    values = BatchResult(
+        (
+            BatchSlot.success("first"),
+            BatchSlot.failure("invalid"),
+            BatchSlot.filtered(),
+            BatchSlot.success("last"),
+        )
+    )
+    api.tapir.property.set_property_values_of_elements.return_value = [
+        tapir.SuccessfulExecutionResult(success=True),
+        _error(),
+    ]
+
+    result = utilities.set_flat_property_values_sparse_result(elements, property_id, values)
+
+    payload = api.tapir.property.set_property_values_of_elements.call_args.args[0]
+    assert [item.elementId.guid for item in payload] == [elements[0], elements[3]]
+    assert [item.propertyValue.value for item in payload] == ["first", "last"]
+    assert result.slots[0].is_success
+    assert result.slots[1].is_upstream_failed
+    assert result.slots[2].is_filtered
+    assert result.slots[3].is_error
+
+
+def test_sparse_flat_write_validates_element_count():
+    utilities = PropertyUtilities(MagicMock())
+
+    with pytest.raises(ValueError, match="Expected 1 rows in values_matrix, got 0"):
+        utilities.set_flat_property_values_sparse_result([uuid4()], uuid4(), BatchResult(()))
+
+
+def test_scripting_write_returns_none_and_partial_failure_raises_informative_error():
+    api = MagicMock()
+    utilities = PropertyUtilities(api)
+    elements = [uuid4(), uuid4()]
+    property_id = uuid4()
+
+    api.tapir.property.set_property_values_of_elements.return_value = [
+        tapir.SuccessfulExecutionResult(success=True),
+        _error(),
+    ]
+    with pytest.raises(BatchWriteError) as raised:
+        utilities.set_flat_property_values(elements, property_id, ["first", "second"])
+
+    error = raised.value
+    assert error.succeeded_count == 1
+    assert error.failed_count == 1
+    assert error.upstream_failed_count == 0
+    assert error.filtered_count == 0
+    assert error.partial_success is True
+    assert error.result.slots[1].is_error
+    assert "Single property write partially failed." in str(error)
+    assert "Successful writes were applied and were not rolled back." in str(error)
+    assert "  - [1]: [7] bad" in str(error)
+
+    api.tapir.property.set_property_values_of_elements.return_value = [
+        tapir.SuccessfulExecutionResult(success=True),
+        tapir.SuccessfulExecutionResult(success=True),
+    ]
+    assert utilities.set_flat_property_values(elements, property_id, ["first", "second"]) is None
+
+
+def test_sparse_scripting_write_reports_write_errors_and_omitted_input_counts():
+    api = MagicMock()
+    utilities = PropertyUtilities(api)
+    values = BatchResult(
+        (
+            BatchSlot.success("first"),
+            BatchSlot.failure("unavailable"),
+            BatchSlot.filtered(),
+            BatchSlot.success("last"),
+        )
+    )
+    api.tapir.property.set_property_values_of_elements.return_value = [
+        tapir.SuccessfulExecutionResult(success=True),
+        _error(),
+    ]
+
+    with pytest.raises(BatchWriteError) as raised:
+        utilities.set_flat_property_values_sparse(
+            [uuid4(), uuid4(), uuid4(), uuid4()], uuid4(), values
+        )
+
+    error = raised.value
+    assert error.succeeded_count == 1
+    assert error.failed_count == 1
+    assert error.upstream_failed_count == 1
+    assert error.filtered_count == 1
+    assert "1 value was skipped because an upstream operation failed." in str(error)
+    assert "1 value was filtered intentionally." in str(error)
+
+
+def test_dense_matrix_write_rejects_skipped_input_before_calling_api():
+    api = MagicMock()
+    utilities = PropertyUtilities(api)
+    values = BatchGrid(((BatchRow((BatchSlot.filtered(),)),)), width=1)
+
+    with pytest.raises(BatchOperationError, match="requires every item to succeed"):
+        utilities.set_property_values_per_element_result([uuid4()], [uuid4()], values)
+
+    api.tapir.property.set_property_values_of_elements.assert_not_called()
 
 
 def test_resolution_metadata_and_enum_helpers():

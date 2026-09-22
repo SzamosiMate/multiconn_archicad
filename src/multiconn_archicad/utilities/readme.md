@@ -41,7 +41,7 @@ To serve both fast-prototyping scripts and large-scale, eager batch pipelines (e
 1. **Standard Method (`<name>`):**
    * **Target:** Simple scripts and rapid prototypes that require a clean result or an exception.
    * **Behavior:** **Raises on reported failure.** After the batch response arrives, any element or inner property failure raises a descriptive `BatchOperationError`. Writes may already have partially succeeded; these helpers provide no rollback or atomicity.
-   * **Return Types:** Plain Python types (`list[T]`, scalar primitives) for queries, and **`int` (count of written property values)** for writes.
+   * **Return Types:** Plain Python types (`list[T]`, scalar primitives) for queries. Successful writes return `None`; failed writes raise `BatchWriteError` with the complete typed result attached.
    * **Implementation:** A clean façade over `<name>_result(...)` calling `.raise_for_errors()`.
 2. **Diagnostic Variant (`<name>_result`):**
    * **Target:** Telemetry, automated QA checkers, GUI viewers, and multi-step eager batch pipelines.
@@ -121,7 +121,7 @@ Centralizes type coercion across all utilities.
 ### `properties.py` (`PropertyUtilities` and Pure Helpers)
 * Value reads return Tapir **display strings**. They do not parse numbers or normalize units.
 * Writes preserve `tapir.PropertyValue` instances, convert `None` to `""`, and otherwise use `str(value)`.
-* **High-Level Sparse Writing:** `set_property_values_per_element_sparse_result(elements, properties, values_matrix)` automatically omits non-successful cells, performs the API call, and projects outcomes back onto an $N \times M$ `BatchGrid`.
+* **High-Level Sparse Writing:** `set_property_values_per_element_sparse_result(elements, properties, values_matrix)` automatically omits non-successful cells, performs the API call, and projects outcomes back onto an $N \times M$ `BatchGrid`. For a single property, `set_flat_property_values_sparse_result(elements, property_id, values)` provides the same behavior directly with a `BatchResult`.
 
 ---
 
