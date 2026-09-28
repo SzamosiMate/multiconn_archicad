@@ -233,3 +233,50 @@ else:
 ```
 
 The partial report retains all facts recorded up to the moment of failure.
+
+---
+
+## Pattern 8: Query Elements from a Saved Layer Combination
+
+Read the main 3D elements on the combination's visible layers, including locked layers:
+
+```python
+api = conn.unified
+elements = api.utilities.element.get_elements_in_layer_combination("Coordination")
+```
+
+This reads the saved combination without activating it or changing the current selection.
+The returned list can be stored by an element-input widget. To inspect only layer names, use
+`api.utilities.attribute.get_layer_names_of_combination("Coordination")`.
+
+The population and property operations are also available separately:
+
+```python
+from multiconn_archicad.models.official.types import BuiltInPropertyUserId
+
+elements = api.utilities.element.get_3d_elements()
+layer_property = api.utilities.property.resolve_property_id(
+    BuiltInPropertyUserId(nonLocalizedName="ModelView_LayerName")
+)
+by_layer = api.utilities.element.group_elements_by_property_value(elements, layer_property)
+matching = api.utilities.element.filter_elements_by_property_values(
+    elements, layer_property, ["Walls", "Slabs"]
+)
+```
+
+For diagnostics, retain the original population indices:
+
+```python
+result = api.utilities.element.filter_elements_by_property_values_result(
+    elements, layer_property, ["Walls", "Slabs"]
+)
+for index, error in result.iter_errors():
+    print(elements[index], error)
+matching = result.successes
+```
+
+Nonmatching elements are `FILTERED`; unreadable property values remain errors. Grouping returns the
+dictionary directly and raises if a property read fails.
+
+`get_3d_elements()` and the layer-combination attribute helpers return plain lists and raise on API
+errors. They have no diagnostic variants.

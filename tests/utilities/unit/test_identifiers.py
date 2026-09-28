@@ -4,10 +4,13 @@ import uuid
 import pytest
 
 from multiconn_archicad.utilities.identifiers import (
+    normalize_attribute_id,
+    normalize_attribute_ids,
     normalize_element_id,
     normalize_element_ids,
     normalize_property_id,
     split_builtin_name,
+    to_official_attribute_id,
     to_official_property_id,
 )
 from multiconn_archicad.models.official import types as official
@@ -100,6 +103,65 @@ def test_to_official_property_id():
     converted = to_official_property_id(tapir_item)
     assert isinstance(converted, official.PropertyIdArrayItem)
     assert converted.propertyId.guid == raw_guid
+
+
+# ==============================================================================
+# Attribute ID Normalization Tests
+# ==============================================================================
+
+
+def test_normalize_attribute_id_from_all_types():
+    raw_guid = uuid.uuid4()
+    str_guid = str(raw_guid)
+
+    # From string and UUID
+    assert normalize_attribute_id(str_guid).attributeId.guid == raw_guid
+    assert normalize_attribute_id(raw_guid).attributeId.guid == raw_guid
+
+    # Tapir wrapper is already the target representation and passes through.
+    tapir_item = tapir.AttributeIdArrayItem(attributeId=tapir.AttributeId(guid=raw_guid))
+    assert normalize_attribute_id(tapir_item) is tapir_item
+
+    # Other API model shapes are converted to the Tapir wrapper.
+    official_item = official.AttributeIdWrapperItem(attributeId=official.AttributeId(guid=raw_guid))
+    converted_official_item = normalize_attribute_id(official_item)
+    assert isinstance(converted_official_item, tapir.AttributeIdArrayItem)
+    assert converted_official_item.attributeId.guid == raw_guid
+
+    tapir_id = tapir.AttributeId(guid=raw_guid)
+    converted_tapir_id = normalize_attribute_id(tapir_id)
+    assert isinstance(converted_tapir_id, tapir.AttributeIdArrayItem)
+    assert converted_tapir_id.attributeId.guid == raw_guid
+
+    official_id = official.AttributeId(guid=raw_guid)
+    converted_official_id = normalize_attribute_id(official_id)
+    assert isinstance(converted_official_id, tapir.AttributeIdArrayItem)
+    assert converted_official_id.attributeId.guid == raw_guid
+
+
+def test_normalize_attribute_id_invalid_guid_and_type_raise():
+    with pytest.raises(ValueError):
+        normalize_attribute_id("not-a-guid")  # type: ignore
+
+    with pytest.raises(TypeError, match="Unsupported attribute ID type"):
+        normalize_attribute_id({"guid": str(uuid.uuid4())})  # type: ignore
+
+
+def test_attribute_id_bulk_and_official_conversion_preserve_input():
+    guid = uuid.uuid4()
+    attributes = [tapir.AttributeIdArrayItem(attributeId=tapir.AttributeId(guid=guid)), str(guid)]
+    original = attributes.copy()
+
+    normalized = normalize_attribute_ids(attributes)
+    assert attributes == original
+    assert normalized[0] is attributes[0]
+    assert normalized[1].attributeId.guid == guid
+    assert normalize_attribute_ids([]) == []
+
+    official_item = official.AttributeIdWrapperItem(attributeId=official.AttributeId(guid=guid))
+    assert to_official_attribute_id(official_item) is official_item
+    converted = to_official_attribute_id(normalized[0])
+    assert converted.attributeId.guid == guid
 
 
 # ==============================================================================

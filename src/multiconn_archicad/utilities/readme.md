@@ -36,7 +36,7 @@ The `utilities` subpackage provides **Level 3 Ergonomic Sugar** on top of `Unifi
 * **No "Active Record" Objects:** Never wrap an Archicad element in a stateful class with instance methods (e.g., `element.get_property()`). This encourages iterative $N+1$ socket calls, severely degrading CAD performance.
 
 ### B. The Dedicated Dual-Method Convention
-To serve both fast-prototyping scripts and large-scale, eager batch pipelines (e.g., 100k+ elements), bulk operations provide two companion methods:
+Operations over supplied items provide two companion methods when per-item diagnostics are useful. Discovery queries such as `get_3d_elements()` and layer-combination lookups return plain lists and raise on API errors; they do not need `_result` variants.
 
 1. **Standard Method (`<name>`):**
    * **Target:** Simple scripts and rapid prototypes that require a clean result or an exception.
@@ -59,7 +59,7 @@ Archicad JSON API is optimized for bulk operations.
 *"Be liberal in what you accept, and conservative in what you send."*
 
 1. **Input Parameters:**
-   * Accept liberal union types (`ElementIdLike`, `PropertyIdLike`, `PropertyUserId`) defined in `identifiers.py`.
+   * Accept liberal union types (`ElementIdLike`, `PropertyIdLike`, `AttributeIdLike`, `PropertyUserId`) defined in `identifiers.py`.
    * Annotate collection inputs as read-only abstractions: `Sequence[T]` or `Mapping[K, V]` from `collections.abc`.
    * Accept `BatchResult2D[Any]` or `Sequence[Sequence[Any]]` for 2D inputs.
    * **Never mutate input parameters.**
@@ -91,6 +91,9 @@ from multiconn_archicad.utilities import (
 
 The package explicitly exports these core containers. Import pure payload helpers (`create_element_property_values_sparse`, etc.) directly from `multiconn_archicad.utilities.properties`.
 
+Access bound groups through `api.utilities.property`, `api.utilities.element`, and `api.utilities.attribute`.
+Import identifier aliases and normalizers directly from `multiconn_archicad.utilities.identifiers`.
+
 ---
 
 ## 3. Subpackage Directory Structure
@@ -104,9 +107,9 @@ src/multiconn_archicad/utilities/
 ├── population_results.py # PopulationResults, MultiPopulationResults, PopulationRelation, BatchReport, and reducers
 ├── identifiers.py        # Liberal type aliases & universal ID normalizers
 ├── properties.py         # Batch property reading, writing, and inspection
-├── elements.py           # Planned: selection get/set, type filtering
+├── elements.py           # 3D populations, property filtering/grouping, layer-combination queries
 ├── teamwork.py           # Planned: TeamworkReserve context manager
-└── attributes.py         # Planned: composite attribute queries
+└── attributes.py         # Layer names from saved layer combinations
 ```
 
 ---
@@ -115,13 +118,28 @@ src/multiconn_archicad/utilities/
 
 ### `identifiers.py` (Universal Normalizers)
 Centralizes type coercion across all utilities.
-* **Input aliases:** `ElementIdLike` and `PropertyIdLike` accept models, UUIDs, and GUID strings. `PropertyUserId` accepts Official `BuiltInPropertyUserId` / `UserDefinedPropertyUserId` models.
-* **Coercion Functions:** `normalize_element_id()`, `normalize_element_ids()`, `normalize_property_id()`, `normalize_property_ids()`, `to_official_property_id()`, `split_builtin_name()`.
+* **Input aliases:** `ElementIdLike`, `PropertyIdLike`, and `AttributeIdLike` accept Official/Tapir ID models and wrappers, UUIDs, and GUID strings. `PropertyUserId` accepts Official `BuiltInPropertyUserId` / `UserDefinedPropertyUserId` models.
+* **Coercion Functions:** `normalize_element_id()`, `normalize_element_ids()`, `normalize_property_id()`, `normalize_property_ids()`, `normalize_attribute_id()`, `normalize_attribute_ids()`, `to_official_property_id()`, `to_official_attribute_id()`, `split_builtin_name()`.
+* Attribute normalization returns Tapir `AttributeIdArrayItem`; Official conversion returns `AttributeIdWrapperItem`.
 
 ### `properties.py` (`PropertyUtilities` and Pure Helpers)
 * Value reads return Tapir **display strings**. They do not parse numbers or normalize units.
 * Writes preserve `tapir.PropertyValue` instances, convert `None` to `""`, and otherwise use `str(value)`.
 * **High-Level Sparse Writing:** `set_property_values_per_element_sparse_result(elements, properties, values_matrix)` automatically omits non-successful cells, performs the API call, and projects outcomes back onto an $N \times M$ `BatchGrid`. For a single property, `set_flat_property_values_sparse_result(elements, property_id, values)` provides the same behavior directly with a `BatchResult`.
+
+### `attributes.py` (`AttributeUtilities`)
+* `get_layer_names_of_combination(name)` returns visible layer names from an exact-name match of a saved combination. Visible locked layers and the built-in Archicad layer are included. The query does not activate the combination.
+* It composes `get_layers_of_combination(name)` and the private `_get_names_of_visible_layers(layers)`. Each returns a plain list; command-level failures are raised by the core API client.
+* Missing combinations and missing combination details produce `[]`. Per-layer detail errors raise a `BatchOperationError`; a combination with no visible layers returns `[]`.
+
+### `elements.py` (`ElementUtilities`)
+* `set_selected_elements(elements)` replaces the current selection, accepting any `ElementIdLike` sequence. It compares GUIDs and sends only additions and removals in one command; if the sets already match, it sends no change command. The standard method raises on per-element failures. `set_selected_elements_result(elements)` returns a result aligned with the requested elements, counting already-selected elements as successes and preserving add failures; removal failures raise because the requested selection was not reached.
+* `get_3d_elements()` queries the immutable `TYPES_3D` list with Tapir's `IS_INDEPENDENT` filter. This includes doors, windows, and openings while excluding component subelement types. It adds no current-view visibility or editability filters.
+* The result is a plain element list in type/API order. Command-level failures are raised by the core API client.
+* `filter_elements_by_property_values(elements, property_id, values)` filters an explicit population using exact display-string matches. Its `_result` companion preserves input alignment: matches hold element IDs, nonmatches are `FILTERED`, and property-read failures remain errors.
+* `group_elements_by_property_value(elements, property_id)` returns a dictionary of display strings to element lists. It raises if a property read fails. Grouping preserves duplicate elements, first-seen key order and per-group input order. Empty display strings are valid values.
+* `get_elements_in_layer_combination(name)` combines the attribute query, 3D population query, and the built-in `ModelView_LayerName` property. Its `_result` companion retains property-read failures against the queried population; prerequisites must succeed. No visible layers produces an empty standard result through normal filtering.
+* Filtering with no search values marks every input `FILTERED` without reading properties. Input sequences are never mutated.
 
 ---
 
@@ -317,6 +335,8 @@ Tests run offline with real official and Tapir Pydantic models and mocked API re
 ```text
 tests/utilities/unit/
 ├── test_identifiers.py       # Coercion and GUID normalization
+├── test_attributes.py        # Saved combination visibility, name resolution, and layer errors
+├── test_elements.py          # 3D populations, aligned filtering/grouping, and composition
 ├── test_batch_results.py     # BatchResultBase, BatchResult, BatchResult2D, BatchGrid, RaggedBatchResult, BatchRow, BatchSlot
 ├── test_population_results.py # Single-population snapshots, outcome rules, FIFO matching
 ├── test_multi_population.py  # MultiPopulationResults, bounds validation, deduplication, 1D/2D projections

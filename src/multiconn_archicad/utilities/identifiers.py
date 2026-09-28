@@ -30,6 +30,15 @@ PropertyIdLike = Union[
     UUID,
 ]
 
+AttributeIdLike = Union[
+    tapir.AttributeIdArrayItem,
+    official.AttributeIdWrapperItem,
+    tapir.AttributeId,
+    official.AttributeId,
+    str,
+    UUID,
+]
+
 PropertyUserId = Union[
     official.UserDefinedPropertyUserId,
     official.BuiltInPropertyUserId,
@@ -79,12 +88,37 @@ def normalize_property_ids(properties: Sequence[PropertyIdLike]) -> list[tapir.P
     return [normalize_property_id(p) for p in properties]
 
 
+def normalize_attribute_id(attribute_id: AttributeIdLike) -> tapir.AttributeIdArrayItem:
+    """Coerces any attribute identifier format into a Tapir AttributeIdArrayItem."""
+    if isinstance(attribute_id, tapir.AttributeIdArrayItem):
+        return attribute_id
+    if isinstance(attribute_id, official.AttributeIdWrapperItem):
+        return tapir.AttributeIdArrayItem(attributeId=tapir.AttributeId(guid=attribute_id.attributeId.guid))
+    if isinstance(attribute_id, (tapir.AttributeId, official.AttributeId)):
+        return tapir.AttributeIdArrayItem(attributeId=tapir.AttributeId(guid=attribute_id.guid))
+    if isinstance(attribute_id, (UUID, str)):
+        return tapir.AttributeIdArrayItem(attributeId=tapir.AttributeId(guid=_to_uuid(attribute_id)))
+    raise TypeError(f"Unsupported attribute ID type: {type(attribute_id)!r}")
+
+
+def normalize_attribute_ids(attributes: Sequence[AttributeIdLike]) -> list[tapir.AttributeIdArrayItem]:
+    return [normalize_attribute_id(attribute) for attribute in attributes]
+
+
 def to_official_property_id(property_id: PropertyIdLike) -> official.PropertyIdArrayItem:
     """Converts any property ID to an Official PropertyIdArrayItem."""
     if isinstance(property_id, official.PropertyIdArrayItem):
         return property_id
     guid = normalize_property_id(property_id).propertyId.guid
     return official.PropertyIdArrayItem(propertyId=official.PropertyId(guid=guid))
+
+
+def to_official_attribute_id(attribute_id: AttributeIdLike) -> official.AttributeIdWrapperItem:
+    """Converts any attribute ID to an Official AttributeIdWrapperItem."""
+    if isinstance(attribute_id, official.AttributeIdWrapperItem):
+        return attribute_id
+    guid = normalize_attribute_id(attribute_id).attributeId.guid
+    return official.AttributeIdWrapperItem(attributeId=official.AttributeId(guid=guid))
 
 
 def split_builtin_name(non_localized_name: str) -> tuple[str, str]:
