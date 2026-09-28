@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from .attributes import AttributeUtilities
+from .elements import ElementUtilities
 from .properties import PropertyUtilities
 
 if TYPE_CHECKING:
@@ -13,3 +15,5 @@ class Utilities:
 
     def __init__(self, api: UnifiedApi):
         self.property = PropertyUtilities(api)
+        self.attribute = AttributeUtilities(api)
+        self.element = ElementUtilities(api)
