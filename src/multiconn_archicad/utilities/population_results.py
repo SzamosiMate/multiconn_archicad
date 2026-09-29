@@ -1,4 +1,4 @@
-"""Outcome tracking for multi-step batch workflows."""
+"""Record batch steps and build reports for original items."""
 
 from __future__ import annotations
 
@@ -22,6 +22,8 @@ RecordedResult = TypeVar("RecordedResult", bound=BatchResultType)
 
 
 class BatchStatus(str, Enum):
+    """Summarize an item's or a batch's processing outcome."""
+
     INCOMPLETE = "incomplete"
     SUCCEEDED = "succeeded"
     FAILED = "failed"
@@ -31,7 +33,14 @@ class BatchStatus(str, Enum):
 
 @dataclass(frozen=True, slots=True)
 class BatchStep(Generic[T]):
-    """Immutable record of one population step."""
+    """Record one result and how its positions map to original items.
+
+    Attributes:
+        name: User-supplied label for this step.
+        index: Zero-based recording order within the population.
+        result: Recorded 1D result or 2D result.
+        item_indices: Original-item index for each result slot or row.
+    """
 
     name: str
     index: int
@@ -39,14 +48,18 @@ class BatchStep(Generic[T]):
     item_indices: tuple[int, ...]
 
     def iter_failures(self) -> Iterator[tuple[int, BatchFailure]]:
-        """Yield direct failures paired with their original-item indices."""
+        """Yield direct errors paired with their original-item indices."""
         for coordinate, error in self.result.iter_errors():
             source_index = coordinate[0] if isinstance(coordinate, tuple) else coordinate
             yield self.item_indices[source_index], BatchFailure(self, coordinate, error)
 
     @property
     def slot_states_by_item(self) -> dict[int, list[SlotState]]:
-        """Map original-item indices to every slot state recorded for them."""
+        """Return every recorded cell state grouped by original-item index.
+
+        A 1D step contributes one state per item; a 2D step contributes one
+        state per cell in that item's row.
+        """
         lookup: dict[int, list[SlotState]] = {}
         if isinstance(self.result, BatchResult2D):
             for position, original_index in enumerate(self.item_indices):
@@ -59,25 +72,45 @@ class BatchStep(Generic[T]):
 
 @dataclass(frozen=True, slots=True)
 class BatchFailure:
+    """Locate a direct error within one recorded step.
+
+    Attributes:
+        step: Step containing the error.
+        source_coordinate: Result index, or ``(row, cell)`` for a 2D result.
+        error: Error recorded at that coordinate.
+    """
+
     step: BatchStep[Any]
     source_coordinate: int | tuple[int, int]
     error: BatchError
 
     @property
     def step_ref(self) -> BatchStep[Any]:
+        """Return the step containing this failure."""
         return self.step
 
     @property
     def step_index(self) -> int:
+        """Return the step's zero-based recording index."""
         return self.step.index
 
     @property
     def step_name(self) -> str:
+        """Return the user-supplied step name."""
         return self.step.name
 
 
 @dataclass(frozen=True, slots=True)
 class BatchOutcome(Generic[T]):
+    """Summarize one original item's failures and final status.
+
+    Attributes:
+        original_item: Item from the population supplied to the collector.
+        index: Zero-based position in that original population.
+        failures: Direct errors recorded for this item across all steps.
+        status: Reduced outcome for the item.
+    """
+
     original_item: T
     index: int
     failures: tuple[BatchFailure, ...]
@@ -85,53 +118,67 @@ class BatchOutcome(Generic[T]):
 
     @property
     def failed(self) -> bool:
+        """Return whether the item's final status is failed."""
         return self.status is BatchStatus.FAILED
 
     @property
     def succeeded(self) -> bool:
+        """Return whether the item's final status is succeeded."""
         return self.status is BatchStatus.SUCCEEDED
 
     @property
     def incomplete(self) -> bool:
+        """Return whether this item remains unresolved in the current report."""
         return self.status is BatchStatus.INCOMPLETE
 
     @property
     def upstream_failed(self) -> bool:
+        """Return whether an earlier failure blocked this item."""
         return self.status is BatchStatus.UPSTREAM_FAILED
 
     @property
     def filtered(self) -> bool:
+        """Return whether this item was filtered from processing."""
         return self.status is BatchStatus.FILTERED
 
 
 @dataclass(frozen=True, slots=True)
 class BatchReport(Generic[T]):
+    """Snapshot outcomes, recorded steps, and the aggregate batch status.
+
+    Attributes:
+        outcomes: One outcome for each original item, in input order.
+        steps: Recorded steps in recording order.
+        status: Aggregate status reduced from the outcomes.
+    """
+
     outcomes: tuple[BatchOutcome[T], ...]
     steps: tuple[BatchStep[Any], ...]
     status: BatchStatus
 
     def count(self, status: BatchStatus | None = None) -> int:
-        """Return the total outcome count or the count for one status."""
+        """Return the total outcome count or the count matching ``status``."""
         if status is None:
             return len(self.outcomes)
         return sum(outcome.status is status for outcome in self.outcomes)
 
     def has(self, status: BatchStatus) -> bool:
-        """Return whether at least one outcome has the requested status."""
+        """Return whether any outcome has ``status``."""
         return any(outcome.status is status for outcome in self.outcomes)
 
     def iter_failures(self) -> Iterator[tuple[BatchOutcome[T], BatchFailure]]:
-        """Yield every direct failure together with its original-item outcome."""
+        """Yield each direct failure with its original-item outcome."""
         for outcome in self.outcomes:
             for failure in outcome.failures:
                 yield outcome, failure
 
     def indices(self, status: BatchStatus) -> tuple[int, ...]:
-        """Return the original-item indices whose outcome has ``status``."""
+        """Return original-item indices whose outcome has ``status``."""
         return tuple(outcome.index for outcome in self.outcomes if outcome.status is status)
 
     @property
     def status_counts(self) -> Mapping[str, int]:
+        """Return counts for the total and each batch status."""
         return {
             "total": self.count(),
             "succeeded": self.count(BatchStatus.SUCCEEDED),
@@ -143,24 +190,32 @@ class BatchReport(Generic[T]):
 
 
 class PopulationResults(Generic[T]):
-    """Passive collection of ordered results recorded for an original population."""
+    """Collect ordered results for a fixed original-item population.
+
+    Each step maps result slots or rows back to original-item indices. The
+    collector stores results but does not execute operations or cache live
+    Archicad state.
+    """
 
     __slots__ = ("_original_items", "_steps")
 
     def __init__(self, original_items: Sequence[T]) -> None:
+        """Create a collector for ``original_items`` in their given order."""
         self._original_items = tuple(original_items)
         self._steps: list[BatchStep[Any]] = []
 
     @property
     def original_items(self) -> tuple[T, ...]:
+        """Return the original items as an immutable tuple."""
         return self._original_items
 
     @property
     def steps(self) -> tuple[BatchStep[Any], ...]:
+        """Return recorded steps in recording order."""
         return tuple(self._steps)
 
     def failures_by_item(self) -> tuple[tuple[BatchFailure, ...], ...]:
-        """Return direct failures grouped by original-item index."""
+        """Return direct failures grouped by original-item position."""
         return collect_failures_by_item(self._original_items, self._steps)
 
     def record(
@@ -171,13 +226,41 @@ class PopulationResults(Generic[T]):
         item_indices: Sequence[int] | None = None,
         for_items: Sequence[T] | None = None,
     ) -> RecordedResult:
-        """Record a result and its original-item mapping, then return ``result``."""
+        """Record a result and map its slots or rows to original items.
+
+        Args:
+            name: Label for this step.
+            result: 1D result or 2D result to record.
+            item_indices: Original-item index for each result slot or row.
+            for_items: Original items corresponding to each result slot or row.
+                Duplicate items resolve to successive matching positions.
+
+        Returns:
+            The same result object, for convenient chaining.
+
+        Raises:
+            ValueError: If both mappings are supplied, a mapping has the wrong
+                length, an item is unmatched, or the default one-to-one mapping
+                does not fit the population.
+            IndexError: If an explicit original-item index is out of bounds.
+
+        Notes:
+            Omit both mapping arguments only when the result has one slot or
+            row per original item. A 2D result maps by row, not by cell.
+        """
         indices = self._validate_record_inputs(result, item_indices, for_items)
         self._steps.append(BatchStep(name, len(self._steps), result, indices))
         return result
 
     def snapshot(self, *, completed: bool = False) -> BatchReport[T]:
-        """Return an immutable report snapshot without closing this collection."""
+        """Build an immutable report without closing the collector.
+
+        Args:
+            completed: Mark processing complete. If false, items without direct
+                failures remain incomplete, even when no steps were recorded.
+                If true, outcomes use the last recorded step; with no steps,
+                every original item succeeds.
+        """
         return build_batch_report(self._original_items, self._steps, completed=completed)
 
     def _validate_record_inputs(
@@ -236,7 +319,10 @@ class PopulationResults(Generic[T]):
 def collect_failures_by_item(
     original_items: Sequence[Any], steps: Sequence[BatchStep[Any]]
 ) -> tuple[tuple[BatchFailure, ...], ...]:
-    """Collect direct failures from all steps in stable recording order."""
+    """Group direct step errors by original-item index.
+
+    Failures remain in step and within-step recording order.
+    """
     failures: list[list[BatchFailure]] = [[] for _ in original_items]
     for step in steps:
         for original_index, failure in step.iter_failures():
@@ -247,11 +333,11 @@ def collect_failures_by_item(
 def reduce_population_outcomes(
     original_items: Sequence[T], steps: Sequence[BatchStep[Any]], *, completed: bool
 ) -> tuple[BatchOutcome[T], ...]:
-    """Purely reduce recorded population facts to the default per-item outcomes.
+    """Reduce recorded steps to one outcome per original item.
 
-    Direct failures accumulated in any step take priority. When processing is not
-    complete, every otherwise-clean item is incomplete. Completed populations use
-    the last recorded step as their terminal interpretation.
+    Direct failures in any step take priority. When ``completed`` is false,
+    otherwise-clean items are incomplete. Completed populations use the last
+    recorded step to interpret upstream-failed and filtered states.
     """
     failures_by_item = collect_failures_by_item(original_items, steps)
     terminal_states = steps[-1].slot_states_by_item if steps else {}
@@ -281,7 +367,12 @@ def reduce_population_outcomes(
 
 
 def reduce_batch_status(outcomes: Sequence[BatchOutcome[Any]], *, completed: bool) -> BatchStatus:
-    """Purely reduce item outcomes to the legacy aggregate batch status."""
+    """Reduce per-item outcomes to one aggregate status.
+
+    Any failure makes the batch failed; unfinished or incomplete outcomes make
+    it incomplete. A non-empty batch is filtered or upstream-failed only when
+    every item has that status. Other completed batches succeed.
+    """
     if any(outcome.failed for outcome in outcomes):
         return BatchStatus.FAILED
     if not completed or any(outcome.incomplete for outcome in outcomes):
@@ -296,7 +387,13 @@ def reduce_batch_status(outcomes: Sequence[BatchOutcome[Any]], *, completed: boo
 def build_batch_report(
     original_items: Sequence[T], steps: Sequence[BatchStep[Any]], *, completed: bool
 ) -> BatchReport[T]:
-    """Build an immutable report from population facts without mutating them."""
+    """Build an immutable report from items and recorded steps.
+
+    Args:
+        original_items: Population in original order.
+        steps: Recorded steps in processing order.
+        completed: Whether processing is complete.
+    """
     step_snapshot = tuple(steps)
     outcomes = reduce_population_outcomes(tuple(original_items), step_snapshot, completed=completed)
     return BatchReport(outcomes, step_snapshot, reduce_batch_status(outcomes, completed=completed))

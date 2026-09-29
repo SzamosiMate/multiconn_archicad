@@ -1,3 +1,5 @@
+"""Select, filter, group, and query Archicad elements."""
+
 from __future__ import annotations
 
 from collections.abc import Sequence
@@ -45,22 +47,30 @@ TYPES_3D: tuple[tapir.ElementType, ...] = (
 
 
 class ElementUtilities:
-    """Batch element queries bound to one UnifiedApi instance.
+    """Query and update elements through one Unified API instance.
 
-    The utility stores only the API reference. It does not cache element or
-    attribute state between calls.
+    The utility stores the API reference and does not cache element state.
     """
 
     def __init__(self, api: UnifiedApi):
+        """Bind element operations to ``api``."""
         self._api = api
 
     def set_selected_elements_result(
         self, elements: Sequence[ElementIdLike]
     ) -> BatchResult[tapir.ElementIdArrayItem]:
-        """Replace the selection, changing only IDs that differ from the current set.
+        """Replace the selection and retain per-request add outcomes.
 
-        Results align with ``elements``. Already-selected elements are successes;
-        removal failures raise because they leave unwanted elements selected.
+        Args:
+            elements: Desired selection in result order.
+
+        Returns:
+            A 1D result aligned with ``elements``. Already-selected elements
+            count as successes; add failures remain error slots.
+
+        Raises:
+            BatchOperationError: If removing an element fails, because the
+                requested selection could not be established.
         """
         desired = normalize_element_ids(elements)
         desired_by_guid = {element.elementId.guid: element for element in desired}
@@ -92,11 +102,23 @@ class ElementUtilities:
         )
 
     def set_selected_elements(self, elements: Sequence[ElementIdLike]) -> None:
-        """Replace the selection, raising if any element could not be selected."""
+        """Replace the selection, raising if any add or removal fails.
+
+        Args:
+            elements: Element IDs to leave selected. An empty sequence clears
+                the selection.
+
+        Raises:
+            BatchOperationError: If an element cannot be added or removed.
+        """
         self.set_selected_elements_result(elements).raise_for_errors("Select elements")
 
     def get_3d_elements(self) -> list[tapir.ElementIdArrayItem]:
-        """Collect main 3D elements, including doors, windows, and openings."""
+        """Return independent main 3D elements in the configured type order.
+
+        The list includes doors, windows, and openings, but excludes component
+        subelements.
+        """
         elements: list[tapir.ElementIdArrayItem] = []
         for element_type in TYPES_3D:
             response = self._api.tapir.element.get_elements_by_type(
@@ -112,10 +134,17 @@ class ElementUtilities:
         property_id: PropertyIdLike,
         values: Sequence[str],
     ) -> BatchResult[tapir.ElementIdArrayItem]:
-        """Keep elements whose display value exactly matches one of ``values``.
+        """Keep elements whose property display string exactly matches ``values``.
 
-        Successful non-matches become FILTERED slots. Property read failures
-        retain their original element coordinates.
+        Args:
+            elements: Elements in result order.
+            property_id: Property to read.
+            values: Accepted display strings. If empty, every element is
+                returned as FILTERED without reading the property.
+
+        Returns:
+            A 1D result aligned with ``elements``. Non-matches are FILTERED and
+            property read errors retain their element positions.
         """
         normalized_elements = normalize_element_ids(elements)
         normalized_property = normalize_property_id(property_id)
@@ -146,7 +175,16 @@ class ElementUtilities:
         property_id: PropertyIdLike,
         values: Sequence[str],
     ) -> list[tapir.ElementIdArrayItem]:
-        """Keep matching elements and raise if any property read failed."""
+        """Return matching elements and raise if a property read fails.
+
+        Args:
+            elements: Elements to test.
+            property_id: Property to read.
+            values: Accepted display strings.
+
+        Raises:
+            BatchOperationError: If Archicad reports a property read error.
+        """
         result = self.filter_elements_by_property_values_result(elements, property_id, values)
         result.raise_for_errors("Filter elements by property values")
         return result.successes
@@ -156,7 +194,15 @@ class ElementUtilities:
         elements: Sequence[ElementIdLike],
         property_id: PropertyIdLike,
     ) -> dict[str, list[tapir.ElementIdArrayItem]]:
-        """Group elements by display value, preserving first-seen key order."""
+        """Group elements by property display value in first-seen key order.
+
+        Args:
+            elements: Elements to group.
+            property_id: Property whose display values form the keys.
+
+        Raises:
+            BatchOperationError: If a property read fails.
+        """
         normalized_elements = normalize_element_ids(elements)
         values = self._api.utilities.property.get_flat_property_values(normalized_elements, property_id)
         groups: dict[str, list[tapir.ElementIdArrayItem]] = {}
@@ -165,11 +211,16 @@ class ElementUtilities:
         return groups
 
     def get_elements_in_layer_combination_result(self, name: str) -> BatchResult[tapir.ElementIdArrayItem]:
-        """Return main 3D elements on layers named by a combination.
+        """Find main 3D elements on visible layers in a named combination.
 
-        Layer membership is read from the built-in ModelView_LayerName property.
-        Attribute lookup and population listing are prerequisites and therefore
-        retain their fail-fast behavior.
+        Returns:
+            A 1D result aligned with the listed main 3D elements. Property read
+            failures remain in their element slots.
+
+        Notes:
+            Layer membership is matched by display name using the built-in
+            ``ModelView_LayerName`` property. Attribute lookup and element
+            listing are prerequisites and retain their fail-fast behavior.
         """
         layer_names = self._api.utilities.attribute.get_layer_names_of_combination(name)
         elements = self.get_3d_elements()
@@ -179,7 +230,11 @@ class ElementUtilities:
         return self.filter_elements_by_property_values_result(elements, property_id, layer_names)
 
     def get_elements_in_layer_combination(self, name: str) -> list[tapir.ElementIdArrayItem]:
-        """Return main 3D elements in a named layer combination."""
+        """Return main 3D elements on visible layers in a named combination.
+
+        Raises:
+            BatchOperationError: If a property read fails.
+        """
         result = self.get_elements_in_layer_combination_result(name)
         result.raise_for_errors("Get elements in layer combination")
         return result.successes

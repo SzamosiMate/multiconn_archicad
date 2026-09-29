@@ -1,3 +1,5 @@
+"""Normalize element, property, and attribute identifiers across API models."""
+
 from __future__ import annotations
 
 import re
@@ -55,7 +57,15 @@ def _to_uuid(val: str | UUID) -> UUID:
 
 
 def normalize_element_id(element: ElementIdLike) -> tapir.ElementIdArrayItem:
-    """Coerces any element identifier format into a Tapir ElementIdArrayItem."""
+    """Convert an element identifier to a Tapir array-item model.
+
+    Args:
+        element: A supported Tapir or Official ID model, UUID, or UUID string.
+
+    Raises:
+        TypeError: If ``element`` is not a supported identifier type.
+        ValueError: If a string is not a valid UUID.
+    """
     if isinstance(element, tapir.ElementIdArrayItem):
         return element
     if isinstance(element, official.ElementIdArrayItem):
@@ -68,11 +78,20 @@ def normalize_element_id(element: ElementIdLike) -> tapir.ElementIdArrayItem:
 
 
 def normalize_element_ids(elements: Sequence[ElementIdLike]) -> list[tapir.ElementIdArrayItem]:
+    """Convert element identifiers to Tapir array-item models in input order."""
     return [normalize_element_id(e) for e in elements]
 
 
 def normalize_property_id(property_id: PropertyIdLike) -> tapir.PropertyIdArrayItem:
-    """Coerces any property identifier format into a Tapir PropertyIdArrayItem."""
+    """Convert a property identifier to a Tapir array-item model.
+
+    Args:
+        property_id: A supported Tapir or Official ID model, UUID, or UUID string.
+
+    Raises:
+        TypeError: If ``property_id`` is not a supported identifier type.
+        ValueError: If a string is not a valid UUID.
+    """
     if isinstance(property_id, tapir.PropertyIdArrayItem):
         return property_id
     if isinstance(property_id, official.PropertyIdArrayItem):
@@ -85,11 +104,20 @@ def normalize_property_id(property_id: PropertyIdLike) -> tapir.PropertyIdArrayI
 
 
 def normalize_property_ids(properties: Sequence[PropertyIdLike]) -> list[tapir.PropertyIdArrayItem]:
+    """Convert property identifiers to Tapir array-item models in input order."""
     return [normalize_property_id(p) for p in properties]
 
 
 def normalize_attribute_id(attribute_id: AttributeIdLike) -> tapir.AttributeIdArrayItem:
-    """Coerces any attribute identifier format into a Tapir AttributeIdArrayItem."""
+    """Convert an attribute identifier to a Tapir array-item model.
+
+    Args:
+        attribute_id: A supported Tapir or Official ID model, UUID, or UUID string.
+
+    Raises:
+        TypeError: If ``attribute_id`` is not a supported identifier type.
+        ValueError: If a string is not a valid UUID.
+    """
     if isinstance(attribute_id, tapir.AttributeIdArrayItem):
         return attribute_id
     if isinstance(attribute_id, official.AttributeIdWrapperItem):
@@ -102,11 +130,12 @@ def normalize_attribute_id(attribute_id: AttributeIdLike) -> tapir.AttributeIdAr
 
 
 def normalize_attribute_ids(attributes: Sequence[AttributeIdLike]) -> list[tapir.AttributeIdArrayItem]:
+    """Convert attribute identifiers to Tapir array-item models in input order."""
     return [normalize_attribute_id(attribute) for attribute in attributes]
 
 
 def to_official_property_id(property_id: PropertyIdLike) -> official.PropertyIdArrayItem:
-    """Converts any property ID to an Official PropertyIdArrayItem."""
+    """Convert a supported property identifier to an Official array-item model."""
     if isinstance(property_id, official.PropertyIdArrayItem):
         return property_id
     guid = normalize_property_id(property_id).propertyId.guid
@@ -114,7 +143,7 @@ def to_official_property_id(property_id: PropertyIdLike) -> official.PropertyIdA
 
 
 def to_official_attribute_id(attribute_id: AttributeIdLike) -> official.AttributeIdWrapperItem:
-    """Converts any attribute ID to an Official AttributeIdWrapperItem."""
+    """Convert a supported attribute identifier to an Official wrapper model."""
     if isinstance(attribute_id, official.AttributeIdWrapperItem):
         return attribute_id
     guid = normalize_attribute_id(attribute_id).attributeId.guid
@@ -122,7 +151,12 @@ def to_official_attribute_id(attribute_id: AttributeIdLike) -> official.Attribut
 
 
 def split_builtin_name(non_localized_name: str) -> tuple[str, str]:
-    """Splits a BuiltIn property name like 'General_ID' into ('General', 'ID')."""
+    """Split a built-in property name at its first underscore.
+
+    Raises:
+        ValueError: If the name has no non-empty text on both sides of an
+            underscore.
+    """
     match = re.search(r"(.+?(?=_))_(.+)", non_localized_name)
     if not match:
         raise ValueError(f"BuiltIn name '{non_localized_name}' cannot be split (missing '_' separator).")
