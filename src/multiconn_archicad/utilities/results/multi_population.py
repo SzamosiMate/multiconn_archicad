@@ -6,7 +6,7 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from typing import Any, TypeAlias, TypeVar
 
-from multiconn_archicad.utilities.results import (
+from multiconn_archicad.utilities.results.batch_results import (
     BatchResult,
     BatchResult2D,
     SlotState,
@@ -14,7 +14,7 @@ from multiconn_archicad.utilities.results import (
     BatchRow,
     BatchGrid
 )
-from multiconn_archicad.utilities.population_results import (
+from multiconn_archicad.utilities.results.population import (
     PopulationResults,
     BatchReport
 )

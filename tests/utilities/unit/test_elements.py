@@ -9,8 +9,8 @@ from multiconn_archicad.errors import BatchOperationError
 from multiconn_archicad.models.official import types as official
 from multiconn_archicad.models.tapir.commands import ChangeSelectionOfElementsResult
 from multiconn_archicad.models.tapir import types as tapir
-from multiconn_archicad.utilities.elements import TYPES_3D, ElementUtilities
-from multiconn_archicad.utilities.results import BatchResult, SlotState
+from multiconn_archicad.utilities.namespaces.elements import TYPES_3D, ElementUtilities
+from multiconn_archicad.utilities.results.batch_results import BatchResult, SlotState
 
 
 def _element(guid: UUID | None = None) -> tapir.ElementIdArrayItem:

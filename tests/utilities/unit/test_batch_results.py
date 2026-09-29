@@ -5,7 +5,7 @@ import pytest
 from multiconn_archicad.errors import BatchNotFullySuccessfulError, BatchOperationError
 from multiconn_archicad.models.tapir import types as tapir
 from multiconn_archicad.utilities import BatchResult, BatchResult2D
-from multiconn_archicad.utilities.results import (
+from multiconn_archicad.utilities.results.batch_results import (
     BatchError,
     BatchGrid,
     BatchRow,

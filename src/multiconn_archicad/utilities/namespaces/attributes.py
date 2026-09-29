@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 
 from multiconn_archicad.models.tapir import types as tapir
 from multiconn_archicad.utilities.identifiers import normalize_attribute_id
-from multiconn_archicad.utilities.results import BatchResult
+from multiconn_archicad.utilities.results.batch_results import BatchResult
 
 if TYPE_CHECKING:
     from multiconn_archicad.clients.unified_api.api import UnifiedApi

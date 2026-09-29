@@ -58,9 +58,10 @@ def run(self) -> ExecutionReport:
             self.elements, self.read_properties
         ),
     )
-    payload = create_element_property_values_sparse(self.elements, self.write_properties, read)
-    raw_write = self.api.tapir.property.set_property_values_of_elements(payload) if payload else []
-    population.record("Property write", read.project_successes(raw_write))
+    write = self.property_utilities.set_property_values_per_element_sparse_result(
+        self.elements, self.write_properties, read
+    )
+    population.record("Property write", write)
 
     return ExecutionReport(population.snapshot(completed=True))
 ```

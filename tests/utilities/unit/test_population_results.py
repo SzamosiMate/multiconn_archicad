@@ -6,7 +6,7 @@ import pytest
 
 from multiconn_archicad.models.tapir import types as tapir
 from multiconn_archicad.utilities import BatchResult, BatchStatus, PopulationResults
-from multiconn_archicad.utilities.results import BatchGrid, BatchRow, BatchSlot, RaggedBatchResult
+from multiconn_archicad.utilities.results.batch_results import BatchGrid, BatchRow, BatchSlot, RaggedBatchResult
 
 
 def error(code: int = 1) -> tapir.ErrorItem:

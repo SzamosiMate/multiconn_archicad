@@ -17,7 +17,7 @@ from multiconn_archicad.utilities.identifiers import (
     normalize_property_ids,
     to_official_property_id,
 )
-from multiconn_archicad.utilities.results import (
+from multiconn_archicad.utilities.results.batch_results import (
     BatchGrid,
     BatchResult,
     BatchResult2D,

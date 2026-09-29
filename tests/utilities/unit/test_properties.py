@@ -8,14 +8,14 @@ import pytest
 from multiconn_archicad.errors import BatchOperationError, BatchWriteError
 from multiconn_archicad.models.official import types as official
 from multiconn_archicad.models.tapir import types as tapir
-from multiconn_archicad.utilities.properties import (
+from multiconn_archicad.utilities.namespaces.properties import (
     PropertyUtilities,
     create_element_property_values,
     create_element_property_values_flat,
     create_element_property_values_sparse,
     get_possible_enum_values,
 )
-from multiconn_archicad.utilities.results import (
+from multiconn_archicad.utilities.results.batch_results import (
     BatchGrid,
     BatchResult,
     BatchRow,
