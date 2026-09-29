@@ -3,7 +3,10 @@
 from multiconn_archicad.errors import BatchNotFullySuccessfulError, BatchOperationError, BatchWriteError
 
 from .api import Utilities
-from .population_results import (
+from multiconn_archicad.utilities.namespaces.attributes import AttributeUtilities
+from multiconn_archicad.utilities.namespaces.elements import ElementUtilities
+from multiconn_archicad.utilities.namespaces.properties import PropertyUtilities
+from multiconn_archicad.utilities.results.population import (
     BatchFailure,
     BatchOutcome,
     BatchReport,
@@ -12,11 +15,11 @@ from .population_results import (
     BatchStep,
     PopulationResults,
 )
-from .multi_population_results import (
+from multiconn_archicad.utilities.results.multi_population import (
     MultiPopulationResults,
     PopulationRelation,
 )
-from .results import (
+from multiconn_archicad.utilities.results.batch_results import (
     BatchError,
     BatchGrid,
     BatchResult,
@@ -30,6 +33,9 @@ from .results import (
 
 __all__ = [
     "Utilities",
+    "PropertyUtilities",
+    "AttributeUtilities",
+    "ElementUtilities",
     "BatchResultBase",
     "BatchResult",
     "BatchResult2D",

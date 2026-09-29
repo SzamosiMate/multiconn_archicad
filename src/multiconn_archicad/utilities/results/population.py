@@ -8,7 +8,7 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Generic, TypeAlias, TypeVar
 
-from multiconn_archicad.utilities.results import (
+from multiconn_archicad.utilities.results.batch_results import (
     BatchError,
     BatchResult,
     BatchResult2D,

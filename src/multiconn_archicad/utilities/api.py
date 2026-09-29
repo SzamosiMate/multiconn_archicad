@@ -4,9 +4,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from .attributes import AttributeUtilities
-from .elements import ElementUtilities
-from .properties import PropertyUtilities
+from multiconn_archicad.utilities.namespaces.attributes import AttributeUtilities
+from multiconn_archicad.utilities.namespaces.elements import ElementUtilities
+from multiconn_archicad.utilities.namespaces.properties import PropertyUtilities
 
 if TYPE_CHECKING:
     from multiconn_archicad.clients.unified_api.api import UnifiedApi

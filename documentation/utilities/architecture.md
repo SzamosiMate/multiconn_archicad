@@ -72,6 +72,9 @@ Archicad JSON API is optimized for bulk operations.
 ```python
 from multiconn_archicad.utilities import (
     Utilities,
+    PropertyUtilities,
+    AttributeUtilities,
+    ElementUtilities,
     BatchResultBase,
     BatchResult,
     BatchResult2D,
@@ -89,7 +92,7 @@ from multiconn_archicad.utilities import (
 )
 ```
 
-The package explicitly exports these core containers. Import pure payload helpers (`create_element_property_values_sparse`, etc.) directly from `multiconn_archicad.utilities.properties`.
+The package explicitly exports these utility groups and core containers. Import pure payload helpers (`create_element_property_values_sparse`, etc.) directly from `multiconn_archicad.utilities.namespaces.properties`.
 
 Access bound groups through `api.utilities.property`, `api.utilities.element`, and `api.utilities.attribute`.
 Import identifier aliases and normalizers directly from `multiconn_archicad.utilities.identifiers`.
@@ -100,16 +103,19 @@ Import identifier aliases and normalizers directly from `multiconn_archicad.util
 
 ```text
 src/multiconn_archicad/utilities/
-├── __init__.py           # Public export surface
-├── api.py                # Utilities domain-group container
-├── readme.md             # This document
-├── results.py            # BatchResultBase, BatchResult, BatchResult2D, BatchGrid, RaggedBatchResult, BatchRow, BatchSlot, BatchError
-├── population_results.py # PopulationResults, MultiPopulationResults, PopulationRelation, BatchReport, and reducers
-├── identifiers.py        # Liberal type aliases & universal ID normalizers
-├── properties.py         # Batch property reading, writing, and inspection
-├── elements.py           # 3D populations, property filtering/grouping, layer-combination queries
-├── teamwork.py           # Planned: TeamworkReserve context manager
-└── attributes.py         # Layer names from saved layer combinations
+├── __init__.py               # Public export surface
+├── api.py                    # Utilities domain-group container
+├── identifiers.py            # ID aliases and normalizers
+├── namespaces/
+│   ├── __init__.py
+│   ├── attributes.py         # Attribute and layer-combination lookups
+│   ├── elements.py           # Element selection, filtering, and grouping
+│   └── properties.py         # Property operations and payload builders
+└── results/
+    ├── __init__.py
+    ├── batch_results.py      # Aligned 1D and 2D result containers
+    ├── population.py         # PopulationResults, steps, outcomes, reports
+    └── multi_population.py   # MultiPopulationResults and relations
 ```
 
 ---
@@ -122,17 +128,17 @@ Centralizes type coercion across all utilities.
 * **Coercion Functions:** `normalize_element_id()`, `normalize_element_ids()`, `normalize_property_id()`, `normalize_property_ids()`, `normalize_attribute_id()`, `normalize_attribute_ids()`, `to_official_property_id()`, `to_official_attribute_id()`, `split_builtin_name()`.
 * Attribute normalization returns Tapir `AttributeIdArrayItem`; Official conversion returns `AttributeIdWrapperItem`.
 
-### `properties.py` (`PropertyUtilities` and Pure Helpers)
+### `namespaces/properties.py` (`PropertyUtilities` and Pure Helpers)
 * Value reads return Tapir **display strings**. They do not parse numbers or normalize units.
 * Writes preserve `tapir.PropertyValue` instances, convert `None` to `""`, and otherwise use `str(value)`.
 * **High-Level Sparse Writing:** `set_property_values_per_element_sparse_result(elements, properties, values_matrix)` automatically omits non-successful cells, performs the API call, and projects outcomes back onto an $N \times M$ `BatchGrid`. For a single property, `set_flat_property_values_sparse_result(elements, property_id, values)` provides the same behavior directly with a `BatchResult`.
 
-### `attributes.py` (`AttributeUtilities`)
+### `namespaces/attributes.py` (`AttributeUtilities`)
 * `get_layer_names_of_combination(name)` returns visible layer names from an exact-name match of a saved combination. Visible locked layers and the built-in Archicad layer are included. The query does not activate the combination.
 * It composes `get_layers_of_combination(name)` and the private `_get_names_of_visible_layers(layers)`. Each returns a plain list; command-level failures are raised by the core API client.
 * Missing combinations and missing combination details produce `[]`. Per-layer detail errors raise a `BatchOperationError`; a combination with no visible layers returns `[]`.
 
-### `elements.py` (`ElementUtilities`)
+### `namespaces/elements.py` (`ElementUtilities`)
 * `set_selected_elements(elements)` replaces the current selection, accepting any `ElementIdLike` sequence. It compares GUIDs and sends only additions and removals in one command; if the sets already match, it sends no change command. The standard method raises on per-element failures. `set_selected_elements_result(elements)` returns a result aligned with the requested elements, counting already-selected elements as successes and preserving add failures; removal failures raise because the requested selection was not reached.
 * `get_3d_elements()` queries the immutable `TYPES_3D` list with Tapir's `IS_INDEPENDENT` filter. This includes doors, windows, and openings while excluding component subelement types. It adds no current-view visibility or editability filters.
 * The result is a plain element list in type/API order. Command-level failures are raised by the core API client.
@@ -264,68 +270,9 @@ target_grid = matching.project_rows(source_read_matrix)  # 2D grid projection
 
 ---
 
-## 7. Common Pipeline Patterns in Practice
+## 7. Usage Patterns
 
-### Pattern 1: Paired Cell-Level 2D Copy ($N \times M \to N \times M$)
-```python
-def run(self) -> ExecutionReport:
-    population = PopulationResults(self.elements)
-    read = population.record(
-        "Property read",
-        self.property_utilities.get_property_values_per_element_result(self.elements, self.read_properties),
-    )
-    population.record(
-        "Property write",
-        self.property_utilities.set_property_values_per_element_sparse_result(self.elements, self.write_properties, read),
-    )
-    return ExecutionReport(population.snapshot(completed=True), planned_step_count=2)
-```
-
-### Pattern 2: Multi-Population Cross-Copy ($N \to M$ Spatial Match)
-```python
-def run(self) -> ExecutionReport:
-    multi = MultiPopulationResults()
-    sources = multi.add_population("sources", self.source_elements)
-    targets = multi.add_population("targets", self.target_elements)
-
-    # 1. Read source data
-    read_grid = sources.record(
-        "Read sources",
-        self.property_utilities.get_property_values_per_element_result(self.source_elements, self.properties),
-    )
-
-    # 2. Calculate and register spatial match pairs [(src_idx, tgt_idx), ...]
-    matching = multi.relate(sources, targets, self.match_geometry())
-
-    # 3. Project source grid to target coordinates (unmatched elements default to FILTERED)
-    target_aligned_grid = matching.project_rows(read_grid)
-
-    # 4. Sparse write to targets (propagates UPSTREAM_FAILED and FILTERED cleanly)
-    targets.record(
-        "Write targets",
-        self.property_utilities.set_property_values_per_element_sparse_result(
-            self.target_elements, self.properties, target_aligned_grid
-        ),
-    )
-
-    return ExecutionReport(multi.snapshot(completed=True)["targets"])
-```
-
-### Pattern 3: Conditional Domain Filtering ($N \to K$ subset)
-```python
-def run(self) -> ExecutionReport:
-    population = PopulationResults(self.elements)
-    read = population.record("Read", self.property_utilities.get_property_values_per_element_result(...))
-    qualifying = [
-        elem for elem, row in zip(self.elements, read.rows)
-        if row.is_all(SlotState.SUCCESS) and float(row[0].value) > 200.0
-    ]
-    write_res = self.property_utilities.set_property_values_per_element_result(
-        qualifying, self.write_properties, qualifying_values
-    )
-    population.record("Write", write_res, for_items=qualifying)
-    return ExecutionReport(population.snapshot(completed=True), planned_step_count=2)
-```
+See [Usage Patterns](usage_patterns.md) for sparse writes, cross-population projections, conditional subsets, and error inspection examples.
 
 ---
 
@@ -335,17 +282,18 @@ Tests run offline with real official and Tapir Pydantic models and mocked API re
 
 ```text
 tests/utilities/unit/
+├── test_utilities_api.py     # Bound utility groups and public exports
 ├── test_identifiers.py       # Coercion and GUID normalization
 ├── test_attributes.py        # Saved combination visibility, name resolution, and layer errors
 ├── test_elements.py          # 3D populations, aligned filtering/grouping, and composition
 ├── test_batch_results.py     # BatchResultBase, BatchResult, BatchResult2D, BatchGrid, RaggedBatchResult, BatchRow, BatchSlot
 ├── test_population_results.py # Single-population snapshots, outcome rules, FIFO matching
-├── test_multi_population.py  # MultiPopulationResults, bounds validation, deduplication, 1D/2D projections
+├── test_multiple_populations.py # MultiPopulationResults, bounds validation, deduplication, 1D/2D projections
 └── test_properties.py        # Sparse/dense builders, projection pipelines
 ```
 
 The test suite enforces that:
 * `count()` and `has()` work accurately across all 4 `SlotState`s.
-* `PopulationRelation.relate()` validates index bounds against both source and target populations.
+* `MultiPopulationResults.relate()` validates index bounds against both source and target populations.
 * `project()` and `project_rows()` broadcast unmatched states accurately and reject ambiguous multi-source matches.
 * snapshots remain immutable after subsequent recording steps.

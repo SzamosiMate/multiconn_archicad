@@ -14,7 +14,7 @@ from multiconn_archicad.utilities.identifiers import (
     normalize_element_ids,
     normalize_property_id,
 )
-from multiconn_archicad.utilities.results import (
+from multiconn_archicad.utilities.results.batch_results import (
     BatchResult,
     BatchSlot,
 )

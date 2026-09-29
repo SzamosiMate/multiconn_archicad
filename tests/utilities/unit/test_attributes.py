@@ -8,7 +8,7 @@ import pytest
 
 from multiconn_archicad.errors import BatchOperationError
 from multiconn_archicad.models.tapir import types as tapir
-from multiconn_archicad.utilities.attributes import AttributeUtilities
+from multiconn_archicad.utilities.namespaces.attributes import AttributeUtilities
 
 
 def _attribute_id(value: UUID | None = None) -> tapir.AttributeId:
