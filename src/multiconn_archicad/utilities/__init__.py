@@ -1,4 +1,4 @@
-"""Public utility and batch-result classes."""
+"""Expose utility groups, batch results, and population reports."""
 
 from multiconn_archicad.errors import BatchNotFullySuccessfulError, BatchOperationError, BatchWriteError
 
