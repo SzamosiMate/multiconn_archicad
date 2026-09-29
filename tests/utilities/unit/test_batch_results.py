@@ -353,9 +353,9 @@ def test_raise_for_errors():
         failed_2d.raise_for_errors("2D")
 
 
-def test_require_all_success_reports_every_non_success_state_and_allows_empty_results():
-    BatchResult.from_items([]).require_all_success("Empty batch")
-    BatchResult.from_items(["ok"]).require_all_success("Clean batch")
+def test_raise_for_non_success_reports_every_non_success_state_and_allows_empty_results():
+    BatchResult.from_items([]).raise_for_non_success("Empty batch")
+    BatchResult.from_items(["ok"]).raise_for_non_success("Clean batch")
 
     result = BatchResult(
         (
@@ -367,7 +367,7 @@ def test_require_all_success_reports_every_non_success_state_and_allows_empty_re
     )
 
     with pytest.raises(BatchNotFullySuccessfulError) as raised:
-        result.require_all_success("Dense input")
+        result.raise_for_non_success("Dense input")
 
     assert raised.value.result is result
     assert raised.value.error_count == 1

@@ -72,7 +72,7 @@ def _validate_and_coerce_matrix(
     norm_properties = normalize_property_ids(properties)
     matrix = _coerce_property_matrix(values_matrix, len(norm_elements), len(norm_properties))
     if not allow_errors:
-        matrix.require_all_success("Dense property write input")
+        matrix.raise_for_non_success("Dense property write input")
     return norm_elements, norm_properties, matrix
 
 

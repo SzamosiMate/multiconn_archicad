@@ -107,10 +107,10 @@ def run(self) -> ExecutionReport:
 ### Unmatched Target Handling
 By default, `matching.project()` and `matching.project_rows()` map unmatched targets to `SlotState.FILTERED`. This guarantees non-destructive omission.
 
-If your workflow treats unmatched elements as missing prerequisites, pass `unmatched=SlotState.UPSTREAM_FAILED`:
+If your workflow treats unmatched elements as missing prerequisites, pass `default_state=SlotState.UPSTREAM_FAILED`:
 
 ```python
-target_matrix = matching.project_rows(read_grid, unmatched=SlotState.UPSTREAM_FAILED)
+target_matrix = matching.project_rows(read_grid, default_state=SlotState.UPSTREAM_FAILED)
 ```
 
 ---
