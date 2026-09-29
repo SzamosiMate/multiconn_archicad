@@ -82,11 +82,11 @@ def test_project_1d_preserves_matches_and_configures_unmatched_targets() -> None
     assert projected.slots[2].is_filtered
 
     # Upstream failed
-    proj_upstream = matching.project(BatchResult.from_items(["val_s0", "val_s1"]), unmatched=SlotState.UPSTREAM_FAILED)
+    proj_upstream = matching.project(BatchResult.from_items(["val_s0", "val_s1"]), default_state=SlotState.UPSTREAM_FAILED)
     assert proj_upstream.slots[2].is_upstream_failed
 
     # Fallback value slot
-    proj_custom = matching.project(BatchResult.from_items(["val_s0", "val_s1"]), unmatched=BatchSlot.success("DEFAULT"))
+    proj_custom = matching.project(BatchResult.from_items(["val_s0", "val_s1"]), default_state=BatchSlot.success("DEFAULT"))
     assert proj_custom.slots[2].value == "DEFAULT"
 
 

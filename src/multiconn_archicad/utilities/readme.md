@@ -187,7 +187,8 @@ res.count(SlotState.FILTERED)        # Filtered count
 
 # 2. Boolean checks
 res.has(SlotState.ERROR)             # True if any errors exist
-res.is_all(SlotState.SUCCESS)        # True if 100% succeeded
+res.is_all(SlotState.SUCCESS)        # True only for a non-empty, fully successful result
+res.raise_for_non_success()          # Raises for any non-successful slot; accepts an empty result
 
 # 3. Uniform index queries (same signature for all states)
 res.indices(SlotState.ERROR)         # tuple of coordinates matching state
@@ -257,9 +258,9 @@ target_grid = matching.project_rows(source_read_matrix)  # 2D grid projection
 ```
 
 #### Unmatched Replacement & Safe Omission
-* In 1D and 2D projections, targets without a matching source receive `unmatched` (default: `SlotState.FILTERED`).
+* In 1D and 2D projections, targets without a matching source receive `default_state` (default: `SlotState.FILTERED`).
 * `FILTERED` guarantees safe omission: downstream sparse writers (`set_property_values_per_element_sparse_result`) will completely omit those cells from API write payloads.
-* If a domain pipeline treats unmatched targets as broken prerequisites, pass `unmatched=SlotState.UPSTREAM_FAILED`.
+* If a domain pipeline treats unmatched targets as broken prerequisites, pass `default_state=SlotState.UPSTREAM_FAILED`.
 
 ---
 

@@ -105,7 +105,7 @@ class PopulationRelation:
         return self._reverse.get(target_index, ())
 
     def project(
-        self, result: BatchResult[T], *, unmatched: SlotState | BatchSlot[T] = SlotState.FILTERED,
+        self, result: BatchResult[T], *, default_state: SlotState | BatchSlot[T] = SlotState.FILTERED,
     ) -> BatchResult[T]:
         """Project a 1D source-aligned result onto target coordinates."""
         if len(result.slots) != len(self.source.original_items):
@@ -113,7 +113,7 @@ class PopulationRelation:
                 f"Result length ({len(result.slots)}) does not match source count ({len(self.source.original_items)})."
             )
 
-        unmatched_slot = _resolve_unmatched_slot(unmatched)
+        unmatched_slot = _resolve_unmatched_slot(default_state)
         slots: list[BatchSlot[T]] = []
 
         for t_idx in range(len(self.target.original_items)):

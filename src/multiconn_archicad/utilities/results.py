@@ -256,12 +256,8 @@ class BatchResultBase(ABC, Generic[T]):
         if self.has(SlotState.ERROR):
             raise BatchOperationError(operation_name, self)
 
-    def require_all_success(self, operation_name: str = "Batch operation") -> None:
-        """Raise with a state summary unless every slot succeeded.
-
-        Empty results satisfy this requirement, matching Python's ``all``
-        semantics and allowing empty batch operations.
-        """
+    def raise_for_non_success(self, operation_name: str = "Batch operation") -> None:
+        """Raise if any slot is not successful; an empty result has no failures."""
         if all(slot.is_success for _, slot in self.iter_slots()):
             return
         raise BatchNotFullySuccessfulError(operation_name, self)
