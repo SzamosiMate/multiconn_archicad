@@ -55,6 +55,7 @@ def test_ui_mode_lifecycle_pending_to_ready(slow_archicad_api):
 
     try:
         conn = MultiConn(ui_mode=True)
+        _ = conn.primary
         assert server_entered.wait(timeout=5.0)
         port = slow_archicad_api.server_port
 
@@ -92,6 +93,7 @@ def test_default_mode_blocks_and_waits(slow_archicad_api):
     slow_archicad_api.set_response("GetProjectInfo", "get_project_info_solo.json")
 
     conn = MultiConn(ui_mode=False)
+    _ = conn.primary
     assert server_entered.wait(timeout=5.0)
 
     caller_resolved = threading.Event()

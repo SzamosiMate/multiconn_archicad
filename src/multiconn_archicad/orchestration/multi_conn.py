@@ -44,7 +44,6 @@ class MultiConn:
         self._ui_mode = ui_mode
 
         self._fleet_scanned: bool = False
-        self._target_primary_port: Port | None = Port(cli_args.port) if cli_args.port else port
 
         # load actions
         self.connect: Connect = Connect(self)
@@ -54,6 +53,10 @@ class MultiConn:
         self.find_archicad: FindArchicad = FindArchicad(self)
         self.open_project: OpenProject = OpenProject(self)
         self.switch_project: SwitchProject = SwitchProject(self)
+
+        port = Port(cli_args.port) if cli_args.port else port
+        if port is not None:
+            self._set_primary(port)
 
     @property
     def open_port_headers(self) -> dict[Port, ConnHeader]:
@@ -106,8 +109,8 @@ class MultiConn:
 
     @property
     def primary(self) -> ConnHeader | None:
-        if self._primary is None and (self._target_primary_port is not None or not self._fleet_scanned):
-            self._set_primary(self._target_primary_port)
+        if self._primary is None:
+            self._set_primary()
         return self._primary
 
     @primary.setter
@@ -137,7 +140,7 @@ class MultiConn:
             "ready": self.get_all_port_headers_with_status(Status.READY),
             "active": {p: self._open_port_headers[p] for p in self._active_ports if p in self._open_port_headers},
             "failed": self.get_all_port_headers_with_status(Status.FAILED),
-            "primary": self._primary or self._target_primary_port,
+            "primary": self._primary,
             "dialog_handler": self.dialog_handler,
         }
         return f"{self.__class__.__name__}({attrs})"
@@ -148,7 +151,7 @@ class MultiConn:
             "ready": self.get_all_port_headers_with_status(Status.READY),
             "active": {p: self._open_port_headers[p] for p in self._active_ports if p in self._open_port_headers},
             "failed": self.get_all_port_headers_with_status(Status.FAILED),
-            "primary": self._primary or self._target_primary_port,
+            "primary": self._primary,
             "dialog_handler": self.dialog_handler,
         }
         return f"{self.__class__.__name__}(\n{pformat(attrs, indent=4)})"
@@ -186,25 +189,21 @@ class MultiConn:
             header.cancel()
             if self._primary and self._primary.port == port:
                 self._primary = None
-                self._target_primary_port = None
         return header
 
     def _set_primary(self, new_value: None | Port | ConnHeader = None) -> None:
         if isinstance(new_value, Port):
-            self._target_primary_port = new_value
             self._set_primary_from_port(new_value)
         elif isinstance(new_value, ConnHeader) and new_value.port in self.open_ports:
-            self._target_primary_port = new_value.port
             self._set_primary_from_header(new_value)
         elif self.open_ports:
             self._set_primary_from_port(sorted(self.open_ports)[0])
         else:
             self._primary = None
-            self._target_primary_port = None
             log.info("Primary connection cleared")
 
     def _set_primary_from_port(self, port: Port) -> None:
-        if port not in self._open_port_headers:
+        if port in self.port_range and port not in self._open_port_headers:
             self.check_port(port)
         if port in self._open_port_headers.keys():
             self._primary = self._open_port_headers[port]
