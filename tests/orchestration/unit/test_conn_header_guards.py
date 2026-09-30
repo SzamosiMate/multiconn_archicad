@@ -43,10 +43,9 @@ def ready_identity_header(base_header):
 
 @pytest.fixture
 def ready_session_header(ready_identity_header):
-    """Configures a fully active, session-ready header."""
-    # Using public port setter initializes _core, _standard, and _unified
+    """Configures a fully ready, session-ready header."""
     ready_identity_header.port = Port(19723)
-    ready_identity_header._status = Status.ACTIVE
+    ready_identity_header._status = Status.READY
     ready_identity_header._tapir_info = TapirInfo(version=SUPPORTED_TAPIR_VERSION)
     return ready_identity_header
 
@@ -107,7 +106,7 @@ def test_is_session_ready_with_uninstalled_tapir(ready_session_header):
 
 
 @pytest.mark.parametrize("status", [Status.PENDING, Status.UNASSIGNED, Status.FAILED])
-def test_is_session_ready_fails_when_not_active(ready_session_header, status):
+def test_is_session_ready_fails_when_not_ready(ready_session_header, status):
     ready_session_header._status = status
     assert is_session_ready(ready_session_header) is False
 

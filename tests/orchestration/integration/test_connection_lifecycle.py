@@ -14,17 +14,16 @@ def test_no_running_archicad_and_no_port_arg(monkeypatch):
     """
     Verifies that with no running AC and no port argument, primary is None.
     """
-    # ARRANGE
+
     class EmptyArgs:
         host = "http://127.0.0.1"
         port = None
+
     monkeypatch.setattr("multiconn_archicad.orchestration.system.cli_parser.get_cli_args_once", lambda: EmptyArgs())
     monkeypatch.setattr("multiconn_archicad.orchestration.multi_conn.MultiConn._port_range", [])
 
-    # ACT
     conn = MultiConn()
 
-    # ASSERT
     assert len(conn.open_port_headers) == 0
     assert conn.primary is None
 
@@ -33,52 +32,61 @@ def test_init_with_invalid_port_raises_error(monkeypatch):
     """
     Verifies that providing a port with no running AC raises an error immediately.
     """
-    # ARRANGE
+
     class EmptyArgs:
         host = "http://127.0.0.1"
         port = None
+
     monkeypatch.setattr("multiconn_archicad.orchestration.system.cli_parser.get_cli_args_once", lambda: EmptyArgs())
     monkeypatch.setattr("multiconn_archicad.orchestration.multi_conn.MultiConn._port_range", [])
 
-    # ACT & ASSERT
     with pytest.raises(KeyError, match="Failed to set primary"):
         MultiConn(port=Port(19723))
-
 
 
 def test_discover_single_instance(archicad_api):
     archicad_api.set_response("GetProjectInfo", "get_project_info_solo.json")
     conn = MultiConn()
     assert len(conn.open_port_headers) == 1
-    managed_header = conn.open_port_headers[archicad_api.server_port]
-    assert managed_header.status == Status.PENDING
-    assert conn.primary is not None
-    assert conn.primary.status == Status.ACTIVE
 
+    managed_header = conn.open_port_headers[archicad_api.server_port]
+    # Header is discovered and ready
+    assert managed_header.status == Status.READY
+    # Primary is a direct reference to the same header
+    assert conn.primary is managed_header
+    assert conn.primary.status == Status.READY
+    # It is not automatically in the batch active list
+    assert archicad_api.server_port not in conn.active
 
 
 def test_connect_all_and_status_change(archicad_api):
     archicad_api.set_response("GetProjectInfo", "get_project_info_solo.json")
     conn = MultiConn()
-    managed_header = conn.open_port_headers[archicad_api.server_port]
+    port = archicad_api.server_port
+    managed_header = conn.open_port_headers[port]
 
     conn.disconnect.all()
-    assert managed_header.status == Status.PENDING
+    assert port not in conn.active
+    assert managed_header.status == Status.READY
 
     conn.connect.all()
-    assert managed_header.status == Status.ACTIVE
-
+    assert port in conn.active
+    assert conn.active[port] is managed_header
+    assert managed_header.status == Status.READY
 
 
 def test_disconnect_and_status_change(archicad_api):
     archicad_api.set_response("GetProjectInfo", "get_project_info_solo.json")
     conn = MultiConn()
-    conn.connect.all()
-    managed_header = conn.open_port_headers[archicad_api.server_port]
-    assert managed_header.status == Status.ACTIVE
-    conn.disconnect.from_headers(managed_header)
-    assert managed_header.status == Status.PENDING
+    port = archicad_api.server_port
+    managed_header = conn.open_port_headers[port]
 
+    conn.connect.all()
+    assert port in conn.active
+
+    conn.disconnect.from_headers(managed_header)
+    assert port not in conn.active
+    assert managed_header.status == Status.READY
 
 
 def test_refresh_detects_closed_instance(archicad_api):
@@ -97,7 +105,6 @@ def test_refresh_detects_closed_instance(archicad_api):
 
     assert len(conn.open_port_headers) == 0
     assert conn.primary is None
-
 
 
 def test_quit_all_sends_command_and_removes_header(archicad_api):

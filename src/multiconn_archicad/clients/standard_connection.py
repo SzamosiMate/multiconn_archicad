@@ -11,12 +11,12 @@ if TYPE_CHECKING:
 
 
 class StandardConnection:
-    types = Types
-    commands = Commands
-    utilities = Utilities
-
     def __init__(self, port: Port):
         self._request: Request = create_request(int(port))
+        self.is_versioned: bool = False
+        self.types = Types
+        self.commands = Commands
+        self.utilities = Utilities
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}(_request={self._request.full_url})"
@@ -24,13 +24,10 @@ class StandardConnection:
     def __str__(self) -> str:
         return f"{self.__class__.__name__}(_request={self._request.full_url})"
 
-    def connect(self, product_info: ProductInfo) -> None:
+    def bind(self, product_info: ProductInfo) -> None:
+        """Internal binding hook — no public connect() needed."""
         v = _Versioning(product_info.version, product_info.buildNumber, self._request)
         self.commands = v.commands
         self.types = v.types
         self.utilities = v.utilities
-
-    def disconnect(self) -> None:
-        self.types = Types
-        self.commands = Commands
-        self.utilities = Utilities
+        self.is_versioned = True

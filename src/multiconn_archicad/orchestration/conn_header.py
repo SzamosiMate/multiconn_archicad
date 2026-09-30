@@ -35,7 +35,7 @@ log = logging.getLogger(__name__)
 
 class Status(Enum):
     PENDING = "pending"
-    ACTIVE = "active"
+    READY = "ready"
     FAILED = "failed"
     UNASSIGNED = "unassigned"
 
@@ -76,7 +76,6 @@ class ConnHeader:
         self._fetch_token: object | None = None
         self.init_future: Future | None = None
         self._unpacked_future: Future | None = None
-        self._auto_connect: bool = False
 
         self._core: CoreCommands | None = CoreCommands(port) if port else None
         self._standard: StandardConnection | None = StandardConnection(port) if port else None
@@ -101,19 +100,22 @@ class ConnHeader:
 
     @port.setter
     def port(self, port: Port | None) -> None:
+        if port == self._port:
+            return
+        if self._port is not None and port is not None:
+            raise ValueError(
+                f"Cannot reassign ConnHeader from port {self._port} to {port}. "
+                f"ConnHeader is bound to a single Archicad instance. Create a new ConnHeader instead."
+            )
+
         self._port = port
         self._ram_monitor.reset_process()
+
         if port:
             self._core = CoreCommands(port)
             self._standard = StandardConnection(port)
             self._unified = UnifiedApi(self.core)
-            match self.status:
-                case Status.ACTIVE:
-                    self.connect()
-                case Status.UNASSIGNED:
-                    self._status = Status.PENDING
-                case Status.FAILED:
-                    self._status = Status.PENDING
+            self._status = Status.PENDING
         else:
             self.unassign()
 
@@ -140,9 +142,12 @@ class ConnHeader:
 
     @property
     def standard(self) -> StandardConnection:
+        """Standard Graphisoft connection with JIT self-healing version binding."""
         self._sync_if_needed()
         if self._standard is None:
             raise HeaderUnassignedError("StandardConnection is not initialized.")
+        if not self._standard.is_versioned and is_product_info_initialized(self._product_info):
+            self._standard.bind(self._product_info)
         return self._standard
 
     @property
@@ -173,10 +178,10 @@ class ConnHeader:
         return self._tapir_info
 
     def to_dict(self) -> dict[str, Any]:
-        """Serialize connection header. Requires the header to be fully initialized."""
+        """Serialize connection header. Requires the header to have project identity."""
         if not has_project_identity(self):
             raise ValueError(
-                f"Cannot serialize ConnHeader on port {self.port}: Header is not fully initialized "
+                f"Cannot serialize ConnHeader on port {self.port}: Header is missing project identity "
                 f"(status={self._status.value})."
             )
         return {
@@ -188,7 +193,7 @@ class ConnHeader:
 
     @classmethod
     def from_dict(cls, data: Any) -> Self:
-        """Validate and construct a ConnHeader from serialized snapshot data."""
+        """Validate and construct a ConnHeader from serialized snapshot data (starts UNASSIGNED)."""
         if isinstance(data, cls):
             return data
         if not isinstance(data, dict):
@@ -266,6 +271,7 @@ class ConnHeader:
         """Starts a new fetch, superseding any currently running fetch."""
         self._is_cancelled = False
         self._fetch_token = object()
+        self._status = Status.PENDING
         self.init_future = EXECUTOR.submit(self._fetch_worker, self._fetch_token)
 
     def _fetch_worker(self, my_token: object) -> HeaderMetadata | None:
@@ -281,6 +287,7 @@ class ConnHeader:
             return None
 
         self._assign_metadata(metadata)
+        self._resolve_status(metadata.product_info)
         return metadata
 
     def _assign_metadata(self, metadata: HeaderMetadata) -> None:
@@ -293,14 +300,11 @@ class ConnHeader:
         if isinstance(self._tapir_info, APIResponseError) or isinstance(metadata.tapir_info, TapirInfo):
             self._tapir_info = metadata.tapir_info
 
-    def connect(self) -> None:
-        """Public method to wait for metadata and establish standard API connection."""
-        self._sync_if_needed()
-        self._resolve_connection_state()
-
-    def disconnect(self) -> None:
-        self.standard.disconnect()
-        self._status = Status.PENDING
+    def _resolve_status(self, product_info: ProductInfo) -> None:
+        if is_product_info_initialized(product_info):
+            self._status = Status.READY
+        else:
+            self._status = Status.FAILED
 
     def unassign(self) -> None:
         self.cancel()
@@ -313,11 +317,6 @@ class ConnHeader:
 
     def cancel(self):
         self._is_cancelled = True
-
-    def sync_from_master_future(self, master_future: Future) -> None:
-        """Links this header to a master future."""
-        self.init_future = master_future
-        self._auto_connect = True
 
     def _sync_if_needed(self):
         """Safely unpacks the future when data is needed or ready."""
@@ -335,15 +334,12 @@ class ConnHeader:
             self._unpack_future()
 
     def _unpack_future(self) -> None:
-        """Helper to resolve the future and mutate state."""
+        """Resolves background future"""
         try:
             res = self.init_future.result()
             if res and self.init_future is not self._unpacked_future:
                 self._assign_metadata(res)
                 self._unpacked_future = self.init_future
-
-                if self._auto_connect and self._status == Status.PENDING:
-                    self._resolve_connection_state()
 
         except CancelledError:
             pass
@@ -351,17 +347,6 @@ class ConnHeader:
             log.warning(f"Background fetch failed: {e}")
             self._status = Status.FAILED
             self._unpacked_future = self.init_future
-
-    def _resolve_connection_state(self) -> None:
-        """Configures standard connection and updates header status based on product info."""
-        info = self._product_info
-        if is_product_info_initialized(info):
-            if self._standard is None:
-                raise HeaderUnassignedError("StandardConnection is not initialized.")
-            self._standard.connect(info)
-            self._status = Status.ACTIVE
-        else:
-            self._status = Status.FAILED
 
     def _execute_api_fetch[T](
         self,
@@ -422,7 +407,7 @@ ValidatedHeader = ProjectIdentityHeader
 
 
 class SessionReadyHeader(ProjectIdentityHeader):
-    """Guaranteed to be active, connected to a port, with Tapir polled."""
+    """Guaranteed to be ready, connected to a port, with Tapir polled."""
     port: Port
     tapir_info: TapirInfo
     core: CoreCommands
@@ -444,7 +429,7 @@ def is_session_ready(header: ConnHeader) -> TypeGuard[SessionReadyHeader]:
     return bool(
         has_project_identity(header)
         and header.port is not None
-        and header.status == Status.ACTIVE
+        and header.status is Status.READY
         and isinstance(header.tapir_info, TapirInfo)
     )
 

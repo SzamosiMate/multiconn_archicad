@@ -102,9 +102,9 @@ def test_ui_mode_returns_pending_immediately(slow_archicad_api):
     # Wait for the future to finish
     conn.primary.init_future.result(timeout=5.0)
 
-    # Now UI mode unpacks the resolved data
+    # Now UI mode unpacks to READY
     assert isinstance(conn.primary.product_info, ProductInfo)
-    assert conn.primary.status == Status.ACTIVE
+    assert conn.primary.status == Status.READY
 
 
 def test_default_mode_blocks_and_waits(slow_archicad_api):
@@ -151,32 +151,34 @@ def test_default_mode_blocks_and_waits(slow_archicad_api):
 
 def test_auto_connect_vs_manual_connect(slow_archicad_api):
     """
-    Test Case 4: Prove that conn.primary automatically connects when data is ready,
-    while headers in the pool wait.
+    Test Case 4: Prove that primary is ready immediately upon discovery,
+    while batch active membership is explicitly controlled via MultiConn.
     """
     slow_archicad_api.set_response("GetProjectInfo", "get_project_info_solo.json")
 
     conn = MultiConn()
+    port = slow_archicad_api.server_port
+    pool_header = conn.open_port_headers[port]
 
     # Block until fetch finishes
     _ = conn.primary.product_info
 
-    # Primary auto-connects
-    assert conn.primary.status == Status.ACTIVE
+    # Both primary and pool header are the same object, and technically READY
+    assert conn.primary is pool_header
+    assert conn.primary.status == Status.READY
 
-    # Pooled header remains pending until connect() is explicitly called
-    port = slow_archicad_api.server_port
-    pool_header = conn.open_port_headers[port]
-    assert pool_header.status == Status.PENDING
+    # Port is not in the batch worklist by default
+    assert port not in conn.active
 
-    pool_header.connect()
-    assert pool_header.status == Status.ACTIVE
+    # Explicitly activate for batch execution
+    conn.connect.from_ports(port)
+    assert port in conn.active
 
 
 def test_vanilla_archicad_no_addon_scenario(slow_archicad_api):
     """
     Test Case 5: Prove that if standard API commands succeed but Tapir Add-On
-    commands fail, the connection gracefully survives and becomes active.
+    commands fail, the connection gracefully survives and becomes READY.
     """
 
     def fail_project_info_handler(payload: dict) -> dict:
@@ -189,14 +191,14 @@ def test_vanilla_archicad_no_addon_scenario(slow_archicad_api):
     # Block to wait for background fetch
     _ = conn.primary.product_info
 
-    # Primary should still be ACTIVE despite Tapir command failure
-    assert conn.primary.status == Status.ACTIVE
+    # Primary should be READY despite Tapir command failure
+    assert conn.primary.status == Status.READY
     assert isinstance(conn.primary.archicad_id, APIResponseError)
 
 
 def test_primary_shared_metadata_and_independence(slow_archicad_api):
     """
-    Test Case 6: Prove the link and the detachment logic between primary and pool headers.
+    Test Case 6: Prove that primary and the pool header share canonical identity.
     """
     slow_archicad_api.set_response("GetProjectInfo", "get_project_info_solo.json")
 
@@ -204,11 +206,11 @@ def test_primary_shared_metadata_and_independence(slow_archicad_api):
     port = slow_archicad_api.server_port
     pool_header = conn.open_port_headers[port]
 
-    assert conn.primary.init_future is not None
-    assert pool_header.init_future is not None
+    # Verify canonical identity (no cloning)
+    assert conn.primary is pool_header
+    assert conn.primary.init_future is pool_header.init_future
 
     _ = conn.primary.product_info  # Wait for fetch to finish
-
     assert conn.primary.product_info is pool_header.product_info
 
     def v28_handler(payload: dict) -> dict:
@@ -218,12 +220,12 @@ def test_primary_shared_metadata_and_independence(slow_archicad_api):
 
     conn.primary.refresh_metadata()
 
-    # Refresh creates a new independent future on the primary
-    assert conn.primary.init_future is not pool_header.init_future
+    # They share the exact same refreshed future
+    assert conn.primary.init_future is pool_header.init_future
 
     _ = conn.primary.product_info  # Wait for new fetch to finish
     assert conn.primary.product_info.version == 28
-    assert pool_header.product_info.version == 27
+    assert pool_header.product_info.version == 28
 
 
 def test_stress_multiple_connections_performance(slow_archicad_api, monkeypatch):
@@ -234,15 +236,11 @@ def test_stress_multiple_connections_performance(slow_archicad_api, monkeypatch)
     from multiconn_archicad.orchestration.basic_types import Port
     import httpx
 
-    # 1. Restore full port range
     full_range = [Port(p) for p in range(19723, 19744)]
     num_ports = len(full_range)
     monkeypatch.setattr("multiconn_archicad.orchestration.multi_conn.MultiConn._port_range", full_range)
-
-    # 2. Mock TCP check so all ports appear active
     monkeypatch.setattr("multiconn_archicad.orchestration.multi_conn.is_port_listening", lambda url, port: True)
 
-    # 3. Route all httpx requests to mock server
     mock_url = f"http://127.0.0.1:{slow_archicad_api.server_port}"
     original_post = httpx.Client.post
 
@@ -251,8 +249,6 @@ def test_stress_multiple_connections_performance(slow_archicad_api, monkeypatch)
 
     monkeypatch.setattr(httpx.Client, "post", routed_post)
 
-    # 4. Use a Barrier to prove all 21 ports are executing concurrently.
-    # If the thread pool degraded to sequential execution, the barrier would time out on the 1st request.
     barrier = threading.Barrier(num_ports)
 
     def concurrent_handler(payload: dict) -> dict:
@@ -271,5 +267,8 @@ def test_stress_multiple_connections_performance(slow_archicad_api, monkeypatch)
     _ = conn.primary.product_info
     _ = conn.open_port_headers[Port(19743)].product_info
 
-    assert conn.primary.status == Status.ACTIVE
-    assert conn.open_port_headers[Port(19743)].status == Status.PENDING
+    # All healthy headers are READY
+    assert conn.primary.status == Status.READY
+    assert conn.open_port_headers[Port(19743)].status == Status.READY
+    # None are in the batch worklist by default
+    assert len(conn.active) == 0
