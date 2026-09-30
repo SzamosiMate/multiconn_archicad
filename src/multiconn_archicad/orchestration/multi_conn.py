@@ -38,6 +38,7 @@ class MultiConn:
         cli_args = get_cli_args_once()
         self._base_url: str = cli_args.host if cli_args.host else host
         self.open_port_headers: dict[Port, ConnHeader] = {}
+        self._active_ports: set[Port] = set()
         self._primary: ConnHeader | None = None
         self.dialog_handler: DialogHandlerBase = dialog_handler
         self._ui_mode = ui_mode
@@ -57,14 +58,26 @@ class MultiConn:
 
     @property
     def pending(self) -> dict[Port, ConnHeader]:
+        """Headers currently fetching metadata in background."""
         return self.get_all_port_headers_with_status(Status.PENDING)
 
     @property
+    def ready(self) -> dict[Port, ConnHeader]:
+        """Headers that have finished discovery and are ready for use."""
+        return self.get_all_port_headers_with_status(Status.READY)
+
+    @property
     def active(self) -> dict[Port, ConnHeader]:
-        return self.get_all_port_headers_with_status(Status.ACTIVE)
+        """Headers explicitly queued in MultiConn's batch execution worklist."""
+        return {
+            port: self.open_port_headers[port]
+            for port in self._active_ports
+            if port in self.open_port_headers
+        }
 
     @property
     def failed(self) -> dict[Port, ConnHeader]:
+        """Headers where metadata discovery failed or timed out."""
         return self.get_all_port_headers_with_status(Status.FAILED)
 
     @property
@@ -105,11 +118,11 @@ class MultiConn:
         return SUPPORTED_TAPIR_VERSION
 
     def __repr__(self) -> str:
-        attrs = {name: getattr(self, name) for name in ["pending", "active", "failed", "primary", "dialog_handler"]}
+        attrs = {name: getattr(self, name) for name in ["pending", "ready", "active", "failed", "primary", "dialog_handler"]}
         return f"{self.__class__.__name__}({attrs})"
 
     def __str__(self) -> str:
-        attrs = {name: getattr(self, name) for name in ["pending", "active", "failed", "primary", "dialog_handler"]}
+        attrs = {name: getattr(self, name) for name in ["pending", "ready", "active", "failed", "primary", "dialog_handler"]}
         return f"{self.__class__.__name__}(\n{pformat(attrs, indent=4)})"
 
     def get_all_port_headers_with_status(self, status: Status) -> dict[Port, ConnHeader]:
@@ -136,6 +149,7 @@ class MultiConn:
 
     def close_if_open(self, port: Port) -> ConnHeader | None:
         header = None
+        self._active_ports.discard(port)
         if port in self.open_port_headers.keys():
             log.info(f"Removing connection header for inactive/unresponsive port {port}.")
             header = self.open_port_headers.pop(port)
@@ -157,24 +171,14 @@ class MultiConn:
 
     def _set_primary_from_port(self, port: Port) -> None:
         if port in self.open_port_headers.keys():
-            self._copy_header(self.open_port_headers[port])
+            self._primary = self.open_port_headers[port]
             log.info(f"Primary connection set to Archicad instance on port {port}")
         else:
             raise KeyError(f"Failed to set primary. Port {port} is closed.")
 
     def _set_primary_from_header(self, header: ConnHeader) -> None:
         if header in self.open_port_headers.values() and header.port:
-            self._copy_header(self.open_port_headers[header.port])
+            self._primary = self.open_port_headers[header.port]
             log.info(f"Archicad instance matching the header found on port {header.port}. Setting primary.")
         else:
             raise KeyError(f"Failed to set primary. There is no open port with header: {header}")
-
-    def _copy_header(self, master_header: ConnHeader) -> None:
-        assert master_header.port, "Cannot copy unassigned header"
-        primary_header = ConnHeader(port=master_header.port, ui_mode=self._ui_mode, initialize=False)
-
-        if master_header.init_future:
-            primary_header.sync_from_master_future(master_header.init_future)
-
-        self._primary = primary_header
-

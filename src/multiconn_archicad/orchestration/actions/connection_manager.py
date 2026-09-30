@@ -40,11 +40,12 @@ class ConnectionManager(ABC):
 class Connect(ConnectionManager):
     def _execute_action(self, conn_headers: list[ConnHeader]) -> list[ConnHeader]:
         for conn_header in conn_headers:
-            project_name = (
-                conn_header.archicad_id.projectName if is_id_initialized(conn_header.archicad_id) else "Unknown"
-            )
-            log.info(f"Connecting to project {project_name} at port {conn_header.port}")
-            conn_header.connect()
+            if conn_header.port:
+                self.multi_conn._active_ports.add(conn_header.port)
+                project_name = (
+                    conn_header.archicad_id.projectName if is_id_initialized(conn_header.archicad_id) else "Unknown"
+                )
+                log.info(f"Added project {project_name} at port {conn_header.port} to active batch worklist")
         return conn_headers
 
     def failed(self) -> None:
@@ -54,9 +55,10 @@ class Connect(ConnectionManager):
 class Disconnect(ConnectionManager):
     def _execute_action(self, conn_headers: list[ConnHeader]) -> list[ConnHeader]:
         for conn_header in conn_headers:
-            project_name = (
-                conn_header.archicad_id.projectName if is_id_initialized(conn_header.archicad_id) else "Unknown"
-            )
-            log.info(f"Disconnecting from project {project_name} at port {conn_header.port}")
-            conn_header.disconnect()
+            if conn_header.port:
+                self.multi_conn._active_ports.discard(conn_header.port)
+                project_name = (
+                    conn_header.archicad_id.projectName if is_id_initialized(conn_header.archicad_id) else "Unknown"
+                )
+                log.info(f"Removed project {project_name} at port {conn_header.port} from active batch worklist")
         return conn_headers

@@ -58,6 +58,7 @@ class QuitAndDisconnect:
                     quit_successful = True
             if quit_successful:
                 processed_headers.append(conn_header)
+                self.multi_conn._active_ports.discard(conn_header.port)
                 self.multi_conn.open_port_headers.pop(conn_header.port)
                 conn_header.unassign()
         return processed_headers
