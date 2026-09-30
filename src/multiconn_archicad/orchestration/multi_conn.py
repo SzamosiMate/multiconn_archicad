@@ -37,11 +37,14 @@ class MultiConn:
     ) -> None:
         cli_args = get_cli_args_once()
         self._base_url: str = cli_args.host if cli_args.host else host
-        self.open_port_headers: dict[Port, ConnHeader] = {}
+        self._open_port_headers: dict[Port, ConnHeader] = {}
         self._active_ports: set[Port] = set()
         self._primary: ConnHeader | None = None
         self.dialog_handler: DialogHandlerBase = dialog_handler
         self._ui_mode = ui_mode
+
+        self._fleet_scanned: bool = False
+        self._target_primary_port: Port | None = Port(cli_args.port) if cli_args.port else port
 
         # load actions
         self.connect: Connect = Connect(self)
@@ -52,32 +55,41 @@ class MultiConn:
         self.open_project: OpenProject = OpenProject(self)
         self.switch_project: SwitchProject = SwitchProject(self)
 
-        self.refresh.all_ports()
-        port = Port(cli_args.port) if cli_args.port else port
-        self._set_primary(port)
+    @property
+    def open_port_headers(self) -> dict[Port, ConnHeader]:
+        self._ensure_fleet_scanned()
+        return self._open_port_headers
+
+    @open_port_headers.setter
+    def open_port_headers(self, value: dict[Port, ConnHeader]) -> None:
+        self._open_port_headers = value
 
     @property
     def pending(self) -> dict[Port, ConnHeader]:
         """Headers currently fetching metadata in background."""
+        self._ensure_fleet_scanned()
         return self.get_all_port_headers_with_status(Status.PENDING)
 
     @property
     def ready(self) -> dict[Port, ConnHeader]:
         """Headers that have finished discovery and are ready for use."""
+        self._ensure_fleet_scanned()
         return self.get_all_port_headers_with_status(Status.READY)
 
     @property
     def active(self) -> dict[Port, ConnHeader]:
         """Headers explicitly queued in MultiConn's batch execution worklist."""
+        self._ensure_fleet_scanned()
         return {
-            port: self.open_port_headers[port]
+            port: self._open_port_headers[port]
             for port in self._active_ports
-            if port in self.open_port_headers
+            if port in self._open_port_headers
         }
 
     @property
     def failed(self) -> dict[Port, ConnHeader]:
         """Headers where metadata discovery failed or timed out."""
+        self._ensure_fleet_scanned()
         return self.get_all_port_headers_with_status(Status.FAILED)
 
     @property
@@ -94,23 +106,25 @@ class MultiConn:
 
     @property
     def primary(self) -> ConnHeader | None:
+        if self._primary is None and (self._target_primary_port is not None or not self._fleet_scanned):
+            self._set_primary(self._target_primary_port)
         return self._primary
 
     @primary.setter
-    def primary(self, new_value: Port | ConnHeader) -> None:
+    def primary(self, new_value: None | Port | ConnHeader) -> None:
         self._set_primary(new_value)
 
     @property
     def core(self) -> CoreCommands | type[CoreCommands]:
-        return self._primary.core if self._primary else CoreCommands
+        return self.primary.core if self.primary else CoreCommands
 
     @property
     def standard(self) -> StandardConnection | type[StandardConnection]:
-        return self._primary.standard if self._primary else StandardConnection
+        return self.primary.standard if self.primary else StandardConnection
 
     @property
     def unified(self) -> UnifiedApi | type[UnifiedApi]:
-        return self._primary.unified if self._primary else UnifiedApi
+        return self.primary.unified if self.primary else UnifiedApi
 
     @property
     def supported_tapir_version(self) -> str:
@@ -118,22 +132,38 @@ class MultiConn:
         return SUPPORTED_TAPIR_VERSION
 
     def __repr__(self) -> str:
-        attrs = {name: getattr(self, name) for name in ["pending", "ready", "active", "failed", "primary", "dialog_handler"]}
+        attrs = {
+            "pending": self.get_all_port_headers_with_status(Status.PENDING),
+            "ready": self.get_all_port_headers_with_status(Status.READY),
+            "active": {p: self._open_port_headers[p] for p in self._active_ports if p in self._open_port_headers},
+            "failed": self.get_all_port_headers_with_status(Status.FAILED),
+            "primary": self._primary or self._target_primary_port,
+            "dialog_handler": self.dialog_handler,
+        }
         return f"{self.__class__.__name__}({attrs})"
 
     def __str__(self) -> str:
-        attrs = {name: getattr(self, name) for name in ["pending", "ready", "active", "failed", "primary", "dialog_handler"]}
+        attrs = {
+            "pending": self.get_all_port_headers_with_status(Status.PENDING),
+            "ready": self.get_all_port_headers_with_status(Status.READY),
+            "active": {p: self._open_port_headers[p] for p in self._active_ports if p in self._open_port_headers},
+            "failed": self.get_all_port_headers_with_status(Status.FAILED),
+            "primary": self._primary or self._target_primary_port,
+            "dialog_handler": self.dialog_handler,
+        }
         return f"{self.__class__.__name__}(\n{pformat(attrs, indent=4)})"
 
     def get_all_port_headers_with_status(self, status: Status) -> dict[Port, ConnHeader]:
         return {
             conn_header.port: conn_header
-            for conn_header in self.open_port_headers.values()
+            for conn_header in self._open_port_headers.values()
             if conn_header.status == status and conn_header.port
         }
 
     def scan_ports(self, ports: list[Port]) -> None:
         list(EXECUTOR.map(self.check_port, ports))
+        if set(ports) >= set(self._port_range):
+            self._fleet_scanned = True
 
     def check_port(self, port: Port) -> None:
         if is_port_listening(self._base_url, port):
@@ -142,43 +172,57 @@ class MultiConn:
             self.close_if_open(port)
 
     def create_or_refresh_connection(self, port: Port) -> None:
-        if port not in self.open_port_headers.keys():
-            self.open_port_headers[port] = ConnHeader(port, ui_mode=self._ui_mode)
+        if port not in self._open_port_headers.keys():
+            self._open_port_headers[port] = ConnHeader(port, ui_mode=self._ui_mode)
         else:
-            self.open_port_headers[port].refresh_metadata()
+            self._open_port_headers[port].refresh_metadata()
 
     def close_if_open(self, port: Port) -> ConnHeader | None:
         header = None
         self._active_ports.discard(port)
-        if port in self.open_port_headers.keys():
+        if port in self._open_port_headers.keys():
             log.info(f"Removing connection header for inactive/unresponsive port {port}.")
-            header = self.open_port_headers.pop(port)
+            header = self._open_port_headers.pop(port)
             header.cancel()
             if self._primary and self._primary.port == port:
-                self._set_primary()
+                self._primary = None
+                self._target_primary_port = None
         return header
 
     def _set_primary(self, new_value: None | Port | ConnHeader = None) -> None:
         if isinstance(new_value, Port):
+            self._target_primary_port = new_value
             self._set_primary_from_port(new_value)
         elif isinstance(new_value, ConnHeader) and new_value.port in self.open_ports:
+            self._target_primary_port = new_value.port
             self._set_primary_from_header(new_value)
         elif self.open_ports:
             self._set_primary_from_port(sorted(self.open_ports)[0])
         else:
             self._primary = None
+            self._target_primary_port = None
             log.info("Primary connection cleared")
 
     def _set_primary_from_port(self, port: Port) -> None:
-        if port in self.open_port_headers.keys():
-            self._primary = self.open_port_headers[port]
+        if port not in self._open_port_headers:
+            self.check_port(port)
+        if port in self._open_port_headers.keys():
+            self._primary = self._open_port_headers[port]
             log.info(f"Primary connection set to Archicad instance on port {port}")
         else:
             raise KeyError(f"Failed to set primary. Port {port} is closed.")
 
     def _set_primary_from_header(self, header: ConnHeader) -> None:
-        if header in self.open_port_headers.values() and header.port:
-            self._primary = self.open_port_headers[header.port]
+        if header.port and header.port not in self._open_port_headers:
+            self.check_port(header.port)
+        if header.port and header.port in self._open_port_headers.values() and header.port:
+            self._primary = self._open_port_headers[header.port]
             log.info(f"Archicad instance matching the header found on port {header.port}. Setting primary.")
         else:
             raise KeyError(f"Failed to set primary. There is no open port with header: {header}")
+
+    def _ensure_fleet_scanned(self) -> None:
+        if not self._fleet_scanned:
+            self._fleet_scanned = True
+            log.info("Triggering on-demand fleet port scan...")
+            self.refresh.all_ports()
