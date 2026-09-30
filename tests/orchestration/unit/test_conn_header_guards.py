@@ -20,6 +20,7 @@ from multiconn_archicad.orchestration.basic_types import (
     TeamworkCredentials,
 )
 from multiconn_archicad.constants import SUPPORTED_TAPIR_VERSION
+from multiconn_archicad.errors import HeaderUnassignedError
 
 pytestmark = pytest.mark.unit
 
@@ -149,3 +150,64 @@ def test_is_tapir_session_ready_fails_when_version_outdated(ready_session_header
 def test_is_tapir_session_ready_fails_when_session_not_ready(ready_session_header):
     ready_session_header._status = Status.PENDING
     assert is_tapir_session_ready(ready_session_header) is False
+
+# =========================================================================
+# ConnHeader Invariants & Lifecycle Transitions
+# =========================================================================
+
+def test_port_immutability():
+    """
+    Verifies that a ConnHeader is strictly bound to its assigned port:
+    - Setting to the same port is a safe no-op.
+    - Reassigning to a different port raises ValueError.
+    """
+    header = ConnHeader(port=Port(19723), initialize=False)
+
+    # Same port: safe no-op
+    header.port = Port(19723)
+    assert header.port == Port(19723)
+
+    # Different port: strictly forbidden
+    with pytest.raises(ValueError, match="Cannot reassign ConnHeader from port 19723 to 19724"):
+        header.port = Port(19724)
+
+
+def test_port_lifecycle_binding_and_unassign():
+    """
+    Verifies the UNASSIGNED -> PENDING -> UNASSIGNED state lifecycle:
+    - None -> Port: initializes sub-clients, sets PENDING, but does NOT auto-fetch.
+    - Port -> None: fully unassigns, clears port, and prevents client access.
+    """
+    header = ConnHeader(initialize=False)
+    assert header.status == Status.UNASSIGNED
+    assert header.port is None
+
+    # None -> Port (Template binding)
+    header.port = Port(19723)
+    assert header.status == Status.PENDING
+    assert header.port == Port(19723)
+    assert header.init_future is None  # Fetch must be explicitly invoked
+    assert header.core is not None
+
+    # Port -> None (Unassign)
+    header.port = None
+    assert header.status == Status.UNASSIGNED
+    assert header.port is None
+
+    with pytest.raises(HeaderUnassignedError):
+        _ = header.core
+
+
+def test_standard_connection_jit_binding():
+    """
+    Verifies that StandardConnection is stateless until ProductInfo is resolved,
+    at which point accessing .standard dynamically binds JIT.
+    """
+    header = ConnHeader(port=Port(19723), initialize=False)
+
+    # Unversioned initially
+    assert not header.standard.is_versioned
+
+    # Assign metadata and access property to trigger JIT binding
+    header._product_info = ProductInfo(version=27, buildNumber=3001, languageCode="INT")
+    assert header.standard.is_versioned
