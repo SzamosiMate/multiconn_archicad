@@ -125,6 +125,9 @@ def test_quit_all_sends_command_and_removes_header(archicad_api):
     conn = MultiConn()
 
     header_to_quit = conn.open_port_headers[archicad_api.server_port]
+    conn.primary = archicad_api.server_port
+    primary_changes = []
+    conn.events.subscribe_primary_changed(lambda previous, current: primary_changes.append((previous, current)))
     processed_headers = conn.quit.all()
 
     assert len(processed_headers) == 1
@@ -132,3 +135,4 @@ def test_quit_all_sends_command_and_removes_header(archicad_api):
     assert len(conn.open_port_headers) == 0
     assert header_to_quit.status == Status.UNASSIGNED
     assert header_to_quit.port is None
+    assert any(previous is header_to_quit and current is None for previous, current in primary_changes)

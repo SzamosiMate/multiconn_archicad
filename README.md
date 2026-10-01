@@ -17,8 +17,8 @@
 - **Multi-instance Management**: Seamlessly execute commands across one, several, or all open Archicad projects.
 - **Project Automation**: Programmatically find, open, and switch between solo and teamwork projects.
 - **Thread-Safe Architecture**: Built on a synchronous threading model using `httpx` for maximum stability and performance.
-- **Lazy Metadata Evaluation**: Initializes instantly by offloading heavy API discovery (Project info, versioning) to background threads.
-- **UI Mode Support**: Prevent GUI freezes in plugins by using non-blocking placeholders.
+- **Lazy Metadata Evaluation**: Scans ports on first connection access and fetches metadata in background threads.
+- **UI Mode Support**: Returns placeholders while metadata is pending and offers connection notifications for GUI updates.
 
 ## Installation
 
@@ -47,23 +47,45 @@ pip install multiconn_archicad[dialog-handlers]
 Version 0.6.0 introduces a significant architectural shift from `asyncio` to **Synchronous Threading**. This change provides better stability when interacting with Archicad’s C++ host environment while maintaining a responsive API.
 
 ### 1. Instant Initialization (Lazy Loading)
-When you instantiate `MultiConn()`, it returns control to your script in milliseconds. It performs a "TCP knock" to find open ports and spawns background threads to fetch project metadata (like `projectName` and `version`).
+`MultiConn()` does not scan ports unless you provide an explicit port. The first connection property access scans the configured ports and starts background metadata fetches.
 
 ### 2. Sync-on-Demand
 In standard scripts, the library uses "Lazy Evaluation." If you access a property (e.g., `conn.primary.product_info`) before the background thread has finished fetching it, the library will **automatically pause** your main thread for a fraction of a second until the data is ready.
 
 ### 3. UI Mode (Non-Blocking)
-If you are developing a GUI (e.g., using PyQt, Tkinter, or Blender), you can enable `ui_mode=True`. This prevents the main thread from ever freezing. 
+For a GUI, use `ui_mode=True` so metadata properties return placeholders while fetching. Call `conn.refresh.all_ports()` on the application thread: it waits for the fast TCP probes, then starts background HTTP metadata fetches. Pass a dispatcher that posts callbacks to your UI thread.
+
+Port probes run in parallel. Once all probes finish, refresh applies connection additions, refreshes, and removals on its calling thread. It preserves an existing primary or selects the lowest known open port when there is no primary. If no connections remain, primary is `None`. Metadata fetching continues in the background, so the UI can display a loading message until `metadata_resolved` arrives.
+
+Register callbacks and manage connections on the application thread. Dispatch callbacks onto that thread; the default dispatcher executes callbacks on their publishing thread.
 
 ```python
-conn = MultiConn(ui_mode=True)
+from multiconn_archicad import MultiConn
 
-# In UI mode, this returns instantly without waiting for the network.
-# If data isn't ready, it returns a `PendingResponse` placeholder.
-info = conn.primary.product_info
-if isinstance(info, PendingResponse):
-    print("Still fetching data...")
+# Replace these with your UI framework's scheduling and rendering functions.
+conn = MultiConn(ui_mode=True, dispatcher=post_to_ui_thread)
+cache = {}
+selected = [None]
+
+def on_primary_changed(previous, current):
+    selected[0] = current
+    cache.clear()
+    clear_dropdowns()
+    render_connection(current)  # Show loading state until metadata resolves.
+
+def on_metadata_resolved(header):
+    if selected[0] is header:
+        render_connection(header)  # Inspect status and project/Tapir readiness here.
+
+unsubscribe_primary = conn.events.subscribe_primary_changed(on_primary_changed)
+unsubscribe_metadata = conn.events.subscribe_metadata_resolved(on_metadata_resolved)
+
+conn.refresh.all_ports()  # Discover connections and select a primary; metadata fetches run in the background.
 ```
+
+Refresh selects the initial primary and invokes `on_primary_changed` through the dispatcher. That callback clears application caches and renders the current metadata or a loading state; `render_connection(None)` should show that no connection is selected. `on_metadata_resolved` renders again when the HTTP fetch finishes. Later, assigning `conn.primary` explicitly switches the selection and invokes the same callback.
+
+Registration replays the current selection and completed metadata for managed headers. Both subscription methods return an idempotent unsubscribe function. The application owns its caches; use a selection generation in asynchronous dropdown work to discard results from an earlier selection.
 
 ---
 

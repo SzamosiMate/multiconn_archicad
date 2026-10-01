@@ -62,7 +62,7 @@ class SwitchProject:
         original_header = self.multi_conn.open_port_headers[original_port]
         original_header.core.post_tapir_command("OpenProject", {"projectFilePath": new_path})
         self._wait_until_alive(original_header)
-        self.multi_conn.open_port_headers[original_port] = ConnHeader(original_port)
+        self.multi_conn._attach_header(original_port, ConnHeader(original_port, initialize=False))
         return self.multi_conn.open_port_headers[original_port]
 
     def _find_duplicate_path(self, new_path: str) -> Port | None:
@@ -172,8 +172,7 @@ class OpenProject:
     def _activate_and_attach_header(self, header: ConnHeader) -> Port:
         port = Port(self._find_archicad_port())
         header.port = port
-        header.refresh_metadata()
-        self.multi_conn.open_port_headers[port] = header
+        self.multi_conn._attach_header(port, header)
         return port
 
     def _find_archicad_port(self) -> int:

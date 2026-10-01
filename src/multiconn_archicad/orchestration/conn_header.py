@@ -2,7 +2,7 @@ from __future__ import annotations
 from concurrent.futures import Future, CancelledError
 import threading
 from enum import Enum
-from typing import Self, Any, TypeGuard, Callable
+from typing import Self, Any, TypeGuard, Callable, TYPE_CHECKING
 from pprint import pformat
 import logging
 import warnings
@@ -28,6 +28,9 @@ from multiconn_archicad.clients.standard_connection import StandardConnection
 from multiconn_archicad.clients.unified_api.api import UnifiedApi
 from multiconn_archicad.orchestration.system.thread_utils import EXECUTOR
 from multiconn_archicad.orchestration.system.ram_monitor import RamMonitor
+
+if TYPE_CHECKING:
+    from multiconn_archicad.orchestration.events import ConnectionEvents
 
 
 log = logging.getLogger(__name__)
@@ -67,6 +70,9 @@ class ConnHeader:
         self._status: Status = Status.PENDING if port else Status.UNASSIGNED
         self._ui_mode: bool = ui_mode
         self._is_cancelled: bool = False
+        self._fetch_lock = threading.RLock()
+        self._events: ConnectionEvents | None = None
+        self._fetch_context = threading.local()
 
         self._ram_monitor = RamMonitor(
             port_getter=lambda: self._port,
@@ -88,6 +94,12 @@ class ConnHeader:
 
         if initialize and port:
             self.refresh_metadata()
+
+    def _bind(self, *, events: ConnectionEvents, ui_mode: bool) -> None:
+        """Configure an adopted header before registration and metadata fetching."""
+        with self._fetch_lock:
+            self._events = events
+            self._ui_mode = ui_mode
 
     @property
     def status(self) -> Status:
@@ -269,25 +281,49 @@ class ConnHeader:
 
     def refresh_metadata(self):
         """Starts a new fetch, superseding any currently running fetch."""
-        self._is_cancelled = False
-        self._fetch_token = object()
-        self._status = Status.PENDING
-        self.init_future = EXECUTOR.submit(self._fetch_worker, self._fetch_token)
+        with self._fetch_lock:
+            self._is_cancelled = False
+            token = self._fetch_token = object()
+            self._status = Status.PENDING
+            self.init_future = EXECUTOR.submit(self._fetch_worker, token)
+
+    def _resolved_fetch_token(self) -> object | None:
+        """Snapshot the current completed fetch without waiting for its future."""
+        with self._fetch_lock:
+            if not self._is_cancelled and self._status in (Status.READY, Status.FAILED):
+                return self._fetch_token
+        return None
 
     def _fetch_worker(self, my_token: object) -> HeaderMetadata | None:
-        self._ram_monitor.get_current_rss()
-        metadata = HeaderMetadata(
-            product_info=self.get_product_info(timeout=5.0),
-            archicad_id=self.get_archicad_id(timeout=5.0),
-            archicad_location=self.get_archicad_location(timeout=5.0),
-            tapir_info=self.get_tapir_info(timeout=5.0),
-        )
+        self._fetch_context.active = True
+        try:
+            return self._fetch_worker_body(my_token)
+        finally:
+            self._fetch_context.active = False
 
-        if self._fetch_token is not my_token or self._is_cancelled:
-            return None
+    def _fetch_worker_body(self, my_token: object) -> HeaderMetadata | None:
+        try:
+            self._ram_monitor.get_current_rss()
+            metadata = HeaderMetadata(
+                product_info=self.get_product_info(timeout=5.0),
+                archicad_id=self.get_archicad_id(timeout=5.0),
+                archicad_location=self.get_archicad_location(timeout=5.0),
+                tapir_info=self.get_tapir_info(timeout=5.0),
+            )
+        except Exception:
+            log.exception("Background metadata fetch failed")
+            metadata = None
 
-        self._assign_metadata(metadata)
-        self._resolve_status(metadata.product_info)
+        with self._fetch_lock:
+            if self._fetch_token is not my_token or self._is_cancelled:
+                return None
+            if metadata is not None:
+                self._assign_metadata(metadata)
+                self._resolve_status(metadata.product_info)
+            else:
+                self._status = Status.FAILED
+        if self._events is not None:
+            self._events._resolved(self, my_token)
         return metadata
 
     def _assign_metadata(self, metadata: HeaderMetadata) -> None:
@@ -300,7 +336,7 @@ class ConnHeader:
         if isinstance(self._tapir_info, APIResponseError) or isinstance(metadata.tapir_info, TapirInfo):
             self._tapir_info = metadata.tapir_info
 
-    def _resolve_status(self, product_info: ProductInfo) -> None:
+    def _resolve_status(self, product_info: ProductInfo | APIResponseError) -> None:
         if is_product_info_initialized(product_info):
             self._status = Status.READY
         else:
@@ -316,7 +352,9 @@ class ConnHeader:
         self._unified = None
 
     def cancel(self):
-        self._is_cancelled = True
+        with self._fetch_lock:
+            self._is_cancelled = True
+            self._fetch_token = None
 
     def _sync_if_needed(self):
         """Safely unpacks the future when data is needed or ready."""
@@ -324,6 +362,7 @@ class ConnHeader:
             not self.init_future
             or self.init_future is self._unpacked_future
             or threading.current_thread().name.startswith("MultiConnWorker")
+            or getattr(self._fetch_context, "active", False)
         ):
             return
 
@@ -335,18 +374,21 @@ class ConnHeader:
 
     def _unpack_future(self) -> None:
         """Resolves background future"""
+        future = self.init_future
+        if future is None:
+            return
         try:
-            res = self.init_future.result()
-            if res and self.init_future is not self._unpacked_future:
-                self._assign_metadata(res)
-                self._unpacked_future = self.init_future
+            future.result()
 
         except CancelledError:
             pass
         except Exception as e:
             log.warning(f"Background fetch failed: {e}")
-            self._status = Status.FAILED
-            self._unpacked_future = self.init_future
+            with self._fetch_lock:
+                if future is self.init_future and not self._is_cancelled:
+                    self._status = Status.FAILED
+        finally:
+            self._unpacked_future = future
 
     def _execute_api_fetch[T](
         self,
