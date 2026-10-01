@@ -27,12 +27,7 @@ log = logging.getLogger(__name__)
 
 
 class MultiConn:
-    """Manage connections with application-serialized lifecycle operations.
-
-    Port probes and metadata fetching run on workers. Connection management runs
-    on the calling thread; applications serialize those calls and dispatch any
-    callbacks that manage connections onto the same application thread.
-    """
+    """Manage connections to multiple Archicad instances and select a primary connection."""
 
     _port_range: list[Port] = [Port(port) for port in DEFAULT_PORT_RANGE]
 

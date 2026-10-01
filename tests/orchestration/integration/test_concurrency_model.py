@@ -32,7 +32,7 @@ def test_fast_initialization_despite_slow_server(slow_archicad_api):
         conn = MultiConn()
         assert conn.primary is not None
         assert server_entered.wait(timeout=5.0), "Background fetch did not start as expected"
-        assert not conn.primary.init_future.done()
+        assert not conn.primary._fetch_task[1].done()
     finally:
         unblock_server.set()
 
@@ -68,7 +68,7 @@ def test_ui_mode_lifecycle_pending_to_ready(slow_archicad_api):
         unblock_server.set()
 
     # Wait for completion
-    conn.primary.init_future.result(timeout=5.0)
+    conn.primary._fetch_task[1].result(timeout=5.0)
 
     # Resolved: unpacks to ProductInfo and transitions to conn.ready
     assert isinstance(conn.primary.product_info, ProductInfo)
@@ -143,7 +143,7 @@ def test_primary_canonical_identity_shared_with_pool(slow_archicad_api):
     pool_header = conn.open_port_headers[port]
 
     assert conn.primary is pool_header
-    assert conn.primary.init_future is pool_header.init_future
+    assert conn.primary._fetch_task is pool_header._fetch_task
 
     _ = conn.primary.product_info
     assert conn.primary.product_info is pool_header.product_info
@@ -154,7 +154,7 @@ def test_primary_canonical_identity_shared_with_pool(slow_archicad_api):
     )
 
     conn.primary.refresh_metadata()
-    assert conn.primary.init_future is pool_header.init_future
+    assert conn.primary._fetch_task is pool_header._fetch_task
 
     _ = conn.primary.product_info
     assert conn.primary.product_info.version == 28

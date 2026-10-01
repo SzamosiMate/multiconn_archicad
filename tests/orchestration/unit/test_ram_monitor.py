@@ -1,8 +1,10 @@
+from dataclasses import replace
 from unittest.mock import patch, MagicMock
 import threading
 
 from multiconn_archicad.orchestration.basic_types import Port, ProductInfo, SoloProjectID, ArchicadLocation
-from multiconn_archicad.orchestration.conn_header import ConnHeader
+from multiconn_archicad.orchestration.conn_header import ConnHeader, Status
+from multiconn_archicad.orchestration.header_state import HeaderState
 from multiconn_archicad.orchestration.system.ram_monitor import AtomicPeak, RamMonitor
 
 
@@ -70,8 +72,7 @@ def test_fetch_worker_auto_seeds_peak_ram_in_background():
     with patch("multiconn_archicad.orchestration.system.ram_monitor.find_pid_by_port", return_value=12345):
         with patch("multiconn_archicad.orchestration.system.ram_monitor.get_process_rss_bytes", return_value=3_221_225_472):
             # Run fetch worker
-            token = object()
-            header._fetch_token = token
+            token = header._state.begin_fetch()
             header._fetch_worker(token)
 
             # Assert peak RAM is now auto-seeded
@@ -84,9 +85,15 @@ def test_to_dict_serialization_with_auto_seeded_peak_ram():
     when seeded by live process queries.
     """
     header = ConnHeader(port=Port(19723), initialize=False)
-    header._product_info = ProductInfo(version=27, buildNumber=3001, languageCode="INT")
-    header._archicad_id = SoloProjectID(projectPath="/path/project.pln", projectName="TestProject")
-    header._archicad_location = ArchicadLocation(archicadLocation="/path/to/Archicad")
+    header._state = HeaderState(
+        Status.PENDING,
+        replace(
+            header._state.snapshot().metadata,
+            product_info=ProductInfo(version=27, buildNumber=3001, languageCode="INT"),
+            archicad_id=SoloProjectID(projectPath="/path/project.pln", projectName="TestProject"),
+            archicad_location=ArchicadLocation(archicadLocation="/path/to/Archicad"),
+        ),
+    )
 
     with patch("multiconn_archicad.orchestration.system.ram_monitor.find_pid_by_port", return_value=12345):
         with patch("multiconn_archicad.orchestration.system.ram_monitor.get_process_rss_bytes", return_value=4_294_967_296):
