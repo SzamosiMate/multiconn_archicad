@@ -45,6 +45,11 @@ def test_switch_project_success(archicad_api):
     conn = MultiConn()
     original_port = archicad_api.server_port
     original_header = conn.open_port_headers[original_port]
+    conn.primary = original_port
+    primary_changes = []
+    metadata_results = []
+    conn.events.subscribe_primary_changed(lambda previous, current: primary_changes.append((previous, current)))
+    conn.events.subscribe_metadata_resolved(metadata_results.append)
 
     assert isinstance(original_header.archicad_id, SoloProjectID)
 
@@ -66,6 +71,9 @@ def test_switch_project_success(archicad_api):
     assert new_header_state is not original_header
     assert conn.open_port_headers[original_port] is new_header_state
     assert isinstance(new_header_state.archicad_id, TeamworkProjectID)
+    new_header_state.init_future.result(timeout=5)
+    assert (original_header, new_header_state) in primary_changes
+    assert any(header is new_header_state for header in metadata_results)
 
 
 @patch("multiconn_archicad.orchestration.actions.project_handler.subprocess.Popen")
@@ -87,6 +95,8 @@ def test_open_project_calls_dependencies_correctly(
 
     conn = MultiConn()
     conn.dialog_handler.start = MagicMock()
+    metadata_results = []
+    conn.events.subscribe_metadata_resolved(metadata_results.append)
 
     # Configure mock for Popen
     mock_process = MagicMock()
@@ -135,3 +145,5 @@ def test_open_project_calls_dependencies_correctly(
 
     # 4. Verify a new header was added for the new port
     assert new_port in conn.open_port_headers
+    conn.open_port_headers[new_port].init_future.result(timeout=5)
+    assert any(header is header_to_open for header in metadata_results)

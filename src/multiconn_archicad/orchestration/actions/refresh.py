@@ -22,6 +22,7 @@ class Refresh:
         self.execute_action([port for port, header in self.multi_conn.open_port_headers.items() if header in args])
 
     def all_ports(self) -> None:
+        """Refresh configured ports and select a primary if none remains."""
         self.execute_action(self.multi_conn.port_range)
 
     def open_ports(self) -> None:
@@ -31,9 +32,10 @@ class Refresh:
         self.execute_action(self.multi_conn.closed_ports)
 
     def execute_action(self, ports: list[Port]) -> None:
-        self.multi_conn.scan_ports(ports)
-        self.multi_conn.open_port_headers = dict(sorted(self.multi_conn.open_port_headers.items()))
+        self.multi_conn._scan_ports(ports)
+        self.multi_conn._ensure_primary()
+        open_headers = self.multi_conn._open_port_headers
         log.info(
-            f"Refreshing - Open ports: {len(self.multi_conn.open_port_headers)}, "
-            f"Closed ports: {len(self.multi_conn.closed_ports)}"
+            f"Refreshing - Open ports: {len(open_headers)}, "
+            f"Closed ports: {len(set(self.multi_conn.port_range) - open_headers.keys())}"
         )

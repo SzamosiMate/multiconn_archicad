@@ -7,6 +7,7 @@ from multiconn_archicad.clients.core.core_commands import CoreCommands
 from multiconn_archicad.clients.standard_connection import StandardConnection
 from multiconn_archicad.clients.unified_api.api import UnifiedApi
 from multiconn_archicad.orchestration.conn_header import ConnHeader, Status
+from multiconn_archicad.orchestration.events import ConnectionEvents, Dispatcher
 from multiconn_archicad.orchestration.basic_types import Port
 from multiconn_archicad.orchestration.actions import (
     Connect,
@@ -26,6 +27,13 @@ log = logging.getLogger(__name__)
 
 
 class MultiConn:
+    """Manage connections with application-serialized lifecycle operations.
+
+    Port probes and metadata fetching run on workers. Connection management runs
+    on the calling thread; applications serialize those calls and dispatch any
+    callbacks that manage connections onto the same application thread.
+    """
+
     _port_range: list[Port] = [Port(port) for port in DEFAULT_PORT_RANGE]
 
     def __init__(
@@ -34,12 +42,18 @@ class MultiConn:
         port: Port | None = None,
         host: str = DEFAULT_HOST,
         ui_mode: bool = False,
+        dispatcher: Dispatcher | None = None,
     ) -> None:
         cli_args = get_cli_args_once()
         self._base_url: str = cli_args.host if cli_args.host else host
         self._open_port_headers: dict[Port, ConnHeader] = {}
         self._active_ports: set[Port] = set()
         self._primary: ConnHeader | None = None
+        self.events = ConnectionEvents(
+            dispatcher,
+            get_primary=lambda: self._primary,
+            get_headers=lambda: self._open_port_headers.copy(),
+        )
         self.dialog_handler: DialogHandlerBase = dialog_handler
         self._ui_mode = ui_mode
 
@@ -163,33 +177,77 @@ class MultiConn:
             if conn_header.status == status and conn_header.port
         }
 
-    def scan_ports(self, ports: list[Port]) -> None:
-        list(EXECUTOR.map(self.check_port, ports))
+    def _scan_ports(self, ports: list[Port]) -> None:
+        """Probe ports in parallel, then update connections on the calling thread."""
+        results = list(EXECUTOR.map(self._probe_port, ports))
+        for port, listening in results:
+            self._apply_port_result(port, listening)
         if set(ports) >= set(self._port_range):
             self._fleet_scanned = True
 
-    def check_port(self, port: Port) -> None:
-        if is_port_listening(self._base_url, port):
+    def _check_port(self, port: Port) -> None:
+        self._apply_port_result(*self._probe_port(port))
+
+    def _probe_port(self, port: Port) -> tuple[Port, bool]:
+        return port, is_port_listening(self._base_url, port)
+
+    def _apply_port_result(self, port: Port, listening: bool) -> None:
+        if listening:
             self.create_or_refresh_connection(port)
         else:
             self.close_if_open(port)
 
     def create_or_refresh_connection(self, port: Port) -> None:
-        if port not in self._open_port_headers.keys():
-            self._open_port_headers[port] = ConnHeader(port, ui_mode=self._ui_mode)
+        header = self._open_port_headers.get(port)
+        if header is None:
+            self._attach_header(port, ConnHeader(port, initialize=False))
         else:
-            self._open_port_headers[port].refresh_metadata()
+            header.refresh_metadata()
+
+    def _attach_header(self, port: Port, header: ConnHeader) -> None:
+        """Register a header, start its fetch, then notify any selection change."""
+        previous = self._open_port_headers.get(port)
+        if previous is not None and previous is not header:
+            previous.cancel()
+        header._bind(events=self.events, ui_mode=self._ui_mode)
+        self._open_port_headers[port] = header
+        header.refresh_metadata()
+        self._replace_primary(previous, header)
+
+    def _remove_header(self, port: Port) -> ConnHeader | None:
+        """Remove a managed header while preserving it for the caller."""
+        header = self._open_port_headers.pop(port, None)
+        self._active_ports.discard(port)
+        if header is None:
+            return None
+        header.cancel()
+        self._replace_primary(header, None)
+        return header
 
     def close_if_open(self, port: Port) -> ConnHeader | None:
-        header = None
-        self._active_ports.discard(port)
         if port in self._open_port_headers.keys():
             log.info(f"Removing connection header for inactive/unresponsive port {port}.")
-            header = self._open_port_headers.pop(port)
-            header.cancel()
-            if self._primary and self._primary.port == port:
-                self._primary = None
-        return header
+        return self._remove_header(port)
+
+    def _replace_primary(self, previous: ConnHeader | None, replacement: ConnHeader | None) -> None:
+        """Follow a selected header's replacement or removal."""
+        if previous is not None and self._primary is previous:
+            self._commit_primary(replacement)
+
+    def _commit_primary(self, header: ConnHeader | None) -> None:
+        """Update selection and publish its change."""
+        if header is not None and (header.port is None or self._open_port_headers.get(header.port) is not header):
+            raise KeyError(f"Failed to set primary. Port {header.port} is closed.")
+        if self._primary is header:
+            return
+        previous = self._primary
+        self._primary = header
+        self.events._primary_changed(previous, header)
+
+    def _ensure_primary(self) -> None:
+        """Select a known open connection when there is no current selection."""
+        if self._primary is None and self._open_port_headers:
+            self._set_primary_from_port(min(self._open_port_headers))
 
     def _set_primary(self, new_value: None | Port | ConnHeader = None) -> None:
         if isinstance(new_value, Port):
@@ -199,23 +257,23 @@ class MultiConn:
         elif self.open_ports:
             self._set_primary_from_port(sorted(self.open_ports)[0])
         else:
-            self._primary = None
+            self._commit_primary(None)
             log.info("Primary connection cleared")
 
     def _set_primary_from_port(self, port: Port) -> None:
         if port in self.port_range and port not in self._open_port_headers:
-            self.check_port(port)
+            self._check_port(port)
         if port in self._open_port_headers.keys():
-            self._primary = self._open_port_headers[port]
+            self._commit_primary(self._open_port_headers[port])
             log.info(f"Primary connection set to Archicad instance on port {port}")
         else:
             raise KeyError(f"Failed to set primary. Port {port} is closed.")
 
     def _set_primary_from_header(self, header: ConnHeader) -> None:
         if header.port and header.port not in self._open_port_headers:
-            self.check_port(header.port)
-        if header.port and header.port in self._open_port_headers.values() and header.port:
-            self._primary = self._open_port_headers[header.port]
+            self._check_port(header.port)
+        if header.port and header.port in self._open_port_headers:
+            self._commit_primary(self._open_port_headers[header.port])
             log.info(f"Archicad instance matching the header found on port {header.port}. Setting primary.")
         else:
             raise KeyError(f"Failed to set primary. There is no open port with header: {header}")
