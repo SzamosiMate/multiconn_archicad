@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections import deque
 from collections.abc import Mapping
 import logging
-from threading import RLock
+from threading import Lock
 from typing import Callable, TYPE_CHECKING, cast
 
 if TYPE_CHECKING:
@@ -45,7 +45,7 @@ class _Subscription:
         if port is None or self.queued_tokens.get(port) is token:
             return False
         self.queued_tokens[port] = token
-        return self.enqueue("metadata", port, header, token)
+        return self.enqueue("metadata", header, token)
 
     def schedule(self) -> None:
         try:
@@ -65,11 +65,14 @@ class _Subscription:
                     return
                 kind, args = self.queue.popleft()
                 if kind == "metadata":
-                    _, header, token = args
+                    header, token = args
                     if not self.owner._is_current_completion(cast("ConnHeader", header), token):
                         continue
             try:
-                self.callback(cast("ConnHeader", args[1])) if kind == "metadata" else self.callback(*args)
+                if kind == "metadata":
+                    self.callback(args[0])
+                else:
+                    self.callback(*args)
             except Exception:
                 log.exception("Connection event callback failed")
 
@@ -86,13 +89,7 @@ class _Subscription:
 
 
 class ConnectionEvents:
-    """Deliver connection changes through the supplied zero-argument dispatcher.
-
-    The default dispatcher runs callbacks synchronously on the publishing thread.
-    Applications serialize registration with connection management. Metadata
-    publication may run concurrently. State providers return snapshots without
-    triggering discovery.
-    """
+    """Notify subscribers when metadata is available or the primary connection changes."""
 
     def __init__(
         self,
@@ -102,7 +99,7 @@ class ConnectionEvents:
         get_headers: Callable[[], Mapping[Port, ConnHeader]],
     ) -> None:
         self._dispatcher = dispatcher or _direct
-        self._lock = RLock()
+        self._lock = Lock()
         self._get_primary = get_primary
         self._get_headers = get_headers
         self._metadata_subscribers: list[_Subscription] = []
@@ -155,7 +152,7 @@ class ConnectionEvents:
             if not self._is_current_completion(header, token):
                 return
             for subscriber in self._metadata_subscribers:
-                if subscriber.active and subscriber.enqueue_metadata(header, token):
+                if subscriber.enqueue_metadata(header, token):
                     to_schedule.append(subscriber)
         for subscriber in to_schedule:
             subscriber.schedule()
@@ -166,7 +163,7 @@ class ConnectionEvents:
             if previous is current:
                 return
             for subscriber in self._primary_subscribers:
-                if subscriber.active and subscriber.enqueue("primary", previous, current):
+                if subscriber.enqueue("primary", previous, current):
                     to_schedule.append(subscriber)
         for subscriber in to_schedule:
             subscriber.schedule()

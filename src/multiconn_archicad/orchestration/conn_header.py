@@ -1,12 +1,10 @@
 from __future__ import annotations
 from concurrent.futures import Future, CancelledError
 import threading
-from enum import Enum
 from typing import Self, Any, TypeGuard, Callable, TYPE_CHECKING
 from pprint import pformat
 import logging
 import warnings
-from dataclasses import dataclass
 
 from pydantic import GetCoreSchemaHandler, ValidationError
 from pydantic_core import core_schema
@@ -28,6 +26,12 @@ from multiconn_archicad.clients.standard_connection import StandardConnection
 from multiconn_archicad.clients.unified_api.api import UnifiedApi
 from multiconn_archicad.orchestration.system.thread_utils import EXECUTOR
 from multiconn_archicad.orchestration.system.ram_monitor import RamMonitor
+from multiconn_archicad.orchestration.header_state import (
+    HeaderMetadata as HeaderMetadata,
+    HeaderSnapshot,
+    HeaderState,
+    Status as Status,
+)
 
 if TYPE_CHECKING:
     from multiconn_archicad.orchestration.events import ConnectionEvents
@@ -36,29 +40,9 @@ if TYPE_CHECKING:
 log = logging.getLogger(__name__)
 
 
-class Status(Enum):
-    PENDING = "pending"
-    READY = "ready"
-    FAILED = "failed"
-    UNASSIGNED = "unassigned"
-
-    def __repr__(self) -> str:
-        return f"{self.__class__.__name__}.{self.name}"
-
-    def __str__(self) -> str:
-        return self.__repr__()
-
-
-@dataclass(frozen=True)
-class HeaderMetadata:
-    """Bundle containing all polled metadata from an Archicad instance."""
-    product_info: ProductInfo | APIResponseError
-    archicad_id: ArchiCadID | APIResponseError
-    archicad_location: ArchicadLocation | APIResponseError
-    tapir_info: TapirInfo | APIResponseError
-
-
 class ConnHeader:
+    """Represent an Archicad connection with its metadata and API clients."""
+
     def __init__(
         self,
         port: Port | None = None,
@@ -67,10 +51,8 @@ class ConnHeader:
         initial_peak_ram_bytes: int | None = None,
     ):
         self._port: Port | None = port
-        self._status: Status = Status.PENDING if port else Status.UNASSIGNED
+        self._state = HeaderState(Status.PENDING if port else Status.UNASSIGNED)
         self._ui_mode: bool = ui_mode
-        self._is_cancelled: bool = False
-        self._fetch_lock = threading.RLock()
         self._events: ConnectionEvents | None = None
         self._fetch_context = threading.local()
 
@@ -79,32 +61,28 @@ class ConnHeader:
             initial_peak_bytes=initial_peak_ram_bytes,
         )
 
-        self._fetch_token: object | None = None
-        self.init_future: Future | None = None
-        self._unpacked_future: Future | None = None
+        self._fetch_task: tuple[object, Future] | None = None
+        self._waited_future: Future | None = None
 
         self._core: CoreCommands | None = CoreCommands(port) if port else None
         self._standard: StandardConnection | None = StandardConnection(port) if port else None
         self._unified: UnifiedApi | None = UnifiedApi(self.core) if self._core else None
-
-        self._product_info: ProductInfo | APIResponseError = PendingResponse()
-        self._archicad_id: ArchiCadID | APIResponseError = PendingResponse()
-        self._archicad_location: ArchicadLocation | APIResponseError = PendingResponse()
-        self._tapir_info: TapirInfo | APIResponseError = PendingResponse()
 
         if initialize and port:
             self.refresh_metadata()
 
     def _bind(self, *, events: ConnectionEvents, ui_mode: bool) -> None:
         """Configure an adopted header before registration and metadata fetching."""
-        with self._fetch_lock:
-            self._events = events
-            self._ui_mode = ui_mode
+        self._events = events
+        self._ui_mode = ui_mode
+
+    def _snapshot(self) -> HeaderSnapshot:
+        self._sync_if_needed()
+        return self._state.snapshot()
 
     @property
     def status(self) -> Status:
-        self._sync_if_needed()
-        return self._status
+        return self._snapshot().status
 
     @property
     def port(self) -> Port | None:
@@ -127,7 +105,7 @@ class ConnHeader:
             self._core = CoreCommands(port)
             self._standard = StandardConnection(port)
             self._unified = UnifiedApi(self.core)
-            self._status = Status.PENDING
+            self._state.assign()
         else:
             self.unassign()
 
@@ -158,8 +136,9 @@ class ConnHeader:
         self._sync_if_needed()
         if self._standard is None:
             raise HeaderUnassignedError("StandardConnection is not initialized.")
-        if not self._standard.is_versioned and is_product_info_initialized(self._product_info):
-            self._standard.bind(self._product_info)
+        product_info = self._state.snapshot().metadata.product_info
+        if not self._standard.is_versioned and is_product_info_initialized(product_info):
+            self._standard.bind(product_info)
         return self._standard
 
     @property
@@ -171,35 +150,33 @@ class ConnHeader:
 
     @property
     def product_info(self) -> ProductInfo | APIResponseError:
-        self._sync_if_needed()
-        return self._product_info
+        return self._snapshot().metadata.product_info
 
     @property
     def archicad_id(self) -> ArchiCadID | APIResponseError:
-        self._sync_if_needed()
-        return self._archicad_id
+        return self._snapshot().metadata.archicad_id
 
     @property
     def archicad_location(self) -> ArchicadLocation | APIResponseError:
-        self._sync_if_needed()
-        return self._archicad_location
+        return self._snapshot().metadata.archicad_location
 
     @property
     def tapir_info(self) -> TapirInfo | APIResponseError:
-        self._sync_if_needed()
-        return self._tapir_info
+        return self._snapshot().metadata.tapir_info
 
     def to_dict(self) -> dict[str, Any]:
         """Serialize connection header. Requires the header to have project identity."""
-        if not has_project_identity(self):
+        snapshot = self._snapshot()
+        metadata = snapshot.metadata
+        if not _has_project_identity(metadata):
             raise ValueError(
                 f"Cannot serialize ConnHeader on port {self.port}: Header is missing project identity "
-                f"(status={self._status.value})."
+                f"(status={snapshot.status.value})."
             )
         return {
-            "productInfo": self._product_info.model_dump(),
-            "archicadId": self._archicad_id.model_dump(),
-            "archicadLocation": self._archicad_location.model_dump(),
+            "productInfo": metadata.product_info.model_dump(),
+            "archicadId": metadata.archicad_id.model_dump(),
+            "archicadLocation": metadata.archicad_location.model_dump(),
             "peakArchicadRamBytes": self.peak_archicad_ram_bytes,
         }
 
@@ -212,9 +189,15 @@ class ConnHeader:
             raise ValueError(f"Expected {cls.__name__} instance or dict, got {type(data).__name__}")
 
         instance = cls(initialize=False)
-        instance._product_info = ProductInfo.model_validate(data["productInfo"])
-        instance._archicad_id = ArchiCadID.model_validate(data["archicadId"])
-        instance._archicad_location = ArchicadLocation.model_validate(data["archicadLocation"])
+        instance._state = HeaderState(
+            Status.UNASSIGNED,
+            HeaderMetadata(
+                product_info=ProductInfo.model_validate(data["productInfo"]),
+                archicad_id=ArchiCadID.model_validate(data["archicadId"]),
+                archicad_location=ArchicadLocation.model_validate(data["archicadLocation"]),
+                tapir_info=PendingResponse(),
+            ),
+        )
         instance.peak_archicad_ram_bytes = data.get("peakArchicadRamBytes")
         return instance
 
@@ -240,59 +223,47 @@ class ConnHeader:
         if self is other:
             return True
         if isinstance(other, ConnHeader):
-            if has_project_identity(self) and has_project_identity(other):
-                if (
-                    self.product_info == other.product_info
-                    and self.archicad_id == other.archicad_id
-                    and self.archicad_location == other.archicad_location
-                ):
-                    return True
+            mine = self._snapshot().metadata
+            if not _has_project_identity(mine):
+                return False
+            theirs = other._snapshot().metadata
+            return bool(
+                _has_project_identity(theirs)
+                and mine.product_info == theirs.product_info
+                and mine.archicad_id == theirs.archicad_id
+                and mine.archicad_location == theirs.archicad_location
+            )
         return False
 
-    def __repr__(self) -> str:
-        attrs = {
-            name: getattr(self, name)
-            for name in [
-                "port",
-                "_status",
-                "product_info",
-                "archicad_id",
-                "archicad_location",
-                "tapir_info",
-                "peak_archicad_ram_bytes",
-            ]
+    def _representation_attributes(self) -> dict[str, Any]:
+        snapshot = self._snapshot()
+        metadata = snapshot.metadata
+        return {
+            "port": self.port,
+            "_status": snapshot.status,
+            "product_info": metadata.product_info,
+            "archicad_id": metadata.archicad_id,
+            "archicad_location": metadata.archicad_location,
+            "tapir_info": metadata.tapir_info,
+            "peak_archicad_ram_bytes": self.peak_archicad_ram_bytes,
         }
-        return f"{self.__class__.__name__}({attrs})"
+
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}({self._representation_attributes()})"
 
     def __str__(self) -> str:
-        attrs = {
-            name: getattr(self, name)
-            for name in [
-                "port",
-                "_status",
-                "product_info",
-                "archicad_id",
-                "archicad_location",
-                "tapir_info",
-                "peak_archicad_ram_bytes",
-            ]
-        }
+        attrs = self._representation_attributes()
         return f"{self.__class__.__name__}(\n{pformat(attrs, width=200, indent=4)})"
 
     def refresh_metadata(self):
         """Starts a new fetch, superseding any currently running fetch."""
-        with self._fetch_lock:
-            self._is_cancelled = False
-            token = self._fetch_token = object()
-            self._status = Status.PENDING
-            self.init_future = EXECUTOR.submit(self._fetch_worker, token)
+        token = self._state.begin_fetch()
+        # Keep each future paired with its own token, even while submit is running.
+        self._fetch_task = (token, EXECUTOR.submit(self._fetch_worker, token))
 
     def _resolved_fetch_token(self) -> object | None:
         """Snapshot the current completed fetch without waiting for its future."""
-        with self._fetch_lock:
-            if not self._is_cancelled and self._status in (Status.READY, Status.FAILED):
-                return self._fetch_token
-        return None
+        return self._state.resolved_token()
 
     def _fetch_worker(self, my_token: object) -> HeaderMetadata | None:
         self._fetch_context.active = True
@@ -314,68 +285,35 @@ class ConnHeader:
             log.exception("Background metadata fetch failed")
             metadata = None
 
-        with self._fetch_lock:
-            if self._fetch_token is not my_token or self._is_cancelled:
-                return None
-            if metadata is not None:
-                self._assign_metadata(metadata)
-                self._resolve_status(metadata.product_info)
-            else:
-                self._status = Status.FAILED
+        if not self._state.complete(my_token, metadata):
+            return None
         if self._events is not None:
             self._events._resolved(self, my_token)
         return metadata
 
-    def _assign_metadata(self, metadata: HeaderMetadata) -> None:
-        if isinstance(self._product_info, APIResponseError) or isinstance(metadata.product_info, ProductInfo):
-            self._product_info = metadata.product_info
-        if isinstance(self._archicad_id, APIResponseError) or isinstance(metadata.archicad_id, ArchiCadID):
-            self._archicad_id = metadata.archicad_id
-        if isinstance(self._archicad_location, APIResponseError) or isinstance(metadata.archicad_location, ArchicadLocation):
-            self._archicad_location = metadata.archicad_location
-        if isinstance(self._tapir_info, APIResponseError) or isinstance(metadata.tapir_info, TapirInfo):
-            self._tapir_info = metadata.tapir_info
-
-    def _resolve_status(self, product_info: ProductInfo | APIResponseError) -> None:
-        if is_product_info_initialized(product_info):
-            self._status = Status.READY
-        else:
-            self._status = Status.FAILED
-
     def unassign(self) -> None:
-        self.cancel()
+        self._state.unassign()
         self._ram_monitor.reset_process()
-        self._status = Status.UNASSIGNED
         self._port = None
         self._core = None
         self._standard = None
         self._unified = None
 
     def cancel(self):
-        with self._fetch_lock:
-            self._is_cancelled = True
-            self._fetch_token = None
+        self._state.cancel()
 
     def _sync_if_needed(self):
-        """Safely unpacks the future when data is needed or ready."""
+        """Wait for metadata while keeping UI and worker reads nonblocking."""
+        task = self._fetch_task
+        if task is None:
+            return
+        token, future = task
         if (
-            not self.init_future
-            or self.init_future is self._unpacked_future
+            future is self._waited_future
             or threading.current_thread().name.startswith("MultiConnWorker")
             or getattr(self._fetch_context, "active", False)
+            or (self._ui_mode and not future.done())
         ):
-            return
-
-        if self._ui_mode:  # UI Mode: Only unpack if background thread is done
-            if self.init_future.done():
-                self._unpack_future()
-        else:  # Standard Mode: Safely block and wait for data
-            self._unpack_future()
-
-    def _unpack_future(self) -> None:
-        """Resolves background future"""
-        future = self.init_future
-        if future is None:
             return
         try:
             future.result()
@@ -384,11 +322,10 @@ class ConnHeader:
             pass
         except Exception as e:
             log.warning(f"Background fetch failed: {e}")
-            with self._fetch_lock:
-                if future is self.init_future and not self._is_cancelled:
-                    self._status = Status.FAILED
+            if task is self._fetch_task:
+                self._state.complete(token, None)
         finally:
-            self._unpacked_future = future
+            self._waited_future = future
 
     def _execute_api_fetch[T](
         self,
@@ -459,31 +396,39 @@ class SessionReadyHeader(ProjectIdentityHeader):
 
 def has_project_identity(header: ConnHeader) -> TypeGuard[ProjectIdentityHeader]:
     """Validates that the header has full project identity data for serialization/launch."""
+    return _has_project_identity(header._snapshot().metadata)
+
+
+def _has_project_identity(metadata: HeaderMetadata) -> bool:
     return bool(
-        isinstance(header.product_info, ProductInfo)
-        and isinstance(header.archicad_id, (SoloProjectID, TeamworkProjectID))
-        and isinstance(header.archicad_location, ArchicadLocation)
+        isinstance(metadata.product_info, ProductInfo)
+        and isinstance(metadata.archicad_id, (SoloProjectID, TeamworkProjectID))
+        and isinstance(metadata.archicad_location, ArchicadLocation)
     )
 
 
 def is_session_ready(header: ConnHeader) -> TypeGuard[SessionReadyHeader]:
     """Validates that Archicad is live on a port and all background tasks have finished."""
+    return _is_session_ready(header._snapshot(), header.port)
+
+
+def _is_session_ready(snapshot: HeaderSnapshot, port: Port | None) -> bool:
     return bool(
-        has_project_identity(header)
-        and header.port is not None
-        and header.status is Status.READY
-        and isinstance(header.tapir_info, TapirInfo)
+        _has_project_identity(snapshot.metadata)
+        and port is not None
+        and snapshot.status is Status.READY
+        and isinstance(snapshot.metadata.tapir_info, TapirInfo)
     )
 
 
 def is_tapir_session_ready(header: ConnHeader, min_version: str | None = None) -> TypeGuard[SessionReadyHeader]:
     """Validates that Archicad is live on a port and the Tapir API version meets requirements"""
-    tapir_meets_requirements = header.tapir_info.is_at_least(min_version) if min_version else header.tapir_info.is_supported
-    return bool(
-        is_session_ready(header)
-        and header.tapir_info.is_installed
-        and tapir_meets_requirements
-    )
+    snapshot = header._snapshot()
+    tapir_info = snapshot.metadata.tapir_info
+    if not _is_session_ready(snapshot, header.port) or not isinstance(tapir_info, TapirInfo):
+        return False
+    tapir_meets_requirements = tapir_info.is_at_least(min_version) if min_version else tapir_info.is_supported
+    return bool(tapir_info.is_installed and tapir_meets_requirements)
 
 
 def is_product_info_initialized(product_info: ProductInfo | APIResponseError) -> TypeGuard[ProductInfo]:
