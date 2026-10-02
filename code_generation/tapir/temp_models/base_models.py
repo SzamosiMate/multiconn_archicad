@@ -192,6 +192,15 @@ class BuildingMaterialPhysicalPropertiesArrayItem(APIModel):
     properties: BuildingMaterialPhysicalProperties
 
 
+class ClassificationItemConflictPolicy(Enum):
+    """
+    What to do with an item whose id already exists in a merged system: replace it or keep the existing one.
+    """
+
+    REPLACE = "replace"
+    SKIP = "skip"
+
+
 class ClassificationItemDetails(APIModel):
     """
     The details of a classification item.
@@ -212,6 +221,16 @@ class ClassificationItemDetails(APIModel):
         list[ClassificationItemDetails] | None,
         Field(description="A list of classification items."),
     ] = None
+
+
+class ClassificationSystemConflictPolicy(Enum):
+    """
+    What to do with a system whose name already exists: merge, replace it, or keep the existing one.
+    """
+
+    MERGE = "merge"
+    REPLACE = "replace"
+    SKIP = "skip"
 
 
 class ColorRGB(APIModel):
@@ -410,6 +429,22 @@ class CurtainWallSegmentDetails(APIModel):
     ] = None
 
 
+class EmbeddedLibraryItem(APIModel):
+    path: Annotated[
+        str,
+        Field(
+            description="The relative path of the library item inside the embedded library, the same path AddFilesToEmbeddedLibrary takes as outputPath."
+        ),
+    ]
+
+
+class DeleteEmbeddedLibraryItemsParameters(APIModel):
+    embeddedLibraryItems: Annotated[
+        list[EmbeddedLibraryItem],
+        Field(description="A list of embedded library items to delete."),
+    ]
+
+
 class DeleteProjectInfoFieldsParameters(APIModel):
     projectInfoIds: Annotated[
         list[str],
@@ -482,26 +517,6 @@ class Change(APIModel):
     id: str
 
 
-class NameType(Enum):
-    """
-    How the drawing's title name is assembled (Identification tabpage of the Drawing Settings dialog).
-    """
-
-    VIEW_OR_SOURCE_FILE_NAME = "ViewOrSourceFileName"
-    VIEW_ID_AND_NAME = "ViewIdAndName"
-    CUSTOM_NAME = "CustomName"
-
-
-class NumberingType(Enum):
-    """
-    How the drawing's title ID is assigned (Identification tabpage of the Drawing Settings dialog).
-    """
-
-    BY_LAYOUT = "ByLayout"
-    BY_VIEW_ID = "ByViewId"
-    CUSTOM_NUMBER = "CustomNumber"
-
-
 class DrawingNameType(Enum):
     """
     How the drawing's title name is assembled (Identification tabpage of the Drawing Settings dialog).
@@ -546,10 +561,16 @@ class DrawingSettings(APIModel):
         Coordinate2D | None,
         Field(description="Offset of the model origin within the drawing."),
     ] = None
+    isCutWithFrame: Annotated[
+        bool | None,
+        Field(
+            description="Whether the drawing is clipped by a custom polygon. Set to false to clear an existing crop and restore the drawing's full auto-fit extent. Only consulted when no clipPolygon is supplied in the same call - supplying a clipPolygon always enables clipping. Setting it to true without a clipPolygon merely re-enables the clip polygon already stored on the Drawing."
+        ),
+    ] = None
     clipPolygon: Annotated[
         list[Coordinate2D] | None,
         Field(
-            description="Polygon (in model coordinates) used to clip the drawing view. At least 3 points. Setting this also enables polygon clipping (useDrawingPolyClip).",
+            description="Polygon (in model coordinates) used to clip the drawing view. At least 3 points. Setting this also enables polygon clipping (isCutWithFrame becomes true); to remove clipping, set isCutWithFrame to false instead.",
             min_length=3,
         ),
     ] = None
@@ -1258,6 +1279,33 @@ class HotspotSettings(APIModel):
     penIndex: int | None = None
 
 
+class IFCElementsToExport(Enum):
+    """
+    Only for the save method, and only together with translatorName: which elements to export. The default is VisibleElementsOnAllStories.
+    """
+
+    ENTIRE_PROJECT = "EntireProject"
+    VISIBLE_ELEMENTS_ON_ALL_STORIES = "VisibleElementsOnAllStories"
+    ALL_ELEMENTS_ON_CURRENT_STORY = "AllElementsOnCurrentStory"
+    VISIBLE_ELEMENTS_ON_CURRENT_STORY = "VisibleElementsOnCurrentStory"
+    SELECTED_ELEMENTS_ONLY = "SelectedElementsOnly"
+
+
+class IFCExportTranslator(APIModel):
+    name: Annotated[
+        str,
+        Field(
+            description="The name of the translator, as the IFC Translators dialog shows it."
+        ),
+    ]
+    preview: Annotated[
+        bool,
+        Field(
+            description="Whether this is the preview translator, the one the IFC properties of elements are previewed with."
+        ),
+    ]
+
+
 class Method(Enum):
     """
     The file operation method to use.
@@ -1286,6 +1334,21 @@ class IFCFileOperationParameters(APIModel):
         FileType | None,
         Field(description="The type of the IFC file. The default is 'ifc'."),
     ] = None
+    translatorName: Annotated[
+        str | None,
+        Field(
+            description="Only for the save method: the name of the IFC export translator to save with, as GetIFCExportTranslators lists them. Without it the save runs with the translator Archicad would offer in its own Save dialog. Needs a fileType of ifc or ifczip (ifc or ifcxml on Archicad 25 and 26)."
+        ),
+    ] = None
+    elementsToExport: IFCElementsToExport | None = None
+
+
+class ImportClassificationsXmlParameters(APIModel):
+    xml: Annotated[
+        str, Field(description="A Classification Manager export (XML) to import.")
+    ]
+    systemConflictPolicy: ClassificationSystemConflictPolicy
+    itemConflictPolicy: ClassificationItemConflictPolicy
 
 
 class ConflictPolicy(Enum):
@@ -1452,7 +1515,7 @@ class KeynoteFolderIdArrayItem(APIModel):
 
 class KeynoteFolderModificationData(APIModel):
     keynoteFolderId: KeynoteFolderId
-    key: str | None = None
+    key: Annotated[str | None, Field(min_length=1)] = None
     title: str | None = None
     reference: str | None = None
 
@@ -1462,7 +1525,7 @@ class KeynoteItemData(APIModel):
         KeynoteFolderId | None,
         Field(description="The parent folder. Optional; defaults to the root folder."),
     ] = None
-    key: str
+    key: Annotated[str, Field(min_length=1)]
     title: str | None = None
     description: str | None = None
     reference: str | None = None
@@ -1486,7 +1549,7 @@ class KeynoteItemIdArrayItem(APIModel):
 
 class KeynoteItemModificationData(APIModel):
     keynoteItemId: KeynoteItemId
-    key: str | None = None
+    key: Annotated[str | None, Field(min_length=1)] = None
     title: str | None = None
     description: str | None = None
     reference: str | None = None
@@ -2477,6 +2540,16 @@ class PropertyMeasureType(Enum):
     ANGLE = "Angle"
 
 
+class PropertyEnumValueRemoval(APIModel):
+    enumValueId: GuidId
+
+
+class PropertyEnumValueRename(APIModel):
+    enumValueId: GuidId
+    displayValue: str
+    nonLocalizedValue: str | None = None
+
+
 class PropertyGroup(APIModel):
     """
     Represents a property group.
@@ -2511,6 +2584,12 @@ class PropertyGroupIdArrayItem(APIModel):
     propertyGroupId: PropertyGroupId
 
 
+class PropertyGroupUpdate(APIModel):
+    propertyGroupId: PropertyGroupId
+    name: str | None = None
+    description: str | None = None
+
+
 class PropertyId(APIModel):
     """
     The identifier of a property.
@@ -2528,6 +2607,16 @@ class PropertyIdArrayItem(APIModel):
     A wrapper containing the property identifier.
     """
     propertyId: PropertyId
+
+
+class PropertyImportConflictPolicy(Enum):
+    """
+    What to do with a property whose name already exists in its group: append imports it under a new unused name, replace replaces the existing definition, skip keeps the existing one.
+    """
+
+    APPEND = "append"
+    REPLACE = "replace"
+    SKIP = "skip"
 
 
 class PropertyValue(APIModel):
@@ -2665,6 +2754,39 @@ class Rotation(APIModel):
         Coordinate2D, Field(description="End point of the rotation arc.")
     ]
     origin: Annotated[Coordinate2D, Field(description="Center of rotation.")]
+
+
+class SaveProjectAsArchiveParameters(APIModel):
+    archiveFilePath: Annotated[
+        str,
+        Field(
+            description="Absolute path of the .pla archive to write. An existing file is overwritten. The archive becomes the open project, as Save As does."
+        ),
+    ]
+    includeLibraryParts: Annotated[
+        bool | None,
+        Field(
+            description="Optional, true by default. Whether the library parts the project uses go into the archive, which makes the archive usable as a linked library of another project."
+        ),
+    ] = None
+    includeProperties: Annotated[
+        bool | None,
+        Field(
+            description="Optional, true by default. Whether the properties go into the archive."
+        ),
+    ] = None
+    includeTextures: Annotated[
+        bool | None,
+        Field(
+            description="Optional, false by default. Whether the linked textures go into the archive."
+        ),
+    ] = None
+    includeBackgroundPicture: Annotated[
+        bool | None,
+        Field(
+            description="Optional, false by default. Whether the background picture goes into the archive."
+        ),
+    ] = None
 
 
 class SectionData(APIModel):
@@ -3082,7 +3204,7 @@ class StoryParameters(APIModel):
     height: Annotated[
         float | None,
         Field(
-            description="Story height, calculated as the level of the story above minus this story's level. Omitted for the topmost story, which has no story above."
+            description="Story height, calculated as the level of the story above minus this story's level. The topmost story gets its height from the virtual story that Archicad keeps above it in the story settings; only an Archicad that did not report that virtual story would leave the top story without a height."
         ),
     ] = None
     name: Annotated[str, Field(description="The name of the story.")]
@@ -3250,7 +3372,12 @@ class TextRunDetails(APIModel):
     """
     One monostyle run of text (API_RunType). Concatenating 'text' across all runs in order gives the full content; a newline character starts a new line.
     """
-    text: Annotated[str, Field(description="The run's text content.")]
+    text: Annotated[
+        str,
+        Field(
+            description="The run's text content. Windows-style CRLF (and bare CR) line endings are normalized to LF."
+        ),
+    ]
     penIndex: Annotated[
         int | None,
         Field(
@@ -3296,7 +3423,9 @@ class TextSettings(APIModel):
     """
     text: Annotated[
         str | None,
-        Field(description="The new text content. Newlines create multiple lines."),
+        Field(
+            description="The new text content. Newlines create multiple lines; Windows-style CRLF (and bare CR) line endings are normalized to LF."
+        ),
     ] = None
     position: Annotated[
         Coordinate2D | None,
@@ -3313,7 +3442,7 @@ class TextSettings(APIModel):
     height: Annotated[
         float | None,
         Field(
-            description="The character height in millimeters. Only applied to Text elements."
+            description="The character height in millimeters. Only applied to Text elements. A multistyle Text takes its height from the per-run sizes of its content, so applying it rebuilds the content as one paragraph with the new height on every run (the runs' own pens/fonts/faces are kept) and switches the element to automatic width, as setting text does. Refused when the content holds an autotext run; give the new content explicitly via text then, or use ModifyTexts."
         ),
     ] = None
     justification: Justification | None = None
@@ -3623,6 +3752,15 @@ class TrimType(Enum):
     KEEP_OUTSIDE = "KeepOutside"
     KEEP_ALL = "KeepAll"
     NO = "No"
+
+
+class UpdatePropertyGroupsParameters(APIModel):
+    propertyGroups: Annotated[
+        list[PropertyGroupUpdate],
+        Field(
+            description="The custom property groups to update. Only the fields given change."
+        ),
+    ]
 
 
 class UpdateZonesParameters(APIModel):
@@ -3988,6 +4126,12 @@ class BeamData(APIModel):
         ),
     ] = None
     anchorPoint: BeamAnchorPoint | None = None
+    circleBased: Annotated[
+        bool | None,
+        Field(
+            description="True for a round beam cross section, false for rectangular. Ignored if profileId is also given. Applied to all segments."
+        ),
+    ] = None
     isWidthAndHeightLinked: Annotated[
         bool | None,
         Field(
@@ -3996,12 +4140,14 @@ class BeamData(APIModel):
     ] = None
     buildingMaterialId: Annotated[
         AttributeId | None,
-        Field(description="Cross section building material. Applied to all segments."),
+        Field(
+            description="Cross section building material (round or rectangular, per circleBased). Applied to all segments."
+        ),
     ] = None
     profileId: Annotated[
         AttributeId | None,
         Field(
-            description="Switches the cross section to this custom extruded profile. Applied to all segments."
+            description="Switches the cross section to this custom extruded profile (circleBased becomes false). Applied to all segments."
         ),
     ] = None
 
@@ -4165,6 +4311,15 @@ class ClassificationItemIdArrayItem(APIModel):
     classificationItemId: ClassificationItemId
 
 
+class ClassificationItemUpdate(APIModel):
+    classificationItemId: ClassificationItemId
+    id: Annotated[
+        str | None, Field(description="The new code of the item, e.g. 21.10.")
+    ] = None
+    name: str | None = None
+    description: str | None = None
+
+
 class ClassificationSystemDetails(APIModel):
     """
     The details of a classification system.
@@ -4206,6 +4361,20 @@ class ClassificationSystemId(APIModel):
 
 class ClassificationSystemIdArrayItem(APIModel):
     classificationSystemId: ClassificationSystemId
+
+
+class ClassificationSystemUpdate(APIModel):
+    classificationSystemId: ClassificationSystemId
+    name: str | None = None
+    description: str | None = None
+    source: str | None = None
+    version: str | None = None
+    date: Annotated[
+        str | None,
+        Field(
+            description="A date in its string representation as defined in ISO 8601: YYYY-MM-DD.",
+        ),
+    ] = None
 
 
 class ClassificationSystemsWithItem(APIModel):
@@ -4878,9 +5047,45 @@ class DocumentRevisionReference(APIModel):
 class DrawingData(APIModel):
     navigatorItemId: NavigatorItemId
     layoutDatabaseId: DatabaseId | None = None
-    name: Annotated[str, Field(min_length=1)]
+    name: Annotated[
+        str | None,
+        Field(
+            description="Custom title name of the new Drawing. Giving a name implies nameType CustomName unless nameType is set explicitly.",
+            min_length=1,
+        ),
+    ] = None
+    nameType: Annotated[
+        DrawingNameType | None,
+        Field(
+            description="How the drawing's title name is assembled (Identification tabpage of the Drawing Settings dialog). Defaults to CustomName when name is given, otherwise to the Drawing tool's current default."
+        ),
+    ] = None
     position: Coordinate2D
-    scale: Annotated[float | None, Field(gt=0.0)] = None
+    scale: Annotated[
+        float | None,
+        Field(
+            description="Scale ratio applied to the drawing relative to its source view (API_DrawingType::ratio). Defaults to 1.0.",
+            gt=0.0,
+        ),
+    ] = None
+    angle: Annotated[
+        float | None,
+        Field(
+            description="Rotation angle of the drawing in radians. Defaults to the Drawing tool's current default."
+        ),
+    ] = None
+    drawingScale: Annotated[
+        float | None,
+        Field(
+            description="The nominal scale of the drawing. Defaults to the Drawing tool's current default."
+        ),
+    ] = None
+    modelOffset: Annotated[
+        Coordinate2D | None,
+        Field(
+            description="Offset of the model origin within the drawing. Defaults to the Drawing tool's current default."
+        ),
+    ] = None
     clipPolygon: Annotated[list[Coordinate2D] | None, Field(min_length=3)] = None
 
 
@@ -5561,6 +5766,15 @@ class GetGDLParametersOfElementsParameters(APIModel):
 class GetGroupsOfElementsParameters(APIModel):
     elements: Annotated[
         list[ElementIdArrayItem], Field(description="A list of elements.")
+    ]
+
+
+class GetIFCExportTranslatorsResult(APIModel):
+    translators: Annotated[
+        list[IFCExportTranslator],
+        Field(
+            description="The IFC export translators of the project, the preview translator first."
+        ),
     ]
 
 
@@ -6374,7 +6588,30 @@ class HotlinkNodeCreated(APIModel):
 IFCFileOperationResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
 
 
+class ImportClassificationsXmlResult(APIModel):
+    executionResult: Annotated[
+        SuccessfulExecutionResult | FailedExecutionResult,
+        Field(description="The result of the execution."),
+    ]
+    created: list[GuidId]
+    removed: list[GuidId]
+
+
 ImportIssuesFromBCFResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
+
+
+class ImportPropertiesXmlParameters(APIModel):
+    xml: Annotated[str, Field(description="A Property Manager export (XML) to import.")]
+    conflictPolicy: PropertyImportConflictPolicy
+
+
+class ImportPropertiesXmlResult(APIModel):
+    executionResult: Annotated[
+        SuccessfulExecutionResult | FailedExecutionResult,
+        Field(description="The result of the execution."),
+    ]
+    created: list[GuidId]
+    removed: list[GuidId]
 
 
 class KeynoteFolderData(APIModel):
@@ -6382,7 +6619,7 @@ class KeynoteFolderData(APIModel):
         KeynoteFolderId | None,
         Field(description="The parent folder. Optional; defaults to the root folder."),
     ] = None
-    key: str
+    key: Annotated[str, Field(min_length=1)]
     title: str
 
 
@@ -7328,7 +7565,12 @@ class ModifyKeynoteItemsResult(APIModel):
 
 class LabelsWithDetail(APIModel):
     elementId: ElementId
-    text: str | None = None
+    text: Annotated[
+        str | None,
+        Field(
+            description="The new text content. Newlines create multiple lines; Windows-style CRLF (and bare CR) line endings are normalized to LF."
+        ),
+    ] = None
     runs: Annotated[list[TextRunDetails] | None, Field(min_length=1)] = None
     style: TextStyleSettableDetails | None = None
     symbolStyle: LabelSymbolStyleSettableDetails | None = None
@@ -7438,7 +7680,12 @@ class TextsWithDetail(APIModel):
             description="Optional. Moves the text to this floor; when omitted and a coordinate is given, the floor is derived from its z value."
         ),
     ] = None
-    text: str | None = None
+    text: Annotated[
+        str | None,
+        Field(
+            description="The new text content. Newlines create multiple lines; Windows-style CRLF (and bare CR) line endings are normalized to LF."
+        ),
+    ] = None
     runs: Annotated[list[TextRunDetails] | None, Field(min_length=1)] = None
     style: TextStyleSettableDetails | None = None
 
@@ -7503,9 +7750,9 @@ class MorphPolygon(APIModel):
 
 class DesignOptionAndSetPair(APIModel):
     designOptionId: Annotated[
-        DesignOptionId | None,
+        DesignOptionId,
         Field(description="The identifier of the design option to move."),
-    ] = None
+    ]
     setName: str
 
 
@@ -8024,6 +8271,15 @@ class ProfileSkinData(APIModel):
     ] = None
 
 
+class PropertyAvailabilityUpdate(APIModel):
+    """
+    Classification items the property is available for: set replaces the list, add and remove edit it.
+    """
+    set: list[ClassificationItemIdArrayItem] | None = None
+    add: list[ClassificationItemIdArrayItem] | None = None
+    remove: list[ClassificationItemIdArrayItem] | None = None
+
+
 class Group(APIModel):
     """
     The property group defined by name or id. If both fields exists the id will be used.
@@ -8032,21 +8288,11 @@ class Group(APIModel):
     name: str | None = None
 
 
-class PropertyExpressionUpdate(APIModel):
-    propertyId: PropertyId
-    expressions: Annotated[
-        list[str] | None,
-        Field(
-            description="The new expression strings for the property. Only for expression-based properties.",
-            min_length=1,
-        ),
-    ] = None
-    possibleEnumValues: Annotated[
-        list[EnumValuesToAddItem] | None,
-        Field(
-            description="The enum values to add to an enumeration property. Values already on the property keep their identifier, so element values assigned to them survive; values not listed here are kept as well."
-        ),
-    ] = None
+class PropertyGroupDetails(APIModel):
+    propertyGroupId: PropertyGroupId
+    name: str
+    description: str | None = None
+    isCustom: bool
 
 
 QuitArchicadResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
@@ -8201,6 +8447,9 @@ class SaveAsModuleFileParameters(APIModel):
 
 
 SaveAsModuleFileResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
+
+
+SaveProjectAsArchiveResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
 
 
 SaveProjectResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
@@ -8560,7 +8809,7 @@ class TextDataWithRuns(APIModel):
     text: Annotated[
         str | None,
         Field(
-            description="The text content. Newlines create multiple lines. Ignored if 'runs' is also given."
+            description="The text content. Newlines create multiple lines; Windows-style CRLF (and bare CR) line endings are normalized to LF. Ignored if 'runs' is also given."
         ),
     ] = None
     runs: Annotated[
@@ -8622,7 +8871,7 @@ class TextDataWithText(APIModel):
     text: Annotated[
         str,
         Field(
-            description="The text content. Newlines create multiple lines. Ignored if 'runs' is also given."
+            description="The text content. Newlines create multiple lines; Windows-style CRLF (and bare CR) line endings are normalized to LF. Ignored if 'runs' is also given."
         ),
     ]
     runs: Annotated[
@@ -8734,6 +8983,38 @@ class UnlockElementsParameters(APIModel):
 UnlockElementsResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
 
 
+class UpdateClassificationItemsParameters(APIModel):
+    classificationItems: Annotated[
+        list[ClassificationItemUpdate],
+        Field(
+            description="The classification items to update. Only the fields given change; items keep their guid and their parent."
+        ),
+    ]
+
+
+class UpdateClassificationItemsResult(APIModel):
+    executionResults: Annotated[
+        list[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
+
+
+class UpdateClassificationSystemsParameters(APIModel):
+    classificationSystems: Annotated[
+        list[ClassificationSystemUpdate],
+        Field(
+            description="The classification systems to update. Only the fields given change."
+        ),
+    ]
+
+
+class UpdateClassificationSystemsResult(APIModel):
+    executionResults: Annotated[
+        list[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
+
+
 class UpdateDrawingsParameters(APIModel):
     elements: Annotated[
         list[ElementIdArrayItem], Field(description="A list of elements.")
@@ -8754,14 +9035,14 @@ class UpdateFavoritesFromElementsResult(APIModel):
     ]
 
 
-class UpdatePropertyDefinitionsParameters(APIModel):
-    propertyDefinitions: Annotated[
-        list[PropertyExpressionUpdate],
-        Field(description="The property definitions to update."),
+class UpdatePropertyDefinitionsResult(APIModel):
+    executionResults: Annotated[
+        list[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
     ]
 
 
-class UpdatePropertyDefinitionsResult(APIModel):
+class UpdatePropertyGroupsResult(APIModel):
     executionResults: Annotated[
         list[SuccessfulExecutionResult | FailedExecutionResult],
         Field(description="A list of execution results."),
@@ -9240,6 +9521,12 @@ class AddFilesToEmbeddedLibraryParameters(APIModel):
         list[LibraryFileAddition],
         Field(description="A list of library file additions to the embedded library"),
     ]
+    overwriteExisting: Annotated[
+        bool | None,
+        Field(
+            description="Optional. When true, an embedded library item already existing on an outputPath is deleted first, so the newly added file replaces the loaded library part. By default false: the existing loaded part stays in use. Requires Archicad 27 or newer."
+        ),
+    ] = None
 
 
 class AddFilesToEmbeddedLibraryResult(APIModel):
@@ -9495,6 +9782,12 @@ class BeamDetails(APIModel):
         float | None,
         Field(description="Cross section height of the beam (all segments)."),
     ] = None
+    circleBased: Annotated[
+        bool | None,
+        Field(
+            description="True for a round beam cross section, false for rectangular."
+        ),
+    ] = None
     isWidthAndHeightLinked: Annotated[
         bool | None,
         Field(
@@ -9549,14 +9842,22 @@ class BeamWithDetails(APIModel):
             description="When true, Archicad keeps width and height equal and setting one changes the other - set to false first to give width/height independent values. Applied to all segments."
         ),
     ] = None
+    circleBased: Annotated[
+        bool | None,
+        Field(
+            description="True for a round beam cross section, false for rectangular. Ignored once profileId switches the beam to a custom profile shape. Applied to all segments."
+        ),
+    ] = None
     buildingMaterialId: Annotated[
         AttributeId | None,
-        Field(description="Cross section building material. Applied to all segments."),
+        Field(
+            description="Cross section building material (round or rectangular, per circleBased). Applied to all segments."
+        ),
     ] = None
     profileId: Annotated[
         AttributeId | None,
         Field(
-            description="Switches the cross section to this custom extruded profile. Applied to all segments."
+            description="Switches the cross section to this custom extruded profile (circleBased becomes false). Applied to all segments."
         ),
     ] = None
     holes: Annotated[
@@ -10514,7 +10815,18 @@ class DeleteElementsParameters(APIModel):
     ]
 
 
-DeleteElementsResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
+class DeleteElementsResult(APIModel):
+    executionResults: Annotated[
+        list[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
+
+
+class DeleteEmbeddedLibraryItemsResult(APIModel):
+    executionResults: Annotated[
+        list[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
 
 
 class DeleteFavoritesResult(APIModel):
@@ -10758,7 +11070,7 @@ class DrawingDetails(APIModel):
         ),
     ]
     nameType: Annotated[
-        NameType,
+        DrawingNameType,
         Field(
             description="How the drawing's title name is assembled (Identification tabpage of the Drawing Settings dialog)."
         ),
@@ -10770,7 +11082,7 @@ class DrawingDetails(APIModel):
         ),
     ] = None
     numberingType: Annotated[
-        NumberingType,
+        DrawingNumberingType,
         Field(
             description="How the drawing's title ID is assigned (Identification tabpage of the Drawing Settings dialog)."
         ),
@@ -11181,7 +11493,7 @@ class LabelData(APIModel):
     text: Annotated[
         str | None,
         Field(
-            description="The text content if the label is a text label. Ignored if 'runs' is also given."
+            description="The text content if the label is a text label. Newlines create multiple lines; Windows-style CRLF (and bare CR) line endings are normalized to LF. Ignored if 'runs' is also given."
         ),
     ] = None
     runs: Annotated[
@@ -11835,6 +12147,24 @@ class PropertyDetails(APIModel):
             description="The expression strings of an expression-based property. Only present when isExpressionBased is true."
         ),
     ] = None
+    propertyGroupId: PropertyGroupId | None = None
+    propertyDescription: str | None = None
+    defaultValueDisplay: Annotated[
+        str | None,
+        Field(
+            description="The basic default value as text. Only for custom, non expression-based properties whose default is set."
+        ),
+    ] = None
+    availability: Annotated[
+        list[ClassificationItemIdArrayItem] | None,
+        Field(description="Classification items a custom property is available for."),
+    ] = None
+    defaultEnumValueIds: Annotated[
+        list[GuidId] | None,
+        Field(
+            description="The option guids an enumeration property's default holds. Only for custom enumeration properties whose default is set."
+        ),
+    ] = None
 
 
 class RemoveSolidElementLinksParameters(APIModel):
@@ -12323,6 +12653,10 @@ class GetAllPropertiesResult(APIModel):
     properties: Annotated[
         list[PropertyDetails], Field(description="A list of property identifiers.")
     ]
+    propertyGroups: Annotated[
+        list[PropertyGroupDetails] | None,
+        Field(description="Every property group, including empty ones."),
+    ] = None
 
 
 GetAttributesByTypeResult: TypeAlias = AttributeHeadersWrapper | ErrorItem
@@ -12509,6 +12843,65 @@ class PropertyDefinitionArrayItem(APIModel):
     propertyDefinition: PropertyDefinition
 
 
+class PropertyDefinitionUpdate(APIModel):
+    propertyId: PropertyId
+    name: Annotated[str | None, Field(description="New name of the property.")] = None
+    description: Annotated[
+        str | None, Field(description="New description of the property.")
+    ] = None
+    groupId: Annotated[
+        PropertyGroupId | None,
+        Field(description="Move the property into this custom property group."),
+    ] = None
+    defaultValue: Annotated[
+        BasicDefaultValue | ExpressionDefaultValue | None,
+        Field(
+            description="New default value: a basic value or expressions. Switching between the two is allowed."
+        ),
+    ] = None
+    expressions: Annotated[
+        list[str] | None,
+        Field(
+            description="The new expression strings for the property. Only for expression-based properties.",
+            min_length=1,
+        ),
+    ] = None
+    availability: PropertyAvailabilityUpdate | None = None
+    possibleEnumValues: Annotated[
+        list[EnumValuesToAddItem] | None,
+        Field(
+            description="The enum values to add to an enumeration property. Values already on the property keep their identifier, so element values assigned to them survive; values not listed here are kept as well."
+        ),
+    ] = None
+    renameEnumValues: Annotated[
+        list[PropertyEnumValueRename] | None,
+        Field(
+            description="Change the text of existing enum options. The option keeps its identifier, so element values follow the new text."
+        ),
+    ] = None
+    removeEnumValues: Annotated[
+        list[PropertyEnumValueRemoval] | None,
+        Field(
+            description="Enum options to remove. Elements holding a removed option lose that value."
+        ),
+    ] = None
+    enumOrder: Annotated[
+        list[str] | None,
+        Field(
+            description="Every option's display text, once, in the new order (applied after rename, remove and add)."
+        ),
+    ] = None
+
+
+class UpdatePropertyDefinitionsParameters(APIModel):
+    propertyDefinitions: Annotated[
+        list[PropertyDefinitionUpdate],
+        Field(
+            description="The property definitions to update. Only the fields given change; the definition keeps its guid, so element values survive."
+        ),
+    ]
+
+
 class ZoneBoundariesOfZonesWrapper(APIModel):
     zoneBoundariesOfZones: Annotated[
         list[ZoneBoundariesWrapper | ErrorItem],
@@ -12691,6 +13084,12 @@ class NavigatorItem(APIModel):
             description="True when the item is independent, that is when its link to the Project Map is broken."
         ),
     ]
+    sourceNavigatorItemId: Annotated[
+        NavigatorItemId | None,
+        Field(
+            description="The identifier of the navigator item this one was created from: the Project Map item behind a view, or the source view behind a placed Drawing's Layout Book entry. Missing when the item has no such source; Project Map items never do."
+        ),
+    ] = None
     children: Annotated[
         list[NavigatorItemArrayItem] | None,
         Field(

@@ -10,6 +10,8 @@ from multiconn_archicad.models.tapir.commands import (
     AddFilesToEmbeddedLibraryResult,
     AddLibrariesParameters,
     AddLibrariesResult,
+    DeleteEmbeddedLibraryItemsParameters,
+    DeleteEmbeddedLibraryItemsResult,
     GetAvailableLibraryPartsParameters,
     GetAvailableLibraryPartsResult,
     GetLibrariesResult,
@@ -18,6 +20,7 @@ from multiconn_archicad.models.tapir.commands import (
     SetLibrariesResult,
 )
 from multiconn_archicad.models.tapir.types import (
+    EmbeddedLibraryItem,
     FailedExecutionResult,
     Library,
     LibraryFileAddition,
@@ -27,7 +30,7 @@ from multiconn_archicad.models.tapir.types import (
 )
 
 if TYPE_CHECKING:
-    from multiconn_archicad.core.core_commands import CoreCommands
+    from multiconn_archicad.clients.core.core_commands import CoreCommands
 
 
 class LibraryCommands:
@@ -35,14 +38,20 @@ class LibraryCommands:
         self._core = core
 
     def add_files_to_embedded_library(
-        self, files: list[LibraryFileAddition]
+        self, files: list[LibraryFileAddition], overwrite_existing: None | bool = None
     ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
         """
-        Adds the given files into the embedded library.
+        Adds the given files into the embedded library. With the overwriteExisting flag an
+        embedded library item already existing on an outputPath is replaced (Archicad 27 or
+        newer).
 
         Args:
             files (list[LibraryFileAddition]): A list of library file additions to the embedded
                 library
+            overwrite_existing (None | bool): Optional. When true, an embedded library item
+                already existing on an outputPath is deleted first, so the newly added file
+                replaces the loaded library part. By default false: the existing loaded part
+                stays in use. Requires Archicad 27 or newer.
 
         Returns:
             list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
@@ -55,6 +64,7 @@ class LibraryCommands:
         """
         params_dict = {
             "files": files,
+            "overwriteExisting": overwrite_existing,
         }
         validated_params = AddFilesToEmbeddedLibraryParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
@@ -88,6 +98,37 @@ class LibraryCommands:
         )
         validated_response = TypeAdapter(AddLibrariesResult).validate_python(response_dict)
         return validated_response
+
+    def delete_embedded_library_items(
+        self, embedded_library_items: list[EmbeddedLibraryItem]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Deletes the given items from the embedded library. The path of an item is the same
+        relative path that AddFilesToEmbeddedLibrary takes as outputPath. Available from
+        Archicad 27.
+
+        Args:
+            embedded_library_items (list[EmbeddedLibraryItem]): A list of embedded library items
+                to delete.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "embeddedLibraryItems": embedded_library_items,
+        }
+        validated_params = DeleteEmbeddedLibraryItemsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "DeleteEmbeddedLibraryItems", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = DeleteEmbeddedLibraryItemsResult.model_validate(response_dict)
+        return validated_response.executionResults
 
     def get_available_library_parts(
         self, filter_by_type_id: LibraryPartType | None = None

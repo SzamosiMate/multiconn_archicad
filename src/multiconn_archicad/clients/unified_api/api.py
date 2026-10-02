@@ -3,7 +3,6 @@
 
 from __future__ import annotations
 from typing import TYPE_CHECKING
-
 from multiconn_archicad.utilities.api import Utilities
 
 from .official.addon import AddonCommands as OfficialAddonCommands

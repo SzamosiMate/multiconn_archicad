@@ -8,6 +8,8 @@ from code_generation.tapir.paths import tapir_paths
 from code_generation.official.official_commands import OFFICIAL_ADDON_COMMANDS
 from code_generation.shared.schema_patching import (
     apply_permanent_patches,
+    apply_breaking_permanent_patches,
+    apply_breaking_source_review_patches,
     apply_temporary_patches,
 )
 
@@ -152,6 +154,8 @@ def main():
     print(f"Generated unpatched schema at: {tapir_paths.UNPATCHED_SCHEMA_OUTPUT}")
 
     apply_permanent_patches(master_defs)
+    apply_breaking_permanent_patches(master_defs)
+    apply_breaking_source_review_patches(master_defs)
     apply_temporary_patches(master_defs)
     master_defs = dict(sorted(master_defs.items()))
 

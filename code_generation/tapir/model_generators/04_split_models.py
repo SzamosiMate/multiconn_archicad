@@ -1,5 +1,6 @@
 import json
 import re
+from code_generation.shared.model_aliases import TAPIR_TYPE_ALIASES, render_type_aliases
 from code_generation.tapir.paths import tapir_paths
 
 
@@ -128,6 +129,7 @@ def main():
             base_model_blocks.append(block)
 
     base_model_names = {get_definition_name(b) for b in base_model_blocks if get_definition_name(b)}
+    compatibility_aliases = render_type_aliases(TAPIR_TYPE_ALIASES, base_model_names)
     unknown_rebuild_names = set(rebuild_names) - base_model_names - command_names
     if unknown_rebuild_names:
         names = ", ".join(sorted(unknown_rebuild_names))
@@ -142,6 +144,8 @@ def main():
     base_rebuild_calls = [f"{name}.model_rebuild()" for name in rebuild_names if name in base_model_names]
     if base_rebuild_calls:
         base_body_str += "\n\n\n" + "\n".join(base_rebuild_calls)
+    if compatibility_aliases:
+        base_body_str += "\n\n\n" + compatibility_aliases
     base_content_uncleaned = base_header_str + "\n\n" + base_body_str
     final_base_content = remove_unused_imports(base_content_uncleaned)
 

@@ -47,6 +47,10 @@
       "properties": {
         "files": {
           "$ref": "#/$defs/LibraryFileAdditions"
+        },
+        "overwriteExisting": {
+          "type": "boolean",
+          "description": "Optional. When true, an embedded library item already existing on an outputPath is deleted first, so the newly added file replaces the loaded library part. By default false: the existing loaded part stays in use. Requires Archicad 27 or newer."
         }
       },
       "additionalProperties": false,
@@ -752,17 +756,21 @@
         "anchorPoint": {
           "$ref": "#/$defs/BeamAnchorPoint"
         },
+        "circleBased": {
+          "type": "boolean",
+          "description": "True for a round beam cross section, false for rectangular. Ignored if profileId is also given. Applied to all segments."
+        },
         "isWidthAndHeightLinked": {
           "type": "boolean",
           "description": "When true (the default), Archicad keeps width and height equal and setting one changes the other - set to false to give width/height independent values. Applied to all segments."
         },
         "buildingMaterialId": {
           "$ref": "#/$defs/AttributeId",
-          "description": "Cross section building material. Applied to all segments."
+          "description": "Cross section building material (round or rectangular, per circleBased). Applied to all segments."
         },
         "profileId": {
           "$ref": "#/$defs/AttributeId",
-          "description": "Switches the cross section to this custom extruded profile. Applied to all segments."
+          "description": "Switches the cross section to this custom extruded profile (circleBased becomes false). Applied to all segments."
         }
       },
       "additionalProperties": false,
@@ -846,6 +854,10 @@
         "height": {
           "type": "number",
           "description": "Cross section height of the beam (all segments)."
+        },
+        "circleBased": {
+          "type": "boolean",
+          "description": "True for a round beam cross section, false for rectangular."
         },
         "isWidthAndHeightLinked": {
           "type": "boolean",
@@ -1000,13 +1012,17 @@
           "type": "boolean",
           "description": "When true, Archicad keeps width and height equal and setting one changes the other - set to false first to give width/height independent values. Applied to all segments."
         },
+        "circleBased": {
+          "type": "boolean",
+          "description": "True for a round beam cross section, false for rectangular. Ignored once profileId switches the beam to a custom profile shape. Applied to all segments."
+        },
         "buildingMaterialId": {
           "$ref": "#/$defs/AttributeId",
-          "description": "Cross section building material. Applied to all segments."
+          "description": "Cross section building material (round or rectangular, per circleBased). Applied to all segments."
         },
         "profileId": {
           "$ref": "#/$defs/AttributeId",
-          "description": "Switches the cross section to this custom extruded profile. Applied to all segments."
+          "description": "Switches the cross section to this custom extruded profile (circleBased becomes false). Applied to all segments."
         },
         "holes": {
           "type": "array",
@@ -1574,6 +1590,14 @@
         "$ref": "#/$defs/ClassificationIdOrError"
       }
     },
+    "ClassificationItemConflictPolicy": {
+      "type": "string",
+      "enum": [
+        "replace",
+        "skip"
+      ],
+      "description": "What to do with an item whose id already exists in a merged system: replace it or keep the existing one."
+    },
     "ClassificationItemDetails": {
       "type": "object",
       "description": "The details of a classification item.",
@@ -1636,6 +1660,37 @@
       "items": {
         "$ref": "#/$defs/ClassificationItemIdArrayItem"
       }
+    },
+    "ClassificationItemUpdate": {
+      "type": "object",
+      "properties": {
+        "classificationItemId": {
+          "$ref": "#/$defs/ClassificationItemId"
+        },
+        "id": {
+          "type": "string",
+          "description": "The new code of the item, e.g. 21.10."
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "classificationItemId"
+      ]
+    },
+    "ClassificationSystemConflictPolicy": {
+      "type": "string",
+      "enum": [
+        "merge",
+        "replace",
+        "skip"
+      ],
+      "description": "What to do with a system whose name already exists: merge, replace it, or keep the existing one."
     },
     "ClassificationSystemDetails": {
       "type": "object",
@@ -1702,6 +1757,33 @@
       "items": {
         "$ref": "#/$defs/ClassificationSystemIdArrayItem"
       }
+    },
+    "ClassificationSystemUpdate": {
+      "type": "object",
+      "properties": {
+        "classificationSystemId": {
+          "$ref": "#/$defs/ClassificationSystemId"
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "source": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        },
+        "date": {
+          "$ref": "#/$defs/Date"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "classificationSystemId"
+      ]
     },
     "ClassificationSystemsWithItems": {
       "type": "array",
@@ -4842,7 +4924,54 @@
       ]
     },
     "DeleteElementsResult": {
-      "$ref": "#/$defs/ExecutionResult"
+      "type": "object",
+      "properties": {
+        "executionResults": {
+          "$ref": "#/$defs/ExecutionResults"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "executionResults"
+      ]
+    },
+    "DeleteEmbeddedLibraryItemsParameters": {
+      "type": "object",
+      "properties": {
+        "embeddedLibraryItems": {
+          "type": "array",
+          "description": "A list of embedded library items to delete.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "path": {
+                "type": "string",
+                "description": "The relative path of the library item inside the embedded library, the same path AddFilesToEmbeddedLibrary takes as outputPath."
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "path"
+            ]
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "embeddedLibraryItems"
+      ]
+    },
+    "DeleteEmbeddedLibraryItemsResult": {
+      "type": "object",
+      "properties": {
+        "executionResults": {
+          "$ref": "#/$defs/ExecutionResults"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "executionResults"
+      ]
     },
     "DeleteFavoritesParameters": {
       "type": "object",
@@ -5624,14 +5753,32 @@
         },
         "name": {
           "type": "string",
-          "minLength": 1
+          "minLength": 1,
+          "description": "Custom title name of the new Drawing. Giving a name implies nameType CustomName unless nameType is set explicitly."
+        },
+        "nameType": {
+          "$ref": "#/$defs/DrawingNameType",
+          "description": "How the drawing's title name is assembled (Identification tabpage of the Drawing Settings dialog). Defaults to CustomName when name is given, otherwise to the Drawing tool's current default."
         },
         "position": {
           "$ref": "#/$defs/Coordinate2D"
         },
         "scale": {
           "type": "number",
-          "exclusiveMinimum": 0.0
+          "exclusiveMinimum": 0.0,
+          "description": "Scale ratio applied to the drawing relative to its source view (API_DrawingType::ratio). Defaults to 1.0."
+        },
+        "angle": {
+          "type": "number",
+          "description": "Rotation angle of the drawing in radians. Defaults to the Drawing tool's current default."
+        },
+        "drawingScale": {
+          "type": "number",
+          "description": "The nominal scale of the drawing. Defaults to the Drawing tool's current default."
+        },
+        "modelOffset": {
+          "$ref": "#/$defs/Coordinate2D",
+          "description": "Offset of the model origin within the drawing. Defaults to the Drawing tool's current default."
         },
         "clipPolygon": {
           "type": "array",
@@ -5644,7 +5791,6 @@
       "additionalProperties": false,
       "required": [
         "navigatorItemId",
-        "name",
         "position"
       ]
     },
@@ -5691,12 +5837,7 @@
           "description": "The identifier of the navigator item (view/layout) this Drawing was created from. Read-only: Archicad only lets this be set at creation time (see CreateDrawings) - it cannot be changed afterwards to relink the Drawing to a different source."
         },
         "nameType": {
-          "type": "string",
-          "enum": [
-            "ViewOrSourceFileName",
-            "ViewIdAndName",
-            "CustomName"
-          ],
+          "$ref": "#/$defs/DrawingNameType",
           "description": "How the drawing's title name is assembled (Identification tabpage of the Drawing Settings dialog)."
         },
         "customName": {
@@ -5704,12 +5845,7 @@
           "description": "The drawing's custom title name. Present only when nameType is CustomName."
         },
         "numberingType": {
-          "type": "string",
-          "enum": [
-            "ByLayout",
-            "ByViewId",
-            "CustomNumber"
-          ],
+          "$ref": "#/$defs/DrawingNumberingType",
           "description": "How the drawing's title ID is assigned (Identification tabpage of the Drawing Settings dialog)."
         },
         "customNumber": {
@@ -5787,9 +5923,13 @@
           "$ref": "#/$defs/Coordinate2D",
           "description": "Offset of the model origin within the drawing."
         },
+        "isCutWithFrame": {
+          "type": "boolean",
+          "description": "Whether the drawing is clipped by a custom polygon. Set to false to clear an existing crop and restore the drawing's full auto-fit extent. Only consulted when no clipPolygon is supplied in the same call - supplying a clipPolygon always enables clipping. Setting it to true without a clipPolygon merely re-enables the clip polygon already stored on the Drawing."
+        },
         "clipPolygon": {
           "type": "array",
-          "description": "Polygon (in model coordinates) used to clip the drawing view. At least 3 points. Setting this also enables polygon clipping (useDrawingPolyClip).",
+          "description": "Polygon (in model coordinates) used to clip the drawing view. At least 3 points. Setting this also enables polygon clipping (isCutWithFrame becomes true); to remove clipping, set isCutWithFrame to false instead.",
           "items": {
             "$ref": "#/$defs/Coordinate2D"
           },
@@ -7390,6 +7530,13 @@
           "items": {
             "$ref": "#/$defs/PropertyDetails"
           }
+        },
+        "propertyGroups": {
+          "type": "array",
+          "description": "Every property group, including empty ones.",
+          "items": {
+            "$ref": "#/$defs/PropertyGroupDetails"
+          }
         }
       },
       "additionalProperties": false,
@@ -8649,6 +8796,22 @@
       "additionalProperties": false,
       "required": [
         "hotlinks"
+      ]
+    },
+    "GetIFCExportTranslatorsResult": {
+      "type": "object",
+      "properties": {
+        "translators": {
+          "type": "array",
+          "description": "The IFC export translators of the project, the preview translator first.",
+          "items": {
+            "$ref": "#/$defs/IFCExportTranslator"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "translators"
       ]
     },
     "GetIFCIdsOfElementsParameters": {
@@ -10833,6 +10996,35 @@
       "additionalProperties": false,
       "required": []
     },
+    "IFCElementsToExport": {
+      "type": "string",
+      "description": "Only for the save method, and only together with translatorName: which elements to export. The default is VisibleElementsOnAllStories.",
+      "enum": [
+        "EntireProject",
+        "VisibleElementsOnAllStories",
+        "AllElementsOnCurrentStory",
+        "VisibleElementsOnCurrentStory",
+        "SelectedElementsOnly"
+      ]
+    },
+    "IFCExportTranslator": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The name of the translator, as the IFC Translators dialog shows it."
+        },
+        "preview": {
+          "type": "boolean",
+          "description": "Whether this is the preview translator, the one the IFC properties of elements are previewed with."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "preview"
+      ]
+    },
     "IFCFileOperationParameters": {
       "type": "object",
       "properties": {
@@ -10858,6 +11050,13 @@
             "ifczip",
             "ifcxmlzip"
           ]
+        },
+        "translatorName": {
+          "type": "string",
+          "description": "Only for the save method: the name of the IFC export translator to save with, as GetIFCExportTranslators lists them. Without it the save runs with the translator Archicad would offer in its own Save dialog. Needs a fileType of ifc or ifczip (ifc or ifcxml on Archicad 25 and 26)."
+        },
+        "elementsToExport": {
+          "$ref": "#/$defs/IFCElementsToExport"
         }
       },
       "additionalProperties": false,
@@ -10868,6 +11067,53 @@
     },
     "IFCFileOperationResult": {
       "$ref": "#/$defs/ExecutionResult"
+    },
+    "ImportClassificationsXmlParameters": {
+      "type": "object",
+      "properties": {
+        "xml": {
+          "type": "string",
+          "description": "A Classification Manager export (XML) to import."
+        },
+        "systemConflictPolicy": {
+          "$ref": "#/$defs/ClassificationSystemConflictPolicy"
+        },
+        "itemConflictPolicy": {
+          "$ref": "#/$defs/ClassificationItemConflictPolicy"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "xml",
+        "systemConflictPolicy",
+        "itemConflictPolicy"
+      ]
+    },
+    "ImportClassificationsXmlResult": {
+      "type": "object",
+      "properties": {
+        "executionResult": {
+          "$ref": "#/$defs/ExecutionResult"
+        },
+        "created": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/GuidId"
+          }
+        },
+        "removed": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/GuidId"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "executionResult",
+        "created",
+        "removed"
+      ]
     },
     "ImportFavoritesParameters": {
       "type": "object",
@@ -10933,6 +11179,49 @@
     },
     "ImportIssuesFromBCFResult": {
       "$ref": "#/$defs/ExecutionResult"
+    },
+    "ImportPropertiesXmlParameters": {
+      "type": "object",
+      "properties": {
+        "xml": {
+          "type": "string",
+          "description": "A Property Manager export (XML) to import."
+        },
+        "conflictPolicy": {
+          "$ref": "#/$defs/PropertyImportConflictPolicy"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "xml",
+        "conflictPolicy"
+      ]
+    },
+    "ImportPropertiesXmlResult": {
+      "type": "object",
+      "properties": {
+        "executionResult": {
+          "$ref": "#/$defs/ExecutionResult"
+        },
+        "created": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/GuidId"
+          }
+        },
+        "removed": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/GuidId"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "executionResult",
+        "created",
+        "removed"
+      ]
     },
     "InteriorElevationData": {
       "type": "object",
@@ -11082,7 +11371,8 @@
           "description": "The parent folder. Optional; defaults to the root folder."
         },
         "key": {
-          "type": "string"
+          "type": "string",
+          "minLength": 1
         },
         "title": {
           "type": "string"
@@ -11188,7 +11478,8 @@
           "$ref": "#/$defs/KeynoteFolderId"
         },
         "key": {
-          "type": "string"
+          "type": "string",
+          "minLength": 1
         },
         "title": {
           "type": "string"
@@ -11210,7 +11501,8 @@
           "description": "The parent folder. Optional; defaults to the root folder."
         },
         "key": {
-          "type": "string"
+          "type": "string",
+          "minLength": 1
         },
         "title": {
           "type": "string"
@@ -11311,7 +11603,8 @@
           "$ref": "#/$defs/KeynoteItemId"
         },
         "key": {
-          "type": "string"
+          "type": "string",
+          "minLength": 1
         },
         "title": {
           "type": "string"
@@ -11421,7 +11714,7 @@
         },
         "text": {
           "type": "string",
-          "description": "The text content if the label is a text label. Ignored if 'runs' is also given."
+          "description": "The text content if the label is a text label. Newlines create multiple lines; Windows-style CRLF (and bare CR) line endings are normalized to LF. Ignored if 'runs' is also given."
         },
         "runs": {
           "type": "array",
@@ -13864,7 +14157,8 @@
                 "$ref": "#/$defs/ElementId"
               },
               "text": {
-                "type": "string"
+                "type": "string",
+                "description": "The new text content. Newlines create multiple lines; Windows-style CRLF (and bare CR) line endings are normalized to LF."
               },
               "runs": {
                 "type": "array",
@@ -14121,7 +14415,8 @@
                 "description": "Optional. Moves the text to this floor; when omitted and a coordinate is given, the floor is derived from its z value."
               },
               "text": {
-                "type": "string"
+                "type": "string",
+                "description": "The new text content. Newlines create multiple lines; Windows-style CRLF (and bare CR) line endings are normalized to LF."
               },
               "runs": {
                 "type": "array",
@@ -14772,7 +15067,7 @@
             },
             "additionalProperties": false,
             "required": [
-              "elementId",
+              "designOptionId",
               "setName"
             ]
           }
@@ -14957,6 +15252,10 @@
         "isIndependent": {
           "type": "boolean",
           "description": "True when the item is independent, that is when its link to the Project Map is broken."
+        },
+        "sourceNavigatorItemId": {
+          "$ref": "#/$defs/NavigatorItemId",
+          "description": "The identifier of the navigator item this one was created from: the Project Map item behind a view, or the source view behind a placed Drawing's Layout Book entry. Missing when the item has no such source; Project Map items never do."
         },
         "children": {
           "type": "array",
@@ -17028,6 +17327,31 @@
         "north"
       ]
     },
+    "PropertyAvailabilityUpdate": {
+      "type": "object",
+      "description": "Classification items the property is available for: set replaces the list, add and remove edit it.",
+      "properties": {
+        "set": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ClassificationItemIdArrayItem"
+          }
+        },
+        "add": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ClassificationItemIdArrayItem"
+          }
+        },
+        "remove": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ClassificationItemIdArrayItem"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
     "PropertyDataType": {
       "type": "string",
       "enum": [
@@ -17128,6 +17452,70 @@
         "propertyDefinition"
       ]
     },
+    "PropertyDefinitionUpdate": {
+      "type": "object",
+      "properties": {
+        "propertyId": {
+          "$ref": "#/$defs/PropertyId"
+        },
+        "name": {
+          "type": "string",
+          "description": "New name of the property."
+        },
+        "description": {
+          "type": "string",
+          "description": "New description of the property."
+        },
+        "groupId": {
+          "$ref": "#/$defs/PropertyGroupId",
+          "description": "Move the property into this custom property group."
+        },
+        "defaultValue": {
+          "$ref": "#/$defs/PropertyDefaultValue",
+          "description": "New default value: a basic value or expressions. Switching between the two is allowed."
+        },
+        "expressions": {
+          "type": "array",
+          "description": "The new expression strings for the property. Only for expression-based properties.",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        },
+        "availability": {
+          "$ref": "#/$defs/PropertyAvailabilityUpdate"
+        },
+        "possibleEnumValues": {
+          "$ref": "#/$defs/EnumValuesToAdd",
+          "description": "The enum values to add to an enumeration property. Values already on the property keep their identifier, so element values assigned to them survive; values not listed here are kept as well."
+        },
+        "renameEnumValues": {
+          "type": "array",
+          "description": "Change the text of existing enum options. The option keeps its identifier, so element values follow the new text.",
+          "items": {
+            "$ref": "#/$defs/PropertyEnumValueRename"
+          }
+        },
+        "removeEnumValues": {
+          "type": "array",
+          "description": "Enum options to remove. Elements holding a removed option lose that value.",
+          "items": {
+            "$ref": "#/$defs/PropertyEnumValueRemoval"
+          }
+        },
+        "enumOrder": {
+          "type": "array",
+          "description": "Every option's display text, once, in the new order (applied after rename, remove and add).",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "propertyId"
+      ]
+    },
     "PropertyDetails": {
       "type": "object",
       "description": "The details of the property.",
@@ -17197,6 +17585,30 @@
           "items": {
             "type": "string"
           }
+        },
+        "propertyGroupId": {
+          "$ref": "#/$defs/PropertyGroupId"
+        },
+        "propertyDescription": {
+          "type": "string"
+        },
+        "defaultValueDisplay": {
+          "type": "string",
+          "description": "The basic default value as text. Only for custom, non expression-based properties whose default is set."
+        },
+        "availability": {
+          "type": "array",
+          "description": "Classification items a custom property is available for.",
+          "items": {
+            "$ref": "#/$defs/ClassificationItemIdArrayItem"
+          }
+        },
+        "defaultEnumValueIds": {
+          "type": "array",
+          "description": "The option guids an enumeration property's default holds. Only for custom enumeration properties whose default is set.",
+          "items": {
+            "$ref": "#/$defs/GuidId"
+          }
         }
       },
       "additionalProperties": false,
@@ -17212,28 +17624,35 @@
         "isExpressionBased"
       ]
     },
-    "PropertyExpressionUpdate": {
+    "PropertyEnumValueRemoval": {
       "type": "object",
       "properties": {
-        "propertyId": {
-          "$ref": "#/$defs/PropertyId"
-        },
-        "expressions": {
-          "type": "array",
-          "description": "The new expression strings for the property. Only for expression-based properties.",
-          "items": {
-            "type": "string"
-          },
-          "minItems": 1
-        },
-        "possibleEnumValues": {
-          "$ref": "#/$defs/EnumValuesToAdd",
-          "description": "The enum values to add to an enumeration property. Values already on the property keep their identifier, so element values assigned to them survive; values not listed here are kept as well."
+        "enumValueId": {
+          "$ref": "#/$defs/GuidId"
         }
       },
       "additionalProperties": false,
       "required": [
-        "propertyId"
+        "enumValueId"
+      ]
+    },
+    "PropertyEnumValueRename": {
+      "type": "object",
+      "properties": {
+        "enumValueId": {
+          "$ref": "#/$defs/GuidId"
+        },
+        "displayValue": {
+          "type": "string"
+        },
+        "nonLocalizedValue": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "enumValueId",
+        "displayValue"
       ]
     },
     "PropertyGroup": {
@@ -17265,6 +17684,29 @@
         "propertyGroup"
       ]
     },
+    "PropertyGroupDetails": {
+      "type": "object",
+      "properties": {
+        "propertyGroupId": {
+          "$ref": "#/$defs/PropertyGroupId"
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "isCustom": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "propertyGroupId",
+        "name",
+        "isCustom"
+      ]
+    },
     "PropertyGroupId": {
       "type": "object",
       "description": "The identifier of a property group.",
@@ -17284,6 +17726,24 @@
       "properties": {
         "propertyGroupId": {
           "$ref": "#/$defs/PropertyGroupId"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "propertyGroupId"
+      ]
+    },
+    "PropertyGroupUpdate": {
+      "type": "object",
+      "properties": {
+        "propertyGroupId": {
+          "$ref": "#/$defs/PropertyGroupId"
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
         }
       },
       "additionalProperties": false,
@@ -17342,6 +17802,15 @@
       "items": {
         "$ref": "#/$defs/PropertyIdArrayItem"
       }
+    },
+    "PropertyImportConflictPolicy": {
+      "type": "string",
+      "enum": [
+        "append",
+        "replace",
+        "skip"
+      ],
+      "description": "What to do with a property whose name already exists in its group: append imports it under a new unused name, replace replaces the existing definition, skip keeps the existing one."
     },
     "PropertyValue": {
       "type": "object",
@@ -18179,6 +18648,38 @@
       ]
     },
     "SaveAsModuleFileResult": {
+      "$ref": "#/$defs/ExecutionResult"
+    },
+    "SaveProjectAsArchiveParameters": {
+      "type": "object",
+      "properties": {
+        "archiveFilePath": {
+          "type": "string",
+          "description": "Absolute path of the .pla archive to write. An existing file is overwritten. The archive becomes the open project, as Save As does."
+        },
+        "includeLibraryParts": {
+          "type": "boolean",
+          "description": "Optional, true by default. Whether the library parts the project uses go into the archive, which makes the archive usable as a linked library of another project."
+        },
+        "includeProperties": {
+          "type": "boolean",
+          "description": "Optional, true by default. Whether the properties go into the archive."
+        },
+        "includeTextures": {
+          "type": "boolean",
+          "description": "Optional, false by default. Whether the linked textures go into the archive."
+        },
+        "includeBackgroundPicture": {
+          "type": "boolean",
+          "description": "Optional, false by default. Whether the background picture goes into the archive."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "archiveFilePath"
+      ]
+    },
+    "SaveProjectAsArchiveResult": {
       "$ref": "#/$defs/ExecutionResult"
     },
     "SaveProjectResult": {
@@ -19479,7 +19980,7 @@
         },
         "height": {
           "type": "number",
-          "description": "Story height, calculated as the level of the story above minus this story's level. Omitted for the topmost story, which has no story above."
+          "description": "Story height, calculated as the level of the story above minus this story's level. The topmost story gets its height from the virtual story that Archicad keeps above it in the story settings; only an Archicad that did not report that virtual story would leave the top story without a height."
         },
         "name": {
           "type": "string",
@@ -19885,7 +20386,7 @@
         },
         "text": {
           "type": "string",
-          "description": "The text content. Newlines create multiple lines. Ignored if 'runs' is also given."
+          "description": "The text content. Newlines create multiple lines; Windows-style CRLF (and bare CR) line endings are normalized to LF. Ignored if 'runs' is also given."
         },
         "runs": {
           "type": "array",
@@ -19939,7 +20440,7 @@
         },
         "text": {
           "type": "string",
-          "description": "The text content. Newlines create multiple lines. Ignored if 'runs' is also given."
+          "description": "The text content. Newlines create multiple lines; Windows-style CRLF (and bare CR) line endings are normalized to LF. Ignored if 'runs' is also given."
         },
         "runs": {
           "type": "array",
@@ -20044,7 +20545,7 @@
       "properties": {
         "text": {
           "type": "string",
-          "description": "The run's text content."
+          "description": "The run's text content. Windows-style CRLF (and bare CR) line endings are normalized to LF."
         },
         "penIndex": {
           "type": "integer",
@@ -20095,7 +20596,7 @@
       "properties": {
         "text": {
           "type": "string",
-          "description": "The new text content. Newlines create multiple lines."
+          "description": "The new text content. Newlines create multiple lines; Windows-style CRLF (and bare CR) line endings are normalized to LF."
         },
         "position": {
           "$ref": "#/$defs/Coordinate2D",
@@ -20107,7 +20608,7 @@
         },
         "height": {
           "type": "number",
-          "description": "The character height in millimeters. Only applied to Text elements."
+          "description": "The character height in millimeters. Only applied to Text elements. A multistyle Text takes its height from the per-run sizes of its content, so applying it rebuilds the content as one paragraph with the new height on every run (the runs' own pens/fonts/faces are kept) and switches the element to automatic width, as setting text does. Refused when the content holds an autotext run; give the new content explicitly via text then, or use ModifyTexts."
         },
         "justification": {
           "$ref": "#/$defs/Justification"
@@ -20595,6 +21096,62 @@
     "UnlockElementsResult": {
       "$ref": "#/$defs/ExecutionResult"
     },
+    "UpdateClassificationItemsParameters": {
+      "type": "object",
+      "properties": {
+        "classificationItems": {
+          "type": "array",
+          "description": "The classification items to update. Only the fields given change; items keep their guid and their parent.",
+          "items": {
+            "$ref": "#/$defs/ClassificationItemUpdate"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "classificationItems"
+      ]
+    },
+    "UpdateClassificationItemsResult": {
+      "type": "object",
+      "properties": {
+        "executionResults": {
+          "$ref": "#/$defs/ExecutionResults"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "executionResults"
+      ]
+    },
+    "UpdateClassificationSystemsParameters": {
+      "type": "object",
+      "properties": {
+        "classificationSystems": {
+          "type": "array",
+          "description": "The classification systems to update. Only the fields given change.",
+          "items": {
+            "$ref": "#/$defs/ClassificationSystemUpdate"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "classificationSystems"
+      ]
+    },
+    "UpdateClassificationSystemsResult": {
+      "type": "object",
+      "properties": {
+        "executionResults": {
+          "$ref": "#/$defs/ExecutionResults"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "executionResults"
+      ]
+    },
     "UpdateDrawingsParameters": {
       "type": "object",
       "properties": {
@@ -20642,9 +21199,9 @@
       "properties": {
         "propertyDefinitions": {
           "type": "array",
-          "description": "The property definitions to update.",
+          "description": "The property definitions to update. Only the fields given change; the definition keeps its guid, so element values survive.",
           "items": {
-            "$ref": "#/$defs/PropertyExpressionUpdate"
+            "$ref": "#/$defs/PropertyDefinitionUpdate"
           }
         }
       },
@@ -20654,6 +21211,34 @@
       ]
     },
     "UpdatePropertyDefinitionsResult": {
+      "type": "object",
+      "properties": {
+        "executionResults": {
+          "$ref": "#/$defs/ExecutionResults"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "executionResults"
+      ]
+    },
+    "UpdatePropertyGroupsParameters": {
+      "type": "object",
+      "properties": {
+        "propertyGroups": {
+          "type": "array",
+          "description": "The custom property groups to update. Only the fields given change.",
+          "items": {
+            "$ref": "#/$defs/PropertyGroupUpdate"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "propertyGroups"
+      ]
+    },
+    "UpdatePropertyGroupsResult": {
       "type": "object",
       "properties": {
         "executionResults": {

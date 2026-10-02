@@ -25,7 +25,7 @@ Examples are `$multiconn-codegen audit`, `$multiconn-codegen regenerate tapir`, 
 ## Prepare
 
 - For an update, determine the target Tapir version from the request. Ask for it only when it cannot be inferred. For regeneration, retain the pinned version.
-- Before changing behavior, inspect the relevant parts of `code_generation/tapir/run_tapir_pipeline.py`, `code_generation/shared/schema_patching.py`, `code_generation/shared/model_cleaner.py`, `code_generation/shared/typed_dict_cleaner.py`, `code_generation/tapir/generation_audit.py`, and `code_generation/unified/api_generator/run_pipeline.py`.
+- Before changing behavior, inspect the relevant parts of `code_generation/tapir/run_tapir_pipeline.py`, `code_generation/shared/schema_patching.py`, `code_generation/tapir/model_generators/03_model_cleaner.py`, `code_generation/tapir/model_generators/06_typed_dict_cleaner.py`, `code_generation/tapir/generation_audit.py`, and `code_generation/unified/api_generator/run_pipeline.py`.
 - Record the pre-generation Tapir version and the public definitions in `src/multiconn_archicad/models/tapir/types.py`. Use the checked-in revision as the comparison baseline, not line positions in the working file.
 - Preserve unrelated working-tree changes. Do not commit, push, or open a pull request unless requested.
 
@@ -58,9 +58,16 @@ Examples are `$multiconn-codegen audit`, `$multiconn-codegen regenerate tapir`, 
 
 Put each patch in exactly one category:
 
-- **Permanent:** required by a code-generator limitation or an intentional Python client design choice. An upstream schema correction would not make the local requirement disappear.
-- **Upstream-breaking:** corrects an upstream schema problem, but the proper upstream correction changes a public schema name or shape. Use `apply_upstream_breaking_patches`. If this function does not yet exist, add it and invoke it after permanent patches and before temporary patches.
-- **Temporary:** corrects an upstream problem that can be fixed without a breaking public-schema change. Remove the patch after the upstream correction arrives.
+- **Permanent:** established generator workarounds or intentional client choices that preserve the upstream schema contract. Use `apply_permanent_patches`. Preserve existing intent even when an equivalent upstream refactor is technically possible; do not propose upstream changes solely to accommodate generator shortcomings such as `Data` becoming `Datum`.
+- **Temporary:** fixes intended for non-breaking upstream adoption. Use `apply_temporary_patches`, record the upstream change that would allow removal, and remove the patch when that correction arrives. Naming an anonymous schema or reusing an equivalent definition may belong here when upstream adoption is intended and existing public names, fields, requiredness, constraints, and union behavior can be preserved.
+- **Breaking permanent:** confirmed intentional client differences in requiredness, constraints, accepted values, payload structure, or existing public schema definitions. Use `apply_breaking_permanent_patches`. State the deliberate client behavior, its reason, and compatibility consequences; a difference from upstream alone does not establish intent.
+- **Breaking — source review / potential error:** shape-changing patches whose justification remains uncertain and may involve a schema or local patch error. Use `apply_breaking_source_review_patches`. This category flags unresolved follow-up; it does not assert an upstream defect or endorse a breaking upstream proposal.
+
+Run the stages in this order: permanent → breaking permanent → breaking source review → temporary. Document dependencies when a reference points to a definition extracted in a later stage, and verify that the completed schema resolves those references.
+
+During an update, classify patches introduced or materially changed by that update, plus older patches explicitly requested for review. Do not reopen all established permanent classifications unless asked. Judge each patch against the unpatched upstream schema, separately from release changes already supplied by upstream. Renaming/removing existing public definitions or changing accepted payloads requires a breaking classification.
+
+Investigation of Tapir implementation source is outside this skill's scope. For a breaking source-review patch, record the exact schema path, affected consumers, observed transformation, and unresolved question for a separate follow-up. Do not fetch or inspect Tapir implementation source as part of this workflow. Preserve existing behavior while classification remains pending unless a local repair is independently justified by in-scope schema/generator evidence. Pending follow-up does not by itself block an otherwise completed version update.
 
 Use existing helpers where possible. Patch helpers must validate their targets and fail loudly when the upstream schema changes; do not add conditional skips for stale patches.
 
@@ -96,9 +103,14 @@ If the run exposes a deterministic failure class not covered by the audit, or a 
 - For `regenerate tapir` and `update tapir`, run unified generation once after the Tapir audit/repair loop is clean. Do not regenerate it after every intermediate Tapir repair.
 - For `regenerate unified`, run the unified pipeline directly against the current generated models.
 - Run `python -m code_generation.unified.api_generator.run_pipeline` with the project environment's Python.
-- If the pipeline fails because an existing file under `src/multiconn_archicad/unified_api` imports a Tapir model that the finalized Tapir pipeline renamed or removed, confirm the stale name from the traceback and generated Tapir definitions. Remove only that stale import as a temporary bootstrap edit, then immediately rerun the unified pipeline so generated output replaces the manual edit.
+- If the pipeline fails because an existing file under `src/multiconn_archicad/clients/unified_api` imports a Tapir model that the finalized Tapir pipeline renamed or removed, confirm the stale name from the traceback and generated Tapir definitions. Remove only that stale import as a temporary bootstrap edit, then immediately rerun the unified pipeline so generated output replaces the manual edit.
 - Do not remove imports speculatively. If the traceback does not prove this known stale-import case, or the retry fails for another reason, diagnose it normally.
+- When output routing changes, verify that command literals target `src/multiconn_archicad/clients/core/literal_commands.py` and unified output targets `src/multiconn_archicad/clients/unified_api`, matching the modules imported by the client. A successful pipeline alone does not establish that the consumed package was updated.
 - Run the relevant tests only after unified generation succeeds. For Tapir regeneration or update, run the full project test suite unless the user requested a narrower scope. For standalone unified regeneration, run the generated unified-method tests and any tests covering changed generator code.
+
+### Check reproducibility proportionally
+
+Keep the complete-pipeline reproducibility check. When changing test-schema dependency traversal or investigating ordering noise, add a focused check in separate processes with different `PYTHONHASHSEED` values. A same-process rerun can miss randomized set iteration. Compare contents and ordering at the affected collector; do not claim whole-pipeline cross-process reproducibility from a focused check. Avoid routine repeated full-suite runs or unrelated generator/lint cleanup.
 
 ## Review the result
 
@@ -107,6 +119,12 @@ Compare public definitions structurally so ordering-only changes do not look sem
 Start the report with a release-level API summary: counts and names of added, removed, and structurally changed commands and type models. Do not put these aggregate facts in the decision table.
 
 In the decision table, use one row per independently reviewable change. Do not group unrelated schema locations merely because they share a mechanical cause such as anonymous inline generation. Each row must identify the exact schema definition or property path, affected command or public-model consumers, the upstream shape or generated symptom, the chosen resolution, and its patch category. Add a short detailed note after the table whenever requiredness, union behavior, compatibility, or competing designs cannot be understood from one row.
+
+Classify **Unified API breaking changes** separately from schema patch categories. Compare existing method signatures and generated return/unwrapping behavior against the baseline. Include removed/renamed methods, changed required arguments, incompatible parameter model/type changes, and changed return shapes. A new optional response field can change single-field unwrapping from a list/value to a result object; report that as a Unified API break even when the upstream schema addition is non-breaking. Appended optional arguments and new methods are normally additive.
+
+Use a dedicated `Unified API breaking changes` section with one row per affected method: exact schema source, before, after, cause, and caller migration. Count these separately in the API summary. A change may have both a schema patch category and a Unified API compatibility consequence; neither classification replaces the other. Do not leave a method break visible only as an `N/A` patch row. Also review referenced model changes that can affect callers even when a method's annotation is unchanged.
+
+In patch summaries, separate new/changed patch counts from any existing inventory and state whether counts refer to declarations or expanded loop operations. Record temporary retirement conditions, intentional breaking permanent behavior, and unresolved questions for breaking source-review patches. Keep unchanged permanent patches out of new upstream recommendations. Distinguish classification-only changes from generated behavior changes.
 
 Whenever handwritten generator, cleaner, formatter, or audit behavior changes, explain the new concept in the report. Include what triggered it, its input-to-output transformation, why that layer owns the fix, affected models, and its deliberate limitations. Check relevant generator settings before adding a cleaner workaround and report why no suitable setting was used.
 
@@ -132,13 +150,20 @@ Use this structure, omitting empty detail rows but retaining every heading. Stat
 
 - Commands: `<counts and names added, removed, and structurally changed>`
 - Type models: `<counts and names added, removed, and structurally changed>`
-- Review decisions: `<count by patch category>`
+- Unified API breaking changes: `<count and affected method names>`
+- Review decisions: `<new/changed counts by all four patch categories; distinguish existing inventory and count units>`
 
 ### Generated API changes requiring review
 
 | Change | Schema source | API consumers | Upstream/generated problem | Resolution | Patch category |
 |---|---|---|---|---|---|
-| `<one independently reviewable change>` | `<exact definition or property path>` | `<commands and public models>` | `<relevant shape, requiredness, duplication, or generated symptom>` | `<what changed and why>` | `<Permanent, Upstream-breaking, Temporary, or N/A>` |
+| `<one independently reviewable change>` | `<exact definition or property path>` | `<commands and public models>` | `<relevant shape, requiredness, duplication, or generated symptom>` | `<what changed and why>` | `<Permanent, Temporary, Breaking permanent, Breaking — source review / potential error, or N/A>` |
+
+### Unified API breaking changes
+
+| Method | Schema source | Before | After | Cause | Caller migration |
+|---|---|---|---|---|---|
+| `<affected method>` | `<exact definition or property path>` | `<old signature/return behavior>` | `<new signature/return behavior>` | `<schema or generation trigger>` | `<concrete call-site adjustment>` |
 
 ### Detailed decision notes
 
@@ -173,7 +198,8 @@ Use this structure, omitting empty detail rows but retaining every heading. Stat
 
 ### Patch changes
 
-- `<counts and short summary by category, or None>`
+- `<new/changed counts by all four categories and count units; existing inventory separately if relevant>`
+- `<temporary retirement condition, intentional breaking behavior, or unresolved source-review question, as appropriate>`
 
 ### Audit changes
 

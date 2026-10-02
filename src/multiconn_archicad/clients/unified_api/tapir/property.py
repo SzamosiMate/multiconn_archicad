@@ -19,12 +19,16 @@ from multiconn_archicad.models.tapir.commands import (
     GetPropertyValuesOfAttributesResult,
     GetPropertyValuesOfElementsParameters,
     GetPropertyValuesOfElementsResult,
+    ImportPropertiesXmlParameters,
+    ImportPropertiesXmlResult,
     SetPropertyValuesOfAttributesParameters,
     SetPropertyValuesOfAttributesResult,
     SetPropertyValuesOfElementsParameters,
     SetPropertyValuesOfElementsResult,
     UpdatePropertyDefinitionsParameters,
     UpdatePropertyDefinitionsResult,
+    UpdatePropertyGroupsParameters,
+    UpdatePropertyGroupsResult,
 )
 from multiconn_archicad.models.tapir.types import (
     AttributeIdArrayItem,
@@ -34,17 +38,18 @@ from multiconn_archicad.models.tapir.types import (
     ErrorItem,
     FailedExecutionResult,
     PropertyDefinitionArrayItem,
-    PropertyDetails,
-    PropertyExpressionUpdate,
+    PropertyDefinitionUpdate,
     PropertyGroupArrayItem,
     PropertyGroupIdArrayItem,
+    PropertyGroupUpdate,
     PropertyIdArrayItem,
+    PropertyImportConflictPolicy,
     PropertyValuesArrayItem,
     SuccessfulExecutionResult,
 )
 
 if TYPE_CHECKING:
-    from multiconn_archicad.core.core_commands import CoreCommands
+    from multiconn_archicad.clients.core.core_commands import CoreCommands
 
 
 class PropertyCommands:
@@ -162,12 +167,12 @@ class PropertyCommands:
         validated_response = DeletePropertyGroupsResult.model_validate(response_dict)
         return validated_response.executionResults
 
-    def get_all_properties(self) -> list[PropertyDetails]:
+    def get_all_properties(self) -> GetAllPropertiesResult:
         """
         Returns all user defined and built-in properties.
 
         Returns:
-            list[PropertyDetails]: A list of property identifiers.
+            GetAllPropertiesResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -176,7 +181,7 @@ class PropertyCommands:
         """
         response_dict = self._core.post_tapir_command("GetAllProperties")
         validated_response = GetAllPropertiesResult.model_validate(response_dict)
-        return validated_response.properties
+        return validated_response
 
     def get_property_values_of_attributes(
         self, attribute_ids: list[AttributeIdArrayItem], properties: list[PropertyIdArrayItem]
@@ -241,6 +246,36 @@ class PropertyCommands:
         validated_response = GetPropertyValuesOfElementsResult.model_validate(response_dict)
         return validated_response.propertyValuesForElements
 
+    def import_properties_xml(
+        self, xml: str, conflict_policy: PropertyImportConflictPolicy
+    ) -> ImportPropertiesXmlResult:
+        """
+        Imports a Property Manager XML export, with the given policy for names that already
+        exist. Returns the property definitions it created and removed.
+
+        Args:
+            xml (str): A Property Manager export (XML) to import.
+            conflict_policy (PropertyImportConflictPolicy)
+
+        Returns:
+            ImportPropertiesXmlResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "xml": xml,
+            "conflictPolicy": conflict_policy,
+        }
+        validated_params = ImportPropertiesXmlParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "ImportPropertiesXml", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = ImportPropertiesXmlResult.model_validate(response_dict)
+        return validated_response
+
     def set_property_values_of_attributes(
         self, attribute_property_values: list[AttributePropertyValue]
     ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
@@ -301,15 +336,17 @@ class PropertyCommands:
         return validated_response.executionResults
 
     def update_property_definitions(
-        self, property_definitions: list[PropertyExpressionUpdate]
+        self, property_definitions: list[PropertyDefinitionUpdate]
     ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
         """
-        Updates existing Custom Property Definitions: the expression(s) of an expression-based
-        property, or the possible enum values of an enumeration property.
+        Updates existing Custom Property Definitions in place, keeping their guid: name,
+        description, group, default value or expressions, availability, and enum options (add,
+        rename, remove, reorder).
 
         Args:
-            property_definitions (list[PropertyExpressionUpdate]): The property definitions to
-                update.
+            property_definitions (list[PropertyDefinitionUpdate]): The property definitions to
+                update. Only the fields given change; the definition keeps its guid, so element
+                values survive.
 
         Returns:
             list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
@@ -328,4 +365,34 @@ class PropertyCommands:
             "UpdatePropertyDefinitions", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = UpdatePropertyDefinitionsResult.model_validate(response_dict)
+        return validated_response.executionResults
+
+    def update_property_groups(
+        self, property_groups: list[PropertyGroupUpdate]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Updates the name and/or description of existing Custom Property Groups, keeping their
+        guid.
+
+        Args:
+            property_groups (list[PropertyGroupUpdate]): The custom property groups to update.
+                Only the fields given change.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "propertyGroups": property_groups,
+        }
+        validated_params = UpdatePropertyGroupsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "UpdatePropertyGroups", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = UpdatePropertyGroupsResult.model_validate(response_dict)
         return validated_response.executionResults

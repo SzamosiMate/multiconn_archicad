@@ -46,7 +46,7 @@ from multiconn_archicad.models.tapir.types import (
 )
 
 if TYPE_CHECKING:
-    from multiconn_archicad.core.core_commands import CoreCommands
+    from multiconn_archicad.clients.core.core_commands import CoreCommands
 
 
 class DesignOptionsCommands:
