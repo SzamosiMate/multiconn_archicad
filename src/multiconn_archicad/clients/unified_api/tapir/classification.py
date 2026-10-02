@@ -16,12 +16,22 @@ from multiconn_archicad.models.tapir.commands import (
     DeleteClassificationSystemsResult,
     GetClassificationsOfElementsParameters,
     GetClassificationsOfElementsResult,
+    ImportClassificationsXmlParameters,
+    ImportClassificationsXmlResult,
     SetClassificationsOfElementsParameters,
     SetClassificationsOfElementsResult,
+    UpdateClassificationItemsParameters,
+    UpdateClassificationItemsResult,
+    UpdateClassificationSystemsParameters,
+    UpdateClassificationSystemsResult,
 )
 from multiconn_archicad.models.tapir.types import (
+    ClassificationItemConflictPolicy,
     ClassificationItemIdArrayItem,
+    ClassificationItemUpdate,
+    ClassificationSystemConflictPolicy,
     ClassificationSystemIdArrayItem,
+    ClassificationSystemUpdate,
     ClassificationSystemsWithItem,
     ElementClassification,
     ElementClassificationItemArray,
@@ -33,7 +43,7 @@ from multiconn_archicad.models.tapir.types import (
 )
 
 if TYPE_CHECKING:
-    from multiconn_archicad.core.core_commands import CoreCommands
+    from multiconn_archicad.clients.core.core_commands import CoreCommands
 
 
 class ClassificationCommands:
@@ -192,6 +202,41 @@ class ClassificationCommands:
         validated_response = GetClassificationsOfElementsResult.model_validate(response_dict)
         return validated_response.elementClassifications
 
+    def import_classifications_xml(
+        self,
+        xml: str,
+        system_conflict_policy: ClassificationSystemConflictPolicy,
+        item_conflict_policy: ClassificationItemConflictPolicy,
+    ) -> ImportClassificationsXmlResult:
+        """
+        Imports a Classification Manager XML export, with the given policies for systems and
+        items that already exist. Returns the systems and items it created and removed.
+
+        Args:
+            xml (str): A Classification Manager export (XML) to import.
+            system_conflict_policy (ClassificationSystemConflictPolicy)
+            item_conflict_policy (ClassificationItemConflictPolicy)
+
+        Returns:
+            ImportClassificationsXmlResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "xml": xml,
+            "systemConflictPolicy": system_conflict_policy,
+            "itemConflictPolicy": item_conflict_policy,
+        }
+        validated_params = ImportClassificationsXmlParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "ImportClassificationsXml", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = ImportClassificationsXmlResult.model_validate(response_dict)
+        return validated_response
+
     def set_classifications_of_elements(
         self, element_classifications: list[ElementClassification]
     ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
@@ -221,4 +266,65 @@ class ClassificationCommands:
             "SetClassificationsOfElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = SetClassificationsOfElementsResult.model_validate(response_dict)
+        return validated_response.executionResults
+
+    def update_classification_items(
+        self, classification_items: list[ClassificationItemUpdate]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Updates the id (code), name and/or description of existing Classification Items, keeping
+        their guid and so the elements classified with them. Items cannot be moved to another
+        parent.
+
+        Args:
+            classification_items (list[ClassificationItemUpdate]): The classification items to
+                update. Only the fields given change; items keep their guid and their parent.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "classificationItems": classification_items,
+        }
+        validated_params = UpdateClassificationItemsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "UpdateClassificationItems", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = UpdateClassificationItemsResult.model_validate(response_dict)
+        return validated_response.executionResults
+
+    def update_classification_systems(
+        self, classification_systems: list[ClassificationSystemUpdate]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Updates the name, description, source, version and/or date of existing Classification
+        Systems, keeping their guid.
+
+        Args:
+            classification_systems (list[ClassificationSystemUpdate]): The classification
+                systems to update. Only the fields given change.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "classificationSystems": classification_systems,
+        }
+        validated_params = UpdateClassificationSystemsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "UpdateClassificationSystems", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = UpdateClassificationSystemsResult.model_validate(response_dict)
         return validated_response.executionResults

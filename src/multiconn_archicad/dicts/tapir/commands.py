@@ -29,8 +29,12 @@ from .types import (
     BuildingMaterialData,
     BuildingMaterialPhysicalPropertiesList,
     CircleData,
+    ClassificationItemConflictPolicy,
     ClassificationItemIds,
+    ClassificationItemUpdate,
+    ClassificationSystemConflictPolicy,
     ClassificationSystemIds,
+    ClassificationSystemUpdate,
     ClassificationSystemsWithItems,
     Collision,
     ColorRGB,
@@ -92,6 +96,7 @@ from .types import (
     ElementsWithMoveVector,
     ElementsWithRotation,
     ElementsWrapperOrError,
+    EmbeddedLibraryItem,
     ExecutionResult,
     ExecutionResults,
     FavoriteRename,
@@ -106,6 +111,7 @@ from .types import (
     GDLParameterList,
     GroupIdArrayItem,
     GroupIdOrError,
+    GuidId,
     HatchData,
     HotlinkInstanceChange,
     HotlinkInstanceCreation,
@@ -113,6 +119,8 @@ from .types import (
     HotlinkNodeCreatedOrError,
     Hotlinks,
     HotspotData,
+    IFCElementsToExport,
+    IFCExportTranslator,
     InteriorElevationData,
     Issue,
     IssueCommentStatus,
@@ -197,13 +205,16 @@ from .types import (
     ProjectInfoFields,
     ProjectLocation,
     PropertyDefinitionArrayItem,
+    PropertyDefinitionUpdate,
     PropertyDetails,
-    PropertyExpressionUpdate,
     PropertyGroupArrayItem,
+    PropertyGroupDetails,
     PropertyGroupIdArrayItem,
+    PropertyGroupUpdate,
     PropertyIdArrayItem,
     PropertyIdOrErrorArray,
     PropertyIds,
+    PropertyImportConflictPolicy,
     PropertyValuesOrErrorArray,
     RevisionChange,
     RevisionChangesOfEntities,
@@ -261,6 +272,10 @@ class CreateDesignOptionSetsParameters(TypedDict):
 
 class CreateHotlinkNodesParameters(TypedDict):
     hotlinkNodes: list[HotlinkNode]
+
+
+class DeleteEmbeddedLibraryItemsParameters(TypedDict):
+    embeddedLibraryItems: list[EmbeddedLibraryItem]
 
 
 class DeleteProjectInfoFieldsParameters(TypedDict):
@@ -375,6 +390,14 @@ class IFCFileOperationParameters(TypedDict):
     method: Literal["save", "merge", "open"]
     ifcFilePath: str
     fileType: NotRequired[Literal["ifc", "ifcxml", "ifczip", "ifcxmlzip"]]
+    translatorName: NotRequired[str]
+    elementsToExport: NotRequired[IFCElementsToExport]
+
+
+class ImportClassificationsXmlParameters(TypedDict):
+    xml: str
+    systemConflictPolicy: ClassificationSystemConflictPolicy
+    itemConflictPolicy: ClassificationItemConflictPolicy
 
 
 class ImportFavoritesParameters(TypedDict):
@@ -437,6 +460,14 @@ class RenameNavigatorItemParameters(TypedDict):
     newId: NotRequired[str]
 
 
+class SaveProjectAsArchiveParameters(TypedDict):
+    archiveFilePath: str
+    includeLibraryParts: NotRequired[bool]
+    includeProperties: NotRequired[bool]
+    includeTextures: NotRequired[bool]
+    includeBackgroundPicture: NotRequired[bool]
+
+
 class Set3DCutPlanesParameters(TypedDict):
     cutPlanes: NotRequired[list[CutPlane]]
 
@@ -494,6 +525,10 @@ class ShowScriptUIParameters(TypedDict):
     allowSelfSignedCertificates: NotRequired[bool]
     clearCookies: NotRequired[bool]
     autoHeight: NotRequired[bool]
+
+
+class UpdatePropertyGroupsParameters(TypedDict):
+    propertyGroups: list[PropertyGroupUpdate]
 
 
 class UpdateZonesParameters(TypedDict):
@@ -948,6 +983,10 @@ class GetGroupsOfElementsParameters(TypedDict):
     elements: Elements
 
 
+class GetIFCExportTranslatorsResult(TypedDict):
+    translators: list[IFCExportTranslator]
+
+
 class GetIFCIdsOfElementsParameters(TypedDict):
     elements: Elements
 
@@ -1145,7 +1184,24 @@ HighlightElementsResult: TypeAlias = ExecutionResult
 IFCFileOperationResult: TypeAlias = ExecutionResult
 
 
+class ImportClassificationsXmlResult(TypedDict):
+    executionResult: ExecutionResult
+    created: list[GuidId]
+    removed: list[GuidId]
+
+
 ImportIssuesFromBCFResult: TypeAlias = ExecutionResult
+
+
+class ImportPropertiesXmlParameters(TypedDict):
+    xml: str
+    conflictPolicy: PropertyImportConflictPolicy
+
+
+class ImportPropertiesXmlResult(TypedDict):
+    executionResult: ExecutionResult
+    created: list[GuidId]
+    removed: list[GuidId]
 
 
 class LockElementsParameters(TypedDict):
@@ -1341,6 +1397,9 @@ class SaveAsModuleFileParameters(TypedDict):
 SaveAsModuleFileResult: TypeAlias = ExecutionResult
 
 
+SaveProjectAsArchiveResult: TypeAlias = ExecutionResult
+
+
 SaveProjectResult: TypeAlias = ExecutionResult
 
 
@@ -1444,6 +1503,22 @@ class UnlockElementsParameters(TypedDict):
 UnlockElementsResult: TypeAlias = ExecutionResult
 
 
+class UpdateClassificationItemsParameters(TypedDict):
+    classificationItems: list[ClassificationItemUpdate]
+
+
+class UpdateClassificationItemsResult(TypedDict):
+    executionResults: ExecutionResults
+
+
+class UpdateClassificationSystemsParameters(TypedDict):
+    classificationSystems: list[ClassificationSystemUpdate]
+
+
+class UpdateClassificationSystemsResult(TypedDict):
+    executionResults: ExecutionResults
+
+
 class UpdateDrawingsParameters(TypedDict):
     elements: Elements
 
@@ -1459,11 +1534,11 @@ class UpdateFavoritesFromElementsResult(TypedDict):
     executionResults: ExecutionResults
 
 
-class UpdatePropertyDefinitionsParameters(TypedDict):
-    propertyDefinitions: list[PropertyExpressionUpdate]
-
-
 class UpdatePropertyDefinitionsResult(TypedDict):
+    executionResults: ExecutionResults
+
+
+class UpdatePropertyGroupsResult(TypedDict):
     executionResults: ExecutionResults
 
 
@@ -1475,6 +1550,7 @@ AddCommentToIssueResult: TypeAlias = ExecutionResult
 
 class AddFilesToEmbeddedLibraryParameters(TypedDict):
     files: LibraryFileAdditions
+    overwriteExisting: NotRequired[bool]
 
 
 class AddFilesToEmbeddedLibraryResult(TypedDict):
@@ -1872,7 +1948,12 @@ class DeleteElementsParameters(TypedDict):
     elements: Elements
 
 
-DeleteElementsResult: TypeAlias = ExecutionResult
+class DeleteElementsResult(TypedDict):
+    executionResults: ExecutionResults
+
+
+class DeleteEmbeddedLibraryItemsResult(TypedDict):
+    executionResults: ExecutionResults
 
 
 class DeleteFavoritesResult(TypedDict):
@@ -2121,6 +2202,7 @@ class CreateZonesParameters(TypedDict):
 
 class GetAllPropertiesResult(TypedDict):
     properties: list[PropertyDetails]
+    propertyGroups: NotRequired[list[PropertyGroupDetails]]
 
 
 GetAttributesByTypeResult: TypeAlias = AttributeHeadersOrError
@@ -2176,6 +2258,10 @@ class ModifyRoofsParameters(TypedDict):
 
 class ModifySlabsParameters(TypedDict):
     slabsWithDetails: list[SlabWithDetails]
+
+
+class UpdatePropertyDefinitionsParameters(TypedDict):
+    propertyDefinitions: list[PropertyDefinitionUpdate]
 
 
 class CreateGroupsParameters(TypedDict):

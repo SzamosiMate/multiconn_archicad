@@ -113,12 +113,18 @@ BuildingMaterialPhysicalPropertiesList: TypeAlias = list[BuildingMaterialPhysica
 """A list of building material physical properties"""
 
 
+ClassificationItemConflictPolicy: TypeAlias = Literal["replace", "skip"]
+
+
 class ClassificationItemDetails(TypedDict):
     """The details of a classification item."""
     id: str
     name: str
     description: str
     children: NotRequired[list[ClassificationItemDetails]]
+
+
+ClassificationSystemConflictPolicy: TypeAlias = Literal["merge", "replace", "skip"]
 
 
 class ColorRGB(TypedDict):
@@ -220,6 +226,10 @@ class CurtainWallSegmentDetails(TypedDict):
 Date: TypeAlias = str
 
 
+class EmbeddedLibraryItem(TypedDict):
+    path: str
+
+
 class DesignOptionData(TypedDict):
     name: str
     id: str
@@ -279,6 +289,7 @@ class DrawingSettings(TypedDict):
     ratio: NotRequired[float]
     drawingScale: NotRequired[float]
     modelOffset: NotRequired[Coordinate2D]
+    isCutWithFrame: NotRequired[bool]
     clipPolygon: NotRequired[list[Coordinate2D]]
     nameType: NotRequired[DrawingNameType]
     customName: NotRequired[str]
@@ -591,6 +602,20 @@ class HotspotSettings(TypedDict):
     position: NotRequired[Coordinate2D]
     height: NotRequired[float]
     penIndex: NotRequired[int]
+
+
+IFCElementsToExport: TypeAlias = Literal[
+    "EntireProject",
+    "VisibleElementsOnAllStories",
+    "AllElementsOnCurrentStory",
+    "VisibleElementsOnCurrentStory",
+    "SelectedElementsOnly",
+]
+
+
+class IFCExportTranslator(TypedDict):
+    name: str
+    preview: bool
 
 
 class InteriorElevationData(TypedDict):
@@ -1271,6 +1296,16 @@ PropertyDataType: TypeAlias = Literal[
 ]
 
 
+class PropertyEnumValueRemoval(TypedDict):
+    enumValueId: GuidId
+
+
+class PropertyEnumValueRename(TypedDict):
+    enumValueId: GuidId
+    displayValue: str
+    nonLocalizedValue: NotRequired[str]
+
+
 class PropertyGroup(TypedDict):
     """Represents a property group."""
     name: str
@@ -1292,6 +1327,12 @@ class PropertyGroupIdArrayItem(TypedDict):
     propertyGroupId: PropertyGroupId
 
 
+class PropertyGroupUpdate(TypedDict):
+    propertyGroupId: PropertyGroupId
+    name: NotRequired[str]
+    description: NotRequired[str]
+
+
 class PropertyId(TypedDict):
     """The identifier of a property."""
     guid: Guid
@@ -1311,6 +1352,9 @@ PropertyIdOrErrorArray: TypeAlias = list[PropertyIdOrError]
 
 PropertyIds: TypeAlias = list[PropertyIdArrayItem]
 """A list of property identifiers."""
+
+
+PropertyImportConflictPolicy: TypeAlias = Literal["append", "replace", "skip"]
 
 
 class PropertyValue(TypedDict):
@@ -1856,6 +1900,7 @@ class BeamData(TypedDict):
     width: NotRequired[float]
     height: NotRequired[float]
     anchorPoint: NotRequired[BeamAnchorPoint]
+    circleBased: NotRequired[bool]
     isWidthAndHeightLinked: NotRequired[bool]
     buildingMaterialId: NotRequired[AttributeId]
     profileId: NotRequired[AttributeId]
@@ -1952,6 +1997,13 @@ ClassificationItemIds: TypeAlias = list[ClassificationItemIdArrayItem]
 """A list of classification item identifiers."""
 
 
+class ClassificationItemUpdate(TypedDict):
+    classificationItemId: ClassificationItemId
+    id: NotRequired[str]
+    name: NotRequired[str]
+    description: NotRequired[str]
+
+
 class ClassificationSystemDetails(TypedDict):
     """The details of a classification system."""
     name: str
@@ -1972,6 +2024,15 @@ class ClassificationSystemIdArrayItem(TypedDict):
 
 ClassificationSystemIds: TypeAlias = list[ClassificationSystemIdArrayItem]
 """A list of classification system identifiers."""
+
+
+class ClassificationSystemUpdate(TypedDict):
+    classificationSystemId: ClassificationSystemId
+    name: NotRequired[str]
+    description: NotRequired[str]
+    source: NotRequired[str]
+    version: NotRequired[str]
+    date: NotRequired[Date]
 
 
 class ClassificationSystemsWithItem(TypedDict):
@@ -2149,9 +2210,13 @@ DocumentRevisionReferences: TypeAlias = list[DocumentRevisionReference]
 class DrawingData(TypedDict):
     navigatorItemId: NavigatorItemId
     layoutDatabaseId: NotRequired[DatabaseId]
-    name: str
+    name: NotRequired[str]
+    nameType: NotRequired[DrawingNameType]
     position: Coordinate2D
     scale: NotRequired[float]
+    angle: NotRequired[float]
+    drawingScale: NotRequired[float]
+    modelOffset: NotRequired[Coordinate2D]
     clipPolygon: NotRequired[list[Coordinate2D]]
 
 
@@ -3029,7 +3094,7 @@ class MorphPolygon(TypedDict):
 
 
 class DesignOptionAndSetPair(TypedDict):
-    designOptionId: NotRequired[DesignOptionId]
+    designOptionId: DesignOptionId
     setName: str
 
 
@@ -3282,16 +3347,24 @@ class ProfileSkinData(TypedDict):
     edgeOverrides: NotRequired[list[ProfileEdgeOverride]]
 
 
+class PropertyAvailabilityUpdate(TypedDict):
+    """Classification items the property is available for: set replaces the list, add and remove edit it."""
+    set: NotRequired[list[ClassificationItemIdArrayItem]]
+    add: NotRequired[list[ClassificationItemIdArrayItem]]
+    remove: NotRequired[list[ClassificationItemIdArrayItem]]
+
+
 class Group(TypedDict):
     """The property group defined by name or id. If both fields exists the id will be used."""
     propertyGroupId: NotRequired[PropertyGroupId]
     name: NotRequired[str]
 
 
-class PropertyExpressionUpdate(TypedDict):
-    propertyId: PropertyId
-    expressions: NotRequired[list[str]]
-    possibleEnumValues: NotRequired[EnumValuesToAdd]
+class PropertyGroupDetails(TypedDict):
+    propertyGroupId: PropertyGroupId
+    name: str
+    description: NotRequired[str]
+    isCustom: bool
 
 
 class ElementPair(TypedDict):
@@ -3836,6 +3909,7 @@ class BeamDetails(TypedDict):
     holes: NotRequired[list[BeamHole]]
     width: NotRequired[float]
     height: NotRequired[float]
+    circleBased: NotRequired[bool]
     isWidthAndHeightLinked: NotRequired[bool]
     buildingMaterialId: NotRequired[AttributeId]
     profileId: NotRequired[AttributeId]
@@ -3858,6 +3932,7 @@ class BeamWithDetails(TypedDict):
     width: NotRequired[float]
     height: NotRequired[float]
     isWidthAndHeightLinked: NotRequired[bool]
+    circleBased: NotRequired[bool]
     buildingMaterialId: NotRequired[AttributeId]
     profileId: NotRequired[AttributeId]
     holes: NotRequired[list[BeamHole]]
@@ -4092,9 +4167,9 @@ class DrawingDetails(TypedDict):
     bounds: BoundingBox2D
     clipPolygon: NotRequired[list[Coordinate2D]]
     navigatorItemId: NavigatorItemId
-    nameType: Literal["ViewOrSourceFileName", "ViewIdAndName", "CustomName"]
+    nameType: DrawingNameType
     customName: NotRequired[str]
-    numberingType: Literal["ByLayout", "ByViewId", "CustomNumber"]
+    numberingType: DrawingNumberingType
     customNumber: NotRequired[str]
     isInNumbering: bool
     titleLibraryPartIndex: float
@@ -4576,6 +4651,11 @@ class PropertyDetails(TypedDict):
     propertyIsEditable: bool
     isExpressionBased: bool
     expressions: NotRequired[list[str]]
+    propertyGroupId: NotRequired[PropertyGroupId]
+    propertyDescription: NotRequired[str]
+    defaultValueDisplay: NotRequired[str]
+    availability: NotRequired[list[ClassificationItemIdArrayItem]]
+    defaultEnumValueIds: NotRequired[list[GuidId]]
 
 
 PropertyValueDetails: TypeAlias = NormalOrUserUndefinedPropertyValue | NotAvailablePropertyValue
@@ -4855,6 +4935,20 @@ class PropertyDefinitionArrayItem(TypedDict):
     propertyDefinition: PropertyDefinition
 
 
+class PropertyDefinitionUpdate(TypedDict):
+    propertyId: PropertyId
+    name: NotRequired[str]
+    description: NotRequired[str]
+    groupId: NotRequired[PropertyGroupId]
+    defaultValue: NotRequired[PropertyDefaultValue]
+    expressions: NotRequired[list[str]]
+    availability: NotRequired[PropertyAvailabilityUpdate]
+    possibleEnumValues: NotRequired[EnumValuesToAdd]
+    renameEnumValues: NotRequired[list[PropertyEnumValueRename]]
+    removeEnumValues: NotRequired[list[PropertyEnumValueRemoval]]
+    enumOrder: NotRequired[list[str]]
+
+
 TypeSpecificDetails: TypeAlias = (
     HotlinkDetails
     | WallDetails
@@ -4947,8 +5041,12 @@ class NavigatorItem(TypedDict):
     customUiId: bool
     customName: bool
     isIndependent: bool
+    sourceNavigatorItemId: NotRequired[NavigatorItemId]
     children: NotRequired[list[NavigatorItemArrayItem]]
 
 
 class NavigatorItemArrayItem(TypedDict):
     navigatorItem: NavigatorItem
+
+
+PropertyExpressionUpdate: TypeAlias = PropertyDefinitionUpdate

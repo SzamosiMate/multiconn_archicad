@@ -33,8 +33,12 @@ from .types import (
     BuildingMaterialData,
     BuildingMaterialPhysicalPropertiesArrayItem,
     CircleData,
+    ClassificationItemConflictPolicy,
     ClassificationItemIdArrayItem,
+    ClassificationItemUpdate,
+    ClassificationSystemConflictPolicy,
     ClassificationSystemIdArrayItem,
+    ClassificationSystemUpdate,
     ClassificationSystemsWithItem,
     Collision,
     ColorRGB,
@@ -93,6 +97,7 @@ from .types import (
     ElementsWithMoveVector,
     ElementsWithRotation,
     ElementsWrapper,
+    EmbeddedLibraryItem,
     Error,
     ErrorItem,
     FailedExecutionResult,
@@ -108,6 +113,7 @@ from .types import (
     Format,
     GDLParameterList,
     GroupIdArrayItem,
+    GuidId,
     HatchData,
     HighlightedColor,
     Hotlink,
@@ -116,6 +122,8 @@ from .types import (
     HotlinkNode,
     HotlinkNodeCreated,
     HotspotData,
+    IFCElementsToExport,
+    IFCExportTranslator,
     ImageType,
     InteriorElevationData,
     Issue,
@@ -201,11 +209,14 @@ from .types import (
     ProjectInfoFieldData,
     ProjectLocation,
     PropertyDefinitionArrayItem,
+    PropertyDefinitionUpdate,
     PropertyDetails,
-    PropertyExpressionUpdate,
     PropertyGroupArrayItem,
+    PropertyGroupDetails,
     PropertyGroupIdArrayItem,
+    PropertyGroupUpdate,
     PropertyIdArrayItem,
+    PropertyImportConflictPolicy,
     PropertyValuesArrayItem,
     RevisionChange,
     RevisionChangesArrayItem,
@@ -273,6 +284,13 @@ class CreateHotlinkNodesParameters(APIModel):
         Field(
             description="The hotlink module nodes to create. A node that already points at the same source file (compared case-insensitively) is returned as it is, with existing: true, and the name and story settings asked for are ignored. On Archicad 25 a node that has not been placed yet cannot be found, so a repeated request there creates a second node."
         ),
+    ]
+
+
+class DeleteEmbeddedLibraryItemsParameters(APIModel):
+    embeddedLibraryItems: Annotated[
+        list[EmbeddedLibraryItem],
+        Field(description="A list of embedded library items to delete."),
     ]
 
 
@@ -479,6 +497,19 @@ class IFCFileOperationParameters(APIModel):
         FileType | None,
         Field(description="The type of the IFC file. The default is 'ifc'."),
     ] = None
+    translatorName: Annotated[
+        str | None,
+        Field(
+            description="Only for the save method: the name of the IFC export translator to save with, as GetIFCExportTranslators lists them. Without it the save runs with the translator Archicad would offer in its own Save dialog. Needs a fileType of ifc or ifczip (ifc or ifcxml on Archicad 25 and 26)."
+        ),
+    ] = None
+    elementsToExport: IFCElementsToExport | None = None
+
+
+class ImportClassificationsXmlParameters(APIModel):
+    xml: Annotated[str, Field(description="A Classification Manager export (XML) to import.")]
+    systemConflictPolicy: ClassificationSystemConflictPolicy
+    itemConflictPolicy: ClassificationItemConflictPolicy
 
 
 class ImportFavoritesParameters(APIModel):
@@ -583,6 +614,33 @@ class RenameNavigatorItemParameters(APIModel):
     navigatorItemId: NavigatorItemId
     newName: str | None = None
     newId: str | None = None
+
+
+class SaveProjectAsArchiveParameters(APIModel):
+    archiveFilePath: Annotated[
+        str,
+        Field(
+            description="Absolute path of the .pla archive to write. An existing file is overwritten. The archive becomes the open project, as Save As does."
+        ),
+    ]
+    includeLibraryParts: Annotated[
+        bool | None,
+        Field(
+            description="Optional, true by default. Whether the library parts the project uses go into the archive, which makes the archive usable as a linked library of another project."
+        ),
+    ] = None
+    includeProperties: Annotated[
+        bool | None,
+        Field(description="Optional, true by default. Whether the properties go into the archive."),
+    ] = None
+    includeTextures: Annotated[
+        bool | None,
+        Field(description="Optional, false by default. Whether the linked textures go into the archive."),
+    ] = None
+    includeBackgroundPicture: Annotated[
+        bool | None,
+        Field(description="Optional, false by default. Whether the background picture goes into the archive."),
+    ] = None
 
 
 class Set3DCutPlanesParameters(APIModel):
@@ -725,6 +783,13 @@ class ShowScriptUIParameters(APIModel):
             description="Automatically resizes the palette's height to fit the page content as it changes. Defaults to false."
         ),
     ] = None
+
+
+class UpdatePropertyGroupsParameters(APIModel):
+    propertyGroups: Annotated[
+        list[PropertyGroupUpdate],
+        Field(description="The custom property groups to update. Only the fields given change."),
+    ]
 
 
 class UpdateZonesParameters(APIModel):
@@ -1390,6 +1455,13 @@ class GetGroupsOfElementsParameters(APIModel):
     elements: Annotated[list[ElementIdArrayItem], Field(description="A list of elements.")]
 
 
+class GetIFCExportTranslatorsResult(APIModel):
+    translators: Annotated[
+        list[IFCExportTranslator],
+        Field(description="The IFC export translators of the project, the preview translator first."),
+    ]
+
+
 class GetIFCIdsOfElementsParameters(APIModel):
     elements: Annotated[list[ElementIdArrayItem], Field(description="A list of elements.")]
 
@@ -1709,7 +1781,30 @@ HighlightElementsResult: TypeAlias = SuccessfulExecutionResult | FailedExecution
 IFCFileOperationResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
 
 
+class ImportClassificationsXmlResult(APIModel):
+    executionResult: Annotated[
+        SuccessfulExecutionResult | FailedExecutionResult,
+        Field(description="The result of the execution."),
+    ]
+    created: list[GuidId]
+    removed: list[GuidId]
+
+
 ImportIssuesFromBCFResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
+
+
+class ImportPropertiesXmlParameters(APIModel):
+    xml: Annotated[str, Field(description="A Property Manager export (XML) to import.")]
+    conflictPolicy: PropertyImportConflictPolicy
+
+
+class ImportPropertiesXmlResult(APIModel):
+    executionResult: Annotated[
+        SuccessfulExecutionResult | FailedExecutionResult,
+        Field(description="The result of the execution."),
+    ]
+    created: list[GuidId]
+    removed: list[GuidId]
 
 
 class LockElementsParameters(APIModel):
@@ -2014,6 +2109,9 @@ class SaveAsModuleFileParameters(APIModel):
 SaveAsModuleFileResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
 
 
+SaveProjectAsArchiveResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
+
+
 SaveProjectResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
 
 
@@ -2164,6 +2262,36 @@ class UnlockElementsParameters(APIModel):
 UnlockElementsResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
 
 
+class UpdateClassificationItemsParameters(APIModel):
+    classificationItems: Annotated[
+        list[ClassificationItemUpdate],
+        Field(
+            description="The classification items to update. Only the fields given change; items keep their guid and their parent."
+        ),
+    ]
+
+
+class UpdateClassificationItemsResult(APIModel):
+    executionResults: Annotated[
+        list[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
+
+
+class UpdateClassificationSystemsParameters(APIModel):
+    classificationSystems: Annotated[
+        list[ClassificationSystemUpdate],
+        Field(description="The classification systems to update. Only the fields given change."),
+    ]
+
+
+class UpdateClassificationSystemsResult(APIModel):
+    executionResults: Annotated[
+        list[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
+
+
 class UpdateDrawingsParameters(APIModel):
     elements: Annotated[list[ElementIdArrayItem], Field(description="A list of elements.")]
 
@@ -2182,14 +2310,14 @@ class UpdateFavoritesFromElementsResult(APIModel):
     ]
 
 
-class UpdatePropertyDefinitionsParameters(APIModel):
-    propertyDefinitions: Annotated[
-        list[PropertyExpressionUpdate],
-        Field(description="The property definitions to update."),
+class UpdatePropertyDefinitionsResult(APIModel):
+    executionResults: Annotated[
+        list[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
     ]
 
 
-class UpdatePropertyDefinitionsResult(APIModel):
+class UpdatePropertyGroupsResult(APIModel):
     executionResults: Annotated[
         list[SuccessfulExecutionResult | FailedExecutionResult],
         Field(description="A list of execution results."),
@@ -2207,6 +2335,12 @@ class AddFilesToEmbeddedLibraryParameters(APIModel):
         list[LibraryFileAddition],
         Field(description="A list of library file additions to the embedded library"),
     ]
+    overwriteExisting: Annotated[
+        bool | None,
+        Field(
+            description="Optional. When true, an embedded library item already existing on an outputPath is deleted first, so the newly added file replaces the loaded library part. By default false: the existing loaded part stays in use. Requires Archicad 27 or newer."
+        ),
+    ] = None
 
 
 class AddFilesToEmbeddedLibraryResult(APIModel):
@@ -2864,7 +2998,18 @@ class DeleteElementsParameters(APIModel):
     elements: Annotated[list[ElementIdArrayItem], Field(description="A list of elements.")]
 
 
-DeleteElementsResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
+class DeleteElementsResult(APIModel):
+    executionResults: Annotated[
+        list[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
+
+
+class DeleteEmbeddedLibraryItemsResult(APIModel):
+    executionResults: Annotated[
+        list[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
 
 
 class DeleteFavoritesResult(APIModel):
@@ -3212,6 +3357,10 @@ class CreateZonesParameters(APIModel):
 
 class GetAllPropertiesResult(APIModel):
     properties: Annotated[list[PropertyDetails], Field(description="A list of property identifiers.")]
+    propertyGroups: Annotated[
+        list[PropertyGroupDetails] | None,
+        Field(description="Every property group, including empty ones."),
+    ] = None
 
 
 GetAttributesByTypeResult: TypeAlias = AttributeHeadersWrapper | ErrorItem
@@ -3295,6 +3444,15 @@ class ModifyRoofsParameters(APIModel):
 
 class ModifySlabsParameters(APIModel):
     slabsWithDetails: list[SlabWithDetails]
+
+
+class UpdatePropertyDefinitionsParameters(APIModel):
+    propertyDefinitions: Annotated[
+        list[PropertyDefinitionUpdate],
+        Field(
+            description="The property definitions to update. Only the fields given change; the definition keeps its guid, so element values survive."
+        ),
+    ]
 
 
 class CreateGroupsParameters(APIModel):

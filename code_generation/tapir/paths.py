@@ -19,7 +19,7 @@ class TapirApiPaths:
     # --- Final Output Directories ---
     FINAL_MODELS_DIR = FINAL_SRC_DIR / "models" / "tapir"
     FINAL_DICTS_DIR = FINAL_SRC_DIR / "dicts" / "tapir"
-    FINAL_CORE_DIR = FINAL_SRC_DIR / "core"
+    FINAL_CORE_DIR = FINAL_SRC_DIR / "clients" / "core"
 
     # --- Schema & Name List Outputs (Intermediate) ---
     UNPATCHED_SCHEMA_OUTPUT = SCHEMA_DIR / "tapir_unpatched_schema.json"

@@ -35,6 +35,8 @@ from multiconn_archicad.models.tapir.commands import (
     RebuildViewResult,
     SaveAsModuleFileParameters,
     SaveAsModuleFileResult,
+    SaveProjectAsArchiveParameters,
+    SaveProjectAsArchiveResult,
     SaveProjectResult,
     SetGeoLocationParameters,
     SetGeoLocationResult,
@@ -64,7 +66,7 @@ from multiconn_archicad.models.tapir.types import (
 )
 
 if TYPE_CHECKING:
-    from multiconn_archicad.core.core_commands import CoreCommands
+    from multiconn_archicad.clients.core.core_commands import CoreCommands
 
 
 class ProjectCommands:
@@ -524,6 +526,52 @@ class ProjectCommands:
         """
         response_dict = self._core.post_tapir_command("SaveProject")
         validated_response = TypeAdapter(SaveProjectResult).validate_python(response_dict)
+        return validated_response
+
+    def save_project_as_archive(
+        self,
+        archive_file_path: str,
+        include_library_parts: None | bool = None,
+        include_properties: None | bool = None,
+        include_textures: None | bool = None,
+        include_background_picture: None | bool = None,
+    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+        """
+        Saves the open project as an archive (.pla) file, with the library parts it uses inside.
+
+        Args:
+            archive_file_path (str): Absolute path of the .pla archive to write. An existing
+                file is overwritten. The archive becomes the open project, as Save As does.
+            include_library_parts (None | bool): Optional, true by default. Whether the library
+                parts the project uses go into the archive, which makes the archive usable as a
+                linked library of another project.
+            include_properties (None | bool): Optional, true by default. Whether the properties
+                go into the archive.
+            include_textures (None | bool): Optional, false by default. Whether the linked
+                textures go into the archive.
+            include_background_picture (None | bool): Optional, false by default. Whether the
+                background picture goes into the archive.
+
+        Returns:
+            FailedExecutionResult | SuccessfulExecutionResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "archiveFilePath": archive_file_path,
+            "includeLibraryParts": include_library_parts,
+            "includeProperties": include_properties,
+            "includeTextures": include_textures,
+            "includeBackgroundPicture": include_background_picture,
+        }
+        validated_params = SaveProjectAsArchiveParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "SaveProjectAsArchive", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = TypeAdapter(SaveProjectAsArchiveResult).validate_python(response_dict)
         return validated_response
 
     def set_geo_location(

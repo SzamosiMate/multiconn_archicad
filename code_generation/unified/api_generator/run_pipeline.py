@@ -1,6 +1,7 @@
 import subprocess
 import sys
 import pathlib
+import os
 
 
 # --- Path Setup ---
@@ -8,7 +9,7 @@ PIPELINE_ROOT = pathlib.Path(__file__).parent.parent.resolve()
 BUILD_DIR = PIPELINE_ROOT / "temp_files"
 PIPELINE_DIR = PIPELINE_ROOT / "api_generator"
 PROJECT_ROOT = PIPELINE_ROOT.parent.parent
-OUTPUT_DIR = PROJECT_ROOT / "src" / "multiconn_archicad" / "unified_api"
+OUTPUT_DIR = PROJECT_ROOT / "src" / "multiconn_archicad" / "clients" / "unified_api"
 TEST_OUTPUT_DIR = PROJECT_ROOT / "tests" / "generated"
 
 # Define intermediate file paths
@@ -22,7 +23,12 @@ def run_stage(script_name: str, args: list[str]):
     command = [sys.executable, str(script_path)] + args
 
     print(f"\n--- Running Stage: {script_name} ---")
-    result = subprocess.run(command, check=False)  # check=False to handle errors manually
+    env = os.environ.copy()
+    python_path = [str(PROJECT_ROOT), str(PROJECT_ROOT / "src")]
+    if env.get("PYTHONPATH"):
+        python_path.append(env["PYTHONPATH"])
+    env["PYTHONPATH"] = os.pathsep.join(python_path)
+    result = subprocess.run(command, check=False, env=env)  # check=False to handle errors manually
 
     if result.returncode != 0:
         print(f"❌ Error in stage {script_name}. Halting pipeline.", file=sys.stderr)

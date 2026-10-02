@@ -1,5 +1,6 @@
 import json
 import re
+from code_generation.shared.model_aliases import TAPIR_TYPE_ALIASES, render_type_aliases
 from code_generation.tapir.paths import tapir_paths
 
 
@@ -139,17 +140,20 @@ def main():
     print(f"Found {len(definitions_in_order)} total definitions.")
     print(f"Categorized into: {len(base_blocks)} base | {len(command_blocks)} command")
 
+    base_model_names_in_file = {get_definition_name(b) for b in base_blocks if get_definition_name(b)}
+    compatibility_aliases = render_type_aliases(TAPIR_TYPE_ALIASES, base_model_names_in_file)
+
     # --- Generate Base Models File (`types.py`) ---
     print("\nProcessing base models...")
     base_file_content = "\n".join(get_header_lines()) + "\n\n\n" + "\n\n\n".join(base_blocks)
+    if compatibility_aliases:
+        base_file_content += "\n\n\n" + compatibility_aliases
     final_base_content = remove_unused_imports(base_file_content)
     tapir_paths.FINAL_TYPED_DICT_TYPES.write_text(final_base_content + "\n", "utf-8")
     print(f"Wrote {len(base_blocks)} definitions to {tapir_paths.FINAL_TYPED_DICT_TYPES}")
 
     # --- Generate Command Models File (`commands.py`) ---
     print("\nProcessing command models...")
-    base_model_names_in_file = {get_definition_name(b) for b in base_blocks if get_definition_name(b)}
-
     needed_imports = set()
     for block in command_blocks:
         needed_imports.update(find_cross_file_dependencies(block, base_model_names_in_file))

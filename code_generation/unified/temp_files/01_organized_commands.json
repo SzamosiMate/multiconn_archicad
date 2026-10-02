@@ -76,7 +76,7 @@
             {
                 "name": "AddFilesToEmbeddedLibrary",
                 "group": "Library Commands",
-                "description": "Adds the given files into the embedded library.",
+                "description": "Adds the given files into the embedded library. With the overwriteExisting flag an embedded library item already existing on an outputPath is replaced (Archicad 27 or newer).",
                 "version": "1.2.2",
                 "source": "tapir"
             },
@@ -85,6 +85,13 @@
                 "group": "Library Commands",
                 "description": "Adds the given folders to the project's local libraries, skipping any already loaded.",
                 "version": "1.5.9",
+                "source": "tapir"
+            },
+            {
+                "name": "DeleteEmbeddedLibraryItems",
+                "group": "Library Commands",
+                "description": "Deletes the given items from the embedded library. The path of an item is the same relative path that AddFilesToEmbeddedLibrary takes as outputPath. Available from Archicad 27.",
+                "version": "1.6.0",
                 "source": "tapir"
             },
             {
@@ -521,6 +528,13 @@
                 "source": "tapir"
             },
             {
+                "name": "SaveProjectAsArchive",
+                "group": "Project Commands",
+                "description": "Saves the open project as an archive (.pla) file, with the library parts it uses inside.",
+                "version": "1.6.0",
+                "source": "tapir"
+            },
+            {
                 "name": "SetGeoLocation",
                 "group": "Project Commands",
                 "description": "Sets the project location details.",
@@ -553,7 +567,7 @@
             {
                 "name": "DeleteElements",
                 "group": "Element Commands",
-                "description": "Deletes elements.",
+                "description": "Deletes elements. Returns an execution result for each input element: an element that could not be deleted (for example because its layer is locked) gets a failed execution result instead of being skipped silently.",
                 "version": "1.2.1",
                 "source": "tapir"
             },
@@ -1268,10 +1282,31 @@
                 "source": "tapir"
             },
             {
+                "name": "ImportClassificationsXml",
+                "group": "Classification Commands",
+                "description": "Imports a Classification Manager XML export, with the given policies for systems and items that already exist. Returns the systems and items it created and removed.",
+                "version": "1.6.0",
+                "source": "tapir"
+            },
+            {
                 "name": "SetClassificationsOfElements",
                 "group": "Classification Commands",
                 "description": "Sets the classifications of elements. In order to set the classification of an element to unclassified, omit the classificationItemId field. It works for subelements of hierarchal elements also.",
                 "version": "1.0.7",
+                "source": "tapir"
+            },
+            {
+                "name": "UpdateClassificationItems",
+                "group": "Classification Commands",
+                "description": "Updates the id (code), name and/or description of existing Classification Items, keeping their guid and so the elements classified with them. Items cannot be moved to another parent.",
+                "version": "1.6.0",
+                "source": "tapir"
+            },
+            {
+                "name": "UpdateClassificationSystems",
+                "group": "Classification Commands",
+                "description": "Updates the name, description, source, version and/or date of existing Classification Systems, keeping their guid.",
+                "version": "1.6.0",
                 "source": "tapir"
             }
         ],
@@ -1507,6 +1542,13 @@
                 "source": "tapir"
             },
             {
+                "name": "ImportPropertiesXml",
+                "group": "Property Commands",
+                "description": "Imports a Property Manager XML export, with the given policy for names that already exist. Returns the property definitions it created and removed.",
+                "version": "1.6.0",
+                "source": "tapir"
+            },
+            {
                 "name": "SetPropertyValuesOfAttributes",
                 "group": "Property Commands",
                 "description": "Sets the property values of attributes.",
@@ -1523,8 +1565,15 @@
             {
                 "name": "UpdatePropertyDefinitions",
                 "group": "Property Commands",
-                "description": "Updates existing Custom Property Definitions: the expression(s) of an expression-based property, or the possible enum values of an enumeration property.",
+                "description": "Updates existing Custom Property Definitions in place, keeping their guid: name, description, group, default value or expressions, availability, and enum options (add, rename, remove, reorder).",
                 "version": "1.5.4",
+                "source": "tapir"
+            },
+            {
+                "name": "UpdatePropertyGroups",
+                "group": "Property Commands",
+                "description": "Updates the name and/or description of existing Custom Property Groups, keeping their guid.",
+                "version": "1.6.0",
                 "source": "tapir"
             }
         ],
@@ -1618,6 +1667,13 @@
                 "source": "tapir"
             },
             {
+                "name": "GetIFCExportTranslators",
+                "group": "IFC Commands",
+                "description": "Lists the IFC export translators of the project, the preview translator first. Pass one of the names to IFCFileOperation as translatorName.",
+                "version": "1.6.0",
+                "source": "tapir"
+            },
+            {
                 "name": "GetIFCIdsOfElements",
                 "group": "IFC Commands",
                 "description": "Retrieves the IFC identifiers of the given elements.",
@@ -1641,7 +1697,7 @@
             {
                 "name": "IFCFileOperation",
                 "group": "IFC Commands",
-                "description": "Executes an IFC file operation.",
+                "description": "Executes an IFC file operation: opens or merges an IFC file, or saves the project as an IFC file. A save can name the export translator to use.",
                 "version": "1.2.6",
                 "source": "tapir"
             }

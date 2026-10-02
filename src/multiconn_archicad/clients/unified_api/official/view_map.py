@@ -14,7 +14,7 @@ from multiconn_archicad.models.official.commands import (
 from multiconn_archicad.models.official.types import FolderParameters, NavigatorItemId
 
 if TYPE_CHECKING:
-    from multiconn_archicad.core.core_commands import CoreCommands
+    from multiconn_archicad.clients.core.core_commands import CoreCommands
 
 
 class ViewMapCommands:

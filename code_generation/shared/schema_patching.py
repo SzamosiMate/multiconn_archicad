@@ -253,12 +253,79 @@ def apply_permanent_patches(master_defs: dict[str, Any]):
     name_required_variants(master_defs, "TextData", [], ["TextDataWithText", "TextDataWithRuns"])
 
 
-def apply_temporary_patches(master_defs: dict[str, Any]):
+def apply_breaking_permanent_patches(master_defs: dict[str, Any]):
+    """Intentional client shape changes retained permanently, even if upstream differs.
+
+    Assign patches here only when the client design choice is established;
+    a difference from the upstream schema alone does not establish intent.
     """
-    Patches that we expect to be fixed on the Tapir side eventually.
-    Once the upstream schema is fixed, these can be deleted.
+    print("Applying breaking permanent schema patches (none assigned)...")
+
+
+def apply_breaking_source_review_patches(master_defs: dict[str, Any]):
+    """Shape-changing patches pending source review for a possible schema or local-patch error.
+
+    Check the Tapir implementation before proposing a breaking upstream fix.
+    Then move the patch to a settled category, remove it after an upstream fix,
+    or repair the local patch if its shape change was the error.
+    """
+    print("Applying breaking schema patches pending source review...")
+
+    # Read-model sharing tightens partial-update requiredness or changes beam-hole constraints.
+    replace_inline_schema_with_ref(master_defs, "SetGeoLocationParameters", ["projectLocation"], "ProjectLocation")
+    replace_inline_schema_with_ref(master_defs, "SetGeoLocationParameters", ["surveyPoint"], "SurveyPoint")
+    replace_inline_schema_with_ref(master_defs, "BeamWithDetails", ["holes", "items"], "BeamHole")
+
+    # Restricting an unconstrained public string to an enum is a schema-contract change.
+    replace_inline_schema_with_ref(master_defs, "MEPRoutingElementDetails", ["domain"], "MEPSystemDomain", preserve_description=True)
+    replace_inline_schema_with_ref(master_defs, "MEPPortDetails", ["domain"], "MEPSystemDomain", preserve_description=True)
+    replace_inline_schema_with_ref(master_defs, "GetMEPDistributionSystemsResult", ["distributionSystems", "items", "domain"], "MEPSystemDomain", preserve_description=True)
+    replace_inline_schema_with_ref(master_defs, "MEPSystemData", ["domain"], "MEPSystemDomain", preserve_description=True)
+    replace_inline_schema_with_ref(master_defs, "GetMEPElementsResult", ["elements", "items", "type"], "MEPElementType", preserve_description=True)
+
+    # Removing the named empty result changes the exported command-model surface.
+    _, export_result, _ = _require_target(master_defs, "ExportFavoritesResult", [])
+    if export_result != {"type": "object", "properties": {}, "additionalProperties": False}:
+        raise ValueError("ExportFavoritesResult changed upstream; review and remove its schema patch.")
+    del master_defs["ExportFavoritesResult"]
+
+
+def apply_temporary_patches(master_defs: dict[str, Any]):
+    """Planned non-breaking upstream schema fixes; removable after upstream adopts them.
+
+    Preserve established permanent generator/client workarounds. New 1.6.0
+    naming and equivalent-reference patches below are intended upstream fixes.
     """
     print("Applying temporary schema patches (pending upstream fixes)...")
+
+    # --- Tapir 1.6.0: name update payloads separately from creation and response data ---
+    extract_inline_schema(master_defs, "UpdateClassificationItemsParameters", ["classificationItems", "items"], "ClassificationItemUpdate")
+    extract_inline_schema(master_defs, "UpdateClassificationSystemsParameters", ["classificationSystems", "items"], "ClassificationSystemUpdate")
+    extract_inline_schema(master_defs, "UpdatePropertyGroupsParameters", ["propertyGroups", "items"], "PropertyGroupUpdate")
+    extract_inline_schema(master_defs, "GetAllPropertiesResult", ["propertyGroups", "items"], "PropertyGroupDetails")
+    extract_inline_schema(master_defs, "UpdatePropertyDefinitionsParameters", ["propertyDefinitions", "items"], "PropertyDefinitionUpdate")
+    extract_inline_schema(master_defs, "PropertyDefinitionUpdate", ["availability"], "PropertyAvailabilityUpdate")
+    extract_inline_schema(master_defs, "PropertyDefinitionUpdate", ["renameEnumValues", "items"], "PropertyEnumValueRename")
+    extract_inline_schema(master_defs, "PropertyDefinitionUpdate", ["removeEnumValues", "items"], "PropertyEnumValueRemoval")
+
+    # --- Domain-specific names for new command payloads and policies ---
+    extract_inline_schema(master_defs, "GetIFCExportTranslatorsResult", ["translators", "items"], "IFCExportTranslator")
+    extract_inline_enum(master_defs, "IFCFileOperationParameters", ["elementsToExport"], "IFCElementsToExport")
+    extract_inline_enum(master_defs, "ImportClassificationsXmlParameters", ["systemConflictPolicy"], "ClassificationSystemConflictPolicy")
+    extract_inline_enum(master_defs, "ImportClassificationsXmlParameters", ["itemConflictPolicy"], "ClassificationItemConflictPolicy")
+    extract_inline_enum(master_defs, "ImportPropertiesXmlParameters", ["conflictPolicy"], "PropertyImportConflictPolicy")
+
+    # --- Reuse identical drawing enums and GUID-only identifiers without widening unions ---
+    replace_inline_schema_with_ref(master_defs, "DrawingData", ["nameType"], "DrawingNameType", preserve_description=True)
+    replace_inline_schema_with_ref(master_defs, "DrawingDetails", ["nameType"], "DrawingNameType", preserve_description=True)
+    replace_inline_schema_with_ref(master_defs, "DrawingDetails", ["numberingType"], "DrawingNumberingType", preserve_description=True)
+    replace_inline_schema_with_ref(master_defs, "PropertyDetails", ["defaultEnumValueIds", "items"], "GuidId")
+    replace_inline_schema_with_ref(master_defs, "PropertyEnumValueRename", ["enumValueId"], "GuidId")
+    replace_inline_schema_with_ref(master_defs, "PropertyEnumValueRemoval", ["enumValueId"], "GuidId")
+    replace_inline_schema_with_ref(master_defs, "ImportClassificationsXmlResult", ["created", "items"], "GuidId")
+    replace_inline_schema_with_ref(master_defs, "ImportClassificationsXmlResult", ["removed", "items"], "GuidId")
+    replace_inline_schema_with_ref(master_defs, "ImportPropertiesXmlResult", ["created", "items"], "GuidId")
+    replace_inline_schema_with_ref(master_defs, "ImportPropertiesXmlResult", ["removed", "items"], "GuidId")
 
     # --- Extract specific inline Enums ---
     extract_inline_enum(master_defs, "WallDetails", ["structureType"], "WallStructureType")
@@ -291,7 +358,6 @@ def apply_temporary_patches(master_defs: dict[str, Any]):
     extract_inline_schema(master_defs, "DimensionData", ["witnessPoints", "items"], "CoordinateWitnessPoint")
     extract_inline_schema(master_defs, "AssociativeDimensionData", ["witnessPoints", "items"], "AssociativeWitnessPoint")
     extract_inline_schema(master_defs, "RenameFavoritesParameters", ["renames", "items"], "FavoriteRename")
-    extract_inline_schema(master_defs, "UpdatePropertyDefinitionsParameters", ["propertyDefinitions", "items"], "PropertyExpressionUpdate")
     extract_inline_schema(master_defs, "UpdateFavoritesFromElementsParameters", ["favoritesFromElements", "items"], "FavoritesFromElementUpdate")
     extract_inline_schema(master_defs, "RemoveSolidElementLinksParameters", ["solidLinks", "items"], "SolidLinkReference")
     extract_inline_schema(master_defs, "GetSolidElementLinksResult", ["solidLinks", "items"], "SolidLinksOfElement")
@@ -328,9 +394,6 @@ def apply_temporary_patches(master_defs: dict[str, Any]):
         master_defs, "GetElementsOfDesignOptionsResult", ["elementsOfDesignOptions"]
     )
     elements_of_design_options["items"] = {"$ref": "#/$defs/ElementsOfDesignOptionOrError"}
-
-    replace_inline_schema_with_ref(master_defs, "SetGeoLocationParameters", ["projectLocation"], "ProjectLocation")
-    replace_inline_schema_with_ref(master_defs, "SetGeoLocationParameters", ["surveyPoint"], "SurveyPoint")
 
     _, nav_window, _ = _require_target(master_defs, "NavigatorItemIdOrDatabaseIdAndWindowType", [])
     if "oneOf" in nav_window and len(nav_window["oneOf"]) > 1:
@@ -425,10 +488,9 @@ def apply_temporary_patches(master_defs: dict[str, Any]):
     extract_inline_enum(master_defs, "WallDetails", ["zoneRel"], "WallZoneRelation")
     replace_inline_schema_with_ref(master_defs, "WallWithDetails", ["zoneRel"], "WallZoneRelation")
 
-    # Beam holes: same item shape and same discriminator in both models
+    # Name beam-hole response schemas; modification sharing is pending source review.
     extract_inline_schema(master_defs, "BeamDetails", ["holes", "items"], "BeamHole")
     extract_inline_enum(master_defs, "BeamHole", ["type"], "BeamHoleType")
-    replace_inline_schema_with_ref(master_defs, "BeamWithDetails", ["holes", "items"], "BeamHole")
     extract_inline_enum(master_defs, "HatchOrientation", ["type"], "HatchOrientationType")
 
     # geometryType and profileType are NOT shared: the modification models accept fewer
@@ -442,9 +504,6 @@ def apply_temporary_patches(master_defs: dict[str, Any]):
     extract_inline_schema(
         master_defs, "CreateInteriorElevationsParameters", ["interiorElevationsData", "items"], "InteriorElevationData"
     )
-
-    # --- remove malformed Export Favorites result ---
-    master_defs.pop("ExportFavoritesResult", None)
 
     # --- MEP enums/schemas (Tapir 1.5.6) ---
     extract_inline_enum(master_defs, "GetMEPElementsParameters", ["elementTypes", "items"], "MEPElementType")
@@ -470,17 +529,9 @@ def apply_temporary_patches(master_defs: dict[str, Any]):
 
     # --- Unify MEP Domain schemas to point to MEPSystemDomain ---
     replace_inline_schema_with_ref(
-        master_defs, "MEPRoutingElementDetails", ["domain"], "MEPSystemDomain", preserve_description=True
-    )
-    replace_inline_schema_with_ref(
-        master_defs, "MEPPortDetails", ["domain"], "MEPSystemDomain", preserve_description=True
-    )
-    replace_inline_schema_with_ref(
         master_defs, "GetMEPElementsParameters", ["domains", "items"], "MEPSystemDomain", preserve_description=True
     )
-    replace_inline_schema_with_ref(master_defs,"GetMEPDistributionSystemsResult",["distributionSystems", "items", "domain"],"MEPSystemDomain", preserve_description=True)
     extract_inline_schema(master_defs, "GetMEPDistributionSystemsResult", ["distributionSystems", "items"], "MEPDistributionSystem")
-    replace_inline_schema_with_ref(master_defs, "MEPSystemData", ["domain"], "MEPSystemDomain", preserve_description=True)
     replace_inline_schema_with_ref(master_defs, "MEPElementData", ["domain"], "MEPSystemDomain", preserve_description=True)
     replace_inline_schema_with_ref(master_defs, "MEPRoutingElementData", ["domain"], "MEPSystemDomain", preserve_description=True)
 
@@ -492,11 +543,6 @@ def apply_temporary_patches(master_defs: dict[str, Any]):
     # --- Extract 4-value discrete MEP element type enum ---
     extract_inline_enum(
         master_defs, "MEPElementData", ["type"], "MEPComponentType"
-    )
-
-    # --- Point MEPElement.type to the broad 11-value MEPElementType ---
-    replace_inline_schema_with_ref(
-        master_defs, "MEPElement", ["type"], "MEPElementType", preserve_description=True
     )
 
     # --- Tapir 1.5.7: Object/Lamp repeat the story visibility and home story link objects ---

@@ -8,6 +8,7 @@ from pydantic import TypeAdapter
 from multiconn_archicad.models.tapir.commands import (
     GetElementsByIFCIdsParameters,
     GetElementsByIFCIdsResult,
+    GetIFCExportTranslatorsResult,
     GetIFCIdsOfElementsParameters,
     GetIFCIdsOfElementsResult,
     GetIFCPropertiesOfElementsParameters,
@@ -26,12 +27,14 @@ from multiconn_archicad.models.tapir.types import (
     ErrorItem,
     FailedExecutionResult,
     FileType,
+    IFCElementsToExport,
+    IFCExportTranslator,
     Method,
     SuccessfulExecutionResult,
 )
 
 if TYPE_CHECKING:
-    from multiconn_archicad.core.core_commands import CoreCommands
+    from multiconn_archicad.clients.core.core_commands import CoreCommands
 
 
 class IfcCommands:
@@ -64,6 +67,24 @@ class IfcCommands:
         )
         validated_response = GetElementsByIFCIdsResult.model_validate(response_dict)
         return validated_response.elementsByIFCIds
+
+    def get_ifc_export_translators(self) -> list[IFCExportTranslator]:
+        """
+        Lists the IFC export translators of the project, the preview translator first. Pass one
+        of the names to IFCFileOperation as translatorName.
+
+        Returns:
+            list[IFCExportTranslator]: The IFC export translators of the project, the preview
+                translator first.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        response_dict = self._core.post_tapir_command("GetIFCExportTranslators")
+        validated_response = GetIFCExportTranslatorsResult.model_validate(response_dict)
+        return validated_response.translators
 
     def get_ifc_ids_of_elements(self, elements: list[ElementIdArrayItem]) -> list[ElementIFCIds | ErrorItem]:
         """
@@ -145,15 +166,26 @@ class IfcCommands:
         return validated_response.elementIFCTypes
 
     def ifc_file_operation(
-        self, method: Method, ifc_file_path: str, file_type: FileType | None = None
+        self,
+        method: Method,
+        ifc_file_path: str,
+        file_type: FileType | None = None,
+        translator_name: None | str = None,
+        elements_to_export: IFCElementsToExport | None = None,
     ) -> FailedExecutionResult | SuccessfulExecutionResult:
         """
-        Executes an IFC file operation.
+        Executes an IFC file operation: opens or merges an IFC file, or saves the project as an
+        IFC file. A save can name the export translator to use.
 
         Args:
             method (Method): The file operation method to use.
             ifc_file_path (str): The target IFC file to use.
             file_type (FileType | None): The type of the IFC file. The default is 'ifc'.
+            translator_name (None | str): Only for the save method: the name of the IFC export
+                translator to save with, as GetIFCExportTranslators lists them. Without it the
+                save runs with the translator Archicad would offer in its own Save dialog. Needs
+                a fileType of ifc or ifczip (ifc or ifcxml on Archicad 25 and 26).
+            elements_to_export (IFCElementsToExport | None)
 
         Returns:
             FailedExecutionResult | SuccessfulExecutionResult
@@ -167,6 +199,8 @@ class IfcCommands:
             "method": method,
             "ifcFilePath": ifc_file_path,
             "fileType": file_type,
+            "translatorName": translator_name,
+            "elementsToExport": elements_to_export,
         }
         validated_params = IFCFileOperationParameters(**params_dict)
         response_dict = self._core.post_tapir_command(

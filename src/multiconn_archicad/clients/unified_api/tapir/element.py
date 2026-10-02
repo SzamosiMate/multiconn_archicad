@@ -100,7 +100,7 @@ from multiconn_archicad.models.tapir.types import (
 )
 
 if TYPE_CHECKING:
-    from multiconn_archicad.core.core_commands import CoreCommands
+    from multiconn_archicad.clients.core.core_commands import CoreCommands
 
 
 class ElementCommands:
@@ -139,15 +139,20 @@ class ElementCommands:
         validated_response = ChangeSelectionOfElementsResult.model_validate(response_dict)
         return validated_response
 
-    def delete_elements(self, elements: list[ElementIdArrayItem]) -> FailedExecutionResult | SuccessfulExecutionResult:
+    def delete_elements(
+        self, elements: list[ElementIdArrayItem]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
         """
-        Deletes elements.
+        Deletes elements. Returns an execution result for each input element: an element that
+        could not be deleted (for example because its layer is locked) gets a failed execution
+        result instead of being skipped silently.
 
         Args:
             elements (list[ElementIdArrayItem]): A list of elements.
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -161,8 +166,8 @@ class ElementCommands:
         response_dict = self._core.post_tapir_command(
             "DeleteElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
-        validated_response = TypeAdapter(DeleteElementsResult).validate_python(response_dict)
-        return validated_response
+        validated_response = DeleteElementsResult.model_validate(response_dict)
+        return validated_response.executionResults
 
     def filter_elements(
         self, elements: list[ElementIdArrayItem], filters: None | list[ElementFilter] = None

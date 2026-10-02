@@ -8,7 +8,7 @@ from pydantic import TypeAdapter
 from multiconn_archicad.models.official.commands import GetProductInfoResult, IsAliveResult
 
 if TYPE_CHECKING:
-    from multiconn_archicad.core.core_commands import CoreCommands
+    from multiconn_archicad.clients.core.core_commands import CoreCommands
 
 
 class BasicCommands:

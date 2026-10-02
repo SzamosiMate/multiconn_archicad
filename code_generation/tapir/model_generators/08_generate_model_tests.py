@@ -39,7 +39,7 @@ def collect_dependencies_recursively(
     collected_defs[name] = definition
     content_str = json.dumps(definition)
     dependencies = re.findall(r'"#/\$defs/(\w+)"', content_str)
-    for dep_name in set(dependencies):
+    for dep_name in sorted(set(dependencies)):
         collect_dependencies_recursively(dep_name, all_definitions, collected_defs, processed)
 
 
