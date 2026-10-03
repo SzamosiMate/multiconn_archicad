@@ -21,6 +21,10 @@ FIXTURES_DIR = Path(__file__).parent / "fixtures"
 class QuietThreadingHTTPServer(ThreadingHTTPServer):
     """A custom server that suppresses ONLY expected socket teardown errors."""
 
+    # Stress tests route all 21 simulated ports to this one listener. The
+    # Python 3.12/3.13 default backlog of five can delay a burst of connections.
+    request_queue_size = 128
+
     def handle_error(self, request, client_address):
         # socketserver leaves the exception in sys.exc_info()
         exc_type, exc_value, exc_traceback = sys.exc_info()
@@ -265,31 +269,3 @@ def clean_models():
     _unload()
     yield
     _restore_normal_models()
-
-
-@pytest.fixture
-def slow_archicad_api(archicad_api):
-    """
-    Wraps the mock server handlers with dynamic routing to simulate metadata endpoints.
-    """
-
-    def passthrough_handler(payload: dict) -> dict:
-        command = payload.get("command")
-
-        # Unwrap Tapir add-on command name if necessary
-        if command == "API.ExecuteAddOnCommand":
-            command_name = payload.get("parameters", {}).get("addOnCommandId", {}).get("commandName")
-        else:
-            command_name = command
-
-        response_dict = archicad_api.get_response_data(command_name)
-        if not response_dict:
-            response_dict = {"succeeded": True, "result": {}}
-        return response_dict
-
-    # Register handlers for the metadata endpoints hit during init
-    archicad_api.set_handler("API.GetProductInfo", passthrough_handler)
-    archicad_api.set_handler("GetProjectInfo", passthrough_handler)
-    archicad_api.set_handler("GetArchicadLocation", passthrough_handler)
-
-    yield archicad_api
