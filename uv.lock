@@ -794,7 +794,7 @@ wheels = [
 
 [[package]]
 name = "multiconn-archicad"
-version = "0.9.0"
+version = "0.9.1"
 source = { editable = "." }
 dependencies = [
     { name = "archicad" },
@@ -825,7 +825,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "archicad", specifier = ">=28.3000" },
+    { name = "archicad", specifier = ">=29.3000" },
     { name = "httpx", specifier = ">=0.28.1" },
     { name = "packaging", specifier = ">=24.0" },
     { name = "psutil", specifier = ">=6.1.1,<8.0" },
