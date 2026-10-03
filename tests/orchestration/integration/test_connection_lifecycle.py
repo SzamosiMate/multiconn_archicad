@@ -84,15 +84,15 @@ def test_batch_worklist_connect_and_disconnect(archicad_api):
     assert conn.primary is managed_header
 
 
-def test_failed_metadata_populates_failed_queue_and_can_connect(slow_archicad_api):
+def test_failed_metadata_populates_failed_queue_and_can_connect(archicad_api):
     """
     Verifies that handshake failure marks the header FAILED in conn.failed,
     and conn.connect.failed() adds it to the active worklist for retry.
     """
-    slow_archicad_api.set_handler("API.GetProductInfo", lambda p: {"succeeded": False, "error": {"code": 500}})
+    archicad_api.set_handler("API.GetProductInfo", lambda p: {"succeeded": False, "error": {"code": 500}})
 
     conn = MultiConn()
-    port = slow_archicad_api.server_port
+    port = archicad_api.server_port
     _ = conn.primary.product_info
 
     assert port in conn.failed

@@ -1,3 +1,4 @@
+import ssl
 import threading
 import pytest
 
@@ -12,7 +13,7 @@ pytestmark = [
 ]
 
 
-def test_fast_initialization_despite_slow_server(slow_archicad_api):
+def test_fast_initialization_despite_slow_server(archicad_api):
     """
     Prove MultiConn() returns control to the user immediately
     without waiting for background server requests to complete.
@@ -23,10 +24,10 @@ def test_fast_initialization_despite_slow_server(slow_archicad_api):
     def blocking_handler(payload: dict) -> dict:
         server_entered.set()
         unblock_server.wait(timeout=5.0)
-        return slow_archicad_api.get_response_data("API.GetProductInfo") or {"succeeded": True, "result": {}}
+        return archicad_api.get_response_data("API.GetProductInfo") or {"succeeded": True, "result": {}}
 
-    slow_archicad_api.set_handler("API.GetProductInfo", blocking_handler)
-    slow_archicad_api.set_response("GetProjectInfo", "get_project_info_solo.json")
+    archicad_api.set_handler("API.GetProductInfo", blocking_handler)
+    archicad_api.set_response("GetProjectInfo", "get_project_info_solo.json")
 
     try:
         conn = MultiConn()
@@ -37,7 +38,7 @@ def test_fast_initialization_despite_slow_server(slow_archicad_api):
         unblock_server.set()
 
 
-def test_ui_mode_lifecycle_pending_to_ready(slow_archicad_api):
+def test_ui_mode_lifecycle_pending_to_ready(archicad_api):
     """
     Prove ui_mode=True returns pending placeholders and populates conn.pending,
     then transitions cleanly to conn.ready and unpacks to ProductInfo once complete.
@@ -48,16 +49,16 @@ def test_ui_mode_lifecycle_pending_to_ready(slow_archicad_api):
     def blocking_handler(payload: dict) -> dict:
         server_entered.set()
         unblock_server.wait(timeout=5.0)
-        return slow_archicad_api.get_response_data("API.GetProductInfo") or {"succeeded": True, "result": {}}
+        return archicad_api.get_response_data("API.GetProductInfo") or {"succeeded": True, "result": {}}
 
-    slow_archicad_api.set_handler("API.GetProductInfo", blocking_handler)
-    slow_archicad_api.set_response("GetProjectInfo", "get_project_info_solo.json")
+    archicad_api.set_handler("API.GetProductInfo", blocking_handler)
+    archicad_api.set_response("GetProjectInfo", "get_project_info_solo.json")
 
     try:
         conn = MultiConn(ui_mode=True)
         _ = conn.primary
         assert server_entered.wait(timeout=5.0)
-        port = slow_archicad_api.server_port
+        port = archicad_api.server_port
 
         # In-flight: properties return PendingResponse and port is in conn.pending
         assert isinstance(conn.primary.product_info, PendingResponse)
@@ -77,7 +78,7 @@ def test_ui_mode_lifecycle_pending_to_ready(slow_archicad_api):
     assert port not in conn.pending
 
 
-def test_default_mode_blocks_and_waits(slow_archicad_api):
+def test_default_mode_blocks_and_waits(archicad_api):
     """
     Prove ui_mode=False blocks the caller's thread until the background fetch finishes.
     """
@@ -87,10 +88,10 @@ def test_default_mode_blocks_and_waits(slow_archicad_api):
     def blocking_handler(payload: dict) -> dict:
         server_entered.set()
         unblock_server.wait(timeout=5.0)
-        return slow_archicad_api.get_response_data("API.GetProductInfo") or {"succeeded": True, "result": {}}
+        return archicad_api.get_response_data("API.GetProductInfo") or {"succeeded": True, "result": {}}
 
-    slow_archicad_api.set_handler("API.GetProductInfo", blocking_handler)
-    slow_archicad_api.set_response("GetProjectInfo", "get_project_info_solo.json")
+    archicad_api.set_handler("API.GetProductInfo", blocking_handler)
+    archicad_api.set_response("GetProjectInfo", "get_project_info_solo.json")
 
     conn = MultiConn(ui_mode=False)
     _ = conn.primary
@@ -118,12 +119,12 @@ def test_default_mode_blocks_and_waits(slow_archicad_api):
     assert isinstance(resolved_product_info, ProductInfo)
 
 
-def test_vanilla_archicad_no_addon_scenario(slow_archicad_api):
+def test_vanilla_archicad_no_addon_scenario(archicad_api):
     """
     Prove that if standard API commands succeed but Tapir Add-On commands fail,
     the connection gracefully survives and becomes READY.
     """
-    slow_archicad_api.set_handler("GetProjectInfo", lambda p: {"succeeded": False, "error": {"code": 1}})
+    archicad_api.set_handler("GetProjectInfo", lambda p: {"succeeded": False, "error": {"code": 1}})
 
     conn = MultiConn()
     _ = conn.primary.product_info  # Wait for fetch
@@ -132,14 +133,14 @@ def test_vanilla_archicad_no_addon_scenario(slow_archicad_api):
     assert isinstance(conn.primary.archicad_id, APIResponseError)
 
 
-def test_primary_canonical_identity_shared_with_pool(slow_archicad_api):
+def test_primary_canonical_identity_shared_with_pool(archicad_api):
     """
     Prove that primary and the pool header share canonical identity.
     """
-    slow_archicad_api.set_response("GetProjectInfo", "get_project_info_solo.json")
+    archicad_api.set_response("GetProjectInfo", "get_project_info_solo.json")
 
     conn = MultiConn()
-    port = slow_archicad_api.server_port
+    port = archicad_api.server_port
     pool_header = conn.open_port_headers[port]
 
     assert conn.primary is pool_header
@@ -148,7 +149,7 @@ def test_primary_canonical_identity_shared_with_pool(slow_archicad_api):
     _ = conn.primary.product_info
     assert conn.primary.product_info is pool_header.product_info
 
-    slow_archicad_api.set_handler(
+    archicad_api.set_handler(
         "API.GetProductInfo",
         lambda p: {"succeeded": True, "result": {"version": 28, "buildNumber": 3001, "languageCode": "INT"}},
     )
@@ -160,7 +161,7 @@ def test_primary_canonical_identity_shared_with_pool(slow_archicad_api):
     assert conn.primary.product_info.version == 28
 
 
-def test_stress_multiple_connections_performance(slow_archicad_api, monkeypatch):
+def test_stress_multiple_connections_performance(archicad_api, monkeypatch):
     """
     STRESS TEST: Simulates all 21 Archicad ports open concurrently.
     """
@@ -172,24 +173,35 @@ def test_stress_multiple_connections_performance(slow_archicad_api, monkeypatch)
     monkeypatch.setattr("multiconn_archicad.orchestration.multi_conn.MultiConn._port_range", full_range)
     monkeypatch.setattr("multiconn_archicad.orchestration.multi_conn.is_port_listening", lambda url, port: True)
 
-    mock_url = f"http://127.0.0.1:{slow_archicad_api.server_port}"
-    original_post = httpx.Client.post
+    mock_url = f"http://127.0.0.1:{archicad_api.server_port}"
+    # HTTPX prepares TLS even for HTTP URLs. Load the trust store once so 21
+    # workers do not contend on certificate loading under fuzz_threads/coverage.
+    ssl_context = ssl.create_default_context()
+    original_client_init = httpx.Client.__init__
 
+    def local_client_init(client, *args, **kwargs):
+        kwargs.setdefault("verify", ssl_context)
+        original_client_init(client, *args, **kwargs)
+
+    monkeypatch.setattr(httpx.Client, "__init__", local_client_init)
+    original_post = httpx.Client.post
     monkeypatch.setattr(httpx.Client, "post", lambda s, u, *a, **k: original_post(s, mock_url, *a, **k))
 
     barrier = threading.Barrier(num_ports)
 
     def concurrent_handler(payload: dict) -> dict:
         if payload.get("command") == "API.GetProductInfo":
-            barrier.wait(timeout=10.0)
-        return slow_archicad_api.get_response_data("API.GetProductInfo") or {"succeeded": True, "result": {}}
+            # Leave two seconds before the metadata request's five-second timeout.
+            barrier.wait(timeout=3.0)
+        return archicad_api.get_response_data("API.GetProductInfo") or {"succeeded": True, "result": {}}
 
-    slow_archicad_api.set_handler("API.GetProductInfo", concurrent_handler)
-    slow_archicad_api.set_response("GetProjectInfo", "get_project_info_solo.json")
+    archicad_api.set_handler("API.GetProductInfo", concurrent_handler)
+    archicad_api.set_response("GetProjectInfo", "get_project_info_solo.json")
 
     conn = MultiConn(ui_mode=False)
     assert len(conn.open_port_headers) == num_ports
 
-    _ = conn.primary.product_info
-    assert conn.primary.status == Status.READY
+    # Wait for the whole fleet before fixture teardown, including on failure.
+    statuses = [header.status for header in conn.open_port_headers.values()]
+    assert statuses == [Status.READY] * num_ports
     assert len(conn.active) == 0
