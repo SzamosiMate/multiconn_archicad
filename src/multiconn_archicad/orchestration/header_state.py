@@ -43,6 +43,7 @@ class HeaderSnapshot:
 
     status: Status
     metadata: HeaderMetadata
+    latest_metadata: HeaderMetadata | None = None
 
 
 class HeaderState:
@@ -63,6 +64,7 @@ class HeaderState:
                 tapir_info=PendingResponse(),
             )
         self._metadata = metadata
+        self._latest_metadata: HeaderMetadata | None = None
         self._token: object | None = None
 
     def begin_fetch(self) -> object:
@@ -70,6 +72,7 @@ class HeaderState:
         with self._lock:
             self._token = token = object()
             self._status = Status.PENDING
+            self._latest_metadata = None
             return token
 
     def complete(self, token: object, metadata: HeaderMetadata | None) -> bool:
@@ -77,6 +80,7 @@ class HeaderState:
         with self._lock:
             if token is not self._token:
                 return False
+            self._latest_metadata = metadata
             if metadata is None:
                 self._status = Status.FAILED
             else:
@@ -88,22 +92,25 @@ class HeaderState:
         """Invalidate an in-flight result without clearing metadata or status."""
         with self._lock:
             self._token = None
+            self._latest_metadata = None
 
     def unassign(self) -> None:
         """Invalidate the fetch and preserve historical project metadata."""
         with self._lock:
             self._token = None
+            self._latest_metadata = None
             self._status = Status.UNASSIGNED
 
     def assign(self) -> None:
         """Mark a newly bound header pending without starting a fetch."""
         with self._lock:
             self._token = None
+            self._latest_metadata = None
             self._status = Status.PENDING
 
     def snapshot(self) -> HeaderSnapshot:
         with self._lock:
-            return HeaderSnapshot(self._status, self._metadata)
+            return HeaderSnapshot(self._status, self._metadata, self._latest_metadata)
 
     def resolved_token(self) -> object | None:
         """Read completion validity without waiting for the worker's future."""

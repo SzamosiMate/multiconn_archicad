@@ -65,7 +65,12 @@ class MultiConn:
 
         port = Port(cli_args.port) if cli_args.port else port
         if port is not None:
-            self._set_primary(port)
+            try:
+                self._set_primary(port)
+            except KeyError:
+                if not ui_mode:
+                    raise
+                log.warning("Requested Archicad port %s is unavailable", port)
 
     @property
     def open_port_headers(self) -> dict[Port, ConnHeader]:
@@ -92,11 +97,7 @@ class MultiConn:
     def active(self) -> dict[Port, ConnHeader]:
         """Headers explicitly queued in MultiConn's batch execution worklist."""
         self._ensure_fleet_scanned()
-        return {
-            port: self._open_port_headers[port]
-            for port in self._active_ports
-            if port in self._open_port_headers
-        }
+        return {port: self._open_port_headers[port] for port in self._active_ports if port in self._open_port_headers}
 
     @property
     def failed(self) -> dict[Port, ConnHeader]:

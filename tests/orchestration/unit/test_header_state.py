@@ -33,8 +33,8 @@ def test_refresh_replaces_metadata_without_changing_previous_snapshot(metadata):
     updated = replace(metadata, product_info=ProductInfo(version=28, buildNumber=4000, languageCode="INT"))
     state.complete(state.begin_fetch(), updated)
 
-    assert before == HeaderSnapshot(Status.READY, partial)
-    assert state.snapshot() == HeaderSnapshot(Status.READY, updated)
+    assert before == HeaderSnapshot(Status.READY, partial, partial)
+    assert state.snapshot() == HeaderSnapshot(Status.READY, updated, updated)
 
 
 @pytest.mark.parametrize("unexpected_failure", [False, True])
@@ -45,7 +45,7 @@ def test_failed_refresh_preserves_successful_metadata(metadata, unexpected_failu
     token = state.begin_fetch()
     state.complete(token, fetched)
 
-    assert state.snapshot() == HeaderSnapshot(Status.FAILED, metadata)
+    assert state.snapshot() == HeaderSnapshot(Status.FAILED, metadata, fetched)
     assert state.resolved_token() is token
 
 
@@ -58,6 +58,31 @@ def test_cancel_invalidates_completed_fetch_without_clearing_metadata(metadata):
     assert not state.complete(token, None)
     assert state.snapshot() == HeaderSnapshot(Status.READY, metadata)
     assert state.resolved_token() is None
+
+
+def test_latest_metadata_is_cleared_on_refresh_and_stale_fetch_cannot_restore_it(metadata):
+    state = HeaderState(Status.PENDING)
+    old_token = state.begin_fetch()
+    state.complete(old_token, metadata)
+    current_token = state.begin_fetch()
+    assert state.snapshot().metadata == metadata
+    assert state.snapshot().latest_metadata is None
+    assert not state.complete(old_token, metadata)
+    assert state.snapshot().latest_metadata is None
+
+    current = replace(metadata, archicad_id=APIResponseError(message="project query failed"))
+    state.complete(current_token, current)
+    assert state.snapshot().metadata == metadata
+    assert state.snapshot().latest_metadata == current
+
+
+@pytest.mark.parametrize("operation", ["cancel", "unassign", "assign"])
+def test_lifecycle_reset_clears_latest_metadata_but_preserves_history(metadata, operation):
+    state = HeaderState(Status.PENDING)
+    state.complete(state.begin_fetch(), metadata)
+    getattr(state, operation)()
+    assert state.snapshot().metadata == metadata
+    assert state.snapshot().latest_metadata is None
 
 
 def test_unassign_and_reassign_preserve_project_identity(metadata):

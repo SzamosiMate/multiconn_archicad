@@ -30,11 +30,17 @@ pytestmark = pytest.mark.unit
 
 def _with_metadata(header, **fields):
     snapshot = header._state.snapshot()
-    header._state = HeaderState(snapshot.status, replace(snapshot.metadata, **fields))
+    metadata = replace(snapshot.metadata, **fields)
+    header._state = HeaderState(snapshot.status, metadata)
+    if snapshot.status is Status.READY:
+        header._state.complete(header._state.begin_fetch(), metadata)
 
 
 def _with_status(header, status):
     header._state = HeaderState(status, header._state.snapshot().metadata)
+    if status is Status.READY:
+        metadata = header._state.snapshot().metadata
+        header._state.complete(header._state.begin_fetch(), metadata)
 
 
 @pytest.fixture
@@ -67,6 +73,7 @@ def ready_session_header(ready_identity_header):
 # =========================================================================
 # LEVEL 1: has_project_identity
 # =========================================================================
+
 
 def test_has_project_identity_solo(ready_identity_header):
     assert has_project_identity(ready_identity_header) is True
@@ -113,8 +120,62 @@ def test_is_header_fully_initialized_deprecation(ready_identity_header):
 # LEVEL 2: is_session_ready
 # =========================================================================
 
+
 def test_is_session_ready_success(ready_session_header):
     assert is_session_ready(ready_session_header) is True
+
+
+def test_session_guard_is_exported_independently_of_project_identity():
+    from multiconn_archicad import ProjectIdentityHeader, SessionReadyHeader, is_session_ready as exported_guard
+
+    assert issubclass(SessionReadyHeader, ConnHeader)
+    assert not issubclass(SessionReadyHeader, ProjectIdentityHeader)
+    assert exported_guard is is_session_ready
+
+
+@pytest.mark.parametrize("version", ["0.0.1", SUPPORTED_TAPIR_VERSION])
+def test_session_supports_untitled_project_without_executable_location(ready_session_header, version):
+    _with_metadata(
+        ready_session_header,
+        archicad_id=UntitledProjectID(),
+        archicad_location=APIResponseError(message="location unavailable"),
+        tapir_info=TapirInfo(version=version),
+    )
+    assert is_session_ready(ready_session_header)
+    assert is_tapir_session_ready(ready_session_header) is (version == SUPPORTED_TAPIR_VERSION)
+    assert is_tapir_session_ready(ready_session_header, min_version=version)
+    assert not has_project_identity(ready_session_header)
+
+
+@pytest.mark.parametrize("field", ["product_info", "archicad_id", "tapir_info"])
+def test_session_rejects_failed_current_field_despite_successful_history(ready_session_header, field):
+    previous = ready_session_header.latest_metadata
+    current = replace(previous, **{field: APIResponseError(message="timed out")})
+    ready_session_header._state.complete(ready_session_header._state.begin_fetch(), current)
+    assert ready_session_header._state.snapshot().metadata == previous
+    assert ready_session_header.latest_metadata == current
+    assert has_project_identity(ready_session_header)
+    assert not is_session_ready(ready_session_header)
+    assert not is_tapir_session_ready(ready_session_header)
+
+
+@pytest.mark.parametrize("operation", ["refresh", "cancel", "unassign"])
+def test_readiness_rejects_pending_or_canceled_session(ready_session_header, operation):
+    if operation == "refresh":
+        ready_session_header._state.begin_fetch()
+    else:
+        getattr(ready_session_header, operation)()
+    assert ready_session_header.latest_metadata is None
+    assert has_project_identity(ready_session_header)
+    assert not is_session_ready(ready_session_header)
+    assert not is_tapir_session_ready(ready_session_header)
+
+
+def test_historical_ready_metadata_is_not_a_fresh_session(ready_session_header):
+    ready_session_header._state = HeaderState(Status.READY, ready_session_header._state.snapshot().metadata)
+    assert has_project_identity(ready_session_header)
+    assert not is_session_ready(ready_session_header)
+    assert not is_tapir_session_ready(ready_session_header)
 
 
 def test_is_session_ready_with_uninstalled_tapir(ready_session_header):
@@ -138,14 +199,22 @@ def test_is_session_ready_fails_when_tapir_unresolved(ready_session_header):
     assert is_session_ready(ready_session_header) is False
 
 
-def test_is_session_ready_fails_when_identity_missing(ready_session_header):
+def test_is_session_ready_accepts_untitled_identity(ready_session_header):
     _with_metadata(ready_session_header, archicad_id=UntitledProjectID())
+    assert is_session_ready(ready_session_header) is True
+    assert is_tapir_session_ready(ready_session_header) is True
+    assert has_project_identity(ready_session_header) is False
+
+
+def test_is_session_ready_fails_when_identity_unresolved(ready_session_header):
+    _with_metadata(ready_session_header, archicad_id=APIResponseError(message="project unavailable"))
     assert is_session_ready(ready_session_header) is False
 
 
 # =========================================================================
 # LEVEL 3: is_tapir_session_ready
 # =========================================================================
+
 
 def test_is_tapir_session_ready_success(ready_session_header):
     assert is_tapir_session_ready(ready_session_header) is True
@@ -176,6 +245,7 @@ def test_is_tapir_session_ready_fails_when_tapir_unresolved(ready_session_header
 # =========================================================================
 # ConnHeader Invariants & Lifecycle Transitions
 # =========================================================================
+
 
 def test_port_immutability():
     """
