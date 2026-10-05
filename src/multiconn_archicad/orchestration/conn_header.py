@@ -164,6 +164,11 @@ class ConnHeader:
     def tapir_info(self) -> TapirInfo | APIResponseError:
         return self._snapshot().metadata.tapir_info
 
+    @property
+    def latest_metadata(self) -> HeaderMetadata | None:
+        """Current fetch result, without historical fallback; None while pending or canceled."""
+        return self._snapshot().latest_metadata
+
     def to_dict(self) -> dict[str, Any]:
         """Serialize connection header. Requires the header to have project identity."""
         snapshot = self._snapshot()
@@ -376,6 +381,7 @@ class ConnHeader:
 
 class ProjectIdentityHeader(ConnHeader):
     """Guaranteed to have all metadata that is required to reopen a project"""
+
     product_info: ProductInfo
     archicad_id: SoloProjectID | TeamworkProjectID
     archicad_location: ArchicadLocation
@@ -385,9 +391,12 @@ class ProjectIdentityHeader(ConnHeader):
 ValidatedHeader = ProjectIdentityHeader
 
 
-class SessionReadyHeader(ProjectIdentityHeader):
-    """Guaranteed to be ready, connected to a port, with Tapir polled."""
+class SessionReadyHeader(ConnHeader):
+    """A fresh command session, including untitled projects, with Tapir polled."""
+
     port: Port
+    product_info: ProductInfo
+    archicad_id: ArchiCadID
     tapir_info: TapirInfo
     core: CoreCommands
     standard: StandardConnection
@@ -408,24 +417,32 @@ def _has_project_identity(metadata: HeaderMetadata) -> bool:
 
 
 def is_session_ready(header: ConnHeader) -> TypeGuard[SessionReadyHeader]:
-    """Validates that Archicad is live on a port and all background tasks have finished."""
+    """Require fresh product/project metadata and polled Tapir, including untitled projects.
+
+    Tapir installation/version and the executable location are not required.
+    """
     return _is_session_ready(header._snapshot(), header.port)
 
 
 def _is_session_ready(snapshot: HeaderSnapshot, port: Port | None) -> bool:
+    metadata = snapshot.latest_metadata
     return bool(
-        _has_project_identity(snapshot.metadata)
+        metadata is not None
+        and isinstance(metadata.product_info, ProductInfo)
+        and isinstance(metadata.archicad_id, ArchiCadID)
         and port is not None
         and snapshot.status is Status.READY
-        and isinstance(snapshot.metadata.tapir_info, TapirInfo)
+        and isinstance(metadata.tapir_info, TapirInfo)
     )
 
 
 def is_tapir_session_ready(header: ConnHeader, min_version: str | None = None) -> TypeGuard[SessionReadyHeader]:
-    """Validates that Archicad is live on a port and the Tapir API version meets requirements"""
+    """Require a ready session (including untitled projects) and a suitable installed Tapir."""
     snapshot = header._snapshot()
-    tapir_info = snapshot.metadata.tapir_info
-    if not _is_session_ready(snapshot, header.port) or not isinstance(tapir_info, TapirInfo):
+    if not _is_session_ready(snapshot, header.port) or snapshot.latest_metadata is None:
+        return False
+    tapir_info = snapshot.latest_metadata.tapir_info
+    if not isinstance(tapir_info, TapirInfo):
         return False
     tapir_meets_requirements = tapir_info.is_at_least(min_version) if min_version else tapir_info.is_supported
     return bool(tapir_info.is_installed and tapir_meets_requirements)

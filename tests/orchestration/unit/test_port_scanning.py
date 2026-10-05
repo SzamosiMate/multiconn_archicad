@@ -83,7 +83,9 @@ def test_refresh_eagerly_selects_primary_while_metadata_is_pending(monkeypatch, 
     monkeypatch.setattr(ConnHeader, "get_archicad_id", lambda self, timeout: APIResponseError(message="no project"))
     monkeypatch.setattr(ConnHeader, "get_archicad_location", lambda self, timeout: APIResponseError(message="unknown"))
     monkeypatch.setattr(ConnHeader, "get_tapir_info", lambda self, timeout: APIResponseError(message="missing"))
-    monkeypatch.setattr("multiconn_archicad.orchestration.system.ram_monitor.RamMonitor.get_current_rss", lambda self: None)
+    monkeypatch.setattr(
+        "multiconn_archicad.orchestration.system.ram_monitor.RamMonitor.get_current_rss", lambda self: None
+    )
     conn = MultiConn(ui_mode=True)
     selections = []
     conn.events.subscribe_primary_changed(lambda previous, current: selections.append((previous, current)))
@@ -133,3 +135,13 @@ def test_refresh_without_connections_keeps_primary_none(monkeypatch):
 
     assert conn._primary is None
     assert selections == [(None, None)]
+
+
+def test_closed_explicit_port_is_unavailable_in_ui_mode_but_still_errors_in_cli_mode(monkeypatch):
+    port = Port(19723)
+    monkeypatch.setattr(MultiConn, "_port_range", [port])
+    monkeypatch.setattr("multiconn_archicad.orchestration.multi_conn.is_port_listening", lambda host, port: False)
+    conn = MultiConn(port=port, ui_mode=True)
+    assert conn.primary is None
+    with pytest.raises(KeyError):
+        MultiConn(port=port)
