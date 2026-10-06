@@ -116,118 +116,91 @@ Keep the complete-pipeline reproducibility check. When changing test-schema depe
 
 Compare public definitions structurally so ordering-only changes do not look semantic. Review added, removed, renamed, and changed definitions, and investigate unexplained generated-file movement or other diff noise.
 
-Start the report with a release-level API summary: counts and names of added, removed, and structurally changed commands and type models. Do not put these aggregate facts in the decision table.
+Start with a release-level API summary: counts and names of added, removed, and structurally changed commands and type models. Keep aggregate facts here, separate from individual change entries. Separate new/changed/removed patch counts from unchanged inventory, state whether they count declarations or expanded loop operations, and distinguish classification-only changes from generated behavior changes.
 
-In the decision table, use one row per independently reviewable change. Do not group unrelated schema locations merely because they share a mechanical cause such as anonymous inline generation. Each row must identify the exact schema definition or property path, affected command or public-model consumers, the upstream shape or generated symptom, the chosen resolution, and its patch category. Add a short detailed note after the table whenever requiredness, union behavior, compatibility, or competing designs cannot be understood from one row.
+Group review entries under patch-category headings. Use short lists and actual code snippets instead of prose-heavy tables. Each independently reviewable decision needs its own entry identifying the source, affected consumers, observed problem, and resolution. Give the exact schema definition/property path once, either as a JSON pointer or through a patch call whose parent and path identify it unambiguously. Do not group unrelated locations just because they share a mechanical cause; ordinary related upstream additions with no separate decision can be summarized together.
 
-Classify **Unified API breaking changes** separately from schema patch categories. Compare existing method signatures and generated return/unwrapping behavior against the baseline. Include removed/renamed methods, changed required arguments, incompatible parameter model/type changes, and changed return shapes. A new optional response field can change single-field unwrapping from a list/value to a result object; report that as a Unified API break even when the upstream schema addition is non-breaking. Appended optional arguments and new methods are normally additive.
+Explain requiredness, unions, naming decisions, tradeoffs, temporary retirement conditions, intentional breaking behavior, and unresolved source-review questions alongside their entries. Explain each issue once; do not repeat it in separate detailed notes, semantic-review tables, or patch summaries. Keep unchanged permanent patches out of new upstream recommendations.
 
-Use a dedicated `Unified API breaking changes` section with one row per affected method: exact schema source, before, after, cause, and caller migration. Count these separately in the API summary. A change may have both a schema patch category and a Unified API compatibility consequence; neither classification replaces the other. Do not leave a method break visible only as an `N/A` patch row. Also review referenced model changes that can affect callers even when a method's annotation is unchanged.
+Classify **Unified API breaking changes** separately from schema patch categories. Compare signatures and generated return/unwrapping behavior against the baseline, including referenced model changes even when annotations stay the same. Include removed/renamed methods, changed required arguments, incompatible parameter models/types, and changed return shapes. A new optional response field that changes single-field unwrapping is a Unified API break even when the upstream addition is non-breaking. Appended optional arguments and new methods are normally additive.
 
-In patch summaries, separate new/changed patch counts from any existing inventory and state whether counts refer to declarations or expanded loop operations. Record temporary retirement conditions, intentional breaking permanent behavior, and unresolved questions for breaking source-review patches. Keep unchanged permanent patches out of new upstream recommendations. Distinguish classification-only changes from generated behavior changes.
+Use a dedicated `Unified API breaking changes` section with a short entry per affected method: before/after behavior and concrete caller migration. Identify the exact schema source and cause here or refer to the relevant category entry. This section owns migration; the category entry owns the patch decision. Count breaks separately in the API summary, and do not hide them only among upstream additions.
 
-Whenever handwritten generator, cleaner, formatter, or audit behavior changes, explain the new concept in the report. Include what triggered it, its input-to-output transformation, why that layer owns the fix, affected models, and its deliberate limitations. Check relevant generator settings before adding a cleaner workaround and report why no suitable setting was used.
+When handwritten generator, cleaner, formatter, or audit behavior changes, explain its trigger, input-to-output transformation, owning layer, affected models, settings considered, and deliberate limitations. Omit this section when none changed.
 
-For the new-model inventory:
-
-- Use `src/multiconn_archicad/models/tapir/types.py` as the canonical source.
-- Include only type-model names added relative to the pre-generation baseline and untouched by patches or generator/cleaner changes made during this run.
-- Exclude command parameter and result models from `commands.py`.
-- Do not repeat the corresponding TypedDict names. Check their consistency and report a mismatch as a problem.
-- List only the names; no rationale is needed. In an ideal update, every new type model is in this table.
+For the untouched new-type inventory, use `src/multiconn_archicad/models/tapir/types.py`. Include only names added relative to the checked-in baseline and untouched by patches or generator/cleaner changes made during the run. Exclude command models and repeated TypedDict names. Check representation consistency and report mismatches. List names only, without rationale.
 
 ## Report for human review
 
-Use this structure, omitting empty detail rows but retaining every heading. State `None` where appropriate.
+Use the compact structure below. Retain the API summary, verification, and human-review outcome; omit other empty sections and category headings. Avoid wide tables, repeated inventories, and routine success narration. Use actual patch calls, model excerpts, signature diffs, or caller examples when they clarify a change. Label abbreviated excerpts; do not invent executed code or validation results. Distinguish formatter success from lint findings and limited checks from broader claims.
 
-```markdown
+````markdown
 ## Tapir generation report
 
-**Result:** Ready for human review | Blocked
-**Tapir:** <old version> → <new version>
+**Result:** Ready for human review | Blocked · **Tapir:** <old version> → <new version>
 
 ### API change summary
 
-- Commands: `<counts and names added, removed, and structurally changed>`
-- Type models: `<counts and names added, removed, and structurally changed>`
-- Unified API breaking changes: `<count and affected method names>`
-- Review decisions: `<new/changed counts by all four patch categories; distinguish existing inventory and count units>`
+- Commands: <counts and names added, removed, and structurally changed>
+- Type models: <counts and names added, removed, and structurally changed>
+- Unified API breaks: <count and affected methods>
+- Patches: <new/changed/removed counts by category, count units, unchanged inventory>
 
-### Generated API changes requiring review
+### Changes by patch category
 
-| Change | Schema source | API consumers | Upstream/generated problem | Resolution | Patch category |
-|---|---|---|---|---|---|
-| `<one independently reviewable change>` | `<exact definition or property path>` | `<commands and public models>` | `<relevant shape, requiredness, duplication, or generated symptom>` | `<what changed and why>` | `<Permanent, Temporary, Breaking permanent, Breaking — source review / potential error, or N/A>` |
+#### Temporary
+
+- **<change and consumers>.** <Problem and resolution in a short paragraph.>
+
+```python
+# Actual patch call, model excerpt, or usage example.
+```
+
+<Retirement condition or decision needed, when relevant.>
+
+<Use the same entry format for nonempty Permanent, Breaking permanent,
+Breaking — source review / potential error, and Removed patches groups.>
+
+#### Upstream changes — no local patch
+
+- **<related API addition/change>.** <Concise behavior and exact source.>
 
 ### Unified API breaking changes
 
-| Method | Schema source | Before | After | Cause | Caller migration |
-|---|---|---|---|---|---|
-| `<affected method>` | `<exact definition or property path>` | `<old signature/return behavior>` | `<new signature/return behavior>` | `<schema or generation trigger>` | `<concrete call-site adjustment>` |
+- **<method>.** <Before → after; refer to the category entry for its cause.>
 
-### Detailed decision notes
-
-#### `<change needing more explanation>`
-
-- Before: `<relevant upstream and generated behavior>`
-- After: `<resulting public models and behavior>`
-- Compatibility and tradeoffs: `<what the reviewer needs to know>`
-- Decision needed: `<specific confirmation, or None>`
-
-### Semantic naming review
-
-| Generated name | Schema context and consumers | Finding | Resolution |
-|---|---|---|---|
-| `<original generated name>` | `<property path and API consumers>` | `<known semantic error type>` | `<new name, shared type, separation, or focused unresolved question>` |
+```python
+# Concrete caller migration.
+```
 
 ### Untouched new type models
 
-| Model |
-|---|
-| `<ModelName>` |
+- <ModelName>
 
-### Generator and cleaner changes
+### Generator and audit changes
 
-#### `<function or behavior, or None>`
-
-- Trigger: `<observed failure>`
-- Transformation: `<input to output behavior>`
-- Why this layer: `<why settings or schema patches were insufficient>`
-- Affected models: `<names>`
-- Scope and limitations: `<what it deliberately does not change>`
-
-### Patch changes
-
-- `<new/changed counts by all four categories and count units; existing inventory separately if relevant>`
-- `<temporary retirement condition, intentional breaking behavior, or unresolved source-review question, as appropriate>`
-
-### Audit changes
-
-- `<new deterministic checks, or None>`
+- **<changed behavior>.** <Trigger, transformation, owning layer, affected models,
+  settings considered, and limitations; only when changed.>
 
 ### New patterns noticed
 
-- `<new deterministic or semantic error type, its example, and whether to add an audit rule or semantic-review checklist entry; or None>`
+- <New deterministic/semantic error type and whether to extend the audit or
+  semantic-review checklist; omit when none.>
 
 ### Verification
 
-- Generation audit: `<result>`
-- Reproducibility: `<result>`
-- Unified API generation: `<result, including whether a stale import bootstrap was needed>`
-- Ruff: `<result>`
-- Tests: `<result>`
-- Unexpected generated diff noise: `<result>`
+- Audit and reproducibility: <results and scope>
+- Unified generation: <result, output routing, any stale-import bootstrap>
+- Ruff: <formatting result and any lint findings>
+- Tests: <result and scope>
+- Representation consistency and diff review: <result and any remaining noise>
 
 ### Human review
 
-- `<specific decisions or confirmations needed, or None>`
+<Specific unresolved decisions, or "No pending decisions.">
+````
 
-### Suggested skill update
-
-None.
-```
-
-When the workflow itself should change, replace `None` in the final section with a standalone, copyable prompt:
+Only when the workflow itself should change, append a standalone, copyable prompt:
 
 ```markdown
 ### Suggested skill update
@@ -239,4 +212,4 @@ Copy and use this prompt if you agree:
 > Update the `multiconn-codegen` skill so that <specific workflow change>. Preserve <important existing constraint>. Do not <likely overreach>.
 ```
 
-Keep model-specific fixes in schema patching and generally applicable deterministic checks in the generation audit. Reserve skill-update suggestions for changes to how the overall generation and review workflow should operate.
+Keep model-specific fixes in schema patching and generally applicable deterministic checks in the generation audit. Reserve skill-update suggestions for changes to the overall generation and review workflow.
