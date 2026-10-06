@@ -82,6 +82,7 @@ from .types import (
     ElementGroupParameters,
     ElementIFCIds,
     ElementIFCProperties,
+    ElementIFCPropertyValue,
     ElementIFCType,
     ElementId,
     ElementIdArrayItem,
@@ -208,6 +209,7 @@ from .types import (
     ProjectInfoField,
     ProjectInfoFieldData,
     ProjectLocation,
+    ProjectLocationUpdate,
     PropertyDefinitionArrayItem,
     PropertyDefinitionUpdate,
     PropertyDetails,
@@ -246,6 +248,7 @@ from .types import (
     SurfaceAttributeField,
     SurfaceData,
     SurveyPoint,
+    SurveyPointUpdate,
     TextDataWithRuns,
     TextDataWithText,
     TextsWithDetail,
@@ -2160,7 +2163,28 @@ class SetGDLParametersOfElementsResult(APIModel):
     ]
 
 
+class SetGeoLocationParameters(APIModel):
+    projectLocation: ProjectLocationUpdate | None = None
+    surveyPoint: SurveyPointUpdate | None = None
+
+
 SetGeoLocationResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
+
+
+class SetIFCPropertiesOfElementsParameters(APIModel):
+    elementIFCPropertyValues: Annotated[
+        list[ElementIFCPropertyValue],
+        Field(
+            description="The IFC property values to set. Only single value (IfcPropertySingleValue) properties are supported."
+        ),
+    ]
+
+
+class SetIFCPropertiesOfElementsResult(APIModel):
+    executionResults: Annotated[
+        list[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
+    ]
 
 
 class SetLayoutSettingsParameters(APIModel):
@@ -3288,11 +3312,6 @@ class SetClassificationsOfElementsParameters(APIModel):
         list[ElementClassification],
         Field(description="A list of element classification identifiers."),
     ]
-
-
-class SetGeoLocationParameters(APIModel):
-    projectLocation: ProjectLocation | None = None
-    surveyPoint: SurveyPoint | None = None
 
 
 class SetStoriesParameters(APIModel):

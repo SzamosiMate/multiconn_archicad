@@ -271,9 +271,7 @@ def apply_breaking_source_review_patches(master_defs: dict[str, Any]):
     """
     print("Applying breaking schema patches pending source review...")
 
-    # Read-model sharing tightens partial-update requiredness or changes beam-hole constraints.
-    replace_inline_schema_with_ref(master_defs, "SetGeoLocationParameters", ["projectLocation"], "ProjectLocation")
-    replace_inline_schema_with_ref(master_defs, "SetGeoLocationParameters", ["surveyPoint"], "SurveyPoint")
+    # Read-model sharing changes beam-hole constraints.
     replace_inline_schema_with_ref(master_defs, "BeamWithDetails", ["holes", "items"], "BeamHole")
 
     # Restricting an unconstrained public string to an enum is a schema-contract change.
@@ -378,12 +376,16 @@ def apply_temporary_patches(master_defs: dict[str, Any]):
         "DesignOptionCombinationData",
     )
 
-    # --- Unify GeoLocation schemas ---
+    # --- Keep complete GeoLocation responses separate from partial-update payloads ---
     extract_inline_schema(master_defs, "GetGeoLocationResult", ["projectLocation"], "ProjectLocation")
     extract_inline_schema(master_defs, "GetGeoLocationResult", ["surveyPoint", "position"], "SurveyPointPosition")
     extract_inline_schema(master_defs, "GetGeoLocationResult", ["surveyPoint", "geoReferencingParameters"],
                           "GeoReferencingParameters")
     extract_inline_schema(master_defs, "GetGeoLocationResult", ["surveyPoint"], "SurveyPoint")
+    extract_inline_schema(master_defs, "SetGeoLocationParameters", ["projectLocation"], "ProjectLocationUpdate")
+    extract_inline_schema(master_defs, "SetGeoLocationParameters", ["surveyPoint", "position"], "SurveyPointPositionUpdate")
+    extract_inline_schema(master_defs, "SetGeoLocationParameters", ["surveyPoint", "geoReferencingParameters"], "GeoReferencingParametersUpdate")
+    extract_inline_schema(master_defs, "SetGeoLocationParameters", ["surveyPoint"], "SurveyPointUpdate")
 
     # Fix the bad inline schema by pointing it to the existing ArrayItem definition
     _, design_options, _ = _require_target(master_defs, "GetElementsOfDesignOptionsParameters", ["designOptions"])
