@@ -78,6 +78,7 @@ from .types import (
     ElementGroupParameters,
     ElementIFCIdsOrErrors,
     ElementIFCPropertiesOrErrors,
+    ElementIFCPropertyValue,
     ElementIFCTypesOrErrors,
     ElementId,
     ElementIdOrError,
@@ -204,6 +205,7 @@ from .types import (
     ProjectInfoFieldData,
     ProjectInfoFields,
     ProjectLocation,
+    ProjectLocationUpdate,
     PropertyDefinitionArrayItem,
     PropertyDefinitionUpdate,
     PropertyDetails,
@@ -242,6 +244,7 @@ from .types import (
     SurfaceAttributeOrError,
     SurfaceData,
     SurveyPoint,
+    SurveyPointUpdate,
     TextData,
     TextsWithDetail,
     TrimType,
@@ -1433,7 +1436,20 @@ class SetGDLParametersOfElementsResult(TypedDict):
     executionResults: ExecutionResults
 
 
+class SetGeoLocationParameters(TypedDict):
+    projectLocation: NotRequired[ProjectLocationUpdate]
+    surveyPoint: NotRequired[SurveyPointUpdate]
+
+
 SetGeoLocationResult: TypeAlias = ExecutionResult
+
+
+class SetIFCPropertiesOfElementsParameters(TypedDict):
+    elementIFCPropertyValues: list[ElementIFCPropertyValue]
+
+
+class SetIFCPropertiesOfElementsResult(TypedDict):
+    executionResults: ExecutionResults
 
 
 class SetLayoutSettingsParameters(TypedDict):
@@ -2144,11 +2160,6 @@ class RemoveSolidElementLinksParameters(TypedDict):
 
 class SetClassificationsOfElementsParameters(TypedDict):
     elementClassifications: ElementClassifications
-
-
-class SetGeoLocationParameters(TypedDict):
-    projectLocation: NotRequired[ProjectLocation]
-    surveyPoint: NotRequired[SurveyPoint]
 
 
 class SetStoriesParameters(TypedDict):

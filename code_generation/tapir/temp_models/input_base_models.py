@@ -1045,6 +1045,73 @@ class GeoReferencingParameters(APIModel):
             description="Name by which the map zone, relating to the MapProjection, is identified."
         ),
     ]
+    xAxisAbscissa: Annotated[
+        float,
+        Field(
+            description="Value along the easting axis of the end point of a vector indicating the position of the local x axis of the engineering coordinate reference system (IfcMapConversion.XAxisAbscissa)."
+        ),
+    ]
+    xAxisOrdinate: Annotated[
+        float,
+        Field(
+            description="Value along the northing axis of the end point of a vector indicating the position of the local x axis of the engineering coordinate reference system (IfcMapConversion.XAxisOrdinate)."
+        ),
+    ]
+    scale: Annotated[
+        float,
+        Field(
+            description="Scale to be used, when the units of the CRS are not identical to the units of the engineering coordinate system (IfcMapConversion.Scale)."
+        ),
+    ]
+
+
+class GeoReferencingParametersUpdate(APIModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    crsName: Annotated[
+        str | None,
+        Field(
+            description="Name by which the coordinate reference system is identified."
+        ),
+    ] = None
+    description: Annotated[
+        str | None,
+        Field(description="Informal description of this coordinate reference system."),
+    ] = None
+    geodeticDatum: Annotated[
+        str | None, Field(description="Name by which this datum is identified.")
+    ] = None
+    verticalDatum: Annotated[
+        str | None, Field(description="Name by which the vertical datum is identified.")
+    ] = None
+    mapProjection: Annotated[
+        str | None, Field(description="Name by which the map projection is identified.")
+    ] = None
+    mapZone: Annotated[
+        str | None,
+        Field(
+            description="Name by which the map zone, relating to the MapProjection, is identified."
+        ),
+    ] = None
+    xAxisAbscissa: Annotated[
+        float | None,
+        Field(
+            description="Value along the easting axis of the end point of a vector indicating the position of the local x axis of the engineering coordinate reference system (IfcMapConversion.XAxisAbscissa)."
+        ),
+    ] = None
+    xAxisOrdinate: Annotated[
+        float | None,
+        Field(
+            description="Value along the northing axis of the end point of a vector indicating the position of the local x axis of the engineering coordinate reference system (IfcMapConversion.XAxisOrdinate)."
+        ),
+    ] = None
+    scale: Annotated[
+        float | None,
+        Field(
+            description="Scale to be used, when the units of the CRS are not identical to the units of the engineering coordinate system (IfcMapConversion.Scale)."
+        ),
+    ] = None
 
 
 class GetAddOnVersionResult(APIModel):
@@ -2286,6 +2353,8 @@ class MEPSystemAttributeField(Enum):
     CENTER_LINE_PEN = "centerLinePen"
     FILL_ID = "fillId"
     CENTER_LINE_TYPE_ID = "centerLineTypeId"
+    MATERIAL_ID = "materialId"
+    INSULATION_MATERIAL_ID = "insulationMaterialId"
 
 
 class MEPSystemDomain(Enum):
@@ -3007,6 +3076,18 @@ class ProjectLocation(APIModel):
     latitude: Annotated[float, Field(description="latitude in degrees")]
     altitude: Annotated[float, Field(description="altitude in meters")]
     north: Annotated[float, Field(description="north direction in radians")]
+
+
+class ProjectLocationUpdate(APIModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    longitude: Annotated[float | None, Field(description="longitude in degrees")] = None
+    latitude: Annotated[float | None, Field(description="latitude in degrees")] = None
+    altitude: Annotated[float | None, Field(description="altitude in meters")] = None
+    north: Annotated[float | None, Field(description="north direction in radians")] = (
+        None
+    )
 
 
 class PropertyDataType(Enum):
@@ -4027,6 +4108,44 @@ class SurveyPointPosition(APIModel):
             description="Orthogonal height relative to the vertical datum specified."
         ),
     ]
+
+
+class SurveyPointPositionUpdate(APIModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    eastings: Annotated[
+        float | None,
+        Field(
+            description="Location along the easting of the coordinate system of the target map coordinate reference system."
+        ),
+    ] = None
+    northings: Annotated[
+        float | None,
+        Field(
+            description="Location along the northing of the coordinate system of the target map coordinate reference system."
+        ),
+    ] = None
+    elevation: Annotated[
+        float | None,
+        Field(
+            description="Orthogonal height relative to the vertical datum specified."
+        ),
+    ] = None
+
+
+class SurveyPointUpdate(APIModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    position: SurveyPointPositionUpdate | None = None
+    positionInProject: Annotated[
+        Coordinate3D | None,
+        Field(
+            description="The survey point's position in the project's coordinate system (Options > Project Preferences > Location Settings > Survey Point > Position). Moves the survey point in the project without changing its map coordinates in 'position'."
+        ),
+    ] = None
+    geoReferencingParameters: GeoReferencingParametersUpdate | None = None
 
 
 class SymbolLabelTextDirection(Enum):
@@ -8818,7 +8937,14 @@ class MEPRoutingElementData(APIModel):
     crossSectionReferenceId: Annotated[
         int | None,
         Field(
-            description="Optional cross section reference id of the segment preference table (used for circular cross sections)."
+            description="Optional cross section reference id of the segment preference table (used for circular cross sections). Resolved against preferenceTableId if given, otherwise against the table of the current routing tool default."
+        ),
+    ] = None
+    preferenceTableId: Annotated[
+        UUID | None,
+        Field(
+            description="Optional guid of the segment preference table (see GetMEPPreferenceTables) applied to all segments. Not applicable to the CableCarrier domain.",
+            pattern="^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
         ),
     ] = None
     mepSystemId: Annotated[
@@ -8843,6 +8969,19 @@ class MEPRoutingElementModificationData(APIModel):
     crossSectionShape: Annotated[
         MEPCrossSectionShape | None,
         Field(description="New cross section shape applied to all segments."),
+    ] = None
+    crossSectionReferenceId: Annotated[
+        int | None,
+        Field(
+            description="New cross section reference id of the segment preference table applied to all segments (used for circular cross sections). Resolved against preferenceTableId if given, otherwise against the table the segments already use."
+        ),
+    ] = None
+    preferenceTableId: Annotated[
+        UUID | None,
+        Field(
+            description="New segment preference table (guid as returned by GetMEPPreferenceTables) applied to all segments. Not applicable to the CableCarrier domain.",
+            pattern="^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+        ),
     ] = None
     nodePositions: Annotated[
         list[Coordinate3D] | None,
@@ -8876,6 +9015,19 @@ class MEPRoutingSegmentDetails(APIModel):
     crossSectionWidth: float
     crossSectionHeight: float
     crossSectionShape: str
+    crossSectionReferenceId: Annotated[
+        int | None,
+        Field(
+            description="The cross section reference id of the segment in its preference table (meaningful for circular cross sections)."
+        ),
+    ] = None
+    preferenceTableId: Annotated[
+        UUID | None,
+        Field(
+            description="The guid of the segment preference table used by the segment (see GetMEPPreferenceTables).",
+            pattern="^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+        ),
+    ] = None
 
 
 class MEPSystemAttribute(APIModel):
@@ -8901,6 +9053,18 @@ class MEPSystemAttribute(APIModel):
     centerLinePen: int | None = None
     fillId: AttributeIdArrayItem | None = None
     centerLineTypeId: AttributeIdArrayItem | None = None
+    materialId: Annotated[
+        AttributeIdArrayItem | None,
+        Field(
+            description="The surface (material) attribute applied to the 3D model of the elements of the system."
+        ),
+    ] = None
+    insulationMaterialId: Annotated[
+        AttributeIdArrayItem | None,
+        Field(
+            description="The surface (material) attribute applied to the insulation of the elements of the system."
+        ),
+    ] = None
 
 
 class MEPSystemData(APIModel):
@@ -8958,6 +9122,18 @@ class MEPSystemData(APIModel):
     centerLineTypeId: Annotated[
         AttributeIdArrayItem | None,
         Field(description="Identifier of the center line type attribute."),
+    ] = None
+    materialId: Annotated[
+        AttributeIdArrayItem | None,
+        Field(
+            description="Identifier of the surface (material) attribute applied to the 3D model of the elements of the system."
+        ),
+    ] = None
+    insulationMaterialId: Annotated[
+        AttributeIdArrayItem | None,
+        Field(
+            description="Identifier of the surface (material) attribute applied to the insulation of the elements of the system."
+        ),
     ] = None
 
 
@@ -10462,12 +10638,70 @@ class SetGDLParametersOfElementsResult(APIModel):
     ]
 
 
+class SetGeoLocationParameters(APIModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    projectLocation: ProjectLocationUpdate | None = None
+    surveyPoint: SurveyPointUpdate | None = None
+
+
 class SetGeoLocationResult(
     RootModel[SuccessfulExecutionResult | FailedExecutionResult]
 ):
     root: Annotated[
         SuccessfulExecutionResult | FailedExecutionResult,
         Field(description="The result of the execution."),
+    ]
+
+
+class ElementIFCPropertyValue(APIModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    elementId: ElementId
+    propertySetName: Annotated[
+        str,
+        Field(
+            description="The name of the property set, for example Pset_DoorCommon. Custom property set names are also accepted."
+        ),
+    ]
+    propertyName: Annotated[
+        str, Field(description="The name of the property, for example FireRating.")
+    ]
+    type: Annotated[
+        str,
+        Field(
+            description="The IFC type of the value, for example IfcLabel, IfcText, IfcIdentifier, IfcBoolean, IfcLogical, IfcInteger, IfcReal or a measure type like IfcThermalTransmittanceMeasure."
+        ),
+    ]
+    value: Annotated[
+        Any,
+        Field(
+            description="The new value of the property. Provide a boolean for IfcBoolean and IfcLogical (IfcLogical also accepts the string Unknown), a number for the numeric types and a string for every other type."
+        ),
+    ]
+
+
+class SetIFCPropertiesOfElementsParameters(APIModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    elementIFCPropertyValues: Annotated[
+        list[ElementIFCPropertyValue],
+        Field(
+            description="The IFC property values to set. Only single value (IfcPropertySingleValue) properties are supported."
+        ),
+    ]
+
+
+class SetIFCPropertiesOfElementsResult(APIModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    executionResults: Annotated[
+        list[SuccessfulExecutionResult | FailedExecutionResult],
+        Field(description="A list of execution results."),
     ]
 
 
@@ -10810,6 +11044,12 @@ class SurveyPoint(APIModel):
         extra="forbid",
     )
     position: SurveyPointPosition
+    positionInProject: Annotated[
+        Coordinate3D,
+        Field(
+            description="The survey point's position in the project's coordinate system (Options > Project Preferences > Location Settings > Survey Point > Position). The map coordinates of the same point are in 'position'."
+        ),
+    ]
     geoReferencingParameters: GeoReferencingParameters
 
 
@@ -15152,14 +15392,6 @@ class SetClassificationsOfElementsParameters(APIModel):
     ]
 
 
-class SetGeoLocationParameters(APIModel):
-    model_config = ConfigDict(
-        extra="forbid",
-    )
-    projectLocation: ProjectLocation | None = None
-    surveyPoint: SurveyPoint | None = None
-
-
 class SetStoriesParameters(APIModel):
     model_config = ConfigDict(
         extra="forbid",
@@ -15994,7 +16226,7 @@ class DetailsOfElement(APIModel):
     floorPlanPolygons: Annotated[
         list[FloorPlanPolygon] | None,
         Field(
-            description="Cut-fill polygons as drawn on the floor plan (wall joins resolved by ArchiCAD). Available for elements with a cut-fill representation (walls, columns, beams). Absent when the element has no cut fill or when the floor plan database is not accessible."
+            description="Cut-fill polygons as drawn on the floor plan (wall joins resolved by ArchiCAD). Only collected for construction element types whose floor plan symbol comes from a real cut through the element - walls, columns, beams and their segments, slabs, roofs, shells, meshes, morphs, curtain walls and their segments/panels/frames, stairs and their risers/treads/structures. Absent for every other type, when the element has no cut fill, or when the floor plan database is not accessible."
         ),
     ] = None
 

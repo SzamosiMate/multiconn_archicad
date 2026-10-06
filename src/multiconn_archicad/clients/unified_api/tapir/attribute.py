@@ -294,7 +294,8 @@ class AttributeCommands:
         self, mep_system_data_array: list[MEPSystemData], overwrite_existing: None | bool = None
     ) -> list[AttributeIdArrayItem | ErrorItem]:
         """
-        Creates or overwrites MEP System attributes based on the given parameters.
+        Creates or overwrites MEP System attributes (domain, pens, fill, center line type,
+        surface and insulation surface) based on the given parameters.
 
         Args:
             mep_system_data_array (list[MEPSystemData]): Array of data to create new MEP
@@ -709,7 +710,8 @@ class AttributeCommands:
         self, attribute_ids: list[AttributeIdArrayItem], fields: None | list[MEPSystemAttributeField] = None
     ) -> list[ErrorItem | MEPSystemAttribute]:
         """
-        Returns the details of the given MEP System attributes.
+        Returns the details of the given MEP System attributes (domain, pens, fill, center line
+        type, surface and insulation surface).
 
         Args:
             attribute_ids (list[AttributeIdArrayItem]): A list of attributes.

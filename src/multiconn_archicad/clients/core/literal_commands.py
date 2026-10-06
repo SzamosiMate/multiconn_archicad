@@ -313,6 +313,7 @@ TapirCommandType = Literal[
     "SetElementNotificationClient",
     "SetGDLParametersOfElements",
     "SetGeoLocation",
+    "SetIFCPropertiesOfElements",
     "SetLayoutSettings",
     "SetLibraries",
     "SetProjectInfoField",

@@ -602,6 +602,21 @@ class GeoReferencingParameters(TypedDict):
     verticalDatum: str
     mapProjection: str
     mapZone: str
+    xAxisAbscissa: float
+    xAxisOrdinate: float
+    scale: float
+
+
+class GeoReferencingParametersUpdate(TypedDict):
+    crsName: NotRequired[str]
+    description: NotRequired[str]
+    geodeticDatum: NotRequired[str]
+    verticalDatum: NotRequired[str]
+    mapProjection: NotRequired[str]
+    mapZone: NotRequired[str]
+    xAxisAbscissa: NotRequired[float]
+    xAxisOrdinate: NotRequired[float]
+    scale: NotRequired[float]
 
 
 class GetAddOnVersionResult(TypedDict):
@@ -1196,6 +1211,8 @@ MEPSystemAttributeField: TypeAlias = Literal[
     "centerLinePen",
     "fillId",
     "centerLineTypeId",
+    "materialId",
+    "insulationMaterialId",
 ]
 
 
@@ -1607,6 +1624,13 @@ class ProjectLocation(TypedDict):
     latitude: float
     altitude: float
     north: float
+
+
+class ProjectLocationUpdate(TypedDict):
+    longitude: NotRequired[float]
+    latitude: NotRequired[float]
+    altitude: NotRequired[float]
+    north: NotRequired[float]
 
 
 PropertyDataType: TypeAlias = Literal[
@@ -2084,6 +2108,18 @@ class SurveyPointPosition(TypedDict):
     eastings: float
     northings: float
     elevation: float
+
+
+class SurveyPointPositionUpdate(TypedDict):
+    eastings: NotRequired[float]
+    northings: NotRequired[float]
+    elevation: NotRequired[float]
+
+
+class SurveyPointUpdate(TypedDict):
+    position: NotRequired[SurveyPointPositionUpdate]
+    positionInProject: NotRequired[Coordinate3D]
+    geoReferencingParameters: NotRequired[GeoReferencingParametersUpdate]
 
 
 SymbolLabelTextDirection: TypeAlias = Literal[
@@ -4312,6 +4348,7 @@ class MEPRoutingElementData(TypedDict):
     crossSectionHeight: NotRequired[float]
     crossSectionShape: NotRequired[MEPCrossSectionShape]
     crossSectionReferenceId: NotRequired[int]
+    preferenceTableId: NotRequired[Guid]
     mepSystemId: NotRequired[AttributeId]
 
 
@@ -4321,6 +4358,8 @@ class MEPRoutingElementModificationData(TypedDict):
     crossSectionWidth: NotRequired[float]
     crossSectionHeight: NotRequired[float]
     crossSectionShape: NotRequired[MEPCrossSectionShape]
+    crossSectionReferenceId: NotRequired[int]
+    preferenceTableId: NotRequired[Guid]
     nodePositions: NotRequired[list[Coordinate3D]]
 
 
@@ -4340,6 +4379,8 @@ class MEPRoutingSegmentDetails(TypedDict):
     crossSectionWidth: float
     crossSectionHeight: float
     crossSectionShape: str
+    crossSectionReferenceId: NotRequired[int]
+    preferenceTableId: NotRequired[Guid]
 
 
 class MEPSystemAttribute(TypedDict):
@@ -4356,6 +4397,8 @@ class MEPSystemAttribute(TypedDict):
     centerLinePen: NotRequired[int]
     fillId: NotRequired[AttributeIdArrayItem]
     centerLineTypeId: NotRequired[AttributeIdArrayItem]
+    materialId: NotRequired[AttributeIdArrayItem]
+    insulationMaterialId: NotRequired[AttributeIdArrayItem]
 
 
 MEPSystemAttributeOrError: TypeAlias = MEPSystemAttribute | ErrorItem
@@ -4375,6 +4418,8 @@ class MEPSystemData(TypedDict):
     centerLinePen: NotRequired[int]
     fillId: NotRequired[AttributeIdArrayItem]
     centerLineTypeId: NotRequired[AttributeIdArrayItem]
+    materialId: NotRequired[AttributeIdArrayItem]
+    insulationMaterialId: NotRequired[AttributeIdArrayItem]
 
 
 class MeshData(TypedDict):
@@ -5052,7 +5097,28 @@ class SetGDLParametersOfElementsResult(TypedDict):
     executionResults: ExecutionResults
 
 
+class SetGeoLocationParameters(TypedDict):
+    projectLocation: NotRequired[ProjectLocationUpdate]
+    surveyPoint: NotRequired[SurveyPointUpdate]
+
+
 SetGeoLocationResult: TypeAlias = ExecutionResult
+
+
+class ElementIFCPropertyValue(TypedDict):
+    elementId: ElementId
+    propertySetName: str
+    propertyName: str
+    type: str
+    value: Any
+
+
+class SetIFCPropertiesOfElementsParameters(TypedDict):
+    elementIFCPropertyValues: list[ElementIFCPropertyValue]
+
+
+class SetIFCPropertiesOfElementsResult(TypedDict):
+    executionResults: ExecutionResults
 
 
 class SetLayoutSettingsParameters(TypedDict):
@@ -5225,6 +5291,7 @@ class SurfaceData(TypedDict):
 
 class SurveyPoint(TypedDict):
     position: SurveyPointPosition
+    positionInProject: Coordinate3D
     geoReferencingParameters: GeoReferencingParameters
 
 
@@ -7212,11 +7279,6 @@ class RoofWithDetails(TypedDict):
 
 class SetClassificationsOfElementsParameters(TypedDict):
     elementClassifications: ElementClassifications
-
-
-class SetGeoLocationParameters(TypedDict):
-    projectLocation: NotRequired[ProjectLocation]
-    surveyPoint: NotRequired[SurveyPoint]
 
 
 class SetStoriesParameters(TypedDict):

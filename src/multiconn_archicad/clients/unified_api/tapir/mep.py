@@ -109,7 +109,8 @@ class MepCommands:
     ) -> list[ElementIdArrayItem | ErrorItem]:
         """
         Creates MEP routing elements (duct, pipe or cable carrier routes) along the given
-        polylines with optional cross section data and MEP system. Available from Archicad 28.
+        polylines with optional cross section data (shape, size, preference table and reference
+        id) and MEP system. Available from Archicad 28.
 
         Args:
             routing_elements_data (list[MEPRoutingElementData]): Array of data to create MEP
@@ -240,7 +241,8 @@ class MepCommands:
     ) -> list[ErrorItem | MEPRoutingElementDetails]:
         """
         Retrieves the details of the given MEP routing elements: domain, MEP system, route
-        polyline, segments with cross section data and nodes. Available from Archicad 28.
+        polyline, segments with cross section data (shape, size, preference table and reference
+        id) and nodes. Available from Archicad 28.
 
         Args:
             elements (list[ElementIdArrayItem]): A list of elements.
@@ -268,8 +270,9 @@ class MepCommands:
         self, routing_elements_data: list[MEPRoutingElementModificationData]
     ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
         """
-        Modifies the given MEP routing elements: MEP system, cross section data of all segments
-        and node positions. Available from Archicad 28.
+        Modifies the given MEP routing elements: MEP system, cross section data (shape, size,
+        preference table and reference id) of all segments and node positions. Available from
+        Archicad 28.
 
         Args:
             routing_elements_data (list[MEPRoutingElementModificationData]): Array of data to

@@ -56,7 +56,7 @@
     {
         "name": "ChangeWindow",
         "group": "Application Commands",
-        "description": "Changes the current (active) window to the given window.",
+        "description": "Changes the current (active) window to the given window. With windowType 'FloorPlan' and a storyIndex it also activates that story on the floor plan.",
         "version": "1.3.1"
     },
     {
@@ -302,13 +302,13 @@
     {
         "name": "CreateMEPRoutingElements",
         "group": "MEP Commands",
-        "description": "Creates MEP routing elements (duct, pipe or cable carrier routes) along the given polylines with optional cross section data and MEP system. Available from Archicad 28.",
+        "description": "Creates MEP routing elements (duct, pipe or cable carrier routes) along the given polylines with optional cross section data (shape, size, preference table and reference id) and MEP system. Available from Archicad 28.",
         "version": "1.5.6"
     },
     {
         "name": "CreateMEPSystems",
         "group": "Attribute Commands",
-        "description": "Creates or overwrites MEP System attributes based on the given parameters.",
+        "description": "Creates or overwrites MEP System attributes (domain, pens, fill, center line type, surface and insulation surface) based on the given parameters.",
         "version": "1.5.4"
     },
     {
@@ -932,13 +932,13 @@
     {
         "name": "GetMEPRoutingElements",
         "group": "MEP Commands",
-        "description": "Retrieves the details of the given MEP routing elements: domain, MEP system, route polyline, segments with cross section data and nodes. Available from Archicad 28.",
+        "description": "Retrieves the details of the given MEP routing elements: domain, MEP system, route polyline, segments with cross section data (shape, size, preference table and reference id) and nodes. Available from Archicad 28.",
         "version": "1.5.6"
     },
     {
         "name": "GetMEPSystems",
         "group": "Attribute Commands",
-        "description": "Returns the details of the given MEP System attributes.",
+        "description": "Returns the details of the given MEP System attributes (domain, pens, fill, center line type, surface and insulation surface).",
         "version": "1.5.4"
     },
     {
@@ -1196,7 +1196,7 @@
     {
         "name": "ModifyMEPRoutingElements",
         "group": "MEP Commands",
-        "description": "Modifies the given MEP routing elements: MEP system, cross section data of all segments and node positions. Available from Archicad 28.",
+        "description": "Modifies the given MEP routing elements: MEP system, cross section data (shape, size, preference table and reference id) of all segments and node positions. Available from Archicad 28.",
         "version": "1.5.6"
     },
     {
@@ -1414,6 +1414,12 @@
         "group": "Project Commands",
         "description": "Sets the project location details.",
         "version": "1.2.9"
+    },
+    {
+        "name": "SetIFCPropertiesOfElements",
+        "group": "IFC Commands",
+        "description": "Sets local IFC properties on elements by creating or modifying single value (IfcPropertySingleValue) properties in the given property sets. Available only in Archicad 25, 26 and 27 for now.",
+        "version": "1.7.0"
     },
     {
         "name": "SetLayoutSettings",

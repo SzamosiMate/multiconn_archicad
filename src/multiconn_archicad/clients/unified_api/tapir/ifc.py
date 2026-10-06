@@ -17,10 +17,13 @@ from multiconn_archicad.models.tapir.commands import (
     GetIFCTypeOfElementsResult,
     IFCFileOperationParameters,
     IFCFileOperationResult,
+    SetIFCPropertiesOfElementsParameters,
+    SetIFCPropertiesOfElementsResult,
 )
 from multiconn_archicad.models.tapir.types import (
     ElementIFCIds,
     ElementIFCProperties,
+    ElementIFCPropertyValue,
     ElementIFCType,
     ElementIdArrayItem,
     ElementsByIFCId,
@@ -208,3 +211,34 @@ class IfcCommands:
         )
         validated_response = TypeAdapter(IFCFileOperationResult).validate_python(response_dict)
         return validated_response
+
+    def set_ifc_properties_of_elements(
+        self, element_ifc_property_values: list[ElementIFCPropertyValue]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Sets local IFC properties on elements by creating or modifying single value
+        (IfcPropertySingleValue) properties in the given property sets. Available only in
+        Archicad 25, 26 and 27 for now.
+
+        Args:
+            element_ifc_property_values (list[ElementIFCPropertyValue]): The IFC property values
+                to set. Only single value (IfcPropertySingleValue) properties are supported.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elementIFCPropertyValues": element_ifc_property_values,
+        }
+        validated_params = SetIFCPropertiesOfElementsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "SetIFCPropertiesOfElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = SetIFCPropertiesOfElementsResult.model_validate(response_dict)
+        return validated_response.executionResults

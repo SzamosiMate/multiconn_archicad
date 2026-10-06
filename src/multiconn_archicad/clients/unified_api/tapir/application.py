@@ -45,7 +45,8 @@ class ApplicationCommands:
         self, parameters: NavigatorItemIdArrayItem | DatabaseIdAndWindowType
     ) -> FailedExecutionResult | SuccessfulExecutionResult:
         """
-        Changes the current (active) window to the given window.
+        Changes the current (active) window to the given window. With windowType 'FloorPlan' and
+        a storyIndex it also activates that story on the floor plan.
 
         Args:
             parameters (NavigatorItemIdArrayItem | DatabaseIdAndWindowType): Union model

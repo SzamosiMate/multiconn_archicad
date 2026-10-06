@@ -59,10 +59,10 @@ from multiconn_archicad.models.tapir.types import (
     PrintArea,
     ProjectInfoField,
     ProjectInfoFieldData,
-    ProjectLocation,
+    ProjectLocationUpdate,
     StorySettings,
     SuccessfulExecutionResult,
-    SurveyPoint,
+    SurveyPointUpdate,
 )
 
 if TYPE_CHECKING:
@@ -575,14 +575,14 @@ class ProjectCommands:
         return validated_response
 
     def set_geo_location(
-        self, project_location: None | ProjectLocation = None, survey_point: None | SurveyPoint = None
+        self, project_location: None | ProjectLocationUpdate = None, survey_point: None | SurveyPointUpdate = None
     ) -> FailedExecutionResult | SuccessfulExecutionResult:
         """
         Sets the project location details.
 
         Args:
-            project_location (None | ProjectLocation)
-            survey_point (None | SurveyPoint)
+            project_location (None | ProjectLocationUpdate)
+            survey_point (None | SurveyPointUpdate)
 
         Returns:
             FailedExecutionResult | SuccessfulExecutionResult
