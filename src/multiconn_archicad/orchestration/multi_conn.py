@@ -1,3 +1,4 @@
+from argparse import Namespace
 from pprint import pformat
 
 from multiconn_archicad.constants import DEFAULT_PORT_RANGE, DEFAULT_HOST, SUPPORTED_TAPIR_VERSION
@@ -35,12 +36,12 @@ class MultiConn:
         self,
         dialog_handler: DialogHandlerBase = EmptyDialogHandler(),
         port: Port | None = None,
-        host: str = DEFAULT_HOST,
+        host: str | None = None,
         ui_mode: bool = False,
         dispatcher: Dispatcher | None = None,
     ) -> None:
         cli_args = get_cli_args_once()
-        self._base_url: str = cli_args.host if cli_args.host else host
+        self._base_url: str = host if host else cli_args.host if cli_args.host else DEFAULT_HOST
         self._open_port_headers: dict[Port, ConnHeader] = {}
         self._active_ports: set[Port] = set()
         self._primary: ConnHeader | None = None
@@ -63,14 +64,7 @@ class MultiConn:
         self.open_project: OpenProject = OpenProject(self)
         self.switch_project: SwitchProject = SwitchProject(self)
 
-        port = Port(cli_args.port) if cli_args.port else port
-        if port is not None:
-            try:
-                self._set_primary(port)
-            except KeyError:
-                if not ui_mode:
-                    raise
-                log.warning("Requested Archicad port %s is unavailable", port)
+        self._resolve_primary(port, cli_args)
 
     @property
     def open_port_headers(self) -> dict[Port, ConnHeader]:
@@ -273,6 +267,16 @@ class MultiConn:
             log.info(f"Archicad instance matching the header found on port {header.port}. Setting primary.")
         else:
             raise KeyError(f"Failed to set primary. There is no open port with header: {header}")
+
+    def _resolve_primary(self, port: Port | None, cli_args: Namespace) -> None:
+        port = port if port else Port(cli_args.port) if cli_args.port else None
+        if port is not None:
+            try:
+                self._set_primary(port)
+            except KeyError:
+                if not self._ui_mode:
+                    raise
+                log.warning("Requested Archicad port %s is unavailable", port)
 
     def _ensure_fleet_scanned(self) -> None:
         if not self._fleet_scanned:
