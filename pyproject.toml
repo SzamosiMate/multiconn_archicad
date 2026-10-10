@@ -80,6 +80,7 @@ line-ending = "lf"
 docstring-code-format = true
 
 [tool.pytest.ini_options]
+pythonpath = ["."]
 addopts = [
     "--import-mode=importlib",
 ]
