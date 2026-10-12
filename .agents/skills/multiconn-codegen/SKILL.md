@@ -28,6 +28,7 @@ Examples are `$multiconn-codegen audit`, `$multiconn-codegen regenerate tapir`, 
 - Before changing behavior, inspect the relevant parts of `code_generation/tapir/run_tapir_pipeline.py`, `code_generation/shared/schema_patching.py`, `code_generation/tapir/model_generators/03_model_cleaner.py`, `code_generation/tapir/model_generators/06_typed_dict_cleaner.py`, `code_generation/tapir/generation_audit.py`, and `code_generation/unified/api_generator/run_pipeline.py`.
 - Record the pre-generation Tapir version and the public definitions in `src/multiconn_archicad/models/tapir/types.py`. Use the checked-in revision as the comparison baseline, not line positions in the working file.
 - Preserve unrelated working-tree changes. Do not commit, push, or open a pull request unless requested.
+- For an update, consult existing upstream-patch tracking under `documentation/` when available. Retirement requires the correction in the target release's fetched documentation schema, not merely a merged source PR or a release tag. Keep patches whose source fixes are merged but absent from the released input.
 
 ### Inspect large artifacts efficiently
 
@@ -70,6 +71,8 @@ During an update, classify patches introduced or materially changed by that upda
 Investigation of Tapir implementation source is outside this skill's scope. For a breaking source-review patch, record the exact schema path, affected consumers, observed transformation, and unresolved question for a separate follow-up. Do not fetch or inspect Tapir implementation source as part of this workflow. Preserve existing behavior while classification remains pending unless a local repair is independently justified by in-scope schema/generator evidence. Pending follow-up does not by itself block an otherwise completed version update.
 
 Use existing helpers where possible. Patch helpers must validate their targets and fail loudly when the upstream schema changes; do not add conditional skips for stale patches.
+
+When released input contains a tracked correction, inspect the unpatched definition and affected consumers before removing redundant operations. Trace renamed/moved paths and earlier naming dependencies; a guard failure alone does not prove equivalence. Retain necessary compatibility aliases in `code_generation/shared/model_aliases.py`, confirm both generated representations and unified behavior, and record the confirmed release in existing tracking. Do not fetch C++ implementation source for retirement checks; unresolved source questions belong to the upstream follow-up.
 
 Keep each patch call on one physical line. Use a formatter-skip marker on that statement only when required to preserve the one-line declaration. Group patches with the same reason together. Add a short comment when introducing a new reason for patching, and reuse that heading for later patches with the same reason; do not narrate every individual call.
 
@@ -121,6 +124,8 @@ Start with a release-level API summary: counts and names of added, removed, and 
 Group review entries under patch-category headings. Use short lists and actual code snippets instead of prose-heavy tables. Each independently reviewable decision needs its own entry identifying the source, affected consumers, observed problem, and resolution. Give the exact schema definition/property path once, either as a JSON pointer or through a patch call whose parent and path identify it unambiguously. Do not group unrelated locations just because they share a mechanical cause; ordinary related upstream additions with no separate decision can be summarized together.
 
 Explain requiredness, unions, naming decisions, tradeoffs, temporary retirement conditions, intentional breaking behavior, and unresolved source-review questions alongside their entries. Explain each issue once; do not repeat it in separate detailed notes, semantic-review tables, or patch summaries. Keep unchanged permanent patches out of new upstream recommendations.
+
+When upstream follow-up remains, add a short `Upstream follow-up` section linking the relevant category entries and existing tracking. Identify new or materially changed temporary candidates and unresolved source-review questions; distinguish them from submitted fixes and merged fixes awaiting release. Include original paths when earlier naming patches obscure them. This hands work to a separately requested `$multiconn-upstream-patches` run; do not invoke that workflow automatically or duplicate its investigation here.
 
 Classify **Unified API breaking changes** separately from schema patch categories. Compare signatures and generated return/unwrapping behavior against the baseline, including referenced model changes even when annotations stay the same. Include removed/renamed methods, changed required arguments, incompatible parameter models/types, and changed return shapes. A new optional response field that changes single-field unwrapping is a Unified API break even when the upstream addition is non-breaking. Appended optional arguments and new methods are normally additive.
 
