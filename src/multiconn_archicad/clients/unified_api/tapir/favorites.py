@@ -15,6 +15,7 @@ from multiconn_archicad.models.tapir.commands import (
     DeleteFavoritesParameters,
     DeleteFavoritesResult,
     ExportFavoritesParameters,
+    ExportFavoritesResult,
     GetFavoritePreviewImageParameters,
     GetFavoritePreviewImageResult,
     GetFavoritesByTypeParameters,
@@ -206,9 +207,10 @@ class FavoritesCommands:
             "names": names,
         }
         validated_params = ExportFavoritesParameters(**params_dict)
-        self._core.post_tapir_command(
+        response_dict = self._core.post_tapir_command(
             "ExportFavorites", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
+        validated_response = ExportFavoritesResult.model_validate(response_dict)
         return None
 
     def get_favorite_preview_image(

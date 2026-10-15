@@ -198,7 +198,7 @@ class SolidElementOperationCommands:
                 trimmingElement the roofs and shells among them do the trimming.
             trimming_element (ElementId | None): Optional. The roof or shell that trims every
                 element in the list.
-            trim_type (None | TrimType)
+            trim_type (None | TrimType): Used with trimmingElement; defaults to KeepInside.
 
         Returns:
             FailedExecutionResult | SuccessfulExecutionResult

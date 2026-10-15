@@ -27,8 +27,9 @@ Examples are `$multiconn-codegen audit`, `$multiconn-codegen regenerate tapir`, 
 - For an update, determine the target Tapir version from the request. Ask for it only when it cannot be inferred. For regeneration, retain the pinned version.
 - Before changing behavior, inspect the relevant parts of `code_generation/tapir/run_tapir_pipeline.py`, `code_generation/shared/schema_patching.py`, `code_generation/tapir/model_generators/03_model_cleaner.py`, `code_generation/tapir/model_generators/06_typed_dict_cleaner.py`, `code_generation/tapir/generation_audit.py`, and `code_generation/unified/api_generator/run_pipeline.py`.
 - Record the pre-generation Tapir version and the public definitions in `src/multiconn_archicad/models/tapir/types.py`. Use the checked-in revision as the comparison baseline, not line positions in the working file.
+- Distinguish the checked-in diff baseline, initial working outputs, and the previously used client API. Compare patched public models when assessing migrations; a raw upstream-schema difference alone does not establish a new client break. Record discrepancies explicitly, including user-provided corrections to the prior API.
 - Preserve unrelated working-tree changes. Do not commit, push, or open a pull request unless requested.
-- For an update, consult existing upstream-patch tracking under `documentation/` when available. Retirement requires the correction in the target release's fetched documentation schema, not merely a merged source PR or a release tag. Keep patches whose source fixes are merged but absent from the released input.
+- Read the [pipeline brief](../../../code_generation/documentation/archicad_api_codegen_brief.md) when architecture or output routing needs context. For an update, consult the previous release report in `code_generation/documentation/reports/` and `code_generation/documentation/schema-patch-tracking.md`. Retirement requires the correction in the target release's fetched documentation schema, not merely a merged source PR or a release tag. Keep patches whose source fixes are merged but absent from the released input.
 
 ### Inspect large artifacts efficiently
 
@@ -59,8 +60,8 @@ Examples are `$multiconn-codegen audit`, `$multiconn-codegen regenerate tapir`, 
 
 Put each patch in exactly one category:
 
-- **Permanent:** established generator workarounds or intentional client choices that preserve the upstream schema contract. Use `apply_permanent_patches`. Preserve existing intent even when an equivalent upstream refactor is technically possible; do not propose upstream changes solely to accommodate generator shortcomings such as `Data` becoming `Datum`.
-- **Temporary:** fixes intended for non-breaking upstream adoption. Use `apply_temporary_patches`, record the upstream change that would allow removal, and remove the patch when that correction arrives. Naming an anonymous schema or reusing an equivalent definition may belong here when upstream adoption is intended and existing public names, fields, requiredness, constraints, and union behavior can be preserved.
+- **Permanent:** established generator workarounds or intentional client choices that preserve the upstream schema contract. Use `apply_permanent_patches`. Preserve existing intent even when an equivalent upstream refactor is technically possible; do not propose upstream changes solely to accommodate generator shortcomings such as `Data` becoming `Datum`, incorrect singularization, or numeric collision suffixes. Keep these local even when naming the valid upstream inline schema would also solve the problem.
+- **Temporary:** fixes intended for non-breaking upstream adoption. Use `apply_temporary_patches`, record the upstream change that would allow removal, and remove the patch when that correction arrives. Require an independently justified upstream correction or shared-schema improvement, preserving existing public names, fields, requiredness, constraints, and union behavior. Naming a valid anonymous schema solely to fix this generator is not sufficient; a broader upstream extraction policy must be explicitly in scope.
 - **Breaking permanent:** confirmed intentional client differences in requiredness, constraints, accepted values, payload structure, or existing public schema definitions. Use `apply_breaking_permanent_patches`. State the deliberate client behavior, its reason, and compatibility consequences; a difference from upstream alone does not establish intent.
 - **Breaking — source review / potential error:** shape-changing patches whose justification remains uncertain and may involve a schema or local patch error. Use `apply_breaking_source_review_patches`. This category flags unresolved follow-up; it does not assert an upstream defect or endorse a breaking upstream proposal.
 
@@ -97,7 +98,7 @@ Known semantic error types are:
 - a generated representation that weakens or obscures an important schema constraint such as `oneOf`, `anyOf`, or conditional required fields;
 - inconsistent Pydantic and TypedDict public surfaces.
 
-When a better name or reuse decision is clear from the schema and consumers, implement it and report the resolution. When multiple materially different choices remain plausible, preserve the best safe generated result and ask a focused human-review question.
+Use the smallest naming correction that resolves the demonstrated problem. Do not add role suffixes such as `Update` solely because they sound better when singularization alone fixes the name and no collision remains. When a necessary naming or reuse decision is clear from the schema and consumers, implement it and report the resolution; otherwise preserve a valid generated name. When multiple materially different choices remain plausible, preserve the best safe generated result and ask a focused human-review question.
 
 If the run exposes a deterministic failure class not covered by the audit, or a semantic failure class not covered by the list above, record it under `New patterns noticed`. State whether it should become a deterministic audit rule or a maintained semantic-review error type. A new instance of a known error type is not a new pattern.
 
@@ -129,6 +130,8 @@ When upstream follow-up remains, add a short `Upstream follow-up` section linkin
 
 Classify **Unified API breaking changes** separately from schema patch categories. Compare signatures and generated return/unwrapping behavior against the baseline, including referenced model changes even when annotations stay the same. Include removed/renamed methods, changed required arguments, incompatible parameter models/types, and changed return shapes. A new optional response field that changes single-field unwrapping is a Unified API break even when the upstream addition is non-breaking. Appended optional arguments and new methods are normally additive.
 
+Distinguish wire-schema acceptance from Python compatibility: widening an enum does not narrow JSON acceptance, but replacing its Python enum class can change equality and validation of enum instances. Do not present an enum-to-enum change as a new string-to-enum migration.
+
 Use a dedicated `Unified API breaking changes` section with a short entry per affected method: before/after behavior and concrete caller migration. Identify the exact schema source and cause here or refer to the relevant category entry. This section owns migration; the category entry owns the patch decision. Count breaks separately in the API summary, and do not hide them only among upstream additions.
 
 When handwritten generator, cleaner, formatter, or audit behavior changes, explain its trigger, input-to-output transformation, owning layer, affected models, settings considered, and deliberate limitations. Omit this section when none changed.
@@ -136,6 +139,8 @@ When handwritten generator, cleaner, formatter, or audit behavior changes, expla
 For the untouched new-type inventory, use `src/multiconn_archicad/models/tapir/types.py`. Include only names added relative to the checked-in baseline and untouched by patches or generator/cleaner changes made during the run. Exclude command models and repeated TypedDict names. Check representation consistency and report mismatches. List names only, without rationale.
 
 ## Report for human review
+
+For release updates, maintain one final reviewed report at `code_generation/documentation/reports/tapir-<version>.md`, alongside the changes it explains. Revise that report during the same update rather than saving each intermediate attempt. Keep ongoing patch dispositions in `code_generation/documentation/schema-patch-tracking.md`; link instead of repeating its inventory. Preserve historical reports as records of their stated baselines and verification. Keep intermediate logs, snapshots and test output in untracked scratch storage. Audit-only work remains read-only and can report in the response. These files are intended for source control, but do not stage or commit them unless requested.
 
 Use the compact structure below. Retain the API summary, verification, and human-review outcome; omit other empty sections and category headings. Avoid wide tables, repeated inventories, and routine success narration. Use actual patch calls, model excerpts, signature diffs, or caller examples when they clarify a change. Label abbreviated excerpts; do not invent executed code or validation results. Distinguish formatter success from lint findings and limited checks from broader claims.
 

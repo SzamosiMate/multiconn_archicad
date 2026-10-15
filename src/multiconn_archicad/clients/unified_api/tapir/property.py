@@ -194,9 +194,9 @@ class PropertyCommands:
             properties (list[PropertyIdArrayItem]): A list of property identifiers.
 
         Returns:
-            list[ErrorItem | PropertyValuesArrayItem]: List of property value lists. The order
-                of the outer list is that of the given attributes. The order of the inner lists
-                are that of the given properties.
+            list[ErrorItem | PropertyValuesArrayItem]: The order of the outer list is that of
+                the given attributes. The order of the inner lists are that of the given
+                properties.
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -226,9 +226,9 @@ class PropertyCommands:
             properties (list[PropertyIdArrayItem]): A list of property identifiers.
 
         Returns:
-            list[ErrorItem | PropertyValuesArrayItem]: List of property value lists. The order
-                of the outer list is that of the given elements. The order of the inner lists
-                are that of the given properties.
+            list[ErrorItem | PropertyValuesArrayItem]: The order of the outer list is that of
+                the given elements. The order of the inner lists are that of the given
+                properties.
 
         Raises:
             ArchicadAPIError: If the API returns an error response.

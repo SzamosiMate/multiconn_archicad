@@ -1,6 +1,11 @@
 """Python compatibility names emitted by both Tapir model splitters."""
 
 TAPIR_TYPE_ALIASES = {
+    "MEPDomains": "MEPDomain",
+    "MEPSystemDomain": "MEPDomain",
+    "CoverFillOrientationType": "HatchOrientationType",
+    "Level": "RoofLevel",
+    "PivotLine": "RoofPivotLine",
     "PropertyExpressionUpdate": "PropertyDefinitionUpdate",
 }
 

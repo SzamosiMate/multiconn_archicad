@@ -2,8 +2,9 @@ from copy import deepcopy
 from typing import Any, Optional
 
 
-def _get_target_from_path(defs: dict[str, Any], parent_name: str, path: list[str]) -> tuple[
-    Optional[dict], Optional[dict], str]:
+def _get_target_from_path(
+    defs: dict[str, Any], parent_name: str, path: list[str]
+) -> tuple[Optional[dict], Optional[dict], str]:
     """
     Navigates the schema dict. Returns (parent_of_target, target_schema, last_key_used).
     Automatically assumes segments are properties unless the segment is 'items'.
@@ -62,12 +63,21 @@ def _require_target(defs: dict[str, Any], parent_name: str, path: list[str]) -> 
     return container, target_schema, key
 
 
+def _require_new_definition(defs: dict[str, Any], name: str) -> None:
+    if name in defs:
+        raise ValueError(
+            f"Schema patch definition '{name}' already exists. "
+            "Review the upstream definition before updating or removing the patch in schema_patching.py."
+        )
+
+
 def extract_inline_schema(defs: dict[str, Any], parent_name: str, path: list[str], new_def_name: str):
     """
     Helper to extract an inline schema definition into a named $ref.
     Path is simplified: ['surveyPoint', 'position'] instead of ['properties', 'surveyPoint', 'properties', 'position']
     """
     container, target_schema, key = _require_target(defs, parent_name, path)
+    _require_new_definition(defs, new_def_name)
 
     print(f"  -> Extracting Model {parent_name} / {path} to {new_def_name}")
 
@@ -89,8 +99,8 @@ def extract_inline_enum(defs: dict[str, Any], parent_name: str, path: list[str],
     container, target_schema, key = _require_target(defs, parent_name, path)
 
     if "enum" not in target_schema:
-        print(f"  -> Warning: Expected enum at {parent_name} / {path}, but found none.")
-        return
+        raise ValueError(f"Expected enum at '{parent_name}' / {path}, but found none. Review the upstream definition.")
+    _require_new_definition(defs, new_def_name)
 
     print(f"  -> Extracting Enum {parent_name} / {path} to {new_def_name}")
 
@@ -140,19 +150,40 @@ def name_required_variants(defs: dict[str, Any], parent_name: str, path: list[st
             f"{len(variants) if isinstance(variants, list) else type(variants).__name__}."
         )
 
+    for variant_name in variant_names:
+        _require_new_definition(defs, variant_name)
+
     common_schema = {key: deepcopy(value) for key, value in target_schema.items() if key != union_key}
     common_required = common_schema.pop("required", [])
     for variant, variant_name in zip(variants, variant_names):
         if not isinstance(variant, dict) or set(variant) != {"required"} or not isinstance(variant["required"], list):
-            raise ValueError(
-                f"Expected a required-only variant at '{parent_name}' / {path}, found {variant!r}."
-            )
+            raise ValueError(f"Expected a required-only variant at '{parent_name}' / {path}, found {variant!r}.")
         named_variant = deepcopy(common_schema)
         named_variant["required"] = list(dict.fromkeys([*common_required, *variant["required"]]))
         defs[variant_name] = named_variant
 
     target_schema.clear()
     target_schema[union_key] = [{"$ref": f"#/$defs/{name}"} for name in variant_names]
+
+
+def extract_union_variant(defs: dict[str, Any], parent_name: str, path: list[str], index: int, new_def_name: str):
+    """Name an inline oneOf/anyOf branch, rejecting stale or already named targets."""
+    _, target_schema, _ = _require_target(defs, parent_name, path)
+    union_keys = [key for key in ("oneOf", "anyOf") if key in target_schema]
+    if len(union_keys) != 1:
+        raise ValueError(f"Expected exactly one union at '{parent_name}' / {path}, found {union_keys}.")
+    variants = target_schema[union_keys[0]]
+    if not isinstance(variants, list) or not 0 <= index < len(variants) or not isinstance(variants[index], dict):
+        raise ValueError(f"Missing union variant {index} at '{parent_name}' / {path}.")
+    branch = variants[index]
+    if "$ref" in branch:
+        raise ValueError(
+            f"Schema patch union variant {index} at '{parent_name}' / {path} already references {branch['$ref']!r}. "
+            "Review the upstream definition before updating or removing the patch in schema_patching.py."
+        )
+    _require_new_definition(defs, new_def_name)
+    defs[new_def_name] = branch
+    variants[index] = {"$ref": f"#/$defs/{new_def_name}"}
 
 
 def apply_permanent_patches(master_defs: dict[str, Any]):
@@ -244,7 +275,7 @@ def apply_permanent_patches(master_defs: dict[str, Any]):
     # the MeshWithDetails wrapper (extracted above) carries the actual data in 'meshData'.
     extract_inline_schema(master_defs, "MeshWithDetails", ["meshData"], "MeshModificationData")
 
-    extract_inline_schema(master_defs,"RevisionCustomSchemeData",["items"],"RevisionCustomSchemeEntry")
+    extract_inline_schema(master_defs, "RevisionCustomSchemeData", ["items"], "RevisionCustomSchemeEntry")
 
     # --- Preserve stable public names for deliberate conditional object schemas ---
     name_required_variants(master_defs, "Hole2D", [], ["Hole2DWithOutline", "Hole2DWithLegacyCoordinates"])
@@ -261,327 +292,44 @@ def apply_breaking_permanent_patches(master_defs: dict[str, Any]):
 
 
 def apply_breaking_source_review_patches(master_defs: dict[str, Any]):
-    """Shape-changing patches pending source review for a possible schema or local-patch error.
-
-    Check the Tapir implementation before proposing a breaking upstream fix.
-    Then move the patch to a settled category, remove it after an upstream fix,
-    or repair the local patch if its shape change was the error.
-    """
-    print("Applying breaking schema patches pending source review...")
-
-    # Pending upstream enum changes: inputs accept three domains; element results emit eleven types.
-    replace_inline_schema_with_ref(master_defs, "MEPSystemData", ["domain"], "MEPDomain", preserve_description=True)
-    replace_inline_schema_with_ref(master_defs, "GetMEPElementsResult", ["elements", "items", "type"], "MEPElementType", preserve_description=True)
+    """Shape-changing patches pending source review (none remain after Tapir 1.7.1)."""
+    print("Applying breaking schema patches pending source review (none assigned)...")
 
 
 def apply_temporary_patches(master_defs: dict[str, Any]):
-    """Planned non-breaking upstream schema fixes; removable after upstream adopts them.
+    """Non-breaking fixes still absent from released Tapir documentation.
 
-    Preserve established permanent generator/client workarounds. New 1.6.0
-    naming and equivalent-reference patches below are intended upstream fixes.
+    Tapir 1.7.1 supplies the other named definitions and references previously
+    patched here. Keep modification holes separate from response identifiers.
     """
     print("Applying temporary schema patches (pending upstream fixes)...")
 
-    # --- Tapir 1.6.0: name update payloads separately from creation and response data ---
-    extract_inline_schema(master_defs, "UpdateClassificationItemsParameters", ["classificationItems", "items"], "ClassificationItemUpdate")
-    extract_inline_schema(master_defs, "UpdateClassificationSystemsParameters", ["classificationSystems", "items"], "ClassificationSystemUpdate")
-    extract_inline_schema(master_defs, "UpdatePropertyGroupsParameters", ["propertyGroups", "items"], "PropertyGroupUpdate")
-    extract_inline_schema(master_defs, "GetAllPropertiesResult", ["propertyGroups", "items"], "PropertyGroupDetails")
-    extract_inline_schema(master_defs, "UpdatePropertyDefinitionsParameters", ["propertyDefinitions", "items"], "PropertyDefinitionUpdate")
-    extract_inline_schema(master_defs, "PropertyDefinitionUpdate", ["availability"], "PropertyAvailabilityUpdate")
-    extract_inline_schema(master_defs, "PropertyDefinitionUpdate", ["renameEnumValues", "items"], "PropertyEnumValueRename")
-    extract_inline_schema(master_defs, "PropertyDefinitionUpdate", ["removeEnumValues", "items"], "PropertyEnumValueRemoval")
-
-    # --- Domain-specific names for new command payloads and policies ---
-    extract_inline_schema(master_defs, "GetIFCExportTranslatorsResult", ["translators", "items"], "IFCExportTranslator")
-    extract_inline_enum(master_defs, "IFCFileOperationParameters", ["elementsToExport"], "IFCElementsToExport")
-    extract_inline_enum(master_defs, "ImportClassificationsXmlParameters", ["systemConflictPolicy"], "ClassificationSystemConflictPolicy")
-    extract_inline_enum(master_defs, "ImportClassificationsXmlParameters", ["itemConflictPolicy"], "ClassificationItemConflictPolicy")
-    extract_inline_enum(master_defs, "ImportPropertiesXmlParameters", ["conflictPolicy"], "PropertyImportConflictPolicy")
-
-    # --- Reuse identical drawing enums and GUID-only identifiers without widening unions ---
-    replace_inline_schema_with_ref(master_defs, "DrawingData", ["nameType"], "DrawingNameType", preserve_description=True)
-    replace_inline_schema_with_ref(master_defs, "DrawingDetails", ["nameType"], "DrawingNameType", preserve_description=True)
-    replace_inline_schema_with_ref(master_defs, "DrawingDetails", ["numberingType"], "DrawingNumberingType", preserve_description=True)
-    replace_inline_schema_with_ref(master_defs, "PropertyDetails", ["defaultEnumValueIds", "items"], "GuidId")
-    replace_inline_schema_with_ref(master_defs, "PropertyEnumValueRename", ["enumValueId"], "GuidId")
-    replace_inline_schema_with_ref(master_defs, "PropertyEnumValueRemoval", ["enumValueId"], "GuidId")
-    replace_inline_schema_with_ref(master_defs, "ImportClassificationsXmlResult", ["created", "items"], "GuidId")
-    replace_inline_schema_with_ref(master_defs, "ImportClassificationsXmlResult", ["removed", "items"], "GuidId")
-    replace_inline_schema_with_ref(master_defs, "ImportPropertiesXmlResult", ["created", "items"], "GuidId")
-    replace_inline_schema_with_ref(master_defs, "ImportPropertiesXmlResult", ["removed", "items"], "GuidId")
-
-    # --- Extract specific inline Enums ---
-    extract_inline_enum(master_defs, "WallDetails", ["structureType"], "WallStructureType")
-    extract_inline_enum(master_defs, "WallData", ["structureType"], "WallStructureType")
-    extract_inline_enum(master_defs, "WallWithDetails", ["structureType"], "WallStructureType")
-    extract_inline_enum(master_defs, "SlabDetails", ["structureType"], "SlabStructureType")
-    extract_inline_enum(master_defs, "SlabWithDetails", ["structureType"], "SlabStructureType")
-    extract_inline_enum(master_defs, "RoofData", ["structureType"], "RoofStructureType")
-    extract_inline_enum(master_defs, "RoofWithDetails", ["structureType"], "RoofStructureType")
-
-    # --- Name the per-attribute-type detail field enums (Tapir 1.5.4 attribute commands) ---
-    extract_inline_enum(master_defs, "GetFillsParameters", ["fields", "items"], "FillAttributeField")
-    extract_inline_enum(master_defs, "GetZoneCategoriesParameters", ["fields", "items"], "ZoneCategoryAttributeField")
-    extract_inline_enum(master_defs, "GetMEPSystemsParameters", ["fields", "items"], "MEPSystemAttributeField")
-    extract_inline_enum(master_defs, "GetPenTablesParameters", ["fields", "items"], "PenTableAttributeField")
-    extract_inline_enum(master_defs, "GetProfilesParameters", ["fields", "items"], "ProfileAttributeField")
-    extract_inline_enum(master_defs, "GetCompositesParameters", ["fields", "items"], "CompositeAttributeField")
-    extract_inline_enum(master_defs, "CompositeSkin", ["type"], "CompositeSkinType")
-    extract_inline_enum(master_defs, "GetSurfacesParameters", ["fields", "items"], "SurfaceAttributeField")
-    extract_inline_enum(master_defs, "GetLayersParameters", ["fields", "items"], "LayerAttributeField")
-    extract_inline_enum(master_defs, "GetBuildingMaterialsParameters", ["fields", "items"], "BuildingMaterialAttributeField")
-    extract_inline_enum(master_defs, "GetLinesParameters", ["fields", "items"], "LineAttributeField")
-
-    # --- Replace inline Coordinate2D properties in RotateElementsParameters ---
-    replace_inline_schema_with_ref(master_defs, "RotateElementsParameters", ["elementsWithRotations", "items", "rotation", "beginPoint"], "Coordinate2D", preserve_description=True)
-    replace_inline_schema_with_ref(master_defs, "RotateElementsParameters", ["elementsWithRotations", "items", "rotation", "endPoint"], "Coordinate2D", preserve_description=True)
-    replace_inline_schema_with_ref(master_defs, "RotateElementsParameters", ["elementsWithRotations", "items", "rotation", "origin"], "Coordinate2D", preserve_description=True)
-
-    # --- Extract conflicting inline Schemas ---
-    extract_inline_schema(master_defs, "DimensionData", ["witnessPoints", "items"], "CoordinateWitnessPoint")
-    extract_inline_schema(master_defs, "AssociativeDimensionData", ["witnessPoints", "items"], "AssociativeWitnessPoint")
-    extract_inline_schema(master_defs, "RenameFavoritesParameters", ["renames", "items"], "FavoriteRename")
-    extract_inline_schema(master_defs, "UpdateFavoritesFromElementsParameters", ["favoritesFromElements", "items"], "FavoritesFromElementUpdate")
-    extract_inline_schema(master_defs, "RemoveSolidElementLinksParameters", ["solidLinks", "items"], "SolidLinkReference")
-    extract_inline_schema(master_defs, "GetSolidElementLinksResult", ["solidLinks", "items"], "SolidLinksOfElement")
-    extract_inline_schema(
-        master_defs, "CreateProjectInfoFieldsParameters", ["projectInfoFields", "items"], "ProjectInfoFieldData"
-    )
-    extract_inline_schema(master_defs, "CreateDesignOptionsParameters", ["designOptions", "items"], "DesignOptionData")
-    extract_inline_schema(
-        master_defs,
-        "GetDesignOptionCombinationsResult",
-        ["designOptionCombinations", "items"],
-        "DesignOptionCombinationDetails",
-    )
-    extract_inline_schema(
-        master_defs,
-        "CreateDesignOptionCombinationsParameters",
-        ["designOptionCombinations", "items"],
-        "DesignOptionCombinationData",
-    )
-
-    # --- Keep complete GeoLocation responses separate from partial-update payloads ---
-    extract_inline_schema(master_defs, "GetGeoLocationResult", ["projectLocation"], "ProjectLocation")
-    extract_inline_schema(master_defs, "GetGeoLocationResult", ["surveyPoint", "position"], "SurveyPointPosition")
-    extract_inline_schema(master_defs, "GetGeoLocationResult", ["surveyPoint", "geoReferencingParameters"],
-                          "GeoReferencingParameters")
-    extract_inline_schema(master_defs, "GetGeoLocationResult", ["surveyPoint"], "SurveyPoint")
-    extract_inline_schema(master_defs, "SetGeoLocationParameters", ["projectLocation"], "ProjectLocationUpdate")
-    extract_inline_schema(master_defs, "SetGeoLocationParameters", ["surveyPoint", "position"], "SurveyPointPositionUpdate")
-    extract_inline_schema(master_defs, "SetGeoLocationParameters", ["surveyPoint", "geoReferencingParameters"], "GeoReferencingParametersUpdate")
-    extract_inline_schema(master_defs, "SetGeoLocationParameters", ["surveyPoint"], "SurveyPointUpdate")
-
-    # Fix the bad inline schema by pointing it to the existing ArrayItem definition
-    _, design_options, _ = _require_target(master_defs, "GetElementsOfDesignOptionsParameters", ["designOptions"])
-    design_options["items"] = {"$ref": "#/$defs/DesignOptionIdArrayItem"}
-
-    # Fix broken #ref in GetElementsOfDesignOptionsResult
-    _, elements_of_design_options, _ = _require_target(
-        master_defs, "GetElementsOfDesignOptionsResult", ["elementsOfDesignOptions"]
-    )
-    elements_of_design_options["items"] = {"$ref": "#/$defs/ElementsOfDesignOptionOrError"}
-
-    _, nav_window, _ = _require_target(master_defs, "NavigatorItemIdOrDatabaseIdAndWindowType", [])
-    if "oneOf" in nav_window and len(nav_window["oneOf"]) > 1:
-        # Extract the second union element (the inline object) to a new definition
-        master_defs["DatabaseIdAndWindowType"] = nav_window["oneOf"][1]
-        # Replace the inline object with a $ref
-        nav_window["oneOf"][1] = {"$ref": "#/$defs/DatabaseIdAndWindowType"}
-
-    # --- Unify Zoom schemas ---
-    extract_inline_schema(master_defs, "ViewTransformations", ["zoom"], "Zoom")
-    replace_inline_schema_with_ref(master_defs, "ViewSettings", ["zoom"], "Zoom")
-
-    # --- Unify Morph Get/Create/Modify sub-schemas (Tapir 1.5.5 full morph parameter coverage) ---
-    extract_inline_schema(master_defs, "MorphDetails", ["linkToSettings"], "LinkToSettings")
-    replace_inline_schema_with_ref(master_defs, "MorphData", ["linkToSettings"], "LinkToSettings")
-    replace_inline_schema_with_ref(master_defs, "MorphWithDetails", ["linkToSettings"], "LinkToSettings")
-    extract_inline_enum(master_defs, "MorphDetails", ["displayOption"], "DisplayOption")
-    replace_inline_schema_with_ref(master_defs, "MorphData", ["displayOption"], "DisplayOption")
-    replace_inline_schema_with_ref(master_defs, "MorphWithDetails", ["displayOption"], "DisplayOption")
-    extract_inline_enum(master_defs, "MorphDetails", ["viewDepthLimitation"], "ViewDepthLimitation")
-    replace_inline_schema_with_ref(master_defs, "MorphData", ["viewDepthLimitation"], "ViewDepthLimitation")
-    replace_inline_schema_with_ref(master_defs, "MorphWithDetails", ["viewDepthLimitation"], "ViewDepthLimitation")
-    extract_inline_enum(master_defs, "MorphDetails", ["textureProjectionType"], "TextureProjectionType")
-    replace_inline_schema_with_ref(master_defs, "MorphData", ["textureProjectionType"], "TextureProjectionType")
-    replace_inline_schema_with_ref(master_defs, "MorphWithDetails", ["textureProjectionType"], "TextureProjectionType")
-    extract_inline_schema(master_defs, "MorphDetails", ["coverFillOrientation"], "CoverFillOrientation")
-    replace_inline_schema_with_ref(master_defs, "MorphData", ["coverFillOrientation"], "CoverFillOrientation")
-    replace_inline_schema_with_ref(master_defs, "MorphWithDetails", ["coverFillOrientation"], "CoverFillOrientation")
-    replace_inline_schema_with_ref(master_defs, "CoverFillOrientation", ["type"], "HatchOrientationType")
-
-    # --- Morph body geometry ---
-    extract_inline_schema(master_defs, "MorphBody", ["polygons", "items"], "MorphPolygon")
-    extract_inline_schema(master_defs, "MorphPolygon", ["holes", "items"], "MorphPolygonHole")
-
-    # --- Design option link type ---
-    extract_inline_enum(
-        master_defs, "GetDesignOptionForElementsResult", ["designOptionForElements", "items", "type"], "DesignOptionLinkType"
-    )
-
-    # --- Unify Mesh Get/Create/Modify sub-schemas ---
-    extract_inline_enum(master_defs, "MeshDetails", ["ridges"], "MeshRidges")
-    replace_inline_schema_with_ref(master_defs, "MeshData", ["ridges"], "MeshRidges", preserve_description=True)
-    replace_inline_schema_with_ref(master_defs, "MeshModificationData", ["ridges"], "MeshRidges", preserve_description=True)
-    extract_inline_schema(master_defs, "MeshDetails", ["sublines", "items"], "MeshSubline")
-    replace_inline_schema_with_ref(master_defs, "MeshData", ["sublines", "items"], "MeshSubline")
-    replace_inline_schema_with_ref(master_defs, "MeshModificationData", ["sublines", "items"], "MeshSubline")
-
-    # --- Line/Fill attribute creation sub-schemas (Tapir 1.5.4 attribute commands) ---
-    # note - executes with already extracted objects lineDataArray -> LineData, fillDataArray -> FillData etc
-    replace_inline_schema_with_ref(master_defs, "LineData", ["dashItems", "items"], "LineDashItem")
-    extract_inline_schema(master_defs, "LineData", ["lineItems", "items"], "LineSymbolItemData")
-    replace_inline_schema_with_ref(master_defs, "FillData", ["lineItems", "items"], "FillLineItem")
-    replace_inline_schema_with_ref(master_defs, "FillData", ["symbolLines", "items"], "FillSymbolLine")
-    replace_inline_schema_with_ref(master_defs, "FillData", ["symbolArcs", "items"], "FillSymbolArc")
-    extract_inline_schema(master_defs, "PenTableData", ["pens", "items"], "PenData")
-    extract_inline_schema(master_defs, "ProfileData", ["newSkins", "items"], "ProfileSkinData")
-    extract_inline_schema(master_defs, "ProfileData", ["skinOverrides", "items", "edgeOverrides", "items"], "ProfileEdgeOverride",)
-
-    # --- Attribute detail enums ---
-    extract_inline_enum(master_defs, "FillAttribute", ["subType"], "FillSubType")
-    extract_inline_enum(master_defs, "MEPSystemAttribute", ["domain", "items"], "MEPDomain")
-    extract_inline_enum(master_defs, "ProfileAttribute", ["useWith", "items"], "ProfileUseWith")
-
-    # --- Drawing bounds ---
-    extract_inline_schema(master_defs, "DrawingDetails", ["bounds"], "BoundingBox2D")
-
-    extract_inline_schema(master_defs, "ProfileSkinData", ["contours", "items"], "ProfileSkinContour")
-    replace_inline_schema_with_ref(master_defs, "ProfileSkinData", ["edgeOverrides", "items"], "ProfileEdgeOverride")
-
-    # --- Solid element operation links (create side; Remove/Get variants are extracted above) ---
-    extract_inline_schema(master_defs, "CreateSolidElementLinksParameters", ["solidLinks", "items"], "SolidLinkData")
-
-    # --- Layout custom data (Get and Set sides have different required lists) ---
-    extract_inline_schema(
-        master_defs, "GetLayoutSettingsResult", ["layoutSettings", "items", "customData", "items"], "LayoutCustomData"
-    )
-    extract_inline_schema(master_defs, "LayoutSettingsData", ["customData", "items"], "LayoutCustomDataToSet")
-
-    # --- Tapir 1.5.8: Data/Details/WithDetails now all carry the same enums inline ---
-    extract_inline_enum(master_defs, "BeamDetails", ["anchorPoint"], "BeamAnchorPoint")
-    for parent in ("BeamData", "BeamWithDetails"):
-        replace_inline_schema_with_ref(master_defs, parent, ["anchorPoint"], "BeamAnchorPoint")
-    extract_inline_enum(master_defs, "ColumnDetails", ["coreAnchor"], "ColumnCoreAnchor")
-    for parent in ("ColumnData", "ColumnWithDetails"):
-        replace_inline_schema_with_ref(master_defs, parent, ["coreAnchor"], "ColumnCoreAnchor")
-    extract_inline_enum(master_defs, "SlabDetails", ["referencePlaneLocation"], "SlabReferencePlaneLocation")
-    for parent in ("SlabData", "SlabWithDetails"):
-        replace_inline_schema_with_ref(master_defs, parent, ["referencePlaneLocation"], "SlabReferencePlaneLocation")
-    extract_inline_enum(master_defs, "WallDetails", ["referenceLineLocation"], "WallReferenceLineLocation")
-    for parent in ("WallData", "WallWithDetails"):
-        replace_inline_schema_with_ref(master_defs, parent, ["referenceLineLocation"], "WallReferenceLineLocation")
-    extract_inline_enum(master_defs, "WallDetails", ["zoneRel"], "WallZoneRelation")
-    replace_inline_schema_with_ref(master_defs, "WallWithDetails", ["zoneRel"], "WallZoneRelation")
-
-    # Keep beam-hole modification constraints separate from response identifiers.
-    extract_inline_schema(master_defs, "BeamDetails", ["holes", "items"], "BeamHole")
-    extract_inline_enum(master_defs, "BeamHole", ["type"], "BeamHoleType")
+    # Retire when upstream names the modification item and reuses its equivalent type enum.
     extract_inline_schema(master_defs, "BeamWithDetails", ["holes", "items"], "BeamHoleModification")
     replace_inline_schema_with_ref(master_defs, "BeamHoleModification", ["type"], "BeamHoleType")
-    extract_inline_enum(master_defs, "HatchOrientation", ["type"], "HatchOrientationType")
 
-    # geometryType and profileType are NOT shared: the modification models accept fewer
-    # values than the read models (no Polygonal / no Poly), so they keep separate enums.
-    extract_inline_enum(master_defs, "WallDetails", ["geometryType"], "WallGeometryType")
-    extract_inline_enum(master_defs, "WallWithDetails", ["geometryType"], "WallModificationGeometryType")
-    extract_inline_enum(master_defs, "WallDetails", ["profileType"], "WallProfileType")
-    extract_inline_enum(master_defs, "WallWithDetails", ["profileType"], "WallModificationProfileType")
+    # Tapir 1.7.1: reuse equivalent slab and wall definitions without changing their contracts.
+    replace_inline_schema_with_ref(master_defs, "SlabData", ["structureType"], "SlabStructureType", preserve_description=True)  # fmt: skip
+    for parent in ("WallData", "WallDetails", "WallWithDetails"):
+        replace_inline_schema_with_ref(master_defs, parent, ["linkToSettings"], "LinkToSettings", preserve_description=True)  # fmt: skip
 
-    # --- Tapir 1.5.8: CreateInteriorElevations payload ---
-    extract_inline_schema(
-        master_defs, "CreateInteriorElevationsParameters", ["interiorElevationsData", "items"], "InteriorElevationData"
-    )
+    # Teamwork object-set/cache conflicts identify the same users as element reservations.
+    extract_inline_schema(master_defs, "ReserveElementsResult", ["conflicts", "items", "user"], "User")
+    for parent in (
+        "GetLockableObjectSetStatusResult",
+        "ReserveLockableObjectSetResult",
+        "ReserveHotlinkCacheManagementResult",
+    ):
+        replace_inline_schema_with_ref(master_defs, parent, ["conflicts", "items"], "User")
 
-    # --- MEP enums/schemas (Tapir 1.5.6) ---
-    extract_inline_enum(master_defs, "GetMEPElementsParameters", ["elementTypes", "items"], "MEPElementType")
-    replace_inline_schema_with_ref(master_defs, "GetMEPElementsParameters", ["domains", "items"], "MEPDomain")
-    extract_inline_schema(master_defs, "GetMEPElementsResult", ["elements", "items"], "MEPElement")
+    # collision fixes;
+    extract_inline_schema(master_defs, "ChangeHotlinkNodesParameters", ["hotlinkNodes", "items"], "HotlinkNodeChange")
+    extract_inline_schema(master_defs, "UpdateHotlinksParameters", ["hotlinkNodes", "items"], "HotlinkNodeReference")
+    extract_inline_enum(master_defs, "GetLockableObjectSetStatusResult", ["status"], "LockableObjectSetStatus")
 
-
-    # --- DrawingSettings title name and numbering enums ---
-    extract_inline_enum(master_defs, "DrawingSettings", ["nameType"], "DrawingNameType")
-    extract_inline_enum(master_defs, "DrawingSettings", ["numberingType"], "DrawingNumberingType")
-
-    # --- MEP Routing Cross Section Shape enum ---
-    extract_inline_enum(
-        master_defs, "MEPRoutingElementData", ["crossSectionShape"], "MEPCrossSectionShape"
-    )
-    replace_inline_schema_with_ref(
-        master_defs,
-        "MEPRoutingElementModificationData",
-        ["crossSectionShape"],
-        "MEPCrossSectionShape",
-        preserve_description=True,
-    )
-
-    # --- Unify MEP Domain schemas to point to MEPDomain ---
-    extract_inline_schema(master_defs, "GetMEPDistributionSystemsResult", ["distributionSystems", "items"], "MEPDistributionSystem")
-    replace_inline_schema_with_ref(master_defs, "MEPElementData", ["domain"], "MEPDomain", preserve_description=True)
-    replace_inline_schema_with_ref(master_defs, "MEPRoutingElementData", ["domain"], "MEPDomain", preserve_description=True)
-
-    # GetMEPPreferenceTables accepts only two of the three domains, so it keeps its own enum
-    extract_inline_enum(master_defs, "GetMEPPreferenceTablesParameters", ["domain"], "MEPPreferenceTableDomain")
-    extract_inline_schema(master_defs, "GetMEPPreferenceTablesResult", ["tables", "items"], "MEPPreferenceTable")
-    extract_inline_schema(master_defs, "MEPPreferenceTable", ["rows", "items"], "MEPPreferenceRow")
-
-    # --- Extract 4-value discrete MEP element type enum ---
-    extract_inline_enum(
-        master_defs, "MEPElementData", ["type"], "MEPComponentType"
-    )
-
-    # --- Tapir 1.5.7: Object/Lamp repeat the story visibility and home story link objects ---
-    for parent in ("ObjectDetails", "ObjectData", "ObjectWithDetails", "LampData", "LampWithDetails"):
-        replace_inline_schema_with_ref(master_defs, parent, ["visibility"], "StoryVisibility")
-        replace_inline_schema_with_ref(master_defs, parent, ["linkToSettings"], "LinkToSettings")
-
-    # --- GetRelationsOfElements returns a union of per-element-type relation objects ---
-    _, element_relations, _ = _require_target(master_defs, "ElementRelationsOrError", [])
-    relation_variants = [
-        "WallRelations", "BeamRelations", "BeamSegmentRelations",
-        "ZoneRelationsOfElement", "OpeningRelationsOfElement", "RoofOrShellRelationsOfElement",
-    ]
-    for index, variant_name in enumerate(relation_variants):
-        branch = element_relations["oneOf"][index]
-        if "$ref" in branch:
-            continue
-        master_defs[variant_name] = branch
-        element_relations["oneOf"][index] = {"$ref": f"#/$defs/{variant_name}"}
-
-    # --- Tapir 1.5.9: stabilize new inline command and result schemas ---
-    extract_inline_schema(master_defs, "ChangeHotlinkInstancesParameters", ["hotlinkInstances", "items"], "HotlinkInstanceChange")
-    extract_inline_schema(master_defs, "CreateHotlinkInstancesParameters", ["hotlinkInstances", "items"], "HotlinkInstanceCreation")
-    extract_inline_schema(master_defs, "GetLibrariesResult", ["libraries", "items"], "Library")
-    extract_inline_schema(master_defs, "AddLibrariesParameters", ["libraries", "items"], "LibraryLocation")
-    replace_inline_schema_with_ref(master_defs, "SetLibrariesParameters", ["libraries", "items"], "LibraryLocation")
-    extract_inline_schema(master_defs, "PossibleEnumValues", ["items", "enumValue"], "EnumValue")
-    extract_inline_schema(master_defs, "EnumValuesToAdd", ["items", "enumValue"], "EnumValueToAdd")
-    extract_inline_schema(master_defs, "RoofData", ["pivotLine"], "RoofPivotLine")
-    extract_inline_schema(master_defs, "RoofData", ["levels", "items"], "RoofLevel")
-    extract_inline_schema(master_defs, "RoofDetails", ["pivotLine"], "RoofDetailsPivotLine")
-    extract_inline_schema(master_defs, "RoofDetails", ["levels", "items"], "RoofDetailsLevel")
-    replace_inline_schema_with_ref(master_defs, "RoofWithDetails", ["levels", "items"], "RoofLevel")
-    extract_inline_enum(master_defs, "ElementTrims", ["trimmedBy", "items", "trimType"], "TrimType")
-    replace_inline_schema_with_ref(master_defs, "TrimElementsParameters", ["trimType"], "TrimType")
-    extract_inline_enum(master_defs, "Hotlink", ["type"], "HotlinkType")
-    replace_inline_schema_with_ref(master_defs, "HotlinkDetails", ["hotlinkType"], "HotlinkType")
-    extract_inline_enum(master_defs, "NavigatorItem", ["type"], "NavigatorItemType")
-
-    # --- Tapir 1.5.9: share repeated enums and give inline types domain-specific names ---
-    extract_inline_enum(master_defs, "TextDataWithText", ["justification"], "Justification")
-    replace_inline_schema_with_ref(master_defs, "TextDataWithRuns", ["justification"], "Justification")
-    replace_inline_schema_with_ref(master_defs, "TextDetails", ["justification"], "Justification")
-    replace_inline_schema_with_ref(master_defs, "TextSettings", ["justification"], "Justification")
-    replace_inline_schema_with_ref(master_defs, "TextStyleDetails", ["justification"], "Justification")
-    replace_inline_schema_with_ref(master_defs, "TextStyleSettableDetails", ["justification"], "Justification")
-    extract_inline_enum(master_defs, "LabelData", ["labelClass"], "LabelClass")
-    replace_inline_schema_with_ref(master_defs, "LabelDetails", ["labelClass"], "LabelClass")
-    extract_inline_enum(master_defs, "TextStyleDetails", ["anchor"], "TextBoxAnchor")
-    replace_inline_schema_with_ref(master_defs, "TextStyleSettableDetails", ["anchor"], "TextBoxAnchor")
-    extract_inline_enum(master_defs, "LabelLeaderLineDetails", ["anchorPoint"], "LabelLeaderLineAnchorPoint")
-    replace_inline_schema_with_ref(master_defs, "LabelLeaderLineSettableDetails", ["anchorPoint"], "LabelLeaderLineAnchorPoint")
-    extract_inline_schema(master_defs, "GetAutoTextNameParameters", ["keys", "items"], "AutoTextKeyValue")
-    replace_inline_schema_with_ref(master_defs, "RoofDetails", ["structureType"], "RoofStructureType")
-    extract_inline_enum(master_defs, "LabelSymbolStyleSettableDetails", ["textWay"], "SymbolLabelTextDirection")
+    extract_union_variant(master_defs, "GetMarkerParametersOfElementsResult", ["markerParametersOfElements", "items"], 0, "MarkerParametersOfElement")  # fmt: skip
+    extract_inline_schema(master_defs, "SetMarkerParametersOfElementsParameters", ["elementsWithMarkerParameters", "items"], "ElementWithMarkerParameters")  # fmt: skip
+    extract_inline_schema(master_defs, "MarkerParametersOfElement", ["parameters", "items"], "MarkerGDLParameterDetails")  # fmt: skip
+    extract_inline_schema(master_defs, "ElementWithMarkerParameters", ["markerParameters", "items"], "MarkerParameterUpdate")  # fmt: skip
+    extract_union_variant(master_defs, "MarkerParameterUpdate", [], 0, "MarkerParameterUpdateByName")
+    extract_union_variant(master_defs, "MarkerParameterUpdate", [], 1, "MarkerParameterUpdateByIndex")

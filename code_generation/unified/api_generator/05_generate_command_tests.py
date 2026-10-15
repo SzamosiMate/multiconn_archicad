@@ -206,11 +206,14 @@ class TestGenerator:
                 body_lines.append(f"assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('{alias_prop}'))")
             else:
                 result_obj = self._get_model_object(result_model_name, source)
-                if is_union(result_obj):
+                if hasattr(result_obj, "model_fields") and not result_obj.model_fields:
+                    body_lines.append("assert result is None")
+                elif is_union(result_obj):
                     body_lines.append(f"expected = TypeAdapter(commands.{result_model_name}).validate_python(mock_response)")
+                    body_lines.append("assert result == expected")
                 else:
                     body_lines.append(f"expected = commands.{result_model_name}.model_validate(mock_response)")
-                body_lines.append("assert result == expected")
+                    body_lines.append("assert result == expected")
         else:
             body_lines.append("assert result is None")
 

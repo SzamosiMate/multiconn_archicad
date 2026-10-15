@@ -30,6 +30,8 @@ from multiconn_archicad.models.tapir.commands import (
     GetElementsByTypeResult,
     GetGDLParametersOfElementsParameters,
     GetGDLParametersOfElementsResult,
+    GetMarkerParametersOfElementsParameters,
+    GetMarkerParametersOfElementsResult,
     GetRelationsOfElementsParameters,
     GetRelationsOfElementsResult,
     GetRoomImageParameters,
@@ -57,6 +59,8 @@ from multiconn_archicad.models.tapir.commands import (
     SetElementNotificationClientResult,
     SetGDLParametersOfElementsParameters,
     SetGDLParametersOfElementsResult,
+    SetMarkerParametersOfElementsParameters,
+    SetMarkerParametersOfElementsResult,
     UnlockElementsParameters,
     UnlockElementsResult,
     UpdateZonesParameters,
@@ -78,6 +82,7 @@ from multiconn_archicad.models.tapir.types import (
     ElementId,
     ElementIdArrayItem,
     ElementType,
+    ElementWithMarkerParameters,
     ElementsWithDetail,
     ElementsWithExecutionResults,
     ElementsWithGDLParameter,
@@ -88,6 +93,7 @@ from multiconn_archicad.models.tapir.types import (
     Format,
     GDLParameterList,
     ImageType,
+    MarkerParametersOfElement,
     OpeningRelationsOfElement,
     RoofOrShellRelationsOfElement,
     Settings,
@@ -483,6 +489,38 @@ class ElementCommands:
         )
         validated_response = GetGDLParametersOfElementsResult.model_validate(response_dict)
         return validated_response.gdlParametersOfElements
+
+    def get_marker_parameters_of_elements(
+        self, elements: list[ElementIdArrayItem]
+    ) -> list[ErrorItem | MarkerParametersOfElement]:
+        """
+        Gets the marker library part and the marker's GDL parameters (name, type, value) of the
+        given Window and Door elements. The marker is the stamp drawn next to the opening on the
+        floor plan; its parameters are separate from the opening's own GDL parameters, which
+        GetGDLParametersOfElements returns.
+
+        Args:
+            elements (list[ElementIdArrayItem]): A list of elements.
+
+        Returns:
+            list[ErrorItem | MarkerParametersOfElement]: The marker of each given element, in
+                the order of the input, or an error for an element that is not a window or a
+                door.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elements": elements,
+        }
+        validated_params = GetMarkerParametersOfElementsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetMarkerParametersOfElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetMarkerParametersOfElementsResult.model_validate(response_dict)
+        return validated_response.markerParametersOfElements
 
     def get_relations_of_elements(
         self, elements: list[ElementIdArrayItem], other_element_type: ElementType | None = None
@@ -937,6 +975,36 @@ class ElementCommands:
             "SetGDLParametersOfElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = SetGDLParametersOfElementsResult.model_validate(response_dict)
+        return validated_response.executionResults
+
+    def set_marker_parameters_of_elements(
+        self, elements_with_marker_parameters: list[ElementWithMarkerParameters]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Sets the given GDL parameters of the marker of the given Window and Door elements. The
+        opening's own settings and the other marker parameters are left as they are.
+
+        Args:
+            elements_with_marker_parameters (list[ElementWithMarkerParameters]): The elements
+                with the marker parameters to change.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elementsWithMarkerParameters": elements_with_marker_parameters,
+        }
+        validated_params = SetMarkerParametersOfElementsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "SetMarkerParametersOfElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = SetMarkerParametersOfElementsResult.model_validate(response_dict)
         return validated_response.executionResults
 
     def unlock_elements(self, elements: list[ElementIdArrayItem]) -> FailedExecutionResult | SuccessfulExecutionResult:

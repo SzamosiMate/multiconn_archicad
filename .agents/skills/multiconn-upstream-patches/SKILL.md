@@ -22,11 +22,13 @@ Do not regenerate client models, change the pinned release, remove patches merel
 
 ## Establish inputs and pending work
 
-Read the latest generation report and relevant parts of `code_generation/shared/schema_patching.py`. Use `tapir_unpatched_schema.json` and `tapir_master_schema.json` for released-schema comparisons; confirm their release and patch revision. They do not represent upstream `main`.
+Read the relevant final release report in `code_generation/documentation/reports/`, the current `code_generation/documentation/schema-patch-tracking.md`, and relevant parts of `code_generation/shared/schema_patching.py`. Use `tapir_unpatched_schema.json` and `tapir_master_schema.json` for released-schema comparisons; confirm their release and patch revision. They do not represent upstream `main`.
 
 Record the client release and upstream default-branch commit. Locate the real Tapir checkout using its remote and user context, rather than an assumed working directory or personal absolute path. Inspect repository instructions and existing PRs/tracking before creating duplicate work; fetch current upstream when needed.
 
-Review temporary patches and unresolved breaking source-review patches, including older candidates without a disposition. Distinguish unmerged fixes, merged fixes awaiting a release, and fixes confirmed in released documentation. Skip already merged proposals. Exclude established permanent generator workarounds and intentional breaking client choices unless explicitly selected for review.
+Use the [pipeline brief](../../../code_generation/documentation/archicad_api_codegen_brief.md) when generation-layer context is needed. Source and current released schemas are authoritative; historical reports explain their recorded decisions.
+
+Review temporary patches and unresolved breaking source-review patches, including older candidates without a disposition. Distinguish unmerged fixes, merged fixes awaiting a release, and fixes confirmed in released documentation. Skip already merged proposals. Exclude established permanent generator workarounds and intentional breaking client choices unless explicitly selected for review. Incorrect singularization, numeric collision suffixes and other generator-only naming issues belong to local Permanent patches; valid inline schemas do not require upstream extraction just to accommodate this generator. Propose naming/extraction only with independent schema-design justification or an explicitly requested upstream extraction policy.
 
 Trace dependencies: a patch can target a definition introduced by earlier naming operations rather than an actual upstream definition. Map it back to the original command/property before searching C++.
 
@@ -59,7 +61,7 @@ Indiscriminate reference expansion does not prove equivalence: sibling keywords,
 
 Provide short copyable Markdown per PR: the concrete problem, resulting behavior, useful examples and material compatibility consequences. Keep validation and unresolved decisions in the accompanying report. When both reference and definition retain descriptions, separately list their locations and full quoted strings.
 
-Maintain a lightweight tracking document under the client's `documentation/`, reusing an existing one when available. Group related operations by decision and record the original paths, PR/commit or unresolved question, removal condition, client alias needs and disposition:
+Maintain the ongoing tracking document at `code_generation/documentation/schema-patch-tracking.md`. Put durable upstream review reports under `code_generation/documentation/reports/` when needed; link to tracking rather than duplicating its inventory. Keep final reviewed reports and tracking suitable for source control, and keep intermediate logs/snapshots in untracked scratch storage. Do not stage or commit these files unless requested. Group related operations by decision and record the original paths, PR/commit or unresolved question, removal condition, client alias needs and disposition:
 
 ```text
 needs investigation -> proposed -> submitted -> merged awaiting release -> retired

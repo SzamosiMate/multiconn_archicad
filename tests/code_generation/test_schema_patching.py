@@ -79,3 +79,77 @@ def test_existing_reference_requires_review_even_when_name_matches(helper, refer
     assert reference in message
     assert "Review the upstream definition" in message
     assert definitions == original
+
+
+@pytest.mark.parametrize("helper", HELPERS[:2])
+def test_extraction_rejects_existing_definition_without_overwriting_it(helper):
+    inline = {"type": "string", "enum": ["first", "second"]}
+    definitions = {"Command": {"properties": {"field": inline}}, "NamedDefinition": deepcopy(inline)}
+    original = deepcopy(definitions)
+
+    with pytest.raises(ValueError, match="NamedDefinition.*already exists"):
+        helper(definitions, "Command", ["field"], "NamedDefinition")
+
+    assert definitions == original
+
+
+def test_enum_extraction_requires_an_enum():
+    definitions = {"Command": {"properties": {"field": {"type": "string"}}}}
+    original = deepcopy(definitions)
+
+    with pytest.raises(ValueError, match="Expected enum"):
+        schema_patching.extract_inline_enum(definitions, "Command", ["field"], "NamedDefinition")
+
+    assert definitions == original
+
+
+def test_required_variants_reject_existing_names_before_mutating_schema():
+    definitions = {
+        "Command": {"properties": {"name": {"type": "string"}}, "oneOf": [{"required": ["name"]}, {"required": []}]},
+        "Second": {"type": "string"},
+    }
+    original = deepcopy(definitions)
+
+    with pytest.raises(ValueError, match="Second.*already exists"):
+        schema_patching.name_required_variants(definitions, "Command", [], ["First", "Second"])
+
+    assert definitions == original
+
+
+@pytest.mark.parametrize("union_key", ["oneOf", "anyOf"])
+def test_extract_union_variant_preserves_other_branches_and_constraints(union_key):
+    branch = {"type": "object", "properties": {"value": {}}, "required": ["value"], "additionalProperties": False}
+    definitions = {"Command": {"type": "object", union_key: [deepcopy(branch), {"$ref": "#/$defs/ErrorItem"}]}}
+
+    schema_patching.extract_union_variant(definitions, "Command", [], 0, "NamedVariant")
+
+    assert definitions["NamedVariant"] == branch
+    assert definitions["Command"] == {
+        "type": "object",
+        union_key: [{"$ref": "#/$defs/NamedVariant"}, {"$ref": "#/$defs/ErrorItem"}],
+    }
+    original = deepcopy(definitions)
+    with pytest.raises(ValueError, match="already references"):
+        schema_patching.extract_union_variant(definitions, "Command", [], 0, "NamedVariant")
+    assert definitions == original
+
+
+@pytest.mark.parametrize("target", [{}, {"oneOf": []}, {"oneOf": [None]}, {"oneOf": [], "anyOf": []}])
+def test_union_extraction_rejects_changed_shape_without_mutating_schema(target):
+    definitions = {"Command": target}
+    original = deepcopy(definitions)
+
+    with pytest.raises(ValueError):
+        schema_patching.extract_union_variant(definitions, "Command", [], 0, "NamedVariant")
+
+    assert definitions == original
+
+
+def test_union_extraction_rejects_existing_definition():
+    definitions = {"Command": {"oneOf": [{"type": "string"}]}, "NamedVariant": {"type": "integer"}}
+    original = deepcopy(definitions)
+
+    with pytest.raises(ValueError, match="NamedVariant.*already exists"):
+        schema_patching.extract_union_variant(definitions, "Command", [], 0, "NamedVariant")
+
+    assert definitions == original

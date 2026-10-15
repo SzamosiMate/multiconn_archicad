@@ -1,3 +1,4 @@
+import ast
 import json
 import re
 from code_generation.tapir.paths import tapir_paths
@@ -124,9 +125,21 @@ def remove_redundant_model_configs(content: str) -> str:
     """
     print("    - Removing redundant `model_config` blocks...")
 
-    pattern = re.compile(r"\s*model_config = ConfigDict\(\s*extra=\"forbid\",?\s*\)\s*", re.MULTILINE)
+    config_only_classes = {
+        node.body[0].lineno
+        for node in ast.walk(ast.parse(content))
+        if isinstance(node, ast.ClassDef)
+        and len(node.body) == 1
+        and isinstance(node.body[0], ast.Assign)
+        and any(isinstance(target, ast.Name) and target.id == "model_config" for target in node.body[0].targets)
+    }
+    pattern = re.compile(r'^[ \t]+model_config = ConfigDict\(\s*extra="forbid",?\s*\)[ \t]*(?:\r?\n|$)', re.MULTILINE)
 
-    cleaned_content, num_replacements = pattern.subn("\n    ", content)
+    def replace_config(match):
+        line = content.count("\n", 0, match.start()) + 1
+        return "    pass\n" if line in config_only_classes else ""
+
+    cleaned_content, num_replacements = pattern.subn(replace_config, content)
 
     if num_replacements > 0:
         print(f"      - Successfully removed {num_replacements} redundant config blocks.")
