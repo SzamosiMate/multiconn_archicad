@@ -75,41 +75,66 @@ def restore_collapsed_named_unions(content: str) -> str:
 
 
 def remove_guid_pattern(code: str) -> str:
-    """
-    Surgically removes the 'pattern=...' argument from any field defined as
-    'Annotated[UUID, Field(...)]'. This is necessary because Pydantic V2
-    cannot apply a string pattern to a UUID object after validation.
-    """
+    """Remove string patterns from UUID fields in either supported Field syntax."""
     print("Step 3: Removing conflicting 'pattern' from all UUID Fields...")
 
-    pattern = re.compile(
-        # --- Group 1: Capture the part BEFORE the pattern argument ---
-        r"("
-        # Match any field name like 'guid:' or 'stampMainGuid:'
-        r"\w+:\s*Annotated\[\s*UUID\s*,\s*Field\("
-        # Non-greedily match any characters (including newlines) up to the pattern arg.
-        r".*?"
-        r")"
-        # --- The part to DISCARD ---
-        # Match an optional comma, the pattern argument, and its value.
-        r'(?:,\s*)?pattern\s*=\s*".*?"'
-        # --- Group 2: Capture the part AFTER the pattern argument ---
-        r"("
-        # Non-greedily match any remaining characters until the end of the annotation.
-        r".*?"
-        r"\)\s*\]"
-        r")",
-        flags=re.DOTALL,  # The DOTALL flag makes '.' match newlines, simplifying the regex.
-    )
+    def is_uuid(annotation: ast.expr) -> bool:
+        if isinstance(annotation, ast.Name):
+            return annotation.id == "UUID"
+        if isinstance(annotation, ast.BinOp) and isinstance(annotation.op, ast.BitOr):
+            left, right = annotation.left, annotation.right
+            return (isinstance(left, ast.Constant) and left.value is None and is_uuid(right)) or (
+                isinstance(right, ast.Constant) and right.value is None and is_uuid(left)
+            )
+        return False
 
-    replacement = r"\1\2"
+    # AST columns are UTF-8 byte offsets, including when descriptions contain Unicode.
+    source = code.encode("utf-8")
+    offsets = [0]
+    for line in source.splitlines(keepends=True):
+        offsets.append(offsets[-1] + len(line))
 
-    num_replacements = 0
-    while True:
-        code, count = pattern.subn(replacement, code, count=1)
-        if count == 0:
-            break
-        num_replacements += 1
+    edits = []
+    for field in ast.walk(ast.parse(code)):
+        if not isinstance(field, ast.AnnAssign):
+            continue
+        annotation = field.annotation
+        candidates = [field.value]
+        if (
+            isinstance(annotation, ast.Subscript)
+            and isinstance(annotation.value, ast.Name)
+            and annotation.value.id == "Annotated"
+            and isinstance(annotation.slice, ast.Tuple)
+        ):
+            annotation, *metadata = annotation.slice.elts
+            candidates.extend(metadata)
+        if not is_uuid(annotation):
+            continue
+        for call in candidates:
+            if not isinstance(call, ast.Call) or not isinstance(call.func, ast.Name) or call.func.id != "Field":
+                continue
+            for keyword in call.keywords:
+                if keyword.arg != "pattern":
+                    continue
+                start = offsets[keyword.lineno - 1] + keyword.col_offset
+                end = offsets[keyword.end_lineno - 1] + keyword.end_col_offset
+                following = end
+                while source[following : following + 1].isspace():
+                    following += 1
+                if source[following : following + 1] == b",":
+                    end = following + 1
+                else:
+                    preceding = start - 1
+                    while preceding >= 0 and source[preceding : preceding + 1].isspace():
+                        preceding -= 1
+                    if preceding >= 0 and source[preceding : preceding + 1] == b",":
+                        start = preceding
+                edits.append((start, end))
+
+    for start, end in sorted(edits, reverse=True):
+        source = source[:start] + source[end:]
+    code = re.sub(r"(?m)^[ \t]+(?=\r?$)", "", source.decode("utf-8"))
+    num_replacements = len(edits)
 
     if num_replacements > 0:
         print(f"    - Removed {num_replacements} conflicting 'pattern' arguments from UUID fields.")
