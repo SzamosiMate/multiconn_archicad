@@ -690,6 +690,7 @@
     },
     "BeamAnchorPoint": {
       "type": "string",
+      "description": "Anchor point of the beam cross section on a 3x3 grid.",
       "enum": [
         "TopLeft",
         "TopCenter",
@@ -918,6 +919,39 @@
         "width"
       ]
     },
+    "BeamHoleModification": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "$ref": "#/$defs/BeamHoleType"
+        },
+        "showContour": {
+          "type": "boolean"
+        },
+        "centerX": {
+          "type": "number"
+        },
+        "centerZ": {
+          "type": "number"
+        },
+        "width": {
+          "type": "number",
+          "exclusiveMinimum": 0.0
+        },
+        "height": {
+          "type": "number",
+          "exclusiveMinimum": 0.0,
+          "description": "Only used for the Rectangular type."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "centerX",
+        "centerZ",
+        "width"
+      ]
+    },
     "BeamHoleType": {
       "type": "string",
       "enum": [
@@ -1028,7 +1062,7 @@
           "type": "array",
           "description": "Replaces all holes currently placed on the beam.",
           "items": {
-            "$ref": "#/$defs/BeamHole"
+            "$ref": "#/$defs/BeamHoleModification"
           }
         },
         "cutFillPen": {
@@ -1048,7 +1082,7 @@
     },
     "BoundingBox2D": {
       "type": "object",
-      "description": "Bounding box of the drawing on the layout.",
+      "description": "A two-dimensional bounding box defined by its minimum and maximum coordinates.",
       "properties": {
         "xMin": {
           "type": "number"
@@ -1465,6 +1499,34 @@
         "executionResults"
       ]
     },
+    "ChangeHotlinkNodesParameters": {
+      "type": "object",
+      "properties": {
+        "hotlinkNodes": {
+          "type": "array",
+          "description": "The hotlink nodes to repoint at another source file, as the Hotlink Manager's Relink button does. The placed instances stay where they are. Follow it with UpdateHotlinks on the same nodes to re-read the content from the new file.",
+          "items": {
+            "$ref": "#/$defs/HotlinkNodeChange"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "hotlinkNodes"
+      ]
+    },
+    "ChangeHotlinkNodesResult": {
+      "type": "object",
+      "properties": {
+        "executionResults": {
+          "$ref": "#/$defs/ExecutionResults"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "executionResults"
+      ]
+    },
     "ChangeSelectionOfElementsParameters": {
       "type": "object",
       "properties": {
@@ -1869,6 +1931,7 @@
     },
     "ColumnCoreAnchor": {
       "type": "string",
+      "description": "Anchor point of the column core on a 3x3 grid.",
       "enum": [
         "TopLeft",
         "TopCenter",
@@ -2567,7 +2630,7 @@
       "description": "Orientation/distortion of the floor plan cover fill.",
       "properties": {
         "type": {
-          "$ref": "#/$defs/CoverFillOrientationType"
+          "$ref": "#/$defs/HatchOrientationType"
         },
         "origo": {
           "$ref": "#/$defs/Coordinate2D",
@@ -2595,15 +2658,6 @@
         }
       },
       "additionalProperties": false
-    },
-    "CoverFillOrientationType": {
-      "type": "string",
-      "enum": [
-        "Global",
-        "Rotated",
-        "Distorted",
-        "Centered"
-      ]
     },
     "CoverFillTransformation": {
       "type": "object",
@@ -5758,7 +5812,7 @@
         },
         "nameType": {
           "$ref": "#/$defs/DrawingNameType",
-          "description": "How the drawing's title name is assembled (Identification tabpage of the Drawing Settings dialog). Defaults to CustomName when name is given, otherwise to the Drawing tool's current default."
+          "description": "Defaults to CustomName when name is given, otherwise to the Drawing tool's current default."
         },
         "position": {
           "$ref": "#/$defs/Coordinate2D"
@@ -5822,7 +5876,8 @@
           "description": "Whether the drawing is clipped by a custom polygon (see clipPolygon) instead of showing the full auto-fit extent."
         },
         "bounds": {
-          "$ref": "#/$defs/BoundingBox2D"
+          "$ref": "#/$defs/BoundingBox2D",
+          "description": "Bounds of the drawing on the layout."
         },
         "clipPolygon": {
           "type": "array",
@@ -5837,16 +5892,14 @@
           "description": "The identifier of the navigator item (view/layout) this Drawing was created from. Read-only: Archicad only lets this be set at creation time (see CreateDrawings) - it cannot be changed afterwards to relink the Drawing to a different source."
         },
         "nameType": {
-          "$ref": "#/$defs/DrawingNameType",
-          "description": "How the drawing's title name is assembled (Identification tabpage of the Drawing Settings dialog)."
+          "$ref": "#/$defs/DrawingNameType"
         },
         "customName": {
           "type": "string",
           "description": "The drawing's custom title name. Present only when nameType is CustomName."
         },
         "numberingType": {
-          "$ref": "#/$defs/DrawingNumberingType",
-          "description": "How the drawing's title ID is assigned (Identification tabpage of the Drawing Settings dialog)."
+          "$ref": "#/$defs/DrawingNumberingType"
         },
         "customNumber": {
           "type": "string",
@@ -6451,6 +6504,26 @@
         "Unknown"
       ]
     },
+    "ElementWithMarkerParameters": {
+      "type": "object",
+      "properties": {
+        "elementId": {
+          "$ref": "#/$defs/ElementId"
+        },
+        "markerParameters": {
+          "type": "array",
+          "description": "The marker parameters to change, each given by name or by index. The other marker parameters and the opening's own settings are left as they are.",
+          "items": {
+            "$ref": "#/$defs/MarkerParameterUpdate"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elementId",
+        "markerParameters"
+      ]
+    },
     "Elements": {
       "type": "array",
       "description": "A list of elements.",
@@ -6631,7 +6704,7 @@
     },
     "EnumValue": {
       "type": "object",
-      "description": "The description of an enumeration value.",
+      "description": "An enumeration value.",
       "properties": {
         "enumValueId": {
           "$ref": "#/$defs/EnumValueId"
@@ -6688,7 +6761,7 @@
     },
     "EnumValueToAdd": {
       "type": "object",
-      "description": "The description of an enumeration value.",
+      "description": "Text values for an enumeration option to add.",
       "properties": {
         "displayValue": {
           "type": "string",
@@ -6790,6 +6863,11 @@
       ],
       "additionalProperties": false
     },
+    "ExportFavoritesResult": {
+      "type": "object",
+      "properties": {},
+      "additionalProperties": false
+    },
     "ExportIssuesToBCFParameters": {
       "type": "object",
       "properties": {
@@ -6847,8 +6925,7 @@
           ]
         },
         "error": {
-          "$ref": "#/$defs/Error",
-          "description": "The details of an execution failure."
+          "$ref": "#/$defs/Error"
         }
       },
       "additionalProperties": false,
@@ -7106,7 +7183,7 @@
           "description": "Translucency percentage [0..1] (gradient and some Solid fills)."
         },
         "texture": {
-          "description": "Texture parameters (Image and gradient fills). Only name, rotationAngle, xSize, ySize, mirrorX, and mirrorY are used for Fills.",
+          "description": "Used for Image and gradient fills. Only name, rotationAngle, xSize, ySize, mirrorX, and mirrorY are used for Fills.",
           "$ref": "#/$defs/Texture"
         },
         "lineItems": {
@@ -7147,22 +7224,27 @@
       "type": "object",
       "properties": {
         "frequency": {
-          "type": "number"
+          "type": "number",
+          "description": "The distance between two instances of this item."
         },
         "direction": {
-          "type": "number"
+          "type": "number",
+          "description": "The angle of the item, measured CCW from the horizontal axis, in radians."
         },
         "offsetLine": {
-          "type": "number"
+          "type": "number",
+          "description": "The parallel offset of the item, measured from the (rotated) horizontal axis."
         },
         "offset": {
-          "$ref": "#/$defs/Coordinate2D"
+          "$ref": "#/$defs/Coordinate2D",
+          "description": "The offset of the item."
         },
         "lineLengths": {
           "type": "array",
           "items": {
             "type": "number"
-          }
+          },
+          "description": "Dash-gap length pairs describing this line item. Must contain an even number of items."
         }
       },
       "additionalProperties": false,
@@ -7194,7 +7276,8 @@
           "$ref": "#/$defs/Coordinate2D"
         },
         "angle": {
-          "type": "number"
+          "type": "number",
+          "description": "Arc angle in radians, measured CCW."
         }
       },
       "additionalProperties": false,
@@ -7943,7 +8026,7 @@
       "properties": {
         "elementClassifications": {
           "$ref": "#/$defs/ElementClassificationsOrErrors",
-          "description": "The list of element classification item identifiers. Order of the ids are the same as in the input. Non-existing elements or non-existing classification systems are represented by error objects."
+          "description": "Order of the ids are the same as in the input. Non-existing elements or non-existing classification systems are represented by error objects."
         }
       },
       "additionalProperties": false,
@@ -8235,8 +8318,7 @@
             "type": "object",
             "properties": {
               "elementId": {
-                "$ref": "#/$defs/ElementId",
-                "description": "The identifier of the element."
+                "$ref": "#/$defs/ElementId"
               },
               "type": {
                 "$ref": "#/$defs/DesignOptionLinkType"
@@ -9277,6 +9359,38 @@
         "lines"
       ]
     },
+    "GetLockableObjectSetStatusParameters": {
+      "type": "object",
+      "properties": {
+        "objectSetName": {
+          "type": "string",
+          "description": "The name of the lockable object set, as the Archicad API documents it: BuildingMaterials, Cities, Composites, Favorites, FillTypes, LayerSettingsDialog (layers and layer combinations), LineTypes, MarkupStyles, MEPSystems, ModelViewOptions, OperationProfiles, PenTables, Profiles, ProjectInfo, GeoLocation (project location), PreferencesDialog (project preferences and dimension standards), GraphicOverrides (renovation override styles), Surfaces or ZoneCategories. Other names the Archicad API accepts work too."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "objectSetName"
+      ]
+    },
+    "GetLockableObjectSetStatusResult": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "$ref": "#/$defs/LockableObjectSetStatus"
+        },
+        "conflicts": {
+          "type": "array",
+          "description": "The users who hold a reservation on the object set.",
+          "items": {
+            "$ref": "#/$defs/User"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "status"
+      ]
+    },
     "GetMEPDistributionSystemsResult": {
       "type": "object",
       "properties": {
@@ -9307,7 +9421,7 @@
           "type": "array",
           "description": "Optional filter for the MEP domains.",
           "items": {
-            "$ref": "#/$defs/MEPDomains"
+            "$ref": "#/$defs/MEPDomain"
           }
         }
       },
@@ -9439,6 +9553,42 @@
       "additionalProperties": false,
       "required": [
         "mepSystems"
+      ]
+    },
+    "GetMarkerParametersOfElementsParameters": {
+      "type": "object",
+      "properties": {
+        "elements": {
+          "$ref": "#/$defs/Elements"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elements"
+      ]
+    },
+    "GetMarkerParametersOfElementsResult": {
+      "type": "object",
+      "properties": {
+        "markerParametersOfElements": {
+          "type": "array",
+          "description": "The marker of each given element, in the order of the input, or an error for an element that is not a window or a door.",
+          "items": {
+            "type": "object",
+            "oneOf": [
+              {
+                "$ref": "#/$defs/MarkerParametersOfElement"
+              },
+              {
+                "$ref": "#/$defs/ErrorItem"
+              }
+            ]
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "markerParametersOfElements"
       ]
     },
     "GetModelViewOptionsResult": {
@@ -9662,7 +9812,7 @@
       "properties": {
         "propertyValuesForAttributes": {
           "$ref": "#/$defs/PropertyValuesOrErrorArray",
-          "description": "List of property value lists. The order of the outer list is that of the given attributes. The order of the inner lists are that of the given properties."
+          "description": "The order of the outer list is that of the given attributes. The order of the inner lists are that of the given properties."
         }
       },
       "additionalProperties": false,
@@ -9691,7 +9841,7 @@
       "properties": {
         "propertyValuesForElements": {
           "$ref": "#/$defs/PropertyValuesOrErrorArray",
-          "description": "List of property value lists. The order of the outer list is that of the given elements. The order of the inner lists are that of the given properties."
+          "description": "The order of the outer list is that of the given elements. The order of the inner lists are that of the given properties."
         }
       },
       "additionalProperties": false,
@@ -9848,11 +9998,16 @@
         "result": {
           "type": "string",
           "description": "The submitted content (as passed to window.ACAPI.SubmitResult). Only present when hasResult is true."
+        },
+        "isOpen": {
+          "type": "boolean",
+          "description": "True while the Script UI palette is open. False before the first ShowScriptUI call and once the user closed the palette with its close box, the page called window.ACAPI.ClosePalette or Archicad closed it; stays true while Archicad only temporarily hides all palettes (e.g. during a modal dialog). Lets a waiting script stop polling when the user closes the palette."
         }
       },
       "additionalProperties": false,
       "required": [
-        "hasResult"
+        "hasResult",
+        "isOpen"
       ]
     },
     "GetSectionElementsParameters": {
@@ -10401,6 +10556,14 @@
         "fillBackgroundPenIndex": {
           "type": "integer"
         },
+        "foregroundColor": {
+          "$ref": "#/$defs/ColorRGB",
+          "description": "Optional RGB color (components between 0.0 and 1.0) of the fill foreground, used instead of fillPenIndex. Takes precedence over fillPenIndex when both are given. The same format as the colors returned by GetZoneCategories and GetPenTables."
+        },
+        "backgroundColor": {
+          "$ref": "#/$defs/ColorRGB",
+          "description": "Optional RGB color (components between 0.0 and 1.0) of the fill background, used instead of fillBackgroundPenIndex. Takes precedence over fillBackgroundPenIndex when both are given."
+        },
         "fillId": {
           "$ref": "#/$defs/AttributeId",
           "description": "Optional fill attribute. By default the current fill is used."
@@ -10448,6 +10611,14 @@
         },
         "fillBackgroundPenIndex": {
           "type": "integer"
+        },
+        "foregroundColor": {
+          "$ref": "#/$defs/ColorRGB",
+          "description": "RGB color of the fill foreground. Only present when it overrides fillPenIndex."
+        },
+        "backgroundColor": {
+          "$ref": "#/$defs/ColorRGB",
+          "description": "RGB color of the fill background. Only present when it overrides fillBackgroundPenIndex."
         },
         "fillId": {
           "$ref": "#/$defs/AttributeId",
@@ -10551,10 +10722,20 @@
           "type": "integer"
         },
         "fillPenIndex": {
-          "type": "integer"
+          "type": "integer",
+          "description": "Setting a pen removes the foregroundColor override, so the pen shows."
         },
         "fillBackgroundPenIndex": {
-          "type": "integer"
+          "type": "integer",
+          "description": "Setting a pen removes the backgroundColor override, so the pen shows."
+        },
+        "foregroundColor": {
+          "$ref": "#/$defs/ColorRGB",
+          "description": "RGB color (components between 0.0 and 1.0) of the fill foreground, used instead of fillPenIndex. Takes precedence over fillPenIndex when both are given."
+        },
+        "backgroundColor": {
+          "$ref": "#/$defs/ColorRGB",
+          "description": "RGB color (components between 0.0 and 1.0) of the fill background, used instead of fillBackgroundPenIndex. Takes precedence over fillBackgroundPenIndex when both are given."
         },
         "fillId": {
           "$ref": "#/$defs/AttributeId"
@@ -10813,7 +10994,8 @@
           "$ref": "#/$defs/ElementId"
         },
         "origin": {
-          "$ref": "#/$defs/HotlinkOrigin"
+          "$ref": "#/$defs/HotlinkOrigin",
+          "description": "If z is omitted, the instance's current z is kept."
         },
         "rotationAngle": {
           "type": "number",
@@ -10859,7 +11041,8 @@
           "description": "The node to place, from GetHotlinks or CreateHotlinkNodes. On Archicad 25 a node that has never been placed cannot be read, so a node created through the API can only be placed from Archicad 26 on."
         },
         "origin": {
-          "$ref": "#/$defs/HotlinkOrigin"
+          "$ref": "#/$defs/HotlinkOrigin",
+          "description": "If z is omitted, the instance is placed at 0."
         },
         "rotationAngle": {
           "type": "number",
@@ -10908,6 +11091,23 @@
         "origin"
       ]
     },
+    "HotlinkNodeChange": {
+      "type": "object",
+      "properties": {
+        "hotlinkNodeId": {
+          "$ref": "#/$defs/HotlinkNodeId"
+        },
+        "sourceLocation": {
+          "type": "string",
+          "description": "Absolute path of the new module source file (.mod or .pln)."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "hotlinkNodeId",
+        "sourceLocation"
+      ]
+    },
     "HotlinkNodeCreated": {
       "type": "object",
       "properties": {
@@ -10950,9 +11150,21 @@
         "guid"
       ]
     },
+    "HotlinkNodeReference": {
+      "type": "object",
+      "properties": {
+        "hotlinkNodeId": {
+          "$ref": "#/$defs/HotlinkNodeId"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "hotlinkNodeId"
+      ]
+    },
     "HotlinkOrigin": {
       "type": "object",
-      "description": "Where a hotlink instance's origin lands, in the project's coordinates. z is optional: CreateHotlinkInstances places at 0 when it is omitted, ChangeHotlinkInstances keeps the instance's current z.",
+      "description": "Where a hotlink instance's origin lands, in the project's coordinates.",
       "properties": {
         "x": {
           "type": "number"
@@ -11056,7 +11268,7 @@
     },
     "IFCElementsToExport": {
       "type": "string",
-      "description": "Only for the save method, and only together with translatorName: which elements to export. The default is VisibleElementsOnAllStories.",
+      "description": "Which elements to export.",
       "enum": [
         "EntireProject",
         "VisibleElementsOnAllStories",
@@ -11114,7 +11326,8 @@
           "description": "Only for the save method: the name of the IFC export translator to save with, as GetIFCExportTranslators lists them. Without it the save runs with the translator Archicad would offer in its own Save dialog. Needs a fileType of ifc or ifczip (ifc or ifcxml on Archicad 25 and 26)."
         },
         "elementsToExport": {
-          "$ref": "#/$defs/IFCElementsToExport"
+          "$ref": "#/$defs/IFCElementsToExport",
+          "description": "Only for the save method, and only together with translatorName. The default is VisibleElementsOnAllStories."
         }
       },
       "additionalProperties": false,
@@ -11369,7 +11582,7 @@
     },
     "Justification": {
       "type": "string",
-      "description": "Optional text justification. Equivalent to style.justification.",
+      "description": "Text justification.",
       "enum": [
         "Left",
         "Center",
@@ -11753,7 +11966,7 @@
         "Text",
         "Symbol"
       ],
-      "description": "Whether this is a textual or a symbol label. Optional; if omitted, inherits the current Label tool default (which may silently resolve to either class - explicitly setting this avoids ambiguity)."
+      "description": "Whether this is a textual or a symbol label."
     },
     "LabelData": {
       "type": "object",
@@ -11768,7 +11981,8 @@
           "description": "The parent element if the label is an associative label."
         },
         "labelClass": {
-          "$ref": "#/$defs/LabelClass"
+          "$ref": "#/$defs/LabelClass",
+          "description": "Optional; if omitted, inherits the current Label tool default (which may silently resolve to either class - explicitly setting this avoids ambiguity)."
         },
         "text": {
           "type": "string",
@@ -11784,15 +11998,14 @@
         },
         "style": {
           "$ref": "#/$defs/TextStyleSettableDetails",
-          "description": "Style settings for a text label (font, pen, size, frame, etc). Ignored for symbol labels."
+          "description": "Ignored for symbol labels."
         },
         "symbolStyle": {
           "$ref": "#/$defs/LabelSymbolStyleSettableDetails",
-          "description": "Style settings specific to a symbol label. Ignored for text labels."
+          "description": "Ignored for text labels."
         },
         "leaderLine": {
-          "$ref": "#/$defs/LabelLeaderLineSettableDetails",
-          "description": "Leader line, frame and arrow settings, shared by both label classes."
+          "$ref": "#/$defs/LabelLeaderLineSettableDetails"
         },
         "begCoordinate": {
           "$ref": "#/$defs/Coordinate2D",
@@ -11886,7 +12099,7 @@
         "Bottom",
         "Underlined"
       ],
-      "description": "How the leader line connects to the label text (text-class labels only)."
+      "description": "How the leader line connects to the label text."
     },
     "LabelLeaderLineDetails": {
       "type": "object",
@@ -11913,7 +12126,8 @@
           "description": "Whether the Label has a leader line (pointer line)."
         },
         "anchorPoint": {
-          "$ref": "#/$defs/LabelLeaderLineAnchorPoint"
+          "$ref": "#/$defs/LabelLeaderLineAnchorPoint",
+          "description": "Only applies to text-class labels."
         },
         "leaderShape": {
           "type": "string",
@@ -11959,7 +12173,7 @@
     },
     "LabelLeaderLineSettableDetails": {
       "type": "object",
-      "description": "Every user-configurable leader-line/frame setting of a Label (top-level API_LabelType fields, shared by both Text and Symbol label classes). Shared by CreateLabels ('leaderLine'), ModifyLabels ('leaderLine'), and the Get response.",
+      "description": "Every user-configurable leader-line/frame/arrow setting of a Label (top-level API_LabelType fields, shared by both Text and Symbol label classes). Shared by CreateLabels ('leaderLine'), ModifyLabels ('leaderLine'), and the Get response.",
       "properties": {
         "penIndex": {
           "type": "integer",
@@ -11982,7 +12196,8 @@
           "description": "Whether the Label has a leader line (pointer line)."
         },
         "anchorPoint": {
-          "$ref": "#/$defs/LabelLeaderLineAnchorPoint"
+          "$ref": "#/$defs/LabelLeaderLineAnchorPoint",
+          "description": "Only applies to text-class labels."
         },
         "leaderShape": {
           "type": "string",
@@ -12649,23 +12864,6 @@
         "DecInch"
       ]
     },
-    "Level": {
-      "type": "object",
-      "properties": {
-        "levelHeight": {
-          "type": "number"
-        },
-        "levelAngle": {
-          "type": "number",
-          "exclusiveMinimum": 0.0
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "levelHeight",
-        "levelAngle"
-      ]
-    },
     "LibPartBasedElementDetails": {
       "type": "object",
       "properties": {
@@ -12717,7 +12915,7 @@
     },
     "Library": {
       "type": "object",
-      "description": "Library",
+      "description": "Details of a project library.",
       "properties": {
         "name": {
           "type": "string",
@@ -12767,7 +12965,7 @@
           "description": "The relative path to the new file inside embedded library."
         },
         "type": {
-          "description": "The type of the library part. By default 'Pict'.",
+          "description": "By default 'Pict'.",
           "$ref": "#/$defs/LibraryPartType"
         }
       },
@@ -12899,10 +13097,12 @@
       "type": "object",
       "properties": {
         "dash": {
-          "type": "number"
+          "type": "number",
+          "description": "Length of the visible part of the item."
         },
         "gap": {
-          "type": "number"
+          "type": "number",
+          "description": "Length of the invisible part of the item."
         }
       },
       "additionalProperties": false,
@@ -13144,7 +13344,7 @@
     },
     "LinkToSettings": {
       "type": "object",
-      "description": "Mode of linking the Morph to its home story.",
+      "description": "Mode of linking an element to its home story.",
       "properties": {
         "homeStoryDifference": {
           "type": "integer",
@@ -13171,6 +13371,17 @@
     },
     "LockElementsResult": {
       "$ref": "#/$defs/ExecutionResult"
+    },
+    "LockableObjectSetStatus": {
+      "type": "string",
+      "description": "Free: nobody has reserved it. Editable: the current user has reserved it. Locked: another user has reserved it (see conflicts). NotAvailable: the Teamwork server is offline or not available. NotExist: there is no Teamwork connection, for example the project is not a Teamwork project. An unknown object set name is reported as an error, not as a status.",
+      "enum": [
+        "Free",
+        "Editable",
+        "Locked",
+        "NotAvailable",
+        "NotExist"
+      ]
     },
     "MEPComponentType": {
       "type": "string",
@@ -13237,7 +13448,7 @@
     },
     "MEPCrossSectionShape": {
       "type": "string",
-      "description": "Optional cross section shape applied to all segments.",
+      "description": "Shape of an MEP routing segment's cross section.",
       "enum": [
         "Rectangular",
         "Circular",
@@ -13249,7 +13460,7 @@
       "type": "object",
       "properties": {
         "domain": {
-          "$ref": "#/$defs/MEPSystemDomain"
+          "$ref": "#/$defs/MEPDomainOrUnknown"
         },
         "mepSystemId": {
           "$ref": "#/$defs/AttributeId"
@@ -13264,12 +13475,23 @@
         "elements"
       ]
     },
-    "MEPDomains": {
+    "MEPDomain": {
       "type": "string",
+      "description": "The MEP domain.",
       "enum": [
         "Ventilation",
         "Piping",
         "CableCarrier"
+      ]
+    },
+    "MEPDomainOrUnknown": {
+      "type": "string",
+      "description": "The reported MEP domain. Unknown indicates that the domain could not be determined.",
+      "enum": [
+        "Ventilation",
+        "Piping",
+        "CableCarrier",
+        "Unknown"
       ]
     },
     "MEPElement": {
@@ -13301,8 +13523,8 @@
           "$ref": "#/$defs/MEPComponentType"
         },
         "domain": {
-          "$ref": "#/$defs/MEPSystemDomain",
-          "description": "The MEP domain of the element. Required for all types except Equipment."
+          "$ref": "#/$defs/MEPDomain",
+          "description": "Required for all types except Equipment."
         },
         "position": {
           "$ref": "#/$defs/Coordinate3D"
@@ -13399,7 +13621,7 @@
           "type": "number"
         },
         "domain": {
-          "$ref": "#/$defs/MEPSystemDomain"
+          "$ref": "#/$defs/MEPDomainOrUnknown"
         },
         "mepSystemId": {
           "$ref": "#/$defs/AttributeId"
@@ -13478,7 +13700,7 @@
       "type": "object",
       "properties": {
         "domain": {
-          "$ref": "#/$defs/MEPSystemDomain"
+          "$ref": "#/$defs/MEPDomain"
         },
         "nodeCoordinates": {
           "type": "array",
@@ -13497,7 +13719,8 @@
           "description": "Optional cross section height applied to all segments."
         },
         "crossSectionShape": {
-          "$ref": "#/$defs/MEPCrossSectionShape"
+          "$ref": "#/$defs/MEPCrossSectionShape",
+          "description": "Optional; applied to all segments."
         },
         "crossSectionReferenceId": {
           "type": "integer",
@@ -13523,7 +13746,7 @@
       "description": "The details of an MEP routing element.",
       "properties": {
         "domain": {
-          "$ref": "#/$defs/MEPSystemDomain"
+          "$ref": "#/$defs/MEPDomainOrUnknown"
         },
         "mepSystemId": {
           "$ref": "#/$defs/AttributeId"
@@ -13594,7 +13817,7 @@
         },
         "crossSectionShape": {
           "$ref": "#/$defs/MEPCrossSectionShape",
-          "description": "New cross section shape applied to all segments."
+          "description": "The new shape is applied to all segments."
         },
         "crossSectionReferenceId": {
           "type": "integer",
@@ -13684,7 +13907,7 @@
           "type": "array",
           "description": "The domain(s) this system belongs to. Archicad 29+ allows only one; earlier versions may report several.",
           "items": {
-            "$ref": "#/$defs/MEPSystemDomain"
+            "$ref": "#/$defs/MEPDomain"
           }
         },
         "contourPen": {
@@ -13764,8 +13987,8 @@
           "description": "Name. If overwriteExisting is true, then the existing MEP System with the given name will be overwritten."
         },
         "domain": {
-          "$ref": "#/$defs/MEPSystemDomain",
-          "description": "Ventilation, Piping, or CableCarrier. Only elements belonging to the same domain can use this system."
+          "$ref": "#/$defs/MEPDomain",
+          "description": "Only elements belonging to the same domain can use this system."
         },
         "contourPen": {
           "type": "integer",
@@ -13805,14 +14028,6 @@
         "name"
       ]
     },
-    "MEPSystemDomain": {
-      "type": "string",
-      "enum": [
-        "Ventilation",
-        "Piping",
-        "CableCarrier"
-      ]
-    },
     "ManualZoneGeometry": {
       "type": "object",
       "description": "Manual zone placement.",
@@ -13841,6 +14056,139 @@
         "polygonCoordinates"
       ]
     },
+    "MarkerGDLParameterDetails": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The name of the parameter."
+        },
+        "displayName": {
+          "type": "string",
+          "description": "The display name of the parameter."
+        },
+        "index": {
+          "type": "integer",
+          "description": "The index of the parameter."
+        },
+        "type": {
+          "type": "string",
+          "description": "The type of the parameter."
+        },
+        "dimension1": {
+          "type": "integer",
+          "description": "The 1st dimension of array (in case of array value)."
+        },
+        "dimension2": {
+          "type": "integer",
+          "description": "The 2nd dimension of array (in case of array value)."
+        },
+        "value": {
+          "description": "The value of the parameter."
+        },
+        "valueDescription": {
+          "type": "string",
+          "description": "The value description for numeric parameter."
+        },
+        "itemDescriptions": {
+          "type": "array",
+          "description": "Per-item text labels for an array-type parameter, one per array element in dim1xdim2 order. Only present when the library part defines them.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "flags": {
+          "type": "array",
+          "description": "The flags of the parameter.",
+          "items": {
+            "type": "string",
+            "enum": [
+              "Hidden",
+              "HiddenFromScript",
+              "Disabled",
+              "Child",
+              "Unique",
+              "Fixed",
+              "BoldName",
+              "Open"
+            ]
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "displayName",
+        "index",
+        "type",
+        "value",
+        "flags"
+      ]
+    },
+    "MarkerParameterUpdate": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/MarkerParameterUpdateByName"
+        },
+        {
+          "$ref": "#/$defs/MarkerParameterUpdateByIndex"
+        }
+      ]
+    },
+    "MarkerParameterUpdateByIndex": {
+      "type": "object",
+      "properties": {
+        "index": {
+          "type": "integer",
+          "description": "The index of the marker parameter, as GetMarkerParametersOfElements reports it."
+        },
+        "value": {
+          "description": "The new value of the marker parameter, see the value given with a name."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "index",
+        "value"
+      ]
+    },
+    "MarkerParameterUpdateByName": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The name of the marker parameter."
+        },
+        "value": {
+          "description": "The new value of the marker parameter: a number for the numeric types (Integer, Length, Angle, RealNumber, PenColor, LineType, Material, FillPattern, BuildingMaterial, Profile, RGBColor, Intensity), a string for String and Title, true/false for Boolean and 'On'/'Off' for LightSwitch. Array parameters are not supported."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "value"
+      ]
+    },
+    "MarkerParametersOfElement": {
+      "type": "object",
+      "properties": {
+        "libPart": {
+          "$ref": "#/$defs/LibPartDetails",
+          "description": "The library part of the marker. Absent when it could not be read."
+        },
+        "parameters": {
+          "type": "array",
+          "description": "The GDL parameters of the marker.",
+          "items": {
+            "$ref": "#/$defs/MarkerGDLParameterDetails"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "parameters"
+      ]
+    },
     "MeshData": {
       "type": "object",
       "description": "The parameters of the new Mesh.",
@@ -13864,8 +14212,7 @@
           "description": "The height of the skirt."
         },
         "ridges": {
-          "$ref": "#/$defs/MeshRidges",
-          "description": "How ridges between mesh facets are displayed in 3D: 'AllSharp' shows all ridges, 'AllSmooth' hides them, 'UserDefined' shows only ridges along user-defined level lines (the drawing-set look for contour-line topography)."
+          "$ref": "#/$defs/MeshRidges"
         },
         "showLines": {
           "type": "boolean",
@@ -14006,8 +14353,7 @@
           "description": "The height of the skirt."
         },
         "ridges": {
-          "$ref": "#/$defs/MeshRidges",
-          "description": "How ridges between mesh facets are displayed in 3D."
+          "$ref": "#/$defs/MeshRidges"
         },
         "showLines": {
           "type": "boolean",
@@ -14055,7 +14401,7 @@
     },
     "MeshRidges": {
       "type": "string",
-      "description": "How ridges between mesh facets are displayed in 3D.",
+      "description": "How ridges between mesh facets are displayed in 3D: 'AllSharp' shows all ridges, 'AllSmooth' hides them, 'UserDefined' shows only ridges along user-defined level lines (the drawing-set look for contour-line topography).",
       "enum": [
         "AllSharp",
         "AllSmooth",
@@ -14621,7 +14967,7 @@
         },
         "edgeDefault": {
           "type": "string",
-          "description": "Default display status for every edge that has no entry in edgeOverrides. Reported accurately on Get; on Create/Modify this is set on the element but does not take effect due to the same confirmed Archicad SDK bug as edgeOverrides (element.morph.edgeType is silently discarded by ACAPI_Element_Create/Change).",
+          "description": "Default display status for every edge that has no entry in edgeOverrides. Reported accurately on Get. On Create/Modify it takes effect from Archicad 29 on, where it is applied to every edge of the element with ACAPI_Element_ChangeMorphEdgeType right after the element is created or changed (e.g. 'HardHidden' hides all edges of a triangulated body). On Archicad 28 and earlier it is set on the element but does not take effect due to the same confirmed Archicad SDK bug as edgeOverrides (element.morph.edgeType is silently discarded by ACAPI_Element_Create/Change).",
           "enum": [
             "HardVisible",
             "HardHidden",
@@ -14666,7 +15012,7 @@
         },
         "edgeOverrides": {
           "type": "array",
-          "description": "READ-ONLY in practice: reported accurately by GetDetailsOfElements (reflecting whatever Archicad itself currently has), but CreateMorphs/ModifyMorphs silently ignore this field on input - per-edge display status cannot be set by an add-on due to a confirmed, still-unresolved Archicad SDK bug (element.morph.edgeType/bodyType are silently discarded by ACAPI_Element_Create/Change; see the GRAPHISOFT community forum thread 'Help with setting morph's hidden edges in the API'). Sparse when present - only edges whose display status differs from edgeDefault get an entry. Identifies an edge by the (unordered) pair of vertex indices it connects.",
+          "description": "READ-ONLY in practice: reported accurately by GetDetailsOfElements (reflecting whatever Archicad itself currently has), but CreateMorphs/ModifyMorphs silently ignore this field on input - per-edge display status cannot be set by an add-on due to a confirmed, still-unresolved Archicad SDK bug (element.morph.edgeType/bodyType are silently discarded by ACAPI_Element_Create/Change; see the GRAPHISOFT community forum thread 'Help with setting morph's hidden edges in the API'). To hide or smooth ALL edges of a Morph use edgeDefault, which does take effect from Archicad 29 on. Sparse when present - only edges whose display status differs from edgeDefault get an entry. Identifies an edge by the (unordered) pair of vertex indices it connects.",
           "items": {
             "type": "object",
             "properties": {
@@ -14715,7 +15061,7 @@
         },
         "body": {
           "$ref": "#/$defs/MorphBody",
-          "description": "Builds arbitrary geometry (any number of faces, holes, per-face materials, edge display overrides) instead of a simple box. Mutually exclusive with `size` - give exactly one of the two."
+          "description": "Builds arbitrary geometry instead of a simple box. Mutually exclusive with `size` - give exactly one of the two."
         },
         "buildingMaterialId": {
           "$ref": "#/$defs/AttributeId"
@@ -14997,7 +15343,7 @@
         },
         "surfaceId": {
           "$ref": "#/$defs/AttributeId",
-          "description": "Optional per-face Surface (render material) override. Falls back to the Morph's own default surface when omitted. Named surfaceId, not buildingMaterialId - confirmed live that Archicad's per-face body override is a Surface index, not a building material (a Morph's building material is always a single whole-volume property, element.morph.buildingMaterial, exposed as the sibling 'buildingMaterialId' field on MorphDetails/CreateMorphs/ModifyMorphs - never per-face). Version-dependent write bug, isolated live: silently lost on Create on Archicad 25 (presumably 26 too - same pre-2700 API_OverriddenAttribute shape, though Archicad 26 itself could not be installed to confirm live), confirmed fixed and working correctly from Archicad 27 onward (27 and 29 both verified). No SDK/build available locally to check Archicad 28."
+          "description": "Optional per-face surface (render material) override. Uses the Morph's default surface when omitted. Ignored during creation in Archicad 25."
         }
       },
       "additionalProperties": false,
@@ -16645,23 +16991,6 @@
         "description"
       ]
     },
-    "PivotLine": {
-      "type": "object",
-      "description": "If given, a single-plane roof is created instead of a multi-plane roof: one plane tilted along this pivot line. The plane rises on the left side of the line direction (begCoordinate towards endCoordinate); flip the line to tilt towards the other side.",
-      "properties": {
-        "begCoordinate": {
-          "$ref": "#/$defs/Coordinate2D"
-        },
-        "endCoordinate": {
-          "$ref": "#/$defs/Coordinate2D"
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "begCoordinate",
-        "endCoordinate"
-      ]
-    },
     "PolyArc": {
       "type": "object",
       "description": "Representation of an arc segment of a two dimensional polygon/polyline.",
@@ -17606,7 +17935,7 @@
         },
         "possibleEnumValues": {
           "$ref": "#/$defs/EnumValuesToAdd",
-          "description": "The enum values to add to an enumeration property. Values already on the property keep their identifier, so element values assigned to them survive; values not listed here are kept as well."
+          "description": "Values already on the property keep their identifier, so element values assigned to them survive; values not listed here are kept as well."
         },
         "renameEnumValues": {
           "type": "array",
@@ -18074,6 +18403,25 @@
     "ReleaseElementsResult": {
       "$ref": "#/$defs/ExecutionResult"
     },
+    "ReleaseHotlinkCacheManagementResult": {
+      "$ref": "#/$defs/ExecutionResult"
+    },
+    "ReleaseLockableObjectSetParameters": {
+      "type": "object",
+      "properties": {
+        "objectSetName": {
+          "type": "string",
+          "description": "The name of the lockable object set, as the Archicad API documents it: BuildingMaterials, Cities, Composites, Favorites, FillTypes, LayerSettingsDialog (layers and layer combinations), LineTypes, MarkupStyles, MEPSystems, ModelViewOptions, OperationProfiles, PenTables, Profiles, ProjectInfo, GeoLocation (project location), PreferencesDialog (project preferences and dimension standards), GraphicOverrides (renovation override styles), Surfaces or ZoneCategories. Other names the Archicad API accepts work too."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "objectSetName"
+      ]
+    },
+    "ReleaseLockableObjectSetResult": {
+      "$ref": "#/$defs/ExecutionResult"
+    },
     "ReloadLibrariesResult": {
       "$ref": "#/$defs/ExecutionResult"
     },
@@ -18241,20 +18589,7 @@
                 "$ref": "#/$defs/ElementId"
               },
               "user": {
-                "type": "object",
-                "properties": {
-                  "userId": {
-                    "type": "number"
-                  },
-                  "userName": {
-                    "type": "string"
-                  }
-                },
-                "additionalProperties": false,
-                "required": [
-                  "userId",
-                  "userName"
-                ]
+                "$ref": "#/$defs/User"
               }
             },
             "additionalProperties": false,
@@ -18262,6 +18597,57 @@
               "elementId",
               "user"
             ]
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "executionResult"
+      ]
+    },
+    "ReserveHotlinkCacheManagementResult": {
+      "type": "object",
+      "properties": {
+        "executionResult": {
+          "$ref": "#/$defs/ExecutionResult"
+        },
+        "conflicts": {
+          "type": "array",
+          "description": "The user whose reservation prevented reserving the Hotlink and XRef management.",
+          "items": {
+            "$ref": "#/$defs/User"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "executionResult"
+      ]
+    },
+    "ReserveLockableObjectSetParameters": {
+      "type": "object",
+      "properties": {
+        "objectSetName": {
+          "type": "string",
+          "description": "The name of the lockable object set, as the Archicad API documents it: BuildingMaterials, Cities, Composites, Favorites, FillTypes, LayerSettingsDialog (layers and layer combinations), LineTypes, MarkupStyles, MEPSystems, ModelViewOptions, OperationProfiles, PenTables, Profiles, ProjectInfo, GeoLocation (project location), PreferencesDialog (project preferences and dimension standards), GraphicOverrides (renovation override styles), Surfaces or ZoneCategories. Other names the Archicad API accepts work too."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "objectSetName"
+      ]
+    },
+    "ReserveLockableObjectSetResult": {
+      "type": "object",
+      "properties": {
+        "executionResult": {
+          "$ref": "#/$defs/ExecutionResult"
+        },
+        "conflicts": {
+          "type": "array",
+          "description": "The users whose reservation prevented reserving the object set.",
+          "items": {
+            "$ref": "#/$defs/User"
           }
         }
       },
@@ -18432,7 +18818,8 @@
         },
         "thickness": {
           "type": "number",
-          "exclusiveMinimum": 0.0
+          "exclusiveMinimum": 0.0,
+          "description": "Only takes effect on a Basic (homogeneous) roof - a Composite roof takes its thickness from the composite attribute. Without structureType the new roof keeps the structure of the roof tool default (or the favorite), which may be a composite; send structureType 'Basic' for the thickness to apply."
         },
         "polygonCoordinates": {
           "type": "array",
@@ -18451,7 +18838,8 @@
           "$ref": "#/$defs/Holes2D"
         },
         "pivotLine": {
-          "$ref": "#/$defs/PivotLine"
+          "$ref": "#/$defs/RoofPivotLine",
+          "description": "If given, creates a single-plane roof instead of a multi-plane roof, tilted along this pivot line."
         },
         "angle": {
           "type": "number",
@@ -18466,7 +18854,7 @@
           "minItems": 1,
           "maxItems": 16,
           "items": {
-            "$ref": "#/$defs/Level"
+            "$ref": "#/$defs/RoofLevel"
           }
         },
         "structureType": {
@@ -18519,7 +18907,8 @@
           "description": "Single-plane: the slope in radians."
         },
         "pivotLine": {
-          "$ref": "#/$defs/RoofDetailsPivotLine"
+          "$ref": "#/$defs/RoofDetailsPivotLine",
+          "description": "For single-plane roofs."
         },
         "eavesOverhang": {
           "type": "number",
@@ -18584,7 +18973,7 @@
     },
     "RoofDetailsPivotLine": {
       "type": "object",
-      "description": "Single-plane: the pivot line the plane rotates about.",
+      "description": "The pivot line about which a roof plane rotates.",
       "properties": {
         "begin": {
           "$ref": "#/$defs/Coordinate2D"
@@ -18597,6 +18986,23 @@
       "required": [
         "begin",
         "end"
+      ]
+    },
+    "RoofLevel": {
+      "type": "object",
+      "properties": {
+        "levelHeight": {
+          "type": "number"
+        },
+        "levelAngle": {
+          "type": "number",
+          "exclusiveMinimum": 0.0
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "levelHeight",
+        "levelAngle"
       ]
     },
     "RoofOrShellRelationsOfElement": {
@@ -18621,6 +19027,23 @@
         "roofOrShellRelations"
       ]
     },
+    "RoofPivotLine": {
+      "type": "object",
+      "description": "A directed pivot line defined by its beginning and end coordinates. The roof plane rises on the left side of the line direction (begCoordinate towards endCoordinate); reverse the direction to tilt towards the other side.",
+      "properties": {
+        "begCoordinate": {
+          "$ref": "#/$defs/Coordinate2D"
+        },
+        "endCoordinate": {
+          "$ref": "#/$defs/Coordinate2D"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "begCoordinate",
+        "endCoordinate"
+      ]
+    },
     "RoofStructureType": {
       "type": "string",
       "enum": [
@@ -18639,7 +19062,8 @@
         },
         "thickness": {
           "type": "number",
-          "exclusiveMinimum": 0.0
+          "exclusiveMinimum": 0.0,
+          "description": "Only takes effect on a Basic (homogeneous) roof - a Composite roof takes its thickness from the composite attribute. Send structureType 'Basic' in the same call to switch a composite roof first."
         },
         "eavesOverhang": {
           "type": "number"
@@ -18649,7 +19073,7 @@
           "minItems": 1,
           "maxItems": 16,
           "items": {
-            "$ref": "#/$defs/Level"
+            "$ref": "#/$defs/RoofLevel"
           }
         },
         "structureType": {
@@ -19257,6 +19681,34 @@
     "SetLibrariesResult": {
       "$ref": "#/$defs/ExecutionResult"
     },
+    "SetMarkerParametersOfElementsParameters": {
+      "type": "object",
+      "properties": {
+        "elementsWithMarkerParameters": {
+          "type": "array",
+          "description": "The elements with the marker parameters to change.",
+          "items": {
+            "$ref": "#/$defs/ElementWithMarkerParameters"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elementsWithMarkerParameters"
+      ]
+    },
+    "SetMarkerParametersOfElementsResult": {
+      "type": "object",
+      "properties": {
+        "executionResults": {
+          "$ref": "#/$defs/ExecutionResults"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "executionResults"
+      ]
+    },
     "SetProjectInfoFieldParameters": {
       "type": "object",
       "properties": {
@@ -19548,7 +20000,7 @@
         },
         "navigationDisabled": {
           "type": "boolean",
-          "description": "Prevents the page from navigating away (e.g. clicking a link to another site). Defaults to false."
+          "description": "Prevents the page from navigating away (e.g. clicking a link to another site) once it has loaded. Defaults to false."
         },
         "allowSelfSignedCertificates": {
           "type": "boolean",
@@ -19585,11 +20037,24 @@
         },
         "thickness": {
           "type": "number",
-          "description": "Optional slab thickness.",
+          "description": "Optional slab thickness. Only takes effect on a Basic (homogeneous) slab - a Composite slab takes its thickness from the composite attribute. Without structureType, buildingMaterialId or compositeId the new slab keeps the structure of the slab tool default (or the favorite), which may be a composite; send structureType 'Basic' for the thickness to apply.",
           "exclusiveMinimum": 0.0
         },
+        "structureType": {
+          "$ref": "#/$defs/SlabStructureType",
+          "description": "Optional structure of the slab. If omitted, derived from buildingMaterialId or compositeId when one is given, otherwise the slab tool default (or the favorite) is kept."
+        },
+        "buildingMaterialId": {
+          "$ref": "#/$defs/AttributeId",
+          "description": "Building material of a Basic slab. Cannot be combined with compositeId."
+        },
+        "compositeId": {
+          "$ref": "#/$defs/AttributeId",
+          "description": "Composite attribute of a Composite slab. Cannot be combined with buildingMaterialId."
+        },
         "referencePlaneLocation": {
-          "$ref": "#/$defs/SlabReferencePlaneLocation"
+          "$ref": "#/$defs/SlabReferencePlaneLocation",
+          "description": "For a basic (homogeneous) slab only 'Top' or 'Bottom' are valid."
         },
         "polygonCoordinates": {
           "type": "array",
@@ -19698,6 +20163,7 @@
     },
     "SlabReferencePlaneLocation": {
       "type": "string",
+      "description": "Location of the slab reference plane.",
       "enum": [
         "Top",
         "CoreTop",
@@ -19723,7 +20189,8 @@
         },
         "thickness": {
           "type": "number",
-          "exclusiveMinimum": 0.0
+          "exclusiveMinimum": 0.0,
+          "description": "Only takes effect on a Basic (homogeneous) slab - a Composite slab takes its thickness from the composite attribute. Send structureType 'Basic' in the same call to switch a composite slab first."
         },
         "structureType": {
           "$ref": "#/$defs/SlabStructureType"
@@ -20160,6 +20627,10 @@
         "name": {
           "type": "string",
           "description": "The name of the story."
+        },
+        "ifcId": {
+          "type": "string",
+          "description": "The IFC GlobalId of the story, i.e. of the IfcBuildingStorey it is exported as (the same identifier the IFC Project Manager shows). Available from Archicad 28; older versions omit it."
         }
       },
       "additionalProperties": false,
@@ -20625,11 +21096,12 @@
           "description": "Optional rotation angle in radians. Equivalent to style.angle."
         },
         "justification": {
-          "$ref": "#/$defs/Justification"
+          "$ref": "#/$defs/Justification",
+          "description": "Optional; equivalent to style.justification."
         },
         "style": {
           "$ref": "#/$defs/TextStyleSettableDetails",
-          "description": "Full style settings (font, effects, frame, anchor, etc). height/pen/angle/justification above take precedence over the same fields here if both are given."
+          "description": "height/pen/angle/justification above take precedence over the same fields here if both are given."
         },
         "floorIndex": {
           "type": "integer",
@@ -20679,11 +21151,12 @@
           "description": "Optional rotation angle in radians. Equivalent to style.angle."
         },
         "justification": {
-          "$ref": "#/$defs/Justification"
+          "$ref": "#/$defs/Justification",
+          "description": "Optional; equivalent to style.justification."
         },
         "style": {
           "$ref": "#/$defs/TextStyleSettableDetails",
-          "description": "Full style settings (font, effects, frame, anchor, etc). height/pen/angle/justification above take precedence over the same fields here if both are given."
+          "description": "height/pen/angle/justification above take precedence over the same fields here if both are given."
         },
         "floorIndex": {
           "type": "integer",
@@ -20720,7 +21193,8 @@
           "description": "The pen attribute index (same as style.penIndex)."
         },
         "justification": {
-          "$ref": "#/$defs/Justification"
+          "$ref": "#/$defs/Justification",
+          "description": "Same as style.justification."
         },
         "zCoordinate": {
           "type": "number",
@@ -20728,7 +21202,7 @@
         },
         "style": {
           "$ref": "#/$defs/TextStyleDetails",
-          "description": "The full style state; the flat fields above are the subset SetDetailsOfElements takes back."
+          "description": "The flat fields above are the subset SetDetailsOfElements takes back."
         },
         "paragraphCount": {
           "type": "integer",
@@ -20827,7 +21301,8 @@
           "description": "The character height in millimeters. Only applied to Text elements. A multistyle Text takes its height from the per-run sizes of its content, so applying it rebuilds the content as one paragraph with the new height on every run (the runs' own pens/fonts/faces are kept) and switches the element to automatic width, as setting text does. Refused when the content holds an autotext run; give the new content explicitly via text then, or use ModifyTexts."
         },
         "justification": {
-          "$ref": "#/$defs/Justification"
+          "$ref": "#/$defs/Justification",
+          "description": "Only applied to Text elements."
         }
       },
       "additionalProperties": false,
@@ -21169,7 +21644,8 @@
           "description": "Optional. The roof or shell that trims every element in the list."
         },
         "trimType": {
-          "$ref": "#/$defs/TrimType"
+          "$ref": "#/$defs/TrimType",
+          "description": "Used with trimmingElement; defaults to KeepInside."
         }
       },
       "additionalProperties": false,
@@ -21182,6 +21658,7 @@
     },
     "TrimType": {
       "type": "string",
+      "description": "Which side of the trimming element the elements keep.",
       "enum": [
         "KeepInside",
         "KeepOutside",
@@ -21410,6 +21887,34 @@
         "executionResults"
       ]
     },
+    "UpdateHotlinksParameters": {
+      "type": "object",
+      "properties": {
+        "hotlinkNodes": {
+          "type": "array",
+          "description": "The hotlink nodes to update, from GetHotlinks or CreateHotlinkNodes. Each node's cached content is re-read from its source file, as the Hotlink Manager's Update button does.",
+          "items": {
+            "$ref": "#/$defs/HotlinkNodeReference"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "hotlinkNodes"
+      ]
+    },
+    "UpdateHotlinksResult": {
+      "type": "object",
+      "properties": {
+        "executionResults": {
+          "$ref": "#/$defs/ExecutionResults"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "executionResults"
+      ]
+    },
     "UpdatePropertyDefinitionsParameters": {
       "type": "object",
       "properties": {
@@ -21487,6 +21992,22 @@
     },
     "UpdateZonesResult": {
       "$ref": "#/$defs/ExecutionResult"
+    },
+    "User": {
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "number"
+        },
+        "userName": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "userId",
+        "userName"
+      ]
     },
     "UserUndefinedPropertyValue": {
       "type": "object",
@@ -21592,7 +22113,8 @@
           "description": "Whether changing to the view should ignore its stored zoom."
         },
         "zoom": {
-          "$ref": "#/$defs/Zoom"
+          "$ref": "#/$defs/Zoom",
+          "description": "Stored zoom box. Used only when saveZoom is true."
         },
         "rotation": {
           "type": "number",
@@ -21643,7 +22165,8 @@
       "type": "object",
       "properties": {
         "zoom": {
-          "$ref": "#/$defs/Zoom"
+          "$ref": "#/$defs/Zoom",
+          "description": "The current zoom parameters."
         },
         "rotation": {
           "type": "number",
@@ -21686,7 +22209,7 @@
       "properties": {
         "favoriteName": {
           "type": "string",
-          "description": "Optional name of a favorite to base the new element on. Its settings are applied first, then the explicitly given fields override them."
+          "description": "Optional name of a Wall favorite to base the new element on. Its settings (structure, reference line location, top link, offsets, ...) are applied first, then the explicitly given fields override them. With a favorite only begCoordinate and endCoordinate are needed."
         },
         "begCoordinate": {
           "$ref": "#/$defs/Coordinate2D"
@@ -21704,24 +22227,29 @@
         },
         "height": {
           "type": "number",
-          "exclusiveMinimum": 0.0
+          "exclusiveMinimum": 0.0,
+          "description": "Optional explicit height. Sets relativeTopStory to 0, so it replaces the top link of the favorite or the tool default. When omitted, the height and top link of the favorite (or of the Wall tool defaults) are kept."
         },
         "thickness": {
           "type": "number",
-          "exclusiveMinimum": 0.0
+          "exclusiveMinimum": 0.0,
+          "description": "Optional thickness. When omitted, the favorite's or the Wall tool default's thickness is kept. Only takes effect on a Basic (homogeneous) wall - a Composite or Profile wall takes its thickness from the composite or profile attribute. Without structureType the new wall keeps the structure of the favorite (or the wall tool default), which may be a composite; send structureType 'Basic' for the thickness to apply."
         },
         "offset": {
-          "type": "number"
+          "type": "number",
+          "description": "Optional reference line offset. When omitted, the favorite's or the Wall tool default's offset is kept."
         },
         "arcAngle": {
           "type": "number",
           "description": "Arc angle in radians; non-zero creates a curved wall (begCoordinate/endCoordinate are the chord endpoints)."
         },
         "referenceLineLocation": {
-          "$ref": "#/$defs/WallReferenceLineLocation"
+          "$ref": "#/$defs/WallReferenceLineLocation",
+          "description": "Optional. When omitted, the favorite's or the Wall tool default's reference line location is kept. The Core* values only have an effect on a Composite or Profile wall."
         },
         "structureType": {
-          "$ref": "#/$defs/WallStructureType"
+          "$ref": "#/$defs/WallStructureType",
+          "description": "Optional. When neither this nor one of the attribute ids below is given, the favorite's or the Wall tool default's structure is kept."
         },
         "buildingMaterialId": {
           "$ref": "#/$defs/AttributeId"
@@ -21731,14 +22259,74 @@
         },
         "profileId": {
           "$ref": "#/$defs/AttributeId"
+        },
+        "contourPen": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Pen of the wall's own contour/reference outline (API_WallType::contPen) - distinct from cutFillPen, which is the cut fill pattern's pen."
+        },
+        "contourPen3D": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Pen of the wall's contour in 3D views (API_WallType::contPen3D)."
+        },
+        "contourLineTypeId": {
+          "$ref": "#/$defs/AttributeId",
+          "description": "Line type of the wall's own contour (API_WallType::contLtype) - pairs with contourPen, which only sets the pen, not the line type."
+        },
+        "belowViewLineTypeId": {
+          "$ref": "#/$defs/AttributeId",
+          "description": "Line type used when \"OutLines Only\" is selected from the \"Floor Plan Display\" popup (API_WallType::belowViewLineType)."
+        },
+        "aboveViewLinePen": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Pen used when \"Overhead All\" is selected from the \"Floor Plan Display\" popup."
+        },
+        "aboveViewLineTypeId": {
+          "$ref": "#/$defs/AttributeId",
+          "description": "Line type used when \"Overhead All\" is selected from the \"Floor Plan Display\" popup - pairs with aboveViewLinePen."
+        },
+        "displayOption": {
+          "$ref": "#/$defs/DisplayOption"
+        },
+        "viewDepthLimitation": {
+          "$ref": "#/$defs/ViewDepthLimitation",
+          "description": "Only has an effect on a multi-story wall (relativeTopStory/topOffset making it span more than one story)."
+        },
+        "useCompositePriority": {
+          "type": "boolean",
+          "description": "When true, the Composite's own priority is used at junctions instead of connectionPriority."
+        },
+        "linkToSettings": {
+          "$ref": "#/$defs/LinkToSettings",
+          "description": "Mode of linking the wall to its home story."
+        },
+        "inheritEndSurface": {
+          "type": "boolean",
+          "description": "The end surface of the wall is inherited from the adjoining wall."
+        },
+        "alignTexture": {
+          "type": "boolean",
+          "description": "Align texture mapping to the wall's edges."
+        },
+        "polyCanChange": {
+          "type": "boolean",
+          "description": "The polygonal wall's corners can be changed in case of L and T connections. Only meaningful for a Polygonal wall (geometryType)."
+        },
+        "materialsChained": {
+          "type": "boolean",
+          "description": "Whether the surface materials are chained."
+        },
+        "logHeight": {
+          "type": "number",
+          "description": "Height of the log for log walls. 0 means a normal (non-log) wall."
         }
       },
       "additionalProperties": false,
       "required": [
         "begCoordinate",
-        "endCoordinate",
-        "height",
-        "thickness"
+        "endCoordinate"
       ]
     },
     "WallDetails": {
@@ -21813,7 +22401,8 @@
           "$ref": "#/$defs/WallReferenceLineLocation"
         },
         "profileType": {
-          "$ref": "#/$defs/WallProfileType"
+          "$ref": "#/$defs/WallProfileType",
+          "description": "Only Normal/Slanted/Trapez are settable via ModifyWalls - Poly needs a profile attribute wired through a separate mechanism. slantAlpha/slantBeta only have an effect once this is Slanted or Trapez."
         },
         "slantAlpha": {
           "type": "number",
@@ -21855,6 +22444,88 @@
         },
         "cutFillBackgroundPen": {
           "$ref": "#/$defs/OverriddenPen"
+        },
+        "contourPen": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Pen of the wall's own contour/reference outline (API_WallType::contPen) - distinct from cutFillPen, which is the cut fill pattern's pen inherited from the building material/composite/profile. Unlike cutFillPen this is not inheritable/overridable, it is the wall's own pen index directly, the same field used regardless of structureType (Basic, Composite or Profile)."
+        },
+        "contourPen3D": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Pen of the wall's contour in 3D views (API_WallType::contPen3D)."
+        },
+        "contourLineTypeId": {
+          "$ref": "#/$defs/AttributeId",
+          "description": "Line type of the wall's own contour (API_WallType::contLtype) - pairs with contourPen, which only sets the pen, not the line type."
+        },
+        "belowViewLineTypeId": {
+          "$ref": "#/$defs/AttributeId",
+          "description": "Line type used when \"OutLines Only\" is selected from the \"Floor Plan Display\" popup (API_WallType::belowViewLineType). Corresponds to the \"Uncut Lines\" value in the Wall Settings dialog."
+        },
+        "aboveViewLinePen": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Pen used when \"Overhead All\" is selected from the \"Floor Plan Display\" popup. Corresponds to the \"Overhead Line Pens\" value in the Wall Settings dialog."
+        },
+        "aboveViewLineTypeId": {
+          "$ref": "#/$defs/AttributeId",
+          "description": "Line type used when \"Overhead All\" is selected from the \"Floor Plan Display\" popup - pairs with aboveViewLinePen."
+        },
+        "displayOption": {
+          "$ref": "#/$defs/DisplayOption"
+        },
+        "viewDepthLimitation": {
+          "$ref": "#/$defs/ViewDepthLimitation",
+          "description": "Only has an effect on a multi-story wall (relativeTopStory/topOffset making it span more than one story)."
+        },
+        "connectionPriority": {
+          "type": "integer",
+          "description": "Priority of the wall in a junction with other elements (API_WallType::wallConnPriority - higher wins the cut/cover at the junction). Archicad ignores writes to this field; read-only in practice."
+        },
+        "useCompositePriority": {
+          "type": "boolean",
+          "description": "When true, the Composite's own priority is used at junctions instead of connectionPriority."
+        },
+        "junctionSequence": {
+          "type": "integer",
+          "description": "Tie-breaker (0-999) used when two walls meet with the same connectionPriority, or when 3+ walls meet in a junction (API_WallType::sequence). Archicad ignores writes to this field; read-only in practice."
+        },
+        "linkToSettings": {
+          "$ref": "#/$defs/LinkToSettings",
+          "description": "Mode of linking the wall to its home story."
+        },
+        "inheritEndSurface": {
+          "type": "boolean",
+          "description": "The end surface of the wall is inherited from the adjoining wall."
+        },
+        "alignTexture": {
+          "type": "boolean",
+          "description": "Align texture mapping to the wall's edges."
+        },
+        "offsetFromOutside": {
+          "type": "number",
+          "description": "Distance between the reference line and the outside face of the wall. Output only - not settable via ModifyWalls."
+        },
+        "polyCanChange": {
+          "type": "boolean",
+          "description": "The polygonal wall's corners can be changed in case of L and T connections. Only meaningful for a Polygonal wall (geometryType)."
+        },
+        "materialsChained": {
+          "type": "boolean",
+          "description": "Whether the surface materials are chained."
+        },
+        "logHeight": {
+          "type": "number",
+          "description": "Height of the log for log walls. 0 means a normal (non-log) wall."
+        },
+        "hasWindow": {
+          "type": "boolean",
+          "description": "Whether the wall has at least one Window. Output only."
+        },
+        "hasDoor": {
+          "type": "boolean",
+          "description": "Whether the wall has at least one Door. Output only."
         }
       },
       "additionalProperties": false,
@@ -21882,7 +22553,7 @@
         "Straight",
         "Trapezoid"
       ],
-      "description": "The wall's plan outline shape (Polygonal is not settable here, read-only via GetDetailsOfElements). This is unrelated to slantAlpha/slantBeta - see profileType for the cross section shape those depend on."
+      "description": "The wall's plan outline shape, distinct from its cross section shape."
     },
     "WallModificationProfileType": {
       "type": "string",
@@ -21891,7 +22562,7 @@
         "Slanted",
         "Trapez"
       ],
-      "description": "Cross section shape of the wall, distinct from geometryType (which is the plan outline). slantAlpha/slantBeta only have an effect once this is set to Slanted."
+      "description": "Cross section shape of the wall, distinct from geometryType (which is the plan outline)."
     },
     "WallProfileType": {
       "type": "string",
@@ -21901,7 +22572,7 @@
         "Trapez",
         "Poly"
       ],
-      "description": "Cross section shape of the wall, distinct from geometryType (which is the plan outline). Only Normal/Slanted/Trapez are settable via ModifyWalls - Poly needs a profile attribute wired through a separate mechanism. slantAlpha/slantBeta only have an effect once this is Slanted or Trapez."
+      "description": "Cross section shape of the wall, distinct from geometryType (which is the plan outline)."
     },
     "WallReferenceLineLocation": {
       "type": "string",
@@ -21997,7 +22668,8 @@
           "$ref": "#/$defs/ElementId"
         },
         "geometryType": {
-          "$ref": "#/$defs/WallModificationGeometryType"
+          "$ref": "#/$defs/WallModificationGeometryType",
+          "description": "Polygonal is not settable here; it is read-only via GetDetailsOfElements. This is unrelated to slantAlpha/slantBeta - see profileType for the cross section shape those depend on."
         },
         "begCoordinate": {
           "$ref": "#/$defs/Coordinate2D"
@@ -22016,7 +22688,8 @@
         },
         "thickness": {
           "type": "number",
-          "exclusiveMinimum": 0.0
+          "exclusiveMinimum": 0.0,
+          "description": "Only takes effect on a Basic (homogeneous) wall - a Composite or Profile wall takes its thickness from the composite or profile attribute. Send structureType 'Basic' in the same call to switch such a wall first."
         },
         "bottomOffset": {
           "type": "number"
@@ -22040,7 +22713,8 @@
           "$ref": "#/$defs/WallReferenceLineLocation"
         },
         "profileType": {
-          "$ref": "#/$defs/WallModificationProfileType"
+          "$ref": "#/$defs/WallModificationProfileType",
+          "description": "slantAlpha/slantBeta only have an effect once this is set to Slanted."
         },
         "slantAlpha": {
           "type": "number",
@@ -22082,6 +22756,68 @@
         },
         "cutFillBackgroundPen": {
           "$ref": "#/$defs/OverriddenPen"
+        },
+        "contourPen": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Pen of the wall's own contour/reference outline (API_WallType::contPen) - distinct from cutFillPen, which is the cut fill pattern's pen. Not inheritable/overridable like cutFillPen, it is the wall's own pen index directly, the same field regardless of structureType."
+        },
+        "contourPen3D": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Pen of the wall's contour in 3D views (API_WallType::contPen3D)."
+        },
+        "contourLineTypeId": {
+          "$ref": "#/$defs/AttributeId",
+          "description": "Line type of the wall's own contour (API_WallType::contLtype) - pairs with contourPen, which only sets the pen, not the line type."
+        },
+        "belowViewLineTypeId": {
+          "$ref": "#/$defs/AttributeId",
+          "description": "Line type used when \"OutLines Only\" is selected from the \"Floor Plan Display\" popup (API_WallType::belowViewLineType)."
+        },
+        "aboveViewLinePen": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Pen used when \"Overhead All\" is selected from the \"Floor Plan Display\" popup."
+        },
+        "aboveViewLineTypeId": {
+          "$ref": "#/$defs/AttributeId",
+          "description": "Line type used when \"Overhead All\" is selected from the \"Floor Plan Display\" popup - pairs with aboveViewLinePen."
+        },
+        "displayOption": {
+          "$ref": "#/$defs/DisplayOption"
+        },
+        "viewDepthLimitation": {
+          "$ref": "#/$defs/ViewDepthLimitation",
+          "description": "Only has an effect on a multi-story wall (relativeTopStory/topOffset making it span more than one story)."
+        },
+        "useCompositePriority": {
+          "type": "boolean",
+          "description": "When true, the Composite's own priority is used at junctions instead of connectionPriority."
+        },
+        "linkToSettings": {
+          "$ref": "#/$defs/LinkToSettings",
+          "description": "Mode of linking the wall to its home story."
+        },
+        "inheritEndSurface": {
+          "type": "boolean",
+          "description": "The end surface of the wall is inherited from the adjoining wall."
+        },
+        "alignTexture": {
+          "type": "boolean",
+          "description": "Align texture mapping to the wall's edges."
+        },
+        "polyCanChange": {
+          "type": "boolean",
+          "description": "The polygonal wall's corners can be changed in case of L and T connections. Only meaningful for a Polygonal wall (geometryType)."
+        },
+        "materialsChained": {
+          "type": "boolean",
+          "description": "Whether the surface materials are chained."
+        },
+        "logHeight": {
+          "type": "number",
+          "description": "Height of the log for log walls. 0 means a normal (non-log) wall."
         }
       },
       "additionalProperties": false,
@@ -22678,7 +23414,7 @@
     },
     "Zoom": {
       "type": "object",
-      "description": "The actual zoom parameters, rectangular region of the model.",
+      "description": "A rectangular zoom box in model coordinates.",
       "properties": {
         "xMin": {
           "type": "number",

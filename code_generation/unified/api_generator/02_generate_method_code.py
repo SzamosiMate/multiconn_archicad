@@ -169,7 +169,9 @@ def _generate_standard_method(
 
     if result_model:
         # Check if the result model is just a wrapper for a single field (alias)
-        if (
+        if inspect.isclass(result_model) and hasattr(result_model, "model_fields") and not result_model.model_fields:
+            final_return_type_hint = "None"
+        elif (
             inspect.isclass(result_model)
             and hasattr(result_model, "model_fields")
             and len(result_model.model_fields) == 1
@@ -201,6 +203,7 @@ def _generate_standard_method(
         "type_model_dependencies": sorted(list(dependencies["types"])),
         "alias_property_name": alias_property_name,
     }
+
 
 def _build_signature_and_docs(
     snake_name: str, params_model: Any, return_type_hint: str, dependencies: dict
@@ -276,9 +279,7 @@ def _build_docstring(
         docstring += "\nReturns:\n"
         # Only add the description part if it's a non-empty string
         return_line = f"{return_type}: {return_desc}" if return_desc else return_type
-        wrapped_doc = textwrap.fill(
-            return_line, width=88, initial_indent="    ", subsequent_indent=" " * 8
-        )
+        wrapped_doc = textwrap.fill(return_line, width=88, initial_indent="    ", subsequent_indent=" " * 8)
         docstring += f"{wrapped_doc}\n"
 
     docstring += "\nRaises:\n"
@@ -336,7 +337,13 @@ def _build_body(
         else:
             body_lines.append(f"validated_response = {validation_model_name}.model_validate(response_dict)")
 
-        if alias_property_name:
+        if (
+            inspect.isclass(validation_model)
+            and hasattr(validation_model, "model_fields")
+            and not validation_model.model_fields
+        ):
+            body_lines.append("return None")
+        elif alias_property_name:
             body_lines.append(f"return validated_response.{alias_property_name}")
         else:
             body_lines.append("return validated_response")
@@ -347,12 +354,14 @@ def _build_body(
 def _generate_rename_navigator_item_fix(command_details: dict[str, Any], dependencies: dict) -> dict:
     """Surgical fix to generate a user-friendly method for RenameNavigatorItem."""
     # Manually add all required model dependencies for this command
-    dependencies["commands"].update([
-        "RenameNavigatorItemParameters",
-        "RenameNavigatorItemByName",
-        "RenameNavigatorItemById",
-        "RenameNavigatorItemByNameAndId",
-    ])
+    dependencies["commands"].update(
+        [
+            "RenameNavigatorItemParameters",
+            "RenameNavigatorItemByName",
+            "RenameNavigatorItemById",
+            "RenameNavigatorItemByNameAndId",
+        ]
+    )
     dependencies["types"].add("NavigatorItemId")
 
     signature = (

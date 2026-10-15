@@ -8,6 +8,8 @@ from pydantic import TypeAdapter
 from multiconn_archicad.models.tapir.commands import (
     ChangeHotlinkInstancesParameters,
     ChangeHotlinkInstancesResult,
+    ChangeHotlinkNodesParameters,
+    ChangeHotlinkNodesResult,
     CloseProjectResult,
     CreateHotlinkInstancesParameters,
     CreateHotlinkInstancesResult,
@@ -43,6 +45,8 @@ from multiconn_archicad.models.tapir.commands import (
     SetProjectInfoFieldParameters,
     SetStoriesParameters,
     SetStoriesResult,
+    UpdateHotlinksParameters,
+    UpdateHotlinksResult,
 )
 from multiconn_archicad.models.tapir.types import (
     AutoTextKey,
@@ -55,7 +59,9 @@ from multiconn_archicad.models.tapir.types import (
     HotlinkInstanceChange,
     HotlinkInstanceCreation,
     HotlinkNode,
+    HotlinkNodeChange,
     HotlinkNodeCreated,
+    HotlinkNodeReference,
     PrintArea,
     ProjectInfoField,
     ProjectInfoFieldData,
@@ -102,6 +108,38 @@ class ProjectCommands:
             "ChangeHotlinkInstances", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = ChangeHotlinkInstancesResult.model_validate(response_dict)
+        return validated_response.executionResults
+
+    def change_hotlink_nodes(
+        self, hotlink_nodes: list[HotlinkNodeChange]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Repoints hotlink module nodes at other source files, as the Hotlink Manager's Relink
+        button does. Follow it with UpdateHotlinks to re-read the content.
+
+        Args:
+            hotlink_nodes (list[HotlinkNodeChange]): The hotlink nodes to repoint at another
+                source file, as the Hotlink Manager's Relink button does. The placed instances
+                stay where they are. Follow it with UpdateHotlinks on the same nodes to re-read
+                the content from the new file.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "hotlinkNodes": hotlink_nodes,
+        }
+        validated_params = ChangeHotlinkNodesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "ChangeHotlinkNodes", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = ChangeHotlinkNodesResult.model_validate(response_dict)
         return validated_response.executionResults
 
     def close_project(self) -> FailedExecutionResult | SuccessfulExecutionResult:
@@ -376,7 +414,8 @@ class ProjectCommands:
 
     def get_stories(self) -> GetStoriesResult:
         """
-        Retrieves information about the story sructure of the currently loaded project.
+        Retrieves information about the story structure of the currently loaded project: index,
+        floor id, name, level, height and, from Archicad 28, the IFC GlobalId of each story.
 
         Returns:
             GetStoriesResult
@@ -652,3 +691,34 @@ class ProjectCommands:
         )
         validated_response = TypeAdapter(SetStoriesResult).validate_python(response_dict)
         return validated_response
+
+    def update_hotlinks(
+        self, hotlink_nodes: list[HotlinkNodeReference]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Re-reads the source files of hotlink module nodes and refreshes their cached content in
+        the project, as the Hotlink Manager's Update button does.
+
+        Args:
+            hotlink_nodes (list[HotlinkNodeReference]): The hotlink nodes to update, from
+                GetHotlinks or CreateHotlinkNodes. Each node's cached content is re-read from
+                its source file, as the Hotlink Manager's Update button does.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "hotlinkNodes": hotlink_nodes,
+        }
+        validated_params = UpdateHotlinksParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "UpdateHotlinks", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = UpdateHotlinksResult.model_validate(response_dict)
+        return validated_response.executionResults

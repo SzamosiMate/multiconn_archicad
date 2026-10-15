@@ -31,7 +31,7 @@ from multiconn_archicad.models.tapir.types import (
     MEPConnectionData,
     MEPConnectionResult,
     MEPDistributionSystem,
-    MEPDomains,
+    MEPDomain,
     MEPElement,
     MEPElementData,
     MEPElementPorts,
@@ -152,7 +152,7 @@ class MepCommands:
         return validated_response.distributionSystems
 
     def get_mep_elements(
-        self, element_types: None | list[MEPElementType] = None, domains: None | list[MEPDomains] = None
+        self, element_types: None | list[MEPElementType] = None, domains: None | list[MEPDomain] = None
     ) -> list[MEPElement]:
         """
         Retrieves the MEP (Mechanical, Electrical, Plumbing) elements of the project, optionally
@@ -163,7 +163,7 @@ class MepCommands:
         Args:
             element_types (None | list[MEPElementType]): Optional filter for the MEP element
                 types.
-            domains (None | list[MEPDomains]): Optional filter for the MEP domains.
+            domains (None | list[MEPDomain]): Optional filter for the MEP domains.
 
         Returns:
             list[MEPElement]: The MEP elements.

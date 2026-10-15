@@ -48,6 +48,12 @@
         "version": "1.5.9"
     },
     {
+        "name": "ChangeHotlinkNodes",
+        "group": "Project Commands",
+        "description": "Repoints hotlink module nodes at other source files, as the Hotlink Manager's Relink button does. Follow it with UpdateHotlinks to re-read the content.",
+        "version": "1.7.1"
+    },
+    {
         "name": "ChangeSelectionOfElements",
         "group": "Element Commands",
         "description": "Adds/removes a number of elements to/from the current selection.",
@@ -906,6 +912,12 @@
         "version": "1.5.4"
     },
     {
+        "name": "GetLockableObjectSetStatus",
+        "group": "Teamwork Commands",
+        "description": "Returns the Teamwork reservation status of a non-element lockable object set and the users who hold it.",
+        "version": "1.7.1"
+    },
+    {
         "name": "GetMEPDistributionSystems",
         "group": "MEP Commands",
         "description": "Retrieves the MEP distribution systems of the project with their domain, MEP system attribute and member elements. Available from Archicad 28.",
@@ -940,6 +952,12 @@
         "group": "Attribute Commands",
         "description": "Returns the details of the given MEP System attributes (domain, pens, fill, center line type, surface and insulation surface).",
         "version": "1.5.4"
+    },
+    {
+        "name": "GetMarkerParametersOfElements",
+        "group": "Element Commands",
+        "description": "Gets the marker library part and the marker's GDL parameters (name, type, value) of the given Window and Door elements. The marker is the stamp drawn next to the opening on the floor plan; its parameters are separate from the opening's own GDL parameters, which GetGDLParametersOfElements returns.",
+        "version": "1.7.1"
     },
     {
         "name": "GetModelViewOptions",
@@ -1028,7 +1046,7 @@
     {
         "name": "GetScriptUIResult",
         "group": "Script UI Commands",
-        "description": "Retrieves and clears the result last submitted from the Script UI palette's page (via window.ACAPI.SubmitResult), if any.",
+        "description": "Retrieves and clears the result last submitted from the Script UI palette's page (via window.ACAPI.SubmitResult), if any, and reports whether the palette is still open, so a waiting script can stop when the user closes it.",
         "version": "1.5.4"
     },
     {
@@ -1058,7 +1076,7 @@
     {
         "name": "GetStories",
         "group": "Project Commands",
-        "description": "Retrieves information about the story sructure of the currently loaded project.",
+        "description": "Retrieves information about the story structure of the currently loaded project: index, floor id, name, level, height and, from Archicad 28, the IFC GlobalId of each story.",
         "version": "1.1.5"
     },
     {
@@ -1308,6 +1326,18 @@
         "version": "1.1.4"
     },
     {
+        "name": "ReleaseHotlinkCacheManagement",
+        "group": "Teamwork Commands",
+        "description": "Releases the Hotlink and XRef management in Teamwork mode.",
+        "version": "1.7.1"
+    },
+    {
+        "name": "ReleaseLockableObjectSet",
+        "group": "Teamwork Commands",
+        "description": "Releases a non-element lockable object set reserved with ReserveLockableObjectSet in Teamwork mode.",
+        "version": "1.7.1"
+    },
+    {
         "name": "ReloadLibraries",
         "group": "Library Commands",
         "description": "Executes the reload libraries command.",
@@ -1348,6 +1378,18 @@
         "group": "Teamwork Commands",
         "description": "Reserves elements in Teamwork mode.",
         "version": "1.1.4"
+    },
+    {
+        "name": "ReserveHotlinkCacheManagement",
+        "group": "Teamwork Commands",
+        "description": "Reserves the Hotlink and XRef management in Teamwork mode, which is needed before changing hotlink nodes.",
+        "version": "1.7.1"
+    },
+    {
+        "name": "ReserveLockableObjectSet",
+        "group": "Teamwork Commands",
+        "description": "Reserves a non-element lockable object set (attributes, favorites, project info, project preferences, etc.) in Teamwork mode. The object set is given by its Archicad API name, e.g. 'Composites', 'LayerSettingsDialog' or 'ProjectInfo'.",
+        "version": "1.7.1"
     },
     {
         "name": "RotateElements",
@@ -1432,6 +1474,12 @@
         "group": "Library Commands",
         "description": "Makes the given folders the project's local libraries; built-in, embedded, server and web libraries are kept. Set the libraries before opening a file that needs them and the missing-library dialog does not appear.",
         "version": "1.5.9"
+    },
+    {
+        "name": "SetMarkerParametersOfElements",
+        "group": "Element Commands",
+        "description": "Sets the given GDL parameters of the marker of the given Window and Door elements. The opening's own settings and the other marker parameters are left as they are.",
+        "version": "1.7.1"
     },
     {
         "name": "SetProjectInfoField",
@@ -1534,6 +1582,12 @@
         "group": "Favorites Commands",
         "description": "Update existing favorites from the given elements.",
         "version": "1.5.4"
+    },
+    {
+        "name": "UpdateHotlinks",
+        "group": "Project Commands",
+        "description": "Re-reads the source files of hotlink module nodes and refreshes their cached content in the project, as the Hotlink Manager's Update button does.",
+        "version": "1.7.1"
     },
     {
         "name": "UpdatePropertyDefinitions",

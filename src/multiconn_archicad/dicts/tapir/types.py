@@ -54,7 +54,7 @@ BeamHoleType: TypeAlias = Literal["Rectangular", "Circular"]
 
 
 class BoundingBox2D(TypedDict):
-    """Bounding box of the drawing on the layout."""
+    """A two-dimensional bounding box defined by its minimum and maximum coordinates."""
     xMin: float
     yMin: float
     xMax: float
@@ -171,9 +171,6 @@ class Coordinate3D(TypedDict):
     x: float
     y: float
     z: float
-
-
-CoverFillOrientationType: TypeAlias = Literal["Global", "Rotated", "Distorted", "Centered"]
 
 
 class CoverFillTransformation(TypedDict):
@@ -413,7 +410,7 @@ ElementType: TypeAlias = Literal[
 
 
 class EnumValueToAdd(TypedDict):
-    """The description of an enumeration value."""
+    """Text values for an enumeration option to add."""
     displayValue: str
     nonLocalizedValue: NotRequired[str]
 
@@ -586,8 +583,12 @@ class HotlinkNodeId(TypedDict):
     guid: Guid
 
 
+class HotlinkNodeReference(TypedDict):
+    hotlinkNodeId: HotlinkNodeId
+
+
 class HotlinkOrigin(TypedDict):
-    """Where a hotlink instance's origin lands, in the project's coordinates. z is optional: CreateHotlinkInstances places at 0 when it is omitted, ChangeHotlinkInstances keeps the instance's current z."""
+    """Where a hotlink instance's origin lands, in the project's coordinates."""
     x: float
     y: float
     z: NotRequired[float]
@@ -821,17 +822,12 @@ LengthType: TypeAlias = Literal[
 ]
 
 
-class Level(TypedDict):
-    levelHeight: float
-    levelAngle: float
-
-
 class LibPartUnId(TypedDict):
     guid: Guid
 
 
 class Library(TypedDict):
-    """Library"""
+    """Details of a project library."""
     name: str
     path: str
     type: str
@@ -904,9 +900,12 @@ class LineSymbolItemData(TypedDict):
 
 
 class LinkToSettings(TypedDict):
-    """Mode of linking the Morph to its home story."""
+    """Mode of linking an element to its home story."""
     homeStoryDifference: NotRequired[int]
     newCreationMode: NotRequired[bool]
+
+
+LockableObjectSetStatus: TypeAlias = Literal["Free", "Editable", "Locked", "NotAvailable", "NotExist"]
 
 
 MEPComponentType: TypeAlias = Literal["Terminal", "Accessory", "Equipment", "Fitting"]
@@ -915,7 +914,18 @@ MEPComponentType: TypeAlias = Literal["Terminal", "Accessory", "Equipment", "Fit
 MEPCrossSectionShape: TypeAlias = Literal["Rectangular", "Circular", "Oval", "UShape"]
 
 
-MEPDomains: TypeAlias = Literal["Ventilation", "Piping", "CableCarrier"]
+MEPDomain: TypeAlias = Literal["Ventilation", "Piping", "CableCarrier"]
+
+
+MEPDomainOrUnknown: TypeAlias = Literal["Ventilation", "Piping", "CableCarrier", "Unknown"]
+
+
+class MEPElementData(TypedDict):
+    type: MEPComponentType
+    domain: NotRequired[MEPDomain]
+    position: Coordinate3D
+    orientationDirection: NotRequired[Coordinate3D]
+    orientationRotation: NotRequired[Coordinate3D]
 
 
 MEPElementType: TypeAlias = Literal[
@@ -960,7 +970,38 @@ MEPSystemAttributeField: TypeAlias = Literal[
 ]
 
 
-MEPSystemDomain: TypeAlias = Literal["Ventilation", "Piping", "CableCarrier"]
+class MarkerGDLParameterDetails(TypedDict):
+    name: str
+    displayName: str
+    index: int
+    type: str
+    dimension1: NotRequired[int]
+    dimension2: NotRequired[int]
+    value: Any
+    valueDescription: NotRequired[str]
+    itemDescriptions: NotRequired[list[str]]
+    flags: list[
+        Literal[
+            "Hidden",
+            "HiddenFromScript",
+            "Disabled",
+            "Child",
+            "Unique",
+            "Fixed",
+            "BoldName",
+            "Open",
+        ]
+    ]
+
+
+class MarkerParameterUpdateByIndex(TypedDict):
+    index: int
+    value: Any
+
+
+class MarkerParameterUpdateByName(TypedDict):
+    name: str
+    value: Any
 
 
 MeshRidges: TypeAlias = Literal["AllSharp", "AllSmooth", "UserDefined"]
@@ -1187,12 +1228,6 @@ class PenTablePen(TypedDict):
     description: str
 
 
-class PivotLine(TypedDict):
-    """If given, a single-plane roof is created instead of a multi-plane roof: one plane tilted along this pivot line. The plane rises on the left side of the line direction (begCoordinate towards endCoordinate); flip the line to tilt towards the other side."""
-    begCoordinate: Coordinate2D
-    endCoordinate: Coordinate2D
-
-
 class PolyArc(TypedDict):
     """Representation of an arc segment of a two dimensional polygon/polyline."""
     begIndex: int
@@ -1410,11 +1445,6 @@ PropertyValuesOrErrorArray: TypeAlias = list[PropertyValuesOrError]
 """A list of property value lists."""
 
 
-class User(TypedDict):
-    userId: float
-    userName: str
-
-
 class RevisionCustomSchemeEntry(TypedDict):
     customSchemeKey: Guid
     customSchemeValue: str
@@ -1431,9 +1461,20 @@ class RoofDetailsLevel(TypedDict):
 
 
 class RoofDetailsPivotLine(TypedDict):
-    """Single-plane: the pivot line the plane rotates about."""
+    """The pivot line about which a roof plane rotates."""
     begin: Coordinate2D
     end: Coordinate2D
+
+
+class RoofLevel(TypedDict):
+    levelHeight: float
+    levelAngle: float
+
+
+class RoofPivotLine(TypedDict):
+    """A directed pivot line defined by its beginning and end coordinates. The roof plane rises on the left side of the line direction (begCoordinate towards endCoordinate); reverse the direction to tilt towards the other side."""
+    begCoordinate: Coordinate2D
+    endCoordinate: Coordinate2D
 
 
 RoofStructureType: TypeAlias = Literal["Basic", "Composite"]
@@ -1559,6 +1600,7 @@ class StoryParameters(TypedDict):
     level: float
     height: NotRequired[float]
     name: str
+    ifcId: NotRequired[str]
 
 
 class StorySettings(TypedDict):
@@ -1766,6 +1808,11 @@ TextureProjectionType: TypeAlias = Literal["Invalid", "Planar", "Default", "Cyli
 TrimType: TypeAlias = Literal["KeepInside", "KeepOutside", "KeepAll", "No"]
 
 
+class User(TypedDict):
+    userId: float
+    userName: str
+
+
 class UserUndefinedPropertyValue(TypedDict):
     """A userUndefined value means that there is no actual number/string/etc. value, but the user deliberately set an Undefined value: this is a valid value, too."""
     type: PropertyDataType
@@ -1871,7 +1918,7 @@ class ZoneSettings(TypedDict):
 
 
 class Zoom(TypedDict):
-    """The actual zoom parameters, rectangular region of the model."""
+    """A rectangular zoom box in model coordinates."""
     xMin: float
     yMin: float
     xMax: float
@@ -1944,6 +1991,15 @@ class BeamData(TypedDict):
 
 class BeamHole(TypedDict):
     holeId: float
+    type: BeamHoleType
+    showContour: NotRequired[bool]
+    centerX: float
+    centerZ: float
+    width: float
+    height: NotRequired[float]
+
+
+class BeamHoleModification(TypedDict):
     type: BeamHoleType
     showContour: NotRequired[bool]
     centerX: float
@@ -2146,7 +2202,7 @@ class CoverFill(TypedDict):
 
 class CoverFillOrientation(TypedDict):
     """Orientation/distortion of the floor plan cover fill."""
-    type: NotRequired[CoverFillOrientationType]
+    type: NotRequired[HatchOrientationType]
     origo: NotRequired[Coordinate2D]
     matrix00: NotRequired[float]
     matrix10: NotRequired[float]
@@ -2567,6 +2623,8 @@ class HatchData(TypedDict):
     contourPenIndex: NotRequired[int]
     fillPenIndex: NotRequired[int]
     fillBackgroundPenIndex: NotRequired[int]
+    foregroundColor: NotRequired[ColorRGB]
+    backgroundColor: NotRequired[ColorRGB]
     fillId: NotRequired[AttributeId]
     buildingMaterialId: NotRequired[AttributeId]
     roomSpecial: NotRequired[int]
@@ -2652,6 +2710,11 @@ class HotlinkInstanceCreation(TypedDict):
     adjustLevelDiffs: NotRequired[bool]
 
 
+class HotlinkNodeChange(TypedDict):
+    hotlinkNodeId: HotlinkNodeId
+    sourceLocation: str
+
+
 class HotlinkNodeCreated(TypedDict):
     hotlinkNodeId: HotlinkNodeId
     existing: bool
@@ -2697,7 +2760,7 @@ class LabelLeaderLineDetails(TypedDict):
 
 
 class LabelLeaderLineSettableDetails(TypedDict):
-    """Every user-configurable leader-line/frame setting of a Label (top-level API_LabelType fields, shared by both Text and Symbol label classes). Shared by CreateLabels ('leaderLine'), ModifyLabels ('leaderLine'), and the Get response."""
+    """Every user-configurable leader-line/frame/arrow setting of a Label (top-level API_LabelType fields, shared by both Text and Symbol label classes). Shared by CreateLabels ('leaderLine'), ModifyLabels ('leaderLine'), and the Get response."""
     penIndex: NotRequired[int]
     lineTypeId: NotRequired[AttributeId]
     contourOffset: NotRequired[float]
@@ -2949,7 +3012,7 @@ MEPConnectionResultsOrErrors: TypeAlias = list[MEPConnectionResultOrError]
 
 
 class MEPDistributionSystem(TypedDict):
-    domain: MEPSystemDomain
+    domain: MEPDomainOrUnknown
     mepSystemId: NotRequired[AttributeId]
     elements: Elements
 
@@ -2958,14 +3021,6 @@ class MEPElement(TypedDict):
     elementId: ElementId
     type: MEPElementType
     domain: str
-
-
-class MEPElementData(TypedDict):
-    type: MEPComponentType
-    domain: NotRequired[MEPSystemDomain]
-    position: Coordinate3D
-    orientationDirection: NotRequired[Coordinate3D]
-    orientationRotation: NotRequired[Coordinate3D]
 
 
 class MEPPortDetails(TypedDict):
@@ -2977,7 +3032,7 @@ class MEPPortDetails(TypedDict):
     shape: str
     width: float
     height: float
-    domain: MEPSystemDomain
+    domain: MEPDomainOrUnknown
     mepSystemId: AttributeId
     isPhysicallyConnected: bool
     connectedPortId: NotRequired[Guid]
@@ -2985,7 +3040,7 @@ class MEPPortDetails(TypedDict):
 
 
 class MEPRoutingElementData(TypedDict):
-    domain: MEPSystemDomain
+    domain: MEPDomain
     nodeCoordinates: list[Coordinate3D]
     crossSectionWidth: NotRequired[float]
     crossSectionHeight: NotRequired[float]
@@ -3027,7 +3082,7 @@ class MEPSystemAttribute(TypedDict):
     attributeId: AttributeId
     index: int
     name: str
-    domain: NotRequired[list[MEPSystemDomain]]
+    domain: NotRequired[list[MEPDomain]]
     contourPen: NotRequired[int]
     fillPen: NotRequired[int]
     fillBackgroundPen: NotRequired[int]
@@ -3046,7 +3101,7 @@ class MEPSystemData(TypedDict):
     attributeId: NotRequired[AttributeId]
     index: NotRequired[str]
     name: str
-    domain: NotRequired[MEPSystemDomain]
+    domain: NotRequired[MEPDomain]
     contourPen: NotRequired[int]
     fillPen: NotRequired[int]
     fillBackgroundPen: NotRequired[int]
@@ -3055,6 +3110,14 @@ class MEPSystemData(TypedDict):
     centerLineTypeId: NotRequired[AttributeIdArrayItem]
     materialId: NotRequired[AttributeIdArrayItem]
     insulationMaterialId: NotRequired[AttributeIdArrayItem]
+
+
+MarkerParameterUpdate: TypeAlias = MarkerParameterUpdateByName | MarkerParameterUpdateByIndex
+
+
+class MarkerParametersOfElement(TypedDict):
+    libPart: NotRequired[LibPartDetails]
+    parameters: list[MarkerGDLParameterDetails]
 
 
 class MeshData(TypedDict):
@@ -3668,8 +3731,8 @@ class WallData(TypedDict):
     endCoordinate: Coordinate2D
     floorIndex: NotRequired[int]
     zCoordinate: NotRequired[float]
-    height: float
-    thickness: float
+    height: NotRequired[float]
+    thickness: NotRequired[float]
     offset: NotRequired[float]
     arcAngle: NotRequired[float]
     referenceLineLocation: NotRequired[WallReferenceLineLocation]
@@ -3677,6 +3740,21 @@ class WallData(TypedDict):
     buildingMaterialId: NotRequired[AttributeId]
     compositeId: NotRequired[AttributeId]
     profileId: NotRequired[AttributeId]
+    contourPen: NotRequired[int]
+    contourPen3D: NotRequired[int]
+    contourLineTypeId: NotRequired[AttributeId]
+    belowViewLineTypeId: NotRequired[AttributeId]
+    aboveViewLinePen: NotRequired[int]
+    aboveViewLineTypeId: NotRequired[AttributeId]
+    displayOption: NotRequired[DisplayOption]
+    viewDepthLimitation: NotRequired[ViewDepthLimitation]
+    useCompositePriority: NotRequired[bool]
+    linkToSettings: NotRequired[LinkToSettings]
+    inheritEndSurface: NotRequired[bool]
+    alignTexture: NotRequired[bool]
+    polyCanChange: NotRequired[bool]
+    materialsChained: NotRequired[bool]
+    logHeight: NotRequired[float]
 
 
 class WallDetails(TypedDict):
@@ -3711,6 +3789,26 @@ class WallDetails(TypedDict):
     sideMaterial: NotRequired[OverriddenMaterial]
     cutFillPen: NotRequired[OverriddenPen]
     cutFillBackgroundPen: NotRequired[OverriddenPen]
+    contourPen: NotRequired[int]
+    contourPen3D: NotRequired[int]
+    contourLineTypeId: NotRequired[AttributeId]
+    belowViewLineTypeId: NotRequired[AttributeId]
+    aboveViewLinePen: NotRequired[int]
+    aboveViewLineTypeId: NotRequired[AttributeId]
+    displayOption: NotRequired[DisplayOption]
+    viewDepthLimitation: NotRequired[ViewDepthLimitation]
+    connectionPriority: NotRequired[int]
+    useCompositePriority: NotRequired[bool]
+    junctionSequence: NotRequired[int]
+    linkToSettings: NotRequired[LinkToSettings]
+    inheritEndSurface: NotRequired[bool]
+    alignTexture: NotRequired[bool]
+    offsetFromOutside: NotRequired[float]
+    polyCanChange: NotRequired[bool]
+    materialsChained: NotRequired[bool]
+    logHeight: NotRequired[float]
+    hasWindow: NotRequired[bool]
+    hasDoor: NotRequired[bool]
 
 
 class WallThicknessDimensionData(TypedDict):
@@ -3747,6 +3845,21 @@ class WallWithDetails(TypedDict):
     sideMaterial: NotRequired[OverriddenMaterial]
     cutFillPen: NotRequired[OverriddenPen]
     cutFillBackgroundPen: NotRequired[OverriddenPen]
+    contourPen: NotRequired[int]
+    contourPen3D: NotRequired[int]
+    contourLineTypeId: NotRequired[AttributeId]
+    belowViewLineTypeId: NotRequired[AttributeId]
+    aboveViewLinePen: NotRequired[int]
+    aboveViewLineTypeId: NotRequired[AttributeId]
+    displayOption: NotRequired[DisplayOption]
+    viewDepthLimitation: NotRequired[ViewDepthLimitation]
+    useCompositePriority: NotRequired[bool]
+    linkToSettings: NotRequired[LinkToSettings]
+    inheritEndSurface: NotRequired[bool]
+    alignTexture: NotRequired[bool]
+    polyCanChange: NotRequired[bool]
+    materialsChained: NotRequired[bool]
+    logHeight: NotRequired[float]
 
 
 class WindowData(TypedDict):
@@ -3989,7 +4102,7 @@ class BeamWithDetails(TypedDict):
     circleBased: NotRequired[bool]
     buildingMaterialId: NotRequired[AttributeId]
     profileId: NotRequired[AttributeId]
-    holes: NotRequired[list[BeamHole]]
+    holes: NotRequired[list[BeamHoleModification]]
     cutFillPen: NotRequired[OverriddenPen]
     cutFillBackgroundPen: NotRequired[OverriddenPen]
     coverFill: NotRequired[CoverFill]
@@ -4309,6 +4422,11 @@ class ElementTrims(TypedDict):
 ElementTrimsOrError: TypeAlias = ElementTrims | ErrorItem
 
 
+class ElementWithMarkerParameters(TypedDict):
+    elementId: ElementId
+    markerParameters: list[MarkerParameterUpdate]
+
+
 class ElementsWithExecutionResults(TypedDict):
     """The response of the GetElementsByType command."""
     elements: Elements
@@ -4328,7 +4446,7 @@ class EndpointConnections(TypedDict):
 
 
 class EnumValue(TypedDict):
-    """The description of an enumeration value."""
+    """An enumeration value."""
     enumValueId: NotRequired[EnumValueId]
     guid: NotRequired[Guid]
     displayValue: str
@@ -4452,7 +4570,7 @@ MEPElementPortsOrErrors: TypeAlias = list[MEPElementPortsOrError]
 
 class MEPRoutingElementDetails(TypedDict):
     """The details of an MEP routing element."""
-    domain: MEPSystemDomain
+    domain: MEPDomainOrUnknown
     mepSystemId: AttributeId
     polyline: list[Coordinate3D]
     segments: list[MEPRoutingSegmentDetails]
@@ -4741,10 +4859,10 @@ class RoofData(TypedDict):
     polygonCoordinates: list[Coordinate2D]
     polygonArcs: NotRequired[list[PolyArc]]
     holes: NotRequired[Holes2D]
-    pivotLine: NotRequired[PivotLine]
+    pivotLine: NotRequired[RoofPivotLine]
     angle: NotRequired[float]
     eavesOverhang: NotRequired[float]
-    levels: NotRequired[list[Level]]
+    levels: NotRequired[list[RoofLevel]]
     structureType: NotRequired[RoofStructureType]
     buildingMaterialId: NotRequired[AttributeId]
     compositeId: NotRequired[AttributeId]
@@ -4773,7 +4891,7 @@ class RoofWithDetails(TypedDict):
     level: NotRequired[float]
     thickness: NotRequired[float]
     eavesOverhang: NotRequired[float]
-    levels: NotRequired[list[Level]]
+    levels: NotRequired[list[RoofLevel]]
     structureType: NotRequired[RoofStructureType]
     buildingMaterialId: NotRequired[AttributeId]
     compositeId: NotRequired[AttributeId]
@@ -4792,6 +4910,9 @@ class SlabData(TypedDict):
     favoriteName: NotRequired[str]
     level: float
     thickness: NotRequired[float]
+    structureType: NotRequired[SlabStructureType]
+    buildingMaterialId: NotRequired[AttributeId]
+    compositeId: NotRequired[AttributeId]
     referencePlaneLocation: NotRequired[SlabReferencePlaneLocation]
     polygonCoordinates: list[Coordinate2D]
     polygonArcs: NotRequired[list[PolyArc]]
@@ -4941,6 +5062,8 @@ class HatchDetails(TypedDict):
     contourPenIndex: NotRequired[int]
     fillPenIndex: NotRequired[int]
     fillBackgroundPenIndex: NotRequired[int]
+    foregroundColor: NotRequired[ColorRGB]
+    backgroundColor: NotRequired[ColorRGB]
     fillId: NotRequired[AttributeId]
     buildingMaterialId: NotRequired[AttributeId]
     roomSpecial: NotRequired[int]
@@ -4956,6 +5079,8 @@ class HatchSettings(TypedDict):
     contourPenIndex: NotRequired[int]
     fillPenIndex: NotRequired[int]
     fillBackgroundPenIndex: NotRequired[int]
+    foregroundColor: NotRequired[ColorRGB]
+    backgroundColor: NotRequired[ColorRGB]
     fillId: NotRequired[AttributeId]
     buildingMaterialId: NotRequired[AttributeId]
     roomSpecial: NotRequired[int]
@@ -5101,6 +5226,21 @@ class NavigatorItem(TypedDict):
 
 class NavigatorItemArrayItem(TypedDict):
     navigatorItem: NavigatorItem
+
+
+CoverFillOrientationType: TypeAlias = HatchOrientationType
+
+
+Level: TypeAlias = RoofLevel
+
+
+MEPDomains: TypeAlias = MEPDomain
+
+
+MEPSystemDomain: TypeAlias = MEPDomain
+
+
+PivotLine: TypeAlias = RoofPivotLine
 
 
 PropertyExpressionUpdate: TypeAlias = PropertyDefinitionUpdate

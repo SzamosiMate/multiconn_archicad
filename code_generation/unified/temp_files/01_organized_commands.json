@@ -402,6 +402,13 @@
                 "source": "tapir"
             },
             {
+                "name": "ChangeHotlinkNodes",
+                "group": "Project Commands",
+                "description": "Repoints hotlink module nodes at other source files, as the Hotlink Manager's Relink button does. Follow it with UpdateHotlinks to re-read the content.",
+                "version": "1.7.1",
+                "source": "tapir"
+            },
+            {
                 "name": "CloseProject",
                 "group": "Project Commands",
                 "description": "Closes the currently opened project.",
@@ -488,7 +495,7 @@
             {
                 "name": "GetStories",
                 "group": "Project Commands",
-                "description": "Retrieves information about the story sructure of the currently loaded project.",
+                "description": "Retrieves information about the story structure of the currently loaded project: index, floor id, name, level, height and, from Archicad 28, the IFC GlobalId of each story.",
                 "version": "1.1.5",
                 "source": "tapir"
             },
@@ -553,6 +560,13 @@
                 "group": "Project Commands",
                 "description": "Sets the story sructure of the currently loaded project.",
                 "version": "1.1.5",
+                "source": "tapir"
+            },
+            {
+                "name": "UpdateHotlinks",
+                "group": "Project Commands",
+                "description": "Re-reads the source files of hotlink module nodes and refreshes their cached content in the project, as the Hotlink Manager's Update button does.",
+                "version": "1.7.1",
                 "source": "tapir"
             }
         ],
@@ -639,6 +653,13 @@
                 "group": "Element Commands",
                 "description": "Gets all the GDL parameters (name, type, value) of the given elements.",
                 "version": "1.5.7",
+                "source": "tapir"
+            },
+            {
+                "name": "GetMarkerParametersOfElements",
+                "group": "Element Commands",
+                "description": "Gets the marker library part and the marker's GDL parameters (name, type, value) of the given Window and Door elements. The marker is the stamp drawn next to the opening on the floor plan; its parameters are separate from the opening's own GDL parameters, which GetGDLParametersOfElements returns.",
+                "version": "1.7.1",
                 "source": "tapir"
             },
             {
@@ -737,6 +758,13 @@
                 "group": "Element Commands",
                 "description": "Sets the given GDL parameters of the given elements.",
                 "version": "1.5.7",
+                "source": "tapir"
+            },
+            {
+                "name": "SetMarkerParametersOfElements",
+                "group": "Element Commands",
+                "description": "Sets the given GDL parameters of the marker of the given Window and Door elements. The opening's own settings and the other marker parameters are left as they are.",
+                "version": "1.7.1",
                 "source": "tapir"
             },
             {
@@ -1709,11 +1737,76 @@
                 "source": "tapir"
             }
         ],
+        "Teamwork Commands": [
+            {
+                "name": "GetLockableObjectSetStatus",
+                "group": "Teamwork Commands",
+                "description": "Returns the Teamwork reservation status of a non-element lockable object set and the users who hold it.",
+                "version": "1.7.1",
+                "source": "tapir"
+            },
+            {
+                "name": "ReleaseElements",
+                "group": "Teamwork Commands",
+                "description": "Releases elements in Teamwork mode.",
+                "version": "1.1.4",
+                "source": "tapir"
+            },
+            {
+                "name": "ReleaseHotlinkCacheManagement",
+                "group": "Teamwork Commands",
+                "description": "Releases the Hotlink and XRef management in Teamwork mode.",
+                "version": "1.7.1",
+                "source": "tapir"
+            },
+            {
+                "name": "ReleaseLockableObjectSet",
+                "group": "Teamwork Commands",
+                "description": "Releases a non-element lockable object set reserved with ReserveLockableObjectSet in Teamwork mode.",
+                "version": "1.7.1",
+                "source": "tapir"
+            },
+            {
+                "name": "ReserveElements",
+                "group": "Teamwork Commands",
+                "description": "Reserves elements in Teamwork mode.",
+                "version": "1.1.4",
+                "source": "tapir"
+            },
+            {
+                "name": "ReserveHotlinkCacheManagement",
+                "group": "Teamwork Commands",
+                "description": "Reserves the Hotlink and XRef management in Teamwork mode, which is needed before changing hotlink nodes.",
+                "version": "1.7.1",
+                "source": "tapir"
+            },
+            {
+                "name": "ReserveLockableObjectSet",
+                "group": "Teamwork Commands",
+                "description": "Reserves a non-element lockable object set (attributes, favorites, project info, project preferences, etc.) in Teamwork mode. The object set is given by its Archicad API name, e.g. 'Composites', 'LayerSettingsDialog' or 'ProjectInfo'.",
+                "version": "1.7.1",
+                "source": "tapir"
+            },
+            {
+                "name": "TeamworkReceive",
+                "group": "Teamwork Commands",
+                "description": "Performs a receive operation on the currently opened Teamwork project.",
+                "version": "0.1.0",
+                "source": "tapir"
+            },
+            {
+                "name": "TeamworkSend",
+                "group": "Teamwork Commands",
+                "description": "Performs a send operation on the currently opened Teamwork project.",
+                "version": "0.1.0",
+                "source": "tapir"
+            }
+        ],
         "Script UI Commands": [
             {
                 "name": "GetScriptUIResult",
                 "group": "Script UI Commands",
-                "description": "Retrieves and clears the result last submitted from the Script UI palette's page (via window.ACAPI.SubmitResult), if any.",
+                "description": "Retrieves and clears the result last submitted from the Script UI palette's page (via window.ACAPI.SubmitResult), if any, and reports whether the palette is still open, so a waiting script can stop when the user closes it.",
                 "version": "1.5.4",
                 "source": "tapir"
             },
@@ -1815,36 +1908,6 @@
                 "group": "Element Modification Commands",
                 "description": "Modifies Window elements based on the given parameters.",
                 "version": "1.4.0",
-                "source": "tapir"
-            }
-        ],
-        "Teamwork Commands": [
-            {
-                "name": "ReleaseElements",
-                "group": "Teamwork Commands",
-                "description": "Releases elements in Teamwork mode.",
-                "version": "1.1.4",
-                "source": "tapir"
-            },
-            {
-                "name": "ReserveElements",
-                "group": "Teamwork Commands",
-                "description": "Reserves elements in Teamwork mode.",
-                "version": "1.1.4",
-                "source": "tapir"
-            },
-            {
-                "name": "TeamworkReceive",
-                "group": "Teamwork Commands",
-                "description": "Performs a receive operation on the currently opened Teamwork project.",
-                "version": "0.1.0",
-                "source": "tapir"
-            },
-            {
-                "name": "TeamworkSend",
-                "group": "Teamwork Commands",
-                "description": "Performs a send operation on the currently opened Teamwork project.",
-                "version": "0.1.0",
                 "source": "tapir"
             }
         ]

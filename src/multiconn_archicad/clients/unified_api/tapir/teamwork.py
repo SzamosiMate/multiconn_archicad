@@ -6,10 +6,18 @@ from typing import TYPE_CHECKING
 from pydantic import TypeAdapter
 
 from multiconn_archicad.models.tapir.commands import (
+    GetLockableObjectSetStatusParameters,
+    GetLockableObjectSetStatusResult,
     ReleaseElementsParameters,
     ReleaseElementsResult,
+    ReleaseHotlinkCacheManagementResult,
+    ReleaseLockableObjectSetParameters,
+    ReleaseLockableObjectSetResult,
     ReserveElementsParameters,
     ReserveElementsResult,
+    ReserveHotlinkCacheManagementResult,
+    ReserveLockableObjectSetParameters,
+    ReserveLockableObjectSetResult,
     TeamworkReceiveResult,
     TeamworkSendResult,
 )
@@ -22,6 +30,39 @@ if TYPE_CHECKING:
 class TeamworkCommands:
     def __init__(self, core: CoreCommands):
         self._core = core
+
+    def get_lockable_object_set_status(self, object_set_name: str) -> GetLockableObjectSetStatusResult:
+        """
+        Returns the Teamwork reservation status of a non-element lockable object set and the
+        users who hold it.
+
+        Args:
+            object_set_name (str): The name of the lockable object set, as the Archicad API
+                documents it: BuildingMaterials, Cities, Composites, Favorites, FillTypes,
+                LayerSettingsDialog (layers and layer combinations), LineTypes, MarkupStyles,
+                MEPSystems, ModelViewOptions, OperationProfiles, PenTables, Profiles,
+                ProjectInfo, GeoLocation (project location), PreferencesDialog (project
+                preferences and dimension standards), GraphicOverrides (renovation override
+                styles), Surfaces or ZoneCategories. Other names the Archicad API accepts work
+                too.
+
+        Returns:
+            GetLockableObjectSetStatusResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "objectSetName": object_set_name,
+        }
+        validated_params = GetLockableObjectSetStatusParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetLockableObjectSetStatus", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetLockableObjectSetStatusResult.model_validate(response_dict)
+        return validated_response
 
     def release_elements(self, elements: list[ElementIdArrayItem]) -> FailedExecutionResult | SuccessfulExecutionResult:
         """
@@ -48,6 +89,55 @@ class TeamworkCommands:
         validated_response = TypeAdapter(ReleaseElementsResult).validate_python(response_dict)
         return validated_response
 
+    def release_hotlink_cache_management(self) -> FailedExecutionResult | SuccessfulExecutionResult:
+        """
+        Releases the Hotlink and XRef management in Teamwork mode.
+
+        Returns:
+            FailedExecutionResult | SuccessfulExecutionResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        response_dict = self._core.post_tapir_command("ReleaseHotlinkCacheManagement")
+        validated_response = TypeAdapter(ReleaseHotlinkCacheManagementResult).validate_python(response_dict)
+        return validated_response
+
+    def release_lockable_object_set(self, object_set_name: str) -> FailedExecutionResult | SuccessfulExecutionResult:
+        """
+        Releases a non-element lockable object set reserved with ReserveLockableObjectSet in
+        Teamwork mode.
+
+        Args:
+            object_set_name (str): The name of the lockable object set, as the Archicad API
+                documents it: BuildingMaterials, Cities, Composites, Favorites, FillTypes,
+                LayerSettingsDialog (layers and layer combinations), LineTypes, MarkupStyles,
+                MEPSystems, ModelViewOptions, OperationProfiles, PenTables, Profiles,
+                ProjectInfo, GeoLocation (project location), PreferencesDialog (project
+                preferences and dimension standards), GraphicOverrides (renovation override
+                styles), Surfaces or ZoneCategories. Other names the Archicad API accepts work
+                too.
+
+        Returns:
+            FailedExecutionResult | SuccessfulExecutionResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "objectSetName": object_set_name,
+        }
+        validated_params = ReleaseLockableObjectSetParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "ReleaseLockableObjectSet", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = TypeAdapter(ReleaseLockableObjectSetResult).validate_python(response_dict)
+        return validated_response
+
     def reserve_elements(self, elements: list[ElementIdArrayItem]) -> ReserveElementsResult:
         """
         Reserves elements in Teamwork mode.
@@ -71,6 +161,57 @@ class TeamworkCommands:
             "ReserveElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = ReserveElementsResult.model_validate(response_dict)
+        return validated_response
+
+    def reserve_hotlink_cache_management(self) -> ReserveHotlinkCacheManagementResult:
+        """
+        Reserves the Hotlink and XRef management in Teamwork mode, which is needed before
+        changing hotlink nodes.
+
+        Returns:
+            ReserveHotlinkCacheManagementResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        response_dict = self._core.post_tapir_command("ReserveHotlinkCacheManagement")
+        validated_response = ReserveHotlinkCacheManagementResult.model_validate(response_dict)
+        return validated_response
+
+    def reserve_lockable_object_set(self, object_set_name: str) -> ReserveLockableObjectSetResult:
+        """
+        Reserves a non-element lockable object set (attributes, favorites, project info, project
+        preferences, etc.) in Teamwork mode. The object set is given by its Archicad API name,
+        e.g. 'Composites', 'LayerSettingsDialog' or 'ProjectInfo'.
+
+        Args:
+            object_set_name (str): The name of the lockable object set, as the Archicad API
+                documents it: BuildingMaterials, Cities, Composites, Favorites, FillTypes,
+                LayerSettingsDialog (layers and layer combinations), LineTypes, MarkupStyles,
+                MEPSystems, ModelViewOptions, OperationProfiles, PenTables, Profiles,
+                ProjectInfo, GeoLocation (project location), PreferencesDialog (project
+                preferences and dimension standards), GraphicOverrides (renovation override
+                styles), Surfaces or ZoneCategories. Other names the Archicad API accepts work
+                too.
+
+        Returns:
+            ReserveLockableObjectSetResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "objectSetName": object_set_name,
+        }
+        validated_params = ReserveLockableObjectSetParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "ReserveLockableObjectSet", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = ReserveLockableObjectSetResult.model_validate(response_dict)
         return validated_response
 
     def teamwork_receive(self) -> FailedExecutionResult | SuccessfulExecutionResult:

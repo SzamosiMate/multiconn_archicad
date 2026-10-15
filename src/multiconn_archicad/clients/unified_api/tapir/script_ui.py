@@ -19,7 +19,8 @@ class ScriptUiCommands:
     def get_script_ui_result(self) -> GetScriptUIResultResult:
         """
         Retrieves and clears the result last submitted from the Script UI palette's page (via
-        window.ACAPI.SubmitResult), if any.
+        window.ACAPI.SubmitResult), if any, and reports whether the palette is still open, so a
+        waiting script can stop when the user closes it.
 
         Returns:
             GetScriptUIResultResult
@@ -72,7 +73,7 @@ class ScriptUiCommands:
             context_menu_enabled (None | bool): Whether right-click shows the browser's context
                 menu (e.g. Inspect Element). Defaults to true.
             navigation_disabled (None | bool): Prevents the page from navigating away (e.g.
-                clicking a link to another site). Defaults to false.
+                clicking a link to another site) once it has loaded. Defaults to false.
             allow_self_signed_certificates (None | bool): Only relevant if htmlContent links to
                 a remote https:// resource with a self-signed certificate. Defaults to false.
             clear_cookies (None | bool): Deletes all browser cookies before loading htmlContent.

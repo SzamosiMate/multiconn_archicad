@@ -188,7 +188,8 @@ class IfcCommands:
                 translator to save with, as GetIFCExportTranslators lists them. Without it the
                 save runs with the translator Archicad would offer in its own Save dialog. Needs
                 a fileType of ifc or ifczip (ifc or ifcxml on Archicad 25 and 26).
-            elements_to_export (IFCElementsToExport | None)
+            elements_to_export (IFCElementsToExport | None): Only for the save method, and only
+                together with translatorName. The default is VisibleElementsOnAllStories.
 
         Returns:
             FailedExecutionResult | SuccessfulExecutionResult
