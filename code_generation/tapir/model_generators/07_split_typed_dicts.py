@@ -73,10 +73,10 @@ def remove_unused_imports(content: str) -> str:
 
 def main():
     """
-    Splits a single TypedDicts file into base and command files,
-    PRESERVING the original definition order.
+    Splits a single TypedDicts file into base and command files.
+    Preserves common dependency order and sorts command definitions by name.
     """
-    print("--- Starting TypedDict Splitting Process (Preserving Original Order) ---")
+    print("--- Starting TypedDict Splitting Process (Stable Command Order) ---")
 
     # 1. Load model name sets
     try:
@@ -127,7 +127,7 @@ def main():
     if not base_names and not command_names:
         base_names = all_definition_names
 
-    # 3. Categorize definitions into two lists, maintaining their original relative order
+    # 3. Preserve common dependency order; commands are independent of that order.
     base_blocks = []
     command_blocks = []
     for block in definitions_in_order:
@@ -136,6 +136,8 @@ def main():
             command_blocks.append(block)
         else:  # Default to base
             base_blocks.append(block)
+
+    command_blocks.sort(key=get_definition_name)
 
     print(f"Found {len(definitions_in_order)} total definitions.")
     print(f"Categorized into: {len(base_blocks)} base | {len(command_blocks)} command")
@@ -169,7 +171,7 @@ def main():
         import_block = "from .types import (\n    " + ",\n    ".join(sorted_imports) + ",\n)"
         file_parts.append(import_block)
 
-    # Add the command blocks, which are already in the correct relative order
+    # Add commands in name order, independent of the combined generator output order.
     file_parts.extend(command_blocks)
 
     final_command_content = "\n\n\n".join(file_parts)

@@ -23,7 +23,7 @@ def main() -> None:
         use_double_quotes=True,
         collapse_root_models=True,
         field_constraints=True,
-        use_annotated=True,
+        use_annotated=False,
         use_one_literal_as_default=True,
         use_schema_description=True,
         disable_timestamp=True,

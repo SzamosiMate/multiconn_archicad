@@ -84,7 +84,7 @@ def remove_unused_imports(content: str) -> str:
 def main():
     """
     Reads a single, ordered Pydantic models file and splits it into
-    `types.py` and `commands.py`, preserving order and creating explicit imports.
+    `types.py` and `commands.py`, preserving common dependency order and sorting commands by name.
     """
     print("--- Starting Model Splitting Process (with Dynamic Imports) ---")
 
@@ -127,6 +127,9 @@ def main():
             command_model_blocks.append(block)
         else:
             base_model_blocks.append(block)
+
+    # Common types are imported; their generation order should not move command definitions.
+    command_model_blocks.sort(key=get_definition_name)
 
     base_model_names = {get_definition_name(b) for b in base_model_blocks if get_definition_name(b)}
     compatibility_aliases = render_type_aliases(TAPIR_TYPE_ALIASES, base_model_names)
