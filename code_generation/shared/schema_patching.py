@@ -269,21 +269,9 @@ def apply_breaking_source_review_patches(master_defs: dict[str, Any]):
     """
     print("Applying breaking schema patches pending source review...")
 
-    # Read-model sharing changes beam-hole constraints.
-    replace_inline_schema_with_ref(master_defs, "BeamWithDetails", ["holes", "items"], "BeamHole")
-
-    # Restricting an unconstrained public string to an enum is a schema-contract change.
-    replace_inline_schema_with_ref(master_defs, "MEPRoutingElementDetails", ["domain"], "MEPSystemDomain", preserve_description=True)
-    replace_inline_schema_with_ref(master_defs, "MEPPortDetails", ["domain"], "MEPSystemDomain", preserve_description=True)
-    replace_inline_schema_with_ref(master_defs, "GetMEPDistributionSystemsResult", ["distributionSystems", "items", "domain"], "MEPSystemDomain", preserve_description=True)
-    replace_inline_schema_with_ref(master_defs, "MEPSystemData", ["domain"], "MEPSystemDomain", preserve_description=True)
+    # Pending upstream enum changes: inputs accept three domains; element results emit eleven types.
+    replace_inline_schema_with_ref(master_defs, "MEPSystemData", ["domain"], "MEPDomain", preserve_description=True)
     replace_inline_schema_with_ref(master_defs, "GetMEPElementsResult", ["elements", "items", "type"], "MEPElementType", preserve_description=True)
-
-    # Removing the named empty result changes the exported command-model surface.
-    _, export_result, _ = _require_target(master_defs, "ExportFavoritesResult", [])
-    if export_result != {"type": "object", "properties": {}, "additionalProperties": False}:
-        raise ValueError("ExportFavoritesResult changed upstream; review and remove its schema patch.")
-    del master_defs["ExportFavoritesResult"]
 
 
 def apply_temporary_patches(master_defs: dict[str, Any]):
@@ -422,7 +410,7 @@ def apply_temporary_patches(master_defs: dict[str, Any]):
     extract_inline_schema(master_defs, "MorphDetails", ["coverFillOrientation"], "CoverFillOrientation")
     replace_inline_schema_with_ref(master_defs, "MorphData", ["coverFillOrientation"], "CoverFillOrientation")
     replace_inline_schema_with_ref(master_defs, "MorphWithDetails", ["coverFillOrientation"], "CoverFillOrientation")
-    extract_inline_enum(master_defs, "CoverFillOrientation", ["type"], "CoverFillOrientationType")
+    replace_inline_schema_with_ref(master_defs, "CoverFillOrientation", ["type"], "HatchOrientationType")
 
     # --- Morph body geometry ---
     extract_inline_schema(master_defs, "MorphBody", ["polygons", "items"], "MorphPolygon")
@@ -454,7 +442,7 @@ def apply_temporary_patches(master_defs: dict[str, Any]):
 
     # --- Attribute detail enums ---
     extract_inline_enum(master_defs, "FillAttribute", ["subType"], "FillSubType")
-    extract_inline_enum(master_defs, "MEPSystemAttribute", ["domain", "items"], "MEPSystemDomain")
+    extract_inline_enum(master_defs, "MEPSystemAttribute", ["domain", "items"], "MEPDomain")
     extract_inline_enum(master_defs, "ProfileAttribute", ["useWith", "items"], "ProfileUseWith")
 
     # --- Drawing bounds ---
@@ -488,9 +476,11 @@ def apply_temporary_patches(master_defs: dict[str, Any]):
     extract_inline_enum(master_defs, "WallDetails", ["zoneRel"], "WallZoneRelation")
     replace_inline_schema_with_ref(master_defs, "WallWithDetails", ["zoneRel"], "WallZoneRelation")
 
-    # Name beam-hole response schemas; modification sharing is pending source review.
+    # Keep beam-hole modification constraints separate from response identifiers.
     extract_inline_schema(master_defs, "BeamDetails", ["holes", "items"], "BeamHole")
     extract_inline_enum(master_defs, "BeamHole", ["type"], "BeamHoleType")
+    extract_inline_schema(master_defs, "BeamWithDetails", ["holes", "items"], "BeamHoleModification")
+    replace_inline_schema_with_ref(master_defs, "BeamHoleModification", ["type"], "BeamHoleType")
     extract_inline_enum(master_defs, "HatchOrientation", ["type"], "HatchOrientationType")
 
     # geometryType and profileType are NOT shared: the modification models accept fewer
@@ -507,7 +497,7 @@ def apply_temporary_patches(master_defs: dict[str, Any]):
 
     # --- MEP enums/schemas (Tapir 1.5.6) ---
     extract_inline_enum(master_defs, "GetMEPElementsParameters", ["elementTypes", "items"], "MEPElementType")
-    extract_inline_enum(master_defs, "GetMEPElementsParameters", ["domains", "items"], "MEPDomains")
+    replace_inline_schema_with_ref(master_defs, "GetMEPElementsParameters", ["domains", "items"], "MEPDomain")
     extract_inline_schema(master_defs, "GetMEPElementsResult", ["elements", "items"], "MEPElement")
 
 
@@ -527,10 +517,10 @@ def apply_temporary_patches(master_defs: dict[str, Any]):
         preserve_description=True,
     )
 
-    # --- Unify MEP Domain schemas to point to MEPSystemDomain ---
+    # --- Unify MEP Domain schemas to point to MEPDomain ---
     extract_inline_schema(master_defs, "GetMEPDistributionSystemsResult", ["distributionSystems", "items"], "MEPDistributionSystem")
-    replace_inline_schema_with_ref(master_defs, "MEPElementData", ["domain"], "MEPSystemDomain", preserve_description=True)
-    replace_inline_schema_with_ref(master_defs, "MEPRoutingElementData", ["domain"], "MEPSystemDomain", preserve_description=True)
+    replace_inline_schema_with_ref(master_defs, "MEPElementData", ["domain"], "MEPDomain", preserve_description=True)
+    replace_inline_schema_with_ref(master_defs, "MEPRoutingElementData", ["domain"], "MEPDomain", preserve_description=True)
 
     # GetMEPPreferenceTables accepts only two of the three domains, so it keeps its own enum
     extract_inline_enum(master_defs, "GetMEPPreferenceTablesParameters", ["domain"], "MEPPreferenceTableDomain")
@@ -568,11 +558,11 @@ def apply_temporary_patches(master_defs: dict[str, Any]):
     replace_inline_schema_with_ref(master_defs, "SetLibrariesParameters", ["libraries", "items"], "LibraryLocation")
     extract_inline_schema(master_defs, "PossibleEnumValues", ["items", "enumValue"], "EnumValue")
     extract_inline_schema(master_defs, "EnumValuesToAdd", ["items", "enumValue"], "EnumValueToAdd")
-    extract_inline_schema(master_defs, "RoofData", ["pivotLine"], "PivotLine")
-    extract_inline_schema(master_defs, "RoofData", ["levels", "items"], "Level")
+    extract_inline_schema(master_defs, "RoofData", ["pivotLine"], "RoofPivotLine")
+    extract_inline_schema(master_defs, "RoofData", ["levels", "items"], "RoofLevel")
     extract_inline_schema(master_defs, "RoofDetails", ["pivotLine"], "RoofDetailsPivotLine")
     extract_inline_schema(master_defs, "RoofDetails", ["levels", "items"], "RoofDetailsLevel")
-    replace_inline_schema_with_ref(master_defs, "RoofWithDetails", ["levels", "items"], "Level")
+    replace_inline_schema_with_ref(master_defs, "RoofWithDetails", ["levels", "items"], "RoofLevel")
     extract_inline_enum(master_defs, "ElementTrims", ["trimmedBy", "items", "trimType"], "TrimType")
     replace_inline_schema_with_ref(master_defs, "TrimElementsParameters", ["trimType"], "TrimType")
     extract_inline_enum(master_defs, "Hotlink", ["type"], "HotlinkType")

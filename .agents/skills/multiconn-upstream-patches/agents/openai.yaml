@@ -1,0 +1,4 @@
+interface:
+  display_name: "Upstream Tapir Schema Patches"
+  short_description: "Review and prepare Tapir fixes for client patches"
+  default_prompt: "Use $multiconn-upstream-patches to review the latest codegen follow-up and prepare justified upstream schema fixes."
