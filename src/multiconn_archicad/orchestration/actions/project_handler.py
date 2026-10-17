@@ -12,7 +12,6 @@ from multiconn_archicad.errors import (
     ProjectNotFoundError,
     StandardAPIError,
 )
-from multiconn_archicad.orchestration.system.platform_utils import escape_spaces_in_path, is_using_mac
 from multiconn_archicad.orchestration.system.exception_logging import auto_decorate_methods, log_exceptions
 from multiconn_archicad.orchestration.system.process_utils import find_port_by_pid
 from multiconn_archicad.orchestration.basic_types import Port, TeamworkCredentials, TeamworkProjectID, SoloProjectID
@@ -159,13 +158,17 @@ class OpenProject:
 
     def _start_process(self, project_params: ProjectIdentityParams) -> None:
         log.info(f"opening project: {project_params.conn_header.archicad_id.projectName}")
-        demo_flag = " -demo" if project_params.demo else ""
+        header = project_params.conn_header
+        args = [
+            header.archicad_location.archicadLocation,
+            header.archicad_id.get_project_location(project_params.teamwork_credentials),
+        ]
+        if project_params.demo:
+            args.append("-demo")
         self.process = subprocess.Popen(
-            f"{escape_spaces_in_path(project_params.conn_header.archicad_location.archicadLocation)} "
-            f"{escape_spaces_in_path(project_params.conn_header.archicad_id.get_project_location(project_params.teamwork_credentials))}"
-            + demo_flag,
+            args,
             start_new_session=True,
-            shell=is_using_mac(),
+            shell=False,
             text=True,
         )
 

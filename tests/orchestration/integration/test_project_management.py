@@ -76,12 +76,12 @@ def test_switch_project_success(archicad_api):
     assert any(header is new_header_state for header in metadata_results)
 
 
-@patch("multiconn_archicad.orchestration.actions.project_handler.subprocess.Popen")
+@patch("multiconn_archicad.orchestration.actions.project_handler.subprocess")
 @patch("multiconn_archicad.orchestration.system.process_utils.psutil.Process")
 @patch("multiconn_archicad.orchestration.actions.refresh")
 @patch("multiconn_archicad.orchestration.multi_conn.get_cli_args_once")
 def test_open_project_calls_dependencies_correctly(
-    mock_get_cli_args, mock_refresh, mock_psutil_process, mock_popen, archicad_api
+    mock_get_cli_args, mock_refresh, mock_psutil_process, mock_subprocess, archicad_api
 ):
     """
     Verifies that open_project calls Popen and psutil correctly without
@@ -99,6 +99,7 @@ def test_open_project_calls_dependencies_correctly(
     conn.events.subscribe_metadata_resolved(metadata_results.append)
 
     # Configure mock for Popen
+    mock_popen = mock_subprocess.Popen
     mock_process = MagicMock()
     mock_process.pid = 12345
     mock_popen.return_value = mock_process
@@ -125,16 +126,19 @@ def test_open_project_calls_dependencies_correctly(
     )
 
     # ACT
+    expected_executable = header_to_open.archicad_location.archicadLocation
     opened_port = conn.open_project.from_header(header_to_open)
 
     # ASSERT
     assert opened_port == new_port
 
     # 1. Verify subprocess.Popen was called correctly
-    mock_popen.assert_called_once()
-    call_args = mock_popen.call_args[0][0]
-    assert "C:\\Archicad\\ARCHICAD.exe" in call_args
-    assert "C:\\path\\to\\project.pln" in call_args
+    mock_popen.assert_called_once_with(
+        [expected_executable, "C:\\path\\to\\project.pln"],
+        start_new_session=True,
+        shell=False,
+        text=True,
+    )
 
     # 2. Verify dialog handler was started
     conn.dialog_handler.start.assert_called_once_with(mock_process)
