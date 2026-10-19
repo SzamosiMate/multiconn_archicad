@@ -1,4 +1,4 @@
 interface:
-  display_name: "Upstream Tapir Schema Patches"
-  short_description: "Review and prepare Tapir fixes for client patches"
-  default_prompt: "Use $multiconn-upstream-patches to review the latest codegen follow-up and prepare justified upstream schema fixes."
+  display_name: "Refine Tapir API Schemas"
+  short_description: "Review and publish Tapir API schema refinements"
+  default_prompt: "Use $multiconn-upstream-patches to review the latest codegen follow-up, sync my fork and publish justified schema refinements; provide the PR title and copyable Markdown description for me to submit."

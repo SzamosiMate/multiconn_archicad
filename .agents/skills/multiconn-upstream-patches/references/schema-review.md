@@ -10,13 +10,11 @@ Inspect SDK contracts precisely. A direct `Domain` return differs from `Result<D
 
 ## Descriptions
 
-- Move generic descriptions about the extracted concept to the shared definition.
-- Keep meaningful caller defaults, restrictions and operation effects at the referencing property. Split generic/contextual text when needed.
-- Remove redundancy but retain distinct facts. Do not mechanically duplicate descriptions.
+- Put general object meaning on the shared definition, and general field behavior on that field. A creation-time flag's meaning belongs on the shared flag, not repeated on all enclosing object references.
+- Keep only unique caller defaults, restrictions, effects, field-name mappings or readback expectations at referencing properties. If there is nothing distinct to add, use a plain reference.
+- Split generic and contextual facts rather than copying whole descriptions. Preserve real limitations and supported-version facts; remove redundant explanations and investigation narratives. Never shorten away a default or restriction.
 
-Inspect the actual target-branch renderer. A valid sibling description can be swallowed when the renderer replaces the whole reference node. If both descriptions are supported, check that resolving a caller does not mutate the shared definition or leak context to another caller. If support is absent, keep necessary context in a rendered location or identify the separate renderer dependency before moving it.
-
-Keep real limitations and supported-version facts; remove investigation narratives and repeated justifications from API prose. Never shorten away a default or restriction. Report full quoted strings for every retained double-description case, with its command/property.
+Inspect the actual target-branch renderer. A sibling description can be swallowed when the renderer replaces the whole reference node. Where both descriptions are supported, verify that resolving a caller does not mutate the definition or leak context to another caller. Otherwise keep necessary facts in a rendered location or identify the renderer dependency. Record full strings/locations for retained double-description cases in the single run report.
 
 ## Compatibility and evidence
 

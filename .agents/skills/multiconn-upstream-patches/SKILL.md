@@ -1,72 +1,71 @@
 ---
 name: multiconn-upstream-patches
-description: Review multiconn_archicad temporary and source-review schema patches against Tapir implementation source, and prepare upstream schema fixes with reviewable branches and PR descriptions. Use for upstream patch cleanup following a Tapir model update; model regeneration belongs to multiconn-codegen.
+description: Review MultiConn schema patches against Tapir source and publish justified API schema refinements to the user's fork after a release update. Supports review-only and local preparation; client model regeneration belongs to multiconn-codegen.
 ---
 
-# Bring MultiConn schema patches upstream
+# Refine Tapir API schemas upstream
 
-Reduce downstream patch debt by fixing Tapir's schema sources. Start from the current patch inventory and generation report, then check current upstream source. A successful run can find no new upstream work: merged fixes may still await a release.
+Use the current downstream inventory to find useful source-schema improvements. Tapir's public changes are schema refinements, not downstream patches. A successful review can find no new work when fixes are already merged or awaiting release.
 
-## Operations and boundaries
+## Choose the endpoint
 
-- `review`: read-only investigation and a proposed grouping of changes.
-- `prepare`: investigate, implement justified upstream changes on reviewable branches, validate them and write copyable PR descriptions. Commit and publish only within the user's requested scope. Infer the operation from the request when omitted; an inventory or explanation request remains read-only.
+- `review`: investigate and recommend; do not modify Tapir source or publish/sync remote branches.
+- `prepare`: implement and validate locally when the user explicitly wants preparation only.
+- `publish`: sync the fork, implement, validate, commit and push a reviewable fork branch. This is the default for actionable requests such as “bring the temporary patches upstream.” Deliver the PR title/body for the user to submit; create or edit a PR only when requested.
 
-```text
-$multiconn-upstream-patches review the follow-up from the latest generation report
-$multiconn-upstream-patches prepare the new non-breaking temporary fixes
-$multiconn-upstream-patches prepare and push branches; I will open the PRs manually
-```
+Infer scope from the request and existing authorization. Preserve an explicit local-only or review-only instruction. Do not regenerate models, change the release pin, remove patches merely because source changes merged, or start this workflow automatically after codegen. Explain any incorrect client patch separately and change it only within scope.
 
-Do not regenerate client models, change the pinned release, remove patches merely because source changes merged, or automatically start this workflow when generation finishes. If investigation exposes an incorrect local patch, explain the client correction separately and implement it only within the requested scope. A passing generation audit does not establish that a patch should go upstream.
+## Establish inputs and source state
 
-## Establish inputs and pending work
+Read the relevant final release report in `code_generation/documentation/reports/`, the active `schema-patch-tracking.md`, and relevant calls/helpers in `code_generation/shared/schema_patching.py`. Use `tapir_unpatched_schema.json` and `tapir_master_schema.json` for released comparisons; confirm the client release and local patch revision. They are not upstream-main snapshots. Historical reports are supporting evidence, not mandatory reading when current source answers the question. Use the [pipeline brief](../../../code_generation/documentation/archicad_api_codegen_brief.md) only when generation-layer context is needed.
 
-Read the relevant final release report in `code_generation/documentation/reports/`, the current `code_generation/documentation/schema-patch-tracking.md`, and relevant parts of `code_generation/shared/schema_patching.py`. Use `tapir_unpatched_schema.json` and `tapir_master_schema.json` for released-schema comparisons; confirm their release and patch revision. They do not represent upstream `main`.
+Locate the Tapir checkout from remotes and user context. Read its repository instructions and working-tree state. Discover the upstream repository, the user's fork and default branches rather than assuming `origin` is upstream. Record the client release, exact source baseline and final branch tip; avoid routine per-file hashes and exhaustive snapshots in durable reports.
 
-Record the client release and upstream default-branch commit. Locate the real Tapir checkout using its remote and user context, rather than an assumed working directory or personal absolute path. Inspect repository instructions and existing PRs/tracking before creating duplicate work; fetch current upstream when needed.
+For `publish`, start by fast-forward syncing the fork's matching default branch, for example `gh repo sync <fork-owner/repo> --source <upstream-owner/repo> --branch <default-branch>`, then fetch and verify the chosen base. Syncing needs no manual GitHub UI step. Never add `--force` to reset the fork's default branch. If it has diverged, preserve its commits, report that sync was skipped and base the proposal on fetched upstream instead. Preserve unrelated local work.
 
-Use the [pipeline brief](../../../code_generation/documentation/archicad_api_codegen_brief.md) when generation-layer context is needed. Source and current released schemas are authoritative; historical reports explain their recorded decisions.
+Inspect existing PRs and active tracking before starting duplicate work. Review temporary and unresolved source-review candidates, including older items without a disposition; distinguish unmerged, merged-awaiting-release and released fixes. Skip already merged proposals. Permanent generator workarounds and intentional client contract choices remain out of scope unless selected. Valid inline schemas need not be extracted just because a generator names them poorly; require independent schema-design value or an explicitly selected extraction policy.
 
-Review temporary patches and unresolved breaking source-review patches, including older candidates without a disposition. Distinguish unmerged fixes, merged fixes awaiting a release, and fixes confirmed in released documentation. Skip already merged proposals. Exclude established permanent generator workarounds and intentional breaking client choices unless explicitly selected for review. Incorrect singularization, numeric collision suffixes and other generator-only naming issues belong to local Permanent patches; valid inline schemas do not require upstream extraction just to accommodate this generator. Propose naming/extraction only with independent schema-design justification or an explicitly requested upstream extraction policy.
+Trace dependencies back through local extractions to the original command/property before searching source. Count expanded helper operations separately from declarations; counts do not determine branch or PR boundaries.
 
-Trace dependencies: a patch can target a definition introduced by earlier naming operations rather than an actual upstream definition. Map it back to the original command/property before searching C++.
+## Decide and implement
 
-## Investigate each decision
+For each decision identify the original path and consumers, local transformation, source implementation and retirement condition. Compare released input, patched input and current source. Record already-fixed outcomes instead of extracting again. For contract changes, inspect execution plus the exact SDK getter/setter, using primary Graphisoft documentation and available version-specific headers. Separate documented support, fallback handling and live observations. An uncertain acceptance change is not a non-breaking extraction.
 
-Record the original schema path, consumers, local transformation and reason, source location and retirement condition. Count declarations separately from operations expanded by loops; counts do not determine PR boundaries.
+Read [schema-review.md](references/schema-review.md) for sharing, descriptions and compatibility evidence.
 
-Compare the released schema, patched schema and latest upstream source. If source already contains the fix, record that outcome rather than extracting it again. For a contract-changing patch, inspect command execution and the exact SDK getter/setter. Use primary Graphisoft documentation and available version-specific SDK headers when behavior depends on them. Distinguish documented supported values, Tapir fallback handling and live observations.
+- Edit schema strings in `archicad-addon/Sources/*.cpp` and `archicad-addon/Sources/RFIX/Images/CommonSchemaDefinitions.json`. Leave generated documentation to maintainers unless requested.
+- Share the same concept and contract, preserving creation/modification/read differences. Search related consumers for meaningful further reuse. Ensure commands introducing common references use `CommonSchema::Used`.
+- Put general meaning on the shared definition or its actual field. Keep only distinct caller defaults, restrictions, effects or readback notes at referencing properties. Do not move a nested field's entire explanation onto every enclosing reference just to preserve its wording.
+- Group coherent equivalent changes; isolate acceptance changes. Use a few meaningful commits and independent branches where appropriate, making definition dependencies explicit.
 
-Outcomes include equivalent extraction/reuse; source typo/correction; deliberate contract tightening; incorrect local patch; intentional workaround; already submitted/merged; and unresolved. Do not relabel an uncertain breaking patch as non-breaking. Read [schema-review.md](references/schema-review.md) for sharing, names, descriptions and compatibility evidence.
+## Branches, commits and publication
 
-## Prepare upstream changes
-
-- Edit `archicad-addon/Sources/*.cpp` schema strings and `archicad-addon/Sources/RFIX/Images/CommonSchemaDefinitions.json`. Documentation `.js` files are generated inputs for MultiConn, not the upstream editing surface. Leave documentation generation to maintainers unless requested.
-- Reuse definitions for the same concept and contract, preserving request/response and creation/modification distinctions. Search related consumers for further meaningful reuse, including equivalent enums outside the original patch list.
-- Ensure commands introducing common references include common definitions through `CommonSchema::Used`. This constructor change can be needed even without execution changes.
-- Start with numerous straightforward equivalent changes, then payloads and unions. Isolate acceptance changes and other breaking decisions. Combine logical groups into a few PRs and meaningful commits; do not impose a fixed count or one commit per patch.
-- Prefer independent branches from current upstream `main` for the user's rebase-and-merge workflow. Shared definitions can create dependencies: combine or sequence such changes explicitly. Separate files do not prove independence.
-- Follow requested review history: new commit versus amend/rebase. Force-push only when authorized, using an explicit lease. Preserve unrelated work and make managed-worktree branches available for normal checkout when finished.
-
-## Validate
-
-Interpret C++ schema sources with Tapir's current documentation tooling in memory or in isolated temporary output. Do not hand-edit or commit generated documentation. Check reference resolution, name collisions, command access to common definitions and the complete structural difference against the recorded upstream baseline.
-
-For equivalent extraction, preserve fields, types, requiredness, additional properties, bounds, enum values/order and union branches. Review annotations separately. For correction/tightening, allow only the justified acceptance change and explain it: input validation can alter behavior before unchanged C++ execution code runs.
-
-Indiscriminate reference expansion does not prove equivalence: sibling keywords, recursive definitions and union semantics require care. Check actual description rendering when moving text beside `$ref`. Use checks proportional to the change; distinguish source checks, SDK builds and live Archicad tests. Put validation evidence in the work report, without a routine verification section in the PR description.
-
-## Deliver and track retirement
-
-Provide short copyable Markdown per PR: the concrete problem, resulting behavior, useful examples and material compatibility consequences. Keep validation and unresolved decisions in the accompanying report. When both reference and definition retain descriptions, separately list their locations and full quoted strings.
-
-Maintain the ongoing tracking document at `code_generation/documentation/schema-patch-tracking.md`. Put durable upstream review reports under `code_generation/documentation/reports/` when needed; link to tracking rather than duplicating its inventory. Keep final reviewed reports and tracking suitable for source control, and keep intermediate logs/snapshots in untracked scratch storage. Do not stage or commit these files unless requested. Group related operations by decision and record the original paths, PR/commit or unresolved question, removal condition, client alias needs and disposition:
+Use version-based names without a `codex/` prefix:
 
 ```text
-needs investigation -> proposed -> submitted -> merged awaiting release -> retired
+PR title: Refine API schemas following Tapir <reviewed-version>
+Branch:   schema/refinements-<reviewed-version>
+Example:  schema/refinements-1.7.1
 ```
 
-Record the released version only after confirmation. This is tracking, not an executable patch registry: do not duplicate patch implementations or generated schemas. Update it during requested runs; do not create a watcher or scheduled task.
+The version identifies the reviewed release, not a promise about the release containing the changes. Add a short suffix only when separate proposals genuinely need it. Reuse an existing proposal's branch and keep an open PR's head intact; do not rename it just to adopt this convention.
 
-Retirement belongs to a later `$multiconn-codegen update tapir to <released-version>` run. Confirm the correction in fetched release documentation, map renamed/moved paths, remove redundant operations and resolve dependencies, retain necessary aliases in `code_generation/shared/model_aliases.py`, then complete both model representations, unified generation and tests. A release tag is insufficient if its documentation lacks the correction. Preserve loud guards; do not hide stale patches with conditional skips.
+Describe upstream changes in commit subjects rather than downstream patch debt. Use an explanatory body when provenance or a compatibility decision matters. Follow requested commit/amend history. After validation, commit only intended Tapir source changes, push to the user's fork and verify its remote tip. Rebase an existing branch when requested or needed for integration; force-push only with authorization and an explicit lease on the recorded remote tip. The endpoint is a published fork branch, not a merged upstream PR.
+
+## Validate proportionately
+
+Interpret sources using Tapir's current documentation tooling in memory or isolated temporary output. Cache the baseline for the run. Check reference resolution, name collisions, command access to common definitions and the complete structural difference against that baseline. Do not hand-edit or commit generated docs.
+
+Equivalent changes preserve fields, types, requiredness, additional properties, bounds, enum order and union branches; review annotations separately. For a correction/tightening, allow only the justified acceptance change and explain it. Input validation can change behavior before unchanged execution code runs.
+
+Do not use indiscriminate expansion as proof: preserve reference siblings, recursive definitions and union semantics. Check the actual renderer when descriptions move. Run focused annotation/renderer checks after prose-only edits; repeat the full contract comparison when source contracts or the rebase baseline change. Distinguish source checks, SDK builds and live Archicad tests, and put their evidence/limitations in the run report.
+
+## Deliver one run record and maintain the active queue
+
+Return the branch/commit or existing PR link and the main validation result. Provide the PR title and description inside a fenced `markdown` block so the user can copy raw Markdown. Use a short descriptive opening, a compact `Area | Changes` table or bullets, then material compatibility consequences. Explain the resulting upstream schema; keep routine test logs and investigation history out of the PR body. Do not force the title to list every affected domain.
+
+Maintain **at most one durable upstream report per logical run**, including follow-up reviews, description edits, rebases and publication on later dates. Use a name such as `reports/upstream-refinements-<version>-<start-date>.md` and update it in place. Keep only useful decisions/rejected alternatives, source baseline/final head/PR, compatibility evidence and validation limits. When both a reference and its definition retain descriptions, list their locations and full strings. Link to active tracking instead of repeating its path inventory. Keep scratch scripts, intermediate logs and snapshots untracked; no additional report per phase, day or question. A no-new-work review may only need a tracking update.
+
+`code_generation/documentation/schema-patch-tracking.md` is the **active queue**: unresolved candidates, published branches/submitted PRs and merged fixes awaiting released documentation. Group by decision and record original paths, source/PR status, removal conditions and alias needs. Do not copy all Permanent patches into it or keep retired-patch inventories/tombstones. Once release adoption confirms retirement, remove the entry; the generation report and Git history preserve what changed. Do not duplicate executable patch implementations or generated schemas. Reports/tracking remain unstaged unless the user asks to commit them.
+
+Retirement belongs to a later `$multiconn-codegen update tapir to <released-version>` run: confirm the correction in fetched release documentation, resolve renamed paths/dependencies, remove redundant calls, retain necessary aliases in `code_generation/shared/model_aliases.py`, then complete both representations, unified generation and tests. A source merge or release tag alone is insufficient. Preserve loud stale-patch guards. Do not create a watcher or scheduled task.
