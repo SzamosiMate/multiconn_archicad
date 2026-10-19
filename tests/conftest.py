@@ -21,8 +21,8 @@ FIXTURES_DIR = Path(__file__).parent / "fixtures"
 class QuietThreadingHTTPServer(ThreadingHTTPServer):
     """A custom server that suppresses ONLY expected socket teardown errors."""
 
-    # Stress tests route all 21 simulated ports to this one listener. The
-    # Python 3.12/3.13 default backlog of five can delay a burst of connections.
+    # Keep concurrent mock requests from being delayed by the Python 3.12/3.13
+    # default listen backlog of five.
     request_queue_size = 128
 
     def handle_error(self, request, client_address):

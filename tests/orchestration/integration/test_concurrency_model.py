@@ -1,5 +1,6 @@
-import ssl
+from concurrent.futures import wait
 import threading
+from types import SimpleNamespace
 import pytest
 
 from multiconn_archicad import MultiConn
@@ -163,45 +164,76 @@ def test_primary_canonical_identity_shared_with_pool(archicad_api):
 
 def test_stress_multiple_connections_performance(archicad_api, monkeypatch):
     """
-    STRESS TEST: Simulates all 21 Archicad ports open concurrently.
+    Prove all 21 ports can fetch metadata before any fetch completes.
     """
+    from multiconn_archicad.clients.core.core_commands import CoreCommands
+    from multiconn_archicad.constants import SUPPORTED_TAPIR_VERSION
     from multiconn_archicad.orchestration.basic_types import Port
-    import httpx
+    from multiconn_archicad.orchestration.system.ram_monitor import RamMonitor
 
     full_range = [Port(p) for p in range(19723, 19744)]
+    expected_ports = set(full_range)
     num_ports = len(full_range)
     monkeypatch.setattr("multiconn_archicad.orchestration.multi_conn.MultiConn._port_range", full_range)
     monkeypatch.setattr("multiconn_archicad.orchestration.multi_conn.is_port_listening", lambda url, port: True)
+    monkeypatch.setattr(
+        "multiconn_archicad.orchestration.multi_conn.get_cli_args_once",
+        lambda: SimpleNamespace(host=None, port=None),
+    )
+    monkeypatch.setattr(RamMonitor, "get_current_rss", lambda self: None)
 
-    mock_url = f"http://127.0.0.1:{archicad_api.server_port}"
-    # HTTPX prepares TLS even for HTTP URLs. Load the trust store once so 21
-    # workers do not contend on certificate loading under fuzz_threads/coverage.
-    ssl_context = ssl.create_default_context()
-    original_client_init = httpx.Client.__init__
-
-    def local_client_init(client, *args, **kwargs):
-        kwargs.setdefault("verify", ssl_context)
-        original_client_init(client, *args, **kwargs)
-
-    monkeypatch.setattr(httpx.Client, "__init__", local_client_init)
-    original_post = httpx.Client.post
-    monkeypatch.setattr(httpx.Client, "post", lambda s, u, *a, **k: original_post(s, mock_url, *a, **k))
-
-    barrier = threading.Barrier(num_ports)
-
-    def concurrent_handler(payload: dict) -> dict:
-        if payload.get("command") == "API.GetProductInfo":
-            # Leave two seconds before the metadata request's five-second timeout.
-            barrier.wait(timeout=3.0)
-        return archicad_api.get_response_data("API.GetProductInfo") or {"succeeded": True, "result": {}}
-
-    archicad_api.set_handler("API.GetProductInfo", concurrent_handler)
+    # Keep response parsing and metadata validation real, but exclude disk I/O,
+    # TLS setup and socket deadlines from the concurrency assertion.
     archicad_api.set_response("GetProjectInfo", "get_project_info_solo.json")
+    responses = {
+        command: archicad_api.get_response_data(command)
+        for command in ("API.GetProductInfo", "GetProjectInfo", "GetArchicadLocation")
+    }
+    responses["GetAddOnVersion"] = {
+        "succeeded": True,
+        "result": {"addOnCommandResponse": {"version": SUPPORTED_TAPIR_VERSION}},
+    }
+    entered_ports = set()
+    entered_lock = threading.Lock()
+    all_entered = threading.Event()
+    release = threading.Event()
+
+    def in_memory_request(core, payload: dict, timeout) -> dict:
+        command = payload["command"]
+        if command == "API.GetProductInfo":
+            with entered_lock:
+                entered_ports.add(core.port)
+                if entered_ports == expected_ports:
+                    all_entered.set()
+            # This is a hang safeguard, not a simulated HTTP timeout. The main
+            # thread releases every worker together after observing overlap.
+            assert release.wait(timeout=60.0), "Test did not release metadata workers"
+        elif command == "API.ExecuteAddOnCommand":
+            command = payload["parameters"]["addOnCommandId"]["commandName"]
+        return responses[command]
+
+    monkeypatch.setattr(CoreCommands, "_post_command", in_memory_request)
 
     conn = MultiConn(ui_mode=False)
-    assert len(conn.open_port_headers) == num_ports
+    try:
+        assert set(conn.open_port_headers) == expected_ports
+        started = all_entered.wait(timeout=30.0)
+        with entered_lock:
+            missing_ports = expected_ports - entered_ports
+        assert started, (
+            f"Only {num_ports - len(missing_ports)}/{num_ports} workers entered; missing: {sorted(missing_ports)}"
+        )
+    finally:
+        release.set()
+        # Use the existing pool directly: cleanup must not trigger another scan.
+        futures = [
+            header._fetch_task[1]
+            for header in conn._open_port_headers.values()
+            if header._fetch_task is not None
+        ]
+        _, unfinished = wait(futures, timeout=30.0)
+        assert not unfinished, f"{len(unfinished)} metadata workers did not finish after release"
 
-    # Wait for the whole fleet before fixture teardown, including on failure.
     statuses = [header.status for header in conn.open_port_headers.values()]
     assert statuses == [Status.READY] * num_ports
     assert len(conn.active) == 0
