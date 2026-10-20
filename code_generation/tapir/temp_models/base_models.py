@@ -11993,13 +11993,184 @@ Hotlink.model_rebuild()
 NavigatorItem.model_rebuild()
 
 
+AttributeHeadersOrError: TypeAlias = AttributeHeadersWrapper | ErrorItem
+
+
+AttributeIdOrError: TypeAlias = AttributeIdArrayItem | ErrorItem
+
+
+AutoTextNameOrError: TypeAlias = AutoTextName | ErrorItem
+
+
+BoundingBox3DOrError: TypeAlias = BoundingBox3DArrayItem | ErrorItem
+
+
+BuildingMaterialAttributeOrError: TypeAlias = BuildingMaterialAttribute | ErrorItem
+
+
+ClassificationIdOrError: TypeAlias = ClassificationIdArrayItem | ErrorItem
+
+
+CompositeAttributeOrError: TypeAlias = CompositeAttribute | ErrorItem
+
+
+ConnectedElementsOrError: TypeAlias = ConnectedElementsWrapper | ErrorItem
+
+
+DatabaseIdOrError: TypeAlias = DatabaseIdArrayItem | ErrorItem
+
+
+DesignOptionCombinationIdOrError: TypeAlias = DesignOptionCombinationIdArrayItem | ErrorItem
+
+
+DesignOptionIdOrError: TypeAlias = DesignOptionIdArrayItem | ErrorItem
+
+
+DimensionDataOrError: TypeAlias = DimensionData | ErrorItem
+
+
+ElementIFCIdsOrError: TypeAlias = ElementIFCIds | ErrorItem
+
+
+ElementIFCPropertiesOrError: TypeAlias = ElementIFCProperties | ErrorItem
+
+
+ElementIFCTypeOrError: TypeAlias = ElementIFCType | ErrorItem
+
+
+ElementIdOrError: TypeAlias = ElementIdArrayItem | ErrorItem
+
+
+ElementOrGroupId: TypeAlias = ElementIdArrayItem | GroupIdArrayItem
+
+
+ElementRelationsOrError: TypeAlias = WallRelations | BeamRelations | BeamSegmentRelations | ZoneRelationsOfElement | OpeningRelationsOfElement | RoofOrShellRelationsOfElement | ErrorItem
+
+
+ElementTrimsOrError: TypeAlias = ElementTrims | ErrorItem
+
+
+ElementsOfDesignOptionOrError: TypeAlias = ElementsOfDesignOption | ErrorItem
+
+
+ElementsWithExecutionResultsOrError: TypeAlias = ElementsWithExecutionResults | ErrorItem
+
+
+ElementsWrapperOrError: TypeAlias = ElementsWrapper | ErrorItem
+
+
+EnumValueId: TypeAlias = DisplayValueEnumId | NonLocalizedValueEnumId
+
+
+ExecutionResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
+
+
+FavoritesOrError: TypeAlias = FavoritesWrapper | ErrorItem
+
+
+FillAttributeOrError: TypeAlias = FillAttribute | ErrorItem
+
+
+GroupIdOrError: TypeAlias = GroupIdArrayItem | ErrorItem
+
+
 Hole2D: TypeAlias = Hole2DWithOutline | Hole2DWithLegacyCoordinates
+
+
+HotlinkNodeCreatedOrError: TypeAlias = HotlinkNodeCreated | ErrorItem
+
+
+KeynoteAutoTextTokensOrError: TypeAlias = KeynoteAutoTextTokens | ErrorItem
+
+
+KeynoteFolderIdOrError: TypeAlias = KeynoteFolderIdArrayItem | ErrorItem
+
+
+KeynoteItemIdOrError: TypeAlias = KeynoteItemIdArrayItem | ErrorItem
+
+
+LayerAttributeOrError: TypeAlias = LayerAttribute | ErrorItem
+
+
+LayerCombinationAttributeOrError: TypeAlias = LayerCombinationAttribute | ErrorItem
+
+
+LineAttributeOrError: TypeAlias = LineAttribute | ErrorItem
+
+
+MEPConnectionResultOrError: TypeAlias = MEPConnectionResult | ErrorItem
+
+
+MEPElementPortsOrError: TypeAlias = MEPElementPorts | ErrorItem
+
+
+MEPRoutingElementDetailsOrError: TypeAlias = MEPRoutingElementDetails | ErrorItem
+
+
+MEPSystemAttributeOrError: TypeAlias = MEPSystemAttribute | ErrorItem
 
 
 MarkerParameterUpdate: TypeAlias = MarkerParameterUpdateByName | MarkerParameterUpdateByIndex
 
 
+NavigatorItemIdOrDatabaseIdAndWindowType: TypeAlias = NavigatorItemIdArrayItem | DatabaseIdAndWindowType
+
+
+NavigatorItemIdOrError: TypeAlias = NavigatorItemIdArrayItem | ErrorItem
+
+
+NormalOrUserUndefinedPropertyValue: TypeAlias = NormalNumberPropertyValue | NormalIntegerPropertyValue | NormalStringPropertyValue | NormalBooleanPropertyValue | NormalLengthPropertyValue | NormalAreaPropertyValue | NormalVolumePropertyValue | NormalAnglePropertyValue | NormalNumberListPropertyValue | NormalIntegerListPropertyValue | NormalStringListPropertyValue | NormalBooleanListPropertyValue | NormalLengthListPropertyValue | NormalAreaListPropertyValue | NormalVolumeListPropertyValue | NormalAngleListPropertyValue | NormalSingleEnumPropertyValue | NormalMultiEnumPropertyValue | UserUndefinedPropertyValue
+
+
+PenTableAttributeOrError: TypeAlias = PenTableAttribute | ErrorItem
+
+
+ProfileAttributeOrError: TypeAlias = ProfileAttribute | ErrorItem
+
+
+PropertyDefaultValue: TypeAlias = BasicDefaultValue | ExpressionDefaultValue
+
+
+PropertyIdOrError: TypeAlias = PropertyIdArrayItem | ErrorItem
+
+
+PropertyValueDetails: TypeAlias = NormalOrUserUndefinedPropertyValue | NotAvailablePropertyValue
+
+
+PropertyValueOrErrorItem: TypeAlias = PropertyValueArrayItem | ErrorItem
+
+
+RevisionChangesOfEntities: TypeAlias = RevisionChangesArrayItem | ErrorItem
+
+
 SetGDLParameterDetails: TypeAlias = SetGDLParameterByNameDetails | SetGDLParameterByIndexDetails
 
 
+SpecialFolderPathOrError: TypeAlias = SpecialFolderPath | ErrorItem
+
+
+SurfaceAttributeOrError: TypeAlias = SurfaceAttribute | ErrorItem
+
+
 TextData: TypeAlias = TextDataWithText | TextDataWithRuns
+
+
+TypeSpecificDetails: TypeAlias = HotlinkDetails | WallDetails | BeamDetails | SlabDetails | RoofDetails | ColumnDetails | DetailWorksheetDetails | WindowDoorDetails | LibPartBasedElementDetails | ObjectDetails | PolylineDetails | ZoneDetails | CurtainWallDetails | CurtainWallSegmentDetails | CurtainWallPanelDetails | CurtainWallFrameDetails | MeshDetails | MorphDetails | DrawingDetails | LabelDetails | TextDetails | NotYetSupportedElementTypeDetails
+
+
+TypeSpecificSettings: TypeAlias = WallSettings | ZoneSettings | LineSettings | ArcSettings | HotspotSettings | SplineSettings | PolylineSettings | HatchSettings | DrawingSettings | TextSettings
+
+
+ViewSettingsOrError: TypeAlias = ViewSettings | ErrorItem
+
+
+ViewTransformationsOrError: TypeAlias = ViewTransformations | ErrorItem
+
+
+ZoneBoundariesOrError: TypeAlias = ZoneBoundariesWrapper | ErrorItem
+
+
+ZoneCategoryAttributeOrError: TypeAlias = ZoneCategoryAttribute | ErrorItem
+
+
+ZoneCreationGeometry: TypeAlias = AutomaticZoneGeometry | ManualZoneGeometry
