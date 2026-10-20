@@ -51,18 +51,32 @@ def restore_collapsed_named_unions(content: str) -> str:
     schema = json.loads(tapir_paths.MASTER_SCHEMA_OUTPUT.read_text(encoding="utf-8"))
     existing_names = set(re.findall(r"^(?:class\s+)?([A-Z]\w+)\s*(?:\(|:\s*TypeAlias\s*=)", content, re.MULTILINE))
     aliases = []
+    definitions = schema.get("$defs", {})
 
-    for name, definition in schema.get("$defs", {}).items():
+    def is_object_variant(ref: str, seen: frozenset[str] = frozenset()) -> bool:
+        name = ref.rsplit("/", 1)[-1]
+        if name in seen or name not in definitions:
+            return False
+        variant = definitions[name]
+        if variant.get("type") == "object":
+            return True
+        if "$ref" in variant:
+            return is_object_variant(variant["$ref"], seen | {name})
+        return False
+
+    for name, definition in definitions.items():
         if name in existing_names or not isinstance(definition, dict):
             continue
         union_keys = [key for key in ("oneOf", "anyOf") if key in definition]
-        if len(union_keys) != 1 or set(definition) != {union_keys[0]}:
+        if len(union_keys) != 1 or set(definition) - {union_keys[0], "type", "description", "title"}:
             continue
         variants = definition[union_keys[0]]
         if not isinstance(variants, list) or not variants:
             continue
         refs = [variant.get("$ref") for variant in variants if isinstance(variant, dict) and set(variant) == {"$ref"}]
         if len(refs) != len(variants) or not all(isinstance(ref, str) and ref.startswith("#/$defs/") for ref in refs):
+            continue
+        if "type" in definition and (definition["type"] != "object" or not all(is_object_variant(ref) for ref in refs)):
             continue
         aliases.append(f"{name}: TypeAlias = {' | '.join(ref.rsplit('/', 1)[-1] for ref in refs)}")
 
