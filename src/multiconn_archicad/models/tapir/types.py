@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Any, List, Literal, TypeAlias
+from typing import Annotated, Any, List, Literal, TypeAlias
 from uuid import UUID
 from enum import Enum
 from pydantic import Field
@@ -64,13 +64,23 @@ class AttributeType(Enum):
     BUILDING_MATERIAL = "BuildingMaterial"
 
 
-AutoTextKeyValue: TypeAlias = str
+AutoTextKeyValue: TypeAlias = Annotated[str, Field(min_length=1)]
 
 
 class AutoTextName(APIModel):
     name: str = Field(
         ...,
         description="The autotext's display name, as shown in the Insert Autotext dialog of Archicad.",
+    )
+
+
+class AxonometricProjectionParameters(APIModel):
+    """The parameters of an axonometric projection. Present only when isPersp is false."""
+    transformationMatrix: list[float] = Field(
+        ...,
+        description="The 3x4 transformation matrix of the axonometric projection, row by row (12 numbers).",
+        max_length=12,
+        min_length=12,
     )
 
 
@@ -96,6 +106,45 @@ class BeamShape(Enum):
 class BeamHoleType(Enum):
     RECTANGULAR = "Rectangular"
     CIRCULAR = "Circular"
+
+
+class BeamQuantities(APIModel):
+    """Quantities of a Beam element, as calculated by Archicad. Lengths in meters, areas in square meters, volumes in cubic meters."""
+    volume: float = Field(..., description="Net volume of the beam.")
+    volumeConditional: float = Field(..., description="Conditional net volume of the beam.")
+    holesVolume: float = Field(..., description="Total volume of the holes in the beam.")
+    area: float = Field(..., description="Floor plan area of the beam.")
+    leftLength: float = Field(..., description="Length on the left side of the reference line.")
+    rightLength: float = Field(..., description="Length on the right side of the reference line.")
+    topSurface: float = Field(..., description="Surface of the top of the beam.")
+    bottomSurface: float = Field(..., description="Surface of the bottom of the beam.")
+    leftSurface: float = Field(..., description="Side surface on the left side of the reference line.")
+    rightSurface: float = Field(..., description="Side surface on the right side of the reference line.")
+    endSurface: float = Field(..., description="Surface of both ends of the beam.")
+    holesSurface: float = Field(..., description="Total surface of the holes in the beam.")
+    holesEdgeSurface: float = Field(..., description="Total surface of the hole edges in the beam.")
+    holesNumber: int = Field(..., description="Number of holes in the beam.")
+    crossSectionAreaCutBegin: float = Field(..., description="Area of the cross section at the beginning of the beam.")
+    crossSectionAreaCutEnd: float = Field(..., description="Area of the cross section at the end of the beam.")
+
+
+class BeamSegmentQuantities(APIModel):
+    """Quantities of a BeamSegment element, as calculated by Archicad. Lengths in meters, areas in square meters, volumes in cubic meters."""
+    volume: float = Field(..., description="Net volume of the beam segment.")
+    holesVolume: float = Field(..., description="Total volume of the holes in the beam segment.")
+    length: float = Field(..., description="Length of the beam segment.")
+    leftLength: float = Field(..., description="Length on the left side.")
+    rightLength: float = Field(..., description="Length on the right side.")
+    topSurface: float = Field(..., description="Surface of the top of the beam segment.")
+    bottomSurface: float = Field(..., description="Surface of the bottom of the beam segment.")
+    leftSurface: float = Field(..., description="Surface of the left side of the beam segment.")
+    rightSurface: float = Field(..., description="Surface of the right side of the beam segment.")
+    endSurface: float = Field(..., description="Surface of the ends of the beam segment.")
+    holesSurface: float = Field(..., description="Total surface of the holes in the beam segment.")
+
+
+class Body3DPolygonHole(APIModel):
+    vertexIds: list[int] = Field(..., min_length=3)
 
 
 class BoundingBox2D(APIModel):
@@ -210,6 +259,43 @@ class Coordinates(APIModel):
     z: float = Field(..., description="Z value of the coordinate.")
 
 
+class ColumnQuantities(APIModel):
+    """Quantities of a Column element, as calculated by Archicad. Lengths in meters, areas in square meters, volumes in cubic meters."""
+    coreVolume: float = Field(..., description="Net volume of the column core.")
+    veneerVolume: float = Field(..., description="Net volume of the column veneer.")
+    coreGrossVolume: float = Field(..., description="Gross volume of the column core.")
+    veneerGrossVolume: float = Field(..., description="Gross volume of the column veneer.")
+    coreSurface: float = Field(..., description="Net side surface of the column core.")
+    veneerSurface: float = Field(..., description="Net side surface of the column veneer.")
+    coreGrossSurface: float = Field(..., description="Gross side surface of the column core.")
+    veneerGrossSurface: float = Field(..., description="Gross side surface of the column veneer.")
+    area: float = Field(..., description="Floor plan area of the column.")
+    perimeter: float = Field(..., description="Floor plan perimeter of the column.")
+    minHeight: float = Field(..., description="Minimum height of the column.")
+    maxHeight: float = Field(..., description="Maximum height of the column.")
+    crossSectionAreaCutBegin: float = Field(
+        ..., description="Area of the cross section at the beginning of the column."
+    )
+    crossSectionAreaCutEnd: float = Field(..., description="Area of the cross section at the end of the column.")
+
+
+class ColumnSegmentQuantities(APIModel):
+    """Quantities of a ColumnSegment element, as calculated by Archicad. Lengths in meters, areas in square meters, volumes in cubic meters."""
+    volume: float = Field(..., description="Net volume of the column segment.")
+    grossVolume: float = Field(..., description="Gross volume of the column segment.")
+    coreVolume: float = Field(..., description="Net volume of the segment core.")
+    coreGrossVolume: float = Field(..., description="Gross volume of the segment core.")
+    veneerVolume: float = Field(..., description="Net volume of the segment veneer.")
+    veneerGrossVolume: float = Field(..., description="Gross volume of the segment veneer.")
+    coreSurface: float = Field(..., description="Net surface of the segment core.")
+    veneerSideSurface: float = Field(..., description="Side surface of the segment veneer.")
+    length: float = Field(..., description="Length of the column segment.")
+    area: float = Field(..., description="Area of the column segment.")
+    height: float = Field(..., description="Height of the column segment.")
+    minHeight: float = Field(..., description="Minimum height of the column segment.")
+    maxHeight: float = Field(..., description="Maximum height of the column segment.")
+
+
 class CompositeAttributeField(Enum):
     USE_WITH = "useWith"
     SKINS = "skins"
@@ -278,10 +364,20 @@ class HotlinkNode(APIModel):
     )
 
 
+class CurtainWallCrossingFrameType(Enum):
+    """The diagonal frame of a pattern cell: none, or from the bottom left to the top right corner, or from the top left to the bottom right corner."""
+    NONE = "None"
+    FROM_BOTTOM_LEFT_TO_TOP_RIGHT = "FromBottomLeftToTopRight"
+    FROM_TOP_LEFT_TO_BOTTOM_RIGHT = "FromTopLeftToBottomRight"
+
+
 class CurtainWallDetails(APIModel):
     height: float | None = None
     flipped: bool | None = None
     angle: float | None = Field(None, description="The rotation angle of the curtain wall in radians.")
+
+
+CurtainWallFlexibleIndex: TypeAlias = Annotated[int, Field(ge=0)]
 
 
 class PanelConnectionHole(APIModel):
@@ -305,6 +401,63 @@ class CurtainWallFrameType(Enum):
     CORNER = "Corner"
     BOUNDARY = "Boundary"
     CUSTOM = "Custom"
+
+
+class CurtainWallPatternCell(APIModel):
+    """The panel and frame classes of one cell of the pattern unit of a curtain wall segment. Panel classes are numbered as Archicad numbers them: 0 is no panel (the cell is left empty), 1 is the first panel class of the curtain wall (as listed in the Curtain Wall Settings, from the favorite or the tool defaults), 2 the second and so on. Frame classes: 0 is no frame (the cell is merged with its neighbour), 1 the Division frame, 2 the Corner frame, 3 the Boundary frame, 4 the first custom frame class of the curtain wall, 5 the second and so on. Fields not given keep the default assignment of the cell."""
+    columnIndex: int = Field(
+        ...,
+        description="Zero-based column of the cell within the pattern unit, counted from the start of the segment.",
+        ge=0,
+    )
+    rowIndex: int = Field(
+        ...,
+        description="Zero-based row of the cell within the pattern unit, counted from the bottom.",
+        ge=0,
+    )
+    panelClassIndex: int | None = Field(
+        None,
+        description="The panel class of the cell. 0 leaves the cell without a panel (Archicad keeps a hidden 'deleted panel' subelement there). With a crossing frame it is the class of the left (or lower) half; see rightPanelClassIndex for the other half.",
+        ge=0,
+    )
+    rightPanelClassIndex: int | None = Field(
+        None,
+        description="The panel class of the right (or upper) half of a cell with a crossing frame. Defaults to panelClassIndex.",
+        ge=0,
+    )
+    leftFrameClassIndex: int | None = Field(
+        None,
+        description="The frame class of the frame on the left edge of the cell (the grid line at the start of the column).",
+        ge=0,
+    )
+    bottomFrameClassIndex: int | None = Field(
+        None,
+        description="The frame class of the frame on the bottom edge of the cell (the grid line at the bottom of the row).",
+        ge=0,
+    )
+    crossingFrameType: CurtainWallCrossingFrameType | None = None
+    crossingFrameClassIndex: int | None = Field(
+        None,
+        description="The frame class of the diagonal frame of the cell. Only used when crossingFrameType is not 'None'.",
+        ge=0,
+    )
+
+
+class CurtainWallPatternLogic(Enum):
+    """How the pattern unit fills the segment: 'FixedSizes' keeps the given sizes and repeats the unit, which may leave a partial unit at the end (Archicad: Fixed Size); 'BestDivision' stretches the flexible columns/rows so that whole units fill the segment with the least stretching (Archicad: Best Division)."""
+    FIXED_SIZES = "FixedSizes"
+    BEST_DIVISION = "BestDivision"
+
+
+class CurtainWallPatternOrigin(Enum):
+    """Where the pattern unit is anchored on the segment: at its start, centered with a unit starting at the center, centered with a unit centered on the center, or at its end."""
+    START_WITH_PATTERN = "StartWithPattern"
+    START_FROM_CENTER = "StartFromCenter"
+    ALIGN_TO_CENTER = "AlignToCenter"
+    END_WITH_PATTERN = "EndWithPattern"
+
+
+CurtainWallPatternSize: TypeAlias = Annotated[float, Field(gt=0.0)]
 
 
 class CurtainWallSegmentDetails(APIModel):
@@ -341,6 +494,15 @@ class DesignOptionLinkType(Enum):
 class DetailData(APIModel):
     name: str = Field(..., min_length=1)
     referenceId: str = Field(..., min_length=1)
+
+
+class DimensionOrigin(Enum):
+    """The origin a level dimension measures from."""
+    PROJECT_ZERO = "ProjectZero"
+    REFERENCE_LEVEL1 = "ReferenceLevel1"
+    REFERENCE_LEVEL2 = "ReferenceLevel2"
+    STORED_ORIGIN = "StoredOrigin"
+    ALTITUDE = "Altitude"
 
 
 class Dimensions3D(APIModel):
@@ -426,6 +588,24 @@ class DrawingSettings(APIModel):
         None,
         description="Library part index of the drawing title (API_DrawingTitle::libInd). A negative/invalid index means no title object is instantiated; setting it to a valid index (e.g. copied from another drawing) makes Archicad create the title's own placed element.",
     )
+
+
+class ElectricalLoadClassification(APIModel):
+    name: str
+    demandFactor: float = Field(..., description="The demand factor, between 0 and 1.")
+
+
+class ElectricalLoads(APIModel):
+    """An electrical load in total and per phase, as Archicad calculates it."""
+    total: float
+    phaseA: float
+    phaseB: float
+    phaseC: float
+
+
+class ElectricalWiringType(APIModel):
+    name: str
+    crossSectionalArea: float = Field(..., description="The cross-sectional area of the wire in square millimeters.")
 
 
 class ElementDetailsField(Enum):
@@ -776,6 +956,286 @@ class NavigatorMapId(Enum):
     PUBLISHER_SETS = "PublisherSets"
 
 
+class GraphicOverrideColumnCoatingType(Enum):
+    """Matches columns whose coating type equals this."""
+    CORE = "Core"
+    FINISH = "Finish"
+    OTHER = "Other"
+
+
+class GraphicOverrideColumnCrossSectionType(Enum):
+    """Matches columns whose cross section type equals this."""
+    RECTANGULAR = "Rectangular"
+    CIRCULAR = "Circular"
+    PROFILED = "Profiled"
+
+
+class GraphicOverrideCustomPropertyBool(APIModel):
+    """Matches elements by a custom (user-defined) boolean property, identified by its plain name and the name of the property group it appears under (both exactly as shown in the Property Manager). Provide 'name', 'group', and exactly one of the operators below. The 6 'has.../is...' operators are available on every custom property type, not just boolean ones."""
+    name: str = Field(..., description="The custom property's name, exactly as defined.")
+    group: str = Field(
+        ...,
+        description="The custom property group's name, exactly as defined (e.g. 'Generalites').",
+    )
+    equals: bool | None = Field(None, description="Matches if the property's value equals this.")
+    hasDefaultValue: bool | None = Field(
+        None,
+        description="If true, matches elements where this property currently has its default value.",
+    )
+    hasCustomValue: bool | None = Field(
+        None,
+        description="If true, matches elements where this property has a custom (overridden, non-default) value.",
+    )
+    isAvailable: bool | None = Field(None, description="If true, matches elements where this property is available.")
+    isNotAvailable: bool | None = Field(
+        None,
+        description="If true, matches elements where this property is not available.",
+    )
+    isUndefined: bool | None = Field(None, description="If true, matches elements where this property is undefined.")
+    isNotUndefined: bool | None = Field(
+        None,
+        description="If true, matches elements where this property is not undefined.",
+    )
+
+
+class GraphicOverrideCustomPropertyInteger(APIModel):
+    """Matches elements by a custom (user-defined) integer property, identified by its plain name and the name of the property group it appears under. Provide 'name', 'group', and exactly one operator."""
+    name: str = Field(..., description="The custom property's name, exactly as defined.")
+    group: str = Field(..., description="The custom property group's name, exactly as defined.")
+    equals: int | None = None
+    notEquals: int | None = None
+    lessThan: int | None = None
+    greaterThan: int | None = None
+    lessOrEqual: int | None = None
+    greaterOrEqual: int | None = None
+    hasDefaultValue: bool | None = None
+    hasCustomValue: bool | None = None
+    isAvailable: bool | None = None
+    isNotAvailable: bool | None = None
+    isUndefined: bool | None = None
+    isNotUndefined: bool | None = None
+
+
+class GraphicOverrideCustomPropertyNumber(APIModel):
+    """Matches elements by a custom (user-defined) numeric property, identified by its plain name and the name of the property group it appears under. Provide 'name', 'group', and exactly one operator."""
+    name: str = Field(..., description="The custom property's name, exactly as defined.")
+    group: str = Field(..., description="The custom property group's name, exactly as defined.")
+    equals: float | None = None
+    notEquals: float | None = None
+    lessThan: float | None = None
+    greaterThan: float | None = None
+    lessOrEqual: float | None = None
+    greaterOrEqual: float | None = None
+    hasDefaultValue: bool | None = None
+    hasCustomValue: bool | None = None
+    isAvailable: bool | None = None
+    isNotAvailable: bool | None = None
+    isUndefined: bool | None = None
+    isNotUndefined: bool | None = None
+
+
+class GraphicOverrideCustomPropertyString(APIModel):
+    """Matches elements by a custom (user-defined) text or option-set property, identified by its plain name and the name of the property group it appears under. Provide 'name', 'group', and exactly one operator."""
+    name: str = Field(..., description="The custom property's name, exactly as defined.")
+    group: str = Field(..., description="The custom property group's name, exactly as defined.")
+    equals: str | None = Field(None, description="Matches if the property's value equals this string exactly.")
+    notEquals: str | None = Field(None, description="Matches if the property's value does not equal this string.")
+    hasDefaultValue: bool | None = None
+    hasCustomValue: bool | None = None
+    isAvailable: bool | None = None
+    isNotAvailable: bool | None = None
+    isUndefined: bool | None = None
+    isNotUndefined: bool | None = None
+
+
+class GraphicOverrideElementType(Enum):
+    """The tool an element was created with. Limited to tools that are not backed by a built-in GDL library part (Door, Window, Object, Lamp, Zone, Label, Grid and most MEP part types are intentionally excluded - their identification relies on a library part guid that was confirmed to differ across ArchiCAD builds, so it cannot be hardcoded reliably)."""
+    WALL = "Wall"
+    COLUMN = "Column"
+    BEAM = "Beam"
+    SLAB = "Slab"
+    ROOF = "Roof"
+    SHELL = "Shell"
+    STAIR = "Stair"
+    RAILING = "Railing"
+    CURTAIN_WALL = "CurtainWall"
+    OPENING = "Opening"
+    MESH = "Mesh"
+    MORPH = "Morph"
+    DIMENSION = "Dimension"
+    LEVEL_DIMENSION = "LevelDimension"
+    RADIAL_DIMENSION = "RadialDimension"
+    ANGLE_DIMENSION = "AngleDimension"
+    TEXT = "Text"
+    CHANGE_MARKER = "ChangeMarker"
+    HATCH = "Hatch"
+    LINE = "Line"
+    ARC = "Arc"
+    POLY_LINE = "PolyLine"
+    SPLINE = "Spline"
+    HOTSPOT = "Hotspot"
+    SECTION = "Section"
+    ELEVATION = "Elevation"
+    INTERIOR_ELEVATION = "InteriorElevation"
+    DETAIL = "Detail"
+    WORKSHEET = "Worksheet"
+    CAMERA = "Camera"
+    FIGURE = "Figure"
+    DRAWING = "Drawing"
+    STRUCTURAL_LINK = "StructuralLink"
+    STRUCTURAL_SUPPORT = "StructuralSupport"
+    LINEAR_LOAD = "LinearLoad"
+    POINT_LOAD = "PointLoad"
+    SURFACE_LOAD = "SurfaceLoad"
+    DUCT_ROUTING = "DuctRouting"
+    CABLE_CARRIER_ROUTING = "CableCarrierRouting"
+    PIPE_ROUTING = "PipeRouting"
+
+
+class GraphicOverrideFillTypes(APIModel):
+    """The fill types an override applies to."""
+    cutFill: bool = Field(..., description="Applies to cut fills.")
+    coverFill: bool = Field(..., description="Applies to cover fills.")
+    draftingFill: bool = Field(..., description="Applies to drafting fills.")
+
+
+class GraphicOverridePenReplacement(Enum):
+    """Matches elements whose pen replacement rule equals this value."""
+    NONE = "None"
+    FOREGROUND_ONLY = "ForegroundOnly"
+    BACKGROUND_ONLY = "BackgroundOnly"
+    BOTH = "Both"
+
+
+class GraphicOverridePosition(Enum):
+    """Matches elements whose position equals this value."""
+    EXTERIOR = "Exterior"
+    INTERIOR = "Interior"
+    UNDEFINED = "Undefined"
+
+
+class GraphicOverrideProfileParameter(APIModel):
+    """Matches elements by a custom Complex Profile modifier parameter, identified by its plain name as defined on that Complex Profile attribute (e.g. 'Debord tole') rather than a fixed field - use this for any profile modifier not covered by the profileStretchHeight/profileNominalWidth/... fields above. Provide 'name' and exactly one comparison operator."""
+    name: str = Field(
+        ...,
+        description="The profile modifier parameter's name, exactly as defined on the Complex Profile attribute.",
+    )
+    equals: float | None = None
+    notEquals: float | None = None
+    lessThan: float | None = None
+    greaterThan: float | None = None
+    lessOrEqual: float | None = None
+    greaterOrEqual: float | None = None
+
+
+class GraphicOverrideRoofCutBodyType(Enum):
+    """Matches roofs whose cut body type equals this."""
+    CONTOURS_DOWN = "ContoursDown"
+    REFERENCE_LINE_DOWN = "ReferenceLineDown"
+
+
+class GraphicOverrideRoofEaveOverhangType(Enum):
+    """Matches roofs whose eave overhang type equals this."""
+    OFFSET = "Offset"
+    MANUAL = "Manual"
+
+
+class GraphicOverrideRoofEdgeAngle(Enum):
+    """Matches roofs whose edge angle mode equals this."""
+    VERTICAL = "Vertical"
+    PERPENDICULAR = "Perpendicular"
+    CUSTOM = "Custom"
+
+
+class GraphicOverrideRoofGeometryType(Enum):
+    """Matches roofs whose geometry type equals this."""
+    SINGLE_PANEL = "SinglePanel"
+    MULTIPLE_PANELS = "MultiplePanels"
+
+
+class GraphicOverrideShellCutBodyType(Enum):
+    """Matches shells whose cut body type equals this."""
+    EDITABLE = "Editable"
+    EXTRUDE_UP = "ExtrudeUp"
+    EXTRUDE_DOWN = "ExtrudeDown"
+
+
+class GraphicOverrideShellGeometryType(Enum):
+    """Matches shells whose geometry type equals this."""
+    EXTRUDE = "Extrude"
+    REVOLVED = "Revolved"
+    RULED = "Ruled"
+
+
+class GraphicOverrideSlabEdgeAngle(Enum):
+    """Matches slabs whose edge angle mode equals this."""
+    VERTICAL = "Vertical"
+    CUSTOM = "Custom"
+
+
+class GraphicOverrideStructuralFunction(Enum):
+    """Matches elements whose structural function equals this value."""
+    LOAD_BEARING = "LoadBearing"
+    NON_LOAD_BEARING = "NonLoadBearing"
+    UNDEFINED = "Undefined"
+
+
+class GraphicOverrideStructureType(Enum):
+    """Matches elements whose structure type (Wall/Beam/Column basic vs. composite vs. complex profile) equals this value."""
+    BASIC = "Basic"
+    COMPOSITE = "Composite"
+    COMPLEX_PROFILE = "ComplexProfile"
+
+
+class GraphicOverrideSurfaceTypes(APIModel):
+    """The surface types an override applies to."""
+    cutSurface: bool = Field(..., description="Applies to cut surfaces.")
+    uncutSurface: bool = Field(..., description="Applies to uncut surfaces.")
+
+
+class GraphicOverrideWallComplexity(Enum):
+    """Matches walls whose complexity equals this."""
+    STRAIGHT = "Straight"
+    SLANTED = "Slanted"
+    DOUBLE_SLANTED = "DoubleSlanted"
+
+
+class GraphicOverrideWallGeometryType(Enum):
+    """Matches walls whose geometry type equals this."""
+    UNIFORM = "Uniform"
+    TRAPEZOID = "Trapezoid"
+    POLYGONAL = "Polygonal"
+
+
+class GridElementLengthMode(Enum):
+    """How the line length is applied. length (default): to the GDL parameter AC_Length when the library part has it, as the Grid Tool's grid marker does; otherwise to the object's A size, converted to xRatio as CreateObjects does. none: the length is left to 'parameters'."""
+    LENGTH = "length"
+    NONE = "none"
+
+
+class GridParameter(APIModel):
+    name: str
+    value: Any = Field(
+        ...,
+        description="A number or a boolean for a numeric parameter, a string for a String or Title parameter.",
+    )
+
+
+class GridParameterDetails(APIModel):
+    name: str
+    displayName: str
+    type: str = Field(
+        ...,
+        description="Integer, Length, Angle, RealNum, LightSwitch, ColorRGB, Intensity, LineType, Material, FillPattern, PenColor, String, Boolean, Title, BuildingMaterial, Profile, Dictionary or Unknown.",
+    )
+    value: Any | None = Field(
+        None,
+        description="Number for numeric and boolean types, string for String and Title. Not given for arrays.",
+    )
+    dimension1: int | None = Field(None, description="First dimension of an array parameter.")
+    dimension2: int | None = Field(None, description="Second dimension of an array parameter.")
+
+
 class GuidId(APIModel):
     """Identifier."""
     guid: UUID = Field(
@@ -791,7 +1251,7 @@ class HatchOrientationType(Enum):
     CENTERED = "Centered"
 
 
-HighlightedColor: TypeAlias = list[int]
+HighlightedColor: TypeAlias = Annotated[list[int], Field(max_length=4, min_length=4)]
 
 
 class HotlinkNodeId(APIModel):
@@ -884,6 +1344,26 @@ class FileType(Enum):
     IFCXML = "ifcxml"
     IFCZIP = "ifczip"
     IFCXMLZIP = "ifcxmlzip"
+
+
+class ImageColorDepth(Enum):
+    """Optional, trueColor by default. The color depth of the image, as in the Save as picture dialog."""
+    BLACK_AND_WHITE = "blackAndWhite"
+    FIELD_16_COLORS = "16Colors"
+    FIELD_256_COLORS = "256Colors"
+    FIELD_16_GRAYS = "16Grays"
+    FIELD_256_GRAYS = "256Grays"
+    TRUE_COLOR = "trueColor"
+    TRUE_COLOR_WITH_ALPHA = "trueColorWithAlpha"
+
+
+class ImageFormat(Enum):
+    """Optional. The image file format; omitted, it comes from the extension of imageFilePath (.png, .jpg or .jpeg, .bmp, .tif or .tiff, .gif)."""
+    PNG = "png"
+    JPG = "jpg"
+    BMP = "bmp"
+    TIFF = "tiff"
+    GIF = "gif"
 
 
 class ConflictPolicy(Enum):
@@ -1235,7 +1715,7 @@ class LinkToSettings(APIModel):
     homeStoryDifference: int | None = Field(None, description="Difference of the home story from the current story.")
     newCreationMode: bool | None = Field(
         None,
-        description="If true, the story link is relative to the current story (homeStoryDifference is used); if false, the element's absolute floor index is used instead.",
+        description="Controls home-story selection during element creation. If true, homeStoryDifference selects the home story relative to the current story and the element's absolute floor index is ignored. If false, the absolute floor index is used and Archicad fills homeStoryDifference. This is a creation instruction, not a persistent linking mode.",
     )
 
 
@@ -1246,6 +1726,24 @@ class LockableObjectSetStatus(Enum):
     LOCKED = "Locked"
     NOT_AVAILABLE = "NotAvailable"
     NOT_EXIST = "NotExist"
+
+
+class MEPAngleSet(APIModel):
+    """The angles (in degrees) that the elbow and branch preference tables of a domain can use."""
+    name: str
+    angles: list[float]
+
+
+class MEPBranchPreferenceTableRow(APIModel):
+    mainAxisReferenceId: int
+    branchAxisReferenceId: int
+    branchAxisAngle: float | None = Field(None, description="In degrees. Available from Archicad 29.")
+    mainAxisDiameter: float
+    branchAxisDiameter: float
+    length: float
+    branchOffset: float
+    connectionLength: float
+    description: str | None = None
 
 
 class MEPComponentType(Enum):
@@ -1278,6 +1776,14 @@ class MEPDomainOrUnknown(Enum):
     UNKNOWN = "Unknown"
 
 
+class MEPElbowPreferenceTableRow(APIModel):
+    referenceId: int
+    angle: float | None = Field(None, description="In degrees. Available from Archicad 29.")
+    diameter: float
+    radius: float
+    description: str | None = None
+
+
 class MEPElementData(APIModel):
     type: MEPComponentType
     domain: MEPDomain | None = Field(None, description="Required for all types except Equipment.")
@@ -1304,6 +1810,26 @@ class MEPElementType(Enum):
     FITTING = "Fitting"
     FLEXIBLE_SEGMENT = "FlexibleSegment"
     TAKE_OFF = "TakeOff"
+    ELECTRICAL_PANEL = "ElectricalPanel"
+    ELECTRICAL_DEVICE = "ElectricalDevice"
+
+
+class MEPOrientation(APIModel):
+    """The orientation of an MEP element, given by a direction and a rotation vector."""
+    direction: Coordinate3D = Field(..., description="The direction vector.")
+    rotation: Coordinate3D = Field(..., description="The rotation vector.")
+
+
+class MEPPhysicalSystemId(APIModel):
+    """The identifier of an MEP physical system."""
+    guid: UUID = Field(
+        ...,
+        description="A Globally Unique Identifier (or Universally Unique Identifier) in its string representation as defined in RFC 4122.",
+    )
+
+
+class MEPPhysicalSystemIdArrayItem(APIModel):
+    physicalSystemId: MEPPhysicalSystemId
 
 
 class MEPPreferenceRow(APIModel):
@@ -1323,6 +1849,12 @@ class MEPPreferenceTableDomain(Enum):
     VENTILATION = "Ventilation"
 
 
+class MEPReferenceSet(APIModel):
+    """The reference ids (nominal sizes) that the preference tables of a domain can use."""
+    name: str
+    referenceIds: list[int]
+
+
 class MEPSystemAttributeField(Enum):
     DOMAIN = "domain"
     CONTOUR_PEN = "contourPen"
@@ -1333,6 +1865,32 @@ class MEPSystemAttributeField(Enum):
     CENTER_LINE_TYPE_ID = "centerLineTypeId"
     MATERIAL_ID = "materialId"
     INSULATION_MATERIAL_ID = "insulationMaterialId"
+
+
+class MEPSystemGroupData(APIModel):
+    name: str
+
+
+class MEPSystemGroupId(APIModel):
+    """The identifier of an MEP system group."""
+    guid: UUID = Field(
+        ...,
+        description="A Globally Unique Identifier (or Universally Unique Identifier) in its string representation as defined in RFC 4122.",
+    )
+
+
+class MEPSystemGroupIdArrayItem(APIModel):
+    systemGroupId: MEPSystemGroupId
+
+
+class MEPTransitionPreferenceTableRow(APIModel):
+    beginReferenceId: int
+    endReferenceId: int
+    beginDiameter: float
+    endDiameter: float
+    length: float | None = Field(None, description="Piping only.")
+    angle: float | None = Field(None, description="In degrees. Ventilation only.")
+    description: str | None = None
 
 
 class MarkerGDLParameterDetails(APIModel):
@@ -1420,6 +1978,15 @@ class EdgeOverride(APIModel):
 
 class MorphPolygonHole(APIModel):
     vertexIds: list[int] = Field(..., min_length=3)
+
+
+class MorphQuantities(APIModel):
+    """Quantities of a Morph element, as calculated by Archicad. Lengths in meters, areas in square meters, volumes in cubic meters."""
+    volume: float = Field(..., description="Net volume of the body.")
+    surface: float = Field(..., description="Net area of the body surface.")
+    floorPlanArea: float = Field(..., description="Net area of the floor plan projection.")
+    floorPlanPerimeter: float = Field(..., description="Perimeter of the floor plan projection.")
+    height: float = Field(..., description="Height of the morph.")
 
 
 class MoveVector(APIModel):
@@ -1618,6 +2185,20 @@ class PenTablePen(APIModel):
     color: ColorRGB
     width: float
     description: str
+
+
+class PerspectiveProjectionParameters(APIModel):
+    """The parameters of a perspective projection of the 3D window."""
+    cameraPosition: Coordinate3D = Field(..., description="The position of the camera.")
+    targetPosition: Coordinate3D = Field(..., description="The position of the target point the camera looks at.")
+    distance: float = Field(..., description="The distance between the camera and the target.")
+    azimuth: float = Field(..., description="The azimuth angle of the camera.")
+    viewCone: float = Field(..., description="The view cone angle of the camera.")
+    rollAngle: float = Field(..., description="The roll angle of the camera.")
+    isTwoPointPersp: bool = Field(
+        ...,
+        description="True for a two-point perspective (vertical edges stay vertical).",
+    )
 
 
 class PolyArc(APIModel):
@@ -1928,6 +2509,41 @@ class RoofPivotLine(APIModel):
     endCoordinate: Coordinate2D
 
 
+class RoofQuantities(APIModel):
+    """Quantities of a Roof element, as calculated by Archicad. Lengths in meters, areas in square meters, volumes in cubic meters."""
+    volume: float = Field(..., description="Net volume of the roof.")
+    volumeConditional: float = Field(..., description="Conditional net volume of the roof.")
+    grossVolume: float = Field(..., description="Gross volume of the roof.")
+    topSurface: float = Field(..., description="Net top surface of the roof.")
+    bottomSurface: float = Field(..., description="Net bottom surface of the roof.")
+    edgeSurface: float = Field(..., description="Net surface of the edges of the roof.")
+    topSurfaceConditional: float = Field(..., description="Conditional top surface of the roof.")
+    bottomSurfaceConditional: float = Field(..., description="Conditional bottom surface of the roof.")
+    grossTopSurface: float = Field(..., description="Gross top surface of the roof.")
+    grossBottomSurface: float = Field(..., description="Gross bottom surface of the roof.")
+    grossEdgeSurface: float = Field(..., description="Gross surface of the edges of the roof.")
+    contourArea: float = Field(..., description="Area of the roof contour polygon.")
+    perimeter: float = Field(..., description="Perimeter of the roof.")
+    holesSurface: float = Field(..., description="Total area of the holes in the roof.")
+    holesPerimeter: float = Field(..., description="Total perimeter of the holes in the roof.")
+    openingsSurface: float = Field(..., description="Total surface of the roof openings.")
+    ridgesLength: float = Field(
+        ...,
+        description="Length of the ridge edges (divided by 2, as Archicad reports it).",
+    )
+    valleysLength: float = Field(
+        ...,
+        description="Length of the valley edges (divided by 2, as Archicad reports it).",
+    )
+    hipsLength: float = Field(
+        ...,
+        description="Length of the hip edges (divided by 2, as Archicad reports it).",
+    )
+    gablesLength: float = Field(..., description="Length of the gable edges.")
+    eavesLength: float = Field(..., description="Length of the eave edges.")
+    peaksLength: float = Field(..., description="Length of the peak edges.")
+
+
 class RoofStructureType(Enum):
     BASIC = "Basic"
     COMPOSITE = "Composite"
@@ -1973,7 +2589,7 @@ class SetGDLParameterByIndexDetails(APIModel):
     index: int = Field(..., description="The index of the parameter.")
     index1: int | None = Field(
         None,
-        description="Optional 1-based first index for changing a single item of an array parameter without resizing it. Only valid for array parameters and only together with a single (non-list) value.",
+        description="Optional 1-based first index for changing a single item of an array parameter. Only valid for array parameters and only together with a single (non-list) value.",
     )
     index2: int | None = Field(
         None,
@@ -1981,7 +2597,7 @@ class SetGDLParameterByIndexDetails(APIModel):
     )
     value: Any = Field(
         ...,
-        description="The new value of the parameter. For array parameters provide a list of values for one-dimensional arrays (e.g. [1, 2, 3]) or a list of lists for two-dimensional arrays (e.g. [[11, 12], [21, 22]]); the array parameter is resized to match the given values. Alternatively provide index1 (and optionally index2) together with a single value to change one item of the array without resizing it. Within one command call whole-array (list) values are applied after all single-value changes.",
+        description="The new value of the parameter. For array parameters provide a list of values for one-dimensional arrays (e.g. [1, 2, 3]) or a list of lists for two-dimensional arrays (e.g. [[11, 12], [21, 22]]); the list must contain exactly as many values as the parameter has items, resizing an array parameter is not supported. Alternatively provide index1 (and optionally index2) together with a single value to change one item of the array. Within one command call whole-array (list) values are applied after all single-value changes.",
     )
 
 
@@ -1990,7 +2606,7 @@ class SetGDLParameterByNameDetails(APIModel):
     name: str = Field(..., description="The name of the parameter.")
     index1: int | None = Field(
         None,
-        description="Optional 1-based first index for changing a single item of an array parameter without resizing it. Only valid for array parameters and only together with a single (non-list) value.",
+        description="Optional 1-based first index for changing a single item of an array parameter. Only valid for array parameters and only together with a single (non-list) value.",
     )
     index2: int | None = Field(
         None,
@@ -1998,7 +2614,7 @@ class SetGDLParameterByNameDetails(APIModel):
     )
     value: Any = Field(
         ...,
-        description="The new value of the parameter. For array parameters provide a list of values for one-dimensional arrays (e.g. [1, 2, 3]) or a list of lists for two-dimensional arrays (e.g. [[11, 12], [21, 22]]); the array parameter is resized to match the given values. Alternatively provide index1 (and optionally index2) together with a single value to change one item of the array without resizing it. Within one command call whole-array (list) values are applied after all single-value changes.",
+        description="The new value of the parameter. For array parameters provide a list of values for one-dimensional arrays (e.g. [1, 2, 3]) or a list of lists for two-dimensional arrays (e.g. [[11, 12], [21, 22]]); the list must contain exactly as many values as the parameter has items, resizing an array parameter is not supported. Alternatively provide index1 (and optionally index2) together with a single value to change one item of the array. Within one command call whole-array (list) values are applied after all single-value changes.",
     )
 
 
@@ -2007,11 +2623,48 @@ class NavigatorItemIdsWithRotationItem(APIModel):
     rotation: float = Field(..., description="View rotation angle in radians.")
 
 
+class ShellQuantities(APIModel):
+    """Quantities of a Shell element, as calculated by Archicad. Lengths in meters, areas in square meters, volumes in cubic meters."""
+    volume: float = Field(..., description="Net volume of the shell.")
+    volumeConditional: float = Field(..., description="Conditional net volume of the shell.")
+    grossVolume: float = Field(..., description="Gross volume of the shell.")
+    referenceSurface: float = Field(..., description="Net area of the reference surface.")
+    oppositeSurface: float = Field(..., description="Net area of the surface opposite to the reference.")
+    edgeSurface: float = Field(..., description="Total area of the edges.")
+    referenceSurfaceConditional: float = Field(..., description="Conditional area of the reference surface.")
+    oppositeSurfaceConditional: float = Field(..., description="Conditional area of the opposite surface.")
+    grossReferenceSurface: float = Field(..., description="Gross area of the reference surface.")
+    grossOppositeSurface: float = Field(..., description="Gross area of the opposite surface.")
+    grossEdgeSurface: float = Field(..., description="Gross area of the edges.")
+    perimeter: float = Field(..., description="Perimeter of the contour polygon.")
+    holesSurface: float = Field(..., description="Total area of the holes.")
+    holesPerimeter: float = Field(..., description="Total perimeter of the holes.")
+    floorPlanArea: float = Field(..., description="Projected floor plan area of the contour polygon.")
+
+
 class AlertType(Enum):
     """The type of the alert dialog."""
     INFORMATION = "information"
     WARNING = "warning"
     ERROR = "error"
+
+
+class SlabQuantities(APIModel):
+    """Quantities of a Slab element, as calculated by Archicad. Lengths in meters, areas in square meters, volumes in cubic meters."""
+    volume: float = Field(..., description="Net volume of the slab.")
+    volumeConditional: float = Field(..., description="Conditional net volume of the slab.")
+    grossVolume: float = Field(..., description="Gross volume of the slab.")
+    topSurface: float = Field(..., description="Net top surface of the slab.")
+    bottomSurface: float = Field(..., description="Net bottom surface of the slab.")
+    edgeSurface: float = Field(..., description="Net surface of the edges of the slab.")
+    topSurfaceConditional: float = Field(..., description="Conditional top surface of the slab.")
+    bottomSurfaceConditional: float = Field(..., description="Conditional bottom surface of the slab.")
+    grossTopSurface: float = Field(..., description="Gross top surface of the slab.")
+    grossBottomSurface: float = Field(..., description="Gross bottom surface of the slab.")
+    grossEdgeSurface: float = Field(..., description="Gross surface of the edges of the slab.")
+    perimeter: float = Field(..., description="Perimeter of the slab.")
+    holesSurface: float = Field(..., description="Total area of the holes in the slab.")
+    holesPerimeter: float = Field(..., description="Total perimeter of the holes in the slab.")
 
 
 class SlabReferencePlaneLocation(Enum):
@@ -2250,6 +2903,14 @@ class TextBoxAnchor(Enum):
     RIGHT_BOTTOM = "RightBottom"
 
 
+class TextFrameShape(Enum):
+    """Text frame shape. Standalone Text elements only support Rectangle. Available from Archicad 28; earlier versions ignore it and read it back as Rectangle."""
+    RECTANGLE = "Rectangle"
+    CIRCLE = "Circle"
+    ROUNDED_RECTANGLE = "RoundedRectangle"
+    PILL = "Pill"
+
+
 class TextRunDetails(APIModel):
     """One monostyle run of text (API_RunType). Concatenating 'text' across all runs in order gives the full content; a newline character starts a new line."""
     text: str = Field(
@@ -2263,6 +2924,10 @@ class TextRunDetails(APIModel):
     fontIndex: int | None = Field(
         None,
         description="Font attribute index. Optional; defaults to the style's fontIndex.",
+    )
+    fontName: str | None = Field(
+        None,
+        description="Name of the font for this run only, resolved like the style's fontName (and taking precedence over the run's fontIndex). Optional; defaults to the style's font. Read back as the name of the font the run's fontIndex refers to, absent when no loaded font has that index.",
     )
     bold: bool | None = None
     italic: bool | None = None
@@ -2298,18 +2963,14 @@ class TextSettings(APIModel):
     justification: Justification | None = Field(None, description="Only applied to Text elements.")
 
 
-class TextFrameShape(Enum):
-    """Text frame shape. Standalone Text elements only support Rectangle. Available from Archicad 28; earlier versions ignore it and read it back as Rectangle."""
-    RECTANGLE = "Rectangle"
-    CIRCLE = "Circle"
-    ROUNDED_RECTANGLE = "RoundedRectangle"
-    PILL = "Pill"
-
-
 class TextStyleDetails(APIModel):
     """Full readable style state of a Text or text-class Label: every field of TextStyleSettableDetails plus the read-only ones (lineCount, boxWidth, boxHeight)."""
     penIndex: int | None = Field(None, description="Pen attribute index.")
     fontIndex: int | None = Field(None, description="Font attribute index.")
+    fontName: str | None = Field(
+        None,
+        description="The name of the font fontIndex refers to, as the Font attributes carry it. Absent when no loaded font has that index.",
+    )
     bold: bool | None = None
     italic: bool | None = None
     underline: bool | None = None
@@ -2341,10 +3002,7 @@ class TextStyleDetails(APIModel):
         None,
         description="The text should always be readable (flips when viewed upside down).",
     )
-    textFrameShape: TextFrameShape | None = Field(
-        None,
-        description="Text frame shape. Standalone Text elements only support Rectangle. Available from Archicad 28; earlier versions ignore it and read it back as Rectangle.",
-    )
+    textFrameShape: TextFrameShape | None = None
     textFrameSizeFixed: bool | None = Field(
         None,
         description="Use fixedWidth/fixedHeight instead of fitting the frame to the text box. Available from Archicad 28; earlier versions ignore it and read it back as false.",
@@ -2372,6 +3030,10 @@ class TextStyleSettableDetails(APIModel):
     """Every user-configurable style setting of a Text or a text-class Label (API_TextType). Shared by CreateTexts/CreateLabels ('style'), ModifyTexts/ModifyLabels ('style'), and the Get response."""
     penIndex: int | None = Field(None, description="Pen attribute index.")
     fontIndex: int | None = Field(None, description="Font attribute index.")
+    fontName: str | None = Field(
+        None,
+        description="Name of the font, as the Font attributes carry it and GetDetailsOfElements reports it in fontName, e.g. 'Arial'. Resolved to the font's index (exact match first, then case-insensitive); the command fails when no loaded font has the name. Takes precedence over fontIndex if both are given.",
+    )
     bold: bool | None = None
     italic: bool | None = None
     underline: bool | None = None
@@ -2496,9 +3158,9 @@ class ViewCloneData(APIModel):
     navigatorItemId: NavigatorItemId = Field(
         ..., description="Navigator item ID of the Project Map viewpoint to clone."
     )
-    parentNavigatorItemId: NavigatorItemId | None = Field(
-        None,
-        description="Navigator item ID of the View Map folder to place the clone in. Optional; defaults to the View Map root.",
+    parentNavigatorItemId: NavigatorItemId = Field(
+        ...,
+        description="Navigator item ID of the View Map folder to place the clone in. Required - Archicad's CloneProjectMapItemToViewMap API leaves a clone created directly at the View Map root in a broken state (it cannot be deleted or moved afterwards, by API or by hand), so Tapir refuses to fall back to the root on your behalf. Create a View Map folder (CreateViewMapFolder) first if you don't already have one to target.",
     )
 
 
@@ -2506,9 +3168,9 @@ class ViewData(APIModel):
     navigatorItemId: NavigatorItemId = Field(
         ..., description="Source navigator item whose database and settings are copied."
     )
-    parentNavigatorItemId: NavigatorItemId | None = Field(
-        None,
-        description="View Map folder to place the new view in. Optional; defaults to View Map root.",
+    parentNavigatorItemId: NavigatorItemId = Field(
+        ...,
+        description="View Map folder to place the new view in. Required - the underlying Archicad API used to create the item leaves it undeletable and unmovable afterwards when it is attached directly to the View Map root, so Tapir refuses to fall back to the root on your behalf. Create a View Map folder (CreateViewMapFolder) first if you don't already have one to target.",
     )
     name: str | None = Field(
         None,
@@ -2568,6 +3230,41 @@ class WallProfileType(Enum):
     SLANTED = "Slanted"
     TRAPEZ = "Trapez"
     POLY = "Poly"
+
+
+class WallQuantities(APIModel):
+    """Quantities of a Wall element, as calculated by Archicad. Lengths in meters, areas in square meters, volumes in cubic meters."""
+    volume: float = Field(..., description="Net volume of the wall.")
+    volumeConditional: float = Field(
+        ...,
+        description="Conditional net volume of the wall (openings smaller than minOpeningSize are not subtracted).",
+    )
+    grossVolume: float = Field(..., description="Gross volume of the wall (openings not subtracted).")
+    referenceSideSurface: float = Field(..., description="Net surface on the reference line side.")
+    oppositeSideSurface: float = Field(..., description="Net surface on the side opposite to the reference line.")
+    edgeSurface: float = Field(..., description="Surface of the edges of the wall.")
+    referenceSideSurfaceConditional: float = Field(..., description="Conditional surface on the reference line side.")
+    oppositeSideSurfaceConditional: float = Field(
+        ...,
+        description="Conditional surface on the side opposite to the reference line.",
+    )
+    grossReferenceSideSurface: float = Field(..., description="Gross surface on the reference line side.")
+    grossOppositeSideSurface: float = Field(
+        ..., description="Gross surface on the side opposite to the reference line."
+    )
+    length: float = Field(..., description="Average of the lengths on the two sides of the wall.")
+    referenceSideLength: float = Field(..., description="Length on the reference line side.")
+    oppositeSideLength: float = Field(..., description="Length on the side opposite to the reference line.")
+    centerLength: float = Field(..., description="Length of the wall at its center.")
+    referenceLineLength: float = Field(..., description="Length of the reference line.")
+    minHeight: float = Field(..., description="Minimum height of the wall.")
+    maxHeight: float = Field(..., description="Maximum height of the wall.")
+    area: float = Field(..., description="Floor plan area of the wall.")
+    perimeter: float = Field(..., description="Floor plan perimeter of the wall.")
+    windowsSurface: float = Field(..., description="Surface of the windows in the wall.")
+    doorsSurface: float = Field(..., description="Surface of the doors in the wall.")
+    emptyOpeningsSurface: float = Field(..., description="Surface of the empty openings in the wall.")
+    emptyOpeningsVolume: float = Field(..., description="Volume of the empty openings in the wall.")
 
 
 class WallReferenceLineLocation(Enum):
@@ -2642,6 +3339,21 @@ class ZoneCategoryAttributeField(Enum):
     STAMP_REV_GUID = "stampRevGuid"
 
 
+class ZoneQuantities(APIModel):
+    """Quantities of a Zone element, as calculated by Archicad. Lengths in meters, areas in square meters, volumes in cubic meters."""
+    area: float = Field(..., description="Measured area of the zone.")
+    netArea: float = Field(..., description="Net area of the zone.")
+    calculatedArea: float = Field(..., description="Calculated area of the zone (after reductions).")
+    perimeter: float = Field(..., description="Perimeter of the zone.")
+    netPerimeter: float = Field(..., description="Net perimeter of the zone.")
+    volume: float = Field(..., description="Volume of the zone.")
+    height: float = Field(..., description="Height of the zone.")
+    wallsPerimeter: float = Field(..., description="Length of the perimeter walls.")
+    wallsSurface: float = Field(..., description="Surface of the perimeter walls.")
+    doorsSurface: float = Field(..., description="Surface of the doors in the zone.")
+    windowsSurface: float = Field(..., description="Surface of the windows in the zone.")
+
+
 class ZoneSettings(APIModel):
     """Settings for modifying a zone."""
     stampPosition: Coordinate2D | None = Field(None, description="Position of the origin of the zone stamp.")
@@ -2706,8 +3418,14 @@ class BeamData(APIModel):
         None,
         description="Rotation angle of the profile around the beam's center line, in radians.",
     )
-    arcAngle: float | None = None
-    verticalCurveHeight: float | None = None
+    arcAngle: float | None = Field(
+        None,
+        description="Optional arc angle in radians. A non-zero value makes a horizontally curved beam.",
+    )
+    verticalCurveHeight: float | None = Field(
+        None,
+        description="Optional rise of a vertically curved beam. A non-zero value makes a vertically curved beam; it wins over arcAngle.",
+    )
     width: float | None = Field(
         None,
         description="Cross section width of the beam. Applied to all segments.",
@@ -2754,6 +3472,22 @@ class BeamHoleModification(APIModel):
     centerZ: float
     width: float = Field(..., gt=0.0)
     height: float | None = Field(None, description="Only used for the Rectangular type.", gt=0.0)
+
+
+class Body3DPolygon(APIModel):
+    vertexIds: list[int] = Field(
+        ...,
+        description="The outer contour of the face: 0-based indices into vertices.",
+        min_length=3,
+    )
+    holes: list[Body3DPolygonHole] | None = Field(
+        None,
+        description="The holes in the face, each a closed loop of 0-based indices into vertices.",
+    )
+    surfaceId: AttributeId | None = Field(
+        None,
+        description="The surface attribute of the face. Left out when the face's material is not a project attribute (for example one defined by a GDL script).",
+    )
 
 
 class BuildingMaterialAttribute(APIModel):
@@ -2917,6 +3651,18 @@ class ColumnData(APIModel):
     coordinates: Coordinates = Field(..., description="3D coordinate.")
     height: float | None = Field(None, description="Optional column height.", gt=0.0)
     axisRotationAngle: float | None = Field(None, description="Optional column rotation angle in radians.")
+    slantAngle: float | None = Field(
+        None,
+        description="Optional slant angle in radians. A non-zero value also makes the column slanted, unless isSlanted is given explicitly.",
+    )
+    isSlanted: bool | None = Field(
+        None,
+        description="Optional explicit slanted state. By default it is derived from slantAngle.",
+    )
+    slantDirectionAngle: float | None = Field(
+        None,
+        description="Optional rotation angle of the slanted column on the horizontal plane in radians.",
+    )
     width: float | None = Field(
         None,
         description="Cross section width of the column. Applied to all segments.",
@@ -3053,6 +3799,21 @@ class CurtainWallFrameDetails(APIModel):
     type: CurtainWallFrameType
 
 
+class CurtainWallPattern(APIModel):
+    """The column (primary) or row (secondary) pattern of a curtain wall segment: the sizes of the columns/rows of one pattern unit and how the unit is repeated along the segment."""
+    sizes: list[CurtainWallPatternSize] = Field(
+        ...,
+        description="The sizes (widths of the columns or heights of the rows) of the pattern unit in meters, in order from the start of the segment or from the bottom. The unit is repeated to fill the segment.",
+        min_length=1,
+    )
+    logic: CurtainWallPatternLogic | None = None
+    origin: CurtainWallPatternOrigin | None = None
+    flexibleIndices: list[CurtainWallFlexibleIndex] | None = Field(
+        None,
+        description="Zero-based indices of the columns/rows of the pattern unit that 'BestDivision' may stretch. When omitted, all of them are flexible. Ignored by 'FixedSizes'.",
+    )
+
+
 class DatabaseId(APIModel):
     """The identifier of a database"""
     guid: UUID = Field(
@@ -3091,6 +3852,11 @@ class DesignOptionCombinationIdArrayItem(APIModel):
     designOptionCombinationId: DesignOptionCombinationId
 
 
+class DesignOptionCombinationRename(APIModel):
+    designOptionCombinationId: DesignOptionCombinationId
+    name: str = Field(..., description="The new name of the design option combination.")
+
+
 class DesignOptionId(APIModel):
     """The identifier of a design option."""
     guid: UUID = Field(
@@ -3101,6 +3867,35 @@ class DesignOptionId(APIModel):
 
 class DesignOptionIdArrayItem(APIModel):
     designOptionId: DesignOptionId
+
+
+class DesignOptionRename(APIModel):
+    designOptionId: DesignOptionId
+    name: str | None = Field(
+        None,
+        description="The new name of the design option. The name is kept when it is not given.",
+    )
+    id: str | None = Field(
+        None,
+        description="The new string id of the design option. The id is kept when it is not given.",
+    )
+
+
+class DesignOptionSetId(APIModel):
+    """The identifier of a design option set."""
+    guid: UUID = Field(
+        ...,
+        description="A Globally Unique Identifier (or Universally Unique Identifier) in its string representation as defined in RFC 4122.",
+    )
+
+
+class DesignOptionSetIdArrayItem(APIModel):
+    designOptionSetId: DesignOptionSetId
+
+
+class DesignOptionSetRename(APIModel):
+    designOptionSetId: DesignOptionSetId
+    name: str = Field(..., description="The new name of the design option set.")
 
 
 class DocumentRevisionId(APIModel):
@@ -3147,6 +3942,31 @@ class DrawingData(APIModel):
         description="Offset of the model origin within the drawing. Defaults to the Drawing tool's current default.",
     )
     clipPolygon: list[Coordinate2D] | None = Field(None, min_length=3)
+
+
+class ElectricalPanelData(APIModel):
+    position: Coordinate3D = Field(..., description="The anchor point of the new panel.")
+    orientation: MEPOrientation | None = Field(
+        None,
+        description="Defaults to the direction (1, 0, 0) and the rotation (0, 1, 0).",
+    )
+    rotation: float | None = Field(None, description="The base rotation in radians.")
+    isReflected: bool | None = None
+    libraryPartId: LibPartUnId | None = Field(
+        None,
+        description="The library part to use, as listed by GetAvailableLibraryParts.",
+    )
+    xSize: float | None = Field(
+        None,
+        description="The size along the local x axis. Some library parts calculate their own size, then the item fails.",
+    )
+    ySize: float | None = Field(
+        None,
+        description="The size along the local y axis. Some library parts calculate their own size, then the item fails.",
+    )
+    panelName: str | None = None
+    circuitNamePrefix: str | None = None
+    circuitIdStyle: int | None = None
 
 
 class ElementId(APIModel):
@@ -3447,6 +4267,1576 @@ class Subelement(APIModel):
     columnSegments: list[ElementIdArrayItem] | None = Field(None, description="A list of elements.")
 
 
+class GraphicOverrideCombinationId(APIModel):
+    """The identifier of a graphic override combination."""
+    guid: UUID = Field(
+        ...,
+        description="A Globally Unique Identifier (or Universally Unique Identifier) in its string representation as defined in RFC 4122.",
+    )
+
+
+class GraphicOverrideCombinationIdArrayItem(APIModel):
+    graphicOverrideCombinationId: GraphicOverrideCombinationId
+
+
+class GraphicOverrideCriterion(APIModel):
+    """Structured conditions of a graphic override rule, turned into Archicad's criterion XML (an alternative to criterionXML). Give exactly one property. 'and'/'or' combine a flat list of other conditions (no nesting, see their description). 'elementType' filters by the tool an element was created with; 'all3DTypes'/'all2DTypes' match every 3D or 2D element. The other properties are conditions of Archicad's criteria editor: classification, layer and Model View, Construction, Positioning, Plan and Section, Surfaces and Materials, ID and Categories, Geometry, custom properties, and fields of the Wall, Column, Beam, Slab, Roof, Shell, Object/Lamp, Door/Window, Opening, Curtain Wall and Stair tools. Their identifiers were captured from rules made in the criteria editor of Archicad 29; Archicad 27 keeps the generated rules as well. Not available: the renovation status of an element, and the shape, limits and orientation of an Opening."""
+    and_: list[GraphicOverrideCriterion] | None = Field(
+        None,
+        alias="and",
+        description="Matches if all of the nested criteria match. The nested criteria must all be leaves (elementType, classification, layer*, ...) - an 'and'/'or' nested inside this array is rejected, ArchiCAD's criteria editor does not reliably support that depth of nesting.",
+    )
+    or_: list[GraphicOverrideCriterion] | None = Field(
+        None,
+        alias="or",
+        description="Matches if any of the nested criteria match. The nested criteria must all be leaves (elementType, classification, layer*, ...) - an 'and'/'or' nested inside this array is rejected, ArchiCAD's criteria editor does not reliably support that depth of nesting.",
+    )
+    elementType: GraphicOverrideElementType | None = Field(None, description="Matches elements created with this tool.")
+    classification: str | None = Field(
+        None,
+        description="Matches elements classified with this Classification System item ID (e.g. 'Slab'), or with any descendant of it in the classification tree (ArchiCAD's 'is in the branch of' operator - not a strict equality check).",
+    )
+    classificationNot: str | None = Field(
+        None,
+        description="Matches elements NOT classified with this Classification System item ID and not with any descendant of it in the classification tree (ArchiCAD's 'is not in the branch of' operator - not a strict inequality check).",
+    )
+    classificationSystem: str | None = Field(
+        None,
+        description="The classification system 'classification'/'classificationNot' refers to: its name as shown in the Classification Manager (e.g. 'Classification Archicad'), or its name and version as the criteria editor shows them (e.g. 'Classification Archicad - v 2.0'). Left out: the only classification system of the project that contains the item ID; an error when several do.",
+    )
+    all3DTypes: bool | None = Field(None, description="If true, matches every 3D model element type.")
+    all2DTypes: bool | None = Field(None, description="If true, matches every 2D drawing element type.")
+    missingAttributes: bool | None = Field(
+        None,
+        description="Matches elements whose 'Missing attributes' status equals this value.",
+    )
+    missingLibraryPart: bool | None = Field(
+        None,
+        description="Matches elements whose 'Missing library part' status equals this value (e.g. an Object/Lamp referencing a library part not found in the loaded libraries).",
+    )
+    layer: str | None = Field(None, description="Matches elements on this layer (by layer name).")
+    layerNot: str | None = Field(None, description="Matches elements NOT on this layer (by layer name).")
+    layerLocked: bool | None = Field(
+        None,
+        description="Matches elements whose layer's locked state equals this value.",
+    )
+    layerVisible: bool | None = Field(
+        None,
+        description="Matches elements whose layer's visible state equals this value.",
+    )
+    layerCombination: str | None = Field(
+        None,
+        description="Matches elements whose layer is shown in this layer combination (by layer combination name). ArchiCAD only offers 'contains'/'does not contain' for this field, no strict equality.",
+    )
+    layerCombinationNot: str | None = Field(
+        None,
+        description="Matches elements whose layer is NOT shown in this layer combination (by layer combination name).",
+    )
+    layerNameIs: str | None = Field(
+        None,
+        description="Matches elements whose layer name equals this string exactly.",
+    )
+    layerNameIsNot: str | None = Field(
+        None,
+        description="Matches elements whose layer name does not equal this string.",
+    )
+    layerNameContains: str | None = Field(
+        None, description="Matches elements whose layer name contains this substring."
+    )
+    layerNameNotContains: str | None = Field(
+        None,
+        description="Matches elements whose layer name does not contain this substring.",
+    )
+    layerNameStartsWith: str | None = Field(
+        None,
+        description="Matches elements whose layer name starts with this substring.",
+    )
+    layerNameEndsWith: str | None = Field(
+        None, description="Matches elements whose layer name ends with this substring."
+    )
+    compositeStructure: str | None = Field(
+        None,
+        description="Matches elements built with this Composite Structure attribute (by name).",
+    )
+    compositeStructureNot: str | None = Field(
+        None,
+        description="Matches elements NOT built with this Composite Structure attribute (by name).",
+    )
+    complexProfile: str | None = Field(
+        None,
+        description="Matches elements built with this Complex Profile attribute (by name).",
+    )
+    complexProfileNot: str | None = Field(
+        None,
+        description="Matches elements NOT built with this Complex Profile attribute (by name).",
+    )
+    compositeStructureNameIs: str | None = Field(
+        None,
+        description="Matches elements whose Composite Structure attribute name equals this string exactly.",
+    )
+    compositeStructureNameIsNot: str | None = Field(
+        None,
+        description="Matches elements whose Composite Structure attribute name does not equal this string.",
+    )
+    compositeStructureNameContains: str | None = Field(
+        None,
+        description="Matches elements whose Composite Structure attribute name contains this substring.",
+    )
+    compositeStructureNameNotContains: str | None = Field(
+        None,
+        description="Matches elements whose Composite Structure attribute name does not contain this substring.",
+    )
+    compositeStructureNameStartsWith: str | None = Field(
+        None,
+        description="Matches elements whose Composite Structure attribute name starts with this substring.",
+    )
+    compositeStructureNameEndsWith: str | None = Field(
+        None,
+        description="Matches elements whose Composite Structure attribute name ends with this substring.",
+    )
+    complexProfileNameIs: str | None = Field(
+        None,
+        description="Matches elements whose Complex Profile attribute name equals this string exactly.",
+    )
+    complexProfileNameIsNot: str | None = Field(
+        None,
+        description="Matches elements whose Complex Profile attribute name does not equal this string.",
+    )
+    complexProfileNameContains: str | None = Field(
+        None,
+        description="Matches elements whose Complex Profile attribute name contains this substring.",
+    )
+    complexProfileNameNotContains: str | None = Field(
+        None,
+        description="Matches elements whose Complex Profile attribute name does not contain this substring.",
+    )
+    complexProfileNameStartsWith: str | None = Field(
+        None,
+        description="Matches elements whose Complex Profile attribute name starts with this substring.",
+    )
+    complexProfileNameEndsWith: str | None = Field(
+        None,
+        description="Matches elements whose Complex Profile attribute name ends with this substring.",
+    )
+    roofConnected: bool | None = Field(
+        None,
+        description="Matches roofs whose 'connected to other roof(s)' status equals this value.",
+    )
+    structureType: GraphicOverrideStructureType | None = None
+    seaLevelAltitude: float | None = Field(
+        None, description="Matches elements whose sea level altitude equals this value."
+    )
+    seaLevelAltitudeNot: float | None = Field(
+        None,
+        description="Matches elements whose sea level altitude does not equal this value.",
+    )
+    seaLevelAltitudeLessThan: float | None = Field(
+        None,
+        description="Matches elements whose sea level altitude is less than this value.",
+    )
+    seaLevelAltitudeGreaterThan: float | None = Field(
+        None,
+        description="Matches elements whose sea level altitude is greater than this value.",
+    )
+    seaLevelAltitudeLessOrEqual: float | None = Field(
+        None,
+        description="Matches elements whose sea level altitude is less than or equal to this value.",
+    )
+    seaLevelAltitudeGreaterOrEqual: float | None = Field(
+        None,
+        description="Matches elements whose sea level altitude is greater than or equal to this value.",
+    )
+    projectZeroAltitude: float | None = Field(
+        None,
+        description="Matches elements whose altitude to project zero equals this value.",
+    )
+    projectZeroAltitudeNot: float | None = Field(
+        None,
+        description="Matches elements whose altitude to project zero does not equal this value.",
+    )
+    projectZeroAltitudeLessThan: float | None = Field(
+        None,
+        description="Matches elements whose altitude to project zero is less than this value.",
+    )
+    projectZeroAltitudeGreaterThan: float | None = Field(
+        None,
+        description="Matches elements whose altitude to project zero is greater than this value.",
+    )
+    projectZeroAltitudeLessOrEqual: float | None = Field(
+        None,
+        description="Matches elements whose altitude to project zero is less than or equal to this value.",
+    )
+    projectZeroAltitudeGreaterOrEqual: float | None = Field(
+        None,
+        description="Matches elements whose altitude to project zero is greater than or equal to this value.",
+    )
+    groundFloorAltitude: float | None = Field(
+        None,
+        description="Matches elements whose altitude to the ground floor equals this value.",
+    )
+    groundFloorAltitudeNot: float | None = Field(
+        None,
+        description="Matches elements whose altitude to the ground floor does not equal this value.",
+    )
+    groundFloorAltitudeLessThan: float | None = Field(
+        None,
+        description="Matches elements whose altitude to the ground floor is less than this value.",
+    )
+    groundFloorAltitudeGreaterThan: float | None = Field(
+        None,
+        description="Matches elements whose altitude to the ground floor is greater than this value.",
+    )
+    groundFloorAltitudeLessOrEqual: float | None = Field(
+        None,
+        description="Matches elements whose altitude to the ground floor is less than or equal to this value.",
+    )
+    groundFloorAltitudeGreaterOrEqual: float | None = Field(
+        None,
+        description="Matches elements whose altitude to the ground floor is greater than or equal to this value.",
+    )
+    roofAltitude: float | None = Field(None, description="Matches elements whose roof altitude equals this value.")
+    roofAltitudeNot: float | None = Field(
+        None,
+        description="Matches elements whose roof altitude does not equal this value.",
+    )
+    roofAltitudeLessThan: float | None = Field(
+        None,
+        description="Matches elements whose roof altitude is less than this value.",
+    )
+    roofAltitudeGreaterThan: float | None = Field(
+        None,
+        description="Matches elements whose roof altitude is greater than this value.",
+    )
+    roofAltitudeLessOrEqual: float | None = Field(
+        None,
+        description="Matches elements whose roof altitude is less than or equal to this value.",
+    )
+    roofAltitudeGreaterOrEqual: float | None = Field(
+        None,
+        description="Matches elements whose roof altitude is greater than or equal to this value.",
+    )
+    floorIndex: int | None = Field(
+        None,
+        description="Matches elements whose placement story equals this 0-based story/floor index (same convention as floorIndex elsewhere in Tapir). Only equality is supported - ArchiCAD's criteria editor does not offer a 'not equal' option for this field.",
+    )
+    sillHeight: float | None = Field(
+        None,
+        description="Matches Door/Window/RoofWindow/Opening elements whose sill height equals this value.",
+    )
+    sillHeightNot: float | None = None
+    sillHeightLessThan: float | None = None
+    sillHeightGreaterThan: float | None = None
+    sillHeightLessOrEqual: float | None = None
+    sillHeightGreaterOrEqual: float | None = None
+    lintelHeight: float | None = Field(
+        None,
+        description="Matches Door/Window/RoofWindow/Opening elements whose lintel height equals this value.",
+    )
+    lintelHeightNot: float | None = None
+    lintelHeightLessThan: float | None = None
+    lintelHeightGreaterThan: float | None = None
+    lintelHeightLessOrEqual: float | None = None
+    lintelHeightGreaterOrEqual: float | None = None
+    screedThickness: float | None = Field(
+        None,
+        description="Matches Door/Window/RoofWindow elements whose screed thickness ('Epaisseur chape') equals this value.",
+    )
+    screedThicknessNot: float | None = None
+    screedThicknessLessThan: float | None = None
+    screedThicknessGreaterThan: float | None = None
+    screedThicknessLessOrEqual: float | None = None
+    screedThicknessGreaterOrEqual: float | None = None
+    linkedUpperStoryAbsolute: int | None = Field(
+        None,
+        description="Matches Stair/Zone elements whose absolute linked upper story equals this 0-based story index. Only equality is supported. -31001 means 'not linked' ('Non lie').",
+    )
+    linkedUpperStoryRelative: int | None = Field(
+        None,
+        description="Matches Stair/Zone elements whose relative linked upper story equals this value. Only equality is supported. -31001 means 'not linked' ('Non lie').",
+    )
+    mepDiameter: float | None = Field(None, description="Matches MEP elements whose diameter equals this value.")
+    mepDiameterNot: float | None = None
+    mepDiameterLessThan: float | None = None
+    mepDiameterGreaterThan: float | None = None
+    mepDiameterLessOrEqual: float | None = None
+    mepDiameterGreaterOrEqual: float | None = None
+    mepDiameter2: float | None = Field(None, description="Matches MEP elements whose 2nd diameter equals this value.")
+    mepDiameter2Not: float | None = None
+    mepDiameter2LessThan: float | None = None
+    mepDiameter2GreaterThan: float | None = None
+    mepDiameter2LessOrEqual: float | None = None
+    mepDiameter2GreaterOrEqual: float | None = None
+    mepDN: int | None = Field(
+        None,
+        description="Matches MEP elements whose nominal diameter (DN) equals this value.",
+    )
+    mepDNNot: int | None = None
+    mepDNLessThan: int | None = None
+    mepDNGreaterThan: int | None = None
+    mepDNLessOrEqual: int | None = None
+    mepDNGreaterOrEqual: int | None = None
+    mepDN2: int | None = Field(
+        None,
+        description="Matches MEP elements whose 2nd nominal diameter (DN) equals this value.",
+    )
+    mepDN2Not: int | None = None
+    mepDN2LessThan: int | None = None
+    mepDN2GreaterThan: int | None = None
+    mepDN2LessOrEqual: int | None = None
+    mepDN2GreaterOrEqual: int | None = None
+    mepHeight: float | None = Field(None, description="Matches MEP elements whose height equals this value.")
+    mepHeightNot: float | None = None
+    mepHeightLessThan: float | None = None
+    mepHeightGreaterThan: float | None = None
+    mepHeightLessOrEqual: float | None = None
+    mepHeightGreaterOrEqual: float | None = None
+    mepHeight2: float | None = Field(None, description="Matches MEP elements whose 2nd height equals this value.")
+    mepHeight2Not: float | None = None
+    mepHeight2LessThan: float | None = None
+    mepHeight2GreaterThan: float | None = None
+    mepHeight2LessOrEqual: float | None = None
+    mepHeight2GreaterOrEqual: float | None = None
+    mepWidth: float | None = Field(None, description="Matches MEP elements whose width equals this value.")
+    mepWidthNot: float | None = None
+    mepWidthLessThan: float | None = None
+    mepWidthGreaterThan: float | None = None
+    mepWidthLessOrEqual: float | None = None
+    mepWidthGreaterOrEqual: float | None = None
+    mepWidth2: float | None = Field(None, description="Matches MEP elements whose 2nd width equals this value.")
+    mepWidth2Not: float | None = None
+    mepWidth2LessThan: float | None = None
+    mepWidth2GreaterThan: float | None = None
+    mepWidth2LessOrEqual: float | None = None
+    mepWidth2GreaterOrEqual: float | None = None
+    mepAngle: float | None = Field(
+        None,
+        description="Matches MEP elements whose angle equals this value (degrees).",
+    )
+    mepAngleNot: float | None = None
+    mepAngleLessThan: float | None = None
+    mepAngleGreaterThan: float | None = None
+    mepAngleLessOrEqual: float | None = None
+    mepAngleGreaterOrEqual: float | None = None
+    mepCustomAngle: float | None = Field(
+        None,
+        description="Matches MEP elements whose custom angle equals this value (degrees).",
+    )
+    mepCustomAngleNot: float | None = None
+    mepCustomAngleLessThan: float | None = None
+    mepCustomAngleGreaterThan: float | None = None
+    mepCustomAngleLessOrEqual: float | None = None
+    mepCustomAngleGreaterOrEqual: float | None = None
+    mepInsulationThickness: float | None = Field(
+        None,
+        description="Matches MEP elements whose insulation thickness equals this value.",
+    )
+    mepInsulationThicknessNot: float | None = None
+    mepInsulationThicknessLessThan: float | None = None
+    mepInsulationThicknessGreaterThan: float | None = None
+    mepInsulationThicknessLessOrEqual: float | None = None
+    mepInsulationThicknessGreaterOrEqual: float | None = None
+    mepLength: float | None = Field(None, description="Matches MEP elements whose length equals this value.")
+    mepLengthNot: float | None = None
+    mepLengthLessThan: float | None = None
+    mepLengthGreaterThan: float | None = None
+    mepLengthLessOrEqual: float | None = None
+    mepLengthGreaterOrEqual: float | None = None
+    mepDescriptionIs: str | None = Field(
+        None,
+        description="Matches MEP elements whose description equals this string exactly.",
+    )
+    mepDescriptionIsNot: str | None = None
+    mepDescriptionContains: str | None = None
+    mepDescriptionNotContains: str | None = None
+    mepDescriptionStartsWith: str | None = None
+    mepDescriptionEndsWith: str | None = None
+    mepMaterialNameIs: str | None = Field(
+        None,
+        description="Matches MEP elements whose material name equals this string exactly.",
+    )
+    mepMaterialNameIsNot: str | None = None
+    mepMaterialNameContains: str | None = None
+    mepMaterialNameNotContains: str | None = None
+    mepMaterialNameStartsWith: str | None = None
+    mepMaterialNameEndsWith: str | None = None
+    wallComplexity: GraphicOverrideWallComplexity | None = None
+    wallComplexityNot: GraphicOverrideWallComplexity | None = Field(
+        None, description="Matches walls whose complexity is NOT this."
+    )
+    wallLevelOffset: float | None = Field(
+        None,
+        description="Matches walls whose home story level offset equals this value.",
+    )
+    wallLevelOffsetNot: float | None = None
+    wallLevelOffsetLessThan: float | None = None
+    wallLevelOffsetGreaterThan: float | None = None
+    wallLevelOffsetLessOrEqual: float | None = None
+    wallLevelOffsetGreaterOrEqual: float | None = None
+    wallTopOffset: float | None = Field(None, description="Matches walls whose top offset equals this value.")
+    wallTopOffsetNot: float | None = None
+    wallTopOffsetLessThan: float | None = None
+    wallTopOffsetGreaterThan: float | None = None
+    wallTopOffsetLessOrEqual: float | None = None
+    wallTopOffsetGreaterOrEqual: float | None = None
+    wallReferenceLinePosition: WallReferenceLineLocation | None = Field(
+        None, description="Matches walls whose reference line position equals this."
+    )
+    wallReferenceLinePositionNot: WallReferenceLineLocation | None = None
+    wallOutsideAngle: float | None = Field(
+        None,
+        description="Matches walls whose outside slant angle equals this value (degrees).",
+    )
+    wallOutsideAngleNot: float | None = None
+    wallOutsideAngleLessThan: float | None = None
+    wallOutsideAngleGreaterThan: float | None = None
+    wallOutsideAngleLessOrEqual: float | None = None
+    wallOutsideAngleGreaterOrEqual: float | None = None
+    wallInsideAngle: float | None = Field(
+        None,
+        description="Matches walls whose inside slant angle equals this value (degrees).",
+    )
+    wallInsideAngleNot: float | None = None
+    wallInsideAngleLessThan: float | None = None
+    wallInsideAngleGreaterThan: float | None = None
+    wallInsideAngleLessOrEqual: float | None = None
+    wallInsideAngleGreaterOrEqual: float | None = None
+    wallThickness: float | None = Field(None, description="Matches walls whose thickness equals this value.")
+    wallThicknessNot: float | None = None
+    wallThicknessLessThan: float | None = None
+    wallThicknessGreaterThan: float | None = None
+    wallThicknessLessOrEqual: float | None = None
+    wallThicknessGreaterOrEqual: float | None = None
+    wallHeight: float | None = Field(None, description="Matches walls whose height equals this value.")
+    wallHeightNot: float | None = None
+    wallHeightLessThan: float | None = None
+    wallHeightGreaterThan: float | None = None
+    wallHeightLessOrEqual: float | None = None
+    wallHeightGreaterOrEqual: float | None = None
+    wallProfileHeight: float | None = Field(None, description="Matches walls whose profile height equals this value.")
+    wallProfileHeightNot: float | None = None
+    wallProfileHeightLessThan: float | None = None
+    wallProfileHeightGreaterThan: float | None = None
+    wallProfileHeightLessOrEqual: float | None = None
+    wallProfileHeightGreaterOrEqual: float | None = None
+    wallHeightReversed: bool | None = Field(
+        None,
+        description="Matches walls whose height is measured downward (reversed) if true.",
+    )
+    wallWidth: float | None = Field(None, description="Matches walls whose width equals this value.")
+    wallWidthNot: float | None = None
+    wallWidthLessThan: float | None = None
+    wallWidthGreaterThan: float | None = None
+    wallWidthLessOrEqual: float | None = None
+    wallWidthGreaterOrEqual: float | None = None
+    wallProfileWidth: float | None = Field(None, description="Matches walls whose profile width equals this value.")
+    wallProfileWidthNot: float | None = None
+    wallProfileWidthLessThan: float | None = None
+    wallProfileWidthGreaterThan: float | None = None
+    wallProfileWidthLessOrEqual: float | None = None
+    wallProfileWidthGreaterOrEqual: float | None = None
+    objectLength: float | None = Field(
+        None,
+        description="Matches Object/Lamp elements whose length parameter ('A') equals this value.",
+    )
+    objectLengthNot: float | None = None
+    objectLengthLessThan: float | None = None
+    objectLengthGreaterThan: float | None = None
+    objectLengthLessOrEqual: float | None = None
+    objectLengthGreaterOrEqual: float | None = None
+    jambThickness1: float | None = Field(
+        None,
+        description="Matches Door/Window elements whose jamb thickness 1 ('Epaisseur Montant1') equals this value.",
+    )
+    jambThickness1Not: float | None = None
+    jambThickness1LessThan: float | None = None
+    jambThickness1GreaterThan: float | None = None
+    jambThickness1LessOrEqual: float | None = None
+    jambThickness1GreaterOrEqual: float | None = None
+    jambThickness2: float | None = Field(
+        None,
+        description="Matches Door/Window elements whose jamb thickness 2 ('Epaisseur Montant2') equals this value.",
+    )
+    jambThickness2Not: float | None = None
+    jambThickness2LessThan: float | None = None
+    jambThickness2GreaterThan: float | None = None
+    jambThickness2LessOrEqual: float | None = None
+    jambThickness2GreaterOrEqual: float | None = None
+    curtainWallPanelOffset: float | None = Field(
+        None,
+        description="Matches Curtain Wall elements whose panel offset equals this value.",
+    )
+    curtainWallPanelOffsetNot: float | None = None
+    curtainWallPanelOffsetLessThan: float | None = None
+    curtainWallPanelOffsetGreaterThan: float | None = None
+    curtainWallPanelOffsetLessOrEqual: float | None = None
+    curtainWallPanelOffsetGreaterOrEqual: float | None = None
+    stairRiserInclineAngle: float | None = Field(
+        None, description="Matches stairs whose riser incline angle equals this value."
+    )
+    stairRiserInclineAngleNot: float | None = None
+    stairRiserInclineAngleLessThan: float | None = None
+    stairRiserInclineAngleGreaterThan: float | None = None
+    stairRiserInclineAngleLessOrEqual: float | None = None
+    stairRiserInclineAngleGreaterOrEqual: float | None = None
+    stairMinHeadroom: float | None = Field(
+        None,
+        description="Matches stairs whose minimum headroom height equals this value.",
+    )
+    stairMinHeadroomNot: float | None = None
+    stairMinHeadroomLessThan: float | None = None
+    stairMinHeadroomGreaterThan: float | None = None
+    stairMinHeadroomLessOrEqual: float | None = None
+    stairMinHeadroomGreaterOrEqual: float | None = None
+    stairInvalidHeight: bool | None = Field(
+        None,
+        description="Matches stairs whose 'Invalid height' status equals this value.",
+    )
+    stairDefaultWidth: float | None = Field(None, description="Matches stairs whose default width equals this value.")
+    stairDefaultWidthNot: float | None = None
+    stairDefaultWidthLessThan: float | None = None
+    stairDefaultWidthGreaterThan: float | None = None
+    stairDefaultWidthLessOrEqual: float | None = None
+    stairDefaultWidthGreaterOrEqual: float | None = None
+    stairSlope: float | None = Field(None, description="Matches stairs whose slope equals this value.")
+    stairSlopeNot: float | None = None
+    stairSlopeLessThan: float | None = None
+    stairSlopeGreaterThan: float | None = None
+    stairSlopeLessOrEqual: float | None = None
+    stairSlopeGreaterOrEqual: float | None = None
+    stairMaxRiserHeight: float | None = Field(
+        None,
+        description="Matches stairs whose maximum riser height equals this value. Only equality is supported - not exhaustively tested against every comparison operator like other numeric fields.",
+    )
+    stairMinRiserHeight: float | None = Field(
+        None,
+        description="Matches stairs whose minimum riser height equals this value. Only equality is supported.",
+    )
+    stairMaxGoing: float | None = Field(
+        None,
+        description="Matches stairs whose maximum going (tread depth) equals this value. Only equality is supported.",
+    )
+    stairMinGoing: float | None = Field(
+        None,
+        description="Matches stairs whose minimum going (tread depth) equals this value. Only equality is supported.",
+    )
+    stairRiserCount: int | None = Field(
+        None,
+        description="Matches stairs whose number of risers equals this value. Only equality is supported.",
+    )
+    stairStepCount: int | None = Field(
+        None,
+        description="Matches stairs whose number of steps equals this value. Only equality is supported.",
+    )
+    stairStepCountPerFlight: int | None = Field(
+        None,
+        description="Matches stairs whose number of steps per flight equals this value. Only equality is supported.",
+    )
+    wallGeometryType: GraphicOverrideWallGeometryType | None = None
+    wallGeometryTypeNot: GraphicOverrideWallGeometryType | None = None
+    wallReferenceLineOffset: float | None = Field(
+        None,
+        description="Matches walls whose reference line offset equals this value. Uses a different underlying mechanism than every other numeric field in this schema, reverse-engineered separately - support all 6 comparison operators like the rest.",
+    )
+    wallReferenceLineOffsetNot: float | None = None
+    wallReferenceLineOffsetLessThan: float | None = None
+    wallReferenceLineOffsetGreaterThan: float | None = None
+    wallReferenceLineOffsetLessOrEqual: float | None = None
+    wallReferenceLineOffsetGreaterOrEqual: float | None = None
+    wallTopLine: str | None = Field(
+        None,
+        description="Matches walls whose ceiling line is this Line Type attribute (by name).",
+    )
+    wallTopLineNot: str | None = None
+    wallCutLine: str | None = Field(
+        None,
+        description="Matches walls whose cut line is this Line Type attribute (by name).",
+    )
+    wallCutLineNot: str | None = None
+    wallUncutLine: str | None = Field(
+        None,
+        description="Matches walls whose uncut line is this Line Type attribute (by name).",
+    )
+    wallUncutLineNot: str | None = None
+    wallHatchForegroundPen: int | None = Field(
+        None,
+        description="Matches walls whose hatch foreground pen equals this plain pen index.",
+    )
+    wallHatchForegroundPenNot: int | None = None
+    wallContourPen: int | None = Field(
+        None,
+        description="Matches walls whose 2D contour pen equals this plain pen index.",
+    )
+    wallContourPenNot: int | None = None
+    wallTopLinePen: int | None = Field(
+        None,
+        description="Matches walls whose ceiling line pen equals this plain pen index.",
+    )
+    wallTopLinePenNot: int | None = None
+    wallCutHatchBackgroundPen: int | None = Field(
+        None,
+        description="Matches walls whose cut hatch background pen equals this plain pen index.",
+    )
+    wallCutHatchBackgroundPenNot: int | None = None
+    wallHatchBackgroundPen: int | None = Field(
+        None,
+        description="Matches walls whose hatch background pen equals this plain pen index.",
+    )
+    wallHatchBackgroundPenNot: int | None = None
+    wallUncutLinePen: int | None = Field(
+        None,
+        description="Matches walls whose uncut line pen equals this plain pen index.",
+    )
+    wallUncutLinePenNot: int | None = None
+    wallOutsideSurface: str | None = Field(
+        None,
+        description="Matches walls whose outside face surface is this Surface attribute (by name).",
+    )
+    wallOutsideSurfaceNot: str | None = None
+    wallInsideSurface: str | None = Field(
+        None,
+        description="Matches walls whose inside face surface is this Surface attribute (by name).",
+    )
+    wallInsideSurfaceNot: str | None = None
+    wallSideSurface: str | None = Field(
+        None,
+        description="Matches walls whose side surface is this Surface attribute (by name).",
+    )
+    wallSideSurfaceNot: str | None = None
+    wallParentIdIs: str | None = Field(
+        None,
+        description="Matches walls whose parent element ID equals this string exactly.",
+    )
+    wallParentIdIsNot: str | None = None
+    wallParentIdContains: str | None = None
+    wallParentIdNotContains: str | None = None
+    wallParentIdStartsWith: str | None = None
+    wallParentIdEndsWith: str | None = None
+    wallConnectedOpeningIdsIs: str | None = Field(
+        None,
+        description="Matches walls whose connected opening IDs list equals this string exactly.",
+    )
+    wallConnectedOpeningIdsIsNot: str | None = None
+    wallConnectedOpeningIdsContains: str | None = None
+    wallConnectedOpeningIdsNotContains: str | None = None
+    wallConnectedOpeningIdsStartsWith: str | None = None
+    wallConnectedOpeningIdsEndsWith: str | None = None
+    libraryPartNameIs: str | None = Field(
+        None,
+        description="Matches elements whose library part name equals this string exactly.",
+    )
+    libraryPartNameIsNot: str | None = None
+    libraryPartNameContains: str | None = None
+    libraryPartNameNotContains: str | None = None
+    libraryPartNameStartsWith: str | None = None
+    libraryPartNameEndsWith: str | None = None
+    subTypeNameIs: str | None = Field(
+        None,
+        description="Matches elements whose subtype name equals this string exactly.",
+    )
+    subTypeNameIsNot: str | None = None
+    subTypeNameContains: str | None = None
+    subTypeNameNotContains: str | None = None
+    subTypeNameStartsWith: str | None = None
+    subTypeNameEndsWith: str | None = None
+    columnCoatingType: GraphicOverrideColumnCoatingType | None = None
+    columnCoatingTypeNot: GraphicOverrideColumnCoatingType | None = None
+    columnInclinationAngle: float | None = Field(
+        None,
+        description="Matches columns whose inclination angle equals this value (degrees).",
+    )
+    columnInclinationAngleNot: float | None = None
+    columnInclinationAngleLessThan: float | None = None
+    columnInclinationAngleGreaterThan: float | None = None
+    columnInclinationAngleLessOrEqual: float | None = None
+    columnInclinationAngleGreaterOrEqual: float | None = None
+    columnCrossSectionType: GraphicOverrideColumnCrossSectionType | None = None
+    columnCoreDiameter: float | None = Field(None, description="Matches columns whose core diameter equals this value.")
+    columnCoreDiameterNot: float | None = None
+    columnCoreDiameterLessThan: float | None = None
+    columnCoreDiameterGreaterThan: float | None = None
+    columnCoreDiameterLessOrEqual: float | None = None
+    columnCoreDiameterGreaterOrEqual: float | None = None
+    columnCoatingThickness: float | None = Field(
+        None, description="Matches columns whose coating thickness equals this value."
+    )
+    columnCoatingThicknessNot: float | None = None
+    columnCoatingThicknessLessThan: float | None = None
+    columnCoatingThicknessGreaterThan: float | None = None
+    columnCoatingThicknessLessOrEqual: float | None = None
+    columnCoatingThicknessGreaterOrEqual: float | None = None
+    columnBottomCrossSectionHeightCut: float | None = None
+    columnBottomCrossSectionHeightCutNot: float | None = None
+    columnBottomCrossSectionHeightCutLessThan: float | None = None
+    columnBottomCrossSectionHeightCutGreaterThan: float | None = None
+    columnBottomCrossSectionHeightCutLessOrEqual: float | None = None
+    columnBottomCrossSectionHeightCutGreaterOrEqual: float | None = None
+    columnBottomCrossSectionHeightPerpendicular: float | None = None
+    columnBottomCrossSectionHeightPerpendicularNot: float | None = None
+    columnBottomCrossSectionHeightPerpendicularLessThan: float | None = None
+    columnBottomCrossSectionHeightPerpendicularGreaterThan: float | None = None
+    columnBottomCrossSectionHeightPerpendicularLessOrEqual: float | None = None
+    columnBottomCrossSectionHeightPerpendicularGreaterOrEqual: float | None = None
+    columnTopCrossSectionHeightCut: float | None = None
+    columnTopCrossSectionHeightCutNot: float | None = None
+    columnTopCrossSectionHeightCutLessThan: float | None = None
+    columnTopCrossSectionHeightCutGreaterThan: float | None = None
+    columnTopCrossSectionHeightCutLessOrEqual: float | None = None
+    columnTopCrossSectionHeightCutGreaterOrEqual: float | None = None
+    columnTopCrossSectionHeightPerpendicular: float | None = None
+    columnTopCrossSectionHeightPerpendicularNot: float | None = None
+    columnTopCrossSectionHeightPerpendicularLessThan: float | None = None
+    columnTopCrossSectionHeightPerpendicularGreaterThan: float | None = None
+    columnTopCrossSectionHeightPerpendicularLessOrEqual: float | None = None
+    columnTopCrossSectionHeightPerpendicularGreaterOrEqual: float | None = None
+    columnProfileCoreHeight: float | None = None
+    columnProfileCoreHeightNot: float | None = None
+    columnProfileCoreHeightLessThan: float | None = None
+    columnProfileCoreHeightGreaterThan: float | None = None
+    columnProfileCoreHeightLessOrEqual: float | None = None
+    columnProfileCoreHeightGreaterOrEqual: float | None = None
+    columnCoreHeightDiameterRatio: float | None = None
+    columnCoreHeightDiameterRatioNot: float | None = None
+    columnCoreHeightDiameterRatioLessThan: float | None = None
+    columnCoreHeightDiameterRatioGreaterThan: float | None = None
+    columnCoreHeightDiameterRatioLessOrEqual: float | None = None
+    columnCoreHeightDiameterRatioGreaterOrEqual: float | None = None
+    columnBottomCrossSectionWidthCut: float | None = None
+    columnBottomCrossSectionWidthCutNot: float | None = None
+    columnBottomCrossSectionWidthCutLessThan: float | None = None
+    columnBottomCrossSectionWidthCutGreaterThan: float | None = None
+    columnBottomCrossSectionWidthCutLessOrEqual: float | None = None
+    columnBottomCrossSectionWidthCutGreaterOrEqual: float | None = None
+    columnBottomCrossSectionWidthPerpendicular: float | None = None
+    columnBottomCrossSectionWidthPerpendicularNot: float | None = None
+    columnBottomCrossSectionWidthPerpendicularLessThan: float | None = None
+    columnBottomCrossSectionWidthPerpendicularGreaterThan: float | None = None
+    columnBottomCrossSectionWidthPerpendicularLessOrEqual: float | None = None
+    columnBottomCrossSectionWidthPerpendicularGreaterOrEqual: float | None = None
+    columnTopCrossSectionWidthCut: float | None = None
+    columnTopCrossSectionWidthCutNot: float | None = None
+    columnTopCrossSectionWidthCutLessThan: float | None = None
+    columnTopCrossSectionWidthCutGreaterThan: float | None = None
+    columnTopCrossSectionWidthCutLessOrEqual: float | None = None
+    columnTopCrossSectionWidthCutGreaterOrEqual: float | None = None
+    columnTopCrossSectionWidthPerpendicular: float | None = None
+    columnTopCrossSectionWidthPerpendicularNot: float | None = None
+    columnTopCrossSectionWidthPerpendicularLessThan: float | None = None
+    columnTopCrossSectionWidthPerpendicularGreaterThan: float | None = None
+    columnTopCrossSectionWidthPerpendicularLessOrEqual: float | None = None
+    columnTopCrossSectionWidthPerpendicularGreaterOrEqual: float | None = None
+    columnCoreWidth: float | None = None
+    columnCoreWidthNot: float | None = None
+    columnCoreWidthLessThan: float | None = None
+    columnCoreWidthGreaterThan: float | None = None
+    columnCoreWidthLessOrEqual: float | None = None
+    columnCoreWidthGreaterOrEqual: float | None = None
+    columnProfileCoreWidth: float | None = None
+    columnProfileCoreWidthNot: float | None = None
+    columnProfileCoreWidthLessThan: float | None = None
+    columnProfileCoreWidthGreaterThan: float | None = None
+    columnProfileCoreWidthLessOrEqual: float | None = None
+    columnProfileCoreWidthGreaterOrEqual: float | None = None
+    columnCoveringHatch: str | None = Field(
+        None,
+        description="Matches columns whose covering hatch is this Fill attribute (by name).",
+    )
+    columnCoveringHatchNot: str | None = None
+    columnCoatingHatch: str | None = Field(
+        None,
+        description="Matches columns whose coating hatch is this Fill attribute (by name).",
+    )
+    columnCoatingHatchNot: str | None = None
+    columnCoreForegroundPen: int | None = Field(
+        None,
+        description="Matches columns whose core foreground pen equals this plain pen index.",
+    )
+    columnCoreForegroundPenNot: int | None = None
+    columnCoatingForegroundPen: int | None = Field(
+        None,
+        description="Matches columns whose coating foreground pen equals this plain pen index.",
+    )
+    columnCoatingForegroundPenNot: int | None = None
+    columnCoveringHatchForegroundPen: int | None = Field(
+        None,
+        description="Matches columns whose covering hatch foreground pen equals this plain pen index.",
+    )
+    columnCoveringHatchForegroundPenNot: int | None = None
+    columnCoveringHatchBackgroundPen: int | None = Field(
+        None,
+        description="Matches columns whose covering hatch background pen equals this plain pen index.",
+    )
+    columnCoveringHatchBackgroundPenNot: int | None = None
+    columnCoatingBackgroundPen: int | None = Field(
+        None,
+        description="Matches columns whose coating background pen equals this plain pen index.",
+    )
+    columnCoatingBackgroundPenNot: int | None = None
+    columnCoreBackgroundPen: int | None = Field(
+        None,
+        description="Matches columns whose core background pen equals this plain pen index.",
+    )
+    columnCoreBackgroundPenNot: int | None = None
+    columnHiddenLinePen: int | None = Field(
+        None,
+        description="Matches columns whose hidden line pen equals this plain pen index.",
+    )
+    columnHiddenLinePenNot: int | None = None
+    columnHiddenLineType: str | None = Field(
+        None,
+        description="Matches columns whose hidden line type is this Line Type attribute (by name).",
+    )
+    columnHiddenLineTypeNot: str | None = None
+    columnCoreSurface: str | None = Field(
+        None,
+        description="Matches columns whose core surface is this Surface attribute (by name).",
+    )
+    columnCoreSurfaceNot: str | None = None
+    columnCoatingSurface: str | None = Field(
+        None,
+        description="Matches columns whose coating surface is this Surface attribute (by name).",
+    )
+    columnCoatingSurfaceNot: str | None = None
+    columnExtrusionSurface: str | None = Field(
+        None,
+        description="Matches columns whose extrusion surface is this Surface attribute (by name).",
+    )
+    columnExtrusionSurfaceNot: str | None = None
+    beamAxisPen: int | None = Field(None, description="Matches beams whose axis pen equals this plain pen index.")
+    beamAxisPenNot: int | None = None
+    beamAxisLineType: str | None = Field(
+        None,
+        description="Matches beams whose axis line type is this Line Type attribute (by name).",
+    )
+    beamAxisLineTypeNot: str | None = None
+    beamEndSurface: str | None = Field(
+        None,
+        description="Matches beams whose end surface is this Surface attribute (by name).",
+    )
+    beamEndSurfaceNot: str | None = None
+    beamRightSurface: str | None = Field(
+        None,
+        description="Matches beams whose right surface is this Surface attribute (by name).",
+    )
+    beamRightSurfaceNot: str | None = None
+    beamLeftSurface: str | None = Field(
+        None,
+        description="Matches beams whose left surface is this Surface attribute (by name).",
+    )
+    beamLeftSurfaceNot: str | None = None
+    beamBottomSurface: str | None = Field(
+        None,
+        description="Matches beams whose bottom surface is this Surface attribute (by name).",
+    )
+    beamBottomSurfaceNot: str | None = None
+    beamTopSurface: str | None = Field(
+        None,
+        description="Matches beams whose top surface is this Surface attribute (by name).",
+    )
+    beamTopSurfaceNot: str | None = None
+    slabReferencePlaneLocation: SlabReferencePlaneLocation | None = Field(
+        None, description="Matches slabs whose reference plane location equals this."
+    )
+    slabReferencePlaneLocationNot: SlabReferencePlaneLocation | None = None
+    slabEdgeAngle: GraphicOverrideSlabEdgeAngle | None = None
+    slabEdgeAngleNot: GraphicOverrideSlabEdgeAngle | None = None
+    slabDefaultEdgeAngle: float | None = Field(
+        None,
+        description="Matches slabs whose default edge angle equals this value (degrees).",
+    )
+    slabDefaultEdgeAngleNot: float | None = None
+    slabDefaultEdgeAngleLessThan: float | None = None
+    slabDefaultEdgeAngleGreaterThan: float | None = None
+    slabDefaultEdgeAngleLessOrEqual: float | None = None
+    slabDefaultEdgeAngleGreaterOrEqual: float | None = None
+    slabCutLinePen: int | None = Field(
+        None,
+        description="Matches slabs whose cut line pen equals this plain pen index.",
+    )
+    slabCutLinePenNot: int | None = None
+    slabConstructionMaterialFill: str | None = Field(
+        None,
+        description="Matches slabs whose construction material fill is this Fill attribute (by name). Despite the field's label in the criteria editor, Archicad stores a Fill here, not a Building Material (checked on rules made in the editor).",
+    )
+    slabConstructionMaterialFillNot: str | None = None
+    roofCutBodyType: GraphicOverrideRoofCutBodyType | None = None
+    roofCutBodyTypeNot: GraphicOverrideRoofCutBodyType | None = None
+    roofLevelNumber: int | None = Field(None, description="Matches roofs whose level number equals this value.")
+    roofLevelNumberNot: int | None = None
+    roofLevelNumberLessThan: int | None = None
+    roofLevelNumberGreaterThan: int | None = None
+    roofLevelNumberLessOrEqual: int | None = None
+    roofLevelNumberGreaterOrEqual: int | None = None
+    roofEaveOverhangType: GraphicOverrideRoofEaveOverhangType | None = None
+    roofEdgeAngle: GraphicOverrideRoofEdgeAngle | None = None
+    roofEdgeAngleNot: GraphicOverrideRoofEdgeAngle | None = None
+    roofEaveOverhang: float | None = Field(None, description="Matches roofs whose eave overhang equals this value.")
+    roofEaveOverhangNot: float | None = None
+    roofEaveOverhangLessThan: float | None = None
+    roofEaveOverhangGreaterThan: float | None = None
+    roofEaveOverhangLessOrEqual: float | None = None
+    roofEaveOverhangGreaterOrEqual: float | None = None
+    roofGeometryType: GraphicOverrideRoofGeometryType | None = None
+    roofGeometryTypeNot: GraphicOverrideRoofGeometryType | None = None
+    roofPitch: float | None = Field(
+        None,
+        description="Matches roofs that have a pitch equal to this value (degrees) among their panels.",
+    )
+    roofPitchNot: float | None = None
+    roofPitchLessThan: float | None = None
+    roofPitchGreaterThan: float | None = None
+    roofPitchLessOrEqual: float | None = None
+    roofPitchGreaterOrEqual: float | None = None
+    shellCutBodyType: GraphicOverrideShellCutBodyType | None = None
+    shellTiltAngle: float | None = Field(
+        None, description="Matches shells whose tilt angle equals this value (degrees)."
+    )
+    shellTiltAngleNot: float | None = None
+    shellTiltAngleLessThan: float | None = None
+    shellTiltAngleGreaterThan: float | None = None
+    shellTiltAngleLessOrEqual: float | None = None
+    shellTiltAngleGreaterOrEqual: float | None = None
+    shellGeometryType: GraphicOverrideShellGeometryType | None = None
+    hatchFill: str | None = Field(
+        None,
+        description="Matches elements whose hatch is this Fill attribute (by name). ArchiCAD only offers 'contains'/'does not contain' for this field, no strict equality.",
+    )
+    hatchFillNot: str | None = Field(
+        None,
+        description="Matches elements whose hatch is NOT this Fill attribute (by name).",
+    )
+    lineAttribute: str | None = Field(
+        None,
+        description="Matches elements whose contour/line is this Line Type attribute (by name). ArchiCAD only offers 'contains'/'does not contain' for this field, no strict equality.",
+    )
+    lineAttributeNot: str | None = Field(
+        None,
+        description="Matches elements whose contour/line is NOT this Line Type attribute (by name).",
+    )
+    fontIs: str | None = Field(
+        None,
+        description="Matches elements whose font equals this font name (as GetDetailsOfElements reports it in fontName, with its script, e.g. 'Arial Western') exactly. Applies to 2D annotation (Text/Label) elements - unlike every other field in this schema, this one and 'textPen*' are NOT combined with a 3D-model-element anchor when used alone or together, since they don't apply to 3D model elements.",
+    )
+    fontContains: str | None = Field(
+        None,
+        description="Matches elements whose font is one of a list containing this font name (as GetDetailsOfElements reports it in fontName, with its script, e.g. 'Arial Western') (ArchiCAD's 'contains' operator for a font field).",
+    )
+    fontNotContains: str | None = Field(
+        None,
+        description="Matches elements whose font is not one of a list containing this font name (as GetDetailsOfElements reports it in fontName, with its script, e.g. 'Arial Western').",
+    )
+    penReplacement: GraphicOverridePenReplacement | None = None
+    penReplacementNot: GraphicOverridePenReplacement | None = Field(
+        None,
+        description="Matches elements whose pen replacement rule does not equal this value.",
+    )
+    linePenContains: int | None = Field(
+        None,
+        description="Matches elements whose line pen number is this value (by plain pen number 1-255, not an attribute name). ArchiCAD only offers 'contains'/'does not contain' for this field, no strict equality.",
+    )
+    linePenNotContains: int | None = Field(
+        None,
+        description="Matches elements whose line pen number is NOT this value (by plain pen number 1-255).",
+    )
+    textPenIs: int | None = Field(
+        None,
+        description="Matches elements whose text pen number equals this value (by plain pen number 1-255). Applies to 2D annotation elements - see 'fontIs' for the anchor-exemption note.",
+    )
+    textPenContains: int | None = Field(
+        None,
+        description="Matches elements whose text pen number is this value (ArchiCAD's 'contains' operator for a pen field, by plain pen number 1-255).",
+    )
+    textPenNotContains: int | None = Field(
+        None,
+        description="Matches elements whose text pen number is NOT this value (by plain pen number 1-255).",
+    )
+    hatchContourPen: int | None = Field(
+        None,
+        description="Matches elements whose hatch contour pen number equals this value (by plain pen number 1-255). Unlike 'linePenContains', ArchiCAD offers strict is/is-not here, not contains/does-not-contain.",
+    )
+    hatchContourPenNot: int | None = Field(
+        None,
+        description="Matches elements whose hatch contour pen number does not equal this value (by plain pen number 1-255).",
+    )
+    openingEndSurface: str | None = Field(
+        None,
+        description="Matches Opening elements whose end surface equals this Surface attribute (by name).",
+    )
+    openingEndSurfaceNot: str | None = Field(
+        None,
+        description="Matches Opening elements whose end surface does not equal this Surface attribute (by name).",
+    )
+    openingExtrusionSurface: str | None = Field(
+        None,
+        description="Matches Opening elements whose extrusion surface equals this Surface attribute (by name).",
+    )
+    openingExtrusionSurfaceNot: str | None = Field(
+        None,
+        description="Matches Opening elements whose extrusion surface does not equal this Surface attribute (by name).",
+    )
+    curtainWallFrameCutLine: str | None = Field(
+        None,
+        description="Matches Curtain Wall elements whose frame cut line equals this Line Type attribute (by name).",
+    )
+    curtainWallFrameCutLineNot: str | None = Field(
+        None,
+        description="Matches Curtain Wall elements whose frame cut line does not equal this Line Type attribute (by name).",
+    )
+    curtainWallPanelCutLine: str | None = Field(
+        None,
+        description="Matches Curtain Wall elements whose panel cut line equals this Line Type attribute (by name).",
+    )
+    curtainWallPanelCutLineNot: str | None = Field(
+        None,
+        description="Matches Curtain Wall elements whose panel cut line does not equal this Line Type attribute (by name).",
+    )
+    curtainWallFrameCutLinePen: int | None = Field(
+        None,
+        description="Matches Curtain Wall elements whose frame cut line pen number equals this value (by plain pen number 1-255).",
+    )
+    curtainWallFrameCutLinePenNot: int | None = Field(
+        None,
+        description="Matches Curtain Wall elements whose frame cut line pen number does not equal this value.",
+    )
+    curtainWallPanelCutLinePen: int | None = Field(
+        None,
+        description="Matches Curtain Wall elements whose panel cut line pen number equals this value (by plain pen number 1-255).",
+    )
+    curtainWallPanelCutLinePenNot: int | None = Field(
+        None,
+        description="Matches Curtain Wall elements whose panel cut line pen number does not equal this value.",
+    )
+    constructionMaterial: str | None = Field(
+        None,
+        description="Matches elements built with this Building Material attribute (by name). ArchiCAD only offers 'contains'/'does not contain' for this field, no strict equality.",
+    )
+    constructionMaterialNot: str | None = Field(
+        None,
+        description="Matches elements NOT built with this Building Material attribute (by name).",
+    )
+    surface: str | None = Field(
+        None,
+        description="Matches elements whose surface is this Surface (Material) attribute (by name). ArchiCAD only offers 'contains'/'does not contain' for this field, no strict equality.",
+    )
+    surfaceNot: str | None = Field(
+        None,
+        description="Matches elements whose surface is NOT this Surface (Material) attribute (by name).",
+    )
+    constructionMaterialIdIs: str | None = Field(
+        None,
+        description="Matches elements whose construction material ID equals this string exactly.",
+    )
+    constructionMaterialIdIsNot: str | None = Field(
+        None,
+        description="Matches elements whose construction material ID does not equal this string.",
+    )
+    constructionMaterialIdContains: str | None = Field(
+        None,
+        description="Matches elements whose construction material ID contains this substring.",
+    )
+    constructionMaterialIdNotContains: str | None = Field(
+        None,
+        description="Matches elements whose construction material ID does not contain this substring.",
+    )
+    constructionMaterialIdStartsWith: str | None = Field(
+        None,
+        description="Matches elements whose construction material ID starts with this substring.",
+    )
+    constructionMaterialIdEndsWith: str | None = Field(
+        None,
+        description="Matches elements whose construction material ID ends with this substring.",
+    )
+    constructionMaterialNameIs: str | None = Field(
+        None,
+        description="Matches elements whose Building Material attribute name equals this string exactly.",
+    )
+    constructionMaterialNameIsNot: str | None = Field(
+        None,
+        description="Matches elements whose Building Material attribute name does not equal this string.",
+    )
+    constructionMaterialNameContains: str | None = Field(
+        None,
+        description="Matches elements whose Building Material attribute name contains this substring.",
+    )
+    constructionMaterialNameNotContains: str | None = Field(
+        None,
+        description="Matches elements whose Building Material attribute name does not contain this substring.",
+    )
+    constructionMaterialNameStartsWith: str | None = Field(
+        None,
+        description="Matches elements whose Building Material attribute name starts with this substring.",
+    )
+    constructionMaterialNameEndsWith: str | None = Field(
+        None,
+        description="Matches elements whose Building Material attribute name ends with this substring.",
+    )
+    surfaceNameIs: str | None = Field(
+        None,
+        description="Matches elements whose Surface (Material) attribute name equals this string exactly.",
+    )
+    surfaceNameIsNot: str | None = Field(
+        None,
+        description="Matches elements whose Surface (Material) attribute name does not equal this string.",
+    )
+    surfaceNameContains: str | None = Field(
+        None,
+        description="Matches elements whose Surface (Material) attribute name contains this substring.",
+    )
+    surfaceNameNotContains: str | None = Field(
+        None,
+        description="Matches elements whose Surface (Material) attribute name does not contain this substring.",
+    )
+    surfaceNameStartsWith: str | None = Field(
+        None,
+        description="Matches elements whose Surface (Material) attribute name starts with this substring.",
+    )
+    surfaceNameEndsWith: str | None = Field(
+        None,
+        description="Matches elements whose Surface (Material) attribute name ends with this substring.",
+    )
+    renovationFilterIs: str | None = Field(
+        None,
+        description="Matches elements whose Renovation Filter display status equals this filter name exactly.",
+    )
+    renovationFilterIsNot: str | None = Field(
+        None,
+        description="Matches elements whose Renovation Filter display status does not equal this filter name.",
+    )
+    structuralFunction: GraphicOverrideStructuralFunction | None = None
+    structuralFunctionNot: GraphicOverrideStructuralFunction | None = Field(
+        None,
+        description="Matches elements whose structural function does not equal this value.",
+    )
+    position: GraphicOverridePosition | None = None
+    positionNot: GraphicOverridePosition | None = Field(
+        None, description="Matches elements whose position does not equal this value."
+    )
+    variantStateIs: str | None = Field(
+        None,
+        description="Matches elements whose Variant State equals this string exactly (e.g. 'Main Model'). Variants are an Archicad 27+ feature - this criterion is meaningless on earlier versions.",
+    )
+    variantStateIsNot: str | None = Field(
+        None,
+        description="Matches elements whose Variant State does not equal this string. Variants are an Archicad 27+ feature - this criterion is meaningless on earlier versions.",
+    )
+    variantSetIs: str | None = Field(
+        None,
+        description="Matches elements whose Variant Set equals this string exactly (e.g. 'Main Model'). Variants are an Archicad 27+ feature - this criterion is meaningless on earlier versions.",
+    )
+    variantSetIsNot: str | None = Field(
+        None,
+        description="Matches elements whose Variant Set does not equal this string. Variants are an Archicad 27+ feature - this criterion is meaningless on earlier versions.",
+    )
+    elementIdIs: str | None = Field(
+        None,
+        description="Matches elements whose element ID equals this string exactly.",
+    )
+    elementIdIsNot: str | None = Field(
+        None,
+        description="Matches elements whose element ID does not equal this string.",
+    )
+    elementIdLessThan: str | None = Field(
+        None,
+        description="Matches elements whose element ID is less than this string (lexicographic comparison, stored as text).",
+    )
+    elementIdGreaterThan: str | None = Field(
+        None,
+        description="Matches elements whose element ID is greater than this string.",
+    )
+    elementIdLessOrEqual: str | None = Field(
+        None,
+        description="Matches elements whose element ID is less than or equal to this string.",
+    )
+    elementIdGreaterOrEqual: str | None = Field(
+        None,
+        description="Matches elements whose element ID is greater than or equal to this string.",
+    )
+    elementIdContains: str | None = Field(
+        None, description="Matches elements whose element ID contains this substring."
+    )
+    elementIdNotContains: str | None = Field(
+        None,
+        description="Matches elements whose element ID does not contain this substring.",
+    )
+    elementIdStartsWith: str | None = Field(
+        None,
+        description="Matches elements whose element ID starts with this substring.",
+    )
+    elementIdEndsWith: str | None = Field(
+        None, description="Matches elements whose element ID ends with this substring."
+    )
+    uniqueIdIs: str | None = Field(None, description="Matches elements whose unique ID equals this string exactly.")
+    uniqueIdIsNot: str | None = Field(None, description="Matches elements whose unique ID does not equal this string.")
+    uniqueIdContains: str | None = Field(None, description="Matches elements whose unique ID contains this substring.")
+    uniqueIdNotContains: str | None = Field(
+        None,
+        description="Matches elements whose unique ID does not contain this substring.",
+    )
+    uniqueIdStartsWith: str | None = Field(
+        None, description="Matches elements whose unique ID starts with this substring."
+    )
+    uniqueIdEndsWith: str | None = Field(None, description="Matches elements whose unique ID ends with this substring.")
+    linkMainIdIs: str | None = Field(
+        None,
+        description="Matches elements whose link's main identifier equals this string exactly.",
+    )
+    linkMainIdIsNot: str | None = Field(
+        None,
+        description="Matches elements whose link's main identifier does not equal this string.",
+    )
+    linkMainIdLessThan: str | None = Field(
+        None,
+        description="Matches elements whose link's main identifier is less than this string.",
+    )
+    linkMainIdGreaterThan: str | None = Field(
+        None,
+        description="Matches elements whose link's main identifier is greater than this string.",
+    )
+    linkMainIdLessOrEqual: str | None = Field(
+        None,
+        description="Matches elements whose link's main identifier is less than or equal to this string.",
+    )
+    linkMainIdGreaterOrEqual: str | None = Field(
+        None,
+        description="Matches elements whose link's main identifier is greater than or equal to this string.",
+    )
+    linkMainIdContains: str | None = Field(
+        None,
+        description="Matches elements whose link's main identifier contains this substring.",
+    )
+    linkMainIdNotContains: str | None = Field(
+        None,
+        description="Matches elements whose link's main identifier does not contain this substring.",
+    )
+    linkMainIdStartsWith: str | None = Field(
+        None,
+        description="Matches elements whose link's main identifier starts with this substring.",
+    )
+    linkMainIdEndsWith: str | None = Field(
+        None,
+        description="Matches elements whose link's main identifier ends with this substring.",
+    )
+    linkedElementIdIs: str | None = Field(
+        None,
+        description="Matches elements whose 'linked element ID' equals this string exactly.",
+    )
+    linkedElementIdIsNot: str | None = Field(
+        None,
+        description="Matches elements whose 'linked element ID' does not equal this string.",
+    )
+    linkedElementIdLessThan: str | None = Field(
+        None,
+        description="Matches elements whose 'linked element ID' is less than this string.",
+    )
+    linkedElementIdGreaterThan: str | None = Field(
+        None,
+        description="Matches elements whose 'linked element ID' is greater than this string.",
+    )
+    linkedElementIdLessOrEqual: str | None = Field(
+        None,
+        description="Matches elements whose 'linked element ID' is less than or equal to this string.",
+    )
+    linkedElementIdGreaterOrEqual: str | None = Field(
+        None,
+        description="Matches elements whose 'linked element ID' is greater than or equal to this string.",
+    )
+    linkedElementIdContains: str | None = Field(
+        None,
+        description="Matches elements whose 'linked element ID' contains this substring.",
+    )
+    linkedElementIdNotContains: str | None = Field(
+        None,
+        description="Matches elements whose 'linked element ID' does not contain this substring.",
+    )
+    linkedElementIdStartsWith: str | None = Field(
+        None,
+        description="Matches elements whose 'linked element ID' starts with this substring.",
+    )
+    linkedElementIdEndsWith: str | None = Field(
+        None,
+        description="Matches elements whose 'linked element ID' ends with this substring.",
+    )
+    nameIs: str | None = Field(None, description="Matches elements whose name equals this string exactly.")
+    nameIsNot: str | None = Field(None, description="Matches elements whose name does not equal this string.")
+    nameContains: str | None = Field(None, description="Matches elements whose name contains this substring.")
+    nameNotContains: str | None = Field(
+        None, description="Matches elements whose name does not contain this substring."
+    )
+    nameStartsWith: str | None = Field(None, description="Matches elements whose name starts with this substring.")
+    nameEndsWith: str | None = Field(None, description="Matches elements whose name ends with this substring.")
+    hasLinkSource: bool | None = Field(None, description="If true, matches elements linked to any link source.")
+    hasLinkSourceNot: bool | None = Field(None, description="If true, matches elements NOT linked to any link source.")
+    missingVariant: bool | None = Field(
+        None,
+        description="Matches elements whose 'missing variant' status equals this value.",
+    )
+    profileStretchHeight: float | None = Field(
+        None,
+        description="Matches elements whose Complex Profile 'height stretch' modifier equals this value.",
+    )
+    profileStretchHeightNot: float | None = Field(
+        None,
+        description="Matches elements whose Complex Profile 'height stretch' modifier does not equal this value.",
+    )
+    profileStretchHeightLessThan: float | None = Field(
+        None,
+        description="Matches elements whose Complex Profile 'height stretch' modifier is less than this value.",
+    )
+    profileStretchHeightGreaterThan: float | None = Field(
+        None,
+        description="Matches elements whose Complex Profile 'height stretch' modifier is greater than this value.",
+    )
+    profileStretchHeightLessOrEqual: float | None = Field(
+        None,
+        description="Matches elements whose Complex Profile 'height stretch' modifier is less than or equal to this value.",
+    )
+    profileStretchHeightGreaterOrEqual: float | None = Field(
+        None,
+        description="Matches elements whose Complex Profile 'height stretch' modifier is greater than or equal to this value.",
+    )
+    profileStretchWidth: float | None = Field(
+        None,
+        description="Matches elements whose Complex Profile 'width stretch' modifier equals this value.",
+    )
+    profileStretchWidthNot: float | None = Field(
+        None,
+        description="Matches elements whose Complex Profile 'width stretch' modifier does not equal this value.",
+    )
+    profileStretchWidthLessThan: float | None = Field(
+        None,
+        description="Matches elements whose Complex Profile 'width stretch' modifier is less than this value.",
+    )
+    profileStretchWidthGreaterThan: float | None = Field(
+        None,
+        description="Matches elements whose Complex Profile 'width stretch' modifier is greater than this value.",
+    )
+    profileStretchWidthLessOrEqual: float | None = Field(
+        None,
+        description="Matches elements whose Complex Profile 'width stretch' modifier is less than or equal to this value.",
+    )
+    profileStretchWidthGreaterOrEqual: float | None = Field(
+        None,
+        description="Matches elements whose Complex Profile 'width stretch' modifier is greater than or equal to this value.",
+    )
+    profileNominalHeight: float | None = Field(
+        None,
+        description="Matches elements whose Complex Profile nominal height equals this value.",
+    )
+    profileNominalHeightNot: float | None = Field(
+        None,
+        description="Matches elements whose Complex Profile nominal height does not equal this value.",
+    )
+    profileNominalHeightLessThan: float | None = Field(
+        None,
+        description="Matches elements whose Complex Profile nominal height is less than this value.",
+    )
+    profileNominalHeightGreaterThan: float | None = Field(
+        None,
+        description="Matches elements whose Complex Profile nominal height is greater than this value.",
+    )
+    profileNominalHeightLessOrEqual: float | None = Field(
+        None,
+        description="Matches elements whose Complex Profile nominal height is less than or equal to this value.",
+    )
+    profileNominalHeightGreaterOrEqual: float | None = Field(
+        None,
+        description="Matches elements whose Complex Profile nominal height is greater than or equal to this value.",
+    )
+    profileTotalHeight: float | None = Field(
+        None,
+        description="Matches elements whose Complex Profile total height equals this value.",
+    )
+    profileTotalHeightNot: float | None = Field(
+        None,
+        description="Matches elements whose Complex Profile total height does not equal this value.",
+    )
+    profileTotalHeightLessThan: float | None = Field(
+        None,
+        description="Matches elements whose Complex Profile total height is less than this value.",
+    )
+    profileTotalHeightGreaterThan: float | None = Field(
+        None,
+        description="Matches elements whose Complex Profile total height is greater than this value.",
+    )
+    profileTotalHeightLessOrEqual: float | None = Field(
+        None,
+        description="Matches elements whose Complex Profile total height is less than or equal to this value.",
+    )
+    profileTotalHeightGreaterOrEqual: float | None = Field(
+        None,
+        description="Matches elements whose Complex Profile total height is greater than or equal to this value.",
+    )
+    profileTotalWidth: float | None = Field(
+        None,
+        description="Matches elements whose Complex Profile total width equals this value.",
+    )
+    profileTotalWidthNot: float | None = Field(
+        None,
+        description="Matches elements whose Complex Profile total width does not equal this value.",
+    )
+    profileTotalWidthLessThan: float | None = Field(
+        None,
+        description="Matches elements whose Complex Profile total width is less than this value.",
+    )
+    profileTotalWidthGreaterThan: float | None = Field(
+        None,
+        description="Matches elements whose Complex Profile total width is greater than this value.",
+    )
+    profileTotalWidthLessOrEqual: float | None = Field(
+        None,
+        description="Matches elements whose Complex Profile total width is less than or equal to this value.",
+    )
+    profileTotalWidthGreaterOrEqual: float | None = Field(
+        None,
+        description="Matches elements whose Complex Profile total width is greater than or equal to this value.",
+    )
+    profileNominalWidth: float | None = Field(
+        None,
+        description="Matches elements whose Complex Profile nominal width equals this value.",
+    )
+    profileNominalWidthNot: float | None = Field(
+        None,
+        description="Matches elements whose Complex Profile nominal width does not equal this value.",
+    )
+    profileNominalWidthLessThan: float | None = Field(
+        None,
+        description="Matches elements whose Complex Profile nominal width is less than this value.",
+    )
+    profileNominalWidthGreaterThan: float | None = Field(
+        None,
+        description="Matches elements whose Complex Profile nominal width is greater than this value.",
+    )
+    profileNominalWidthLessOrEqual: float | None = Field(
+        None,
+        description="Matches elements whose Complex Profile nominal width is less than or equal to this value.",
+    )
+    profileNominalWidthGreaterOrEqual: float | None = Field(
+        None,
+        description="Matches elements whose Complex Profile nominal width is greater than or equal to this value.",
+    )
+    profileParameter: GraphicOverrideProfileParameter | None = None
+    customPropertyBool: GraphicOverrideCustomPropertyBool | None = None
+    customPropertyString: GraphicOverrideCustomPropertyString | None = None
+    customPropertyNumber: GraphicOverrideCustomPropertyNumber | None = None
+    customPropertyInteger: GraphicOverrideCustomPropertyInteger | None = None
+
+
+class GraphicOverrideRuleId(APIModel):
+    """The identifier of a graphic override rule."""
+    guid: UUID = Field(
+        ...,
+        description="A Globally Unique Identifier (or Universally Unique Identifier) in its string representation as defined in RFC 4122.",
+    )
+
+
+class GraphicOverrideRuleIdArrayItem(APIModel):
+    graphicOverrideRuleId: GraphicOverrideRuleId
+
+
+class GraphicOverrideStyle(APIModel):
+    """What a graphic override rule overrides and how. A field that is left out is not overridden."""
+    lineType: AttributeId | None = Field(None, description="The line type that replaces the line type of lines.")
+    lineMarkerTextPen: int | None = Field(
+        None,
+        description="The pen index that replaces the pen of lines, markers and texts.",
+    )
+    fillType: AttributeId | None = Field(None, description="The fill type that replaces the fill type of fills.")
+    fillTypeAppliesTo: GraphicOverrideFillTypes | None = Field(
+        None,
+        description="The fills the fill type override applies to. Left out: all fills.",
+    )
+    fillForegroundPen: int | None = Field(None, description="The pen index that replaces the foreground pen of fills.")
+    fillForegroundPenAppliesTo: GraphicOverrideFillTypes | None = Field(
+        None,
+        description="The fills the foreground pen override applies to. Left out: all fills.",
+    )
+    fillBackgroundPen: int | None = Field(
+        None,
+        description="The pen index that replaces the background pen of fills. Use either this or fillBackgroundColor.",
+    )
+    fillBackgroundColor: ColorRGB | None = Field(
+        None,
+        description="The color that replaces the background pen of fills. Use either this or fillBackgroundPen.",
+    )
+    fillBackgroundPenAppliesTo: GraphicOverrideFillTypes | None = Field(
+        None,
+        description="The fills the background pen override applies to. Left out: all fills.",
+    )
+    surface: AttributeId | None = Field(
+        None,
+        description="The surface that replaces the surface of elements. Use either this or surfaceColor.",
+    )
+    surfaceColor: ColorRGB | None = Field(
+        None,
+        description="The color that replaces the surface of elements. Use either this or surface.",
+    )
+    surfaceAppliesTo: GraphicOverrideSurfaceTypes | None = Field(
+        None,
+        description="The surfaces the surface override applies to. Left out: all surfaces.",
+    )
+    showSkinSeparators: bool | None = Field(None, description="Show the skin separator lines.")
+    overridePenColorAndThickness: bool | None = Field(None, description="Override the pen color and thickness.")
+    hiddenContours: GraphicOverrideSurfaceTypes | None = Field(
+        None, description="The contours to hide when overrideContours is true."
+    )
+    overrideContours: bool | None = Field(None, description="Override the contour visibility.")
+
+
+class GraphicalOverrideRuleDetails(APIModel):
+    ruleId: GuidId
+    name: str
+    ruleGroupName: str = Field(..., description="Name of the rule group the rule belongs to.")
+    criterionXML: str = Field(
+        ...,
+        description="The criterion in Archicad's own XML format. Change its values and pass it to CreateGraphicalOverrideRule to make similar rules.",
+    )
+
+
+class GridElementData(APIModel):
+    begCoordinate: Coordinate2D = Field(..., description="Start point of the grid line (the object's insertion point).")
+    endCoordinate: Coordinate2D = Field(
+        ...,
+        description="End point of the grid line. Sets the direction and, unless lengthMode is 'none', the length.",
+    )
+    lengthMode: GridElementLengthMode | None = None
+    floorIndex: int | None = Field(None, description="Home story index. Default: the tool default.")
+    layerIndex: int | None = Field(
+        None,
+        description="Layer attribute index. Only a positive index takes effect. Default: the tool default.",
+    )
+    parameters: list[GridParameter] | None = Field(
+        None,
+        description="GDL parameters to set by name (read the names with GetGridElementDefaults). The value is a number, a boolean or a string. Unknown names and wrong value types are reported in warnings and skipped. The tool defaults can look different from a grid drawn with the Grid Tool (for example a short line with a leader to the bubble); to get the same look, copy the parameters of such a grid (GetGridElements with includeParameters).",
+    )
+
+
+class GridElementDetails(APIModel):
+    elementId: ElementId = Field(..., description="The grid element. The zero GUID for the tool defaults.")
+    variation: str = Field(
+        ...,
+        description="Four-character variation of the object: 'GREL' for a grid element.",
+    )
+    floorIndex: int = Field(..., description="Home story index.")
+    layerIndex: int = Field(..., description="Layer attribute index.")
+    pos: Coordinate2D = Field(..., description="Insertion point: the start of the grid line.")
+    angle: float = Field(..., description="Direction of the grid line in radians.")
+    length: float = Field(
+        ...,
+        description="Length of the grid line: the GDL parameter AC_Length of the Grid Tool's grid marker, or the object's A size for a library part without it.",
+    )
+    xRatio: float = Field(
+        ...,
+        description="The object's xRatio as stored: its A size with useXYFixSize on, otherwise the A size divided by the library part's own A.",
+    )
+    yRatio: float = Field(..., description="The object's yRatio as stored, like xRatio for the B size.")
+    useXYFixSize: bool = Field(..., description="Whether xRatio and yRatio hold the sizes themselves.")
+    level: float = Field(..., description="Elevation of the object from its home story.")
+    libInd: int = Field(..., description="Library part index.")
+    libraryPartName: str = Field(..., description="Localized name of the library part.")
+    parameters: list[GridParameterDetails] | None = Field(
+        None, description="GDL parameters, separators left out. Only when requested."
+    )
+
+
 class GroupId(APIModel):
     """The identifier of a group."""
     guid: UUID = Field(
@@ -3698,7 +6088,11 @@ class LabelLeaderLineSettableDetails(APIModel):
 class LabelSymbolStyleSettableDetails(APIModel):
     """Every user-configurable style setting specific to a Symbol-class Label (top-level API_LabelType fields documented as 'for symbol labels only'). Shared by CreateLabels ('symbolStyle'), ModifyLabels ('symbolStyle'), and the Get response."""
     textWay: SymbolLabelTextDirection | None = None
-    fontIndex: int | None = None
+    fontIndex: int | None = Field(None, description="Font attribute index.")
+    fontName: str | None = Field(
+        None,
+        description="Name of the font, as the Font attributes carry it. On input resolved to the font's index like a Text style's fontName, taking precedence over fontIndex, and failing when no loaded font has the name; on read-back the name of the font fontIndex refers to, absent when no loaded font has that index.",
+    )
     bold: bool | None = None
     italic: bool | None = None
     underline: bool | None = None
@@ -3855,6 +6249,14 @@ class LayoutData(APIModel):
     masterNavigatorItemId: NavigatorItemId | None = None
     layoutName: str = Field(..., min_length=1)
     parentNavigatorItemId: NavigatorItemId | None = None
+    paperWidth: float | None = Field(
+        None,
+        description="Optional paper width in mm, used together with paperHeight. Sets the size of the new layout, and of the master layout when this command creates it from masterLayoutName: a new master starts with the template's default size, which layoutParameters cannot change. An existing master keeps its size. Wins over layoutParameters.horizontalSize.",
+    )
+    paperHeight: float | None = Field(
+        None,
+        description="Optional paper height in mm, used together with paperWidth. See paperWidth. Wins over layoutParameters.verticalSize.",
+    )
     layoutParameters: LayoutParameters | None = None
 
 
@@ -3873,6 +6275,80 @@ class LayoutSettingsData(APIModel):
     doNotIncludeInNumbering: bool | None = None
     showMasterBelow: bool | None = None
     customData: list[LayoutCustomDataToSet] | None = None
+
+
+class LevelDimensionData(APIModel):
+    """The parameters of the new Level Dimension."""
+    favoriteName: str | None = Field(
+        None,
+        description="Optional name of a Level Dimension favorite to base the new element on. Its settings (marker, format, text style, layer, pen) are applied first, then the explicitly given fields override them.",
+    )
+    position: Coordinate2D = Field(
+        ...,
+        description="The location of the marker on the floor plan. With a parentElementId it must lie on that element, the measured level is the parent's height at this point. Outside the parent's outline Archicad still creates the dimension, but without a height (GetDetailsOfElements reads a level of -110000000).",
+    )
+    parentElementId: ElementId | None = Field(
+        None,
+        description="Optional element the level dimension is associated with (Mesh, Slab, Roof, Shell, Morph, Beam, Column, Wall, Object, Stair ...). The dimension then shows the element's height at the position and follows the element when it changes. Without it the dimension measures the floor level, or the given static level.",
+    )
+    level: float | None = Field(
+        None,
+        description="Optional fixed level value in meters (absolute, from the project zero). Only used without parentElementId; the dimension then shows this value instead of the floor level.",
+    )
+    floorIndex: int | None = Field(
+        None,
+        description="The index of the floor to place the dimension on. Optional parameter, by default the floor of the parent element, otherwise the current floor is used.",
+    )
+    layerIndex: int | None = Field(
+        None,
+        description="Layer attribute index to place the dimension on. Optional parameter, by default the layer of the favorite or the Level Dimension tool default is used.",
+    )
+    pen: int | None = Field(None, description="Pen index of the marker. Optional parameter.")
+    textHeight: float | None = Field(
+        None,
+        description="Height of the dimension text in millimeters (paper size). Optional parameter.",
+    )
+    textPen: int | None = Field(None, description="Pen index of the dimension text. Optional parameter.")
+    dimForm: int | None = Field(
+        None,
+        description="Marker type of the Level Dimension tool, 0-19 as Archicad stores it (read it back with GetDetailsOfElements from an existing level dimension or one placed with a favorite). Optional parameter.",
+        ge=0,
+        le=19,
+    )
+    needPlus: bool | None = Field(None, description="Show a plus sign for positive values. Optional parameter.")
+    markerSize: float | None = Field(
+        None,
+        description="Size of the marker in millimeters (paper size). Optional parameter.",
+    )
+    angle: float | None = Field(None, description="Rotation angle of the marker in radians. Optional parameter.")
+    origin: DimensionOrigin | None = Field(
+        None, description="The origin the level is measured from. Optional parameter."
+    )
+
+
+class LevelDimensionDetails(APIModel):
+    position: Coordinate2D = Field(..., description="The location of the marker.")
+    level: float = Field(
+        ...,
+        description="The level the dimension shows in meters: the height of the owner element at the position for an associative level dimension, the floor level or the static value otherwise.",
+    )
+    staticLevel: bool = Field(
+        ...,
+        description="The static flag as Archicad reports it. A level dimension created with a fixed 'level' and no parent keeps that value although Archicad reads this flag as false.",
+    )
+    ownerElementId: ElementId | None = Field(
+        None,
+        description="Present only for an associative level dimension: the element it measures.",
+    )
+    ownerElementType: ElementType | None = Field(None, description="Present only for an associative level dimension.")
+    dimForm: int = Field(..., description="Marker type 0-19.")
+    needPlus: bool
+    pen: int
+    textHeight: float = Field(..., description="Height of the dimension text in millimeters.")
+    textPen: int
+    markerSize: float = Field(..., description="Size of the marker in millimeters.")
+    angle: float = Field(..., description="Rotation angle of the marker in radians.")
+    origin: DimensionOrigin
 
 
 class LibPartDetails(APIModel):
@@ -3977,6 +6453,12 @@ class LineSettings(APIModel):
     lineTypeId: AttributeId | None = None
 
 
+class MEPBranchPreferenceTable(APIModel):
+    guid: str
+    name: str
+    rows: list[MEPBranchPreferenceTableRow]
+
+
 class MEPConnectionData(APIModel):
     routingElementId: ElementId = Field(..., description="The routing element to connect.")
     connectToId: ElementId = Field(..., description="The MEP element or routing element to connect to.")
@@ -3995,12 +6477,44 @@ class MEPDistributionSystem(APIModel):
     elements: list[ElementIdArrayItem] = Field(..., description="A list of elements.")
 
 
+class MEPElbowPreferenceTable(APIModel):
+    guid: str
+    name: str
+    rows: list[MEPElbowPreferenceTableRow]
+
+
 class MEPElement(APIModel):
     elementId: ElementId
     type: MEPElementType = Field(..., description="The type of the MEP element.")
     domain: str = Field(
         ...,
         description="The MEP domain of the element. Empty for domain-independent elements (e.g. Equipment).",
+    )
+
+
+class MEPPhysicalSystemData(APIModel):
+    systemGroupId: MEPSystemGroupId = Field(..., description="The system group the new physical system belongs to.")
+    name: str
+    rootElementId: ElementId | None = Field(
+        None,
+        description="The MEP element the system starts from. Archicad keeps it only while it is part of an MEP network: the root of a stand-alone element is cleared when the MEP networks are recalculated.",
+    )
+    mepSystemId: AttributeId | None = Field(
+        None,
+        description="The MEP system attribute used as the category of the physical system.",
+    )
+
+
+class MEPPhysicalSystemDetails(APIModel):
+    physicalSystemId: MEPPhysicalSystemId
+    name: str
+    rootElementId: ElementId | None = Field(
+        None,
+        description="The element the system starts from. Missing when not set, or when Archicad cleared it because the element is not part of an MEP network.",
+    )
+    mepSystemId: AttributeId | None = Field(
+        None,
+        description="The MEP system attribute used as the category of the system. Missing when not set.",
     )
 
 
@@ -4043,6 +6557,10 @@ class MEPRoutingElementData(APIModel):
         description="Optional guid of the segment preference table (see GetMEPPreferenceTables) applied to all segments. Not applicable to the CableCarrier domain.",
     )
     mepSystemId: AttributeId | None = Field(None, description="Optional MEP system attribute.")
+    layerIndex: int | None = Field(
+        None,
+        description="Optional layer attribute index of the routing element and all its parts (routing segments, rigid segments, elbows and transitions). Only a positive index takes effect; otherwise the routing tool default layer is used. A layer that does not exist or is locked gives an error for the item, and nothing is placed.",
+    )
 
 
 class MEPRoutingElementModificationData(APIModel):
@@ -4153,6 +6671,18 @@ class MEPSystemData(APIModel):
     )
 
 
+class MEPSystemGroupDetails(APIModel):
+    systemGroupId: MEPSystemGroupId
+    name: str
+    physicalSystems: list[MEPPhysicalSystemDetails | ErrorItem]
+
+
+class MEPTransitionPreferenceTable(APIModel):
+    guid: str
+    name: str
+    rows: list[MEPTransitionPreferenceTableRow]
+
+
 class MarkerParametersOfElement(APIModel):
     libPart: LibPartDetails | None = Field(
         None,
@@ -4171,6 +6701,10 @@ class MeshData(APIModel):
     level: float | None = Field(None, description="The Z reference level of coordinates.")
     skirtType: MeshSkirtType | None = None
     skirtLevel: float | None = Field(None, description="The height of the skirt.")
+    buildingMaterialId: AttributeId | None = Field(
+        None,
+        description="Optional building material of the mesh. Its top, side and bottom surface overrides are cleared, also one from the Mesh tool defaults, so the mesh shows the building material's own surface.",
+    )
     ridges: MeshRidges | None = None
     showLines: bool | None = Field(
         None,
@@ -4919,6 +7453,10 @@ class TextDataWithRuns(APIModel):
         None,
         description="Optional floor index. If omitted, derived from the coordinate's z value.",
     )
+    layerIndex: int | None = Field(
+        None,
+        description="Optional layer attribute index. If omitted, the Text tool default layer is used.",
+    )
 
 
 class TextDataWithText(APIModel):
@@ -4957,6 +7495,10 @@ class TextDataWithText(APIModel):
     floorIndex: int | None = Field(
         None,
         description="Optional floor index. If omitted, derived from the coordinate's z value.",
+    )
+    layerIndex: int | None = Field(
+        None,
+        description="Optional layer attribute index. If omitted, the Text tool default layer is used.",
     )
 
 
@@ -5018,9 +7560,8 @@ class ViewSettings(APIModel):
         None,
         description="Structure display mode. One of EntireStructure, CoreOnly, WithoutFinishes, StructureOnly.",
     )
-    renovationFilterGuid: UUID | None = Field(
-        None,
-        description="GUID of the renovation filter applied to the view.",
+    renovationFilterGuid: GuidId | None = Field(
+        None, description="Identifier of the renovation filter applied to the view."
     )
     d3styleName: str | None = Field(None, description="Name of the 3D style. Empty if not set.")
     renderingSceneName: str | None = Field(None, description="Name of the rendering scene. Empty if not set.")
@@ -5112,7 +7653,10 @@ class WallData(APIModel):
         None,
         description="When true, the Composite's own priority is used at junctions instead of connectionPriority.",
     )
-    linkToSettings: LinkToSettings | None = Field(None, description="Mode of linking the wall to its home story.")
+    linkToSettings: LinkToSettings | None = Field(
+        None,
+        description="When newCreationMode is true, homeStoryDifference overrides the home story selected by floorIndex or derived from zCoordinate.",
+    )
     inheritEndSurface: bool | None = Field(
         None,
         description="The end surface of the wall is inherited from the adjoining wall.",
@@ -5226,7 +7770,10 @@ class WallDetails(APIModel):
         None,
         description="Tie-breaker (0-999) used when two walls meet with the same connectionPriority, or when 3+ walls meet in a junction (API_WallType::sequence). Archicad ignores writes to this field; read-only in practice.",
     )
-    linkToSettings: LinkToSettings | None = Field(None, description="Mode of linking the wall to its home story.")
+    linkToSettings: LinkToSettings | None = Field(
+        None,
+        description="newCreationMode is expected to read back as false after creation; Archicad resolves the relative story selection to an absolute floor index.",
+    )
     inheritEndSurface: bool | None = Field(
         None,
         description="The end surface of the wall is inherited from the adjoining wall.",
@@ -5348,7 +7895,7 @@ class WallWithDetails(APIModel):
         None,
         description="When true, the Composite's own priority is used at junctions instead of connectionPriority.",
     )
-    linkToSettings: LinkToSettings | None = Field(None, description="Mode of linking the wall to its home story.")
+    linkToSettings: LinkToSettings | None = None
     inheritEndSurface: bool | None = Field(
         None,
         description="The end surface of the wall is inherited from the adjoining wall.",
@@ -5374,6 +7921,10 @@ class WindowData(APIModel):
     reflected: bool | None = None
     refSide: bool | None = None
     oSide: bool | None = None
+    libraryPartName: str | None = Field(
+        None,
+        description="Optional. Localized library part name (docu_UName) to place instead of the tool default/favorite, e.g. a shutter part that has no favorite. It has to be a window library part. Applied to the tool defaults before cloning.",
+    )
     favoriteName: str | None = Field(
         None,
         description="Optional. Name of an existing Window favorite (as returned by `GetFavoritesByType`). Applied to the Window tool defaults before the create.",
@@ -5498,6 +8049,24 @@ class ZoneRelations(APIModel):
 class ZoneRelationsOfElement(APIModel):
     """Relations of a zone."""
     zoneRelations: ZoneRelations
+
+
+class ActiveGraphicalOverrideCombinationById(APIModel):
+    """The graphic override combination to apply, given by id or by name."""
+    combinationId: GraphicOverrideCombinationId
+    name: str | None = Field(
+        None,
+        description="The name of the graphic override combination, as shown in Document > Graphic Overrides > Graphic Override Combinations.",
+    )
+
+
+class ActiveGraphicalOverrideCombinationByName(APIModel):
+    """The graphic override combination to apply, given by id or by name."""
+    combinationId: GraphicOverrideCombinationId | None = None
+    name: str = Field(
+        ...,
+        description="The name of the graphic override combination, as shown in Document > Graphic Overrides > Graphic Override Combinations.",
+    )
 
 
 class FavoritesToApplyItem(APIModel):
@@ -5692,6 +8261,15 @@ class BeamWithDetails(APIModel):
     cutFillPen: OverriddenPen | None = None
     cutFillBackgroundPen: OverriddenPen | None = None
     coverFill: CoverFill | None = None
+
+
+class Body3D(APIModel):
+    """One solid body of an element's 3D model: a flat vertex list in world coordinates and the planar faces referencing it. The faces are not triangulated: a face is a closed loop of vertex indices (counterclockwise seen from outside the body) plus the loops of its holes."""
+    vertices: list[Coordinate3D] = Field(
+        ...,
+        description="The vertices of the body in world coordinates (meters, absolute Z).",
+    )
+    polygons: list[Body3DPolygon] = Field(..., description="The faces of the body.")
 
 
 class DrawingsWithNewLink(APIModel):
@@ -5902,6 +8480,44 @@ class LayerCombinationDataArrayItem(APIModel):
     )
 
 
+class CurtainWallData(APIModel):
+    """The parameters of the new Curtain Wall. Everything not given here - the frame and panel classes, the surfaces, the boundary and corner frames, the pattern - comes from the favorite or from the Curtain Wall tool defaults of the open project."""
+    favoriteName: str | None = Field(
+        None,
+        description="Optional name of a favorite to base the new element on. Its settings are applied first, then the explicitly given fields override them.",
+    )
+    coordinates: list[Coordinate2D] = Field(
+        ...,
+        description="The 2D coordinates of the reference line of the curtain wall on the floor plan. Each pair of consecutive coordinates becomes one straight segment, so two coordinates give a single-segment curtain wall.",
+        min_length=2,
+    )
+    zCoordinate: float | None = Field(
+        None,
+        description="Optional Z coordinate (absolute elevation) of the bottom of the curtain wall. When omitted, the base level of the favorite (or of the Curtain Wall tool defaults) relative to the floor is kept.",
+    )
+    floorIndex: int | None = Field(
+        None,
+        description="Optional floor index. When omitted, derived from zCoordinate if that is given, otherwise the current story.",
+    )
+    height: float | None = Field(
+        None,
+        description="Optional height of the curtain wall. When omitted, the height of the favorite (or of the Curtain Wall tool defaults) is kept.",
+        gt=0.0,
+    )
+    primaryPattern: CurtainWallPattern | None = Field(
+        None,
+        description="Optional column pattern: the sizes of the columns along the segment (the primary grid). When omitted, the pattern of the favorite (or of the tool defaults) is kept.",
+    )
+    secondaryPattern: CurtainWallPattern | None = Field(
+        None,
+        description="Optional row pattern: the sizes of the rows from the bottom up (the secondary grid). When omitted, the pattern of the favorite (or of the tool defaults) is kept.",
+    )
+    cells: list[CurtainWallPatternCell] | None = Field(
+        None,
+        description="Optional assignment of panel and frame classes to the cells of the pattern unit. The unit repeats along and up the segment, so an assignment applies to every repetition of that cell. A cell not listed here keeps the assignment of the favorite (or of the tool defaults) when the pattern is unchanged, otherwise the assignment of the first default cell.",
+    )
+
+
 class CurtainWallPanelDetails(APIModel):
     polygonCoordinates: list[Coordinate3D] = Field(
         ..., description="The 3D coordinates of the panel polygon.", min_length=3
@@ -5989,6 +8605,10 @@ class DoorData(APIModel):
     reflected: bool | None = None
     refSide: bool | None = None
     oSide: bool | None = None
+    libraryPartName: str | None = Field(
+        None,
+        description="Optional. Localized library part name (docu_UName) to place instead of the tool default/favorite, e.g. a shutter part that has no favorite. It has to be a door library part. Applied to the tool defaults before cloning.",
+    )
     favoriteName: str | None = Field(
         None,
         description="Optional. Name of an existing Door favorite (as returned by `GetFavoritesByType`). Applied to the Door tool defaults before the create.",
@@ -6058,6 +8678,189 @@ class DrawingDetails(APIModel):
     )
 
 
+class ElectricalCircuitConnectionData(APIModel):
+    elementId: ElementId = Field(..., description="An electrical device or an electrical panel.")
+    circuitId: ElementId = Field(..., description="The electrical circuit to connect to.")
+
+
+class ElectricalCircuitData(APIModel):
+    electricalPanelId: ElementId = Field(..., description="The panel to add the new circuit to.")
+    description: str | None = None
+    voltage: float | None = None
+    wiringTypeName: str | None = Field(
+        None,
+        description="One of the wiring types of the electrical project settings, or an empty string for none.",
+    )
+    isPhaseAUsed: bool | None = None
+    isPhaseBUsed: bool | None = None
+    isPhaseCUsed: bool | None = None
+
+
+class ElectricalCircuitDetails(APIModel):
+    """The details of an electrical circuit."""
+    elementId: ElementId
+    name: str = Field(
+        ...,
+        description="The name of the circuit, including the circuit name prefix of its panel.",
+    )
+    description: str
+    ownerPanelId: ElementId = Field(..., description="The panel that owns the circuit.")
+    childDevices: list[ElementIdArrayItem] = Field(..., description="The electrical devices connected to the circuit.")
+    childPanels: list[ElementIdArrayItem] = Field(..., description="The electrical panels connected to the circuit.")
+    voltage: float
+    phases: str = Field(..., description="The used phases, as Archicad displays them.")
+    isPhaseAUsed: bool
+    isPhaseBUsed: bool
+    isPhaseCUsed: bool
+    wiringTypeName: str = Field(
+        ...,
+        description="The name of the wiring type, as defined in the electrical project settings.",
+    )
+    connectedLoad: ElectricalLoads
+    demandLoad: ElectricalLoads
+    voltageDrop: float
+    estimatedCableLength: float
+
+
+class ElectricalCircuitModificationData(APIModel):
+    elementId: ElementId
+    description: str | None = None
+    voltage: float | None = None
+    wiringTypeName: str | None = Field(
+        None,
+        description="One of the wiring types of the electrical project settings, or an empty string for none.",
+    )
+    isPhaseAUsed: bool | None = None
+    isPhaseBUsed: bool | None = None
+    isPhaseCUsed: bool | None = None
+
+
+class ElectricalDeviceData(APIModel):
+    position: Coordinate3D = Field(..., description="The anchor point of the new device.")
+    orientation: MEPOrientation | None = Field(
+        None,
+        description="Defaults to the direction (1, 0, 0) and the rotation (0, 1, 0).",
+    )
+    rotation: float | None = Field(None, description="The base rotation in radians.")
+    isReflected: bool | None = None
+    libraryPartId: LibPartUnId | None = Field(
+        None,
+        description="The library part to use, as listed by GetAvailableLibraryParts.",
+    )
+    xSize: float | None = Field(
+        None,
+        description="The size along the local x axis. Some library parts calculate their own size, then the item fails.",
+    )
+    ySize: float | None = Field(
+        None,
+        description="The size along the local y axis. Some library parts calculate their own size, then the item fails.",
+    )
+    apparentPower: int | None = Field(None, description="The apparent power in VA.", ge=0)
+    isApparentPowerEnabled: bool | None = None
+    loadClassificationName: str | None = Field(
+        None,
+        description="One of the load classifications of the electrical project settings, or an empty string for none.",
+    )
+    circuitId: ElementId | None = Field(None, description="The circuit to connect the new device to.")
+
+
+class ElectricalDeviceDetails(APIModel):
+    """The details of an electrical device (a light, socket or other consumer)."""
+    elementId: ElementId
+    parentCircuitId: ElementId | None = Field(
+        None,
+        description="The circuit the device is connected to. Missing when the device is not connected to a circuit.",
+    )
+    anchorPoint: Coordinate3D = Field(..., description="The anchor point of the element.")
+    orientation: MEPOrientation
+    rotation: float = Field(..., description="The base rotation of the element in radians.")
+    isReflected: bool = Field(..., description="The element is mirrored.")
+    libraryPartId: LibPartUnId = Field(..., description="The library part of the element.")
+    xSize: float = Field(..., description="The size of the element along its local x axis.")
+    ySize: float = Field(..., description="The size of the element along its local y axis.")
+    apparentPower: float = Field(..., description="The apparent power of the device in VA.")
+    isApparentPowerEnabled: bool
+    loadClassificationName: str = Field(
+        ...,
+        description="The name of the load classification, as defined in the electrical project settings.",
+    )
+    demandLoad: float
+    connectedElements: list[ElementIdArrayItem] = Field(
+        ..., description="The MEP elements directly connected to the device."
+    )
+
+
+class ElectricalDeviceModificationData(APIModel):
+    elementId: ElementId
+    apparentPower: int | None = Field(None, description="The apparent power in VA.", ge=0)
+    isApparentPowerEnabled: bool | None = None
+    loadClassificationName: str | None = Field(
+        None,
+        description="One of the load classifications of the electrical project settings, or an empty string for none.",
+    )
+    anchorPoint: Coordinate3D | None = None
+    orientation: MEPOrientation | None = None
+    rotation: float | None = Field(None, description="The base rotation in radians.")
+    isReflected: bool | None = None
+    libraryPartId: LibPartUnId | None = Field(
+        None,
+        description="The library part to use, as listed by GetAvailableLibraryParts.",
+    )
+    xSize: float | None = Field(
+        None,
+        description="The size along the local x axis. Some library parts calculate their own size, then the item fails.",
+    )
+    ySize: float | None = Field(
+        None,
+        description="The size along the local y axis. Some library parts calculate their own size, then the item fails.",
+    )
+
+
+class ElectricalPanelDetails(APIModel):
+    """The details of an electrical panel (distribution board)."""
+    elementId: ElementId
+    panelName: str
+    circuitNamePrefix: str = Field(..., description="The prefix of the names of the circuits of the panel.")
+    circuitIdStyle: int = Field(..., description="The index of the style of the circuit ids.")
+    circuits: list[ElementIdArrayItem] = Field(..., description="The circuits owned by the panel.")
+    parentCircuitId: ElementId | None = Field(
+        None,
+        description="The circuit the panel is connected to. Missing when the panel is not connected to a circuit.",
+    )
+    anchorPoint: Coordinate3D = Field(..., description="The anchor point of the element.")
+    orientation: MEPOrientation
+    rotation: float = Field(..., description="The base rotation of the element in radians.")
+    isReflected: bool = Field(..., description="The element is mirrored.")
+    libraryPartId: LibPartUnId = Field(..., description="The library part of the element.")
+    xSize: float = Field(..., description="The size of the element along its local x axis.")
+    ySize: float = Field(..., description="The size of the element along its local y axis.")
+    connectedLoad: ElectricalLoads
+    demandLoad: ElectricalLoads
+
+
+class ElectricalPanelModificationData(APIModel):
+    elementId: ElementId
+    panelName: str | None = None
+    circuitNamePrefix: str | None = None
+    circuitIdStyle: int | None = None
+    anchorPoint: Coordinate3D | None = None
+    orientation: MEPOrientation | None = None
+    rotation: float | None = Field(None, description="The base rotation in radians.")
+    isReflected: bool | None = None
+    libraryPartId: LibPartUnId | None = Field(
+        None,
+        description="The library part to use, as listed by GetAvailableLibraryParts.",
+    )
+    xSize: float | None = Field(
+        None,
+        description="The size along the local x axis. Some library parts calculate their own size, then the item fails.",
+    )
+    ySize: float | None = Field(
+        None,
+        description="The size along the local y axis. Some library parts calculate their own size, then the item fails.",
+    )
+
+
 class ElementClassification(APIModel):
     """The classification of an element."""
     elementId: ElementId
@@ -6068,6 +8871,28 @@ class ElementClassificationItemArray(APIModel):
     """A wrapper containing a list of element classification identifiers or errors."""
     classificationIds: list[ClassificationIdArrayItem | ErrorItem] = Field(
         ..., description="A list of element classification identifiers or errors."
+    )
+
+
+class ElementComponentQuantities(APIModel):
+    buildingMaterialId: AttributeIdArrayItem
+    volume: float = Field(..., description="Net volume of the skin.")
+    projectedArea: float = Field(
+        ...,
+        description="Projected area of the skin. Archicad reports 0 when the legacy intersection and surface calculation is turned on in the Project Preferences.",
+    )
+    isCore: bool = Field(..., description="The skin is marked as core.")
+    isFinish: bool = Field(..., description="The skin is marked as finish.")
+    subElementId: ElementId | None = Field(
+        None,
+        description="The sub-element (for example a column or beam segment) the skin belongs to. Present only when Archicad attaches the skin to a sub-element.",
+    )
+
+
+class ElementGeometry3D(APIModel):
+    bodies: list[Body3D] = Field(
+        ...,
+        description="The solid bodies of the element's 3D model, including those of its subelements for a Stair, Railing or Curtain Wall. Empty when the element has no solid 3D model (for example a 2D element, or one filtered out of the 3D view).",
     )
 
 
@@ -6089,6 +8914,29 @@ class ElementIFCType(APIModel):
     elementId: ElementId
     ifcType: str
     typeObjectIFCType: str
+
+
+class ElementQuantityDetails(APIModel):
+    type: ElementType
+    quantities: (
+        WallQuantities
+        | ColumnQuantities
+        | BeamQuantities
+        | SlabQuantities
+        | RoofQuantities
+        | ShellQuantities
+        | MorphQuantities
+        | ZoneQuantities
+        | ColumnSegmentQuantities
+        | BeamSegmentQuantities
+    ) = Field(
+        ...,
+        description="The type-specific quantities of an element. The fields depend on the type of the element.",
+    )
+    composites: list[ElementComponentQuantities] = Field(
+        ...,
+        description="The quantities per building material, in the order Archicad reports them: one item for each skin of a composite or complex profile element, and a single item for a basic element. Empty for Zones and Morphs, for which Archicad reports no skins.",
+    )
 
 
 class ElementTrims(APIModel):
@@ -6173,6 +9021,68 @@ class DesignOptionForElement(APIModel):
     elementId: ElementId
     type: DesignOptionLinkType
     designOption: DesignOptionDetails | None = None
+
+
+class GraphicOverrideRuleGroup(APIModel):
+    name: str
+    graphicOverrideRuleIds: list[GraphicOverrideRuleIdArrayItem] = Field(..., description="The rules of the group.")
+
+
+class GraphicOverrideCombinationData(APIModel):
+    name: str = Field(..., description="The name of the combination, unique within the project.")
+    graphicOverrideRuleIds: list[GraphicOverrideRuleIdArrayItem] = Field(
+        ..., description="The rules of the combination, in priority order."
+    )
+
+
+class GraphicOverrideCombinationDetails(APIModel):
+    graphicOverrideCombinationId: GraphicOverrideCombinationId
+    name: str
+    graphicOverrideRuleIds: list[GraphicOverrideRuleIdArrayItem] = Field(
+        ..., description="The rules of the combination, in priority order."
+    )
+
+
+class GraphicOverrideRuleData(APIModel):
+    name: str = Field(..., description="The name of the rule, unique within the project.")
+    ruleGroupName: str = Field(
+        ...,
+        description="The name of the rule group to put the rule in. Created when it does not exist.",
+    )
+    criterionXML: str | None = Field(
+        None,
+        description="The criterion of the rule, in the XML format Archicad saves override rules in. Take it from GetGraphicOverrideRules and change its values: Archicad drops XML written from scratch without an error, and the rule then applies to all elements. Left out together with 'criterion': Archicad's default criterion for new rules.",
+    )
+    criterion: GraphicOverrideCriterion | None = Field(
+        None,
+        description="The criterion of the rule as structured conditions, turned into Archicad's criterion XML. Use it instead of criterionXML, not with it.",
+    )
+    style: GraphicOverrideStyle | None = None
+
+
+class GraphicOverrideRuleDetails(APIModel):
+    graphicOverrideRuleId: GraphicOverrideRuleId
+    name: str
+    ruleGroupName: str | None = Field(None, description="The name of the rule group the rule belongs to.")
+    criterionXML: str = Field(
+        ...,
+        description="The criterion of the rule, in the XML format Archicad saves override rules in. Change its values and pass it to CreateGraphicOverrideRules or ModifyGraphicOverrideRules to make similar rules.",
+    )
+    style: GraphicOverrideStyle
+
+
+class GraphicOverrideRuleModificationData(APIModel):
+    graphicOverrideRuleId: GraphicOverrideRuleId
+    name: str | None = Field(None, description="The new name of the rule.")
+    criterionXML: str | None = Field(
+        None,
+        description="The new criterion of the rule, in the XML format Archicad saves override rules in. Take it from GetGraphicOverrideRules and change its values: Archicad drops XML written from scratch without an error, and the rule then applies to all elements.",
+    )
+    criterion: GraphicOverrideCriterion | None = Field(
+        None,
+        description="The new criterion of the rule as structured conditions, turned into Archicad's criterion XML. Use it instead of criterionXML, not with it.",
+    )
+    style: GraphicOverrideStyle | None = None
 
 
 class KeynoteFolderDetails(APIModel):
@@ -6354,6 +9264,11 @@ class MorphData(APIModel):
     yAxis: Coordinate3D | None = None
     zAxis: Coordinate3D | None = None
     surfaceId: AttributeId | None = None
+    topExpansion: float | None = Field(
+        None,
+        description="Only used with `size` (box) morphs. Expands the top rectangle outwards on all four sides by this amount, creating a frustum (e.g. sloped excavation shape). 0 creates a cuboid.",
+        ge=0.0,
+    )
     castShadow: bool | None = None
     receiveShadow: bool | None = None
     isAutoOnStoryVisibility: bool | None = None
@@ -6869,7 +9784,10 @@ class ZoneData(APIModel):
         None,
         description="Optional name of a favorite to base the new element on. Its settings are applied first, then the explicitly given fields override them.",
     )
-    floorIndex: float | None = None
+    floorIndex: float | None = Field(
+        None,
+        description="Optional story index of the new zone. An automatic zone (geometry.referencePosition) is found around its reference point on this story, which is made active in the floor plan while the zone is created; the previously active story is restored afterwards.",
+    )
     name: str = Field(..., description="Name of the zone.")
     numberStr: str = Field(..., description="Zone number.")
     categoryAttributeId: AttributeId | None = Field(None, description="The identifier of the zone category attribute.")
@@ -7133,6 +10051,7 @@ class DetailsOfElement(APIModel):
         | DrawingDetails
         | LabelDetails
         | TextDetails
+        | LevelDimensionDetails
         | NotYetSupportedElementTypeDetails
     ) = Field(
         ...,
@@ -7253,6 +10172,15 @@ DesignOptionIdOrError: TypeAlias = DesignOptionIdArrayItem | ErrorItem
 DimensionDataOrError: TypeAlias = DimensionData | ErrorItem
 
 
+ElectricalCircuitDetailsOrError: TypeAlias = ElectricalCircuitDetails | ErrorItem
+
+
+ElectricalDeviceDetailsOrError: TypeAlias = ElectricalDeviceDetails | ErrorItem
+
+
+ElectricalPanelDetailsOrError: TypeAlias = ElectricalPanelDetails | ErrorItem
+
+
 ElementIFCIdsOrError: TypeAlias = ElementIFCIds | ErrorItem
 
 
@@ -7266,6 +10194,20 @@ ElementIdOrError: TypeAlias = ElementIdArrayItem | ErrorItem
 
 
 ElementOrGroupId: TypeAlias = ElementIdArrayItem | GroupIdArrayItem
+
+
+ElementQuantities: TypeAlias = (
+    WallQuantities
+    | ColumnQuantities
+    | BeamQuantities
+    | SlabQuantities
+    | RoofQuantities
+    | ShellQuantities
+    | MorphQuantities
+    | ZoneQuantities
+    | ColumnSegmentQuantities
+    | BeamSegmentQuantities
+)
 
 
 ElementRelationsOrError: TypeAlias = (
@@ -7303,6 +10245,12 @@ FavoritesOrError: TypeAlias = FavoritesWrapper | ErrorItem
 FillAttributeOrError: TypeAlias = FillAttribute | ErrorItem
 
 
+GraphicOverrideCombinationIdOrError: TypeAlias = GraphicOverrideCombinationIdArrayItem | ErrorItem
+
+
+GraphicOverrideRuleIdOrError: TypeAlias = GraphicOverrideRuleIdArrayItem | ErrorItem
+
+
 GroupIdOrError: TypeAlias = GroupIdArrayItem | ErrorItem
 
 
@@ -7336,10 +10284,22 @@ MEPConnectionResultOrError: TypeAlias = MEPConnectionResult | ErrorItem
 MEPElementPortsOrError: TypeAlias = MEPElementPorts | ErrorItem
 
 
+MEPPhysicalSystemDetailsOrError: TypeAlias = MEPPhysicalSystemDetails | ErrorItem
+
+
+MEPPhysicalSystemIdOrError: TypeAlias = MEPPhysicalSystemIdArrayItem | ErrorItem
+
+
 MEPRoutingElementDetailsOrError: TypeAlias = MEPRoutingElementDetails | ErrorItem
 
 
 MEPSystemAttributeOrError: TypeAlias = MEPSystemAttribute | ErrorItem
+
+
+MEPSystemGroupDetailsOrError: TypeAlias = MEPSystemGroupDetails | ErrorItem
+
+
+MEPSystemGroupIdOrError: TypeAlias = MEPSystemGroupIdArrayItem | ErrorItem
 
 
 MarkerParameterUpdate: TypeAlias = MarkerParameterUpdateByName | MarkerParameterUpdateByIndex
@@ -7429,6 +10389,7 @@ TypeSpecificDetails: TypeAlias = (
     | DrawingDetails
     | LabelDetails
     | TextDetails
+    | LevelDimensionDetails
     | NotYetSupportedElementTypeDetails
 )
 
@@ -7463,6 +10424,7 @@ ZoneCreationGeometry: TypeAlias = AutomaticZoneGeometry | ManualZoneGeometry
 
 
 ClassificationItemDetails.model_rebuild()
+GraphicOverrideCriterion.model_rebuild()
 KeynoteFolderDetails.model_rebuild()
 Hotlink.model_rebuild()
 NavigatorItem.model_rebuild()

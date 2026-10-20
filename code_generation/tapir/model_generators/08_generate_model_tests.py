@@ -7,6 +7,7 @@ from types import UnionType
 from multiconn_archicad.models.tapir import commands as tapir_models
 
 from code_generation.tapir.paths import tapir_paths
+from code_generation.shared.utils import bound_graphic_override_criteria
 
 KNOWN_XFAILURES = {}
 
@@ -17,6 +18,8 @@ SCHEMAS_TO_PATCH = {
     "GetDetailsOfElementsResult",
     "CreateClassificationItemsParameters",
     "CreateClassificationSystemsParameters",
+    "CreateGraphicOverrideRulesParameters",
+    "ModifyGraphicOverrideRulesParameters",
 }
 
 
@@ -49,6 +52,7 @@ def patch_schema_definitions(definitions: dict, model_name_to_test: str) -> dict
     that cause Hypothesis to fail or be too slow.
     """
     patched_defs = copy.deepcopy(definitions)
+    bound_graphic_override_criteria(patched_defs)
 
     if model_name_to_test == "GetHotlinksResult":
         if "Hotlink" in patched_defs and "properties" in patched_defs["Hotlink"]:

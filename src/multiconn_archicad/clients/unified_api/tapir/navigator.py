@@ -32,6 +32,8 @@ from multiconn_archicad.models.tapir.commands import (
     DeleteNavigatorItemsResult,
     FitInWindowParameters,
     FitInWindowResult,
+    Get3DProjectionSettingsResult,
+    GetActiveGraphicalOverrideCombinationResult,
     GetDatabaseIdFromNavigatorItemIdParameters,
     GetDatabaseIdFromNavigatorItemIdResult,
     GetLayoutCustomSchemeResult,
@@ -51,6 +53,10 @@ from multiconn_archicad.models.tapir.commands import (
     RenameNavigatorItemResult,
     Set3DCutPlanesParameters,
     Set3DCutPlanesResult,
+    Set3DProjectionSettingsParameters,
+    Set3DProjectionSettingsResult,
+    SetActiveGraphicalOverrideCombinationParameters,
+    SetActiveGraphicalOverrideCombinationResult,
     SetLayoutSettingsParameters,
     SetLayoutSettingsResult,
     SetViewRotationParameters,
@@ -61,6 +67,8 @@ from multiconn_archicad.models.tapir.commands import (
     UpdateDrawingsResult,
 )
 from multiconn_archicad.models.tapir.types import (
+    ActiveGraphicalOverrideCombinationById,
+    ActiveGraphicalOverrideCombinationByName,
     CustomSchemeItem,
     CutPlane,
     DatabaseIdArrayItem,
@@ -82,6 +90,7 @@ from multiconn_archicad.models.tapir.types import (
     NavigatorItemIdsWithRotationItem,
     NavigatorItemIdsWithViewSetting,
     NavigatorMapId,
+    PerspectiveProjectionParameters,
     SectionData,
     SubsetData,
     SuccessfulExecutionResult,
@@ -136,7 +145,7 @@ class NavigatorCommands:
         self, views_data: list[ViewCloneData]
     ) -> list[ErrorItem | NavigatorItemIdArrayItem]:
         """
-        Clones Project Map viewpoints into the View Map, optionally into a specified folder.
+        Clones Project Map viewpoints into a specified View Map folder.
 
         Args:
             views_data (list[ViewCloneData]): Array of views to clone from the Project Map to
@@ -349,8 +358,8 @@ class NavigatorCommands:
 
     def create_views_in_view_map(self, views_data: list[ViewData]) -> list[ErrorItem | NavigatorItemIdArrayItem]:
         """
-        Creates independent (non-clone) navigator views in the View Map by copying database and
-        settings from source items.
+        Creates independent (non-clone) navigator views in a specified View Map folder, by
+        copying database and settings from source items.
 
         Args:
             views_data (list[ViewData]): Array of views to create as independent (non-clone)
@@ -454,6 +463,43 @@ class NavigatorCommands:
             "FitInWindow", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = TypeAdapter(FitInWindowResult).validate_python(response_dict)
+        return validated_response
+
+    def get_3d_projection_settings(self) -> Get3DProjectionSettingsResult:
+        """
+        Gets the 3D projection settings of the 3D window: whether it is perspective or
+        axonometric, the camera and target position, view cone, roll angle, distance and azimuth
+        of a perspective, or the transformation matrix of an axonometry.
+
+        Returns:
+            Get3DProjectionSettingsResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        response_dict = self._core.post_tapir_command("Get3DProjectionSettings")
+        validated_response = Get3DProjectionSettingsResult.model_validate(response_dict)
+        return validated_response
+
+    def get_active_graphical_override_combination(self) -> GetActiveGraphicalOverrideCombinationResult:
+        """
+        Gets the graphic override combination applied to the current window, with its id and
+        name. The response is empty when no combination is applied. This is the combination of
+        the window itself, not the one stored in a saved view (see GetViewSettings). Available
+        from Archicad 30.
+
+        Returns:
+            GetActiveGraphicalOverrideCombinationResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        response_dict = self._core.post_tapir_command("GetActiveGraphicalOverrideCombination")
+        validated_response = GetActiveGraphicalOverrideCombinationResult.model_validate(response_dict)
         return validated_response
 
     def get_database_id_from_navigator_item_id(
@@ -699,15 +745,25 @@ class NavigatorCommands:
         return None
 
     def rename_navigator_item(
-        self, navigator_item_id: NavigatorItemId, new_name: None | str = None, new_id: None | str = None
+        self,
+        navigator_item_id: NavigatorItemId,
+        new_name: None | str = None,
+        new_id: None | str = None,
+        custom_name: None | bool = None,
     ) -> FailedExecutionResult | SuccessfulExecutionResult:
         """
-        Renames a navigator item or changes its ID.
+        Renames a navigator item or changes its ID. Fails when Archicad does not apply the new
+        name (e.g. on Project Map schedule items, which are named by their scheme). With
+        customName false the item drops its custom name and follows its Project Map source
+        again.
 
         Args:
             navigator_item_id (NavigatorItemId)
             new_name (None | str)
             new_id (None | str)
+            custom_name (None | bool): Set to false to drop the custom name of the item, so that
+                it follows the name of its Project Map source again. Cannot be combined with
+                newName.
 
         Returns:
             FailedExecutionResult | SuccessfulExecutionResult
@@ -721,6 +777,7 @@ class NavigatorCommands:
             "navigatorItemId": navigator_item_id,
             "newName": new_name,
             "newId": new_id,
+            "customName": custom_name,
         }
         validated_params = RenameNavigatorItemParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
@@ -754,6 +811,64 @@ class NavigatorCommands:
             "Set3DCutPlanes", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = TypeAdapter(Set3DCutPlanesResult).validate_python(response_dict)
+        return validated_response
+
+    def set_3d_projection_settings(
+        self, perspective: PerspectiveProjectionParameters
+    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+        """
+        Sets a perspective projection for the 3D window. Every perspective parameter is
+        required: read a known good set with Get3DProjectionSettings and pass it back, with the
+        values to change replaced.
+
+        Args:
+            perspective (PerspectiveProjectionParameters)
+
+        Returns:
+            FailedExecutionResult | SuccessfulExecutionResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "perspective": perspective,
+        }
+        validated_params = Set3DProjectionSettingsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "Set3DProjectionSettings", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = TypeAdapter(Set3DProjectionSettingsResult).validate_python(response_dict)
+        return validated_response
+
+    def set_active_graphical_override_combination(
+        self, parameters: ActiveGraphicalOverrideCombinationById | ActiveGraphicalOverrideCombinationByName
+    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+        """
+        Applies a graphic override combination, given by id or by name, to the current window.
+        The current window must be a model window (floor plan, section, elevation, 3D, ...). To
+        remove the overrides, apply the project's 'No Overrides' combination. The saved view is
+        not changed (see SetViewSettings for that). Available from Archicad 30.
+
+        Args:
+            parameters (ActiveGraphicalOverrideCombinationById |
+                ActiveGraphicalOverrideCombinationByName): Union model configuration parameters.
+
+        Returns:
+            FailedExecutionResult | SuccessfulExecutionResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        validated_params = TypeAdapter(SetActiveGraphicalOverrideCombinationParameters).validate_python(parameters)
+        response_dict = self._core.post_tapir_command(
+            "SetActiveGraphicalOverrideCombination",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+        )
+        validated_response = TypeAdapter(SetActiveGraphicalOverrideCombinationResult).validate_python(response_dict)
         return validated_response
 
     def set_layout_settings(

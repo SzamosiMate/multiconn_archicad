@@ -38,6 +38,23 @@ def fix_root_model_unions_to_type_alias(content: str) -> str:
     def replacer(match):
         name = match.group(1)
         inner_type = re.sub(r"\s+", " ", match.group(2)).strip()
+        # RootModel fields can carry item bounds or length constraints. Moving
+        # those onto the alias keeps validation when the wrapper is collapsed.
+        model = ast.parse(match.group(0)).body[0]
+        for field in model.body:
+            if not (
+                isinstance(field, ast.AnnAssign)
+                and isinstance(field.target, ast.Name)
+                and field.target.id == "root"
+                and isinstance(field.value, ast.Call)
+                and isinstance(field.value.func, ast.Name)
+                and field.value.func.id == "Field"
+            ):
+                continue
+            constraints = [kw for kw in field.value.keywords if kw.arg not in {"description", "title", "default"}]
+            if constraints:
+                metadata = ast.unparse(ast.Call(func=ast.Name(id="Field"), args=[], keywords=constraints))
+                inner_type = f"Annotated[{inner_type}, {metadata}]"
         return f"{name}: TypeAlias = {inner_type}"
 
     content, num_replacements = pattern.subn(replacer, content)

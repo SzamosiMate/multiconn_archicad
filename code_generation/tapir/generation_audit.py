@@ -76,12 +76,14 @@ def audit_schema_names(schema: dict[str, Any]) -> list[Finding]:
             findings.append(Finding("invalid-properties", path, "Schema 'properties' must be an object."))
             continue
         for name in properties:
-            if not _is_python_identifier(name):
+            # JSON keys can be Python keywords: codegen emits Pydantic aliases
+            # and functional TypedDict declarations for these valid wire names.
+            if not name.isidentifier():
                 findings.append(
                     Finding(
                         "invalid-schema-name",
                         f"{path}.properties.{name}",
-                        f"Property name '{name}' is not valid Python.",
+                        f"Property name '{name}' is not a valid identifier.",
                     )
                 )
 
@@ -119,6 +121,15 @@ def _public_definition_names(path: Path, tree: ast.Module) -> Iterable[tuple[str
         elif isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name):
             if isinstance(node.annotation, ast.Name) and node.annotation.id == "TypeAlias":
                 yield node.target.id, node.lineno
+        elif (
+            isinstance(node, ast.Assign)
+            and isinstance(node.value, ast.Call)
+            and isinstance(node.value.func, ast.Name)
+            and node.value.func.id == "TypedDict"
+        ):
+            for target in node.targets:
+                if isinstance(target, ast.Name):
+                    yield target.id, node.lineno
 
 
 def audit_python_files(paths: Iterable[Path]) -> tuple[list[Finding], dict[Path, ast.Module]]:

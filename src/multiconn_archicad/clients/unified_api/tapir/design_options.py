@@ -12,6 +12,12 @@ from multiconn_archicad.models.tapir.commands import (
     CreateDesignOptionSetsResult,
     CreateDesignOptionsParameters,
     CreateDesignOptionsResult,
+    DeleteDesignOptionCombinationsParameters,
+    DeleteDesignOptionCombinationsResult,
+    DeleteDesignOptionSetsParameters,
+    DeleteDesignOptionSetsResult,
+    DeleteDesignOptionsParameters,
+    DeleteDesignOptionsResult,
     GetDesignOptionCombinationsResult,
     GetDesignOptionForElementsParameters,
     GetDesignOptionForElementsResult,
@@ -23,6 +29,12 @@ from multiconn_archicad.models.tapir.commands import (
     MoveDesignOptionsToAnotherSetResult,
     MoveElementsToDesignOptionsParameters,
     MoveElementsToDesignOptionsResult,
+    RenameDesignOptionCombinationsParameters,
+    RenameDesignOptionCombinationsResult,
+    RenameDesignOptionSetsParameters,
+    RenameDesignOptionSetsResult,
+    RenameDesignOptionsParameters,
+    RenameDesignOptionsResult,
     SetActiveDesignOptionsInCombinationsParameters,
     SetActiveDesignOptionsInCombinationsResult,
 )
@@ -32,11 +44,15 @@ from multiconn_archicad.models.tapir.types import (
     DesignOptionCombinationData,
     DesignOptionCombinationDetails,
     DesignOptionCombinationIdArrayItem,
+    DesignOptionCombinationRename,
     DesignOptionData,
     DesignOptionDetails,
     DesignOptionForElement,
     DesignOptionIdArrayItem,
+    DesignOptionRename,
     DesignOptionSet,
+    DesignOptionSetIdArrayItem,
+    DesignOptionSetRename,
     ElementDesignOptionPair,
     ElementIdArrayItem,
     ElementsOfDesignOption,
@@ -137,6 +153,92 @@ class DesignOptionsCommands:
         )
         validated_response = CreateDesignOptionsResult.model_validate(response_dict)
         return validated_response.designOptionIdsOrErrors
+
+    def delete_design_option_combinations(
+        self, design_option_combinations: list[DesignOptionCombinationIdArrayItem]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Deletes the given design option combinations. Available from Archicad 29.
+
+        Args:
+            design_option_combinations (list[DesignOptionCombinationIdArrayItem]): The design
+                option combinations to delete.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "designOptionCombinations": design_option_combinations,
+        }
+        validated_params = DeleteDesignOptionCombinationsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "DeleteDesignOptionCombinations", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = DeleteDesignOptionCombinationsResult.model_validate(response_dict)
+        return validated_response.executionResults
+
+    def delete_design_option_sets(
+        self, design_option_sets: list[DesignOptionSetIdArrayItem]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Deletes the given design option sets. Available from Archicad 29.
+
+        Args:
+            design_option_sets (list[DesignOptionSetIdArrayItem]): The design option sets to
+                delete.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "designOptionSets": design_option_sets,
+        }
+        validated_params = DeleteDesignOptionSetsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "DeleteDesignOptionSets", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = DeleteDesignOptionSetsResult.model_validate(response_dict)
+        return validated_response.executionResults
+
+    def delete_design_options(
+        self, design_options: list[DesignOptionIdArrayItem]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Deletes the given design options. Available from Archicad 29.
+
+        Args:
+            design_options (list[DesignOptionIdArrayItem]): The design options to delete.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "designOptions": design_options,
+        }
+        validated_params = DeleteDesignOptionsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "DeleteDesignOptions", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = DeleteDesignOptionsResult.model_validate(response_dict)
+        return validated_response.executionResults
 
     def get_design_option_combinations(self) -> list[DesignOptionCombinationDetails]:
         """
@@ -296,6 +398,94 @@ class DesignOptionsCommands:
             "MoveElementsToDesignOptions", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = MoveElementsToDesignOptionsResult.model_validate(response_dict)
+        return validated_response.executionResults
+
+    def rename_design_option_combinations(
+        self, design_option_combinations: list[DesignOptionCombinationRename]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Changes the name of the given design option combinations. Available from Archicad 29.
+
+        Args:
+            design_option_combinations (list[DesignOptionCombinationRename]): The design option
+                combinations to rename, each with the new name.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "designOptionCombinations": design_option_combinations,
+        }
+        validated_params = RenameDesignOptionCombinationsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "RenameDesignOptionCombinations", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = RenameDesignOptionCombinationsResult.model_validate(response_dict)
+        return validated_response.executionResults
+
+    def rename_design_option_sets(
+        self, design_option_sets: list[DesignOptionSetRename]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Changes the name of the given design option sets. Available from Archicad 29.
+
+        Args:
+            design_option_sets (list[DesignOptionSetRename]): The design option sets to rename,
+                each with the new name.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "designOptionSets": design_option_sets,
+        }
+        validated_params = RenameDesignOptionSetsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "RenameDesignOptionSets", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = RenameDesignOptionSetsResult.model_validate(response_dict)
+        return validated_response.executionResults
+
+    def rename_design_options(
+        self, design_options: list[DesignOptionRename]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Changes the name and/or the string id of the given design options. Available from
+        Archicad 29.
+
+        Args:
+            design_options (list[DesignOptionRename]): The design options to rename, each with
+                the new name and/or id. At least one of them must be given.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "designOptions": design_options,
+        }
+        validated_params = RenameDesignOptionsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "RenameDesignOptions", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = RenameDesignOptionsResult.model_validate(response_dict)
         return validated_response.executionResults
 
     def set_active_design_options_in_combinations(

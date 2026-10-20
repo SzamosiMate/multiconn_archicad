@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Literal, TypeAlias, TypedDict
+from typing import Any, Literal, TypeAlias, TypedDict, get_type_hints
 
 from typing_extensions import NotRequired
 
@@ -45,6 +45,13 @@ class AutoTextName(TypedDict):
     name: str
 
 
+class AxonometricProjectionParameters(TypedDict):
+    """
+    The parameters of an axonometric projection. Present only when isPersp is false.
+    """
+    transformationMatrix: list[float]
+
+
 BeamAnchorPoint: TypeAlias = Literal[
     "TopLeft",
     "TopCenter",
@@ -59,6 +66,49 @@ BeamAnchorPoint: TypeAlias = Literal[
 
 
 BeamHoleType: TypeAlias = Literal["Rectangular", "Circular"]
+
+
+class BeamQuantities(TypedDict):
+    """
+    Quantities of a Beam element, as calculated by Archicad. Lengths in meters, areas in square meters, volumes in cubic meters.
+    """
+    volume: float
+    volumeConditional: float
+    holesVolume: float
+    area: float
+    leftLength: float
+    rightLength: float
+    topSurface: float
+    bottomSurface: float
+    leftSurface: float
+    rightSurface: float
+    endSurface: float
+    holesSurface: float
+    holesEdgeSurface: float
+    holesNumber: int
+    crossSectionAreaCutBegin: float
+    crossSectionAreaCutEnd: float
+
+
+class BeamSegmentQuantities(TypedDict):
+    """
+    Quantities of a BeamSegment element, as calculated by Archicad. Lengths in meters, areas in square meters, volumes in cubic meters.
+    """
+    volume: float
+    holesVolume: float
+    length: float
+    leftLength: float
+    rightLength: float
+    topSurface: float
+    bottomSurface: float
+    leftSurface: float
+    rightSurface: float
+    endSurface: float
+    holesSurface: float
+
+
+class Body3DPolygonHole(TypedDict):
+    vertexIds: list[int]
 
 
 class BoundingBox2D(TypedDict):
@@ -180,6 +230,45 @@ class Coordinates(TypedDict):
     z: float
 
 
+class ColumnQuantities(TypedDict):
+    """
+    Quantities of a Column element, as calculated by Archicad. Lengths in meters, areas in square meters, volumes in cubic meters.
+    """
+    coreVolume: float
+    veneerVolume: float
+    coreGrossVolume: float
+    veneerGrossVolume: float
+    coreSurface: float
+    veneerSurface: float
+    coreGrossSurface: float
+    veneerGrossSurface: float
+    area: float
+    perimeter: float
+    minHeight: float
+    maxHeight: float
+    crossSectionAreaCutBegin: float
+    crossSectionAreaCutEnd: float
+
+
+class ColumnSegmentQuantities(TypedDict):
+    """
+    Quantities of a ColumnSegment element, as calculated by Archicad. Lengths in meters, areas in square meters, volumes in cubic meters.
+    """
+    volume: float
+    grossVolume: float
+    coreVolume: float
+    coreGrossVolume: float
+    veneerVolume: float
+    veneerGrossVolume: float
+    coreSurface: float
+    veneerSideSurface: float
+    length: float
+    area: float
+    height: float
+    minHeight: float
+    maxHeight: float
+
+
 CompositeAttributeField: TypeAlias = Literal["useWith", "skins", "separators"]
 
 
@@ -216,6 +305,20 @@ class CreateDesignOptionSetsParameters(TypedDict):
     designOptionSets: list[str]
 
 
+class CreateGraphicalOverrideCombinationParameters(TypedDict):
+    name: str
+    ruleNames: list[str]
+
+
+class CreateGraphicalOverrideRuleParameters(TypedDict):
+    name: str
+    ruleGroupName: NotRequired[str]
+    criterionXML: NotRequired[str]
+    surfaceRGB: NotRequired[ColorRGB]
+    linePenIndex: NotRequired[int]
+    overrideContours: NotRequired[bool]
+
+
 class HotlinkNode(TypedDict):
     sourceLocation: str
     name: NotRequired[str]
@@ -227,10 +330,18 @@ class CreateHotlinkNodesParameters(TypedDict):
     hotlinkNodes: list[HotlinkNode]
 
 
+CurtainWallCrossingFrameType: TypeAlias = Literal[
+    "None", "FromBottomLeftToTopRight", "FromTopLeftToBottomRight"
+]
+
+
 class CurtainWallDetails(TypedDict):
     height: NotRequired[float]
     flipped: NotRequired[bool]
     angle: NotRequired[float]
+
+
+CurtainWallFlexibleIndex: TypeAlias = int
 
 
 class PanelConnectionHole(TypedDict):
@@ -256,6 +367,31 @@ CurtainWallFrameType: TypeAlias = Literal[
 ]
 
 
+class CurtainWallPatternCell(TypedDict):
+    """
+    The panel and frame classes of one cell of the pattern unit of a curtain wall segment. Panel classes are numbered as Archicad numbers them: 0 is no panel (the cell is left empty), 1 is the first panel class of the curtain wall (as listed in the Curtain Wall Settings, from the favorite or the tool defaults), 2 the second and so on. Frame classes: 0 is no frame (the cell is merged with its neighbour), 1 the Division frame, 2 the Corner frame, 3 the Boundary frame, 4 the first custom frame class of the curtain wall, 5 the second and so on. Fields not given keep the default assignment of the cell.
+    """
+    columnIndex: int
+    rowIndex: int
+    panelClassIndex: NotRequired[int]
+    rightPanelClassIndex: NotRequired[int]
+    leftFrameClassIndex: NotRequired[int]
+    bottomFrameClassIndex: NotRequired[int]
+    crossingFrameType: NotRequired[CurtainWallCrossingFrameType]
+    crossingFrameClassIndex: NotRequired[int]
+
+
+CurtainWallPatternLogic: TypeAlias = Literal["FixedSizes", "BestDivision"]
+
+
+CurtainWallPatternOrigin: TypeAlias = Literal[
+    "StartWithPattern", "StartFromCenter", "AlignToCenter", "EndWithPattern"
+]
+
+
+CurtainWallPatternSize: TypeAlias = float
+
+
 class CurtainWallSegmentDetails(TypedDict):
     begCoordinate: Coordinate3D
     endCoordinate: Coordinate3D
@@ -275,6 +411,12 @@ class EmbeddedLibraryItem(TypedDict):
 
 class DeleteEmbeddedLibraryItemsParameters(TypedDict):
     embeddedLibraryItems: list[EmbeddedLibraryItem]
+
+
+class DeleteGraphicOverrideRuleGroupsParameters(TypedDict):
+    ruleGroupNames: list[str]
+    moveRulesToGroup: NotRequired[str]
+    deleteRules: NotRequired[bool]
 
 
 class DeleteProjectInfoFieldsParameters(TypedDict):
@@ -298,6 +440,11 @@ DesignOptionLinkType: TypeAlias = Literal[
 class DetailData(TypedDict):
     name: str
     referenceId: str
+
+
+DimensionOrigin: TypeAlias = Literal[
+    "ProjectZero", "ReferenceLevel1", "ReferenceLevel2", "StoredOrigin", "Altitude"
+]
 
 
 class Dimensions3D(TypedDict):
@@ -356,6 +503,26 @@ class DrawingSettings(TypedDict):
     customNumber: NotRequired[str]
     isInNumbering: NotRequired[bool]
     titleLibraryPartIndex: NotRequired[float]
+
+
+class ElectricalLoadClassification(TypedDict):
+    name: str
+    demandFactor: float
+
+
+class ElectricalLoads(TypedDict):
+    """
+    An electrical load in total and per phase, as Archicad calculates it.
+    """
+    total: float
+    phaseA: float
+    phaseB: float
+    phaseC: float
+
+
+class ElectricalWiringType(TypedDict):
+    name: str
+    crossSectionalArea: float
 
 
 ElementDetailsField: TypeAlias = Literal[
@@ -506,10 +673,6 @@ class ErrorItem(TypedDict):
 class ExportFavoritesParameters(TypedDict):
     path: str
     names: NotRequired[list[str]]
-
-
-class ExportFavoritesResult(TypedDict):
-    pass
 
 
 class ExpressionDefaultValue(TypedDict):
@@ -674,6 +837,12 @@ class FloorPlanPolygon(TypedDict):
     coordinates: NotRequired[list[Coordinate2D]]
 
 
+class GetElectricalProjectSettingsResult(TypedDict):
+    voltage: float
+    wiringTypes: list[ElectricalWiringType]
+    loadClassifications: list[ElectricalLoadClassification]
+
+
 class GetElementPreviewImageResult(TypedDict):
     previewImage: str
 
@@ -696,6 +865,14 @@ class GetFavoritePreviewImageResult(TypedDict):
 
 class GetFavoritesByTypeParameters(TypedDict):
     elementType: ElementType
+
+
+class GetGridElementDefaultsParameters(TypedDict):
+    pass
+
+
+class GetGridElementsParameters(TypedDict):
+    includeParameters: NotRequired[bool]
 
 
 class CustomSchemeItem(TypedDict):
@@ -762,6 +939,227 @@ class GetSuspendGroupsModeResult(TypedDict):
 class GetUserGSIDResult(TypedDict):
     userId: str
     organizationIds: NotRequired[list[str]]
+
+
+GraphicOverrideColumnCoatingType: TypeAlias = Literal["Core", "Finish", "Other"]
+
+
+GraphicOverrideColumnCrossSectionType: TypeAlias = Literal[
+    "Rectangular", "Circular", "Profiled"
+]
+
+
+class GraphicOverrideCustomPropertyBool(TypedDict):
+    """
+    Matches elements by a custom (user-defined) boolean property, identified by its plain name and the name of the property group it appears under (both exactly as shown in the Property Manager). Provide 'name', 'group', and exactly one of the operators below. The 6 'has.../is...' operators are available on every custom property type, not just boolean ones.
+    """
+    name: str
+    group: str
+    equals: NotRequired[bool]
+    hasDefaultValue: NotRequired[bool]
+    hasCustomValue: NotRequired[bool]
+    isAvailable: NotRequired[bool]
+    isNotAvailable: NotRequired[bool]
+    isUndefined: NotRequired[bool]
+    isNotUndefined: NotRequired[bool]
+
+
+class GraphicOverrideCustomPropertyInteger(TypedDict):
+    """
+    Matches elements by a custom (user-defined) integer property, identified by its plain name and the name of the property group it appears under. Provide 'name', 'group', and exactly one operator.
+    """
+    name: str
+    group: str
+    equals: NotRequired[int]
+    notEquals: NotRequired[int]
+    lessThan: NotRequired[int]
+    greaterThan: NotRequired[int]
+    lessOrEqual: NotRequired[int]
+    greaterOrEqual: NotRequired[int]
+    hasDefaultValue: NotRequired[bool]
+    hasCustomValue: NotRequired[bool]
+    isAvailable: NotRequired[bool]
+    isNotAvailable: NotRequired[bool]
+    isUndefined: NotRequired[bool]
+    isNotUndefined: NotRequired[bool]
+
+
+class GraphicOverrideCustomPropertyNumber(TypedDict):
+    """
+    Matches elements by a custom (user-defined) numeric property, identified by its plain name and the name of the property group it appears under. Provide 'name', 'group', and exactly one operator.
+    """
+    name: str
+    group: str
+    equals: NotRequired[float]
+    notEquals: NotRequired[float]
+    lessThan: NotRequired[float]
+    greaterThan: NotRequired[float]
+    lessOrEqual: NotRequired[float]
+    greaterOrEqual: NotRequired[float]
+    hasDefaultValue: NotRequired[bool]
+    hasCustomValue: NotRequired[bool]
+    isAvailable: NotRequired[bool]
+    isNotAvailable: NotRequired[bool]
+    isUndefined: NotRequired[bool]
+    isNotUndefined: NotRequired[bool]
+
+
+class GraphicOverrideCustomPropertyString(TypedDict):
+    """
+    Matches elements by a custom (user-defined) text or option-set property, identified by its plain name and the name of the property group it appears under. Provide 'name', 'group', and exactly one operator.
+    """
+    name: str
+    group: str
+    equals: NotRequired[str]
+    notEquals: NotRequired[str]
+    hasDefaultValue: NotRequired[bool]
+    hasCustomValue: NotRequired[bool]
+    isAvailable: NotRequired[bool]
+    isNotAvailable: NotRequired[bool]
+    isUndefined: NotRequired[bool]
+    isNotUndefined: NotRequired[bool]
+
+
+GraphicOverrideElementType: TypeAlias = Literal[
+    "Wall",
+    "Column",
+    "Beam",
+    "Slab",
+    "Roof",
+    "Shell",
+    "Stair",
+    "Railing",
+    "CurtainWall",
+    "Opening",
+    "Mesh",
+    "Morph",
+    "Dimension",
+    "LevelDimension",
+    "RadialDimension",
+    "AngleDimension",
+    "Text",
+    "ChangeMarker",
+    "Hatch",
+    "Line",
+    "Arc",
+    "PolyLine",
+    "Spline",
+    "Hotspot",
+    "Section",
+    "Elevation",
+    "InteriorElevation",
+    "Detail",
+    "Worksheet",
+    "Camera",
+    "Figure",
+    "Drawing",
+    "StructuralLink",
+    "StructuralSupport",
+    "LinearLoad",
+    "PointLoad",
+    "SurfaceLoad",
+    "DuctRouting",
+    "CableCarrierRouting",
+    "PipeRouting",
+]
+
+
+class GraphicOverrideFillTypes(TypedDict):
+    """
+    The fill types an override applies to.
+    """
+    cutFill: bool
+    coverFill: bool
+    draftingFill: bool
+
+
+GraphicOverridePenReplacement: TypeAlias = Literal[
+    "None", "ForegroundOnly", "BackgroundOnly", "Both"
+]
+
+
+GraphicOverridePosition: TypeAlias = Literal["Exterior", "Interior", "Undefined"]
+
+
+class GraphicOverrideProfileParameter(TypedDict):
+    """
+    Matches elements by a custom Complex Profile modifier parameter, identified by its plain name as defined on that Complex Profile attribute (e.g. 'Debord tole') rather than a fixed field - use this for any profile modifier not covered by the profileStretchHeight/profileNominalWidth/... fields above. Provide 'name' and exactly one comparison operator.
+    """
+    name: str
+    equals: NotRequired[float]
+    notEquals: NotRequired[float]
+    lessThan: NotRequired[float]
+    greaterThan: NotRequired[float]
+    lessOrEqual: NotRequired[float]
+    greaterOrEqual: NotRequired[float]
+
+
+GraphicOverrideRoofCutBodyType: TypeAlias = Literal["ContoursDown", "ReferenceLineDown"]
+
+
+GraphicOverrideRoofEaveOverhangType: TypeAlias = Literal["Offset", "Manual"]
+
+
+GraphicOverrideRoofEdgeAngle: TypeAlias = Literal["Vertical", "Perpendicular", "Custom"]
+
+
+GraphicOverrideRoofGeometryType: TypeAlias = Literal["SinglePanel", "MultiplePanels"]
+
+
+GraphicOverrideShellCutBodyType: TypeAlias = Literal[
+    "Editable", "ExtrudeUp", "ExtrudeDown"
+]
+
+
+GraphicOverrideShellGeometryType: TypeAlias = Literal["Extrude", "Revolved", "Ruled"]
+
+
+GraphicOverrideSlabEdgeAngle: TypeAlias = Literal["Vertical", "Custom"]
+
+
+GraphicOverrideStructuralFunction: TypeAlias = Literal[
+    "LoadBearing", "NonLoadBearing", "Undefined"
+]
+
+
+GraphicOverrideStructureType: TypeAlias = Literal[
+    "Basic", "Composite", "ComplexProfile"
+]
+
+
+class GraphicOverrideSurfaceTypes(TypedDict):
+    """
+    The surface types an override applies to.
+    """
+    cutSurface: bool
+    uncutSurface: bool
+
+
+GraphicOverrideWallComplexity: TypeAlias = Literal[
+    "Straight", "Slanted", "DoubleSlanted"
+]
+
+
+GraphicOverrideWallGeometryType: TypeAlias = Literal[
+    "Uniform", "Trapezoid", "Polygonal"
+]
+
+
+GridElementLengthMode: TypeAlias = Literal["length", "none"]
+
+
+class GridParameter(TypedDict):
+    name: str
+    value: Any
+
+
+class GridParameterDetails(TypedDict):
+    name: str
+    displayName: str
+    type: str
+    value: NotRequired[Any]
+    dimension1: NotRequired[int]
+    dimension2: NotRequired[int]
 
 
 Guid: TypeAlias = str
@@ -847,6 +1245,20 @@ class IFCFileOperationParameters(TypedDict):
     fileType: NotRequired[Literal["ifc", "ifcxml", "ifczip", "ifcxmlzip"]]
     translatorName: NotRequired[str]
     elementsToExport: NotRequired[IFCElementsToExport]
+
+
+ImageColorDepth: TypeAlias = Literal[
+    "blackAndWhite",
+    "16Colors",
+    "256Colors",
+    "16Grays",
+    "256Grays",
+    "trueColor",
+    "trueColorWithAlpha",
+]
+
+
+ImageFormat: TypeAlias = Literal["png", "jpg", "bmp", "tiff", "gif"]
 
 
 class ImportClassificationsXmlParameters(TypedDict):
@@ -1173,6 +1585,26 @@ LockableObjectSetStatus: TypeAlias = Literal[
 ]
 
 
+class MEPAngleSet(TypedDict):
+    """
+    The angles (in degrees) that the elbow and branch preference tables of a domain can use.
+    """
+    name: str
+    angles: list[float]
+
+
+class MEPBranchPreferenceTableRow(TypedDict):
+    mainAxisReferenceId: int
+    branchAxisReferenceId: int
+    branchAxisAngle: NotRequired[float]
+    mainAxisDiameter: float
+    branchAxisDiameter: float
+    length: float
+    branchOffset: float
+    connectionLength: float
+    description: NotRequired[str]
+
+
 MEPComponentType: TypeAlias = Literal["Terminal", "Accessory", "Equipment", "Fitting"]
 
 
@@ -1185,6 +1617,14 @@ MEPDomain: TypeAlias = Literal["Ventilation", "Piping", "CableCarrier"]
 MEPDomainOrUnknown: TypeAlias = Literal[
     "Ventilation", "Piping", "CableCarrier", "Unknown"
 ]
+
+
+class MEPElbowPreferenceTableRow(TypedDict):
+    referenceId: int
+    angle: NotRequired[float]
+    diameter: float
+    radius: float
+    description: NotRequired[str]
 
 
 class MEPElementData(TypedDict):
@@ -1207,7 +1647,31 @@ MEPElementType: TypeAlias = Literal[
     "Fitting",
     "FlexibleSegment",
     "TakeOff",
+    "ElectricalPanel",
+    "ElectricalDevice",
 ]
+
+
+class MEPOrientation(TypedDict):
+    """
+    The orientation of an MEP element, given by a direction and a rotation vector.
+    """
+    direction: Coordinate3D
+    rotation: Coordinate3D
+
+
+class MEPPhysicalSystemId(TypedDict):
+    """
+    The identifier of an MEP physical system.
+    """
+    guid: Guid
+
+
+class MEPPhysicalSystemIdArrayItem(TypedDict):
+    physicalSystemId: MEPPhysicalSystemId
+
+
+MEPPhysicalSystemIdOrError: TypeAlias = MEPPhysicalSystemIdArrayItem | ErrorItem
 
 
 class MEPPreferenceRow(TypedDict):
@@ -1224,6 +1688,14 @@ class MEPPreferenceTable(TypedDict):
 MEPPreferenceTableDomain: TypeAlias = Literal["Piping", "Ventilation"]
 
 
+class MEPReferenceSet(TypedDict):
+    """
+    The reference ids (nominal sizes) that the preference tables of a domain can use.
+    """
+    name: str
+    referenceIds: list[int]
+
+
 MEPSystemAttributeField: TypeAlias = Literal[
     "domain",
     "contourPen",
@@ -1235,6 +1707,34 @@ MEPSystemAttributeField: TypeAlias = Literal[
     "materialId",
     "insulationMaterialId",
 ]
+
+
+class MEPSystemGroupData(TypedDict):
+    name: str
+
+
+class MEPSystemGroupId(TypedDict):
+    """
+    The identifier of an MEP system group.
+    """
+    guid: Guid
+
+
+class MEPSystemGroupIdArrayItem(TypedDict):
+    systemGroupId: MEPSystemGroupId
+
+
+MEPSystemGroupIdOrError: TypeAlias = MEPSystemGroupIdArrayItem | ErrorItem
+
+
+class MEPTransitionPreferenceTableRow(TypedDict):
+    beginReferenceId: int
+    endReferenceId: int
+    beginDiameter: float
+    endDiameter: float
+    length: NotRequired[float]
+    angle: NotRequired[float]
+    description: NotRequired[str]
 
 
 class MarkerGDLParameterDetails(TypedDict):
@@ -1283,6 +1783,14 @@ class MeshSubline(TypedDict):
     coordinates: list[Coordinate3D]
 
 
+class ModifyElectricalProjectSettingsParameters(TypedDict):
+    voltage: NotRequired[float]
+    wiringTypesToAdd: NotRequired[list[ElectricalWiringType]]
+    wiringTypesToRemove: NotRequired[list[str]]
+    loadClassificationsToAdd: NotRequired[list[ElectricalLoadClassification]]
+    loadClassificationsToRemove: NotRequired[list[str]]
+
+
 class ModifyKeynoteFoldersParameters(TypedDict):
     foldersData: list[KeynoteFolderModificationData]
 
@@ -1304,6 +1812,17 @@ class EdgeOverride(TypedDict):
 
 class MorphPolygonHole(TypedDict):
     vertexIds: list[int]
+
+
+class MorphQuantities(TypedDict):
+    """
+    Quantities of a Morph element, as calculated by Archicad. Lengths in meters, areas in square meters, volumes in cubic meters.
+    """
+    volume: float
+    surface: float
+    floorPlanArea: float
+    floorPlanPerimeter: float
+    height: float
 
 
 class MoveVector(TypedDict):
@@ -1551,6 +2070,19 @@ class PenTablePen(TypedDict):
     color: ColorRGB
     width: float
     description: str
+
+
+class PerspectiveProjectionParameters(TypedDict):
+    """
+    The parameters of a perspective projection of the 3D window.
+    """
+    cameraPosition: Coordinate3D
+    targetPosition: Coordinate3D
+    distance: float
+    azimuth: float
+    viewCone: float
+    rollAngle: float
+    isTwoPointPersp: bool
 
 
 class PolyArc(TypedDict):
@@ -1842,6 +2374,7 @@ class RenameNavigatorItemParameters(TypedDict):
     navigatorItemId: NavigatorItemId
     newName: NotRequired[str]
     newId: NotRequired[str]
+    customName: NotRequired[bool]
 
 
 class ReserveLockableObjectSetParameters(TypedDict):
@@ -1886,6 +2419,34 @@ class RoofPivotLine(TypedDict):
     endCoordinate: Coordinate2D
 
 
+class RoofQuantities(TypedDict):
+    """
+    Quantities of a Roof element, as calculated by Archicad. Lengths in meters, areas in square meters, volumes in cubic meters.
+    """
+    volume: float
+    volumeConditional: float
+    grossVolume: float
+    topSurface: float
+    bottomSurface: float
+    edgeSurface: float
+    topSurfaceConditional: float
+    bottomSurfaceConditional: float
+    grossTopSurface: float
+    grossBottomSurface: float
+    grossEdgeSurface: float
+    contourArea: float
+    perimeter: float
+    holesSurface: float
+    holesPerimeter: float
+    openingsSurface: float
+    ridgesLength: float
+    valleysLength: float
+    hipsLength: float
+    gablesLength: float
+    eavesLength: float
+    peaksLength: float
+
+
 RoofStructureType: TypeAlias = Literal["Basic", "Composite"]
 
 
@@ -1898,12 +2459,24 @@ class Rotation(TypedDict):
     origin: Coordinate2D
 
 
+class SaveCurrentWindowAsImageParameters(TypedDict):
+    imageFilePath: str
+    format: NotRequired[ImageFormat]
+    colorDepth: NotRequired[ImageColorDepth]
+    dithered: NotRequired[bool]
+    entireDrawing: NotRequired[bool]
+
+
 class SaveProjectAsArchiveParameters(TypedDict):
     archiveFilePath: str
     includeLibraryParts: NotRequired[bool]
     includeProperties: NotRequired[bool]
     includeTextures: NotRequired[bool]
     includeBackgroundPicture: NotRequired[bool]
+
+
+class SaveProjectParameters(TypedDict):
+    projectPath: NotRequired[str]
 
 
 class SectionData(TypedDict):
@@ -1926,6 +2499,10 @@ class CutPlane(TypedDict):
 
 class Set3DCutPlanesParameters(TypedDict):
     cutPlanes: NotRequired[list[CutPlane]]
+
+
+class Set3DProjectionSettingsParameters(TypedDict):
+    perspective: PerspectiveProjectionParameters
 
 
 class SetElementNotificationClientParameters(TypedDict):
@@ -1983,6 +2560,27 @@ class SetViewRotationParameters(TypedDict):
     navigatorItemIdsWithRotation: list[NavigatorItemIdsWithRotationItem]
 
 
+class ShellQuantities(TypedDict):
+    """
+    Quantities of a Shell element, as calculated by Archicad. Lengths in meters, areas in square meters, volumes in cubic meters.
+    """
+    volume: float
+    volumeConditional: float
+    grossVolume: float
+    referenceSurface: float
+    oppositeSurface: float
+    edgeSurface: float
+    referenceSurfaceConditional: float
+    oppositeSurfaceConditional: float
+    grossReferenceSurface: float
+    grossOppositeSurface: float
+    grossEdgeSurface: float
+    perimeter: float
+    holesSurface: float
+    holesPerimeter: float
+    floorPlanArea: float
+
+
 class ShowAlertParameters(TypedDict):
     alertType: Literal["information", "warning", "error"]
     title: str
@@ -2011,6 +2609,26 @@ class ShowScriptUIParameters(TypedDict):
     allowSelfSignedCertificates: NotRequired[bool]
     clearCookies: NotRequired[bool]
     autoHeight: NotRequired[bool]
+
+
+class SlabQuantities(TypedDict):
+    """
+    Quantities of a Slab element, as calculated by Archicad. Lengths in meters, areas in square meters, volumes in cubic meters.
+    """
+    volume: float
+    volumeConditional: float
+    grossVolume: float
+    topSurface: float
+    bottomSurface: float
+    edgeSurface: float
+    topSurfaceConditional: float
+    bottomSurfaceConditional: float
+    grossTopSurface: float
+    grossBottomSurface: float
+    grossEdgeSurface: float
+    perimeter: float
+    holesSurface: float
+    holesPerimeter: float
 
 
 SlabReferencePlaneLocation: TypeAlias = Literal[
@@ -2201,6 +2819,9 @@ TextBoxAnchor: TypeAlias = Literal[
 ]
 
 
+TextFrameShape: TypeAlias = Literal["Rectangle", "Circle", "RoundedRectangle", "Pill"]
+
+
 class TextRunDetails(TypedDict):
     """
     One monostyle run of text (API_RunType). Concatenating 'text' across all runs in order gives the full content; a newline character starts a new line.
@@ -2208,6 +2829,7 @@ class TextRunDetails(TypedDict):
     text: str
     penIndex: NotRequired[int]
     fontIndex: NotRequired[int]
+    fontName: NotRequired[str]
     bold: NotRequired[bool]
     italic: NotRequired[bool]
     underline: NotRequired[bool]
@@ -2235,6 +2857,7 @@ class TextStyleDetails(TypedDict):
     """
     penIndex: NotRequired[int]
     fontIndex: NotRequired[int]
+    fontName: NotRequired[str]
     bold: NotRequired[bool]
     italic: NotRequired[bool]
     underline: NotRequired[bool]
@@ -2257,9 +2880,7 @@ class TextStyleDetails(TypedDict):
     fixedAngle: NotRequired[bool]
     contourOffset: NotRequired[float]
     flipEnabled: NotRequired[bool]
-    textFrameShape: NotRequired[
-        Literal["Rectangle", "Circle", "RoundedRectangle", "Pill"]
-    ]
+    textFrameShape: NotRequired[TextFrameShape]
     textFrameSizeFixed: NotRequired[bool]
     textFrameFixedWidth: NotRequired[float]
     textFrameFixedHeight: NotRequired[float]
@@ -2274,6 +2895,7 @@ class TextStyleSettableDetails(TypedDict):
     """
     penIndex: NotRequired[int]
     fontIndex: NotRequired[int]
+    fontName: NotRequired[str]
     bold: NotRequired[bool]
     italic: NotRequired[bool]
     underline: NotRequired[bool]
@@ -2296,9 +2918,7 @@ class TextStyleSettableDetails(TypedDict):
     fixedAngle: NotRequired[bool]
     contourOffset: NotRequired[float]
     flipEnabled: NotRequired[bool]
-    textFrameShape: NotRequired[
-        Literal["Rectangle", "Circle", "RoundedRectangle", "Pill"]
-    ]
+    textFrameShape: NotRequired[TextFrameShape]
     textFrameSizeFixed: NotRequired[bool]
     textFrameFixedWidth: NotRequired[float]
     textFrameFixedHeight: NotRequired[float]
@@ -2361,12 +2981,12 @@ class UserUndefinedPropertyValue(TypedDict):
 
 class ViewCloneData(TypedDict):
     navigatorItemId: NavigatorItemId
-    parentNavigatorItemId: NotRequired[NavigatorItemId]
+    parentNavigatorItemId: NavigatorItemId
 
 
 class ViewData(TypedDict):
     navigatorItemId: NavigatorItemId
-    parentNavigatorItemId: NotRequired[NavigatorItemId]
+    parentNavigatorItemId: NavigatorItemId
     name: NotRequired[str]
 
 
@@ -2397,6 +3017,35 @@ WallModificationProfileType: TypeAlias = Literal["Normal", "Slanted", "Trapez"]
 
 
 WallProfileType: TypeAlias = Literal["Normal", "Slanted", "Trapez", "Poly"]
+
+
+class WallQuantities(TypedDict):
+    """
+    Quantities of a Wall element, as calculated by Archicad. Lengths in meters, areas in square meters, volumes in cubic meters.
+    """
+    volume: float
+    volumeConditional: float
+    grossVolume: float
+    referenceSideSurface: float
+    oppositeSideSurface: float
+    edgeSurface: float
+    referenceSideSurfaceConditional: float
+    oppositeSideSurfaceConditional: float
+    grossReferenceSideSurface: float
+    grossOppositeSideSurface: float
+    length: float
+    referenceSideLength: float
+    oppositeSideLength: float
+    centerLength: float
+    referenceLineLength: float
+    minHeight: float
+    maxHeight: float
+    area: float
+    perimeter: float
+    windowsSurface: float
+    doorsSurface: float
+    emptyOpeningsSurface: float
+    emptyOpeningsVolume: float
 
 
 WallReferenceLineLocation: TypeAlias = Literal[
@@ -2458,6 +3107,23 @@ class WorksheetData(TypedDict):
 ZoneCategoryAttributeField: TypeAlias = Literal[
     "categoryCode", "color", "stampName", "stampMainGuid", "stampRevGuid"
 ]
+
+
+class ZoneQuantities(TypedDict):
+    """
+    Quantities of a Zone element, as calculated by Archicad. Lengths in meters, areas in square meters, volumes in cubic meters.
+    """
+    area: float
+    netArea: float
+    calculatedArea: float
+    perimeter: float
+    netPerimeter: float
+    volume: float
+    height: float
+    wallsPerimeter: float
+    wallsSurface: float
+    doorsSurface: float
+    windowsSurface: float
 
 
 class ZoneSettings(TypedDict):
@@ -2589,6 +3255,12 @@ class BeamHoleModification(TypedDict):
     centerZ: float
     width: float
     height: NotRequired[float]
+
+
+class Body3DPolygon(TypedDict):
+    vertexIds: list[int]
+    holes: NotRequired[list[Body3DPolygonHole]]
+    surfaceId: NotRequired[AttributeId]
 
 
 BoundingBox3DOrError: TypeAlias = BoundingBox3DArrayItem | ErrorItem
@@ -2757,6 +3429,9 @@ class ColumnData(TypedDict):
     coordinates: Coordinates
     height: NotRequired[float]
     axisRotationAngle: NotRequired[float]
+    slantAngle: NotRequired[float]
+    isSlanted: NotRequired[bool]
+    slantDirectionAngle: NotRequired[float]
     width: NotRequired[float]
     depth: NotRequired[float]
     coreAnchor: NotRequired[ColumnCoreAnchor]
@@ -2882,6 +3557,14 @@ class CreateFillsResult(TypedDict):
     attributeIds: AttributeIdsOrErrors
 
 
+class CreateGraphicalOverrideCombinationResult(TypedDict):
+    combinationId: GuidId
+
+
+class CreateGraphicalOverrideRuleResult(TypedDict):
+    ruleId: GuidId
+
+
 class CreateHotspotsParameters(TypedDict):
     hotspotsData: list[HotspotData]
 
@@ -2938,6 +3621,18 @@ class CreateLinesResult(TypedDict):
 
 class CreateMEPElementsParameters(TypedDict):
     elementsData: list[MEPElementData]
+
+
+class CreateMEPPhysicalSystemsResult(TypedDict):
+    physicalSystems: list[MEPPhysicalSystemIdOrError]
+
+
+class CreateMEPSystemGroupsParameters(TypedDict):
+    systemGroupsData: list[MEPSystemGroupData]
+
+
+class CreateMEPSystemGroupsResult(TypedDict):
+    systemGroups: list[MEPSystemGroupIdOrError]
 
 
 class CreateMEPSystemsResult(TypedDict):
@@ -3022,6 +3717,16 @@ class CurtainWallFrameDetails(TypedDict):
     segmentIndex: float
     className: str
     type: CurtainWallFrameType
+
+
+class CurtainWallPattern(TypedDict):
+    """
+    The column (primary) or row (secondary) pattern of a curtain wall segment: the sizes of the columns/rows of one pattern unit and how the unit is repeated along the segment.
+    """
+    sizes: list[CurtainWallPatternSize]
+    logic: NotRequired[CurtainWallPatternLogic]
+    origin: NotRequired[CurtainWallPatternOrigin]
+    flexibleIndices: NotRequired[list[CurtainWallFlexibleIndex]]
 
 
 class DatabaseId(TypedDict):
@@ -3124,6 +3829,11 @@ A list of design option combination identifiers or errors.
 """
 
 
+class DesignOptionCombinationRename(TypedDict):
+    designOptionCombinationId: DesignOptionCombinationId
+    name: str
+
+
 class DesignOptionId(TypedDict):
     """
     The identifier of a design option.
@@ -3142,6 +3852,28 @@ DesignOptionIdsOrErrors: TypeAlias = list[DesignOptionIdOrError]
 """
 A list of design option identifiers or errors.
 """
+
+
+class DesignOptionRename(TypedDict):
+    designOptionId: DesignOptionId
+    name: NotRequired[str]
+    id: NotRequired[str]
+
+
+class DesignOptionSetId(TypedDict):
+    """
+    The identifier of a design option set.
+    """
+    guid: Guid
+
+
+class DesignOptionSetIdArrayItem(TypedDict):
+    designOptionSetId: DesignOptionSetId
+
+
+class DesignOptionSetRename(TypedDict):
+    designOptionSetId: DesignOptionSetId
+    name: str
 
 
 class DocumentRevisionId(TypedDict):
@@ -3177,6 +3909,19 @@ class DrawingData(TypedDict):
     clipPolygon: NotRequired[list[Coordinate2D]]
 
 
+class ElectricalPanelData(TypedDict):
+    position: Coordinate3D
+    orientation: NotRequired[MEPOrientation]
+    rotation: NotRequired[float]
+    isReflected: NotRequired[bool]
+    libraryPartId: NotRequired[LibPartUnId]
+    xSize: NotRequired[float]
+    ySize: NotRequired[float]
+    panelName: NotRequired[str]
+    circuitNamePrefix: NotRequired[str]
+    circuitIdStyle: NotRequired[int]
+
+
 class ElementId(TypedDict):
     """
     The identifier of an element.
@@ -3210,6 +3955,20 @@ ElementPropertyValues: TypeAlias = list[ElementPropertyValue]
 """
 A list of element property values.
 """
+
+
+ElementQuantities: TypeAlias = (
+    WallQuantities
+    | ColumnQuantities
+    | BeamQuantities
+    | SlabQuantities
+    | RoofQuantities
+    | ShellQuantities
+    | MorphQuantities
+    | ZoneQuantities
+    | ColumnSegmentQuantities
+    | BeamSegmentQuantities
+)
 
 
 class TrimmedByItem(TypedDict):
@@ -3283,6 +4042,9 @@ ExecutionResults: TypeAlias = list[ExecutionResult]
 """
 A list of execution results.
 """
+
+
+ExportFavoritesResult: TypeAlias = ExecutionResult
 
 
 class ExportIssuesToBCFParameters(TypedDict):
@@ -3416,6 +4178,18 @@ class Get3DBoundingBoxesParameters(TypedDict):
 
 class Get3DBoundingBoxesResult(TypedDict):
     boundingBoxes3D: BoundingBoxes3D
+
+
+class Get3DGeometryOfElementsParameters(TypedDict):
+    elements: Elements
+
+
+class Get3DProjectionSettingsResult(TypedDict):
+    isPersp: bool
+    cameraElementId: NotRequired[ElementId]
+    activeCameraSetElementId: NotRequired[ElementId]
+    perspective: NotRequired[PerspectiveProjectionParameters]
+    axonometric: NotRequired[AxonometricProjectionParameters]
 
 
 class GetAllElementsParameters(TypedDict):
@@ -3573,6 +4347,19 @@ class GetDimensionDataParameters(TypedDict):
     elements: list[Element]
 
 
+class GetElectricalCircuitsParameters(TypedDict):
+    elements: NotRequired[Elements]
+    electricalPanels: NotRequired[Elements]
+
+
+class GetElectricalDevicesParameters(TypedDict):
+    elements: NotRequired[Elements]
+
+
+class GetElectricalPanelsParameters(TypedDict):
+    elements: NotRequired[Elements]
+
+
 class GetElementPreviewImageParameters(TypedDict):
     elementId: ElementId
     imageType: NotRequired[Literal["2D", "Section", "3D"]]
@@ -3630,6 +4417,23 @@ class GetFillsResult(TypedDict):
 
 class GetGDLParametersOfElementsParameters(TypedDict):
     elements: Elements
+
+
+class GetGridElementDefaultsResult(TypedDict):
+    elementId: NotRequired[ElementId]
+    variation: str
+    floorIndex: int
+    layerIndex: int
+    pos: Coordinate2D
+    angle: float
+    length: float
+    xRatio: float
+    yRatio: float
+    useXYFixSize: bool
+    level: float
+    libInd: int
+    libraryPartName: str
+    parameters: list[GridParameterDetails]
 
 
 class GetGroupsOfElementsParameters(TypedDict):
@@ -3737,10 +4541,7 @@ class GetMEPPortsParameters(TypedDict):
 
 class GetMEPPreferenceTablesParameters(TypedDict):
     domain: MEPPreferenceTableDomain
-
-
-class GetMEPPreferenceTablesResult(TypedDict):
-    tables: list[MEPPreferenceTable]
+    includeFittingTables: NotRequired[bool]
 
 
 class GetMEPRoutingElementsParameters(TypedDict):
@@ -3786,6 +4587,11 @@ class GetPropertyValuesOfElementsParameters(TypedDict):
 
 class GetPropertyValuesOfElementsResult(TypedDict):
     propertyValuesForElements: PropertyValuesOrErrorArray
+
+
+class GetQuantitiesOfElementsParameters(TypedDict):
+    elements: Elements
+    minOpeningSize: NotRequired[float]
 
 
 class GetRelationsOfElementsParameters(TypedDict):
@@ -3901,6 +4707,765 @@ class GetZoneBoundariesParameters(TypedDict):
 class GetZoneCategoriesParameters(TypedDict):
     attributeIds: AttributeIds
     fields: NotRequired[list[ZoneCategoryAttributeField]]
+
+
+class GraphicOverrideCombinationId(TypedDict):
+    """
+    The identifier of a graphic override combination.
+    """
+    guid: Guid
+
+
+class GraphicOverrideCombinationIdArrayItem(TypedDict):
+    graphicOverrideCombinationId: GraphicOverrideCombinationId
+
+
+GraphicOverrideCombinationIdOrError: TypeAlias = (
+    GraphicOverrideCombinationIdArrayItem | ErrorItem
+)
+
+
+GraphicOverrideCriterion = TypedDict(
+    "GraphicOverrideCriterion",
+    {
+        "and": NotRequired[list["GraphicOverrideCriterion"]],
+        "or": NotRequired[list["GraphicOverrideCriterion"]],
+        "elementType": NotRequired[GraphicOverrideElementType],
+        "classification": NotRequired[str],
+        "classificationNot": NotRequired[str],
+        "classificationSystem": NotRequired[str],
+        "all3DTypes": NotRequired[bool],
+        "all2DTypes": NotRequired[bool],
+        "missingAttributes": NotRequired[bool],
+        "missingLibraryPart": NotRequired[bool],
+        "layer": NotRequired[str],
+        "layerNot": NotRequired[str],
+        "layerLocked": NotRequired[bool],
+        "layerVisible": NotRequired[bool],
+        "layerCombination": NotRequired[str],
+        "layerCombinationNot": NotRequired[str],
+        "layerNameIs": NotRequired[str],
+        "layerNameIsNot": NotRequired[str],
+        "layerNameContains": NotRequired[str],
+        "layerNameNotContains": NotRequired[str],
+        "layerNameStartsWith": NotRequired[str],
+        "layerNameEndsWith": NotRequired[str],
+        "compositeStructure": NotRequired[str],
+        "compositeStructureNot": NotRequired[str],
+        "complexProfile": NotRequired[str],
+        "complexProfileNot": NotRequired[str],
+        "compositeStructureNameIs": NotRequired[str],
+        "compositeStructureNameIsNot": NotRequired[str],
+        "compositeStructureNameContains": NotRequired[str],
+        "compositeStructureNameNotContains": NotRequired[str],
+        "compositeStructureNameStartsWith": NotRequired[str],
+        "compositeStructureNameEndsWith": NotRequired[str],
+        "complexProfileNameIs": NotRequired[str],
+        "complexProfileNameIsNot": NotRequired[str],
+        "complexProfileNameContains": NotRequired[str],
+        "complexProfileNameNotContains": NotRequired[str],
+        "complexProfileNameStartsWith": NotRequired[str],
+        "complexProfileNameEndsWith": NotRequired[str],
+        "roofConnected": NotRequired[bool],
+        "structureType": NotRequired[GraphicOverrideStructureType],
+        "seaLevelAltitude": NotRequired[float],
+        "seaLevelAltitudeNot": NotRequired[float],
+        "seaLevelAltitudeLessThan": NotRequired[float],
+        "seaLevelAltitudeGreaterThan": NotRequired[float],
+        "seaLevelAltitudeLessOrEqual": NotRequired[float],
+        "seaLevelAltitudeGreaterOrEqual": NotRequired[float],
+        "projectZeroAltitude": NotRequired[float],
+        "projectZeroAltitudeNot": NotRequired[float],
+        "projectZeroAltitudeLessThan": NotRequired[float],
+        "projectZeroAltitudeGreaterThan": NotRequired[float],
+        "projectZeroAltitudeLessOrEqual": NotRequired[float],
+        "projectZeroAltitudeGreaterOrEqual": NotRequired[float],
+        "groundFloorAltitude": NotRequired[float],
+        "groundFloorAltitudeNot": NotRequired[float],
+        "groundFloorAltitudeLessThan": NotRequired[float],
+        "groundFloorAltitudeGreaterThan": NotRequired[float],
+        "groundFloorAltitudeLessOrEqual": NotRequired[float],
+        "groundFloorAltitudeGreaterOrEqual": NotRequired[float],
+        "roofAltitude": NotRequired[float],
+        "roofAltitudeNot": NotRequired[float],
+        "roofAltitudeLessThan": NotRequired[float],
+        "roofAltitudeGreaterThan": NotRequired[float],
+        "roofAltitudeLessOrEqual": NotRequired[float],
+        "roofAltitudeGreaterOrEqual": NotRequired[float],
+        "floorIndex": NotRequired[int],
+        "sillHeight": NotRequired[float],
+        "sillHeightNot": NotRequired[float],
+        "sillHeightLessThan": NotRequired[float],
+        "sillHeightGreaterThan": NotRequired[float],
+        "sillHeightLessOrEqual": NotRequired[float],
+        "sillHeightGreaterOrEqual": NotRequired[float],
+        "lintelHeight": NotRequired[float],
+        "lintelHeightNot": NotRequired[float],
+        "lintelHeightLessThan": NotRequired[float],
+        "lintelHeightGreaterThan": NotRequired[float],
+        "lintelHeightLessOrEqual": NotRequired[float],
+        "lintelHeightGreaterOrEqual": NotRequired[float],
+        "screedThickness": NotRequired[float],
+        "screedThicknessNot": NotRequired[float],
+        "screedThicknessLessThan": NotRequired[float],
+        "screedThicknessGreaterThan": NotRequired[float],
+        "screedThicknessLessOrEqual": NotRequired[float],
+        "screedThicknessGreaterOrEqual": NotRequired[float],
+        "linkedUpperStoryAbsolute": NotRequired[int],
+        "linkedUpperStoryRelative": NotRequired[int],
+        "mepDiameter": NotRequired[float],
+        "mepDiameterNot": NotRequired[float],
+        "mepDiameterLessThan": NotRequired[float],
+        "mepDiameterGreaterThan": NotRequired[float],
+        "mepDiameterLessOrEqual": NotRequired[float],
+        "mepDiameterGreaterOrEqual": NotRequired[float],
+        "mepDiameter2": NotRequired[float],
+        "mepDiameter2Not": NotRequired[float],
+        "mepDiameter2LessThan": NotRequired[float],
+        "mepDiameter2GreaterThan": NotRequired[float],
+        "mepDiameter2LessOrEqual": NotRequired[float],
+        "mepDiameter2GreaterOrEqual": NotRequired[float],
+        "mepDN": NotRequired[int],
+        "mepDNNot": NotRequired[int],
+        "mepDNLessThan": NotRequired[int],
+        "mepDNGreaterThan": NotRequired[int],
+        "mepDNLessOrEqual": NotRequired[int],
+        "mepDNGreaterOrEqual": NotRequired[int],
+        "mepDN2": NotRequired[int],
+        "mepDN2Not": NotRequired[int],
+        "mepDN2LessThan": NotRequired[int],
+        "mepDN2GreaterThan": NotRequired[int],
+        "mepDN2LessOrEqual": NotRequired[int],
+        "mepDN2GreaterOrEqual": NotRequired[int],
+        "mepHeight": NotRequired[float],
+        "mepHeightNot": NotRequired[float],
+        "mepHeightLessThan": NotRequired[float],
+        "mepHeightGreaterThan": NotRequired[float],
+        "mepHeightLessOrEqual": NotRequired[float],
+        "mepHeightGreaterOrEqual": NotRequired[float],
+        "mepHeight2": NotRequired[float],
+        "mepHeight2Not": NotRequired[float],
+        "mepHeight2LessThan": NotRequired[float],
+        "mepHeight2GreaterThan": NotRequired[float],
+        "mepHeight2LessOrEqual": NotRequired[float],
+        "mepHeight2GreaterOrEqual": NotRequired[float],
+        "mepWidth": NotRequired[float],
+        "mepWidthNot": NotRequired[float],
+        "mepWidthLessThan": NotRequired[float],
+        "mepWidthGreaterThan": NotRequired[float],
+        "mepWidthLessOrEqual": NotRequired[float],
+        "mepWidthGreaterOrEqual": NotRequired[float],
+        "mepWidth2": NotRequired[float],
+        "mepWidth2Not": NotRequired[float],
+        "mepWidth2LessThan": NotRequired[float],
+        "mepWidth2GreaterThan": NotRequired[float],
+        "mepWidth2LessOrEqual": NotRequired[float],
+        "mepWidth2GreaterOrEqual": NotRequired[float],
+        "mepAngle": NotRequired[float],
+        "mepAngleNot": NotRequired[float],
+        "mepAngleLessThan": NotRequired[float],
+        "mepAngleGreaterThan": NotRequired[float],
+        "mepAngleLessOrEqual": NotRequired[float],
+        "mepAngleGreaterOrEqual": NotRequired[float],
+        "mepCustomAngle": NotRequired[float],
+        "mepCustomAngleNot": NotRequired[float],
+        "mepCustomAngleLessThan": NotRequired[float],
+        "mepCustomAngleGreaterThan": NotRequired[float],
+        "mepCustomAngleLessOrEqual": NotRequired[float],
+        "mepCustomAngleGreaterOrEqual": NotRequired[float],
+        "mepInsulationThickness": NotRequired[float],
+        "mepInsulationThicknessNot": NotRequired[float],
+        "mepInsulationThicknessLessThan": NotRequired[float],
+        "mepInsulationThicknessGreaterThan": NotRequired[float],
+        "mepInsulationThicknessLessOrEqual": NotRequired[float],
+        "mepInsulationThicknessGreaterOrEqual": NotRequired[float],
+        "mepLength": NotRequired[float],
+        "mepLengthNot": NotRequired[float],
+        "mepLengthLessThan": NotRequired[float],
+        "mepLengthGreaterThan": NotRequired[float],
+        "mepLengthLessOrEqual": NotRequired[float],
+        "mepLengthGreaterOrEqual": NotRequired[float],
+        "mepDescriptionIs": NotRequired[str],
+        "mepDescriptionIsNot": NotRequired[str],
+        "mepDescriptionContains": NotRequired[str],
+        "mepDescriptionNotContains": NotRequired[str],
+        "mepDescriptionStartsWith": NotRequired[str],
+        "mepDescriptionEndsWith": NotRequired[str],
+        "mepMaterialNameIs": NotRequired[str],
+        "mepMaterialNameIsNot": NotRequired[str],
+        "mepMaterialNameContains": NotRequired[str],
+        "mepMaterialNameNotContains": NotRequired[str],
+        "mepMaterialNameStartsWith": NotRequired[str],
+        "mepMaterialNameEndsWith": NotRequired[str],
+        "wallComplexity": NotRequired[GraphicOverrideWallComplexity],
+        "wallComplexityNot": NotRequired[GraphicOverrideWallComplexity],
+        "wallLevelOffset": NotRequired[float],
+        "wallLevelOffsetNot": NotRequired[float],
+        "wallLevelOffsetLessThan": NotRequired[float],
+        "wallLevelOffsetGreaterThan": NotRequired[float],
+        "wallLevelOffsetLessOrEqual": NotRequired[float],
+        "wallLevelOffsetGreaterOrEqual": NotRequired[float],
+        "wallTopOffset": NotRequired[float],
+        "wallTopOffsetNot": NotRequired[float],
+        "wallTopOffsetLessThan": NotRequired[float],
+        "wallTopOffsetGreaterThan": NotRequired[float],
+        "wallTopOffsetLessOrEqual": NotRequired[float],
+        "wallTopOffsetGreaterOrEqual": NotRequired[float],
+        "wallReferenceLinePosition": NotRequired[WallReferenceLineLocation],
+        "wallReferenceLinePositionNot": NotRequired[WallReferenceLineLocation],
+        "wallOutsideAngle": NotRequired[float],
+        "wallOutsideAngleNot": NotRequired[float],
+        "wallOutsideAngleLessThan": NotRequired[float],
+        "wallOutsideAngleGreaterThan": NotRequired[float],
+        "wallOutsideAngleLessOrEqual": NotRequired[float],
+        "wallOutsideAngleGreaterOrEqual": NotRequired[float],
+        "wallInsideAngle": NotRequired[float],
+        "wallInsideAngleNot": NotRequired[float],
+        "wallInsideAngleLessThan": NotRequired[float],
+        "wallInsideAngleGreaterThan": NotRequired[float],
+        "wallInsideAngleLessOrEqual": NotRequired[float],
+        "wallInsideAngleGreaterOrEqual": NotRequired[float],
+        "wallThickness": NotRequired[float],
+        "wallThicknessNot": NotRequired[float],
+        "wallThicknessLessThan": NotRequired[float],
+        "wallThicknessGreaterThan": NotRequired[float],
+        "wallThicknessLessOrEqual": NotRequired[float],
+        "wallThicknessGreaterOrEqual": NotRequired[float],
+        "wallHeight": NotRequired[float],
+        "wallHeightNot": NotRequired[float],
+        "wallHeightLessThan": NotRequired[float],
+        "wallHeightGreaterThan": NotRequired[float],
+        "wallHeightLessOrEqual": NotRequired[float],
+        "wallHeightGreaterOrEqual": NotRequired[float],
+        "wallProfileHeight": NotRequired[float],
+        "wallProfileHeightNot": NotRequired[float],
+        "wallProfileHeightLessThan": NotRequired[float],
+        "wallProfileHeightGreaterThan": NotRequired[float],
+        "wallProfileHeightLessOrEqual": NotRequired[float],
+        "wallProfileHeightGreaterOrEqual": NotRequired[float],
+        "wallHeightReversed": NotRequired[bool],
+        "wallWidth": NotRequired[float],
+        "wallWidthNot": NotRequired[float],
+        "wallWidthLessThan": NotRequired[float],
+        "wallWidthGreaterThan": NotRequired[float],
+        "wallWidthLessOrEqual": NotRequired[float],
+        "wallWidthGreaterOrEqual": NotRequired[float],
+        "wallProfileWidth": NotRequired[float],
+        "wallProfileWidthNot": NotRequired[float],
+        "wallProfileWidthLessThan": NotRequired[float],
+        "wallProfileWidthGreaterThan": NotRequired[float],
+        "wallProfileWidthLessOrEqual": NotRequired[float],
+        "wallProfileWidthGreaterOrEqual": NotRequired[float],
+        "objectLength": NotRequired[float],
+        "objectLengthNot": NotRequired[float],
+        "objectLengthLessThan": NotRequired[float],
+        "objectLengthGreaterThan": NotRequired[float],
+        "objectLengthLessOrEqual": NotRequired[float],
+        "objectLengthGreaterOrEqual": NotRequired[float],
+        "jambThickness1": NotRequired[float],
+        "jambThickness1Not": NotRequired[float],
+        "jambThickness1LessThan": NotRequired[float],
+        "jambThickness1GreaterThan": NotRequired[float],
+        "jambThickness1LessOrEqual": NotRequired[float],
+        "jambThickness1GreaterOrEqual": NotRequired[float],
+        "jambThickness2": NotRequired[float],
+        "jambThickness2Not": NotRequired[float],
+        "jambThickness2LessThan": NotRequired[float],
+        "jambThickness2GreaterThan": NotRequired[float],
+        "jambThickness2LessOrEqual": NotRequired[float],
+        "jambThickness2GreaterOrEqual": NotRequired[float],
+        "curtainWallPanelOffset": NotRequired[float],
+        "curtainWallPanelOffsetNot": NotRequired[float],
+        "curtainWallPanelOffsetLessThan": NotRequired[float],
+        "curtainWallPanelOffsetGreaterThan": NotRequired[float],
+        "curtainWallPanelOffsetLessOrEqual": NotRequired[float],
+        "curtainWallPanelOffsetGreaterOrEqual": NotRequired[float],
+        "stairRiserInclineAngle": NotRequired[float],
+        "stairRiserInclineAngleNot": NotRequired[float],
+        "stairRiserInclineAngleLessThan": NotRequired[float],
+        "stairRiserInclineAngleGreaterThan": NotRequired[float],
+        "stairRiserInclineAngleLessOrEqual": NotRequired[float],
+        "stairRiserInclineAngleGreaterOrEqual": NotRequired[float],
+        "stairMinHeadroom": NotRequired[float],
+        "stairMinHeadroomNot": NotRequired[float],
+        "stairMinHeadroomLessThan": NotRequired[float],
+        "stairMinHeadroomGreaterThan": NotRequired[float],
+        "stairMinHeadroomLessOrEqual": NotRequired[float],
+        "stairMinHeadroomGreaterOrEqual": NotRequired[float],
+        "stairInvalidHeight": NotRequired[bool],
+        "stairDefaultWidth": NotRequired[float],
+        "stairDefaultWidthNot": NotRequired[float],
+        "stairDefaultWidthLessThan": NotRequired[float],
+        "stairDefaultWidthGreaterThan": NotRequired[float],
+        "stairDefaultWidthLessOrEqual": NotRequired[float],
+        "stairDefaultWidthGreaterOrEqual": NotRequired[float],
+        "stairSlope": NotRequired[float],
+        "stairSlopeNot": NotRequired[float],
+        "stairSlopeLessThan": NotRequired[float],
+        "stairSlopeGreaterThan": NotRequired[float],
+        "stairSlopeLessOrEqual": NotRequired[float],
+        "stairSlopeGreaterOrEqual": NotRequired[float],
+        "stairMaxRiserHeight": NotRequired[float],
+        "stairMinRiserHeight": NotRequired[float],
+        "stairMaxGoing": NotRequired[float],
+        "stairMinGoing": NotRequired[float],
+        "stairRiserCount": NotRequired[int],
+        "stairStepCount": NotRequired[int],
+        "stairStepCountPerFlight": NotRequired[int],
+        "wallGeometryType": NotRequired[GraphicOverrideWallGeometryType],
+        "wallGeometryTypeNot": NotRequired[GraphicOverrideWallGeometryType],
+        "wallReferenceLineOffset": NotRequired[float],
+        "wallReferenceLineOffsetNot": NotRequired[float],
+        "wallReferenceLineOffsetLessThan": NotRequired[float],
+        "wallReferenceLineOffsetGreaterThan": NotRequired[float],
+        "wallReferenceLineOffsetLessOrEqual": NotRequired[float],
+        "wallReferenceLineOffsetGreaterOrEqual": NotRequired[float],
+        "wallTopLine": NotRequired[str],
+        "wallTopLineNot": NotRequired[str],
+        "wallCutLine": NotRequired[str],
+        "wallCutLineNot": NotRequired[str],
+        "wallUncutLine": NotRequired[str],
+        "wallUncutLineNot": NotRequired[str],
+        "wallHatchForegroundPen": NotRequired[int],
+        "wallHatchForegroundPenNot": NotRequired[int],
+        "wallContourPen": NotRequired[int],
+        "wallContourPenNot": NotRequired[int],
+        "wallTopLinePen": NotRequired[int],
+        "wallTopLinePenNot": NotRequired[int],
+        "wallCutHatchBackgroundPen": NotRequired[int],
+        "wallCutHatchBackgroundPenNot": NotRequired[int],
+        "wallHatchBackgroundPen": NotRequired[int],
+        "wallHatchBackgroundPenNot": NotRequired[int],
+        "wallUncutLinePen": NotRequired[int],
+        "wallUncutLinePenNot": NotRequired[int],
+        "wallOutsideSurface": NotRequired[str],
+        "wallOutsideSurfaceNot": NotRequired[str],
+        "wallInsideSurface": NotRequired[str],
+        "wallInsideSurfaceNot": NotRequired[str],
+        "wallSideSurface": NotRequired[str],
+        "wallSideSurfaceNot": NotRequired[str],
+        "wallParentIdIs": NotRequired[str],
+        "wallParentIdIsNot": NotRequired[str],
+        "wallParentIdContains": NotRequired[str],
+        "wallParentIdNotContains": NotRequired[str],
+        "wallParentIdStartsWith": NotRequired[str],
+        "wallParentIdEndsWith": NotRequired[str],
+        "wallConnectedOpeningIdsIs": NotRequired[str],
+        "wallConnectedOpeningIdsIsNot": NotRequired[str],
+        "wallConnectedOpeningIdsContains": NotRequired[str],
+        "wallConnectedOpeningIdsNotContains": NotRequired[str],
+        "wallConnectedOpeningIdsStartsWith": NotRequired[str],
+        "wallConnectedOpeningIdsEndsWith": NotRequired[str],
+        "libraryPartNameIs": NotRequired[str],
+        "libraryPartNameIsNot": NotRequired[str],
+        "libraryPartNameContains": NotRequired[str],
+        "libraryPartNameNotContains": NotRequired[str],
+        "libraryPartNameStartsWith": NotRequired[str],
+        "libraryPartNameEndsWith": NotRequired[str],
+        "subTypeNameIs": NotRequired[str],
+        "subTypeNameIsNot": NotRequired[str],
+        "subTypeNameContains": NotRequired[str],
+        "subTypeNameNotContains": NotRequired[str],
+        "subTypeNameStartsWith": NotRequired[str],
+        "subTypeNameEndsWith": NotRequired[str],
+        "columnCoatingType": NotRequired[GraphicOverrideColumnCoatingType],
+        "columnCoatingTypeNot": NotRequired[GraphicOverrideColumnCoatingType],
+        "columnInclinationAngle": NotRequired[float],
+        "columnInclinationAngleNot": NotRequired[float],
+        "columnInclinationAngleLessThan": NotRequired[float],
+        "columnInclinationAngleGreaterThan": NotRequired[float],
+        "columnInclinationAngleLessOrEqual": NotRequired[float],
+        "columnInclinationAngleGreaterOrEqual": NotRequired[float],
+        "columnCrossSectionType": NotRequired[GraphicOverrideColumnCrossSectionType],
+        "columnCoreDiameter": NotRequired[float],
+        "columnCoreDiameterNot": NotRequired[float],
+        "columnCoreDiameterLessThan": NotRequired[float],
+        "columnCoreDiameterGreaterThan": NotRequired[float],
+        "columnCoreDiameterLessOrEqual": NotRequired[float],
+        "columnCoreDiameterGreaterOrEqual": NotRequired[float],
+        "columnCoatingThickness": NotRequired[float],
+        "columnCoatingThicknessNot": NotRequired[float],
+        "columnCoatingThicknessLessThan": NotRequired[float],
+        "columnCoatingThicknessGreaterThan": NotRequired[float],
+        "columnCoatingThicknessLessOrEqual": NotRequired[float],
+        "columnCoatingThicknessGreaterOrEqual": NotRequired[float],
+        "columnBottomCrossSectionHeightCut": NotRequired[float],
+        "columnBottomCrossSectionHeightCutNot": NotRequired[float],
+        "columnBottomCrossSectionHeightCutLessThan": NotRequired[float],
+        "columnBottomCrossSectionHeightCutGreaterThan": NotRequired[float],
+        "columnBottomCrossSectionHeightCutLessOrEqual": NotRequired[float],
+        "columnBottomCrossSectionHeightCutGreaterOrEqual": NotRequired[float],
+        "columnBottomCrossSectionHeightPerpendicular": NotRequired[float],
+        "columnBottomCrossSectionHeightPerpendicularNot": NotRequired[float],
+        "columnBottomCrossSectionHeightPerpendicularLessThan": NotRequired[float],
+        "columnBottomCrossSectionHeightPerpendicularGreaterThan": NotRequired[float],
+        "columnBottomCrossSectionHeightPerpendicularLessOrEqual": NotRequired[float],
+        "columnBottomCrossSectionHeightPerpendicularGreaterOrEqual": NotRequired[float],
+        "columnTopCrossSectionHeightCut": NotRequired[float],
+        "columnTopCrossSectionHeightCutNot": NotRequired[float],
+        "columnTopCrossSectionHeightCutLessThan": NotRequired[float],
+        "columnTopCrossSectionHeightCutGreaterThan": NotRequired[float],
+        "columnTopCrossSectionHeightCutLessOrEqual": NotRequired[float],
+        "columnTopCrossSectionHeightCutGreaterOrEqual": NotRequired[float],
+        "columnTopCrossSectionHeightPerpendicular": NotRequired[float],
+        "columnTopCrossSectionHeightPerpendicularNot": NotRequired[float],
+        "columnTopCrossSectionHeightPerpendicularLessThan": NotRequired[float],
+        "columnTopCrossSectionHeightPerpendicularGreaterThan": NotRequired[float],
+        "columnTopCrossSectionHeightPerpendicularLessOrEqual": NotRequired[float],
+        "columnTopCrossSectionHeightPerpendicularGreaterOrEqual": NotRequired[float],
+        "columnProfileCoreHeight": NotRequired[float],
+        "columnProfileCoreHeightNot": NotRequired[float],
+        "columnProfileCoreHeightLessThan": NotRequired[float],
+        "columnProfileCoreHeightGreaterThan": NotRequired[float],
+        "columnProfileCoreHeightLessOrEqual": NotRequired[float],
+        "columnProfileCoreHeightGreaterOrEqual": NotRequired[float],
+        "columnCoreHeightDiameterRatio": NotRequired[float],
+        "columnCoreHeightDiameterRatioNot": NotRequired[float],
+        "columnCoreHeightDiameterRatioLessThan": NotRequired[float],
+        "columnCoreHeightDiameterRatioGreaterThan": NotRequired[float],
+        "columnCoreHeightDiameterRatioLessOrEqual": NotRequired[float],
+        "columnCoreHeightDiameterRatioGreaterOrEqual": NotRequired[float],
+        "columnBottomCrossSectionWidthCut": NotRequired[float],
+        "columnBottomCrossSectionWidthCutNot": NotRequired[float],
+        "columnBottomCrossSectionWidthCutLessThan": NotRequired[float],
+        "columnBottomCrossSectionWidthCutGreaterThan": NotRequired[float],
+        "columnBottomCrossSectionWidthCutLessOrEqual": NotRequired[float],
+        "columnBottomCrossSectionWidthCutGreaterOrEqual": NotRequired[float],
+        "columnBottomCrossSectionWidthPerpendicular": NotRequired[float],
+        "columnBottomCrossSectionWidthPerpendicularNot": NotRequired[float],
+        "columnBottomCrossSectionWidthPerpendicularLessThan": NotRequired[float],
+        "columnBottomCrossSectionWidthPerpendicularGreaterThan": NotRequired[float],
+        "columnBottomCrossSectionWidthPerpendicularLessOrEqual": NotRequired[float],
+        "columnBottomCrossSectionWidthPerpendicularGreaterOrEqual": NotRequired[float],
+        "columnTopCrossSectionWidthCut": NotRequired[float],
+        "columnTopCrossSectionWidthCutNot": NotRequired[float],
+        "columnTopCrossSectionWidthCutLessThan": NotRequired[float],
+        "columnTopCrossSectionWidthCutGreaterThan": NotRequired[float],
+        "columnTopCrossSectionWidthCutLessOrEqual": NotRequired[float],
+        "columnTopCrossSectionWidthCutGreaterOrEqual": NotRequired[float],
+        "columnTopCrossSectionWidthPerpendicular": NotRequired[float],
+        "columnTopCrossSectionWidthPerpendicularNot": NotRequired[float],
+        "columnTopCrossSectionWidthPerpendicularLessThan": NotRequired[float],
+        "columnTopCrossSectionWidthPerpendicularGreaterThan": NotRequired[float],
+        "columnTopCrossSectionWidthPerpendicularLessOrEqual": NotRequired[float],
+        "columnTopCrossSectionWidthPerpendicularGreaterOrEqual": NotRequired[float],
+        "columnCoreWidth": NotRequired[float],
+        "columnCoreWidthNot": NotRequired[float],
+        "columnCoreWidthLessThan": NotRequired[float],
+        "columnCoreWidthGreaterThan": NotRequired[float],
+        "columnCoreWidthLessOrEqual": NotRequired[float],
+        "columnCoreWidthGreaterOrEqual": NotRequired[float],
+        "columnProfileCoreWidth": NotRequired[float],
+        "columnProfileCoreWidthNot": NotRequired[float],
+        "columnProfileCoreWidthLessThan": NotRequired[float],
+        "columnProfileCoreWidthGreaterThan": NotRequired[float],
+        "columnProfileCoreWidthLessOrEqual": NotRequired[float],
+        "columnProfileCoreWidthGreaterOrEqual": NotRequired[float],
+        "columnCoveringHatch": NotRequired[str],
+        "columnCoveringHatchNot": NotRequired[str],
+        "columnCoatingHatch": NotRequired[str],
+        "columnCoatingHatchNot": NotRequired[str],
+        "columnCoreForegroundPen": NotRequired[int],
+        "columnCoreForegroundPenNot": NotRequired[int],
+        "columnCoatingForegroundPen": NotRequired[int],
+        "columnCoatingForegroundPenNot": NotRequired[int],
+        "columnCoveringHatchForegroundPen": NotRequired[int],
+        "columnCoveringHatchForegroundPenNot": NotRequired[int],
+        "columnCoveringHatchBackgroundPen": NotRequired[int],
+        "columnCoveringHatchBackgroundPenNot": NotRequired[int],
+        "columnCoatingBackgroundPen": NotRequired[int],
+        "columnCoatingBackgroundPenNot": NotRequired[int],
+        "columnCoreBackgroundPen": NotRequired[int],
+        "columnCoreBackgroundPenNot": NotRequired[int],
+        "columnHiddenLinePen": NotRequired[int],
+        "columnHiddenLinePenNot": NotRequired[int],
+        "columnHiddenLineType": NotRequired[str],
+        "columnHiddenLineTypeNot": NotRequired[str],
+        "columnCoreSurface": NotRequired[str],
+        "columnCoreSurfaceNot": NotRequired[str],
+        "columnCoatingSurface": NotRequired[str],
+        "columnCoatingSurfaceNot": NotRequired[str],
+        "columnExtrusionSurface": NotRequired[str],
+        "columnExtrusionSurfaceNot": NotRequired[str],
+        "beamAxisPen": NotRequired[int],
+        "beamAxisPenNot": NotRequired[int],
+        "beamAxisLineType": NotRequired[str],
+        "beamAxisLineTypeNot": NotRequired[str],
+        "beamEndSurface": NotRequired[str],
+        "beamEndSurfaceNot": NotRequired[str],
+        "beamRightSurface": NotRequired[str],
+        "beamRightSurfaceNot": NotRequired[str],
+        "beamLeftSurface": NotRequired[str],
+        "beamLeftSurfaceNot": NotRequired[str],
+        "beamBottomSurface": NotRequired[str],
+        "beamBottomSurfaceNot": NotRequired[str],
+        "beamTopSurface": NotRequired[str],
+        "beamTopSurfaceNot": NotRequired[str],
+        "slabReferencePlaneLocation": NotRequired[SlabReferencePlaneLocation],
+        "slabReferencePlaneLocationNot": NotRequired[SlabReferencePlaneLocation],
+        "slabEdgeAngle": NotRequired[GraphicOverrideSlabEdgeAngle],
+        "slabEdgeAngleNot": NotRequired[GraphicOverrideSlabEdgeAngle],
+        "slabDefaultEdgeAngle": NotRequired[float],
+        "slabDefaultEdgeAngleNot": NotRequired[float],
+        "slabDefaultEdgeAngleLessThan": NotRequired[float],
+        "slabDefaultEdgeAngleGreaterThan": NotRequired[float],
+        "slabDefaultEdgeAngleLessOrEqual": NotRequired[float],
+        "slabDefaultEdgeAngleGreaterOrEqual": NotRequired[float],
+        "slabCutLinePen": NotRequired[int],
+        "slabCutLinePenNot": NotRequired[int],
+        "slabConstructionMaterialFill": NotRequired[str],
+        "slabConstructionMaterialFillNot": NotRequired[str],
+        "roofCutBodyType": NotRequired[GraphicOverrideRoofCutBodyType],
+        "roofCutBodyTypeNot": NotRequired[GraphicOverrideRoofCutBodyType],
+        "roofLevelNumber": NotRequired[int],
+        "roofLevelNumberNot": NotRequired[int],
+        "roofLevelNumberLessThan": NotRequired[int],
+        "roofLevelNumberGreaterThan": NotRequired[int],
+        "roofLevelNumberLessOrEqual": NotRequired[int],
+        "roofLevelNumberGreaterOrEqual": NotRequired[int],
+        "roofEaveOverhangType": NotRequired[GraphicOverrideRoofEaveOverhangType],
+        "roofEdgeAngle": NotRequired[GraphicOverrideRoofEdgeAngle],
+        "roofEdgeAngleNot": NotRequired[GraphicOverrideRoofEdgeAngle],
+        "roofEaveOverhang": NotRequired[float],
+        "roofEaveOverhangNot": NotRequired[float],
+        "roofEaveOverhangLessThan": NotRequired[float],
+        "roofEaveOverhangGreaterThan": NotRequired[float],
+        "roofEaveOverhangLessOrEqual": NotRequired[float],
+        "roofEaveOverhangGreaterOrEqual": NotRequired[float],
+        "roofGeometryType": NotRequired[GraphicOverrideRoofGeometryType],
+        "roofGeometryTypeNot": NotRequired[GraphicOverrideRoofGeometryType],
+        "roofPitch": NotRequired[float],
+        "roofPitchNot": NotRequired[float],
+        "roofPitchLessThan": NotRequired[float],
+        "roofPitchGreaterThan": NotRequired[float],
+        "roofPitchLessOrEqual": NotRequired[float],
+        "roofPitchGreaterOrEqual": NotRequired[float],
+        "shellCutBodyType": NotRequired[GraphicOverrideShellCutBodyType],
+        "shellTiltAngle": NotRequired[float],
+        "shellTiltAngleNot": NotRequired[float],
+        "shellTiltAngleLessThan": NotRequired[float],
+        "shellTiltAngleGreaterThan": NotRequired[float],
+        "shellTiltAngleLessOrEqual": NotRequired[float],
+        "shellTiltAngleGreaterOrEqual": NotRequired[float],
+        "shellGeometryType": NotRequired[GraphicOverrideShellGeometryType],
+        "hatchFill": NotRequired[str],
+        "hatchFillNot": NotRequired[str],
+        "lineAttribute": NotRequired[str],
+        "lineAttributeNot": NotRequired[str],
+        "fontIs": NotRequired[str],
+        "fontContains": NotRequired[str],
+        "fontNotContains": NotRequired[str],
+        "penReplacement": NotRequired[GraphicOverridePenReplacement],
+        "penReplacementNot": NotRequired[GraphicOverridePenReplacement],
+        "linePenContains": NotRequired[int],
+        "linePenNotContains": NotRequired[int],
+        "textPenIs": NotRequired[int],
+        "textPenContains": NotRequired[int],
+        "textPenNotContains": NotRequired[int],
+        "hatchContourPen": NotRequired[int],
+        "hatchContourPenNot": NotRequired[int],
+        "openingEndSurface": NotRequired[str],
+        "openingEndSurfaceNot": NotRequired[str],
+        "openingExtrusionSurface": NotRequired[str],
+        "openingExtrusionSurfaceNot": NotRequired[str],
+        "curtainWallFrameCutLine": NotRequired[str],
+        "curtainWallFrameCutLineNot": NotRequired[str],
+        "curtainWallPanelCutLine": NotRequired[str],
+        "curtainWallPanelCutLineNot": NotRequired[str],
+        "curtainWallFrameCutLinePen": NotRequired[int],
+        "curtainWallFrameCutLinePenNot": NotRequired[int],
+        "curtainWallPanelCutLinePen": NotRequired[int],
+        "curtainWallPanelCutLinePenNot": NotRequired[int],
+        "constructionMaterial": NotRequired[str],
+        "constructionMaterialNot": NotRequired[str],
+        "surface": NotRequired[str],
+        "surfaceNot": NotRequired[str],
+        "constructionMaterialIdIs": NotRequired[str],
+        "constructionMaterialIdIsNot": NotRequired[str],
+        "constructionMaterialIdContains": NotRequired[str],
+        "constructionMaterialIdNotContains": NotRequired[str],
+        "constructionMaterialIdStartsWith": NotRequired[str],
+        "constructionMaterialIdEndsWith": NotRequired[str],
+        "constructionMaterialNameIs": NotRequired[str],
+        "constructionMaterialNameIsNot": NotRequired[str],
+        "constructionMaterialNameContains": NotRequired[str],
+        "constructionMaterialNameNotContains": NotRequired[str],
+        "constructionMaterialNameStartsWith": NotRequired[str],
+        "constructionMaterialNameEndsWith": NotRequired[str],
+        "surfaceNameIs": NotRequired[str],
+        "surfaceNameIsNot": NotRequired[str],
+        "surfaceNameContains": NotRequired[str],
+        "surfaceNameNotContains": NotRequired[str],
+        "surfaceNameStartsWith": NotRequired[str],
+        "surfaceNameEndsWith": NotRequired[str],
+        "renovationFilterIs": NotRequired[str],
+        "renovationFilterIsNot": NotRequired[str],
+        "structuralFunction": NotRequired[GraphicOverrideStructuralFunction],
+        "structuralFunctionNot": NotRequired[GraphicOverrideStructuralFunction],
+        "position": NotRequired[GraphicOverridePosition],
+        "positionNot": NotRequired[GraphicOverridePosition],
+        "variantStateIs": NotRequired[str],
+        "variantStateIsNot": NotRequired[str],
+        "variantSetIs": NotRequired[str],
+        "variantSetIsNot": NotRequired[str],
+        "elementIdIs": NotRequired[str],
+        "elementIdIsNot": NotRequired[str],
+        "elementIdLessThan": NotRequired[str],
+        "elementIdGreaterThan": NotRequired[str],
+        "elementIdLessOrEqual": NotRequired[str],
+        "elementIdGreaterOrEqual": NotRequired[str],
+        "elementIdContains": NotRequired[str],
+        "elementIdNotContains": NotRequired[str],
+        "elementIdStartsWith": NotRequired[str],
+        "elementIdEndsWith": NotRequired[str],
+        "uniqueIdIs": NotRequired[str],
+        "uniqueIdIsNot": NotRequired[str],
+        "uniqueIdContains": NotRequired[str],
+        "uniqueIdNotContains": NotRequired[str],
+        "uniqueIdStartsWith": NotRequired[str],
+        "uniqueIdEndsWith": NotRequired[str],
+        "linkMainIdIs": NotRequired[str],
+        "linkMainIdIsNot": NotRequired[str],
+        "linkMainIdLessThan": NotRequired[str],
+        "linkMainIdGreaterThan": NotRequired[str],
+        "linkMainIdLessOrEqual": NotRequired[str],
+        "linkMainIdGreaterOrEqual": NotRequired[str],
+        "linkMainIdContains": NotRequired[str],
+        "linkMainIdNotContains": NotRequired[str],
+        "linkMainIdStartsWith": NotRequired[str],
+        "linkMainIdEndsWith": NotRequired[str],
+        "linkedElementIdIs": NotRequired[str],
+        "linkedElementIdIsNot": NotRequired[str],
+        "linkedElementIdLessThan": NotRequired[str],
+        "linkedElementIdGreaterThan": NotRequired[str],
+        "linkedElementIdLessOrEqual": NotRequired[str],
+        "linkedElementIdGreaterOrEqual": NotRequired[str],
+        "linkedElementIdContains": NotRequired[str],
+        "linkedElementIdNotContains": NotRequired[str],
+        "linkedElementIdStartsWith": NotRequired[str],
+        "linkedElementIdEndsWith": NotRequired[str],
+        "nameIs": NotRequired[str],
+        "nameIsNot": NotRequired[str],
+        "nameContains": NotRequired[str],
+        "nameNotContains": NotRequired[str],
+        "nameStartsWith": NotRequired[str],
+        "nameEndsWith": NotRequired[str],
+        "hasLinkSource": NotRequired[bool],
+        "hasLinkSourceNot": NotRequired[bool],
+        "missingVariant": NotRequired[bool],
+        "profileStretchHeight": NotRequired[float],
+        "profileStretchHeightNot": NotRequired[float],
+        "profileStretchHeightLessThan": NotRequired[float],
+        "profileStretchHeightGreaterThan": NotRequired[float],
+        "profileStretchHeightLessOrEqual": NotRequired[float],
+        "profileStretchHeightGreaterOrEqual": NotRequired[float],
+        "profileStretchWidth": NotRequired[float],
+        "profileStretchWidthNot": NotRequired[float],
+        "profileStretchWidthLessThan": NotRequired[float],
+        "profileStretchWidthGreaterThan": NotRequired[float],
+        "profileStretchWidthLessOrEqual": NotRequired[float],
+        "profileStretchWidthGreaterOrEqual": NotRequired[float],
+        "profileNominalHeight": NotRequired[float],
+        "profileNominalHeightNot": NotRequired[float],
+        "profileNominalHeightLessThan": NotRequired[float],
+        "profileNominalHeightGreaterThan": NotRequired[float],
+        "profileNominalHeightLessOrEqual": NotRequired[float],
+        "profileNominalHeightGreaterOrEqual": NotRequired[float],
+        "profileTotalHeight": NotRequired[float],
+        "profileTotalHeightNot": NotRequired[float],
+        "profileTotalHeightLessThan": NotRequired[float],
+        "profileTotalHeightGreaterThan": NotRequired[float],
+        "profileTotalHeightLessOrEqual": NotRequired[float],
+        "profileTotalHeightGreaterOrEqual": NotRequired[float],
+        "profileTotalWidth": NotRequired[float],
+        "profileTotalWidthNot": NotRequired[float],
+        "profileTotalWidthLessThan": NotRequired[float],
+        "profileTotalWidthGreaterThan": NotRequired[float],
+        "profileTotalWidthLessOrEqual": NotRequired[float],
+        "profileTotalWidthGreaterOrEqual": NotRequired[float],
+        "profileNominalWidth": NotRequired[float],
+        "profileNominalWidthNot": NotRequired[float],
+        "profileNominalWidthLessThan": NotRequired[float],
+        "profileNominalWidthGreaterThan": NotRequired[float],
+        "profileNominalWidthLessOrEqual": NotRequired[float],
+        "profileNominalWidthGreaterOrEqual": NotRequired[float],
+        "profileParameter": NotRequired[GraphicOverrideProfileParameter],
+        "customPropertyBool": NotRequired[GraphicOverrideCustomPropertyBool],
+        "customPropertyString": NotRequired[GraphicOverrideCustomPropertyString],
+        "customPropertyNumber": NotRequired[GraphicOverrideCustomPropertyNumber],
+        "customPropertyInteger": NotRequired[GraphicOverrideCustomPropertyInteger],
+    },
+)
+GraphicOverrideCriterion.__annotations__ = get_type_hints(GraphicOverrideCriterion, include_extras=True)
+
+
+class GraphicOverrideRuleId(TypedDict):
+    """
+    The identifier of a graphic override rule.
+    """
+    guid: Guid
+
+
+class GraphicOverrideRuleIdArrayItem(TypedDict):
+    graphicOverrideRuleId: GraphicOverrideRuleId
+
+
+GraphicOverrideRuleIdOrError: TypeAlias = GraphicOverrideRuleIdArrayItem | ErrorItem
+
+
+class GraphicOverrideStyle(TypedDict):
+    """
+    What a graphic override rule overrides and how. A field that is left out is not overridden.
+    """
+    lineType: NotRequired[AttributeId]
+    lineMarkerTextPen: NotRequired[int]
+    fillType: NotRequired[AttributeId]
+    fillTypeAppliesTo: NotRequired[GraphicOverrideFillTypes]
+    fillForegroundPen: NotRequired[int]
+    fillForegroundPenAppliesTo: NotRequired[GraphicOverrideFillTypes]
+    fillBackgroundPen: NotRequired[int]
+    fillBackgroundColor: NotRequired[ColorRGB]
+    fillBackgroundPenAppliesTo: NotRequired[GraphicOverrideFillTypes]
+    surface: NotRequired[AttributeId]
+    surfaceColor: NotRequired[ColorRGB]
+    surfaceAppliesTo: NotRequired[GraphicOverrideSurfaceTypes]
+    showSkinSeparators: NotRequired[bool]
+    overridePenColorAndThickness: NotRequired[bool]
+    hiddenContours: NotRequired[GraphicOverrideSurfaceTypes]
+    overrideContours: NotRequired[bool]
+
+
+class GraphicalOverrideRuleDetails(TypedDict):
+    ruleId: GuidId
+    name: str
+    ruleGroupName: str
+    criterionXML: str
+
+
+class GridElementData(TypedDict):
+    begCoordinate: Coordinate2D
+    endCoordinate: Coordinate2D
+    lengthMode: NotRequired[GridElementLengthMode]
+    floorIndex: NotRequired[int]
+    layerIndex: NotRequired[int]
+    parameters: NotRequired[list[GridParameter]]
+
+
+class GridElementDetails(TypedDict):
+    elementId: ElementId
+    variation: str
+    floorIndex: int
+    layerIndex: int
+    pos: Coordinate2D
+    angle: float
+    length: float
+    xRatio: float
+    yRatio: float
+    useXYFixSize: bool
+    level: float
+    libInd: int
+    libraryPartName: str
+    parameters: NotRequired[list[GridParameterDetails]]
 
 
 class GroupId(TypedDict):
@@ -4142,6 +5707,7 @@ class LabelSymbolStyleSettableDetails(TypedDict):
     """
     textWay: NotRequired[SymbolLabelTextDirection]
     fontIndex: NotRequired[int]
+    fontName: NotRequired[str]
     bold: NotRequired[bool]
     italic: NotRequired[bool]
     underline: NotRequired[bool]
@@ -4265,6 +5831,8 @@ class LayoutData(TypedDict):
     masterNavigatorItemId: NotRequired[NavigatorItemId]
     layoutName: str
     parentNavigatorItemId: NotRequired[NavigatorItemId]
+    paperWidth: NotRequired[float]
+    paperHeight: NotRequired[float]
     layoutParameters: NotRequired[LayoutParameters]
 
 
@@ -4283,6 +5851,42 @@ class LayoutSettingsData(TypedDict):
     doNotIncludeInNumbering: NotRequired[bool]
     showMasterBelow: NotRequired[bool]
     customData: NotRequired[list[LayoutCustomDataToSet]]
+
+
+class LevelDimensionData(TypedDict):
+    """
+    The parameters of the new Level Dimension.
+    """
+    favoriteName: NotRequired[str]
+    position: Coordinate2D
+    parentElementId: NotRequired[ElementId]
+    level: NotRequired[float]
+    floorIndex: NotRequired[int]
+    layerIndex: NotRequired[int]
+    pen: NotRequired[int]
+    textHeight: NotRequired[float]
+    textPen: NotRequired[int]
+    dimForm: NotRequired[int]
+    needPlus: NotRequired[bool]
+    markerSize: NotRequired[float]
+    angle: NotRequired[float]
+    origin: NotRequired[DimensionOrigin]
+
+
+class LevelDimensionDetails(TypedDict):
+    position: Coordinate2D
+    level: float
+    staticLevel: bool
+    ownerElementId: NotRequired[ElementId]
+    ownerElementType: NotRequired[ElementType]
+    dimForm: int
+    needPlus: bool
+    pen: int
+    textHeight: float
+    textPen: int
+    markerSize: float
+    angle: float
+    origin: DimensionOrigin
 
 
 class LibPartDetails(TypedDict):
@@ -4379,6 +5983,12 @@ class LockElementsParameters(TypedDict):
 LockElementsResult: TypeAlias = ExecutionResult
 
 
+class MEPBranchPreferenceTable(TypedDict):
+    guid: str
+    name: str
+    rows: list[MEPBranchPreferenceTableRow]
+
+
 class MEPConnectionData(TypedDict):
     routingElementId: ElementId
     connectToId: ElementId
@@ -4408,10 +6018,33 @@ class MEPDistributionSystem(TypedDict):
     elements: Elements
 
 
+class MEPElbowPreferenceTable(TypedDict):
+    guid: str
+    name: str
+    rows: list[MEPElbowPreferenceTableRow]
+
+
 class MEPElement(TypedDict):
     elementId: ElementId
     type: MEPElementType
     domain: str
+
+
+class MEPPhysicalSystemData(TypedDict):
+    systemGroupId: MEPSystemGroupId
+    name: str
+    rootElementId: NotRequired[ElementId]
+    mepSystemId: NotRequired[AttributeId]
+
+
+class MEPPhysicalSystemDetails(TypedDict):
+    physicalSystemId: MEPPhysicalSystemId
+    name: str
+    rootElementId: NotRequired[ElementId]
+    mepSystemId: NotRequired[AttributeId]
+
+
+MEPPhysicalSystemDetailsOrError: TypeAlias = MEPPhysicalSystemDetails | ErrorItem
 
 
 class MEPPortDetails(TypedDict):
@@ -4441,6 +6074,7 @@ class MEPRoutingElementData(TypedDict):
     crossSectionReferenceId: NotRequired[int]
     preferenceTableId: NotRequired[Guid]
     mepSystemId: NotRequired[AttributeId]
+    layerIndex: NotRequired[int]
 
 
 class MEPRoutingElementModificationData(TypedDict):
@@ -4513,6 +6147,21 @@ class MEPSystemData(TypedDict):
     insulationMaterialId: NotRequired[AttributeIdArrayItem]
 
 
+class MEPSystemGroupDetails(TypedDict):
+    systemGroupId: MEPSystemGroupId
+    name: str
+    physicalSystems: list[MEPPhysicalSystemDetailsOrError]
+
+
+MEPSystemGroupDetailsOrError: TypeAlias = MEPSystemGroupDetails | ErrorItem
+
+
+class MEPTransitionPreferenceTable(TypedDict):
+    guid: str
+    name: str
+    rows: list[MEPTransitionPreferenceTableRow]
+
+
 MarkerParameterUpdate: TypeAlias = (
     MarkerParameterUpdateByName | MarkerParameterUpdateByIndex
 )
@@ -4532,6 +6181,7 @@ class MeshData(TypedDict):
     level: NotRequired[float]
     skirtType: NotRequired[MeshSkirtType]
     skirtLevel: NotRequired[float]
+    buildingMaterialId: NotRequired[AttributeId]
     ridges: NotRequired[MeshRidges]
     showLines: NotRequired[bool]
     contourPen: NotRequired[int]
@@ -4592,6 +6242,25 @@ class ModifyColumnsResult(TypedDict):
 
 
 class ModifyDoorsResult(TypedDict):
+    executionResults: ExecutionResults
+
+
+class ModifyElectricalCircuitsResult(TypedDict):
+    executionResults: ExecutionResults
+
+
+class ModifyElectricalDevicesResult(TypedDict):
+    executionResults: ExecutionResults
+
+
+class ModifyElectricalPanelsResult(TypedDict):
+    executionResults: ExecutionResults
+
+
+ModifyElectricalProjectSettingsResult: TypeAlias = ExecutionResult
+
+
+class ModifyGraphicOverrideRulesResult(TypedDict):
     executionResults: ExecutionResults
 
 
@@ -5081,6 +6750,30 @@ class RemoveSolidElementLinksResult(TypedDict):
     executionResults: ExecutionResults
 
 
+class RenameDesignOptionCombinationsParameters(TypedDict):
+    designOptionCombinations: list[DesignOptionCombinationRename]
+
+
+class RenameDesignOptionCombinationsResult(TypedDict):
+    executionResults: ExecutionResults
+
+
+class RenameDesignOptionSetsParameters(TypedDict):
+    designOptionSets: list[DesignOptionSetRename]
+
+
+class RenameDesignOptionSetsResult(TypedDict):
+    executionResults: ExecutionResults
+
+
+class RenameDesignOptionsParameters(TypedDict):
+    designOptions: list[DesignOptionRename]
+
+
+class RenameDesignOptionsResult(TypedDict):
+    executionResults: ExecutionResults
+
+
 class RenameFavoritesResult(TypedDict):
     executionResults: ExecutionResults
 
@@ -5162,6 +6855,12 @@ class SaveAsModuleFileParameters(TypedDict):
 SaveAsModuleFileResult: TypeAlias = ExecutionResult
 
 
+class SaveCurrentWindowAsImageResult(TypedDict):
+    imageFilePath: str
+    zoom: NotRequired[Zoom]
+    rotation: NotRequired[float]
+
+
 SaveProjectAsArchiveResult: TypeAlias = ExecutionResult
 
 
@@ -5169,6 +6868,9 @@ SaveProjectResult: TypeAlias = ExecutionResult
 
 
 Set3DCutPlanesResult: TypeAlias = ExecutionResult
+
+
+Set3DProjectionSettingsResult: TypeAlias = ExecutionResult
 
 
 class ActiveDesignOptionsInCombination(TypedDict):
@@ -5182,6 +6884,9 @@ class SetActiveDesignOptionsInCombinationsParameters(TypedDict):
 
 class SetActiveDesignOptionsInCombinationsResult(TypedDict):
     executionResults: ExecutionResults
+
+
+SetActiveGraphicalOverrideCombinationResult: TypeAlias = ExecutionResult
 
 
 class SetClassificationsOfElementsResult(TypedDict):
@@ -5436,6 +7141,7 @@ class TextDataWithRuns(TypedDict):
     justification: NotRequired[Justification]
     style: NotRequired[TextStyleSettableDetails]
     floorIndex: NotRequired[int]
+    layerIndex: NotRequired[int]
 
 
 class TextDataWithText(TypedDict):
@@ -5452,6 +7158,7 @@ class TextDataWithText(TypedDict):
     justification: NotRequired[Justification]
     style: NotRequired[TextStyleSettableDetails]
     floorIndex: NotRequired[int]
+    layerIndex: NotRequired[int]
 
 
 class TextDetails(TypedDict):
@@ -5546,7 +7253,7 @@ class ViewSettings(TypedDict):
     structureDisplay: NotRequired[
         Literal["EntireStructure", "CoreOnly", "WithoutFinishes", "StructureOnly"]
     ]
-    renovationFilterGuid: NotRequired[Guid]
+    renovationFilterGuid: NotRequired[GuidId]
     d3styleName: NotRequired[str]
     renderingSceneName: NotRequired[str]
     usePhotoRendering: NotRequired[bool]
@@ -5709,6 +7416,7 @@ class WindowData(TypedDict):
     reflected: NotRequired[bool]
     refSide: NotRequired[bool]
     oSide: NotRequired[bool]
+    libraryPartName: NotRequired[str]
     favoriteName: NotRequired[str]
 
 
@@ -5806,6 +7514,22 @@ class ZoneRelationsOfElement(TypedDict):
     Relations of a zone.
     """
     zoneRelations: ZoneRelations
+
+
+class ActiveGraphicalOverrideCombinationById(TypedDict):
+    """
+    The graphic override combination to apply, given by id or by name.
+    """
+    combinationId: GraphicOverrideCombinationId
+    name: NotRequired[str]
+
+
+class ActiveGraphicalOverrideCombinationByName(TypedDict):
+    """
+    The graphic override combination to apply, given by id or by name.
+    """
+    combinationId: NotRequired[GraphicOverrideCombinationId]
+    name: str
 
 
 AddCommentToIssueResult: TypeAlias = ExecutionResult
@@ -6012,6 +7736,14 @@ class BeamWithDetails(TypedDict):
     coverFill: NotRequired[CoverFill]
 
 
+class Body3D(TypedDict):
+    """
+    One solid body of an element's 3D model: a flat vertex list in world coordinates and the planar faces referencing it. The faces are not triangulated: a face is a closed loop of vertex indices (counterclockwise seen from outside the body) plus the loops of its holes.
+    """
+    vertices: list[Coordinate3D]
+    polygons: list[Body3DPolygon]
+
+
 class DrawingsWithNewLink(TypedDict):
     """
     An existing Drawing and the navigator item it should be relinked to.
@@ -6162,6 +7894,10 @@ class ConnectMEPElementsResult(TypedDict):
     connectionResults: MEPConnectionResultsOrErrors
 
 
+class ConnectToElectricalCircuitsResult(TypedDict):
+    executionResults: ExecutionResults
+
+
 class ConnectedElement(TypedDict):
     elements: Elements
 
@@ -6241,6 +7977,10 @@ class CreateColumnsResult(TypedDict):
     elements: ElementIdsOrErrors
 
 
+class CreateCurtainWallsResult(TypedDict):
+    elements: ElementIdsOrErrors
+
+
 class CreateDesignOptionCombinationsResult(TypedDict):
     designOptionCombinationIdsOrErrors: DesignOptionCombinationIdsOrErrors
 
@@ -6269,6 +8009,22 @@ class CreateDrawingsResult(TypedDict):
     elements: ElementIdsOrErrors
 
 
+class CreateElectricalCircuitsResult(TypedDict):
+    elements: ElementIdsOrErrors
+
+
+class CreateElectricalDevicesResult(TypedDict):
+    elements: ElementIdsOrErrors
+
+
+class CreateElectricalPanelsParameters(TypedDict):
+    electricalPanelsData: list[ElectricalPanelData]
+
+
+class CreateElectricalPanelsResult(TypedDict):
+    elements: ElementIdsOrErrors
+
+
 class FavoritesFromElement(TypedDict):
     """
     The identifier of the element and the name of the new favorite.
@@ -6289,6 +8045,23 @@ class CreateFavoritesFromElementsResult(TypedDict):
 class CreateFillsParameters(TypedDict):
     fillDataArray: list[FillData]
     overwriteExisting: NotRequired[bool]
+
+
+class CreateGraphicOverrideCombinationsResult(TypedDict):
+    graphicOverrideCombinationIds: list[GraphicOverrideCombinationIdOrError]
+
+
+class CreateGraphicOverrideRulesResult(TypedDict):
+    graphicOverrideRuleIds: list[GraphicOverrideRuleIdOrError]
+
+
+class CreateGridElementsParameters(TypedDict):
+    gridElements: list[GridElementData]
+
+
+class CreateGridElementsResult(TypedDict):
+    elements: ElementIdsOrErrors
+    warnings: list[str]
 
 
 class CreateGroupsResult(TypedDict):
@@ -6371,6 +8144,14 @@ class CreateLayoutResult(TypedDict):
     databases: DatabaseIdsOrErrors
 
 
+class CreateLevelDimensionsParameters(TypedDict):
+    levelDimensionsData: list[LevelDimensionData]
+
+
+class CreateLevelDimensionsResult(TypedDict):
+    elements: ElementIdsOrErrors
+
+
 class CreateLineElementsParameters(TypedDict):
     linesData: list[LineElementData]
 
@@ -6386,6 +8167,10 @@ class CreateLinesParameters(TypedDict):
 
 class CreateMEPElementsResult(TypedDict):
     elements: ElementIdsOrErrors
+
+
+class CreateMEPPhysicalSystemsParameters(TypedDict):
+    physicalSystemsData: list[MEPPhysicalSystemData]
 
 
 class CreateMEPRoutingElementsParameters(TypedDict):
@@ -6516,6 +8301,20 @@ class CreateZonesResult(TypedDict):
     elements: ElementIdsOrErrors
 
 
+class CurtainWallData(TypedDict):
+    """
+    The parameters of the new Curtain Wall. Everything not given here - the frame and panel classes, the surfaces, the boundary and corner frames, the pattern - comes from the favorite or from the Curtain Wall tool defaults of the open project.
+    """
+    favoriteName: NotRequired[str]
+    coordinates: list[Coordinate2D]
+    zCoordinate: NotRequired[float]
+    floorIndex: NotRequired[int]
+    height: NotRequired[float]
+    primaryPattern: NotRequired[CurtainWallPattern]
+    secondaryPattern: NotRequired[CurtainWallPattern]
+    cells: NotRequired[list[CurtainWallPatternCell]]
+
+
 class CurtainWallPanelDetails(TypedDict):
     polygonCoordinates: list[Coordinate3D]
     isHidden: bool
@@ -6536,6 +8335,38 @@ class DeleteClassificationSystemsResult(TypedDict):
     executionResults: ExecutionResults
 
 
+class DeleteDesignOptionCombinationsParameters(TypedDict):
+    designOptionCombinations: list[DesignOptionCombinationIdArrayItem]
+
+
+class DeleteDesignOptionCombinationsResult(TypedDict):
+    executionResults: ExecutionResults
+
+
+class DeleteDesignOptionSetsParameters(TypedDict):
+    designOptionSets: list[DesignOptionSetIdArrayItem]
+
+
+class DeleteDesignOptionSetsResult(TypedDict):
+    executionResults: ExecutionResults
+
+
+class DeleteDesignOptionsParameters(TypedDict):
+    designOptions: list[DesignOptionIdArrayItem]
+
+
+class DeleteDesignOptionsResult(TypedDict):
+    executionResults: ExecutionResults
+
+
+class DeleteElectricalCircuitsParameters(TypedDict):
+    electricalCircuits: Elements
+
+
+class DeleteElectricalCircuitsResult(TypedDict):
+    executionResults: ExecutionResults
+
+
 class DeleteElementsParameters(TypedDict):
     elements: Elements
 
@@ -6549,6 +8380,26 @@ class DeleteEmbeddedLibraryItemsResult(TypedDict):
 
 
 class DeleteFavoritesResult(TypedDict):
+    executionResults: ExecutionResults
+
+
+class DeleteGraphicOverrideCombinationsParameters(TypedDict):
+    graphicOverrideCombinationIds: list[GraphicOverrideCombinationIdArrayItem]
+
+
+class DeleteGraphicOverrideCombinationsResult(TypedDict):
+    executionResults: ExecutionResults
+
+
+class DeleteGraphicOverrideRuleGroupsResult(TypedDict):
+    executionResults: ExecutionResults
+
+
+class DeleteGraphicOverrideRulesParameters(TypedDict):
+    graphicOverrideRuleIds: list[GraphicOverrideRuleIdArrayItem]
+
+
+class DeleteGraphicOverrideRulesResult(TypedDict):
     executionResults: ExecutionResults
 
 
@@ -6648,6 +8499,7 @@ class DoorData(TypedDict):
     reflected: NotRequired[bool]
     refSide: NotRequired[bool]
     oSide: NotRequired[bool]
+    libraryPartName: NotRequired[str]
     favoriteName: NotRequired[str]
 
 
@@ -6683,6 +8535,145 @@ class DrawingDetails(TypedDict):
     titleElementId: NotRequired[ElementId]
 
 
+class ElectricalCircuitConnectionData(TypedDict):
+    elementId: ElementId
+    circuitId: ElementId
+
+
+class ElectricalCircuitData(TypedDict):
+    electricalPanelId: ElementId
+    description: NotRequired[str]
+    voltage: NotRequired[float]
+    wiringTypeName: NotRequired[str]
+    isPhaseAUsed: NotRequired[bool]
+    isPhaseBUsed: NotRequired[bool]
+    isPhaseCUsed: NotRequired[bool]
+
+
+class ElectricalCircuitDetails(TypedDict):
+    """
+    The details of an electrical circuit.
+    """
+    elementId: ElementId
+    name: str
+    description: str
+    ownerPanelId: ElementId
+    childDevices: Elements
+    childPanels: Elements
+    voltage: float
+    phases: str
+    isPhaseAUsed: bool
+    isPhaseBUsed: bool
+    isPhaseCUsed: bool
+    wiringTypeName: str
+    connectedLoad: ElectricalLoads
+    demandLoad: ElectricalLoads
+    voltageDrop: float
+    estimatedCableLength: float
+
+
+ElectricalCircuitDetailsOrError: TypeAlias = ElectricalCircuitDetails | ErrorItem
+
+
+class ElectricalCircuitModificationData(TypedDict):
+    elementId: ElementId
+    description: NotRequired[str]
+    voltage: NotRequired[float]
+    wiringTypeName: NotRequired[str]
+    isPhaseAUsed: NotRequired[bool]
+    isPhaseBUsed: NotRequired[bool]
+    isPhaseCUsed: NotRequired[bool]
+
+
+class ElectricalDeviceData(TypedDict):
+    position: Coordinate3D
+    orientation: NotRequired[MEPOrientation]
+    rotation: NotRequired[float]
+    isReflected: NotRequired[bool]
+    libraryPartId: NotRequired[LibPartUnId]
+    xSize: NotRequired[float]
+    ySize: NotRequired[float]
+    apparentPower: NotRequired[int]
+    isApparentPowerEnabled: NotRequired[bool]
+    loadClassificationName: NotRequired[str]
+    circuitId: NotRequired[ElementId]
+
+
+class ElectricalDeviceDetails(TypedDict):
+    """
+    The details of an electrical device (a light, socket or other consumer).
+    """
+    elementId: ElementId
+    parentCircuitId: NotRequired[ElementId]
+    anchorPoint: Coordinate3D
+    orientation: MEPOrientation
+    rotation: float
+    isReflected: bool
+    libraryPartId: LibPartUnId
+    xSize: float
+    ySize: float
+    apparentPower: float
+    isApparentPowerEnabled: bool
+    loadClassificationName: str
+    demandLoad: float
+    connectedElements: Elements
+
+
+ElectricalDeviceDetailsOrError: TypeAlias = ElectricalDeviceDetails | ErrorItem
+
+
+class ElectricalDeviceModificationData(TypedDict):
+    elementId: ElementId
+    apparentPower: NotRequired[int]
+    isApparentPowerEnabled: NotRequired[bool]
+    loadClassificationName: NotRequired[str]
+    anchorPoint: NotRequired[Coordinate3D]
+    orientation: NotRequired[MEPOrientation]
+    rotation: NotRequired[float]
+    isReflected: NotRequired[bool]
+    libraryPartId: NotRequired[LibPartUnId]
+    xSize: NotRequired[float]
+    ySize: NotRequired[float]
+
+
+class ElectricalPanelDetails(TypedDict):
+    """
+    The details of an electrical panel (distribution board).
+    """
+    elementId: ElementId
+    panelName: str
+    circuitNamePrefix: str
+    circuitIdStyle: int
+    circuits: Elements
+    parentCircuitId: NotRequired[ElementId]
+    anchorPoint: Coordinate3D
+    orientation: MEPOrientation
+    rotation: float
+    isReflected: bool
+    libraryPartId: LibPartUnId
+    xSize: float
+    ySize: float
+    connectedLoad: ElectricalLoads
+    demandLoad: ElectricalLoads
+
+
+ElectricalPanelDetailsOrError: TypeAlias = ElectricalPanelDetails | ErrorItem
+
+
+class ElectricalPanelModificationData(TypedDict):
+    elementId: ElementId
+    panelName: NotRequired[str]
+    circuitNamePrefix: NotRequired[str]
+    circuitIdStyle: NotRequired[int]
+    anchorPoint: NotRequired[Coordinate3D]
+    orientation: NotRequired[MEPOrientation]
+    rotation: NotRequired[float]
+    isReflected: NotRequired[bool]
+    libraryPartId: NotRequired[LibPartUnId]
+    xSize: NotRequired[float]
+    ySize: NotRequired[float]
+
+
 class ElementClassification(TypedDict):
     """
     The classification of an element.
@@ -6711,6 +8702,19 @@ ElementClassificationsOrErrors: TypeAlias = list[ElementClassificationOrError]
 """
 A list of element classification identifiers or errors.
 """
+
+
+class ElementComponentQuantities(TypedDict):
+    buildingMaterialId: AttributeIdArrayItem
+    volume: float
+    projectedArea: float
+    isCore: bool
+    isFinish: bool
+    subElementId: NotRequired[ElementId]
+
+
+class ElementGeometry3D(TypedDict):
+    bodies: list[Body3D]
 
 
 class ElementIFCIds(TypedDict):
@@ -6773,6 +8777,12 @@ ElementOrGroupIds: TypeAlias = list[ElementOrGroupId]
 """
 A list of element and/or group identifiers.
 """
+
+
+class ElementQuantityDetails(TypedDict):
+    type: ElementType
+    quantities: ElementQuantities
+    composites: list[ElementComponentQuantities]
 
 
 class ElementTrims(TypedDict):
@@ -6850,6 +8860,18 @@ class GDLParameterList(TypedDict):
     parameters: GDLParameterArray
 
 
+class Get3DGeometryOfElementsResult(TypedDict):
+    geometries3D: list[ElementGeometry3D | ErrorItem]
+
+
+class GetActiveGraphicalOverrideCombinationResult(TypedDict):
+    """
+    The graphic override combination applied to the current window. Empty when the current window has no combination applied.
+    """
+    combinationId: NotRequired[GraphicOverrideCombinationId]
+    name: NotRequired[str]
+
+
 GetAllElementsResult: TypeAlias = ElementsWithExecutionResultsOrError
 
 
@@ -6883,6 +8905,18 @@ class GetDimensionDataResult(TypedDict):
     dimensionsData: list[DimensionDataOrError]
 
 
+class GetElectricalCircuitsResult(TypedDict):
+    electricalCircuits: list[ElectricalCircuitDetailsOrError]
+
+
+class GetElectricalDevicesResult(TypedDict):
+    electricalDevices: list[ElectricalDeviceDetailsOrError]
+
+
+class GetElectricalPanelsResult(TypedDict):
+    electricalPanels: list[ElectricalPanelDetailsOrError]
+
+
 class GetElementTrimsResult(TypedDict):
     elementTrims: list[ElementTrimsOrError]
 
@@ -6901,6 +8935,23 @@ class GetGDLParametersOfElementsResult(TypedDict):
 class GetGeoLocationResult(TypedDict):
     projectLocation: ProjectLocation
     surveyPoint: SurveyPoint
+
+
+class GraphicOverrideRuleGroup(TypedDict):
+    name: str
+    graphicOverrideRuleIds: list[GraphicOverrideRuleIdArrayItem]
+
+
+class GetGraphicOverrideRuleGroupsResult(TypedDict):
+    graphicOverrideRuleGroups: list[GraphicOverrideRuleGroup]
+
+
+class GetGraphicalOverrideRulesResult(TypedDict):
+    rules: list[GraphicalOverrideRuleDetails]
+
+
+class GetGridElementsResult(TypedDict):
+    gridElements: list[GridElementDetails]
 
 
 class GetGroupsOfElementsResult(TypedDict):
@@ -6935,6 +8986,19 @@ class GetMEPElementsResult(TypedDict):
     elements: list[MEPElement]
 
 
+class GetMEPPreferenceTablesResult(TypedDict):
+    tables: list[MEPPreferenceTable]
+    referenceSet: MEPReferenceSet
+    angleSet: NotRequired[MEPAngleSet]
+    elbowTables: NotRequired[list[MEPElbowPreferenceTable]]
+    branchTables: NotRequired[list[MEPBranchPreferenceTable]]
+    transitionTables: NotRequired[list[MEPTransitionPreferenceTable]]
+
+
+class GetMEPSystemGroupsResult(TypedDict):
+    systemGroups: list[MEPSystemGroupDetailsOrError]
+
+
 class GetMEPSystemsResult(TypedDict):
     mepSystems: list[MEPSystemAttributeOrError]
 
@@ -6945,6 +9009,10 @@ class GetMarkerParametersOfElementsResult(TypedDict):
 
 class GetPenTablesResult(TypedDict):
     penTables: list[PenTableAttributeOrError]
+
+
+class GetQuantitiesOfElementsResult(TypedDict):
+    quantitiesOfElements: list[ElementQuantityDetails | ErrorItem]
 
 
 class GetRevisionIssuesResult(TypedDict):
@@ -6977,6 +9045,41 @@ class GetViewSettingsResult(TypedDict):
 
 class GetZoneCategoriesResult(TypedDict):
     zoneCategories: list[ZoneCategoryAttributeOrError]
+
+
+class GraphicOverrideCombinationData(TypedDict):
+    name: str
+    graphicOverrideRuleIds: list[GraphicOverrideRuleIdArrayItem]
+
+
+class GraphicOverrideCombinationDetails(TypedDict):
+    graphicOverrideCombinationId: GraphicOverrideCombinationId
+    name: str
+    graphicOverrideRuleIds: list[GraphicOverrideRuleIdArrayItem]
+
+
+class GraphicOverrideRuleData(TypedDict):
+    name: str
+    ruleGroupName: str
+    criterionXML: NotRequired[str]
+    criterion: NotRequired[GraphicOverrideCriterion]
+    style: NotRequired[GraphicOverrideStyle]
+
+
+class GraphicOverrideRuleDetails(TypedDict):
+    graphicOverrideRuleId: GraphicOverrideRuleId
+    name: str
+    ruleGroupName: NotRequired[str]
+    criterionXML: str
+    style: GraphicOverrideStyle
+
+
+class GraphicOverrideRuleModificationData(TypedDict):
+    graphicOverrideRuleId: GraphicOverrideRuleId
+    name: NotRequired[str]
+    criterionXML: NotRequired[str]
+    criterion: NotRequired[GraphicOverrideCriterion]
+    style: NotRequired[GraphicOverrideStyle]
 
 
 Hole2D: TypeAlias = Hole2DWithOutline | Hole2DWithLegacyCoordinates
@@ -7122,6 +9225,22 @@ class ModifyDoorsParameters(TypedDict):
     doorsWithDetails: list[DoorWithDetails]
 
 
+class ModifyElectricalCircuitsParameters(TypedDict):
+    electricalCircuitsData: list[ElectricalCircuitModificationData]
+
+
+class ModifyElectricalDevicesParameters(TypedDict):
+    electricalDevicesData: list[ElectricalDeviceModificationData]
+
+
+class ModifyElectricalPanelsParameters(TypedDict):
+    electricalPanelsData: list[ElectricalPanelModificationData]
+
+
+class ModifyGraphicOverrideRulesParameters(TypedDict):
+    graphicOverrideRules: list[GraphicOverrideRuleModificationData]
+
+
 class ModifyObjectsParameters(TypedDict):
     objectsWithDetails: list[ObjectWithDetails]
 
@@ -7156,6 +9275,7 @@ class MorphData(TypedDict):
     yAxis: NotRequired[Coordinate3D]
     zAxis: NotRequired[Coordinate3D]
     surfaceId: NotRequired[AttributeId]
+    topExpansion: NotRequired[float]
     castShadow: NotRequired[bool]
     receiveShadow: NotRequired[bool]
     isAutoOnStoryVisibility: NotRequired[bool]
@@ -7465,6 +9585,11 @@ class RoofWithDetails(TypedDict):
     holes: NotRequired[Holes2D]
 
 
+SetActiveGraphicalOverrideCombinationParameters: TypeAlias = (
+    ActiveGraphicalOverrideCombinationById | ActiveGraphicalOverrideCombinationByName
+)
+
+
 class SetClassificationsOfElementsParameters(TypedDict):
     elementClassifications: ElementClassifications
 
@@ -7618,11 +9743,19 @@ class BeamSegmentRelations(TypedDict):
     beamSegmentConnections: EndpointConnections
 
 
+class ConnectToElectricalCircuitsParameters(TypedDict):
+    connectionsData: list[ElectricalCircuitConnectionData]
+
+
 ConnectedElementsOrError: TypeAlias = ConnectedElementsWrapper | ErrorItem
 
 
 class CreateAssociativeDimensionsParameters(TypedDict):
     dimensionsData: list[AssociativeDimensionData]
+
+
+class CreateCurtainWallsParameters(TypedDict):
+    curtainWallsData: list[CurtainWallData]
 
 
 class CreateDesignOptionCombinationsParameters(TypedDict):
@@ -7631,6 +9764,22 @@ class CreateDesignOptionCombinationsParameters(TypedDict):
 
 class CreateDoorsParameters(TypedDict):
     doorsData: list[DoorData]
+
+
+class CreateElectricalCircuitsParameters(TypedDict):
+    electricalCircuitsData: list[ElectricalCircuitData]
+
+
+class CreateElectricalDevicesParameters(TypedDict):
+    electricalDevicesData: list[ElectricalDeviceData]
+
+
+class CreateGraphicOverrideCombinationsParameters(TypedDict):
+    graphicOverrideCombinations: list[GraphicOverrideCombinationData]
+
+
+class CreateGraphicOverrideRulesParameters(TypedDict):
+    graphicOverrideRules: list[GraphicOverrideRuleData]
 
 
 class CreateLabelsParameters(TypedDict):
@@ -7708,6 +9857,14 @@ class GetCurrentRevisionChangesOfLayoutsResult(TypedDict):
 
 class GetDocumentRevisionsResult(TypedDict):
     documentRevisions: list[DocumentRevision]
+
+
+class GetGraphicOverrideCombinationsResult(TypedDict):
+    graphicOverrideCombinations: list[GraphicOverrideCombinationDetails]
+
+
+class GetGraphicOverrideRulesResult(TypedDict):
+    graphicOverrideRules: list[GraphicOverrideRuleDetails]
 
 
 class GetKeynoteTreeResult(TypedDict):
@@ -7852,6 +10009,7 @@ TypeSpecificDetails: TypeAlias = (
     | DrawingDetails
     | LabelDetails
     | TextDetails
+    | LevelDimensionDetails
     | NotYetSupportedElementTypeDetails
 )
 

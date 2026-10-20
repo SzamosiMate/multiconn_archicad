@@ -12,6 +12,10 @@ from multiconn_archicad.models.tapir.commands import (
     CreateCompositesResult,
     CreateFillsParameters,
     CreateFillsResult,
+    CreateGraphicOverrideCombinationsParameters,
+    CreateGraphicOverrideCombinationsResult,
+    CreateGraphicOverrideRulesParameters,
+    CreateGraphicOverrideRulesResult,
     CreateLayerCombinationsParameters,
     CreateLayerCombinationsResult,
     CreateLayersParameters,
@@ -30,6 +34,12 @@ from multiconn_archicad.models.tapir.commands import (
     CreateZoneCategoriesResult,
     DeleteAttributesParameters,
     DeleteAttributesResult,
+    DeleteGraphicOverrideCombinationsParameters,
+    DeleteGraphicOverrideCombinationsResult,
+    DeleteGraphicOverrideRuleGroupsParameters,
+    DeleteGraphicOverrideRuleGroupsResult,
+    DeleteGraphicOverrideRulesParameters,
+    DeleteGraphicOverrideRulesResult,
     GetAttributesByTypeParameters,
     GetAttributesByTypeResult,
     GetBuildingMaterialPhysicalPropertiesParameters,
@@ -40,6 +50,9 @@ from multiconn_archicad.models.tapir.commands import (
     GetCompositesResult,
     GetFillsParameters,
     GetFillsResult,
+    GetGraphicOverrideCombinationsResult,
+    GetGraphicOverrideRuleGroupsResult,
+    GetGraphicOverrideRulesResult,
     GetLayerCombinationsParameters,
     GetLayerCombinationsResult,
     GetLayersParameters,
@@ -56,6 +69,8 @@ from multiconn_archicad.models.tapir.commands import (
     GetSurfacesResult,
     GetZoneCategoriesParameters,
     GetZoneCategoriesResult,
+    ModifyGraphicOverrideRulesParameters,
+    ModifyGraphicOverrideRulesResult,
 )
 from multiconn_archicad.models.tapir.types import (
     AttributeHeadersWrapper,
@@ -74,6 +89,14 @@ from multiconn_archicad.models.tapir.types import (
     FillAttribute,
     FillAttributeField,
     FillData,
+    GraphicOverrideCombinationData,
+    GraphicOverrideCombinationDetails,
+    GraphicOverrideCombinationIdArrayItem,
+    GraphicOverrideRuleData,
+    GraphicOverrideRuleDetails,
+    GraphicOverrideRuleGroup,
+    GraphicOverrideRuleIdArrayItem,
+    GraphicOverrideRuleModificationData,
     LayerAttribute,
     LayerAttributeField,
     LayerCombinationAttribute,
@@ -198,6 +221,67 @@ class AttributeCommands:
         )
         validated_response = CreateFillsResult.model_validate(response_dict)
         return validated_response.attributeIds
+
+    def create_graphic_override_combinations(
+        self, graphic_override_combinations: list[GraphicOverrideCombinationData]
+    ) -> list[ErrorItem | GraphicOverrideCombinationIdArrayItem]:
+        """
+        Creates graphic override combinations from existing rules. Available from Archicad 27.
+
+        Args:
+            graphic_override_combinations (list[GraphicOverrideCombinationData]): The graphic
+                override combinations to create.
+
+        Returns:
+            list[ErrorItem | GraphicOverrideCombinationIdArrayItem]: The identifiers of the
+                created combinations, or errors, in the order of the input.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "graphicOverrideCombinations": graphic_override_combinations,
+        }
+        validated_params = CreateGraphicOverrideCombinationsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "CreateGraphicOverrideCombinations",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+        )
+        validated_response = CreateGraphicOverrideCombinationsResult.model_validate(response_dict)
+        return validated_response.graphicOverrideCombinationIds
+
+    def create_graphic_override_rules(
+        self, graphic_override_rules: list[GraphicOverrideRuleData]
+    ) -> list[ErrorItem | GraphicOverrideRuleIdArrayItem]:
+        """
+        Creates graphic override rules. The criterion is given as Archicad's criterion XML or as
+        structured conditions. The rule group is created when no rule group has the given name.
+        Available from Archicad 27.
+
+        Args:
+            graphic_override_rules (list[GraphicOverrideRuleData]): The graphic override rules
+                to create.
+
+        Returns:
+            list[ErrorItem | GraphicOverrideRuleIdArrayItem]: The identifiers of the created
+                rules, or errors, in the order of the input.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "graphicOverrideRules": graphic_override_rules,
+        }
+        validated_params = CreateGraphicOverrideRulesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "CreateGraphicOverrideRules", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = CreateGraphicOverrideRulesResult.model_validate(response_dict)
+        return validated_response.graphicOverrideRuleIds
 
     def create_layer_combinations(
         self, layer_combination_data_array: list[LayerCombinationDataArrayItem], overwrite_existing: None | bool = None
@@ -472,6 +556,104 @@ class AttributeCommands:
         validated_response = DeleteAttributesResult.model_validate(response_dict)
         return validated_response.executionResults
 
+    def delete_graphic_override_combinations(
+        self, graphic_override_combination_ids: list[GraphicOverrideCombinationIdArrayItem]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Deletes graphic override combinations. Their rules are kept. Available from Archicad 27.
+
+        Args:
+            graphic_override_combination_ids (list[GraphicOverrideCombinationIdArrayItem]): The
+                graphic override combinations to delete. Their rules are kept.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "graphicOverrideCombinationIds": graphic_override_combination_ids,
+        }
+        validated_params = DeleteGraphicOverrideCombinationsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "DeleteGraphicOverrideCombinations",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+        )
+        validated_response = DeleteGraphicOverrideCombinationsResult.model_validate(response_dict)
+        return validated_response.executionResults
+
+    def delete_graphic_override_rule_groups(
+        self, rule_group_names: list[str], move_rules_to_group: None | str = None, delete_rules: None | bool = None
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Deletes graphic override rule groups, found by name. A group that still contains rules
+        is kept unless its rules are moved to another group or deleted with it. Available from
+        Archicad 27.
+
+        Args:
+            rule_group_names (list[str]): The names of the rule groups to delete.
+            move_rules_to_group (None | str): The name of the rule group the rules of the
+                deleted groups are moved to, so they are kept. Created when no rule group has
+                this name.
+            delete_rules (None | bool): Delete the rules of the deleted groups too. Without this
+                or moveRulesToGroup, a group that still contains rules is not deleted.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "ruleGroupNames": rule_group_names,
+            "moveRulesToGroup": move_rules_to_group,
+            "deleteRules": delete_rules,
+        }
+        validated_params = DeleteGraphicOverrideRuleGroupsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "DeleteGraphicOverrideRuleGroups",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+        )
+        validated_response = DeleteGraphicOverrideRuleGroupsResult.model_validate(response_dict)
+        return validated_response.executionResults
+
+    def delete_graphic_override_rules(
+        self, graphic_override_rule_ids: list[GraphicOverrideRuleIdArrayItem]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Deletes graphic override rules. They are also removed from the combinations that contain
+        them. Available from Archicad 27.
+
+        Args:
+            graphic_override_rule_ids (list[GraphicOverrideRuleIdArrayItem]): The graphic
+                override rules to delete.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "graphicOverrideRuleIds": graphic_override_rule_ids,
+        }
+        validated_params = DeleteGraphicOverrideRulesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "DeleteGraphicOverrideRules", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = DeleteGraphicOverrideRulesResult.model_validate(response_dict)
+        return validated_response.executionResults
+
     def get_attributes_by_type(self, attribute_type: AttributeType) -> AttributeHeadersWrapper | ErrorItem:
         """
         Returns the details of every attribute of the given type.
@@ -617,6 +799,59 @@ class AttributeCommands:
         )
         validated_response = GetFillsResult.model_validate(response_dict)
         return validated_response.fills
+
+    def get_graphic_override_combinations(self) -> list[GraphicOverrideCombinationDetails]:
+        """
+        Gets all graphic override combinations of the project with the rules they contain.
+        Available from Archicad 27.
+
+        Returns:
+            list[GraphicOverrideCombinationDetails]: The graphic override combinations of the
+                project.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        response_dict = self._core.post_tapir_command("GetGraphicOverrideCombinations")
+        validated_response = GetGraphicOverrideCombinationsResult.model_validate(response_dict)
+        return validated_response.graphicOverrideCombinations
+
+    def get_graphic_override_rule_groups(self) -> list[GraphicOverrideRuleGroup]:
+        """
+        Gets all graphic override rule groups of the project with the rules they contain, empty
+        groups included. Available from Archicad 27.
+
+        Returns:
+            list[GraphicOverrideRuleGroup]: The graphic override rule groups of the project,
+                empty ones included.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        response_dict = self._core.post_tapir_command("GetGraphicOverrideRuleGroups")
+        validated_response = GetGraphicOverrideRuleGroupsResult.model_validate(response_dict)
+        return validated_response.graphicOverrideRuleGroups
+
+    def get_graphic_override_rules(self) -> list[GraphicOverrideRuleDetails]:
+        """
+        Gets all graphic override rules of the project, with their rule group, criterion and
+        style. Available from Archicad 27.
+
+        Returns:
+            list[GraphicOverrideRuleDetails]: The graphic override rules of the project.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        response_dict = self._core.post_tapir_command("GetGraphicOverrideRules")
+        validated_response = GetGraphicOverrideRulesResult.model_validate(response_dict)
+        return validated_response.graphicOverrideRules
 
     def get_layer_combinations(
         self, attributes: list[AttributeIdArrayItem]
@@ -861,3 +1096,34 @@ class AttributeCommands:
         )
         validated_response = GetZoneCategoriesResult.model_validate(response_dict)
         return validated_response.zoneCategories
+
+    def modify_graphic_override_rules(
+        self, graphic_override_rules: list[GraphicOverrideRuleModificationData]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Modifies the name, criterion or style of graphic override rules. The criterion is given
+        as Archicad's criterion XML or as structured conditions. A given style replaces the
+        whole style of the rule. Available from Archicad 27.
+
+        Args:
+            graphic_override_rules (list[GraphicOverrideRuleModificationData]): The graphic
+                override rules to modify.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "graphicOverrideRules": graphic_override_rules,
+        }
+        validated_params = ModifyGraphicOverrideRulesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "ModifyGraphicOverrideRules", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = ModifyGraphicOverrideRulesResult.model_validate(response_dict)
+        return validated_response.executionResults

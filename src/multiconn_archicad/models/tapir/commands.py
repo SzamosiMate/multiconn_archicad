@@ -9,6 +9,8 @@ from multiconn_archicad.models.base import APIModel
 
 from .types import (
     ActiveDesignOptionsInCombination,
+    ActiveGraphicalOverrideCombinationById,
+    ActiveGraphicalOverrideCombinationByName,
     AlertType,
     Angle,
     ArcData,
@@ -23,6 +25,7 @@ from .types import (
     AutoTextKey,
     AutoTextKeyValue,
     AutoTextName,
+    AxonometricProjectionParameters,
     BeamData,
     BeamRelations,
     BeamSegmentRelations,
@@ -51,7 +54,9 @@ from .types import (
     Conflict,
     ConflictPolicy,
     ConnectedElementsWrapper,
+    Coordinate2D,
     Coordinate3D,
+    CurtainWallData,
     CustomSchemeItem,
     CutPlane,
     DatabaseIdAndWindowType,
@@ -60,11 +65,15 @@ from .types import (
     DesignOptionCombinationData,
     DesignOptionCombinationDetails,
     DesignOptionCombinationIdArrayItem,
+    DesignOptionCombinationRename,
     DesignOptionData,
     DesignOptionDetails,
     DesignOptionForElement,
     DesignOptionIdArrayItem,
+    DesignOptionRename,
     DesignOptionSet,
+    DesignOptionSetIdArrayItem,
+    DesignOptionSetRename,
     DetailData,
     DetailsOfElement,
     DimensionData,
@@ -73,12 +82,25 @@ from .types import (
     DoorWithDetails,
     DrawingData,
     DrawingsWithNewLink,
+    ElectricalCircuitConnectionData,
+    ElectricalCircuitData,
+    ElectricalCircuitDetails,
+    ElectricalCircuitModificationData,
+    ElectricalDeviceData,
+    ElectricalDeviceDetails,
+    ElectricalDeviceModificationData,
+    ElectricalLoadClassification,
+    ElectricalPanelData,
+    ElectricalPanelDetails,
+    ElectricalPanelModificationData,
+    ElectricalWiringType,
     Element,
     ElementClassification,
     ElementClassificationItemArray,
     ElementDesignOptionPair,
     ElementDetailsField,
     ElementFilter,
+    ElementGeometry3D,
     ElementGroupParameters,
     ElementIFCIds,
     ElementIFCProperties,
@@ -88,6 +110,7 @@ from .types import (
     ElementIdArrayItem,
     ElementPair,
     ElementPropertyValue,
+    ElementQuantityDetails,
     ElementTrims,
     ElementType,
     ElementWithMarkerParameters,
@@ -114,6 +137,19 @@ from .types import (
     FillData,
     Format,
     GDLParameterList,
+    GraphicOverrideCombinationData,
+    GraphicOverrideCombinationDetails,
+    GraphicOverrideCombinationId,
+    GraphicOverrideCombinationIdArrayItem,
+    GraphicOverrideRuleData,
+    GraphicOverrideRuleDetails,
+    GraphicOverrideRuleGroup,
+    GraphicOverrideRuleIdArrayItem,
+    GraphicOverrideRuleModificationData,
+    GraphicalOverrideRuleDetails,
+    GridElementData,
+    GridElementDetails,
+    GridParameterDetails,
     GroupIdArrayItem,
     GuidId,
     HatchData,
@@ -128,6 +164,8 @@ from .types import (
     HotspotData,
     IFCElementsToExport,
     IFCExportTranslator,
+    ImageColorDepth,
+    ImageFormat,
     ImageType,
     InteriorElevationData,
     Issue,
@@ -159,6 +197,7 @@ from .types import (
     LayoutSetting,
     LayoutSettingsData,
     Length,
+    LevelDimensionData,
     Library,
     LibraryFileAddition,
     LibraryLocation,
@@ -169,22 +208,32 @@ from .types import (
     LineData,
     LineElementData,
     LockableObjectSetStatus,
+    MEPAngleSet,
+    MEPBranchPreferenceTable,
     MEPConnectionData,
     MEPConnectionResult,
     MEPDistributionSystem,
     MEPDomain,
+    MEPElbowPreferenceTable,
     MEPElement,
     MEPElementData,
     MEPElementPorts,
     MEPElementType,
+    MEPPhysicalSystemData,
+    MEPPhysicalSystemIdArrayItem,
     MEPPreferenceTable,
     MEPPreferenceTableDomain,
+    MEPReferenceSet,
     MEPRoutingElementData,
     MEPRoutingElementDetails,
     MEPRoutingElementModificationData,
     MEPSystemAttribute,
     MEPSystemAttributeField,
     MEPSystemData,
+    MEPSystemGroupData,
+    MEPSystemGroupDetails,
+    MEPSystemGroupIdArrayItem,
+    MEPTransitionPreferenceTable,
     MarkerParametersOfElement,
     MeshData,
     MeshWithDetails,
@@ -206,6 +255,7 @@ from .types import (
     PenTableAttribute,
     PenTableAttributeField,
     PenTableData,
+    PerspectiveProjectionParameters,
     PolylineData,
     PrintArea,
     ProfileAttribute,
@@ -279,6 +329,7 @@ from .types import (
     ZoneCategoryData,
     ZoneData,
     ZoneRelationsOfElement,
+    Zoom,
 )
 
 
@@ -442,6 +493,19 @@ class ConnectMEPElementsResult(APIModel):
     )
 
 
+class ConnectToElectricalCircuitsParameters(APIModel):
+    connectionsData: list[ElectricalCircuitConnectionData] = Field(
+        ...,
+        description="Array of electrical devices or panels and the circuits to connect them to. A panel connected to a circuit becomes a sub-panel of the panel of that circuit.",
+    )
+
+
+class ConnectToElectricalCircuitsResult(APIModel):
+    executionResults: list[SuccessfulExecutionResult | FailedExecutionResult] = Field(
+        ..., description="A list of execution results."
+    )
+
+
 class CreateArcsParameters(APIModel):
     arcsData: list[ArcData] = Field(..., description="Array of data to create Arcs.")
 
@@ -542,6 +606,14 @@ class CreateCompositesResult(APIModel):
     )
 
 
+class CreateCurtainWallsParameters(APIModel):
+    curtainWallsData: list[CurtainWallData] = Field(..., description="Array of data to create Curtain Walls.")
+
+
+class CreateCurtainWallsResult(APIModel):
+    elements: list[ElementIdArrayItem | ErrorItem] = Field(..., description="A list of element identifiers or errors.")
+
+
 class CreateDesignOptionCombinationsParameters(APIModel):
     designOptionCombinations: list[DesignOptionCombinationData]
 
@@ -598,6 +670,39 @@ class CreateDrawingsResult(APIModel):
     elements: list[ElementIdArrayItem | ErrorItem] = Field(..., description="A list of element identifiers or errors.")
 
 
+class CreateElectricalCircuitsParameters(APIModel):
+    electricalCircuitsData: list[ElectricalCircuitData] = Field(
+        ...,
+        description="Array of data to create electrical circuits. Each item adds one circuit to the given panel.",
+    )
+
+
+class CreateElectricalCircuitsResult(APIModel):
+    elements: list[ElementIdArrayItem | ErrorItem] = Field(..., description="A list of element identifiers or errors.")
+
+
+class CreateElectricalDevicesParameters(APIModel):
+    electricalDevicesData: list[ElectricalDeviceData] = Field(
+        ...,
+        description="Array of data to create electrical devices. The fields that are not given are taken from the default settings of the Electrical Device tool.",
+    )
+
+
+class CreateElectricalDevicesResult(APIModel):
+    elements: list[ElementIdArrayItem | ErrorItem] = Field(..., description="A list of element identifiers or errors.")
+
+
+class CreateElectricalPanelsParameters(APIModel):
+    electricalPanelsData: list[ElectricalPanelData] = Field(
+        ...,
+        description="Array of data to create electrical panels. The fields that are not given are taken from the default settings of the Electrical Panel tool.",
+    )
+
+
+class CreateElectricalPanelsResult(APIModel):
+    elements: list[ElementIdArrayItem | ErrorItem] = Field(..., description="A list of element identifiers or errors.")
+
+
 class CreateFavoritesFromElementsParameters(APIModel):
     favoritesFromElements: list[FavoritesFromElement]
 
@@ -619,6 +724,90 @@ class CreateFillsParameters(APIModel):
 class CreateFillsResult(APIModel):
     attributeIds: list[AttributeIdArrayItem | ErrorItem] = Field(
         ..., description="A list of attribute identifiers or errors."
+    )
+
+
+class CreateGraphicOverrideCombinationsParameters(APIModel):
+    graphicOverrideCombinations: list[GraphicOverrideCombinationData] = Field(
+        ..., description="The graphic override combinations to create."
+    )
+
+
+class CreateGraphicOverrideCombinationsResult(APIModel):
+    graphicOverrideCombinationIds: list[GraphicOverrideCombinationIdArrayItem | ErrorItem] = Field(
+        ...,
+        description="The identifiers of the created combinations, or errors, in the order of the input.",
+    )
+
+
+class CreateGraphicOverrideRulesParameters(APIModel):
+    graphicOverrideRules: list[GraphicOverrideRuleData] = Field(
+        ..., description="The graphic override rules to create."
+    )
+
+
+class CreateGraphicOverrideRulesResult(APIModel):
+    graphicOverrideRuleIds: list[GraphicOverrideRuleIdArrayItem | ErrorItem] = Field(
+        ...,
+        description="The identifiers of the created rules, or errors, in the order of the input.",
+    )
+
+
+class CreateGraphicalOverrideCombinationParameters(APIModel):
+    name: str = Field(
+        ...,
+        description="Name of the override combination. When a combination with this name exists, its rule list is replaced.",
+    )
+    ruleNames: list[str] = Field(
+        ...,
+        description="Names of the override rules in the combination, in order. Rule names are unique in the project, whatever the rule group. An empty list makes a combination without rules.",
+    )
+
+
+class CreateGraphicalOverrideCombinationResult(APIModel):
+    combinationId: GuidId = Field(..., description="The created or changed override combination.")
+
+
+class CreateGraphicalOverrideRuleParameters(APIModel):
+    name: str = Field(
+        ...,
+        description="Name of the override rule. Rule names are unique in the project: an existing rule with this name is overwritten, in whichever rule group it is.",
+    )
+    ruleGroupName: str | None = Field(
+        None,
+        description="Rule group of a new rule, created when it does not exist. Default: 'Tapir'. An overwritten rule stays in its own group.",
+    )
+    criterionXML: str | None = Field(
+        None,
+        description="Optional criterion XML. Archicad only takes XML in its own format: read it from a rule made in the GUI with GetGraphicalOverrideRules and change the values. XML written from scratch is dropped without an error, and so is an empty one: the rule then applies to all elements.",
+    )
+    surfaceRGB: ColorRGB | None = Field(
+        None,
+        description="Optional color override of the cut and uncut surfaces. Components are in the 0..1 range.",
+    )
+    linePenIndex: int | None = Field(
+        None,
+        description="Optional pen index override for lines, markers and texts. Only a positive index takes effect.",
+    )
+    overrideContours: bool | None = Field(
+        None,
+        description="Optional. If true, the contours of the overridden surfaces are recolored too.",
+    )
+
+
+class CreateGraphicalOverrideRuleResult(APIModel):
+    ruleId: GuidId = Field(..., description="The created or overwritten override rule.")
+
+
+class CreateGridElementsParameters(APIModel):
+    gridElements: list[GridElementData]
+
+
+class CreateGridElementsResult(APIModel):
+    elements: list[ElementIdArrayItem | ErrorItem] = Field(..., description="A list of element identifiers or errors.")
+    warnings: list[str] = Field(
+        ...,
+        description="Parameters that were not set, prefixed with the index of the grid element.",
     )
 
 
@@ -782,6 +971,17 @@ class CreateLayoutSubsetResult(APIModel):
     navigatorItems: list[NavigatorItemIdArrayItem | ErrorItem]
 
 
+class CreateLevelDimensionsParameters(APIModel):
+    levelDimensionsData: list[LevelDimensionData] = Field(
+        ...,
+        description="Array of data to create Level Dimensions (the Level Dimension tool of the floor plan).",
+    )
+
+
+class CreateLevelDimensionsResult(APIModel):
+    elements: list[ElementIdArrayItem | ErrorItem] = Field(..., description="A list of element identifiers or errors.")
+
+
 class CreateLineElementsParameters(APIModel):
     linesData: list[LineElementData] = Field(..., description="Array of data to create Lines.")
 
@@ -812,6 +1012,16 @@ class CreateMEPElementsResult(APIModel):
     elements: list[ElementIdArrayItem | ErrorItem] = Field(..., description="A list of element identifiers or errors.")
 
 
+class CreateMEPPhysicalSystemsParameters(APIModel):
+    physicalSystemsData: list[MEPPhysicalSystemData] = Field(
+        ..., description="Array of data to create physical systems."
+    )
+
+
+class CreateMEPPhysicalSystemsResult(APIModel):
+    physicalSystems: list[MEPPhysicalSystemIdArrayItem | ErrorItem]
+
+
 class CreateMEPRoutingElementsParameters(APIModel):
     routingElementsData: list[MEPRoutingElementData] = Field(
         ..., description="Array of data to create MEP routing elements."
@@ -820,6 +1030,14 @@ class CreateMEPRoutingElementsParameters(APIModel):
 
 class CreateMEPRoutingElementsResult(APIModel):
     elements: list[ElementIdArrayItem | ErrorItem] = Field(..., description="A list of element identifiers or errors.")
+
+
+class CreateMEPSystemGroupsParameters(APIModel):
+    systemGroupsData: list[MEPSystemGroupData] = Field(..., description="Array of data to create system groups.")
+
+
+class CreateMEPSystemGroupsResult(APIModel):
+    systemGroups: list[MEPSystemGroupIdArrayItem | ErrorItem]
 
 
 class CreateMEPSystemsParameters(APIModel):
@@ -1124,6 +1342,48 @@ class DeleteClassificationSystemsResult(APIModel):
     )
 
 
+class DeleteDesignOptionCombinationsParameters(APIModel):
+    designOptionCombinations: list[DesignOptionCombinationIdArrayItem] = Field(
+        ..., description="The design option combinations to delete."
+    )
+
+
+class DeleteDesignOptionCombinationsResult(APIModel):
+    executionResults: list[SuccessfulExecutionResult | FailedExecutionResult] = Field(
+        ..., description="A list of execution results."
+    )
+
+
+class DeleteDesignOptionSetsParameters(APIModel):
+    designOptionSets: list[DesignOptionSetIdArrayItem] = Field(..., description="The design option sets to delete.")
+
+
+class DeleteDesignOptionSetsResult(APIModel):
+    executionResults: list[SuccessfulExecutionResult | FailedExecutionResult] = Field(
+        ..., description="A list of execution results."
+    )
+
+
+class DeleteDesignOptionsParameters(APIModel):
+    designOptions: list[DesignOptionIdArrayItem] = Field(..., description="The design options to delete.")
+
+
+class DeleteDesignOptionsResult(APIModel):
+    executionResults: list[SuccessfulExecutionResult | FailedExecutionResult] = Field(
+        ..., description="A list of execution results."
+    )
+
+
+class DeleteElectricalCircuitsParameters(APIModel):
+    electricalCircuits: list[ElementIdArrayItem] = Field(..., description="The circuits to remove from their panels.")
+
+
+class DeleteElectricalCircuitsResult(APIModel):
+    executionResults: list[SuccessfulExecutionResult | FailedExecutionResult] = Field(
+        ..., description="A list of execution results."
+    )
+
+
 class DeleteElementsParameters(APIModel):
     elements: list[ElementIdArrayItem] = Field(..., description="A list of elements.")
 
@@ -1151,6 +1411,49 @@ class DeleteFavoritesParameters(APIModel):
 
 
 class DeleteFavoritesResult(APIModel):
+    executionResults: list[SuccessfulExecutionResult | FailedExecutionResult] = Field(
+        ..., description="A list of execution results."
+    )
+
+
+class DeleteGraphicOverrideCombinationsParameters(APIModel):
+    graphicOverrideCombinationIds: list[GraphicOverrideCombinationIdArrayItem] = Field(
+        ...,
+        description="The graphic override combinations to delete. Their rules are kept.",
+    )
+
+
+class DeleteGraphicOverrideCombinationsResult(APIModel):
+    executionResults: list[SuccessfulExecutionResult | FailedExecutionResult] = Field(
+        ..., description="A list of execution results."
+    )
+
+
+class DeleteGraphicOverrideRuleGroupsParameters(APIModel):
+    ruleGroupNames: list[str] = Field(..., description="The names of the rule groups to delete.")
+    moveRulesToGroup: str | None = Field(
+        None,
+        description="The name of the rule group the rules of the deleted groups are moved to, so they are kept. Created when no rule group has this name.",
+    )
+    deleteRules: bool | None = Field(
+        None,
+        description="Delete the rules of the deleted groups too. Without this or moveRulesToGroup, a group that still contains rules is not deleted.",
+    )
+
+
+class DeleteGraphicOverrideRuleGroupsResult(APIModel):
+    executionResults: list[SuccessfulExecutionResult | FailedExecutionResult] = Field(
+        ..., description="A list of execution results."
+    )
+
+
+class DeleteGraphicOverrideRulesParameters(APIModel):
+    graphicOverrideRuleIds: list[GraphicOverrideRuleIdArrayItem] = Field(
+        ..., description="The graphic override rules to delete."
+    )
+
+
+class DeleteGraphicOverrideRulesResult(APIModel):
     executionResults: list[SuccessfulExecutionResult | FailedExecutionResult] = Field(
         ..., description="A list of execution results."
     )
@@ -1248,8 +1551,7 @@ class ExportFavoritesParameters(APIModel):
     names: list[str] | None = Field(None, description="Optional subset of Favorites to export. Default: export all.")
 
 
-class ExportFavoritesResult(APIModel):
-    pass
+ExportFavoritesResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
 
 
 class ExportIssuesToBCFParameters(APIModel):
@@ -1301,6 +1603,45 @@ class Get3DBoundingBoxesParameters(APIModel):
 
 class Get3DBoundingBoxesResult(APIModel):
     boundingBoxes3D: list[BoundingBox3DArrayItem | ErrorItem] = Field(..., description="A list of 3D bounding boxes.")
+
+
+class Get3DGeometryOfElementsParameters(APIModel):
+    elements: list[ElementIdArrayItem] = Field(..., description="A list of elements.")
+
+
+class Get3DGeometryOfElementsResult(APIModel):
+    geometries3D: list[ElementGeometry3D | ErrorItem] = Field(
+        ...,
+        description="The 3D geometry of each element, aligned with the input: the solid bodies of its 3D model, or an error.",
+    )
+
+
+class Get3DProjectionSettingsResult(APIModel):
+    isPersp: bool = Field(
+        ...,
+        description="True for a perspective projection, false for an axonometric one.",
+    )
+    cameraElementId: ElementId | None = Field(
+        None,
+        description="The Camera element the projection was set from. Missing when the projection does not come from a camera.",
+    )
+    activeCameraSetElementId: ElementId | None = Field(
+        None, description="The active Camera Set element. Missing when there is none."
+    )
+    perspective: PerspectiveProjectionParameters | None = Field(
+        None,
+        description="The perspective parameters. Present only when isPersp is true.",
+    )
+    axonometric: AxonometricProjectionParameters | None = None
+
+
+class GetActiveGraphicalOverrideCombinationResult(APIModel):
+    """The graphic override combination applied to the current window. Empty when the current window has no combination applied."""
+    combinationId: GraphicOverrideCombinationId | None = None
+    name: str | None = Field(
+        None,
+        description="The name of the graphic override combination. Missing when the combination cannot be read, e.g. it was deleted.",
+    )
 
 
 class GetAddOnVersionResult(APIModel):
@@ -1535,6 +1876,53 @@ class GetDocumentRevisionsResult(APIModel):
     documentRevisions: list[DocumentRevision]
 
 
+class GetElectricalCircuitsParameters(APIModel):
+    elements: list[ElementIdArrayItem] | None = Field(None, description="Optional list of electrical circuits.")
+    electricalPanels: list[ElementIdArrayItem] | None = Field(
+        None,
+        description="Optional list of electrical panels whose circuits are returned. When neither elements nor electricalPanels is given, every circuit of every electrical panel of the project is returned.",
+    )
+
+
+class GetElectricalCircuitsResult(APIModel):
+    electricalCircuits: list[ElectricalCircuitDetails | ErrorItem] = Field(
+        ...,
+        description="The given circuits first, in their order, then the circuits of the given panels, in the order of the panels.",
+    )
+
+
+class GetElectricalDevicesParameters(APIModel):
+    elements: list[ElementIdArrayItem] | None = Field(
+        None,
+        description="Optional list of electrical devices. Every electrical device of the project is returned when it is not given.",
+    )
+
+
+class GetElectricalDevicesResult(APIModel):
+    electricalDevices: list[ElectricalDeviceDetails | ErrorItem] = Field(
+        ..., description="The electrical devices, in the order of the given elements."
+    )
+
+
+class GetElectricalPanelsParameters(APIModel):
+    elements: list[ElementIdArrayItem] | None = Field(
+        None,
+        description="Optional list of electrical panels. Every electrical panel of the project is returned when it is not given.",
+    )
+
+
+class GetElectricalPanelsResult(APIModel):
+    electricalPanels: list[ElectricalPanelDetails | ErrorItem] = Field(
+        ..., description="The electrical panels, in the order of the given elements."
+    )
+
+
+class GetElectricalProjectSettingsResult(APIModel):
+    voltage: float = Field(..., description="The default voltage of the project.")
+    wiringTypes: list[ElectricalWiringType]
+    loadClassifications: list[ElectricalLoadClassification]
+
+
 class GetElementPreviewImageParameters(APIModel):
     elementId: ElementId
     imageType: ImageType | None = Field(None, description="The type of the preview image. Default is 3D.")
@@ -1651,6 +2039,72 @@ class GetGDLParametersOfElementsResult(APIModel):
 class GetGeoLocationResult(APIModel):
     projectLocation: ProjectLocation
     surveyPoint: SurveyPoint
+
+
+class GetGraphicOverrideCombinationsResult(APIModel):
+    graphicOverrideCombinations: list[GraphicOverrideCombinationDetails] = Field(
+        ..., description="The graphic override combinations of the project."
+    )
+
+
+class GetGraphicOverrideRuleGroupsResult(APIModel):
+    graphicOverrideRuleGroups: list[GraphicOverrideRuleGroup] = Field(
+        ...,
+        description="The graphic override rule groups of the project, empty ones included.",
+    )
+
+
+class GetGraphicOverrideRulesResult(APIModel):
+    graphicOverrideRules: list[GraphicOverrideRuleDetails] = Field(
+        ..., description="The graphic override rules of the project."
+    )
+
+
+class GetGraphicalOverrideRulesResult(APIModel):
+    rules: list[GraphicalOverrideRuleDetails]
+
+
+class GetGridElementDefaultsParameters(APIModel):
+    pass
+
+
+class GetGridElementDefaultsResult(APIModel):
+    elementId: ElementId | None = Field(None, description="The grid element. The zero GUID for the tool defaults.")
+    variation: str = Field(
+        ...,
+        description="Four-character variation of the object: 'GREL' for a grid element.",
+    )
+    floorIndex: int = Field(..., description="Home story index.")
+    layerIndex: int = Field(..., description="Layer attribute index.")
+    pos: Coordinate2D = Field(..., description="Insertion point: the start of the grid line.")
+    angle: float = Field(..., description="Direction of the grid line in radians.")
+    length: float = Field(
+        ...,
+        description="Length of the grid line: the GDL parameter AC_Length of the Grid Tool's grid marker, or the object's A size for a library part without it.",
+    )
+    xRatio: float = Field(
+        ...,
+        description="The object's xRatio as stored: its A size with useXYFixSize on, otherwise the A size divided by the library part's own A.",
+    )
+    yRatio: float = Field(..., description="The object's yRatio as stored, like xRatio for the B size.")
+    useXYFixSize: bool = Field(..., description="Whether xRatio and yRatio hold the sizes themselves.")
+    level: float = Field(..., description="Elevation of the object from its home story.")
+    libInd: int = Field(..., description="Library part index.")
+    libraryPartName: str = Field(..., description="Localized name of the library part.")
+    parameters: list[GridParameterDetails] = Field(
+        ..., description="GDL parameters, separators left out. Only when requested."
+    )
+
+
+class GetGridElementsParameters(APIModel):
+    includeParameters: bool | None = Field(
+        None,
+        description="Also return the GDL parameters of each grid element. Default false.",
+    )
+
+
+class GetGridElementsResult(APIModel):
+    gridElements: list[GridElementDetails]
 
 
 class GetGroupsOfElementsParameters(APIModel):
@@ -1819,10 +2273,28 @@ class GetMEPPortsResult(APIModel):
 
 class GetMEPPreferenceTablesParameters(APIModel):
     domain: MEPPreferenceTableDomain
+    includeFittingTables: bool | None = Field(
+        None,
+        description="Also return the elbow, branch and transition preference tables. Defaults to false.",
+    )
 
 
 class GetMEPPreferenceTablesResult(APIModel):
     tables: list[MEPPreferenceTable] = Field(..., description="The circular segment preference tables of the domain.")
+    referenceSet: MEPReferenceSet
+    angleSet: MEPAngleSet | None = Field(None, description="Available from Archicad 29.")
+    elbowTables: list[MEPElbowPreferenceTable] | None = Field(
+        None,
+        description="The elbow preference tables of the domain. Only when includeFittingTables is true.",
+    )
+    branchTables: list[MEPBranchPreferenceTable] | None = Field(
+        None,
+        description="The branch preference tables of the domain. Only when includeFittingTables is true.",
+    )
+    transitionTables: list[MEPTransitionPreferenceTable] | None = Field(
+        None,
+        description="The transition preference tables of the domain. Only when includeFittingTables is true, available from Archicad 29.",
+    )
 
 
 class GetMEPRoutingElementsParameters(APIModel):
@@ -1832,6 +2304,12 @@ class GetMEPRoutingElementsParameters(APIModel):
 class GetMEPRoutingElementsResult(APIModel):
     routingElements: list[MEPRoutingElementDetails | ErrorItem] = Field(
         ..., description="A list of MEP routing element details or errors."
+    )
+
+
+class GetMEPSystemGroupsResult(APIModel):
+    systemGroups: list[MEPSystemGroupDetails | ErrorItem] = Field(
+        ..., description="The system groups of the project with their physical systems."
     )
 
 
@@ -1951,6 +2429,22 @@ class GetPropertyValuesOfElementsResult(APIModel):
     propertyValuesForElements: list[PropertyValuesArrayItem | ErrorItem] = Field(
         ...,
         description="The order of the outer list is that of the given elements. The order of the inner lists are that of the given properties.",
+    )
+
+
+class GetQuantitiesOfElementsParameters(APIModel):
+    elements: list[ElementIdArrayItem] = Field(..., description="A list of elements.")
+    minOpeningSize: float | None = Field(
+        None,
+        description="Optional minimum opening size in square meters. Openings smaller than this are not subtracted when the conditional values (for example volumeConditional of a Wall) are calculated. Archicad only uses it for walls. Default value is 0, so every opening is subtracted.",
+        ge=0.0,
+    )
+
+
+class GetQuantitiesOfElementsResult(APIModel):
+    quantitiesOfElements: list[ElementQuantityDetails | ErrorItem] = Field(
+        ...,
+        description="The quantities of the elements, in the order of the given elements. Lengths are in meters, areas in square meters and volumes in cubic meters.",
     )
 
 
@@ -2296,6 +2790,70 @@ class ModifyDoorsResult(APIModel):
     )
 
 
+class ModifyElectricalCircuitsParameters(APIModel):
+    electricalCircuitsData: list[ElectricalCircuitModificationData] = Field(
+        ...,
+        description="Array of data to modify electrical circuits. Only the given fields are changed.",
+    )
+
+
+class ModifyElectricalCircuitsResult(APIModel):
+    executionResults: list[SuccessfulExecutionResult | FailedExecutionResult] = Field(
+        ..., description="A list of execution results."
+    )
+
+
+class ModifyElectricalDevicesParameters(APIModel):
+    electricalDevicesData: list[ElectricalDeviceModificationData] = Field(
+        ...,
+        description="Array of data to modify electrical devices. Only the given fields are changed.",
+    )
+
+
+class ModifyElectricalDevicesResult(APIModel):
+    executionResults: list[SuccessfulExecutionResult | FailedExecutionResult] = Field(
+        ..., description="A list of execution results."
+    )
+
+
+class ModifyElectricalPanelsParameters(APIModel):
+    electricalPanelsData: list[ElectricalPanelModificationData] = Field(
+        ...,
+        description="Array of data to modify electrical panels. Only the given fields are changed.",
+    )
+
+
+class ModifyElectricalPanelsResult(APIModel):
+    executionResults: list[SuccessfulExecutionResult | FailedExecutionResult] = Field(
+        ..., description="A list of execution results."
+    )
+
+
+class ModifyElectricalProjectSettingsParameters(APIModel):
+    voltage: float | None = None
+    wiringTypesToAdd: list[ElectricalWiringType] | None = None
+    wiringTypesToRemove: list[str] | None = Field(None, description="The names of the wiring types to remove.")
+    loadClassificationsToAdd: list[ElectricalLoadClassification] | None = None
+    loadClassificationsToRemove: list[str] | None = Field(
+        None, description="The names of the load classifications to remove."
+    )
+
+
+ModifyElectricalProjectSettingsResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
+
+
+class ModifyGraphicOverrideRulesParameters(APIModel):
+    graphicOverrideRules: list[GraphicOverrideRuleModificationData] = Field(
+        ..., description="The graphic override rules to modify."
+    )
+
+
+class ModifyGraphicOverrideRulesResult(APIModel):
+    executionResults: list[SuccessfulExecutionResult | FailedExecutionResult] = Field(
+        ..., description="A list of execution results."
+    )
+
+
 class ModifyKeynoteFoldersParameters(APIModel):
     foldersData: list[KeynoteFolderModificationData] = Field(
         ...,
@@ -2588,6 +3146,44 @@ class RemoveSolidElementLinksResult(APIModel):
     )
 
 
+class RenameDesignOptionCombinationsParameters(APIModel):
+    designOptionCombinations: list[DesignOptionCombinationRename] = Field(
+        ...,
+        description="The design option combinations to rename, each with the new name.",
+    )
+
+
+class RenameDesignOptionCombinationsResult(APIModel):
+    executionResults: list[SuccessfulExecutionResult | FailedExecutionResult] = Field(
+        ..., description="A list of execution results."
+    )
+
+
+class RenameDesignOptionSetsParameters(APIModel):
+    designOptionSets: list[DesignOptionSetRename] = Field(
+        ..., description="The design option sets to rename, each with the new name."
+    )
+
+
+class RenameDesignOptionSetsResult(APIModel):
+    executionResults: list[SuccessfulExecutionResult | FailedExecutionResult] = Field(
+        ..., description="A list of execution results."
+    )
+
+
+class RenameDesignOptionsParameters(APIModel):
+    designOptions: list[DesignOptionRename] = Field(
+        ...,
+        description="The design options to rename, each with the new name and/or id. At least one of them must be given.",
+    )
+
+
+class RenameDesignOptionsResult(APIModel):
+    executionResults: list[SuccessfulExecutionResult | FailedExecutionResult] = Field(
+        ..., description="A list of execution results."
+    )
+
+
 class RenameFavoritesParameters(APIModel):
     renames: list[FavoriteRename]
 
@@ -2602,6 +3198,10 @@ class RenameNavigatorItemParameters(APIModel):
     navigatorItemId: NavigatorItemId
     newName: str | None = None
     newId: str | None = None
+    customName: bool | None = Field(
+        None,
+        description="Set to false to drop the custom name of the item, so that it follows the name of its Project Map source again. Cannot be combined with newName.",
+    )
 
 
 RenameNavigatorItemResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
@@ -2669,6 +3269,35 @@ class SaveAsModuleFileParameters(APIModel):
 SaveAsModuleFileResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
 
 
+class SaveCurrentWindowAsImageParameters(APIModel):
+    imageFilePath: str = Field(
+        ...,
+        description="Absolute path of the image file to write. An existing file is overwritten.",
+    )
+    format: ImageFormat | None = None
+    colorDepth: ImageColorDepth | None = None
+    dithered: bool | None = Field(
+        None,
+        description="Optional, false by default. Whether the image is dithered when its color depth drops colors.",
+    )
+    entireDrawing: bool | None = Field(
+        None,
+        description="Optional, false by default. Whether the image covers the entire drawing of a 2D window instead of its current zoom, as the Entire Drawing option of the Save as picture dialog does.",
+    )
+
+
+class SaveCurrentWindowAsImageResult(APIModel):
+    imageFilePath: str = Field(..., description="The path of the written image file.")
+    zoom: Zoom | None = Field(
+        None,
+        description="The zoom of the window the image shows, as GetView2DTransformations reports it. Absent for the 3D window.",
+    )
+    rotation: float | None = Field(
+        None,
+        description="The orientation of the window in radian, as GetView2DTransformations reports it. Absent for the 3D window.",
+    )
+
+
 class SaveProjectAsArchiveParameters(APIModel):
     archiveFilePath: str = Field(
         ...,
@@ -2695,6 +3324,13 @@ class SaveProjectAsArchiveParameters(APIModel):
 SaveProjectAsArchiveResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
 
 
+class SaveProjectParameters(APIModel):
+    projectPath: str | None = Field(
+        None,
+        description="Optional. Full path of a .pln file to save the project to, as File > Save As does: the open project then refers to that file. This saves an untitled project, or one opened from an older Archicad version, which cannot be saved in place. An existing file at the path is overwritten. When omitted, or when it is the project's own file, the project is saved in place, which keeps the refusal of a project opened read-only.",
+    )
+
+
 SaveProjectResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
 
 
@@ -2705,6 +3341,13 @@ class Set3DCutPlanesParameters(APIModel):
 Set3DCutPlanesResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
 
 
+class Set3DProjectionSettingsParameters(APIModel):
+    perspective: PerspectiveProjectionParameters
+
+
+Set3DProjectionSettingsResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
+
+
 class SetActiveDesignOptionsInCombinationsParameters(APIModel):
     activeDesignOptionsInCombinations: list[ActiveDesignOptionsInCombination]
 
@@ -2713,6 +3356,14 @@ class SetActiveDesignOptionsInCombinationsResult(APIModel):
     executionResults: list[SuccessfulExecutionResult | FailedExecutionResult] = Field(
         ..., description="A list of execution results."
     )
+
+
+SetActiveGraphicalOverrideCombinationParameters: TypeAlias = (
+    ActiveGraphicalOverrideCombinationById | ActiveGraphicalOverrideCombinationByName
+)
+
+
+SetActiveGraphicalOverrideCombinationResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
 
 
 class SetClassificationsOfElementsParameters(APIModel):

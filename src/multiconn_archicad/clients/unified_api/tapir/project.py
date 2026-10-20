@@ -37,8 +37,11 @@ from multiconn_archicad.models.tapir.commands import (
     RebuildViewResult,
     SaveAsModuleFileParameters,
     SaveAsModuleFileResult,
+    SaveCurrentWindowAsImageParameters,
+    SaveCurrentWindowAsImageResult,
     SaveProjectAsArchiveParameters,
     SaveProjectAsArchiveResult,
+    SaveProjectParameters,
     SaveProjectResult,
     SetGeoLocationParameters,
     SetGeoLocationResult,
@@ -62,6 +65,8 @@ from multiconn_archicad.models.tapir.types import (
     HotlinkNodeChange,
     HotlinkNodeCreated,
     HotlinkNodeReference,
+    ImageColorDepth,
+    ImageFormat,
     PrintArea,
     ProjectInfoField,
     ProjectInfoFieldData,
@@ -551,9 +556,62 @@ class ProjectCommands:
         validated_response = TypeAdapter(SaveAsModuleFileResult).validate_python(response_dict)
         return validated_response
 
-    def save_project(self) -> FailedExecutionResult | SuccessfulExecutionResult:
+    def save_current_window_as_image(
+        self,
+        image_file_path: str,
+        format: ImageFormat | None = None,
+        color_depth: ImageColorDepth | None = None,
+        dithered: None | bool = None,
+        entire_drawing: None | bool = None,
+    ) -> SaveCurrentWindowAsImageResult:
+        """
+        Saves what the current window shows as an image file (png, jpg, bmp, tiff or gif), as
+        File > Save as does with a picture format.
+
+        Args:
+            image_file_path (str): Absolute path of the image file to write. An existing file is
+                overwritten.
+            format (ImageFormat | None)
+            color_depth (ImageColorDepth | None)
+            dithered (None | bool): Optional, false by default. Whether the image is dithered
+                when its color depth drops colors.
+            entire_drawing (None | bool): Optional, false by default. Whether the image covers
+                the entire drawing of a 2D window instead of its current zoom, as the Entire
+                Drawing option of the Save as picture dialog does.
+
+        Returns:
+            SaveCurrentWindowAsImageResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "imageFilePath": image_file_path,
+            "format": format,
+            "colorDepth": color_depth,
+            "dithered": dithered,
+            "entireDrawing": entire_drawing,
+        }
+        validated_params = SaveCurrentWindowAsImageParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "SaveCurrentWindowAsImage", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = SaveCurrentWindowAsImageResult.model_validate(response_dict)
+        return validated_response
+
+    def save_project(self, project_path: None | str = None) -> FailedExecutionResult | SuccessfulExecutionResult:
         """
         Saves the currently opened project.
+
+        Args:
+            project_path (None | str): Optional. Full path of a .pln file to save the project
+                to, as File > Save As does: the open project then refers to that file. This
+                saves an untitled project, or one opened from an older Archicad version, which
+                cannot be saved in place. An existing file at the path is overwritten. When
+                omitted, or when it is the project's own file, the project is saved in place,
+                which keeps the refusal of a project opened read-only.
 
         Returns:
             FailedExecutionResult | SuccessfulExecutionResult
@@ -563,7 +621,13 @@ class ProjectCommands:
             RequestError: If there is a network or connection error.
             pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
-        response_dict = self._core.post_tapir_command("SaveProject")
+        params_dict = {
+            "projectPath": project_path,
+        }
+        validated_params = SaveProjectParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "SaveProject", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
         validated_response = TypeAdapter(SaveProjectResult).validate_python(response_dict)
         return validated_response
 
