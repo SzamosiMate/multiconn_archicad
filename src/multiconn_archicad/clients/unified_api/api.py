@@ -26,6 +26,7 @@ from .tapir.element_creation import ElementCreationCommands as TapirElementCreat
 from .tapir.element_grouping import ElementGroupingCommands as TapirElementGroupingCommands
 from .tapir.element_modification import ElementModificationCommands as TapirElementModificationCommands
 from .tapir.favorites import FavoritesCommands as TapirFavoritesCommands
+from .tapir.graphic_override import GraphicOverrideCommands as TapirGraphicOverrideCommands
 from .tapir.ifc import IfcCommands as TapirIfcCommands
 from .tapir.issue_management import IssueManagementCommands as TapirIssueManagementCommands
 from .tapir.keynote import KeynoteCommands as TapirKeynoteCommands
@@ -56,6 +57,7 @@ class TapirApi:
         self.element_grouping = TapirElementGroupingCommands(core)
         self.element_modification = TapirElementModificationCommands(core)
         self.favorites = TapirFavoritesCommands(core)
+        self.graphic_override = TapirGraphicOverrideCommands(core)
         self.ifc = TapirIfcCommands(core)
         self.issue_management = TapirIssueManagementCommands(core)
         self.keynote = TapirKeynoteCommands(core)

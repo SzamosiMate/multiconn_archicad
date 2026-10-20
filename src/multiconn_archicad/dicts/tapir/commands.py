@@ -7,6 +7,8 @@ from typing_extensions import NotRequired
 
 from .types import (
     ActiveDesignOptionsInCombination,
+    ActiveGraphicalOverrideCombinationById,
+    ActiveGraphicalOverrideCombinationByName,
     Angle,
     ArcData,
     Area,
@@ -21,6 +23,7 @@ from .types import (
     AutoTextKey,
     AutoTextKeyValue,
     AutoTextNamesOrErrors,
+    AxonometricProjectionParameters,
     BeamData,
     BeamWithDetails,
     BoundingBoxes3D,
@@ -46,7 +49,9 @@ from .types import (
     CompositeData,
     Conflict,
     ConnectedElementsOrError,
+    Coordinate2D,
     Coordinate3D,
+    CurtainWallData,
     CustomSchemeItem,
     CutPlane,
     DatabaseIdsOrErrors,
@@ -54,13 +59,18 @@ from .types import (
     DesignOptionAndSetPair,
     DesignOptionCombinationData,
     DesignOptionCombinationDetails,
+    DesignOptionCombinationIdArrayItem,
     DesignOptionCombinationIdsOrErrors,
+    DesignOptionCombinationRename,
     DesignOptionData,
     DesignOptionDetails,
     DesignOptionForElement,
     DesignOptionIdArrayItem,
     DesignOptionIdsOrErrors,
+    DesignOptionRename,
     DesignOptionSet,
+    DesignOptionSetIdArrayItem,
+    DesignOptionSetRename,
     DetailData,
     DetailsOfElement,
     DimensionDataOrError,
@@ -69,12 +79,25 @@ from .types import (
     DoorWithDetails,
     DrawingData,
     DrawingsWithNewLink,
+    ElectricalCircuitConnectionData,
+    ElectricalCircuitData,
+    ElectricalCircuitDetailsOrError,
+    ElectricalCircuitModificationData,
+    ElectricalDeviceData,
+    ElectricalDeviceDetailsOrError,
+    ElectricalDeviceModificationData,
+    ElectricalLoadClassification,
+    ElectricalPanelData,
+    ElectricalPanelDetailsOrError,
+    ElectricalPanelModificationData,
+    ElectricalWiringType,
     Element,
     ElementClassifications,
     ElementClassificationsOrErrors,
     ElementDesignOptionPair,
     ElementDetailsField,
     ElementFilter,
+    ElementGeometry3D,
     ElementGroupParameters,
     ElementIFCIdsOrErrors,
     ElementIFCPropertiesOrErrors,
@@ -85,6 +108,7 @@ from .types import (
     ElementIdsOrErrors,
     ElementPair,
     ElementPropertyValues,
+    ElementQuantityDetails,
     ElementRelationsOrError,
     ElementTrimsOrError,
     ElementType,
@@ -112,6 +136,21 @@ from .types import (
     FillAttributeOrError,
     FillData,
     GDLParameterList,
+    GraphicOverrideCombinationData,
+    GraphicOverrideCombinationDetails,
+    GraphicOverrideCombinationId,
+    GraphicOverrideCombinationIdArrayItem,
+    GraphicOverrideCombinationIdOrError,
+    GraphicOverrideRuleData,
+    GraphicOverrideRuleDetails,
+    GraphicOverrideRuleGroup,
+    GraphicOverrideRuleIdArrayItem,
+    GraphicOverrideRuleIdOrError,
+    GraphicOverrideRuleModificationData,
+    GraphicalOverrideRuleDetails,
+    GridElementData,
+    GridElementDetails,
+    GridParameterDetails,
     GroupIdArrayItem,
     GroupIdOrError,
     GuidId,
@@ -126,6 +165,8 @@ from .types import (
     HotspotData,
     IFCElementsToExport,
     IFCExportTranslator,
+    ImageColorDepth,
+    ImageFormat,
     InteriorElevationData,
     Issue,
     IssueCommentStatus,
@@ -158,6 +199,7 @@ from .types import (
     LayoutSetting,
     LayoutSettingsData,
     Length,
+    LevelDimensionData,
     Library,
     LibraryFileAdditions,
     LibraryLocation,
@@ -168,22 +210,32 @@ from .types import (
     LineData,
     LineElementData,
     LockableObjectSetStatus,
+    MEPAngleSet,
+    MEPBranchPreferenceTable,
     MEPConnectionData,
     MEPConnectionResultsOrErrors,
     MEPDistributionSystem,
     MEPDomain,
+    MEPElbowPreferenceTable,
     MEPElement,
     MEPElementData,
     MEPElementPortsOrErrors,
     MEPElementType,
+    MEPPhysicalSystemData,
+    MEPPhysicalSystemIdOrError,
     MEPPreferenceTable,
     MEPPreferenceTableDomain,
+    MEPReferenceSet,
     MEPRoutingElementData,
     MEPRoutingElementDetailsOrErrors,
     MEPRoutingElementModificationData,
     MEPSystemAttributeField,
     MEPSystemAttributeOrError,
     MEPSystemData,
+    MEPSystemGroupData,
+    MEPSystemGroupDetailsOrError,
+    MEPSystemGroupIdOrError,
+    MEPTransitionPreferenceTable,
     MarkerParametersOfElement,
     MeshData,
     MeshWithDetails,
@@ -204,6 +256,7 @@ from .types import (
     PenTableAttributeField,
     PenTableAttributeOrError,
     PenTableData,
+    PerspectiveProjectionParameters,
     PolylineData,
     ProfileAttributeField,
     ProfileAttributeOrError,
@@ -273,6 +326,7 @@ from .types import (
     ZoneCategoryAttributeOrError,
     ZoneCategoryData,
     ZoneData,
+    Zoom,
 )
 
 
@@ -390,6 +444,14 @@ class ConnectMEPElementsResult(TypedDict):
     connectionResults: MEPConnectionResultsOrErrors
 
 
+class ConnectToElectricalCircuitsParameters(TypedDict):
+    connectionsData: list[ElectricalCircuitConnectionData]
+
+
+class ConnectToElectricalCircuitsResult(TypedDict):
+    executionResults: ExecutionResults
+
+
 class CreateArcsParameters(TypedDict):
     arcsData: list[ArcData]
 
@@ -472,6 +534,14 @@ class CreateCompositesResult(TypedDict):
     attributeIds: AttributeIdsOrErrors
 
 
+class CreateCurtainWallsParameters(TypedDict):
+    curtainWallsData: list[CurtainWallData]
+
+
+class CreateCurtainWallsResult(TypedDict):
+    elements: ElementIdsOrErrors
+
+
 class CreateDesignOptionCombinationsParameters(TypedDict):
     designOptionCombinations: list[DesignOptionCombinationData]
 
@@ -520,6 +590,30 @@ class CreateDrawingsResult(TypedDict):
     elements: ElementIdsOrErrors
 
 
+class CreateElectricalCircuitsParameters(TypedDict):
+    electricalCircuitsData: list[ElectricalCircuitData]
+
+
+class CreateElectricalCircuitsResult(TypedDict):
+    elements: ElementIdsOrErrors
+
+
+class CreateElectricalDevicesParameters(TypedDict):
+    electricalDevicesData: list[ElectricalDeviceData]
+
+
+class CreateElectricalDevicesResult(TypedDict):
+    elements: ElementIdsOrErrors
+
+
+class CreateElectricalPanelsParameters(TypedDict):
+    electricalPanelsData: list[ElectricalPanelData]
+
+
+class CreateElectricalPanelsResult(TypedDict):
+    elements: ElementIdsOrErrors
+
+
 class CreateFavoritesFromElementsParameters(TypedDict):
     favoritesFromElements: list[FavoritesFromElement]
 
@@ -535,6 +629,53 @@ class CreateFillsParameters(TypedDict):
 
 class CreateFillsResult(TypedDict):
     attributeIds: AttributeIdsOrErrors
+
+
+class CreateGraphicOverrideCombinationsParameters(TypedDict):
+    graphicOverrideCombinations: list[GraphicOverrideCombinationData]
+
+
+class CreateGraphicOverrideCombinationsResult(TypedDict):
+    graphicOverrideCombinationIds: list[GraphicOverrideCombinationIdOrError]
+
+
+class CreateGraphicOverrideRulesParameters(TypedDict):
+    graphicOverrideRules: list[GraphicOverrideRuleData]
+
+
+class CreateGraphicOverrideRulesResult(TypedDict):
+    graphicOverrideRuleIds: list[GraphicOverrideRuleIdOrError]
+
+
+class CreateGraphicalOverrideCombinationParameters(TypedDict):
+    name: str
+    ruleNames: list[str]
+
+
+class CreateGraphicalOverrideCombinationResult(TypedDict):
+    combinationId: GuidId
+
+
+class CreateGraphicalOverrideRuleParameters(TypedDict):
+    name: str
+    ruleGroupName: NotRequired[str]
+    criterionXML: NotRequired[str]
+    surfaceRGB: NotRequired[ColorRGB]
+    linePenIndex: NotRequired[int]
+    overrideContours: NotRequired[bool]
+
+
+class CreateGraphicalOverrideRuleResult(TypedDict):
+    ruleId: GuidId
+
+
+class CreateGridElementsParameters(TypedDict):
+    gridElements: list[GridElementData]
+
+
+class CreateGridElementsResult(TypedDict):
+    elements: ElementIdsOrErrors
+    warnings: list[str]
 
 
 class CreateGroupsParameters(TypedDict):
@@ -669,6 +810,14 @@ class CreateLayoutSubsetResult(TypedDict):
     navigatorItems: list[NavigatorItemIdOrError]
 
 
+class CreateLevelDimensionsParameters(TypedDict):
+    levelDimensionsData: list[LevelDimensionData]
+
+
+class CreateLevelDimensionsResult(TypedDict):
+    elements: ElementIdsOrErrors
+
+
 class CreateLineElementsParameters(TypedDict):
     linesData: list[LineElementData]
 
@@ -694,12 +843,28 @@ class CreateMEPElementsResult(TypedDict):
     elements: ElementIdsOrErrors
 
 
+class CreateMEPPhysicalSystemsParameters(TypedDict):
+    physicalSystemsData: list[MEPPhysicalSystemData]
+
+
+class CreateMEPPhysicalSystemsResult(TypedDict):
+    physicalSystems: list[MEPPhysicalSystemIdOrError]
+
+
 class CreateMEPRoutingElementsParameters(TypedDict):
     routingElementsData: list[MEPRoutingElementData]
 
 
 class CreateMEPRoutingElementsResult(TypedDict):
     elements: ElementIdsOrErrors
+
+
+class CreateMEPSystemGroupsParameters(TypedDict):
+    systemGroupsData: list[MEPSystemGroupData]
+
+
+class CreateMEPSystemGroupsResult(TypedDict):
+    systemGroups: list[MEPSystemGroupIdOrError]
 
 
 class CreateMEPSystemsParameters(TypedDict):
@@ -948,6 +1113,38 @@ class DeleteClassificationSystemsResult(TypedDict):
     executionResults: ExecutionResults
 
 
+class DeleteDesignOptionCombinationsParameters(TypedDict):
+    designOptionCombinations: list[DesignOptionCombinationIdArrayItem]
+
+
+class DeleteDesignOptionCombinationsResult(TypedDict):
+    executionResults: ExecutionResults
+
+
+class DeleteDesignOptionSetsParameters(TypedDict):
+    designOptionSets: list[DesignOptionSetIdArrayItem]
+
+
+class DeleteDesignOptionSetsResult(TypedDict):
+    executionResults: ExecutionResults
+
+
+class DeleteDesignOptionsParameters(TypedDict):
+    designOptions: list[DesignOptionIdArrayItem]
+
+
+class DeleteDesignOptionsResult(TypedDict):
+    executionResults: ExecutionResults
+
+
+class DeleteElectricalCircuitsParameters(TypedDict):
+    electricalCircuits: Elements
+
+
+class DeleteElectricalCircuitsResult(TypedDict):
+    executionResults: ExecutionResults
+
+
 class DeleteElementsParameters(TypedDict):
     elements: Elements
 
@@ -969,6 +1166,32 @@ class DeleteFavoritesParameters(TypedDict):
 
 
 class DeleteFavoritesResult(TypedDict):
+    executionResults: ExecutionResults
+
+
+class DeleteGraphicOverrideCombinationsParameters(TypedDict):
+    graphicOverrideCombinationIds: list[GraphicOverrideCombinationIdArrayItem]
+
+
+class DeleteGraphicOverrideCombinationsResult(TypedDict):
+    executionResults: ExecutionResults
+
+
+class DeleteGraphicOverrideRuleGroupsParameters(TypedDict):
+    ruleGroupNames: list[str]
+    moveRulesToGroup: NotRequired[str]
+    deleteRules: NotRequired[bool]
+
+
+class DeleteGraphicOverrideRuleGroupsResult(TypedDict):
+    executionResults: ExecutionResults
+
+
+class DeleteGraphicOverrideRulesParameters(TypedDict):
+    graphicOverrideRuleIds: list[GraphicOverrideRuleIdArrayItem]
+
+
+class DeleteGraphicOverrideRulesResult(TypedDict):
     executionResults: ExecutionResults
 
 
@@ -1041,8 +1264,7 @@ class ExportFavoritesParameters(TypedDict):
     names: NotRequired[list[str]]
 
 
-class ExportFavoritesResult(TypedDict):
-    pass
+ExportFavoritesResult: TypeAlias = ExecutionResult
 
 
 class ExportIssuesToBCFParameters(TypedDict):
@@ -1084,6 +1306,28 @@ class Get3DBoundingBoxesParameters(TypedDict):
 
 class Get3DBoundingBoxesResult(TypedDict):
     boundingBoxes3D: BoundingBoxes3D
+
+
+class Get3DGeometryOfElementsParameters(TypedDict):
+    elements: Elements
+
+
+class Get3DGeometryOfElementsResult(TypedDict):
+    geometries3D: list[ElementGeometry3D | ErrorItem]
+
+
+class Get3DProjectionSettingsResult(TypedDict):
+    isPersp: bool
+    cameraElementId: NotRequired[ElementId]
+    activeCameraSetElementId: NotRequired[ElementId]
+    perspective: NotRequired[PerspectiveProjectionParameters]
+    axonometric: NotRequired[AxonometricProjectionParameters]
+
+
+class GetActiveGraphicalOverrideCombinationResult(TypedDict):
+    """The graphic override combination applied to the current window. Empty when the current window has no combination applied."""
+    combinationId: NotRequired[GraphicOverrideCombinationId]
+    name: NotRequired[str]
 
 
 class GetAddOnVersionResult(TypedDict):
@@ -1269,6 +1513,37 @@ class GetDocumentRevisionsResult(TypedDict):
     documentRevisions: list[DocumentRevision]
 
 
+class GetElectricalCircuitsParameters(TypedDict):
+    elements: NotRequired[Elements]
+    electricalPanels: NotRequired[Elements]
+
+
+class GetElectricalCircuitsResult(TypedDict):
+    electricalCircuits: list[ElectricalCircuitDetailsOrError]
+
+
+class GetElectricalDevicesParameters(TypedDict):
+    elements: NotRequired[Elements]
+
+
+class GetElectricalDevicesResult(TypedDict):
+    electricalDevices: list[ElectricalDeviceDetailsOrError]
+
+
+class GetElectricalPanelsParameters(TypedDict):
+    elements: NotRequired[Elements]
+
+
+class GetElectricalPanelsResult(TypedDict):
+    electricalPanels: list[ElectricalPanelDetailsOrError]
+
+
+class GetElectricalProjectSettingsResult(TypedDict):
+    voltage: float
+    wiringTypes: list[ElectricalWiringType]
+    loadClassifications: list[ElectricalLoadClassification]
+
+
 class GetElementPreviewImageParameters(TypedDict):
     elementId: ElementId
     imageType: NotRequired[Literal["2D", "Section", "3D"]]
@@ -1370,6 +1645,51 @@ class GetGDLParametersOfElementsResult(TypedDict):
 class GetGeoLocationResult(TypedDict):
     projectLocation: ProjectLocation
     surveyPoint: SurveyPoint
+
+
+class GetGraphicOverrideCombinationsResult(TypedDict):
+    graphicOverrideCombinations: list[GraphicOverrideCombinationDetails]
+
+
+class GetGraphicOverrideRuleGroupsResult(TypedDict):
+    graphicOverrideRuleGroups: list[GraphicOverrideRuleGroup]
+
+
+class GetGraphicOverrideRulesResult(TypedDict):
+    graphicOverrideRules: list[GraphicOverrideRuleDetails]
+
+
+class GetGraphicalOverrideRulesResult(TypedDict):
+    rules: list[GraphicalOverrideRuleDetails]
+
+
+class GetGridElementDefaultsParameters(TypedDict):
+    pass
+
+
+class GetGridElementDefaultsResult(TypedDict):
+    elementId: NotRequired[ElementId]
+    variation: str
+    floorIndex: int
+    layerIndex: int
+    pos: Coordinate2D
+    angle: float
+    length: float
+    xRatio: float
+    yRatio: float
+    useXYFixSize: bool
+    level: float
+    libInd: int
+    libraryPartName: str
+    parameters: list[GridParameterDetails]
+
+
+class GetGridElementsParameters(TypedDict):
+    includeParameters: NotRequired[bool]
+
+
+class GetGridElementsResult(TypedDict):
+    gridElements: list[GridElementDetails]
 
 
 class GetGroupsOfElementsParameters(TypedDict):
@@ -1503,10 +1823,16 @@ class GetMEPPortsResult(TypedDict):
 
 class GetMEPPreferenceTablesParameters(TypedDict):
     domain: MEPPreferenceTableDomain
+    includeFittingTables: NotRequired[bool]
 
 
 class GetMEPPreferenceTablesResult(TypedDict):
     tables: list[MEPPreferenceTable]
+    referenceSet: MEPReferenceSet
+    angleSet: NotRequired[MEPAngleSet]
+    elbowTables: NotRequired[list[MEPElbowPreferenceTable]]
+    branchTables: NotRequired[list[MEPBranchPreferenceTable]]
+    transitionTables: NotRequired[list[MEPTransitionPreferenceTable]]
 
 
 class GetMEPRoutingElementsParameters(TypedDict):
@@ -1515,6 +1841,10 @@ class GetMEPRoutingElementsParameters(TypedDict):
 
 class GetMEPRoutingElementsResult(TypedDict):
     routingElements: MEPRoutingElementDetailsOrErrors
+
+
+class GetMEPSystemGroupsResult(TypedDict):
+    systemGroups: list[MEPSystemGroupDetailsOrError]
 
 
 class GetMEPSystemsParameters(TypedDict):
@@ -1601,6 +1931,15 @@ class GetPropertyValuesOfElementsParameters(TypedDict):
 
 class GetPropertyValuesOfElementsResult(TypedDict):
     propertyValuesForElements: PropertyValuesOrErrorArray
+
+
+class GetQuantitiesOfElementsParameters(TypedDict):
+    elements: Elements
+    minOpeningSize: NotRequired[float]
+
+
+class GetQuantitiesOfElementsResult(TypedDict):
+    quantitiesOfElements: list[ElementQuantityDetails | ErrorItem]
 
 
 class GetRelationsOfElementsParameters(TypedDict):
@@ -1839,6 +2178,49 @@ class ModifyDoorsResult(TypedDict):
     executionResults: ExecutionResults
 
 
+class ModifyElectricalCircuitsParameters(TypedDict):
+    electricalCircuitsData: list[ElectricalCircuitModificationData]
+
+
+class ModifyElectricalCircuitsResult(TypedDict):
+    executionResults: ExecutionResults
+
+
+class ModifyElectricalDevicesParameters(TypedDict):
+    electricalDevicesData: list[ElectricalDeviceModificationData]
+
+
+class ModifyElectricalDevicesResult(TypedDict):
+    executionResults: ExecutionResults
+
+
+class ModifyElectricalPanelsParameters(TypedDict):
+    electricalPanelsData: list[ElectricalPanelModificationData]
+
+
+class ModifyElectricalPanelsResult(TypedDict):
+    executionResults: ExecutionResults
+
+
+class ModifyElectricalProjectSettingsParameters(TypedDict):
+    voltage: NotRequired[float]
+    wiringTypesToAdd: NotRequired[list[ElectricalWiringType]]
+    wiringTypesToRemove: NotRequired[list[str]]
+    loadClassificationsToAdd: NotRequired[list[ElectricalLoadClassification]]
+    loadClassificationsToRemove: NotRequired[list[str]]
+
+
+ModifyElectricalProjectSettingsResult: TypeAlias = ExecutionResult
+
+
+class ModifyGraphicOverrideRulesParameters(TypedDict):
+    graphicOverrideRules: list[GraphicOverrideRuleModificationData]
+
+
+class ModifyGraphicOverrideRulesResult(TypedDict):
+    executionResults: ExecutionResults
+
+
 class ModifyKeynoteFoldersParameters(TypedDict):
     foldersData: list[KeynoteFolderModificationData]
 
@@ -2053,6 +2435,30 @@ class RemoveSolidElementLinksResult(TypedDict):
     executionResults: ExecutionResults
 
 
+class RenameDesignOptionCombinationsParameters(TypedDict):
+    designOptionCombinations: list[DesignOptionCombinationRename]
+
+
+class RenameDesignOptionCombinationsResult(TypedDict):
+    executionResults: ExecutionResults
+
+
+class RenameDesignOptionSetsParameters(TypedDict):
+    designOptionSets: list[DesignOptionSetRename]
+
+
+class RenameDesignOptionSetsResult(TypedDict):
+    executionResults: ExecutionResults
+
+
+class RenameDesignOptionsParameters(TypedDict):
+    designOptions: list[DesignOptionRename]
+
+
+class RenameDesignOptionsResult(TypedDict):
+    executionResults: ExecutionResults
+
+
 class RenameFavoritesParameters(TypedDict):
     renames: list[FavoriteRename]
 
@@ -2065,6 +2471,7 @@ class RenameNavigatorItemParameters(TypedDict):
     navigatorItemId: NavigatorItemId
     newName: NotRequired[str]
     newId: NotRequired[str]
+    customName: NotRequired[bool]
 
 
 RenameNavigatorItemResult: TypeAlias = ExecutionResult
@@ -2109,6 +2516,20 @@ class SaveAsModuleFileParameters(TypedDict):
 SaveAsModuleFileResult: TypeAlias = ExecutionResult
 
 
+class SaveCurrentWindowAsImageParameters(TypedDict):
+    imageFilePath: str
+    format: NotRequired[ImageFormat]
+    colorDepth: NotRequired[ImageColorDepth]
+    dithered: NotRequired[bool]
+    entireDrawing: NotRequired[bool]
+
+
+class SaveCurrentWindowAsImageResult(TypedDict):
+    imageFilePath: str
+    zoom: NotRequired[Zoom]
+    rotation: NotRequired[float]
+
+
 class SaveProjectAsArchiveParameters(TypedDict):
     archiveFilePath: str
     includeLibraryParts: NotRequired[bool]
@@ -2118,6 +2539,10 @@ class SaveProjectAsArchiveParameters(TypedDict):
 
 
 SaveProjectAsArchiveResult: TypeAlias = ExecutionResult
+
+
+class SaveProjectParameters(TypedDict):
+    projectPath: NotRequired[str]
 
 
 SaveProjectResult: TypeAlias = ExecutionResult
@@ -2130,12 +2555,27 @@ class Set3DCutPlanesParameters(TypedDict):
 Set3DCutPlanesResult: TypeAlias = ExecutionResult
 
 
+class Set3DProjectionSettingsParameters(TypedDict):
+    perspective: PerspectiveProjectionParameters
+
+
+Set3DProjectionSettingsResult: TypeAlias = ExecutionResult
+
+
 class SetActiveDesignOptionsInCombinationsParameters(TypedDict):
     activeDesignOptionsInCombinations: list[ActiveDesignOptionsInCombination]
 
 
 class SetActiveDesignOptionsInCombinationsResult(TypedDict):
     executionResults: ExecutionResults
+
+
+SetActiveGraphicalOverrideCombinationParameters: TypeAlias = (
+    ActiveGraphicalOverrideCombinationById | ActiveGraphicalOverrideCombinationByName
+)
+
+
+SetActiveGraphicalOverrideCombinationResult: TypeAlias = ExecutionResult
 
 
 class SetClassificationsOfElementsParameters(TypedDict):

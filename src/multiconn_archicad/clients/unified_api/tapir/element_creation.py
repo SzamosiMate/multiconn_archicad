@@ -18,8 +18,12 @@ from multiconn_archicad.models.tapir.commands import (
     CreateCirclesResult,
     CreateColumnsParameters,
     CreateColumnsResult,
+    CreateCurtainWallsParameters,
+    CreateCurtainWallsResult,
     CreateDoorsParameters,
     CreateDoorsResult,
+    CreateGridElementsParameters,
+    CreateGridElementsResult,
     CreateHatchesParameters,
     CreateHatchesResult,
     CreateHotspotsParameters,
@@ -28,6 +32,8 @@ from multiconn_archicad.models.tapir.commands import (
     CreateLabelsResult,
     CreateLampsParameters,
     CreateLampsResult,
+    CreateLevelDimensionsParameters,
+    CreateLevelDimensionsResult,
     CreateLineElementsParameters,
     CreateLineElementsResult,
     CreateMeshesParameters,
@@ -66,13 +72,16 @@ from multiconn_archicad.models.tapir.types import (
     BeamData,
     CircleData,
     ColumnData,
+    CurtainWallData,
     DoorData,
     ElementIdArrayItem,
     ErrorItem,
+    GridElementData,
     HatchData,
     HotspotData,
     LabelData,
     LampData,
+    LevelDimensionData,
     LineElementData,
     MeshData,
     MorphData,
@@ -256,6 +265,33 @@ class ElementCreationCommands:
         validated_response = CreateColumnsResult.model_validate(response_dict)
         return validated_response.elements
 
+    def create_curtain_walls(self, curtain_walls_data: list[CurtainWallData]) -> list[ElementIdArrayItem | ErrorItem]:
+        """
+        Creates Curtain Wall elements along a reference polyline with a column (primary) and row
+        (secondary) pattern. The frame and panel classes come from the favorite or from the
+        Curtain Wall tool defaults; the pattern cells can assign them to the grid.
+
+        Args:
+            curtain_walls_data (list[CurtainWallData]): Array of data to create Curtain Walls.
+
+        Returns:
+            list[ElementIdArrayItem | ErrorItem]: A list of element identifiers or errors.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "curtainWallsData": curtain_walls_data,
+        }
+        validated_params = CreateCurtainWallsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "CreateCurtainWalls", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = CreateCurtainWallsResult.model_validate(response_dict)
+        return validated_response.elements
+
     def create_doors(self, doors_data: list[DoorData]) -> list[ElementIdArrayItem | ErrorItem]:
         """
         Creates Door elements in host walls based on the given parameters.
@@ -280,6 +316,32 @@ class ElementCreationCommands:
         )
         validated_response = CreateDoorsResult.model_validate(response_dict)
         return validated_response.elements
+
+    def create_grid_elements(self, grid_elements: list[GridElementData]) -> CreateGridElementsResult:
+        """
+        Creates grid elements, the elements the Grid Tool places, from begin and end
+        coordinates, with optional story, layer and GDL parameters. Needs Archicad 26 or later.
+
+        Args:
+            grid_elements (list[GridElementData])
+
+        Returns:
+            CreateGridElementsResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "gridElements": grid_elements,
+        }
+        validated_params = CreateGridElementsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "CreateGridElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = CreateGridElementsResult.model_validate(response_dict)
+        return validated_response
 
     def create_hatches(self, hatches_data: list[HatchData]) -> list[ElementIdArrayItem | ErrorItem]:
         """
@@ -379,6 +441,37 @@ class ElementCreationCommands:
             "CreateLamps", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = CreateLampsResult.model_validate(response_dict)
+        return validated_response.elements
+
+    def create_level_dimensions(
+        self, level_dimensions_data: list[LevelDimensionData]
+    ) -> list[ElementIdArrayItem | ErrorItem]:
+        """
+        Creates Level Dimension elements (the Level Dimension tool) based on the given
+        parameters. With a parentElementId the dimension is associative: it shows the height of
+        the parent element (Mesh, Slab, Roof ...) at its position and follows the element when
+        it changes.
+
+        Args:
+            level_dimensions_data (list[LevelDimensionData]): Array of data to create Level
+                Dimensions (the Level Dimension tool of the floor plan).
+
+        Returns:
+            list[ElementIdArrayItem | ErrorItem]: A list of element identifiers or errors.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "levelDimensionsData": level_dimensions_data,
+        }
+        validated_params = CreateLevelDimensionsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "CreateLevelDimensions", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = CreateLevelDimensionsResult.model_validate(response_dict)
         return validated_response.elements
 
     def create_line_elements(self, lines_data: list[LineElementData]) -> list[ElementIdArrayItem | ErrorItem]:

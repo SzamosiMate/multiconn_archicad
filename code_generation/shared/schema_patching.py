@@ -188,8 +188,8 @@ def extract_union_variant(defs: dict[str, Any], parent_name: str, path: list[str
 
 def apply_permanent_patches(master_defs: dict[str, Any]):
     """
-    Patches that are required permanently due to limitations in code generators
-    or conscious design choices in our Python client (e.g., forcing better names).
+    Established creation/modification item naming retained as the Permanent exception.
+    Other schema-specific names and shared definitions belong in Temporary.
     """
     print("Applying permanent schema patches...")
 
@@ -246,6 +246,20 @@ def apply_permanent_patches(master_defs: dict[str, Any]):
         "CreateSurfacesParameters": ("surfaceDataArray", "SurfaceData"),
         "CreateLayersParameters": ("layerDataArray", "LayerData"),
         "CreateBuildingMaterialsParameters": ("buildingMaterialDataArray", "BuildingMaterialData"),
+        "CreateCurtainWallsParameters": ("curtainWallsData", "CurtainWallData"),
+        "CreateElectricalCircuitsParameters": ("electricalCircuitsData", "ElectricalCircuitData"),
+        "CreateElectricalDevicesParameters": ("electricalDevicesData", "ElectricalDeviceData"),
+        "CreateElectricalPanelsParameters": ("electricalPanelsData", "ElectricalPanelData"),
+        "CreateLevelDimensionsParameters": ("levelDimensionsData", "LevelDimensionData"),
+        "CreateMEPPhysicalSystemsParameters": ("physicalSystemsData", "MEPPhysicalSystemData"),
+        "CreateMEPSystemGroupsParameters": ("systemGroupsData", "MEPSystemGroupData"),
+        "ConnectToElectricalCircuitsParameters": ("connectionsData", "ElectricalCircuitConnectionData"),
+        "CreateGraphicOverrideCombinationsParameters": (
+            "graphicOverrideCombinations",
+            "GraphicOverrideCombinationData",
+        ),
+        "CreateGraphicOverrideRulesParameters": ("graphicOverrideRules", "GraphicOverrideRuleData"),
+        "CreateGridElementsParameters": ("gridElements", "GridElementData"),
     }
 
     for parent_model, (field_name, new_model_name) in creation_data_types.items():
@@ -266,21 +280,18 @@ def apply_permanent_patches(master_defs: dict[str, Any]):
         "ModifyKeynoteFoldersParameters": ("foldersData", "KeynoteFolderModificationData"),
         "ModifyKeynoteItemsParameters": ("itemsData", "KeynoteItemModificationData"),
         "ModifyMEPRoutingElementsParameters": ("routingElementsData", "MEPRoutingElementModificationData"),
+        "ModifyElectricalCircuitsParameters": ("electricalCircuitsData", "ElectricalCircuitModificationData"),
+        "ModifyElectricalDevicesParameters": ("electricalDevicesData", "ElectricalDeviceModificationData"),
+        "ModifyElectricalPanelsParameters": ("electricalPanelsData", "ElectricalPanelModificationData"),
+        "ModifyGraphicOverrideRulesParameters": ("graphicOverrideRules", "GraphicOverrideRuleModificationData"),
     }
 
     for parent_model, (field_name, new_model_name) in element_modification_datatypes.items():
         extract_inline_schema(master_defs, parent_model, [field_name, "items"], new_model_name)
 
-    # ModifyMeshes wraps its payload one level deeper than the other Modify commands:
-    # the MeshWithDetails wrapper (extracted above) carries the actual data in 'meshData'.
-    extract_inline_schema(master_defs, "MeshWithDetails", ["meshData"], "MeshModificationData")
-
-    extract_inline_schema(master_defs, "RevisionCustomSchemeData", ["items"], "RevisionCustomSchemeEntry")
-
     # --- Preserve stable public names for deliberate conditional object schemas ---
     name_required_variants(master_defs, "Hole2D", [], ["Hole2DWithOutline", "Hole2DWithLegacyCoordinates"])
     name_required_variants(master_defs, "TextData", [], ["TextDataWithText", "TextDataWithRuns"])
-
 
 def apply_breaking_permanent_patches(master_defs: dict[str, Any]):
     """Intentional client shape changes retained permanently, even if upstream differs.
@@ -297,32 +308,10 @@ def apply_breaking_source_review_patches(master_defs: dict[str, Any]):
 
 
 def apply_temporary_patches(master_defs: dict[str, Any]):
-    """Non-breaking fixes still absent from released Tapir documentation.
+    """Named extractions and shared contracts pending released upstream adoption."""
+    print("Applying temporary schema patches (pending upstream named definitions and sharing)...")
 
-    Tapir 1.7.1 supplies the other named definitions and references previously
-    patched here. Keep modification holes separate from response identifiers.
-    """
-    print("Applying temporary schema patches (pending upstream fixes)...")
-
-    # Retire when upstream names the modification item and reuses its equivalent type enum.
-    extract_inline_schema(master_defs, "BeamWithDetails", ["holes", "items"], "BeamHoleModification")
-    replace_inline_schema_with_ref(master_defs, "BeamHoleModification", ["type"], "BeamHoleType")
-
-    # Tapir 1.7.1: reuse equivalent slab and wall definitions without changing their contracts.
-    replace_inline_schema_with_ref(master_defs, "SlabData", ["structureType"], "SlabStructureType", preserve_description=True)  # fmt: skip
-    for parent in ("WallData", "WallDetails", "WallWithDetails"):
-        replace_inline_schema_with_ref(master_defs, parent, ["linkToSettings"], "LinkToSettings", preserve_description=True)  # fmt: skip
-
-    # Teamwork object-set/cache conflicts identify the same users as element reservations.
-    extract_inline_schema(master_defs, "ReserveElementsResult", ["conflicts", "items", "user"], "User")
-    for parent in (
-        "GetLockableObjectSetStatusResult",
-        "ReserveLockableObjectSetResult",
-        "ReserveHotlinkCacheManagementResult",
-    ):
-        replace_inline_schema_with_ref(master_defs, parent, ["conflicts", "items"], "User")
-
-    # collision fixes;
+    # Preserve public names for hotlink, Teamwork and marker inline schemas.
     extract_inline_schema(master_defs, "ChangeHotlinkNodesParameters", ["hotlinkNodes", "items"], "HotlinkNodeChange")
     extract_inline_schema(master_defs, "UpdateHotlinksParameters", ["hotlinkNodes", "items"], "HotlinkNodeReference")
     extract_inline_enum(master_defs, "GetLockableObjectSetStatusResult", ["status"], "LockableObjectSetStatus")
@@ -333,3 +322,108 @@ def apply_temporary_patches(master_defs: dict[str, Any]):
     extract_inline_schema(master_defs, "ElementWithMarkerParameters", ["markerParameters", "items"], "MarkerParameterUpdate")  # fmt: skip
     extract_union_variant(master_defs, "MarkerParameterUpdate", [], 0, "MarkerParameterUpdateByName")
     extract_union_variant(master_defs, "MarkerParameterUpdate", [], 1, "MarkerParameterUpdateByIndex")
+
+    # Name response and rename items pending matching upstream extractions.
+    for parent, field, name in (
+        ("GetGraphicOverrideCombinationsResult", "graphicOverrideCombinations", "GraphicOverrideCombinationDetails"),
+        ("GetGraphicOverrideRulesResult", "graphicOverrideRules", "GraphicOverrideRuleDetails"),
+        ("GetGridElementsResult", "gridElements", "GridElementDetails"),
+        ("RenameDesignOptionCombinationsParameters", "designOptionCombinations", "DesignOptionCombinationRename"),
+        ("RenameDesignOptionSetsParameters", "designOptionSets", "DesignOptionSetRename"),
+        ("RenameDesignOptionsParameters", "designOptions", "DesignOptionRename"),
+        ("GetGraphicalOverrideRulesResult", "rules", "GraphicalOverrideRuleDetails"),
+    ):
+        extract_inline_schema(master_defs, parent, [field, "items"], name)
+
+    # Name geometry, quantity and MEP result branches without generic or numbered models.
+    extract_inline_schema(master_defs, "Body3D", ["polygons", "items"], "Body3DPolygon")
+    extract_inline_schema(master_defs, "Body3DPolygon", ["holes", "items"], "Body3DPolygonHole")
+    extract_union_variant(master_defs, "Get3DGeometryOfElementsResult", ["geometries3D", "items"], 0, "ElementGeometry3D")  # fmt: skip
+    extract_union_variant(master_defs, "GetQuantitiesOfElementsResult", ["quantitiesOfElements", "items"], 0, "ElementQuantityDetails")  # fmt: skip
+    extract_inline_schema(master_defs, "ElementQuantityDetails", ["composites", "items"], "ElementComponentQuantities")
+    extract_inline_schema(master_defs, 'Get3DProjectionSettingsResult', ['axonometric'], 'AxonometricProjectionParameters')  # fmt: skip
+    for kind in ("Branch", "Elbow", "Transition"):
+        extract_inline_schema(master_defs, f'MEP{kind}PreferenceTable', ['rows', 'items'], f'MEP{kind}PreferenceTableRow')  # fmt: skip
+    extract_union_variant(master_defs, "MEPPhysicalSystemIdOrError", [], 0, "MEPPhysicalSystemIdArrayItem")
+    extract_union_variant(master_defs, "MEPSystemGroupIdOrError", [], 0, "MEPSystemGroupIdArrayItem")
+
+    # Grid read/default parameters share a contract; writes deliberately have fewer fields.
+    extract_inline_schema(master_defs, "GridElementData", ["parameters", "items"], "GridParameter")
+    extract_inline_schema(master_defs, "GridElementDetails", ["parameters", "items"], "GridParameterDetails")
+    extract_inline_enum(master_defs, "GridElementData", ["lengthMode"], "GridElementLengthMode")
+    extract_inline_enum(master_defs, "SaveCurrentWindowAsImageParameters", ["format"], "ImageFormat")
+    extract_inline_enum(master_defs, "SaveCurrentWindowAsImageParameters", ["colorDepth"], "ImageColorDepth")
+    extract_inline_schema(master_defs, "CurtainWallPattern", ["sizes", "items"], "CurtainWallPatternSize")
+    extract_inline_schema(master_defs, "CurtainWallPattern", ["flexibleIndices", "items"], "CurtainWallFlexibleIndex")
+
+    # Conditional selection remains a union, with separate ID/name public variants.
+    name_required_variants(master_defs, "SetActiveGraphicalOverrideCombinationParameters", [], ["ActiveGraphicalOverrideCombinationById", "ActiveGraphicalOverrideCombinationByName"])  # fmt: skip
+
+    # Criterion enums describe filtering values, which can differ from element edit enums.
+    for field, name in (
+        ("structureType", "GraphicOverrideStructureType"),
+        ("wallComplexity", "GraphicOverrideWallComplexity"),
+        ("wallGeometryType", "GraphicOverrideWallGeometryType"),
+        ("columnCoatingType", "GraphicOverrideColumnCoatingType"),
+        ("columnCrossSectionType", "GraphicOverrideColumnCrossSectionType"),
+        ("slabEdgeAngle", "GraphicOverrideSlabEdgeAngle"),
+        ("roofCutBodyType", "GraphicOverrideRoofCutBodyType"),
+        ("roofEaveOverhangType", "GraphicOverrideRoofEaveOverhangType"),
+        ("roofEdgeAngle", "GraphicOverrideRoofEdgeAngle"),
+        ("roofGeometryType", "GraphicOverrideRoofGeometryType"),
+        ("shellCutBodyType", "GraphicOverrideShellCutBodyType"),
+        ("shellGeometryType", "GraphicOverrideShellGeometryType"),
+        ("penReplacement", "GraphicOverridePenReplacement"),
+        ("structuralFunction", "GraphicOverrideStructuralFunction"),
+        ("position", "GraphicOverridePosition"),
+    ):
+        extract_inline_enum(master_defs, "GraphicOverrideCriterion", [field], name)
+    for field, name in (
+        ("profileParameter", "GraphicOverrideProfileParameter"),
+        ("customPropertyBool", "GraphicOverrideCustomPropertyBool"),
+        ("customPropertyString", "GraphicOverrideCustomPropertyString"),
+        ("customPropertyNumber", "GraphicOverrideCustomPropertyNumber"),
+        ("customPropertyInteger", "GraphicOverrideCustomPropertyInteger"),
+    ):
+        extract_inline_schema(master_defs, "GraphicOverrideCriterion", [field], name)
+
+    # Extract shared definitions before replacing their read/write consumers below.
+    extract_inline_schema(master_defs, "GetElectricalProjectSettingsResult", ["wiringTypes", "items"], "ElectricalWiringType")  # fmt: skip
+    extract_inline_schema(master_defs, "GetElectricalProjectSettingsResult", ["loadClassifications", "items"], "ElectricalLoadClassification")  # fmt: skip
+    extract_inline_enum(master_defs, "TextStyleDetails", ["textFrameShape"], "TextFrameShape")
+
+    # Equivalent electrical settings occur in both read and add operations.
+    replace_inline_schema_with_ref(master_defs, "ModifyElectricalProjectSettingsParameters", ["wiringTypesToAdd", "items"], "ElectricalWiringType")  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, "ModifyElectricalProjectSettingsParameters", ["loadClassificationsToAdd", "items"], "ElectricalLoadClassification")  # fmt: skip
+
+    # Preserve shared read/default grid parameter shape without requiring response-only fields on writes.
+    replace_inline_schema_with_ref(master_defs, "GetGridElementDefaultsResult", ["parameters", "items"], "GridParameterDetails")  # fmt: skip
+
+    # Graphical override IDs and colors match the existing shared wire definitions.
+    replace_inline_schema_with_ref(master_defs, "CreateGraphicalOverrideRuleParameters", ["surfaceRGB"], "ColorRGB", preserve_description=True)  # fmt: skip
+    for parent in (
+        "GetActiveGraphicalOverrideCombinationResult",
+        "ActiveGraphicalOverrideCombinationById",
+        "ActiveGraphicalOverrideCombinationByName",
+    ):
+        replace_inline_schema_with_ref(master_defs, parent, ["combinationId"], "GraphicOverrideCombinationId")
+
+    # Positive/negative criterion operators must expose the same enum class.
+    for field, name in (
+        ("wallComplexityNot", "GraphicOverrideWallComplexity"),
+        ("wallGeometryTypeNot", "GraphicOverrideWallGeometryType"),
+        ("columnCoatingTypeNot", "GraphicOverrideColumnCoatingType"),
+        ("slabEdgeAngleNot", "GraphicOverrideSlabEdgeAngle"),
+        ("roofCutBodyTypeNot", "GraphicOverrideRoofCutBodyType"),
+        ("roofEdgeAngleNot", "GraphicOverrideRoofEdgeAngle"),
+        ("roofGeometryTypeNot", "GraphicOverrideRoofGeometryType"),
+        ("penReplacementNot", "GraphicOverridePenReplacement"),
+        ("structuralFunctionNot", "GraphicOverrideStructuralFunction"),
+        ("positionNot", "GraphicOverridePosition"),
+        ("wallReferenceLinePosition", "WallReferenceLineLocation"),
+        ("wallReferenceLinePositionNot", "WallReferenceLineLocation"),
+        ("slabReferencePlaneLocation", "SlabReferencePlaneLocation"),
+        ("slabReferencePlaneLocationNot", "SlabReferencePlaneLocation"),
+    ):
+        replace_inline_schema_with_ref(master_defs, "GraphicOverrideCriterion", [field], name, preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, "TextStyleSettableDetails", ["textFrameShape"], "TextFrameShape", preserve_description=True)  # fmt: skip

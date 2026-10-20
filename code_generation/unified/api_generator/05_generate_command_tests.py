@@ -12,7 +12,7 @@ from types import UnionType
 from multiconn_archicad.models.tapir import commands as tapir_commands, types as tapir_types
 from multiconn_archicad.models.official import commands as official_commands, types as official_types
 
-from code_generation.shared.utils import camel_to_snake
+from code_generation.shared.utils import bound_graphic_override_criteria, camel_to_snake
 from code_generation.tapir.paths import tapir_paths
 from code_generation.official.paths import official_paths
 
@@ -31,6 +31,8 @@ def is_union(obj: Any) -> bool:
 
 def patch_recursive_schemas(definitions: dict, model_name_to_test: str, source: str) -> dict:
     patched_defs = copy.deepcopy(definitions)
+    if source == "tapir":
+        bound_graphic_override_criteria(patched_defs)
 
     # Tapir recursive types
     if "Hotlink" in patched_defs and "properties" in patched_defs["Hotlink"]:
@@ -203,13 +205,17 @@ class TestGenerator:
 
         if has_result:
             if alias_prop:
-                body_lines.append(f"assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('{alias_prop}'))")
+                body_lines.append(
+                    f"assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('{alias_prop}'))"
+                )
             else:
                 result_obj = self._get_model_object(result_model_name, source)
                 if hasattr(result_obj, "model_fields") and not result_obj.model_fields:
                     body_lines.append("assert result is None")
                 elif is_union(result_obj):
-                    body_lines.append(f"expected = TypeAdapter(commands.{result_model_name}).validate_python(mock_response)")
+                    body_lines.append(
+                        f"expected = TypeAdapter(commands.{result_model_name}).validate_python(mock_response)"
+                    )
                     body_lines.append("assert result == expected")
                 else:
                     body_lines.append(f"expected = commands.{result_model_name}.model_validate(mock_response)")

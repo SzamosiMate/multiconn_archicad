@@ -13,6 +13,7 @@ def main():
 
     print("Step 1: Reordering forward-referencing TypeAliases...")
     content = fix_forward_reference_aliases(content)
+    content = fix_graphic_override_forward_refs(content)
 
     print("Step 2: Assembling and formatting the final file...")
     content = assemble_final_file(content)
@@ -52,6 +53,20 @@ def fix_forward_reference_aliases(content: str) -> str:
     return content
 
 
+def fix_graphic_override_forward_refs(content: str) -> str:
+    """Defer the two recursive keyword fields, then resolve their runtime types."""
+    reference = "NotRequired[list[GraphicOverrideCriterion]]"
+    if reference not in content:
+        return content
+    content = content.replace(reference, 'NotRequired[list["GraphicOverrideCriterion"]]')
+    return re.sub(
+        r"(?ms)^(GraphicOverrideCriterion = TypedDict\(.*?^\))",
+        r"\1\nGraphicOverrideCriterion.__annotations__ = get_type_hints(GraphicOverrideCriterion, include_extras=True)",
+        content,
+        count=1,
+    )
+
+
 def assemble_final_file(content: str) -> str:
     """Adds standard headers and ensures consistent double-blank line separation between definitions."""
     body_lines = [
@@ -63,7 +78,7 @@ def assemble_final_file(content: str) -> str:
     header = [
         "from __future__ import annotations",
         "",
-        "from typing import Any, Literal, TypeAlias, TypedDict",
+        "from typing import Any, Literal, TypeAlias, TypedDict, get_type_hints",
         "",
         "from typing_extensions import NotRequired",
         "",

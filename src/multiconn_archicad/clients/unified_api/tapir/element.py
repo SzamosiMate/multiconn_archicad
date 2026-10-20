@@ -14,6 +14,8 @@ from multiconn_archicad.models.tapir.commands import (
     FilterElementsResult,
     Get3DBoundingBoxesParameters,
     Get3DBoundingBoxesResult,
+    Get3DGeometryOfElementsParameters,
+    Get3DGeometryOfElementsResult,
     GetAllElementsParameters,
     GetAllElementsResult,
     GetCollisionsParameters,
@@ -30,8 +32,14 @@ from multiconn_archicad.models.tapir.commands import (
     GetElementsByTypeResult,
     GetGDLParametersOfElementsParameters,
     GetGDLParametersOfElementsResult,
+    GetGridElementDefaultsParameters,
+    GetGridElementDefaultsResult,
+    GetGridElementsParameters,
+    GetGridElementsResult,
     GetMarkerParametersOfElementsParameters,
     GetMarkerParametersOfElementsResult,
+    GetQuantitiesOfElementsParameters,
+    GetQuantitiesOfElementsResult,
     GetRelationsOfElementsParameters,
     GetRelationsOfElementsResult,
     GetRoomImageParameters,
@@ -79,8 +87,10 @@ from multiconn_archicad.models.tapir.types import (
     Element,
     ElementDetailsField,
     ElementFilter,
+    ElementGeometry3D,
     ElementId,
     ElementIdArrayItem,
+    ElementQuantityDetails,
     ElementType,
     ElementWithMarkerParameters,
     ElementsWithDetail,
@@ -92,6 +102,7 @@ from multiconn_archicad.models.tapir.types import (
     FailedExecutionResult,
     Format,
     GDLParameterList,
+    GridElementDetails,
     ImageType,
     MarkerParametersOfElement,
     OpeningRelationsOfElement,
@@ -230,6 +241,37 @@ class ElementCommands:
         )
         validated_response = Get3DBoundingBoxesResult.model_validate(response_dict)
         return validated_response.boundingBoxes3D
+
+    def get_3d_geometry_of_elements(self, elements: list[ElementIdArrayItem]) -> list[ElementGeometry3D | ErrorItem]:
+        """
+        Gets the 3D geometry of elements as the solid bodies of their 3D model: a vertex list in
+        world coordinates and the planar faces (with their holes) referencing it, each face with
+        its surface attribute when that is a project attribute. The bodies of the subelements of
+        a Stair, Railing or Curtain Wall are included. The output is aligned with the input
+        array of elements. The 3D model of the elements is generated as needed, so many elements
+        can take a while.
+
+        Args:
+            elements (list[ElementIdArrayItem]): A list of elements.
+
+        Returns:
+            list[ElementGeometry3D | ErrorItem]: The 3D geometry of each element, aligned with
+                the input: the solid bodies of its 3D model, or an error.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elements": elements,
+        }
+        validated_params = Get3DGeometryOfElementsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "Get3DGeometryOfElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = Get3DGeometryOfElementsResult.model_validate(response_dict)
+        return validated_response.geometries3D
 
     def get_all_elements(
         self, filters: None | list[ElementFilter] = None, databases: None | list[DatabaseIdArrayItem] = None
@@ -490,6 +532,55 @@ class ElementCommands:
         validated_response = GetGDLParametersOfElementsResult.model_validate(response_dict)
         return validated_response.gdlParametersOfElements
 
+    def get_grid_element_defaults(self) -> GetGridElementDefaultsResult:
+        """
+        Returns the Grid Tool defaults: library part, size and GDL parameters of a new grid
+        element. Needs Archicad 26 or later.
+
+        Returns:
+            GetGridElementDefaultsResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {}
+        validated_params = GetGridElementDefaultsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetGridElementDefaults", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetGridElementDefaultsResult.model_validate(response_dict)
+        return validated_response
+
+    def get_grid_elements(self, include_parameters: None | bool = None) -> list[GridElementDetails]:
+        """
+        Lists the grid elements (placed with the Grid Tool or created by CreateGridElements)
+        with their position, angle, size, library part and optionally GDL parameters. Needs
+        Archicad 26 or later.
+
+        Args:
+            include_parameters (None | bool): Also return the GDL parameters of each grid
+                element. Default false.
+
+        Returns:
+            list[GridElementDetails]
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "includeParameters": include_parameters,
+        }
+        validated_params = GetGridElementsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetGridElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetGridElementsResult.model_validate(response_dict)
+        return validated_response.gridElements
+
     def get_marker_parameters_of_elements(
         self, elements: list[ElementIdArrayItem]
     ) -> list[ErrorItem | MarkerParametersOfElement]:
@@ -521,6 +612,45 @@ class ElementCommands:
         )
         validated_response = GetMarkerParametersOfElementsResult.model_validate(response_dict)
         return validated_response.markerParametersOfElements
+
+    def get_quantities_of_elements(
+        self, elements: list[ElementIdArrayItem], min_opening_size: None | float = None
+    ) -> list[ElementQuantityDetails | ErrorItem]:
+        """
+        Gets the quantities of the given elements calculated by Archicad (volumes, surfaces,
+        lengths etc.), together with the volume and projected area per building material (one
+        item per skin of composite and complex profile elements, one item for basic elements).
+        Supported types: Wall, Column, Beam, Slab, Roof, Shell, Morph, Zone, ColumnSegment,
+        BeamSegment. Use the optional minOpeningSize parameter to control the conditional
+        values.
+
+        Args:
+            elements (list[ElementIdArrayItem]): A list of elements.
+            min_opening_size (None | float): Optional minimum opening size in square meters.
+                Openings smaller than this are not subtracted when the conditional values (for
+                example volumeConditional of a Wall) are calculated. Archicad only uses it for
+                walls. Default value is 0, so every opening is subtracted.
+
+        Returns:
+            list[ElementQuantityDetails | ErrorItem]: The quantities of the elements, in the
+                order of the given elements. Lengths are in meters, areas in square meters and
+                volumes in cubic meters.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elements": elements,
+            "minOpeningSize": min_opening_size,
+        }
+        validated_params = GetQuantitiesOfElementsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetQuantitiesOfElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetQuantitiesOfElementsResult.model_validate(response_dict)
+        return validated_response.quantitiesOfElements
 
     def get_relations_of_elements(
         self, elements: list[ElementIdArrayItem], other_element_type: ElementType | None = None
@@ -791,7 +921,9 @@ class ElementCommands:
         self, elements_with_move_vectors: list[ElementsWithMoveVector]
     ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
         """
-        Moves elements with a given vector.
+        Moves elements with a given vector. An element that cannot be edited (its layer is
+        hidden or locked, it is locked, or it is not available in teamwork) gets a failed
+        execution result naming the reason instead of being skipped silently.
 
         Args:
             elements_with_move_vectors (list[ElementsWithMoveVector]): The elements with move
@@ -851,7 +983,9 @@ class ElementCommands:
         self, elements_with_rotations: list[ElementsWithRotation]
     ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
         """
-        Rotates elements around a reference point.
+        Rotates elements around a reference point. An element that cannot be edited (its layer
+        is hidden or locked, it is locked, or it is not available in teamwork) gets a failed
+        execution result naming the reason instead of being skipped silently.
 
         Args:
             elements_with_rotations (list[ElementsWithRotation]): The elements with rotation

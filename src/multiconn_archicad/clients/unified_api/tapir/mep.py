@@ -8,10 +8,31 @@ from pydantic import TypeAdapter
 from multiconn_archicad.models.tapir.commands import (
     ConnectMEPElementsParameters,
     ConnectMEPElementsResult,
+    ConnectToElectricalCircuitsParameters,
+    ConnectToElectricalCircuitsResult,
+    CreateElectricalCircuitsParameters,
+    CreateElectricalCircuitsResult,
+    CreateElectricalDevicesParameters,
+    CreateElectricalDevicesResult,
+    CreateElectricalPanelsParameters,
+    CreateElectricalPanelsResult,
     CreateMEPElementsParameters,
     CreateMEPElementsResult,
+    CreateMEPPhysicalSystemsParameters,
+    CreateMEPPhysicalSystemsResult,
     CreateMEPRoutingElementsParameters,
     CreateMEPRoutingElementsResult,
+    CreateMEPSystemGroupsParameters,
+    CreateMEPSystemGroupsResult,
+    DeleteElectricalCircuitsParameters,
+    DeleteElectricalCircuitsResult,
+    GetElectricalCircuitsParameters,
+    GetElectricalCircuitsResult,
+    GetElectricalDevicesParameters,
+    GetElectricalDevicesResult,
+    GetElectricalPanelsParameters,
+    GetElectricalPanelsResult,
+    GetElectricalProjectSettingsResult,
     GetMEPDistributionSystemsResult,
     GetMEPElementsParameters,
     GetMEPElementsResult,
@@ -21,10 +42,31 @@ from multiconn_archicad.models.tapir.commands import (
     GetMEPPreferenceTablesResult,
     GetMEPRoutingElementsParameters,
     GetMEPRoutingElementsResult,
+    GetMEPSystemGroupsResult,
+    ModifyElectricalCircuitsParameters,
+    ModifyElectricalCircuitsResult,
+    ModifyElectricalDevicesParameters,
+    ModifyElectricalDevicesResult,
+    ModifyElectricalPanelsParameters,
+    ModifyElectricalPanelsResult,
+    ModifyElectricalProjectSettingsParameters,
+    ModifyElectricalProjectSettingsResult,
     ModifyMEPRoutingElementsParameters,
     ModifyMEPRoutingElementsResult,
 )
 from multiconn_archicad.models.tapir.types import (
+    ElectricalCircuitConnectionData,
+    ElectricalCircuitData,
+    ElectricalCircuitDetails,
+    ElectricalCircuitModificationData,
+    ElectricalDeviceData,
+    ElectricalDeviceDetails,
+    ElectricalDeviceModificationData,
+    ElectricalLoadClassification,
+    ElectricalPanelData,
+    ElectricalPanelDetails,
+    ElectricalPanelModificationData,
+    ElectricalWiringType,
     ElementIdArrayItem,
     ErrorItem,
     FailedExecutionResult,
@@ -36,11 +78,15 @@ from multiconn_archicad.models.tapir.types import (
     MEPElementData,
     MEPElementPorts,
     MEPElementType,
-    MEPPreferenceTable,
+    MEPPhysicalSystemData,
+    MEPPhysicalSystemIdArrayItem,
     MEPPreferenceTableDomain,
     MEPRoutingElementData,
     MEPRoutingElementDetails,
     MEPRoutingElementModificationData,
+    MEPSystemGroupData,
+    MEPSystemGroupDetails,
+    MEPSystemGroupIdArrayItem,
     SuccessfulExecutionResult,
 )
 
@@ -78,6 +124,128 @@ class MepCommands:
         validated_response = ConnectMEPElementsResult.model_validate(response_dict)
         return validated_response.connectionResults
 
+    def connect_to_electrical_circuits(
+        self, connections_data: list[ElectricalCircuitConnectionData]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Connects electrical devices, or panels as sub-panels, to electrical circuits. Available
+        from Archicad 30.
+
+        Args:
+            connections_data (list[ElectricalCircuitConnectionData]): Array of electrical
+                devices or panels and the circuits to connect them to. A panel connected to a
+                circuit becomes a sub-panel of the panel of that circuit.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "connectionsData": connections_data,
+        }
+        validated_params = ConnectToElectricalCircuitsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "ConnectToElectricalCircuits", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = ConnectToElectricalCircuitsResult.model_validate(response_dict)
+        return validated_response.executionResults
+
+    def create_electrical_circuits(
+        self, electrical_circuits_data: list[ElectricalCircuitData]
+    ) -> list[ElementIdArrayItem | ErrorItem]:
+        """
+        Adds new circuits to electrical panels, optionally with the given description, voltage,
+        wiring type and used phases. Available from Archicad 30.
+
+        Args:
+            electrical_circuits_data (list[ElectricalCircuitData]): Array of data to create
+                electrical circuits. Each item adds one circuit to the given panel.
+
+        Returns:
+            list[ElementIdArrayItem | ErrorItem]: A list of element identifiers or errors.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "electricalCircuitsData": electrical_circuits_data,
+        }
+        validated_params = CreateElectricalCircuitsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "CreateElectricalCircuits", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = CreateElectricalCircuitsResult.model_validate(response_dict)
+        return validated_response.elements
+
+    def create_electrical_devices(
+        self, electrical_devices_data: list[ElectricalDeviceData]
+    ) -> list[ElementIdArrayItem | ErrorItem]:
+        """
+        Places electrical devices with the default settings of the Electrical Device tool,
+        optionally with the given library part, size, rotation, mirroring, apparent power and
+        load classification, and connects them to a circuit. Available from Archicad 30.
+
+        Args:
+            electrical_devices_data (list[ElectricalDeviceData]): Array of data to create
+                electrical devices. The fields that are not given are taken from the default
+                settings of the Electrical Device tool.
+
+        Returns:
+            list[ElementIdArrayItem | ErrorItem]: A list of element identifiers or errors.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "electricalDevicesData": electrical_devices_data,
+        }
+        validated_params = CreateElectricalDevicesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "CreateElectricalDevices", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = CreateElectricalDevicesResult.model_validate(response_dict)
+        return validated_response.elements
+
+    def create_electrical_panels(
+        self, electrical_panels_data: list[ElectricalPanelData]
+    ) -> list[ElementIdArrayItem | ErrorItem]:
+        """
+        Places electrical panels with the default settings of the Electrical Panel tool,
+        optionally with the given library part, size, rotation, mirroring, panel name and
+        circuit naming. Available from Archicad 30.
+
+        Args:
+            electrical_panels_data (list[ElectricalPanelData]): Array of data to create
+                electrical panels. The fields that are not given are taken from the default
+                settings of the Electrical Panel tool.
+
+        Returns:
+            list[ElementIdArrayItem | ErrorItem]: A list of element identifiers or errors.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "electricalPanelsData": electrical_panels_data,
+        }
+        validated_params = CreateElectricalPanelsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "CreateElectricalPanels", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = CreateElectricalPanelsResult.model_validate(response_dict)
+        return validated_response.elements
+
     def create_mep_elements(self, elements_data: list[MEPElementData]) -> list[ElementIdArrayItem | ErrorItem]:
         """
         Creates MEP elements (Terminal, Accessory, Equipment or Fitting) at the given positions.
@@ -104,13 +272,43 @@ class MepCommands:
         validated_response = CreateMEPElementsResult.model_validate(response_dict)
         return validated_response.elements
 
+    def create_mep_physical_systems(
+        self, physical_systems_data: list[MEPPhysicalSystemData]
+    ) -> list[ErrorItem | MEPPhysicalSystemIdArrayItem]:
+        """
+        Creates physical systems in MEP system groups, optionally with a root element and an MEP
+        system as their category. Available from Archicad 29.
+
+        Args:
+            physical_systems_data (list[MEPPhysicalSystemData]): Array of data to create
+                physical systems.
+
+        Returns:
+            list[ErrorItem | MEPPhysicalSystemIdArrayItem]
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "physicalSystemsData": physical_systems_data,
+        }
+        validated_params = CreateMEPPhysicalSystemsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "CreateMEPPhysicalSystems", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = CreateMEPPhysicalSystemsResult.model_validate(response_dict)
+        return validated_response.physicalSystems
+
     def create_mep_routing_elements(
         self, routing_elements_data: list[MEPRoutingElementData]
     ) -> list[ElementIdArrayItem | ErrorItem]:
         """
         Creates MEP routing elements (duct, pipe or cable carrier routes) along the given
         polylines with optional cross section data (shape, size, preference table and reference
-        id) and MEP system. Available from Archicad 28.
+        id), MEP system and layer (also set on the segments, elbows and transitions). Available
+        from Archicad 28.
 
         Args:
             routing_elements_data (list[MEPRoutingElementData]): Array of data to create MEP
@@ -133,6 +331,180 @@ class MepCommands:
         )
         validated_response = CreateMEPRoutingElementsResult.model_validate(response_dict)
         return validated_response.elements
+
+    def create_mep_system_groups(
+        self, system_groups_data: list[MEPSystemGroupData]
+    ) -> list[ErrorItem | MEPSystemGroupIdArrayItem]:
+        """
+        Creates MEP system groups. Available from Archicad 29.
+
+        Args:
+            system_groups_data (list[MEPSystemGroupData]): Array of data to create system
+                groups.
+
+        Returns:
+            list[ErrorItem | MEPSystemGroupIdArrayItem]
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "systemGroupsData": system_groups_data,
+        }
+        validated_params = CreateMEPSystemGroupsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "CreateMEPSystemGroups", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = CreateMEPSystemGroupsResult.model_validate(response_dict)
+        return validated_response.systemGroups
+
+    def delete_electrical_circuits(
+        self, electrical_circuits: list[ElementIdArrayItem]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Removes electrical circuits from their panels. Available from Archicad 30.
+
+        Args:
+            electrical_circuits (list[ElementIdArrayItem]): The circuits to remove from their
+                panels.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "electricalCircuits": electrical_circuits,
+        }
+        validated_params = DeleteElectricalCircuitsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "DeleteElectricalCircuits", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = DeleteElectricalCircuitsResult.model_validate(response_dict)
+        return validated_response.executionResults
+
+    def get_electrical_circuits(
+        self,
+        elements: None | list[ElementIdArrayItem] = None,
+        electrical_panels: None | list[ElementIdArrayItem] = None,
+    ) -> list[ElectricalCircuitDetails | ErrorItem]:
+        """
+        Gets the given electrical circuits, the circuits of the given panels, or every circuit
+        of the project: name, description, owner panel, connected devices and panels, voltage,
+        phases, wiring type, loads, voltage drop and estimated cable length. Available from
+        Archicad 30.
+
+        Args:
+            elements (None | list[ElementIdArrayItem]): Optional list of electrical circuits.
+            electrical_panels (None | list[ElementIdArrayItem]): Optional list of electrical
+                panels whose circuits are returned. When neither elements nor electricalPanels
+                is given, every circuit of every electrical panel of the project is returned.
+
+        Returns:
+            list[ElectricalCircuitDetails | ErrorItem]: The given circuits first, in their
+                order, then the circuits of the given panels, in the order of the panels.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elements": elements,
+            "electricalPanels": electrical_panels,
+        }
+        validated_params = GetElectricalCircuitsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetElectricalCircuits", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetElectricalCircuitsResult.model_validate(response_dict)
+        return validated_response.electricalCircuits
+
+    def get_electrical_devices(
+        self, elements: None | list[ElementIdArrayItem] = None
+    ) -> list[ElectricalDeviceDetails | ErrorItem]:
+        """
+        Gets the electrical devices (lights, sockets and other consumers) of the project or the
+        given ones: parent circuit, placement, apparent power, load classification, demand load
+        and directly connected MEP elements. Available from Archicad 30.
+
+        Args:
+            elements (None | list[ElementIdArrayItem]): Optional list of electrical devices.
+                Every electrical device of the project is returned when it is not given.
+
+        Returns:
+            list[ElectricalDeviceDetails | ErrorItem]: The electrical devices, in the order of
+                the given elements.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elements": elements,
+        }
+        validated_params = GetElectricalDevicesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetElectricalDevices", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetElectricalDevicesResult.model_validate(response_dict)
+        return validated_response.electricalDevices
+
+    def get_electrical_panels(
+        self, elements: None | list[ElementIdArrayItem] = None
+    ) -> list[ElectricalPanelDetails | ErrorItem]:
+        """
+        Gets the electrical panels (distribution boards) of the project or the given ones: name,
+        circuit naming, circuits, parent circuit, placement and the connected and demand loads
+        in total and per phase. Available from Archicad 30.
+
+        Args:
+            elements (None | list[ElementIdArrayItem]): Optional list of electrical panels.
+                Every electrical panel of the project is returned when it is not given.
+
+        Returns:
+            list[ElectricalPanelDetails | ErrorItem]: The electrical panels, in the order of the
+                given elements.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elements": elements,
+        }
+        validated_params = GetElectricalPanelsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetElectricalPanels", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetElectricalPanelsResult.model_validate(response_dict)
+        return validated_response.electricalPanels
+
+    def get_electrical_project_settings(self) -> GetElectricalProjectSettingsResult:
+        """
+        Gets the electrical project settings: the default voltage, the wiring types with their
+        cross-sectional area and the load classifications with their demand factor. Available
+        from Archicad 30.
+
+        Returns:
+            GetElectricalProjectSettingsResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        response_dict = self._core.post_tapir_command("GetElectricalProjectSettings")
+        validated_response = GetElectricalProjectSettingsResult.model_validate(response_dict)
+        return validated_response
 
     def get_mep_distribution_systems(self) -> list[MEPDistributionSystem]:
         """
@@ -210,16 +582,22 @@ class MepCommands:
         validated_response = GetMEPPortsResult.model_validate(response_dict)
         return validated_response.elementPorts
 
-    def get_mep_preference_tables(self, domain: MEPPreferenceTableDomain) -> list[MEPPreferenceTable]:
+    def get_mep_preference_tables(
+        self, domain: MEPPreferenceTableDomain, include_fitting_tables: None | bool = None
+    ) -> GetMEPPreferenceTablesResult:
         """
         Gets the circular cross section preference tables (referenceId, diameter, description)
-        of the Piping or Ventilation domain. Available from Archicad 28.
+        and the reference set of the Piping or Ventilation domain, optionally with the elbow,
+        branch and transition preference tables. The angle set and the transition tables are
+        available from Archicad 29. Available from Archicad 28.
 
         Args:
             domain (MEPPreferenceTableDomain)
+            include_fitting_tables (None | bool): Also return the elbow, branch and transition
+                preference tables. Defaults to false.
 
         Returns:
-            list[MEPPreferenceTable]: The circular segment preference tables of the domain.
+            GetMEPPreferenceTablesResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -228,13 +606,14 @@ class MepCommands:
         """
         params_dict = {
             "domain": domain,
+            "includeFittingTables": include_fitting_tables,
         }
         validated_params = GetMEPPreferenceTablesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
             "GetMEPPreferenceTables", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = GetMEPPreferenceTablesResult.model_validate(response_dict)
-        return validated_response.tables
+        return validated_response
 
     def get_mep_routing_elements(
         self, elements: list[ElementIdArrayItem]
@@ -265,6 +644,158 @@ class MepCommands:
         )
         validated_response = GetMEPRoutingElementsResult.model_validate(response_dict)
         return validated_response.routingElements
+
+    def get_mep_system_groups(self) -> list[ErrorItem | MEPSystemGroupDetails]:
+        """
+        Gets the MEP system groups of the project with their physical systems: name, root
+        element and MEP system. Available from Archicad 29.
+
+        Returns:
+            list[ErrorItem | MEPSystemGroupDetails]: The system groups of the project with their
+                physical systems.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        response_dict = self._core.post_tapir_command("GetMEPSystemGroups")
+        validated_response = GetMEPSystemGroupsResult.model_validate(response_dict)
+        return validated_response.systemGroups
+
+    def modify_electrical_circuits(
+        self, electrical_circuits_data: list[ElectricalCircuitModificationData]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Modifies the description, voltage, wiring type and used phases of electrical circuits.
+        Available from Archicad 30.
+
+        Args:
+            electrical_circuits_data (list[ElectricalCircuitModificationData]): Array of data to
+                modify electrical circuits. Only the given fields are changed.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "electricalCircuitsData": electrical_circuits_data,
+        }
+        validated_params = ModifyElectricalCircuitsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "ModifyElectricalCircuits", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = ModifyElectricalCircuitsResult.model_validate(response_dict)
+        return validated_response.executionResults
+
+    def modify_electrical_devices(
+        self, electrical_devices_data: list[ElectricalDeviceModificationData]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Modifies the apparent power, load classification and placement (anchor point,
+        orientation, rotation, mirroring, library part, size) of electrical devices. Available
+        from Archicad 30.
+
+        Args:
+            electrical_devices_data (list[ElectricalDeviceModificationData]): Array of data to
+                modify electrical devices. Only the given fields are changed.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "electricalDevicesData": electrical_devices_data,
+        }
+        validated_params = ModifyElectricalDevicesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "ModifyElectricalDevices", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = ModifyElectricalDevicesResult.model_validate(response_dict)
+        return validated_response.executionResults
+
+    def modify_electrical_panels(
+        self, electrical_panels_data: list[ElectricalPanelModificationData]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Modifies the name, circuit naming and placement (anchor point, orientation, rotation,
+        mirroring, library part, size) of electrical panels. Available from Archicad 30.
+
+        Args:
+            electrical_panels_data (list[ElectricalPanelModificationData]): Array of data to
+                modify electrical panels. Only the given fields are changed.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "electricalPanelsData": electrical_panels_data,
+        }
+        validated_params = ModifyElectricalPanelsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "ModifyElectricalPanels", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = ModifyElectricalPanelsResult.model_validate(response_dict)
+        return validated_response.executionResults
+
+    def modify_electrical_project_settings(
+        self,
+        voltage: None | float = None,
+        wiring_types_to_add: None | list[ElectricalWiringType] = None,
+        wiring_types_to_remove: None | list[str] = None,
+        load_classifications_to_add: None | list[ElectricalLoadClassification] = None,
+        load_classifications_to_remove: None | list[str] = None,
+    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+        """
+        Modifies the electrical project settings: sets the default voltage and adds or removes
+        wiring types and load classifications. Available from Archicad 30.
+
+        Args:
+            voltage (None | float)
+            wiring_types_to_add (None | list[ElectricalWiringType])
+            wiring_types_to_remove (None | list[str]): The names of the wiring types to remove.
+            load_classifications_to_add (None | list[ElectricalLoadClassification])
+            load_classifications_to_remove (None | list[str]): The names of the load
+                classifications to remove.
+
+        Returns:
+            FailedExecutionResult | SuccessfulExecutionResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "voltage": voltage,
+            "wiringTypesToAdd": wiring_types_to_add,
+            "wiringTypesToRemove": wiring_types_to_remove,
+            "loadClassificationsToAdd": load_classifications_to_add,
+            "loadClassificationsToRemove": load_classifications_to_remove,
+        }
+        validated_params = ModifyElectricalProjectSettingsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "ModifyElectricalProjectSettings",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+        )
+        validated_response = TypeAdapter(ModifyElectricalProjectSettingsResult).validate_python(response_dict)
+        return validated_response
 
     def modify_mep_routing_elements(
         self, routing_elements_data: list[MEPRoutingElementModificationData]

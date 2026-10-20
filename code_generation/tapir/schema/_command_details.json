@@ -68,7 +68,7 @@
     {
         "name": "CloneProjectMapItemToViewMap",
         "group": "Navigator Commands",
-        "description": "Clones Project Map viewpoints into the View Map, optionally into a specified folder.",
+        "description": "Clones Project Map viewpoints into a specified View Map folder.",
         "version": "1.1.7"
     },
     {
@@ -82,6 +82,12 @@
         "group": "MEP Commands",
         "description": "Connects MEP routing elements to other MEP elements or routes. Merges routes, splits routes or creates branch elements as needed. Available from Archicad 28.",
         "version": "1.5.6"
+    },
+    {
+        "name": "ConnectToElectricalCircuits",
+        "group": "MEP Commands",
+        "description": "Connects electrical devices, or panels as sub-panels, to electrical circuits. Available from Archicad 30.",
+        "version": "1.7.2"
     },
     {
         "name": "CreateArcs",
@@ -144,6 +150,12 @@
         "version": "1.0.2"
     },
     {
+        "name": "CreateCurtainWalls",
+        "group": "Element Commands",
+        "description": "Creates Curtain Wall elements along a reference polyline with a column (primary) and row (secondary) pattern. The frame and panel classes come from the favorite or from the Curtain Wall tool defaults; the pattern cells can assign them to the grid.",
+        "version": "1.7.2"
+    },
+    {
         "name": "CreateDesignOptionCombinations",
         "group": "Design Options Commands",
         "description": "Creates new design option combinations with the given parameters. Available from Archicad 29.",
@@ -180,6 +192,24 @@
         "version": "1.4.0"
     },
     {
+        "name": "CreateElectricalCircuits",
+        "group": "MEP Commands",
+        "description": "Adds new circuits to electrical panels, optionally with the given description, voltage, wiring type and used phases. Available from Archicad 30.",
+        "version": "1.7.2"
+    },
+    {
+        "name": "CreateElectricalDevices",
+        "group": "MEP Commands",
+        "description": "Places electrical devices with the default settings of the Electrical Device tool, optionally with the given library part, size, rotation, mirroring, apparent power and load classification, and connects them to a circuit. Available from Archicad 30.",
+        "version": "1.7.2"
+    },
+    {
+        "name": "CreateElectricalPanels",
+        "group": "MEP Commands",
+        "description": "Places electrical panels with the default settings of the Electrical Panel tool, optionally with the given library part, size, rotation, mirroring, panel name and circuit naming. Available from Archicad 30.",
+        "version": "1.7.2"
+    },
+    {
         "name": "CreateFavoritesFromElements",
         "group": "Favorites Commands",
         "description": "Create favorites from the given elements.",
@@ -190,6 +220,36 @@
         "group": "Attribute Commands",
         "description": "Creates or overwrites Fill attributes based on the given parameters.",
         "version": "1.5.4"
+    },
+    {
+        "name": "CreateGraphicOverrideCombinations",
+        "group": "Attribute Commands",
+        "description": "Creates graphic override combinations from existing rules. Available from Archicad 27.",
+        "version": "1.7.2"
+    },
+    {
+        "name": "CreateGraphicOverrideRules",
+        "group": "Attribute Commands",
+        "description": "Creates graphic override rules. The criterion is given as Archicad's criterion XML or as structured conditions. The rule group is created when no rule group has the given name. Available from Archicad 27.",
+        "version": "1.7.2"
+    },
+    {
+        "name": "CreateGraphicalOverrideCombination",
+        "group": "Graphic Override Commands",
+        "description": "Creates a graphic override combination from rule names, or replaces the rules of an existing one. Needs Archicad 27 or later.",
+        "version": "1.7.2"
+    },
+    {
+        "name": "CreateGraphicalOverrideRule",
+        "group": "Graphic Override Commands",
+        "description": "Creates or overwrites a graphic override rule in a rule group: name, criterion XML, surface color and line pen. Needs Archicad 27 or later.",
+        "version": "1.7.2"
+    },
+    {
+        "name": "CreateGridElements",
+        "group": "Element Commands",
+        "description": "Creates grid elements, the elements the Grid Tool places, from begin and end coordinates, with optional story, layer and GDL parameters. Needs Archicad 26 or later.",
+        "version": "1.7.2"
     },
     {
         "name": "CreateGroups",
@@ -288,6 +348,12 @@
         "version": "1.4.0"
     },
     {
+        "name": "CreateLevelDimensions",
+        "group": "Element Commands",
+        "description": "Creates Level Dimension elements (the Level Dimension tool) based on the given parameters. With a parentElementId the dimension is associative: it shows the height of the parent element (Mesh, Slab, Roof ...) at its position and follows the element when it changes.",
+        "version": "1.7.2"
+    },
+    {
         "name": "CreateLineElements",
         "group": "Element Commands",
         "description": "Creates Line elements based on the given parameters.",
@@ -306,10 +372,22 @@
         "version": "1.5.6"
     },
     {
+        "name": "CreateMEPPhysicalSystems",
+        "group": "MEP Commands",
+        "description": "Creates physical systems in MEP system groups, optionally with a root element and an MEP system as their category. Available from Archicad 29.",
+        "version": "1.7.2"
+    },
+    {
         "name": "CreateMEPRoutingElements",
         "group": "MEP Commands",
-        "description": "Creates MEP routing elements (duct, pipe or cable carrier routes) along the given polylines with optional cross section data (shape, size, preference table and reference id) and MEP system. Available from Archicad 28.",
+        "description": "Creates MEP routing elements (duct, pipe or cable carrier routes) along the given polylines with optional cross section data (shape, size, preference table and reference id), MEP system and layer (also set on the segments, elbows and transitions). Available from Archicad 28.",
         "version": "1.5.6"
+    },
+    {
+        "name": "CreateMEPSystemGroups",
+        "group": "MEP Commands",
+        "description": "Creates MEP system groups. Available from Archicad 29.",
+        "version": "1.7.2"
     },
     {
         "name": "CreateMEPSystems",
@@ -434,7 +512,7 @@
     {
         "name": "CreateViewsInViewMap",
         "group": "Navigator Commands",
-        "description": "Creates independent (non-clone) navigator views in the View Map by copying database and settings from source items.",
+        "description": "Creates independent (non-clone) navigator views in a specified View Map folder, by copying database and settings from source items.",
         "version": "1.1.7"
     },
     {
@@ -492,6 +570,30 @@
         "version": "1.5.2"
     },
     {
+        "name": "DeleteDesignOptionCombinations",
+        "group": "Design Options Commands",
+        "description": "Deletes the given design option combinations. Available from Archicad 29.",
+        "version": "1.7.1"
+    },
+    {
+        "name": "DeleteDesignOptionSets",
+        "group": "Design Options Commands",
+        "description": "Deletes the given design option sets. Available from Archicad 29.",
+        "version": "1.7.1"
+    },
+    {
+        "name": "DeleteDesignOptions",
+        "group": "Design Options Commands",
+        "description": "Deletes the given design options. Available from Archicad 29.",
+        "version": "1.7.1"
+    },
+    {
+        "name": "DeleteElectricalCircuits",
+        "group": "MEP Commands",
+        "description": "Removes electrical circuits from their panels. Available from Archicad 30.",
+        "version": "1.7.2"
+    },
+    {
         "name": "DeleteElements",
         "group": "Element Commands",
         "description": "Deletes elements. Returns an execution result for each input element: an element that could not be deleted (for example because its layer is locked) gets a failed execution result instead of being skipped silently.",
@@ -508,6 +610,24 @@
         "group": "Favorites Commands",
         "description": "Delete existing favorites.",
         "version": "1.5.4"
+    },
+    {
+        "name": "DeleteGraphicOverrideCombinations",
+        "group": "Attribute Commands",
+        "description": "Deletes graphic override combinations. Their rules are kept. Available from Archicad 27.",
+        "version": "1.7.2"
+    },
+    {
+        "name": "DeleteGraphicOverrideRuleGroups",
+        "group": "Attribute Commands",
+        "description": "Deletes graphic override rule groups, found by name. A group that still contains rules is kept unless its rules are moved to another group or deleted with it. Available from Archicad 27.",
+        "version": "1.7.2"
+    },
+    {
+        "name": "DeleteGraphicOverrideRules",
+        "group": "Attribute Commands",
+        "description": "Deletes graphic override rules. They are also removed from the combinations that contain them. Available from Archicad 27.",
+        "version": "1.7.2"
     },
     {
         "name": "DeleteIssue",
@@ -592,6 +712,24 @@
         "group": "Element Commands",
         "description": "Get the 3D bounding box of elements. The bounding box is calculated from the global origin in the 3D view. The output is the array of the bounding boxes respective to the input array of elements.",
         "version": "1.1.2"
+    },
+    {
+        "name": "Get3DGeometryOfElements",
+        "group": "Element Commands",
+        "description": "Gets the 3D geometry of elements as the solid bodies of their 3D model: a vertex list in world coordinates and the planar faces (with their holes) referencing it, each face with its surface attribute when that is a project attribute. The bodies of the subelements of a Stair, Railing or Curtain Wall are included. The output is aligned with the input array of elements. The 3D model of the elements is generated as needed, so many elements can take a while.",
+        "version": "1.7.2"
+    },
+    {
+        "name": "Get3DProjectionSettings",
+        "group": "Navigator Commands",
+        "description": "Gets the 3D projection settings of the 3D window: whether it is perspective or axonometric, the camera and target position, view cone, roll angle, distance and azimuth of a perspective, or the transformation matrix of an axonometry.",
+        "version": "1.7.1"
+    },
+    {
+        "name": "GetActiveGraphicalOverrideCombination",
+        "group": "Navigator Commands",
+        "description": "Gets the graphic override combination applied to the current window, with its id and name. The response is empty when no combination is applied. This is the combination of the window itself, not the one stored in a saved view (see GetViewSettings). Available from Archicad 30.",
+        "version": "1.7.2"
     },
     {
         "name": "GetAddOnVersion",
@@ -750,6 +888,30 @@
         "version": "1.1.9"
     },
     {
+        "name": "GetElectricalCircuits",
+        "group": "MEP Commands",
+        "description": "Gets the given electrical circuits, the circuits of the given panels, or every circuit of the project: name, description, owner panel, connected devices and panels, voltage, phases, wiring type, loads, voltage drop and estimated cable length. Available from Archicad 30.",
+        "version": "1.7.2"
+    },
+    {
+        "name": "GetElectricalDevices",
+        "group": "MEP Commands",
+        "description": "Gets the electrical devices (lights, sockets and other consumers) of the project or the given ones: parent circuit, placement, apparent power, load classification, demand load and directly connected MEP elements. Available from Archicad 30.",
+        "version": "1.7.2"
+    },
+    {
+        "name": "GetElectricalPanels",
+        "group": "MEP Commands",
+        "description": "Gets the electrical panels (distribution boards) of the project or the given ones: name, circuit naming, circuits, parent circuit, placement and the connected and demand loads in total and per phase. Available from Archicad 30.",
+        "version": "1.7.2"
+    },
+    {
+        "name": "GetElectricalProjectSettings",
+        "group": "MEP Commands",
+        "description": "Gets the electrical project settings: the default voltage, the wiring types with their cross-sectional area and the load classifications with their demand factor. Available from Archicad 30.",
+        "version": "1.7.2"
+    },
+    {
         "name": "GetElementPreviewImage",
         "group": "Element Commands",
         "description": "Returns the preview image of the given element.",
@@ -820,6 +982,42 @@
         "group": "Project Commands",
         "description": "Gets the project location details.",
         "version": "1.1.6"
+    },
+    {
+        "name": "GetGraphicOverrideCombinations",
+        "group": "Attribute Commands",
+        "description": "Gets all graphic override combinations of the project with the rules they contain. Available from Archicad 27.",
+        "version": "1.7.2"
+    },
+    {
+        "name": "GetGraphicOverrideRuleGroups",
+        "group": "Attribute Commands",
+        "description": "Gets all graphic override rule groups of the project with the rules they contain, empty groups included. Available from Archicad 27.",
+        "version": "1.7.2"
+    },
+    {
+        "name": "GetGraphicOverrideRules",
+        "group": "Attribute Commands",
+        "description": "Gets all graphic override rules of the project, with their rule group, criterion and style. Available from Archicad 27.",
+        "version": "1.7.2"
+    },
+    {
+        "name": "GetGraphicalOverrideRules",
+        "group": "Graphic Override Commands",
+        "description": "Returns every graphic override rule with its criterion XML. Needs Archicad 27 or later.",
+        "version": "1.7.2"
+    },
+    {
+        "name": "GetGridElementDefaults",
+        "group": "Element Commands",
+        "description": "Returns the Grid Tool defaults: library part, size and GDL parameters of a new grid element. Needs Archicad 26 or later.",
+        "version": "1.7.2"
+    },
+    {
+        "name": "GetGridElements",
+        "group": "Element Commands",
+        "description": "Lists the grid elements (placed with the Grid Tool or created by CreateGridElements) with their position, angle, size, library part and optionally GDL parameters. Needs Archicad 26 or later.",
+        "version": "1.7.2"
     },
     {
         "name": "GetGroupsOfElements",
@@ -938,7 +1136,7 @@
     {
         "name": "GetMEPPreferenceTables",
         "group": "MEP Commands",
-        "description": "Gets the circular cross section preference tables (referenceId, diameter, description) of the Piping or Ventilation domain. Available from Archicad 28.",
+        "description": "Gets the circular cross section preference tables (referenceId, diameter, description) and the reference set of the Piping or Ventilation domain, optionally with the elbow, branch and transition preference tables. The angle set and the transition tables are available from Archicad 29. Available from Archicad 28.",
         "version": "1.5.7"
     },
     {
@@ -946,6 +1144,12 @@
         "group": "MEP Commands",
         "description": "Retrieves the details of the given MEP routing elements: domain, MEP system, route polyline, segments with cross section data (shape, size, preference table and reference id) and nodes. Available from Archicad 28.",
         "version": "1.5.6"
+    },
+    {
+        "name": "GetMEPSystemGroups",
+        "group": "MEP Commands",
+        "description": "Gets the MEP system groups of the project with their physical systems: name, root element and MEP system. Available from Archicad 29.",
+        "version": "1.7.2"
     },
     {
         "name": "GetMEPSystems",
@@ -1012,6 +1216,12 @@
         "group": "Property Commands",
         "description": "Returns the property values of the elements for the given property. It works for subelements of hierarchal elements also.",
         "version": "1.0.6"
+    },
+    {
+        "name": "GetQuantitiesOfElements",
+        "group": "Element Commands",
+        "description": "Gets the quantities of the given elements calculated by Archicad (volumes, surfaces, lengths etc.), together with the volume and projected area per building material (one item per skin of composite and complex profile elements, one item for basic elements). Supported types: Wall, Column, Beam, Slab, Roof, Shell, Morph, Zone, ColumnSegment, BeamSegment. Use the optional minOpeningSize parameter to control the conditional values.",
+        "version": "1.7.2"
     },
     {
         "name": "GetRelationsOfElements",
@@ -1188,6 +1398,36 @@
         "version": "1.4.0"
     },
     {
+        "name": "ModifyElectricalCircuits",
+        "group": "MEP Commands",
+        "description": "Modifies the description, voltage, wiring type and used phases of electrical circuits. Available from Archicad 30.",
+        "version": "1.7.2"
+    },
+    {
+        "name": "ModifyElectricalDevices",
+        "group": "MEP Commands",
+        "description": "Modifies the apparent power, load classification and placement (anchor point, orientation, rotation, mirroring, library part, size) of electrical devices. Available from Archicad 30.",
+        "version": "1.7.2"
+    },
+    {
+        "name": "ModifyElectricalPanels",
+        "group": "MEP Commands",
+        "description": "Modifies the name, circuit naming and placement (anchor point, orientation, rotation, mirroring, library part, size) of electrical panels. Available from Archicad 30.",
+        "version": "1.7.2"
+    },
+    {
+        "name": "ModifyElectricalProjectSettings",
+        "group": "MEP Commands",
+        "description": "Modifies the electrical project settings: sets the default voltage and adds or removes wiring types and load classifications. Available from Archicad 30.",
+        "version": "1.7.2"
+    },
+    {
+        "name": "ModifyGraphicOverrideRules",
+        "group": "Attribute Commands",
+        "description": "Modifies the name, criterion or style of graphic override rules. The criterion is given as Archicad's criterion XML or as structured conditions. A given style replaces the whole style of the rule. Available from Archicad 27.",
+        "version": "1.7.2"
+    },
+    {
         "name": "ModifyKeynoteFolders",
         "group": "Keynote Commands",
         "description": "Modifies the key, title or reference of the given keynote folders. Available from Archicad 28.",
@@ -1274,7 +1514,7 @@
     {
         "name": "MoveElements",
         "group": "Element Commands",
-        "description": "Moves elements with a given vector.",
+        "description": "Moves elements with a given vector. An element that cannot be edited (its layer is hidden or locked, it is locked, or it is not available in teamwork) gets a failed execution result naming the reason instead of being skipped silently.",
         "version": "1.0.2"
     },
     {
@@ -1362,6 +1602,24 @@
         "version": "1.5.4"
     },
     {
+        "name": "RenameDesignOptionCombinations",
+        "group": "Design Options Commands",
+        "description": "Changes the name of the given design option combinations. Available from Archicad 29.",
+        "version": "1.7.1"
+    },
+    {
+        "name": "RenameDesignOptionSets",
+        "group": "Design Options Commands",
+        "description": "Changes the name of the given design option sets. Available from Archicad 29.",
+        "version": "1.7.1"
+    },
+    {
+        "name": "RenameDesignOptions",
+        "group": "Design Options Commands",
+        "description": "Changes the name and/or the string id of the given design options. Available from Archicad 29.",
+        "version": "1.7.1"
+    },
+    {
         "name": "RenameFavorites",
         "group": "Favorites Commands",
         "description": "Rename existing favorites.",
@@ -1370,7 +1628,7 @@
     {
         "name": "RenameNavigatorItem",
         "group": "Navigator Commands",
-        "description": "Renames a navigator item or changes its ID.",
+        "description": "Renames a navigator item or changes its ID. Fails when Archicad does not apply the new name (e.g. on Project Map schedule items, which are named by their scheme). With customName false the item drops its custom name and follows its Project Map source again.",
         "version": "1.1.7"
     },
     {
@@ -1394,7 +1652,7 @@
     {
         "name": "RotateElements",
         "group": "Element Commands",
-        "description": "Rotates elements around a reference point.",
+        "description": "Rotates elements around a reference point. An element that cannot be edited (its layer is hidden or locked, it is locked, or it is not available in teamwork) gets a failed execution result naming the reason instead of being skipped silently.",
         "version": "1.5.3"
     },
     {
@@ -1402,6 +1660,12 @@
         "group": "Project Commands",
         "description": "Saves the given elements, or the current selection, as a hotlink module (.mod) file.",
         "version": "1.5.9"
+    },
+    {
+        "name": "SaveCurrentWindowAsImage",
+        "group": "Project Commands",
+        "description": "Saves what the current window shows as an image file (png, jpg, bmp, tiff or gif), as File > Save as does with a picture format.",
+        "version": "1.7.1"
     },
     {
         "name": "SaveProject",
@@ -1422,10 +1686,22 @@
         "version": "1.3.1"
     },
     {
+        "name": "Set3DProjectionSettings",
+        "group": "Navigator Commands",
+        "description": "Sets a perspective projection for the 3D window. Every perspective parameter is required: read a known good set with Get3DProjectionSettings and pass it back, with the values to change replaced.",
+        "version": "1.7.1"
+    },
+    {
         "name": "SetActiveDesignOptionsInCombinations",
         "group": "Design Options Commands",
         "description": "Sets active design options in the given combinations. Available from Archicad 29.",
         "version": "1.5.1"
+    },
+    {
+        "name": "SetActiveGraphicalOverrideCombination",
+        "group": "Navigator Commands",
+        "description": "Applies a graphic override combination, given by id or by name, to the current window. The current window must be a model window (floor plan, section, elevation, 3D, ...). To remove the overrides, apply the project's 'No Overrides' combination. The saved view is not changed (see SetViewSettings for that). Available from Archicad 30.",
+        "version": "1.7.2"
     },
     {
         "name": "SetClassificationsOfElements",

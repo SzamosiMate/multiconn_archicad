@@ -187,7 +187,9 @@ class FavoritesCommands:
         validated_response = DeleteFavoritesResult.model_validate(response_dict)
         return validated_response.executionResults
 
-    def export_favorites(self, path: str, names: None | list[str] = None) -> None:
+    def export_favorites(
+        self, path: str, names: None | list[str] = None
+    ) -> FailedExecutionResult | SuccessfulExecutionResult:
         """
         Export the project's Favorites to a .prefs file or folder.
 
@@ -196,6 +198,9 @@ class FavoritesCommands:
                 format (.prefs), writes a single file; otherwise treats as folder.
             names (None | list[str]): Optional subset of Favorites to export. Default: export
                 all.
+
+        Returns:
+            FailedExecutionResult | SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -210,8 +215,8 @@ class FavoritesCommands:
         response_dict = self._core.post_tapir_command(
             "ExportFavorites", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
-        validated_response = ExportFavoritesResult.model_validate(response_dict)
-        return None
+        validated_response = TypeAdapter(ExportFavoritesResult).validate_python(response_dict)
+        return validated_response
 
     def get_favorite_preview_image(
         self,
