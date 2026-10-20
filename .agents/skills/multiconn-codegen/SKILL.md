@@ -116,6 +116,7 @@ If the run exposes a deterministic failure class not covered by the audit, or a 
 - If the pipeline fails because an existing file under `src/multiconn_archicad/clients/unified_api` imports a Tapir model that the finalized Tapir pipeline renamed or removed, confirm the stale name from the traceback and generated Tapir definitions. Remove only that stale import as a temporary bootstrap edit, then immediately rerun the unified pipeline so generated output replaces the manual edit.
 - Do not remove imports speculatively. If the traceback does not prove this known stale-import case, or the retry fails for another reason, diagnose it normally.
 - When output routing changes, verify that command literals target `src/multiconn_archicad/clients/core/literal_commands.py` and unified output targets `src/multiconn_archicad/clients/unified_api`, matching the modules imported by the client. A successful pipeline alone does not establish that the consumed package was updated.
+- After successful unified generation, automatically stage newly created generated Python files under `src/multiconn_archicad/clients/unified_api/`. Identify untracked or newly added paths in that directory, verify their generated-file header and pipeline ownership, and use `git add -- <exact paths>` for those files only. Do not stage unrelated files or modifications to previously tracked unified API files. Preserve existing staged changes. This applies to Tapir updates and either regeneration operation; audit-only work stays read-only.
 - Run the relevant tests only after unified generation succeeds. For Tapir regeneration or update, run the full project test suite unless the user requested a narrower scope. For standalone unified regeneration, run the generated unified-method tests and any tests covering changed generator code.
 
 ### Check reproducibility proportionally
@@ -146,7 +147,7 @@ For the untouched new-type inventory, use `src/multiconn_archicad/models/tapir/t
 
 ## Report for human review
 
-For release updates, maintain one final reviewed report at `code_generation/documentation/reports/tapir-<version>.md`, alongside the changes it explains. Revise that report during the same update rather than saving each intermediate attempt. Keep ongoing patch dispositions in `code_generation/documentation/schema-patch-tracking.md`; link instead of repeating its inventory. Preserve historical reports as records of their stated baselines and verification. Keep intermediate logs, snapshots and test output in untracked scratch storage. Audit-only work remains read-only and can report in the response. Automatically stage the final reviewed release-update report with `git add -- code_generation/documentation/reports/tapir-<version>.md`, and restage it after final revisions. Stage only that report; leave other files and existing staged changes alone. Do not commit unless requested.
+For release updates, maintain one final reviewed report at `code_generation/documentation/reports/tapir-<version>.md`, alongside the changes it explains. Revise that report during the same update rather than saving each intermediate attempt. Keep ongoing patch dispositions in `code_generation/documentation/schema-patch-tracking.md`; link instead of repeating its inventory. Preserve historical reports as records of their stated baselines and verification. Keep intermediate logs, snapshots and test output in untracked scratch storage. Audit-only work remains read-only and can report in the response. Automatically stage the final reviewed release-update report with `git add -- code_generation/documentation/reports/tapir-<version>.md`, and restage it after final revisions. Together with newly generated unified API files described above, stage only the final report; leave other files and existing staged changes alone. Do not commit unless requested.
 
 Use the compact structure below. Retain the API summary, verification, and human-review outcome; omit other empty sections and category headings. Avoid wide tables, repeated inventories, and routine success narration. Use actual patch calls, model excerpts, signature diffs, or caller examples when they clarify a change. Label abbreviated excerpts; do not invent executed code or validation results. Distinguish formatter success from lint findings and limited checks from broader claims.
 
@@ -235,7 +236,8 @@ Keep model-specific fixes in schema patching and generally applicable determinis
 For a completed Tapir version update, prepare a title and copyable Markdown body
 alongside the final report. For other operations, prepare them when requested.
 Keep the draft in untracked scratch storage and return its path and title. Preparing
-the message does not authorize staging beyond the final report described above,
+the message does not authorize staging beyond the final report and new generated
+unified API files described above,
 committing, pushing, or opening a PR.
 
 Use `Update to Tapir <version>` unless the user supplies a title or the final scope
