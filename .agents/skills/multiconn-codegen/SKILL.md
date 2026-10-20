@@ -18,7 +18,7 @@ Interpret the text following the skill invocation as one of four operations:
 - **`audit`:** inspect the currently generated Tapir schema and models, run the generation audit, scan the existing generated diff when present, and report findings. Keep this operation read-only unless the user also asks for repairs.
 - **`regenerate tapir`:** regenerate the currently pinned Tapir version, run the audit and reproducibility check, repair generation failures at their source, regenerate the unified API, run tests, and report the result. Do not change the Tapir version.
 - **`regenerate unified`:** regenerate only the unified API from the current Official and Tapir models, handle a stale generated import when necessary, run relevant tests, and report the result. Do not rerun either model pipeline.
-- **`update tapir to <version>`:** change to the requested Tapir version and perform the complete update loop: preflight, fetch, regenerate, audit, repair, repeat until clean, scan the entire diff for new problem classes, improve safeguards where appropriate, regenerate the unified API, test, and report.
+- **`update tapir to <version>`:** change to the requested Tapir version and perform the complete update loop: preflight, fetch, regenerate, audit, repair, repeat until clean, scan the entire diff for new problem classes, improve safeguards where appropriate, regenerate the unified API, test, report, and prepare a pull-request title and body.
 
 Examples are `$multiconn-codegen audit`, `$multiconn-codegen regenerate tapir`, `$multiconn-codegen regenerate unified`, and `$multiconn-codegen update tapir to 1.5.9`.
 
@@ -58,16 +58,22 @@ Examples are `$multiconn-codegen audit`, `$multiconn-codegen regenerate tapir`, 
 
 ### Classify schema patches
 
-Put each patch in exactly one category:
+Preserve existing category assignments first. The working tree, including user edits, is authoritative. Do not move an existing patch between categories during audit, regeneration, release updates, repairs, or documentation reconciliation unless the user explicitly asks to reclassify those existing patches. This applies even when the patch would receive a different category under the rules for new work, has been materially modified, or an older report describes another category. Flag discrepancies or recommend a reclassification separately; do not implement it without that scope. A general request to update Tapir or apply new-patch rules does not authorize reclassifying existing patches.
 
-- **Permanent:** established generator workarounds or intentional client choices that preserve the upstream schema contract. Use `apply_permanent_patches`. Preserve existing intent even when an equivalent upstream refactor is technically possible; do not propose upstream changes solely to accommodate generator shortcomings such as `Data` becoming `Datum`, incorrect singularization, or numeric collision suffixes. Keep these local even when naming the valid upstream inline schema would also solve the problem.
-- **Temporary:** fixes intended for non-breaking upstream adoption. Use `apply_temporary_patches`, record the upstream change that would allow removal, and remove the patch when that correction arrives. Require an independently justified upstream correction or shared-schema improvement, preserving existing public names, fields, requiredness, constraints, and union behavior. Naming a valid anonymous schema solely to fix this generator is not sufficient; a broader upstream extraction policy must be explicitly in scope.
-- **Breaking permanent:** confirmed intentional client differences in requiredness, constraints, accepted values, payload structure, or existing public schema definitions. Use `apply_breaking_permanent_patches`. State the deliberate client behavior, its reason, and compatibility consequences; a difference from upstream alone does not establish intent.
-- **Breaking — source review / potential error:** shape-changing patches whose justification remains uncertain and may involve a schema or local patch error. Use `apply_breaking_source_review_patches`. This category flags unresolved follow-up; it does not assert an upstream defect or endorse a breaking upstream proposal.
+For newly introduced schema patches, use exactly one category:
 
-Run the stages in this order: permanent → breaking permanent → breaking source review → temporary. Document dependencies when a reference points to a definition extracted in a later stage, and verify that the completed schema resolves those references.
+- **Permanent:** extend the established creation/modification item-naming pattern. Put new entries directly in `creation_data_types` or `element_modification_datatypes` in `apply_permanent_patches`, including analogous connection payloads already covered by the creation list. Do not create a separate mixed creation/modification/response loop. This is the exception to the Temporary default for new names; it does not expand the scope of Permanent or change existing assignments.
+- **Temporary:** the default for new non-breaking schema refinements. Use `apply_temporary_patches` for every other extraction introducing a new public name, including conditional variants, contextual naming, and generator collision/singularization fixes. Shared-schema and enum extractions and reference replacements also belong here, with their producers before their consumers. Record the released definition/reference changes that allow retirement, preserving existing public fields, requiredness, constraints and union behavior. A valid anonymous schema is not inherently defective, but a local naming workaround need not remain Permanent merely because its immediate trigger is a generator limitation.
+- **Breaking permanent:** confirmed intentional client differences in requiredness, constraints, accepted values, payload structure, or existing public definitions. Use `apply_breaking_permanent_patches` only for an established client design choice; explain its reason and compatibility consequences. A difference from upstream alone is insufficient. Do not use this category to override the preservation of existing assignments or to justify a new naming-only patch.
+- **Breaking — source review / potential error:** shape-changing patches whose justification remains uncertain and may involve a schema or local patch error. Use `apply_breaking_source_review_patches`. This flags unresolved follow-up; it does not assert an upstream defect or endorse a breaking upstream proposal.
 
-During an update, classify patches introduced or materially changed by that update, plus older patches explicitly requested for review. Do not reopen all established permanent classifications unless asked. Judge each patch against the unpatched upstream schema, separately from release changes already supplied by upstream. Renaming/removing existing public definitions or changing accepted payloads requires a breaking classification.
+General cleaner, formatter, audit and patch-helper repairs are generator implementation changes, not schema-patch category decisions. Keep reusable fixes in their owning layer rather than creating Permanent schema extractions to work around them. Compatibility aliases are a separate public-API preservation mechanism: retain them when retiring a Temporary patch if upstream adopts a different name.
+
+Run the stages in this order: permanent → breaking permanent → breaking source review → temporary. Document dependencies and verify that the completed schema resolves references; do not move existing patches between categories merely to arrange dependencies.
+
+Judge new patches against the unpatched upstream schema, separately from changes already supplied by the release. Renaming/removing existing public definitions or changing accepted payloads requires a breaking classification; naming a newly introduced shape without changing acceptance is normally Temporary, subject to the established creation/modification-list exception. If a necessary repair would require an unauthorized reclassification of an existing patch, finish independent work and report that decision instead of silently moving it.
+
+Removing a redundant patch after verified adoption in released documentation is normal retirement, not category migration. If upstream uses a different name, verify the contract and consumers, adopt the released definition, and retain required Python compatibility names through `code_generation/shared/model_aliases.py`. Do not silently skip, overwrite, or rename stale targets.
 
 Investigation of Tapir implementation source is outside this skill's scope. For a breaking source-review patch, record the exact schema path, affected consumers, observed transformation, and unresolved question for a separate follow-up. Do not fetch or inspect Tapir implementation source as part of this workflow. Preserve existing behavior while classification remains pending unless a local repair is independently justified by in-scope schema/generator evidence. Pending follow-up does not by itself block an otherwise completed version update.
 
@@ -223,3 +229,50 @@ Copy and use this prompt if you agree:
 ```
 
 Keep model-specific fixes in schema patching and generally applicable deterministic checks in the generation audit. Reserve skill-update suggestions for changes to the overall generation and review workflow.
+
+## Prepare a pull-request message
+
+For a completed Tapir version update, prepare a title and copyable Markdown body
+alongside the final report. For other operations, prepare them when requested.
+Keep the draft in untracked scratch storage and return its path and title. Preparing
+the message does not authorize staging, committing, pushing, or opening a PR.
+
+Use `Update to Tapir <version>` unless the user supplies a title or the final scope
+calls for a different one. Base the body on the full proposed diff against the
+intended PR base, including earlier commits on the branch and relevant uncommitted
+or new files. Reconcile report claims with the current working tree; do not copy
+stale counts, category assignments, or abandoned approaches. Rewrite the title and
+body when scope changes.
+
+Follow the descriptive style in the release skill's
+[release-note guidance](../prepare-github-release/references/release-notes.md).
+Recent update PRs [#83](https://github.com/SzamosiMate/multiconn_archicad/pull/83),
+[#78](https://github.com/SzamosiMate/multiconn_archicad/pull/78), and
+[#76](https://github.com/SzamosiMate/multiconn_archicad/pull/76) show the established
+summary, command-table, changed-behavior, and caller-migration structure. When
+available, inspect the latest comparable PRs in the actual origin repository;
+resolve repository redirects before concluding that history is unavailable.
+References guide style; the current diff establishes the facts.
+
+- Start with the previous/target Tapir versions and the main capabilities added.
+- List new commands in `Command | Description` tables, grouped by domain when
+  useful. Use exact names, one-sentence descriptions, and material Archicad version
+  restrictions. Distinguish similarly named APIs such as `Graphic` and `Graphical`.
+- Describe meaningful existing-command changes separately. Put incompatible
+  parameter, model, enum, and return-shape changes in `Caller migrations`, with
+  before/after behavior and short caller examples where helpful. Include restored
+  validation constraints affecting existing callers.
+- Summarize meaningful generator, audit, and patch-retirement changes for review;
+  link the repository-relative generation report for detailed decisions and model
+  inventories. Include separately retained generator work when it is in the PR.
+- Add concise validation evidence and its limits. Distinguish recorded prior runs
+  from checks run for this draft, mock tests from live Archicad testing, and
+  formatting from lint. Do not claim a clean full lint run if findings remain.
+- Omit empty sections, repeated feature lists, redundant body titles, local
+  absolute paths, and speculative compatibility claims. Do not run release helpers
+  or add release-only autogenerated attribution/changelog sections to a PR body.
+
+Return the finished title and body, or a directly usable Markdown file link. When
+copyable Markdown in chat is requested, use one fenced `markdown` block for the
+body. Publish only when separately authorized; pass a prepared file to `gh` with
+`--body-file` rather than interpolating multiline Markdown into a shell command.
