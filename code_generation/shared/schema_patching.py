@@ -289,9 +289,6 @@ def apply_permanent_patches(master_defs: dict[str, Any]):
     for parent_model, (field_name, new_model_name) in element_modification_datatypes.items():
         extract_inline_schema(master_defs, parent_model, [field_name, "items"], new_model_name)
 
-    # --- Preserve stable public names for deliberate conditional object schemas ---
-    name_required_variants(master_defs, "Hole2D", [], ["Hole2DWithOutline", "Hole2DWithLegacyCoordinates"])
-    name_required_variants(master_defs, "TextData", [], ["TextDataWithText", "TextDataWithRuns"])
 
 def apply_breaking_permanent_patches(master_defs: dict[str, Any]):
     """Intentional client shape changes retained permanently, even if upstream differs.
@@ -427,3 +424,7 @@ def apply_temporary_patches(master_defs: dict[str, Any]):
     ):
         replace_inline_schema_with_ref(master_defs, "GraphicOverrideCriterion", [field], name, preserve_description=True)  # fmt: skip
     replace_inline_schema_with_ref(master_defs, "TextStyleSettableDetails", ["textFrameShape"], "TextFrameShape", preserve_description=True)  # fmt: skip
+
+    # --- Preserve stable public names for deliberate conditional object schemas ---
+    name_required_variants(master_defs, "Hole2D", [], ["Hole2DWithOutline", "Hole2DWithLegacyCoordinates"])
+    name_required_variants(master_defs, "TextData", [], ["TextDataWithText", "TextDataWithRuns"])
