@@ -8,6 +8,8 @@ from pydantic import TypeAdapter
 from multiconn_archicad.models.tapir.commands import (
     GetElementsByIFCIdsParameters,
     GetElementsByIFCIdsResult,
+    GetIFCAttributesOfElementsParameters,
+    GetIFCAttributesOfElementsResult,
     GetIFCExportTranslatorsResult,
     GetIFCIdsOfElementsParameters,
     GetIFCIdsOfElementsResult,
@@ -17,12 +19,19 @@ from multiconn_archicad.models.tapir.commands import (
     GetIFCTypeOfElementsResult,
     IFCFileOperationParameters,
     IFCFileOperationResult,
+    RemoveIFCPropertiesOfElementsParameters,
+    RemoveIFCPropertiesOfElementsResult,
+    SetIFCAttributesOfElementsParameters,
+    SetIFCAttributesOfElementsResult,
     SetIFCPropertiesOfElementsParameters,
     SetIFCPropertiesOfElementsResult,
 )
 from multiconn_archicad.models.tapir.types import (
+    ElementIFCAttributeValue,
+    ElementIFCAttributes,
     ElementIFCIds,
     ElementIFCProperties,
+    ElementIFCPropertyRemoval,
     ElementIFCPropertyValue,
     ElementIFCType,
     ElementIdArrayItem,
@@ -70,6 +79,41 @@ class IfcCommands:
         )
         validated_response = GetElementsByIFCIdsResult.model_validate(response_dict)
         return validated_response.elementsByIFCIds
+
+    def get_ifc_attributes_of_elements(
+        self, elements: list[ElementIdArrayItem], stored_only: None | bool = None
+    ) -> list[ElementIFCAttributes | ErrorItem]:
+        """
+        Retrieves the IFC attributes (Name, Description, ObjectType, Tag, PredefinedType,
+        LongName, ...) of the given elements, subelements included: the name, the IFC value type
+        and the value of each attribute. On Archicad 25, 26 and 27 storedOnly returns only the
+        attributes stored on the elements.
+
+        Args:
+            elements (list[ElementIdArrayItem]): A list of elements.
+            stored_only (None | bool): Return only the attributes stored on the elements, not
+                the ones Archicad would generate on IFC export. Used only in Archicad 25, 26 and
+                27. Default: false.
+
+        Returns:
+            list[ElementIFCAttributes | ErrorItem]: A list of the IFC attributes of elements or
+                errors.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elements": elements,
+            "storedOnly": stored_only,
+        }
+        validated_params = GetIFCAttributesOfElementsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetIFCAttributesOfElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetIFCAttributesOfElementsResult.model_validate(response_dict)
+        return validated_response.elementIFCAttributes
 
     def get_ifc_export_translators(self) -> list[IFCExportTranslator]:
         """
@@ -212,6 +256,67 @@ class IfcCommands:
         )
         validated_response = TypeAdapter(IFCFileOperationResult).validate_python(response_dict)
         return validated_response
+
+    def remove_ifc_properties_of_elements(
+        self, element_ifc_properties: list[ElementIFCPropertyRemoval]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Removes local IFC properties, given by property set and property name, from elements.
+        Available only in Archicad 25, 26 and 27 for now.
+
+        Args:
+            element_ifc_properties (list[ElementIFCPropertyRemoval]): The local IFC properties
+                to remove.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elementIFCProperties": element_ifc_properties,
+        }
+        validated_params = RemoveIFCPropertiesOfElementsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "RemoveIFCPropertiesOfElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = RemoveIFCPropertiesOfElementsResult.model_validate(response_dict)
+        return validated_response.executionResults
+
+    def set_ifc_attributes_of_elements(
+        self, element_ifc_attribute_values: list[ElementIFCAttributeValue]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Sets the values of IFC attributes (Name, Description, ObjectType, Tag, ...) of elements.
+        The attribute must be one GetIFCAttributesOfElements returns for the element; its IFC
+        value type is kept. Available only in Archicad 25, 26 and 27 for now.
+
+        Args:
+            element_ifc_attribute_values (list[ElementIFCAttributeValue]): The IFC attribute
+                values to set.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elementIFCAttributeValues": element_ifc_attribute_values,
+        }
+        validated_params = SetIFCAttributesOfElementsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "SetIFCAttributesOfElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = SetIFCAttributesOfElementsResult.model_validate(response_dict)
+        return validated_response.executionResults
 
     def set_ifc_properties_of_elements(
         self, element_ifc_property_values: list[ElementIFCPropertyValue]

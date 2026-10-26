@@ -14,10 +14,14 @@ from multiconn_archicad.models.tapir.commands import (
     DeleteClassificationItemsResult,
     DeleteClassificationSystemsParameters,
     DeleteClassificationSystemsResult,
+    GetClassificationsOfElementDefaultsParameters,
+    GetClassificationsOfElementDefaultsResult,
     GetClassificationsOfElementsParameters,
     GetClassificationsOfElementsResult,
     ImportClassificationsXmlParameters,
     ImportClassificationsXmlResult,
+    SetClassificationsOfElementDefaultsParameters,
+    SetClassificationsOfElementDefaultsResult,
     SetClassificationsOfElementsParameters,
     SetClassificationsOfElementsResult,
     UpdateClassificationItemsParameters,
@@ -35,7 +39,9 @@ from multiconn_archicad.models.tapir.types import (
     ClassificationSystemsWithItem,
     ElementClassification,
     ElementClassificationItemArray,
+    ElementDefaultClassification,
     ElementIdArrayItem,
+    ElementType,
     ErrorItem,
     FailedExecutionResult,
     NewClassificationItem,
@@ -168,6 +174,42 @@ class ClassificationCommands:
         validated_response = DeleteClassificationSystemsResult.model_validate(response_dict)
         return validated_response.executionResults
 
+    def get_classifications_of_element_defaults(
+        self, element_types: list[ElementType], classification_system_ids: list[ClassificationSystemIdArrayItem]
+    ) -> list[ElementClassificationItemArray | ErrorItem]:
+        """
+        Returns the classification of the tool defaults (the settings new elements get) of the
+        given element types in the given classification systems.
+
+        Args:
+            element_types (list[ElementType]): The element types whose tool defaults (the
+                settings new elements get) are read.
+            classification_system_ids (list[ClassificationSystemIdArrayItem]): A list of
+                classification system identifiers.
+
+        Returns:
+            list[ElementClassificationItemArray | ErrorItem]: Order of the outer list is that of
+                the given element types, the inner list that of the given classification
+                systems. Invalid element types or non-existing classification systems are
+                represented by error objects.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elementTypes": element_types,
+            "classificationSystemIds": classification_system_ids,
+        }
+        validated_params = GetClassificationsOfElementDefaultsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetClassificationsOfElementDefaults",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+        )
+        validated_response = GetClassificationsOfElementDefaultsResult.model_validate(response_dict)
+        return validated_response.elementDefaultClassifications
+
     def get_classifications_of_elements(
         self, elements: list[ElementIdArrayItem], classification_system_ids: list[ClassificationSystemIdArrayItem]
     ) -> list[ElementClassificationItemArray | ErrorItem]:
@@ -235,6 +277,38 @@ class ClassificationCommands:
         )
         validated_response = ImportClassificationsXmlResult.model_validate(response_dict)
         return validated_response
+
+    def set_classifications_of_element_defaults(
+        self, element_default_classifications: list[ElementDefaultClassification]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Sets the classifications of the tool defaults (the settings new elements get) of the
+        given element types. In order to set a default to unclassified, omit the
+        classificationItemId field.
+
+        Args:
+            element_default_classifications (list[ElementDefaultClassification]): The
+                classifications to set on the tool defaults (the settings new elements get).
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elementDefaultClassifications": element_default_classifications,
+        }
+        validated_params = SetClassificationsOfElementDefaultsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "SetClassificationsOfElementDefaults",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+        )
+        validated_response = SetClassificationsOfElementDefaultsResult.model_validate(response_dict)
+        return validated_response.executionResults
 
     def set_classifications_of_elements(
         self, element_classifications: list[ElementClassification]

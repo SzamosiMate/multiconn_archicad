@@ -12,12 +12,16 @@ from multiconn_archicad.models.tapir.commands import (
     CreateDesignOptionSetsResult,
     CreateDesignOptionsParameters,
     CreateDesignOptionsResult,
+    DeactivateDesignOptionsInCombinationsParameters,
+    DeactivateDesignOptionsInCombinationsResult,
     DeleteDesignOptionCombinationsParameters,
     DeleteDesignOptionCombinationsResult,
     DeleteDesignOptionSetsParameters,
     DeleteDesignOptionSetsResult,
     DeleteDesignOptionsParameters,
     DeleteDesignOptionsResult,
+    DuplicateDesignOptionCombinationsParameters,
+    DuplicateDesignOptionCombinationsResult,
     GetDesignOptionCombinationsResult,
     GetDesignOptionForElementsParameters,
     GetDesignOptionForElementsResult,
@@ -46,11 +50,11 @@ from multiconn_archicad.models.tapir.types import (
     DesignOptionCombinationIdArrayItem,
     DesignOptionCombinationRename,
     DesignOptionData,
+    DesignOptionDeactivation,
     DesignOptionDetails,
     DesignOptionForElement,
     DesignOptionIdArrayItem,
     DesignOptionRename,
-    DesignOptionSet,
     DesignOptionSetIdArrayItem,
     DesignOptionSetRename,
     ElementDesignOptionPair,
@@ -154,6 +158,36 @@ class DesignOptionsCommands:
         validated_response = CreateDesignOptionsResult.model_validate(response_dict)
         return validated_response.designOptionIdsOrErrors
 
+    def deactivate_design_options_in_combinations(
+        self, deactivated_design_options_in_combinations: list[DesignOptionDeactivation]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Turns off the given design options in the given combinations, leaving their other
+        options as they are. Available from Archicad 29.
+
+        Args:
+            deactivated_design_options_in_combinations (list[DesignOptionDeactivation])
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "deactivatedDesignOptionsInCombinations": deactivated_design_options_in_combinations,
+        }
+        validated_params = DeactivateDesignOptionsInCombinationsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "DeactivateDesignOptionsInCombinations",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+        )
+        validated_response = DeactivateDesignOptionsInCombinationsResult.model_validate(response_dict)
+        return validated_response.executionResults
+
     def delete_design_option_combinations(
         self, design_option_combinations: list[DesignOptionCombinationIdArrayItem]
     ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
@@ -240,6 +274,38 @@ class DesignOptionsCommands:
         validated_response = DeleteDesignOptionsResult.model_validate(response_dict)
         return validated_response.executionResults
 
+    def duplicate_design_option_combinations(
+        self, design_option_combinations: list[DesignOptionCombinationIdArrayItem]
+    ) -> list[DesignOptionCombinationIdArrayItem | ErrorItem]:
+        """
+        Duplicates the given design option combinations and returns the identifiers of the new
+        combinations. Available from Archicad 29.
+
+        Args:
+            design_option_combinations (list[DesignOptionCombinationIdArrayItem]): The design
+                option combinations to duplicate.
+
+        Returns:
+            list[DesignOptionCombinationIdArrayItem | ErrorItem]: The identifiers of the new
+                combinations, in the order of the input, or an error for each combination that
+                could not be duplicated.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "designOptionCombinations": design_option_combinations,
+        }
+        validated_params = DuplicateDesignOptionCombinationsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "DuplicateDesignOptionCombinations",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+        )
+        validated_response = DuplicateDesignOptionCombinationsResult.model_validate(response_dict)
+        return validated_response.designOptionCombinationIdsOrErrors
+
     def get_design_option_combinations(self) -> list[DesignOptionCombinationDetails]:
         """
         Retrieves information about existing design option combinations.
@@ -282,12 +348,13 @@ class DesignOptionsCommands:
         validated_response = GetDesignOptionForElementsResult.model_validate(response_dict)
         return validated_response.designOptionForElements
 
-    def get_design_option_sets(self) -> list[DesignOptionSet]:
+    def get_design_option_sets(self) -> GetDesignOptionSetsResult:
         """
-        Retrieves information about existing design option sets. Available from Archicad 29.
+        Retrieves information about existing design option sets, and in Teamwork projects the
+        Teamwork identifier of the design options. Available from Archicad 29.
 
         Returns:
-            list[DesignOptionSet]
+            GetDesignOptionSetsResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -296,7 +363,7 @@ class DesignOptionsCommands:
         """
         response_dict = self._core.post_tapir_command("GetDesignOptionSets")
         validated_response = GetDesignOptionSetsResult.model_validate(response_dict)
-        return validated_response.designOptionSets
+        return validated_response
 
     def get_design_options(self) -> list[DesignOptionDetails]:
         """

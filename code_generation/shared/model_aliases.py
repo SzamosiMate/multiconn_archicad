@@ -1,6 +1,8 @@
 """Python compatibility names emitted by both Tapir model splitters."""
 
 TAPIR_TYPE_ALIASES = {
+    "GraphicOverrideRuleDetails": "GraphicOverrideRule",
+    "MarkerGDLParameterDetails": "StoredGDLParameter",
     "MEPDomains": "MEPDomain",
     "MEPSystemDomain": "MEPDomain",
     "CoverFillOrientationType": "HatchOrientationType",

@@ -26,6 +26,8 @@ from multiconn_archicad.models.tapir.commands import (
     CreateMEPSystemGroupsResult,
     DeleteElectricalCircuitsParameters,
     DeleteElectricalCircuitsResult,
+    DeleteMEPPhysicalSystemsParameters,
+    DeleteMEPPhysicalSystemsResult,
     GetElectricalCircuitsParameters,
     GetElectricalCircuitsResult,
     GetElectricalDevicesParameters,
@@ -51,8 +53,12 @@ from multiconn_archicad.models.tapir.commands import (
     ModifyElectricalPanelsResult,
     ModifyElectricalProjectSettingsParameters,
     ModifyElectricalProjectSettingsResult,
+    ModifyMEPPhysicalSystemsParameters,
+    ModifyMEPPhysicalSystemsResult,
     ModifyMEPRoutingElementsParameters,
     ModifyMEPRoutingElementsResult,
+    ModifyMEPSystemGroupsParameters,
+    ModifyMEPSystemGroupsResult,
 )
 from multiconn_archicad.models.tapir.types import (
     ElectricalCircuitConnectionData,
@@ -80,6 +86,7 @@ from multiconn_archicad.models.tapir.types import (
     MEPElementType,
     MEPPhysicalSystemData,
     MEPPhysicalSystemIdArrayItem,
+    MEPPhysicalSystemModificationData,
     MEPPreferenceTableDomain,
     MEPRoutingElementData,
     MEPRoutingElementDetails,
@@ -87,6 +94,7 @@ from multiconn_archicad.models.tapir.types import (
     MEPSystemGroupData,
     MEPSystemGroupDetails,
     MEPSystemGroupIdArrayItem,
+    MEPSystemGroupModificationData,
     SuccessfulExecutionResult,
 )
 
@@ -389,6 +397,36 @@ class MepCommands:
         validated_response = DeleteElectricalCircuitsResult.model_validate(response_dict)
         return validated_response.executionResults
 
+    def delete_mep_physical_systems(
+        self, physical_systems: list[MEPPhysicalSystemIdArrayItem]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Removes MEP physical systems from their system groups. Their member elements are not
+        deleted. Available from Archicad 29.
+
+        Args:
+            physical_systems (list[MEPPhysicalSystemIdArrayItem]): The physical systems to
+                remove from their system groups. Their member elements are not deleted.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "physicalSystems": physical_systems,
+        }
+        validated_params = DeleteMEPPhysicalSystemsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "DeleteMEPPhysicalSystems", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = DeleteMEPPhysicalSystemsResult.model_validate(response_dict)
+        return validated_response.executionResults
+
     def get_electrical_circuits(
         self,
         elements: None | list[ElementIdArrayItem] = None,
@@ -619,9 +657,12 @@ class MepCommands:
         self, elements: list[ElementIdArrayItem]
     ) -> list[ErrorItem | MEPRoutingElementDetails]:
         """
-        Retrieves the details of the given MEP routing elements: domain, MEP system, route
-        polyline, segments with cross section data (shape, size, preference table and reference
-        id) and nodes. Available from Archicad 28.
+        Retrieves the details of the given MEP routing elements: domain, MEP system, offset from
+        the home story, branch preference table, the ports logically connected at the route's
+        beginning and end, route polyline, segments with cross section data (shape, size,
+        preference table and reference id), begin and end nodes, anchor, reference line offsets,
+        wall thickness, flange size and rigid segments, and nodes with their incoming and
+        outgoing segments, elbows and transitions. Available from Archicad 28.
 
         Args:
             elements (list[ElementIdArrayItem]): A list of elements.
@@ -647,8 +688,8 @@ class MepCommands:
 
     def get_mep_system_groups(self) -> list[ErrorItem | MEPSystemGroupDetails]:
         """
-        Gets the MEP system groups of the project with their physical systems: name, root
-        element and MEP system. Available from Archicad 29.
+        Gets the MEP system groups of the project with their physical systems: name, editable
+        flag, root element and MEP system. Available from Archicad 29.
 
         Returns:
             list[ErrorItem | MEPSystemGroupDetails]: The system groups of the project with their
@@ -797,13 +838,44 @@ class MepCommands:
         validated_response = TypeAdapter(ModifyElectricalProjectSettingsResult).validate_python(response_dict)
         return validated_response
 
+    def modify_mep_physical_systems(
+        self, physical_systems_data: list[MEPPhysicalSystemModificationData]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Modifies MEP physical systems: name, root element and the MEP system used as their
+        category. Only the given fields are changed. Available from Archicad 29.
+
+        Args:
+            physical_systems_data (list[MEPPhysicalSystemModificationData]): Array of data to
+                modify physical systems. Only the given fields are changed.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "physicalSystemsData": physical_systems_data,
+        }
+        validated_params = ModifyMEPPhysicalSystemsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "ModifyMEPPhysicalSystems", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = ModifyMEPPhysicalSystemsResult.model_validate(response_dict)
+        return validated_response.executionResults
+
     def modify_mep_routing_elements(
         self, routing_elements_data: list[MEPRoutingElementModificationData]
     ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
         """
-        Modifies the given MEP routing elements: MEP system, cross section data (shape, size,
-        preference table and reference id) of all segments and node positions. Available from
-        Archicad 28.
+        Modifies the given MEP routing elements: MEP system, branch preference table, cross
+        section data (shape, size, preference table and reference id), anchor, reference line
+        offsets, wall thickness and flange size of all segments, and node positions. Available
+        from Archicad 28.
 
         Args:
             routing_elements_data (list[MEPRoutingElementModificationData]): Array of data to
@@ -826,4 +898,33 @@ class MepCommands:
             "ModifyMEPRoutingElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = ModifyMEPRoutingElementsResult.model_validate(response_dict)
+        return validated_response.executionResults
+
+    def modify_mep_system_groups(
+        self, system_groups_data: list[MEPSystemGroupModificationData]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Renames MEP system groups. Available from Archicad 29.
+
+        Args:
+            system_groups_data (list[MEPSystemGroupModificationData]): Array of data to modify
+                system groups.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "systemGroupsData": system_groups_data,
+        }
+        validated_params = ModifyMEPSystemGroupsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "ModifyMEPSystemGroups", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = ModifyMEPSystemGroupsResult.model_validate(response_dict)
         return validated_response.executionResults

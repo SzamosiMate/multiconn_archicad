@@ -22,6 +22,7 @@ BatchCoordinate: TypeAlias = int | ValueCoordinate
 ERROR_CONTAINER_MODELS = (
     tapir.FailedExecutionResult,
     tapir.ErrorItem,
+    tapir.PropertyValueErrorItem,
     official.FailedExecutionResult,
     official.ErrorItem,
 )

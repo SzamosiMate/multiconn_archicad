@@ -8,22 +8,41 @@ from pydantic import TypeAdapter
 from multiconn_archicad.models.tapir.commands import (
     ChangeWindowParameters,
     ChangeWindowResult,
+    Get3DCutawayStatusResult,
     GetAddOnVersionResult,
     GetArchicadLocationResult,
+    GetArchicadReleaseInfoResult,
+    GetContainingDatabasesParameters,
+    GetContainingDatabasesResult,
+    GetCurrentWindowDrawingScaleResult,
     GetCurrentWindowTypeResult,
+    GetElementFromUserParameters,
+    GetElementFromUserResult,
     GetPointFromUserParameters,
     GetPointFromUserResult,
+    GetPrinterInfoResult,
+    GetProductVersionInfoResult,
     GetSpecialFoldersParameters,
     GetSpecialFoldersResult,
     GetUserGSIDResult,
     QuitArchicadResult,
+    Set3DCutawayStatusParameters,
+    Set3DCutawayStatusResult,
+    SetCurrentWindowDrawingScaleParameters,
+    SetCurrentWindowDrawingScaleResult,
+    SetDialogAutoCloseParameters,
+    SetDialogAutoCloseResult,
     ShowAlertParameters,
     ShowAlertResult,
 )
 from multiconn_archicad.models.tapir.types import (
     AlertType,
+    ContainingDatabase,
     Coordinate3D,
-    DatabaseIdAndWindowType,
+    DatabaseById,
+    DatabaseByWindowType,
+    ElementIdArrayItem,
+    ElementType,
     ErrorItem,
     FailedExecutionResult,
     NavigatorItemIdArrayItem,
@@ -42,15 +61,16 @@ class ApplicationCommands:
         self._core = core
 
     def change_window(
-        self, parameters: NavigatorItemIdArrayItem | DatabaseIdAndWindowType
+        self, parameters: NavigatorItemIdArrayItem | DatabaseByWindowType | DatabaseById
     ) -> FailedExecutionResult | SuccessfulExecutionResult:
         """
-        Changes the current (active) window to the given window. With windowType 'FloorPlan' and
-        a storyIndex it also activates that story on the floor plan.
+        Changes the current (active) window to the given window. A databaseId on its own is
+        enough; the window type is taken from the database. With windowType 'FloorPlan' and a
+        storyIndex it also activates that story on the floor plan.
 
         Args:
-            parameters (NavigatorItemIdArrayItem | DatabaseIdAndWindowType): Union model
-                configuration parameters.
+            parameters (NavigatorItemIdArrayItem | DatabaseByWindowType | DatabaseById): Union
+                model configuration parameters.
 
         Returns:
             FailedExecutionResult | SuccessfulExecutionResult
@@ -65,6 +85,23 @@ class ApplicationCommands:
             "ChangeWindow", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = TypeAdapter(ChangeWindowResult).validate_python(response_dict)
+        return validated_response
+
+    def get_3d_cutaway_status(self) -> Get3DCutawayStatusResult:
+        """
+        Returns whether 3D Cutaway is on and whether the cutting planes are shown in the 3D
+        window. In Archicad 25-27 the 3D window may need to be open.
+
+        Returns:
+            Get3DCutawayStatusResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        response_dict = self._core.post_tapir_command("Get3DCutawayStatus")
+        validated_response = Get3DCutawayStatusResult.model_validate(response_dict)
         return validated_response
 
     def get_add_on_version(self) -> str:
@@ -99,6 +136,73 @@ class ApplicationCommands:
         validated_response = GetArchicadLocationResult.model_validate(response_dict)
         return validated_response.archicadLocation
 
+    def get_archicad_release_info(self) -> GetArchicadReleaseInfoResult:
+        """
+        Retrieves the main version, release version and build number of the running Archicad,
+        with the caption of its window.
+
+        Returns:
+            GetArchicadReleaseInfoResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        response_dict = self._core.post_tapir_command("GetArchicadReleaseInfo")
+        validated_response = GetArchicadReleaseInfoResult.model_validate(response_dict)
+        return validated_response
+
+    def get_containing_databases(self, elements: list[ElementIdArrayItem]) -> list[ContainingDatabase | ErrorItem]:
+        """
+        Returns the database (window type, database id and name) that contains each of the given
+        elements, from any database, not only the current one. Pass the windowType and
+        databaseId to ChangeWindow to open it, for example to find an element placed on a
+        layout.
+
+        Args:
+            elements (list[ElementIdArrayItem]): A list of elements.
+
+        Returns:
+            list[ContainingDatabase | ErrorItem]: The database of each element, in the order of
+                the input elements. Pass windowType and databaseId to ChangeWindow to open it.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elements": elements,
+        }
+        validated_params = GetContainingDatabasesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetContainingDatabases", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetContainingDatabasesResult.model_validate(response_dict)
+        return validated_response.databases
+
+    def get_current_window_drawing_scale(self) -> float:
+        """
+        Returns the drawing scale of the current (active) window, the scale shown in the bottom
+        bar, as its denominator: 100.0 for 1:100, 20.0 for 1:20. Unlike GetViewSettings it needs
+        no saved view. It reads the scale of the current database: the floor plan, a section,
+        elevation, interior elevation, detail, worksheet or 3D document window, each of which
+        has its own. Layouts always return 1.0.
+
+        Returns:
+            float: The denominator of the drawing scale of the current window: 100.0 for 1:100,
+                20.0 for 1:20. Always 1.0 for layouts.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        response_dict = self._core.post_tapir_command("GetCurrentWindowDrawingScale")
+        validated_response = GetCurrentWindowDrawingScaleResult.model_validate(response_dict)
+        return validated_response.scale
+
     def get_current_window_type(self) -> WindowType:
         """
         Returns the type of the current (active) window.
@@ -114,6 +218,43 @@ class ApplicationCommands:
         response_dict = self._core.post_tapir_command("GetCurrentWindowType")
         validated_response = GetCurrentWindowTypeResult.model_validate(response_dict)
         return validated_response.currentWindowType
+
+    def get_element_from_user(
+        self, prompt: None | str = None, element_types: None | list[ElementType] = None
+    ) -> GetElementFromUserResult:
+        """
+        Asks the designer to click an element in the current window and returns its id, its type
+        and the clicked point. A click on empty space or on an element of a type not asked for
+        asks again. Archicad waits for the click or for Escape, and every other JSON command
+        queues behind this one until then; cancelling returns cancelled.
+
+        Args:
+            prompt (None | str): Shown in the control box while Archicad waits for the click.
+                Single-byte text: the box takes a char field. Archicad's main thread waits for
+                the click or for Escape, and every other JSON command queues behind this one
+                until then.
+            element_types (None | list[ElementType]): Only an element of one of these types is
+                accepted. A click on empty space or on an element of another type asks for the
+                click again. Default: any element.
+
+        Returns:
+            GetElementFromUserResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "prompt": prompt,
+            "elementTypes": element_types,
+        }
+        validated_params = GetElementFromUserParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetElementFromUser", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetElementFromUserResult.model_validate(response_dict)
+        return validated_response
 
     def get_point_from_user(self, prompt: None | str = None) -> Coordinate3D:
         """
@@ -144,6 +285,41 @@ class ApplicationCommands:
         )
         validated_response = GetPointFromUserResult.model_validate(response_dict)
         return validated_response.position
+
+    def get_printer_info(self) -> GetPrinterInfoResult:
+        """
+        Retrieves Archicad's current print settings: the print area, grid, fixed text size and
+        scale (the settings PrintView takes).
+
+        Returns:
+            GetPrinterInfoResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        response_dict = self._core.post_tapir_command("GetPrinterInfo")
+        validated_response = GetPrinterInfoResult.model_validate(response_dict)
+        return validated_response
+
+    def get_product_version_info(self) -> GetProductVersionInfoResult:
+        """
+        Retrieves the version information of the running Archicad: build number, language code,
+        product family and version text, plus the product name, product type and
+        main/update/hotfix versions from Archicad 29. Requires Archicad 28 or later.
+
+        Returns:
+            GetProductVersionInfoResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        response_dict = self._core.post_tapir_command("GetProductVersionInfo")
+        validated_response = GetProductVersionInfoResult.model_validate(response_dict)
+        return validated_response
 
     def get_special_folders(self, folder_types: list[SpecialFolderType]) -> list[ErrorItem | SpecialFolderPath]:
         """
@@ -203,6 +379,104 @@ class ApplicationCommands:
         """
         response_dict = self._core.post_tapir_command("QuitArchicad")
         validated_response = TypeAdapter(QuitArchicadResult).validate_python(response_dict)
+        return validated_response
+
+    def set_3d_cutaway_status(
+        self, cutaway_enabled: None | bool = None, cutting_planes_visible: None | bool = None
+    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+        """
+        Turns 3D Cutaway on or off and shows or hides the cutting planes in the 3D window. In
+        Archicad 25-27 the 3D window may need to be open.
+
+        Args:
+            cutaway_enabled (None | bool): Turns 3D Cutaway on or off. Left unchanged when
+                omitted.
+            cutting_planes_visible (None | bool): Shows or hides the cutting planes. Left
+                unchanged when omitted.
+
+        Returns:
+            FailedExecutionResult | SuccessfulExecutionResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "cutawayEnabled": cutaway_enabled,
+            "cuttingPlanesVisible": cutting_planes_visible,
+        }
+        validated_params = Set3DCutawayStatusParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "Set3DCutawayStatus", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = TypeAdapter(Set3DCutawayStatusResult).validate_python(response_dict)
+        return validated_response
+
+    def set_current_window_drawing_scale(
+        self, scale: float, rebuild: None | bool = False
+    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+        """
+        Changes the drawing scale of the current (active) window, the scale shown in the bottom
+        bar, to the given denominator: 100 for 1:100. It changes the scale of the current
+        database: the floor plan, a section, elevation, interior elevation, detail, worksheet or
+        3D document window, each of which has its own. Layouts are always 1:1 and are rejected.
+        The scale must be between 1 and 30000. The change is undoable.
+
+        Args:
+            scale (float): The denominator of the new drawing scale: 100 for 1:100, 20 for 1:20.
+                Archicad accepts scales between 1 and 30000.
+            rebuild (None | bool): Rebuild the window after the scale changed (the API's zoom
+                flag). Default: false.
+
+        Returns:
+            FailedExecutionResult | SuccessfulExecutionResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "scale": scale,
+            "rebuild": rebuild,
+        }
+        validated_params = SetCurrentWindowDrawingScaleParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "SetCurrentWindowDrawingScale", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = TypeAdapter(SetCurrentWindowDrawingScaleResult).validate_python(response_dict)
+        return validated_response
+
+    def set_dialog_auto_close(self, enabled: bool) -> FailedExecutionResult | SuccessfulExecutionResult:
+        """
+        Turns the dialog auto close on or off. While it is on, Archicad closes the dialogs it
+        would show with their default button instead of waiting for the user, so automation is
+        not blocked by them. To have it on already while Archicad opens a project (before any
+        command can be sent), set the TAPIR_DIALOG_AUTOCLOSE environment variable to true for
+        the Archicad process before starting it.
+
+        Args:
+            enabled (bool): True turns the dialog auto close on: Archicad closes the dialogs it
+                would show with their default button instead of waiting for the user. False
+                turns it off.
+
+        Returns:
+            FailedExecutionResult | SuccessfulExecutionResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "enabled": enabled,
+        }
+        validated_params = SetDialogAutoCloseParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "SetDialogAutoClose", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = TypeAdapter(SetDialogAutoCloseResult).validate_python(response_dict)
         return validated_response
 
     def show_alert(

@@ -25,6 +25,8 @@ from multiconn_archicad.models.tapir.commands import (
     GetIssuesResult,
     ImportIssuesFromBCFParameters,
     ImportIssuesFromBCFResult,
+    ImportMarkupsFromPDFParameters,
+    ImportMarkupsFromPDFResult,
 )
 from multiconn_archicad.models.tapir.types import (
     Comment,
@@ -333,4 +335,32 @@ class IssueManagementCommands:
             "ImportIssuesFromBCF", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = TypeAdapter(ImportIssuesFromBCFResult).validate_python(response_dict)
+        return validated_response
+
+    def import_markups_from_pdf(self, pdf_file_path: str) -> ImportMarkupsFromPDFResult:
+        """
+        Imports the markups of the specified PDF file as issues, like Issue Manager > Import PDF
+        markups, without any dialog and without opening the Issue Manager palette, and reports
+        the issues it created. Available from Archicad 29.
+
+        Args:
+            pdf_file_path (str): The os path to the PDF file with the markups, including it's
+                name.
+
+        Returns:
+            ImportMarkupsFromPDFResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "pdfFilePath": pdf_file_path,
+        }
+        validated_params = ImportMarkupsFromPDFParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "ImportMarkupsFromPDF", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = ImportMarkupsFromPDFResult.model_validate(response_dict)
         return validated_response

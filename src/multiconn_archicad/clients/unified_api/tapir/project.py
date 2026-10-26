@@ -24,11 +24,23 @@ from multiconn_archicad.models.tapir.commands import (
     GetAutoTextNameParameters,
     GetAutoTextNameResult,
     GetCalculationUnitsResult,
+    GetCurrentViewImageParameters,
+    GetCurrentViewImageResult,
     GetGeoLocationResult,
+    GetHotlinkProxyElementTableParameters,
+    GetHotlinkProxyElementTableResult,
     GetHotlinksResult,
+    GetNoteAutoTextKeywordsParameters,
+    GetNoteAutoTextKeywordsResult,
     GetProjectInfoFieldsResult,
     GetProjectInfoResult,
+    GetProjectNotesResult,
+    GetProjectPreferencesParameters,
+    GetProjectPreferencesResult,
     GetStoriesResult,
+    GetSurveyPointTransformationResult,
+    NewProjectParameters,
+    NewProjectResult,
     OpenProjectParameters,
     OpenProjectResult,
     PrintViewParameters,
@@ -46,6 +58,10 @@ from multiconn_archicad.models.tapir.commands import (
     SetGeoLocationParameters,
     SetGeoLocationResult,
     SetProjectInfoFieldParameters,
+    SetProjectNotesParameters,
+    SetProjectNotesResult,
+    SetProjectPreferencesParameters,
+    SetProjectPreferencesResult,
     SetStoriesParameters,
     SetStoriesResult,
     UpdateHotlinksParameters,
@@ -54,6 +70,8 @@ from multiconn_archicad.models.tapir.commands import (
 from multiconn_archicad.models.tapir.types import (
     AutoTextKey,
     AutoTextName,
+    CalculationUnitPreferencesUpdate,
+    DimensionPreferencesUpdate,
     ElementId,
     ElementIdArrayItem,
     ErrorItem,
@@ -65,15 +83,21 @@ from multiconn_archicad.models.tapir.types import (
     HotlinkNodeChange,
     HotlinkNodeCreated,
     HotlinkNodeReference,
+    HotlinkProxyElementTable,
     ImageColorDepth,
     ImageFormat,
+    NoteAutoTextKeyword,
     PrintArea,
     ProjectInfoField,
     ProjectInfoFieldData,
     ProjectLocationUpdate,
+    ProjectPreferenceType,
     StorySettings,
     SuccessfulExecutionResult,
     SurveyPointUpdate,
+    ViewImageFormat,
+    ViewImageSource,
+    WorkingUnitPreferencesUpdate,
 )
 
 if TYPE_CHECKING:
@@ -352,9 +376,42 @@ class ProjectCommands:
         validated_response = GetCalculationUnitsResult.model_validate(response_dict)
         return validated_response
 
+    def get_current_view_image(
+        self, source: None | ViewImageSource = None, format: None | ViewImageFormat = None
+    ) -> GetCurrentViewImageResult:
+        """
+        Returns what the 3D window, or the PhotoRendering window, shows as a base64 encoded png
+        or jpg image with its size in pixels, without writing a file. Available from Archicad
+        30.
+
+        Args:
+            source (None | ViewImageSource)
+            format (None | ViewImageFormat)
+
+        Returns:
+            GetCurrentViewImageResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "source": source,
+            "format": format,
+        }
+        validated_params = GetCurrentViewImageParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetCurrentViewImage", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetCurrentViewImageResult.model_validate(response_dict)
+        return validated_response
+
     def get_geo_location(self) -> GetGeoLocationResult:
         """
-        Gets the project location details.
+        Gets the project location details: the project location, and the survey point's
+        position, geo-referencing parameters, visibility and lock state (the lock from Archicad
+        26).
 
         Returns:
             GetGeoLocationResult
@@ -368,10 +425,43 @@ class ProjectCommands:
         validated_response = GetGeoLocationResult.model_validate(response_dict)
         return validated_response
 
+    def get_hotlink_proxy_element_table(
+        self, hotlink_instances: list[ElementIdArrayItem]
+    ) -> list[ErrorItem | HotlinkProxyElementTable]:
+        """
+        Maps the proxy elements of placed hotlink instances to the elements of the source file
+        they were made from, so an element seen in a hotlinked module can be traced back to its
+        source element.
+
+        Args:
+            hotlink_instances (list[ElementIdArrayItem]): The placed hotlink instances: elements
+                of type Hotlink, for example the hotlinkId of an element inside one. Not the
+                nodes GetHotlinks returns.
+
+        Returns:
+            list[ErrorItem | HotlinkProxyElementTable]: One item per requested instance, in
+                order: its proxy elements with the source elements they were made from, or an
+                error.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "hotlinkInstances": hotlink_instances,
+        }
+        validated_params = GetHotlinkProxyElementTableParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetHotlinkProxyElementTable", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetHotlinkProxyElementTableResult.model_validate(response_dict)
+        return validated_response.proxyElementTables
+
     def get_hotlinks(self) -> list[Hotlink]:
         """
-        Gets the file system locations (path) of the hotlink modules. The hotlinks can have tree
-        hierarchy in the project.
+        Gets the file system locations (path) of the hotlink modules and the instance elements
+        placed from each node. The hotlinks can have tree hierarchy in the project.
 
         Returns:
             list[Hotlink]: A list of hotlink nodes.
@@ -384,6 +474,33 @@ class ProjectCommands:
         response_dict = self._core.post_tapir_command("GetHotlinks")
         validated_response = GetHotlinksResult.model_validate(response_dict)
         return validated_response.hotlinks
+
+    def get_note_auto_text_keywords(self, auto_text_ids: list[int]) -> list[ErrorItem | NoteAutoTextKeyword]:
+        """
+        Retrieves the keywords of note autotexts (the autotexts of dimension, label and other
+        element notes) by their numeric API_NoteAutotextID values. Available from Archicad 26.
+
+        Args:
+            auto_text_ids (list[int]): Numeric values of the API_NoteAutotextID enumeration of
+                the Archicad API (the autotexts of dimension, label and other element notes).
+
+        Returns:
+            list[ErrorItem | NoteAutoTextKeyword]: One result per input id, in the same order.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "autoTextIds": auto_text_ids,
+        }
+        validated_params = GetNoteAutoTextKeywordsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetNoteAutoTextKeywords", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetNoteAutoTextKeywordsResult.model_validate(response_dict)
+        return validated_response.keywords
 
     def get_project_info(self) -> GetProjectInfoResult:
         """
@@ -417,6 +534,53 @@ class ProjectCommands:
         validated_response = GetProjectInfoFieldsResult.model_validate(response_dict)
         return validated_response.fields
 
+    def get_project_notes(self) -> GetProjectNotesResult:
+        """
+        Gets the Project Notes of the project (File > Info > Project Notes): client, project
+        name, company, address, architect, draftsmen, project status, date of issue, keywords
+        and notes.
+
+        Returns:
+            GetProjectNotesResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        response_dict = self._core.post_tapir_command("GetProjectNotes")
+        validated_response = GetProjectNotesResult.model_validate(response_dict)
+        return validated_response
+
+    def get_project_preferences(
+        self, preference_types: None | list[ProjectPreferenceType] = None
+    ) -> GetProjectPreferencesResult:
+        """
+        Gets pages of the project preferences (Options > Project Preferences): the working
+        units, the dimensions and the calculation units. Further pages may follow.
+
+        Args:
+            preference_types (None | list[ProjectPreferenceType]): The preference pages to get.
+                Every page when missing.
+
+        Returns:
+            GetProjectPreferencesResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "preferenceTypes": preference_types,
+        }
+        validated_params = GetProjectPreferencesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetProjectPreferences", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetProjectPreferencesResult.model_validate(response_dict)
+        return validated_response
+
     def get_stories(self) -> GetStoriesResult:
         """
         Retrieves information about the story structure of the currently loaded project: index,
@@ -432,6 +596,54 @@ class ProjectCommands:
         """
         response_dict = self._core.post_tapir_command("GetStories")
         validated_response = GetStoriesResult.model_validate(response_dict)
+        return validated_response
+
+    def get_survey_point_transformation(self) -> GetSurveyPointTransformationResult:
+        """
+        Gets the 3x4 matrix that transforms points from the Project Origin coordinate system
+        into the Survey Point coordinate system, row by row, and its inverse when it is
+        invertible. Read only. Available from Archicad 27.
+
+        Returns:
+            GetSurveyPointTransformationResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        response_dict = self._core.post_tapir_command("GetSurveyPointTransformation")
+        validated_response = GetSurveyPointTransformationResult.model_validate(response_dict)
+        return validated_response
+
+    def new_project(self, new_and_reset: None | bool = None) -> FailedExecutionResult | SuccessfulExecutionResult:
+        """
+        Starts a new, untitled project from the template set in Archicad's New Project settings,
+        as File > New does; with newAndReset also the working environment is reset, as New and
+        Reset All does. The unsaved changes of the open project are discarded, as with
+        OpenProject.
+
+        Args:
+            new_and_reset (None | bool): Optional. Also reset the working environment to the
+                template's, as File > New > New and Reset All does, instead of keeping the
+                current one as File > New does. Defaults to false.
+
+        Returns:
+            FailedExecutionResult | SuccessfulExecutionResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "newAndReset": new_and_reset,
+        }
+        validated_params = NewProjectParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "NewProject", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = TypeAdapter(NewProjectResult).validate_python(response_dict)
         return validated_response
 
     def open_project(self, project_file_path: str) -> FailedExecutionResult | SuccessfulExecutionResult:
@@ -681,7 +893,9 @@ class ProjectCommands:
         self, project_location: None | ProjectLocationUpdate = None, survey_point: None | SurveyPointUpdate = None
     ) -> FailedExecutionResult | SuccessfulExecutionResult:
         """
-        Sets the project location details.
+        Sets the project location details: the project location, and the survey point's
+        position, geo-referencing parameters, visibility and lock state (the lock from Archicad
+        26). Omitted fields stay unchanged.
 
         Args:
             project_location (None | ProjectLocationUpdate)
@@ -729,6 +943,108 @@ class ProjectCommands:
             "SetProjectInfoField", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         return None
+
+    def set_project_notes(
+        self,
+        client: None | str = None,
+        project_name: None | str = None,
+        company: None | str = None,
+        street: None | str = None,
+        city: None | str = None,
+        country: None | str = None,
+        postal_code: None | str = None,
+        architect: None | str = None,
+        draftsmen: None | str = None,
+        project_status: None | str = None,
+        date_of_issue: None | str = None,
+        keywords: None | str = None,
+        notes: None | str = None,
+    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+        """
+        Changes the Project Notes of the project (File > Info > Project Notes). Only the given
+        fields are changed; texts longer than the field Archicad stores are truncated.
+
+        Args:
+            client (None | str): Client.
+            project_name (None | str): Project name.
+            company (None | str): Company.
+            street (None | str): Street.
+            city (None | str): City.
+            country (None | str): Country.
+            postal_code (None | str): Postal code.
+            architect (None | str): Architect.
+            draftsmen (None | str): Draftsmen.
+            project_status (None | str): Project status.
+            date_of_issue (None | str): Date of issue (free text, as typed in Project Notes).
+            keywords (None | str): Keywords.
+            notes (None | str): Notes.
+
+        Returns:
+            FailedExecutionResult | SuccessfulExecutionResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "client": client,
+            "projectName": project_name,
+            "company": company,
+            "street": street,
+            "city": city,
+            "country": country,
+            "postalCode": postal_code,
+            "architect": architect,
+            "draftsmen": draftsmen,
+            "projectStatus": project_status,
+            "dateOfIssue": date_of_issue,
+            "keywords": keywords,
+            "notes": notes,
+        }
+        validated_params = SetProjectNotesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "SetProjectNotes", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = TypeAdapter(SetProjectNotesResult).validate_python(response_dict)
+        return validated_response
+
+    def set_project_preferences(
+        self,
+        working_units: None | WorkingUnitPreferencesUpdate = None,
+        dimensions: DimensionPreferencesUpdate | None = None,
+        calculation_units: CalculationUnitPreferencesUpdate | None = None,
+    ) -> SetProjectPreferencesResult:
+        """
+        Changes pages of the project preferences (Options > Project Preferences): the working
+        units, the dimensions and the calculation units. Only the given fields change, the rest
+        of each page keeps its value. In Teamwork the PreferencesDialog lockable object set has
+        to be reserved first (ReserveLockableObjectSet). Available from Archicad 27.
+
+        Args:
+            working_units (None | WorkingUnitPreferencesUpdate)
+            dimensions (DimensionPreferencesUpdate | None)
+            calculation_units (CalculationUnitPreferencesUpdate | None)
+
+        Returns:
+            SetProjectPreferencesResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "workingUnits": working_units,
+            "dimensions": dimensions,
+            "calculationUnits": calculation_units,
+        }
+        validated_params = SetProjectPreferencesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "SetProjectPreferences", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = SetProjectPreferencesResult.model_validate(response_dict)
+        return validated_response
 
     def set_stories(self, stories: list[StorySettings]) -> FailedExecutionResult | SuccessfulExecutionResult:
         """

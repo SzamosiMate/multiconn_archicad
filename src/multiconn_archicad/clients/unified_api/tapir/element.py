@@ -8,8 +8,11 @@ from pydantic import TypeAdapter
 from multiconn_archicad.models.tapir.commands import (
     ChangeSelectionOfElementsParameters,
     ChangeSelectionOfElementsResult,
+    ConvertRevealOffsetsParameters,
+    ConvertRevealOffsetsResult,
     DeleteElementsParameters,
     DeleteElementsResult,
+    DeleteSelectedElementsResult,
     FilterElementsParameters,
     FilterElementsResult,
     Get3DBoundingBoxesParameters,
@@ -18,6 +21,8 @@ from multiconn_archicad.models.tapir.commands import (
     Get3DGeometryOfElementsResult,
     GetAllElementsParameters,
     GetAllElementsResult,
+    GetCategoryValuesOfElementsParameters,
+    GetCategoryValuesOfElementsResult,
     GetCollisionsParameters,
     GetCollisionsResult,
     GetConnectedElementsParameters,
@@ -26,18 +31,37 @@ from multiconn_archicad.models.tapir.commands import (
     GetDetailsOfElementsResult,
     GetDimensionDataParameters,
     GetDimensionDataResult,
+    GetElementAtCoordinateParameters,
+    GetElementAtCoordinateResult,
+    GetElementCategoriesResult,
     GetElementPreviewImageParameters,
     GetElementPreviewImageResult,
+    GetElementTypeNamesParameters,
+    GetElementTypeNamesResult,
     GetElementsByTypeParameters,
     GetElementsByTypeResult,
+    GetElementsInDrawOrderParameters,
+    GetElementsInDrawOrderResult,
     GetGDLParametersOfElementsParameters,
     GetGDLParametersOfElementsResult,
     GetGridElementDefaultsParameters,
     GetGridElementDefaultsResult,
     GetGridElementsParameters,
     GetGridElementsResult,
+    GetHierarchicalElementOwnersParameters,
+    GetHierarchicalElementOwnersResult,
+    GetLinksOfElementsParameters,
+    GetLinksOfElementsResult,
     GetMarkerParametersOfElementsParameters,
     GetMarkerParametersOfElementsResult,
+    GetOpeningDefaultParameters,
+    GetOpeningDefaultResult,
+    GetOpeningDetailsParameters,
+    GetOpeningDetailsResult,
+    GetOpeningFloorPlanParametersParameters,
+    GetOpeningFloorPlanParametersResult,
+    GetOpeningTransformationsParameters,
+    GetOpeningTransformationsResult,
     GetQuantitiesOfElementsParameters,
     GetQuantitiesOfElementsResult,
     GetRelationsOfElementsParameters,
@@ -49,18 +73,36 @@ from multiconn_archicad.models.tapir.commands import (
     GetSelectedElementsResult,
     GetSubelementsOfHierarchicalElementsParameters,
     GetSubelementsOfHierarchicalElementsResult,
+    GetSurfaceQuantitiesOfElementsParameters,
+    GetSurfaceQuantitiesOfElementsResult,
     GetZoneBoundariesParameters,
     GetZoneBoundariesResult,
+    GetZoneReductionsParameters,
+    GetZoneReductionsResult,
     HighlightElementsParameters,
     HighlightElementsResult,
+    LinkElementsParameters,
+    LinkElementsResult,
     LockElementsParameters,
     LockElementsResult,
+    MeasureTextsParameters,
+    MeasureTextsResult,
+    MirrorElementsParameters,
+    MirrorElementsResult,
     MoveElementsParameters,
     MoveElementsResult,
+    RegularizePolygonsParameters,
+    RegularizePolygonsResult,
+    RegularizePolylinesParameters,
+    RegularizePolylinesResult,
     RemoveElementNotificationClientParameters,
     RemoveElementNotificationClientResult,
     RotateElementsParameters,
     RotateElementsResult,
+    RunParameterScriptOfElementsParameters,
+    RunParameterScriptOfElementsResult,
+    SetCategoryValuesOfElementsParameters,
+    SetCategoryValuesOfElementsResult,
     SetDetailsOfElementsParameters,
     SetDetailsOfElementsResult,
     SetElementNotificationClientParameters,
@@ -69,6 +111,18 @@ from multiconn_archicad.models.tapir.commands import (
     SetGDLParametersOfElementsResult,
     SetMarkerParametersOfElementsParameters,
     SetMarkerParametersOfElementsResult,
+    SetOpeningDetailsParameters,
+    SetOpeningDetailsResult,
+    SetOpeningFloorPlanParametersParameters,
+    SetOpeningFloorPlanParametersResult,
+    SetZoneLabelingSettingsParameters,
+    SetZoneLabelingSettingsResult,
+    SolveStairBaselineParameters,
+    SolveStairBaselineResult,
+    TriangulatePolygonsOfElementsParameters,
+    TriangulatePolygonsOfElementsResult,
+    UnlinkElementsParameters,
+    UnlinkElementsResult,
     UnlockElementsParameters,
     UnlockElementsResult,
     UpdateZonesParameters,
@@ -81,17 +135,29 @@ from multiconn_archicad.models.tapir.types import (
     Collision,
     ColorRGB,
     ConnectedElementsWrapper,
+    Coordinate2D,
     DatabaseIdArrayItem,
     DetailsOfElement,
     DimensionData,
     Element,
+    ElementCategoryDetails,
+    ElementCategoryType,
+    ElementCategoryValueData,
+    ElementCategoryValues,
     ElementDetailsField,
     ElementFilter,
     ElementGeometry3D,
     ElementId,
     ElementIdArrayItem,
+    ElementLinkData,
+    ElementLinkReference,
+    ElementLinks,
+    ElementMirrorData,
     ElementQuantityDetails,
+    ElementSurfaceQuantities,
+    ElementTriangulation,
     ElementType,
+    ElementTypeName,
     ElementWithMarkerParameters,
     ElementsWithDetail,
     ElementsWithExecutionResults,
@@ -103,16 +169,34 @@ from multiconn_archicad.models.tapir.types import (
     Format,
     GDLParameterList,
     GridElementDetails,
+    HierarchicalElementOwner,
+    HierarchicalOwnerMode,
     ImageType,
     MarkerParametersOfElement,
+    OpeningDetails,
+    OpeningFloorPlanDetails,
+    OpeningFloorPlanModificationData,
+    OpeningModificationData,
     OpeningRelationsOfElement,
+    OpeningRevealOffsetData,
+    OpeningRevealOffsets,
+    OpeningTransformation,
+    PolygonRegularizationData,
+    PolylineRegularizationData,
+    RegularizedPolygons,
+    RegularizedPolyline,
     RoofOrShellRelationsOfElement,
     Settings,
+    StairBaselineData,
+    StairBaselineSolution,
     Subelement,
     SuccessfulExecutionResult,
+    TextMeasurement,
+    TextMeasurementData,
     WallRelations,
     ZoneBoundariesOfZonesWrapper,
     ZoneBoundariesWrapper,
+    ZoneReductions,
     ZoneRelationsOfElement,
 )
 
@@ -156,16 +240,56 @@ class ElementCommands:
         validated_response = ChangeSelectionOfElementsResult.model_validate(response_dict)
         return validated_response
 
+    def convert_reveal_offsets(self, openings: list[OpeningRevealOffsetData]) -> list[ErrorItem | OpeningRevealOffsets]:
+        """
+        Converts the reveal depth offset of windows and doors placed in walls between the two
+        references Archicad uses: measured from the core skin of a composite wall, or from the
+        wall side. Give exactly one of coreOffset or sideOffset per opening; both values are
+        returned. For walls with a basic structure the two values are equal. The output is
+        aligned with the input array of openings. Available from Archicad 27.
+
+        Args:
+            openings (list[OpeningRevealOffsetData]): Windows and doors placed in walls, each
+                with exactly one of coreOffset or sideOffset.
+
+        Returns:
+            list[ErrorItem | OpeningRevealOffsets]: The reveal depth offset of each opening in
+                both references, aligned with the input, or an error.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "openings": openings,
+        }
+        validated_params = ConvertRevealOffsetsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "ConvertRevealOffsets", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = ConvertRevealOffsetsResult.model_validate(response_dict)
+        return validated_response.revealOffsets
+
     def delete_elements(
         self, elements: list[ElementIdArrayItem]
     ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
         """
-        Deletes elements. Returns an execution result for each input element: an element that
-        could not be deleted (for example because its layer is locked) gets a failed execution
-        result instead of being skipped silently.
+        Deletes elements. The zones of the call are deleted before all the other elements, so an
+        automatic zone deleted together with its bounding walls is gone before its boundary is;
+        deleting the boundary of an automatic zone without the zone itself can open Archicad's
+        modal 'No closed polygon found' dialog, which blocks the command until someone clicks it
+        in Archicad. Returns an execution result for each input element: an element that could
+        not be deleted (for example because its layer is locked) gets a failed execution result
+        instead of being skipped silently.
 
         Args:
-            elements (list[ElementIdArrayItem]): A list of elements.
+            elements (list[ElementIdArrayItem]): The elements to delete. The zones among them
+                are deleted before all the others, so an automatic zone deleted together with
+                its bounding elements is gone before its boundary is. Deleting the boundary of
+                an automatic zone without the zone itself can open Archicad's modal 'No closed
+                polygon found around the clicked point' dialog, which blocks the command until
+                someone clicks it in Archicad.
 
         Returns:
             list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
@@ -186,15 +310,46 @@ class ElementCommands:
         validated_response = DeleteElementsResult.model_validate(response_dict)
         return validated_response.executionResults
 
+    def delete_selected_elements(self) -> FailedExecutionResult | SuccessfulExecutionResult:
+        """
+        Deletes the currently selected elements in one undo step, the same as pressing the
+        Delete key.
+
+        Returns:
+            FailedExecutionResult | SuccessfulExecutionResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        response_dict = self._core.post_tapir_command("DeleteSelectedElements")
+        validated_response = TypeAdapter(DeleteSelectedElementsResult).validate_python(response_dict)
+        return validated_response
+
     def filter_elements(
-        self, elements: list[ElementIdArrayItem], filters: None | list[ElementFilter] = None
+        self,
+        elements: list[ElementIdArrayItem],
+        filters: None | list[ElementFilter] = None,
+        layer_indices: None | list[int] = None,
+        floor_indices: None | list[int] = None,
+        element_types: None | list[ElementType] = None,
     ) -> list[ElementIdArrayItem]:
         """
-        Tests an elements by the given criterias.
+        Keeps the elements that match all the given criteria: Archicad's flag filters (filters),
+        layer (layerIndices), home story (floorIndices) and element type (elementTypes). Within
+        one criterion any of the listed values matches; an omitted criterion does not filter.
 
         Args:
             elements (list[ElementIdArrayItem]): A list of elements.
-            filters (None | list[ElementFilter])
+            filters (None | list[ElementFilter]): Optional. Archicad's own flag filters. An
+                element is kept only when it fulfills all of them.
+            layer_indices (None | list[int]): Optional. An element is kept only when it is on
+                one of these layers (the layerIndex field of GetDetailsOfElements).
+            floor_indices (None | list[int]): Optional. An element is kept only when its home
+                story is one of these (the floorIndex field of GetDetailsOfElements).
+            element_types (None | list[ElementType]): Optional. An element is kept only when its
+                type is one of these.
 
         Returns:
             list[ElementIdArrayItem]: A list of elements.
@@ -207,6 +362,9 @@ class ElementCommands:
         params_dict = {
             "elements": elements,
             "filters": filters,
+            "layerIndices": layer_indices,
+            "floorIndices": floor_indices,
+            "elementTypes": element_types,
         }
         validated_params = FilterElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
@@ -247,9 +405,9 @@ class ElementCommands:
         Gets the 3D geometry of elements as the solid bodies of their 3D model: a vertex list in
         world coordinates and the planar faces (with their holes) referencing it, each face with
         its surface attribute when that is a project attribute. The bodies of the subelements of
-        a Stair, Railing or Curtain Wall are included. The output is aligned with the input
-        array of elements. The 3D model of the elements is generated as needed, so many elements
-        can take a while.
+        a Stair, Railing or Curtain Wall, and of the segments of a Column or Beam, are included.
+        The output is aligned with the input array of elements. The 3D model of the elements is
+        generated as needed, so many elements can take a while.
 
         Args:
             elements (list[ElementIdArrayItem]): A list of elements.
@@ -278,7 +436,8 @@ class ElementCommands:
     ) -> ElementsWithExecutionResults | ErrorItem:
         """
         Returns the identifier of all elements on the plan. Use the optional filter parameter
-        for filtering.
+        for filtering. Objects that belong to another element (zone stamps, the parts of stairs
+        and railings) are left out unless the IncludeSubElemObjects filter is given.
 
         Args:
             filters (None | list[ElementFilter])
@@ -302,6 +461,42 @@ class ElementCommands:
         )
         validated_response = TypeAdapter(GetAllElementsResult).validate_python(response_dict)
         return validated_response
+
+    def get_category_values_of_elements(
+        self, elements: list[ElementIdArrayItem], categories: None | list[ElementCategoryType] = None
+    ) -> list[ElementCategoryValues | ErrorItem]:
+        """
+        Gets the category values (Structural Function, Position, Renovation Status ...) of the
+        given elements, optionally only for the given category types. An element that has none
+        of the requested categories (an annotation, for example) gets an error item. The names
+        are localized: use the type and the categoryValueId in scripts.
+
+        Args:
+            elements (list[ElementIdArrayItem]): A list of elements.
+            categories (None | list[ElementCategoryType]): The categories to read. Left out:
+                every category the element has.
+
+        Returns:
+            list[ElementCategoryValues | ErrorItem]: The category values of each element, in the
+                order of the input. A category the element does not have is left out of its
+                list; an element that does not exist or has none of the requested categories (an
+                annotation, for example) is represented by an error object.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elements": elements,
+            "categories": categories,
+        }
+        validated_params = GetCategoryValuesOfElementsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetCategoryValuesOfElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetCategoryValuesOfElementsResult.model_validate(response_dict)
+        return validated_response.categoryValuesOfElements
 
     def get_collisions(
         self,
@@ -374,7 +569,7 @@ class ElementCommands:
 
     def get_details_of_elements(
         self, elements: list[ElementIdArrayItem], fields: None | list[ElementDetailsField] = None
-    ) -> list[DetailsOfElement]:
+    ) -> list[DetailsOfElement | ErrorItem]:
         """
         Gets the details of the given elements (geometry parameters etc). Use the optional
         fields parameter to return only the fields you need and skip the computation of the
@@ -389,7 +584,10 @@ class ElementCommands:
                 primitives and can dominate the execution time of batch reads.
 
         Returns:
-            list[DetailsOfElement]
+            list[DetailsOfElement | ErrorItem]: One entry per input element, in the same order
+                as the input elements array. An element that cannot be read gets an error entry
+                in its place, so the position of an entry tells which input element it belongs
+                to.
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -432,6 +630,72 @@ class ElementCommands:
         validated_response = GetDimensionDataResult.model_validate(response_dict)
         return validated_response.dimensionsData
 
+    def get_element_at_coordinate(
+        self,
+        element_type: ElementType,
+        coordinate: Coordinate2D,
+        z: None | float = None,
+        filters: None | list[ElementFilter] = None,
+    ) -> GetElementAtCoordinateResult:
+        """
+        Finds the element of the given polygonal type (for example Slab, Roof, Mesh, Zone or
+        Hatch) at a coordinate of the floor plan of the current database, the way a click there
+        would. Use the optional filters parameter (the values of FilterElements) to consider
+        only, for example, the elements visible by layer, and the optional z parameter to give
+        the elevation of the point. Returns found: false when there is no such element. Useful
+        together with GetPointFromUser.
+
+        Args:
+            element_type (ElementType): The type of the element to look for. Only polygonal
+                element types can be searched, for example Slab, Roof, Mesh, Zone or Hatch.
+            coordinate (Coordinate2D): The point to search at, in the project's coordinates, on
+                the floor plan of the current database.
+            z (None | float): Optional. The elevation of the search point, handed to Archicad
+                together with the coordinate. Default is 0.
+            filters (None | list[ElementFilter]): Optional. Only an element passing every given
+                filter is found (the same values as FilterElements accepts).
+
+        Returns:
+            GetElementAtCoordinateResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elementType": element_type,
+            "coordinate": coordinate,
+            "z": z,
+            "filters": filters,
+        }
+        validated_params = GetElementAtCoordinateParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetElementAtCoordinate", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetElementAtCoordinateResult.model_validate(response_dict)
+        return validated_response
+
+    def get_element_categories(self) -> list[ElementCategoryDetails]:
+        """
+        Lists the element categories of the project (Structural Function, Position, Renovation
+        Status, Renovation Filter and, in the German version, BRI) with their possible values.
+        The names of the categories and values are localized: identify a category by its type
+        and a value by its categoryValueId, never by name.
+
+        Returns:
+            list[ElementCategoryDetails]: The element categories of the project, each with its
+                possible values.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        response_dict = self._core.post_tapir_command("GetElementCategories")
+        validated_response = GetElementCategoriesResult.model_validate(response_dict)
+        return validated_response.categories
+
     def get_element_preview_image(
         self,
         element_id: ElementId,
@@ -472,6 +736,34 @@ class ElementCommands:
         validated_response = GetElementPreviewImageResult.model_validate(response_dict)
         return validated_response.previewImage
 
+    def get_element_type_names(self, element_types: list[ElementType]) -> list[ElementTypeName | ErrorItem]:
+        """
+        Gets the localized names of the given element types, as the running Archicad shows them
+        (for example 'Wand' for Wall in German Archicad). The output is aligned with the input
+        array of element types. Available from Archicad 27.
+
+        Args:
+            element_types (list[ElementType]): The element types to get the localized names of.
+
+        Returns:
+            list[ElementTypeName | ErrorItem]: The localized name of each element type, aligned
+                with the input, or an error.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elementTypes": element_types,
+        }
+        validated_params = GetElementTypeNamesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetElementTypeNames", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetElementTypeNamesResult.model_validate(response_dict)
+        return validated_response.names
+
     def get_elements_by_type(
         self,
         element_type: ElementType,
@@ -480,7 +772,9 @@ class ElementCommands:
     ) -> ElementsWithExecutionResults | ErrorItem:
         """
         Returns the identifier of every element of the given type on the plan. It works for any
-        type. Use the optional filter parameter for filtering.
+        type. Use the optional filter parameter for filtering. Objects that belong to another
+        element (zone stamps, the parts of stairs and railings) are left out unless the
+        IncludeSubElemObjects filter is given.
 
         Args:
             element_type (ElementType)
@@ -505,6 +799,48 @@ class ElementCommands:
             "GetElementsByType", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = TypeAdapter(GetElementsByTypeResult).validate_python(response_dict)
+        return validated_response
+
+    def get_elements_in_draw_order(
+        self,
+        element_type: ElementType | None = None,
+        filters: None | list[ElementFilter] = None,
+        databases: None | list[DatabaseIdArrayItem] = None,
+    ) -> ElementsWithExecutionResults | ErrorItem:
+        """
+        Returns the identifier of every element of the current database, or of the given
+        databases, in Archicad's drawing order (the order set by Bring to Front and Send to
+        Back), as ACAPI_DrawOrder_DrawOrderGetNext walks it. Use the optional elementType and
+        filters parameters for filtering. Objects that belong to another element (zone stamps,
+        the parts of stairs and railings) are left out unless the IncludeSubElemObjects filter
+        is given.
+
+        Args:
+            element_type (ElementType | None): Optional. Only elements of this type are
+                returned, still in drawing order. If omitted, every element is returned.
+            filters (None | list[ElementFilter]): Optional. The filters an element must pass to
+                be returned, the same as for GetElementsByType.
+            databases (None | list[DatabaseIdArrayItem]): The databases to list the elements of,
+                each in its own drawing order. If omitted, the current database is used.
+
+        Returns:
+            ElementsWithExecutionResults | ErrorItem
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elementType": element_type,
+            "filters": filters,
+            "databases": databases,
+        }
+        validated_params = GetElementsInDrawOrderParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetElementsInDrawOrder", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = TypeAdapter(GetElementsInDrawOrderResult).validate_python(response_dict)
         return validated_response
 
     def get_gdl_parameters_of_elements(self, elements: list[ElementIdArrayItem]) -> list[GDLParameterList]:
@@ -581,6 +917,68 @@ class ElementCommands:
         validated_response = GetGridElementsResult.model_validate(response_dict)
         return validated_response.gridElements
 
+    def get_hierarchical_element_owners(
+        self, elements: list[ElementIdArrayItem], owner_mode: HierarchicalOwnerMode | None = None
+    ) -> list[ErrorItem | HierarchicalElementOwner]:
+        """
+        Gets the owner of each given element in its hierarchical element: the root (e.g. the
+        Curtain Wall, Stair or Railing of a frame, tread or post) or the immediate parent. Also
+        returns whether the given element is a main element, a subelement or not part of a
+        hierarchical element.
+
+        Args:
+            elements (list[ElementIdArrayItem]): The elements whose owners are looked up, e.g.
+                Curtain Wall frames or panels, Stair treads or Railing posts.
+            owner_mode (HierarchicalOwnerMode | None)
+
+        Returns:
+            list[ErrorItem | HierarchicalElementOwner]: The owner of each element, aligned with
+                the input.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elements": elements,
+            "ownerMode": owner_mode,
+        }
+        validated_params = GetHierarchicalElementOwnersParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetHierarchicalElementOwners", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetHierarchicalElementOwnersResult.model_validate(response_dict)
+        return validated_response.owners
+
+    def get_links_of_elements(self, elements: list[ElementIdArrayItem]) -> list[ElementLinks | ErrorItem]:
+        """
+        Gets the links created by LinkElements that start from the given elements: the linked
+        element and the flags of each link. Links pointing to an element are not returned; query
+        the elements they start from. Returns an error item for an element that does not exist.
+
+        Args:
+            elements (list[ElementIdArrayItem]): The elements whose outgoing links are returned.
+
+        Returns:
+            list[ElementLinks | ErrorItem]: The links starting from each element, aligned with
+                the input.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elements": elements,
+        }
+        validated_params = GetLinksOfElementsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetLinksOfElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetLinksOfElementsResult.model_validate(response_dict)
+        return validated_response.linksOfElements
+
     def get_marker_parameters_of_elements(
         self, elements: list[ElementIdArrayItem]
     ) -> list[ErrorItem | MarkerParametersOfElement]:
@@ -613,8 +1011,125 @@ class ElementCommands:
         validated_response = GetMarkerParametersOfElementsResult.model_validate(response_dict)
         return validated_response.markerParametersOfElements
 
+    def get_opening_default(self) -> GetOpeningDefaultResult:
+        """
+        Returns the settings of the Opening tool defaults: the extrusion parameters (as
+        GetOpeningDetails returns them) and the floor plan parameters (as
+        GetOpeningFloorPlanParameters returns them). Available from Archicad 29.
+
+        Returns:
+            GetOpeningDefaultResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {}
+        validated_params = GetOpeningDefaultParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetOpeningDefault", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetOpeningDefaultResult.model_validate(response_dict)
+        return validated_response
+
+    def get_opening_details(self, elements: list[ElementIdArrayItem]) -> list[ErrorItem | OpeningDetails]:
+        """
+        Returns the details of Opening elements: the parent element, the cut and connected
+        elements, the geometry (anchor point, extrusion direction, axes, polygon) and the
+        extrusion parameters (size, anchor, offsets, surface overrides). Available from Archicad
+        29.
+
+        Args:
+            elements (list[ElementIdArrayItem]): The Opening elements (made with the Opening
+                tool) to read.
+
+        Returns:
+            list[ErrorItem | OpeningDetails]: The details of the openings, in the order of the
+                given elements.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elements": elements,
+        }
+        validated_params = GetOpeningDetailsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetOpeningDetails", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetOpeningDetailsResult.model_validate(response_dict)
+        return validated_response.openings
+
+    def get_opening_floor_plan_parameters(
+        self, elements: list[ElementIdArrayItem]
+    ) -> list[ErrorItem | OpeningFloorPlanDetails]:
+        """
+        Returns the floor plan parameters of Opening elements: the reference axis, the cut
+        surface and outline lines, the cover fills and the cut and uncut symbols. Available from
+        Archicad 29.
+
+        Args:
+            elements (list[ElementIdArrayItem]): The Opening elements (made with the Opening
+                tool) to read.
+
+        Returns:
+            list[ErrorItem | OpeningFloorPlanDetails]: The floor plan parameters of the
+                openings, in the order of the given elements.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elements": elements,
+        }
+        validated_params = GetOpeningFloorPlanParametersParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetOpeningFloorPlanParameters", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetOpeningFloorPlanParametersResult.model_validate(response_dict)
+        return validated_response.openings
+
+    def get_opening_transformations(
+        self, elements: list[ElementIdArrayItem]
+    ) -> list[ErrorItem | OpeningTransformation]:
+        """
+        Gets the placement of Opening elements without changing them: the global-to-local
+        transformation matrix Archicad returns, its inverse, and the origin and axes of the
+        opening in world coordinates derived from the inverse. Mirrored openings give a left-
+        handed matrix (isMirrored). Needs Archicad 27 or later.
+
+        Args:
+            elements (list[ElementIdArrayItem]): A list of elements.
+
+        Returns:
+            list[ErrorItem | OpeningTransformation]: The transformation of each given Opening,
+                or an error, in the order of the input elements.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elements": elements,
+        }
+        validated_params = GetOpeningTransformationsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetOpeningTransformations", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetOpeningTransformationsResult.model_validate(response_dict)
+        return validated_response.openingTransformations
+
     def get_quantities_of_elements(
-        self, elements: list[ElementIdArrayItem], min_opening_size: None | float = None
+        self,
+        elements: list[ElementIdArrayItem],
+        min_opening_size: None | float = None,
+        calculate_in_one_call: None | bool = None,
     ) -> list[ElementQuantityDetails | ErrorItem]:
         """
         Gets the quantities of the given elements calculated by Archicad (volumes, surfaces,
@@ -622,7 +1137,7 @@ class ElementCommands:
         item per skin of composite and complex profile elements, one item for basic elements).
         Supported types: Wall, Column, Beam, Slab, Roof, Shell, Morph, Zone, ColumnSegment,
         BeamSegment. Use the optional minOpeningSize parameter to control the conditional
-        values.
+        values, and calculateInOneCall to calculate all the elements in one Archicad call.
 
         Args:
             elements (list[ElementIdArrayItem]): A list of elements.
@@ -630,6 +1145,11 @@ class ElementCommands:
                 Openings smaller than this are not subtracted when the conditional values (for
                 example volumeConditional of a Wall) are calculated. Archicad only uses it for
                 walls. Default value is 0, so every opening is subtracted.
+            calculate_in_one_call (None | bool): Optional. When true, Archicad calculates the
+                quantities of all the supported elements in one call instead of one call per
+                element, which can be faster for many elements. The output has the same format.
+                If that one call fails, every supported element gets the same error. Default
+                value is false.
 
         Returns:
             list[ElementQuantityDetails | ErrorItem]: The quantities of the elements, in the
@@ -644,6 +1164,7 @@ class ElementCommands:
         params_dict = {
             "elements": elements,
             "minOpeningSize": min_opening_size,
+            "calculateInOneCall": calculate_in_one_call,
         }
         validated_params = GetQuantitiesOfElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
@@ -792,7 +1313,9 @@ class ElementCommands:
 
     def get_subelements_of_hierarchical_elements(self, elements: list[ElementIdArrayItem]) -> list[Subelement]:
         """
-        Gets the subelements of the given hierarchical elements.
+        Gets the subelements of the given hierarchical elements. From Archicad 28 the
+        subelements of external hierarchical elements (for example MEP elements or elements of
+        other add-ons) are returned as externalSubelements.
 
         Args:
             elements (list[ElementIdArrayItem]): A list of elements.
@@ -815,6 +1338,47 @@ class ElementCommands:
         )
         validated_response = GetSubelementsOfHierarchicalElementsResult.model_validate(response_dict)
         return validated_response.subelements
+
+    def get_surface_quantities_of_elements(
+        self, elements: list[ElementIdArrayItem], cover_elements: None | list[ElementIdArrayItem] = None
+    ) -> list[ElementSurfaceQuantities | ErrorItem]:
+        """
+        Gets the exposed surface areas of the given elements calculated by Archicad: for each
+        element one item per surface attribute and building material pair with the area that is
+        not covered by the covering elements (for example the wall area behind a slab is taken
+        off the wall's surface). The covering elements are the optional coverElements; by
+        default every construction element of the project. The output is aligned with the input
+        array of elements.
+
+        Args:
+            elements (list[ElementIdArrayItem]): The elements to get the surface quantities of.
+            cover_elements (None | list[ElementIdArrayItem]): Optional covering elements: the
+                area where one of them overlaps a surface of an element is subtracted from that
+                surface, so for example a slab on a wall takes its footprint off the top surface
+                of the wall. When omitted, every Wall, Column, Beam, Slab, Roof, Shell, Morph,
+                Mesh, Stair and Curtain Wall of the project is a covering element. Pass an empty
+                array to get the whole surfaces with nothing subtracted. An element never covers
+                itself.
+
+        Returns:
+            list[ElementSurfaceQuantities | ErrorItem]: The surface quantities of the elements,
+                in the order of the given elements. Areas are in square meters.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elements": elements,
+            "coverElements": cover_elements,
+        }
+        validated_params = GetSurfaceQuantitiesOfElementsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetSurfaceQuantitiesOfElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetSurfaceQuantitiesOfElementsResult.model_validate(response_dict)
+        return validated_response.surfaceQuantitiesOfElements
 
     def get_zone_boundaries(
         self, zone_element_id: ElementId | None = None, zones: None | list[ElementIdArrayItem] = None
@@ -850,6 +1414,37 @@ class ElementCommands:
         )
         validated_response = TypeAdapter(GetZoneBoundariesResult).validate_python(response_dict)
         return validated_response
+
+    def get_zone_reductions(self, elements: list[ElementIdArrayItem]) -> list[ErrorItem | ZoneReductions]:
+        """
+        Gets the area reductions of the given Zones, as the Zone Stamp's area calculation uses
+        them: the polygons of the Zone covered by Walls, Columns, reducing Fills, sloping Roofs
+        and low ceilings, each with its type, the percentage it is reduced by, its area and its
+        outline with holes. Area calculations by local standards need these parts, which
+        GetQuantitiesOfElements only gives as totals. The output is aligned with the input array
+        of elements.
+
+        Args:
+            elements (list[ElementIdArrayItem]): A list of Zones.
+
+        Returns:
+            list[ErrorItem | ZoneReductions]: The area reductions of each Zone, aligned with the
+                input array of elements, or an error.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elements": elements,
+        }
+        validated_params = GetZoneReductionsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetZoneReductions", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetZoneReductionsResult.model_validate(response_dict)
+        return validated_response.reductionsOfZones
 
     def highlight_elements(
         self,
@@ -892,6 +1487,39 @@ class ElementCommands:
         validated_response = TypeAdapter(HighlightElementsResult).validate_python(response_dict)
         return validated_response
 
+    def link_elements(self, links: list[ElementLinkData]) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Creates persistent links between pairs of elements, each from one element to another,
+        with an optional integer flags value per link. Scripts can record their own relations
+        between elements this way (for example which label documents which column) instead of
+        storing GUIDs in properties. The links are stored in the project and have no effect on
+        geometry; they are independent from groups, hotlinks and solid element operations. A
+        link is directional: it is returned by GetLinksOfElements for the element it starts from
+        only, and removed by UnlinkElements. Undoable.
+
+        Args:
+            links (list[ElementLinkData]): The links to create, each from one element to
+                another.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: One result per link,
+                aligned with the input.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "links": links,
+        }
+        validated_params = LinkElementsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "LinkElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = LinkElementsResult.model_validate(response_dict)
+        return validated_response.executionResults
+
     def lock_elements(self, elements: list[ElementIdArrayItem]) -> FailedExecutionResult | SuccessfulExecutionResult:
         """
         Locks the given elements. Manual lock, not teamwork!
@@ -916,6 +1544,66 @@ class ElementCommands:
         )
         validated_response = TypeAdapter(LockElementsResult).validate_python(response_dict)
         return validated_response
+
+    def measure_texts(self, texts: list[TextMeasurementData]) -> list[ErrorItem | TextMeasurement]:
+        """
+        Measures texts before placing them: the length of every line for a given font, style and
+        height, on paper in millimetres or in the model at the current drawing scale, and the
+        font's capital size factor. Creates nothing.
+
+        Args:
+            texts (list[TextMeasurementData]): The texts to measure, each with the font, style
+                and height it would be placed with. Nothing is created.
+
+        Returns:
+            list[ErrorItem | TextMeasurement]: One item per input text, in the same order. The
+                measurement takes no width factor or character spacing into account.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "texts": texts,
+        }
+        validated_params = MeasureTextsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "MeasureTexts", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = MeasureTextsResult.model_validate(response_dict)
+        return validated_response.measurements
+
+    def mirror_elements(
+        self, elements_with_mirror_axes: list[ElementMirrorData]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Mirrors elements across an axis given by two points on the floor plan, optionally as a
+        copy. An element that cannot be edited (its layer is hidden or locked, it is locked, or
+        it is not available in teamwork) gets a failed execution result naming the reason
+        instead of being skipped silently.
+
+        Args:
+            elements_with_mirror_axes (list[ElementMirrorData]): The elements with mirror axes.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elementsWithMirrorAxes": elements_with_mirror_axes,
+        }
+        validated_params = MirrorElementsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "MirrorElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = MirrorElementsResult.model_validate(response_dict)
+        return validated_response.executionResults
 
     def move_elements(
         self, elements_with_move_vectors: list[ElementsWithMoveVector]
@@ -947,6 +1635,78 @@ class ElementCommands:
         )
         validated_response = MoveElementsResult.model_validate(response_dict)
         return validated_response.executionResults
+
+    def regularize_polygons(
+        self, polygons: list[PolygonRegularizationData], with_ancestry: None | bool = None
+    ) -> list[ErrorItem | RegularizedPolygons]:
+        """
+        Regularizes polygons with Archicad's own polygon regularization, before they are used to
+        create slabs, zones or fills: removes duplicate points, fixes the orientation, resolves
+        self-intersections and touching holes. Each input polygon gives 0, 1 or more valid
+        polygons in the format of CreateSlabs, optionally with the input vertex and edge each
+        result vertex and edge came from. Changes nothing in the project.
+
+        Args:
+            polygons (list[PolygonRegularizationData]): The polygons to regularize, in the
+                format of CreateSlabs (polygonCoordinates, polygonArcs, holes). For
+                CreateHatches, pass the outline of a result as its coordinates and arcs.
+            with_ancestry (None | bool): Also return for every vertex and edge of the results
+                which input vertex or edge it came from. Optional, false by default.
+
+        Returns:
+            list[ErrorItem | RegularizedPolygons]: One item per input polygon, in the order of
+                the request.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "polygons": polygons,
+            "withAncestry": with_ancestry,
+        }
+        validated_params = RegularizePolygonsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "RegularizePolygons", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = RegularizePolygonsResult.model_validate(response_dict)
+        return validated_response.results
+
+    def regularize_polylines(
+        self, polylines: list[PolylineRegularizationData], with_ancestry: None | bool = None
+    ) -> list[ErrorItem | RegularizedPolyline]:
+        """
+        Regularizes polylines with Archicad's own polyline regularization: removes repeated
+        consecutive points. The result is in the format of CreatePolylines and may be empty,
+        optionally with the input point and segment each result point and segment came from.
+        Changes nothing in the project.
+
+        Args:
+            polylines (list[PolylineRegularizationData]): The polylines to regularize, in the
+                format of CreatePolylines.
+            with_ancestry (None | bool): Also return for every point and segment of the results
+                which input point or segment it came from. Optional, false by default.
+
+        Returns:
+            list[ErrorItem | RegularizedPolyline]: One item per input polyline, in the order of
+                the request.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "polylines": polylines,
+            "withAncestry": with_ancestry,
+        }
+        validated_params = RegularizePolylinesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "RegularizePolylines", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = RegularizePolylinesResult.model_validate(response_dict)
+        return validated_response.results
 
     def remove_element_notification_client(
         self, port: int, host: None | str = None
@@ -1010,11 +1770,75 @@ class ElementCommands:
         validated_response = RotateElementsResult.model_validate(response_dict)
         return validated_response.executionResults
 
+    def run_parameter_script_of_elements(
+        self, elements: list[ElementIdArrayItem]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Runs the parameter script of the library part of the given elements (objects, lamps,
+        windows, doors, etc.), so that parameter values that depend on other parameters are
+        updated, e.g. after SetGDLParametersOfElements.
+
+        Args:
+            elements (list[ElementIdArrayItem]): A list of elements.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elements": elements,
+        }
+        validated_params = RunParameterScriptOfElementsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "RunParameterScriptOfElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = RunParameterScriptOfElementsResult.model_validate(response_dict)
+        return validated_response.executionResults
+
+    def set_category_values_of_elements(
+        self, element_category_values: list[ElementCategoryValueData]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Sets the category values (Structural Function, Position, Renovation Status ...) of the
+        given elements, one element and one category per item, in a single undoable step. The
+        value must belong to the given category, as GetElementCategories lists them; an element
+        without that category gets a failed execution result. The names are localized: use the
+        type and the categoryValueId in scripts.
+
+        Args:
+            element_category_values (list[ElementCategoryValueData]): The category values to
+                set: one element and one category per item. The same element can appear in
+                several items, one per category.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: One result per item of the
+                input, in the same order.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elementCategoryValues": element_category_values,
+        }
+        validated_params = SetCategoryValuesOfElementsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "SetCategoryValuesOfElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = SetCategoryValuesOfElementsResult.model_validate(response_dict)
+        return validated_response.executionResults
+
     def set_details_of_elements(
         self, elements_with_details: list[ElementsWithDetail]
     ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
         """
-        Sets the details of the given elements (floor, layer, order etc).
+        Sets the details of the given elements (floor, layer, order, Element ID etc).
 
         Args:
             elements_with_details (list[ElementsWithDetail]): The elements with parameters.
@@ -1086,7 +1910,9 @@ class ElementCommands:
         self, elements_with_gdl_parameters: list[ElementsWithGDLParameter]
     ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
         """
-        Sets the given GDL parameters of the given elements.
+        Sets the given GDL parameters of the given elements. An element Archicad does not let
+        the user edit (its layer locked, the element locked, or not reserved by the user in
+        Teamwork) gets a failed execution result naming that reason, whatever the parameter.
 
         Args:
             elements_with_gdl_parameters (list[ElementsWithGDLParameter]): The elements with GDL
@@ -1139,6 +1965,187 @@ class ElementCommands:
             "SetMarkerParametersOfElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = SetMarkerParametersOfElementsResult.model_validate(response_dict)
+        return validated_response.executionResults
+
+    def set_opening_details(
+        self, openings_with_details: list[OpeningModificationData]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Changes the details of Opening elements: the parent element, the cut elements, the
+        polygon, a transformation of the geometry and the extrusion parameters (size, anchor,
+        offsets, surface overrides) returned by GetOpeningDetails. Available from Archicad 29.
+
+        Args:
+            openings_with_details (list[OpeningModificationData]): The Opening elements (made
+                with the Opening tool) to change, each with the details to set. A detail that is
+                left out stays as it is.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "openingsWithDetails": openings_with_details,
+        }
+        validated_params = SetOpeningDetailsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "SetOpeningDetails", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = SetOpeningDetailsResult.model_validate(response_dict)
+        return validated_response.executionResults
+
+    def set_opening_floor_plan_parameters(
+        self, openings_with_floor_plan_parameters: list[OpeningFloorPlanModificationData]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Changes the floor plan parameters of Opening elements returned by
+        GetOpeningFloorPlanParameters, and sets or removes their cut and uncut symbols.
+        Available from Archicad 29.
+
+        Args:
+            openings_with_floor_plan_parameters (list[OpeningFloorPlanModificationData])
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "openingsWithFloorPlanParameters": openings_with_floor_plan_parameters,
+        }
+        validated_params = SetOpeningFloorPlanParametersParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "SetOpeningFloorPlanParameters", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = SetOpeningFloorPlanParametersResult.model_validate(response_dict)
+        return validated_response.executionResults
+
+    def set_zone_labeling_settings(self, automatic_labeling: bool) -> FailedExecutionResult | SuccessfulExecutionResult:
+        """
+        Turns the automatic labeling of Zones on or off. Available from Archicad 28.
+
+        Args:
+            automatic_labeling (bool): Turns the automatic labeling of Zones (placing a Label on
+                each new Zone) on or off.
+
+        Returns:
+            FailedExecutionResult | SuccessfulExecutionResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "automaticLabeling": automatic_labeling,
+        }
+        validated_params = SetZoneLabelingSettingsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "SetZoneLabelingSettings", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = TypeAdapter(SetZoneLabelingSettingsResult).validate_python(response_dict)
+        return validated_response
+
+    def solve_stair_baseline(self, stairs_data: list[StairBaselineData]) -> list[ErrorItem | StairBaselineSolution]:
+        """
+        Runs the Archicad stair solver on the given Stair baselines and parameters without
+        creating any element. Returns for each one whether the baseline was already correct,
+        could be solved or could not be solved, with the baseline and the main stair settings
+        after solving. Available from Archicad 27.
+
+        Args:
+            stairs_data (list[StairBaselineData]): Array of Stair data to check, with the same
+                fields as the items of CreateStairs (without favoriteName). Nothing is created.
+
+        Returns:
+            list[ErrorItem | StairBaselineSolution]: The results of the stair solver, aligned
+                with the input stairsData.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "stairsData": stairs_data,
+        }
+        validated_params = SolveStairBaselineParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "SolveStairBaseline", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = SolveStairBaselineResult.model_validate(response_dict)
+        return validated_response.solutions
+
+    def triangulate_polygons_of_elements(
+        self, elements: list[ElementIdArrayItem]
+    ) -> list[ElementTriangulation | ErrorItem]:
+        """
+        Triangulates the plan polygon of the given elements, holes excluded, as Archicad does
+        it: the outline of a Slab, Zone, Hatch or Mesh and the polygon of a Roof. Each triangle
+        is given by the 2D coordinates of its three vertices. The output is aligned with the
+        input array of elements; an element of another type gets an error item.
+
+        Args:
+            elements (list[ElementIdArrayItem]): A list of elements.
+
+        Returns:
+            list[ElementTriangulation | ErrorItem]: The triangulation of the polygon of each
+                element, aligned with the input: its triangles, or an error (for example for an
+                element type that has no polygon).
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elements": elements,
+        }
+        validated_params = TriangulatePolygonsOfElementsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "TriangulatePolygonsOfElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = TriangulatePolygonsOfElementsResult.model_validate(response_dict)
+        return validated_response.triangulations
+
+    def unlink_elements(
+        self, links: list[ElementLinkReference]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Removes the links created by LinkElements between the given pairs of elements. The
+        direction matters: the link starting from fromElementId and pointing to toElementId is
+        removed. Undoable.
+
+        Args:
+            links (list[ElementLinkReference]): The links to remove, each from one element to
+                another.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: One result per link,
+                aligned with the input.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "links": links,
+        }
+        validated_params = UnlinkElementsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "UnlinkElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = UnlinkElementsResult.model_validate(response_dict)
         return validated_response.executionResults
 
     def unlock_elements(self, elements: list[ElementIdArrayItem]) -> FailedExecutionResult | SuccessfulExecutionResult:
