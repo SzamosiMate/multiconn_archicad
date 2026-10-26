@@ -6,6 +6,8 @@ from typing import TYPE_CHECKING
 from pydantic import TypeAdapter
 
 from multiconn_archicad.models.tapir.commands import (
+    AddPropertyToAttributesParameters,
+    AddPropertyToAttributesResult,
     CreatePropertyDefinitionsParameters,
     CreatePropertyDefinitionsResult,
     CreatePropertyGroupsParameters,
@@ -15,12 +17,20 @@ from multiconn_archicad.models.tapir.commands import (
     DeletePropertyGroupsParameters,
     DeletePropertyGroupsResult,
     GetAllPropertiesResult,
+    GetPropertyDefinitionsOfAttributesParameters,
+    GetPropertyDefinitionsOfAttributesResult,
     GetPropertyValuesOfAttributesParameters,
     GetPropertyValuesOfAttributesResult,
     GetPropertyValuesOfElementsParameters,
     GetPropertyValuesOfElementsResult,
     ImportPropertiesXmlParameters,
     ImportPropertiesXmlResult,
+    MakePropertyAvailableForElementsParameters,
+    MakePropertyAvailableForElementsResult,
+    MakePropertyUnavailableForElementsParameters,
+    MakePropertyUnavailableForElementsResult,
+    RemovePropertyFromAttributesParameters,
+    RemovePropertyFromAttributesResult,
     SetPropertyValuesOfAttributesParameters,
     SetPropertyValuesOfAttributesResult,
     SetPropertyValuesOfElementsParameters,
@@ -32,6 +42,8 @@ from multiconn_archicad.models.tapir.commands import (
 )
 from multiconn_archicad.models.tapir.types import (
     AttributeIdArrayItem,
+    AttributePropertyDefinitionFilter,
+    AttributePropertyIds,
     AttributePropertyValue,
     ElementIdArrayItem,
     ElementPropertyValue,
@@ -42,6 +54,7 @@ from multiconn_archicad.models.tapir.types import (
     PropertyGroupArrayItem,
     PropertyGroupIdArrayItem,
     PropertyGroupUpdate,
+    PropertyId,
     PropertyIdArrayItem,
     PropertyImportConflictPolicy,
     PropertyValuesArrayItem,
@@ -55,6 +68,38 @@ if TYPE_CHECKING:
 class PropertyCommands:
     def __init__(self, core: CoreCommands):
         self._core = core
+
+    def add_property_to_attributes(
+        self, property_id: PropertyId, attribute_ids: list[AttributeIdArrayItem]
+    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+        """
+        Makes an existing custom property available for the given attributes (for example
+        Building Materials), in one undo step. Available in Archicad 25, 26 and 27 only.
+
+        Args:
+            property_id (PropertyId): An existing custom property. Create it first with
+                CreatePropertyDefinitions if needed.
+            attribute_ids (list[AttributeIdArrayItem]): The attributes (for example Building
+                Materials) to make the property available for.
+
+        Returns:
+            FailedExecutionResult | SuccessfulExecutionResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "propertyId": property_id,
+            "attributeIds": attribute_ids,
+        }
+        validated_params = AddPropertyToAttributesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "AddPropertyToAttributes", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = TypeAdapter(AddPropertyToAttributesResult).validate_python(response_dict)
+        return validated_response
 
     def create_property_definitions(
         self, property_definitions: list[PropertyDefinitionArrayItem]
@@ -183,6 +228,38 @@ class PropertyCommands:
         validated_response = GetAllPropertiesResult.model_validate(response_dict)
         return validated_response
 
+    def get_property_definitions_of_attributes(
+        self, attribute_ids: list[AttributeIdArrayItem], filter: AttributePropertyDefinitionFilter | None = None
+    ) -> list[AttributePropertyIds | ErrorItem]:
+        """
+        Returns the property definitions of the given attributes (for example Building
+        Materials): the user defined, the fundamental built-in, or all of them.
+
+        Args:
+            attribute_ids (list[AttributeIdArrayItem]): A list of attributes.
+            filter (AttributePropertyDefinitionFilter | None)
+
+        Returns:
+            list[AttributePropertyIds | ErrorItem]: The property definitions of each attribute,
+                in the order of the given attributes.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "attributeIds": attribute_ids,
+            "filter": filter,
+        }
+        validated_params = GetPropertyDefinitionsOfAttributesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetPropertyDefinitionsOfAttributes",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+        )
+        validated_response = GetPropertyDefinitionsOfAttributesResult.model_validate(response_dict)
+        return validated_response.propertyDefinitionsOfAttributes
+
     def get_property_values_of_attributes(
         self, attribute_ids: list[AttributeIdArrayItem], properties: list[PropertyIdArrayItem]
     ) -> list[ErrorItem | PropertyValuesArrayItem]:
@@ -215,15 +292,22 @@ class PropertyCommands:
         return validated_response.propertyValuesForAttributes
 
     def get_property_values_of_elements(
-        self, elements: list[ElementIdArrayItem], properties: list[PropertyIdArrayItem]
+        self,
+        elements: list[ElementIdArrayItem],
+        properties: list[PropertyIdArrayItem],
+        include_availability: None | bool = None,
     ) -> list[ErrorItem | PropertyValuesArrayItem]:
         """
         Returns the property values of the elements for the given property. It works for
-        subelements of hierarchal elements also.
+        subelements of hierarchal elements also. With includeAvailability it also tells whether
+        each property is available for the element.
 
         Args:
             elements (list[ElementIdArrayItem]): A list of elements.
             properties (list[PropertyIdArrayItem]): A list of property identifiers.
+            include_availability (None | bool): Adds isAvailable to each property value or
+                error, telling whether the property is available for the element (for example by
+                its classification). Default is false.
 
         Returns:
             list[ErrorItem | PropertyValuesArrayItem]: The order of the outer list is that of
@@ -238,6 +322,7 @@ class PropertyCommands:
         params_dict = {
             "elements": elements,
             "properties": properties,
+            "includeAvailability": include_availability,
         }
         validated_params = GetPropertyValuesOfElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
@@ -274,6 +359,101 @@ class PropertyCommands:
             "ImportPropertiesXml", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = ImportPropertiesXmlResult.model_validate(response_dict)
+        return validated_response
+
+    def make_property_available_for_elements(
+        self, elements: list[ElementIdArrayItem], property_id: PropertyId
+    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+        """
+        Makes a property definition available for all the given elements. Available only in
+        Archicad 27.
+
+        Args:
+            elements (list[ElementIdArrayItem]): The elements to make the property available
+                for.
+            property_id (PropertyId)
+
+        Returns:
+            FailedExecutionResult | SuccessfulExecutionResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elements": elements,
+            "propertyId": property_id,
+        }
+        validated_params = MakePropertyAvailableForElementsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "MakePropertyAvailableForElements",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+        )
+        validated_response = TypeAdapter(MakePropertyAvailableForElementsResult).validate_python(response_dict)
+        return validated_response
+
+    def make_property_unavailable_for_elements(
+        self, elements: list[ElementIdArrayItem], property_id: PropertyId
+    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+        """
+        Makes a property definition unavailable for all the given elements. Available only in
+        Archicad 27.
+
+        Args:
+            elements (list[ElementIdArrayItem]): The elements to make the property unavailable
+                for.
+            property_id (PropertyId)
+
+        Returns:
+            FailedExecutionResult | SuccessfulExecutionResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elements": elements,
+            "propertyId": property_id,
+        }
+        validated_params = MakePropertyUnavailableForElementsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "MakePropertyUnavailableForElements",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+        )
+        validated_response = TypeAdapter(MakePropertyUnavailableForElementsResult).validate_python(response_dict)
+        return validated_response
+
+    def remove_property_from_attributes(
+        self, property_id: PropertyId, attribute_ids: list[AttributeIdArrayItem]
+    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+        """
+        Makes a custom property unavailable for the given attributes (for example Building
+        Materials), in one undo step. Available in Archicad 25, 26 and 27 only.
+
+        Args:
+            property_id (PropertyId)
+            attribute_ids (list[AttributeIdArrayItem]): The attributes (for example Building
+                Materials) to make the property unavailable for.
+
+        Returns:
+            FailedExecutionResult | SuccessfulExecutionResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "propertyId": property_id,
+            "attributeIds": attribute_ids,
+        }
+        validated_params = RemovePropertyFromAttributesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "RemovePropertyFromAttributes", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = TypeAdapter(RemovePropertyFromAttributesResult).validate_python(response_dict)
         return validated_response
 
     def set_property_values_of_attributes(

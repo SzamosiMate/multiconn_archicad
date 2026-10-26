@@ -11,7 +11,38 @@ AccuracyType: TypeAlias = Literal["Off", "ShowSmall5", "ShowSmall25", "ShowSmall
 AngleType: TypeAlias = Literal["DecimalDegree", "DegreeMinSec", "Grad", "Radian", "Surveyors"]
 
 
+class AngleUnitFormat(TypedDict):
+    unit: AngleType
+    decimals: int
+    accuracy: int
+
+
+class AngleUnitFormatUpdate(TypedDict):
+    unit: NotRequired[AngleType]
+    decimals: NotRequired[int]
+    accuracy: NotRequired[int]
+
+
 AreaType: TypeAlias = Literal["SquareMeter", "SquareCentimeter", "SquareMillimeter", "SquareFoot", "SquareInch"]
+
+
+AttributeCreationMethod: TypeAlias = Literal[
+    "AddOn",
+    "Merge",
+    "Paste",
+    "New",
+    "Import",
+    "Explode",
+    "Duplicate",
+    "Hotlink",
+    "XRef",
+    "Library",
+    "LibraryMaster",
+    "Unspecified",
+]
+
+
+AttributePropertyDefinitionFilter: TypeAlias = Literal["UserDefined", "FundamentalBuiltIn", "All"]
 
 
 AttributeType: TypeAlias = Literal[
@@ -157,6 +188,18 @@ BuildingMaterialPhysicalPropertiesList: TypeAlias = list[BuildingMaterialPhysica
 """A list of building material physical properties"""
 
 
+class CalculationUnitAreaFormat(TypedDict):
+    unit: AreaType
+    accuracy: AccuracyType
+    decimals: int
+
+
+class CalculationUnitAreaFormatUpdate(TypedDict):
+    unit: NotRequired[AreaType]
+    accuracy: NotRequired[AccuracyType]
+    decimals: NotRequired[int]
+
+
 ClassificationItemConflictPolicy: TypeAlias = Literal["replace", "skip"]
 
 
@@ -270,9 +313,10 @@ CurtainWallCrossingFrameType: TypeAlias = Literal["None", "FromBottomLeftToTopRi
 
 
 class CurtainWallDetails(TypedDict):
-    height: NotRequired[float]
-    flipped: NotRequired[bool]
-    angle: NotRequired[float]
+    height: float
+    actualHeight: NotRequired[float]
+    flipped: bool
+    angle: float
 
 
 CurtainWallFlexibleIndex: TypeAlias = int
@@ -326,6 +370,26 @@ class CurtainWallSegmentDetails(TypedDict):
     isNegativeArc: NotRequired[bool]
 
 
+class CutPlane(TypedDict):
+    """Defines a 3D cut plane using the plane equation: pa*x + pb*y + pc*z + pd = 0"""
+    pa: float
+    pb: float
+    pc: float
+    pd: float
+
+
+DatabaseType: TypeAlias = Literal[
+    "Section",
+    "Elevation",
+    "InteriorElevation",
+    "Detail",
+    "Worksheet",
+    "DocumentFrom3D",
+    "Layout",
+    "MasterLayout",
+]
+
+
 Date: TypeAlias = str
 
 
@@ -350,6 +414,10 @@ DesignOptionLinkType: TypeAlias = Literal[
 class DetailData(TypedDict):
     name: str
     referenceId: str
+
+
+class FloorPlanPolygon(TypedDict):
+    coordinates: NotRequired[list[Coordinate2D]]
 
 
 DimensionOrigin: TypeAlias = Literal["ProjectZero", "ReferenceLevel1", "ReferenceLevel2", "StoredOrigin", "Altitude"]
@@ -382,6 +450,10 @@ class Change(TypedDict):
     id: str
 
 
+class DrawingContentBox(TypedDict):
+    contentBox: BoundingBox2D
+
+
 DrawingNameType: TypeAlias = Literal["ViewOrSourceFileName", "ViewIdAndName", "CustomName"]
 
 
@@ -402,6 +474,10 @@ class DrawingSettings(TypedDict):
     numberingType: NotRequired[DrawingNumberingType]
     customNumber: NotRequired[str]
     isInNumbering: NotRequired[bool]
+    hasBorderLine: NotRequired[bool]
+    borderLineTypeIndex: NotRequired[int]
+    borderPenIndex: NotRequired[int]
+    borderSize: NotRequired[float]
     titleLibraryPartIndex: NotRequired[float]
 
 
@@ -421,6 +497,11 @@ class ElectricalLoads(TypedDict):
 class ElectricalWiringType(TypedDict):
     name: str
     crossSectionalArea: float
+
+
+ElementCategoryType: TypeAlias = Literal[
+    "StructuralFunction", "Position", "RenovationStatus", "RenovationFilter", "BRI"
+]
 
 
 ElementDetailsField: TypeAlias = Literal[
@@ -452,11 +533,28 @@ ElementFilter: TypeAlias = Literal[
 ]
 
 
-class ElementIFCProperty(TypedDict):
-    """The details of an IFC property value of an element."""
-    propertySetName: str
+class ElementIFCAttribute(TypedDict):
+    """An IFC attribute of an element, for example Name, Description, ObjectType, Tag, PredefinedType or LongName."""
     name: str
-    value: str
+    valueType: str
+    value: NotRequired[str]
+
+
+class MirrorAxis(TypedDict):
+    """The mirror axis: the line through two points on the floor plan."""
+    beginPoint: Coordinate2D
+    endPoint: Coordinate2D
+
+
+ElementReservationState: TypeAlias = Literal["Free", "Editable", "Locked"]
+
+
+class Triangle(TypedDict):
+    vertices: list[Coordinate2D]
+
+
+class ElementTriangulation(TypedDict):
+    triangles: list[Triangle]
 
 
 ElementType: TypeAlias = Literal[
@@ -536,6 +634,15 @@ ElementType: TypeAlias = Literal[
 ]
 
 
+class ElementTypeName(TypedDict):
+    elementType: ElementType
+    name: str
+
+
+class EmbeddedLibraryFile(TypedDict):
+    path: str
+
+
 class EnumValueToAdd(TypedDict):
     """Text values for an enumeration option to add."""
     displayValue: str
@@ -571,9 +678,32 @@ class FailedExecutionResult(TypedDict):
     error: Error
 
 
+FavoriteExportFormat: TypeAlias = Literal["prefs", "xml", "legacyPRF"]
+
+
+FavoriteKeepField: TypeAlias = Literal[
+    "id",
+    "layerIndex",
+    "width",
+    "height",
+    "sillHeight",
+    "referenceLineLocation",
+    "topOffset",
+    "relativeTopStory",
+]
+
+
 class FavoriteRename(TypedDict):
     oldName: str
     newName: str
+
+
+FavoriteSubelementType: TypeAlias = Literal["MainMarker", "Other"]
+
+
+class FavoriteSummary(TypedDict):
+    name: str
+    elementType: NotRequired[ElementType]
 
 
 Favorites: TypeAlias = list[str]
@@ -628,6 +758,11 @@ class FillSymbolLine(TypedDict):
     end: Coordinate2D
 
 
+class FontDetails(TypedDict):
+    fontIndex: int
+    fontName: str
+
+
 class GeoReferencingParameters(TypedDict):
     crsName: str
     description: str
@@ -680,10 +815,6 @@ class Settings(TypedDict):
     surfaceTolerance: float
 
 
-class FloorPlanPolygon(TypedDict):
-    coordinates: NotRequired[list[Coordinate2D]]
-
-
 class CustomSchemeItem(TypedDict):
     customSchemeKey: str
     customSchemeName: str
@@ -692,6 +823,9 @@ class CustomSchemeItem(TypedDict):
 class ModelViewOption(TypedDict):
     """Represents the model view options."""
     name: str
+
+
+AutoTextId: TypeAlias = int
 
 
 GraphicOverrideColumnCoatingType: TypeAlias = Literal["Core", "Finish", "Other"]
@@ -843,6 +977,16 @@ GraphicOverrideRoofEdgeAngle: TypeAlias = Literal["Vertical", "Perpendicular", "
 GraphicOverrideRoofGeometryType: TypeAlias = Literal["SinglePanel", "MultiplePanels"]
 
 
+class GraphicOverrideRuleGroupRename(TypedDict):
+    name: str
+    newName: str
+
+
+class GraphicOverrideRuleReference(TypedDict):
+    name: str
+    ruleGroupName: NotRequired[str]
+
+
 GraphicOverrideShellCutBodyType: TypeAlias = Literal["Editable", "ExtrudeUp", "ExtrudeDown"]
 
 
@@ -887,6 +1031,18 @@ class GridParameterDetails(TypedDict):
     dimension2: NotRequired[int]
 
 
+class GroupUserData(TypedDict):
+    """The user data an add-on attached to the group."""
+    dataVersion: int
+    platformSign: int
+    flags: int
+    data: str
+
+
+class GroupUserDataResult(TypedDict):
+    userData: GroupUserData
+
+
 Guid: TypeAlias = str
 
 
@@ -896,6 +1052,9 @@ class GuidId(TypedDict):
 
 
 HatchOrientationType: TypeAlias = Literal["Global", "Rotated", "Distorted", "Centered"]
+
+
+HierarchicalOwnerMode: TypeAlias = Literal["root", "parent"]
 
 
 class HotlinkNodeId(TypedDict):
@@ -920,6 +1079,7 @@ HotlinkType: TypeAlias = Literal["Module", "XRef"]
 class HotspotData(TypedDict):
     """The parameters of the new Hotspot."""
     favoriteName: NotRequired[str]
+    id: NotRequired[str]
     floorInd: NotRequired[float]
     layerIndex: NotRequired[int]
     position: Coordinate2D
@@ -952,6 +1112,12 @@ IFCElementsToExport: TypeAlias = Literal[
 class IFCExportTranslator(TypedDict):
     name: str
     preview: bool
+
+
+IFCPropertySource: TypeAlias = Literal["preview", "local"]
+
+
+IFCPropertyType: TypeAlias = Literal["SingleValue", "ListValue", "BoundedValue", "EnumeratedValue", "TableValue"]
 
 
 ImageColorDepth: TypeAlias = Literal[
@@ -1143,6 +1309,22 @@ class LayoutParameters(TypedDict):
     displayMasterLayoutBelow: NotRequired[bool]
 
 
+LayoutInsertionPosition: TypeAlias = Literal["first", "last"]
+
+
+class LayoutSubsetSettings(TypedDict):
+    name: str
+    ownPrefix: str
+    customNumber: str
+    numberingStyle: Literal["Undefined", "abc", "ABC", "1", "01", "001", "0001", "noID"]
+    startAt: int
+    continueNumbering: bool
+    useUpperPrefix: bool
+    includeToIDSequence: bool
+    customNumbering: bool
+    addOwnPrefix: bool
+
+
 LengthType: TypeAlias = Literal[
     "Meter",
     "Decimeter",
@@ -1173,6 +1355,18 @@ class Library(TypedDict):
 
 class LibraryLocation(TypedDict):
     path: str
+
+
+LibraryPartScripts = TypedDict(
+    "LibraryPartScripts",
+    {
+        "master": NotRequired[str],
+        "parameter": NotRequired[str],
+        "2d": NotRequired[str],
+        "3d": NotRequired[str],
+        "properties": NotRequired[str],
+    },
+)
 
 
 LibraryPartType: TypeAlias = Literal[
@@ -1343,6 +1537,19 @@ class MEPReferenceSet(TypedDict):
     referenceIds: list[int]
 
 
+MEPRoutingAnchor: TypeAlias = Literal[
+    "TopLeft",
+    "TopCenter",
+    "TopRight",
+    "MiddleLeft",
+    "Center",
+    "MiddleRight",
+    "BottomLeft",
+    "BottomCenter",
+    "BottomRight",
+]
+
+
 MEPSystemAttributeField: TypeAlias = Literal[
     "domain",
     "contourPen",
@@ -1372,6 +1579,11 @@ class MEPSystemGroupIdArrayItem(TypedDict):
 MEPSystemGroupIdOrError: TypeAlias = MEPSystemGroupIdArrayItem | ErrorItem
 
 
+class MEPSystemGroupModificationData(TypedDict):
+    systemGroupId: MEPSystemGroupId
+    name: str
+
+
 class MEPTransitionPreferenceTableRow(TypedDict):
     beginReferenceId: int
     endReferenceId: int
@@ -1380,30 +1592,6 @@ class MEPTransitionPreferenceTableRow(TypedDict):
     length: NotRequired[float]
     angle: NotRequired[float]
     description: NotRequired[str]
-
-
-class MarkerGDLParameterDetails(TypedDict):
-    name: str
-    displayName: str
-    index: int
-    type: str
-    dimension1: NotRequired[int]
-    dimension2: NotRequired[int]
-    value: Any
-    valueDescription: NotRequired[str]
-    itemDescriptions: NotRequired[list[str]]
-    flags: list[
-        Literal[
-            "Hidden",
-            "HiddenFromScript",
-            "Disabled",
-            "Child",
-            "Unique",
-            "Fixed",
-            "BoldName",
-            "Open",
-        ]
-    ]
 
 
 class MarkerParameterUpdateByIndex(TypedDict):
@@ -1502,6 +1690,12 @@ NavigatorItemType: TypeAlias = Literal[
     "DrawingItem",
     "UnknownItem",
 ]
+
+
+class NavigatorParentItem(TypedDict):
+    navigatorItemId: NavigatorItemId
+    type: NavigatorItemType
+    name: str
 
 
 class NonLocalizedValueEnumId(TypedDict):
@@ -1626,10 +1820,43 @@ class NotYetSupportedElementTypeDetails(TypedDict):
     error: str
 
 
+class NoteAutoTextKeyword(TypedDict):
+    keyword: str
+
+
+OpeningAnchor: TypeAlias = Literal[
+    "TopLeft",
+    "TopCenter",
+    "TopRight",
+    "MiddleLeft",
+    "Center",
+    "MiddleRight",
+    "BottomLeft",
+    "BottomCenter",
+    "BottomRight",
+]
+
+
+class OpeningGeometry(TypedDict):
+    anchorPoint: Coordinate3D
+    extrusionDirection: Coordinate3D
+    xAxis: Coordinate3D
+    yAxis: Coordinate3D
+    polygon: NotRequired[list[Coordinate2D]]
+
+
+class OpeningRevealOffsets(TypedDict):
+    coreOffset: float
+    sideOffset: float
+
+
 class OverriddenPen(TypedDict):
     """A pen index that may override the one inherited from the element's structure. On Archicad versions where the underlying element does not support this override, 'overridden' is always false."""
     overridden: bool
     penIndex: NotRequired[int]
+
+
+PartialStructureDisplay: TypeAlias = Literal["EntireStructure", "CoreOnly", "WithoutFinishes", "StructureOnly"]
 
 
 class PenData(TypedDict):
@@ -1667,9 +1894,22 @@ class PolyArc(TypedDict):
     arcAngle: float
 
 
+class PolygonEdgeAncestry(TypedDict):
+    """An input vertex or edge: the contour (0 is the outline, k the hole at index k-1 of the request) and the vertex or edge in it (edge i runs from vertex i to the next one). Both are -1 when Archicad created it."""
+    contourIndex: int
+    index: int
+
+
+class PolygonVertexAncestry(TypedDict):
+    """An input vertex or edge: the contour (0 is the outline, k the hole at index k-1 of the request) and the vertex or edge in it (edge i runs from vertex i to the next one). Both are -1 when Archicad created it."""
+    contourIndex: int
+    index: int
+
+
 class PolylineData(TypedDict):
     """The parameters of the new Polyline."""
     favoriteName: NotRequired[str]
+    id: NotRequired[str]
     floorInd: NotRequired[float]
     layerIndex: NotRequired[int]
     linePenIndex: NotRequired[int]
@@ -1678,6 +1918,21 @@ class PolylineData(TypedDict):
     roomSeparator: NotRequired[bool]
     coordinates: list[Coordinate2D]
     arcs: NotRequired[list[PolyArc]]
+
+
+class PolylineEdgeAncestry(TypedDict):
+    """An input point or segment by its index (segment i runs from point i to point i+1); -1 when Archicad created it."""
+    index: int
+
+
+class PolylineRegularizationData(TypedDict):
+    coordinates: list[Coordinate2D]
+    arcs: NotRequired[list[PolyArc]]
+
+
+class PolylineVertexAncestry(TypedDict):
+    """An input point or segment by its index (segment i runs from point i to point i+1); -1 when Archicad created it."""
+    index: int
 
 
 class PossibleNumericValue(TypedDict):
@@ -1694,6 +1949,9 @@ PossibleNumericValues: TypeAlias = list[PossibleNumericValue]
 
 PossibleStringValues: TypeAlias = list[str]
 """The possible string values of a GDL parameter."""
+
+
+PrinterPrintArea: TypeAlias = Literal["currentView", "entireDrawing", "marquee", "unknown"]
 
 
 ProfileAttributeField: TypeAlias = Literal[
@@ -1736,6 +1994,21 @@ class ProfileSkinContour(TypedDict):
 ProfileUseWith: TypeAlias = Literal["Wall", "Beam", "Column", "Handrail", "Other"]
 
 
+ProjectDataName: TypeAlias = str
+
+
+class ProjectDataValue(TypedDict):
+    name: str
+    content: str
+
+
+class ProjectDataValueData(TypedDict):
+    name: str
+    content: str
+    clientOnly: NotRequired[bool]
+    unique: NotRequired[bool]
+
+
 class ProjectInfoField(TypedDict):
     projectInfoId: str
     projectInfoName: str
@@ -1763,6 +2036,9 @@ class ProjectLocationUpdate(TypedDict):
     latitude: NotRequired[float]
     altitude: NotRequired[float]
     north: NotRequired[float]
+
+
+ProjectPreferenceType: TypeAlias = Literal["WorkingUnits", "Dimensions", "CalculationUnits"]
 
 
 PropertyDataType: TypeAlias = Literal[
@@ -1856,9 +2132,16 @@ class PropertyValue(TypedDict):
 class PropertyValueArrayItem(TypedDict):
     """A wrapper containing the property value."""
     propertyValue: PropertyValue
+    isAvailable: NotRequired[bool]
 
 
-PropertyValueOrErrorItem: TypeAlias = PropertyValueArrayItem | ErrorItem
+class PropertyValueErrorItem(TypedDict):
+    """An error in place of a property value."""
+    error: Error
+    isAvailable: NotRequired[bool]
+
+
+PropertyValueOrErrorItem: TypeAlias = PropertyValueArrayItem | PropertyValueErrorItem
 
 
 PropertyValues: TypeAlias = list[PropertyValueOrErrorItem]
@@ -1875,6 +2158,11 @@ PropertyValuesOrError: TypeAlias = PropertyValuesArrayItem | ErrorItem
 
 PropertyValuesOrErrorArray: TypeAlias = list[PropertyValuesOrError]
 """A list of property value lists."""
+
+
+class RevisionChangeCustomSchemeItem(TypedDict):
+    customSchemeKey: str
+    customSchemeName: str
 
 
 class RevisionCustomSchemeEntry(TypedDict):
@@ -1953,12 +2241,7 @@ class SectionData(TypedDict):
     floorIndex: NotRequired[int]
 
 
-class CutPlane(TypedDict):
-    """Defines a 3D cut plane using the plane equation: pa*x + pb*y + pc*z + pd = 0"""
-    pa: float
-    pb: float
-    pc: float
-    pd: float
+SegmentStructureType: TypeAlias = Literal["Basic", "Profile"]
 
 
 class SetGDLParameterByIndexDetails(TypedDict):
@@ -2073,9 +2356,8 @@ SpecialFolderType: TypeAlias = Literal[
 ]
 
 
-class StairData(TypedDict):
-    """The parameters of the new Stair."""
-    favoriteName: NotRequired[str]
+class StairBaselineData(TypedDict):
+    """The parameters of the Stair to check. Fields that are not given come from the current Stair tool defaults, as in CreateStairs."""
     baseLinePoints: list[Coordinate2D]
     zCoordinate: float
     floorIndex: NotRequired[int]
@@ -2085,6 +2367,63 @@ class StairData(TypedDict):
     riserHeight: NotRequired[float]
     treadDepth: NotRequired[float]
     finishVisible: NotRequired[bool]
+
+
+StairBaselineSolutionState: TypeAlias = Literal["Correct", "Solved", "NotSolved"]
+
+
+class StairData(TypedDict):
+    """The parameters of the new Stair."""
+    favoriteName: NotRequired[str]
+    id: NotRequired[str]
+    baseLinePoints: list[Coordinate2D]
+    zCoordinate: float
+    floorIndex: NotRequired[int]
+    totalHeight: NotRequired[float]
+    flightWidth: NotRequired[float]
+    stepNum: NotRequired[int]
+    riserHeight: NotRequired[float]
+    treadDepth: NotRequired[float]
+    finishVisible: NotRequired[bool]
+
+
+class StairDetails(TypedDict):
+    """The settings of a Stair element, the ones CreateStairs takes. The finishes and the structure are modeled by the Stair's subelements (risers, treads and structures), which GetSubelementsOfHierarchicalElements lists."""
+    stepNum: int
+    riserHeight: float
+    treadDepth: float
+    flightWidth: float
+    totalHeight: float
+    level: float
+    zCoordinate: float
+    finishVisible: bool
+    baseLinePoints: list[Coordinate2D]
+    baseLineArcs: NotRequired[list[PolyArc]]
+
+
+class StoredGDLParameter(TypedDict):
+    """A GDL parameter as it is stored with a marker or a Favorite, read without a parameter interface (so without isLocked and possibleValues)."""
+    name: str
+    displayName: str
+    index: int
+    type: str
+    dimension1: NotRequired[int]
+    dimension2: NotRequired[int]
+    value: NotRequired[Any]
+    valueDescription: NotRequired[str]
+    itemDescriptions: NotRequired[list[str]]
+    flags: list[
+        Literal[
+            "Hidden",
+            "HiddenFromScript",
+            "Disabled",
+            "Child",
+            "Unique",
+            "Fixed",
+            "BoldName",
+            "Open",
+        ]
+    ]
 
 
 class StoryParameters(TypedDict):
@@ -2113,6 +2452,31 @@ class StoryVisibility(TypedDict):
     showAllBelow: NotRequired[bool]
     showRelAbove: NotRequired[int]
     showRelBelow: NotRequired[int]
+
+
+class Style3DDetails(TypedDict):
+    name: str
+    engineId: NotRequired[int]
+    model3D: NotRequired[int]
+    transparency: NotRequired[bool]
+    monochromeEnabled: NotRequired[bool]
+    monochromeSurfaceColor: NotRequired[ColorRGB]
+    monochromeContourColor: NotRequired[ColorRGB]
+    backgroundAsInRendering: NotRequired[bool]
+    chainBackgroundColors: NotRequired[bool]
+    backgroundSkyColor: NotRequired[ColorRGB]
+    backgroundColor: NotRequired[ColorRGB]
+    shadingContours: NotRequired[int]
+    vectorialSunShadow: NotRequired[int]
+    vectorialHatching: NotRequired[bool]
+    contourThickness: NotRequired[int]
+    silhouetteThickness: NotRequired[int]
+    vectorialHatchingThickness: NotRequired[int]
+    shadowContourThickness: NotRequired[int]
+    castShadowPercent: NotRequired[int]
+    shadingPercent: NotRequired[int]
+    shadowElevation: NotRequired[float]
+    show3DHotSpotsOnly: NotRequired[bool]
 
 
 class SubsetData(TypedDict):
@@ -2170,9 +2534,18 @@ class SurveyPointUpdate(TypedDict):
     position: NotRequired[SurveyPointPositionUpdate]
     positionInProject: NotRequired[Coordinate3D]
     geoReferencingParameters: NotRequired[GeoReferencingParametersUpdate]
+    isVisible: NotRequired[bool]
+    isLocked: NotRequired[bool]
 
 
 SymbolLabelTextDirection: TypeAlias = Literal["Parallel", "Horizontal", "Vertical", "General"]
+
+
+class TeamworkUser(TypedDict):
+    userId: float
+    userName: str
+    fullName: str
+    isConnected: bool
 
 
 TextBoxAnchor: TypeAlias = Literal[
@@ -2189,6 +2562,25 @@ TextBoxAnchor: TypeAlias = Literal[
 
 
 TextFrameShape: TypeAlias = Literal["Rectangle", "Circle", "RoundedRectangle", "Pill"]
+
+
+class TextMeasurement(TypedDict):
+    length: float
+    longestLineIndex: int
+    lineLengths: list[float]
+    capitalSizeFactor: NotRequired[float]
+
+
+class TextMeasurementData(TypedDict):
+    text: str
+    fontIndex: NotRequired[int]
+    fontName: NotRequired[str]
+    height: float
+    bold: NotRequired[bool]
+    italic: NotRequired[bool]
+    underline: NotRequired[bool]
+    slant: NotRequired[float]
+    inModelUnits: NotRequired[bool]
 
 
 class TextRunDetails(TypedDict):
@@ -2334,6 +2726,12 @@ class ViewData(TypedDict):
 ViewDepthLimitation: TypeAlias = Literal["ToFloorPlanRange", "ToAbsoluteLimit", "EntireElement"]
 
 
+ViewImageFormat: TypeAlias = Literal["png", "jpg"]
+
+
+ViewImageSource: TypeAlias = Literal["3DWindow", "RenderingWindow"]
+
+
 VolumeType: TypeAlias = Literal[
     "CubicMeter",
     "Liter",
@@ -2430,6 +2828,38 @@ WindowType: TypeAlias = Literal[
 ]
 
 
+class WorkingUnitAreaFormat(TypedDict):
+    unit: AreaType
+    decimals: int
+
+
+class WorkingUnitAreaFormatUpdate(TypedDict):
+    unit: NotRequired[AreaType]
+    decimals: NotRequired[int]
+
+
+class WorkingUnitLengthFormat(TypedDict):
+    unit: LengthType
+    decimals: int
+    roundInch: int
+
+
+class WorkingUnitLengthFormatUpdate(TypedDict):
+    unit: NotRequired[LengthType]
+    decimals: NotRequired[int]
+    roundInch: NotRequired[int]
+
+
+class WorkingUnitVolumeFormat(TypedDict):
+    unit: VolumeType
+    decimals: int
+
+
+class WorkingUnitVolumeFormatUpdate(TypedDict):
+    unit: NotRequired[VolumeType]
+    decimals: NotRequired[int]
+
+
 class WorksheetData(TypedDict):
     name: str
     referenceId: str
@@ -2453,11 +2883,15 @@ class ZoneQuantities(TypedDict):
     windowsSurface: float
 
 
+ZoneReductionType: TypeAlias = Literal["Rest", "Wall", "Column", "Hatch", "Gable", "Unknown"]
+
+
 class ZoneSettings(TypedDict):
     """Settings for modifying a zone."""
     stampPosition: NotRequired[Coordinate2D]
     stampAngle: NotRequired[float]
     fixedStampAngle: NotRequired[bool]
+    referencePosition: NotRequired[Coordinate2D]
 
 
 class Zoom(TypedDict):
@@ -2466,6 +2900,59 @@ class Zoom(TypedDict):
     yMin: float
     xMax: float
     yMax: float
+
+
+class AngleDimensionFormat(TypedDict):
+    """The format of the angle dimensions."""
+    unit: AngleType
+    decimals: int
+    hideZeroDecimals: bool
+
+
+class AngleDimensionFormatUpdate(TypedDict):
+    """The format of the angle dimensions."""
+    unit: NotRequired[AngleType]
+    decimals: NotRequired[int]
+    hideZeroDecimals: NotRequired[bool]
+
+
+class AreaDimensionFormat(TypedDict):
+    """The format of the area values the dimensions show (area calculations)."""
+    unit: AreaType
+    decimals: int
+    hideZeroDecimals: bool
+
+
+class AreaDimensionFormatUpdate(TypedDict):
+    """The format of the area values the dimensions show (area calculations)."""
+    unit: NotRequired[AreaType]
+    decimals: NotRequired[int]
+    hideZeroDecimals: NotRequired[bool]
+
+
+class AttributeCreationInfo(TypedDict):
+    """How, from where, by whom and when the attribute was created. Available from Archicad 30, and only for an attribute Archicad keeps a creation record of: legacy or imported attributes may have none, and then the field is left out. Any of the texts may be empty."""
+    method: AttributeCreationMethod
+    methodDescription: str
+    source: str
+    creatorUserName: str
+    creationTime: int
+
+
+class AttributeFolder(TypedDict):
+    """An attribute folder, identified by the type of the attributes it holds and its path from the root folder of that type. Attribute folders exist from Archicad 26."""
+    attributeType: AttributeType
+    path: list[str]
+
+
+class AttributeFolderRename(TypedDict):
+    attributeType: AttributeType
+    path: list[str]
+    newName: str
+
+
+AttributeFolders: TypeAlias = list[AttributeFolder]
+"""A list of attribute folders."""
 
 
 class AttributeId(TypedDict):
@@ -2486,6 +2973,10 @@ AttributeIds: TypeAlias = list[AttributeIdArrayItem]
 
 AttributeIdsOrErrors: TypeAlias = list[AttributeIdOrError]
 """A list of attribute identifiers or errors."""
+
+
+class AttributePropertyIds(TypedDict):
+    propertyIds: PropertyIds
 
 
 class AttributePropertyValue(TypedDict):
@@ -2513,6 +3004,7 @@ class AutomaticZoneGeometry(TypedDict):
 
 class BeamData(TypedDict):
     favoriteName: NotRequired[str]
+    id: NotRequired[str]
     begCoordinate: Coordinate2D
     endCoordinate: Coordinate2D
     floorIndex: NotRequired[int]
@@ -2613,9 +3105,34 @@ class BuildingMaterialData(TypedDict):
     cutFillOrientation: NotRequired[str]
 
 
+class CalculationUnitLengthFormat(TypedDict):
+    unit: LengthType
+    accuracy: AccuracyType
+    decimals: int
+
+
+class CalculationUnitLengthFormatUpdate(TypedDict):
+    unit: NotRequired[LengthType]
+    accuracy: NotRequired[AccuracyType]
+    decimals: NotRequired[int]
+
+
+class CalculationUnitVolumeFormat(TypedDict):
+    unit: VolumeType
+    accuracy: AccuracyType
+    decimals: int
+
+
+class CalculationUnitVolumeFormatUpdate(TypedDict):
+    unit: NotRequired[VolumeType]
+    accuracy: NotRequired[AccuracyType]
+    decimals: NotRequired[int]
+
+
 class CircleData(TypedDict):
     """The parameters of the new Circle."""
     favoriteName: NotRequired[str]
+    id: NotRequired[str]
     floorInd: NotRequired[float]
     layerIndex: NotRequired[int]
     origin: Coordinate2D
@@ -2688,6 +3205,7 @@ ClassificationSystemsWithItems: TypeAlias = list[ClassificationSystemsWithItem]
 class ColumnData(TypedDict):
     """The parameters of the new Column."""
     favoriteName: NotRequired[str]
+    id: NotRequired[str]
     coordinates: Coordinates
     height: NotRequired[float]
     axisRotationAngle: NotRequired[float]
@@ -2785,12 +3303,6 @@ class CurtainWallPattern(TypedDict):
 class DatabaseId(TypedDict):
     """The identifier of a database"""
     guid: Guid
-
-
-class DatabaseIdAndWindowType(TypedDict):
-    windowType: WindowType
-    databaseId: NotRequired[DatabaseId]
-    storyIndex: NotRequired[int]
 
 
 class DatabaseIdArrayItem(TypedDict):
@@ -2910,6 +3422,26 @@ class ElectricalPanelData(TypedDict):
     circuitIdStyle: NotRequired[int]
 
 
+class ElementCategoryId(TypedDict):
+    """The identifier of an element category."""
+    guid: Guid
+
+
+class ElementCategoryValueId(TypedDict):
+    """The identifier of a value of an element category."""
+    guid: Guid
+
+
+class ElementIFCProperty(TypedDict):
+    """The details of an IFC property value of an element."""
+    propertySetName: str
+    name: str
+    value: str
+    valueType: NotRequired[str]
+    propertyType: NotRequired[IFCPropertyType]
+    source: NotRequired[IFCPropertySource]
+
+
 class ElementId(TypedDict):
     """The identifier of an element."""
     guid: Guid
@@ -2924,6 +3456,37 @@ ElementIdOrError: TypeAlias = ElementIdArrayItem | ErrorItem
 
 ElementIdsOrErrors: TypeAlias = list[ElementIdOrError]
 """A list of element identifiers or errors."""
+
+
+class ElementLinkData(TypedDict):
+    """A directional link from one element to another, with the flags stored on it."""
+    fromElementId: ElementId
+    toElementId: ElementId
+    flags: NotRequired[int]
+
+
+class ElementLinkDetails(TypedDict):
+    elementId: ElementId
+    flags: int
+
+
+class ElementLinkReference(TypedDict):
+    """A directional link from one element to another."""
+    fromElementId: ElementId
+    toElementId: ElementId
+
+
+class ElementLinks(TypedDict):
+    links: list[ElementLinkDetails]
+
+
+ElementLinksOrError: TypeAlias = ElementLinks | ErrorItem
+
+
+class ElementMirrorData(TypedDict):
+    elementId: ElementId
+    mirrorAxis: MirrorAxis
+    copy: NotRequired[bool]
 
 
 class ElementPropertyValue(TypedDict):
@@ -2949,6 +3512,31 @@ ElementQuantities: TypeAlias = (
     | ColumnSegmentQuantities
     | BeamSegmentQuantities
 )
+
+
+class ElementReservationStatus(TypedDict):
+    status: ElementReservationState
+    reservedBy: NotRequired[User]
+    owner: NotRequired[User]
+
+
+class ElementSetId(TypedDict):
+    """The identifier of an element set."""
+    guid: Guid
+
+
+class ElementSet(TypedDict):
+    elementSetId: ElementSetId
+
+
+class ElementSetsOfElement(TypedDict):
+    elementSets: list[ElementSet]
+
+
+class ElementSurfaceQuantity(TypedDict):
+    surfaceId: NotRequired[AttributeIdArrayItem]
+    buildingMaterialId: AttributeIdArrayItem
+    exposedArea: float
 
 
 class TrimmedByItem(TypedDict):
@@ -3172,6 +3760,9 @@ class LayoutSetting(TypedDict):
     customLayoutNumbering: NotRequired[bool]
     doNotIncludeInNumbering: NotRequired[bool]
     displayMasterLayoutBelow: NotRequired[bool]
+    masterLayoutDatabaseId: NotRequired[DatabaseId]
+    masterNavigatorItemId: NotRequired[NavigatorItemId]
+    masterLayoutName: NotRequired[str]
     customData: NotRequired[list[LayoutCustomData]]
 
 
@@ -3210,6 +3801,7 @@ class Subelement(TypedDict):
     railingBalusters: NotRequired[Elements]
     beamSegments: NotRequired[Elements]
     columnSegments: NotRequired[Elements]
+    externalSubelements: NotRequired[Elements]
 
 
 class GraphicOverrideCombinationId(TypedDict):
@@ -3910,6 +4502,12 @@ class GraphicOverrideRuleIdArrayItem(TypedDict):
 GraphicOverrideRuleIdOrError: TypeAlias = GraphicOverrideRuleIdArrayItem | ErrorItem
 
 
+class GraphicOverrideRuleMove(TypedDict):
+    graphicOverrideRuleId: GraphicOverrideRuleId
+    ruleGroupName: str
+    beforeGraphicOverrideRuleId: NotRequired[GraphicOverrideRuleId]
+
+
 class GraphicOverrideStyle(TypedDict):
     """What a graphic override rule overrides and how. A field that is left out is not overridden."""
     lineType: NotRequired[AttributeId]
@@ -3979,6 +4577,7 @@ GroupIdOrError: TypeAlias = GroupIdArrayItem | ErrorItem
 class HatchData(TypedDict):
     """The parameters of the new Hatch."""
     favoriteName: NotRequired[str]
+    id: NotRequired[str]
     floorInd: NotRequired[float]
     layerIndex: NotRequired[int]
     coordinates: list[Coordinate2D]
@@ -3995,14 +4594,19 @@ class HatchData(TypedDict):
 
 
 class HatchOrientation(TypedDict):
-    """Orientation and distortion parameters of a fill."""
-    type: HatchOrientationType
-    origin: Coordinate2D
-    matrix00: float
-    matrix10: float
-    matrix01: float
-    matrix11: float
-    innerRadius: float
+    """Orientation and distortion parameters of a fill. When modifying an element, omitted properties keep their current values."""
+    type: NotRequired[HatchOrientationType]
+    origin: NotRequired[Coordinate2D]
+    matrix00: NotRequired[float]
+    matrix10: NotRequired[float]
+    matrix01: NotRequired[float]
+    matrix11: NotRequired[float]
+    innerRadius: NotRequired[float]
+
+
+class HierarchicalElementOwner(TypedDict):
+    ownerElementId: ElementId
+    hierarchicalElementType: Literal["MainElement", "ChildElement", "SingleElement"]
 
 
 class Hole2DWithLegacyCoordinates(TypedDict):
@@ -4084,6 +4688,15 @@ class HotlinkNodeCreated(TypedDict):
 
 
 HotlinkNodeCreatedOrError: TypeAlias = HotlinkNodeCreated | ErrorItem
+
+
+class HotlinkProxyElement(TypedDict):
+    proxyElementId: ElementId
+    sourceElementId: ElementId
+
+
+class HotlinkProxyElementTable(TypedDict):
+    proxyElements: list[HotlinkProxyElement]
 
 
 class KeynoteFolderData(TypedDict):
@@ -4187,6 +4800,7 @@ class LampData(TypedDict):
     lightIsOn: NotRequired[bool]
     floorIndex: NotRequired[int]
     favoriteName: NotRequired[str]
+    id: NotRequired[str]
 
 
 class LampWithDetails(TypedDict):
@@ -4259,6 +4873,8 @@ class LayoutData(TypedDict):
     masterNavigatorItemId: NotRequired[NavigatorItemId]
     layoutName: str
     parentNavigatorItemId: NotRequired[NavigatorItemId]
+    previousNavigatorItemId: NotRequired[NavigatorItemId]
+    position: NotRequired[LayoutInsertionPosition]
     paperWidth: NotRequired[float]
     paperHeight: NotRequired[float]
     layoutParameters: NotRequired[LayoutParameters]
@@ -4278,12 +4894,38 @@ class LayoutSettingsData(TypedDict):
     customLayoutNumbering: NotRequired[bool]
     doNotIncludeInNumbering: NotRequired[bool]
     showMasterBelow: NotRequired[bool]
+    masterNavigatorItemId: NotRequired[NavigatorItemId]
+    masterLayoutDatabaseId: NotRequired[DatabaseId]
+    masterLayoutName: NotRequired[str]
     customData: NotRequired[list[LayoutCustomDataToSet]]
+
+
+class LengthDimensionFormat(TypedDict):
+    """The format of the linear dimensions."""
+    unit: LengthType
+    decimals: int
+    roundInch: int
+    accuracy: AccuracyType
+    showZeroWhole: bool
+    showZeroInch: bool
+    hideZeroDecimals: bool
+
+
+class LengthDimensionFormatUpdate(TypedDict):
+    """The format of the linear dimensions."""
+    unit: NotRequired[LengthType]
+    decimals: NotRequired[int]
+    roundInch: NotRequired[int]
+    accuracy: NotRequired[AccuracyType]
+    showZeroWhole: NotRequired[bool]
+    showZeroInch: NotRequired[bool]
+    hideZeroDecimals: NotRequired[bool]
 
 
 class LevelDimensionData(TypedDict):
     """The parameters of the new Level Dimension."""
     favoriteName: NotRequired[str]
+    id: NotRequired[str]
     position: Coordinate2D
     parentElementId: NotRequired[ElementId]
     level: NotRequired[float]
@@ -4331,6 +4973,11 @@ LibraryFileAdditions: TypeAlias = list[LibraryFileAddition]
 """A list of library file additions to the embedded library"""
 
 
+class LibraryPartScriptData(TypedDict):
+    name: str
+    scripts: LibraryPartScripts
+
+
 class LineAttribute(TypedDict):
     """A line attribute."""
     attributeId: AttributeId
@@ -4374,6 +5021,7 @@ class LineDetails(TypedDict):
 class LineElementData(TypedDict):
     """The parameters of the new Line."""
     favoriteName: NotRequired[str]
+    id: NotRequired[str]
     floorInd: NotRequired[float]
     layerIndex: NotRequired[int]
     begCoordinate: Coordinate2D
@@ -4445,11 +5093,19 @@ class MEPPhysicalSystemData(TypedDict):
 class MEPPhysicalSystemDetails(TypedDict):
     physicalSystemId: MEPPhysicalSystemId
     name: str
+    isEditable: NotRequired[bool]
     rootElementId: NotRequired[ElementId]
     mepSystemId: NotRequired[AttributeId]
 
 
 MEPPhysicalSystemDetailsOrError: TypeAlias = MEPPhysicalSystemDetails | ErrorItem
+
+
+class MEPPhysicalSystemModificationData(TypedDict):
+    physicalSystemId: MEPPhysicalSystemId
+    name: NotRequired[str]
+    rootElementId: NotRequired[ElementId]
+    mepSystemId: NotRequired[AttributeId]
 
 
 class MEPPortDetails(TypedDict):
@@ -4488,6 +5144,12 @@ class MEPRoutingElementModificationData(TypedDict):
     crossSectionShape: NotRequired[MEPCrossSectionShape]
     crossSectionReferenceId: NotRequired[int]
     preferenceTableId: NotRequired[Guid]
+    branchPreferenceTableId: NotRequired[Guid]
+    anchor: NotRequired[MEPRoutingAnchor]
+    referenceLineOffsetX: NotRequired[float]
+    referenceLineOffsetY: NotRequired[float]
+    wallThickness: NotRequired[float]
+    flangeSize: NotRequired[float]
     nodePositions: NotRequired[list[Coordinate3D]]
 
 
@@ -4495,6 +5157,10 @@ class MEPRoutingNodeDetails(TypedDict):
     """The details of an MEP routing node."""
     elementId: ElementId
     position: Coordinate3D
+    incomingSegmentId: NotRequired[ElementId]
+    outgoingSegmentId: NotRequired[ElementId]
+    elbows: NotRequired[Elements]
+    transitions: NotRequired[Elements]
 
 
 class MEPRoutingSegmentDetails(TypedDict):
@@ -4505,6 +5171,14 @@ class MEPRoutingSegmentDetails(TypedDict):
     crossSectionShape: str
     crossSectionReferenceId: NotRequired[int]
     preferenceTableId: NotRequired[Guid]
+    beginNodeId: NotRequired[ElementId]
+    endNodeId: NotRequired[ElementId]
+    anchor: NotRequired[MEPRoutingAnchor]
+    referenceLineOffsetX: NotRequired[float]
+    referenceLineOffsetY: NotRequired[float]
+    wallThickness: NotRequired[float]
+    flangeSize: NotRequired[float]
+    rigidSegments: NotRequired[Elements]
 
 
 class MEPSystemAttribute(TypedDict):
@@ -4545,6 +5219,7 @@ class MEPSystemData(TypedDict):
 class MEPSystemGroupDetails(TypedDict):
     systemGroupId: MEPSystemGroupId
     name: str
+    isEditable: NotRequired[bool]
     physicalSystems: list[MEPPhysicalSystemDetailsOrError]
 
 
@@ -4562,12 +5237,13 @@ MarkerParameterUpdate: TypeAlias = MarkerParameterUpdateByName | MarkerParameter
 
 class MarkerParametersOfElement(TypedDict):
     libPart: NotRequired[LibPartDetails]
-    parameters: list[MarkerGDLParameterDetails]
+    parameters: list[StoredGDLParameter]
 
 
 class MeshData(TypedDict):
     """The parameters of the new Mesh."""
     favoriteName: NotRequired[str]
+    id: NotRequired[str]
     floorIndex: NotRequired[int]
     level: NotRequired[float]
     skirtType: NotRequired[MeshSkirtType]
@@ -4613,7 +5289,7 @@ class MeshModificationData(TypedDict):
     lineTypeIndex: NotRequired[int]
     polygonCoordinates: NotRequired[list[Coordinate3D]]
     polygonArcs: NotRequired[list[PolyArc]]
-    holes: NotRequired[Holes3D]
+    holes: NotRequired[list[Hole3D]]
     sublines: NotRequired[list[MeshSubline]]
 
 
@@ -4661,9 +5337,6 @@ class ElementsWithMoveVector(TypedDict):
 class ElementDesignOptionPair(TypedDict):
     elementId: ElementId
     designOptionId: DesignOptionId
-
-
-NavigatorItemIdOrDatabaseIdAndWindowType: TypeAlias = NavigatorItemIdArrayItem | DatabaseIdAndWindowType
 
 
 class NewClassificationItem(TypedDict):
@@ -4724,6 +5397,7 @@ class ObjectData(TypedDict):
     linkToSettings: NotRequired[LinkToSettings]
     floorIndex: NotRequired[int]
     favoriteName: NotRequired[str]
+    id: NotRequired[str]
 
 
 class ObjectDetails(TypedDict):
@@ -4790,6 +5464,121 @@ class OpeningData(TypedDict):
     height: NotRequired[float]
 
 
+class OpeningDefaultFloorPlanParameters(TypedDict):
+    showReferenceAxis: NotRequired[bool]
+    referenceAxisPen: NotRequired[int]
+    referenceAxisLineTypeId: NotRequired[AttributeId]
+    referenceAxisOverhang: NotRequired[float]
+    cutSurfacesUseLineOfCutElements: NotRequired[bool]
+    cutSurfacesLinePen: NotRequired[int]
+    cutSurfacesLineTypeId: NotRequired[AttributeId]
+    outlinesUseLineOfCutElements: NotRequired[bool]
+    outlinesUncutLinePen: NotRequired[int]
+    outlinesUncutLineTypeId: NotRequired[AttributeId]
+    outlinesOverheadLinePen: NotRequired[int]
+    outlinesOverheadLineTypeId: NotRequired[AttributeId]
+    useCoverFills: NotRequired[bool]
+    coverFillsUseFillsOfCutElements: NotRequired[bool]
+    coverFillId: NotRequired[AttributeId]
+    coverFillPen: NotRequired[int]
+    coverFillBackgroundPen: NotRequired[int]
+    coverFillOrientation: NotRequired[HatchOrientationType]
+    coverFillTransformation: NotRequired[CoverFillTransformation]
+    cutSymbolLibPartId: NotRequired[Guid]
+    unCutSymbolLibPartId: NotRequired[Guid]
+
+
+class OpeningExtrusionParameters(TypedDict):
+    """The size and extrusion settings. A size Archicad does not give for the opening's shape is left out."""
+    width: NotRequired[float]
+    height: NotRequired[float]
+    anchor: OpeningAnchor
+    anchorAltitude: NotRequired[float]
+    extrusionStartOffset: NotRequired[float]
+    finiteBodyLength: NotRequired[float]
+    isExtrusionSurfaceOverridden: bool
+    extrusionSurfaceId: NotRequired[AttributeId]
+    isEndSurfaceOverridden: bool
+    endSurfaceId: NotRequired[AttributeId]
+    areOverriddenSurfacesLinked: bool
+
+
+class OpeningExtrusionParametersUpdate(TypedDict):
+    """The size and extrusion settings to change, with the same names GetOpeningDetails returns."""
+    width: NotRequired[float]
+    height: NotRequired[float]
+    anchor: NotRequired[OpeningAnchor]
+    anchorAltitude: NotRequired[float]
+    extrusionStartOffset: NotRequired[float]
+    finiteBodyLength: NotRequired[float]
+    isExtrusionSurfaceOverridden: NotRequired[bool]
+    extrusionSurfaceId: NotRequired[AttributeId]
+    isEndSurfaceOverridden: NotRequired[bool]
+    endSurfaceId: NotRequired[AttributeId]
+    areOverriddenSurfacesLinked: NotRequired[bool]
+
+
+class OpeningFloorPlanParameters(TypedDict):
+    showReferenceAxis: bool
+    referenceAxisPen: int
+    referenceAxisLineTypeId: AttributeId
+    referenceAxisOverhang: float
+    cutSurfacesUseLineOfCutElements: bool
+    cutSurfacesLinePen: int
+    cutSurfacesLineTypeId: AttributeId
+    outlinesUseLineOfCutElements: bool
+    outlinesUncutLinePen: int
+    outlinesUncutLineTypeId: AttributeId
+    outlinesOverheadLinePen: int
+    outlinesOverheadLineTypeId: AttributeId
+    useCoverFills: bool
+    coverFillsUseFillsOfCutElements: bool
+    coverFillId: AttributeId
+    coverFillPen: int
+    coverFillBackgroundPen: int
+    coverFillOrientation: HatchOrientationType
+    coverFillTransformation: NotRequired[CoverFillTransformation]
+    cutSymbolLibPartId: NotRequired[Guid]
+    unCutSymbolLibPartId: NotRequired[Guid]
+
+
+class OpeningFloorPlanParametersUpdate(TypedDict):
+    """The floor plan parameters to change, with the names GetOpeningFloorPlanParameters returns. The ones left out are not changed."""
+    showReferenceAxis: NotRequired[bool]
+    referenceAxisPen: NotRequired[int]
+    referenceAxisLineTypeId: NotRequired[AttributeId]
+    referenceAxisOverhang: NotRequired[float]
+    cutSurfacesUseLineOfCutElements: NotRequired[bool]
+    cutSurfacesLinePen: NotRequired[int]
+    cutSurfacesLineTypeId: NotRequired[AttributeId]
+    outlinesUseLineOfCutElements: NotRequired[bool]
+    outlinesUncutLinePen: NotRequired[int]
+    outlinesUncutLineTypeId: NotRequired[AttributeId]
+    outlinesOverheadLinePen: NotRequired[int]
+    outlinesOverheadLineTypeId: NotRequired[AttributeId]
+    useCoverFills: NotRequired[bool]
+    coverFillsUseFillsOfCutElements: NotRequired[bool]
+    coverFillId: NotRequired[AttributeId]
+    coverFillPen: NotRequired[int]
+    coverFillBackgroundPen: NotRequired[int]
+    coverFillOrientation: NotRequired[HatchOrientationType]
+    coverFillTransformation: NotRequired[CoverFillTransformation]
+    cutSymbolLibPartId: NotRequired[Guid]
+    unCutSymbolLibPartId: NotRequired[Guid]
+    clearCutSymbol: NotRequired[bool]
+    clearUnCutSymbol: NotRequired[bool]
+
+
+class OpeningModificationData(TypedDict):
+    elementId: ElementId
+    parentElementId: NotRequired[ElementId]
+    addCutElements: NotRequired[list[ElementIdArrayItem]]
+    removeCutElements: NotRequired[list[ElementIdArrayItem]]
+    polygon: NotRequired[list[Coordinate2D]]
+    transformation: NotRequired[list[float]]
+    extrusionParameters: NotRequired[OpeningExtrusionParametersUpdate]
+
+
 class OpeningRelations(TypedDict):
     fromRoom: NotRequired[ElementId]
     toRoom: NotRequired[ElementId]
@@ -4798,6 +5587,24 @@ class OpeningRelations(TypedDict):
 class OpeningRelationsOfElement(TypedDict):
     """Relations of a curtain wall panel, skylight, window or door: the zones on the two sides of the opening."""
     openingRelations: OpeningRelations
+
+
+class OpeningRevealOffsetData(TypedDict):
+    elementId: ElementId
+    coreOffset: NotRequired[float]
+    sideOffset: NotRequired[float]
+
+
+class OpeningTransformation(TypedDict):
+    elementId: ElementId
+    globalToLocal: list[float]
+    localToGlobal: NotRequired[list[float]]
+    origin: NotRequired[Coordinate3D]
+    xAxis: NotRequired[Coordinate3D]
+    yAxis: NotRequired[Coordinate3D]
+    zAxis: NotRequired[Coordinate3D]
+    determinant: float
+    isMirrored: bool
 
 
 class OverriddenMaterial(TypedDict):
@@ -4828,6 +5635,17 @@ class PenTableData(TypedDict):
     isActiveForLayout: NotRequired[bool]
     sourceAttributeId: NotRequired[AttributeIdArrayItem]
     pens: NotRequired[list[PenData]]
+
+
+class PolygonContourAncestry(TypedDict):
+    vertices: list[PolygonVertexAncestry]
+    edges: list[PolygonEdgeAncestry]
+
+
+class PolylineAncestry(TypedDict):
+    """Only with withAncestry. Read from the vertexAncestry and edgeAncestry of Archicad's API_RegularizedPoly; -1 marks a vertex or edge that Archicad created (for example at a self-intersection)."""
+    vertices: list[PolylineVertexAncestry]
+    edges: list[PolylineEdgeAncestry]
 
 
 class PolylineDetails(TypedDict):
@@ -4901,6 +5719,18 @@ class ProfileSkinData(TypedDict):
     edgeOverrides: NotRequired[list[ProfileEdgeOverride]]
 
 
+class ProjectDataKey(TypedDict):
+    name: str
+    guid: str
+    clientOnly: bool
+    teamworkOwner: NotRequired[User]
+
+
+class ProjectDataReservationConflict(TypedDict):
+    name: str
+    user: User
+
+
 class PropertyAvailabilityUpdate(TypedDict):
     """Classification items the property is available for: set replaces the list, add and remove edit it."""
     set: NotRequired[list[ClassificationItemIdArrayItem]]
@@ -4919,6 +5749,12 @@ class PropertyGroupDetails(TypedDict):
     name: str
     description: NotRequired[str]
     isCustom: bool
+
+
+class RegularizedPolyline(TypedDict):
+    coordinates: list[Coordinate2D]
+    arcs: list[PolyArc]
+    ancestry: NotRequired[PolylineAncestry]
 
 
 class ElementPair(TypedDict):
@@ -5017,6 +5853,7 @@ class SolidLinksOfElement(TypedDict):
 class SplineData(TypedDict):
     """The parameters of the new Spline."""
     favoriteName: NotRequired[str]
+    id: NotRequired[str]
     floorInd: NotRequired[float]
     layerIndex: NotRequired[int]
     coordinates: list[Coordinate2D]
@@ -5041,6 +5878,17 @@ class SplineSettings(TypedDict):
     roomSeparator: NotRequired[bool]
     linePenIndex: NotRequired[int]
     lineTypeId: NotRequired[AttributeId]
+
+
+class StairBaselineSolution(TypedDict):
+    solution: StairBaselineSolutionState
+    baseLinePoints: list[Coordinate2D]
+    baseLineArcs: NotRequired[list[PolyArc]]
+    totalHeight: float
+    flightWidth: float
+    stepNum: int
+    riserHeight: float
+    treadDepth: float
 
 
 StoriesParameters: TypeAlias = list[StoryParameters]
@@ -5098,11 +5946,14 @@ class SurveyPoint(TypedDict):
     position: SurveyPointPosition
     positionInProject: Coordinate3D
     geoReferencingParameters: GeoReferencingParameters
+    isVisible: NotRequired[bool]
+    isLocked: NotRequired[bool]
 
 
 class TextDataWithRuns(TypedDict):
     """The parameters of the new Text element."""
     favoriteName: NotRequired[str]
+    id: NotRequired[str]
     coordinate: Coordinate3D
     text: NotRequired[str]
     runs: list[TextRunDetails]
@@ -5118,6 +5969,7 @@ class TextDataWithRuns(TypedDict):
 class TextDataWithText(TypedDict):
     """The parameters of the new Text element."""
     favoriteName: NotRequired[str]
+    id: NotRequired[str]
     coordinate: Coordinate3D
     text: str
     runs: NotRequired[list[TextRunDetails]]
@@ -5175,6 +6027,7 @@ ViewTransformationsOrError: TypeAlias = ViewTransformations | ErrorItem
 
 class WallData(TypedDict):
     favoriteName: NotRequired[str]
+    id: NotRequired[str]
     begCoordinate: Coordinate2D
     endCoordinate: Coordinate2D
     floorIndex: NotRequired[int]
@@ -5334,6 +6187,8 @@ class WindowDoorDetails(TypedDict):
     reflected: bool
     refSide: bool
     oSide: bool
+    reveal: bool
+    revealDepthOffset: float
 
 
 class WindowWithDetails(TypedDict):
@@ -5347,6 +6202,22 @@ class WindowWithDetails(TypedDict):
     oSide: NotRequired[bool]
     reveal: NotRequired[bool]
     revealDepthOffset: NotRequired[float]
+
+
+class WorkingUnitPreferences(TypedDict):
+    """The Working Units page: the units and the number of decimals the model's lengths, areas, volumes and angles are shown with."""
+    length: WorkingUnitLengthFormat
+    area: WorkingUnitAreaFormat
+    volume: WorkingUnitVolumeFormat
+    angle: AngleUnitFormat
+
+
+class WorkingUnitPreferencesUpdate(TypedDict):
+    """The Working Units page: the units and the number of decimals the model's lengths, areas, volumes and angles are shown with."""
+    length: NotRequired[WorkingUnitLengthFormatUpdate]
+    area: NotRequired[WorkingUnitAreaFormatUpdate]
+    volume: NotRequired[WorkingUnitVolumeFormatUpdate]
+    angle: NotRequired[AngleUnitFormatUpdate]
 
 
 class ZoneBoundary(TypedDict):
@@ -5430,6 +6301,7 @@ class FavoritesToApplyItem(TypedDict):
 class ArcData(TypedDict):
     """The parameters of the new Arc."""
     favoriteName: NotRequired[str]
+    id: NotRequired[str]
     floorInd: NotRequired[float]
     layerIndex: NotRequired[int]
     origin: Coordinate2D
@@ -5492,7 +6364,9 @@ class AssociativeDimensionOnSectionData(TypedDict):
 
 
 class AssociativeWitnessPoint(TypedDict):
-    elementId: ElementId
+    """A witness point of a dimension. Give elementId (with line, inIndex, special, nodeType, nodeStatus and nodeId as needed) for a point associated with an element, or only coordinate for a static point that is not associated with any element, like a point added by hand on empty space. A witness point takes either elementId or coordinate, not both."""
+    elementId: NotRequired[ElementId]
+    coordinate: NotRequired[Coordinate2D]
     line: NotRequired[bool]
     inIndex: NotRequired[int]
     special: NotRequired[int]
@@ -5506,6 +6380,7 @@ class AttributeHeader(TypedDict):
     index: float
     name: str
     modificationTime: int
+    creationInfo: NotRequired[AttributeCreationInfo]
 
 
 AttributeHeaders: TypeAlias = list[AttributeHeader]
@@ -5543,6 +6418,18 @@ class BeamDetails(TypedDict):
     profileId: NotRequired[AttributeId]
 
 
+class BeamSegmentDetails(TypedDict):
+    """Details of a BeamSegment subelement of a Beam."""
+    ownerElementId: NotRequired[ElementId]
+    structureType: SegmentStructureType
+    width: float
+    height: float
+    isWidthAndHeightLinked: bool
+    circleBased: bool
+    buildingMaterialId: NotRequired[AttributeId]
+    profileId: NotRequired[AttributeId]
+
+
 class BeamWithDetails(TypedDict):
     elementId: ElementId
     begCoordinate: NotRequired[Coordinate2D]
@@ -5573,6 +6460,22 @@ class Body3D(TypedDict):
     """One solid body of an element's 3D model: a flat vertex list in world coordinates and the planar faces referencing it. The faces are not triangulated: a face is a closed loop of vertex indices (counterclockwise seen from outside the body) plus the loops of its holes."""
     vertices: list[Coordinate3D]
     polygons: list[Body3DPolygon]
+
+
+class CalculationUnitPreferences(TypedDict):
+    """The Calculation Units page: the units, the number of decimals and the extra accuracy of the values in element lists and schedules. GetCalculationUnits answers the same page."""
+    length: CalculationUnitLengthFormat
+    area: CalculationUnitAreaFormat
+    volume: CalculationUnitVolumeFormat
+    angle: AngleUnitFormat
+
+
+class CalculationUnitPreferencesUpdate(TypedDict):
+    """The Calculation Units page: the units, the number of decimals and the extra accuracy of the values in element lists and schedules. GetCalculationUnits answers the same page."""
+    length: NotRequired[CalculationUnitLengthFormatUpdate]
+    area: NotRequired[CalculationUnitAreaFormatUpdate]
+    volume: NotRequired[CalculationUnitVolumeFormatUpdate]
+    angle: NotRequired[AngleUnitFormatUpdate]
 
 
 class DrawingsWithNewLink(TypedDict):
@@ -5625,10 +6528,23 @@ class ColumnDetails(TypedDict):
     profileId: NotRequired[AttributeId]
 
 
+class ColumnSegmentDetails(TypedDict):
+    """Details of a ColumnSegment subelement of a Column."""
+    ownerElementId: NotRequired[ElementId]
+    structureType: SegmentStructureType
+    width: float
+    depth: float
+    isWidthAndHeightLinked: bool
+    circleBased: bool
+    buildingMaterialId: NotRequired[AttributeId]
+    profileId: NotRequired[AttributeId]
+
+
 class ColumnWithDetails(TypedDict):
     elementId: ElementId
     origin: NotRequired[Coordinate2D]
     zCoordinate: NotRequired[float]
+    floorIndex: NotRequired[int]
     height: NotRequired[float]
     bottomOffset: NotRequired[float]
     axisRotationAngle: NotRequired[float]
@@ -5679,6 +6595,12 @@ class ConnectionItem(TypedDict):
     connectedWithBeginPoint: bool
 
 
+class ContainingDatabase(TypedDict):
+    databaseId: DatabaseId
+    windowType: WindowType
+    name: str
+
+
 class CoordinateWitnessPoint(TypedDict):
     coordinate: NotRequired[Coordinate2D]
     coordinate3D: NotRequired[Coordinate3D]
@@ -5713,6 +6635,7 @@ class LayerCombinationDataArrayItem(TypedDict):
 class CurtainWallData(TypedDict):
     """The parameters of the new Curtain Wall. Everything not given here - the frame and panel classes, the surfaces, the boundary and corner frames, the pattern - comes from the favorite or from the Curtain Wall tool defaults of the open project."""
     favoriteName: NotRequired[str]
+    id: NotRequired[str]
     coordinates: list[Coordinate2D]
     zCoordinate: NotRequired[float]
     floorIndex: NotRequired[int]
@@ -5725,9 +6648,32 @@ class CurtainWallData(TypedDict):
 class CurtainWallPanelDetails(TypedDict):
     polygonCoordinates: list[Coordinate3D]
     isHidden: bool
+    isDegenerate: NotRequired[bool]
     segmentIndex: float
     className: str
     frames: list[ElementIdArrayItem]
+
+
+class DatabaseById(TypedDict):
+    windowType: NotRequired[WindowType]
+    databaseId: DatabaseId
+    storyIndex: NotRequired[int]
+
+
+class DatabaseByWindowType(TypedDict):
+    windowType: WindowType
+    databaseId: NotRequired[DatabaseId]
+    storyIndex: NotRequired[int]
+
+
+class DatabaseDetails(TypedDict):
+    type: str
+    databaseId: DatabaseId
+    name: NotRequired[str]
+    referenceId: NotRequired[str]
+
+
+DatabaseIdAndWindowType: TypeAlias = DatabaseByWindowType | DatabaseById
 
 
 class DesignOptionCombinationData(TypedDict):
@@ -5739,6 +6685,11 @@ class DesignOptionCombinationDetails(TypedDict):
     designOptionCombinationId: GuidId
     name: str
     activeDesignOptions: NotRequired[list[DesignOptionIdArrayItem]]
+
+
+class DesignOptionDeactivation(TypedDict):
+    designOptionCombinationId: DesignOptionCombinationId
+    designOptions: list[DesignOptionIdArrayItem]
 
 
 class DesignOptionDetails(TypedDict):
@@ -5776,6 +6727,32 @@ class DimensionData(TypedDict):
 
 
 DimensionDataOrError: TypeAlias = DimensionData | ErrorItem
+
+
+class DimensionPreferences(TypedDict):
+    """The Dimensions page: the dimension standard and the format (unit, decimals, extra accuracy and zero handling) of each dimension type."""
+    dimensionStandardIndex: int
+    linear: LengthDimensionFormat
+    angle: AngleDimensionFormat
+    radial: LengthDimensionFormat
+    level: LengthDimensionFormat
+    elevation: LengthDimensionFormat
+    doorWindow: LengthDimensionFormat
+    parapet: LengthDimensionFormat
+    area: AreaDimensionFormat
+
+
+class DimensionPreferencesUpdate(TypedDict):
+    """The Dimensions page: the dimension standard and the format (unit, decimals, extra accuracy and zero handling) of each dimension type."""
+    dimensionStandardIndex: NotRequired[int]
+    linear: NotRequired[LengthDimensionFormatUpdate]
+    angle: NotRequired[AngleDimensionFormatUpdate]
+    radial: NotRequired[LengthDimensionFormatUpdate]
+    level: NotRequired[LengthDimensionFormatUpdate]
+    elevation: NotRequired[LengthDimensionFormatUpdate]
+    doorWindow: NotRequired[LengthDimensionFormatUpdate]
+    parapet: NotRequired[LengthDimensionFormatUpdate]
+    area: NotRequired[AreaDimensionFormatUpdate]
 
 
 class DoorData(TypedDict):
@@ -5819,6 +6796,10 @@ class DrawingDetails(TypedDict):
     numberingType: DrawingNumberingType
     customNumber: NotRequired[str]
     isInNumbering: bool
+    hasBorderLine: bool
+    borderLineTypeIndex: int
+    borderPenIndex: int
+    borderSize: float
     titleLibraryPartIndex: float
     titleElementId: NotRequired[ElementId]
 
@@ -5956,6 +6937,30 @@ class ElectricalPanelModificationData(TypedDict):
     ySize: NotRequired[float]
 
 
+class ElementCategoryValue(TypedDict):
+    type: ElementCategoryType
+    categoryId: ElementCategoryId
+    categoryValueId: ElementCategoryValueId
+    name: str
+
+
+class ElementCategoryValueData(TypedDict):
+    elementId: ElementId
+    type: ElementCategoryType
+    categoryValueId: ElementCategoryValueId
+
+
+class ElementCategoryValueDetails(TypedDict):
+    categoryValueId: ElementCategoryValueId
+    name: str
+    isVisibleOnUI: bool
+    usableAsCriteria: bool
+
+
+class ElementCategoryValues(TypedDict):
+    categoryValues: list[ElementCategoryValue]
+
+
 class ElementClassification(TypedDict):
     """The classification of an element."""
     elementId: ElementId
@@ -5987,8 +6992,32 @@ class ElementComponentQuantities(TypedDict):
     subElementId: NotRequired[ElementId]
 
 
+class ElementDefaultClassification(TypedDict):
+    elementType: ElementType
+    classificationId: ClassificationId
+
+
 class ElementGeometry3D(TypedDict):
     bodies: list[Body3D]
+
+
+class ElementIFCAttributeValue(TypedDict):
+    elementId: ElementId
+    name: str
+    value: str
+
+
+class ElementIFCAttributes(TypedDict):
+    """The IFC attributes of an element."""
+    elementId: ElementId
+    ifcAttributes: list[ElementIFCAttribute]
+
+
+ElementIFCAttributesOrError: TypeAlias = ElementIFCAttributes | ErrorItem
+
+
+ElementIFCAttributesOrErrors: TypeAlias = list[ElementIFCAttributesOrError]
+"""A list of the IFC attributes of elements or errors."""
 
 
 class ElementIFCIds(TypedDict):
@@ -6018,6 +7047,12 @@ ElementIFCPropertiesOrErrors: TypeAlias = list[ElementIFCPropertiesOrError]
 """A list of the IFC properties of elements or errors."""
 
 
+class ElementIFCPropertyRemoval(TypedDict):
+    elementId: ElementId
+    propertySetName: str
+    propertyName: str
+
+
 class ElementIFCType(TypedDict):
     """The IFC type of an element."""
     elementId: ElementId
@@ -6043,6 +7078,10 @@ class ElementQuantityDetails(TypedDict):
     type: ElementType
     quantities: ElementQuantities
     composites: list[ElementComponentQuantities]
+
+
+class ElementSurfaceQuantities(TypedDict):
+    surfaces: list[ElementSurfaceQuantity]
 
 
 class ElementTrims(TypedDict):
@@ -6085,14 +7124,21 @@ class EnumValue(TypedDict):
     nonLocalizedValue: NotRequired[str]
 
 
+class FavoriteSubelement(TypedDict):
+    subType: FavoriteSubelementType
+    elementType: ElementType
+    libPart: NotRequired[LibPartDetails]
+    parameters: list[StoredGDLParameter]
+
+
 class FloorFill(TypedDict):
-    """Floor plan cover fill settings of a Slab."""
-    use: bool
-    foregroundPen: int
-    backgroundPen: int
-    fillId: AttributeId
-    use3DHatching: bool
-    orientation: HatchOrientation
+    """Floor plan cover fill settings of a Slab. When modifying an element, omitted properties keep their current values."""
+    use: NotRequired[bool]
+    foregroundPen: NotRequired[int]
+    backgroundPen: NotRequired[int]
+    fillId: NotRequired[AttributeId]
+    use3DHatching: NotRequired[bool]
+    orientation: NotRequired[HatchOrientation]
 
 
 GDLParameterArray: TypeAlias = list[GDLParameterDetails]
@@ -6126,6 +7172,15 @@ class GraphicOverrideCombinationDetails(TypedDict):
     graphicOverrideRuleIds: list[GraphicOverrideRuleIdArrayItem]
 
 
+class GraphicOverrideRule(TypedDict):
+    """A graphic override rule with its rule group, criterion and style."""
+    graphicOverrideRuleId: GraphicOverrideRuleId
+    name: str
+    ruleGroupName: NotRequired[str]
+    criterionXML: str
+    style: GraphicOverrideStyle
+
+
 class GraphicOverrideRuleData(TypedDict):
     name: str
     ruleGroupName: str
@@ -6134,20 +7189,15 @@ class GraphicOverrideRuleData(TypedDict):
     style: NotRequired[GraphicOverrideStyle]
 
 
-class GraphicOverrideRuleDetails(TypedDict):
-    graphicOverrideRuleId: GraphicOverrideRuleId
-    name: str
-    ruleGroupName: NotRequired[str]
-    criterionXML: str
-    style: GraphicOverrideStyle
-
-
 class GraphicOverrideRuleModificationData(TypedDict):
     graphicOverrideRuleId: GraphicOverrideRuleId
     name: NotRequired[str]
     criterionXML: NotRequired[str]
     criterion: NotRequired[GraphicOverrideCriterion]
     style: NotRequired[GraphicOverrideStyle]
+
+
+GraphicOverrideRuleOrError: TypeAlias = GraphicOverrideRule | ErrorItem
 
 
 Hole2D: TypeAlias = Hole2DWithOutline | Hole2DWithLegacyCoordinates
@@ -6171,6 +7221,7 @@ class KeynoteFolderDetails(TypedDict):
 class LabelData(TypedDict):
     """The parameters of the new Label."""
     favoriteName: NotRequired[str]
+    id: NotRequired[str]
     parentElementId: NotRequired[ElementId]
     labelClass: NotRequired[LabelClass]
     text: NotRequired[str]
@@ -6244,6 +7295,10 @@ class MEPRoutingElementDetails(TypedDict):
     """The details of an MEP routing element."""
     domain: MEPDomainOrUnknown
     mepSystemId: AttributeId
+    offsetFromHomeStory: NotRequired[float]
+    branchPreferenceTableId: NotRequired[Guid]
+    logicallyConnectedPortIdAtRouteBegin: NotRequired[Guid]
+    logicallyConnectedPortIdAtRouteEnd: NotRequired[Guid]
     polyline: list[Coordinate3D]
     segments: list[MEPRoutingSegmentDetails]
     nodes: list[MEPRoutingNodeDetails]
@@ -6390,6 +7445,9 @@ class MorphWithDetails(TypedDict):
     level: NotRequired[float]
 
 
+NavigatorItemIdOrDatabaseIdAndWindowType: TypeAlias = NavigatorItemIdArrayItem | DatabaseIdAndWindowType
+
+
 NormalOrUserUndefinedPropertyValue: TypeAlias = (
     NormalNumberPropertyValue
     | NormalIntegerPropertyValue
@@ -6411,6 +7469,36 @@ NormalOrUserUndefinedPropertyValue: TypeAlias = (
     | NormalMultiEnumPropertyValue
     | UserUndefinedPropertyValue
 )
+
+
+class OpeningDetails(TypedDict):
+    elementId: ElementId
+    parentElementId: NotRequired[ElementId]
+    cutElements: list[ElementIdArrayItem]
+    connectedOpenings: NotRequired[list[ElementIdArrayItem]]
+    geometry: OpeningGeometry
+    extrusionParameters: OpeningExtrusionParameters
+
+
+class OpeningFloorPlanDetails(TypedDict):
+    elementId: ElementId
+    floorPlanParameters: OpeningFloorPlanParameters
+
+
+class OpeningFloorPlanModificationData(TypedDict):
+    elementId: ElementId
+    floorPlanParameters: OpeningFloorPlanParametersUpdate
+
+
+class PolygonAncestry(TypedDict):
+    """Only with withAncestry. Read from the vertexAncestry and edgeAncestry of Archicad's API_RegularizedPoly; -1 marks a vertex or edge that Archicad created (for example at a self-intersection)."""
+    contours: list[PolygonContourAncestry]
+
+
+class PolygonRegularizationData(TypedDict):
+    polygonCoordinates: list[Coordinate2D]
+    polygonArcs: NotRequired[list[PolyArc]]
+    holes: NotRequired[Holes2D]
 
 
 class PossibleEnumValue(TypedDict):
@@ -6477,6 +7565,11 @@ class ProfileData(TypedDict):
     replaceSkins: NotRequired[bool]
 
 
+class ProjectAttributesByType(TypedDict):
+    attributeType: AttributeType
+    attributes: AttributeHeaders
+
+
 class PropertyDetails(TypedDict):
     """The details of the property."""
     possibleEnumValues: NotRequired[PossibleEnumValues]
@@ -6504,6 +7597,17 @@ class PropertyDetails(TypedDict):
 
 
 PropertyValueDetails: TypeAlias = NormalOrUserUndefinedPropertyValue | NotAvailablePropertyValue
+
+
+class RegularizedPolygon(TypedDict):
+    polygonCoordinates: list[Coordinate2D]
+    polygonArcs: NotRequired[list[PolyArc]]
+    holes: Holes2D
+    ancestry: NotRequired[PolygonAncestry]
+
+
+class RegularizedPolygons(TypedDict):
+    polygons: list[RegularizedPolygon]
 
 
 class RevisionChange(TypedDict):
@@ -6581,6 +7685,7 @@ class NavigatorItemIdsWithViewSetting(TypedDict):
 class SlabData(TypedDict):
     """The parameters of the new Slab."""
     favoriteName: NotRequired[str]
+    id: NotRequired[str]
     level: float
     thickness: NotRequired[float]
     structureType: NotRequired[SlabStructureType]
@@ -6616,6 +7721,7 @@ class SlabDetails(TypedDict):
 class SlabWithDetails(TypedDict):
     elementId: ElementId
     zCoordinate: NotRequired[float]
+    floorIndex: NotRequired[int]
     thickness: NotRequired[float]
     structureType: NotRequired[SlabStructureType]
     buildingMaterialId: NotRequired[AttributeId]
@@ -6649,6 +7755,7 @@ ZoneCreationGeometry: TypeAlias = AutomaticZoneGeometry | ManualZoneGeometry
 class ZoneData(TypedDict):
     """The parameters of the new Zone."""
     favoriteName: NotRequired[str]
+    id: NotRequired[str]
     floorIndex: NotRequired[float]
     name: str
     numberStr: str
@@ -6667,10 +7774,24 @@ class ZoneDetails(TypedDict):
     stampAngle: NotRequired[float]
     fixedStampAngle: NotRequired[bool]
     isManual: bool
+    referencePosition: NotRequired[Coordinate2D]
     polygonOutline: list[Coordinate2D]
     polygonArcs: NotRequired[list[PolyArc]]
     holes: NotRequired[Holes2D]
     zCoordinate: float
+
+
+class ZoneReduction(TypedDict):
+    type: ZoneReductionType
+    percent: float
+    area: float
+    polygonOutline: list[Coordinate2D]
+    polygonArcs: NotRequired[list[PolyArc]]
+    holes: Holes2D
+
+
+class ZoneReductions(TypedDict):
+    reductions: list[ZoneReduction]
 
 
 class AssociativeDimensionData(TypedDict):
@@ -6711,6 +7832,13 @@ class DocumentRevision(TypedDict):
     layoutInfo: LayoutInfo
 
 
+class ElementCategoryDetails(TypedDict):
+    categoryId: ElementCategoryId
+    type: ElementCategoryType
+    name: str
+    values: list[ElementCategoryValueDetails]
+
+
 class ElementGroupParameters(TypedDict):
     """The parameters for creating a single group"""
     elements: ElementOrGroupIds
@@ -6726,6 +7854,16 @@ ElementRelationsOrError: TypeAlias = (
     | RoofOrShellRelationsOfElement
     | ErrorItem
 )
+
+
+class FavoriteSettings(TypedDict):
+    favorite: str
+    elementType: ElementType
+    folder: NotRequired[list[str]]
+    libPart: NotRequired[LibPartDetails]
+    parameters: list[StoredGDLParameter]
+    marker: NotRequired[MarkerParametersOfElement]
+    subElements: list[FavoriteSubelement]
 
 
 class HatchDetails(TypedDict):
@@ -6768,6 +7906,10 @@ class LayerCombinationAttribute(TypedDict):
 LayerCombinationAttributeOrError: TypeAlias = LayerCombinationAttribute | ErrorItem
 
 
+class ProjectAttributes(TypedDict):
+    attributesByType: list[ProjectAttributesByType | ErrorItem]
+
+
 PropertyDefaultValue: TypeAlias = BasicDefaultValue | ExpressionDefaultValue
 
 
@@ -6808,6 +7950,8 @@ TypeSpecificDetails: TypeAlias = (
     | SlabDetails
     | RoofDetails
     | ColumnDetails
+    | ColumnSegmentDetails
+    | BeamSegmentDetails
     | DetailWorksheetDetails
     | WindowDoorDetails
     | LibPartBasedElementDetails
@@ -6824,6 +7968,7 @@ TypeSpecificDetails: TypeAlias = (
     | LabelDetails
     | TextDetails
     | LevelDimensionDetails
+    | StairDetails
     | NotYetSupportedElementTypeDetails
 )
 
@@ -6860,6 +8005,7 @@ class DetailsOfElement(TypedDict):
 
 class Details(TypedDict):
     """Details of an element."""
+    id: NotRequired[str]
     floorIndex: NotRequired[float]
     layerIndex: NotRequired[float]
     drawIndex: NotRequired[float]
@@ -6877,6 +8023,7 @@ class Hotlink(TypedDict):
     hotlinkNodeId: NotRequired[HotlinkNodeId]
     name: NotRequired[str]
     type: NotRequired[HotlinkType]
+    instances: NotRequired[Elements]
     children: NotRequired[Hotlinks]
 
 
@@ -6895,6 +8042,7 @@ class NavigatorItem(TypedDict):
     customName: bool
     isIndependent: bool
     sourceNavigatorItemId: NotRequired[NavigatorItemId]
+    childCount: NotRequired[int]
     children: NotRequired[list[NavigatorItemArrayItem]]
 
 
@@ -6905,6 +8053,9 @@ class NavigatorItemArrayItem(TypedDict):
 CoverFillOrientationType: TypeAlias = HatchOrientationType
 
 
+GraphicOverrideRuleDetails: TypeAlias = GraphicOverrideRule
+
+
 Level: TypeAlias = RoofLevel
 
 
@@ -6912,6 +8063,9 @@ MEPDomains: TypeAlias = MEPDomain
 
 
 MEPSystemDomain: TypeAlias = MEPDomain
+
+
+MarkerGDLParameterDetails: TypeAlias = StoredGDLParameter
 
 
 PivotLine: TypeAlias = RoofPivotLine

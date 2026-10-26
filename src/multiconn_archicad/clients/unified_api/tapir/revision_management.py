@@ -9,6 +9,7 @@ from multiconn_archicad.models.tapir.commands import (
     GetCurrentRevisionChangesOfLayoutsParameters,
     GetCurrentRevisionChangesOfLayoutsResult,
     GetDocumentRevisionsResult,
+    GetRevisionChangeCustomSchemeResult,
     GetRevisionChangesOfElementsParameters,
     GetRevisionChangesOfElementsResult,
     GetRevisionChangesResult,
@@ -20,6 +21,7 @@ from multiconn_archicad.models.tapir.types import (
     ElementIdArrayItem,
     ErrorItem,
     RevisionChange,
+    RevisionChangeCustomSchemeItem,
     RevisionChangesArrayItem,
     RevisionIssue,
 )
@@ -75,6 +77,24 @@ class RevisionManagementCommands:
         response_dict = self._core.post_tapir_command("GetDocumentRevisions")
         validated_response = GetDocumentRevisionsResult.model_validate(response_dict)
         return validated_response.documentRevisions
+
+    def get_revision_change_custom_scheme(self) -> list[RevisionChangeCustomSchemeItem]:
+        """
+        Retrieves the custom fields of changes (the change custom scheme): the key and the name
+        of each field. The keys are the customSchemeKey values in the customSchemeData of
+        changes.
+
+        Returns:
+            list[RevisionChangeCustomSchemeItem]
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        response_dict = self._core.post_tapir_command("GetRevisionChangeCustomScheme")
+        validated_response = GetRevisionChangeCustomSchemeResult.model_validate(response_dict)
+        return validated_response.customScheme
 
     def get_revision_changes(self) -> list[RevisionChange]:
         """

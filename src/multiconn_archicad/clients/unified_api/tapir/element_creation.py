@@ -137,7 +137,8 @@ class ElementCreationCommands:
         self, dimensions_data: list[AssociativeDimensionData]
     ) -> list[ElementIdArrayItem | ErrorItem]:
         """
-        Creates associative linear dimensions from explicit witness point references.
+        Creates associative linear dimensions from explicit witness point references. A witness
+        point can also be static, given by its coordinate instead of an element.
 
         Args:
             dimensions_data (list[AssociativeDimensionData])

@@ -6,6 +6,8 @@ from typing import TYPE_CHECKING
 from pydantic import TypeAdapter
 
 from multiconn_archicad.models.tapir.commands import (
+    CreateAttributeFoldersParameters,
+    CreateAttributeFoldersResult,
     CreateBuildingMaterialsParameters,
     CreateBuildingMaterialsResult,
     CreateCompositesParameters,
@@ -32,6 +34,8 @@ from multiconn_archicad.models.tapir.commands import (
     CreateSurfacesResult,
     CreateZoneCategoriesParameters,
     CreateZoneCategoriesResult,
+    DeleteAttributeFoldersParameters,
+    DeleteAttributeFoldersResult,
     DeleteAttributesParameters,
     DeleteAttributesResult,
     DeleteGraphicOverrideCombinationsParameters,
@@ -42,16 +46,24 @@ from multiconn_archicad.models.tapir.commands import (
     DeleteGraphicOverrideRulesResult,
     GetAttributesByTypeParameters,
     GetAttributesByTypeResult,
+    GetAttributesFromProjectParameters,
+    GetAttributesFromProjectResult,
     GetBuildingMaterialPhysicalPropertiesParameters,
     GetBuildingMaterialPhysicalPropertiesResult,
     GetBuildingMaterialsParameters,
     GetBuildingMaterialsResult,
     GetCompositesParameters,
     GetCompositesResult,
+    GetCurrentLayerCombinationResult,
+    GetCurrentPenTableResult,
     GetFillsParameters,
     GetFillsResult,
+    GetFontsByNameParameters,
+    GetFontsByNameResult,
     GetGraphicOverrideCombinationsResult,
     GetGraphicOverrideRuleGroupsResult,
+    GetGraphicOverrideRulesByNameParameters,
+    GetGraphicOverrideRulesByNameResult,
     GetGraphicOverrideRulesResult,
     GetLayerCombinationsParameters,
     GetLayerCombinationsResult,
@@ -71,8 +83,18 @@ from multiconn_archicad.models.tapir.commands import (
     GetZoneCategoriesResult,
     ModifyGraphicOverrideRulesParameters,
     ModifyGraphicOverrideRulesResult,
+    MoveAttributesAndFoldersParameters,
+    MoveAttributesAndFoldersResult,
+    MoveGraphicOverrideRulesParameters,
+    MoveGraphicOverrideRulesResult,
+    RenameAttributeFoldersParameters,
+    RenameAttributeFoldersResult,
+    RenameGraphicOverrideRuleGroupsParameters,
+    RenameGraphicOverrideRuleGroupsResult,
 )
 from multiconn_archicad.models.tapir.types import (
+    AttributeFolder,
+    AttributeFolderRename,
     AttributeHeadersWrapper,
     AttributeIdArrayItem,
     AttributeType,
@@ -89,14 +111,18 @@ from multiconn_archicad.models.tapir.types import (
     FillAttribute,
     FillAttributeField,
     FillData,
+    FontDetails,
     GraphicOverrideCombinationData,
     GraphicOverrideCombinationDetails,
     GraphicOverrideCombinationIdArrayItem,
+    GraphicOverrideRule,
     GraphicOverrideRuleData,
-    GraphicOverrideRuleDetails,
     GraphicOverrideRuleGroup,
+    GraphicOverrideRuleGroupRename,
     GraphicOverrideRuleIdArrayItem,
     GraphicOverrideRuleModificationData,
+    GraphicOverrideRuleMove,
+    GraphicOverrideRuleReference,
     LayerAttribute,
     LayerAttributeField,
     LayerCombinationAttribute,
@@ -114,6 +140,7 @@ from multiconn_archicad.models.tapir.types import (
     ProfileAttribute,
     ProfileAttributeField,
     ProfileData,
+    ProjectAttributes,
     SuccessfulExecutionResult,
     SurfaceAttribute,
     SurfaceAttributeField,
@@ -130,6 +157,36 @@ if TYPE_CHECKING:
 class AttributeCommands:
     def __init__(self, core: CoreCommands):
         self._core = core
+
+    def create_attribute_folders(
+        self, attribute_folders: list[AttributeFolder]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Creates attribute folders, each given by attribute type and path (the folder names from
+        the root folder down). Missing parent folders are created too; a folder that already
+        exists is kept and reported as success. Available from Archicad 26.
+
+        Args:
+            attribute_folders (list[AttributeFolder]): A list of attribute folders.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "attributeFolders": attribute_folders,
+        }
+        validated_params = CreateAttributeFoldersParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "CreateAttributeFolders", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = CreateAttributeFoldersResult.model_validate(response_dict)
+        return validated_response.executionResults
 
     def create_building_materials(
         self, building_material_data_array: list[BuildingMaterialData], overwrite_existing: None | bool = None
@@ -528,6 +585,37 @@ class AttributeCommands:
         validated_response = CreateZoneCategoriesResult.model_validate(response_dict)
         return validated_response.attributeIds
 
+    def delete_attribute_folders(
+        self, attribute_folders: list[AttributeFolder]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Deletes attribute folders, each given by attribute type and path, together with all the
+        subfolders and deletable attributes they contain (a folder holding an attribute that
+        cannot be deleted is kept). The root folder cannot be deleted. Available from Archicad
+        26.
+
+        Args:
+            attribute_folders (list[AttributeFolder]): A list of attribute folders.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "attributeFolders": attribute_folders,
+        }
+        validated_params = DeleteAttributeFoldersParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "DeleteAttributeFolders", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = DeleteAttributeFoldersResult.model_validate(response_dict)
+        return validated_response.executionResults
+
     def delete_attributes(
         self, attributes_to_delete: list[AttributesToDeleteItem]
     ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
@@ -656,7 +744,9 @@ class AttributeCommands:
 
     def get_attributes_by_type(self, attribute_type: AttributeType) -> AttributeHeadersWrapper | ErrorItem:
         """
-        Returns the details of every attribute of the given type.
+        Returns the details of every attribute of the given type. From Archicad 30 an attribute
+        that Archicad keeps a creation record of also carries creationInfo: how (method), from
+        where (source), by whom and when it was created.
 
         Args:
             attribute_type (AttributeType)
@@ -677,6 +767,39 @@ class AttributeCommands:
             "GetAttributesByType", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = TypeAdapter(GetAttributesByTypeResult).validate_python(response_dict)
+        return validated_response
+
+    def get_attributes_from_project(
+        self, project_file_path: str, attribute_types: list[AttributeType]
+    ) -> ErrorItem | ProjectAttributes:
+        """
+        Reads the attributes of the given types from another project or template file without
+        opening it, for example to compare them with the attributes of the open project. Nothing
+        is imported into the open project. The names are the legacy 8-bit names, so non-ASCII
+        characters may not come through. Available from Archicad 27.
+
+        Args:
+            project_file_path (str): The absolute path of the project or template file (for
+                example .pln or .tpl) to read the attributes from.
+            attribute_types (list[AttributeType]): The attribute types to read.
+
+        Returns:
+            ErrorItem | ProjectAttributes
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "projectFilePath": project_file_path,
+            "attributeTypes": attribute_types,
+        }
+        validated_params = GetAttributesFromProjectParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetAttributesFromProject", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = TypeAdapter(GetAttributesFromProjectResult).validate_python(response_dict)
         return validated_response
 
     def get_building_material_physical_properties(
@@ -768,6 +891,40 @@ class AttributeCommands:
         validated_response = GetCompositesResult.model_validate(response_dict)
         return validated_response.composites
 
+    def get_current_layer_combination(self) -> GetCurrentLayerCombinationResult:
+        """
+        Returns the layer combination in effect in the current window. No layer combination is
+        returned when the current state of the layers matches none.
+
+        Returns:
+            GetCurrentLayerCombinationResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        response_dict = self._core.post_tapir_command("GetCurrentLayerCombination")
+        validated_response = GetCurrentLayerCombinationResult.model_validate(response_dict)
+        return validated_response
+
+    def get_current_pen_table(self) -> GetCurrentPenTableResult:
+        """
+        Returns the current Pen Table (its index, attribute identifier and name) and its number
+        of pens. Pass the returned attributeId to GetPenTables to read the pens.
+
+        Returns:
+            GetCurrentPenTableResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        response_dict = self._core.post_tapir_command("GetCurrentPenTable")
+        validated_response = GetCurrentPenTableResult.model_validate(response_dict)
+        return validated_response
+
     def get_fills(
         self, attribute_ids: list[AttributeIdArrayItem], fields: None | list[FillAttributeField] = None
     ) -> list[ErrorItem | FillAttribute]:
@@ -799,6 +956,35 @@ class AttributeCommands:
         )
         validated_response = GetFillsResult.model_validate(response_dict)
         return validated_response.fills
+
+    def get_fonts_by_name(self, font_names: list[str]) -> list[ErrorItem | FontDetails]:
+        """
+        Finds loaded fonts by name through Archicad's font search and returns their index (as
+        Text and Label fields reference fonts in fontIndex) and name, or an error for a name no
+        loaded font has.
+
+        Args:
+            font_names (list[str]): Names of the fonts to find, as the Text tool's font list
+                shows them and GetDetailsOfElements reports them in fontName, e.g. 'Arial'.
+
+        Returns:
+            list[ErrorItem | FontDetails]: One item per name, in the order given: the font
+                found, or an error when no loaded font has the name.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "fontNames": font_names,
+        }
+        validated_params = GetFontsByNameParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetFontsByName", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetFontsByNameResult.model_validate(response_dict)
+        return validated_response.fonts
 
     def get_graphic_override_combinations(self) -> list[GraphicOverrideCombinationDetails]:
         """
@@ -836,13 +1022,13 @@ class AttributeCommands:
         validated_response = GetGraphicOverrideRuleGroupsResult.model_validate(response_dict)
         return validated_response.graphicOverrideRuleGroups
 
-    def get_graphic_override_rules(self) -> list[GraphicOverrideRuleDetails]:
+    def get_graphic_override_rules(self) -> list[GraphicOverrideRule]:
         """
         Gets all graphic override rules of the project, with their rule group, criterion and
         style. Available from Archicad 27.
 
         Returns:
-            list[GraphicOverrideRuleDetails]: The graphic override rules of the project.
+            list[GraphicOverrideRule]: The graphic override rules of the project.
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -851,6 +1037,37 @@ class AttributeCommands:
         """
         response_dict = self._core.post_tapir_command("GetGraphicOverrideRules")
         validated_response = GetGraphicOverrideRulesResult.model_validate(response_dict)
+        return validated_response.graphicOverrideRules
+
+    def get_graphic_override_rules_by_name(
+        self, graphic_override_rules: list[GraphicOverrideRuleReference]
+    ) -> list[ErrorItem | GraphicOverrideRule]:
+        """
+        Gets graphic override rules by name, with their rule group, criterion and style. The
+        rule group narrows the search; without it the rule is searched in every rule group.
+        Available from Archicad 27.
+
+        Args:
+            graphic_override_rules (list[GraphicOverrideRuleReference]): The graphic override
+                rules to get, by name.
+
+        Returns:
+            list[ErrorItem | GraphicOverrideRule]: The rules, or errors, in the order of the
+                input.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "graphicOverrideRules": graphic_override_rules,
+        }
+        validated_params = GetGraphicOverrideRulesByNameParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetGraphicOverrideRulesByName", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetGraphicOverrideRulesByNameResult.model_validate(response_dict)
         return validated_response.graphicOverrideRules
 
     def get_layer_combinations(
@@ -1126,4 +1343,134 @@ class AttributeCommands:
             "ModifyGraphicOverrideRules", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = ModifyGraphicOverrideRulesResult.model_validate(response_dict)
+        return validated_response.executionResults
+
+    def move_attributes_and_folders(
+        self,
+        target_folder: AttributeFolder,
+        attribute_ids: None | list[AttributeIdArrayItem] = None,
+        attribute_folders: None | list[AttributeFolder] = None,
+    ) -> MoveAttributesAndFoldersResult:
+        """
+        Moves attributes and attribute folders (with their contents) into the target folder,
+        which must be of the same attribute type; an empty target path is the root folder.
+        Returns one execution result per attribute and per folder. Available from Archicad 26.
+
+        Args:
+            target_folder (AttributeFolder): The folder to move the attributes and folders into.
+                An empty path is the root folder.
+            attribute_ids (None | list[AttributeIdArrayItem]): The attributes to move. They must
+                have the attribute type of the target folder.
+            attribute_folders (None | list[AttributeFolder]): The folders to move, with their
+                contents. They must have the attribute type of the target folder.
+
+        Returns:
+            MoveAttributesAndFoldersResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "attributeIds": attribute_ids,
+            "attributeFolders": attribute_folders,
+            "targetFolder": target_folder,
+        }
+        validated_params = MoveAttributesAndFoldersParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "MoveAttributesAndFolders", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = MoveAttributesAndFoldersResult.model_validate(response_dict)
+        return validated_response
+
+    def move_graphic_override_rules(
+        self, graphic_override_rules: list[GraphicOverrideRuleMove]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Moves graphic override rules to another rule group, or to another place in their own
+        group. Available from Archicad 27.
+
+        Args:
+            graphic_override_rules (list[GraphicOverrideRuleMove]): The rules to move, processed
+                in this order.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "graphicOverrideRules": graphic_override_rules,
+        }
+        validated_params = MoveGraphicOverrideRulesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "MoveGraphicOverrideRules", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = MoveGraphicOverrideRulesResult.model_validate(response_dict)
+        return validated_response.executionResults
+
+    def rename_attribute_folders(
+        self, attribute_folders: list[AttributeFolderRename]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Renames attribute folders, each given by attribute type and path, to the given new
+        names. The root folder cannot be renamed. Available from Archicad 26.
+
+        Args:
+            attribute_folders (list[AttributeFolderRename]): The folders to rename, each given
+                by attribute type and path together with its new name.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "attributeFolders": attribute_folders,
+        }
+        validated_params = RenameAttributeFoldersParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "RenameAttributeFolders", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = RenameAttributeFoldersResult.model_validate(response_dict)
+        return validated_response.executionResults
+
+    def rename_graphic_override_rule_groups(
+        self, rule_groups: list[GraphicOverrideRuleGroupRename]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Renames graphic override rule groups, found by name. Their rules are kept. Available
+        from Archicad 27.
+
+        Args:
+            rule_groups (list[GraphicOverrideRuleGroupRename]): The rule groups to rename. Their
+                rules and the combinations that contain them are kept.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "ruleGroups": rule_groups,
+        }
+        validated_params = RenameGraphicOverrideRuleGroupsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "RenameGraphicOverrideRuleGroups",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+        )
+        validated_response = RenameGraphicOverrideRuleGroupsResult.model_validate(response_dict)
         return validated_response.executionResults

@@ -17,6 +17,7 @@ from .official.layout_book import LayoutBookCommands as OfficialLayoutBookComman
 from .official.navigator_tree import NavigatorTreeCommands as OfficialNavigatorTreeCommands
 from .official.property import PropertyCommands as OfficialPropertyCommands
 from .official.view_map import ViewMapCommands as OfficialViewMapCommands
+from .tapir.analytical import AnalyticalCommands as TapirAnalyticalCommands
 from .tapir.application import ApplicationCommands as TapirApplicationCommands
 from .tapir.attribute import AttributeCommands as TapirAttributeCommands
 from .tapir.classification import ClassificationCommands as TapirClassificationCommands
@@ -34,6 +35,7 @@ from .tapir.library import LibraryCommands as TapirLibraryCommands
 from .tapir.mep import MepCommands as TapirMepCommands
 from .tapir.navigator import NavigatorCommands as TapirNavigatorCommands
 from .tapir.project import ProjectCommands as TapirProjectCommands
+from .tapir.project_data import ProjectDataCommands as TapirProjectDataCommands
 from .tapir.property import PropertyCommands as TapirPropertyCommands
 from .tapir.revision_management import RevisionManagementCommands as TapirRevisionManagementCommands
 from .tapir.script_ui import ScriptUiCommands as TapirScriptUiCommands
@@ -48,6 +50,7 @@ class TapirApi:
     """A container for all command groups of the Archicad Tapir API."""
 
     def __init__(self, core: CoreCommands):
+        self.analytical = TapirAnalyticalCommands(core)
         self.application = TapirApplicationCommands(core)
         self.attribute = TapirAttributeCommands(core)
         self.classification = TapirClassificationCommands(core)
@@ -65,6 +68,7 @@ class TapirApi:
         self.mep = TapirMepCommands(core)
         self.navigator = TapirNavigatorCommands(core)
         self.project = TapirProjectCommands(core)
+        self.project_data = TapirProjectDataCommands(core)
         self.property = TapirPropertyCommands(core)
         self.revision_management = TapirRevisionManagementCommands(core)
         self.script_ui = TapirScriptUiCommands(core)

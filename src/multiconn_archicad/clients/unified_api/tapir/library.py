@@ -10,6 +10,10 @@ from multiconn_archicad.models.tapir.commands import (
     AddFilesToEmbeddedLibraryResult,
     AddLibrariesParameters,
     AddLibrariesResult,
+    CopyFilesIntoEmbeddedLibraryParameters,
+    CopyFilesIntoEmbeddedLibraryResult,
+    CreateFolderInEmbeddedLibraryParameters,
+    CreateFolderInEmbeddedLibraryResult,
     DeleteEmbeddedLibraryItemsParameters,
     DeleteEmbeddedLibraryItemsResult,
     GetAvailableLibraryPartsParameters,
@@ -18,13 +22,17 @@ from multiconn_archicad.models.tapir.commands import (
     ReloadLibrariesResult,
     SetLibrariesParameters,
     SetLibrariesResult,
+    SetLibraryPartScriptsParameters,
+    SetLibraryPartScriptsResult,
 )
 from multiconn_archicad.models.tapir.types import (
+    EmbeddedLibraryFile,
     EmbeddedLibraryItem,
     FailedExecutionResult,
     Library,
     LibraryFileAddition,
     LibraryLocation,
+    LibraryPartScriptData,
     LibraryPartType,
     SuccessfulExecutionResult,
 )
@@ -97,6 +105,75 @@ class LibraryCommands:
             "AddLibraries", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = TypeAdapter(AddLibrariesResult).validate_python(response_dict)
+        return validated_response
+
+    def copy_files_into_embedded_library(
+        self,
+        files: list[EmbeddedLibraryFile],
+        target_folder: None | str = None,
+        overwrite_if_exists: None | bool = None,
+    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+        """
+        Copies the given files, keeping their names, into a folder of the embedded library with
+        one library operation. The target folder is created when it is missing. With
+        overwriteIfExists an item of the same name in that folder is replaced.
+
+        Args:
+            files (list[EmbeddedLibraryFile]): The files to copy. Each keeps its file name
+                inside the target folder.
+            target_folder (None | str): Optional. The folder relative to the embedded library to
+                copy the files into, for example 'Office/Doors'. Missing folders are created. By
+                default the root of the embedded library.
+            overwrite_if_exists (None | bool): Optional. When true, an item with the same name
+                in the target folder is replaced. By default false.
+
+        Returns:
+            FailedExecutionResult | SuccessfulExecutionResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "files": files,
+            "targetFolder": target_folder,
+            "overwriteIfExists": overwrite_if_exists,
+        }
+        validated_params = CopyFilesIntoEmbeddedLibraryParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "CopyFilesIntoEmbeddedLibrary", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = TypeAdapter(CopyFilesIntoEmbeddedLibraryResult).validate_python(response_dict)
+        return validated_response
+
+    def create_folder_in_embedded_library(self, folder_path: str) -> FailedExecutionResult | SuccessfulExecutionResult:
+        """
+        Creates a folder, with any missing parent folders, inside the embedded library. The
+        folderPath is relative to the embedded library, like the outputPath of
+        AddFilesToEmbeddedLibrary.
+
+        Args:
+            folder_path (str): The path of the folder relative to the embedded library, for
+                example 'Office/Doors'. Missing parent folders are created too; folders that
+                already exist are kept.
+
+        Returns:
+            FailedExecutionResult | SuccessfulExecutionResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "folderPath": folder_path,
+        }
+        validated_params = CreateFolderInEmbeddedLibraryParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "CreateFolderInEmbeddedLibrary", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = TypeAdapter(CreateFolderInEmbeddedLibraryResult).validate_python(response_dict)
         return validated_response
 
     def delete_embedded_library_items(
@@ -218,3 +295,35 @@ class LibraryCommands:
         )
         validated_response = TypeAdapter(SetLibrariesResult).validate_python(response_dict)
         return validated_response
+
+    def set_library_part_scripts(
+        self, library_parts: list[LibraryPartScriptData]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Sets the master, parameter, 2D, 3D and properties scripts of loaded library parts. Only
+        the given scripts are changed; an empty script makes the section empty. A library part
+        that is not editable (e.g. a part of a library package or a read-only library) is
+        refused and left unchanged. Available from Archicad 28.
+
+        Args:
+            library_parts (list[LibraryPartScriptData]): The library parts to modify and the
+                scripts to set in each.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "libraryParts": library_parts,
+        }
+        validated_params = SetLibraryPartScriptsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "SetLibraryPartScripts", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = SetLibraryPartScriptsResult.model_validate(response_dict)
+        return validated_response.executionResults

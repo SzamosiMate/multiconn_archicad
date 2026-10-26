@@ -16,8 +16,12 @@ from multiconn_archicad.models.tapir.commands import (
     DeleteFavoritesResult,
     ExportFavoritesParameters,
     ExportFavoritesResult,
+    GetAllFavoritesParameters,
+    GetAllFavoritesResult,
     GetFavoritePreviewImageParameters,
     GetFavoritePreviewImageResult,
+    GetFavoriteSettingsParameters,
+    GetFavoriteSettingsResult,
     GetFavoritesByTypeParameters,
     GetFavoritesByTypeResult,
     ImportFavoritesParameters,
@@ -32,7 +36,11 @@ from multiconn_archicad.models.tapir.types import (
     ElementType,
     ErrorItem,
     FailedExecutionResult,
+    FavoriteExportFormat,
+    FavoriteKeepField,
     FavoriteRename,
+    FavoriteSettings,
+    FavoriteSummary,
     FavoritesFromElement,
     FavoritesFromElementUpdate,
     FavoritesToApplyItem,
@@ -86,6 +94,7 @@ class FavoritesCommands:
         apply_classifications: None | bool = None,
         apply_categories: None | bool = None,
         apply_properties: None | bool = None,
+        keep_fields: None | list[FavoriteKeepField] = None,
     ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
         """
         Apply the given favorites to existing elements. Only settings-type parameters are
@@ -94,7 +103,10 @@ class FavoritesCommands:
         hierarchical types (Stair, Railing, Curtain Wall) the settings of the sub-elements are
         not applied, because they are inseparable from the Favorite's own geometry. By default
         settings, classifications, categories and properties are all applied; each can be opted
-        out of individually.
+        out of individually. keepFields lists fields of the target (its ID, layer, an opening's
+        width, height and sill height, a Wall's reference line location, height and top link)
+        that are copied back after the Favorite has been applied, so that e.g. only the library
+        part or the wall type changes.
 
         Args:
             favorites_to_apply (list[FavoritesToApplyItem])
@@ -109,6 +121,17 @@ class FavoritesCommands:
                 (e.g. IFC categories). Default is true.
             apply_properties (None | bool): Whether to apply the Favorite's property values.
                 Default is true.
+            keep_fields (None | list[FavoriteKeepField]): Fields of the target element to keep:
+                after the Favorite has been applied, they are copied back from the target as it
+                was before, so only the Favorite's other settings (e.g. its library part or wall
+                type) take effect. 'id' and 'layerIndex' apply to every element type; 'width',
+                'height' and 'sillHeight' to a Window or Door ('width' and 'height' also to a
+                Skylight); 'height', 'topOffset' and 'relativeTopStory' to a Wall or Column;
+                'referenceLineLocation' to a Wall. A field the target's type does not have is
+                ignored. To keep a Wall's or Column's top exactly as it was, keep 'height',
+                'relativeTopStory' and 'topOffset' together - a kept 'height' alone is
+                recomputed by Archicad while the Favorite's relativeTopStory links the top to a
+                story. Default: nothing is kept.
 
         Returns:
             list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
@@ -125,6 +148,7 @@ class FavoritesCommands:
             "applyClassifications": apply_classifications,
             "applyCategories": apply_categories,
             "applyProperties": apply_properties,
+            "keepFields": keep_fields,
         }
         validated_params = ApplyFavoritesToElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
@@ -188,16 +212,21 @@ class FavoritesCommands:
         return validated_response.executionResults
 
     def export_favorites(
-        self, path: str, names: None | list[str] = None
+        self, path: str, names: None | list[str] = None, format: FavoriteExportFormat | None = None
     ) -> FailedExecutionResult | SuccessfulExecutionResult:
         """
-        Export the project's Favorites to a .prefs file or folder.
+        Export the project's Favorites to a .prefs file or folder. From Archicad 29 they can
+        also be exported to a folder of Favorite files (xml format) or to a legacy .prf file
+        (legacyPRF format).
 
         Args:
-            path (str): Absolute path on the AC host. If extension matches the Favorite binary
-                format (.prefs), writes a single file; otherwise treats as folder.
+            path (str): Absolute path on the AC host. With the prefs format: if extension
+                matches the Favorite binary format (.prefs), writes a single file; otherwise
+                treats as folder. With the xml format: the folder to write the Favorite files
+                to. With the legacyPRF format: the .prf file to write.
             names (None | list[str]): Optional subset of Favorites to export. Default: export
                 all.
+            format (FavoriteExportFormat | None)
 
         Returns:
             FailedExecutionResult | SuccessfulExecutionResult
@@ -210,6 +239,7 @@ class FavoritesCommands:
         params_dict = {
             "path": path,
             "names": names,
+            "format": format,
         }
         validated_params = ExportFavoritesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
@@ -217,6 +247,33 @@ class FavoritesCommands:
         )
         validated_response = TypeAdapter(ExportFavoritesResult).validate_python(response_dict)
         return validated_response
+
+    def get_all_favorites(self, element_type: ElementType | None = None) -> list[FavoriteSummary]:
+        """
+        Returns every Favorite of the project, or only those of the given element type, with its
+        name and element type. Available from Archicad 29.
+
+        Args:
+            element_type (ElementType | None): Only the Favorites of this element type are
+                returned. Omit it to get every Favorite.
+
+        Returns:
+            list[FavoriteSummary]
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elementType": element_type,
+        }
+        validated_params = GetAllFavoritesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetAllFavorites", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetAllFavoritesResult.model_validate(response_dict)
+        return validated_response.favorites
 
     def get_favorite_preview_image(
         self,
@@ -257,6 +314,36 @@ class FavoritesCommands:
         )
         validated_response = GetFavoritePreviewImageResult.model_validate(response_dict)
         return validated_response.previewImage
+
+    def get_favorite_settings(self, favorites: list[str]) -> list[ErrorItem | FavoriteSettings]:
+        """
+        Reads the stored settings of the given favorites without applying them or placing an
+        element: the element type, the folder, the library part and GDL parameters, the marker
+        (library part and parameters) of Window and Door favorites, and the sub-elements. A
+        favorite without a marker has no marker field, which is not an error. The other settings
+        of the element (pens, layer, structure, etc.) are not returned.
+
+        Args:
+            favorites (list[str]): A list of favorite names
+
+        Returns:
+            list[ErrorItem | FavoriteSettings]: The settings of each given Favorite, in the
+                order of the input, or an error for a Favorite that could not be read.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "favorites": favorites,
+        }
+        validated_params = GetFavoriteSettingsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetFavoriteSettings", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetFavoriteSettingsResult.model_validate(response_dict)
+        return validated_response.favoriteSettings
 
     def get_favorites_by_type(self, element_type: ElementType) -> ErrorItem | FavoritesWrapper:
         """

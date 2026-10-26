@@ -49,7 +49,9 @@ def test_payload_builders_and_sparse_matrix_omit_failed_cells():
 def test_matrix_read_preserves_cell_error_and_dictionary_aggregates_failed_rows():
     api = MagicMock()
     api.tapir.property.get_property_values_of_elements.return_value = [
-        tapir.PropertyValuesArrayItem(propertyValues=[_error(), _error()]),
+        tapir.PropertyValuesArrayItem(
+            propertyValues=[tapir.PropertyValueErrorItem(error=_error().error) for _ in range(2)]
+        ),
         tapir.PropertyValuesArrayItem(propertyValues=[_value("b"), _value("c")]),
     ]
     utilities = PropertyUtilities(api)

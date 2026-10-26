@@ -75,17 +75,9 @@ def audit_schema_names(schema: dict[str, Any]) -> list[Finding]:
         if not isinstance(properties, dict):
             findings.append(Finding("invalid-properties", path, "Schema 'properties' must be an object."))
             continue
-        for name in properties:
-            # JSON keys can be Python keywords: codegen emits Pydantic aliases
-            # and functional TypedDict declarations for these valid wire names.
-            if not name.isidentifier():
-                findings.append(
-                    Finding(
-                        "invalid-schema-name",
-                        f"{path}.properties.{name}",
-                        f"Property name '{name}' is not a valid identifier.",
-                    )
-                )
+        # Wire keys need not be Python identifiers. Pydantic aliases and
+        # functional TypedDicts preserve keywords, numeric prefixes and punctuation;
+        # audit_python_files checks that their generated declarations are valid.
 
     return findings
 

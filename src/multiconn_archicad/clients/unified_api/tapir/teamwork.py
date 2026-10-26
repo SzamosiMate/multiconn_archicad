@@ -8,6 +8,11 @@ from pydantic import TypeAdapter
 from multiconn_archicad.models.tapir.commands import (
     GetLockableObjectSetStatusParameters,
     GetLockableObjectSetStatusResult,
+    GetReservationStatusOfElementsParameters,
+    GetReservationStatusOfElementsResult,
+    GetTeamworkStatusResult,
+    GrantElementsParameters,
+    GrantElementsResult,
     ReleaseElementsParameters,
     ReleaseElementsResult,
     ReleaseHotlinkCacheManagementResult,
@@ -21,7 +26,13 @@ from multiconn_archicad.models.tapir.commands import (
     TeamworkReceiveResult,
     TeamworkSendResult,
 )
-from multiconn_archicad.models.tapir.types import ElementIdArrayItem, FailedExecutionResult, SuccessfulExecutionResult
+from multiconn_archicad.models.tapir.types import (
+    ElementIdArrayItem,
+    ElementReservationStatus,
+    ErrorItem,
+    FailedExecutionResult,
+    SuccessfulExecutionResult,
+)
 
 if TYPE_CHECKING:
     from multiconn_archicad.clients.core.core_commands import CoreCommands
@@ -62,6 +73,86 @@ class TeamworkCommands:
             "GetLockableObjectSetStatus", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = GetLockableObjectSetStatusResult.model_validate(response_dict)
+        return validated_response
+
+    def get_reservation_status_of_elements(
+        self, elements: list[ElementIdArrayItem]
+    ) -> list[ElementReservationStatus | ErrorItem]:
+        """
+        Returns the Teamwork reservation status of elements without reserving them: whether each
+        element is free, reserved by the current user or reserved by another user, with the
+        reserving user and the element's owner.
+
+        Args:
+            elements (list[ElementIdArrayItem]): A list of elements.
+
+        Returns:
+            list[ElementReservationStatus | ErrorItem]: One item per input element, in the same
+                order.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elements": elements,
+        }
+        validated_params = GetReservationStatusOfElementsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetReservationStatusOfElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetReservationStatusOfElementsResult.model_validate(response_dict)
+        return validated_response.reservationStatuses
+
+    def get_teamwork_status(self) -> GetTeamworkStatusResult:
+        """
+        Returns whether the opened project is a Teamwork project and is online, the members of
+        the shared project and who has reserved the Hotlink and XRef management. Works in a solo
+        project too, then isShared and isOnline are false.
+
+        Returns:
+            GetTeamworkStatusResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        response_dict = self._core.post_tapir_command("GetTeamworkStatus")
+        validated_response = GetTeamworkStatusResult.model_validate(response_dict)
+        return validated_response
+
+    def grant_elements(
+        self, elements: list[ElementIdArrayItem], user_id: float
+    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+        """
+        Hands over the reservation of elements to another Teamwork user, given by user id,
+        without a dialog. Available from Archicad 27.
+
+        Args:
+            elements (list[ElementIdArrayItem]): A list of elements.
+            user_id (float): The Teamwork user id of the user to hand the elements over to, as
+                GetTeamworkProjectInfo, GetReservationStatusOfElements and the conflicts of
+                ReserveElements report users.
+
+        Returns:
+            FailedExecutionResult | SuccessfulExecutionResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elements": elements,
+            "userId": user_id,
+        }
+        validated_params = GrantElementsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GrantElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = TypeAdapter(GrantElementsResult).validate_python(response_dict)
         return validated_response
 
     def release_elements(self, elements: list[ElementIdArrayItem]) -> FailedExecutionResult | SuccessfulExecutionResult:

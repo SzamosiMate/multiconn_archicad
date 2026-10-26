@@ -284,6 +284,8 @@ def apply_permanent_patches(master_defs: dict[str, Any]):
         "ModifyElectricalDevicesParameters": ("electricalDevicesData", "ElectricalDeviceModificationData"),
         "ModifyElectricalPanelsParameters": ("electricalPanelsData", "ElectricalPanelModificationData"),
         "ModifyGraphicOverrideRulesParameters": ("graphicOverrideRules", "GraphicOverrideRuleModificationData"),
+        "ModifyMEPPhysicalSystemsParameters": ("physicalSystemsData", "MEPPhysicalSystemModificationData"),
+        "ModifyMEPSystemGroupsParameters": ("systemGroupsData", "MEPSystemGroupModificationData"),
     }
 
     for parent_model, (field_name, new_model_name) in element_modification_datatypes.items():
@@ -315,7 +317,6 @@ def apply_temporary_patches(master_defs: dict[str, Any]):
 
     extract_union_variant(master_defs, "GetMarkerParametersOfElementsResult", ["markerParametersOfElements", "items"], 0, "MarkerParametersOfElement")  # fmt: skip
     extract_inline_schema(master_defs, "SetMarkerParametersOfElementsParameters", ["elementsWithMarkerParameters", "items"], "ElementWithMarkerParameters")  # fmt: skip
-    extract_inline_schema(master_defs, "MarkerParametersOfElement", ["parameters", "items"], "MarkerGDLParameterDetails")  # fmt: skip
     extract_inline_schema(master_defs, "ElementWithMarkerParameters", ["markerParameters", "items"], "MarkerParameterUpdate")  # fmt: skip
     extract_union_variant(master_defs, "MarkerParameterUpdate", [], 0, "MarkerParameterUpdateByName")
     extract_union_variant(master_defs, "MarkerParameterUpdate", [], 1, "MarkerParameterUpdateByIndex")
@@ -323,7 +324,6 @@ def apply_temporary_patches(master_defs: dict[str, Any]):
     # Name response and rename items pending matching upstream extractions.
     for parent, field, name in (
         ("GetGraphicOverrideCombinationsResult", "graphicOverrideCombinations", "GraphicOverrideCombinationDetails"),
-        ("GetGraphicOverrideRulesResult", "graphicOverrideRules", "GraphicOverrideRuleDetails"),
         ("GetGridElementsResult", "gridElements", "GridElementDetails"),
         ("RenameDesignOptionCombinationsParameters", "designOptionCombinations", "DesignOptionCombinationRename"),
         ("RenameDesignOptionSetsParameters", "designOptionSets", "DesignOptionSetRename"),
@@ -428,3 +428,186 @@ def apply_temporary_patches(master_defs: dict[str, Any]):
     # --- Preserve stable public names for deliberate conditional object schemas ---
     name_required_variants(master_defs, "Hole2D", [], ["Hole2DWithOutline", "Hole2DWithLegacyCoordinates"])
     name_required_variants(master_defs, "TextData", [], ["TextDataWithText", "TextDataWithRuns"])
+
+    # Released 1.7.3 inline enums need domain names to avoid displacing existing public enums.
+    for parent, path, name in (
+        ("ApplyFavoritesToElementsParameters", ["keepFields", "items"], "FavoriteKeepField"),
+        ("AttributeCreationInfo", ["method"], "AttributeCreationMethod"),
+        ("BeamSegmentDetails", ["structureType"], "SegmentStructureType"),
+        ("ElementIFCProperty", ["propertyType"], "IFCPropertyType"),
+        ("ElementIFCProperty", ["source"], "IFCPropertySource"),
+        ("ExportFavoritesParameters", ["format"], "FavoriteExportFormat"),
+        ("GetCurrentViewImageParameters", ["source"], "ViewImageSource"),
+        ("GetCurrentViewImageParameters", ["format"], "ViewImageFormat"),
+        ("GetDatabasesParameters", ["types", "items"], "DatabaseType"),
+        ("GetHierarchicalElementOwnersParameters", ["ownerMode"], "HierarchicalOwnerMode"),
+        ("GetPrinterInfoResult", ["printArea"], "PrinterPrintArea"),
+        ("GetProjectPreferencesParameters", ["preferenceTypes", "items"], "ProjectPreferenceType"),
+        ("GetPropertyDefinitionsOfAttributesParameters", ["filter"], "AttributePropertyDefinitionFilter"),
+        ("LayoutData", ["position"], "LayoutInsertionPosition"),
+        ("MEPRoutingSegmentDetails", ["anchor"], "MEPRoutingAnchor"),
+    ):
+        extract_inline_enum(master_defs, parent, path, name)
+    replace_inline_schema_with_ref(master_defs, "ColumnSegmentDetails", ["structureType"], "SegmentStructureType")
+    replace_inline_schema_with_ref(master_defs, "MEPRoutingElementModificationData", ["anchor"], "MEPRoutingAnchor", preserve_description=True)  # fmt: skip
+    extract_inline_enum(master_defs, "GetStructureDisplayResult", ["structureDisplay"], "PartialStructureDisplay")
+    replace_inline_schema_with_ref(master_defs, "SetStructureDisplayParameters", ["structureDisplay"], "PartialStructureDisplay")  # fmt: skip
+
+    # Preserve existing shared names while naming newly conditional/result branches explicitly.
+    name_required_variants(master_defs, "DatabaseIdAndWindowType", [], ["DatabaseByWindowType", "DatabaseById"])
+    extract_union_variant(master_defs, "GetDetailsOfElementsResult", ["detailsOfElements", "items"], 0, "DetailsOfElement")  # fmt: skip
+    extract_inline_schema(master_defs, "Set3DCutPlanesParameters", ["cutPlanes", "items"], "CutPlane")
+    replace_inline_schema_with_ref(master_defs, "Get3DCutPlanesResult", ["cutPlanes", "items"], "CutPlane")
+    for parent, field, name in (
+        ("ConvertRevealOffsetsParameters", "openings", "OpeningRevealOffsetData"),
+        ("CopyFilesIntoEmbeddedLibraryParameters", "files", "EmbeddedLibraryFile"),
+        (
+            "DeactivateDesignOptionsInCombinationsParameters",
+            "deactivatedDesignOptionsInCombinations",
+            "DesignOptionDeactivation",
+        ),
+        ("GetAllFavoritesResult", "favorites", "FavoriteSummary"),
+        ("GetDatabasesResult", "databases", "DatabaseDetails"),
+        ("GetElementCategoriesResult", "categories", "ElementCategoryDetails"),
+        ("GetGraphicOverrideRulesByNameParameters", "graphicOverrideRules", "GraphicOverrideRuleReference"),
+        ("GetProjectDataKeysResult", "keys", "ProjectDataKey"),
+        ("GetRevisionChangeCustomSchemeResult", "customScheme", "RevisionChangeCustomSchemeItem"),
+        ("GetTeamworkStatusResult", "users", "TeamworkUser"),
+        ("MeasureTextsParameters", "texts", "TextMeasurementData"),
+        ("MirrorElementsParameters", "elementsWithMirrorAxes", "ElementMirrorData"),
+        ("MoveGraphicOverrideRulesParameters", "graphicOverrideRules", "GraphicOverrideRuleMove"),
+        ("RemoveIFCPropertiesOfElementsParameters", "elementIFCProperties", "ElementIFCPropertyRemoval"),
+        ("RenameAttributeFoldersParameters", "attributeFolders", "AttributeFolderRename"),
+        ("RenameGraphicOverrideRuleGroupsParameters", "ruleGroups", "GraphicOverrideRuleGroupRename"),
+        ("ReserveProjectDataResult", "conflicts", "ProjectDataReservationConflict"),
+        ("SetCategoryValuesOfElementsParameters", "elementCategoryValues", "ElementCategoryValueData"),
+        (
+            "SetClassificationsOfElementDefaultsParameters",
+            "elementDefaultClassifications",
+            "ElementDefaultClassification",
+        ),
+        ("SetIFCAttributesOfElementsParameters", "elementIFCAttributeValues", "ElementIFCAttributeValue"),
+        ("SetLibraryPartScriptsParameters", "libraryParts", "LibraryPartScriptData"),
+        ("SetOpeningDetailsParameters", "openingsWithDetails", "OpeningModificationData"),
+        (
+            "SetOpeningFloorPlanParametersParameters",
+            "openingsWithFloorPlanParameters",
+            "OpeningFloorPlanModificationData",
+        ),
+        ("SetProjectDataParameters", "values", "ProjectDataValueData"),
+        ("SolveStairBaselineParameters", "stairsData", "StairBaselineData"),
+    ):
+        extract_inline_schema(master_defs, parent, [field, "items"], name)
+
+    # Success wrappers retain their error alternatives and required fields.
+    for parent, path, name in (
+        ("ConvertRevealOffsetsResult", ["revealOffsets", "items"], "OpeningRevealOffsets"),
+        ("ElementLinksOrError", [], "ElementLinks"),
+        ("Get3DStyleDetailsResult", ["styles", "items"], "Style3DDetails"),
+        ("GetAttributesFromProjectResult", [], "ProjectAttributes"),
+        ("GetCategoryValuesOfElementsResult", ["categoryValuesOfElements", "items"], "ElementCategoryValues"),
+        ("GetContainingDatabasesResult", ["databases", "items"], "ContainingDatabase"),
+        ("GetDrawingContentBoxesResult", ["contentBoxes", "items"], "DrawingContentBox"),
+        ("GetElementSetsOfElementsResult", ["elementSetsOfElements", "items"], "ElementSetsOfElement"),
+        ("GetElementTypeNamesResult", ["names", "items"], "ElementTypeName"),
+        ("GetFavoriteSettingsResult", ["favoriteSettings", "items"], "FavoriteSettings"),
+        ("GetFontsByNameResult", ["fonts", "items"], "FontDetails"),
+        ("GetHierarchicalElementOwnersResult", ["owners", "items"], "HierarchicalElementOwner"),
+        ("GetHotlinkProxyElementTableResult", ["proxyElementTables", "items"], "HotlinkProxyElementTable"),
+        ("GetLayoutSubsetSettingsResult", ["subsetSettings", "items"], "LayoutSubsetSettings"),
+        ("GetNavigatorParentItemsResult", ["parentItems", "items"], "NavigatorParentItem"),
+        ("GetNoteAutoTextKeywordsResult", ["keywords", "items"], "NoteAutoTextKeyword"),
+        ("GetOpeningDetailsResult", ["openings", "items"], "OpeningDetails"),
+        ("GetOpeningFloorPlanParametersResult", ["openings", "items"], "OpeningFloorPlanDetails"),
+        ("GetOpeningTransformationsResult", ["openingTransformations", "items"], "OpeningTransformation"),
+        ("GetProjectDataResult", ["values", "items"], "ProjectDataValue"),
+        (
+            "GetPropertyDefinitionsOfAttributesResult",
+            ["propertyDefinitionsOfAttributes", "items"],
+            "AttributePropertyIds",
+        ),
+        ("GetReservationStatusOfElementsResult", ["reservationStatuses", "items"], "ElementReservationStatus"),
+        ("GetSurfaceQuantitiesOfElementsResult", ["surfaceQuantitiesOfElements", "items"], "ElementSurfaceQuantities"),
+        ("GetUserDataOfGroupsResult", ["userDataOfGroups", "items"], "GroupUserDataResult"),
+        ("GetZoneReductionsResult", ["reductionsOfZones", "items"], "ZoneReductions"),
+        ("MeasureTextsResult", ["measurements", "items"], "TextMeasurement"),
+        ("RegularizePolygonsResult", ["results", "items"], "RegularizedPolygons"),
+        ("RegularizePolylinesResult", ["results", "items"], "RegularizedPolyline"),
+        ("SolveStairBaselineResult", ["solutions", "items"], "StairBaselineSolution"),
+        ("TriangulatePolygonsOfElementsResult", ["triangulations", "items"], "ElementTriangulation"),
+    ):
+        extract_union_variant(master_defs, parent, path, 0, name)
+
+    # Nested response details are separate from write payloads with different requiredness.
+    extract_union_variant(master_defs, "ProjectAttributes", ["attributesByType", "items"], 0, "ProjectAttributesByType")  # fmt: skip
+    for parent, path, name in (
+        ("ElementLinks", ["links", "items"], "ElementLinkDetails"),
+        ("ElementCategoryDetails", ["values", "items"], "ElementCategoryValueDetails"),
+        ("ElementCategoryValues", ["categoryValues", "items"], "ElementCategoryValue"),
+        ("FavoriteSettings", ["subElements", "items"], "FavoriteSubelement"),
+        ("HotlinkProxyElementTable", ["proxyElements", "items"], "HotlinkProxyElement"),
+        ("OpeningDetails", ["geometry"], "OpeningGeometry"),
+        ("OpeningDetails", ["extrusionParameters"], "OpeningExtrusionParameters"),
+        ("OpeningModificationData", ["extrusionParameters"], "OpeningExtrusionParametersUpdate"),
+        ("GetOpeningDefaultResult", ["floorPlanParameters"], "OpeningDefaultFloorPlanParameters"),
+        ("OpeningFloorPlanDetails", ["floorPlanParameters"], "OpeningFloorPlanParameters"),
+        ("OpeningFloorPlanModificationData", ["floorPlanParameters"], "OpeningFloorPlanParametersUpdate"),
+        ("ElementSurfaceQuantities", ["surfaces", "items"], "ElementSurfaceQuantity"),
+        ("GroupUserDataResult", ["userData"], "GroupUserData"),
+        ("ZoneReductions", ["reductions", "items"], "ZoneReduction"),
+        ("LibraryPartScriptData", ["scripts"], "LibraryPartScripts"),
+        ("RegularizePolygonsParameters", ["polygons", "items"], "PolygonRegularizationData"),
+        ("RegularizePolylinesParameters", ["polylines", "items"], "PolylineRegularizationData"),
+        ("RegularizedPolygons", ["polygons", "items"], "RegularizedPolygon"),
+        ("RegularizedPolygon", ["ancestry"], "PolygonAncestry"),
+        ("PolygonAncestry", ["contours", "items"], "PolygonContourAncestry"),
+        ("PolygonContourAncestry", ["vertices", "items"], "PolygonVertexAncestry"),
+        ("PolygonContourAncestry", ["edges", "items"], "PolygonEdgeAncestry"),
+        ("RegularizedPolyline", ["ancestry"], "PolylineAncestry"),
+        ("PolylineAncestry", ["vertices", "items"], "PolylineVertexAncestry"),
+        ("PolylineAncestry", ["edges", "items"], "PolylineEdgeAncestry"),
+    ):
+        extract_inline_schema(master_defs, parent, path, name)
+    replace_inline_schema_with_ref(master_defs, "Create3DStylesParameters", ["styles", "items"], "Style3DDetails")
+    replace_inline_schema_with_ref(master_defs, "Change3DStylesParameters", ["styles", "items"], "Style3DDetails")
+    replace_inline_schema_with_ref(master_defs, "FavoriteSettings", ["marker"], "MarkerParametersOfElement")
+    replace_inline_schema_with_ref(master_defs, "DeleteMEPPhysicalSystemsParameters", ["physicalSystems", "items"], "MEPPhysicalSystemIdArrayItem")  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, "GetOpeningDefaultResult", ["extrusionParameters"], "OpeningExtrusionParameters")  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, "ElementReservationStatus", ["reservedBy"], "User")
+    replace_inline_schema_with_ref(master_defs, "ElementReservationStatus", ["owner"], "User")
+    extract_inline_enum(master_defs, "OpeningExtrusionParameters", ["anchor"], "OpeningAnchor")
+    replace_inline_schema_with_ref(master_defs, "OpeningExtrusionParametersUpdate", ["anchor"], "OpeningAnchor")
+    extract_inline_enum(master_defs, "ElementReservationStatus", ["status"], "ElementReservationState")
+    extract_inline_enum(master_defs, "ZoneReduction", ["type"], "ZoneReductionType")
+    extract_inline_enum(master_defs, "StairBaselineSolution", ["solution"], "StairBaselineSolutionState")
+    extract_inline_enum(master_defs, "FavoriteSubelement", ["subType"], "FavoriteSubelementType")
+    extract_inline_schema(master_defs, "DeleteProjectDataParameters", ["names", "items"], "ProjectDataName")
+    for parent in (
+        "GetProjectDataParameters",
+        "GrantProjectDataParameters",
+        "ReleaseProjectDataParameters",
+        "RequestProjectDataParameters",
+        "ReserveProjectDataParameters",
+    ):
+        replace_inline_schema_with_ref(master_defs, parent, ["names", "items"], "ProjectDataName")
+
+    # Project preference read models require reported fields; update models allow partial changes.
+    for parent, suffix in (("GetProjectPreferencesResult", ""), ("SetProjectPreferencesParameters", "Update")):
+        for field, prefix in (("workingUnits", "WorkingUnit"), ("calculationUnits", "CalculationUnit")):
+            name = f"{prefix}Preferences{suffix}"
+            extract_inline_schema(master_defs, parent, [field], name)
+            for quantity in ("length", "area", "volume", "angle"):
+                if quantity == "angle":
+                    if prefix == "WorkingUnit":
+                        extract_inline_schema(master_defs, name, [quantity], f"AngleUnitFormat{suffix}")
+                    else:
+                        replace_inline_schema_with_ref(master_defs, name, [quantity], f"AngleUnitFormat{suffix}")
+                else:
+                    extract_inline_schema(master_defs, name, [quantity], f"{prefix}{quantity.title()}Format{suffix}")
+        name = f"DimensionPreferences{suffix}"
+        extract_inline_schema(master_defs, parent, ["dimensions"], name)
+        extract_inline_schema(master_defs, name, ["linear"], f"LengthDimensionFormat{suffix}")
+        for field in ("radial", "level", "elevation", "doorWindow", "parapet"):
+            replace_inline_schema_with_ref(master_defs, name, [field], f"LengthDimensionFormat{suffix}", preserve_description=True)  # fmt: skip
+        extract_inline_schema(master_defs, name, ["angle"], f"AngleDimensionFormat{suffix}")
+        extract_inline_schema(master_defs, name, ["area"], f"AreaDimensionFormat{suffix}")
