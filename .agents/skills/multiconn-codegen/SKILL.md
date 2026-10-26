@@ -129,17 +129,21 @@ Compare public definitions structurally so ordering-only changes do not look sem
 
 Start with a release-level API summary: counts and names of added, removed, and structurally changed commands and type models. Keep aggregate facts here, separate from individual change entries. Separate new/changed/removed patch counts from unchanged inventory, state whether they count declarations or expanded loop operations, and distinguish classification-only changes from generated behavior changes.
 
-Group review entries under patch-category headings. Use short lists and actual code snippets instead of prose-heavy tables. Each independently reviewable decision needs its own entry identifying the source, affected consumers, observed problem, and resolution. Give the exact schema definition/property path once, either as a JSON pointer or through a patch call whose parent and path identify it unambiguously. Do not group unrelated locations just because they share a mechanical cause; ordinary related upstream additions with no separate decision can be summarized together.
+Organize patch decisions under headings describing the **reason to patch**, rather than the API domain or lifecycle category. Reasons include preserving existing public names, naming conditional variants without losing requiredness, preventing collisions between distinct contracts, replacing generic or path-derived names, sharing equivalent contracts, and retiring released refinements while retaining compatibility. Choose reasons demonstrated by the current run; do not force a fixed inventory of headings. The same domain may appear under several reasons, and different domains may share a reason when the justification is the same. A shared helper or domain alone is insufficient justification for grouping.
+
+Label each reason group with its Permanent, Temporary, Breaking permanent, Breaking source review, or retired classification and operation count/unit; when classifications differ within one reason, label the individual entries. This is report organization only: preserve existing patch assignments and pipeline execution order. Identify the source, affected consumers, observed problem and resolution for each decision. Give its exact schema definition/property path once, either as a JSON pointer or through a patch call whose parent and path identify it unambiguously.
+
+Place each explanation immediately beside its actual patch calls, model excerpt or diff, normally explanation followed by code. Keep the code for a reason with that reason; do not collect all explanations first and move their code into a separate section or appendix. Apply this pairing to permanent-list entries, retired patches and compatibility aliases, generator/audit repairs, and handwritten runtime adaptations as well. Use short paragraphs and focused code blocks instead of domain inventories or prose-heavy tables. The [1.7.3 report](../../../code_generation/documentation/reports/tapir-1.7.3.md#patch-decisions-by-reason) is a format example; derive facts, reasons and counts from the current run.
 
 Explain requiredness, unions, naming decisions, tradeoffs, temporary retirement conditions, intentional breaking behavior, and unresolved source-review questions alongside their entries. Explain each issue once; do not repeat it in separate detailed notes, semantic-review tables, or patch summaries. Keep unchanged permanent patches out of new upstream recommendations.
 
-When upstream follow-up remains, add a short `Upstream follow-up` section linking the relevant category entries and existing tracking. Identify new or materially changed temporary candidates and unresolved source-review questions; distinguish them from submitted fixes and merged fixes awaiting release. Include original paths when earlier naming patches obscure them. This hands work to a separately requested `$multiconn-upstream-patches` run; do not invoke that workflow automatically or duplicate its investigation here.
+When upstream follow-up remains, add a short `Upstream follow-up` section linking the relevant reason entries and existing tracking. Identify new or materially changed temporary candidates and unresolved source-review questions; distinguish them from submitted fixes and merged fixes awaiting release. Include original paths when earlier naming patches obscure them. This hands work to a separately requested `$multiconn-upstream-patches` run; do not invoke that workflow automatically or duplicate its investigation here.
 
 Classify **Unified API breaking changes** separately from schema patch categories. Compare signatures and generated return/unwrapping behavior against the baseline, including referenced model changes even when annotations stay the same. Include removed/renamed methods, changed required arguments, incompatible parameter models/types, and changed return shapes. A new optional response field that changes single-field unwrapping is a Unified API break even when the upstream addition is non-breaking. Appended optional arguments and new methods are normally additive.
 
 Distinguish wire-schema acceptance from Python compatibility: widening an enum does not narrow JSON acceptance, but replacing its Python enum class can change equality and validation of enum instances. Do not present an enum-to-enum change as a new string-to-enum migration.
 
-Use a dedicated `Unified API breaking changes` section with a short entry per affected method: before/after behavior and concrete caller migration. Identify the exact schema source and cause here or refer to the relevant category entry. This section owns migration; the category entry owns the patch decision. Count breaks separately in the API summary, and do not hide them only among upstream additions.
+Use a dedicated `Unified API breaking changes` section with a short entry per affected method: before/after behavior and concrete caller migration. Identify the exact schema source and cause here or refer to the relevant reason entry. This section owns migration; the reason entry owns the patch decision. Count breaks separately in the API summary, and do not hide them only among upstream additions.
 
 When handwritten generator, cleaner, formatter, or audit behavior changes, explain its trigger, input-to-output transformation, owning layer, affected models, settings considered, and deliberate limitations. Omit this section when none changed.
 
@@ -149,7 +153,7 @@ For the untouched new-type inventory, use `src/multiconn_archicad/models/tapir/t
 
 For release updates, maintain one final reviewed report at `code_generation/documentation/reports/tapir-<version>.md`, alongside the changes it explains. Revise that report during the same update rather than saving each intermediate attempt. Keep ongoing patch dispositions in `code_generation/documentation/schema-patch-tracking.md`; link instead of repeating its inventory. Preserve historical reports as records of their stated baselines and verification. Keep intermediate logs, snapshots and test output in untracked scratch storage. Audit-only work remains read-only and can report in the response. Automatically stage the final reviewed release-update report with `git add -- code_generation/documentation/reports/tapir-<version>.md`, and restage it after final revisions. Together with newly generated unified API files described above, stage only the final report; leave other files and existing staged changes alone. Do not commit unless requested.
 
-Use the compact structure below. Retain the API summary, verification, and human-review outcome; omit other empty sections and category headings. Avoid wide tables, repeated inventories, and routine success narration. Use actual patch calls, model excerpts, signature diffs, or caller examples when they clarify a change. Label abbreviated excerpts; do not invent executed code or validation results. Distinguish formatter success from lint findings and limited checks from broader claims.
+Use the compact structure below. Retain the API summary, verification, and human-review outcome; omit other empty sections and reason headings. Avoid wide tables, repeated inventories, and routine success narration. Use actual patch calls, model excerpts, signature diffs, or caller examples when they clarify a change. Label abbreviated excerpts; do not invent executed code or validation results. Distinguish formatter success from lint findings and limited checks from broader claims.
 
 ````markdown
 ## Tapir generation report
@@ -163,20 +167,24 @@ Use the compact structure below. Retain the API summary, verification, and human
 - Unified API breaks: <count and affected methods>
 - Patches: <new/changed/removed counts by category, count units, unchanged inventory>
 
-### Changes by patch category
+### Patch decisions by reason
 
-#### Temporary
+#### <Specific reason to patch>
 
-- **<change and consumers>.** <Problem and resolution in a short paragraph.>
+**<Lifecycle category> - <operation count and unit>.** <Source, affected consumers,
+observed problem and resolution. Include relevant requiredness, union/reuse
+decisions and compatibility consequences here.>
 
 ```python
-# Actual patch call, model excerpt, or usage example.
+# Actual patch calls or model excerpt for this reason, directly beside its explanation.
 ```
 
 <Retirement condition or decision needed, when relevant.>
 
-<Use the same entry format for nonempty Permanent, Breaking permanent,
-Breaking — source review / potential error, and Removed patches groups.>
+<Repeat for other reasons, combining domains only when the reason is the same.
+Retain Permanent/Temporary/breaking/retired labels and counts within these groups;
+do not use domains or lifecycle categories as the organizing headings. Place
+retired patch aliases beside their retirement explanation as well.>
 
 #### Upstream changes — no local patch
 
@@ -184,7 +192,7 @@ Breaking — source review / potential error, and Removed patches groups.>
 
 ### Unified API breaking changes
 
-- **<method>.** <Before → after; refer to the category entry for its cause.>
+- **<method>.** <Before → after; refer to the reason entry for its cause.>
 
 ```python
 # Concrete caller migration.
@@ -198,6 +206,10 @@ Breaking — source review / potential error, and Removed patches groups.>
 
 - **<changed behavior>.** <Trigger, transformation, owning layer, affected models,
   settings considered, and limitations; only when changed.>
+
+```diff
+# Actual focused diff beside the explanation; also pair runtime adaptations with code.
+```
 
 ### New patterns noticed
 
