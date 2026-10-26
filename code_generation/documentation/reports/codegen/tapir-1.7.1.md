@@ -156,7 +156,7 @@ This caveat applies to `MEPDistributionSystem.domain`, `MEPPortDetails.domain`, 
 
 ### Upstream follow-up
 
-The remaining new temporary reuse/naming candidates and the retained beam-hole operations are recorded [in the active tracking queue](../schema-patch-tracking.md#submitted-following-171), with their exact decisions and retirement conditions above. The nine permanent naming operations are excluded from upstream recommendations; valid inline schemas and generator naming limitations are not sufficient grounds for an upstream change. All older retirement candidates are confirmed in the released schema. No Tapir implementation source was inspected and no upstream PR was opened during this generation run.
+The remaining new temporary reuse/naming candidates and the retained beam-hole operations are recorded [in the active tracking queue](../../schema-patch-tracking.md#submitted-following-171), with their exact decisions and retirement conditions above. The nine permanent naming operations are excluded from upstream recommendations; valid inline schemas and generator naming limitations are not sufficient grounds for an upstream change. All older retirement candidates are confirmed in the released schema. No Tapir implementation source was inspected and no upstream PR was opened during this generation run.
 
 ### Verification
 
