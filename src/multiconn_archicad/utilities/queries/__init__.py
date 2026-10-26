@@ -4,8 +4,8 @@ from .models import (
     AllOf,
     AnyOf,
     ElementTypePredicate,
-    LengthTest,
     Negate,
+    NumberTest,
     Predicate,
     PropertyPredicate,
     PropertyTest,
@@ -13,17 +13,21 @@ from .models import (
     Query,
     TextTest,
 )
+from .registry import AmbiguousPropertyTypeError, TestRegistry, UnsupportedPropertyTypeError
 
 __all__ = [
     "AllOf",
     "AnyOf",
     "ElementTypePredicate",
-    "LengthTest",
     "Negate",
+    "NumberTest",
     "Predicate",
     "PropertyPredicate",
     "PropertyTest",
     "PropertyTestModel",
     "Query",
     "TextTest",
+    "TestRegistry",
+    "UnsupportedPropertyTypeError",
+    "AmbiguousPropertyTypeError",
 ]
