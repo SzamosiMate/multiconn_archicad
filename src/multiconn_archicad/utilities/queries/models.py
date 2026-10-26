@@ -17,7 +17,6 @@ from multiconn_archicad.models.tapir.types import (
     ElementType,
     PropertyCollectionType,
     PropertyDetails,
-    PropertyMeasureType,
     PropertyValueType,
 )
 
@@ -99,10 +98,10 @@ class TextTest(PropertyTestModel):
         self._require_compatible_property(details)
 
 
-class LengthTest(PropertyTestModel):
-    """Describe a length comparison using an implicit SI operand."""
+class NumberTest(PropertyTestModel):
+    """Compare scalar numbers; measured properties use implicit SI operands."""
 
-    kind: Literal["length"] = "length"
+    kind: Literal["number"] = "number"
     operator: Literal[
         "is",
         "is not",
@@ -111,23 +110,22 @@ class LengthTest(PropertyTestModel):
         "is less than",
         "is less than or equal to",
     ]
-    value: float = Field(strict=True, allow_inf_nan=False, description="Length in metres.")
+    value: float = Field(strict=True, allow_inf_nan=False, description="Numeric operand; quantities use SI units.")
 
     @classmethod
     def accepts(cls, details: PropertyDetails) -> bool:
-        """Accept single real properties measured as lengths."""
-        return (
-            details.propertyCollectionType == PropertyCollectionType.SINGLE
-            and details.propertyValueType == PropertyValueType.REAL
-            and details.propertyMeasureType == PropertyMeasureType.LENGTH
+        """Accept scalar integer and real properties regardless of measure type."""
+        return details.propertyCollectionType == PropertyCollectionType.SINGLE and details.propertyValueType in (
+            PropertyValueType.INTEGER,
+            PropertyValueType.REAL,
         )
 
     def validate_for(self, details: PropertyDetails) -> None:
-        """Require a length property; Pydantic already checked the finite SI operand."""
+        """Require a numeric property; Pydantic already checked the finite operand."""
         self._require_compatible_property(details)
 
 
-PropertyTest: TypeAlias = Annotated[TextTest | LengthTest, Field(discriminator="kind")]
+PropertyTest: TypeAlias = Annotated[TextTest | NumberTest, Field(discriminator="kind")]
 
 
 class PropertyPredicate(_QueryModel):
