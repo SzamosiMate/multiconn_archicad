@@ -29,7 +29,7 @@ Examples are `$multiconn-codegen audit`, `$multiconn-codegen regenerate tapir`, 
 - Record the pre-generation Tapir version and the public definitions in `src/multiconn_archicad/models/tapir/types.py`. Use the checked-in revision as the comparison baseline, not line positions in the working file.
 - Distinguish the checked-in diff baseline, initial working outputs, and the previously used client API. Compare patched public models when assessing migrations; a raw upstream-schema difference alone does not establish a new client break. Record discrepancies explicitly, including user-provided corrections to the prior API.
 - Preserve unrelated working-tree changes. Do not commit, push, or open a pull request unless requested.
-- Read the [pipeline brief](../../../code_generation/documentation/archicad_api_codegen_brief.md) when architecture or output routing needs context. For an update, consult the previous release report in `code_generation/documentation/reports/` and `code_generation/documentation/schema-patch-tracking.md`. Retirement requires the correction in the target release's fetched documentation schema, not merely a merged source PR or a release tag. Keep patches whose source fixes are merged but absent from the released input.
+- Read the [pipeline brief](../../../code_generation/documentation/archicad_api_codegen_brief.md) when architecture or output routing needs context. For an update, consult the previous release report in `code_generation/documentation/reports/codegen/` and `code_generation/documentation/schema-patch-tracking.md`. Relevant upstream run reports live separately in `code_generation/documentation/reports/upstream-patches/`. Retirement requires the correction in the target release's fetched documentation schema, not merely a merged source PR or a release tag. Keep patches whose source fixes are merged but absent from the released input.
 
 ### Inspect large artifacts efficiently
 
@@ -151,7 +151,7 @@ For the untouched new-type inventory, use `src/multiconn_archicad/models/tapir/t
 
 ## Report for human review
 
-For release updates, maintain one final reviewed report at `code_generation/documentation/reports/tapir-<version>.md`, alongside the changes it explains. Revise that report during the same update rather than saving each intermediate attempt. Keep ongoing patch dispositions in `code_generation/documentation/schema-patch-tracking.md`; link instead of repeating its inventory. Preserve historical reports as records of their stated baselines and verification. Keep intermediate logs, snapshots and test output in untracked scratch storage. Audit-only work remains read-only and can report in the response. Automatically stage the final reviewed release-update report with `git add -- code_generation/documentation/reports/tapir-<version>.md`, and restage it after final revisions. Together with newly generated unified API files described above, stage only the final report; leave other files and existing staged changes alone. Do not commit unless requested.
+For release updates, maintain one final reviewed report at `code_generation/documentation/reports/codegen/tapir-<version>.md`, alongside the changes it explains. Revise that report during the same update rather than saving each intermediate attempt. Keep ongoing patch dispositions in `code_generation/documentation/schema-patch-tracking.md`; link instead of repeating its inventory. Upstream-patches run reports belong in the sibling `reports/upstream-patches/` folder; keep relative report/tracking links valid. Preserve historical reports as records of their stated baselines and verification. Keep intermediate logs, snapshots and test output in untracked scratch storage. Audit-only work remains read-only and can report in the response. Automatically stage the final reviewed release-update report with `git add -- code_generation/documentation/reports/codegen/tapir-<version>.md`, and restage it after final revisions. Together with newly generated unified API files described above, stage only the final report; leave other files and existing staged changes alone. Do not commit unless requested.
 
 Use the compact structure below. Retain the API summary, verification, and human-review outcome; omit other empty sections and reason headings. Avoid wide tables, repeated inventories, and routine success narration. Use actual patch calls, model excerpts, signature diffs, or caller examples when they clarify a change. Label abbreviated excerpts; do not invent executed code or validation results. Distinguish formatter success from lint findings and limited checks from broader claims.
 
@@ -288,5 +288,9 @@ References guide style; the current diff establishes the facts.
 
 Return the finished title and body, or a directly usable Markdown file link. When
 copyable Markdown in chat is requested, use one fenced `markdown` block for the
-body. Publish only when separately authorized; pass a prepared file to `gh` with
-`--body-file` rather than interpolating multiline Markdown into a shell command.
+body. Present the completed contents and title/body for user review before opening
+a PR, including a draft. “Do a PR” or “prepare a PR” means prepare that proposal;
+submit only after the user approves the presented proposal and asks to open/submit
+it. Technical self-review is not this user-review checkpoint. When submission is
+authorized, pass a prepared file to `gh` with `--body-file` rather than interpolating
+multiline Markdown into a shell command.

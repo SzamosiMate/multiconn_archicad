@@ -100,7 +100,7 @@ The following 22 replacements share equivalent contracts; extraction producers a
 
 #### Removed patches
 
-The release supplies all six tracked decisions from [the preceding upstream refinement report](upstream-refinements-1.7.1-2026-10-17.md), comprising 12 expanded operations. Their destination contracts match the old patched contracts after reference expansion; no compatibility aliases need changing.
+The release supplies all six tracked decisions from [the preceding upstream refinement report](../upstream-patches/upstream-refinements-1.7.1-2026-10-17.md), comprising 12 expanded operations. Their destination contracts match the old patched contracts after reference expansion; no compatibility aliases need changing.
 
 - **Mesh partial updates:** `ModifyMeshesParameters/meshesData/items/meshData` now references `MeshModificationData`. Remove its one extraction; retain `MeshWithDetails`, its required element/data wrapper, optional edit fields and bounds.
 - **Revision custom-scheme entries:** `RevisionCustomSchemeData/items` now references `RevisionCustomSchemeEntry`. Remove one extraction; the key/value remain required with additional properties forbidden.
@@ -419,7 +419,7 @@ The surrounding code is an existence check, imports and documentation. One share
 
 ### Upstream follow-up
 
-The six prior decisions are confirmed in the fetched 1.7.2 documentation and removed from the active queue. The six new Temporary decisions above are recorded in [active tracking](../schema-patch-tracking.md), with original paths and release retirement conditions. The 15 new Permanent operations extend the established creation/modification lists; the other 71 new operations are Temporary naming or sharing candidates. No upstream implementation review, submission, or publication was performed.
+The six prior decisions are confirmed in the fetched 1.7.2 documentation and removed from the active queue. The six new Temporary decisions above are recorded in [active tracking](../../schema-patch-tracking.md), with original paths and release retirement conditions. The 15 new Permanent operations extend the established creation/modification lists; the other 71 new operations are Temporary naming or sharing candidates. No upstream implementation review, submission, or publication was performed.
 
 ### Verification
 

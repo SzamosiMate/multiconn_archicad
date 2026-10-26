@@ -1,6 +1,6 @@
 # Refine API schemas following Tapir 1.7.1
 
-One upstream-refinement run, started 2026-10-17 and updated through submission on 2026-10-18. This report consolidates the initial preparation, selected-permanent-patch review and publication follow-up. The [active tracking queue](../schema-patch-tracking.md) owns the original paths and release-retirement conditions; this report preserves decisions and evidence rather than duplicating that inventory.
+One upstream-refinement run, started 2026-10-17 and updated through submission on 2026-10-18. This report consolidates the initial preparation, selected-permanent-patch review and publication follow-up. The [active tracking queue](../../schema-patch-tracking.md) owns the original paths and release-retirement conditions; this report preserves decisions and evidence rather than duplicating that inventory.
 
 ## Delivery and provenance
 
@@ -8,7 +8,7 @@ One upstream-refinement run, started 2026-10-17 and updated through submission o
 - **Published head:** [`43e12ebcf55805ba7b76f1a5608c8e80112b60ed`](https://github.com/SzamosiMate/tapir-archicad-automation/commit/43e12ebcf55805ba7b76f1a5608c8e80112b60ed), on fork branch `codex/schema-temporary-patches-1-7-1`. Keep this existing PR head; the preferred naming for future runs is `schema/refinements-<reviewed-version>`.
 - **Final base:** synced fork `main`, `6dfc87d54da3dbd51ebab435e5cfd05a45ffa92a`. The original investigation used upstream `0111fe86620b1f5bebf6105c0695f13cea34cbfe`; the branch was rebased without conflicts and checked again against the final base.
 - **Commits:** `f1ac4d497d5cbbceb461f7829673be6a35b9de3d` contains the original beam/slab/wall/Teamwork refinements and description cleanup. `43e12ebc` separately adds the two older extractions selected by the user. Its body explains their older origin versus the 1.7.1 follow-up.
-- **Client inputs:** pinned Tapir 1.7.1, its [final generation report](tapir-1.7.1.md), saved unpatched/patched schemas and the corresponding helper calls. These are released-schema evidence, not upstream-main snapshots. The initial client commit was `17cda2f6778a8bcdb8068a418a14f9f72d506e33`; input schema/patch content was not changed in this run.
+- **Client inputs:** pinned Tapir 1.7.1, its [final generation report](../codegen/tapir-1.7.1.md), saved unpatched/patched schemas and the corresponding helper calls. These are released-schema evidence, not upstream-main snapshots. The initial client commit was `17cda2f6778a8bcdb8068a418a14f9f72d506e33`; input schema/patch content was not changed in this run.
 - The fork branch was force-pushed with an explicit lease on its former tip `5a084e93c52a94db7abd5443281e78e25a23332f`, and its final remote tip was verified. No base branch, generated documentation or client model output was pushed.
 
 ## Source decisions

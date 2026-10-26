@@ -9,7 +9,7 @@ Run started **2026-10-20** using MultiConn's `multiconn-upstream-patches` skill 
 - Published [`schema/refinements-1.7.2`](https://github.com/SzamosiMate/tapir-archicad-automation/tree/schema/refinements-1.7.2), final commit [`e7bcf0bb6aad030333239d3b7052485c20967e9c`](https://github.com/SzamosiMate/tapir-archicad-automation/commit/e7bcf0bb6aad030333239d3b7052485c20967e9c). `git ls-remote` independently verified the remote tip. One source-only commit changes 12 C++ command files and the common JSON resource; Tapir remains on that branch.
 - Existing proposals were checked: earlier schema proposals, including [#1056](https://github.com/ENZYME-APD/tapir-archicad-automation/pull/1056), are merged. No existing open proposal from this fork covered this queue, and the new branch name was unused. No PR was created.
 
-The [active queue](../schema-patch-tracking.md) owns original paths, grouped operations, publication status and retirement conditions; this report does not duplicate its inventory. All **82 expanded review operations** are represented: 60 naming/conditional operations and 22 shared-reference replacements, yielding **63 new common definitions**. No acceptance correction or tightening was necessary.
+The [active queue](../../schema-patch-tracking.md) owns original paths, grouped operations, publication status and retirement conditions; this report does not duplicate its inventory. All **82 expanded review operations** are represented: 60 naming/conditional operations and 22 shared-reference replacements, yielding **63 new common definitions**. No acceptance correction or tightening was necessary.
 
 ## Decisions and compatibility
 

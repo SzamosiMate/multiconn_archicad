@@ -435,7 +435,7 @@ Abbreviated audit diff (definition-name and generated-syntax checks remain):
 
 ### Upstream follow-up
 
-The two adopted naming refinements above retire from the older fork queue. The other **80 retained Temporary operations** still lack released equivalent naming/sharing. The **161 new Temporary operations** are schema-only candidates for a separately requested upstream review, distinct from the already source-reviewed/published older queue. [Active tracking](../schema-patch-tracking.md) records both groups and retirement conditions. No unresolved breaking source-review patch is introduced.
+The two adopted naming refinements above retire from the older fork queue. The other **80 retained Temporary operations** still lack released equivalent naming/sharing. The **161 new Temporary operations** are schema-only candidates for a separately requested upstream review, distinct from the already source-reviewed/published older queue. [Active tracking](../../schema-patch-tracking.md) records both groups and retirement conditions. No unresolved breaking source-review patch is introduced.
 
 ### Verification
 
