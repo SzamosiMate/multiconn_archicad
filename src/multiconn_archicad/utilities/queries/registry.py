@@ -29,10 +29,12 @@ class TestRegistry:
     """
 
     def __init__(self, *families: type[PropertyTestModel]):
-        self._families: TypeForm[PropertyTestModel] = self._validate_families(families)
+        self._families: tuple[type[PropertyTestModel], ...] = self._validate_families(families)
 
     @staticmethod
-    def _validate_families(families: TypeForm[PropertyTestModel]) -> TypeForm[PropertyTestModel]:
+    def _validate_families(
+        families: tuple[type[PropertyTestModel], ...],
+    ) -> tuple[type[PropertyTestModel], ...]:
         if not families:
             raise ValueError("At least one property-test family is required")
         for family in families:
