@@ -5,7 +5,7 @@ description: "Explicit-use only. Audit, regenerate, update, and review the gener
 
 # MultiConn Tapir code generation
 
-Regenerate the Tapir API from its upstream schema, resolve generation problems at their source, and leave a concise report for human review. Keep the workflow and audit lightweight: a small number of reliable checks is more valuable than broad heuristic linting.
+Regenerate the Tapir API from its upstream schema, resolve generation problems at their source, and produce a detailed temporary review plus a condensed repository record. Keep the workflow and audit lightweight: a small number of reliable checks is more valuable than broad heuristic linting.
 
 ## Invocation policy
 
@@ -29,7 +29,7 @@ Examples are `$multiconn-codegen audit`, `$multiconn-codegen regenerate tapir`, 
 - Record the pre-generation Tapir version and the public definitions in `src/multiconn_archicad/models/tapir/types.py`. Use the checked-in revision as the comparison baseline, not line positions in the working file.
 - Distinguish the checked-in diff baseline, initial working outputs, and the previously used client API. Compare patched public models when assessing migrations; a raw upstream-schema difference alone does not establish a new client break. Record discrepancies explicitly, including user-provided corrections to the prior API.
 - Preserve unrelated working-tree changes. Do not commit, push, or open a pull request unless requested.
-- Read the [pipeline brief](../../../code_generation/documentation/archicad_api_codegen_brief.md) when architecture or output routing needs context. For an update, consult the previous release report in `code_generation/documentation/reports/codegen/` and `code_generation/documentation/schema-patch-tracking.md`. Relevant upstream run reports live separately in `code_generation/documentation/reports/upstream-patches/`. Retirement requires the correction in the target release's fetched documentation schema, not merely a merged source PR or a release tag. Keep patches whose source fixes are merged but absent from the released input.
+- Read the [pipeline brief](../../../code_generation/documentation/archicad_api_codegen_brief.md) when architecture or output routing needs context. Current patch code and `code_generation/documentation/schema-patch-tracking.md` govern active decisions. Consult a condensed release record in `code_generation/documentation/reports/codegen/` only for a specific baseline, provenance or decision question; do not routinely load the archive. Relevant upstream run records live separately in `code_generation/documentation/reports/upstream-patches/`. Retirement requires the correction in the target release's fetched documentation schema, not merely a merged source PR or a release tag. Keep patches whose source fixes are merged but absent from the released input.
 
 ### Inspect large artifacts efficiently
 
@@ -125,6 +125,8 @@ Keep the complete-pipeline reproducibility check. When changing test-schema depe
 
 ## Review the result
 
+The detail below belongs in the temporary human review. Keep only its lasting conclusions in the condensed repository record; future runs must not depend on temporary files.
+
 Compare public definitions structurally so ordering-only changes do not look semantic. Review added, removed, renamed, and changed definitions, and investigate unexplained generated-file movement or other diff noise.
 
 Start with a release-level API summary: counts and names of added, removed, and structurally changed commands and type models. Keep aggregate facts here, separate from individual change entries. Separate new/changed/removed patch counts from unchanged inventory, state whether they count declarations or expanded loop operations, and distinguish classification-only changes from generated behavior changes.
@@ -133,7 +135,7 @@ Organize patch decisions under headings describing the **reason to patch**, rath
 
 Label each reason group with its Permanent, Temporary, Breaking permanent, Breaking source review, or retired classification and operation count/unit; when classifications differ within one reason, label the individual entries. This is report organization only: preserve existing patch assignments and pipeline execution order. Identify the source, affected consumers, observed problem and resolution for each decision. Give its exact schema definition/property path once, either as a JSON pointer or through a patch call whose parent and path identify it unambiguously.
 
-Place each explanation immediately beside its actual patch calls, model excerpt or diff, normally explanation followed by code. Keep the code for a reason with that reason; do not collect all explanations first and move their code into a separate section or appendix. Apply this pairing to permanent-list entries, retired patches and compatibility aliases, generator/audit repairs, and handwritten runtime adaptations as well. Use short paragraphs and focused code blocks instead of domain inventories or prose-heavy tables. The [1.7.3 report](../../../code_generation/documentation/reports/codegen/tapir-1.7.3.md#patch-decisions-by-reason) is a format example; derive facts, reasons and counts from the current run.
+Place each explanation immediately beside its actual patch calls, model excerpt or diff, normally explanation followed by code. Keep the code for a reason with that reason; do not collect all explanations first and move their code into a separate section or appendix. Apply this pairing to permanent-list entries, retired patches and compatibility aliases, generator/audit repairs, and handwritten runtime adaptations as well. Use short paragraphs and focused code blocks. Historical repository records are condensed decision references, not templates for this detailed review; derive facts and counts from the current run.
 
 Explain requiredness, unions, naming decisions, tradeoffs, temporary retirement conditions, intentional breaking behavior, and unresolved source-review questions alongside their entries. Explain each issue once; do not repeat it in separate detailed notes, semantic-review tables, or patch summaries. Keep unchanged permanent patches out of new upstream recommendations.
 
@@ -149,106 +151,27 @@ When handwritten generator, cleaner, formatter, or audit behavior changes, expla
 
 For the untouched new-type inventory, use `src/multiconn_archicad/models/tapir/types.py`. Include only names added relative to the checked-in baseline and untouched by patches or generator/cleaner changes made during the run. Exclude command models and repeated TypedDict names. Check representation consistency and report mismatches. List names only, without rationale.
 
-## Report for human review
+## Deliver the review and reference record
 
-For release updates, maintain one final reviewed report at `code_generation/documentation/reports/codegen/tapir-<version>.md`, alongside the changes it explains. Revise that report during the same update rather than saving each intermediate attempt. Keep ongoing patch dispositions in `code_generation/documentation/schema-patch-tracking.md`; link instead of repeating its inventory. Upstream-patches run reports belong in the sibling `reports/upstream-patches/` folder; keep relative report/tracking links valid. Preserve historical reports as records of their stated baselines and verification. Keep intermediate logs, snapshots and test output in untracked scratch storage. Audit-only work remains read-only and can report in the response. Automatically stage the final reviewed release-update report with `git add -- code_generation/documentation/reports/codegen/tapir-<version>.md`, and restage it after final revisions. Together with newly generated unified API files described above, stage only the final report; leave other files and existing staged changes alone. Do not commit unless requested.
+For each release update, maintain two artifacts and revise each in place during the same logical run:
 
-Use the compact structure below. Retain the API summary, verification, and human-review outcome; omit other empty sections and reason headings. Avoid wide tables, repeated inventories, and routine success narration. Use actual patch calls, model excerpts, signature diffs, or caller examples when they clarify a change. Label abbreviated excerpts; do not invent executed code or validation results. Distinguish formatter success from lint findings and limited checks from broader claims.
+- **Detailed temporary review:** write one Markdown file in a temporary directory outside the repository and link it for the user. Apply the decision-by-reason guidance above: source/consumer evidence, patch classifications and excerpts, retirement conditions, Unified API migrations, generator changes and pending decisions. Include no verification/testing section or routine success logs. Future runs must not depend on this disposable file.
+- **Condensed repository record:** maintain `code_generation/documentation/reports/codegen/tapir-<version>.md`, normally a few short paragraphs or bullets. Keep the exact baseline/input versions, aggregate API and patch counts, lasting patch/alias/generator decisions, essential compatibility consequences and unresolved handoffs. Link to active tracking and source instead of copying full patch calls, model/command inventories, caller examples or the detailed review. Include no verification/testing section.
 
-````markdown
-## Tapir generation report
+Continue performing all required audits, reproducibility checks and tests. Keep results in untracked scratch storage; surface a material failure, skipped required check or limitation to the user even though report verification sections are omitted.
 
-**Result:** Ready for human review | Blocked · **Tapir:** <old version> → <new version>
+Current patch code and `code_generation/documentation/schema-patch-tracking.md` own active policy and retirement conditions. Preserve historical condensed records at their stated baselines; use Git history for superseded inventories. Upstream-patches records remain in the sibling `reports/upstream-patches/` folder. Preserve referenced anchors and links when condensing records. Audit-only work stays read-only; regeneration needs a durable record only when requested or justified by a material decision.
 
-### API change summary
+Automatically stage the condensed update record with `git add -- code_generation/documentation/reports/codegen/tapir-<version>.md` and restage it after final revisions. Together with newly generated unified API files, stage only that record; preserve other staged work and leave tracked source edits unstaged unless authorized. Never stage temporary reviews, PR drafts, snapshots or test logs. Do not commit unless requested.
 
-- Commands: <counts and names added, removed, and structurally changed>
-- Type models: <counts and names added, removed, and structurally changed>
-- Unified API breaks: <count and affected methods>
-- Patches: <new/changed/removed counts by category, count units, unchanged inventory>
-
-### Patch decisions by reason
-
-#### <Specific reason to patch>
-
-**<Lifecycle category> - <operation count and unit>.** <Source, affected consumers,
-observed problem and resolution. Include relevant requiredness, union/reuse
-decisions and compatibility consequences here.>
-
-```python
-# Actual patch calls or model excerpt for this reason, directly beside its explanation.
-```
-
-<Retirement condition or decision needed, when relevant.>
-
-<Repeat for other reasons, combining domains only when the reason is the same.
-Retain Permanent/Temporary/breaking/retired labels and counts within these groups;
-do not use domains or lifecycle categories as the organizing headings. Place
-retired patch aliases beside their retirement explanation as well.>
-
-#### Upstream changes — no local patch
-
-- **<related API addition/change>.** <Concise behavior and exact source.>
-
-### Unified API breaking changes
-
-- **<method>.** <Before → after; refer to the reason entry for its cause.>
-
-```python
-# Concrete caller migration.
-```
-
-### Untouched new type models
-
-- <ModelName>
-
-### Generator and audit changes
-
-- **<changed behavior>.** <Trigger, transformation, owning layer, affected models,
-  settings considered, and limitations; only when changed.>
-
-```diff
-# Actual focused diff beside the explanation; also pair runtime adaptations with code.
-```
-
-### New patterns noticed
-
-- <New deterministic/semantic error type and whether to extend the audit or
-  semantic-review checklist; omit when none.>
-
-### Verification
-
-- Audit and reproducibility: <results and scope>
-- Unified generation: <result, output routing, any stale-import bootstrap>
-- Ruff: <formatting result and any lint findings>
-- Tests: <result and scope>
-- Representation consistency and diff review: <result and any remaining noise>
-
-### Human review
-
-<Specific unresolved decisions, or "No pending decisions.">
-````
-
-Only when the workflow itself should change, append a standalone, copyable prompt:
-
-```markdown
-### Suggested skill update
-
-Reason: <what this run exposed about the workflow>
-
-Copy and use this prompt if you agree:
-
-> Update the `multiconn-codegen` skill so that <specific workflow change>. Preserve <important existing constraint>. Do not <likely overreach>.
-```
-
-Keep model-specific fixes in schema patching and generally applicable deterministic checks in the generation audit. Reserve skill-update suggestions for changes to the overall generation and review workflow.
+Only when the workflow itself needs improvement, append a short copyable skill-update prompt to the temporary review, stating the demonstrated problem and proposed correction. Keep model-specific fixes in schema patching and deterministic checks in the audit; do not copy the prompt into the repository record.
 
 ## Prepare a pull-request message
 
 For a completed Tapir version update, prepare a title and copyable Markdown body
-alongside the final report. For other operations, prepare them when requested.
+alongside the condensed record and temporary review. For other operations, prepare them when requested.
 Keep the draft in untracked scratch storage and return its path and title. Preparing
-the message does not authorize staging beyond the final report and new generated
+the message does not authorize staging beyond the condensed record and new generated
 unified API files described above,
 committing, pushing, or opening a PR.
 
@@ -278,10 +201,12 @@ References guide style; the current diff establishes the facts.
   before/after behavior and short caller examples where helpful. Include restored
   validation constraints affecting existing callers.
 - Summarize meaningful generator, audit, and patch-retirement changes for review;
-  link the repository-relative generation report for detailed decisions and model
-  inventories. Include separately retained generator work when it is in the PR.
-- Keep validation results and their limits in the generation report. Do not add
-  a validation, testing, or verification section to the PR message.
+  link the repository-relative condensed generation record for lasting decisions.
+  Keep detailed inventories in the temporary review; include separately retained
+  generator work when it is in the PR.
+- Keep validation results in scratch logs and surface material limitations to the
+  user. Include no validation, testing, or verification section in either report
+  or the PR message.
 - Omit empty sections, repeated feature lists, redundant body titles, local
   absolute paths, and speculative compatibility claims. Do not run release helpers
   or add release-only autogenerated attribution/changelog sections to a PR body.

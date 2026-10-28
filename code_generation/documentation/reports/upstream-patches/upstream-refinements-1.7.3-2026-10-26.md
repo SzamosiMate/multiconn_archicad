@@ -10,7 +10,7 @@ Run started: **2026-10-26**. Endpoint completed: **publish and create the upstre
 - [PR #1557: Refine API schemas following Tapir 1.7.3](https://github.com/ENZYME-APD/tapir-archicad-automation/pull/1557), open, ready for review and confirmed mergeable against the recorded base.
 - Previous [PR #1386](https://github.com/ENZYME-APD/tapir-archicad-automation/pull/1386) remains open/unmerged; its recorded head `e7bcf0bb6aad030333239d3b7052485c20967e9c` was preserved. This proposal starts directly from upstream main, has no newly introduced definition-name collisions with that batch, and requires none of its definitions.
 
-The [active queue](../../schema-patch-tracking.md) holds source/PR state, deferred consumers and retirement conditions. The [1.7.3 generation report](../codegen/tapir-1.7.3.md#temporary) holds the expanded operation/path inventory; it is not repeated here.
+The [active queue](../../schema-patch-tracking.md) holds source/PR state, deferred consumers and retirement conditions. The [condensed 1.7.3 generation record](../codegen/tapir-1.7.3.md#temporary) preserves the decisions; the expanded historical operation/path inventory remains at `776808e:code_generation/documentation/reports/codegen/tapir-1.7.3.md` in Git and is not repeated here.
 
 ## Decisions and source review
 
