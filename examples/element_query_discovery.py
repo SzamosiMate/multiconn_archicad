@@ -3,7 +3,17 @@
 import json
 
 from multiconn_archicad.models.tapir.commands import GetAllPropertiesResult
-from multiconn_archicad.utilities.queries import PropertyCatalogue, PropertyTest, TestRegistry
+from multiconn_archicad.models.tapir.types import ElementType
+from multiconn_archicad.utilities.queries import (
+    AnyOf,
+    ElementTypePredicate,
+    PropertyCatalogue,
+    PropertyPredicate,
+    PropertyTest,
+    Query,
+    TestRegistry,
+    validate_query,
+)
 
 
 def make_example_catalogue() -> PropertyCatalogue:
@@ -44,5 +54,23 @@ if __name__ == "__main__":
     for field in catalogue:
         print(field.qualified_name, "supported:", field.supported)
     height = catalogue.search("height", supported_only=True)[0]
-    print(height.create_test(operator="is greater than", value=3).model_dump_json())
+    test = height.create_test(operator="is greater than", value=3)
+    query = Query(where=PropertyPredicate.model_validate({**height.reference, "test": test}))
+    result = validate_query(query, catalogue)
+    result.raise_for_errors()
+    print(json.dumps(result.describe(), indent=2))
+
+    # A valid sibling does not skip validation of this unsupported property.
+    fire_rating = catalogue.unsupported[0]
+    invalid_query = Query(
+        where=AnyOf(
+            items=(
+                ElementTypePredicate(types=(ElementType.WALL,)),
+                PropertyPredicate.model_validate(
+                    {**fire_rating.reference, "test": {"kind": "text", "operator": "is", "value": "REI 60"}}
+                ),
+            )
+        )
+    )
+    print(json.dumps(validate_query(invalid_query, catalogue).describe(), indent=2))
     print(json.dumps(catalogue.describe(), indent=2))
