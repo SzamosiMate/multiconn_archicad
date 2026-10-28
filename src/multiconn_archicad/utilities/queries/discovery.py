@@ -10,7 +10,8 @@ from multiconn_archicad.models.tapir.types import PropertyDetails
 from multiconn_archicad.utilities.identifiers import PropertyIdLike, normalize_property_id
 
 from .fields import PropertyInfo, UnsupportedPropertyInfo
-from .registry import TestRegistry, UnsupportedPropertyTypeError
+from .registry import TestRegistry
+from . import UnsupportedPropertyTypeError
 
 DiscoveredProperty: TypeAlias = PropertyInfo | UnsupportedPropertyInfo
 
