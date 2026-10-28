@@ -1,6 +1,7 @@
 """Expose query definitions, test families, and field information."""
 
-from .fields import FieldInfo, PropertyInfo
+from .discovery import DiscoveredProperty, PropertyCatalogue
+from .fields import FieldInfo, PropertyInfo, UnsupportedPropertyInfo
 
 from .models import (
     AllOf,
@@ -21,17 +22,20 @@ __all__ = [
     "AllOf",
     "AnyOf",
     "ElementTypePredicate",
+    "DiscoveredProperty",
     "FieldInfo",
     "Negate",
     "NumberTest",
     "Predicate",
     "PropertyPredicate",
     "PropertyInfo",
+    "PropertyCatalogue",
     "PropertyTest",
     "PropertyTestModel",
     "Query",
     "TextTest",
     "TestRegistry",
     "UnsupportedPropertyTypeError",
+    "UnsupportedPropertyInfo",
     "AmbiguousPropertyTypeError",
 ]

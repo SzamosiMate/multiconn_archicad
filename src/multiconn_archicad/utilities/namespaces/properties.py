@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING, Any
 from multiconn_archicad.errors import BatchWriteError
 from multiconn_archicad.models.official import types as official
 from multiconn_archicad.models.tapir import types as tapir
+from multiconn_archicad.utilities.queries import PropertyCatalogue, PropertyTest, TestRegistry
 from multiconn_archicad.utilities.identifiers import (
     ElementIdLike,
     PropertyIdLike,
@@ -233,6 +234,23 @@ class PropertyUtilities:
     def __init__(self, api: UnifiedApi):
         """Bind property operations to ``api``."""
         self._api = api
+
+    def discover_query_fields(
+        self,
+        *,
+        registry: TestRegistry | None = None,
+    ) -> PropertyCatalogue:
+        """Fetch one fresh Tapir property batch and adapt it for query discovery.
+
+        Unsupported types remain in the catalogue with reasons. Ambiguous
+        registry matches, API failures, and malformed responses raise. The
+        returned catalogue has no project or connection binding. Neither this
+        utility nor the catalogue caches state between discovery calls.
+        """
+        if registry is None:
+            registry = TestRegistry.from_union(PropertyTest)
+        result = self._api.tapir.property.get_all_properties()
+        return PropertyCatalogue(result.properties, registry)
 
     def _get_raw_property_values(
         self, elements: Sequence[ElementIdLike], properties: Sequence[PropertyIdLike]
