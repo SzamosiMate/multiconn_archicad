@@ -4,7 +4,9 @@ from __future__ import annotations
 
 from inspect import isabstract
 from types import UnionType
-from typing import Annotated, Any, Union, get_args, get_origin
+from typing import Annotated, Union, get_args, get_origin
+
+from typing_extensions import TypeForm
 
 from multiconn_archicad.models.tapir.types import PropertyDetails
 
@@ -27,15 +29,19 @@ class TestRegistry:
     """
 
     def __init__(self, *families: type[PropertyTestModel]):
+        self._families: TypeForm[PropertyTestModel] = self._validate_families(families)
+
+    @staticmethod
+    def _validate_families(families: TypeForm[PropertyTestModel]) -> TypeForm[PropertyTestModel]:
         if not families:
             raise ValueError("At least one property-test family is required")
         for family in families:
             if not isinstance(family, type) or not issubclass(family, PropertyTestModel) or isabstract(family):
                 raise TypeError("Test families must be concrete PropertyTestModel subclasses")
-        self._families = families
+        return families
 
     @classmethod
-    def from_union(cls, test_union: Any) -> TestRegistry:
+    def from_union(cls, test_union: TypeForm[PropertyTestModel]) -> TestRegistry:
         """Read models from a union, optionally wrapped in ``Annotated``."""
         if get_origin(test_union) is Annotated:
             test_union = get_args(test_union)[0]

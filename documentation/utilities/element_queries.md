@@ -1,7 +1,8 @@
 # Element query definitions
 
-Stages 1-3 provide query models, JSON serialization, JSON Schema, explicit
-test-family behavior, and family dispatch against supplied property metadata.
+Stages 1-4 provide query models, JSON serialization, JSON Schema, explicit
+test-family behavior, family dispatch, and uniform field information against
+supplied property metadata.
 They do not connect to Archicad, discover fields, resolve query references, or
 execute queries. Parsing checks structure; property-context validation is a
 separate call.
@@ -242,6 +243,19 @@ classes for inspection. It does not fetch properties or traverse a query.
   selecting the first registered match.
 - Both errors derive from `ValueError` and include property context.
 
+`from_union()` uses `TypeForm[PropertyTestModel]` so mypy also rejects unions with
+unrelated types. This requires mypy 2.2 or newer, without an experimental flag.
+Runtime checks still reject non-union expressions and abstract family members.
+The TypeForm backport is imported from `typing_extensions` for Python 3.12-3.14.
+The static regression fixture can be checked with:
+
+```console
+python -m mypy --follow-imports=silent --warn-unused-ignores tests/utilities/typing/query_registry.py
+```
+
+It includes valid unions and expected type errors for unrelated members; unused
+ignore checks ensure that those invalid forms remain rejected by the type checker.
+
 The default union contains `TextTest` and `NumberTest`. Boolean properties,
 enumerations, and lists remain unsupported for now.
 
@@ -294,6 +308,85 @@ registry all use the extended union. No generic dispatch changes are necessary.
 This is static schema extension, not runtime mutation of an existing query model.
 The tests demonstrate the third family using a separate union and Pydantic
 `TypeAdapter`; the default query schema does not yet include boolean tests.
+
+## Uniform field information
+
+`FieldInfo` defines the shared interface for field sources. `PropertyInfo` is its
+first implementation, using supplied `PropertyDetails` and a registry. It performs
+no API calls. Using `details` from the offline example above:
+
+```python
+import json
+
+from multiconn_archicad.utilities.queries import (
+    PropertyInfo,
+    PropertyPredicate,
+    PropertyTest,
+    Query,
+    TestRegistry,
+)
+
+registry = TestRegistry.from_union(PropertyTest)
+height = PropertyInfo(details, registry)
+
+print(height.name)            # Height
+print(height.group)           # Example
+print(height.qualified_name)  # Example / Height
+print(height.property_id)     # The property's UUID, independent of its name.
+print(height.operators())     # Direct readable choices for the selected family.
+
+test = height.create_test(operator="is greater than", value=3)
+# create_test has validated both the test structure and the property's context.
+
+height.validate(test)  # For independently constructed/existing test objects.
+
+predicate = PropertyPredicate.model_validate({**height.reference, "test": test})
+query = Query(where=predicate)
+serialized_query = query.model_dump_json()
+
+serialized_description = json.dumps(height.describe())
+```
+
+The [field-information example](../../examples/element_query_fields.py) runs this
+flow with complete synthetic metadata, without a running Archicad.
+
+| Member | Meaning |
+| --- | --- |
+| `name` | Upstream property name, preserved unchanged |
+| `group` | Upstream property group, preserved unchanged |
+| `qualified_name` | Derived `group / name`, or just `name` for an empty group |
+| `reference` | Fresh JSON-friendly identity: `kind` and the property GUID |
+| `operators()` | The selected family's readable operator strings |
+| `create_test(**data)` | Structure validation followed by property-context validation |
+| `validate(test)` | Check an existing test's family and property-context rules |
+| `test_schema()` | Metadata-aware schema for the supported test |
+| `describe()` | JSON-friendly reference, names, operators, and test schema |
+
+The runtime `PropertyInfo` also exposes its selected `test_model` and a copy of
+its `details` snapshot. Measure metadata remains available in those details even
+though all scalar quantities share `NumberTest`.
+
+`describe()` returns a separate discovery description, not a serialized Python
+object or an executable query. Its `reference` can be combined with a test to
+construct the existing property-predicate shape; query JSON is unchanged. Clients
+can use the direct `operators` list without navigating the schema.
+
+Names are display labels, not identities. Two properties with identical labels
+remain distinct by GUID. Technical names and underscores are not split or
+rewritten. Metadata is deep-copied at construction, and `details` returns a copy,
+so external edits do not invalidate the selected family. Create a new
+`PropertyInfo` to refresh the snapshot.
+
+Unsupported and ambiguous metadata retain the registry's distinct errors.
+`create_test()` raises Pydantic `ValidationError` for malformed test structure;
+`validate()` rejects a mismatched family with `ValueError` and delegates further
+rules to the family's explicit `validate_for()` method.
+
+Future field sources can implement `FieldInfo` with different reference formats
+and test models, while sharing `qualified_name` and discovery serialization.
+For classification fields, the planned labels remain `group = Classifications`
+and `name = classification system name`; classification behavior is not yet
+implemented. Batch discovery and query-wide validation remain later stages.
 
 ## JSON Schema
 
