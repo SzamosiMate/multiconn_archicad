@@ -1,11 +1,10 @@
 # Element query definitions
 
-Stages 1-4 provide query models, JSON serialization, JSON Schema, explicit
-test-family behavior, family dispatch, and uniform field information against
-supplied property metadata.
-They do not connect to Archicad, discover fields, resolve query references, or
-execute queries. Parsing checks structure; property-context validation is a
-separate call.
+Stages 1-5 provide query models, JSON serialization, JSON Schema, test-family
+behavior, uniform field information, and batch property discovery. The models and
+catalogue can use supplied metadata offline. The bound property utility can fetch
+a fresh metadata batch from Archicad. Query-wide context validation and execution
+are not yet implemented.
 
 Import the public models from `multiconn_archicad.utilities.queries`.
 
@@ -356,10 +355,12 @@ flow with complete synthetic metadata, without a running Archicad.
 | `group` | Upstream property group, preserved unchanged |
 | `qualified_name` | Derived `group / name`, or just `name` for an empty group |
 | `reference` | Fresh JSON-friendly identity: `kind` and the property GUID |
+| `supported` | Whether this field has an implemented test family |
+| `unsupported_reason` | Why the field is unsupported, or `None` |
 | `operators()` | The selected family's readable operator strings |
 | `create_test(**data)` | Structure validation followed by property-context validation |
 | `validate(test)` | Check an existing test's family and property-context rules |
-| `test_schema()` | Metadata-aware schema for the supported test |
+| `test_schema()` | Metadata-aware schema, or `None` for an unsupported field |
 | `describe()` | JSON-friendly reference, names, operators, and test schema |
 
 The runtime `PropertyInfo` also exposes its selected `test_model` and a copy of
@@ -377,7 +378,9 @@ rewritten. Metadata is deep-copied at construction, and `details` returns a copy
 so external edits do not invalidate the selected family. Create a new
 `PropertyInfo` to refresh the snapshot.
 
-Unsupported and ambiguous metadata retain the registry's distinct errors.
+Constructing `PropertyInfo` directly with unsupported or ambiguous metadata
+retains the registry's distinct errors. Batch discovery handles unsupported types
+as described below.
 `create_test()` raises Pydantic `ValidationError` for malformed test structure;
 `validate()` rejects a mismatched family with `ValueError` and delegates further
 rules to the family's explicit `validate_for()` method.
@@ -386,7 +389,92 @@ Future field sources can implement `FieldInfo` with different reference formats
 and test models, while sharing `qualified_name` and discovery serialization.
 For classification fields, the planned labels remain `group = Classifications`
 and `name = classification system name`; classification behavior is not yet
-implemented. Batch discovery and query-wide validation remain later stages.
+implemented. Query-wide validation remains a later stage.
+
+## Batch property discovery
+
+For an existing `Utilities` instance bound to one `UnifiedApi`:
+
+```python
+catalogue = utilities.property.discover_query_fields()
+
+for field in catalogue.search("height", supported_only=True):
+    print(field.qualified_name, field.operators())
+
+field = catalogue["22222222-2222-4222-8222-222222222222"]  # Use an actual project GUID.
+if field.supported:
+    test = field.create_test(operator="is greater than", value=3)
+else:
+    print(field.unsupported_reason)
+```
+
+`discover_query_fields()` calls Tapir `GetAllProperties` once and adapts the full
+metadata batch. It reads no element values and does not use official property
+name resolution. Both built-in and custom properties retain their upstream names,
+groups, GUIDs, source types, measures, and other metadata.
+
+The catalogue is a metadata snapshot with no project or connection binding.
+Explicitly call discovery again after switching projects or changing metadata.
+The old catalogue remains an independent snapshot.
+
+For offline adaptation, use the same catalogue directly:
+
+```python
+from multiconn_archicad.utilities.queries import PropertyCatalogue, PropertyTest, TestRegistry
+
+catalogue = PropertyCatalogue(
+    property_details,  # An iterable of Tapir PropertyDetails models.
+    TestRegistry.from_union(PropertyTest),
+)
+```
+
+The [discovery example](../../examples/element_query_discovery.py) contains a
+complete synthetic batch. The unit fixture
+`tests/fixtures/query_property_discovery_19723.json` contains eight minimal metadata
+records sampled from the saved read-only probe, so routine tests require no live
+Archicad instance.
+
+### Catalogue lookup and search
+
+- Iteration and `catalogue.fields` preserve upstream order.
+- `catalogue.supported` contains `PropertyInfo` objects; `catalogue.unsupported`
+  contains `UnsupportedPropertyInfo` objects.
+- `catalogue[id]` accepts shared `PropertyIdLike` inputs and raises `KeyError` for
+  an unknown GUID. `catalogue.get(id)` returns `None` for an unknown GUID. Both
+  reject malformed identifiers.
+- `catalogue.search(text)` performs case-insensitive substring matching against
+  qualified display names, including group labels. It preserves source order.
+- `group="Wall"` restricts search to that exact group. `supported_only=True`
+  excludes unsupported fields. An empty search string matches all fields.
+- Duplicate GUIDs are rejected instead of overwriting records. Similar names or
+  identical labels never merge distinct GUIDs.
+- `catalogue.describe()` returns JSON-friendly field descriptions under `fields`.
+
+### Unsupported fields and errors
+
+Properties without a matching test family remain visible in the catalogue. Their names, identity, and
+metadata are preserved, and discovery descriptions contain:
+
+```json
+{
+  "supported": false,
+  "unsupported_reason": "No query test family supports property ...",
+  "operators": [],
+  "test_schema": null
+}
+```
+
+`supported` means a test family can describe and validate the metadata. It does
+not advertise query execution or retrieval support at this stage, and does not
+say whether an element has a value for that property. `create_test()` and
+`validate()` on an unsupported field raise
+`UnsupportedPropertyTypeError`; the field is not silently treated as text or as a
+non-match. Boolean, enum, and list properties currently follow this policy.
+
+Only `UnsupportedPropertyTypeError` is converted to an unsupported field record.
+Ambiguous family matches, unexpected adapter errors, API failures, and malformed
+API responses still raise. Supply `registry=...` to `discover_query_fields()` when
+using an explicitly extended or restricted family registry.
 
 ## JSON Schema
 

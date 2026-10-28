@@ -11,7 +11,7 @@ from pydantic import BaseModel
 from multiconn_archicad.models.tapir.types import PropertyDetails
 
 from .models import PropertyTestModel
-from .registry import TestRegistry
+from .registry import TestRegistry, UnsupportedPropertyTypeError
 
 TestT = TypeVar("TestT", bound=BaseModel)
 
@@ -22,6 +22,16 @@ class FieldInfo(ABC, Generic[TestT]):
     Concrete field sources supply their own references and test behavior. This
     interface does not require property metadata or perform API calls.
     """
+
+    @property
+    def supported(self) -> bool:
+        """Whether this field has an implemented query-test family."""
+        return True
+
+    @property
+    def unsupported_reason(self) -> str | None:
+        """Explain missing query support, independently of element-value availability."""
+        return None
 
     @property
     @abstractmethod
@@ -62,8 +72,8 @@ class FieldInfo(ABC, Generic[TestT]):
         ...
 
     @abstractmethod
-    def test_schema(self) -> dict[str, Any]:
-        """Describe the field's supported test and operand format."""
+    def test_schema(self) -> dict[str, Any] | None:
+        """Describe the test and operand format, or return None when unsupported."""
         ...
 
     def describe(self) -> dict[str, Any]:
@@ -73,22 +83,18 @@ class FieldInfo(ABC, Generic[TestT]):
             "name": self.name,
             "group": self.group,
             "qualified_name": self.qualified_name,
+            "supported": self.supported,
+            "unsupported_reason": self.unsupported_reason,
             "operators": list(self.operators()),
             "test_schema": self.test_schema(),
         }
 
 
-class PropertyInfo(FieldInfo[PropertyTestModel]):
-    """Expose a property metadata snapshot and its registered test family.
+class _PropertyMetadata(FieldInfo[PropertyTestModel]):
+    """Share immutable-by-interface metadata snapshots across property outcomes."""
 
-    Metadata is copied at construction so caller edits cannot invalidate the
-    selected family's compatibility. Construct a new instance to refresh it.
-    There is no live API reference or project-wide cache.
-    """
-
-    def __init__(self, details: PropertyDetails, registry: TestRegistry):
+    def __init__(self, details: PropertyDetails):
         self._details = details.model_copy(deep=True)
-        self._test_model = registry.resolve(self._details)
 
     @property
     def name(self) -> str:
@@ -115,6 +121,19 @@ class PropertyInfo(FieldInfo[PropertyTestModel]):
         """Return a copy of the snapshot, including its original measure metadata."""
         return self._details.model_copy(deep=True)
 
+
+class PropertyInfo(_PropertyMetadata):
+    """Expose a property metadata snapshot and its registered test family.
+
+    Metadata is copied at construction so caller edits cannot invalidate the
+    selected family's compatibility. Construct a new instance to refresh it.
+    There is no live API reference or project-wide cache.
+    """
+
+    def __init__(self, details: PropertyDetails, registry: TestRegistry):
+        super().__init__(details)
+        self._test_model = registry.resolve(self._details)
+
     @property
     def test_model(self) -> type[PropertyTestModel]:
         """Return the family selected for this property."""
@@ -138,3 +157,31 @@ class PropertyInfo(FieldInfo[PropertyTestModel]):
     def test_schema(self) -> dict[str, Any]:
         """Return the selected family's metadata-aware test schema."""
         return self._test_model.schema_for(self._details)
+
+
+class UnsupportedPropertyInfo(_PropertyMetadata):
+    """Retain property identity and metadata when no test family supports it."""
+
+    def __init__(self, details: PropertyDetails, reason: str):
+        super().__init__(details)
+        self._reason = reason
+
+    @property
+    def supported(self) -> bool:
+        return False
+
+    @property
+    def unsupported_reason(self) -> str:
+        return self._reason
+
+    def operators(self) -> tuple[str, ...]:
+        return ()
+
+    def create_test(self, **data: Any) -> PropertyTestModel:
+        raise UnsupportedPropertyTypeError(self._reason)
+
+    def validate(self, test: PropertyTestModel) -> None:
+        raise UnsupportedPropertyTypeError(self._reason)
+
+    def test_schema(self) -> None:
+        return None
