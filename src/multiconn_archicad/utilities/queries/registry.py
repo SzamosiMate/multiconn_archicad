@@ -9,16 +9,9 @@ from typing import Annotated, Union, get_args, get_origin
 from typing_extensions import TypeForm
 
 from multiconn_archicad.models.tapir.types import PropertyDetails
+from . import UnsupportedPropertyTypeError, AmbiguousPropertyTypeError
 
 from .models import PropertyTestModel
-
-
-class UnsupportedPropertyTypeError(ValueError):
-    """No registered test family accepts a property's metadata."""
-
-
-class AmbiguousPropertyTypeError(ValueError):
-    """Multiple registered test families accept the same property's metadata."""
 
 
 class TestRegistry:

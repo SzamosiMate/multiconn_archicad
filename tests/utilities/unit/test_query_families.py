@@ -3,7 +3,7 @@
 import pytest
 
 from multiconn_archicad.models.tapir import types as tapir
-from multiconn_archicad.utilities.queries import NumberTest, PropertyTestModel, TextTest
+from multiconn_archicad.utilities.queries import InvalidPropertyTestError, NumberTest, PropertyTestModel, TextTest
 
 pytestmark = pytest.mark.unit
 
@@ -63,9 +63,9 @@ def test_context_validation_rejects_incompatible_metadata_after_structure_valida
     details = property_details(**metadata)
 
     assert not type(test).accepts(details)
-    with pytest.raises(ValueError, match=f"{type(test).__name__}.*Example / Height"):
+    with pytest.raises(InvalidPropertyTestError, match=f"{type(test).__name__}.*Example / Height"):
         test.validate_for(details)
-    with pytest.raises(ValueError, match="Example / Height"):
+    with pytest.raises(InvalidPropertyTestError, match="Example / Height"):
         type(test).schema_for(details)
 
 
@@ -127,5 +127,5 @@ def test_number_family_rejects_numeric_collections_and_enum_choices(collection):
     details = property_details(propertyCollectionType=collection)
 
     assert not NumberTest.accepts(details)
-    with pytest.raises(ValueError):
+    with pytest.raises(InvalidPropertyTestError):
         NumberTest(operator="is", value=3).validate_for(details)
