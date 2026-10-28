@@ -10,8 +10,10 @@ from pydantic import BaseModel
 
 from multiconn_archicad.models.tapir.types import PropertyDetails
 
+from .errors import InvalidPropertyTestError
 from .models import PropertyTestModel
-from .registry import TestRegistry, UnsupportedPropertyTypeError
+from .registry import TestRegistry
+from . import UnsupportedPropertyTypeError
 
 TestT = TypeVar("TestT", bound=BaseModel)
 
@@ -151,7 +153,9 @@ class PropertyInfo(_PropertyMetadata):
     def validate(self, test: PropertyTestModel) -> None:
         """Require the selected family and run its property-context rules."""
         if not isinstance(test, self._test_model):
-            raise ValueError(f"{self.qualified_name} requires {self._test_model.__name__}, got {type(test).__name__}")
+            raise InvalidPropertyTestError(
+                f"{self.qualified_name} requires {self._test_model.__name__}, got {type(test).__name__}"
+            )
         test.validate_for(self._details)
 
     def test_schema(self) -> dict[str, Any]:

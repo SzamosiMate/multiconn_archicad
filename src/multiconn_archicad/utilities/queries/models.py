@@ -20,6 +20,8 @@ from multiconn_archicad.models.tapir.types import (
     PropertyValueType,
 )
 
+from .errors import InvalidPropertyTestError
+
 
 class _QueryModel(BaseModel):
     """Reject extra fields and preserve validated values through immutability."""
@@ -49,7 +51,7 @@ class PropertyTestModel(_QueryModel, ABC):
 
     @abstractmethod
     def validate_for(self, details: PropertyDetails) -> None:
-        """Check property compatibility and metadata-dependent operand rules."""
+        """Check context, raising InvalidPropertyTestError for expected failures."""
         ...
 
     @classmethod
@@ -62,7 +64,7 @@ class PropertyTestModel(_QueryModel, ABC):
     def _require_compatible_property(cls, details: PropertyDetails) -> None:
         """Reuse the family's discovery rule when validating a selected test."""
         if not cls.accepts(details):
-            raise ValueError(
+            raise InvalidPropertyTestError(
                 f"{cls.__name__} cannot be used with property "
                 f"{details.propertyGroupName} / {details.propertyName} "
                 f"({details.propertyCollectionType.value}, "

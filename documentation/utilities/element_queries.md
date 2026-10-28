@@ -1,10 +1,10 @@
 # Element query definitions
 
-Stages 1-5 provide query models, JSON serialization, JSON Schema, test-family
-behavior, uniform field information, and batch property discovery. The models and
-catalogue can use supplied metadata offline. The bound property utility can fetch
-a fresh metadata batch from Archicad. Query-wide context validation and execution
-are not yet implemented.
+Stages 1-6 provide query models, JSON serialization, JSON Schema, test-family
+behavior, uniform field information, batch property discovery, and query-wide
+context validation. The catalogue and validator can use supplied metadata offline.
+The bound property utility can fetch a fresh metadata batch from Archicad. Query
+execution is not yet implemented.
 
 Import the public models from `multiconn_archicad.utilities.queries`.
 
@@ -175,6 +175,12 @@ when constructing the model. Future enumeration families will additionally check
 the selected value against the property's available choices. The base method is
 abstract, so a new family cannot inherit a silent no-op.
 
+Families raise `InvalidPropertyTestError` for expected property incompatibility or
+metadata-dependent operand restrictions. It derives from `ValueError`, so existing
+broad exception handlers remain compatible. Custom `validate_for()` implementations
+should use this exception for expected validation failures; unrelated errors are
+not interpreted as user-query problems.
+
 For an offline example:
 
 ```python
@@ -201,7 +207,7 @@ print(NumberTest.operators())      # Readable strings, without navigating JSON S
 test_schema = NumberTest.schema_for(details)
 
 wrong_test = TextTest(operator="contains", value="3")  # Structure is valid.
-wrong_test.validate_for(details)  # Raises ValueError: incompatible property type.
+wrong_test.validate_for(details)  # Raises InvalidPropertyTestError: incompatible property type.
 ```
 
 The shared `PropertyTestModel` interface exposes:
@@ -382,14 +388,14 @@ Constructing `PropertyInfo` directly with unsupported or ambiguous metadata
 retains the registry's distinct errors. Batch discovery handles unsupported types
 as described below.
 `create_test()` raises Pydantic `ValidationError` for malformed test structure;
-`validate()` rejects a mismatched family with `ValueError` and delegates further
+`validate()` rejects a mismatched family with `InvalidPropertyTestError` and delegates further
 rules to the family's explicit `validate_for()` method.
 
 Future field sources can implement `FieldInfo` with different reference formats
 and test models, while sharing `qualified_name` and discovery serialization.
 For classification fields, the planned labels remain `group = Classifications`
 and `name = classification system name`; classification behavior is not yet
-implemented. Query-wide validation remains a later stage.
+implemented. Query-wide validation uses the supplied catalogue as described below.
 
 ## Batch property discovery
 
@@ -475,6 +481,70 @@ Only `UnsupportedPropertyTypeError` is converted to an unsupported field record.
 Ambiguous family matches, unexpected adapter errors, API failures, and malformed
 API responses still raise. Supply `registry=...` to `discover_query_fields()` when
 using an explicitly extended or restricted family registry.
+
+## Query-wide context validation
+
+Parse the query first, then validate it against an existing catalogue:
+
+```python
+from multiconn_archicad.utilities.queries import Query, validate_query
+
+query = Query.model_validate_json(saved_query_json)
+catalogue = utilities.property.discover_query_fields()
+result = validate_query(query, catalogue)
+
+if not result.is_valid:
+    for issue in result.issues:
+        print(issue.path, issue.code, issue.qualified_name, issue.message)
+
+# Optional exception-based handling retains the complete result.
+result.raise_for_errors()
+```
+
+`validate_query()` only uses the supplied query and metadata snapshot. It does not
+fetch metadata, read element values, evaluate boolean expressions, or build a
+second query tree. Success means the query is compatible with that snapshot; it
+does not verify the currently open project or imply that execution is implemented.
+The plain version string is not interpreted by context validation.
+
+Every branch of `all`, `any`, and `not` is checked. A valid earlier sibling does
+not skip later branches. Negation does not hide or invert a context error. Repeated
+property references keep separate issues at their respective query locations.
+Issue order follows the query's source order, descending through each nested group.
+
+| Issue code | Meaning | Location |
+| --- | --- | --- |
+| `unknown_property` | The GUID is absent from the supplied catalogue | The leaf's `property_id` |
+| `unsupported_property` | The property has no supported test family | The leaf's `test` |
+| `invalid_test` | Wrong family or a metadata-dependent operand restriction failed | The leaf's `test` |
+
+Each immutable `QueryValidationIssue` exposes:
+
+- `location`: a tuple of keys and indices, such as `("where", "items", 1, "test")`.
+- `path`: the derived readable form, such as `where.items[1].test`.
+- `code`, `message`, and `property_id`.
+- `name`, `group`, and derived `qualified_name`, or `None` when the property is unknown.
+
+`QueryValidationResult.issues` is an immutable tuple, and `is_valid` is true when it
+is empty. `result.describe()` returns JSON-friendly `is_valid` and `issues`; each
+issue includes its structured location, readable path, field reference, and names.
+This is diagnostic output, not an alternative query representation.
+
+`raise_for_errors()` returns normally for valid queries and raises
+`QueryValidationError` otherwise. The exception's `.result` retains every issue.
+`InvalidPropertyTestError` becomes an `invalid_test` issue, and
+`UnsupportedPropertyTypeError` becomes an `unsupported_property` issue. Other
+exceptions, including plain `ValueError` and ambiguous registry configuration,
+propagate automatically instead of becoming user-query issues.
+
+Pydantic `ValidationError` still reports malformed query structure during parsing,
+before context validation. Element-type choices are checked there and require no
+property lookup. Per-element missing/unreadable value outcomes belong to later
+evaluation semantics, not these metadata-validation issues.
+
+The [offline discovery example](../../examples/element_query_discovery.py) now also
+demonstrates a valid query and an unsupported property inside `any`, without a
+running Archicad instance.
 
 ## JSON Schema
 

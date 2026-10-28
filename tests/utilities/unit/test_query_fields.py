@@ -10,6 +10,7 @@ from multiconn_archicad.models.tapir import types as tapir
 from multiconn_archicad.utilities.queries import (
     AmbiguousPropertyTypeError,
     FieldInfo,
+    InvalidPropertyTestError,
     NumberTest,
     PropertyInfo,
     PropertyPredicate,
@@ -150,7 +151,7 @@ def test_create_test_runs_structure_validation(data):
 def test_validate_rejects_tests_from_another_family():
     info = PropertyInfo(property_details(), Registry.from_union(PropertyTest))
 
-    with pytest.raises(ValueError, match="Example / Height requires NumberTest, got TextTest"):
+    with pytest.raises(InvalidPropertyTestError, match="Example / Height requires NumberTest, got TextTest"):
         info.validate(TextTest(operator="is", value="3"))
 
 
@@ -158,16 +159,16 @@ class LimitedNumberTest(NumberTest):
     def validate_for(self, details: tapir.PropertyDetails) -> None:
         super().validate_for(details)
         if self.value > 10:
-            raise ValueError("Example operand limit is 10")
+            raise InvalidPropertyTestError("Example operand limit is 10")
 
 
 def test_create_and_validate_both_apply_family_context_rules():
     info = PropertyInfo(property_details(), Registry(LimitedNumberTest))
 
     assert isinstance(info.create_test(operator="is", value=10), LimitedNumberTest)
-    with pytest.raises(ValueError, match="operand limit"):
+    with pytest.raises(InvalidPropertyTestError, match="operand limit"):
         info.create_test(operator="is", value=11)
-    with pytest.raises(ValueError, match="operand limit"):
+    with pytest.raises(InvalidPropertyTestError, match="operand limit"):
         info.validate(LimitedNumberTest(operator="is", value=11))
 
 
