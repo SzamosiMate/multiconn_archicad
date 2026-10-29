@@ -1,0 +1,175 @@
+{
+  "properties": [
+    {
+      "propertyId": {
+        "guid": "7E221F33-829B-4FBC-A670-E74DABCE6289"
+      },
+      "propertyType": "StaticBuiltIn",
+      "propertyGroupName": "General Parameters",
+      "propertyName": "Element ID",
+      "propertyCollectionType": "Single",
+      "propertyValueType": "String",
+      "propertyMeasureType": "Default",
+      "propertyIsEditable": true,
+      "isExpressionBased": false
+    },
+    {
+      "propertyId": {
+        "guid": "8BACB089-BBFE-41C2-B5A4-D1CEBC2F4FB3"
+      },
+      "propertyType": "StaticBuiltIn",
+      "propertyGroupName": "GeneralElemProperties",
+      "propertyName": "ElementID",
+      "propertyCollectionType": "Single",
+      "propertyValueType": "String",
+      "propertyMeasureType": "Default",
+      "propertyIsEditable": true,
+      "isExpressionBased": false
+    },
+    {
+      "propertyId": {
+        "guid": "02DB7087-5E1D-4AF3-AF62-4D08C1B70C3E"
+      },
+      "propertyType": "StaticBuiltIn",
+      "propertyGroupName": "WallProperties",
+      "propertyName": "Wall Height",
+      "propertyCollectionType": "Single",
+      "propertyValueType": "Real",
+      "propertyMeasureType": "Length",
+      "propertyIsEditable": true,
+      "isExpressionBased": false
+    },
+    {
+      "propertyId": {
+        "guid": "65EF8C5A-0F4B-4AE4-B807-36BE48D15E52"
+      },
+      "propertyType": "StaticBuiltIn",
+      "propertyGroupName": "Wall",
+      "propertyName": "Maximum Height of the Wall",
+      "propertyCollectionType": "Single",
+      "propertyValueType": "Real",
+      "propertyMeasureType": "Length",
+      "propertyIsEditable": false,
+      "isExpressionBased": false
+    },
+    {
+      "propertyId": {
+        "guid": "53402BE5-29D9-44A5-B6D6-4FA90938DDC9"
+      },
+      "propertyType": "DynamicBuiltIn",
+      "propertyGroupName": "CategoryPropertyDefinitionGroup",
+      "propertyName": "Position",
+      "propertyCollectionType": "SingleChoiceEnumeration",
+      "propertyValueType": "String",
+      "propertyMeasureType": "Default",
+      "propertyIsEditable": true,
+      "isExpressionBased": false,
+      "possibleEnumValues": [
+        {
+          "enumValue": {
+            "displayValue": "Exterior",
+            "nonLocalizedValue": "Exterior",
+            "guid": "6F76AEB9-1C41-7E76-5254-57399CBF985B"
+          }
+        },
+        {
+          "enumValue": {
+            "displayValue": "Interior",
+            "nonLocalizedValue": "Interior",
+            "guid": "512CBDAC-06A3-A73D-ED46-1701A8BCE536"
+          }
+        },
+        {
+          "enumValue": {
+            "displayValue": "Undefined",
+            "nonLocalizedValue": "Undefined",
+            "guid": "677677E5-E514-E73F-39B9-E7AFC2031846"
+          }
+        }
+      ]
+    },
+    {
+      "propertyId": {
+        "guid": "E480E81E-EDE3-43FC-9C52-B55A4CA1A85C"
+      },
+      "propertyType": "Custom",
+      "propertyGroupName": "GENERAL RATINGS",
+      "propertyName": "Fire Resistance Rating",
+      "propertyCollectionType": "SingleChoiceEnumeration",
+      "propertyValueType": "String",
+      "propertyMeasureType": "Default",
+      "propertyIsEditable": true,
+      "isExpressionBased": false,
+      "possibleEnumValues": [
+        {
+          "enumValue": {
+            "displayValue": "20 minutes",
+            "guid": "BFD17326-4EC9-442A-AE48-97B845906FFF"
+          }
+        },
+        {
+          "enumValue": {
+            "displayValue": "30 minutes",
+            "guid": "AE6E3264-3085-4096-B323-A876E7D7532F"
+          }
+        },
+        {
+          "enumValue": {
+            "displayValue": "45 minutes",
+            "guid": "36A080F3-D829-4445-ACDA-ED540AE719FC"
+          }
+        },
+        {
+          "enumValue": {
+            "displayValue": "1 hour",
+            "guid": "43C7596B-085D-4BEB-BBAF-7380A8B0A5B6"
+          }
+        },
+        {
+          "enumValue": {
+            "displayValue": "1.5 hours",
+            "guid": "5C59556B-6827-4FD8-9779-CFD164B290C9"
+          }
+        },
+        {
+          "enumValue": {
+            "displayValue": "2 hours",
+            "guid": "E0133C57-A535-47D1-8298-5322B3887E69"
+          }
+        },
+        {
+          "enumValue": {
+            "displayValue": "3 hours",
+            "guid": "E6FD4FC7-8A31-4A5F-B274-3540A3A9F659"
+          }
+        }
+      ]
+    },
+    {
+      "propertyId": {
+        "guid": "13A61253-66A9-4494-9393-9E8F2E19D55E"
+      },
+      "propertyType": "Custom",
+      "propertyGroupName": "GENERAL RATINGS",
+      "propertyName": "Combustible",
+      "propertyCollectionType": "Single",
+      "propertyValueType": "Boolean",
+      "propertyMeasureType": "Default",
+      "propertyIsEditable": true,
+      "isExpressionBased": false
+    },
+    {
+      "propertyId": {
+        "guid": "5444E766-5E1F-4B7F-90C3-C7DDCC17379B"
+      },
+      "propertyType": "StaticBuiltIn",
+      "propertyGroupName": "GeneralElemProperties",
+      "propertyName": "General_Opening_IDs",
+      "propertyCollectionType": "List",
+      "propertyValueType": "String",
+      "propertyMeasureType": "Default",
+      "propertyIsEditable": false,
+      "isExpressionBased": false
+    }
+  ]
+}
