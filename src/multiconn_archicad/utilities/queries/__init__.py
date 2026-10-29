@@ -8,7 +8,6 @@ from .models import (
     AllOf,
     AnyOf,
     ElementTypePredicate,
-    Negate,
     NumberTest,
     Predicate,
     PropertyPredicate,
@@ -22,12 +21,12 @@ from .validation import QueryValidationError, QueryValidationIssue, QueryValidat
 
 __all__ = [
     "AllOf",
+    "AmbiguousPropertyTypeError",
     "AnyOf",
     "ElementTypePredicate",
     "DiscoveredProperty",
     "FieldInfo",
     "InvalidPropertyTestError",
-    "Negate",
     "NumberTest",
     "Predicate",
     "PropertyPredicate",
@@ -42,5 +41,6 @@ __all__ = [
     "TextTest",
     "TestRegistry",
     "UnsupportedPropertyInfo",
+    "UnsupportedPropertyTypeError",
     "validate_query",
 ]

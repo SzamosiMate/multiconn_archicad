@@ -130,6 +130,9 @@ Centralizes type coercion across all utilities.
 
 ### `namespaces/properties.py` (`PropertyUtilities` and Pure Helpers)
 * Value reads return Tapir **display strings**. They do not parse numbers or normalize units.
+* Flat and grid reads convert the exact `<Undefined>` sentinel to `PropertyUndefinedError`. Confirmed unavailability becomes `PropertyUnavailableError`. Both subclass `BatchError` and use the existing `ERROR` slot state; import them from `multiconn_archicad.utilities` or `utilities.results.property_errors`. Literal text equal to the sentinel is interpreted as undefined too, because Tapir does not distinguish it.
+* Each property-value read checks the Tapir add-on version. For 1.7.3 and newer, it requests `include_availability=True`. For older versions it omits the unsupported argument; the combined unavailable/not-evaluated error remains an ordinary `BatchError`. Missing-GUID, conversion, and other API failures retain their original errors even if `isAvailable` is false.
+* Dictionary reads retain specialized errors in aggregate `causes`. Plain-list/dictionary methods raise `BatchOperationError` for undefined/unavailable cells as well as other failures. `_result` methods retain those conditions for downstream interpretation. No property-state query operators are implemented by this conversion.
 * Writes preserve `tapir.PropertyValue` instances, convert `None` to `""`, and otherwise use `str(value)`.
 * **High-Level Sparse Writing:** `set_property_values_per_element_sparse_result(elements, properties, values_matrix)` automatically omits non-successful cells, performs the API call, and projects outcomes back onto an $N \times M$ `BatchGrid`. For a single property, `set_flat_property_values_sparse_result(elements, property_id, values)` provides the same behavior directly with a `BatchResult`.
 
