@@ -74,7 +74,7 @@ class PropertyTestModel(_QueryModel, ABC):
 
 
 class TextTest(PropertyTestModel):
-    """Describe a text comparison; matching semantics belong to the evaluator."""
+    """Describe a case-insensitive text comparison with significant whitespace."""
 
     kind: Literal["text"] = "text"
     operator: Literal[
@@ -101,7 +101,7 @@ class TextTest(PropertyTestModel):
 
 
 class NumberTest(PropertyTestModel):
-    """Compare scalar numbers; measured properties use implicit SI operands."""
+    """Compare scalar numbers without tolerance; measured operands use SI."""
 
     kind: Literal["number"] = "number"
     operator: Literal[
@@ -159,15 +159,8 @@ class AnyOf(_QueryModel):
     items: tuple[Predicate, ...] = Field(min_length=1)
 
 
-class Negate(_QueryModel):
-    """Negate a predicate; unavailable-value behavior is defined by evaluation."""
-
-    kind: Literal["not"] = "not"
-    item: Predicate
-
-
 Predicate: TypeAlias = Annotated[
-    PropertyPredicate | ElementTypePredicate | AllOf | AnyOf | Negate,
+    PropertyPredicate | ElementTypePredicate | AllOf | AnyOf,
     Field(discriminator="kind"),
 ]
 
@@ -180,5 +173,5 @@ class Query(_QueryModel):
 
 
 # Resolve the recursive predicate alias after all node classes are declared.
-for _model in (AllOf, AnyOf, Negate, Query):
+for _model in (AllOf, AnyOf, Query):
     _model.model_rebuild()

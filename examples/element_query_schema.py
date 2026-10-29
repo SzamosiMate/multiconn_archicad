@@ -1,7 +1,9 @@
 """Build and round-trip a query without connecting to Archicad.
 
-The property GUIDs are illustrative; replace them with actual project GUIDs when
-metadata discovery and execution are implemented in later stages.
+The property GUIDs are illustrative; replace them with actual catalogue GUIDs
+before context validation. Evaluation is not implemented yet. Text comparisons
+will ignore case and preserve whitespace; numeric operands use SI without added
+tolerance.
 """
 
 from uuid import UUID

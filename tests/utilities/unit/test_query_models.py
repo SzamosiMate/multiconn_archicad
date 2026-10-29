@@ -12,7 +12,6 @@ from multiconn_archicad.utilities.queries import (
     AnyOf,
     ElementTypePredicate,
     NumberTest,
-    Negate,
     PropertyPredicate,
     Query,
     TextTest,
@@ -39,12 +38,9 @@ def test_nested_query_round_trips_python_and_json_without_changing_the_tree():
                             "test": {"kind": "number", "operator": "is greater than", "value": 3},
                         },
                         {
-                            "kind": "not",
-                            "item": {
-                                "kind": "property",
-                                "property_id": PROPERTY_ID,
-                                "test": {"kind": "text", "operator": "contains", "value": "Internal"},
-                            },
+                            "kind": "property",
+                            "property_id": PROPERTY_ID,
+                            "test": {"kind": "text", "operator": "does not contain", "value": "Internal"},
                         },
                     ],
                 },
@@ -59,13 +55,13 @@ def test_nested_query_round_trips_python_and_json_without_changing_the_tree():
     assert isinstance(types, ElementTypePredicate)
     assert types.types == (ElementType.WALL, ElementType.SLAB)
     assert isinstance(alternatives, AnyOf)
-    number, negation = alternatives.items
+    number, text = alternatives.items
     assert isinstance(number, PropertyPredicate)
     assert number.property_id == UUID(PROPERTY_ID)
     assert isinstance(number.test, NumberTest)
-    assert isinstance(negation, Negate)
-    assert isinstance(negation.item, PropertyPredicate)
-    assert isinstance(negation.item.test, TextTest)
+    assert isinstance(text, PropertyPredicate)
+    assert isinstance(text.test, TextTest)
+    assert text.test.operator == "does not contain"
     assert query.model_dump(mode="json") == payload
     assert Query.model_validate_json(json.dumps(payload)) == query
     assert Query.model_validate_json(query.model_dump_json()) == query
@@ -101,8 +97,7 @@ def test_python_constructors_supply_discriminators_and_version_defaults():
         {"kind": "element_type", "types": ["Wall"], "extra": True},
         {"kind": "all", "items": []},
         {"kind": "any", "items": []},
-        {"kind": "not"},
-        {"kind": "not", "item": {"kind": "unsupported"}},
+        {"kind": "not", "item": {"kind": "element_type", "types": ["Wall"]}},
         {"kind": "property", "property_id": "not-a-guid", "test": {"kind": "text", "operator": "is", "value": "x"}},
         {"kind": "property", "property_id": PROPERTY_ID, "test": {"kind": "boolean", "operator": "is", "value": True}},
         {"kind": "property", "property_id": PROPERTY_ID, "test": {"kind": "length", "operator": "is", "value": 3}},
@@ -131,6 +126,21 @@ def test_invalid_predicates_are_rejected_from_python_and_json(where):
         Query.model_validate(payload)
     with pytest.raises(ValidationError):
         Query.model_validate_json(json.dumps(payload))
+
+
+@pytest.mark.parametrize("group", ["all", "any"])
+def test_general_negation_is_rejected_inside_groups(group):
+    payload = {
+        "where": {
+            "kind": group,
+            "items": [{"kind": "not", "item": {"kind": "element_type", "types": ["Wall"]}}],
+        }
+    }
+
+    for parse, value in [(Query.model_validate, payload), (Query.model_validate_json, json.dumps(payload))]:
+        with pytest.raises(ValidationError) as caught:
+            parse(value)
+        assert caught.value.errors()[0]["type"] == "union_tag_invalid"
 
 
 def test_schema_version_is_preserved_as_a_plain_string():
@@ -194,10 +204,10 @@ def test_json_schema_exposes_recursive_nodes_and_typed_operator_choices():
     assert set(schema["properties"]["where"]["discriminator"]["mapping"]) == {
         "all",
         "any",
-        "not",
         "element_type",
         "property",
     }
+    assert "Negate" not in definitions
     assert definitions["AllOf"]["properties"]["items"]["items"]["discriminator"]["propertyName"] == "kind"
     assert set(definitions["PropertyPredicate"]["properties"]["test"]["discriminator"]["mapping"]) == {"text", "number"}
     assert definitions["TextTest"]["properties"]["operator"]["enum"] == [

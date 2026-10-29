@@ -14,7 +14,6 @@ from multiconn_archicad.utilities.queries import (
     AnyOf,
     ElementTypePredicate,
     InvalidPropertyTestError,
-    Negate,
     NumberTest,
     PropertyCatalogue,
     PropertyPredicate,
@@ -54,12 +53,10 @@ def test_valid_nested_query_and_metadata_are_not_transformed(catalogue):
             items=(
                 ElementTypePredicate(types=(ElementType.WALL,)),
                 property_test(),
-                Negate(
-                    item=AnyOf(
-                        items=(
-                            property_test(ELEMENT_ID, TextTest(operator="contains", value="Temporary")),
-                            property_test(test=NumberTest(operator="is less than", value=1)),
-                        )
+                AnyOf(
+                    items=(
+                        property_test(ELEMENT_ID, TextTest(operator="does not contain", value="Temporary")),
+                        property_test(test=NumberTest(operator="is greater than or equal to", value=1)),
                     )
                 ),
             )
@@ -86,7 +83,7 @@ def test_collects_all_nested_issue_kinds_with_paths_and_field_context(catalogue)
                 AnyOf(
                     items=(
                         property_test(test=TextTest(operator="contains", value="3")),
-                        Negate(item=property_test(POSITION)),
+                        AllOf(items=(property_test(POSITION),)),
                     )
                 ),
             )
@@ -99,7 +96,7 @@ def test_collects_all_nested_issue_kinds_with_paths_and_field_context(catalogue)
     assert [(issue.code, issue.path) for issue in result.issues] == [
         ("unknown_property", "where.items[0].property_id"),
         ("invalid_test", "where.items[1].items[0].test"),
-        ("unsupported_property", "where.items[1].items[1].item.test"),
+        ("unsupported_property", "where.items[1].items[1].items[0].test"),
     ]
     missing, wrong_type, unsupported = result.issues
     assert missing.property_id == MISSING
@@ -107,7 +104,7 @@ def test_collects_all_nested_issue_kinds_with_paths_and_field_context(catalogue)
     assert wrong_type.qualified_name == "WallProperties / Wall Height"
     assert "requires NumberTest, got TextTest" in wrong_type.message
     assert unsupported.qualified_name == "CategoryPropertyDefinitionGroup / Position"
-    assert unsupported.location == ("where", "items", 1, "items", 1, "item", "test")
+    assert unsupported.location == ("where", "items", 1, "items", 1, "items", 0, "test")
 
 
 @pytest.mark.parametrize("group", [AllOf, AnyOf])
@@ -127,11 +124,12 @@ def test_groups_check_all_branches_even_after_valid_or_invalid_siblings(catalogu
     assert [issue.path for issue in result.issues] == ["where.items[1].property_id", "where.items[2].test"]
 
 
-def test_negation_does_not_hide_or_invert_context_errors(catalogue):
-    result = validate_query(Query(where=Negate(item=property_test(MISSING))), catalogue)
+def test_negative_operator_does_not_hide_context_errors(catalogue):
+    query = Query(where=property_test(MISSING, TextTest(operator="is not", value="Temporary")))
+    result = validate_query(query, catalogue)
 
     assert not result.is_valid
-    assert result.issues[0].path == "where.item.property_id"
+    assert result.issues[0].path == "where.property_id"
     assert result.issues[0].code == "unknown_property"
 
 
