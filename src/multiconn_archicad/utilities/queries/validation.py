@@ -7,9 +7,8 @@ from typing import Any, Literal, TypeAlias, assert_never
 from uuid import UUID
 
 from .discovery import PropertyCatalogue
-from .errors import InvalidPropertyTestError
+from .errors import InvalidPropertyTestError, UnsupportedPropertyTypeError
 from .models import AllOf, AnyOf, ElementTypePredicate, Negate, Predicate, PropertyPredicate, Query
-from . import UnsupportedPropertyTypeError
 
 _Location: TypeAlias = tuple[str | int, ...]
 _IssueCode: TypeAlias = Literal["unknown_property", "unsupported_property", "invalid_test"]

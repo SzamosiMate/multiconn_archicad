@@ -10,10 +10,9 @@ from pydantic import BaseModel
 
 from multiconn_archicad.models.tapir.types import PropertyDetails
 
-from .errors import InvalidPropertyTestError
+from .errors import InvalidPropertyTestError, UnsupportedPropertyTypeError
 from .models import PropertyTestModel
 from .registry import TestRegistry
-from . import UnsupportedPropertyTypeError
 
 TestT = TypeVar("TestT", bound=BaseModel)
 
@@ -122,6 +121,10 @@ class _PropertyMetadata(FieldInfo[PropertyTestModel]):
     def details(self) -> PropertyDetails:
         """Return a copy of the snapshot, including its original measure metadata."""
         return self._details.model_copy(deep=True)
+
+    def describe(self) -> dict[str, Any]:
+        """Include the upstream measure type for supported and unsupported properties."""
+        return {**super().describe(), "measure_type": self._details.propertyMeasureType.value}
 
 
 class PropertyInfo(_PropertyMetadata):
