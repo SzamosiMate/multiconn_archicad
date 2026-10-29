@@ -9,7 +9,7 @@ from typing import Annotated, Union, get_args, get_origin
 from typing_extensions import TypeForm
 
 from multiconn_archicad.models.tapir.types import PropertyDetails
-from . import UnsupportedPropertyTypeError, AmbiguousPropertyTypeError
+from .errors import UnsupportedPropertyTypeError, AmbiguousPropertyTypeError
 
 from .models import PropertyTestModel
 

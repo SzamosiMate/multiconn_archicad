@@ -89,8 +89,9 @@ def test_field_selection_exposes_operators_and_creates_tests_for_query_serializa
     assert Query.model_validate_json(query.model_dump_json()) == query
 
 
-def test_describe_returns_json_friendly_uniform_discovery_information():
-    info = PropertyInfo(property_details(), Registry.from_union(PropertyTest))
+@pytest.mark.parametrize("measure", list(tapir.PropertyMeasureType))
+def test_describe_returns_json_friendly_uniform_discovery_information(measure):
+    info = PropertyInfo(property_details(propertyMeasureType=measure), Registry.from_union(PropertyTest))
 
     description = json.loads(json.dumps(info.describe()))
 
@@ -98,6 +99,7 @@ def test_describe_returns_json_friendly_uniform_discovery_information():
     assert description["name"] == "Height"
     assert description["group"] == "Example"
     assert description["qualified_name"] == "Example / Height"
+    assert description["measure_type"] == measure.value
     assert description["operators"] == list(info.operators())
     assert description["test_schema"] == info.test_schema()
     assert description["test_schema"]["properties"]["value"]["type"] == "number"

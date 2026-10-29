@@ -30,6 +30,7 @@ from multiconn_archicad.utilities.results.batch_results import (
     RaggedBatchResult,
     SlotState,
 )
+from multiconn_archicad.utilities.results.property_errors import PropertyUnavailableError, PropertyUndefinedError
 
 __all__ = [
     "Utilities",
@@ -45,6 +46,8 @@ __all__ = [
     "BatchSlot",
     "SlotState",
     "BatchError",
+    "PropertyUnavailableError",
+    "PropertyUndefinedError",
     "BatchOperationError",
     "BatchNotFullySuccessfulError",
     "BatchWriteError",
