@@ -1,12 +1,26 @@
 # Element query definitions
 
-Stages 1-6 provide query models, JSON serialization, JSON Schema, test-family
+Stages 1-7 provide query models, JSON serialization, JSON Schema, test-family
 behavior, uniform field information, batch property discovery, and query-wide
-context validation. The catalogue and validator can use supplied metadata offline.
+context validation, with an agreed evaluation contract. The catalogue and validator can use supplied metadata offline.
 The bound property utility can fetch a fresh metadata batch from Archicad. Query
 execution is not yet implemented.
 
 Import the public models from `multiconn_archicad.utilities.queries`.
+
+## Stage 7 behavior decisions
+
+The query contract follows Archicad Find and Select: normal AND/OR, negative operators
+on individual tests, case-insensitive text with significant whitespace, and
+ordinary numeric comparisons without added tolerance or display rounding.
+Unavailable properties make every operation false except `not available`.
+All six common user-defined-property state operations are deferred.
+
+These are agreed target semantics, not implemented evaluation behavior. General
+`Negate` / `"not"` predicates have been removed; JSON using `"kind": "not"` is
+rejected at any depth. No query executor exists yet. The complete record of
+default/custom/undefined behavior, Tapir error paths, and retrieval limits is in the
+[stage 7 reference](../../docs/ELEMENT_QUERY_ARCHICAD_BEHAVIOR.md).
 
 ## Constructing a query in Python
 
@@ -95,25 +109,37 @@ element types, and arrays for predicate collections.
 
 ## Boolean composition
 
-`AllOf`, `AnyOf`, and `Negate` can contain any predicate, including another group:
+`AllOf` and `AnyOf` can contain property predicates, element-type predicates, or
+other groups. Negative comparisons use a test's operator:
 
 ```python
-from multiconn_archicad.utilities.queries import AnyOf, ElementTypePredicate, Negate, Query
+from multiconn_archicad.utilities.queries import (
+    AllOf, AnyOf, ElementTypePredicate, PropertyPredicate, Query, TextTest,
+)
 
 query = Query(
-    where=Negate(
-        item=AnyOf(
-            items=(
-                ElementTypePredicate(types=("Door",)),
-                ElementTypePredicate(types=("Window",)),
-            )
+    where=AllOf(
+        items=(
+            AnyOf(
+                items=(
+                    ElementTypePredicate(types=("Door",)),
+                    ElementTypePredicate(types=("Window",)),
+                )
+            ),
+            PropertyPredicate(
+                property_id="11111111-1111-4111-8111-111111111111",
+                test=TextTest(operator="does not contain", value="Temporary"),
+            ),
         )
     )
 )
 ```
 
-This describes elements that are neither doors nor windows. Evaluation, including
-the behavior of negation on unreadable values, belongs to a later stage.
+This describes doors or windows whose referenced text property does not contain
+`Temporary`. An unavailable property makes that negative comparison false, just
+like every other implemented property operation. There is no general negation
+node and no automatic rewriting of saved `"not"` queries. This removes an initial,
+unreleased schema sketch; the default version string remains `"1.0"`.
 
 ## Structure-validation contract
 
@@ -145,8 +171,10 @@ the behavior of negation on unreadable values, belongs to a later stage.
 Text operators are `is`, `is not`, `contains`, `does not contain`, `starts with`,
 and `ends with`. Numeric operators are `is`, `is not`, `is greater than`,
 `is greater than or equal to`, `is less than`, and `is less than or equal to`.
-Their spellings are part of the serialized contract. Case sensitivity and numeric
-comparison tolerances will be defined with the evaluator.
+Their spellings are part of the serialized contract. Text comparisons are
+case-insensitive with significant whitespace. Numeric comparisons use actual
+numeric values without added tolerance or display rounding. Parsing preserves
+the supplied text operand; case folding belongs to evaluation, not serialization.
 
 For example, this fails during structure validation because a numeric test does
 not offer the `contains` operator:
@@ -367,11 +395,18 @@ flow with complete synthetic metadata, without a running Archicad.
 | `create_test(**data)` | Structure validation followed by property-context validation |
 | `validate(test)` | Check an existing test's family and property-context rules |
 | `test_schema()` | Metadata-aware schema, or `None` for an unsupported field |
-| `describe()` | JSON-friendly reference, names, operators, and test schema |
+| `describe()` | JSON-friendly reference, names, operators, test schema, and property measure type |
 
 The runtime `PropertyInfo` also exposes its selected `test_model` and a copy of
 its `details` snapshot. Measure metadata remains available in those details even
 though all scalar quantities share `NumberTest`.
+
+Property descriptions also expose `measure_type` as the upstream string:
+`Length`, `Area`, `Volume`, `Angle`, `Default`, or `Undefined`. For example,
+`height.describe()["measure_type"]` is `"Length"`. Both supported and unsupported
+properties include it, including in `catalogue.describe()`. `Default` and
+`Undefined` are preserved without inferring a physical quantity. This describes
+the measure category; numeric query operands still use the existing SI convention.
 
 `describe()` returns a separate discovery description, not a serialized Python
 object or an executable query. Its `reference` can be combined with a test to
@@ -507,8 +542,8 @@ second query tree. Success means the query is compatible with that snapshot; it
 does not verify the currently open project or imply that execution is implemented.
 The plain version string is not interpreted by context validation.
 
-Every branch of `all`, `any`, and `not` is checked. A valid earlier sibling does
-not skip later branches. Negation does not hide or invert a context error. Repeated
+Every branch of `all` and `any` is checked. A valid earlier sibling does
+not skip later branches. Negative operators do not hide context errors. Repeated
 property references keep separate issues at their respective query locations.
 Issue order follows the query's source order, descending through each nested group.
 
@@ -545,6 +580,59 @@ evaluation semantics, not these metadata-validation issues.
 The [offline discovery example](../../examples/element_query_discovery.py) now also
 demonstrates a valid query and an unsupported property inside `any`, without a
 running Archicad instance.
+
+## Evaluation and result contract
+
+This section specifies the next execution stages; it does not introduce an
+executor or a second query representation. Execution will use the original tree.
+
+- Each ordinary property operation checks availability before comparison.
+  Confirmed unavailability is false, including for `is not` and `does not contain`.
+  It is not an inverted successful comparison or an unknown logical value.
+- `all` and `any` combine successful Boolean answers normally. A false leaf need
+  not exclude an element if another branch of `any` matches.
+- Undefined values remain explicit `PropertyUndefinedError` failures for now;
+  they are not unavailable values or ordinary strings after property adaptation.
+  The six special user-defined-property state operations remain deferred.
+- Command failures and invalid-query failures raise. A missing/invalid property
+  GUID discovered during execution is fatal; an older catalogue is a possible
+  cause. Existing general-purpose property `_result` readers retain that API
+  error; it is the query executor that will enforce this query-level rule.
+- Other encountered per-element read/evaluation failures remain errors rather than
+  Boolean false. A decisive sibling does not suppress an encountered error.
+  Evaluation may skip unnecessary reads; diagnostics cover work actually done.
+
+| A | B | `all(A, B)` | `any(A, B)` |
+| --- | --- | --- | --- |
+| true | true | true | true |
+| true | false | false | true |
+| false | true | false | true |
+| false | false | false | false |
+
+The initial executor will filter an explicit ordered sequence of candidate IDs.
+Candidate retrieval is a separate operation: databases, current selection,
+visibility, and inclusion of subelements are not silently chosen by the query.
+Preserve input order and duplicate candidates, with one result slot per position.
+Repeated reads may be deduplicated internally without changing that alignment.
+An empty candidate sequence produces an empty result after query validation,
+without element-value reads.
+
+Use the existing `BatchResult[ElementIdArrayItem]` contract:
+
+| Final element outcome | Batch slot |
+| --- | --- |
+| Match | `SUCCESS`, containing the element ID |
+| Definite non-match | `FILTERED` |
+| Per-element read/evaluation failure | `ERROR`, retaining its diagnostic |
+
+A future `_result` method will retain the aligned result. Its plain-list companion
+will call `raise_for_errors()` before returning successful matching IDs, following
+existing element utilities. No new batch state, query-specific result container,
+or three-valued Boolean layer is required.
+
+Reliable numeric retrieval is still stage 8 work: Tapir display strings do not
+guarantee raw database precision or SI values. This contract does not authorize
+parsing localized display text to invent typed values.
 
 ## JSON Schema
 

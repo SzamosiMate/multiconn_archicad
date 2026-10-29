@@ -8,7 +8,7 @@ from uuid import UUID
 
 from .discovery import PropertyCatalogue
 from .errors import InvalidPropertyTestError, UnsupportedPropertyTypeError
-from .models import AllOf, AnyOf, ElementTypePredicate, Negate, Predicate, PropertyPredicate, Query
+from .models import AllOf, AnyOf, ElementTypePredicate, Predicate, PropertyPredicate, Query
 
 _Location: TypeAlias = tuple[str | int, ...]
 _IssueCode: TypeAlias = Literal["unknown_property", "unsupported_property", "invalid_test"]
@@ -131,8 +131,6 @@ def validate_query(query: Query, catalogue: PropertyCatalogue) -> QueryValidatio
         elif isinstance(node, (AllOf, AnyOf)):
             for index, item in enumerate(node.items):
                 visit(item, (*location, "items", index))
-        elif isinstance(node, Negate):
-            visit(node.item, (*location, "item"))
         elif isinstance(node, ElementTypePredicate):
             # The enum choices were checked during structure validation.
             return
