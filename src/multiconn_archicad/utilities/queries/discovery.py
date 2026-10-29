@@ -11,7 +11,7 @@ from multiconn_archicad.utilities.identifiers import PropertyIdLike, normalize_p
 
 from .fields import PropertyInfo, UnsupportedPropertyInfo
 from .registry import TestRegistry
-from . import UnsupportedPropertyTypeError
+from .errors import UnsupportedPropertyTypeError
 
 DiscoveredProperty: TypeAlias = PropertyInfo | UnsupportedPropertyInfo
 

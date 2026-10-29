@@ -5,6 +5,8 @@ from __future__ import annotations
 from collections.abc import Sequence
 from typing import TYPE_CHECKING, Any
 
+from packaging.version import Version
+
 from multiconn_archicad.errors import BatchWriteError
 from multiconn_archicad.models.official import types as official
 from multiconn_archicad.models.tapir import types as tapir
@@ -19,19 +21,29 @@ from multiconn_archicad.utilities.identifiers import (
     to_official_property_id,
 )
 from multiconn_archicad.utilities.results.batch_results import (
+    BatchError,
     BatchGrid,
     BatchResult,
     BatchResult2D,
     BatchRow,
     SlotState,
-    extract_error,
 )
+from multiconn_archicad.utilities.results.property_errors import PropertyUnavailableError, PropertyUndefinedError
 
 if TYPE_CHECKING:
     from multiconn_archicad.clients.unified_api.api import UnifiedApi
 
 
-def _extract_property_value(item: tapir.PropertyValueArrayItem) -> str:
+def _normalize_property_value(item: tapir.PropertyValueArrayItem | tapir.PropertyValueErrorItem) -> str | BatchError:
+    """Classify property conditions before discarding the raw cell metadata."""
+    if isinstance(item, tapir.PropertyValueErrorItem):
+        # A missing/invalid GUID can also have isAvailable=False. Only the
+        # combined status error plus that flag proves ordinary unavailability.
+        if item.isAvailable is False and item.error.message == "Not available or not evaluated property":
+            return PropertyUnavailableError(error=item.error)
+        return BatchError(error=item.error)
+    if item.propertyValue.value == "<Undefined>":
+        return PropertyUndefinedError.from_message("Property value is undefined")
     return item.propertyValue.value
 
 
@@ -228,7 +240,8 @@ class PropertyUtilities:
     """Read, write, and inspect properties through one Unified API instance.
 
     Property reads return Archicad display strings without parsing or unit
-    conversion. Property data is not cached.
+    conversion. Undefined and confirmed unavailable values become specialized
+    batch errors. Property data is not cached.
     """
 
     def __init__(self, api: UnifiedApi):
@@ -255,9 +268,14 @@ class PropertyUtilities:
     def _get_raw_property_values(
         self, elements: Sequence[ElementIdLike], properties: Sequence[PropertyIdLike]
     ) -> list[tapir.ErrorItem | tapir.PropertyValuesArrayItem]:
-        return self._api.tapir.property.get_property_values_of_elements(
-            normalize_element_ids(elements), normalize_property_ids(properties)
-        )
+        normalized_elements = normalize_element_ids(elements)
+        normalized_properties = normalize_property_ids(properties)
+        version = Version(self._api.tapir.application.get_add_on_version())
+        if version >= Version("1.7.3"):
+            return self._api.tapir.property.get_property_values_of_elements(
+                normalized_elements, normalized_properties, include_availability=True
+            )
+        return self._api.tapir.property.get_property_values_of_elements(normalized_elements, normalized_properties)
 
     def resolve_property_ids_result(
         self, property_user_ids: Sequence[PropertyUserId]
@@ -311,13 +329,20 @@ class PropertyUtilities:
         Notes:
             Values remain display strings; they are not parsed or converted to
             standard units. Archicad is queried even when ``elements`` is empty.
+            The exact ``<Undefined>`` sentinel becomes PropertyUndefinedError.
+            Tapir 1.7.3+ reads request availability; confirmed unavailability
+            becomes PropertyUnavailableError. Other failures are preserved,
+            including ambiguous unavailable/not-evaluated errors on older Tapir.
 
         Raises:
             ValueError: If no properties are supplied.
         """
         items = self._get_raw_property_values(elements, properties)
-        rows = [item if extract_error(item) else item.propertyValues for item in items]
-        return BatchGrid.from_rows(rows, width=len(properties), accessor=_extract_property_value)
+        rows = [
+            item if isinstance(item, tapir.ErrorItem) else [_normalize_property_value(cell) for cell in item.propertyValues]
+            for item in items
+        ]
+        return BatchGrid[str].from_rows(rows, width=len(properties))
 
     def get_property_values_per_element(
         self, elements: Sequence[ElementIdLike], properties: Sequence[PropertyIdLike]
@@ -333,7 +358,8 @@ class PropertyUtilities:
 
         Raises:
             ValueError: If no properties are supplied.
-            BatchOperationError: If Archicad reports any row or cell error.
+            BatchOperationError: If a row or cell fails, is undefined, or is
+                confirmed unavailable.
 
         Notes:
             Values remain display strings; they are not parsed or converted to
@@ -359,10 +385,15 @@ class PropertyUtilities:
         Notes:
             Values remain display strings; they are not parsed or converted to
             standard units. Archicad is queried even when ``elements`` is empty.
+            Undefined and confirmed unavailable values become specialized batch
+            errors, as in ``get_property_values_per_element_result``.
         """
         property_values = self._get_raw_property_values(elements, [property_id])
-        items = [item if extract_error(item) else item.propertyValues[0] for item in property_values]
-        return BatchResult.from_items(items, accessor=_extract_property_value)
+        items = [
+            item if isinstance(item, tapir.ErrorItem) else _normalize_property_value(item.propertyValues[0])
+            for item in property_values
+        ]
+        return BatchResult[str].from_items(items)
 
     def get_flat_property_values(self, elements: Sequence[ElementIdLike], property_id: PropertyIdLike) -> list[str]:
         """Read one property's display string for each element.
@@ -375,7 +406,8 @@ class PropertyUtilities:
             Display strings in element order.
 
         Raises:
-            BatchOperationError: If Archicad reports a per-element error.
+            BatchOperationError: If an element read fails, is undefined, or is
+                confirmed unavailable.
 
         Notes:
             Values remain display strings; they are not parsed or converted to

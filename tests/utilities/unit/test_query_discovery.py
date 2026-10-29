@@ -74,6 +74,9 @@ def test_supported_and_unsupported_descriptions_are_json_friendly(metadata):
     description = json.loads(json.dumps(catalogue.describe()))
 
     assert len(description["fields"]) == 8
+    assert [field["measure_type"] for field in description["fields"]] == [
+        details.propertyMeasureType.value for details in metadata
+    ]
     enabled = description["fields"][0]
     disabled = next(row for row in description["fields"] if row["name"] == "Position")
     assert enabled["supported"] is True
