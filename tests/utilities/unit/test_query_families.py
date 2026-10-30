@@ -4,6 +4,7 @@ import pytest
 
 from multiconn_archicad.models.tapir import types as tapir
 from multiconn_archicad.utilities.queries import InvalidPropertyTestError, NumberTest, PropertyTestModel, TextTest
+from multiconn_archicad.utilities.results.batch_results import BatchSlot
 
 pytestmark = pytest.mark.unit
 
@@ -92,7 +93,9 @@ def test_family_schema_describes_compatible_operands(family, metadata, value_typ
     schema = family.schema_for(property_details(**metadata))
 
     assert schema["properties"]["value"]["type"] == value_type
-    assert schema["properties"]["operator"]["enum"] == list(family.operators())
+    operator_reference = schema["properties"]["operator"]["$ref"]
+    enum_name = operator_reference.rsplit("/", 1)[1]
+    assert schema["$defs"][enum_name]["enum"] == list(family.operators())
 
 
 def test_new_families_must_explicitly_implement_context_validation():
@@ -101,7 +104,23 @@ def test_new_families_must_explicitly_implement_context_validation():
         def accepts(cls, details: tapir.PropertyDetails) -> bool:
             return True
 
+        def evaluate(self, raw_value: str) -> BatchSlot[bool]:
+            return BatchSlot.success(True)
+
     with pytest.raises(TypeError, match="validate_for"):
+        IncompleteTest()
+
+
+def test_new_families_must_explicitly_implement_evaluation():
+    class IncompleteTest(PropertyTestModel):
+        @classmethod
+        def accepts(cls, details: tapir.PropertyDetails) -> bool:
+            return True
+
+        def validate_for(self, details: tapir.PropertyDetails) -> None:
+            self._require_compatible_property(details)
+
+    with pytest.raises(TypeError, match="evaluate"):
         IncompleteTest()
 
 

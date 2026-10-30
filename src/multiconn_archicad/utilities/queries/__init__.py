@@ -2,6 +2,7 @@
 
 from .discovery import DiscoveredProperty, PropertyCatalogue
 from .errors import InvalidPropertyTestError, UnsupportedPropertyTypeError, AmbiguousPropertyTypeError
+from .evaluation import evaluate_property
 from .fields import FieldInfo, PropertyInfo, UnsupportedPropertyInfo
 
 from .models import (
@@ -17,6 +18,7 @@ from .models import (
     TextTest,
 )
 from .registry import TestRegistry
+from .operators import NumberOperator, TextOperator
 from .validation import QueryValidationError, QueryValidationIssue, QueryValidationResult, validate_query
 
 __all__ = [
@@ -28,6 +30,7 @@ __all__ = [
     "FieldInfo",
     "InvalidPropertyTestError",
     "NumberTest",
+    "NumberOperator",
     "Predicate",
     "PropertyPredicate",
     "PropertyInfo",
@@ -39,8 +42,10 @@ __all__ = [
     "QueryValidationIssue",
     "QueryValidationResult",
     "TextTest",
+    "TextOperator",
     "TestRegistry",
     "UnsupportedPropertyInfo",
     "UnsupportedPropertyTypeError",
+    "evaluate_property",
     "validate_query",
 ]
