@@ -1,6 +1,7 @@
 """Verify family dispatch and static extension without Archicad access."""
 
 from typing import Annotated, Literal, Union
+from enum import StrEnum
 
 import pytest
 from pydantic import Field, TypeAdapter
@@ -15,6 +16,7 @@ from multiconn_archicad.utilities.queries import (
     UnsupportedPropertyTypeError,
 )
 from multiconn_archicad.utilities.queries import TestRegistry as Registry
+from multiconn_archicad.utilities.results.batch_results import BatchSlot
 
 pytestmark = pytest.mark.unit
 
@@ -80,11 +82,16 @@ def test_overlapping_families_are_rejected_regardless_of_registration_order(test
         registry.resolve(property_details())
 
 
+class BooleanOperator(StrEnum):
+    IS = "is"
+    IS_NOT = "is not"
+
+
 class BooleanTest(PropertyTestModel):
     """A third family used only to demonstrate extension in this test."""
 
     kind: Literal["boolean"] = "boolean"
-    operator: Literal["is", "is not"]
+    operator: BooleanOperator
     value: bool = Field(strict=True)
 
     @classmethod
@@ -97,6 +104,13 @@ class BooleanTest(PropertyTestModel):
     def validate_for(self, details: tapir.PropertyDetails) -> None:
         self._require_compatible_property(details)
 
+    def evaluate(self, raw_value: str) -> BatchSlot[bool]:
+        values = {"True": True, "False": False}
+        if raw_value not in values:
+            return BatchSlot.failure(f"Cannot interpret {raw_value!r} as a boolean")
+        matches = values[raw_value] == self.value
+        return BatchSlot.success(matches if self.operator is BooleanOperator.IS else not matches)
+
 
 def test_adding_a_family_requires_only_its_class_and_the_shared_union():
     extended_tests = Annotated[TextTest | NumberTest | BooleanTest, Field(discriminator="kind")]
@@ -108,7 +122,11 @@ def test_adding_a_family_requires_only_its_class_and_the_shared_union():
 
     assert registry.resolve(details) is BooleanTest
     assert isinstance(test, BooleanTest)
+    assert test.operator is BooleanOperator.IS
+    assert BooleanTest.operators() == ("is", "is not")
     test.validate_for(details)
+    assert test.evaluate("True").value is True
+    assert test.evaluate("False").value is False
     assert "boolean" in adapter.json_schema()["discriminator"]["mapping"]
     with pytest.raises(UnsupportedPropertyTypeError):
         Registry.from_union(PropertyTest).resolve(details)

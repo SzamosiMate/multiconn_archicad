@@ -3,7 +3,14 @@
 import json
 
 from multiconn_archicad.models.tapir.types import PropertyDetails
-from multiconn_archicad.utilities.queries import PropertyInfo, PropertyPredicate, PropertyTest, Query, TestRegistry
+from multiconn_archicad.utilities.queries import (
+    NumberOperator,
+    PropertyInfo,
+    PropertyPredicate,
+    PropertyTest,
+    Query,
+    TestRegistry,
+)
 
 
 def make_example_field() -> PropertyInfo:
@@ -29,7 +36,7 @@ if __name__ == "__main__":
     print(height.qualified_name)
     print(height.operators())
 
-    test = height.create_test(operator="is greater than", value=3)
+    test = height.create_test(operator=NumberOperator.GREATER_THAN, value=3)
     height.validate(test)
     predicate = PropertyPredicate.model_validate({**height.reference, "test": test})
     query = Query(where=predicate)

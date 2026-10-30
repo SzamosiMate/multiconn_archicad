@@ -7,6 +7,7 @@ from multiconn_archicad.models.tapir.types import ElementType
 from multiconn_archicad.utilities.queries import (
     AnyOf,
     ElementTypePredicate,
+    NumberOperator,
     PropertyCatalogue,
     PropertyPredicate,
     PropertyTest,
@@ -54,7 +55,7 @@ if __name__ == "__main__":
     for field in catalogue:
         print(field.qualified_name, "supported:", field.supported)
     height = catalogue.search("height", supported_only=True)[0]
-    test = height.create_test(operator="is greater than", value=3)
+    test = height.create_test(operator=NumberOperator.GREATER_THAN, value=3)
     query = Query(where=PropertyPredicate.model_validate({**height.reference, "test": test}))
     result = validate_query(query, catalogue)
     result.raise_for_errors()

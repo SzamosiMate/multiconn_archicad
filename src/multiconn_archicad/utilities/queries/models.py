@@ -1,14 +1,15 @@
-"""Define serializable queries and explicit property-test validation.
+"""Define serializable queries, property-test validation, and value comparisons.
 
 Parsing validates structure. Call a test's ``validate_for`` method separately to
-check supplied property metadata. These models do not fetch metadata or execute
-queries.
+check supplied property metadata. Families evaluate supplied value strings; these
+models do not fetch metadata or execute query trees.
 """
 
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Annotated, Literal, TypeAlias, get_args
+from enum import StrEnum
+from typing import Annotated, Literal, TypeAlias, assert_never, cast
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -19,8 +20,10 @@ from multiconn_archicad.models.tapir.types import (
     PropertyDetails,
     PropertyValueType,
 )
+from multiconn_archicad.utilities.results.batch_results import BatchSlot
 
 from .errors import InvalidPropertyTestError
+from .operators import NumberOperator, TextOperator
 
 
 class _QueryModel(BaseModel):
@@ -30,18 +33,21 @@ class _QueryModel(BaseModel):
 
 
 class PropertyTestModel(_QueryModel, ABC):
-    """Define discovery and context-validation behavior for a test family.
+    """Define discovery, validation, and comparison behavior for a test family.
 
-    Concrete models declare their operator Literal and operand fields. Pydantic
+    Concrete models declare their operator StrEnum and operand fields. Pydantic
     validates those fields at construction. Each family must also explicitly
     implement ``validate_for`` to check supplied property metadata and any
-    metadata-dependent operand restrictions.
+    metadata-dependent operand restrictions. The required ``evaluate`` method
+    compares one successfully retrieved string; read conditions are handled
+    separately by ``evaluate_property``.
     """
 
     @classmethod
     def operators(cls) -> tuple[str, ...]:
-        """Return operator strings directly from the family's Literal field."""
-        return get_args(cls.model_fields["operator"].annotation)
+        """Return readable values from the family's declared operator StrEnum."""
+        operator_type = cast(type[StrEnum], cls.model_fields["operator"].annotation)
+        return tuple(operator.value for operator in operator_type)
 
     @classmethod
     @abstractmethod
@@ -52,6 +58,11 @@ class PropertyTestModel(_QueryModel, ABC):
     @abstractmethod
     def validate_for(self, details: PropertyDetails) -> None:
         """Check context, raising InvalidPropertyTestError for expected failures."""
+        ...
+
+    @abstractmethod
+    def evaluate(self, raw_value: str) -> BatchSlot[bool]:
+        """Compare a retrieved value, retaining expected conversion failures."""
         ...
 
     @classmethod
@@ -77,14 +88,7 @@ class TextTest(PropertyTestModel):
     """Describe a case-insensitive text comparison with significant whitespace."""
 
     kind: Literal["text"] = "text"
-    operator: Literal[
-        "is",
-        "is not",
-        "contains",
-        "does not contain",
-        "starts with",
-        "ends with",
-    ]
+    operator: TextOperator
     value: str = Field(strict=True)
 
     @classmethod
@@ -99,19 +103,32 @@ class TextTest(PropertyTestModel):
         """Require a single string property; Pydantic already checked the operand."""
         self._require_compatible_property(details)
 
+    def evaluate(self, raw_value: str) -> BatchSlot[bool]:
+        """Compare without case sensitivity, preserving whitespace."""
+        actual = raw_value.casefold()
+        expected = self.value.casefold()
+        match self.operator:
+            case TextOperator.IS:
+                return BatchSlot.success(actual == expected)
+            case TextOperator.IS_NOT:
+                return BatchSlot.success(actual != expected)
+            case TextOperator.CONTAINS:
+                return BatchSlot.success(expected in actual)
+            case TextOperator.DOES_NOT_CONTAIN:
+                return BatchSlot.success(expected not in actual)
+            case TextOperator.STARTS_WITH:
+                return BatchSlot.success(actual.startswith(expected))
+            case TextOperator.ENDS_WITH:
+                return BatchSlot.success(actual.endswith(expected))
+            case _:
+                assert_never(self.operator)
+
 
 class NumberTest(PropertyTestModel):
     """Compare scalar numbers without tolerance; measured operands use SI."""
 
     kind: Literal["number"] = "number"
-    operator: Literal[
-        "is",
-        "is not",
-        "is greater than",
-        "is greater than or equal to",
-        "is less than",
-        "is less than or equal to",
-    ]
+    operator: NumberOperator
     value: float = Field(strict=True, allow_inf_nan=False, description="Numeric operand; quantities use SI units.")
 
     @classmethod
@@ -125,6 +142,29 @@ class NumberTest(PropertyTestModel):
     def validate_for(self, details: PropertyDetails) -> None:
         """Require a numeric property; Pydantic already checked the finite operand."""
         self._require_compatible_property(details)
+
+    def evaluate(self, raw_value: str) -> BatchSlot[bool]:
+        """Apply float() directly, without unit conversion, rounding, or tolerance."""
+        try:
+            actual = float(raw_value)
+        except ValueError:
+            return BatchSlot.failure(f"Cannot interpret {raw_value!r} as a number")
+
+        match self.operator:
+            case NumberOperator.IS:
+                return BatchSlot.success(actual == self.value)
+            case NumberOperator.IS_NOT:
+                return BatchSlot.success(actual != self.value)
+            case NumberOperator.GREATER_THAN:
+                return BatchSlot.success(actual > self.value)
+            case NumberOperator.GREATER_THAN_OR_EQUAL_TO:
+                return BatchSlot.success(actual >= self.value)
+            case NumberOperator.LESS_THAN:
+                return BatchSlot.success(actual < self.value)
+            case NumberOperator.LESS_THAN_OR_EQUAL_TO:
+                return BatchSlot.success(actual <= self.value)
+            case _:
+                assert_never(self.operator)
 
 
 PropertyTest: TypeAlias = Annotated[TextTest | NumberTest, Field(discriminator="kind")]

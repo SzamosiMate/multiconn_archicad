@@ -116,13 +116,13 @@ def test_metadata_and_returned_values_cannot_change_the_field_snapshot():
     returned_reference = info.reference
     returned_reference["property_id"] = "changed"
     description = info.describe()
-    description["test_schema"]["properties"]["operator"]["enum"].clear()
+    description["test_schema"]["$defs"]["NumberOperator"]["enum"].clear()
 
     assert info.qualified_name == "Example / Height"
     assert info.reference["property_id"] == PROPERTY_ID
     assert info.details.propertyMeasureType == tapir.PropertyMeasureType.LENGTH
     assert info.details.propertyValueType == tapir.PropertyValueType.REAL
-    assert info.test_schema()["properties"]["operator"]["enum"]
+    assert info.test_schema()["$defs"]["NumberOperator"]["enum"]
     assert isinstance(info.create_test(operator="is", value=3), NumberTest)
 
 
