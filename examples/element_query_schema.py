@@ -1,8 +1,8 @@
 """Build and round-trip a query without connecting to Archicad.
 
 The property GUIDs are illustrative; replace them with actual catalogue GUIDs
-before context validation. Evaluation is not implemented yet. Text comparisons
-will ignore case and preserve whitespace; numeric operands use SI without added
+before context validation. Query-tree evaluation is not implemented yet. Text comparisons
+ignore case and preserve whitespace; numeric operands use SI without added
 tolerance.
 """
 
@@ -13,9 +13,11 @@ from multiconn_archicad.utilities.queries import (
     AllOf,
     ElementTypePredicate,
     NumberTest,
+    NumberOperator,
     PropertyPredicate,
     Query,
     TextTest,
+    TextOperator,
 )
 
 
@@ -27,11 +29,11 @@ def make_example_query() -> Query:
                 ElementTypePredicate(types=(ElementType.WALL,)),
                 PropertyPredicate(
                     property_id=UUID("22222222-2222-4222-8222-222222222222"),
-                    test=NumberTest(operator="is greater than", value=3),
+                    test=NumberTest(operator=NumberOperator.GREATER_THAN, value=3),
                 ),
                 PropertyPredicate(
                     property_id=UUID("11111111-1111-4111-8111-111111111111"),
-                    test=TextTest(operator="starts with", value="External"),
+                    test=TextTest(operator=TextOperator.STARTS_WITH, value="External"),
                 ),
             )
         )

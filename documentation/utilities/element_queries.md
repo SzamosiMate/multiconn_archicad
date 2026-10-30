@@ -1,10 +1,11 @@
 # Element query definitions
 
-Stages 1-7 provide query models, JSON serialization, JSON Schema, test-family
+Stages 1-8 provide query models, JSON serialization, JSON Schema, test-family
 behavior, uniform field information, batch property discovery, and query-wide
-context validation, with an agreed evaluation contract. The catalogue and validator can use supplied metadata offline.
-The bound property utility can fetch a fresh metadata batch from Archicad. Query
-execution is not yet implemented.
+context validation, plus individual property comparisons. The catalogue,
+validator, and comparisons can use supplied metadata/values offline. The bound
+property utility can fetch a fresh metadata/value batch from Archicad. Query-tree
+execution and bound search/filter methods are not yet implemented.
 
 Import the public models from `multiconn_archicad.utilities.queries`.
 
@@ -16,7 +17,8 @@ ordinary numeric comparisons without added tolerance or display rounding.
 Unavailable properties make every operation false except `not available`.
 All six common user-defined-property state operations are deferred.
 
-These are agreed target semantics, not implemented evaluation behavior. General
+Text/numeric comparison and property-condition handling are implemented; group
+evaluation and the bound execution APIs follow in stages 9-10. General
 `Negate` / `"not"` predicates have been removed; JSON using `"kind": "not"` is
 rejected at any depth. No query executor exists yet. The complete record of
 default/custom/undefined behavior, Tapir error paths, and retrieval limits is in the
@@ -33,9 +35,11 @@ from uuid import UUID
 from multiconn_archicad.utilities.queries import (
     AllOf,
     ElementTypePredicate,
+    NumberOperator,
     NumberTest,
     PropertyPredicate,
     Query,
+    TextOperator,
     TextTest,
 )
 
@@ -45,11 +49,11 @@ query = Query(
             ElementTypePredicate(types=("Wall",)),
             PropertyPredicate(
                 property_id=UUID("22222222-2222-4222-8222-222222222222"),
-                test=NumberTest(operator="is greater than", value=3),
+                test=NumberTest(operator=NumberOperator.GREATER_THAN, value=3),
             ),
             PropertyPredicate(
                 property_id=UUID("11111111-1111-4111-8111-111111111111"),
-                test=TextTest(operator="starts with", value="External"),
+                test=TextTest(operator=TextOperator.STARTS_WITH, value="External"),
             ),
         )
     )
@@ -64,6 +68,27 @@ The executable equivalent is [the schema example](../../examples/element_query_s
 `ElementTypePredicate` also accepts the existing Tapir `ElementType` enum members.
 Python sequences supplied to collection fields become immutable tuples; the JSON
 representation uses arrays.
+
+## Operator enums
+
+Each family declares one operator `StrEnum`: `TextOperator` or `NumberOperator`.
+Python code can use named members, while JSON uses their readable string values.
+Pydantic parses those values into enum members. `kind` remains a fixed `Literal`
+discriminator.
+
+```python
+from multiconn_archicad.utilities.queries import NumberOperator, NumberTest
+
+test = NumberTest(operator=NumberOperator.GREATER_THAN, value=3)
+assert test.operator is NumberOperator.GREATER_THAN
+assert test.model_dump(mode="json")["operator"] == "is greater than"
+```
+
+`operators()` iterates the enum declared by the model's `operator` field and
+returns a tuple of readable strings for UI/MCP consumers. JSON Schema represents
+operator enums in `$defs`, referenced from each test's operator field. There is
+no Literal-operator fallback, migration alias, or transitional schema support.
+This is an unreleased design; refactor its models and examples directly.
 
 ## Serialized query
 
@@ -242,14 +267,75 @@ The shared `PropertyTestModel` interface exposes:
 
 | Method | Responsibility |
 | --- | --- |
-| `operators()` | Return the operator Literal's choices as an immutable tuple |
+| `operators()` | Return the operator enum's readable values as an immutable tuple |
 | `accepts(details)` | Declare metadata compatibility for discovery and validation |
 | `validate_for(details)` | Explicitly validate the selected test against property metadata |
 | `schema_for(details)` | Describe a compatible test, with metadata-specific choices when needed |
+| `evaluate(raw_value)` | Compare one successful read string, returning `BatchSlot[bool]` |
 
 `schema_for()` first checks compatibility and then returns JSON Schema. A family
 can override it to enrich available values from metadata. Measure information
 stays in `PropertyDetails`; selecting the numeric family does not discard it.
+
+## Individual property comparisons
+
+Family `evaluate()` methods compare supplied strings without fetching metadata or
+calling Archicad. They do not repeat property-context validation; validate against
+the catalogue before evaluating actual values.
+
+```python
+from multiconn_archicad.utilities.queries import NumberTest, TextTest
+
+height = NumberTest(operator="is greater than", value=3)
+assert height.evaluate("3.5").value is True
+assert height.evaluate("2.5").value is False
+assert height.evaluate("not a number").is_error
+
+description = TextTest(operator="is", value="External")
+assert description.evaluate("EXTERNAL").value is True
+assert description.evaluate(" External").value is False
+```
+
+Numeric families call `float(raw_value)` directly, without unit inference,
+rounding, tolerance, or localized-number parsing. A conversion `ValueError`
+becomes an error slot. Other unexpected exceptions propagate. Text operations
+use `str.casefold()` on both strings and preserve whitespace and the serialized
+operand. Successful comparisons always return `SUCCESS(True)` or
+`SUCCESS(False)`; a false leaf is not a `FILTERED` slot.
+
+Use `evaluate_property()` to interpret the existing property utilities' read
+conditions before invoking a family:
+
+```python
+from multiconn_archicad.utilities import (
+    BatchSlot, PropertyUnavailableError, PropertyUndefinedError,
+)
+from multiconn_archicad.utilities.queries import TextTest, evaluate_property
+
+test = TextTest(operator="is not", value="Temporary")
+assert evaluate_property(test, BatchSlot.success("External")).value is True
+
+unavailable = PropertyUnavailableError.from_message("Unavailable")
+assert evaluate_property(test, BatchSlot.failure(unavailable)).value is False
+
+undefined = PropertyUndefinedError.from_message("Undefined")
+result = evaluate_property(test, BatchSlot.failure(undefined))
+assert result.is_success
+assert result.value is False
+```
+
+The helper accepts completed read slots (`SUCCESS` or `ERROR`). Skipped
+`FILTERED`/`UPSTREAM_FAILED` slots have no read value and are rejected, rather than
+silently treated as a non-match. Both unavailability and undefined bypass the
+family and produce false for every implemented operator, including negative
+ones. Property utilities keep the two distinct error types; query evaluation
+interprets both as false. All other read failures retain their original error
+objects. The helper does not enforce query-wide
+fatal-error policy; that belongs to the future execution boundary.
+
+The [offline comparison example](../../examples/element_query_evaluation.py)
+demonstrates matches, non-matches, conversion errors, unavailability, and undefined
+values. These are individual property tests, not a query-tree executor.
 
 ## Family registry
 
@@ -299,6 +385,7 @@ Implement a concrete `PropertyTestModel` subclass and include it in the declared
 declare:
 
 ```python
+from enum import StrEnum
 from typing import Literal
 
 from pydantic import Field
@@ -309,11 +396,17 @@ from multiconn_archicad.models.tapir.types import (
     PropertyValueType,
 )
 from multiconn_archicad.utilities.queries import PropertyTestModel
+from multiconn_archicad.utilities.results.batch_results import BatchSlot
+
+
+class BooleanOperator(StrEnum):
+    IS = "is"
+    IS_NOT = "is not"
 
 
 class BooleanTest(PropertyTestModel):
     kind: Literal["boolean"] = "boolean"
-    operator: Literal["is", "is not"]
+    operator: BooleanOperator
     value: bool = Field(strict=True)
 
     @classmethod
@@ -325,6 +418,13 @@ class BooleanTest(PropertyTestModel):
 
     def validate_for(self, details: PropertyDetails) -> None:
         self._require_compatible_property(details)
+
+    def evaluate(self, raw_value: str) -> BatchSlot[bool]:
+        values = {"True": True, "False": False}
+        if raw_value not in values:
+            return BatchSlot.failure(f"Cannot interpret {raw_value!r} as a boolean")
+        matches = values[raw_value] == self.value
+        return BatchSlot.success(matches if self.operator is BooleanOperator.IS else not matches)
 ```
 
 The shared declaration would then become:
@@ -585,15 +685,18 @@ running Archicad instance.
 
 This section specifies the next execution stages; it does not introduce an
 executor or a second query representation. Execution will use the original tree.
+Family comparisons and `evaluate_property()` above are available now; recursive
+predicate evaluation and candidate retrieval remain planned.
 
 - Each ordinary property operation checks availability before comparison.
   Confirmed unavailability is false, including for `is not` and `does not contain`.
   It is not an inverted successful comparison or an unknown logical value.
 - `all` and `any` combine successful Boolean answers normally. A false leaf need
   not exclude an element if another branch of `any` matches.
-- Undefined values remain explicit `PropertyUndefinedError` failures for now;
-  they are not unavailable values or ordinary strings after property adaptation.
-  The six special user-defined-property state operations remain deferred.
+- Undefined values produce false in ordinary query comparisons, just like
+  unavailability. The property-read layer keeps `PropertyUndefinedError` distinct
+  from `PropertyUnavailableError`, preserving the information needed for future
+  state operators. All six special state operations remain deferred.
 - Command failures and invalid-query failures raise. A missing/invalid property
   GUID discovered during execution is fatal; an older catalogue is a possible
   cause. Existing general-purpose property `_result` readers retain that API
@@ -609,13 +712,40 @@ executor or a second query representation. Execution will use the original tree.
 | false | true | false | true |
 | false | false | false | false |
 
-The initial executor will filter an explicit ordered sequence of candidate IDs.
-Candidate retrieval is a separate operation: databases, current selection,
-visibility, and inclusion of subelements are not silently chosen by the query.
-Preserve input order and duplicate candidates, with one result slot per position.
-Repeated reads may be deduplicated internally without changing that alignment.
-An empty candidate sequence produces an empty result after query validation,
-without element-value reads.
+The primary entry point will search Archicad directly:
+
+```python
+# Planned APIs; not implemented yet.
+matches = api.utilities.element.find_elements(query)
+
+# Optional filtering of an existing population:
+result = api.utilities.element.filter_elements_by_query_result(elements, query)
+matches = api.utilities.element.filter_elements_by_query(elements, query)
+```
+
+`find_elements()` retrieves its own candidates and returns only elements with a
+final true evaluation. It has no `_result` variant or caller-population alignment.
+Non-matches and ordinary per-element evaluation failures are omitted. Fatal
+failures still raise: invalid queries, missing/invalid property GUIDs, transport
+or whole-command failures, and failed prerequisite candidate listings.
+
+Search derives safe type bounds from the existing query: type predicates supply
+sets, AND intersects bounds, and OR unions them. Property predicates provide no
+type restriction. An unrestricted OR branch requires unrestricted listing.
+Use `GetElementsByType` for finite bounds, `GetAllElements` for unrestricted
+bounds, and no listing for an empty bound. Validate the entire query first.
+
+Keep every type predicate in the original tree. For example,
+`(Wall AND ID starts W) OR (Slab AND ID starts S)` can retrieve only walls/slabs,
+but a slab named `W-01` must still fail. No stripping or second query tree is
+needed. Search returns unique GUIDs in deterministic listing order. Databases,
+visibility filters, and subelement inclusion are explicit listing options; the
+default follows Tapir's current database rather than implying every database.
+
+The supplied-population filter preserves input order and duplicate candidates,
+with one result slot per position. Repeated reads may be deduplicated internally
+without changing that alignment. Empty candidates produce an empty result after
+query validation, without element-value reads.
 
 Use the existing `BatchResult[ElementIdArrayItem]` contract:
 
@@ -625,14 +755,24 @@ Use the existing `BatchResult[ElementIdArrayItem]` contract:
 | Definite non-match | `FILTERED` |
 | Per-element read/evaluation failure | `ERROR`, retaining its diagnostic |
 
-A future `_result` method will retain the aligned result. Its plain-list companion
-will call `raise_for_errors()` before returning successful matching IDs, following
-existing element utilities. No new batch state, query-specific result container,
-or three-valued Boolean layer is required.
+Only the filter exposes this aligned `_result`. Its plain-list companion calls
+`raise_for_errors()` before returning successful matching IDs, following existing
+element utilities. Search uses the same evaluator internally but returns only
+matches. No new batch state, query-specific result container, or three-valued
+Boolean layer is required.
 
-Reliable numeric retrieval is still stage 8 work: Tapir display strings do not
-guarantee raw database precision or SI values. This contract does not authorize
-parsing localized display text to invent typed values.
+Each predicate owns `evaluate(context)` and recursively evaluates children for
+groups. Families own value comparisons. The context supplies already fetched
+data; evaluation methods make no API calls. Groups use
+`BatchRow(children).aggregate().map(all)` or `.map(any)`: aggregation retains
+errors and packages successful values, and the Boolean function runs only for a
+successful aggregate. A non-match is `SUCCESS(False)` internally, becoming
+`FILTERED` only at the final element-result boundary.
+
+Stage 8 adapts supplied successful property values: numeric values use
+`float(api_value)` directly, treating the returned value as authoritative. The SI
+assumption remains in place. No additional precision handling, unit conversion,
+or localized-number parser is required; failed conversions remain errors.
 
 ## JSON Schema
 
