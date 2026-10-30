@@ -12,9 +12,11 @@ from multiconn_archicad.utilities.queries import (
     AnyOf,
     ElementTypePredicate,
     NumberTest,
+    NumberOperator,
     PropertyPredicate,
     Query,
     TextTest,
+    TextOperator,
 )
 
 pytestmark = pytest.mark.unit
@@ -210,7 +212,9 @@ def test_json_schema_exposes_recursive_nodes_and_typed_operator_choices():
     assert "Negate" not in definitions
     assert definitions["AllOf"]["properties"]["items"]["items"]["discriminator"]["propertyName"] == "kind"
     assert set(definitions["PropertyPredicate"]["properties"]["test"]["discriminator"]["mapping"]) == {"text", "number"}
-    assert definitions["TextTest"]["properties"]["operator"]["enum"] == [
+    assert definitions["TextTest"]["properties"]["operator"] == {"$ref": "#/$defs/TextOperator"}
+    assert definitions["NumberTest"]["properties"]["operator"] == {"$ref": "#/$defs/NumberOperator"}
+    assert definitions["TextOperator"]["enum"] == [
         "is",
         "is not",
         "contains",
@@ -218,7 +222,7 @@ def test_json_schema_exposes_recursive_nodes_and_typed_operator_choices():
         "starts with",
         "ends with",
     ]
-    assert definitions["NumberTest"]["properties"]["operator"]["enum"] == [
+    assert definitions["NumberOperator"]["enum"] == [
         "is",
         "is not",
         "is greater than",
@@ -229,3 +233,17 @@ def test_json_schema_exposes_recursive_nodes_and_typed_operator_choices():
     assert (
         definitions["NumberTest"]["properties"]["value"]["description"] == "Numeric operand; quantities use SI units."
     )
+
+
+@pytest.mark.parametrize(
+    ("family", "operator", "value"),
+    [(TextTest, TextOperator.CONTAINS, "External"), (NumberTest, NumberOperator.GREATER_THAN, 3)],
+)
+def test_operator_enums_are_stored_as_members_and_serialized_as_readable_values(family, operator, value):
+    test = family(operator=operator, value=value)
+    parsed = family.model_validate({"operator": operator.value, "value": value})
+
+    assert parsed.operator is operator
+    assert test == parsed
+    assert test.model_dump(mode="json")["operator"] == operator.value
+    assert family.model_validate_json(test.model_dump_json()).operator is operator
