@@ -1,4 +1,5 @@
-"""Expected failures when a property test is checked against metadata."""
+"""Identify invalid property tests and family configuration."""
+
 from __future__ import annotations
 
 
