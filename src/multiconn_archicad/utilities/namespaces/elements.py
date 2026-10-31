@@ -18,6 +18,12 @@ from multiconn_archicad.utilities.results.batch_results import (
     BatchResult,
     BatchSlot,
 )
+from multiconn_archicad.utilities.queries import Query
+from multiconn_archicad.utilities.queries.execution import (
+    evaluate_query_candidates,
+    list_query_candidates,
+    validate_execution_query,
+)
 
 if TYPE_CHECKING:
     from multiconn_archicad.clients.unified_api.api import UnifiedApi
@@ -56,9 +62,49 @@ class ElementUtilities:
         """Bind element operations to ``api``."""
         self._api = api
 
-    def set_selected_elements_result(
-        self, elements: Sequence[ElementIdLike]
+    def find_elements(
+        self,
+        query: Query,
+        *,
+        databases: Sequence[tapir.DatabaseIdArrayItem] | None = None,
+        filters: Sequence[tapir.ElementFilter] | None = None,
+    ) -> list[tapir.ElementIdArrayItem]:
+        """Search Archicad, returning unique proven matches in listing order.
+
+        Safe type restrictions narrow listing without rewriting the query.
+        Scope follows Tapir's current database unless databases are supplied.
+        Ordinary per-element evaluation failures are omitted. Invalid queries
+        (including absent property references), listing/command failures, and unexpected bugs
+        raise. This method has no aligned result variant and changes no selection.
+        """
+        validate_execution_query(self._api, query)
+        candidates = list_query_candidates(self._api, query, databases=databases, filters=filters)
+        results = evaluate_query_candidates(self._api, query, candidates)
+        return [slot.value for slot in results.values() if slot.is_success]
+
+    def filter_elements_by_query_result(
+        self, elements: Sequence[ElementIdLike], query: Query
     ) -> BatchResult[tapir.ElementIdArrayItem]:
+        """Filter supplied elements with one outcome per input, preserving duplicates.
+
+        Matches contain element IDs, non-matches are FILTERED, and per-element
+        failures remain ERROR slots. Query-wide failures still raise. Empty
+        populations validate the query without reading element values.
+        """
+        candidates = normalize_element_ids(elements)
+        validate_execution_query(self._api, query)
+        results = evaluate_query_candidates(self._api, query, candidates)
+        return BatchResult(tuple(results[element.elementId.guid] for element in candidates))
+
+    def filter_elements_by_query(
+        self, elements: Sequence[ElementIdLike], query: Query
+    ) -> list[tapir.ElementIdArrayItem]:
+        """Return matching supplied elements, raising for any evaluation failure."""
+        result = self.filter_elements_by_query_result(elements, query)
+        result.raise_for_errors("Filter elements by query")
+        return result.successes
+
+    def set_selected_elements_result(self, elements: Sequence[ElementIdLike]) -> BatchResult[tapir.ElementIdArrayItem]:
         """Replace the selection and retain per-request add outcomes.
 
         Args:
@@ -96,7 +142,9 @@ class ElementUtilities:
 
         return BatchResult(
             tuple(
-                BatchSlot.success(element) if element.elementId.guid in current_guids else added_slots[element.elementId.guid]
+                BatchSlot.success(element)
+                if element.elementId.guid in current_guids
+                else added_slots[element.elementId.guid]
                 for element in desired
             )
         )

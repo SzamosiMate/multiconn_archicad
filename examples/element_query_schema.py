@@ -1,9 +1,9 @@
 """Build and round-trip a query without connecting to Archicad.
 
 The property GUIDs are illustrative; replace them with actual catalogue GUIDs
-before context validation. Query-tree evaluation is not implemented yet. Text comparisons
-ignore case and preserve whitespace; numeric operands use SI without added
-tolerance.
+before context validation. Supply EvaluationContext to evaluate the tree offline,
+or use the bound element utility to search/filter Archicad. Text comparisons
+ignore case and preserve whitespace; numeric operands use SI without added tolerance.
 """
 
 from uuid import UUID

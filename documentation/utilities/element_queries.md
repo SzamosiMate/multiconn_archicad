@@ -1,11 +1,12 @@
 # Element query definitions
 
-Stages 1-8 provide query models, JSON serialization, JSON Schema, test-family
+Stages 1-10 provide query models, JSON serialization, JSON Schema, test-family
 behavior, uniform field information, batch property discovery, and query-wide
 context validation, plus individual property comparisons. The catalogue,
 validator, and comparisons can use supplied metadata/values offline. The bound
-property utility can fetch a fresh metadata/value batch from Archicad. Query-tree
-execution and bound search/filter methods are not yet implemented.
+property utility can fetch a fresh metadata/value batch from Archicad. The query
+tree can evaluate supplied per-element data. The bound element utility searches
+Archicad directly or filters an existing population with the same query.
 
 Import the public models from `multiconn_archicad.utilities.queries`.
 
@@ -17,10 +18,10 @@ ordinary numeric comparisons without added tolerance or display rounding.
 Unavailable properties make every operation false except `not available`.
 All six common user-defined-property state operations are deferred.
 
-Text/numeric comparison and property-condition handling are implemented; group
-evaluation and the bound execution APIs follow in stages 9-10. General
+Text/numeric comparison, property-condition handling, and recursive group
+evaluation and the bound execution APIs are implemented. General
 `Negate` / `"not"` predicates have been removed; JSON using `"kind": "not"` is
-rejected at any depth. No query executor exists yet. The complete record of
+rejected at any depth. The complete record of
 default/custom/undefined behavior, Tapir error paths, and retrieval limits is in the
 [stage 7 reference](../../docs/ELEMENT_QUERY_ARCHICAD_BEHAVIOR.md).
 
@@ -639,7 +640,7 @@ result.raise_for_errors()
 `validate_query()` only uses the supplied query and metadata snapshot. It does not
 fetch metadata, read element values, evaluate boolean expressions, or build a
 second query tree. Success means the query is compatible with that snapshot; it
-does not verify the currently open project or imply that execution is implemented.
+does not verify the currently open project or supply any element values to evaluation.
 The plain version string is not interpreted by context validation.
 
 Every branch of `all` and `any` is checked. A valid earlier sibling does
@@ -674,19 +675,122 @@ propagate automatically instead of becoming user-query issues.
 
 Pydantic `ValidationError` still reports malformed query structure during parsing,
 before context validation. Element-type choices are checked there and require no
-property lookup. Per-element missing/unreadable value outcomes belong to later
-evaluation semantics, not these metadata-validation issues.
+property lookup. Per-element missing/unreadable value outcomes belong to
+evaluation, not these metadata-validation issues.
 
 The [offline discovery example](../../examples/element_query_discovery.py) now also
 demonstrates a valid query and an unsupported property inside `any`, without a
 running Archicad instance.
 
-## Evaluation and result contract
+## Evaluating a query with supplied data
 
-This section specifies the next execution stages; it does not introduce an
-executor or a second query representation. Execution will use the original tree.
-Family comparisons and `evaluate_property()` above are available now; recursive
-predicate evaluation and candidate retrieval remain planned.
+Each predicate owns `prepare(builder)` and
+`evaluate(context, element_id) -> BatchSlot[bool]`. Groups recursively call their
+children in both passes. Preparation collects source requirements; building the
+context performs their batched reads. One context then supplies completed data
+for every element in the execution. For real project data, validate the query
+against its catalogue first.
+
+```python
+from uuid import UUID
+from unittest.mock import MagicMock
+
+from multiconn_archicad.models.tapir.types import ElementType
+from multiconn_archicad.utilities import BatchGrid, BatchRow, BatchSlot
+from multiconn_archicad.utilities.queries import (
+    AllOf, AnyOf, ContextBuilder, ElementTypePredicate,
+    NumberOperator, NumberTest, PropertyPredicate, Query, TextOperator, TextTest,
+)
+
+height_id = UUID("22222222-2222-4222-8222-222222222222")
+description_id = UUID("11111111-1111-4111-8111-111111111111")
+query = Query(where=AllOf(items=(
+    ElementTypePredicate(types=(ElementType.WALL,)),
+    AnyOf(items=(
+        PropertyPredicate(
+            property_id=height_id,
+            test=NumberTest(operator=NumberOperator.GREATER_THAN, value=3),
+        ),
+        PropertyPredicate(
+            property_id=description_id,
+            test=TextTest(operator=TextOperator.STARTS_WITH, value="External"),
+        ),
+    )),
+)))
+# Supply fake read responses here; ContextBuilder uses the same source commands
+# with a real UnifiedApi when connected to Archicad.
+from multiconn_archicad.models.tapir.types import ElementId, ElementIdArrayItem
+
+element_id = UUID(int=1)
+candidates = [ElementIdArrayItem(elementId=ElementId(guid=element_id))]
+api = MagicMock()
+api.utilities.property.get_property_values_per_element_result.return_value = BatchGrid(
+    rows=(BatchRow((BatchSlot.success("2.5"), BatchSlot.success("EXTERNAL wall"))),),
+    width=2,
+)
+api.tapir.element.filter_elements.return_value = candidates
+
+builder = ContextBuilder()
+query.where.prepare(builder)
+context = builder.build(api, candidates)
+decision = query.where.evaluate(context, element_id)
+assert decision.is_success
+assert decision.value is True
+```
+
+This short wall matches because its description satisfies the OR branch. Type
+predicates remain active at every level; the same values on a slab would fail.
+Undefined/unavailable property slots contribute successful false values, so other
+branches of `any` can still match.
+
+`context.data(PROPERTY_VALUES)` maps property GUIDs to `PropertyValuesData`
+column views. Each view retains the same `BatchGrid` and shared element-to-row
+index; `.value(element_id)` returns the original slot. No per-element property
+dictionary or context is created during evaluation.
+
+`context.data(TYPE_MEMBERSHIP)` maps type frozensets to matching element-GUID
+frozensets from `FilterElements`. A type predicate checks whether its element GUID
+belongs to that set. Type-only/property-only queries request only the data they
+use. Missing sources, keys, or element rows raise `KeyError`; skipped property
+slots are rejected too. These indicate incomplete execution input, not property
+unavailability.
+
+The source objects are typed keys shared by preparation and evaluation. A
+`ContextSource[Key, Value]` implements
+`load(api, elements, keys) -> Mapping[Key, Value]`. Property predicates request
+`builder.require(PROPERTY_VALUES, property_id)`; type predicates request
+`builder.require(TYPE_MEMBERSHIP, frozenset(types))`. The builder deduplicates
+keys in first-request order and invokes each source once. New predicates can
+reuse a source or introduce another source class without editing the builder or
+context. `builder.provide(source, key, value)` seeds already completed data so
+the source only loads missing keys. Empty populations make no source reads.
+
+Internally the context stores `Mapping[object, object]`, and the builder stores
+requests of different source types in one dictionary. Two explicit casts in
+`queries/context.py` recover a source's request type and payload type. Both rely
+on storing and retrieving under the same source object. The generic methods
+check source-specific key and value types at call sites, including seeded values;
+there are no runtime type conversions. Direct construction of a context from a
+raw dictionary bypasses this typed builder boundary.
+
+Groups evaluate every child before aggregating. Real read/conversion errors are
+retained even when a sibling would settle the Boolean result. Error messages
+include paths such as `where.items[1].items[0].test` and property GUIDs. Aggregate
+`causes` retain the original errors beneath the contextual wrappers. An optional
+`path=` keyword changes the diagnostic root label; it is not part of query JSON.
+Unexpected evaluator exceptions propagate.
+
+The [offline predicate example](../../examples/element_query_predicates.py) builds
+one context for four elements using fake reads. It shows nested groups, excluded
+element types, undefined values inside OR, and a numeric conversion failure with
+its query path. It requires no Archicad connection.
+
+## Execution and result contract
+
+The bound element utility validates queries, retrieves candidate/value data in
+batches, and evaluates the original tree. Calls are read-only and do not change
+selection. Supply a parsed `Query`; use `Query.model_validate()` or
+`Query.model_validate_json()` at dictionary/JSON boundaries.
 
 - Each ordinary property operation checks availability before comparison.
   Confirmed unavailability is false, including for `is not` and `does not contain`.
@@ -697,10 +801,11 @@ predicate evaluation and candidate retrieval remain planned.
   unavailability. The property-read layer keeps `PropertyUndefinedError` distinct
   from `PropertyUnavailableError`, preserving the information needed for future
   state operators. All six special state operations remain deferred.
-- Command failures and invalid-query failures raise. A missing/invalid property
-  GUID discovered during execution is fatal; an older catalogue is a possible
-  cause. Existing general-purpose property `_result` readers retain that API
-  error; it is the query executor that will enforce this query-level rule.
+- Command failures and invalid-query failures raise. Property GUIDs are validated
+  against a fresh Tapir catalogue before execution. References absent from that
+  catalogue are invalid queries. There is no additional property-existence scan
+  after reading values; subsequent per-element read errors follow the ordinary
+  search/filter policy.
 - Other encountered per-element read/evaluation failures remain errors rather than
   Boolean false. A decisive sibling does not suppress an encountered error.
   Evaluation may skip unnecessary reads; diagnostics cover work actually done.
@@ -712,10 +817,9 @@ predicate evaluation and candidate retrieval remain planned.
 | false | true | false | true |
 | false | false | false | false |
 
-The primary entry point will search Archicad directly:
+The primary entry point searches Archicad directly:
 
 ```python
-# Planned APIs; not implemented yet.
 matches = api.utilities.element.find_elements(query)
 
 # Optional filtering of an existing population:
@@ -726,8 +830,21 @@ matches = api.utilities.element.filter_elements_by_query(elements, query)
 `find_elements()` retrieves its own candidates and returns only elements with a
 final true evaluation. It has no `_result` variant or caller-population alignment.
 Non-matches and ordinary per-element evaluation failures are omitted. Fatal
-failures still raise: invalid queries, missing/invalid property GUIDs, transport
+failures still raise: invalid queries (including absent property references), transport
 or whole-command failures, and failed prerequisite candidate listings.
+
+`find_elements(query, *, databases=None, filters=None)` accepts the same typed
+database wrappers and `ElementFilter` members used by Tapir listing commands.
+For example:
+
+```python
+from multiconn_archicad.models.tapir.types import ElementFilter
+
+matches = api.utilities.element.find_elements(
+    query,
+    filters=(ElementFilter.IS_VISIBLE_BY_LAYER,),
+)
+```
 
 Search derives safe type bounds from the existing query: type predicates supply
 sets, AND intersects bounds, and OR unions them. Property predicates provide no
@@ -741,11 +858,31 @@ but a slab named `W-01` must still fail. No stripping or second query tree is
 needed. Search returns unique GUIDs in deterministic listing order. Databases,
 visibility filters, and subelement inclusion are explicit listing options; the
 default follows Tapir's current database rather than implying every database.
+Type calls follow `ElementType` declaration order; each response keeps its upstream
+order. Shared execution deduplicates GUIDs by first occurrence, once for reads
+and evaluation. This is necessary because section elements can map to the same
+owner and multiple databases can return that owner. Every listing/database
+failure raises, even if other databases returned elements.
 
 The supplied-population filter preserves input order and duplicate candidates,
 with one result slot per position. Repeated reads may be deduplicated internally
 without changing that alignment. Empty candidates produce an empty result after
 query validation, without element-value reads.
+
+Queries with properties discover one fresh metadata catalogue before listing or
+evaluation, including when the candidate set is empty. Type-only queries need no
+property metadata request. Each execution reads distinct property GUIDs for
+distinct element GUIDs in one property-value batch. A finite overall type bound
+first narrows candidates with `FilterElements`, before property reads. This
+completed bound membership is provided to the context builder. Predicates then
+prepare their own data requirements, with the type source loading only missing
+membership sets. This preserves nested OR semantics without
+reading full element details or carrying known types from listing. Property-only
+queries make no type-filter calls. Tapir preserves input order in these filtered
+subsets. Whole-command errors raise in core; a header unreadable by
+`FilterElements` is omitted from its matching subset. Execution relies on the
+upstream response alignment contract rather than adding speculative shape
+checks. Nothing is cached between executions.
 
 Use the existing `BatchResult[ElementIdArrayItem]` contract:
 
@@ -761,13 +898,17 @@ element utilities. Search uses the same evaluator internally but returns only
 matches. No new batch state, query-specific result container, or three-valued
 Boolean layer is required.
 
-Each predicate owns `evaluate(context)` and recursively evaluates children for
-groups. Families own value comparisons. The context supplies already fetched
-data; evaluation methods make no API calls. Groups use
-`BatchRow(children).aggregate().map(all)` or `.map(any)`: aggregation retains
-errors and packages successful values, and the Boolean function runs only for a
-successful aggregate. A non-match is `SUCCESS(False)` internally, becoming
-`FILTERED` only at the final element-result boundary.
+Context validation failures raise `QueryValidationError` with all query issues.
+The fresh Tapir catalogue covers properties that the official property-details
+command cannot describe, so execution does not add that official lookup.
+Per-element errors retain query paths, GUIDs, and causes in the diagnostic filter;
+search omits them, and the strict filter raises `BatchOperationError` containing
+that result.
+
+The [offline execution example](../../examples/element_query_execution.py) uses
+`UnifiedApi` with a fake command transport, including normal generated-client
+validation. It demonstrates search, aligned filtering with duplicate IDs, and
+strict-filter failure without contacting Archicad.
 
 Stage 8 adapts supplied successful property values: numeric values use
 `float(api_value)` directly, treating the returned value as authoritative. The SI
@@ -781,8 +922,9 @@ schema = Query.model_json_schema()
 ```
 
 The schema contains the recursive predicate discriminators, typed operator enums,
-operand shapes, UUID format, and collection-size constraints. Schema publication
-does not advertise an executable query capability yet. Numeric finiteness is also
+operand shapes, UUID format, and collection-size constraints. This describes query
+syntax; project metadata and per-element read availability remain separate checks.
+Numeric finiteness is also
 enforced by Pydantic at runtime; consumers must validate submitted queries rather
 than relying on JSON Schema alone.
 
