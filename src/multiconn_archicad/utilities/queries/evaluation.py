@@ -1,4 +1,4 @@
-"""Evaluate one property test against an already completed property read."""
+"""Interpret property read conditions before comparing successful values."""
 
 from __future__ import annotations
 

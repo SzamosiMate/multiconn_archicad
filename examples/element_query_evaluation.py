@@ -1,4 +1,4 @@
-"""Evaluate individual property tests offline; query-tree execution is stage 9."""
+"""Evaluate individual tests; see element_query_predicates.py for a full tree."""
 
 from multiconn_archicad.utilities import BatchSlot, PropertyUnavailableError, PropertyUndefinedError
 from multiconn_archicad.utilities.queries import (

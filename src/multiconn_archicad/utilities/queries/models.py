@@ -1,8 +1,9 @@
 """Define serializable queries, property-test validation, and value comparisons.
 
 Parsing validates structure. Call a test's ``validate_for`` method separately to
-check supplied property metadata. Families evaluate supplied value strings; these
-models do not fetch metadata or execute query trees.
+check supplied property metadata. Families compare supplied strings; predicates
+prepare source requests and evaluate the tree against shared execution data.
+Neither performs API reads.
 """
 
 from __future__ import annotations
@@ -20,10 +21,13 @@ from multiconn_archicad.models.tapir.types import (
     PropertyDetails,
     PropertyValueType,
 )
-from multiconn_archicad.utilities.results.batch_results import BatchSlot
+from multiconn_archicad.utilities.results.batch_results import BatchError, BatchRow, BatchSlot
 
 from .errors import InvalidPropertyTestError
+from .context import ContextBuilder, EvaluationContext
+from .evaluation import evaluate_property
 from .operators import NumberOperator, TextOperator
+from .sources import PROPERTY_VALUES, TYPE_MEMBERSHIP
 
 
 class _QueryModel(BaseModel):
@@ -177,12 +181,42 @@ class PropertyPredicate(_QueryModel):
     property_id: UUID
     test: PropertyTest
 
+    def candidate_types(self) -> frozenset[ElementType] | None:
+        """A property comparison alone imposes no element-type restriction."""
+        return None
+
+    def prepare(self, builder: ContextBuilder) -> None:
+        """Request this property's values for the execution's candidate population."""
+        builder.require(PROPERTY_VALUES, self.property_id)
+
+    def evaluate(self, context: EvaluationContext, element_id: UUID, *, path: str = "where") -> BatchSlot[bool]:
+        """Evaluate a supplied property read, retaining its GUID/path on failure."""
+        value = context.data(PROPERTY_VALUES)[self.property_id].value(element_id)
+        result = evaluate_property(self.test, value)
+        if result.is_error:
+            return BatchSlot.failure(
+                BatchError.aggregate((result.error,), context=f"{path}.test (property {self.property_id})")
+            )
+        return result
+
 
 class ElementTypePredicate(_QueryModel):
     """Match one or more Archicad element types."""
 
     kind: Literal["element_type"] = "element_type"
     types: tuple[ElementType, ...] = Field(min_length=1)
+
+    def candidate_types(self) -> frozenset[ElementType]:
+        """Only the declared types can satisfy this predicate."""
+        return frozenset(self.types)
+
+    def prepare(self, builder: ContextBuilder) -> None:
+        """Request membership for this distinct set of element types."""
+        builder.require(TYPE_MEMBERSHIP, self.candidate_types())
+
+    def evaluate(self, context: EvaluationContext, element_id: UUID, *, path: str = "where") -> BatchSlot[bool]:
+        """Use this predicate's supplied FilterElements membership result."""
+        return BatchSlot.success(element_id in context.data(TYPE_MEMBERSHIP)[self.candidate_types()])
 
 
 class AllOf(_QueryModel):
@@ -191,12 +225,55 @@ class AllOf(_QueryModel):
     kind: Literal["all"] = "all"
     items: tuple[Predicate, ...] = Field(min_length=1)
 
+    def candidate_types(self) -> frozenset[ElementType] | None:
+        """Intersect restrictions; unrestricted children add no restriction."""
+        result: frozenset[ElementType] | None = None
+        for child in self.items:
+            types = child.candidate_types()
+            if types is not None:
+                result = types if result is None else result & types
+        return result
+
+    def prepare(self, builder: ContextBuilder) -> None:
+        """Collect requirements from every child, sharing the same builder."""
+        for child in self.items:
+            child.prepare(builder)
+
+    def evaluate(self, context: EvaluationContext, element_id: UUID, *, path: str = "where") -> BatchSlot[bool]:
+        """Evaluate every child and AND successful values, retaining all errors."""
+        children = tuple(
+            child.evaluate(context, element_id, path=f"{path}.items[{index}]") for index, child in enumerate(self.items)
+        )
+        return BatchRow(children).aggregate(context=f"{path} (all)").map(all)
+
 
 class AnyOf(_QueryModel):
     """Require at least one contained predicate to match."""
 
     kind: Literal["any"] = "any"
     items: tuple[Predicate, ...] = Field(min_length=1)
+
+    def candidate_types(self) -> frozenset[ElementType] | None:
+        """Union restrictions; an unrestricted child makes the group unrestricted."""
+        result: frozenset[ElementType] = frozenset()
+        for child in self.items:
+            types = child.candidate_types()
+            if types is None:
+                return None
+            result |= types
+        return result
+
+    def prepare(self, builder: ContextBuilder) -> None:
+        """Collect requirements from every child, sharing the same builder."""
+        for child in self.items:
+            child.prepare(builder)
+
+    def evaluate(self, context: EvaluationContext, element_id: UUID, *, path: str = "where") -> BatchSlot[bool]:
+        """Evaluate every child and OR successful values, retaining all errors."""
+        children = tuple(
+            child.evaluate(context, element_id, path=f"{path}.items[{index}]") for index, child in enumerate(self.items)
+        )
+        return BatchRow(children).aggregate(context=f"{path} (any)").map(any)
 
 
 Predicate: TypeAlias = Annotated[
