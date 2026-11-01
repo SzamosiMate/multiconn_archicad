@@ -5,6 +5,7 @@ from .errors import (
     InvalidPropertyTestError,
     UnsupportedPropertyTypeError,
     AmbiguousPropertyTypeError,
+    UnsupportedQueryVersionError,
 )
 from .context import ContextBuilder, ContextSource, EvaluationContext
 from .evaluation import evaluate_property
@@ -26,6 +27,8 @@ from .registry import TestRegistry
 from .operators import NumberOperator, TextOperator
 from .sources import PROPERTY_VALUES, TYPE_MEMBERSHIP, PropertyValuesData, PropertyValuesSource, TypeMembershipSource
 from .validation import QueryValidationError, QueryValidationIssue, QueryValidationResult, validate_query
+from .versioning import QUERY_SCHEMA_VERSION, validate_query_version
+from multiconn_archicad.utilities.results.query_results import FindElementsResult
 
 __all__ = [
     "AllOf",
@@ -37,6 +40,7 @@ __all__ = [
     "EvaluationContext",
     "DiscoveredProperty",
     "FieldInfo",
+    "FindElementsResult",
     "InvalidPropertyTestError",
     "NumberTest",
     "NumberOperator",
@@ -50,6 +54,7 @@ __all__ = [
     "PropertyTest",
     "PropertyTestModel",
     "Query",
+    "QUERY_SCHEMA_VERSION",
     "QueryValidationError",
     "QueryValidationIssue",
     "QueryValidationResult",
@@ -60,6 +65,8 @@ __all__ = [
     "TypeMembershipSource",
     "UnsupportedPropertyInfo",
     "UnsupportedPropertyTypeError",
+    "UnsupportedQueryVersionError",
     "evaluate_property",
     "validate_query",
+    "validate_query_version",
 ]

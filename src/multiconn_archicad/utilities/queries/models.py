@@ -28,6 +28,7 @@ from .context import ContextBuilder, EvaluationContext
 from .evaluation import evaluate_property
 from .operators import NumberOperator, TextOperator
 from .sources import PROPERTY_VALUES, TYPE_MEMBERSHIP
+from .versioning import QUERY_SCHEMA_VERSION
 
 
 class _QueryModel(BaseModel):
@@ -285,7 +286,7 @@ Predicate: TypeAlias = Annotated[
 class Query(_QueryModel):
     """Store a versioned query tree, independently of any Archicad connection."""
 
-    schema_version: str = "1.0"
+    schema_version: str = QUERY_SCHEMA_VERSION
     where: Predicate
 
 

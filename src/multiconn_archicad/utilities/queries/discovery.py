@@ -27,7 +27,6 @@ class PropertyCatalogue:
 
     def __init__(self, properties: Iterable[PropertyDetails], registry: TestRegistry):
         self._by_id: dict[UUID, DiscoveredProperty] = {}
-        self._fields: list[DiscoveredProperty] = []
         self._register_properties(properties, registry)
 
     def _register_properties(self, properties: Iterable[PropertyDetails], registry: TestRegistry) -> None:
@@ -40,25 +39,24 @@ class PropertyCatalogue:
             if field.property_id in self._by_id:
                 raise ValueError(f"Duplicate property GUID in properties: {field.property_id}")
             self._by_id[field.property_id] = field
-            self._fields.append(field)
 
     @property
     def fields(self) -> tuple[DiscoveredProperty, ...]:
-        return tuple(self._fields)
+        return tuple(self._by_id.values())
 
     @property
     def supported(self) -> tuple[PropertyInfo, ...]:
-        return tuple(field for field in self._fields if isinstance(field, PropertyInfo))
+        return tuple(field for field in self._by_id.values() if isinstance(field, PropertyInfo))
 
     @property
     def unsupported(self) -> tuple[UnsupportedPropertyInfo, ...]:
-        return tuple(field for field in self._fields if isinstance(field, UnsupportedPropertyInfo))
+        return tuple(field for field in self._by_id.values() if isinstance(field, UnsupportedPropertyInfo))
 
     def __iter__(self) -> Iterator[DiscoveredProperty]:
-        return iter(self._fields)
+        return iter(self._by_id.values())
 
     def __len__(self) -> int:
-        return len(self._fields)
+        return len(self._by_id)
 
     def __getitem__(self, property_id: PropertyIdLike) -> DiscoveredProperty:
         """Look up a supported or unsupported field; raise KeyError if absent."""
@@ -79,7 +77,7 @@ class PropertyCatalogue:
         needle = text.casefold()
         return tuple(
             field
-            for field in self._fields
+            for field in self._by_id.values()
             if (not supported_only or field.supported)
             and (group is None or field.group == group)
             and needle in field.qualified_name.casefold()
@@ -87,4 +85,4 @@ class PropertyCatalogue:
 
     def describe(self) -> dict[str, Any]:
         """Return JSON-friendly supported and unsupported field descriptions."""
-        return {"fields": [field.describe() for field in self._fields]}
+        return {"fields": [field.describe() for field in self._by_id.values()]}
