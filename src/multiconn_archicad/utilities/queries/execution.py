@@ -8,11 +8,13 @@ from uuid import UUID
 
 from multiconn_archicad.models.tapir import types as tapir
 from multiconn_archicad.utilities.results.batch_results import BatchResult, BatchSlot
+from multiconn_archicad.utilities.results.query_results import FindElementsResult
 
 from .context import ContextBuilder, EvaluationContext
 from .models import Predicate, Query
 from .sources import PROPERTY_VALUES, TYPE_MEMBERSHIP
 from .validation import validate_query
+from .versioning import validate_query_version
 
 if TYPE_CHECKING:
     from multiconn_archicad.clients.unified_api.api import UnifiedApi
@@ -22,6 +24,7 @@ def validate_execution_query(api: UnifiedApi, query: Query) -> None:
     """Check the complete query before narrowing candidates or skipping reads."""
     if not isinstance(query, Query):
         raise TypeError("Expected a Query instance; parse query JSON with Query.model_validate_json() first")
+    validate_query_version(query.schema_version)
     # Type-only queries have no metadata-dependent criteria. Their structure was
     # validated by Pydantic, so no property discovery request is necessary.
     builder = ContextBuilder()
@@ -45,21 +48,25 @@ def list_query_candidates(
     databases: Sequence[tapir.DatabaseIdArrayItem] | None,
     filters: Sequence[tapir.ElementFilter] | None,
 ) -> list[tapir.ElementIdArrayItem]:
-    """Use safe type bounds for listing, retaining every original predicate."""
-    bounds = query.where.candidate_types()
-    if bounds == frozenset():
+    """List within a safe upper bound on matching element types.
+
+    None means unrestricted; an empty bound means nothing can match. Keep all
+    original predicates for evaluation after listing.
+    """
+    type_bound = query.where.candidate_types()
+    if type_bound == frozenset():
         return []
     database_list = list(databases) if databases is not None else None
     filter_list = list(filters) if filters is not None else None
     elements: list[tapir.ElementIdArrayItem] = []
 
-    if bounds is None:
+    if type_bound is None:
         response = api.tapir.element.get_all_elements(databases=database_list, filters=filter_list)
         elements.extend(_listed_elements(response))
     else:
         # Enum declaration order keeps results independent of set iteration.
         for element_type in tapir.ElementType:
-            if element_type not in bounds:
+            if element_type not in type_bound:
                 continue
             response = api.tapir.element.get_elements_by_type(
                 element_type, databases=database_list, filters=filter_list
@@ -70,72 +77,73 @@ def list_query_candidates(
 
 def evaluate_query_candidates(
     api: UnifiedApi, query: Query, elements: Sequence[tapir.ElementIdArrayItem]
-) -> dict[UUID, BatchSlot[tapir.ElementIdArrayItem]]:
-    """Evaluate each distinct candidate once; callers choose search/filter output."""
+) -> FindElementsResult:
+    """Evaluate each distinct candidate once, retaining its identity and outcome."""
     if not elements:
-        return {}
+        return FindElementsResult((), BatchResult(()))
 
     seen: set[UUID] = set()
-    candidates: list[tapir.ElementIdArrayItem] = []
+    unique_candidates: list[tapir.ElementIdArrayItem] = []
     for element in elements:
         if element.elementId.guid not in seen:
             seen.add(element.elementId.guid)
-            candidates.append(element)
+            unique_candidates.append(element)
 
-    bounds = query.where.candidate_types()
-    eligible = _narrow_candidates(api, candidates, bounds)
-    context = _build_query_context(api, query.where, eligible, bounds)
-    return _evaluate_candidates(query.where, candidates, eligible, context)
+    type_bound = query.where.candidate_types()
+    eligible_candidates = _narrow_candidates(api, unique_candidates, type_bound)
+    context = _build_query_context(api, query.where, eligible_candidates, type_bound)
+    outcomes = _evaluate_candidates(query.where, unique_candidates, eligible_candidates, context)
+    return FindElementsResult(tuple(unique_candidates), outcomes)
 
 
 def _narrow_candidates(
     api: UnifiedApi,
-    candidates: list[tapir.ElementIdArrayItem],
-    bounds: frozenset[tapir.ElementType] | None,
+    unique_candidates: list[tapir.ElementIdArrayItem],
+    type_bound: frozenset[tapir.ElementType] | None,
 ) -> list[tapir.ElementIdArrayItem]:
     """Apply the overall type bound before preparing any predicate data."""
-    if bounds is None:
-        return candidates
-    if not bounds:
+    if type_bound is None:
+        return unique_candidates
+    if not type_bound:
         return []
     return api.tapir.element.filter_elements(
-        candidates, element_types=[kind for kind in tapir.ElementType if kind in bounds]
+        unique_candidates, element_types=[kind for kind in tapir.ElementType if kind in type_bound]
     )
 
 
 def _build_query_context(
     api: UnifiedApi,
     where: Predicate,
-    candidates: Sequence[tapir.ElementIdArrayItem],
-    bounds: frozenset[tapir.ElementType] | None,
+    eligible_candidates: Sequence[tapir.ElementIdArrayItem],
+    type_bound: frozenset[tapir.ElementType] | None,
 ) -> EvaluationContext:
     """Let predicates request data, reusing the completed candidate-bound filter."""
     builder = ContextBuilder()
     where.prepare(builder)
-    if bounds is not None:
-        builder.provide(TYPE_MEMBERSHIP, bounds, frozenset(item.elementId.guid for item in candidates))
-    return builder.build(api, candidates)
+    if type_bound is not None:
+        builder.provide(TYPE_MEMBERSHIP, type_bound, frozenset(item.elementId.guid for item in eligible_candidates))
+    return builder.build(api, eligible_candidates)
 
 
 def _evaluate_candidates(
     where: Predicate,
-    candidates: Sequence[tapir.ElementIdArrayItem],
-    eligible: Sequence[tapir.ElementIdArrayItem],
+    unique_candidates: Sequence[tapir.ElementIdArrayItem],
+    eligible_candidates: Sequence[tapir.ElementIdArrayItem],
     context: EvaluationContext,
-) -> dict[UUID, BatchSlot[tapir.ElementIdArrayItem]]:
+) -> BatchResult[tapir.ElementIdArrayItem]:
     """Evaluate completed reads and translate Boolean decisions into element slots."""
-    results: dict[UUID, BatchSlot[tapir.ElementIdArrayItem]] = {}
-    eligible_ids = {element.elementId.guid for element in eligible}
-    for element in candidates:
+    slots: list[BatchSlot[tapir.ElementIdArrayItem]] = []
+    eligible_ids = {element.elementId.guid for element in eligible_candidates}
+    for element in unique_candidates:
         guid = element.elementId.guid
         if guid not in eligible_ids:
-            results[guid] = BatchSlot.filtered()
+            slots.append(BatchSlot.filtered())
             continue
         decision = where.evaluate(context, guid)
         if decision.is_error:
-            results[guid] = BatchSlot.failure(decision.error)
+            slots.append(BatchSlot.failure(decision.error))
         elif decision.value:
-            results[guid] = BatchSlot.success(element)
+            slots.append(BatchSlot.success(element))
         else:
-            results[guid] = BatchSlot.filtered()
-    return results
+            slots.append(BatchSlot.filtered())
+    return BatchResult(tuple(slots))

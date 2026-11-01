@@ -82,6 +82,12 @@ if __name__ == "__main__":
     api = make_example_api()
     query = make_example_query()
     print("Search matches:", [str(item.elementId.guid) for item in api.utilities.element.find_elements(query)])
+    diagnostic = api.utilities.element.find_elements_result(query)
+    print("Search candidates:", [str(item.elementId.guid) for item in diagnostic.candidates])
+    print("Search outcomes:", [slot.state.value for slot in diagnostic.outcomes.slots])
+    for index, slot in enumerate(diagnostic.outcomes.slots):
+        if slot.is_error:
+            print("Search error:", diagnostic.candidates[index].elementId.guid, slot.error.message)
     supplied = [ELEMENTS[1], ELEMENTS[0], ELEMENTS[2], ELEMENTS[0]]
     result = api.utilities.element.filter_elements_by_query_result(supplied, query)
     print("Filter states:", [slot.state.value for slot in result.slots])
