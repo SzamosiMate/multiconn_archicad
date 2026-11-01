@@ -37,10 +37,10 @@ def make_example_query() -> Query:
                 AnyOf(
                     items=(
                         PropertyPredicate(
-                            property_id=HEIGHT, test=NumberTest(operator=NumberOperator.GREATER_THAN, value=3)
+                            field_id=HEIGHT, test=NumberTest(operator=NumberOperator.GREATER_THAN, value=3)
                         ),
                         PropertyPredicate(
-                            property_id=DESCRIPTION, test=TextTest(operator=TextOperator.STARTS_WITH, value="External")
+                            field_id=DESCRIPTION, test=TextTest(operator=TextOperator.STARTS_WITH, value="External")
                         ),
                     )
                 ),

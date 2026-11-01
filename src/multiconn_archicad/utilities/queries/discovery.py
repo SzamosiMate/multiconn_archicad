@@ -38,6 +38,12 @@ class FieldCatalogue(ABC, Generic[FieldT, IdT]):
                 raise ValueError(f"Duplicate field GUID in catalogue: {guid}")
             self._by_id[guid] = field
 
+    @property
+    @abstractmethod
+    def kind(self) -> str:
+        """Identify the predicate kind whose fields this catalogue contains."""
+        ...
+
     @staticmethod
     @abstractmethod
     def _normalize_id(identifier: IdT) -> UUID:
@@ -68,6 +74,10 @@ class FieldCatalogue(ABC, Generic[FieldT, IdT]):
     def get(self, identifier: IdT) -> FieldT | None:
         return self._by_id.get(self._normalize_id(identifier))
 
+    def get_field(self, field_id: UUID) -> FieldT | None:
+        """Look up a query field by its normalized identity."""
+        return self._by_id.get(field_id)
+
     def search(
         self,
         text: str = "",
@@ -91,6 +101,8 @@ class FieldCatalogue(ABC, Generic[FieldT, IdT]):
 
 class PropertyCatalogue(FieldCatalogue[DiscoveredProperty, PropertyIdLike]):
     """Adapt property definitions through a registry, retaining unsupported fields."""
+
+    kind = "property"
 
     def __init__(self, properties: Iterable[PropertyDetails], registry: TestRegistry):
         super().__init__(self._discover_properties(properties, registry))
@@ -124,6 +136,8 @@ class PropertyCatalogue(FieldCatalogue[DiscoveredProperty, PropertyIdLike]):
 
 class ClassificationCatalogue(FieldCatalogue[ClassificationInfo, ClassificationSystemIdLike]):
     """Index captured system fields, using the common catalogue operations."""
+
+    kind = "classification"
 
     def __init__(self, fields: Iterable[ClassificationInfo]):
         super().__init__((field.system_id, field) for field in fields)

@@ -61,7 +61,7 @@ def test_uniform_names_preserve_upstream_labels_and_derive_qualified_name(group,
     assert info.group == group
     assert info.qualified_name == qualified_name
     assert info.property_id == UUID(PROPERTY_ID)
-    assert info.reference == {"kind": "property", "property_id": PROPERTY_ID}
+    assert info.reference == {"kind": "property", "field_id": PROPERTY_ID}
 
 
 @pytest.mark.parametrize(
@@ -114,12 +114,12 @@ def test_metadata_and_returned_values_cannot_change_the_field_snapshot():
     returned_details = info.details
     returned_details.propertyGroupName = "Changed"
     returned_reference = info.reference
-    returned_reference["property_id"] = "changed"
+    returned_reference["field_id"] = "changed"
     description = info.describe()
     description["test_schema"]["$defs"]["NumberOperator"]["enum"].clear()
 
     assert info.qualified_name == "Example / Height"
-    assert info.reference["property_id"] == PROPERTY_ID
+    assert info.reference["field_id"] == PROPERTY_ID
     assert info.details.propertyMeasureType == tapir.PropertyMeasureType.LENGTH
     assert info.details.propertyValueType == tapir.PropertyValueType.REAL
     assert info.test_schema()["$defs"]["NumberOperator"]["enum"]

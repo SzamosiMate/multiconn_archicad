@@ -99,7 +99,7 @@ from multiconn_archicad.utilities.queries import (
 )
 
 query = Query(where=ClassificationPredicate(
-    system_id=system_id,
+    field_id=system_id,
     test=ClassificationTest(operator="is in branch of", value=item_id),
 ))
 matches = api.utilities.element.find_elements(query)
@@ -117,20 +117,20 @@ The equivalent presence-test JSON is:
   "schema_version": "1.0",
   "where": {
     "kind": "classification",
-    "system_id": "632c30e5-2b82-4a75-bfad-d52febce9a4a",
+    "field_id": "632c30e5-2b82-4a75-bfad-d52febce9a4a",
     "test": {"kind": "classification", "operator": "has no value"}
   }
 }
 ```
 
 Replace identifiers with those discovered in the target project. Offline
-validation uses the shared visitor and diagnostics:
+validation uses the predicate methods and shared diagnostics:
 
 ```python
 from multiconn_archicad.utilities.queries import validate_query
 
-validate_query(query, classifications=catalogue).raise_for_errors()
-# Mixed queries: validate_query(query, property_catalogue, classifications=catalogue)
+validate_query(query, [catalogue]).raise_for_errors()
+# Mixed queries: validate_query(query, [property_catalogue, catalogue])
 ```
 
 Bound search/filter calls discover required metadata families and validate every

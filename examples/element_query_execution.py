@@ -71,7 +71,7 @@ def make_example_query() -> Query:
             items=(
                 ElementTypePredicate(types=(ElementType.WALL,)),
                 PropertyPredicate(
-                    property_id=UUID(HEIGHT), test=NumberTest(operator=NumberOperator.GREATER_THAN, value=3)
+                    field_id=UUID(HEIGHT), test=NumberTest(operator=NumberOperator.GREATER_THAN, value=3)
                 ),
             )
         )

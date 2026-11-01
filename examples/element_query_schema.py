@@ -28,11 +28,11 @@ def make_example_query() -> Query:
             items=(
                 ElementTypePredicate(types=(ElementType.WALL,)),
                 PropertyPredicate(
-                    property_id=UUID("22222222-2222-4222-8222-222222222222"),
+                    field_id=UUID("22222222-2222-4222-8222-222222222222"),
                     test=NumberTest(operator=NumberOperator.GREATER_THAN, value=3),
                 ),
                 PropertyPredicate(
-                    property_id=UUID("11111111-1111-4111-8111-111111111111"),
+                    field_id=UUID("11111111-1111-4111-8111-111111111111"),
                     test=TextTest(operator=TextOperator.STARTS_WITH, value="External"),
                 ),
             )

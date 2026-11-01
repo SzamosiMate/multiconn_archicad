@@ -2,7 +2,8 @@
 
 Parsing validates structure. Call a test's ``validate_for`` method separately to
 check supplied property metadata. Families compare supplied strings; predicates
-prepare source requests and evaluate the tree against shared execution data.
+validate field references, prepare source requests and evaluate the tree against
+shared execution data.
 Neither performs API reads.
 """
 
@@ -22,12 +23,13 @@ from multiconn_archicad.models.tapir.types import (
     PropertyValueType,
 )
 from multiconn_archicad.utilities.results.batch_results import BatchError, BatchRow, BatchSlot
+from multiconn_archicad.utilities.results.property_errors import PropertyUnavailableError, PropertyUndefinedError
 
 from .errors import InvalidPropertyTestError
 from .context import ContextBuilder, EvaluationContext
-from .evaluation import evaluate_property
 from .operators import BooleanOperator, ClassificationOperator, NumberOperator, TextOperator
 from .sources import CLASSIFICATION_FIELDS, CLASSIFICATION_VALUES, PROPERTY_VALUES, TYPE_MEMBERSHIP
+from .validation import FieldCheck, QueryValidationContext, QueryValidationIssue
 from .versioning import QUERY_SCHEMA_VERSION
 
 if TYPE_CHECKING:
@@ -293,8 +295,14 @@ class PropertyPredicate(_QueryModel):
     """Apply a typed test to a property referenced by its project GUID."""
 
     kind: Literal["property"] = "property"
-    property_id: UUID
+    field_id: UUID
     test: PropertyTest
+
+    def validate_fields(
+        self, context: QueryValidationContext, location: tuple[str | int, ...] = ("where",)
+    ) -> tuple[QueryValidationIssue, ...]:
+        """Validate this property's reference and test against captured metadata."""
+        return context.check_field(FieldCheck(predicate=self, location=location))
 
     def candidate_types(self) -> frozenset[ElementType] | None:
         """A property comparison alone imposes no element-type restriction."""
@@ -302,15 +310,15 @@ class PropertyPredicate(_QueryModel):
 
     def prepare(self, builder: ContextBuilder) -> None:
         """Request this property's values for the execution's candidate population."""
-        builder.require(PROPERTY_VALUES, self.property_id)
+        builder.require(PROPERTY_VALUES, self.field_id)
 
     def evaluate(self, context: EvaluationContext, element_id: UUID, *, path: str = "where") -> BatchSlot[bool]:
         """Evaluate a supplied property read, retaining its GUID/path on failure."""
-        value = context.data(PROPERTY_VALUES)[self.property_id].value(element_id)
+        value = context.data(PROPERTY_VALUES)[self.field_id].value(element_id)
         result = evaluate_property(self.test, value)
         if result.is_error:
             return BatchSlot.failure(
-                BatchError.aggregate((result.error,), context=f"{path}.test (property {self.property_id})")
+                BatchError.aggregate((result.error,), context=f"{path}.test (property {self.field_id})")
             )
         return result
 
@@ -319,25 +327,31 @@ class ClassificationPredicate(_QueryModel):
     """Test an element's assignment in one classification system."""
 
     kind: Literal["classification"] = "classification"
-    system_id: UUID
+    field_id: UUID
     test: ClassificationTest
+
+    def validate_fields(
+        self, context: QueryValidationContext, location: tuple[str | int, ...] = ("where",)
+    ) -> tuple[QueryValidationIssue, ...]:
+        """Validate this system reference and test against its captured tree."""
+        return context.check_field(FieldCheck(predicate=self, location=location))
 
     def candidate_types(self) -> frozenset[ElementType] | None:
         return None
 
     def prepare(self, builder: ContextBuilder) -> None:
-        builder.require(CLASSIFICATION_FIELDS, self.system_id)
-        builder.require(CLASSIFICATION_VALUES, self.system_id)
+        builder.require(CLASSIFICATION_FIELDS, self.field_id)
+        builder.require(CLASSIFICATION_VALUES, self.field_id)
 
     def evaluate(self, context: EvaluationContext, element_id: UUID, *, path: str = "where") -> BatchSlot[bool]:
-        field = context.data(CLASSIFICATION_FIELDS)[self.system_id]
-        value = context.data(CLASSIFICATION_VALUES)[self.system_id].value(element_id)
+        field = context.data(CLASSIFICATION_FIELDS)[self.field_id]
+        value = context.data(CLASSIFICATION_VALUES)[self.field_id].value(element_id)
         result = BatchSlot.failure(value.error) if value.is_error else self.test.evaluate(value.value, field)
         if result.is_error:
             return BatchSlot.failure(
                 BatchError.aggregate(
                     (result.error,),
-                    context=f"{path}.test (classification system {self.system_id})",
+                    context=f"{path}.test (classification system {self.field_id})",
                 )
             )
         return result
@@ -348,6 +362,12 @@ class ElementTypePredicate(_QueryModel):
 
     kind: Literal["element_type"] = "element_type"
     types: tuple[ElementType, ...] = Field(min_length=1)
+
+    def validate_fields(
+        self, context: QueryValidationContext, location: tuple[str | int, ...] = ("where",)
+    ) -> tuple[QueryValidationIssue, ...]:
+        """Require no metadata: Pydantic already checked element-type choices."""
+        return ()
 
     def candidate_types(self) -> frozenset[ElementType]:
         """Only the declared types can satisfy this predicate."""
@@ -367,6 +387,16 @@ class AllOf(_QueryModel):
 
     kind: Literal["all"] = "all"
     items: tuple[Predicate, ...] = Field(min_length=1)
+
+    def validate_fields(
+        self, context: QueryValidationContext, location: tuple[str | int, ...] = ("where",)
+    ) -> tuple[QueryValidationIssue, ...]:
+        """Collect every child's field issues in query order."""
+        return tuple(
+            issue
+            for index, child in enumerate(self.items)
+            for issue in child.validate_fields(context, (*location, "items", index))
+        )
 
     def candidate_types(self) -> frozenset[ElementType] | None:
         """Intersect restrictions; unrestricted children add no restriction."""
@@ -395,6 +425,16 @@ class AnyOf(_QueryModel):
 
     kind: Literal["any"] = "any"
     items: tuple[Predicate, ...] = Field(min_length=1)
+
+    def validate_fields(
+        self, context: QueryValidationContext, location: tuple[str | int, ...] = ("where",)
+    ) -> tuple[QueryValidationIssue, ...]:
+        """Collect every child's field issues, regardless of boolean semantics."""
+        return tuple(
+            issue
+            for index, child in enumerate(self.items)
+            for issue in child.validate_fields(context, (*location, "items", index))
+        )
 
     def candidate_types(self) -> frozenset[ElementType] | None:
         """Union restrictions; an unrestricted child makes the group unrestricted."""
@@ -435,3 +475,18 @@ class Query(_QueryModel):
 # Resolve the recursive predicate alias after all node classes are declared.
 for _model in (AllOf, AnyOf, Query):
     _model.model_rebuild()
+
+
+def evaluate_property(test: PropertyTestModel, value: BatchSlot[str]) -> BatchSlot[bool]:
+    """Interpret a success/error read slot, then delegate successful values.
+
+    Known unavailability and undefined values are false, even for negative
+    operators. Other read failures retain their original errors. Skipped slots are not
+    completed reads and cannot be evaluated. The query must already have passed
+    structure and metadata-context validation; no API calls are made here.
+    """
+    if value.is_error:
+        if isinstance(value.error, (PropertyUnavailableError, PropertyUndefinedError)):
+            return BatchSlot.success(False)
+        return BatchSlot.failure(value.error)
+    return test.evaluate(value.value)

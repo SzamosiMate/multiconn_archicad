@@ -11,7 +11,6 @@ from .errors import (
     UnsupportedQueryVersionError,
 )
 from .context import ContextBuilder, ContextSource, EvaluationContext
-from .evaluation import evaluate_property
 from .fields import ClassificationInfo, ClassificationItemInfo, FieldInfo, PropertyInfo, UnsupportedPropertyInfo
 
 from .models import (
@@ -28,7 +27,7 @@ from .models import (
     PropertyTestModel,
     Query,
     TextTest,
-    TestModel,
+    TestModel, evaluate_property,
 )
 from .registry import TestRegistry
 from .operators import BooleanOperator, ClassificationOperator, NumberOperator, TextOperator
@@ -43,7 +42,14 @@ from .sources import (
     PropertyValuesSource,
     TypeMembershipSource,
 )
-from .validation import QueryValidationError, QueryValidationIssue, QueryValidationResult, validate_query
+from .validation import (
+    FieldCheck,
+    QueryValidationContext,
+    QueryValidationError,
+    QueryValidationIssue,
+    QueryValidationResult,
+    validate_query, FieldPredicate,
+)
 from .versioning import QUERY_SCHEMA_VERSION, validate_query_version
 from multiconn_archicad.utilities.results.query_results import FindElementsResult
 
@@ -70,6 +76,7 @@ __all__ = [
     "EvaluationContext",
     "DiscoveredProperty",
     "FieldInfo",
+    "FieldCheck",
     "FieldCatalogue",
     "FindElementsResult",
     "InvalidPropertyTestError",
@@ -88,6 +95,7 @@ __all__ = [
     "PropertyTestModel",
     "Query",
     "QUERY_SCHEMA_VERSION",
+    "QueryValidationContext",
     "QueryValidationError",
     "QueryValidationIssue",
     "QueryValidationResult",
@@ -100,7 +108,6 @@ __all__ = [
     "UnsupportedPropertyInfo",
     "UnsupportedPropertyTypeError",
     "UnsupportedQueryVersionError",
-    "evaluate_property",
     "validate_query",
     "validate_query_version",
 ]

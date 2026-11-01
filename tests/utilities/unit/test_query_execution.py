@@ -42,7 +42,7 @@ def cell_error(message, available=None):
 
 
 def height_node():
-    return PropertyPredicate(property_id=HEIGHT, test=NumberTest(operator=NumberOperator.GREATER_THAN, value=3))
+    return PropertyPredicate(field_id=HEIGHT, test=NumberTest(operator=NumberOperator.GREATER_THAN, value=3))
 
 
 def type_node(*types):
@@ -181,7 +181,7 @@ def test_boolean_queries_share_discovery_batch_reads_and_diagnostic_execution(pr
     query = Query.model_validate_json(
         Query(
             where=PropertyPredicate(
-                property_id=FLAG,
+                field_id=FLAG,
                 test=BooleanTest(operator=operator, value=True),
             )
         ).model_dump_json()
@@ -207,7 +207,7 @@ def test_boolean_conversion_error_survives_a_decisive_or_sibling(project):
         where=AnyOf(
             items=(
                 type_node(tapir.ElementType.WALL),
-                PropertyPredicate(property_id=FLAG, test=BooleanTest(operator=BooleanOperator.IS, value=True)),
+                PropertyPredicate(field_id=FLAG, test=BooleanTest(operator=BooleanOperator.IS, value=True)),
             )
         )
     )
@@ -346,7 +346,7 @@ def test_typed_branches_keep_their_type_predicates_and_use_consistent_scope(proj
             items=(
                 type_node(kind),
                 PropertyPredicate(
-                    property_id=DESCRIPTION, test=TextTest(operator=TextOperator.STARTS_WITH, value=prefix)
+                    field_id=DESCRIPTION, test=TextTest(operator=TextOperator.STARTS_WITH, value=prefix)
                 ),
             )
         )
@@ -414,7 +414,7 @@ def test_invalid_query_is_fatal_even_for_empty_or_impossible_candidates(project,
             items=(
                 type_node(tapir.ElementType.WALL),
                 type_node(tapir.ElementType.SLAB),
-                PropertyPredicate(property_id=HEIGHT, test=TextTest(operator=TextOperator.IS, value="3")),
+                PropertyPredicate(field_id=HEIGHT, test=TextTest(operator=TextOperator.IS, value="3")),
             )
         )
     )
@@ -427,7 +427,7 @@ def test_invalid_query_is_fatal_even_for_empty_or_impossible_candidates(project,
 
 @pytest.mark.parametrize("entry", ["find_elements", "find_elements_result"])
 def test_unknown_property_is_rejected_before_candidate_listing(project, entry):
-    query = Query(where=PropertyPredicate(property_id=uuid4(), test=NumberTest(operator=NumberOperator.IS, value=3)))
+    query = Query(where=PropertyPredicate(field_id=uuid4(), test=NumberTest(operator=NumberOperator.IS, value=3)))
     with pytest.raises(QueryValidationError) as caught:
         invoke(project, entry, query)
     assert caught.value.result.issues[0].code == "unknown_field"
@@ -527,7 +527,7 @@ def test_search_does_not_swallow_unexpected_evaluator_exceptions(project, entry)
             raise RuntimeError("Evaluator bug")
 
     query = Query(
-        where=PropertyPredicate(property_id=HEIGHT, test=BrokenNumberTest(operator=NumberOperator.IS, value=3))
+        where=PropertyPredicate(field_id=HEIGHT, test=BrokenNumberTest(operator=NumberOperator.IS, value=3))
     )
 
     with pytest.raises(RuntimeError, match="Evaluator bug"):
@@ -580,7 +580,7 @@ def test_diagnostic_search_conditions_are_false_leaves_and_real_errors_survive_a
             items=(
                 height_node(),
                 PropertyPredicate(
-                    property_id=DESCRIPTION, test=TextTest(operator=TextOperator.STARTS_WITH, value="External")
+                    field_id=DESCRIPTION, test=TextTest(operator=TextOperator.STARTS_WITH, value="External")
                 ),
             )
         )

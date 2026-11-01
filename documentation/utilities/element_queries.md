@@ -49,11 +49,11 @@ query = Query(
         items=(
             ElementTypePredicate(types=("Wall",)),
             PropertyPredicate(
-                property_id=UUID("22222222-2222-4222-8222-222222222222"),
+                field_id=UUID("22222222-2222-4222-8222-222222222222"),
                 test=NumberTest(operator=NumberOperator.GREATER_THAN, value=3),
             ),
             PropertyPredicate(
-                property_id=UUID("11111111-1111-4111-8111-111111111111"),
+                field_id=UUID("11111111-1111-4111-8111-111111111111"),
                 test=TextTest(operator=TextOperator.STARTS_WITH, value="External"),
             ),
         )
@@ -107,7 +107,7 @@ The Python example produces this JSON:
       },
       {
         "kind": "property",
-        "property_id": "22222222-2222-4222-8222-222222222222",
+        "field_id": "22222222-2222-4222-8222-222222222222",
         "test": {
           "kind": "number",
           "operator": "is greater than",
@@ -116,7 +116,7 @@ The Python example produces this JSON:
       },
       {
         "kind": "property",
-        "property_id": "11111111-1111-4111-8111-111111111111",
+        "field_id": "11111111-1111-4111-8111-111111111111",
         "test": {
           "kind": "text",
           "operator": "starts with",
@@ -153,7 +153,7 @@ query = Query(
                 )
             ),
             PropertyPredicate(
-                property_id="11111111-1111-4111-8111-111111111111",
+                field_id="11111111-1111-4111-8111-111111111111",
                 test=TextTest(operator="does not contain", value="Temporary"),
             ),
         )
@@ -406,7 +406,7 @@ actual property reference):
 ```json
 {
   "kind": "property",
-  "property_id": "33333333-3333-4333-8333-333333333333",
+  "field_id": "33333333-3333-4333-8333-333333333333",
   "test": {"kind": "boolean", "operator": "is", "value": true}
 }
 ```
@@ -622,7 +622,7 @@ from multiconn_archicad.utilities.queries import Query, validate_query
 
 query = Query.model_validate_json(saved_query_json)
 catalogue = utilities.property.discover_query_fields()
-result = validate_query(query, catalogue)
+result = validate_query(query, [catalogue])
 
 if not result.is_valid:
     for issue in result.issues:
@@ -642,6 +642,42 @@ all bound search/filter methods run that check automatically before metadata
 reads or empty-population shortcuts. Parsing alone can retain an unsupported
 query version for inspection.
 
+Pass catalogues as one explicit sequence, for example
+`validate_query(query, [property_catalogue, classification_catalogue])`.
+Their order does not matter. Use an empty sequence for queries needing no field
+metadata. The execution layer assembles this sequence from the field families
+requested by `prepare()`; validation itself never discovers catalogues.
+Both property and classification predicates use `field_id`. For a property this
+is its property GUID; for a classification it is the system GUID, while the test
+operand identifies a classification item when required. Field descriptor
+`reference` dictionaries use the same `kind` and `field_id` keys as query leaves.
+
+`validate_query()` delegates to `query.where.validate_fields(context)`. Each leaf
+passes itself and its tree location to the supplied `QueryValidationContext`,
+while `AllOf` and `AnyOf` recursively collect their children's issues. The context shares captured
+catalogues and common field checks; it does not accumulate issues or perform
+API reads. Validation uses `validate_fields()` to distinguish metadata checks
+from Pydantic's structure-validation methods.
+Each catalogue declares its field `kind` (`"property"` or `"classification"`).
+The context builds a read-only index by kind, then resolves each predicate's
+`field_id` through the selected catalogue's shared `get_field(UUID)` method.
+Duplicate catalogue kinds raise `ValueError` as ambiguous configuration.
+An absent catalogue produces normal `unknown_field` issues for its references.
+Leaves pass `FieldCheck(predicate=self, location=location)` to the shared check.
+The `FieldPredicate` protocol supplies `kind`, `field_id` and the typed `test`,
+without making predicates depend on catalogue classes.
+Missing references and tests on known fields are handled separately.
+
+Predicates can also be checked directly, optionally supplying a location prefix
+when validating a subtree:
+
+```python
+from multiconn_archicad.utilities.queries import QueryValidationContext
+
+context = QueryValidationContext([catalogue])
+issues = query.where.validate_fields(context)  # Tuple of issues rooted at "where".
+```
+
 Every branch of `all` and `any` is checked. A valid earlier sibling does
 not skip later branches. Negative operators do not hide context errors. Repeated
 property references keep separate issues at their respective query locations.
@@ -649,7 +685,7 @@ Issue order follows the query's source order, descending through each nested gro
 
 | Issue code | Meaning | Location |
 | --- | --- | --- |
-| `unknown_field` | The GUID is absent from the supplied catalogue | The leaf's `property_id` |
+| `unknown_field` | The GUID is absent from the supplied catalogue | The leaf's `field_id` |
 | `unsupported_field` | The property has no supported test family | The leaf's `test` |
 | `invalid_test` | Wrong family or a metadata-dependent operand restriction failed | The leaf's `test` |
 
@@ -658,7 +694,7 @@ Each immutable `QueryValidationIssue` exposes:
 - `location`: a tuple of keys and indices, such as `("where", "items", 1, "test")`.
 - `path`: the derived readable form, such as `where.items[1].test`.
 - `code`, `message`, and `reference` (for example,
-  `{"kind": "property", "property_id": "..."}`).
+  `{"kind": "property", "field_id": "..."}`).
 - `name`, `group`, and derived `qualified_name`, or `None` when the property is unknown.
 
 `QueryValidationResult.issues` is an immutable tuple, and `is_valid` is true when it
@@ -709,11 +745,11 @@ query = Query(where=AllOf(items=(
     ElementTypePredicate(types=(ElementType.WALL,)),
     AnyOf(items=(
         PropertyPredicate(
-            property_id=height_id,
+            field_id=height_id,
             test=NumberTest(operator=NumberOperator.GREATER_THAN, value=3),
         ),
         PropertyPredicate(
-            property_id=description_id,
+            field_id=description_id,
             test=TextTest(operator=TextOperator.STARTS_WITH, value="External"),
         ),
     )),

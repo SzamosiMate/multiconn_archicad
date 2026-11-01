@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 from uuid import UUID
 
 from multiconn_archicad.models.tapir import types as tapir
@@ -18,6 +18,7 @@ from .versioning import validate_query_version
 
 if TYPE_CHECKING:
     from multiconn_archicad.clients.unified_api.api import UnifiedApi
+    from .discovery import FieldCatalogue
 
 
 def validate_execution_query(api: UnifiedApi, query: Query) -> ContextBuilder:
@@ -29,11 +30,14 @@ def validate_execution_query(api: UnifiedApi, query: Query) -> ContextBuilder:
     # builder so execution reuses validated classification metadata.
     builder = ContextBuilder()
     query.where.prepare(builder)
-    properties = api.utilities.property.discover_query_fields() if builder.requires(PROPERTY_VALUES) else None
-    classifications = (
-        api.utilities.classification.discover_query_fields() if builder.requires(CLASSIFICATION_FIELDS) else None
-    )
-    validate_query(query, properties, classifications=classifications).raise_for_errors()
+    catalogues: list[FieldCatalogue[Any, Any]] = []
+    if builder.requires(PROPERTY_VALUES):
+        catalogues.append(api.utilities.property.discover_query_fields())
+    classifications = None
+    if builder.requires(CLASSIFICATION_FIELDS):
+        classifications = api.utilities.classification.discover_query_fields()
+        catalogues.append(classifications)
+    validate_query(query, catalogues).raise_for_errors()
     if classifications is not None:
         for field in classifications:
             builder.provide(CLASSIFICATION_FIELDS, field.system_id, field)

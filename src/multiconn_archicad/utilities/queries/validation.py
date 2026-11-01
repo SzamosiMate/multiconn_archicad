@@ -3,26 +3,33 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from types import MappingProxyType
-from typing import Any, Literal, TypeAlias, assert_never
+from typing import TYPE_CHECKING, Any, Literal, TypeAlias, Protocol
+from uuid import UUID
 
-from .discovery import ClassificationCatalogue, PropertyCatalogue
-from .fields import FieldInfo
 from .errors import InvalidFieldTestError, UnsupportedFieldTypeError
-from .models import (
-    AllOf,
-    AnyOf,
-    ClassificationPredicate,
-    ElementTypePredicate,
-    Predicate,
-    PropertyPredicate,
-    Query,
-    TestModel,
-)
+
+if TYPE_CHECKING:
+    from .discovery import FieldCatalogue
+    from .fields import FieldInfo
+    from .models import Query, TestModel
 
 _Location: TypeAlias = tuple[str | int, ...]
 _IssueCode: TypeAlias = Literal["unknown_field", "unsupported_field", "invalid_test"]
+
+
+class FieldPredicate[TestT](Protocol):
+    """Expose the identity and test needed for field-context validation."""
+
+    @property
+    def kind(self) -> str: ...
+
+    @property
+    def field_id(self) -> UUID: ...
+
+    @property
+    def test(self) -> TestT: ...
 
 
 @dataclass(frozen=True, slots=True)
@@ -98,11 +105,81 @@ class QueryValidationError(ValueError):
         super().__init__(f"Query context validation failed:\n{messages}")
 
 
+@dataclass(frozen=True, slots=True)
+class FieldCheck[TestT: TestModel]:
+    """Check one field predicate at its location in the query tree."""
+
+    predicate: FieldPredicate[TestT]
+    location: _Location
+
+
+def _unknown_field_issue[TestT: TestModel](check: FieldCheck[TestT]) -> QueryValidationIssue:
+    """Report a failed lookup at the predicate's identifier."""
+    reference = {"kind": check.predicate.kind, "field_id": str(check.predicate.field_id)}
+    return QueryValidationIssue(
+        location=(*check.location, "field_id"),
+        code="unknown_field",
+        message=f"Field {reference} is not present in the catalogue",
+        reference=reference,
+    )
+
+
+def _check_known_field[TestT: TestModel](
+    field: FieldInfo[TestT], check: FieldCheck[TestT]
+) -> tuple[QueryValidationIssue, ...]:
+    """Check a resolved field's test, preserving unexpected exceptions."""
+    code: _IssueCode
+    try:
+        field.validate(check.predicate.test)
+        return ()
+    except UnsupportedFieldTypeError as error:
+        code, message = "unsupported_field", str(error)
+    except InvalidFieldTestError as error:
+        code, message = "invalid_test", str(error)
+
+    return (
+        QueryValidationIssue(
+            location=(*check.location, "test"),
+            code=code,
+            message=message,
+            reference=field.reference,
+            name=field.name,
+            group=field.group,
+        ),
+    )
+
+
+@dataclass(frozen=True, slots=True, init=False)
+class QueryValidationContext:
+    """Supply captured catalogues and common field checks to predicate methods.
+
+    Predicates supply field identity and own tree traversal. This context
+    resolves references without traversal, API reads or accumulated issues.
+    """
+
+    catalogues: Mapping[str, FieldCatalogue[Any, Any]]
+
+    def __init__(self, catalogues: Sequence[FieldCatalogue[Any, Any]]):
+        by_kind: dict[str, FieldCatalogue[Any, Any]] = {}
+        for catalogue in catalogues:
+            if catalogue.kind in by_kind:
+                raise ValueError(f"Multiple catalogues for field kind {catalogue.kind!r}")
+            by_kind[catalogue.kind] = catalogue
+        object.__setattr__(self, "catalogues", MappingProxyType(by_kind))
+
+    def check_field[TestT: TestModel](self, check: FieldCheck[TestT]) -> tuple[QueryValidationIssue, ...]:
+        """Dispatch a missing reference or a resolved field's test check."""
+        predicate = check.predicate
+        catalogue = self.catalogues.get(predicate.kind)
+        field = catalogue.get_field(predicate.field_id) if catalogue is not None else None
+        if field is None:
+            return (_unknown_field_issue(check),)
+        return _check_known_field(field, check)
+
+
 def validate_query(
     query: Query,
-    catalogue: PropertyCatalogue | None = None,
-    *,
-    classifications: ClassificationCatalogue | None = None,
+    catalogues: Sequence[FieldCatalogue[Any, Any]],
 ) -> QueryValidationResult:
     """Check every branch against supplied metadata, without API or value reads.
 
@@ -111,70 +188,6 @@ def validate_query(
     propagate. This function performs no version-compatibility interpretation or
     boolean evaluation, and returns no transformed query representation.
     """
-    issues: list[QueryValidationIssue] = []
+    context = QueryValidationContext(catalogues)
+    return QueryValidationResult(issues=query.where.validate_fields(context))
 
-    def check_field[TestT: TestModel](
-        field: FieldInfo[TestT] | None,
-        test: TestT,
-        reference: Mapping[str, str],
-        id_field: str,
-        location: _Location,
-    ) -> None:
-        if field is None:
-            issues.append(
-                QueryValidationIssue(
-                    location=(*location, id_field),
-                    code="unknown_field",
-                    message=f"Field {dict(reference)} is not present in the catalogue",
-                    reference=reference,
-                )
-            )
-            return
-        code: _IssueCode
-        try:
-            field.validate(test)
-        except UnsupportedFieldTypeError as error:
-            code, message = "unsupported_field", str(error)
-        except InvalidFieldTestError as error:
-            code, message = "invalid_test", str(error)
-        else:
-            return
-        issues.append(
-            QueryValidationIssue(
-                location=(*location, "test"),
-                code=code,
-                message=message,
-                reference=field.reference,
-                name=field.name,
-                group=field.group,
-            )
-        )
-
-    def visit(node: Predicate, location: _Location) -> None:
-        if isinstance(node, PropertyPredicate):
-            check_field(
-                catalogue.get(node.property_id) if catalogue is not None else None,
-                node.test,
-                {"kind": "property", "property_id": str(node.property_id)},
-                "property_id",
-                location,
-            )
-        elif isinstance(node, ClassificationPredicate):
-            check_field(
-                classifications.get(node.system_id) if classifications is not None else None,
-                node.test,
-                {"kind": "classification", "system_id": str(node.system_id)},
-                "system_id",
-                location,
-            )
-        elif isinstance(node, (AllOf, AnyOf)):
-            for index, item in enumerate(node.items):
-                visit(item, (*location, "items", index))
-        elif isinstance(node, ElementTypePredicate):
-            # The enum choices were checked during structure validation.
-            return
-        else:
-            assert_never(node)
-
-    visit(query.where, ("where",))
-    return QueryValidationResult(issues=tuple(issues))
