@@ -15,11 +15,23 @@ class UnsupportedQueryVersionError(ValueError):
         )
 
 
-class InvalidPropertyTestError(ValueError):
+class InvalidFieldTestError(ValueError):
+    """A test is incompatible with the selected field or its available choices."""
+
+
+class InvalidPropertyTestError(InvalidFieldTestError):
     """A test family or operand is incompatible with the selected property."""
 
 
-class UnsupportedPropertyTypeError(ValueError):
+class InvalidClassificationTestError(InvalidFieldTestError):
+    """A classification test is incompatible with its supplied system metadata."""
+
+
+class UnsupportedFieldTypeError(ValueError):
+    """No implemented test family supports a field's metadata."""
+
+
+class UnsupportedPropertyTypeError(UnsupportedFieldTypeError):
     """No registered test family accepts a property's metadata."""
 
 

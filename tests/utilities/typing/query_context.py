@@ -7,10 +7,13 @@ from uuid import UUID
 from multiconn_archicad.models.tapir.types import ElementType
 from multiconn_archicad.utilities.queries import (
     PROPERTY_VALUES,
+    CLASSIFICATION_FIELDS,
+    CLASSIFICATION_VALUES,
+    ClassificationInfo,
     TYPE_MEMBERSHIP,
     ContextBuilder,
     EvaluationContext,
-    PropertyValuesData,
+    ColumnData,
 )
 
 builder = ContextBuilder()
@@ -25,5 +28,7 @@ builder.require(TYPE_MEMBERSHIP, property_id)  # type: ignore[misc]
 builder.provide(TYPE_MEMBERSHIP, types, "wrong value")  # type: ignore[misc]
 
 context = EvaluationContext()
-assert_type(context.data(PROPERTY_VALUES), Mapping[UUID, PropertyValuesData])
+assert_type(context.data(PROPERTY_VALUES), Mapping[UUID, ColumnData[str]])
+assert_type(context.data(CLASSIFICATION_VALUES), Mapping[UUID, ColumnData[UUID | None]])
+assert_type(context.data(CLASSIFICATION_FIELDS), Mapping[UUID, ClassificationInfo])
 assert_type(context.data(TYPE_MEMBERSHIP), Mapping[frozenset[ElementType], frozenset[UUID]])

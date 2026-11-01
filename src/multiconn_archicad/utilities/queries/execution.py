@@ -12,7 +12,7 @@ from multiconn_archicad.utilities.results.query_results import FindElementsResul
 
 from .context import ContextBuilder, EvaluationContext
 from .models import Predicate, Query
-from .sources import PROPERTY_VALUES, TYPE_MEMBERSHIP
+from .sources import CLASSIFICATION_FIELDS, PROPERTY_VALUES, TYPE_MEMBERSHIP
 from .validation import validate_query
 from .versioning import validate_query_version
 
@@ -20,18 +20,24 @@ if TYPE_CHECKING:
     from multiconn_archicad.clients.unified_api.api import UnifiedApi
 
 
-def validate_execution_query(api: UnifiedApi, query: Query) -> None:
+def validate_execution_query(api: UnifiedApi, query: Query) -> ContextBuilder:
     """Check the complete query before narrowing candidates or skipping reads."""
     if not isinstance(query, Query):
         raise TypeError("Expected a Query instance; parse query JSON with Query.model_validate_json() first")
     validate_query_version(query.schema_version)
-    # Type-only queries have no metadata-dependent criteria. Their structure was
-    # validated by Pydantic, so no property discovery request is necessary.
+    # Discover only the field families requested by prepare(). Keep the same
+    # builder so execution reuses validated classification metadata.
     builder = ContextBuilder()
     query.where.prepare(builder)
-    if builder.requires(PROPERTY_VALUES):
-        catalogue = api.utilities.property.discover_query_fields()
-        validate_query(query, catalogue).raise_for_errors()
+    properties = api.utilities.property.discover_query_fields() if builder.requires(PROPERTY_VALUES) else None
+    classifications = (
+        api.utilities.classification.discover_query_fields() if builder.requires(CLASSIFICATION_FIELDS) else None
+    )
+    validate_query(query, properties, classifications=classifications).raise_for_errors()
+    if classifications is not None:
+        for field in classifications:
+            builder.provide(CLASSIFICATION_FIELDS, field.system_id, field)
+    return builder
 
 
 def _listed_elements(response: tapir.ElementsWithExecutionResults) -> list[tapir.ElementIdArrayItem]:
@@ -76,9 +82,12 @@ def list_query_candidates(
 
 
 def evaluate_query_candidates(
-    api: UnifiedApi, query: Query, elements: Sequence[tapir.ElementIdArrayItem]
+    api: UnifiedApi,
+    query: Query,
+    elements: Sequence[tapir.ElementIdArrayItem],
+    builder: ContextBuilder,
 ) -> FindElementsResult:
-    """Evaluate each distinct candidate once, retaining its identity and outcome."""
+    """Evaluate candidates using the builder carrying validated field metadata."""
     if not elements:
         return FindElementsResult((), BatchResult(()))
 
@@ -91,7 +100,7 @@ def evaluate_query_candidates(
 
     type_bound = query.where.candidate_types()
     eligible_candidates = _narrow_candidates(api, unique_candidates, type_bound)
-    context = _build_query_context(api, query.where, eligible_candidates, type_bound)
+    context = _build_query_context(api, builder, eligible_candidates, type_bound)
     outcomes = _evaluate_candidates(query.where, unique_candidates, eligible_candidates, context)
     return FindElementsResult(tuple(unique_candidates), outcomes)
 
@@ -113,13 +122,11 @@ def _narrow_candidates(
 
 def _build_query_context(
     api: UnifiedApi,
-    where: Predicate,
+    builder: ContextBuilder,
     eligible_candidates: Sequence[tapir.ElementIdArrayItem],
     type_bound: frozenset[tapir.ElementType] | None,
 ) -> EvaluationContext:
     """Let predicates request data, reusing the completed candidate-bound filter."""
-    builder = ContextBuilder()
-    where.prepare(builder)
     if type_bound is not None:
         builder.provide(TYPE_MEMBERSHIP, type_bound, frozenset(item.elementId.guid for item in eligible_candidates))
     return builder.build(api, eligible_candidates)

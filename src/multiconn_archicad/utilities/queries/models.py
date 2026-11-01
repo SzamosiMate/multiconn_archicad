@@ -10,10 +10,10 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from enum import StrEnum
-from typing import Annotated, Literal, TypeAlias, assert_never, cast
+from typing import TYPE_CHECKING, Annotated, Literal, TypeAlias, assert_never, cast
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from multiconn_archicad.models.tapir.types import (
     ElementType,
@@ -26,9 +26,12 @@ from multiconn_archicad.utilities.results.batch_results import BatchError, Batch
 from .errors import InvalidPropertyTestError
 from .context import ContextBuilder, EvaluationContext
 from .evaluation import evaluate_property
-from .operators import BooleanOperator, NumberOperator, TextOperator
-from .sources import PROPERTY_VALUES, TYPE_MEMBERSHIP
+from .operators import BooleanOperator, ClassificationOperator, NumberOperator, TextOperator
+from .sources import CLASSIFICATION_FIELDS, CLASSIFICATION_VALUES, PROPERTY_VALUES, TYPE_MEMBERSHIP
 from .versioning import QUERY_SCHEMA_VERSION
+
+if TYPE_CHECKING:
+    from .fields import ClassificationInfo
 
 
 class _QueryModel(BaseModel):
@@ -37,7 +40,86 @@ class _QueryModel(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
 
-class PropertyTestModel(_QueryModel, ABC):
+class TestModel(_QueryModel, ABC):
+    """Share immutable test structure and readable operator discovery."""
+
+    @classmethod
+    def operators(cls) -> tuple[str, ...]:
+        """Return readable values from the test's declared operator StrEnum."""
+        operator_type = cast(type[StrEnum], cls.model_fields["operator"].annotation)
+        return tuple(operator.value for operator in operator_type)
+
+
+class ClassificationTest(TestModel):
+    """Compare a classification assignment using supplied system/tree metadata."""
+
+    kind: Literal["classification"] = "classification"
+    operator: ClassificationOperator
+    model_config = ConfigDict(
+        json_schema_extra={
+            "oneOf": [
+                {
+                    "properties": {
+                        "operator": {"enum": [op.value for op in ClassificationOperator if not op.requires_value]}
+                    },
+                    "not": {"required": ["value"]},
+                },
+                {
+                    "properties": {
+                        "operator": {"enum": [op.value for op in ClassificationOperator if op.requires_value]},
+                        "value": {"type": "string", "format": "uuid"},
+                    },
+                    "required": ["value"],
+                },
+            ],
+        }
+    )
+    value: UUID | None = Field(default=None, exclude_if=lambda value: value is None)
+
+    @model_validator(mode="after")
+    def validate_operand(self) -> ClassificationTest:
+        if self.operator.requires_value:
+            if self.value is None:
+                raise ValueError(f"{self.operator.value!r} requires a classification item value")
+        elif "value" in self.model_fields_set:
+            raise ValueError(f"{self.operator.value!r} does not accept a value")
+        return self
+
+    def evaluate(self, assignment: UUID | None, field: ClassificationInfo) -> BatchSlot[bool]:
+        """Include the branch root; unclassified assignments match negative tests."""
+        if self.operator is ClassificationOperator.HAS_VALUE:
+            return BatchSlot.success(assignment is not None)
+        if self.operator is ClassificationOperator.HAS_NO_VALUE:
+            return BatchSlot.success(assignment is None)
+
+        matched = False
+        try:
+            match self.operator:
+                case ClassificationOperator.IS | ClassificationOperator.IS_NOT:
+                    matched = assignment == self.value
+                case ClassificationOperator.IS_DIRECT_CHILD_OF | ClassificationOperator.IS_NOT_DIRECT_CHILD_OF:
+                    matched = assignment is not None and field.item(assignment).parent_id == self.value
+                case ClassificationOperator.IS_IN_BRANCH_OF | ClassificationOperator.IS_NOT_IN_BRANCH_OF:
+                    current = assignment
+                    while current is not None:
+                        if current == self.value:
+                            matched = True
+                            break
+                        current = field.item(current).parent_id
+                case _:
+                    assert_never(self.operator)
+        except KeyError:
+            return BatchSlot.failure(f"Classification assignment {assignment} is absent from system {field.system_id}")
+
+        negative = self.operator in (
+            ClassificationOperator.IS_NOT,
+            ClassificationOperator.IS_NOT_IN_BRANCH_OF,
+            ClassificationOperator.IS_NOT_DIRECT_CHILD_OF,
+        )
+        return BatchSlot.success(not matched if negative else matched)
+
+
+class PropertyTestModel(TestModel):
     """Define discovery, validation, and comparison behavior for a test family.
 
     Concrete models declare their operator StrEnum and operand fields. Pydantic
@@ -47,12 +129,6 @@ class PropertyTestModel(_QueryModel, ABC):
     compares one successfully retrieved string; read conditions are handled
     separately by ``evaluate_property``.
     """
-
-    @classmethod
-    def operators(cls) -> tuple[str, ...]:
-        """Return readable values from the family's declared operator StrEnum."""
-        operator_type = cast(type[StrEnum], cls.model_fields["operator"].annotation)
-        return tuple(operator.value for operator in operator_type)
 
     @classmethod
     @abstractmethod
@@ -239,6 +315,34 @@ class PropertyPredicate(_QueryModel):
         return result
 
 
+class ClassificationPredicate(_QueryModel):
+    """Test an element's assignment in one classification system."""
+
+    kind: Literal["classification"] = "classification"
+    system_id: UUID
+    test: ClassificationTest
+
+    def candidate_types(self) -> frozenset[ElementType] | None:
+        return None
+
+    def prepare(self, builder: ContextBuilder) -> None:
+        builder.require(CLASSIFICATION_FIELDS, self.system_id)
+        builder.require(CLASSIFICATION_VALUES, self.system_id)
+
+    def evaluate(self, context: EvaluationContext, element_id: UUID, *, path: str = "where") -> BatchSlot[bool]:
+        field = context.data(CLASSIFICATION_FIELDS)[self.system_id]
+        value = context.data(CLASSIFICATION_VALUES)[self.system_id].value(element_id)
+        result = BatchSlot.failure(value.error) if value.is_error else self.test.evaluate(value.value, field)
+        if result.is_error:
+            return BatchSlot.failure(
+                BatchError.aggregate(
+                    (result.error,),
+                    context=f"{path}.test (classification system {self.system_id})",
+                )
+            )
+        return result
+
+
 class ElementTypePredicate(_QueryModel):
     """Match one or more Archicad element types."""
 
@@ -316,7 +420,7 @@ class AnyOf(_QueryModel):
 
 
 Predicate: TypeAlias = Annotated[
-    PropertyPredicate | ElementTypePredicate | AllOf | AnyOf,
+    PropertyPredicate | ClassificationPredicate | ElementTypePredicate | AllOf | AnyOf,
     Field(discriminator="kind"),
 ]
 
