@@ -3,18 +3,20 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from collections.abc import Sequence
+from dataclasses import dataclass
 from typing import Any, Generic, TypeVar
 from uuid import UUID
 
-from pydantic import BaseModel
-
+from multiconn_archicad.models.official import types as official
 from multiconn_archicad.models.tapir.types import PropertyDetails
+from multiconn_archicad.utilities.identifiers import ClassificationItemIdLike, normalize_classification_item_id
 
-from .errors import InvalidPropertyTestError, UnsupportedPropertyTypeError
-from .models import PropertyTestModel
+from .errors import InvalidClassificationTestError, InvalidPropertyTestError, UnsupportedPropertyTypeError
+from .models import ClassificationTest, PropertyTestModel, TestModel
 from .registry import TestRegistry
 
-TestT = TypeVar("TestT", bound=BaseModel)
+TestT = TypeVar("TestT", bound=TestModel)
 
 
 class FieldInfo(ABC, Generic[TestT]):
@@ -57,25 +59,30 @@ class FieldInfo(ABC, Generic[TestT]):
         """Return a JSON-friendly source reference, independent of display names."""
         ...
 
+    @property
     @abstractmethod
-    def operators(self) -> tuple[str, ...]:
-        """Return readable operator choices directly."""
+    def test_model(self) -> type[TestT]:
+        """Return the selected test class, raising if the field is unsupported."""
         ...
 
-    @abstractmethod
+    def operators(self) -> tuple[str, ...]:
+        """Return readable operator choices directly."""
+        return self.test_model.operators() if self.supported else ()
+
     def create_test(self, **data: Any) -> TestT:
         """Validate test structure and then the selected field's context."""
-        ...
+        test = self.test_model.model_validate(data)
+        self.validate(test)
+        return test
 
     @abstractmethod
     def validate(self, test: TestT) -> None:
         """Validate an already constructed test against this field's context."""
         ...
 
-    @abstractmethod
     def test_schema(self) -> dict[str, Any] | None:
         """Describe the test and operand format, or return None when unsupported."""
-        ...
+        return self.test_model.model_json_schema() if self.supported else None
 
     def describe(self) -> dict[str, Any]:
         """Serialize discovery information without runtime classes or behavior."""
@@ -144,15 +151,6 @@ class PropertyInfo(_PropertyMetadata):
         """Return the family selected for this property."""
         return self._test_model
 
-    def operators(self) -> tuple[str, ...]:
-        return self._test_model.operators()
-
-    def create_test(self, **data: Any) -> PropertyTestModel:
-        """Parse an operand/operator, then run explicit property-context validation."""
-        test = self._test_model.model_validate(data)
-        self.validate(test)
-        return test
-
     def validate(self, test: PropertyTestModel) -> None:
         """Require the selected family and run its property-context rules."""
         if not isinstance(test, self._test_model):
@@ -181,14 +179,123 @@ class UnsupportedPropertyInfo(_PropertyMetadata):
     def unsupported_reason(self) -> str:
         return self._reason
 
-    def operators(self) -> tuple[str, ...]:
-        return ()
-
-    def create_test(self, **data: Any) -> PropertyTestModel:
+    @property
+    def test_model(self) -> type[PropertyTestModel]:
         raise UnsupportedPropertyTypeError(self._reason)
 
     def validate(self, test: PropertyTestModel) -> None:
         raise UnsupportedPropertyTypeError(self._reason)
 
-    def test_schema(self) -> None:
-        return None
+
+@dataclass(frozen=True, slots=True)
+class ClassificationItemInfo:
+    """Retain an item's code, name and tree links independently of mutable API models."""
+
+    item_id: UUID
+    code: str
+    name: str
+    description: str
+    parent_id: UUID | None
+    children: tuple[UUID, ...]
+
+
+class ClassificationInfo(FieldInfo[ClassificationTest]):
+    """Represent one system as a field, retaining its complete ordered item tree."""
+
+    def __init__(self, system: official.ClassificationSystem, items: Sequence[official.ClassificationItemArrayItem]):
+        self._system = system.model_copy(deep=True)
+        self._items: dict[UUID, ClassificationItemInfo] = {}
+        self._register_items(items, parent_id=None)
+
+    def _register_items(self, items: Sequence[official.ClassificationItemArrayItem], parent_id: UUID | None) -> None:
+        for wrapper in items:
+            item = wrapper.classificationItem
+            guid = item.classificationItemId.guid
+            children = item.children or ()
+            self._items[guid] = ClassificationItemInfo(
+                item_id=guid,
+                code=item.id,
+                name=item.name,
+                description=item.description,
+                parent_id=parent_id,
+                children=tuple(child.classificationItem.classificationItemId.guid for child in children),
+            )
+            self._register_items(children, guid)
+
+    @property
+    def system_id(self) -> UUID:
+        return self._system.classificationSystemId.guid
+
+    @property
+    def details(self) -> official.ClassificationSystem:
+        return self._system.model_copy(deep=True)
+
+    @property
+    def group(self) -> str:
+        return "Classifications"
+
+    @property
+    def name(self) -> str:
+        return self._system.name
+
+    @property
+    def reference(self) -> dict[str, str]:
+        return {"kind": "classification", "system_id": str(self.system_id)}
+
+    @property
+    def items(self) -> tuple[ClassificationItemInfo, ...]:
+        """Return items in depth-first API tree order, with parent/child GUIDs."""
+        return tuple(self._items.values())
+
+    def item(self, item_id: ClassificationItemIdLike) -> ClassificationItemInfo:
+        """Look up an item in this system; raise KeyError when it is absent."""
+        return self._items[normalize_classification_item_id(item_id).classificationItemId.guid]
+
+    def descendant_ids(self, item_id: ClassificationItemIdLike, *, include_self: bool = False) -> frozenset[UUID]:
+        """Traverse the captured tree locally, optionally including the root item."""
+        item = self.item(item_id)
+        found = {item.item_id} if include_self else set()
+        pending = list(item.children)
+        while pending:
+            guid = pending.pop()
+            found.add(guid)
+            pending.extend(self._items[guid].children)
+        return frozenset(found)
+
+    @property
+    def test_model(self) -> type[ClassificationTest]:
+        return ClassificationTest
+
+    def validate(self, test: ClassificationTest) -> None:
+        if not isinstance(test, ClassificationTest):
+            raise InvalidClassificationTestError(f"{self.qualified_name} requires ClassificationTest")
+        if test.value is not None and test.value not in self._items:
+            raise InvalidClassificationTestError(f"Item {test.value} is not present in {self.qualified_name}")
+
+    def test_schema(self) -> dict[str, Any]:
+        schema = self.test_model.model_json_schema()
+        choices = [
+            {"const": str(item.item_id), "title": " / ".join(part for part in (item.code, item.name) if part)}
+            for item in self._items.values()
+        ]
+        if choices:
+            schema["properties"]["value"]["oneOf"] = choices
+        else:
+            schema["properties"]["value"]["not"] = {}
+        return schema
+
+    def describe(self) -> dict[str, Any]:
+        return {
+            **super().describe(),
+            "items": [
+                {
+                    "item_id": str(item.item_id),
+                    "code": item.code,
+                    "name": item.name,
+                    "description": item.description,
+                    "parent_id": str(item.parent_id) if item.parent_id else None,
+                    "children": [str(guid) for guid in item.children],
+                }
+                for item in self._items.values()
+            ],
+        }

@@ -15,7 +15,7 @@ from multiconn_archicad.utilities.queries import (
     PROPERTY_VALUES,
     TYPE_MEMBERSHIP,
     PropertyPredicate,
-    PropertyValuesData,
+    ColumnData,
     Query,
     TextOperator,
     TextTest,
@@ -35,7 +35,7 @@ def make_context(*, property_values=None, type_matches=None):
     if property_values is not None:
         grid = BatchGrid(rows=(BatchRow(tuple(property_values.values())),), width=len(property_values))
         data[PROPERTY_VALUES] = {
-            key: PropertyValuesData(grid, {ELEMENT: 0}, column) for column, key in enumerate(property_values)
+            key: ColumnData(grid, {ELEMENT: 0}, column) for column, key in enumerate(property_values)
         }
     if type_matches is not None:
         data[TYPE_MEMBERSHIP] = {

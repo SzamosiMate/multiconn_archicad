@@ -143,7 +143,7 @@ def test_empty_catalogue_is_an_explicit_empty_snapshot():
 
 
 def test_duplicate_guids_are_rejected_instead_of_overwriting_fields(metadata):
-    with pytest.raises(ValueError, match="Duplicate property GUID"):
+    with pytest.raises(ValueError, match="Duplicate field GUID"):
         PropertyCatalogue([metadata[0], metadata[0]], Registry.from_union(PropertyTest))
 
 

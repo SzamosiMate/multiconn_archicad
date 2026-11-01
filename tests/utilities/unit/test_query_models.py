@@ -215,6 +215,7 @@ def test_json_schema_exposes_recursive_nodes_and_typed_operator_choices():
         "any",
         "element_type",
         "property",
+        "classification",
     }
     assert "Negate" not in definitions
     assert definitions["AllOf"]["properties"]["items"]["items"]["discriminator"]["propertyName"] == "kind"

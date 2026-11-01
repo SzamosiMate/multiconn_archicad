@@ -430,7 +430,7 @@ def test_unknown_property_is_rejected_before_candidate_listing(project, entry):
     query = Query(where=PropertyPredicate(property_id=uuid4(), test=NumberTest(operator=NumberOperator.IS, value=3)))
     with pytest.raises(QueryValidationError) as caught:
         invoke(project, entry, query)
-    assert caught.value.result.issues[0].code == "unknown_property"
+    assert caught.value.result.issues[0].code == "unknown_field"
     project.api.tapir.element.get_all_elements.assert_not_called()
     project.api.official.property.get_details_of_properties.assert_not_called()
 

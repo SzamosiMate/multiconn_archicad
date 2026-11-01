@@ -41,6 +41,24 @@ AttributeIdLike = Union[
     UUID,
 ]
 
+ClassificationSystemIdLike = Union[
+    tapir.ClassificationSystemIdArrayItem,
+    official.ClassificationSystemIdArrayItem,
+    tapir.ClassificationSystemId,
+    official.ClassificationSystemId,
+    str,
+    UUID,
+]
+
+ClassificationItemIdLike = Union[
+    tapir.ClassificationItemIdArrayItem,
+    official.ClassificationItemIdArrayItem,
+    tapir.ClassificationItemId,
+    official.ClassificationItemId,
+    str,
+    UUID,
+]
+
 PropertyUserId = Union[
     official.UserDefinedPropertyUserId,
     official.BuiltInPropertyUserId,
@@ -132,6 +150,43 @@ def normalize_attribute_id(attribute_id: AttributeIdLike) -> tapir.AttributeIdAr
 def normalize_attribute_ids(attributes: Sequence[AttributeIdLike]) -> list[tapir.AttributeIdArrayItem]:
     """Convert attribute identifiers to Tapir array-item models in input order."""
     return [normalize_attribute_id(attribute) for attribute in attributes]
+
+
+def normalize_classification_system_id(system_id: ClassificationSystemIdLike) -> tapir.ClassificationSystemIdArrayItem:
+    """Convert a classification system UUID or API ID to a Tapir array item."""
+    if isinstance(system_id, tapir.ClassificationSystemIdArrayItem):
+        return system_id
+    if isinstance(system_id, official.ClassificationSystemIdArrayItem):
+        guid = system_id.classificationSystemId.guid
+    elif isinstance(system_id, (tapir.ClassificationSystemId, official.ClassificationSystemId)):
+        guid = system_id.guid
+    elif isinstance(system_id, (UUID, str)):
+        guid = _to_uuid(system_id)
+    else:
+        raise TypeError(f"Unsupported classification system ID type: {type(system_id)!r}")
+    return tapir.ClassificationSystemIdArrayItem(classificationSystemId=tapir.ClassificationSystemId(guid=guid))
+
+
+def normalize_classification_system_ids(
+    system_ids: Sequence[ClassificationSystemIdLike],
+) -> list[tapir.ClassificationSystemIdArrayItem]:
+    """Normalize classification systems, preserving input order and duplicates."""
+    return [normalize_classification_system_id(system_id) for system_id in system_ids]
+
+
+def normalize_classification_item_id(item_id: ClassificationItemIdLike) -> tapir.ClassificationItemIdArrayItem:
+    """Convert a classification item UUID or API ID to a Tapir array item."""
+    if isinstance(item_id, tapir.ClassificationItemIdArrayItem):
+        return item_id
+    if isinstance(item_id, official.ClassificationItemIdArrayItem):
+        guid = item_id.classificationItemId.guid
+    elif isinstance(item_id, (tapir.ClassificationItemId, official.ClassificationItemId)):
+        guid = item_id.guid
+    elif isinstance(item_id, (UUID, str)):
+        guid = _to_uuid(item_id)
+    else:
+        raise TypeError(f"Unsupported classification item ID type: {type(item_id)!r}")
+    return tapir.ClassificationItemIdArrayItem(classificationItemId=tapir.ClassificationItemId(guid=guid))
 
 
 def to_official_property_id(property_id: PropertyIdLike) -> official.PropertyIdArrayItem:
