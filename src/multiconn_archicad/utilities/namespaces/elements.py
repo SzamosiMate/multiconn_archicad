@@ -96,9 +96,9 @@ class ElementUtilities:
         Query-wide failures raise, even when no candidates can match. Neither
         search method changes selection or reports elements outside listing scope.
         """
-        validate_execution_query(self._api, query)
+        builder = validate_execution_query(self._api, query)
         candidates = list_query_candidates(self._api, query, databases=databases, filters=filters)
-        return evaluate_query_candidates(self._api, query, candidates)
+        return evaluate_query_candidates(self._api, query, candidates, builder)
 
     def filter_elements_by_query_result(
         self, elements: Sequence[ElementIdLike], query: Query
@@ -110,8 +110,8 @@ class ElementUtilities:
         populations validate the query without reading element values.
         """
         candidates = normalize_element_ids(elements)
-        validate_execution_query(self._api, query)
-        result = evaluate_query_candidates(self._api, query, candidates)
+        builder = validate_execution_query(self._api, query)
+        result = evaluate_query_candidates(self._api, query, candidates, builder)
         slots_by_guid = {
             element.elementId.guid: slot for element, slot in zip(result.candidates, result.outcomes.slots)
         }

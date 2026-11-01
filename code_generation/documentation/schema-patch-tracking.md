@@ -28,6 +28,25 @@ The [single 1.8.0 run report](reports/upstream-patches/upstream-refinements-1.8.
 records SDK/source evidence, validation and compatibility consequences. A source
 merge alone does not retire any client operation.
 
+## Classification assignment response correction — 2026-11-01
+
+One Breaking source-review correction now changes the success branch of
+`ClassificationIdOrError` from `ClassificationIdArrayItem` to `ClassificationId`.
+`GetClassificationsOfElements` and `GetClassificationsOfElementDefaults` return
+direct `classificationSystemId` / `classificationItemId` fields inside
+`classificationIds`, without a `classificationId` wrapper. The released 1.7.3
+documentation reference is incorrect. The source in `ClassificationCommands.cpp`
+and live element-assignment reads on Archicad 27/Tapir 1.7.3 confirm the direct
+shape. It is assigned to `apply_breaking_source_review_patches` at the user's
+request, for upstream submission in the next release cycle. No second accepted
+shape or compatibility adapter is added.
+
+Keep this correction until the fetched release schema uses `ClassificationId` at
+the success branch. The existing named `ClassificationIdArrayItem` remains for
+its other consumers. Prior naming/sharing counts below describe their original
+review batches; this correction is additional to those inventories. Regeneration,
+strict audit, reproducibility and the live classification-utility read passed.
+
 ## Retained naming and sharing candidates from 1.7.2
 
 **Submitted as [PR #1386](https://github.com/ENZYME-APD/tapir-archicad-automation/pull/1386); still open and unmerged, updated and checked 2026-11-04.** The retained older decisions in this section are tracked against [`schema/refinements-1.7.2`](https://github.com/SzamosiMate/tapir-archicad-automation/tree/schema/refinements-1.7.2), commit [`e72078d2`](https://github.com/SzamosiMate/tapir-archicad-automation/commit/e72078d2440e70f57fbedfe6d861bc40b18acbdf), merged with upstream `173e4fa0fdd37653a55832b5a1ad8423196e2082`. Text creation variants, marker readback and MEP preference-table rows were deferred during the rebase; reassess those against the 1.7.4 release documentation before deciding on any new upstream proposal or client patch retirement. See the [single run report](reports/upstream-patches/upstream-refinements-1.7.2-2026-10-20.md) for source rationale, compatibility evidence and copyable PR text. The 1.7.3 proposal below remains independent.

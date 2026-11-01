@@ -437,9 +437,12 @@ and Pydantic `TypeAdapter`; that family is not part of the default query schema.
 
 ## Uniform field information
 
-`FieldInfo` defines the shared interface for field sources. `PropertyInfo` is its
-first implementation, using supplied `PropertyDetails` and a registry. It performs
-no API calls. Using `details` from the offline example above:
+`FieldInfo` defines the shared interface for field sources and implements test
+construction, operator discovery and default schema generation. `PropertyInfo`
+selects a property family through its registry; `ClassificationInfo` supplies
+classification choices and tree-aware reference validation. Both use models from
+`models.py`, inheriting common configuration/operator discovery from `TestModel`.
+Descriptors perform no API calls. Using `details` from the offline example above:
 
 ```python
 import json
@@ -519,11 +522,11 @@ as described below.
 `validate()` rejects a mismatched family with `InvalidPropertyTestError` and delegates further
 rules to the family's explicit `validate_for()` method.
 
-Future field sources can implement `FieldInfo` with different reference formats
-and test models, while sharing `qualified_name` and discovery serialization.
-For classification fields, the planned labels remain `group = Classifications`
-and `name = classification system name`; classification behavior is not yet
-implemented. Query-wide validation uses the supplied catalogue as described below.
+Other field sources can implement `FieldInfo` with different references and test
+models. Classification fields use `group = Classifications` and `name = system
+name`, with all eight Archicad operations supported by ClassificationPredicate.
+See [Classification utilities](classifications.md) for full JSON/Python examples,
+operand rules and classification-specific Boolean behavior.
 
 ## Batch property discovery
 
@@ -646,15 +649,16 @@ Issue order follows the query's source order, descending through each nested gro
 
 | Issue code | Meaning | Location |
 | --- | --- | --- |
-| `unknown_property` | The GUID is absent from the supplied catalogue | The leaf's `property_id` |
-| `unsupported_property` | The property has no supported test family | The leaf's `test` |
+| `unknown_field` | The GUID is absent from the supplied catalogue | The leaf's `property_id` |
+| `unsupported_field` | The property has no supported test family | The leaf's `test` |
 | `invalid_test` | Wrong family or a metadata-dependent operand restriction failed | The leaf's `test` |
 
 Each immutable `QueryValidationIssue` exposes:
 
 - `location`: a tuple of keys and indices, such as `("where", "items", 1, "test")`.
 - `path`: the derived readable form, such as `where.items[1].test`.
-- `code`, `message`, and `property_id`.
+- `code`, `message`, and `reference` (for example,
+  `{"kind": "property", "property_id": "..."}`).
 - `name`, `group`, and derived `qualified_name`, or `None` when the property is unknown.
 
 `QueryValidationResult.issues` is an immutable tuple, and `is_valid` is true when it
@@ -664,8 +668,9 @@ This is diagnostic output, not an alternative query representation.
 
 `raise_for_errors()` returns normally for valid queries and raises
 `QueryValidationError` otherwise. The exception's `.result` retains every issue.
-`InvalidPropertyTestError` becomes an `invalid_test` issue, and
-`UnsupportedPropertyTypeError` becomes an `unsupported_property` issue. Other
+`InvalidFieldTestError` becomes an `invalid_test` issue, and
+`UnsupportedFieldTypeError` becomes an `unsupported_field` issue. Property and
+classification errors derive from the relevant shared base error. Other
 exceptions, including plain `ValueError` and ambiguous registry configuration,
 propagate automatically instead of becoming user-query issues.
 
@@ -739,7 +744,7 @@ predicates remain active at every level; the same values on a slab would fail.
 Undefined/unavailable property slots contribute successful false values, so other
 branches of `any` can still match.
 
-`context.data(PROPERTY_VALUES)` maps property GUIDs to `PropertyValuesData`
+`context.data(PROPERTY_VALUES)` maps property GUIDs to `ColumnData[str]`
 column views. Each view retains the same `BatchGrid` and shared element-to-row
 index; `.value(element_id)` returns the original slot. No per-element property
 dictionary or context is created during evaluation.
@@ -790,7 +795,7 @@ selection. Supply a parsed `Query`; use `Query.model_validate()` or
 
 The execution flow is:
 
-1. Check the schema version and validate against fresh property metadata if needed.
+1. Check the schema version and validate against fresh field metadata if needed.
 2. List search candidates within the requested scope, or normalize supplied IDs.
 3. Deduplicate candidates, retaining the first occurrence and its order.
 4. Narrow the working population using the safe element-type bound (`None` means
@@ -911,15 +916,16 @@ without changing that alignment. Empty candidates produce an empty result after
 query validation, without element-value reads.
 
 Queries with properties discover one fresh metadata catalogue before listing or
-evaluation, including when the candidate set is empty. Type-only queries need no
-property metadata request. Each execution reads distinct property GUIDs for
-distinct element GUIDs in one property-value batch. A finite overall type bound
-first narrows candidates with `FilterElements`, before property reads. This
-completed bound membership is provided to the context builder. Predicates then
-prepare their own data requirements, with the type source loading only missing
-membership sets. This preserves nested OR semantics without
+evaluation, including when the candidate set is empty. Classification predicates
+similarly discover their metadata catalogue; type-only queries need neither.
+Predicates prepare requirements before validation. The same builder then carries
+validated classification fields into execution. Each execution reads distinct
+property GUIDs in one property-value batch and distinct classification systems in
+one assignment batch. A finite overall type bound narrows candidates with
+`FilterElements` before value reads, and its completed membership is provided to
+the builder. The type source loads only missing membership sets. This preserves nested OR semantics without
 reading full element details or carrying known types from listing. Property-only
-queries make no type-filter calls. Tapir preserves input order in these filtered
+and classification-only queries make no type-filter calls. Tapir preserves input order in these filtered
 subsets. Whole-command errors raise in core; a header unreadable by
 `FilterElements` is omitted from its matching subset. Execution relies on the
 upstream response alignment contract rather than adding speculative shape

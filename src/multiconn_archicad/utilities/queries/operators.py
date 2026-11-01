@@ -3,6 +3,21 @@
 from enum import StrEnum
 
 
+class ClassificationOperator(StrEnum):
+    IS = "is"
+    IS_NOT = "is not"
+    HAS_VALUE = "has value"
+    HAS_NO_VALUE = "has no value"
+    IS_IN_BRANCH_OF = "is in branch of"
+    IS_NOT_IN_BRANCH_OF = "is not in branch of"
+    IS_DIRECT_CHILD_OF = "is direct child of"
+    IS_NOT_DIRECT_CHILD_OF = "is not direct child of"
+
+    @property
+    def requires_value(self) -> bool:
+        return self not in (self.HAS_VALUE, self.HAS_NO_VALUE)
+
+
 class BooleanOperator(StrEnum):
     IS = "is"
     IS_NOT = "is not"

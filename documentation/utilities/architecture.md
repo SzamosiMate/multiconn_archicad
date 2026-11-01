@@ -2,6 +2,14 @@
 
 This document defines the architectural boundaries, design patterns, coding conventions, and testing strategies for the `utilities` subpackage in `multiconn_archicad`.
 
+The classification namespace (`api.utilities.classification`) provides field/tree
+discovery and aligned assignment reads. Query tests live in `queries.models`,
+field descriptors in `queries.fields`, and catalogues in `queries.discovery`.
+Only the namespace performs API calls. Properties and classifications share
+`TestModel`, `FieldInfo` and `FieldCatalogue` behavior.
+See [Classification utilities](classifications.md) for metadata, assignment reads,
+query operators, validation and shared-context execution.
+
 All contributions to `utilities` must adhere to these guidelines.
 
 ---

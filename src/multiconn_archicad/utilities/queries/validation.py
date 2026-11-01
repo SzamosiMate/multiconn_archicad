@@ -1,29 +1,43 @@
-"""Validate a parsed query against an existing property metadata snapshot."""
+"""Validate parsed query field references against captured metadata."""
 
 from __future__ import annotations
 
 from dataclasses import dataclass
+from collections.abc import Mapping
+from types import MappingProxyType
 from typing import Any, Literal, TypeAlias, assert_never
-from uuid import UUID
 
-from .discovery import PropertyCatalogue
-from .errors import InvalidPropertyTestError, UnsupportedPropertyTypeError
-from .models import AllOf, AnyOf, ElementTypePredicate, Predicate, PropertyPredicate, Query
+from .discovery import ClassificationCatalogue, PropertyCatalogue
+from .fields import FieldInfo
+from .errors import InvalidFieldTestError, UnsupportedFieldTypeError
+from .models import (
+    AllOf,
+    AnyOf,
+    ClassificationPredicate,
+    ElementTypePredicate,
+    Predicate,
+    PropertyPredicate,
+    Query,
+    TestModel,
+)
 
 _Location: TypeAlias = tuple[str | int, ...]
-_IssueCode: TypeAlias = Literal["unknown_property", "unsupported_property", "invalid_test"]
+_IssueCode: TypeAlias = Literal["unknown_field", "unsupported_field", "invalid_test"]
 
 
 @dataclass(frozen=True, slots=True)
 class QueryValidationIssue:
-    """Describe a property-context problem at one occurrence in the query."""
+    """Describe a field-context problem at one occurrence in the query."""
 
     location: _Location
     code: _IssueCode
     message: str
-    property_id: UUID
+    reference: Mapping[str, str]
     name: str | None = None
     group: str | None = None
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "reference", MappingProxyType(dict(self.reference)))
 
     @property
     def path(self) -> str:
@@ -49,7 +63,7 @@ class QueryValidationIssue:
             "path": self.path,
             "code": self.code,
             "message": self.message,
-            "reference": {"kind": "property", "property_id": str(self.property_id)},
+            "reference": dict(self.reference),
             "name": self.name,
             "group": self.group,
             "qualified_name": self.qualified_name,
@@ -84,49 +98,74 @@ class QueryValidationError(ValueError):
         super().__init__(f"Query context validation failed:\n{messages}")
 
 
-def validate_query(query: Query, catalogue: PropertyCatalogue) -> QueryValidationResult:
+def validate_query(
+    query: Query,
+    catalogue: PropertyCatalogue | None = None,
+    *,
+    classifications: ClassificationCatalogue | None = None,
+) -> QueryValidationResult:
     """Check every branch against supplied metadata, without API or value reads.
 
-    Query construction/parsing must first validate structure. Expected property
+    Query construction/parsing must first validate structure. Expected field
     context failures become issues; ambiguous configuration and unexpected errors
     propagate. This function performs no version-compatibility interpretation or
     boolean evaluation, and returns no transformed query representation.
     """
     issues: list[QueryValidationIssue] = []
 
-    def visit(node: Predicate, location: _Location) -> None:
-        if isinstance(node, PropertyPredicate):
-            field = catalogue.get(node.property_id)
-            if field is None:
-                issues.append(
-                    QueryValidationIssue(
-                        location=(*location, "property_id"),
-                        code="unknown_property",
-                        message=f"Property {node.property_id} is not present in the catalogue",
-                        property_id=node.property_id,
-                    )
-                )
-                return
-            code: _IssueCode
-            try:
-                field.validate(node.test)
-            except UnsupportedPropertyTypeError as error:
-                code = "unsupported_property"
-                message = str(error)
-            except InvalidPropertyTestError as error:
-                code = "invalid_test"
-                message = str(error)
-            else:
-                return
+    def check_field[TestT: TestModel](
+        field: FieldInfo[TestT] | None,
+        test: TestT,
+        reference: Mapping[str, str],
+        id_field: str,
+        location: _Location,
+    ) -> None:
+        if field is None:
             issues.append(
                 QueryValidationIssue(
-                    location=(*location, "test"),
-                    code=code,
-                    message=message,
-                    property_id=node.property_id,
-                    name=field.name,
-                    group=field.group,
+                    location=(*location, id_field),
+                    code="unknown_field",
+                    message=f"Field {dict(reference)} is not present in the catalogue",
+                    reference=reference,
                 )
+            )
+            return
+        code: _IssueCode
+        try:
+            field.validate(test)
+        except UnsupportedFieldTypeError as error:
+            code, message = "unsupported_field", str(error)
+        except InvalidFieldTestError as error:
+            code, message = "invalid_test", str(error)
+        else:
+            return
+        issues.append(
+            QueryValidationIssue(
+                location=(*location, "test"),
+                code=code,
+                message=message,
+                reference=field.reference,
+                name=field.name,
+                group=field.group,
+            )
+        )
+
+    def visit(node: Predicate, location: _Location) -> None:
+        if isinstance(node, PropertyPredicate):
+            check_field(
+                catalogue.get(node.property_id) if catalogue is not None else None,
+                node.test,
+                {"kind": "property", "property_id": str(node.property_id)},
+                "property_id",
+                location,
+            )
+        elif isinstance(node, ClassificationPredicate):
+            check_field(
+                classifications.get(node.system_id) if classifications is not None else None,
+                node.test,
+                {"kind": "classification", "system_id": str(node.system_id)},
+                "system_id",
+                location,
             )
         elif isinstance(node, (AllOf, AnyOf)):
             for index, item in enumerate(node.items):

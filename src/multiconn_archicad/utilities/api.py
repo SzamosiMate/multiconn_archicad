@@ -1,10 +1,11 @@
-"""Group element, property, and attribute utilities for one Unified API."""
+"""Group element, property, classification and attribute utilities for one API."""
 
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
 from multiconn_archicad.utilities.namespaces.attributes import AttributeUtilities
+from multiconn_archicad.utilities.namespaces.classifications import ClassificationUtilities
 from multiconn_archicad.utilities.namespaces.elements import ElementUtilities
 from multiconn_archicad.utilities.namespaces.properties import PropertyUtilities
 
@@ -19,6 +20,7 @@ class Utilities:
         property: Property reads, writes, and metadata lookups.
         attribute: Attribute and layer-combination lookups.
         element: Element queries and selection operations.
+        classification: Classification trees, field discovery and assignments.
     """
 
     def __init__(self, api: UnifiedApi):
@@ -26,3 +28,4 @@ class Utilities:
         self.property = PropertyUtilities(api)
         self.attribute = AttributeUtilities(api)
         self.element = ElementUtilities(api)
+        self.classification = ClassificationUtilities(api)

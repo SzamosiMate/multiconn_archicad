@@ -4,6 +4,7 @@ from multiconn_archicad.errors import BatchNotFullySuccessfulError, BatchOperati
 
 from .api import Utilities
 from multiconn_archicad.utilities.namespaces.attributes import AttributeUtilities
+from multiconn_archicad.utilities.namespaces.classifications import ClassificationUtilities
 from multiconn_archicad.utilities.namespaces.elements import ElementUtilities
 from multiconn_archicad.utilities.namespaces.properties import PropertyUtilities
 from multiconn_archicad.utilities.results.population import (
@@ -37,6 +38,7 @@ __all__ = [
     "Utilities",
     "PropertyUtilities",
     "AttributeUtilities",
+    "ClassificationUtilities",
     "ElementUtilities",
     "FindElementsResult",
     "BatchResultBase",

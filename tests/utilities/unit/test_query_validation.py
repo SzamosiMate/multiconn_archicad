@@ -20,6 +20,7 @@ from multiconn_archicad.utilities.queries import (
     PropertyTest,
     Query,
     QueryValidationError,
+    QueryValidationIssue,
     TextTest,
     validate_query,
 )
@@ -32,6 +33,27 @@ ELEMENT_ID = UUID("7E221F33-829B-4FBC-A670-E74DABCE6289")
 HEIGHT = UUID("02DB7087-5E1D-4AF3-AF62-4D08C1B70C3E")
 POSITION = UUID("53402BE5-29D9-44A5-B6D6-4FA90938DDC9")
 MISSING = UUID("00000000-0000-0000-0000-000000000000")
+
+
+def test_validation_issue_can_identify_a_classification_field():
+    reference = {"kind": "classification", "system_id": str(MISSING)}
+    issue = QueryValidationIssue(
+        location=("where", "system_id"),
+        code="unknown_field",
+        message="Unknown system",
+        reference=reference,
+        name="Example",
+        group="Classifications",
+    )
+    description = issue.describe()
+    assert description["reference"] == reference
+    assert description["qualified_name"] == "Classifications / Example"
+    description["reference"]["system_id"] = "changed"
+    assert issue.reference == reference
+    reference["system_id"] = "changed input"
+    assert issue.reference["system_id"] == str(MISSING)
+    with pytest.raises(TypeError):
+        issue.reference["system_id"] = "changed issue"
 
 
 @pytest.fixture
@@ -94,12 +116,12 @@ def test_collects_all_nested_issue_kinds_with_paths_and_field_context(catalogue)
 
     assert not result.is_valid
     assert [(issue.code, issue.path) for issue in result.issues] == [
-        ("unknown_property", "where.items[0].property_id"),
+        ("unknown_field", "where.items[0].property_id"),
         ("invalid_test", "where.items[1].items[0].test"),
-        ("unsupported_property", "where.items[1].items[1].items[0].test"),
+        ("unsupported_field", "where.items[1].items[1].items[0].test"),
     ]
     missing, wrong_type, unsupported = result.issues
-    assert missing.property_id == MISSING
+    assert missing.reference == {"kind": "property", "property_id": str(MISSING)}
     assert missing.name is None and missing.group is None and missing.qualified_name is None
     assert wrong_type.qualified_name == "WallProperties / Wall Height"
     assert "requires NumberTest, got TextTest" in wrong_type.message
@@ -130,7 +152,7 @@ def test_negative_operator_does_not_hide_context_errors(catalogue):
 
     assert not result.is_valid
     assert result.issues[0].path == "where.property_id"
-    assert result.issues[0].code == "unknown_property"
+    assert result.issues[0].code == "unknown_field"
 
 
 def test_repeated_properties_keep_an_issue_for_each_query_occurrence(catalogue):

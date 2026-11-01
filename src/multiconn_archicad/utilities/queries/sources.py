@@ -1,4 +1,4 @@
-"""Load property columns and element-type membership for query contexts."""
+"""Load typed field columns, classification metadata and element-type membership."""
 
 from __future__ import annotations
 
@@ -14,30 +14,62 @@ from .context import ContextSource
 
 if TYPE_CHECKING:
     from multiconn_archicad.clients.unified_api.api import UnifiedApi
+    from .fields import ClassificationInfo
 
 
 @dataclass(frozen=True, slots=True)
-class PropertyValuesData:
-    """View one property column, sharing the grid and row index with other columns."""
+class ColumnData[T]:
+    """View one typed column, sharing the grid and row index with other columns."""
 
-    grid: BatchGrid[str]
+    grid: BatchGrid[T]
     row_indices: Mapping[UUID, int]
     column: int
 
-    def value(self, element_id: UUID) -> BatchSlot[str]:
+    def value(self, element_id: UUID) -> BatchSlot[T]:
         """Return the original successful/error slot for one element."""
         return self.grid.rows[self.row_indices[element_id]].slots[self.column]
 
 
-class PropertyValuesSource(ContextSource[UUID, PropertyValuesData]):
+class PropertyValuesSource(ContextSource[UUID, ColumnData[str]]):
     """Read every distinct requested property in one batch for all candidates."""
 
     def load(
         self, api: UnifiedApi, elements: Sequence[tapir.ElementIdArrayItem], keys: Sequence[UUID]
-    ) -> Mapping[UUID, PropertyValuesData]:
+    ) -> Mapping[UUID, ColumnData[str]]:
         grid = api.utilities.property.get_property_values_per_element_result(elements, keys)
         rows = {element.elementId.guid: index for index, element in enumerate(elements)}
-        return {key: PropertyValuesData(grid, rows, column) for column, key in enumerate(keys)}
+        return {key: ColumnData(grid, rows, column) for column, key in enumerate(keys)}
+
+
+class ClassificationValuesSource(ContextSource[UUID, ColumnData[UUID | None]]):
+    """Read all requested systems together, retaining row and cell errors."""
+
+    def load(
+        self,
+        api: UnifiedApi,
+        elements: Sequence[tapir.ElementIdArrayItem],
+        keys: Sequence[UUID],
+    ) -> Mapping[UUID, ColumnData[UUID | None]]:
+        grid = api.utilities.classification.get_classifications_per_element_result(elements, keys)
+        rows = {element.elementId.guid: index for index, element in enumerate(elements)}
+        return {key: ColumnData(grid, rows, column) for column, key in enumerate(keys)}
+
+
+class ClassificationFieldsSource(ContextSource[UUID, "ClassificationInfo"]):
+    """Identify per-execution classification metadata; this object stores no data.
+
+    Normal search/filter execution provides the validation snapshot to the builder,
+    so load() is skipped. Direct prepare/build callers load missing metadata here.
+    """
+
+    def load(
+        self,
+        api: UnifiedApi,
+        elements: Sequence[tapir.ElementIdArrayItem],
+        keys: Sequence[UUID],
+    ) -> Mapping[UUID, ClassificationInfo]:
+        catalogue = api.utilities.classification.discover_query_fields(keys)
+        return {key: catalogue[key] for key in keys}
 
 
 class TypeMembershipSource(ContextSource[frozenset[tapir.ElementType], frozenset[UUID]]):
@@ -60,4 +92,6 @@ class TypeMembershipSource(ContextSource[frozenset[tapir.ElementType], frozenset
 
 
 PROPERTY_VALUES = PropertyValuesSource()
+CLASSIFICATION_VALUES = ClassificationValuesSource()
+CLASSIFICATION_FIELDS = ClassificationFieldsSource()
 TYPE_MEMBERSHIP = TypeMembershipSource()
