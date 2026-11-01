@@ -122,7 +122,7 @@ class _PropertyMetadata(FieldInfo[PropertyTestModel]):
     @property
     def reference(self) -> dict[str, str]:
         """Return the identity fields used by a property predicate."""
-        return {"kind": "property", "property_id": str(self.property_id)}
+        return {"kind": "property", "field_id": str(self.property_id)}
 
     @property
     def details(self) -> PropertyDetails:
@@ -240,7 +240,7 @@ class ClassificationInfo(FieldInfo[ClassificationTest]):
 
     @property
     def reference(self) -> dict[str, str]:
-        return {"kind": "classification", "system_id": str(self.system_id)}
+        return {"kind": "classification", "field_id": str(self.system_id)}
 
     @property
     def items(self) -> tuple[ClassificationItemInfo, ...]:

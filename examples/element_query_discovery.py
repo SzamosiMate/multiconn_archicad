@@ -57,7 +57,7 @@ if __name__ == "__main__":
     height = catalogue.search("height", supported_only=True)[0]
     test = height.create_test(operator=NumberOperator.GREATER_THAN, value=3)
     query = Query(where=PropertyPredicate.model_validate({**height.reference, "test": test}))
-    result = validate_query(query, catalogue)
+    result = validate_query(query, [catalogue])
     result.raise_for_errors()
     print(json.dumps(result.describe(), indent=2))
 
@@ -73,5 +73,5 @@ if __name__ == "__main__":
             )
         )
     )
-    print(json.dumps(validate_query(invalid_query, catalogue).describe(), indent=2))
+    print(json.dumps(validate_query(invalid_query, [catalogue]).describe(), indent=2))
     print(json.dumps(catalogue.describe(), indent=2))
