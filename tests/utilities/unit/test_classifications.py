@@ -129,7 +129,7 @@ def test_discovery_builds_uniform_ordered_fields_and_reads_each_system_once(api)
     assert field.group == "Classifications"
     assert field.name == "Example"
     assert field.qualified_name == "Classifications / Example"
-    assert field.reference == {"kind": "classification", "system_id": str(SYSTEM)}
+    assert field.reference == {"kind": "classification", "field_id": str(SYSTEM)}
     assert [i.item_id for i in field.items] == [ROOT, CHILD, GRANDCHILD, LEAF]
     assert field.item(CHILD).code == "Wall"
     assert field.item(CHILD).name == ""
@@ -271,7 +271,7 @@ def predicate(operator="is in branch of", value=CHILD, system_id=SYSTEM):
     data = {"operator": operator}
     if ClassificationOperator(operator).requires_value:
         data["value"] = value
-    return ClassificationPredicate(system_id=system_id, test=ClassificationTest.model_validate(data))
+    return ClassificationPredicate(field_id=system_id, test=ClassificationTest.model_validate(data))
 
 
 def test_query_json_and_field_schema_publish_presence_and_item_tests(api):
@@ -430,7 +430,7 @@ def test_unknown_classification_references_validate_before_listing_or_empty_retu
     issue = caught.value.result.issues[0]
     assert issue.code == ("unknown_field" if missing_system else "invalid_test")
     assert issue.reference["kind"] == "classification"
-    assert issue.path == ("where.items[2].system_id" if missing_system else "where.items[2].test")
+    assert issue.path == ("where.items[2].field_id" if missing_system else "where.items[2].test")
     project.api.tapir.element.get_all_elements.assert_not_called()
     project.api.tapir.element.get_elements_by_type.assert_not_called()
     project.api.tapir.classification.get_classifications_of_elements.assert_not_called()
@@ -439,9 +439,27 @@ def test_unknown_classification_references_validate_before_listing_or_empty_retu
 def test_offline_validation_checks_every_classification_reference_without_io(api):
     catalogue = api.utilities.classification.discover_query_fields([SYSTEM])
     query = Query(where=AnyOf(items=(predicate(value=MISSING), predicate(system_id=MISSING))))
-    result = validate_query(query, classifications=catalogue)
+    result = validate_query(query, [catalogue])
     assert [i.code for i in result.issues] == ["invalid_test", "unknown_field"]
     api.tapir.classification.get_classifications_of_elements.assert_not_called()
+
+
+def test_property_and_classification_fields_with_the_same_guid_remain_distinct(query_project, tree):
+    shared_id = UUID(int=500)
+    properties = query_project.api.utilities.property.discover_query_fields()
+    classifications = ClassificationCatalogue([ClassificationInfo(system(guid=shared_id), tree)])
+    query = Query(
+        where=AllOf(
+            items=(
+                PropertyPredicate(field_id=shared_id, test=BooleanTest(operator="is", value=True)),
+                ClassificationPredicate(field_id=shared_id, test=ClassificationTest(operator="has value")),
+            )
+        )
+    )
+
+    assert properties.get_field(shared_id) is properties[shared_id]
+    assert classifications.get_field(shared_id) is classifications[shared_id]
+    assert validate_query(query, [classifications, properties]).is_valid
 
 
 def test_classification_and_property_predicates_share_the_same_query_pipeline(query_project):
@@ -450,7 +468,7 @@ def test_classification_and_property_predicates_share_the_same_query_pipeline(qu
         where=AllOf(
             items=(
                 predicate(),
-                PropertyPredicate(property_id=UUID(int=500), test=BooleanTest(operator="is", value=True)),
+                PropertyPredicate(field_id=UUID(int=500), test=BooleanTest(operator="is", value=True)),
             )
         )
     )
@@ -468,7 +486,7 @@ def test_mixed_query_validation_collects_property_and_classification_issues(quer
     query = Query(
         where=AnyOf(
             items=(
-                PropertyPredicate(property_id=MISSING, test=BooleanTest(operator="is", value=True)),
+                PropertyPredicate(field_id=MISSING, test=BooleanTest(operator="is", value=True)),
                 predicate(value=MISSING),
                 predicate(system_id=MISSING),
             )

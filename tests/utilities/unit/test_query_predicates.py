@@ -45,11 +45,11 @@ def make_context(*, property_values=None, type_matches=None):
 
 
 def height_predicate() -> PropertyPredicate:
-    return PropertyPredicate(property_id=HEIGHT, test=NumberTest(operator=NumberOperator.GREATER_THAN, value=3))
+    return PropertyPredicate(field_id=HEIGHT, test=NumberTest(operator=NumberOperator.GREATER_THAN, value=3))
 
 
 def description_predicate(operator: TextOperator, value: str) -> PropertyPredicate:
-    return PropertyPredicate(property_id=DESCRIPTION, test=TextTest(operator=operator, value=value))
+    return PropertyPredicate(field_id=DESCRIPTION, test=TextTest(operator=operator, value=value))
 
 
 def nested_query() -> Query:
@@ -216,7 +216,7 @@ def test_unexpected_family_exception_propagates_through_a_group():
     node = AnyOf(
         items=(
             ElementTypePredicate(types=(ElementType.WALL,)),
-            PropertyPredicate(property_id=DESCRIPTION, test=BrokenTextTest(operator=TextOperator.IS, value="External")),
+            PropertyPredicate(field_id=DESCRIPTION, test=BrokenTextTest(operator=TextOperator.IS, value="External")),
         )
     )
     context = make_context(

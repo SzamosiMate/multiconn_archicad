@@ -7,6 +7,15 @@ discovery and aligned assignment reads. Query tests live in `queries.models`,
 field descriptors in `queries.fields`, and catalogues in `queries.discovery`.
 Only the namespace performs API calls. Properties and classifications share
 `TestModel`, `FieldInfo` and `FieldCatalogue` behavior.
+The predicate tree follows the Composite pattern: leaves implement their own
+operations and groups delegate to children. Field validation (`validate_fields`),
+requirement preparation (`prepare`), candidate type bounds (`candidate_types`)
+and evaluation (`evaluate`) all live on the predicates. Evaluation interprets
+the query against supplied execution data; there is no separate Visitor dispatch.
+`queries.contracts.FieldPredicate` exposes `kind`, `field_id` and a typed test
+without importing concrete models or catalogues. During validation the context
+resolves fields by catalogue kind and normalized UUID, so predicate models do
+not import catalogue implementations.
 See [Classification utilities](classifications.md) for metadata, assignment reads,
 query operators, validation and shared-context execution.
 

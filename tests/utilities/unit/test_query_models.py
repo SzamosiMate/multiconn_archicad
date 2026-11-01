@@ -38,12 +38,12 @@ def test_nested_query_round_trips_python_and_json_without_changing_the_tree():
                     "items": [
                         {
                             "kind": "property",
-                            "property_id": PROPERTY_ID,
+                            "field_id": PROPERTY_ID,
                             "test": {"kind": "number", "operator": "is greater than", "value": 3},
                         },
                         {
                             "kind": "property",
-                            "property_id": PROPERTY_ID,
+                            "field_id": PROPERTY_ID,
                             "test": {"kind": "text", "operator": "does not contain", "value": "Internal"},
                         },
                     ],
@@ -61,7 +61,7 @@ def test_nested_query_round_trips_python_and_json_without_changing_the_tree():
     assert isinstance(alternatives, AnyOf)
     number, text = alternatives.items
     assert isinstance(number, PropertyPredicate)
-    assert number.property_id == UUID(PROPERTY_ID)
+    assert number.field_id == UUID(PROPERTY_ID)
     assert isinstance(number.test, NumberTest)
     assert isinstance(text, PropertyPredicate)
     assert isinstance(text.test, TextTest)
@@ -77,7 +77,7 @@ def test_python_constructors_supply_discriminators_and_version_defaults():
             items=(
                 ElementTypePredicate(types=(ElementType.WALL,)),
                 PropertyPredicate(
-                    property_id=UUID(PROPERTY_ID),
+                    field_id=UUID(PROPERTY_ID),
                     test=NumberTest(operator="is greater than", value=3),
                 ),
             )
@@ -102,30 +102,30 @@ def test_python_constructors_supply_discriminators_and_version_defaults():
         {"kind": "all", "items": []},
         {"kind": "any", "items": []},
         {"kind": "not", "item": {"kind": "element_type", "types": ["Wall"]}},
-        {"kind": "property", "property_id": "not-a-guid", "test": {"kind": "text", "operator": "is", "value": "x"}},
-        {"kind": "property", "property_id": PROPERTY_ID, "test": {"kind": "enum", "operator": "is", "value": "A"}},
+        {"kind": "property", "field_id": "not-a-guid", "test": {"kind": "text", "operator": "is", "value": "x"}},
+        {"kind": "property", "field_id": PROPERTY_ID, "test": {"kind": "enum", "operator": "is", "value": "A"}},
         {
             "kind": "property",
-            "property_id": PROPERTY_ID,
+            "field_id": PROPERTY_ID,
             "test": {"kind": "boolean", "operator": "contains", "value": True},
         },
-        {"kind": "property", "property_id": PROPERTY_ID, "test": {"kind": "length", "operator": "is", "value": 3}},
+        {"kind": "property", "field_id": PROPERTY_ID, "test": {"kind": "length", "operator": "is", "value": 3}},
         {
             "kind": "property",
-            "property_id": PROPERTY_ID,
+            "field_id": PROPERTY_ID,
             "test": {"kind": "number", "operator": "contains", "value": 3},
         },
         {
             "kind": "property",
-            "property_id": PROPERTY_ID,
+            "field_id": PROPERTY_ID,
             "test": {"kind": "text", "operator": "is greater than", "value": "x"},
         },
         {
             "kind": "property",
-            "property_id": PROPERTY_ID,
+            "field_id": PROPERTY_ID,
             "test": {"kind": "number", "operator": "is", "value": 3, "unit": "m"},
         },
-        {"kind": "property", "property_id": PROPERTY_ID, "test": {"kind": "text", "operator": "eq", "value": "x"}},
+        {"kind": "property", "field_id": PROPERTY_ID, "test": {"kind": "text", "operator": "eq", "value": "x"}},
     ],
 )
 def test_invalid_predicates_are_rejected_from_python_and_json(where):
@@ -218,6 +218,13 @@ def test_json_schema_exposes_recursive_nodes_and_typed_operator_choices():
         "classification",
     }
     assert "Negate" not in definitions
+    for name in ("PropertyPredicate", "ClassificationPredicate"):
+        assert definitions[name]["properties"]["field_id"] == {
+            "format": "uuid",
+            "title": "Field Id",
+            "type": "string",
+        }
+        assert "field_id" in definitions[name]["required"]
     assert definitions["AllOf"]["properties"]["items"]["items"]["discriminator"]["propertyName"] == "kind"
     assert set(definitions["PropertyPredicate"]["properties"]["test"]["discriminator"]["mapping"]) == {
         "text",
@@ -281,7 +288,7 @@ def test_boolean_query_round_trip_preserves_boolean_operands(value):
         "schema_version": "1.0",
         "where": {
             "kind": "property",
-            "property_id": PROPERTY_ID,
+            "field_id": PROPERTY_ID,
             "test": {"kind": "boolean", "operator": "is", "value": value},
         },
     }
