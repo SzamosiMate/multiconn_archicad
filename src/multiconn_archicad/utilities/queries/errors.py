@@ -1,6 +1,18 @@
-"""Identify invalid property tests and family configuration."""
+"""Identify unsupported query versions, invalid tests, and family configuration."""
 
 from __future__ import annotations
+
+
+class UnsupportedQueryVersionError(ValueError):
+    """The executor does not support a query's major/minor schema version."""
+
+    def __init__(self, requested_version: str, supported_version: str):
+        self.requested_version = requested_version
+        self.supported_version = supported_version
+        super().__init__(
+            f"Unsupported query schema version {requested_version!r}; executor supports {supported_version!r} "
+            "and earlier minor versions of the same major"
+        )
 
 
 class InvalidPropertyTestError(ValueError):

@@ -186,10 +186,16 @@ unreleased schema sketch; the default version string remains `"1.0"`.
 - Property/boolean predicates in a union need an explicit `kind` in incoming
   dictionaries/JSON. Concrete Python constructors supply their own `kind` default.
 - `all`, `any`, and element-type collections must contain at least one item.
-- The envelope defaults to `schema_version: "1.0"`. This is a plain string for now:
-  the intended convention is major/minor, with breaking changes incrementing the
-  first number and backwards-compatible changes incrementing the second. Version
-  parsing and compatibility enforcement are deferred.
+- The envelope defaults to `schema_version: "1.0"`, from the public
+  `QUERY_SCHEMA_VERSION` constant. Parsing retains a plain string. Before any API
+  reads, execution requires two non-negative integer components (`major.minor`),
+  the same major as the executor, and an equal or older minor. Compare components
+  numerically: a `1.10` executor accepts `1.9`. Breaking changes increment the
+  major; backwards-compatible changes increment the minor. No migration occurs.
+  Malformed versions raise `ValueError`; unsupported versions raise
+  `UnsupportedQueryVersionError` with `requested_version` and `supported_version`.
+  Version parsing/comparison uses the existing `packaging.version.Version`
+  dependency; the query-specific helper restricts syntax and supported versions.
 - Models are frozen, and collection fields are tuples. Reconstruct a model to
   validate an edit. Pydantic's unchecked APIs such as `model_construct()` and
   `model_copy(update=...)` are not validation entry points for untrusted input.
@@ -641,7 +647,11 @@ result.raise_for_errors()
 fetch metadata, read element values, evaluate boolean expressions, or build a
 second query tree. Success means the query is compatible with that snapshot; it
 does not verify the currently open project or supply any element values to evaluation.
-The plain version string is not interpreted by context validation.
+This property-catalogue validation does not interpret the version string.
+`validate_query_version(query.schema_version)` checks it without API access;
+all bound search/filter methods run that check automatically before metadata
+reads or empty-population shortcuts. Parsing alone can retain an unsupported
+query version for inspection.
 
 Every branch of `all` and `any` is checked. A valid earlier sibling does
 not skip later branches. Negative operators do not hide context errors. Repeated
@@ -792,6 +802,19 @@ batches, and evaluates the original tree. Calls are read-only and do not change
 selection. Supply a parsed `Query`; use `Query.model_validate()` or
 `Query.model_validate_json()` at dictionary/JSON boundaries.
 
+The execution flow is:
+
+1. Check the schema version and validate against fresh property metadata if needed.
+2. List search candidates within the requested scope, or normalize supplied IDs.
+3. Deduplicate candidates, retaining the first occurrence and its order.
+4. Narrow the working population using the safe element-type bound (`None` means
+   unrestricted; an empty set means nothing can match).
+5. Let predicates collect source requirements and load one shared context.
+6. Evaluate the original tree for each eligible element; narrowed-out candidates
+   retain `FILTERED` outcomes in their original positions.
+7. Return matching IDs, an aligned diagnostic search snapshot, or filter slots
+   projected back onto the supplied order and duplicates.
+
 - Each ordinary property operation checks availability before comparison.
   Confirmed unavailability is false, including for `is not` and `does not contain`.
   It is not an inverted successful comparison or an unknown logical value.
@@ -821,6 +844,7 @@ The primary entry point searches Archicad directly:
 
 ```python
 matches = api.utilities.element.find_elements(query)
+diagnostic = api.utilities.element.find_elements_result(query)
 
 # Optional filtering of an existing population:
 result = api.utilities.element.filter_elements_by_query_result(elements, query)
@@ -828,13 +852,44 @@ matches = api.utilities.element.filter_elements_by_query(elements, query)
 ```
 
 `find_elements()` retrieves its own candidates and returns only elements with a
-final true evaluation. It has no `_result` variant or caller-population alignment.
-Non-matches and ordinary per-element evaluation failures are omitted. Fatal
-failures still raise: invalid queries (including absent property references), transport
-or whole-command failures, and failed prerequisite candidate listings.
+final true evaluation. It delegates to `find_elements_result()` and returns
+`result.outcomes.successes`, omitting non-matches and ordinary per-element errors
+without calling `raise_for_errors()`. Fatal failures still raise from both search
+methods: invalid queries (including unsupported versions or absent property
+references), transport or whole-command failures, and failed prerequisite listings.
 
-`find_elements(query, *, databases=None, filters=None)` accepts the same typed
-database wrappers and `ElementFilter` members used by Tapir listing commands.
+For diagnostics, the public `FindElementsResult` retains both candidate identities
+and aligned outcomes:
+
+```python
+from multiconn_archicad.utilities import FindElementsResult
+
+result: FindElementsResult = api.utilities.element.find_elements_result(query)
+matches = result.outcomes.successes
+
+for index, slot in enumerate(result.outcomes.slots):
+    if slot.is_error:
+        candidate = result.candidates[index]
+        print(candidate.elementId.guid, slot.error.message)
+```
+
+`candidates` is a tuple of unique IDs in first-listing order, captured after the
+search's listing scope/type choices and before subsequent type narrowing.
+`outcomes` is a `BatchResult[ElementIdArrayItem]` with one slot per candidate:
+`SUCCESS` contains the matching candidate, `FILTERED` marks a non-match, and
+`ERROR` retains its diagnostic. Narrowed-out candidates remain in the snapshot as
+`FILTERED`. The constructor normalizes candidates to a tuple and rejects unequal
+candidate/outcome lengths.
+
+An empty candidate tuple means listing found no candidates. Nonempty candidates
+with errors and no successes distinguish a failed evaluation from an ordinary
+empty search. Diagnostics only describe this captured population: they do not
+represent every project element or errors that upstream commands did not expose.
+The two-field shape can support a future generic handle adapter that pages by
+original index; no MCP handle system is implemented here.
+
+Both search methods accept the same `query`, `databases`, and `filters` arguments,
+with typed database wrappers and `ElementFilter` members used by Tapir listing commands.
 For example:
 
 ```python
@@ -892,22 +947,22 @@ Use the existing `BatchResult[ElementIdArrayItem]` contract:
 | Definite non-match | `FILTERED` |
 | Per-element read/evaluation failure | `ERROR`, retaining its diagnostic |
 
-Only the filter exposes this aligned `_result`. Its plain-list companion calls
-`raise_for_errors()` before returning successful matching IDs, following existing
-element utilities. Search uses the same evaluator internally but returns only
-matches. No new batch state, query-specific result container, or three-valued
-Boolean layer is required.
+The diagnostic search wraps these slots together with its captured candidate
+sequence. The supplied-population filter exposes the `BatchResult` directly;
+its plain-list companion calls `raise_for_errors()` before returning matches.
+The concise search returns successful matches while omitting per-element errors.
+No new batch state or three-valued Boolean layer is introduced.
 
 Context validation failures raise `QueryValidationError` with all query issues.
 The fresh Tapir catalogue covers properties that the official property-details
 command cannot describe, so execution does not add that official lookup.
-Per-element errors retain query paths, GUIDs, and causes in the diagnostic filter;
-search omits them, and the strict filter raises `BatchOperationError` containing
-that result.
+Per-element errors retain query paths, GUIDs, and causes in diagnostic search
+and filtering; concise search omits them, and the strict filter raises
+`BatchOperationError` containing that result.
 
 The [offline execution example](../../examples/element_query_execution.py) uses
 `UnifiedApi` with a fake command transport, including normal generated-client
-validation. It demonstrates search, aligned filtering with duplicate IDs, and
+validation. It demonstrates concise/diagnostic search, aligned filtering with duplicate IDs, and
 strict-filter failure without contacting Archicad.
 
 Stage 8 adapts supplied successful property values: numeric values use

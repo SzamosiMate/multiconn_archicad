@@ -31,12 +31,14 @@ from multiconn_archicad.utilities.results.batch_results import (
     SlotState,
 )
 from multiconn_archicad.utilities.results.property_errors import PropertyUnavailableError, PropertyUndefinedError
+from multiconn_archicad.utilities.results.query_results import FindElementsResult
 
 __all__ = [
     "Utilities",
     "PropertyUtilities",
     "AttributeUtilities",
     "ElementUtilities",
+    "FindElementsResult",
     "BatchResultBase",
     "BatchResult",
     "BatchResult2D",

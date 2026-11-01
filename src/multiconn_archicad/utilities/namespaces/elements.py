@@ -18,6 +18,7 @@ from multiconn_archicad.utilities.results.batch_results import (
     BatchResult,
     BatchSlot,
 )
+from multiconn_archicad.utilities.results.query_results import FindElementsResult
 from multiconn_archicad.utilities.queries import Query
 from multiconn_archicad.utilities.queries.execution import (
     evaluate_query_candidates,
@@ -74,13 +75,30 @@ class ElementUtilities:
         Safe type restrictions narrow listing without rewriting the query.
         Scope follows Tapir's current database unless databases are supplied.
         Ordinary per-element evaluation failures are omitted. Invalid queries
-        (including absent property references), listing/command failures, and unexpected bugs
-        raise. This method has no aligned result variant and changes no selection.
+        (including unsupported versions or absent property references), listing/
+        command failures, and unexpected bugs raise. Use find_elements_result()
+        to retain candidate identities and per-element diagnostics.
+        """
+        result = self.find_elements_result(query, databases=databases, filters=filters)
+        return result.outcomes.successes
+
+    def find_elements_result(
+        self,
+        query: Query,
+        *,
+        databases: Sequence[tapir.DatabaseIdArrayItem] | None = None,
+        filters: Sequence[tapir.ElementFilter] | None = None,
+    ) -> FindElementsResult:
+        """Search with aligned identities and outcomes for unique listed candidates.
+
+        Capture candidates in first-listing order before subsequent type narrowing.
+        Matches are SUCCESS, non-matches FILTERED, and per-element failures ERROR.
+        Query-wide failures raise, even when no candidates can match. Neither
+        search method changes selection or reports elements outside listing scope.
         """
         validate_execution_query(self._api, query)
         candidates = list_query_candidates(self._api, query, databases=databases, filters=filters)
-        results = evaluate_query_candidates(self._api, query, candidates)
-        return [slot.value for slot in results.values() if slot.is_success]
+        return evaluate_query_candidates(self._api, query, candidates)
 
     def filter_elements_by_query_result(
         self, elements: Sequence[ElementIdLike], query: Query
@@ -93,8 +111,11 @@ class ElementUtilities:
         """
         candidates = normalize_element_ids(elements)
         validate_execution_query(self._api, query)
-        results = evaluate_query_candidates(self._api, query, candidates)
-        return BatchResult(tuple(results[element.elementId.guid] for element in candidates))
+        result = evaluate_query_candidates(self._api, query, candidates)
+        slots_by_guid = {
+            element.elementId.guid: slot for element, slot in zip(result.candidates, result.outcomes.slots)
+        }
+        return BatchResult(tuple(slots_by_guid[element.elementId.guid] for element in candidates))
 
     def filter_elements_by_query(
         self, elements: Sequence[ElementIdLike], query: Query

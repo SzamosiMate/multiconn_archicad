@@ -110,7 +110,7 @@ class _PropertyMetadata(FieldInfo[PropertyTestModel]):
     @property
     def property_id(self) -> UUID:
         """Return the property's identity independently of its display labels."""
-        return UUID(str(self._details.propertyId.guid))
+        return self._details.propertyId.guid
 
     @property
     def reference(self) -> dict[str, str]:
