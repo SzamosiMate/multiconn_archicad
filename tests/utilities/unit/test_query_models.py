@@ -10,6 +10,8 @@ from multiconn_archicad.models.tapir.types import ElementType
 from multiconn_archicad.utilities.queries import (
     AllOf,
     AnyOf,
+    BooleanOperator,
+    BooleanTest,
     ElementTypePredicate,
     NumberTest,
     NumberOperator,
@@ -101,7 +103,12 @@ def test_python_constructors_supply_discriminators_and_version_defaults():
         {"kind": "any", "items": []},
         {"kind": "not", "item": {"kind": "element_type", "types": ["Wall"]}},
         {"kind": "property", "property_id": "not-a-guid", "test": {"kind": "text", "operator": "is", "value": "x"}},
-        {"kind": "property", "property_id": PROPERTY_ID, "test": {"kind": "boolean", "operator": "is", "value": True}},
+        {"kind": "property", "property_id": PROPERTY_ID, "test": {"kind": "enum", "operator": "is", "value": "A"}},
+        {
+            "kind": "property",
+            "property_id": PROPERTY_ID,
+            "test": {"kind": "boolean", "operator": "contains", "value": True},
+        },
         {"kind": "property", "property_id": PROPERTY_ID, "test": {"kind": "length", "operator": "is", "value": 3}},
         {
             "kind": "property",
@@ -211,7 +218,13 @@ def test_json_schema_exposes_recursive_nodes_and_typed_operator_choices():
     }
     assert "Negate" not in definitions
     assert definitions["AllOf"]["properties"]["items"]["items"]["discriminator"]["propertyName"] == "kind"
-    assert set(definitions["PropertyPredicate"]["properties"]["test"]["discriminator"]["mapping"]) == {"text", "number"}
+    assert set(definitions["PropertyPredicate"]["properties"]["test"]["discriminator"]["mapping"]) == {
+        "text",
+        "number",
+        "boolean",
+    }
+    assert definitions["BooleanTest"]["properties"]["value"]["type"] == "boolean"
+    assert definitions["BooleanOperator"]["enum"] == ["is", "is not"]
     assert definitions["TextTest"]["properties"]["operator"] == {"$ref": "#/$defs/TextOperator"}
     assert definitions["NumberTest"]["properties"]["operator"] == {"$ref": "#/$defs/NumberOperator"}
     assert definitions["TextOperator"]["enum"] == [
@@ -237,7 +250,11 @@ def test_json_schema_exposes_recursive_nodes_and_typed_operator_choices():
 
 @pytest.mark.parametrize(
     ("family", "operator", "value"),
-    [(TextTest, TextOperator.CONTAINS, "External"), (NumberTest, NumberOperator.GREATER_THAN, 3)],
+    [
+        (TextTest, TextOperator.CONTAINS, "External"),
+        (NumberTest, NumberOperator.GREATER_THAN, 3),
+        (BooleanTest, BooleanOperator.IS_NOT, False),
+    ],
 )
 def test_operator_enums_are_stored_as_members_and_serialized_as_readable_values(family, operator, value):
     test = family(operator=operator, value=value)
@@ -247,3 +264,28 @@ def test_operator_enums_are_stored_as_members_and_serialized_as_readable_values(
     assert test == parsed
     assert test.model_dump(mode="json")["operator"] == operator.value
     assert family.model_validate_json(test.model_dump_json()).operator is operator
+
+
+@pytest.mark.parametrize("value", [0, 1, 0.0, 1.0, "True", "False", "true", "false", None])
+def test_boolean_operands_require_actual_booleans_in_python_and_json(value):
+    with pytest.raises(ValidationError):
+        BooleanTest(operator="is", value=value)
+    with pytest.raises(ValidationError):
+        BooleanTest.model_validate_json(json.dumps({"operator": "is", "value": value}))
+
+
+@pytest.mark.parametrize("value", [True, False])
+def test_boolean_query_round_trip_preserves_boolean_operands(value):
+    payload = {
+        "schema_version": "1.0",
+        "where": {
+            "kind": "property",
+            "property_id": PROPERTY_ID,
+            "test": {"kind": "boolean", "operator": "is", "value": value},
+        },
+    }
+    query = Query.model_validate(payload)
+    assert isinstance(query.where.test, BooleanTest)
+    assert query.where.test.value is value
+    assert query.model_dump(mode="json") == payload
+    assert Query.model_validate_json(json.dumps(payload)) == query

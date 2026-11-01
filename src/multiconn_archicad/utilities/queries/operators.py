@@ -3,6 +3,11 @@
 from enum import StrEnum
 
 
+class BooleanOperator(StrEnum):
+    IS = "is"
+    IS_NOT = "is not"
+
+
 class TextOperator(StrEnum):
     IS = "is"
     IS_NOT = "is not"

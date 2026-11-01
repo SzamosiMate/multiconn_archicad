@@ -2,6 +2,8 @@
 
 from multiconn_archicad.utilities import BatchSlot, PropertyUnavailableError, PropertyUndefinedError
 from multiconn_archicad.utilities.queries import (
+    BooleanOperator,
+    BooleanTest,
     NumberOperator,
     NumberTest,
     PropertyTestModel,
@@ -14,6 +16,9 @@ from multiconn_archicad.utilities.queries import (
 def make_examples() -> tuple[tuple[str, PropertyTestModel, BatchSlot[str]], ...]:
     """Use the same read-slot contract as the existing property utilities."""
     return (
+        ("Boolean match", BooleanTest(operator=BooleanOperator.IS, value=True), BatchSlot.success("True")),
+        ("Boolean non-match", BooleanTest(operator=BooleanOperator.IS_NOT, value=False), BatchSlot.success("False")),
+        ("Boolean conversion failure", BooleanTest(operator=BooleanOperator.IS, value=True), BatchSlot.success("yes")),
         ("Numeric match", NumberTest(operator=NumberOperator.GREATER_THAN, value=3), BatchSlot.success("3.5")),
         ("Numeric non-match", NumberTest(operator=NumberOperator.GREATER_THAN, value=3), BatchSlot.success("2.5")),
         ("Conversion failure", NumberTest(operator=NumberOperator.IS, value=3), BatchSlot.success("not a number")),

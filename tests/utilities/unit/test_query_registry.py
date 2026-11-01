@@ -2,6 +2,7 @@
 
 from typing import Annotated, Literal, Union
 from enum import StrEnum
+from uuid import UUID
 
 import pytest
 from pydantic import Field, TypeAdapter
@@ -9,6 +10,7 @@ from pydantic import Field, TypeAdapter
 from multiconn_archicad.models.tapir import types as tapir
 from multiconn_archicad.utilities.queries import (
     AmbiguousPropertyTypeError,
+    BooleanTest,
     NumberTest,
     PropertyTest,
     PropertyTestModel,
@@ -37,13 +39,16 @@ def property_details(**changes) -> tapir.PropertyDetails:
     return tapir.PropertyDetails.model_validate(data)
 
 
-@pytest.mark.parametrize("test_union", [PropertyTest, TextTest | NumberTest, Union[TextTest, NumberTest]])
+@pytest.mark.parametrize(
+    "test_union", [PropertyTest, TextTest | NumberTest | BooleanTest, Union[TextTest, NumberTest, BooleanTest]]
+)
 def test_registry_reads_families_from_annotated_and_plain_unions(test_union):
     registry = Registry.from_union(test_union)
 
-    assert registry.families == (TextTest, NumberTest)
+    assert registry.families == (TextTest, NumberTest, BooleanTest)
     assert registry.resolve(property_details()) is NumberTest
     assert registry.resolve(property_details(propertyValueType="String")) is TextTest
+    assert registry.resolve(property_details(propertyValueType="Boolean")) is BooleanTest
 
 
 @pytest.mark.parametrize("test_union", [TextTest | NumberTest, NumberTest | TextTest])
@@ -58,7 +63,7 @@ def test_family_selection_is_independent_of_union_order(test_union):
 @pytest.mark.parametrize(
     "metadata",
     [
-        {"propertyValueType": "Boolean"},
+        {"propertyValueType": "Guid"},
         {"propertyCollectionType": "List"},
         {"propertyCollectionType": "SingleChoiceEnumeration", "propertyValueType": "String"},
     ],
@@ -82,52 +87,51 @@ def test_overlapping_families_are_rejected_regardless_of_registration_order(test
         registry.resolve(property_details())
 
 
-class BooleanOperator(StrEnum):
+class GuidOperator(StrEnum):
     IS = "is"
-    IS_NOT = "is not"
 
 
-class BooleanTest(PropertyTestModel):
-    """A third family used only to demonstrate extension in this test."""
+class GuidTest(PropertyTestModel):
+    """An additional family used only to demonstrate extension in this test."""
 
-    kind: Literal["boolean"] = "boolean"
-    operator: BooleanOperator
-    value: bool = Field(strict=True)
+    kind: Literal["guid"] = "guid"
+    operator: GuidOperator
+    value: UUID
 
     @classmethod
     def accepts(cls, details: tapir.PropertyDetails) -> bool:
         return (
             details.propertyCollectionType == tapir.PropertyCollectionType.SINGLE
-            and details.propertyValueType == tapir.PropertyValueType.BOOLEAN
+            and details.propertyValueType == tapir.PropertyValueType.GUID
         )
 
     def validate_for(self, details: tapir.PropertyDetails) -> None:
         self._require_compatible_property(details)
 
     def evaluate(self, raw_value: str) -> BatchSlot[bool]:
-        values = {"True": True, "False": False}
-        if raw_value not in values:
-            return BatchSlot.failure(f"Cannot interpret {raw_value!r} as a boolean")
-        matches = values[raw_value] == self.value
-        return BatchSlot.success(matches if self.operator is BooleanOperator.IS else not matches)
+        try:
+            actual = UUID(raw_value)
+        except ValueError:
+            return BatchSlot.failure(f"Cannot interpret {raw_value!r} as a GUID")
+        return BatchSlot.success(actual == self.value)
 
 
 def test_adding_a_family_requires_only_its_class_and_the_shared_union():
-    extended_tests = Annotated[TextTest | NumberTest | BooleanTest, Field(discriminator="kind")]
+    extended_tests = Annotated[TextTest | NumberTest | BooleanTest | GuidTest, Field(discriminator="kind")]
     registry = Registry.from_union(extended_tests)
     adapter = TypeAdapter(extended_tests)
-    details = property_details(propertyValueType="Boolean")
+    details = property_details(propertyValueType="Guid")
 
-    test = adapter.validate_json('{"kind": "boolean", "operator": "is", "value": true}')
+    test = adapter.validate_json('{"kind": "guid", "operator": "is", "value": "22222222-2222-4222-8222-222222222222"}')
 
-    assert registry.resolve(details) is BooleanTest
-    assert isinstance(test, BooleanTest)
-    assert test.operator is BooleanOperator.IS
-    assert BooleanTest.operators() == ("is", "is not")
+    assert registry.resolve(details) is GuidTest
+    assert isinstance(test, GuidTest)
+    assert test.operator is GuidOperator.IS
+    assert GuidTest.operators() == ("is",)
     test.validate_for(details)
-    assert test.evaluate("True").value is True
-    assert test.evaluate("False").value is False
-    assert "boolean" in adapter.json_schema()["discriminator"]["mapping"]
+    assert test.evaluate("22222222-2222-4222-8222-222222222222").value is True
+    assert test.evaluate("00000000-0000-0000-0000-000000000000").value is False
+    assert "guid" in adapter.json_schema()["discriminator"]["mapping"]
     with pytest.raises(UnsupportedPropertyTypeError):
         Registry.from_union(PropertyTest).resolve(details)
 
