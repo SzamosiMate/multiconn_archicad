@@ -3,7 +3,13 @@
 import pytest
 
 from multiconn_archicad.models.tapir import types as tapir
-from multiconn_archicad.utilities.queries import InvalidPropertyTestError, NumberTest, PropertyTestModel, TextTest
+from multiconn_archicad.utilities.queries import (
+    BooleanTest,
+    InvalidPropertyTestError,
+    NumberTest,
+    PropertyTestModel,
+    TextTest,
+)
 from multiconn_archicad.utilities.results.batch_results import BatchSlot
 
 pytestmark = pytest.mark.unit
@@ -35,6 +41,7 @@ def property_details(**changes) -> tapir.PropertyDetails:
             {"propertyValueType": "String", "propertyMeasureType": "Default"},
         ),
         (NumberTest(operator="is greater than", value=3), {}),
+        (BooleanTest(operator="is", value=False), {"propertyValueType": "Boolean", "propertyMeasureType": "Default"}),
     ],
 )
 def test_families_accept_and_validate_builtin_and_custom_property_types(source, test, metadata):
@@ -58,6 +65,8 @@ def test_families_accept_and_validate_builtin_and_custom_property_types(source, 
         (NumberTest(operator="is", value=3), {"propertyValueType": "Guid"}),
         (NumberTest(operator="is", value=3), {"propertyCollectionType": "List"}),
         (NumberTest(operator="is", value=3), {"propertyCollectionType": "SingleChoiceEnumeration"}),
+        (BooleanTest(operator="is", value=True), {}),
+        (BooleanTest(operator="is", value=True), {"propertyValueType": "String"}),
     ],
 )
 def test_context_validation_rejects_incompatible_metadata_after_structure_validation(test, metadata):
@@ -71,6 +80,7 @@ def test_context_validation_rejects_incompatible_metadata_after_structure_valida
 
 
 def test_families_expose_readable_operators_directly():
+    assert BooleanTest.operators() == ("is", "is not")
     assert TextTest.operators() == ("is", "is not", "contains", "does not contain", "starts with", "ends with")
     assert NumberTest.operators() == (
         "is",
@@ -87,6 +97,7 @@ def test_families_expose_readable_operators_directly():
     [
         (TextTest, {"propertyValueType": "String", "propertyMeasureType": "Default"}, "string"),
         (NumberTest, {}, "number"),
+        (BooleanTest, {"propertyValueType": "Boolean", "propertyMeasureType": "Default"}, "boolean"),
     ],
 )
 def test_family_schema_describes_compatible_operands(family, metadata, value_type):
@@ -148,3 +159,11 @@ def test_number_family_rejects_numeric_collections_and_enum_choices(collection):
     assert not NumberTest.accepts(details)
     with pytest.raises(InvalidPropertyTestError):
         NumberTest(operator="is", value=3).validate_for(details)
+
+
+@pytest.mark.parametrize("collection", ["Undefined", "List", "SingleChoiceEnumeration", "MultipleChoiceEnumeration"])
+def test_boolean_family_rejects_boolean_collections_and_enum_choices(collection):
+    details = property_details(propertyValueType="Boolean", propertyCollectionType=collection)
+    assert not BooleanTest.accepts(details)
+    with pytest.raises(InvalidPropertyTestError):
+        BooleanTest(operator="is", value=True).validate_for(details)

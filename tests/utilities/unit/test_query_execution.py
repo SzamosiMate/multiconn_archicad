@@ -12,6 +12,8 @@ from multiconn_archicad.utilities.api import Utilities
 from multiconn_archicad.utilities.queries import (
     AllOf,
     AnyOf,
+    BooleanOperator,
+    BooleanTest,
     ElementTypePredicate,
     NumberOperator,
     NumberTest,
@@ -27,6 +29,7 @@ from multiconn_archicad.utilities import FindElementsResult
 pytestmark = pytest.mark.unit
 HEIGHT = UUID("22222222-2222-4222-8222-222222222222")
 DESCRIPTION = UUID("11111111-1111-4111-8111-111111111111")
+FLAG = UUID("33333333-3333-4333-8333-333333333333")
 TALL, SLAB, SHORT, BAD, UNDEFINED, UNAVAILABLE = [UUID(int=index) for index in range(1, 7)]
 
 
@@ -74,6 +77,13 @@ class FakeProject:
             },
         }
         self.row_errors = {}
+        for guid, row in self.values.items():
+            row[FLAG] = {
+                TALL: "True",
+                BAD: "unexpected",
+                UNDEFINED: "<Undefined>",
+                UNAVAILABLE: cell_error("Not available or not evaluated property", False),
+            }.get(guid, "False")
         self.api.tapir.application.get_add_on_version.return_value = "1.7.3"
         common = {
             "propertyType": "Custom",
@@ -85,6 +95,13 @@ class FakeProject:
         self.api.tapir.property.get_all_properties.return_value = GetAllPropertiesResult.model_validate(
             {
                 "properties": [
+                    {
+                        **common,
+                        "propertyId": {"guid": FLAG},
+                        "propertyName": "Flag",
+                        "propertyValueType": "Boolean",
+                        "propertyMeasureType": "Default",
+                    },
                     {
                         **common,
                         "propertyId": {"guid": HEIGHT},
@@ -155,6 +172,48 @@ def invoke(project, entry, query, ids=None):
 
 def guids(elements):
     return [item.elementId.guid for item in elements]
+
+
+@pytest.mark.parametrize(
+    ("operator", "expected"), [(BooleanOperator.IS, [TALL]), (BooleanOperator.IS_NOT, [SLAB, SHORT])]
+)
+def test_boolean_queries_share_discovery_batch_reads_and_diagnostic_execution(project, operator, expected):
+    query = Query.model_validate_json(
+        Query(
+            where=PropertyPredicate(
+                property_id=FLAG,
+                test=BooleanTest(operator=operator, value=True),
+            )
+        ).model_dump_json()
+    )
+    result = project.api.utilities.element.find_elements_result(query)
+
+    assert guids(result.candidates) == list(project.types)
+    assert guids(result.outcomes.successes) == expected
+    assert result.outcomes.slots[3].is_error
+    assert "boolean" in result.outcomes.slots[3].error.message
+    assert f"property {FLAG}" in result.outcomes.slots[3].error.message
+    assert all(result.outcomes.slots[i].is_filtered for i in [4, 5])
+    project.api.tapir.property.get_property_values_of_elements.assert_called_once()
+    assert guids(project.api.utilities.element.find_elements(query)) == expected
+    filtered = project.api.utilities.element.filter_elements_by_query_result([BAD, TALL, TALL, UNAVAILABLE], query)
+    assert filtered.slots[0].is_error
+    assert guids(filtered.successes) == ([TALL, TALL] if operator is BooleanOperator.IS else [])
+    assert filtered.slots[3].is_filtered
+
+
+def test_boolean_conversion_error_survives_a_decisive_or_sibling(project):
+    query = Query(
+        where=AnyOf(
+            items=(
+                type_node(tapir.ElementType.WALL),
+                PropertyPredicate(property_id=FLAG, test=BooleanTest(operator=BooleanOperator.IS, value=True)),
+            )
+        )
+    )
+    result = project.api.utilities.element.filter_elements_by_query_result([BAD], query)
+    assert result.slots[0].is_error
+    assert "where.items[1].test" in result.slots[0].error.message
 
 
 @pytest.mark.parametrize(

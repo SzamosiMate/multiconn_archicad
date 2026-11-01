@@ -14,6 +14,7 @@ from .fields import FieldInfo, PropertyInfo, UnsupportedPropertyInfo
 from .models import (
     AllOf,
     AnyOf,
+    BooleanTest,
     ElementTypePredicate,
     NumberTest,
     Predicate,
@@ -24,7 +25,7 @@ from .models import (
     TextTest,
 )
 from .registry import TestRegistry
-from .operators import NumberOperator, TextOperator
+from .operators import BooleanOperator, NumberOperator, TextOperator
 from .sources import PROPERTY_VALUES, TYPE_MEMBERSHIP, PropertyValuesData, PropertyValuesSource, TypeMembershipSource
 from .validation import QueryValidationError, QueryValidationIssue, QueryValidationResult, validate_query
 from .versioning import QUERY_SCHEMA_VERSION, validate_query_version
@@ -34,6 +35,8 @@ __all__ = [
     "AllOf",
     "AmbiguousPropertyTypeError",
     "AnyOf",
+    "BooleanTest",
+    "BooleanOperator",
     "ContextBuilder",
     "ContextSource",
     "ElementTypePredicate",

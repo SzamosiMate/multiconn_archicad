@@ -18,7 +18,7 @@ ordinary numeric comparisons without added tolerance or display rounding.
 Unavailable properties make every operation false except `not available`.
 All six common user-defined-property state operations are deferred.
 
-Text/numeric comparison, property-condition handling, and recursive group
+Text, numeric and Boolean comparisons, property-condition handling, and recursive group
 evaluation and the bound execution APIs are implemented. General
 `Negate` / `"not"` predicates have been removed; JSON using `"kind": "not"` is
 rejected at any depth. The complete record of
@@ -170,6 +170,9 @@ unreleased schema sketch; the default version string remains `"1.0"`.
 ## Structure-validation contract
 
 - Text operands must be strings. Numbers, booleans, bytes, and null are rejected.
+- Boolean operands must be actual booleans (`true` / `false` in JSON). Numbers
+  and strings such as `1` or `"False"` are rejected. `BooleanTest` supports scalar
+  Boolean properties with `is` / `is not`, both built-in and user-defined.
 - Numeric operands accept finite integer or real numbers. Booleans, numeric strings,
   null, NaN, and infinities are rejected. Integer operands are stored as floats.
 - `NumberTest` supports scalar integer and real properties, regardless of measure
@@ -229,7 +232,7 @@ The two validation steps have distinct entry points:
 2. Calling `test.validate_for(details)` explicitly checks property compatibility
    and any metadata-dependent operand rules. It does not fetch metadata.
 
-Each family implements `validate_for()` explicitly. Text and numeric tests reuse
+Each family implements `validate_for()` explicitly. Text, numeric and Boolean tests reuse
 their `accepts()` rule to check the property's type; their operands were checked
 when constructing the model. Future enumeration families will additionally check
 the selected value against the property's available choices. The base method is
@@ -382,72 +385,55 @@ python -m mypy --follow-imports=silent --warn-unused-ignores tests/utilities/typ
 It includes valid unions and expected type errors for unrelated members; unused
 ignore checks ensure that those invalid forms remain rejected by the type checker.
 
-The default union contains `TextTest` and `NumberTest`. Boolean properties,
-enumerations, and lists remain unsupported for now.
+The default union contains `TextTest`, `NumberTest` and `BooleanTest`.
+Enumerations, GUID properties and lists remain unsupported for now.
+
+### Boolean properties
+
+Boolean tests use a Boolean operand and readable operator enum:
+
+```python
+from multiconn_archicad.utilities.queries import BooleanOperator, BooleanTest
+
+test = BooleanTest(operator=BooleanOperator.IS_NOT, value=False)
+assert test.evaluate("True").value is True
+assert test.evaluate("False").value is False
+```
+
+In query JSON, a Boolean property leaf looks like this (replace the GUID with an
+actual property reference):
+
+```json
+{
+  "kind": "property",
+  "property_id": "33333333-3333-4333-8333-333333333333",
+  "test": {"kind": "boolean", "operator": "is", "value": true}
+}
+```
+
+Tapir returns scalar Boolean values as the exact strings `"True"` and `"False"`.
+The family explicitly decodes those strings. Other successful strings become
+conversion errors, retained in diagnostic query outcomes. Undefined or unavailable
+properties still evaluate to false for both operators, including `is not`.
+
+Discovery selects this family from the property's Single/Boolean metadata;
+`field.operators()` returns `("is", "is not")`, `field.test_schema()` describes a
+Boolean operand, and `field.create_test(operator="is", value=True)` validates it.
+The existing shared property source performs retrieval; no extra Boolean API
+call or executor branch is needed.
 
 ### Adding a family
 
-Implement a concrete `PropertyTestModel` subclass and include it in the declared
-`PropertyTest` union in `models.py`. For example, a future boolean family would
-declare:
+Implement a concrete `PropertyTestModel` subclass with `accepts()`,
+`validate_for()` and `evaluate()`, declare its operator enum and operand fields,
+and include it in `PropertyTest` in `models.py`. Override `schema_for()` when
+choices depend on property metadata. Query parsing, JSON Schema and a newly
+created registry then use that declaration automatically. Export the public
+family/operator types from the queries module.
 
-```python
-from enum import StrEnum
-from typing import Literal
-
-from pydantic import Field
-
-from multiconn_archicad.models.tapir.types import (
-    PropertyCollectionType,
-    PropertyDetails,
-    PropertyValueType,
-)
-from multiconn_archicad.utilities.queries import PropertyTestModel
-from multiconn_archicad.utilities.results.batch_results import BatchSlot
-
-
-class BooleanOperator(StrEnum):
-    IS = "is"
-    IS_NOT = "is not"
-
-
-class BooleanTest(PropertyTestModel):
-    kind: Literal["boolean"] = "boolean"
-    operator: BooleanOperator
-    value: bool = Field(strict=True)
-
-    @classmethod
-    def accepts(cls, details: PropertyDetails) -> bool:
-        return (
-            details.propertyCollectionType == PropertyCollectionType.SINGLE
-            and details.propertyValueType == PropertyValueType.BOOLEAN
-        )
-
-    def validate_for(self, details: PropertyDetails) -> None:
-        self._require_compatible_property(details)
-
-    def evaluate(self, raw_value: str) -> BatchSlot[bool]:
-        values = {"True": True, "False": False}
-        if raw_value not in values:
-            return BatchSlot.failure(f"Cannot interpret {raw_value!r} as a boolean")
-        matches = values[raw_value] == self.value
-        return BatchSlot.success(matches if self.operator is BooleanOperator.IS else not matches)
-```
-
-The shared declaration would then become:
-
-```python
-PropertyTest = Annotated[
-    TextTest | NumberTest | BooleanTest,
-    Field(discriminator="kind"),
-]
-```
-
-After that source change, query parsing, schema generation, and a newly created
-registry all use the extended union. No generic dispatch changes are necessary.
 This is static schema extension, not runtime mutation of an existing query model.
-The tests demonstrate the third family using a separate union and Pydantic
-`TypeAdapter`; the default query schema does not yet include boolean tests.
+The registry tests demonstrate an additional GUID family using a separate union
+and Pydantic `TypeAdapter`; that family is not part of the default query schema.
 
 ## Uniform field information
 
@@ -617,7 +603,7 @@ not advertise query execution or retrieval support at this stage, and does not
 say whether an element has a value for that property. `create_test()` and
 `validate()` on an unsupported field raise
 `UnsupportedPropertyTypeError`; the field is not silently treated as text or as a
-non-match. Boolean, enum, and list properties currently follow this policy.
+non-match. Enum, GUID and list properties currently follow this policy.
 
 Only `UnsupportedPropertyTypeError` is converted to an unsupported field record.
 Ambiguous family matches, unexpected adapter errors, API failures, and malformed

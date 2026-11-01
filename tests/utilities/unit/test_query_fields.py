@@ -176,6 +176,6 @@ def test_create_and_validate_both_apply_family_context_rules():
 
 def test_construction_preserves_unsupported_and_ambiguous_registry_errors():
     with pytest.raises(UnsupportedPropertyTypeError):
-        PropertyInfo(property_details(propertyValueType="Boolean"), Registry.from_union(PropertyTest))
+        PropertyInfo(property_details(propertyValueType="Guid"), Registry.from_union(PropertyTest))
     with pytest.raises(AmbiguousPropertyTypeError):
         PropertyInfo(property_details(), Registry(NumberTest, LimitedNumberTest))

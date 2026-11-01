@@ -2,7 +2,7 @@
 
 import pytest
 
-from multiconn_archicad.utilities.queries import NumberTest, TextTest, evaluate_property
+from multiconn_archicad.utilities.queries import BooleanTest, NumberTest, TextTest, evaluate_property
 from multiconn_archicad.utilities.results.batch_results import BatchError, BatchRow, BatchSlot
 from multiconn_archicad.utilities.results.property_errors import PropertyUnavailableError, PropertyUndefinedError
 
@@ -113,12 +113,13 @@ def test_successful_property_reads_delegate_to_the_family(test, raw_value, expec
     assert result.value is expected
 
 
-@pytest.mark.parametrize("family", [TextTest, NumberTest])
+@pytest.mark.parametrize("family", [TextTest, NumberTest, BooleanTest])
 @pytest.mark.parametrize("condition", [PropertyUnavailableError, PropertyUndefinedError])
 def test_every_operator_returns_false_for_unavailable_or_undefined_properties(family, condition):
     error = condition.from_message("No comparable property value")
     for operator in family.operators():
-        test = family(operator=operator, value="example" if family is TextTest else 3)
+        operand = "example" if family is TextTest else (True if family is BooleanTest else 3)
+        test = family(operator=operator, value=operand)
 
         result = evaluate_property(test, BatchSlot.failure(error))
 
@@ -182,3 +183,21 @@ def test_evaluation_preserves_serialized_test_state():
 
     assert test.evaluate(" external wall").value is True
     assert test.model_dump_json() == original
+
+
+@pytest.mark.parametrize("operator", ["is", "is not"])
+@pytest.mark.parametrize("operand", [True, False])
+@pytest.mark.parametrize("raw_value", ["True", "False"])
+def test_boolean_comparisons_decode_both_values(operator, operand, raw_value):
+    result = evaluate_property(BooleanTest(operator=operator, value=operand), BatchSlot.success(raw_value))
+    expected = (raw_value == "True") == operand
+    assert result.is_success
+    assert result.value is (expected if operator == "is" else not expected)
+
+
+@pytest.mark.parametrize("raw_value", ["", "true", "false", "0", "1", " False ", "yes", "unexpected"])
+def test_unexpected_boolean_values_produce_conversion_errors(raw_value):
+    result = BooleanTest(operator="is not", value=False).evaluate(raw_value)
+    assert result.is_error
+    assert repr(raw_value) in result.error.message
+    assert "boolean" in result.error.message

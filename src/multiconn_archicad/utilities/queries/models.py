@@ -26,7 +26,7 @@ from multiconn_archicad.utilities.results.batch_results import BatchError, Batch
 from .errors import InvalidPropertyTestError
 from .context import ContextBuilder, EvaluationContext
 from .evaluation import evaluate_property
-from .operators import NumberOperator, TextOperator
+from .operators import BooleanOperator, NumberOperator, TextOperator
 from .sources import PROPERTY_VALUES, TYPE_MEMBERSHIP
 from .versioning import QUERY_SCHEMA_VERSION
 
@@ -172,7 +172,45 @@ class NumberTest(PropertyTestModel):
                 assert_never(self.operator)
 
 
-PropertyTest: TypeAlias = Annotated[TextTest | NumberTest, Field(discriminator="kind")]
+class BooleanTest(PropertyTestModel):
+    """Compare scalar booleans returned by Tapir as True/False strings."""
+
+    kind: Literal["boolean"] = "boolean"
+    operator: BooleanOperator
+    value: bool = Field(strict=True)
+
+    @classmethod
+    def accepts(cls, details: PropertyDetails) -> bool:
+        """Accept single Boolean properties, both built-in and user-defined."""
+        return (
+            details.propertyCollectionType == PropertyCollectionType.SINGLE
+            and details.propertyValueType == PropertyValueType.BOOLEAN
+        )
+
+    def validate_for(self, details: PropertyDetails) -> None:
+        """Require Boolean metadata; Pydantic already checked the Boolean operand."""
+        self._require_compatible_property(details)
+
+    def evaluate(self, raw_value: str) -> BatchSlot[bool]:
+        """Decode Tapir's explicit Boolean strings, retaining conversion failures."""
+        match raw_value:
+            case "True":
+                actual = True
+            case "False":
+                actual = False
+            case _:
+                return BatchSlot.failure(f"Cannot interpret {raw_value!r} as a boolean")
+
+        match self.operator:
+            case BooleanOperator.IS:
+                return BatchSlot.success(actual == self.value)
+            case BooleanOperator.IS_NOT:
+                return BatchSlot.success(actual != self.value)
+            case _:
+                assert_never(self.operator)
+
+
+PropertyTest: TypeAlias = Annotated[TextTest | NumberTest | BooleanTest, Field(discriminator="kind")]
 
 
 class PropertyPredicate(_QueryModel):
