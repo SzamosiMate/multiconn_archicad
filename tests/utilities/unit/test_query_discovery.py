@@ -8,10 +8,11 @@ from uuid import UUID
 import pytest
 
 from multiconn_archicad.models.tapir.commands import GetAllPropertiesResult
-from multiconn_archicad.models.tapir.types import PropertyDetails
+from multiconn_archicad.models.tapir.types import PropertyDetails, PropertyType, PropertyValueType
 from multiconn_archicad.utilities.namespaces.properties import PropertyUtilities
 from multiconn_archicad.utilities.queries import (
     AmbiguousPropertyTypeError,
+    BooleanTest,
     NumberTest,
     PropertyCatalogue,
     PropertyInfo,
@@ -46,10 +47,29 @@ def test_catalogue_preserves_order_names_and_distinct_builtin_identities(metadat
     assert catalogue[ELEMENT_ID].qualified_name == "General Parameters / Element ID"
     assert catalogue[SDK_ELEMENT_ID].qualified_name == "GeneralElemProperties / ElementID"
     assert catalogue[ELEMENT_ID].reference != catalogue[SDK_ELEMENT_ID].reference
-    assert len(catalogue.supported) == 4
-    assert len(catalogue.unsupported) == 4
+    assert len(catalogue.supported) == 5
+    assert len(catalogue.unsupported) == 3
     assert all(isinstance(field, PropertyInfo) for field in catalogue.supported)
     assert all(isinstance(field, UnsupportedPropertyInfo) for field in catalogue.unsupported)
+
+
+@pytest.mark.parametrize("source", ["Custom", "StaticBuiltIn", "DynamicBuiltIn"])
+def test_boolean_discovery_provides_operators_schema_and_validated_test_creation(metadata, source):
+    details = metadata[0].model_copy(
+        update={
+            "propertyType": PropertyType(source),
+            "propertyValueType": PropertyValueType.BOOLEAN,
+        }
+    )
+    catalogue = PropertyCatalogue([details], Registry.from_union(PropertyTest))
+    field = catalogue[details.propertyId.guid]
+    assert field.supported
+    assert field.operators() == ("is", "is not")
+    assert field.test_schema()["properties"]["value"]["type"] == "boolean"
+    test = field.create_test(operator="is not", value=False)
+    assert isinstance(test, BooleanTest)
+    assert test.evaluate("True").value is True
+    field.validate(test)
 
 
 def test_unsupported_metadata_keeps_identity_choices_and_an_explicit_reason(metadata):
