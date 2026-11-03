@@ -4,22 +4,29 @@ Client release: **Tapir 1.8.0**. Released documentation checked: **2026-11-02**.
 
 ## Classification assignment response correction — 2026-11-01
 
-One Breaking source-review correction now changes the success branch of
-`ClassificationIdOrError` from `ClassificationIdArrayItem` to `ClassificationId`.
-`GetClassificationsOfElements` and `GetClassificationsOfElementDefaults` return
-direct `classificationSystemId` / `classificationItemId` fields inside
-`classificationIds`, without a `classificationId` wrapper. The released 1.7.3
-documentation reference is incorrect. The source in `ClassificationCommands.cpp`
-and live element-assignment reads on Archicad 27/Tapir 1.7.3 confirm the direct
-shape. It is assigned to `apply_breaking_source_review_patches` at the user's
-request, for upstream submission in the next release cycle. No second accepted
-shape or compatibility adapter is added.
+One Breaking source-review correction changes `ClassificationIdOrError/oneOf/0`
+from `ClassificationIdArrayItem` to `ClassificationId`. Element and element-default
+assignment reads return direct `classificationSystemId` / `classificationItemId`
+fields in `classificationIds`, without a `classificationId` wrapper. Source and
+earlier live AC27/Tapir 1.7.3 element reads confirm that direct shape.
 
-Keep this correction until the fetched release schema uses `ClassificationId` at
-the success branch. The existing named `ClassificationIdArrayItem` remains for
-its other consumers. Prior naming/sharing counts below describe their original
-review batches; this correction is additional to those inventories. Regeneration,
-strict audit, reproducibility and the live classification-utility read passed.
+Published separately as commit [`72bf361f`](https://github.com/SzamosiMate/tapir-archicad-automation/commit/72bf361f07e4b34200ea2067a89202095ac9ea2c)
+on [`schema/refinements-1.8.0`](https://github.com/SzamosiMate/tapir-archicad-automation/tree/schema/refinements-1.8.0), now submitted by the user as [PR #1754](https://github.com/ENZYME-APD/tapir-archicad-automation/pull/1754).
+The correction is a breaking schema/generated-client change; execution is unchanged.
+Retain it until fetched release documentation corrects the element success branch.
+Preserve `ClassificationIdArrayItem` for its remaining wrapped consumers.
+
+**Attribute exception found in the 2026-11-03 source review:**
+`GetClassificationOfAttributesInSystem` explicitly returns wrapped `classificationId`
+successes. The upstream proposal gives that result a separate wrapped/error union,
+preserving its existing wire shape. The current downstream global patch also
+flattens this consumer, which is incorrect. Reconcile this separately during client
+release adoption; no patch implementation, model or adapter was changed by this
+upstream run. Do not treat the attribute consumer as evidence for a direct shape.
+
+The [single 1.8.0 run report](reports/upstream-patches/upstream-refinements-1.8.0-2026-11-03.md)
+records SDK/source evidence, validation and compatibility consequences. A source
+merge alone does not retire any client operation.
 
 ## Retained naming and sharing candidates from 1.7.2
 
@@ -82,8 +89,9 @@ its incorrect `ClassificationIdOrError` success reference. Retain the existing
 82 Permanent, 241 Temporary and one Breaking source-review operation; no existing
 operation changes category or retires in this update. The classification correction
 also reaches the new `GetClassificationOfAttributesInSystem` result through the
-shared schema. Its implementation semantics need a separately requested upstream
-review; this update does not inspect implementation source.
+shared schema. The later upstream source review found that attribute consumer
+requires a wrapped result; see the classification exception above. The generation
+update itself did not inspect implementation source.
 
 The update adds **18 Permanent creation/modification item extractions** in the
 established lists and **370 Temporary helper operations**: 283 inline object/enum
@@ -121,3 +129,63 @@ See the [condensed 1.8.0 record](reports/codegen/tapir-1.8.0.md) for compatibili
 consequences and generator decisions. The older batch descriptions above retain
 their stated historical baselines; their open release-adoption conditions remain
 applicable to the fetched 1.8.0 documentation.
+
+### Published independent 1.8.0 proposal — 2026-11-03
+
+Submitted by the user as [PR #1754](https://github.com/ENZYME-APD/tapir-archicad-automation/pull/1754). Published branch
+[`schema/refinements-1.8.0`](https://github.com/SzamosiMate/tapir-archicad-automation/tree/schema/refinements-1.8.0)
+now has tip [`808781f6`](https://github.com/SzamosiMate/tapir-archicad-automation/commit/808781f63ebb786ab809e1aa490959b3396c944c).
+It contains **341 of the 370 new Temporary operations**, yielding **279 named
+definitions**, plus the separate breaking classification commit above. The original
+source baseline was `c4db2ade1fcfb40bedf81832ad4b5cd429d8504e`; the latest update
+merged upstream `dd7eafc67656f9f397c95e8438f9cd168e612d70` and resolved the drawing-primitive
+schema and appended-definition conflicts. Both original commits remain intact.
+The full schema comparison and AC29 SDK build passed again. #1386 and #1557
+remain outside this branch's prerequisites; their dependent operations stay deferred.
+
+Retire the 341 published operations only after fetched released documentation
+provides equivalent definitions/references at their producer and consumer paths
+in `apply_temporary_patches`. All 279 names match the patched released client;
+no new alias is currently needed, subject to actual release-adoption review.
+Preserve loud guards and every current client operation in the meantime.
+
+**29 operations remain deferred** because a parent or reference definition is
+absent from main. Some prerequisites are in the pending earlier PRs; opening,
+library-script and text-measurement parents were already deferred from those PRs.
+Do not silently publish their consumers or copy the earlier batches into this
+branch. Reassess after equivalent prerequisites are available. The original paths
+below trace through local creation-item and earlier temporary extractions.
+
+| Deferred operation | Original path | Missing prerequisite(s) |
+| --- | --- | --- |
+| `extract_inline_enum` | `SetLibraryPartScriptsParameters/properties/libraryParts/items/properties/deleteScripts/items` | `LibraryPartScriptData` |
+| `extract_inline_enum` | `GetOpeningDefaultResult/properties/floorPlanParameters/properties/floorPlanDisplayMode` | `OpeningDefaultFloorPlanParameters` |
+| `extract_inline_enum` | `GetOpeningDefaultResult/properties/floorPlanParameters/properties/dividedOpeningMode` | `OpeningDefaultFloorPlanParameters` |
+| `extract_inline_enum` | `GetOpeningDefaultResult/properties/floorPlanParameters/properties/openEdgeStyle` | `OpeningDefaultFloorPlanParameters` |
+| `extract_inline_enum` | `GetOpeningDetailsResult/properties/openings/items/oneOf/0/properties/extrusionParameters/properties/constraint` | `OpeningExtrusionParameters` |
+| `extract_inline_enum` | `GetOpeningDetailsResult/properties/openings/items/oneOf/0/properties/extrusionParameters/properties/limitType` | `OpeningExtrusionParameters` |
+| `extract_inline_enum` | `GetOpeningDetailsResult/properties/openings/items/oneOf/0/properties/extrusionParameters/properties/linkedStatus` | `OpeningExtrusionParameters` |
+| `extract_inline_enum` | `GetOpeningDetailsResult/properties/openings/items/oneOf/0/properties/extrusionParameters/properties/shapeType` | `OpeningExtrusionParameters` |
+| `replace_inline_schema_with_ref` | `BreakHotlinkNodesParameters/properties/hotlinkNodes/items` | `HotlinkNodeReference` |
+| `replace_inline_schema_with_ref` | `DeleteHotlinkNodesParameters/properties/hotlinkNodes/items` | `HotlinkNodeReference` |
+| `replace_inline_schema_with_ref` | `GetDimensionStandardsResult/properties/dimensionStandards/items/properties/settings/properties/area` | `AreaDimensionFormat` |
+| `replace_inline_schema_with_ref` | `GetHotlinkDesignOptionTableDetailsParameters/properties/hotlinkNodes/items` | `HotlinkNodeReference` |
+| `replace_inline_schema_with_ref` | `GetVisibleSkinStatusParameters/properties/structureDisplay` | `PartialStructureDisplay` |
+| `replace_inline_schema_with_ref` | `SetOpeningDetailsParameters/properties/openingsWithDetails/items/properties/extrusionParameters/properties/constraint` | `OpeningExtrusionParametersUpdate`, `OpeningConstraint` |
+| `replace_inline_schema_with_ref` | `SetOpeningDetailsParameters/properties/openingsWithDetails/items/properties/extrusionParameters/properties/limitType` | `OpeningExtrusionParametersUpdate`, `OpeningLimitType` |
+| `replace_inline_schema_with_ref` | `SetOpeningDetailsParameters/properties/openingsWithDetails/items/properties/extrusionParameters/properties/linkedStatus` | `OpeningExtrusionParametersUpdate`, `OpeningLinkedStatus` |
+| `replace_inline_schema_with_ref` | `SetOpeningDetailsParameters/properties/openingsWithDetails/items/properties/extrusionParameters/properties/shapeType` | `OpeningExtrusionParametersUpdate`, `OpeningShapeType` |
+| `replace_inline_schema_with_ref` | `GetOpeningFloorPlanParametersResult/properties/openings/items/oneOf/0/properties/floorPlanParameters/properties/floorPlanDisplayMode` | `OpeningFloorPlanParameters`, `OpeningFloorPlanDisplayMode` |
+| `replace_inline_schema_with_ref` | `GetOpeningFloorPlanParametersResult/properties/openings/items/oneOf/0/properties/floorPlanParameters/properties/dividedOpeningMode` | `OpeningFloorPlanParameters`, `OpeningDividedMode` |
+| `replace_inline_schema_with_ref` | `GetOpeningFloorPlanParametersResult/properties/openings/items/oneOf/0/properties/floorPlanParameters/properties/openEdgeStyle` | `OpeningFloorPlanParameters`, `OpeningEdgeStyle` |
+| `replace_inline_schema_with_ref` | `SetOpeningFloorPlanParametersParameters/properties/openingsWithFloorPlanParameters/items/properties/floorPlanParameters/properties/floorPlanDisplayMode` | `OpeningFloorPlanParametersUpdate`, `OpeningFloorPlanDisplayMode` |
+| `replace_inline_schema_with_ref` | `SetOpeningFloorPlanParametersParameters/properties/openingsWithFloorPlanParameters/items/properties/floorPlanParameters/properties/dividedOpeningMode` | `OpeningFloorPlanParametersUpdate`, `OpeningDividedMode` |
+| `replace_inline_schema_with_ref` | `SetOpeningFloorPlanParametersParameters/properties/openingsWithFloorPlanParameters/items/properties/floorPlanParameters/properties/openEdgeStyle` | `OpeningFloorPlanParametersUpdate`, `OpeningEdgeStyle` |
+| `replace_inline_schema_with_ref` | `PlaceOpeningsParameters/properties/openingsData/items/properties/extrusionParameters` | `OpeningExtrusionParametersUpdate` |
+| `replace_inline_schema_with_ref` | `PlaceOpeningsParameters/properties/openingsData/items/properties/floorPlanParameters` | `OpeningFloorPlanParametersUpdate` |
+| `name_required_variants` | `SetLibraryPartScriptsParameters/properties/libraryParts/items` | `LibraryPartScriptData` |
+| `name_required_variants` | `MeasureTextsParameters/properties/texts/items` | `TextMeasurementData` |
+| `replace_inline_schema_with_ref` | `SetOpeningDefaultParameters/properties/extrusionParameters` | `OpeningExtrusionParametersUpdate` |
+| `replace_inline_schema_with_ref` | `SetOpeningDefaultParameters/properties/floorPlanParameters` | `OpeningFloorPlanParametersUpdate` |
+
+The [single run report](reports/upstream-patches/upstream-refinements-1.8.0-2026-11-03.md) records implementation decisions, the classification exception, full validation and copyable PR text.
