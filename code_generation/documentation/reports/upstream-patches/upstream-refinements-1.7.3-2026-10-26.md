@@ -12,6 +12,15 @@ Run started: **2026-10-26**. Endpoint completed: **publish and create the upstre
 
 The [active queue](../../schema-patch-tracking.md) holds source/PR state, deferred consumers and retirement conditions. The [condensed 1.7.3 generation record](../codegen/tapir-1.7.3.md#temporary) preserves the decisions; the expanded historical operation/path inventory remains at `776808e:code_generation/documentation/reports/codegen/tapir-1.7.3.md` in Git and is not repeated here.
 
+
+## Rebase follow-up — 2026-11-02
+
+Rebased the existing PR independently onto upstream main `d3bc733d110895abd222e1f288cdf11b939523f4`; published fork head `1cbfc84f0cac972605320bfd499d63389ee1a583` with an explicit lease. GitHub reports the PR mergeable. A merge-tree check between the two rebased PR heads reports a conflict in `CommonSchemaDefinitions.json`; after either PR merges, reconcile the other against the new main. The rebased branch retains 92 new common definitions.
+
+Per the user's decision, structural changes are deferred for review against the actual 1.7.4 release documentation: Text measurement, group user data, opening read/update/default and floor-plan schemas, library-part scripts, and project preference pages. The two previously deferred cross-batch references remain deferred. Current upstream descriptions are retained in the remaining refactor. The [active queue](../../schema-patch-tracking.md) carries the release-adoption work; the counts and branch tips in the original run notes below describe the older baseline.
+
+The current source interpreter parsed 641 commands. A schema-aware comparison checked all 1,925 baseline shared-definition and command-side roots against main with no structural differences; references resolve and affected commands have common-schema access. The target renderer processed 1,180 non-null command schemas with no shared-definition mutation; caller/definition description pairs were checked. A scan found no current upstream description lost since the original proposal. `git diff --check` passed and execution code is unchanged. This rebase was not SDK-built or tested with live Archicad; earlier build results below apply to the original baseline. No generated docs or MultiConn models were regenerated.
+
 ## Decisions and source review
 
 **159 of 161 new Temporary operations implemented**, yielding **133 named definitions**: 78 inline-object/scalar extractions, 32 union-success extractions, 21 enum extractions, one database conditional-variant operation and 27 shared-reference replacements. Two cross-batch reference replacements remain deferred. Counts are expanded helper operations, not definitions or PR boundaries. Existing Permanent naming workarounds and the older 80 Temporary operations were not republished.

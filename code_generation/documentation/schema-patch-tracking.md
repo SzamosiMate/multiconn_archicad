@@ -1,14 +1,33 @@
 # Active Tapir schema refinements
 
-Client release: **Tapir 1.7.3**. Released documentation checked: **2026-10-26**. This file contains open sharing candidates awaiting released documentation. Remove an entry only after the fetched release contains equivalent definitions and references; historical decisions remain in reports and Git.
+Client release: **Tapir 1.8.0**. Released documentation checked: **2026-11-02**. This file contains open sharing candidates awaiting released documentation. Remove an entry only after the fetched release contains equivalent definitions and references; historical decisions remain in reports and Git.
+
+## Classification assignment response correction — 2026-11-01
+
+One Breaking source-review correction now changes the success branch of
+`ClassificationIdOrError` from `ClassificationIdArrayItem` to `ClassificationId`.
+`GetClassificationsOfElements` and `GetClassificationsOfElementDefaults` return
+direct `classificationSystemId` / `classificationItemId` fields inside
+`classificationIds`, without a `classificationId` wrapper. The released 1.7.3
+documentation reference is incorrect. The source in `ClassificationCommands.cpp`
+and live element-assignment reads on Archicad 27/Tapir 1.7.3 confirm the direct
+shape. It is assigned to `apply_breaking_source_review_patches` at the user's
+request, for upstream submission in the next release cycle. No second accepted
+shape or compatibility adapter is added.
+
+Keep this correction until the fetched release schema uses `ClassificationId` at
+the success branch. The existing named `ClassificationIdArrayItem` remains for
+its other consumers. Prior naming/sharing counts below describe their original
+review batches; this correction is additional to those inventories. Regeneration,
+strict audit, reproducibility and the live classification-utility read passed.
 
 ## Retained naming and sharing candidates from 1.7.2
 
-**Submitted as [PR #1386](https://github.com/ENZYME-APD/tapir-archicad-automation/pull/1386); still open and unmerged, checked 2026-10-26.** The retained older decisions in this section are covered by [`schema/refinements-1.7.2`](https://github.com/SzamosiMate/tapir-archicad-automation/tree/schema/refinements-1.7.2), commit [`e7bcf0bb`](https://github.com/SzamosiMate/tapir-archicad-automation/commit/e7bcf0bb6aad030333239d3b7052485c20967e9c), based on upstream `8c607d93c94200ed69496fae145c9aed53810f4d`. See the [single run report](reports/upstream-patches/upstream-refinements-1.7.2-2026-10-20.md) for source rationale, compatibility evidence and copyable PR text. The 1.7.3 run leaves this branch/head intact and publishes its independent proposal below.
+**Submitted as [PR #1386](https://github.com/ENZYME-APD/tapir-archicad-automation/pull/1386); still open and unmerged, rebased and checked 2026-11-02.** The retained older decisions in this section are tracked against [`schema/refinements-1.7.2`](https://github.com/SzamosiMate/tapir-archicad-automation/tree/schema/refinements-1.7.2), commit [`c7d902d2`](https://github.com/SzamosiMate/tapir-archicad-automation/commit/c7d902d29356946b6433791413298ab36c84784c), based on upstream `d3bc733d110895abd222e1f288cdf11b939523f4`. Text creation variants, marker readback and MEP preference-table rows were deferred during the rebase; reassess those against the 1.7.4 release documentation before deciding on any new upstream proposal or client patch retirement. See the [single run report](reports/upstream-patches/upstream-refinements-1.7.2-2026-10-20.md) for source rationale, compatibility evidence and copyable PR text. The 1.7.3 proposal below remains independent.
 
-Retained inventory: **80 expanded Temporary helper operations**: 58 naming/conditional-variant operations and 22 shared-reference replacements. This includes 70 operations introduced for 1.7.2 and ten older operations (eight hotlink/status/marker names plus two conditional-variant names). Tapir 1.7.3 retires the graphic-rule readback and marker-parameter item extractions, adopting `GraphicOverrideRule` and `StoredGDLParameter` with old Python names retained as compatibility aliases. The latter also relaxes requiredness of `value`; all previous payloads remain accepted. See the [1.7.3 report](reports/codegen/tapir-1.7.3.md#removed-patches).
+Original retained inventory before the 2026-11-02 rebase: **80 expanded Temporary helper operations**: 58 naming/conditional-variant operations and 22 shared-reference replacements. This includes 70 operations introduced for 1.7.2 and ten older operations (eight hotlink/status/marker names plus two conditional-variant names). Tapir 1.7.3 retires the graphic-rule readback and marker-parameter item extractions, adopting `GraphicOverrideRule` and `StoredGDLParameter` with old Python names retained as compatibility aliases. The latter also relaxes requiredness of `value`; all previous payloads remain accepted. See the [1.7.3 report](reports/codegen/tapir-1.7.3.md#removed-patches).
 
-All new schema-specific names outside the established creation/modification lists are Temporary. Source review confirms equivalent contracts for the retained older queue; the fork retains the older client destination names. Released equivalent definitions/references allow retirement; when upstream chooses different names, review equivalence and retain old Python names as compatibility aliases where needed. The actual `Hole2D` and `TextData` conditional calls were already in `apply_temporary_patches` at 1.7.3 preflight; the previous tracking placement note was stale. No category was moved in this update. Keep loud missing-target/existing-reference guards. Valid inline schemas are not inherently defective; these entries record the desired naming convergence. The [condensed generation record](reports/codegen/tapir-1.7.2.md#temporary) preserves the decisions; full historical source paths and consumer differences remain at `776808e:code_generation/documentation/reports/codegen/tapir-1.7.2.md` in Git. The tables below own the active retirement scope.
+All new schema-specific names outside the established creation/modification lists are Temporary. The original source review found equivalent contracts for the older queue at its then-current baseline; the rebased fork retains the applicable client destination names and defers the changed contracts listed above. Released equivalent definitions/references allow retirement; when upstream chooses different names, review equivalence and retain old Python names as compatibility aliases where needed. The actual `Hole2D` and `TextData` conditional calls were already in `apply_temporary_patches` at 1.7.3 preflight; the previous tracking placement note was stale. No category was moved in this update. Keep loud missing-target/existing-reference guards. Valid inline schemas are not inherently defective; these entries record the desired naming convergence. The [condensed generation record](reports/codegen/tapir-1.7.2.md#temporary) preserves the decisions; full historical source paths and consumer differences remain at `776808e:code_generation/documentation/reports/codegen/tapir-1.7.2.md` in Git. The tables below own the active retirement scope.
 
 ### Naming and conditional variants (58 operations)
 
@@ -40,17 +59,65 @@ Paths below are original upstream paths using the patch helpers' shorthand. Extr
 
 ## Source-reviewed 1.7.3 refinements
 
-**161 expanded Temporary operations: 159 submitted in [PR #1557](https://github.com/ENZYME-APD/tapir-archicad-automation/pull/1557), two deferred pending definitions in #1386.** The published branch is [`schema/refinements-1.7.3`](https://github.com/SzamosiMate/tapir-archicad-automation/tree/schema/refinements-1.7.3), commit [`fde941fa`](https://github.com/SzamosiMate/tapir-archicad-automation/commit/fde941fa575ca358f7f15a4e3d54a715d1e47b6a), directly based on upstream `6323441a9000912ba1a7a6df9aaf73c7f7cff936`. It contains 78 inline-schema extractions, 32 union-success-branch extractions, 21 enum extractions, one conditional-variant operation and 27 shared-reference replacements, yielding 133 named definitions. Three further equivalent format references in `GetCalculationUnits` extend meaningful reuse without adding client patch operations. See the [single run report](reports/upstream-patches/upstream-refinements-1.7.3-2026-10-26.md) for source decisions and validation.
+**Original 1.7.3 review: 161 expanded Temporary operations, including 159 originally submitted in [PR #1557](https://github.com/ENZYME-APD/tapir-archicad-automation/pull/1557), two deferred pending definitions in #1386.** The published branch is [`schema/refinements-1.7.3`](https://github.com/SzamosiMate/tapir-archicad-automation/tree/schema/refinements-1.7.3), commit [`1cbfc84f`](https://github.com/SzamosiMate/tapir-archicad-automation/commit/1cbfc84f0cac972605320bfd499d63389ee1a583), rebased onto upstream `d3bc733d110895abd222e1f288cdf11b939523f4`. Its original scope yielded 133 named definitions; the rebased proposal retains 92 after deferring changed contracts. Text measurement, group user data, opening schemas, library-part scripts and project preference pages remain in the client queue and should be reassessed against the 1.7.4 release documentation. Three further equivalent format references in `GetCalculationUnits` extend meaningful reuse without adding client patch operations. See the [single run report](reports/upstream-patches/upstream-refinements-1.7.3-2026-10-26.md) for source decisions and validation.
 
-The [condensed 1.7.3 generation record](reports/codegen/tapir-1.7.3.md#temporary) preserves the decisions; exact historical calls and consumer paths remain at `776808e:code_generation/documentation/reports/codegen/tapir-1.7.3.md` in Git and active calls remain in `code_generation/shared/schema_patching.py`. Source interpretation, complete structural comparison and the AC29 Debug SDK build confirm equivalent contracts for the published proposal. It covers database selection, element-detail success naming, project preference pages/formats, 3D styles/cut planes, openings, favorites, attribute/graphic-rule metadata, IFC fields, categories and relations, geometry/measurement results, project data, Teamwork and command-specific options. Read/update contracts remain separate when required fields differ. All 133 names match existing patched client names; no new compatibility alias is proposed.
+The [condensed 1.7.3 generation record](reports/codegen/tapir-1.7.3.md#temporary) preserves the decisions; exact historical calls and consumer paths remain at `776808e:code_generation/documentation/reports/codegen/tapir-1.7.3.md` in Git and active calls remain in `code_generation/shared/schema_patching.py`. The original proposal passed source interpretation, a complete structural comparison and an AC29 Debug SDK build at its original baseline. The rebased proposal passed a new structural comparison and renderer checks against `d3bc733d`; it has not received a new SDK build. The rebased proposal covers database selection, element-detail success naming, selected calculation-unit formats, 3D styles/cut planes, favorites, attribute/graphic-rule metadata, IFC fields, categories and relations, geometry/measurement results, project data, Teamwork and command-specific options. Read/update contracts remain separate when required fields differ. The original 133 names matched existing patched client names; no new compatibility alias was proposed. Reassess the retained and deferred names during release adoption.
 
 ### Deferred cross-batch references (two operations)
 
 | Original path | Source/PR status and retirement condition |
 | --- | --- |
-| `GetFavoriteSettingsResult/favoriteSettings/items/oneOf/0/marker` (locally `FavoriteSettings/marker`) | Keep inline in #1557. Reuse `MarkerParametersOfElement` after #1386 supplies an equivalent definition updated to current `StoredGDLParameter` semantics. Preserve the caller description: "The marker stored with a Window or Door Favorite. Absent when the Favorite has no marker - that is not an error." The existing client replacement drops this annotation; its acceptance contract is equivalent, and no client implementation is changed by this upstream run. Retire only when released docs reference an equivalent marker contract. |
+| `GetFavoriteSettingsResult/favoriteSettings/items/oneOf/0/marker` (locally `FavoriteSettings/marker`) | Keep inline in #1557. The #1386 marker-readback extraction was deferred during rebase; reconsider reuse only after an equivalent definition with current `StoredGDLParameter` semantics is available. Preserve the caller description: "The marker stored with a Window or Door Favorite. Absent when the Favorite has no marker - that is not an error." The existing client replacement drops this annotation; its acceptance contract is equivalent, and no client implementation is changed by this upstream run. Retire only when released docs reference an equivalent marker contract. |
 | `DeleteMEPPhysicalSystemsParameters/physicalSystems/items` | Keep inline in #1557. Its required `physicalSystemId` wrapper is equivalent to `MEPPhysicalSystemIdArrayItem`, proposed by #1386. Add the reference after that definition is available; retire only when released docs use it at this consumer. |
 
 Retire each operation when released documentation supplies equivalent named definitions and references at all affected consumers, preserving requiredness, bounds, accepted enum values and union/error behavior. Producers must precede dependent references. If upstream chooses different names, preserve required existing Python imports through compatibility aliases. Existing source-reviewed candidates remain independently tracked above.
 
 Final inventory: **241 Temporary operations** (80 retained + 161 new) and **82 Permanent operations** (80 retained + two MEP modification-item additions). No existing patch changes category; no new breaking patch or unresolved breaking source-review candidate is introduced. Wire-key support, alias constraint preservation and functional TypedDict cleanup are generator concerns, separate from these categories. Keep every active operation until equivalent definitions/references appear in released documentation.
+
+
+## Tapir 1.8.0 naming and sharing additions — 2026-11-02
+
+The released 1.8.0 documentation still has all existing patch targets, including
+its incorrect `ClassificationIdOrError` success reference. Retain the existing
+82 Permanent, 241 Temporary and one Breaking source-review operation; no existing
+operation changes category or retires in this update. The classification correction
+also reaches the new `GetClassificationOfAttributesInSystem` result through the
+shared schema. Its implementation semantics need a separately requested upstream
+review; this update does not inspect implementation source.
+
+The update adds **18 Permanent creation/modification item extractions** in the
+established lists and **370 Temporary helper operations**: 283 inline object/enum
+or union-branch names, four conditional-variant naming calls, and 83 shared
+references. The active inventory is **100 Permanent + 611 Temporary + one Breaking
+source-review operation**; counts expand loops, and each conditional-variant call
+counts once rather than once per emitted definition. There are no Breaking
+permanent additions or classification-only changes.
+
+Retirement scope for the new Temporary operations is the exact producer and
+consumer paths in [`apply_temporary_patches`](../shared/schema_patching.py), after
+the 1.7.3 preference-page operations. Released documentation must provide equivalent
+named definitions and reference each affected consumer, preserving fields,
+requiredness, constraints, accepted enum values and union/error alternatives.
+The creation/modification list additions remain Permanent. Naming-only refinements
+are candidates for a separate upstream-patches run; none was submitted by this run.
+
+- Replace generic/path-derived names, keeping domain context: analytical settings,
+  geometries and success branches; viewpoint, library, property, element and MEP
+  contracts; opening symbol/extrusion/floor-plan enums; and user-data keys. These
+  include distinct dimension-standard formats instead of displacing `Level` or
+  sharing preference formats with different fields, and `ElementUnmergePair`
+  instead of displacing the existing trimming `ElementPair`.
+- Name conditional alternatives at `FindModelViewOptionParameters`,
+  `SetActiveRenovationFilterParameters`, `LibraryPartScriptData` and
+  `TextMeasurementData`. Retire only with equivalent named alternatives retaining
+  the release's `oneOf`/`anyOf` and required-field behavior.
+- Share equivalent read/write/reference contracts for viewpoint IDs, MEP row keys
+  and values, opening updates, drawing primitives, user-data keys, and existing
+  color/bounding-box/partial-display contracts. Keep differing requiredness,
+  dimensions, identifier formats, bounds and read/write payloads separate; source
+  calls own the complete paths and canonical destination names.
+
+See the [condensed 1.8.0 record](reports/codegen/tapir-1.8.0.md) for compatibility
+consequences and generator decisions. The older batch descriptions above retain
+their stated historical baselines; their open release-adoption conditions remain
+applicable to the fetched 1.8.0 documentation.

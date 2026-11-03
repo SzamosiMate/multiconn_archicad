@@ -6,25 +6,41 @@ from typing import TYPE_CHECKING
 from pydantic import TypeAdapter
 
 from multiconn_archicad.models.tapir.commands import (
+    CreateElementSetsParameters,
+    CreateElementSetsResult,
     CreateGroupsParameters,
     CreateGroupsResult,
+    DeleteElementSetsParameters,
+    DeleteElementSetsResult,
+    GetAllElementsOfGroupsParameters,
+    GetAllElementsOfGroupsResult,
+    GetAutoGroupModeResult,
+    GetElementSetDataParameters,
+    GetElementSetDataResult,
     GetElementSetsOfElementsParameters,
     GetElementSetsOfElementsResult,
     GetElementsOfGroupsParameters,
     GetElementsOfGroupsResult,
     GetGroupsOfElementsParameters,
     GetGroupsOfElementsResult,
+    GetMainGroupsParameters,
+    GetMainGroupsResult,
     GetSuspendGroupsModeResult,
     GetUserDataOfGroupsParameters,
     GetUserDataOfGroupsResult,
     SetSuspendGroupsModeParameters,
     SetSuspendGroupsModeResult,
+    SetUserDataOfGroupsParameters,
+    SetUserDataOfGroupsResult,
     UngroupElementsParameters,
     UngroupElementsResult,
 )
 from multiconn_archicad.models.tapir.types import (
     ElementGroupParameters,
     ElementIdArrayItem,
+    ElementSetData,
+    ElementSetDetails,
+    ElementSetIdArrayItem,
     ElementSetsOfElement,
     ElementsWrapper,
     ErrorItem,
@@ -32,6 +48,7 @@ from multiconn_archicad.models.tapir.types import (
     GroupIdArrayItem,
     GroupUserDataResult,
     SuccessfulExecutionResult,
+    UserDataPair,
 )
 
 if TYPE_CHECKING:
@@ -41,6 +58,33 @@ if TYPE_CHECKING:
 class ElementGroupingCommands:
     def __init__(self, core: CoreCommands):
         self._core = core
+
+    def create_element_sets(self, element_sets: list[ElementSetData]) -> list[ElementSetIdArrayItem | ErrorItem]:
+        """
+        Creates element sets of the given elements. An element set is a hidden, persistent
+        collection of elements (it is not a group and has no effect on selection or editing).
+
+        Args:
+            element_sets (list[ElementSetData]): The element sets to create.
+
+        Returns:
+            list[ElementSetIdArrayItem | ErrorItem]: The identifier of each created element set,
+                or an error, in the order of the input.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elementSets": element_sets,
+        }
+        validated_params = CreateElementSetsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "CreateElementSets", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = CreateElementSetsResult.model_validate(response_dict)
+        return validated_response.elementSets
 
     def create_groups(self, element_groups: list[ElementGroupParameters]) -> list[ErrorItem | GroupIdArrayItem]:
         """
@@ -66,6 +110,108 @@ class ElementGroupingCommands:
         )
         validated_response = CreateGroupsResult.model_validate(response_dict)
         return validated_response.groupGuids
+
+    def delete_element_sets(
+        self, element_sets: list[ElementSetIdArrayItem]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Deletes the given element sets. The elements of a set are not deleted. Only element sets
+        created by the Tapir Add-On can be deleted; sets created by other add-ons are reported
+        as failed.
+
+        Args:
+            element_sets (list[ElementSetIdArrayItem]): The element sets to delete, as returned
+                by CreateElementSets or GetElementSetsOfElements. Only element sets created by
+                the Tapir Add-On can be deleted. The elements of a deleted set are not deleted.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elementSets": element_sets,
+        }
+        validated_params = DeleteElementSetsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "DeleteElementSets", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = DeleteElementSetsResult.model_validate(response_dict)
+        return validated_response.executionResults
+
+    def get_all_elements_of_groups(self, groups: list[GroupIdArrayItem]) -> list[ElementsWrapper | ErrorItem]:
+        """
+        Gets all the elements of each given group, including the elements of its nested groups.
+
+        Args:
+            groups (list[GroupIdArrayItem]): The groups to get all the elements of.
+
+        Returns:
+            list[ElementsWrapper | ErrorItem]: All the elements of each given group, including
+                the elements of its nested groups, or an error.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "groups": groups,
+        }
+        validated_params = GetAllElementsOfGroupsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetAllElementsOfGroups", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetAllElementsOfGroupsResult.model_validate(response_dict)
+        return validated_response.elementsOfGroups
+
+    def get_auto_group_mode(self) -> bool:
+        """
+        Gets the current state of the Auto Group mode.
+
+        Returns:
+            bool: True if the Auto Group mode is currently on.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        response_dict = self._core.post_tapir_command("GetAutoGroupMode")
+        validated_response = GetAutoGroupModeResult.model_validate(response_dict)
+        return validated_response.autoGroup
+
+    def get_element_set_data(self, element_sets: list[ElementSetIdArrayItem]) -> list[ElementSetDetails | ErrorItem]:
+        """
+        Gets the elements and the custom data of each given element set. Element sets are
+        created by add-ons to link elements together; the custom data is returned as Base64
+        encoded bytes.
+
+        Args:
+            element_sets (list[ElementSetIdArrayItem]): The element sets to get the data of.
+
+        Returns:
+            list[ElementSetDetails | ErrorItem]: The data of each given element set, or an
+                error.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elementSets": element_sets,
+        }
+        validated_params = GetElementSetDataParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetElementSetData", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetElementSetDataResult.model_validate(response_dict)
+        return validated_response.elementSets
 
     def get_element_sets_of_elements(
         self, elements: list[ElementIdArrayItem]
@@ -151,6 +297,33 @@ class ElementGroupingCommands:
         validated_response = GetGroupsOfElementsResult.model_validate(response_dict)
         return validated_response.groupGuids
 
+    def get_main_groups(self, groups: list[GroupIdArrayItem]) -> list[ErrorItem | GroupIdArrayItem]:
+        """
+        Gets the top level group of each given group. A group that is not nested in another
+        group is its own top level group.
+
+        Args:
+            groups (list[GroupIdArrayItem]): The groups to get the top level group of.
+
+        Returns:
+            list[ErrorItem | GroupIdArrayItem]: The top level group of each given group (the
+                group itself if it is not nested in another group), or an error.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "groups": groups,
+        }
+        validated_params = GetMainGroupsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetMainGroups", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetMainGroupsResult.model_validate(response_dict)
+        return validated_response.mainGroups
+
     def get_suspend_groups_mode(self) -> bool:
         """
         Gets the current state of the Suspend Groups mode.
@@ -170,7 +343,9 @@ class ElementGroupingCommands:
     def get_user_data_of_groups(self, groups: list[GroupIdArrayItem]) -> list[ErrorItem | GroupUserDataResult]:
         """
         Gets the user data an add-on attached to each given group: its version, platform sign,
-        flags and bytes (base64 encoded). Returns an error for groups that have no user data.
+        flags and bytes (base64 encoded), and, when its version is 1 (the layout
+        SetUserDataOfGroups writes), its key-value pairs. Returns an error for groups that have
+        no user data.
 
         Args:
             groups (list[GroupIdArrayItem]): The groups to get the user data of.
@@ -219,6 +394,48 @@ class ElementGroupingCommands:
         )
         validated_response = SetSuspendGroupsModeResult.model_validate(response_dict)
         return validated_response.executionResult
+
+    def set_user_data_of_groups(
+        self,
+        groups: list[GroupIdArrayItem],
+        pairs: None | list[UserDataPair] = None,
+        keys_to_delete: None | list[str] = None,
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Stores string values under keys in the user data of groups, for scripts to keep their
+        own state on a group. The given pairs are merged into what each group already holds: a
+        key that exists gets the new value, other keys are left as they are, and the keys listed
+        in keysToDelete are removed. Prefix the keys with the script's name so that scripts do
+        not overwrite each other's data. User data in another layout is left unchanged and
+        reported as an error. One undo step per call.
+
+        Args:
+            groups (list[GroupIdArrayItem]): The groups to store the pairs on.
+            pairs (None | list[UserDataPair]): The key-value pairs to store on each group. A key
+                the group already holds gets the new value; other keys are left as they are.
+            keys_to_delete (None | list[str]): The keys to remove from the user data. A key that
+                is not stored is ignored. Applied after pairs.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: One result per group, in
+                the input order.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "groups": groups,
+            "pairs": pairs,
+            "keysToDelete": keys_to_delete,
+        }
+        validated_params = SetUserDataOfGroupsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "SetUserDataOfGroups", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = SetUserDataOfGroupsResult.model_validate(response_dict)
+        return validated_response.executionResults
 
     def ungroup_elements(
         self, groups: list[GroupIdArrayItem]

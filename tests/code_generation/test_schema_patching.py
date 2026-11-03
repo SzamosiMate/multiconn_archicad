@@ -13,6 +13,54 @@ HELPERS = [
 ]
 
 
+def test_mapping_items_property_is_distinct_from_array_items():
+    definitions = {
+        "Mapping": {
+            "type": "object",
+            "properties": {
+                "items": {"type": "array", "items": {"type": "object", "properties": {"id": {"type": "integer"}}}}
+            },
+        }
+    }
+    schema_patching.extract_inline_schema(definitions, "Mapping", ["items", "items"], "MappingItem")
+    assert definitions["Mapping"]["properties"]["items"]["items"] == {"$ref": "#/$defs/MappingItem"}
+    assert definitions["MappingItem"]["properties"] == {"id": {"type": "integer"}}
+
+
+@pytest.mark.parametrize("union_key", ["oneOf", "anyOf"])
+def test_shared_union_branch_preserves_union_and_context(union_key):
+    definitions = {
+        "Command": {union_key: [{"type": "object", "description": "Context"}, {"$ref": "#/$defs/ErrorItem"}]},
+        "Shared": {"type": "object"},
+    }
+    schema_patching.replace_union_variant_with_ref(definitions, "Command", [], 0, "Shared")
+    assert definitions["Command"][union_key] == [
+        {"$ref": "#/$defs/Shared", "description": "Context"},
+        {"$ref": "#/$defs/ErrorItem"},
+    ]
+    original = deepcopy(definitions)
+    with pytest.raises(ValueError, match="already references"):
+        schema_patching.replace_union_variant_with_ref(definitions, "Command", [], 0, "Shared")
+    assert definitions == original
+
+
+@pytest.mark.parametrize("index", [-1, 1])
+def test_shared_union_branch_rejects_invalid_index_without_mutation(index):
+    definitions = {"Command": {"oneOf": [{"type": "object"}]}, "Shared": {"type": "object"}}
+    original = deepcopy(definitions)
+    with pytest.raises(ValueError, match="Missing union variant"):
+        schema_patching.replace_union_variant_with_ref(definitions, "Command", [], index, "Shared")
+    assert definitions == original
+
+
+def test_shared_union_branch_requires_existing_definition_without_mutation():
+    definitions = {"Command": {"oneOf": [{"type": "object"}]}}
+    original = deepcopy(definitions)
+    with pytest.raises(KeyError, match="Missing shared union definition"):
+        schema_patching.replace_union_variant_with_ref(definitions, "Command", [], 0, "Missing")
+    assert definitions == original
+
+
 @pytest.mark.parametrize("helper", HELPERS)
 @pytest.mark.parametrize("is_array", [False, True])
 def test_inline_target_is_replaced_and_extractions_preserve_schema(helper, is_array):

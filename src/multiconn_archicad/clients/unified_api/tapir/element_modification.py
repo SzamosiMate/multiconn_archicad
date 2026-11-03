@@ -10,6 +10,8 @@ from multiconn_archicad.models.tapir.commands import (
     ModifyBeamsResult,
     ModifyColumnsParameters,
     ModifyColumnsResult,
+    ModifyCurtainWallsParameters,
+    ModifyCurtainWallsResult,
     ModifyDoorsParameters,
     ModifyDoorsResult,
     ModifyLabelsParameters,
@@ -24,6 +26,8 @@ from multiconn_archicad.models.tapir.commands import (
     ModifyObjectsResult,
     ModifyRoofsParameters,
     ModifyRoofsResult,
+    ModifyShellsParameters,
+    ModifyShellsResult,
     ModifySlabsParameters,
     ModifySlabsResult,
     ModifyTextsParameters,
@@ -32,10 +36,13 @@ from multiconn_archicad.models.tapir.commands import (
     ModifyWallsResult,
     ModifyWindowsParameters,
     ModifyWindowsResult,
+    ModifyZonesParameters,
+    ModifyZonesResult,
 )
 from multiconn_archicad.models.tapir.types import (
     BeamWithDetails,
     ColumnWithDetails,
+    CurtainWallWithDetails,
     DoorWithDetails,
     FailedExecutionResult,
     LabelsWithDetail,
@@ -44,11 +51,13 @@ from multiconn_archicad.models.tapir.types import (
     MorphWithDetails,
     ObjectWithDetails,
     RoofWithDetails,
+    ShellWithDetails,
     SlabWithDetails,
     SuccessfulExecutionResult,
     TextsWithDetail,
     WallWithDetails,
     WindowWithDetails,
+    ZoneWithDetails,
 )
 
 if TYPE_CHECKING:
@@ -113,6 +122,42 @@ class ElementModificationCommands:
             "ModifyColumns", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = ModifyColumnsResult.model_validate(response_dict)
+        return validated_response.executionResults
+
+    def modify_curtain_walls(
+        self, curtain_walls_with_details: list[CurtainWallWithDetails]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Modifies Curtain Wall elements in place, keeping their GUID, properties and
+        classifications: the height, the bottom elevation and story, the reference line (with
+        the same number of segments), and the column (primary) and row (secondary) pattern with
+        its cell assignments, in the fields of CreateCurtainWalls.
+
+        Args:
+            curtain_walls_with_details (list[CurtainWallWithDetails]): Array of Curtain Wall
+                elements to modify, with the fields to change. Only the given fields are
+                changed; the others, and the frames and panels not affected by them, are left as
+                they are. The fields are those of CreateCurtainWalls, so a curtain wall can be
+                changed in place instead of being deleted and recreated, keeping its GUID,
+                properties and classifications.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "curtainWallsWithDetails": curtain_walls_with_details,
+        }
+        validated_params = ModifyCurtainWallsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "ModifyCurtainWalls", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = ModifyCurtainWallsResult.model_validate(response_dict)
         return validated_response.executionResults
 
     def modify_doors(
@@ -322,6 +367,35 @@ class ElementModificationCommands:
         validated_response = ModifyRoofsResult.model_validate(response_dict)
         return validated_response.executionResults
 
+    def modify_shells(
+        self, shells_with_details: list[ShellWithDetails]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Modifies the structure (Basic or Composite, building material or composite) of Shell
+        elements based on the given parameters.
+
+        Args:
+            shells_with_details (list[ShellWithDetails])
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "shellsWithDetails": shells_with_details,
+        }
+        validated_params = ModifyShellsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "ModifyShells", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = ModifyShellsResult.model_validate(response_dict)
+        return validated_response.executionResults
+
     def modify_slabs(
         self, slabs_with_details: list[SlabWithDetails]
     ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
@@ -438,4 +512,36 @@ class ElementModificationCommands:
             "ModifyWindows", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = ModifyWindowsResult.model_validate(response_dict)
+        return validated_response.executionResults
+
+    def modify_zones(
+        self, zones_with_details: list[ZoneWithDetails]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Modifies Zone elements: name, number, category, zone stamp, height, base offset, top
+        link and floor thickness. Only the given fields are changed; the polygon is kept.
+
+        Args:
+            zones_with_details (list[ZoneWithDetails]): Array of Zone elements to modify, with
+                the fields to change. Only the given fields are changed; the polygon and the
+                omitted fields are kept. The same fields as the ZoneSettings of
+                SetDetailsOfElements.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "zonesWithDetails": zones_with_details,
+        }
+        validated_params = ModifyZonesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "ModifyZones", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = ModifyZonesResult.model_validate(response_dict)
         return validated_response.executionResults

@@ -21,6 +21,7 @@ from .tapir.analytical import AnalyticalCommands as TapirAnalyticalCommands
 from .tapir.application import ApplicationCommands as TapirApplicationCommands
 from .tapir.attribute import AttributeCommands as TapirAttributeCommands
 from .tapir.classification import ClassificationCommands as TapirClassificationCommands
+from .tapir.custom_data import CustomDataCommands as TapirCustomDataCommands
 from .tapir.design_options import DesignOptionsCommands as TapirDesignOptionsCommands
 from .tapir.element import ElementCommands as TapirElementCommands
 from .tapir.element_creation import ElementCreationCommands as TapirElementCreationCommands
@@ -33,6 +34,7 @@ from .tapir.issue_management import IssueManagementCommands as TapirIssueManagem
 from .tapir.keynote import KeynoteCommands as TapirKeynoteCommands
 from .tapir.library import LibraryCommands as TapirLibraryCommands
 from .tapir.mep import MepCommands as TapirMepCommands
+from .tapir.mep_extended import MepExtendedCommands as TapirMepExtendedCommands
 from .tapir.navigator import NavigatorCommands as TapirNavigatorCommands
 from .tapir.project import ProjectCommands as TapirProjectCommands
 from .tapir.project_data import ProjectDataCommands as TapirProjectDataCommands
@@ -54,6 +56,7 @@ class TapirApi:
         self.application = TapirApplicationCommands(core)
         self.attribute = TapirAttributeCommands(core)
         self.classification = TapirClassificationCommands(core)
+        self.custom_data = TapirCustomDataCommands(core)
         self.design_options = TapirDesignOptionsCommands(core)
         self.element = TapirElementCommands(core)
         self.element_creation = TapirElementCreationCommands(core)
@@ -66,6 +69,7 @@ class TapirApi:
         self.keynote = TapirKeynoteCommands(core)
         self.library = TapirLibraryCommands(core)
         self.mep = TapirMepCommands(core)
+        self.mep_extended = TapirMepExtendedCommands(core)
         self.navigator = TapirNavigatorCommands(core)
         self.project = TapirProjectCommands(core)
         self.project_data = TapirProjectDataCommands(core)

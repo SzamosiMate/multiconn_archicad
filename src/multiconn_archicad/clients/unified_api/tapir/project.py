@@ -6,19 +6,34 @@ from typing import TYPE_CHECKING
 from pydantic import TypeAdapter
 
 from multiconn_archicad.models.tapir.commands import (
+    BreakHotlinkNodesParameters,
+    BreakHotlinkNodesResult,
+    CalculateSunPositionParameters,
+    CalculateSunPositionResult,
     ChangeHotlinkInstancesParameters,
     ChangeHotlinkInstancesResult,
     ChangeHotlinkNodesParameters,
     ChangeHotlinkNodesResult,
     CloseProjectResult,
+    ConvertUnitValuesParameters,
+    ConvertUnitValuesResult,
     CreateHotlinkInstancesParameters,
     CreateHotlinkInstancesResult,
     CreateHotlinkNodesParameters,
     CreateHotlinkNodesResult,
     CreateProjectInfoFieldsParameters,
     CreateProjectInfoFieldsResult,
+    CreateProjectInfoGroupsParameters,
+    CreateProjectInfoGroupsResult,
+    DeleteHotlinkNodesParameters,
+    DeleteHotlinkNodesResult,
     DeleteProjectInfoFieldsParameters,
     DeleteProjectInfoFieldsResult,
+    DeleteProjectInfoGroupsParameters,
+    DeleteProjectInfoGroupsResult,
+    FindDimensionStandardParameters,
+    FindDimensionStandardResult,
+    GetAutoIntersectResult,
     GetAutoTextKeysParameters,
     GetAutoTextKeysResult,
     GetAutoTextNameParameters,
@@ -26,27 +41,48 @@ from multiconn_archicad.models.tapir.commands import (
     GetCalculationUnitsResult,
     GetCurrentViewImageParameters,
     GetCurrentViewImageResult,
+    GetDimensionStandardsParameters,
+    GetDimensionStandardsResult,
+    GetExportToleranceResult,
     GetGeoLocationResult,
+    GetHotlinkOwnersOfElementsParameters,
+    GetHotlinkOwnersOfElementsResult,
     GetHotlinkProxyElementTableParameters,
     GetHotlinkProxyElementTableResult,
+    GetHotlinkSourceStatusParameters,
+    GetHotlinkSourceStatusResult,
     GetHotlinksResult,
+    GetLast3DDefaultLevelsParameters,
+    GetLast3DDefaultLevelsResult,
     GetNoteAutoTextKeywordsParameters,
     GetNoteAutoTextKeywordsResult,
+    GetNoteAutotextsParameters,
+    GetNoteAutotextsResult,
     GetProjectInfoFieldsResult,
+    GetProjectInfoGroupsResult,
     GetProjectInfoResult,
     GetProjectNotesResult,
     GetProjectPreferencesParameters,
     GetProjectPreferencesResult,
+    GetRenderingScenesResult,
+    GetRenovationStatusNamesResult,
     GetStoriesResult,
+    GetSunSettingsResult,
     GetSurveyPointTransformationResult,
+    MoveProjectInfoGroupsParameters,
+    MoveProjectInfoGroupsResult,
     NewProjectParameters,
     NewProjectResult,
     OpenProjectParameters,
     OpenProjectResult,
+    PhotoRenderParameters,
+    PhotoRenderResult,
     PrintViewParameters,
     PrintViewResult,
     RebuildViewParameters,
     RebuildViewResult,
+    RenameProjectInfoGroupsParameters,
+    RenameProjectInfoGroupsResult,
     SaveAsModuleFileParameters,
     SaveAsModuleFileResult,
     SaveCurrentWindowAsImageParameters,
@@ -55,8 +91,16 @@ from multiconn_archicad.models.tapir.commands import (
     SaveProjectAsArchiveResult,
     SaveProjectParameters,
     SaveProjectResult,
+    SetAutoIntersectParameters,
+    SetAutoIntersectResult,
+    SetCurrentRenderingSceneParameters,
+    SetCurrentRenderingSceneResult,
     SetGeoLocationParameters,
     SetGeoLocationResult,
+    SetLast3DDefaultLevelsParameters,
+    SetLast3DDefaultLevelsResult,
+    SetPlaceSettingsParameters,
+    SetPlaceSettingsResult,
     SetProjectInfoFieldParameters,
     SetProjectNotesParameters,
     SetProjectNotesResult,
@@ -71,9 +115,12 @@ from multiconn_archicad.models.tapir.types import (
     AutoTextKey,
     AutoTextName,
     CalculationUnitPreferencesUpdate,
+    ConvertedUnitValue,
     DimensionPreferencesUpdate,
+    DimensionStandard,
     ElementId,
     ElementIdArrayItem,
+    ElementType,
     ErrorItem,
     FailedExecutionResult,
     Hotlink,
@@ -83,21 +130,38 @@ from multiconn_archicad.models.tapir.types import (
     HotlinkNodeChange,
     HotlinkNodeCreated,
     HotlinkNodeReference,
+    HotlinkOwnersOfElement,
     HotlinkProxyElementTable,
+    HotlinkSourceReference,
+    HotlinkSourceStatusResult,
     ImageColorDepth,
     ImageFormat,
     NoteAutoTextKeyword,
+    NoteAutotextDetails,
+    PhotoRenderFormat,
+    PlaceInfo,
+    PlaceSettingsUpdate,
     PrintArea,
     ProjectInfoField,
     ProjectInfoFieldData,
+    ProjectInfoGroup,
+    ProjectInfoGroupData,
+    ProjectInfoGroupIdArrayItem,
+    ProjectInfoGroupMove,
+    ProjectInfoGroupRename,
     ProjectLocationUpdate,
     ProjectPreferenceType,
+    RenovationStatusName,
     StorySettings,
     SuccessfulExecutionResult,
+    SunDateTimeUpdate,
+    SunPosition,
     SurveyPointUpdate,
+    UnitValueConversionData,
     ViewImageFormat,
     ViewImageSource,
     WorkingUnitPreferencesUpdate,
+    ZonePreferencesUpdate,
 )
 
 if TYPE_CHECKING:
@@ -107,6 +171,72 @@ if TYPE_CHECKING:
 class ProjectCommands:
     def __init__(self, core: CoreCommands):
         self._core = core
+
+    def break_hotlink_nodes(
+        self, hotlink_nodes: list[HotlinkNodeReference]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Breaks hotlink nodes, as the Hotlink Manager's Break Hotlink does: the elements of each
+        node's placed instances stay in the project as ordinary elements, no longer tied to the
+        source file.
+
+        Args:
+            hotlink_nodes (list[HotlinkNodeReference]): The hotlink nodes to break, from
+                GetHotlinks or CreateHotlinkNodes. The elements of each node's placed instances
+                stay in the project as ordinary elements, no longer tied to the source file, as
+                the Hotlink Manager's Break Hotlink does. In Teamwork the Hotlink and XRef
+                management has to be reserved first (ReserveHotlinkCacheManagement).
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "hotlinkNodes": hotlink_nodes,
+        }
+        validated_params = BreakHotlinkNodesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "BreakHotlinkNodes", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = BreakHotlinkNodesResult.model_validate(response_dict)
+        return validated_response.executionResults
+
+    def calculate_sun_position(
+        self, date_time: None | SunDateTimeUpdate = None, location: None | ProjectLocationUpdate = None
+    ) -> SunPosition:
+        """
+        Calculates the sun position (azimuth and altitude in degrees) for a date and time, at
+        the project location unless another one is given, without changing the project.
+
+        Args:
+            date_time (None | SunDateTimeUpdate): The date and time to calculate the sun
+                position for; the fields left out keep the project's date and time.
+            location (None | ProjectLocationUpdate): The location to calculate the sun position
+                at; the fields left out keep the project location.
+
+        Returns:
+            SunPosition
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "dateTime": date_time,
+            "location": location,
+        }
+        validated_params = CalculateSunPositionParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "CalculateSunPosition", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = CalculateSunPositionResult.model_validate(response_dict)
+        return validated_response
 
     def change_hotlink_instances(
         self, hotlink_instances: list[HotlinkInstanceChange]
@@ -186,6 +316,35 @@ class ProjectCommands:
         response_dict = self._core.post_tapir_command("CloseProject")
         validated_response = TypeAdapter(CloseProjectResult).validate_python(response_dict)
         return validated_response
+
+    def convert_unit_values(self, values: list[UnitValueConversionData]) -> list[ConvertedUnitValue | ErrorItem]:
+        """
+        Formats lengths, areas, volumes and angles (given in meters, square meters, cubic meters
+        and radians) as Archicad shows them with the unit and rounding of the given Project
+        Preference, returning the text, its extra accuracy decimals and the unit. The output is
+        aligned with the input array of values. Available from Archicad 27.
+
+        Args:
+            values (list[UnitValueConversionData]): The values to convert.
+
+        Returns:
+            list[ConvertedUnitValue | ErrorItem]: The converted values, in the order of the
+                input. A value that cannot be converted is an error item.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "values": values,
+        }
+        validated_params = ConvertUnitValuesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "ConvertUnitValues", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = ConvertUnitValuesResult.model_validate(response_dict)
+        return validated_response.convertedValues
 
     def create_hotlink_instances(
         self, hotlink_instances: list[HotlinkInstanceCreation]
@@ -272,6 +431,69 @@ class ProjectCommands:
         validated_response = CreateProjectInfoFieldsResult.model_validate(response_dict)
         return validated_response.fields
 
+    def create_project_info_groups(
+        self, project_info_groups: list[ProjectInfoGroupData]
+    ) -> list[ErrorItem | ProjectInfoGroupIdArrayItem]:
+        """
+        Creates Project Info groups with the given names, at the end of the group list.
+        Available from Archicad 30.
+
+        Args:
+            project_info_groups (list[ProjectInfoGroupData]): The Project Info groups to create,
+                in order. Each is added to the end of the group list.
+
+        Returns:
+            list[ErrorItem | ProjectInfoGroupIdArrayItem]: A list of Project Info group
+                identifiers or errors.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "projectInfoGroups": project_info_groups,
+        }
+        validated_params = CreateProjectInfoGroupsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "CreateProjectInfoGroups", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = CreateProjectInfoGroupsResult.model_validate(response_dict)
+        return validated_response.projectInfoGroupIdsOrErrors
+
+    def delete_hotlink_nodes(
+        self, hotlink_nodes: list[HotlinkNodeReference]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Deletes hotlink nodes together with their placed instances, as the Hotlink Manager's
+        Delete does.
+
+        Args:
+            hotlink_nodes (list[HotlinkNodeReference]): The hotlink nodes to delete, from
+                GetHotlinks or CreateHotlinkNodes. Each node is removed together with its placed
+                instances and their elements, as the Hotlink Manager's Delete does; use
+                BreakHotlinkNodes instead to keep the elements. In Teamwork the Hotlink and XRef
+                management has to be reserved first (ReserveHotlinkCacheManagement).
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "hotlinkNodes": hotlink_nodes,
+        }
+        validated_params = DeleteHotlinkNodesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "DeleteHotlinkNodes", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = DeleteHotlinkNodesResult.model_validate(response_dict)
+        return validated_response.executionResults
+
     def delete_project_info_fields(
         self, project_info_ids: list[str]
     ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
@@ -301,17 +523,94 @@ class ProjectCommands:
         validated_response = DeleteProjectInfoFieldsResult.model_validate(response_dict)
         return validated_response.executionResults
 
+    def delete_project_info_groups(
+        self, project_info_groups: list[ProjectInfoGroupIdArrayItem]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Deletes Project Info groups. A group that contains fixed (built-in) fields cannot be
+        deleted. Available from Archicad 30.
+
+        Args:
+            project_info_groups (list[ProjectInfoGroupIdArrayItem]): The Project Info groups to
+                delete. A group that contains fixed (built-in) fields cannot be deleted.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "projectInfoGroups": project_info_groups,
+        }
+        validated_params = DeleteProjectInfoGroupsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "DeleteProjectInfoGroups", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = DeleteProjectInfoGroupsResult.model_validate(response_dict)
+        return validated_response.executionResults
+
+    def find_dimension_standard(self, name: str) -> FindDimensionStandardResult:
+        """
+        Finds a dimension standard (Options > Project Preferences > Dimensions) by its name and
+        returns its index, name and guid. Available from Archicad 27.
+
+        Args:
+            name (str): The name of the dimension standard, as listed in Options > Project
+                Preferences > Dimensions.
+
+        Returns:
+            FindDimensionStandardResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "name": name,
+        }
+        validated_params = FindDimensionStandardParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "FindDimensionStandard", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = FindDimensionStandardResult.model_validate(response_dict)
+        return validated_response
+
+    def get_auto_intersect(self) -> bool:
+        """
+        Gets whether Auto-Intersection (Options > Auto-Intersection) is on. It changes what the
+        wall and beam creation commands produce: with it on, the new elements are joined at
+        their intersections.
+
+        Returns:
+            bool: True if Auto-Intersection is currently on.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        response_dict = self._core.post_tapir_command("GetAutoIntersect")
+        validated_response = GetAutoIntersectResult.model_validate(response_dict)
+        return validated_response.isOn
+
     def get_auto_text_keys(self, element_id: ElementId | None = None) -> list[AutoTextKey]:
         """
-        Retrieves the available autotext keys (name and embeddable key), optionally for a
-        specific element. Embed a key in a Text or Label content by surrounding it with '<' and
-        '>'.
+        Retrieves the available autotext keys (name and embeddable key): the Project Info,
+        layout, drawing, date and other autotexts Archicad lists, and the property based ones,
+        optionally for a specific element. Embed a key in a Text or Label content by surrounding
+        it with '<' and '>'.
 
         Args:
             element_id (ElementId | None): Optional. The element to retrieve context dependent
                 autotext keys for (its own properties, plus the ones common to all element
-                types, e.g. 'Element ID', 'Area'). When omitted, only the autotext keys common
-                to all element types are returned.
+                types, e.g. 'Element ID', 'Area'). When omitted, only the property based
+                autotext keys common to all element types are returned. The other autotexts
+                (Project Info, layout, drawing, date, ...) are returned either way.
 
         Returns:
             list[AutoTextKey]
@@ -407,6 +706,52 @@ class ProjectCommands:
         validated_response = GetCurrentViewImageResult.model_validate(response_dict)
         return validated_response
 
+    def get_dimension_standards(self, name: None | str = None) -> list[DimensionStandard]:
+        """
+        Gets the dimension standards of the project (Options > Project Preferences > Dimensions)
+        with their name and the unit, decimals and rounding of each dimension type, optionally
+        only the one with the given name. Read-only. Available from Archicad 27.
+
+        Args:
+            name (None | str): Only the dimension standard with this name is returned (case-
+                sensitive). The list is empty when no standard has this name.
+
+        Returns:
+            list[DimensionStandard]
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "name": name,
+        }
+        validated_params = GetDimensionStandardsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetDimensionStandards", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetDimensionStandardsResult.model_validate(response_dict)
+        return validated_response.dimensionStandards
+
+    def get_export_tolerance(self) -> float:
+        """
+        Gets the export tolerance: the largest distance allowed between an arc and the straight
+        segments that replace it when curves are segmented for export.
+
+        Returns:
+            float: The largest distance allowed between an arc and the straight segments that
+                replace it when Archicad segments curves for export, in meters.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        response_dict = self._core.post_tapir_command("GetExportTolerance")
+        validated_response = GetExportToleranceResult.model_validate(response_dict)
+        return validated_response.arcTolerance
+
     def get_geo_location(self) -> GetGeoLocationResult:
         """
         Gets the project location details: the project location, and the survey point's
@@ -424,6 +769,36 @@ class ProjectCommands:
         response_dict = self._core.post_tapir_command("GetGeoLocation")
         validated_response = GetGeoLocationResult.model_validate(response_dict)
         return validated_response
+
+    def get_hotlink_owners_of_elements(
+        self, elements: list[ElementIdArrayItem]
+    ) -> list[ErrorItem | HotlinkOwnersOfElement]:
+        """
+        Tells for each element whether it comes from a hotlinked module, and returns the hotlink
+        element that contains it and the hotlink instance it belongs to. Available from Archicad
+        27.
+
+        Args:
+            elements (list[ElementIdArrayItem]): A list of elements.
+
+        Returns:
+            list[ErrorItem | HotlinkOwnersOfElement]: The hotlink each element comes from,
+                aligned with the input.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elements": elements,
+        }
+        validated_params = GetHotlinkOwnersOfElementsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetHotlinkOwnersOfElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetHotlinkOwnersOfElementsResult.model_validate(response_dict)
+        return validated_response.hotlinkOwners
 
     def get_hotlink_proxy_element_table(
         self, hotlink_instances: list[ElementIdArrayItem]
@@ -458,6 +833,36 @@ class ProjectCommands:
         validated_response = GetHotlinkProxyElementTableResult.model_validate(response_dict)
         return validated_response.proxyElementTables
 
+    def get_hotlink_source_status(
+        self, hotlinks: list[HotlinkSourceReference]
+    ) -> list[ErrorItem | HotlinkSourceStatusResult]:
+        """
+        Tells for each hotlink source file whether it is available, missing, not accessible,
+        incompatible or offline. Available from Archicad 27.
+
+        Args:
+            hotlinks (list[HotlinkSourceReference]): The source files of hotlinks of the
+                project, for example the location of each node GetHotlinks returns.
+
+        Returns:
+            list[ErrorItem | HotlinkSourceStatusResult]: One item per requested hotlink, in
+                order: the availability of its source file, or an error.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "hotlinks": hotlinks,
+        }
+        validated_params = GetHotlinkSourceStatusParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetHotlinkSourceStatus", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetHotlinkSourceStatusResult.model_validate(response_dict)
+        return validated_response.hotlinkSourceStatuses
+
     def get_hotlinks(self) -> list[Hotlink]:
         """
         Gets the file system locations (path) of the hotlink modules and the instance elements
@@ -474,6 +879,33 @@ class ProjectCommands:
         response_dict = self._core.post_tapir_command("GetHotlinks")
         validated_response = GetHotlinksResult.model_validate(response_dict)
         return validated_response.hotlinks
+
+    def get_last_3d_default_levels(self, element_types: list[ElementType]) -> list[float]:
+        """
+        Gets the last 3D default levels of the given element types' defaults.
+
+        Args:
+            element_types (list[ElementType]): The element types to get the last 3D default
+                level of.
+
+        Returns:
+            list[float]: The last 3D default level of each element type, in the order of
+                elementTypes, in meters.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elementTypes": element_types,
+        }
+        validated_params = GetLast3DDefaultLevelsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetLast3DDefaultLevels", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetLast3DDefaultLevelsResult.model_validate(response_dict)
+        return validated_response.levels
 
     def get_note_auto_text_keywords(self, auto_text_ids: list[int]) -> list[ErrorItem | NoteAutoTextKeyword]:
         """
@@ -501,6 +933,35 @@ class ProjectCommands:
         )
         validated_response = GetNoteAutoTextKeywordsResult.model_validate(response_dict)
         return validated_response.keywords
+
+    def get_note_autotexts(self, note_owner_type: ElementType) -> list[NoteAutotextDetails]:
+        """
+        Retrieves the autotexts available in the notes of an element type (e.g. a Dimension),
+        each with the element types it is available for. The autotexts are identified by the
+        numeric value of their API_NoteAutotextID. Needs Archicad 26 or later.
+
+        Args:
+            note_owner_type (ElementType): The type of the element that owns the note, e.g.
+                'Dimension', 'RadialDimension', 'LevelDimension' or 'AngleDimension'.
+
+        Returns:
+            list[NoteAutotextDetails]: The autotexts available in the notes of the given owner
+                type, in ascending order of autotextId.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "noteOwnerType": note_owner_type,
+        }
+        validated_params = GetNoteAutotextsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetNoteAutotexts", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetNoteAutotextsResult.model_validate(response_dict)
+        return validated_response.noteAutotexts
 
     def get_project_info(self) -> GetProjectInfoResult:
         """
@@ -534,6 +995,25 @@ class ProjectCommands:
         validated_response = GetProjectInfoFieldsResult.model_validate(response_dict)
         return validated_response.fields
 
+    def get_project_info_groups(self) -> list[ProjectInfoGroup]:
+        """
+        Retrieves the Project Info groups in their order, each with its fields: id, name, value
+        and, when exactly one project info autotext has the name of the field, the autotext key
+        that SetProjectInfoField takes. Available from Archicad 30.
+
+        Returns:
+            list[ProjectInfoGroup]: The Project Info groups in their order in the Project Info
+                dialog. Available from Archicad 30.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        response_dict = self._core.post_tapir_command("GetProjectInfoGroups")
+        validated_response = GetProjectInfoGroupsResult.model_validate(response_dict)
+        return validated_response.projectInfoGroups
+
     def get_project_notes(self) -> GetProjectNotesResult:
         """
         Gets the Project Notes of the project (File > Info > Project Notes): client, project
@@ -557,7 +1037,7 @@ class ProjectCommands:
     ) -> GetProjectPreferencesResult:
         """
         Gets pages of the project preferences (Options > Project Preferences): the working
-        units, the dimensions and the calculation units. Further pages may follow.
+        units, the dimensions, the calculation units and the zones. Further pages may follow.
 
         Args:
             preference_types (None | list[ProjectPreferenceType]): The preference pages to get.
@@ -581,6 +1061,43 @@ class ProjectCommands:
         validated_response = GetProjectPreferencesResult.model_validate(response_dict)
         return validated_response
 
+    def get_rendering_scenes(self) -> list[str]:
+        """
+        Gets the names of the rendering scenes of the project, as the Scene list of the
+        PhotoRendering Settings palette shows them.
+
+        Returns:
+            list[str]: The names of the rendering scenes of the project, in the order of the
+                Scene list of the PhotoRendering Settings palette. The API does not tell which
+                one is current.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        response_dict = self._core.post_tapir_command("GetRenderingScenes")
+        validated_response = GetRenderingScenesResult.model_validate(response_dict)
+        return validated_response.sceneNames
+
+    def get_renovation_status_names(self) -> list[ErrorItem | RenovationStatusName]:
+        """
+        Gets the names the running Archicad shows for the renovation statuses Existing, New and
+        Demolished (localized). Available from Archicad 27.
+
+        Returns:
+            list[ErrorItem | RenovationStatusName]: The renovation statuses an element can have,
+                in the order Existing, New, Demolished.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        response_dict = self._core.post_tapir_command("GetRenovationStatusNames")
+        validated_response = GetRenovationStatusNamesResult.model_validate(response_dict)
+        return validated_response.renovationStatuses
+
     def get_stories(self) -> GetStoriesResult:
         """
         Retrieves information about the story structure of the currently loaded project: index,
@@ -596,6 +1113,24 @@ class ProjectCommands:
         """
         response_dict = self._core.post_tapir_command("GetStories")
         validated_response = GetStoriesResult.model_validate(response_dict)
+        return validated_response
+
+    def get_sun_settings(self) -> GetSunSettingsResult:
+        """
+        Gets the project's date and time (Options > Project Preferences > Location Settings),
+        the sun position Archicad calculates for them at the project location, and the sun and
+        ambient light settings.
+
+        Returns:
+            GetSunSettingsResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        response_dict = self._core.post_tapir_command("GetSunSettings")
+        validated_response = GetSunSettingsResult.model_validate(response_dict)
         return validated_response
 
     def get_survey_point_transformation(self) -> GetSurveyPointTransformationResult:
@@ -615,6 +1150,36 @@ class ProjectCommands:
         response_dict = self._core.post_tapir_command("GetSurveyPointTransformation")
         validated_response = GetSurveyPointTransformationResult.model_validate(response_dict)
         return validated_response
+
+    def move_project_info_groups(
+        self, project_info_groups: list[ProjectInfoGroupMove]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Moves Project Info groups before another group, or to the end of the group list when no
+        other group is given. Available from Archicad 30.
+
+        Args:
+            project_info_groups (list[ProjectInfoGroupMove]): The Project Info groups to move,
+                in the order the moves are made.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "projectInfoGroups": project_info_groups,
+        }
+        validated_params = MoveProjectInfoGroupsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "MoveProjectInfoGroups", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = MoveProjectInfoGroupsResult.model_validate(response_dict)
+        return validated_response.executionResults
 
     def new_project(self, new_and_reset: None | bool = None) -> FailedExecutionResult | SuccessfulExecutionResult:
         """
@@ -669,6 +1234,43 @@ class ProjectCommands:
             "OpenProject", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = TypeAdapter(OpenProjectResult).validate_python(response_dict)
+        return validated_response
+
+    def photo_render(
+        self, image_file_path: str, format: None | PhotoRenderFormat = None, scene_name: None | str = None
+    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+        """
+        Renders the 3D model with the current rendering scene, or with the given one, as
+        Document > Creative Imaging > PhotoRender Projection does, and saves the image to a file
+        (png, jpg, bmp, tiff or gif). The image size and quality come from the scene.
+
+        Args:
+            image_file_path (str): Absolute path of the image file to write. An existing file is
+                overwritten.
+            format (None | PhotoRenderFormat)
+            scene_name (None | str): Optional. The rendering scene to render with, one of the
+                names GetRenderingScenes returns. It is made the current scene first, as
+                SetCurrentRenderingScene does, and stays current afterwards. Omitted, the
+                current scene is used.
+
+        Returns:
+            FailedExecutionResult | SuccessfulExecutionResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "imageFilePath": image_file_path,
+            "format": format,
+            "sceneName": scene_name,
+        }
+        validated_params = PhotoRenderParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "PhotoRender", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = TypeAdapter(PhotoRenderResult).validate_python(response_dict)
         return validated_response
 
     def print_view(
@@ -734,6 +1336,35 @@ class ProjectCommands:
         validated_response = TypeAdapter(RebuildViewResult).validate_python(response_dict)
         return validated_response
 
+    def rename_project_info_groups(
+        self, project_info_groups: list[ProjectInfoGroupRename]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Renames Project Info groups. Available from Archicad 30.
+
+        Args:
+            project_info_groups (list[ProjectInfoGroupRename]): The Project Info groups to
+                rename, each with its new name.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "projectInfoGroups": project_info_groups,
+        }
+        validated_params = RenameProjectInfoGroupsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "RenameProjectInfoGroups", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = RenameProjectInfoGroupsResult.model_validate(response_dict)
+        return validated_response.executionResults
+
     def save_as_module_file(
         self, module_file_path: str, elements: None | list[ElementIdArrayItem] = None
     ) -> FailedExecutionResult | SuccessfulExecutionResult:
@@ -778,7 +1409,8 @@ class ProjectCommands:
     ) -> SaveCurrentWindowAsImageResult:
         """
         Saves what the current window shows as an image file (png, jpg, bmp, tiff or gif), as
-        File > Save as does with a picture format.
+        File > Save as does with a picture format. Master layout windows are not supported: save
+        a layout that uses the master layout instead.
 
         Args:
             image_file_path (str): Absolute path of the image file to write. An existing file is
@@ -889,6 +1521,59 @@ class ProjectCommands:
         validated_response = TypeAdapter(SaveProjectAsArchiveResult).validate_python(response_dict)
         return validated_response
 
+    def set_auto_intersect(self, is_on: bool) -> FailedExecutionResult | SuccessfulExecutionResult:
+        """
+        Turns Auto-Intersection on or off. It is a setting of the running Archicad, not of the
+        project; remember to restore the previous state afterwards.
+
+        Args:
+            is_on (bool): Turn Auto-Intersection on or off.
+
+        Returns:
+            FailedExecutionResult | SuccessfulExecutionResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "isOn": is_on,
+        }
+        validated_params = SetAutoIntersectParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "SetAutoIntersect", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = TypeAdapter(SetAutoIntersectResult).validate_python(response_dict)
+        return validated_response
+
+    def set_current_rendering_scene(self, scene_name: str) -> FailedExecutionResult | SuccessfulExecutionResult:
+        """
+        Makes the given rendering scene the current one, as selecting it in the PhotoRendering
+        Settings palette does.
+
+        Args:
+            scene_name (str): The name of the rendering scene to make current, one of the names
+                GetRenderingScenes returns.
+
+        Returns:
+            FailedExecutionResult | SuccessfulExecutionResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "sceneName": scene_name,
+        }
+        validated_params = SetCurrentRenderingSceneParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "SetCurrentRenderingScene", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = TypeAdapter(SetCurrentRenderingSceneResult).validate_python(response_dict)
+        return validated_response
+
     def set_geo_location(
         self, project_location: None | ProjectLocationUpdate = None, survey_point: None | SurveyPointUpdate = None
     ) -> FailedExecutionResult | SuccessfulExecutionResult:
@@ -919,6 +1604,65 @@ class ProjectCommands:
         )
         validated_response = TypeAdapter(SetGeoLocationResult).validate_python(response_dict)
         return validated_response
+
+    def set_last_3d_default_levels(
+        self, element_types: list[ElementType], levels: list[float]
+    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+        """
+        Sets the last 3D default levels of the given element types' defaults.
+
+        Args:
+            element_types (list[ElementType]): The element types to set the last 3D default
+                level of.
+            levels (list[float]): The new last 3D default level of each element type, in the
+                order of elementTypes, in meters.
+
+        Returns:
+            FailedExecutionResult | SuccessfulExecutionResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elementTypes": element_types,
+            "levels": levels,
+        }
+        validated_params = SetLast3DDefaultLevelsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "SetLast3DDefaultLevels", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = TypeAdapter(SetLast3DDefaultLevelsResult).validate_python(response_dict)
+        return validated_response
+
+    def set_place_settings(self, place_info: PlaceSettingsUpdate) -> PlaceInfo:
+        """
+        Changes the place settings of the project: location (longitude, latitude, altitude,
+        north), date, time, summer time and time zone. Only the given fields change. Returns the
+        settings read back, with the sun position Archicad calculated for them. Available from
+        Archicad 27.
+
+        Args:
+            place_info (PlaceSettingsUpdate)
+
+        Returns:
+            PlaceInfo
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "placeInfo": place_info,
+        }
+        validated_params = SetPlaceSettingsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "SetPlaceSettings", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = SetPlaceSettingsResult.model_validate(response_dict)
+        return validated_response.placeInfo
 
     def set_project_info_field(self, project_info_id: str, project_info_value: str) -> None:
         """
@@ -1014,17 +1758,20 @@ class ProjectCommands:
         working_units: None | WorkingUnitPreferencesUpdate = None,
         dimensions: DimensionPreferencesUpdate | None = None,
         calculation_units: CalculationUnitPreferencesUpdate | None = None,
+        zones: None | ZonePreferencesUpdate = None,
     ) -> SetProjectPreferencesResult:
         """
         Changes pages of the project preferences (Options > Project Preferences): the working
-        units, the dimensions and the calculation units. Only the given fields change, the rest
-        of each page keeps its value. In Teamwork the PreferencesDialog lockable object set has
-        to be reserved first (ReserveLockableObjectSet). Available from Archicad 27.
+        units, the dimensions, the calculation units and the zones. Only the given fields
+        change, the rest of each page keeps its value. In Teamwork the PreferencesDialog
+        lockable object set has to be reserved first (ReserveLockableObjectSet). Available from
+        Archicad 27.
 
         Args:
             working_units (None | WorkingUnitPreferencesUpdate)
             dimensions (DimensionPreferencesUpdate | None)
             calculation_units (CalculationUnitPreferencesUpdate | None)
+            zones (None | ZonePreferencesUpdate)
 
         Returns:
             SetProjectPreferencesResult
@@ -1038,6 +1785,7 @@ class ProjectCommands:
             "workingUnits": working_units,
             "dimensions": dimensions,
             "calculationUnits": calculation_units,
+            "zones": zones,
         }
         validated_params = SetProjectPreferencesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(

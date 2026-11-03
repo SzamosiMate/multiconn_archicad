@@ -14,16 +14,20 @@ from multiconn_archicad.models.tapir.commands import (
     GetRevisionChangesOfElementsResult,
     GetRevisionChangesResult,
     GetRevisionIssuesResult,
+    ModifyRevisionIssuesParameters,
+    ModifyRevisionIssuesResult,
 )
 from multiconn_archicad.models.tapir.types import (
     DatabaseIdArrayItem,
     DocumentRevision,
     ElementIdArrayItem,
     ErrorItem,
+    FailedExecutionResult,
     RevisionChange,
     RevisionChangeCustomSchemeItem,
     RevisionChangesArrayItem,
-    RevisionIssue,
+    RevisionIssueModificationData,
+    SuccessfulExecutionResult,
 )
 
 if TYPE_CHECKING:
@@ -36,7 +40,7 @@ class RevisionManagementCommands:
 
     def get_current_revision_changes_of_layouts(
         self, layout_database_ids: list[DatabaseIdArrayItem]
-    ) -> ErrorItem | RevisionChangesArrayItem:
+    ) -> list[ErrorItem | RevisionChangesArrayItem]:
         """
         Retrieves all changes belong to the last revision of the given layouts.
 
@@ -44,7 +48,9 @@ class RevisionManagementCommands:
             layout_database_ids (list[DatabaseIdArrayItem]): A list of Archicad databases.
 
         Returns:
-            ErrorItem | RevisionChangesArrayItem
+            list[ErrorItem | RevisionChangesArrayItem]: The revision changes of the requested
+                entities, in the order of the input, or an error for an entity whose changes
+                could not be retrieved.
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -114,7 +120,7 @@ class RevisionManagementCommands:
 
     def get_revision_changes_of_elements(
         self, elements: list[ElementIdArrayItem]
-    ) -> ErrorItem | RevisionChangesArrayItem:
+    ) -> list[ErrorItem | RevisionChangesArrayItem]:
         """
         Retrieves the changes belong to the given elements.
 
@@ -122,7 +128,9 @@ class RevisionManagementCommands:
             elements (list[ElementIdArrayItem]): A list of elements.
 
         Returns:
-            ErrorItem | RevisionChangesArrayItem
+            list[ErrorItem | RevisionChangesArrayItem]: The revision changes of the requested
+                entities, in the order of the input, or an error for an entity whose changes
+                could not be retrieved.
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -139,12 +147,12 @@ class RevisionManagementCommands:
         validated_response = GetRevisionChangesOfElementsResult.model_validate(response_dict)
         return validated_response.revisionChangesOfElements
 
-    def get_revision_issues(self) -> list[RevisionIssue]:
+    def get_revision_issues(self) -> GetRevisionIssuesResult:
         """
         Retrieves all issues.
 
         Returns:
-            list[RevisionIssue]
+            GetRevisionIssuesResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -153,4 +161,34 @@ class RevisionManagementCommands:
         """
         response_dict = self._core.post_tapir_command("GetRevisionIssues")
         validated_response = GetRevisionIssuesResult.model_validate(response_dict)
-        return validated_response.revisionIssues
+        return validated_response
+
+    def modify_revision_issues(
+        self, revision_issues: list[RevisionIssueModificationData]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Modifies the ID, the short description and the custom scheme data of the given revision
+        issues. Only the given fields are changed. Issued revision issues may refuse the change.
+
+        Args:
+            revision_issues (list[RevisionIssueModificationData]): The revision issues to
+                modify. Only the given fields are changed.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "revisionIssues": revision_issues,
+        }
+        validated_params = ModifyRevisionIssuesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "ModifyRevisionIssues", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = ModifyRevisionIssuesResult.model_validate(response_dict)
+        return validated_response.executionResults

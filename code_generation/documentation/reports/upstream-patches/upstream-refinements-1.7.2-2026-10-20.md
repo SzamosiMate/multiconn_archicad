@@ -2,6 +2,15 @@
 
 Run started **2026-10-20** using MultiConn's `multiconn-upstream-patches` skill and its default publish endpoint.
 
+
+## Rebase follow-up — 2026-11-02
+
+Rebased the existing PR independently onto upstream main `d3bc733d110895abd222e1f288cdf11b939523f4`; published fork head `c7d902d29356946b6433791413298ab36c84784c` with an explicit lease. GitHub reports the PR mergeable. A merge-tree check between the two rebased PR heads reports a conflict in `CommonSchemaDefinitions.json`; after either PR merges, reconcile the other against the new main. The rebased branch retains 55 new common definitions.
+
+Per the user's decision, structural changes are deferred for review against the actual 1.7.4 release documentation: Text creation variants, marker readback, and the three MEP preference-table rows. Main already supplies `GraphicOverrideRule`. The geometry result retains main’s current description. Current upstream descriptions are retained in the remaining refactor. The [active queue](../../schema-patch-tracking.md) carries the release-adoption work; the counts and branch tips in the original run notes below describe the older baseline.
+
+The current source interpreter parsed 641 commands. A schema-aware comparison checked all 1,925 baseline shared-definition and command-side roots against main with no structural differences; references resolve and affected commands have common-schema access. The target renderer processed 1,180 non-null command schemas with no shared-definition mutation; caller/definition description pairs were checked. A scan found no current upstream description lost since the original proposal. `git diff --check` passed and execution code is unchanged. This rebase was not SDK-built or tested with live Archicad; earlier build results below apply to the original baseline. No generated docs or MultiConn models were regenerated.
+
 ## Published result
 
 - Reviewed client release **1.7.2** at client/patch revision `8e27852e838af645d35055d8af83ed5404f6fc87` on `update-to-tapir-1.7.2`. Released unpatched/master inputs and the current patch implementation were read before implementation.

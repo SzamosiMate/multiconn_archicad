@@ -26,21 +26,17 @@ def main():
 def fix_root_model_unions_to_type_alias(content: str) -> str:
     print("Step 2: Converting remaining `RootModel` classes to `TypeAlias`...")
 
-    lookahead = r"(?=\n\n+(class |[A-Z]\w+\s*[:=])|\Z)"
-
-    # 1. We allow whitespace (\s*) inside the class header to handle multiline signatures.
-    # 2. We capture the name and the inner type.
-    # 3. We consume everything until the lookahead (the entire class body).
-    pattern = re.compile(
-        r"class\s+(\w+)\s*\(\s*RootModel\s*\[\s*(.+?)\s*\]\s*\)\s*:.*?" + lookahead, flags=re.DOTALL | re.MULTILINE
-    )
-
-    def replacer(match):
-        name = match.group(1)
-        inner_type = re.sub(r"\s+", " ", match.group(2)).strip()
+    lines = content.splitlines(keepends=True)
+    edits = []
+    for model in ast.parse(content).body:
+        if not isinstance(model, ast.ClassDef) or len(model.bases) != 1:
+            continue
+        base = model.bases[0]
+        if not (isinstance(base, ast.Subscript) and isinstance(base.value, ast.Name) and base.value.id == "RootModel"):
+            continue
+        inner_type = ast.unparse(base.slice)
         # RootModel fields can carry item bounds or length constraints. Moving
         # those onto the alias keeps validation when the wrapper is collapsed.
-        model = ast.parse(match.group(0)).body[0]
         for field in model.body:
             if not (
                 isinstance(field, ast.AnnAssign)
@@ -55,12 +51,14 @@ def fix_root_model_unions_to_type_alias(content: str) -> str:
             if constraints:
                 metadata = ast.unparse(ast.Call(func=ast.Name(id="Field"), args=[], keywords=constraints))
                 inner_type = f"Annotated[{inner_type}, {metadata}]"
-        return f"{name}: TypeAlias = {inner_type}"
+        ending = "" if model.end_lineno == len(lines) else "\n"
+        edits.append((model.lineno - 1, model.end_lineno, f"{model.name}: TypeAlias = {inner_type}{ending}"))
 
-    content, num_replacements = pattern.subn(replacer, content)
-
-    print(f"    - Converted {num_replacements} models to TypeAlias.")
-    return content
+    # Replace only class spans; a final RootModel can be followed by rebuild calls.
+    for start, end, replacement in reversed(edits):
+        lines[start:end] = [replacement]
+    print(f"    - Converted {len(edits)} models to TypeAlias.")
+    return "".join(lines)
 
 
 def restore_collapsed_named_unions(content: str) -> str:
@@ -131,6 +129,9 @@ def remove_guid_pattern(code: str) -> str:
             continue
         annotation = field.annotation
         candidates = [field.value]
+        if isinstance(annotation, ast.Name) and annotation.id == "TypeAlias":
+            annotation = field.value
+            candidates = []
         if (
             isinstance(annotation, ast.Subscript)
             and isinstance(annotation.value, ast.Name)

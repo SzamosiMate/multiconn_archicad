@@ -22,7 +22,7 @@ def _get_target_from_path(
         parent_of_target = current
         last_key = segment
 
-        if segment == "items":
+        if segment == "items" and "items" in current:
             current = current.get("items")
         else:
             # Assume it is a property
@@ -86,7 +86,7 @@ def extract_inline_schema(defs: dict[str, Any], parent_name: str, path: list[str
 
     # 2. Replace the original location with a $ref
     if container:
-        if key == "items":
+        if key == "items" and "items" in container:
             container["items"] = {"$ref": f"#/$defs/{new_def_name}"}
         else:
             container["properties"][key] = {"$ref": f"#/$defs/{new_def_name}"}
@@ -106,7 +106,7 @@ def extract_inline_enum(defs: dict[str, Any], parent_name: str, path: list[str],
 
     defs[new_def_name] = target_schema
     if container:
-        if key == "items":
+        if key == "items" and "items" in container:
             container["items"] = {"$ref": f"#/$defs/{new_def_name}"}
         else:
             container["properties"][key] = {"$ref": f"#/$defs/{new_def_name}"}
@@ -129,7 +129,7 @@ def replace_inline_schema_with_ref(
         new_schema["description"] = target_schema["description"]
 
     if container:
-        if key == "items":
+        if key == "items" and "items" in container:
             container["items"] = new_schema
         else:
             container["properties"][key] = new_schema
@@ -184,6 +184,25 @@ def extract_union_variant(defs: dict[str, Any], parent_name: str, path: list[str
     _require_new_definition(defs, new_def_name)
     defs[new_def_name] = branch
     variants[index] = {"$ref": f"#/$defs/{new_def_name}"}
+
+
+def replace_union_variant_with_ref(defs: dict[str, Any], parent_name: str, path: list[str], index: int, ref_name: str):
+    """Reuse a named union branch, rejecting stale targets and missing definitions."""
+    _, target_schema, _ = _require_target(defs, parent_name, path)
+    union_keys = [key for key in ("oneOf", "anyOf") if key in target_schema]
+    if len(union_keys) != 1:
+        raise ValueError(f"Expected exactly one union at '{parent_name}' / {path}, found {union_keys}.")
+    variants = target_schema[union_keys[0]]
+    if not isinstance(variants, list) or not 0 <= index < len(variants) or not isinstance(variants[index], dict):
+        raise ValueError(f"Missing union variant {index} at '{parent_name}' / {path}.")
+    if "$ref" in variants[index]:
+        raise ValueError(f"Union variant {index} at '{parent_name}' / {path} already references a definition.")
+    if ref_name not in defs:
+        raise KeyError(f"Missing shared union definition '{ref_name}'.")
+    branch = variants[index]
+    variants[index] = {"$ref": f"#/$defs/{ref_name}"}
+    if "description" in branch:
+        variants[index]["description"] = branch["description"]
 
 
 def apply_permanent_patches(master_defs: dict[str, Any]):
@@ -260,6 +279,17 @@ def apply_permanent_patches(master_defs: dict[str, Any]):
         ),
         "CreateGraphicOverrideRulesParameters": ("graphicOverrideRules", "GraphicOverrideRuleData"),
         "CreateGridElementsParameters": ("gridElements", "GridElementData"),
+        "CreateAddOnViewpointsParameters": ("viewpoints", "AddOnViewpointData"),
+        "CreateAnalyticalLoadCasesParameters": ("loadCases", "AnalyticalLoadCaseData"),
+        "CreateAnalyticalLoadCombinationsParameters": ("loadCombinations", "AnalyticalLoadCombinationData"),
+        "CreateAnalyticalLoadGroupsParameters": ("loadGroups", "AnalyticalLoadGroupData"),
+        "CreateElementSetsParameters": ("elementSets", "ElementSetData"),
+        "CreateLibraryPartsParameters": ("libraryParts", "LibraryPartData"),
+        "CreateMEPPreferenceTablesParameters": ("tables", "MEPPreferenceTableData"),
+        "CreateProjectInfoGroupsParameters": ("projectInfoGroups", "ProjectInfoGroupData"),
+        "CreateRailingsParameters": ("railingsData", "RailingData"),
+        "CreateSolidOperationsParameters": ("operations", "SolidOperationData"),
+        "PlaceOpeningsParameters": ("openingsData", "OpeningPlacementData"),
     }
 
     for parent_model, (field_name, new_model_name) in creation_data_types.items():
@@ -286,6 +316,16 @@ def apply_permanent_patches(master_defs: dict[str, Any]):
         "ModifyGraphicOverrideRulesParameters": ("graphicOverrideRules", "GraphicOverrideRuleModificationData"),
         "ModifyMEPPhysicalSystemsParameters": ("physicalSystemsData", "MEPPhysicalSystemModificationData"),
         "ModifyMEPSystemGroupsParameters": ("systemGroupsData", "MEPSystemGroupModificationData"),
+        "ModifyCurtainWallsParameters": ("curtainWallsWithDetails", "CurtainWallWithDetails"),
+        "ModifyGraphicOverrideCombinationsParameters": (
+            "graphicOverrideCombinations",
+            "GraphicOverrideCombinationModificationData",
+        ),
+        "ModifyMEPPortsParameters": ("portsData", "MEPPortModificationData"),
+        "ModifyMEPPreferenceTablesParameters": ("tablesToAdd", "MEPPreferenceTableAddition"),
+        "ModifyRevisionIssuesParameters": ("revisionIssues", "RevisionIssueModificationData"),
+        "ModifyShellsParameters": ("shellsWithDetails", "ShellWithDetails"),
+        "ModifyZonesParameters": ("zonesWithDetails", "ZoneWithDetails"),
     }
 
     for parent_model, (field_name, new_model_name) in element_modification_datatypes.items():
@@ -302,8 +342,12 @@ def apply_breaking_permanent_patches(master_defs: dict[str, Any]):
 
 
 def apply_breaking_source_review_patches(master_defs: dict[str, Any]):
-    """Shape-changing patches pending source review (none remain after Tapir 1.7.1)."""
-    print("Applying breaking schema patches pending source review (none assigned)...")
+    """Shape-changing wire corrections retained until their upstream release."""
+    print("Applying breaking schema patches pending upstream release...")
+
+    # ClassificationCommands.cpp emits IDs directly, without classificationId.
+    # Source and live Tapir 1.7.3 reads confirm this released-schema mismatch.
+    master_defs["ClassificationIdOrError"]["oneOf"][0] = {"$ref": "#/$defs/ClassificationId"}
 
 
 def apply_temporary_patches(master_defs: dict[str, Any]):
@@ -611,3 +655,381 @@ def apply_temporary_patches(master_defs: dict[str, Any]):
             replace_inline_schema_with_ref(master_defs, name, [field], f"LengthDimensionFormat{suffix}", preserve_description=True)  # fmt: skip
         extract_inline_schema(master_defs, name, ["angle"], f"AngleDimensionFormat{suffix}")
         extract_inline_schema(master_defs, name, ["area"], f"AreaDimensionFormat{suffix}")
+
+    # Replace new path-derived names without conflating distinct read/write contracts.
+    extract_inline_schema(master_defs, 'ActivateDesignOptionsInCombinationsParameters', ['designOptionsToActivate', 'items'], 'DesignOptionActivation')  # fmt: skip
+    extract_inline_schema(master_defs, "AddMEPPreferenceTableRowsParameters", ["tableId"], "MEPPreferenceTableId")
+    extract_inline_schema(master_defs, 'AddMEPPreferenceTableRowsParameters', ['rows', 'items'], 'MEPPreferenceRowAddition')  # fmt: skip
+    extract_inline_schema(master_defs, "MEPPreferenceRowAddition", ["key"], "MEPPreferenceRowKey")
+    extract_inline_enum(master_defs, "MEPPreferenceRowKey", ["shape"], "MEPPreferenceRowShape")
+    extract_inline_schema(master_defs, "MEPPreferenceRowAddition", ["values"], "MEPPreferenceRowValues")
+    extract_union_variant(master_defs, 'AddMEPPreferenceTableRowsResult', ['executionResults', 'items'], 0, 'MEPPreferenceRowAdditionResult')  # fmt: skip
+    extract_inline_enum(master_defs, "AnalyticalCrossSection", ["crossSectionType"], "AnalyticalCrossSectionType")
+    extract_inline_schema(master_defs, 'AnalyticalCrossSection', ['profileParameters', 'items'], 'AnalyticalProfileParameter')  # fmt: skip
+    extract_inline_enum(master_defs, "AnalyticalCrossSection", ["alignment"], "AnalyticalCrossSectionAlignment")
+    extract_inline_enum(master_defs, "AnalyticalCurve", ["type"], "AnalyticalCurveType")
+    extract_inline_enum(master_defs, "AnalyticalCurveMember", ["FEMType"], "AnalyticalCurveMemberFEMType")
+    extract_inline_schema(master_defs, 'AnalyticalCurveMember', ['varyingSegmentList', 'items'], 'AnalyticalVaryingSegment')  # fmt: skip
+    extract_inline_schema(master_defs, "AnalyticalEdgeLoad", ["loadSettings"], "AnalyticalEdgeLoadSettings")
+    extract_inline_enum(master_defs, 'AnalyticalEdgeLoadSettings', ['loadDistributionType'], 'AnalyticalLoadDistributionType')  # fmt: skip
+    extract_inline_schema(master_defs, 'AnalyticalExportMappingTable', ['items', 'items'], 'AnalyticalExportMappingItem')  # fmt: skip
+    extract_inline_schema(master_defs, 'AnalyticalExportMappingItem', ['elemPartIds', 'items'], 'AnalyticalExportElementPartId')  # fmt: skip
+    extract_inline_schema(master_defs, "AnalyticalLink", ["linkSettings"], "AnalyticalLinkSettings")
+    extract_inline_enum(master_defs, "AnalyticalLinkSettings", ["geometry"], "AnalyticalLinkGeometryType")
+    extract_inline_enum(master_defs, "AnalyticalLinkSettings", ["type"], "AnalyticalLinkType")
+    extract_inline_schema(master_defs, "AnalyticalLinkSettings", ["rigidSettings"], "AnalyticalRigidLinkSettings")
+    extract_inline_enum(master_defs, 'AnalyticalRigidLinkSettings', ['startConnectionType'], 'AnalyticalLinkConnectionType')  # fmt: skip
+    extract_inline_schema(master_defs, "AnalyticalLinkSettings", ["springSettings"], "AnalyticalSpringLinkSettings")
+    extract_inline_schema(master_defs, "AnalyticalSpringLinkSettings", ["translation"], "AnalyticalSpringTranslation")
+    extract_inline_schema(master_defs, "AnalyticalSpringLinkSettings", ["rotation"], "AnalyticalSpringRotation")
+    extract_inline_enum(master_defs, "AnalyticalMemberPartRef", ["partRefType"], "AnalyticalMemberPartRefType")
+    extract_inline_schema(master_defs, "AnalyticalMemberPartRef", ["customVertexData"], "AnalyticalCustomVertexData")
+    extract_inline_schema(master_defs, "AnalyticalMemberPartRef", ["ratioEdgeData"], "AnalyticalRatioEdgeData")
+    extract_union_variant(master_defs, 'AnalyticalModelVariation', ['layerConnectionClassIds', 'items'], 1, 'AnalyticalLayerConnectionClass')  # fmt: skip
+    extract_inline_schema(master_defs, "AnalyticalPointLoad", ["loadSettings"], "AnalyticalPointLoadSettings")
+    extract_inline_schema(master_defs, 'AnalyticalRelease', ['releaseDescriptions', 'items'], 'AnalyticalReleaseDescription')  # fmt: skip
+    extract_inline_schema(master_defs, "AnalyticalSupport", ["supportSettings"], "AnalyticalSupportSettings")
+    extract_inline_enum(master_defs, "AnalyticalSupportSettings", ["supportType"], "AnalyticalSupportType")
+    extract_inline_schema(master_defs, "AnalyticalSupportSettings", ["supportValues"], "AnalyticalSupportValues")
+    extract_inline_schema(master_defs, "AnalyticalSurfaceLoad", ["loadSettings"], "AnalyticalSurfaceLoadSettings")
+    extract_inline_schema(master_defs, "AnalyticalSurfaceMember", ["surface"], "AnalyticalSurface")
+    extract_inline_enum(master_defs, "AnalyticalSurface", ["surfaceType"], "AnalyticalSurfaceType")
+    extract_inline_schema(master_defs, "AnalyticalSurface", ["planeSurface"], "AnalyticalPlaneSurface")
+    extract_inline_schema(master_defs, "AnalyticalSurface", ["cylinderSurface"], "AnalyticalCylinderSurface")
+    extract_inline_schema(master_defs, "AnalyticalSurfaceMember", ["holeContours", "items"], "AnalyticalHoleContour")
+    extract_inline_enum(master_defs, "AnalyticalSurfaceMember", ["FEMType"], "AnalyticalSurfaceMemberFEMType")
+    extract_inline_enum(master_defs, "AnalyticalVisibilitySettings", ["visibilityMode"], "AnalyticalVisibilityMode")
+    extract_inline_enum(master_defs, 'AnalyticalVisibilitySettings', ['loadVisibilityMode'], 'AnalyticalLoadVisibilityMode')  # fmt: skip
+    extract_inline_schema(master_defs, 'CanMoveElementsToDesignOptionsResult', ['canMoveElements', 'items'], 'DesignOptionMoveCapability')  # fmt: skip
+    extract_inline_enum(master_defs, "CaptureElementStateParameters", ["type"], "ElementStateType")
+    extract_inline_schema(master_defs, "CaptureElementStateResult", ["stateId"], "ElementStateId")
+    extract_inline_schema(master_defs, 'ChangeAddOnViewpointsParameters', ['viewpoints', 'items'], 'AddOnViewpointModificationData')  # fmt: skip
+    extract_inline_schema(master_defs, "AddOnViewpointModificationData", ["viewpointId"], "AddOnViewpointId")
+    extract_inline_schema(master_defs, "ChangeFavoriteParameters", ["source"], "FavoriteSource")
+    extract_inline_schema(master_defs, 'ChangeLibraryPartOfElementsParameters', ['elementsWithLibraryPart', 'items'], 'ElementLibraryPartChange')  # fmt: skip
+    extract_union_variant(master_defs, "ElementLibraryPartChange", ["libraryPart"], 0, "LibraryPartByName")
+    extract_union_variant(master_defs, "ElementLibraryPartChange", ["libraryPart"], 1, "LibraryPartByIndex")
+    extract_union_variant(master_defs, "ElementLibraryPartChange", ["libraryPart"], 2, "LibraryPartByGuid")
+    extract_inline_schema(master_defs, "ChangeTextContentParameters", ["contentChanges", "items"], "TextContentChange")
+    extract_inline_schema(master_defs, "CheckMEPPortConnectabilityParameters", ["portPairs", "items"], "MEPPortPair")
+    extract_union_variant(master_defs, 'CheckMEPPortConnectabilityResult', ['results', 'items'], 0, 'MEPPortConnectability')  # fmt: skip
+    extract_inline_schema(master_defs, "CloseWindowsParameters", ["windows", "items"], "WindowToClose")
+    extract_union_variant(master_defs, 'ConvertAnalyticalLinksToNonShortestResult', ['links', 'items'], 0, 'ConvertedAnalyticalLink')  # fmt: skip
+    extract_inline_schema(master_defs, "ConvertUnitValuesParameters", ["values", "items"], "UnitValueConversionData")
+    extract_inline_enum(master_defs, "UnitValueConversionData", ["preference"], "UnitValuePreference")
+    extract_union_variant(master_defs, "ConvertUnitValuesResult", ["convertedValues", "items"], 0, "ConvertedUnitValue")
+    extract_inline_enum(master_defs, "AddOnViewpointData", ["itemType"], "AddOnViewpointType")
+    extract_union_variant(master_defs, 'CreateAddOnViewpointsResult', ['viewpoints', 'items'], 0, 'AddOnViewpointIdArrayItem')  # fmt: skip
+    extract_union_variant(master_defs, 'CreateAnalyticalLoadCasesResult', ['loadCaseIds', 'items'], 0, 'AnalyticalLoadCaseIdArrayItem')  # fmt: skip
+    extract_union_variant(master_defs, 'CreateAnalyticalLoadCombinationsResult', ['loadCombinationIds', 'items'], 0, 'AnalyticalLoadCombinationIdArrayItem')  # fmt: skip
+    extract_union_variant(master_defs, 'CreateAnalyticalLoadGroupsResult', ['loadGroupIds', 'items'], 0, 'AnalyticalLoadGroupIdArrayItem')  # fmt: skip
+    extract_union_variant(master_defs, 'CreateAnalyticalLoadsParameters', ['loads', 'items'], 0, 'AnalyticalPointLoadData')  # fmt: skip
+    extract_union_variant(master_defs, 'CreateAnalyticalLoadsParameters', ['loads', 'items'], 1, 'AnalyticalEdgeLoadData')  # fmt: skip
+    extract_union_variant(master_defs, 'CreateAnalyticalLoadsParameters', ['loads', 'items'], 2, 'AnalyticalSurfaceLoadData')  # fmt: skip
+    extract_union_variant(master_defs, "CreateDetailsResult", ["databases", "items"], 0, "CreatedDatabase")
+    extract_union_variant(master_defs, "CreateElementSetsResult", ["elementSets", "items"], 0, "ElementSetIdArrayItem")
+    extract_inline_schema(master_defs, "ElementSetIdArrayItem", ["elementSetId"], "ElementSetId")
+    extract_inline_enum(master_defs, "CreateFavoriteParameters", ["conflictPolicy"], "FavoriteConflictPolicy")
+    extract_inline_enum(master_defs, "CreateFavoriteResult", ["outcome"], "FavoriteCreationOutcome")
+    extract_inline_schema(master_defs, "CreateLibraryPartResult", ["libraryPart"], "CreatedLibraryPart")
+    extract_inline_schema(master_defs, "LibraryPartData", ["parameters", "items"], "LibraryPartParameterData")
+    extract_inline_enum(master_defs, "LibraryPartParameterData", ["type"], "LibraryPartParameterType")
+    extract_union_variant(master_defs, 'CreateLibraryPartsResult', ['libraryParts', 'items'], 0, 'LibraryPartCreationDetails')  # fmt: skip
+    extract_union_variant(master_defs, 'CreateMEPPreferenceTablesResult', ['executionResults', 'items'], 0, 'MEPPreferenceTableCreationResult')  # fmt: skip
+    extract_union_variant(master_defs, "CreateSolidOperationsResult", ["results", "items"], 0, "SolidOperationResult")
+    extract_inline_schema(master_defs, 'ElementIFCClassificationReference', ['referencedSource'], 'IFCClassificationSource')  # fmt: skip
+    extract_inline_enum(master_defs, 'ElementIFCClassificationReference', ['source'], 'IFCClassificationReferenceSource')  # fmt: skip
+    extract_inline_schema(master_defs, "FindModelViewOptionParameters", ["modelViewOptionId"], "ModelViewOptionId")
+    extract_union_variant(master_defs, "Get3DModelCountsResult", ["counts", "items"], 0, "Model3DCount")
+    extract_inline_enum(master_defs, "Model3DCount", ["componentType"], "Model3DComponentType")
+    extract_union_variant(master_defs, "GetAddOnViewpointsResult", ["viewpoints", "items"], 0, "AddOnViewpointDetails")
+    extract_inline_enum(master_defs, "AddOnViewpointDetails", ["itemType"], "AddOnViewpointTypeOrUndefined")
+    extract_inline_schema(master_defs, 'GetAllClassificationSystemsResult', ['classificationSystems', 'items'], 'ClassificationSystemSummary')  # fmt: skip
+    extract_inline_enum(master_defs, "GetAllPropertiesParameters", ["propertyTypes", "items"], "PropertyDefinitionType")
+    extract_union_variant(master_defs, "GetAnalyticalLinksResult", ["links", "items"], 0, "AnalyticalLinkDetails")
+    extract_union_variant(master_defs, "GetAnalyticalLoadsResult", ["loads", "items"], 0, "AnalyticalPointLoadDetails")
+    extract_inline_schema(master_defs, "AnalyticalPointLoadDetails", ["geometry"], "AnalyticalPointLoadGeometry")
+    extract_union_variant(master_defs, "GetAnalyticalLoadsResult", ["loads", "items"], 1, "AnalyticalEdgeLoadDetails")
+    extract_union_variant(master_defs, 'GetAnalyticalLoadsResult', ['loads', 'items'], 2, 'AnalyticalSurfaceLoadDetails')  # fmt: skip
+    extract_union_variant(master_defs, 'GetAnalyticalMemberDetailsResult', ['analyticalMembers', 'items'], 0, 'AnalyticalCurveMemberDetails')  # fmt: skip
+    extract_union_variant(master_defs, 'GetAnalyticalMemberDetailsResult', ['analyticalMembers', 'items'], 1, 'AnalyticalSurfaceMemberDetails')  # fmt: skip
+    extract_union_variant(master_defs, 'GetAnalyticalMemberDetailsResult', ['analyticalMembers', 'items'], 2, 'AnalyticalSegmentedSurfaceMemberDetails')  # fmt: skip
+    extract_union_variant(master_defs, 'GetAnalyticalMemberPartGeometriesResult', ['geometries', 'items'], 0, 'AnalyticalMemberPartNode')  # fmt: skip
+    extract_union_variant(master_defs, 'GetAnalyticalMemberPartGeometriesResult', ['geometries', 'items'], 1, 'AnalyticalMemberPartCurve')  # fmt: skip
+    extract_union_variant(master_defs, 'GetAnalyticalMemberTypesOfElementsResult', ['memberTypesOfElements', 'items'], 0, 'AnalyticalMemberTypeResult')  # fmt: skip
+    extract_union_variant(master_defs, 'GetAnalyticalReleasesResult', ['releases', 'items'], 0, 'AnalyticalReleaseResult')  # fmt: skip
+    extract_union_variant(master_defs, 'GetAnalyticalSupportsResult', ['supports', 'items'], 0, 'AnalyticalSupportDetails')  # fmt: skip
+    extract_inline_enum(master_defs, 'GetAvailableLibraryPartsResult', ['libraryParts', 'items', 'type'], 'AvailableLibraryPartType')  # fmt: skip
+    extract_union_variant(master_defs, 'GetBodyMaterialsOfElementsResult', ['bodyMaterials', 'items'], 0, 'ElementBodyMaterials')  # fmt: skip
+    extract_inline_schema(master_defs, "ElementBodyMaterials", ["bodies", "items"], "BodyMaterialDetails")
+    extract_union_variant(master_defs, 'GetCategoryValuesOfDefaultsResult', ['categoryValuesOfDefaults', 'items'], 0, 'DefaultCategoryValues')  # fmt: skip
+    extract_inline_schema(master_defs, "DefaultCategoryValues", ["categoryValues", "items"], "DefaultCategoryValue")
+    extract_union_variant(master_defs, 'GetClassificationItemParentsResult', ['classificationItemParents', 'items'], 0, 'ClassificationItemParent')  # fmt: skip
+    extract_union_variant(master_defs, 'GetClassificationItemVisibilityParameters', ['targets', 'items'], 0, 'ClassificationVisibilityElement')  # fmt: skip
+    extract_union_variant(master_defs, 'GetClassificationItemVisibilityParameters', ['targets', 'items'], 1, 'ClassificationVisibilityToolDefault')  # fmt: skip
+    extract_union_variant(master_defs, 'GetClassificationItemVisibilityParameters', ['targets', 'items'], 2, 'ClassificationVisibilityAttribute')  # fmt: skip
+    extract_union_variant(master_defs, 'GetClassificationItemVisibilityResult', ['classificationItemVisibilities', 'items'], 0, 'ClassificationItemVisibilities')  # fmt: skip
+    extract_union_variant(master_defs, 'ClassificationItemVisibilities', ['visibilities', 'items'], 0, 'ClassificationItemVisibility')  # fmt: skip
+    extract_union_variant(master_defs, 'GetClassificationsOfAttributesResult', ['attributeClassifications', 'items'], 0, 'AttributeClassifications')  # fmt: skip
+    extract_union_variant(master_defs, 'GetClassificationsOfToolDefaultsResult', ['classificationsOfToolDefaults', 'items'], 0, 'ToolDefaultClassifications')  # fmt: skip
+    extract_union_variant(master_defs, 'GetCurtainWallAbsoluteBottomsResult', ['absoluteBottoms', 'items'], 0, 'CurtainWallAbsoluteBottom')  # fmt: skip
+    extract_union_variant(master_defs, 'GetCustomCurveMemberStretchResult', ['stretches', 'items'], 0, 'AnalyticalCurveMemberStretch')  # fmt: skip
+    extract_inline_schema(master_defs, "GetCutPolygonsOfElementsParameters", ["cutPlane"], "ElementCutPlane")
+    extract_union_variant(master_defs, 'GetCutPolygonsOfElementsResult', ['cutPolygons', 'items'], 0, 'ElementCutPolygons')  # fmt: skip
+    extract_inline_schema(master_defs, "ElementCutPolygons", ["bodies", "items"], "BodyCutPolygons")
+    extract_inline_schema(master_defs, "BodyCutPolygons", ["polygons", "items"], "CutPolygon")
+    extract_union_variant(master_defs, 'GetDescriptorsOfElementsResult', ['descriptorsOfElements', 'items'], 0, 'ElementDescriptors')  # fmt: skip
+    extract_inline_schema(master_defs, "ElementDescriptors", ["descriptors", "items"], "ElementDescriptor")
+    extract_inline_enum(master_defs, "ElementDescriptor", ["status"], "ElementDescriptorStatus")
+    extract_inline_schema(master_defs, 'GetDimensionStandardsResult', ['dimensionStandards', 'items'], 'DimensionStandard')  # fmt: skip
+    extract_inline_schema(master_defs, "DimensionStandard", ["settings"], "DimensionStandardSettings")
+    extract_inline_schema(master_defs, "DimensionStandardSettings", ["linear"], "StandardLengthDimensionFormat")
+    extract_inline_schema(master_defs, "DimensionStandardSettings", ["angle"], "StandardAngleDimensionFormat")
+    extract_inline_enum(master_defs, "GetDocumentFrom3DDefaultsResult", ["intPlanConn"], "Document3DPlanConnection")
+    extract_inline_enum(master_defs, 'GetDocumentFrom3DDefaultsResult', ['boundaryDisplay'], 'Document3DBoundaryDisplay')  # fmt: skip
+    extract_inline_schema(master_defs, 'GetDocumentFrom3DDefaultsResult', ['attributeOptions'], 'Document3DAttributeOptions')  # fmt: skip
+    extract_inline_schema(master_defs, 'GetDrawingNumberingGridLinesResult', ['lines', 'items'], 'DrawingNumberingGridLine')  # fmt: skip
+    extract_union_variant(master_defs, 'GetDrawingPrimitivesOfElementsResult', ['drawingPrimitivesOfElements', 'items'], 0, 'ElementDrawingPrimitives')  # fmt: skip
+    extract_inline_schema(master_defs, "ElementDrawingPrimitives", ["primitives", "items"], "DrawingPrimitive")
+    extract_inline_enum(master_defs, "DrawingPrimitive", ["type"], "DrawingPrimitiveType")
+    extract_inline_enum(master_defs, "DrawingPrimitive", ["renovationStatus"], "DrawingPrimitiveRenovationStatus")
+    extract_inline_schema(master_defs, "DrawingPrimitive", ["polygons", "items"], "DrawingPrimitivePolygon")
+    extract_inline_schema(master_defs, "DrawingPrimitive", ["hatchBorder"], "DrawingPrimitiveHatchBorder")
+    extract_inline_schema(master_defs, "GetElementConnectionsResult", ["connections", "items"], "ElementConnection")
+    extract_inline_schema(master_defs, "ElementConnection", ["polygons", "items"], "ElementConnectionPolygon")
+    extract_union_variant(master_defs, "GetElementSetDataResult", ["elementSets", "items"], 0, "ElementSetDetails")
+    extract_inline_schema(master_defs, "ElementSetDetails", ["userData"], "ElementSetUserData")
+    extract_union_variant(master_defs, "GetElementUserDataResult", ["elementUserData", "items"], 0, "ElementUserData")
+    extract_inline_schema(master_defs, "ElementUserData", ["userData", "items"], "ElementUserDataPair")
+    extract_union_variant(master_defs, 'GetElementsByClassificationResult', ['elementsOfClassificationItems', 'items'], 0, 'ClassificationItemElements')  # fmt: skip
+    extract_union_variant(master_defs, "GetFavoriteDetailsResult", ["favoriteDetails", "items"], 0, "FavoriteDetails")
+    extract_inline_schema(master_defs, "FavoriteDetails", ["properties", "items"], "FavoriteProperty")
+    extract_inline_enum(master_defs, "FavoriteProperty", ["status"], "FavoritePropertyStatus")
+    extract_inline_schema(master_defs, "FavoriteDetails", ["categoryValues", "items"], "FavoriteCategoryValue")
+    extract_union_variant(master_defs, 'GetGraphicalOverrideStyleOfElementsResult', ['styles', 'items'], 0, 'GraphicalOverrideStyle')  # fmt: skip
+    extract_union_variant(master_defs, 'GetHotlinkDesignOptionTableDetailsResult', ['hotlinkDesignOptionTables', 'items'], 0, 'HotlinkDesignOptionTableDetails')  # fmt: skip
+    extract_inline_enum(master_defs, "HotlinkDesignOptionTableDetails", ["filterMode"], "HotlinkDesignOptionFilterMode")
+    extract_inline_schema(master_defs, 'HotlinkDesignOptionTableDetails', ['sets', 'items'], 'HotlinkDesignOptionSetDetails')  # fmt: skip
+    extract_inline_schema(master_defs, 'GetHotlinkSourceStatusParameters', ['hotlinks', 'items'], 'HotlinkSourceReference')  # fmt: skip
+    extract_union_variant(master_defs, 'GetHotlinkSourceStatusResult', ['hotlinkSourceStatuses', 'items'], 0, 'HotlinkSourceStatusResult')  # fmt: skip
+    extract_inline_enum(master_defs, "HotlinkSourceStatusResult", ["status"], "HotlinkSourceStatus")
+    extract_union_variant(master_defs, 'GetHotspotsOfElementsResult', ['hotspotsOfElements', 'items'], 0, 'ElementHotspots')  # fmt: skip
+    extract_inline_schema(master_defs, 'GetLCSOfAnalyticalMembersParameters', ['memberParts', 'items'], 'AnalyticalMemberCoordinateSystemRequest')  # fmt: skip
+    extract_union_variant(master_defs, 'GetLCSOfAnalyticalMembersResult', ['localCoordinateSystems', 'items'], 0, 'AnalyticalMemberCoordinateSystem')  # fmt: skip
+    extract_union_variant(master_defs, 'GetLibPartTransformationsResult', ['transformations', 'items'], 0, 'ElementLibraryPartTransformation')  # fmt: skip
+    extract_inline_schema(master_defs, 'ElementLibraryPartTransformation', ['transformation'], 'LibraryPartTransformation')  # fmt: skip
+    extract_union_variant(master_defs, 'GetLibraryPartOriginalLocationsResult', ['locations', 'items'], 0, 'LibraryPartOriginalLocation')  # fmt: skip
+    extract_union_variant(master_defs, 'GetLinkedPropertyObjectsOfElementsParameters', ['elements', 'items'], 1, 'PropertyObjectToolDefault')  # fmt: skip
+    extract_union_variant(master_defs, 'GetLinkedPropertyObjectsOfElementsResult', ['linkedPropertyObjectsOfElements', 'items'], 0, 'ElementLinkedPropertyObjects')  # fmt: skip
+    extract_inline_schema(master_defs, 'ElementLinkedPropertyObjects', ['criteriaPropertyObjects', 'items'], 'CriteriaPropertyObject')  # fmt: skip
+    extract_union_variant(master_defs, 'GetMEPElementDetailsResult', ['elementDetails', 'items'], 0, 'MEPElementDetails')  # fmt: skip
+    extract_union_variant(master_defs, 'GetMEPPreferenceTableContainersResult', ['containers', 'items'], 0, 'MEPPreferenceTableContainer')  # fmt: skip
+    extract_inline_schema(master_defs, 'MEPPreferenceTableContainer', ['tables', 'items'], 'MEPPreferenceTableContainerDetails')  # fmt: skip
+    extract_inline_schema(master_defs, "MEPPreferenceTableContainerDetails", ["sizes"], "MEPPreferenceTableSizes")
+    extract_union_variant(master_defs, 'GetMEPPreferenceTableRowsResult', ['rows', 'items'], 0, 'MEPPreferenceRowDetails')  # fmt: skip
+    extract_union_variant(master_defs, 'GetMEPRoutingParametersResult', ['routingParameters', 'items'], 0, 'MEPRoutingParameters')  # fmt: skip
+    extract_inline_enum(master_defs, "MEPRoutingParameters", ["type"], "MEPRoutingParameterElementType")
+    extract_inline_schema(master_defs, "MEPRoutingParameters", ["routingNodeParameters"], "MEPRoutingNodeParameters")
+    extract_inline_schema(master_defs, "MEPRoutingNodeParameters", ["elbow"], "MEPElbowParameters")
+    extract_inline_schema(master_defs, "MEPRoutingNodeParameters", ["transition"], "MEPTransitionParameters")
+    extract_inline_schema(master_defs, 'MEPRoutingParameters', ['routingSegmentParameters'], 'MEPRoutingSegmentParameters')  # fmt: skip
+    extract_inline_schema(master_defs, "MEPRoutingParameters", ["rigidSegmentParameters"], "MEPRigidSegmentParameters")
+    extract_inline_schema(master_defs, "GetNoteAutotextsResult", ["noteAutotexts", "items"], "NoteAutotextDetails")
+    extract_union_variant(master_defs, 'GetOpeningSymbolParametersResult', ['openings', 'items'], 0, 'OpeningSymbolParameters')  # fmt: skip
+    extract_inline_schema(master_defs, 'OpeningSymbolParameters', ['cutSymbolParameters', 'items'], 'OpeningSymbolParameter')  # fmt: skip
+    extract_inline_enum(master_defs, "GetPolygonFromUserParameters", ["method"], "PolygonInputMethod")
+    extract_union_variant(master_defs, "GetPrinterAndPlotterInfoResult", ["printer"], 0, "PrinterInfo")
+    extract_union_variant(master_defs, "GetPrinterAndPlotterInfoResult", ["plotter"], 0, "PlotterInfo")
+    extract_inline_enum(master_defs, "GetProductVersionInfoResult", ["availableDomains", "items"], "ProductDomain")
+    extract_inline_schema(master_defs, "GetProjectPreferencesResult", ["zones"], "ZonePreferences")
+    extract_inline_schema(master_defs, "ZonePreferences", ["lowCeilingAreaReduction"], "LowCeilingAreaReduction")
+    extract_inline_schema(master_defs, "LowCeilingAreaReduction", ["heightLimits", "items"], "ZoneHeightLimit")
+    extract_inline_enum(master_defs, "GetPropertiesOfToolDefaultsParameters", ["filter"], "ToolDefaultPropertyFilter")
+    extract_union_variant(master_defs, 'GetPropertiesOfToolDefaultsResult', ['propertiesOfToolDefaults', 'items'], 0, 'ToolDefaultProperties')  # fmt: skip
+    extract_inline_schema(master_defs, "ToolDefaultProperties", ["properties", "items"], "ToolDefaultProperty")
+    extract_union_variant(master_defs, 'GetPropertyAvailabilityOfDefaultsResult', ['propertyAvailabilities', 'items'], 0, 'DefaultPropertyAvailability')  # fmt: skip
+    extract_union_variant(master_defs, 'GetPropertyObjectsOfElementsResult', ['propertyObjectsOfElements', 'items'], 0, 'ElementPropertyObjects')  # fmt: skip
+    extract_inline_schema(master_defs, "ElementPropertyObjects", ["propertyObjects", "items"], "ElementPropertyObject")
+    extract_union_variant(master_defs, 'GetPropertyValuesOfAttributesResult', ['propertyValuesForAttributes', 'items'], 0, 'AttributePropertyValuesResult')  # fmt: skip
+    extract_union_variant(master_defs, 'AttributePropertyValuesResult', ['propertyValues', 'items'], 1, 'AttributePropertyValueStatus')  # fmt: skip
+    extract_inline_schema(master_defs, 'GetRenovationFiltersResult', ['renovationFilters', 'items'], 'RenovationFilterDetails')  # fmt: skip
+    extract_union_variant(master_defs, 'GetRenovationStatusNamesResult', ['renovationStatuses', 'items'], 0, 'RenovationStatusName')  # fmt: skip
+    extract_inline_enum(master_defs, "RenovationStatusName", ["status"], "RenovationStatus")
+    extract_inline_schema(master_defs, 'GetRevisionIssuesResult', ['customScheme', 'items'], 'RevisionIssueCustomSchemeItem')  # fmt: skip
+    extract_union_variant(master_defs, 'GetSkylightHolePolygonsResult', ['skylightHolePolygons', 'items'], 0, 'SkylightHolePolygon')  # fmt: skip
+    extract_inline_schema(master_defs, "GetSunSettingsResult", ["sunLight"], "SunLightSettings")
+    extract_union_variant(master_defs, 'GetSurfaceTypesOfElementsResult', ['surfaceTypes', 'items'], 0, 'ElementSurfaceTypes')  # fmt: skip
+    extract_inline_schema(master_defs, "ElementSurfaceTypes", ["polygons", "items"], "ElementSurfaceType")
+    extract_union_variant(master_defs, 'GetTextureCoordinatesResult', ['textureCoordinates', 'items'], 0, 'ElementTextureCoordinates')  # fmt: skip
+    extract_union_variant(master_defs, "ElementTextureCoordinates", ["bodies", "items"], 0, "BodyTextureCoordinates")
+    extract_union_variant(master_defs, "BodyTextureCoordinates", ["polygons", "items"], 0, "TextureCoordinate")
+    extract_union_variant(master_defs, 'GetURLReferencesOfElementsResult', ['urlReferences', 'items'], 0, 'ElementURLReference')  # fmt: skip
+    extract_union_variant(master_defs, 'GetUserDataOfAttributesResult', ['userDataOfAttributes', 'items'], 0, 'AttributeUserData')  # fmt: skip
+    extract_inline_schema(master_defs, "GetViewOptionsResult", ["viewOptions"], "ViewOptions")
+    extract_union_variant(master_defs, 'GetVisibleSkinStatusResult', ['visibleSkinStatuses', 'items'], 0, 'VisibleSkinStatus')  # fmt: skip
+    extract_inline_enum(master_defs, "ImportFavoritesParameters", ["format"], "FavoriteImportFormat")
+    extract_inline_schema(master_defs, "LibraryPackage", ["dependencies", "items"], "LibraryPackageDependency")
+    extract_inline_enum(master_defs, "LibraryPartScriptData", ["deleteScripts", "items"], "LibraryPartScriptType")
+    extract_inline_schema(master_defs, "MEPAngleSet", ["angleDetails", "items"], "MEPAngleDetails")
+    extract_inline_schema(master_defs, "MEPElementData", ["defaults"], "MEPElementDefaults")
+    extract_inline_schema(master_defs, "MEPPreferenceTableChange", ["newRows", "items"], "MEPNewValuePreferenceRow")
+    extract_inline_schema(master_defs, "MEPReferenceSet", ["referenceIdDetails", "items"], "MEPReferenceIdDetails")
+    extract_inline_schema(master_defs, "MEPRoutingElementData", ["defaults"], "MEPRoutingElementDefaults")
+    extract_inline_schema(master_defs, "MEPRoutingElementDefaults", ["routingNode"], "MEPRoutingNodeDefaults")
+    extract_inline_schema(master_defs, "MEPRoutingNodeDefaults", ["elbow"], "MEPElbowDefaults")
+    extract_inline_schema(master_defs, "MEPRoutingNodeDefaults", ["transition"], "MEPTransitionDefaults")
+    extract_inline_schema(master_defs, "MEPValuePreferenceTable", ["rows", "items"], "MEPValuePreferenceRow")
+    extract_union_variant(master_defs, "ModelToScreenResult", ["screenPoints", "items"], 0, "ScreenPoint")
+    extract_union_variant(master_defs, 'ModifyMEPPreferenceTablesResult', ['addedTables', 'items'], 0, 'MEPAddedPreferenceTableId')  # fmt: skip
+    extract_inline_enum(master_defs, "ModifyPensParameters", ["target"], "PenTarget")
+    extract_inline_schema(master_defs, 'RevisionIssueModificationData', ['customSchemeData', 'items'], 'RevisionIssueCustomSchemeValue')  # fmt: skip
+    extract_inline_schema(master_defs, 'MoveProjectInfoGroupsParameters', ['projectInfoGroups', 'items'], 'ProjectInfoGroupMove')  # fmt: skip
+    extract_inline_enum(master_defs, 'OpeningDefaultFloorPlanParameters', ['floorPlanDisplayMode'], 'OpeningFloorPlanDisplayMode')  # fmt: skip
+    extract_inline_enum(master_defs, "OpeningDefaultFloorPlanParameters", ["dividedOpeningMode"], "OpeningDividedMode")
+    extract_inline_enum(master_defs, "OpeningDefaultFloorPlanParameters", ["openEdgeStyle"], "OpeningEdgeStyle")
+    extract_inline_enum(master_defs, "OpeningExtrusionParameters", ["constraint"], "OpeningConstraint")
+    extract_inline_enum(master_defs, "OpeningExtrusionParameters", ["limitType"], "OpeningLimitType")
+    extract_inline_enum(master_defs, "OpeningExtrusionParameters", ["linkedStatus"], "OpeningLinkedStatus")
+    extract_inline_enum(master_defs, "OpeningExtrusionParameters", ["shapeType"], "OpeningShapeType")
+    extract_inline_enum(master_defs, "PhotoRenderParameters", ["format"], "PhotoRenderFormat")
+    extract_inline_schema(master_defs, 'RemoveIFCClassificationReferencesOfElementsParameters', ['elementIFCClassificationReferences', 'items'], 'ElementIFCClassificationReferenceRemoval')  # fmt: skip
+    extract_inline_schema(master_defs, 'ElementIFCClassificationReferenceRemoval', ['referencedSource'], 'IFCClassificationSourceReference')  # fmt: skip
+    extract_inline_schema(master_defs, 'RenameProjectInfoGroupsParameters', ['projectInfoGroups', 'items'], 'ProjectInfoGroupRename')  # fmt: skip
+    extract_inline_schema(master_defs, 'ReorderDesignOptionSetsParameters', ['designOptionSets', 'items'], 'DesignOptionSetMove')  # fmt: skip
+    extract_inline_schema(master_defs, 'ReorderDesignOptionsInSetParameters', ['designOptions', 'items'], 'DesignOptionMove')  # fmt: skip
+    extract_inline_enum(master_defs, "RunActionCenterChecksParameters", ["checks", "items"], "ActionCenterCheck")
+    extract_inline_schema(master_defs, "ScreenToModelParameters", ["screenPoints", "items"], "ScreenPointInput")
+    extract_inline_schema(master_defs, "Set3DFilterAndCutSettingsParameters", ["settings"], "Filter3DSettingsUpdate")
+    extract_inline_enum(master_defs, "Filter3DSettingsUpdate", ["filterMode"], "Filter3DMode")
+    extract_inline_schema(master_defs, "Filter3DSettingsUpdate", ["elemTypeFilter", "items"], "ElementTypeVisibility")
+    extract_inline_schema(master_defs, 'SetAnalyticalReleasesParameters', ['releases', 'items'], 'ElementAnalyticalRelease')  # fmt: skip
+    extract_inline_schema(master_defs, 'SetBuiltInPropertyValuesOfAttributesParameters', ['attributes', 'items'], 'AttributeBuiltInPropertyValues')  # fmt: skip
+    extract_inline_schema(master_defs, 'AttributeBuiltInPropertyValues', ['properties', 'items'], 'BuiltInPropertyValue')  # fmt: skip
+    extract_inline_schema(master_defs, 'SetClassificationsOfAttributesParameters', ['attributeClassifications', 'items'], 'AttributeClassification')  # fmt: skip
+    extract_inline_schema(master_defs, 'SetCustomCurveMemberStretchParameters', ['stretches', 'items'], 'AnalyticalCurveMemberStretchUpdate')  # fmt: skip
+    extract_inline_schema(master_defs, "SetElementInfoStringsParameters", ["elements", "items"], "ElementInfoString")
+    extract_inline_schema(master_defs, 'SetElementUserDataParameters', ['elementUserData', 'items'], 'ElementUserDataUpdate')  # fmt: skip
+    extract_inline_schema(master_defs, 'SetGraphicOverrideRuleOrderParameters', ['graphicOverrideRuleGroups', 'items'], 'GraphicOverrideRuleOrder')  # fmt: skip
+    extract_inline_schema(master_defs, "SetGridSettingsParameters", ["settings"], "GridSettingsUpdate")
+    extract_inline_schema(master_defs, "GridSettingsUpdate", ["backColor"], "GridColorUpdate")
+    extract_inline_schema(master_defs, 'SetIFCClassificationReferencesOfElementsParameters', ['elementIFCClassificationReferences', 'items'], 'ElementIFCClassificationReferenceData')  # fmt: skip
+    extract_inline_schema(master_defs, 'ElementIFCClassificationReferenceData', ['referencedSource'], 'IFCClassificationSourceData')  # fmt: skip
+    extract_inline_schema(master_defs, 'SetLibraryPartMetadataParameters', ['libraryParts', 'items'], 'LibraryPartMetadataData')  # fmt: skip
+    extract_inline_schema(master_defs, "LibraryPartMetadataData", ["metadata"], "LibraryPartMetadata")
+    extract_union_variant(master_defs, 'SetLinkedPropertyObjectsOfElementsParameters', ['elementsWithLinkedPropertyObjects', 'items'], 0, 'LinkedPropertyObjectsByElement')  # fmt: skip
+    extract_union_variant(master_defs, 'SetLinkedPropertyObjectsOfElementsParameters', ['elementsWithLinkedPropertyObjects', 'items'], 1, 'LinkedPropertyObjectsByToolDefault')  # fmt: skip
+    extract_inline_schema(master_defs, 'SetMEPPreferenceTableRowsParameters', ['rows', 'items'], 'MEPPreferenceRowUpdate')  # fmt: skip
+    extract_union_variant(master_defs, 'SetMEPPreferenceTableRowsResult', ['executionResults', 'items'], 0, 'MEPPreferenceRowUpdateResult')  # fmt: skip
+    extract_inline_schema(master_defs, 'SetMEPRoutingParametersParameters', ['elements', 'items'], 'ElementMEPRoutingParameters')  # fmt: skip
+    extract_inline_schema(master_defs, 'ElementMEPRoutingParameters', ['routingNodeParameters'], 'MEPRoutingNodeParametersUpdate')  # fmt: skip
+    extract_inline_schema(master_defs, 'ElementMEPRoutingParameters', ['routingSegmentParameters'], 'MEPRoutingSegmentDefaults')  # fmt: skip
+    extract_inline_schema(master_defs, 'SetOpeningSymbolParametersParameters', ['elements', 'items'], 'OpeningSymbolParametersUpdate')  # fmt: skip
+    extract_inline_schema(master_defs, 'OpeningSymbolParametersUpdate', ['cutSymbolParameters', 'items'], 'OpeningSymbolParameterUpdate')  # fmt: skip
+    extract_inline_schema(master_defs, "SetPlaceSettingsParameters", ["placeInfo"], "PlaceSettingsUpdate")
+    extract_inline_schema(master_defs, "SetPlaceSettingsResult", ["placeInfo"], "PlaceInfo")
+    extract_inline_schema(master_defs, "SetProjectPreferencesParameters", ["zones"], "ZonePreferencesUpdate")
+    extract_inline_schema(master_defs, 'ZonePreferencesUpdate', ['lowCeilingAreaReduction'], 'LowCeilingAreaReductionUpdate')  # fmt: skip
+    extract_inline_schema(master_defs, 'LowCeilingAreaReductionUpdate', ['heightLimits', 'items'], 'ZoneHeightLimitUpdate')  # fmt: skip
+    extract_inline_schema(master_defs, 'SetURLReferencesOfElementsParameters', ['elementsWithURLReferences', 'items'], 'ElementURLReferenceUpdate')  # fmt: skip
+    extract_inline_schema(master_defs, "SetViewOptionsParameters", ["viewOptions"], "ViewOptionsUpdate")
+    extract_inline_enum(master_defs, "ShellDetails", ["shellClass"], "ShellClass")
+    extract_inline_schema(master_defs, "UnmergeElementsParameters", ["elementPairs", "items"], "ElementUnmergePair")
+    extract_union_variant(master_defs, 'GetDetailsOfElementsResult', ['detailsOfElements', 'items'], 1, 'ElementHeaderFromOtherDatabase')  # fmt: skip
+    extract_union_variant(master_defs, 'TriangulatePolygonsOfElementsResult', ['triangulations', 'items'], 1, 'ElementConvexPolygons')  # fmt: skip
+    extract_inline_schema(master_defs, "ElementConvexPolygons", ["convexPolygons", "items"], "ConvexPolygon")
+
+    # Reuse equivalent contracts after all their named producers are available.
+    replace_inline_schema_with_ref(master_defs, 'AnalyticalRigidLinkSettings', ['endConnectionType'], 'AnalyticalLinkConnectionType', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'BreakHotlinkNodesParameters', ['hotlinkNodes', 'items'], 'HotlinkNodeReference', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'CaptureElementStateResult', ['type'], 'ElementStateType', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'AddOnViewpointData', ['parentViewpointId'], 'AddOnViewpointId', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'AddOnViewpointIdArrayItem', ['viewpointId'], 'AddOnViewpointId', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'CreateFavoriteParameters', ['source'], 'FavoriteSource', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'CreateMEPPreferenceTablesParameters', ['domain'], 'MEPPreferenceTableDomain', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'MEPPreferenceTableCreationResult', ['tableId'], 'MEPPreferenceTableId', preserve_description=True)  # fmt: skip
+    replace_union_variant_with_ref(master_defs, "CreateWorksheetsResult", ["databases", "items"], 0, "CreatedDatabase")
+    replace_inline_schema_with_ref(master_defs, 'DeleteAnalyticalLoadCasesParameters', ['loadCaseIds', 'items'], 'AnalyticalLoadCaseIdArrayItem', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'DeleteAnalyticalLoadCombinationsParameters', ['loadCombinationIds', 'items'], 'AnalyticalLoadCombinationIdArrayItem', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'DeleteAnalyticalLoadGroupsParameters', ['loadGroupIds', 'items'], 'AnalyticalLoadGroupIdArrayItem', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'DeleteElementSetsParameters', ['elementSets', 'items'], 'ElementSetIdArrayItem', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'DeleteHotlinkNodesParameters', ['hotlinkNodes', 'items'], 'HotlinkNodeReference', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'DeleteMEPPreferenceTableRowsParameters', ['tableId'], 'MEPPreferenceTableId', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'DeleteMEPPreferenceTableRowsParameters', ['keys', 'items'], 'MEPPreferenceRowKey', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'FindModelViewOptionResult', ['modelViewOptionId'], 'ModelViewOptionId', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'GetAddOnViewpointChildrenParameters', ['viewpointId'], 'AddOnViewpointId', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'GetAddOnViewpointChildrenResult', ['viewpointIds', 'items'], 'AddOnViewpointIdArrayItem', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'GetAddOnViewpointRootsResult', ['viewpointIds', 'items'], 'AddOnViewpointIdArrayItem', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'GetAddOnViewpointsParameters', ['viewpointIds', 'items'], 'AddOnViewpointIdArrayItem', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'AddOnViewpointDetails', ['viewpointId'], 'AddOnViewpointId', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'AddOnViewpointDetails', ['parentViewpointId'], 'AddOnViewpointId', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'DimensionStandardSettings', ['radial'], 'StandardLengthDimensionFormat', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'DimensionStandardSettings', ['level'], 'StandardLengthDimensionFormat', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'DimensionStandardSettings', ['elevation'], 'StandardLengthDimensionFormat', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'DimensionStandardSettings', ['doorWindow'], 'StandardLengthDimensionFormat', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'DimensionStandardSettings', ['parapet'], 'StandardLengthDimensionFormat', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'DimensionStandardSettings', ['area'], 'AreaDimensionFormat', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, "DrawingPrimitive", ["rgbColor"], "ColorRGB", preserve_description=True)
+    replace_inline_schema_with_ref(master_defs, 'DrawingPrimitive', ['destBox'], 'BoundingBox2D', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'GetElementChangesSinceParameters', ['stateId'], 'ElementStateId', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'GetElementChangesSinceParameters', ['toStateId'], 'ElementStateId', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'GetElementSetDataParameters', ['elementSets', 'items'], 'ElementSetIdArrayItem', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'GetHotlinkDesignOptionTableDetailsParameters', ['hotlinkNodes', 'items'], 'HotlinkNodeReference', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'GetLibraryPartOriginalLocationsParameters', ['libraryParts', 'items'], 'LibraryPartByIndex', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'GetMEPPreferenceTableContainersParameters', ['domains', 'items'], 'MEPPreferenceTableDomain', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'MEPPreferenceTableContainer', ['domain'], 'MEPPreferenceTableDomain', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'MEPPreferenceTableContainerDetails', ['tableId'], 'MEPPreferenceTableId', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'GetMEPPreferenceTableRowsParameters', ['tableId'], 'MEPPreferenceTableId', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'GetMEPPreferenceTableRowsParameters', ['keys', 'items'], 'MEPPreferenceRowKey', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'GetMEPPreferenceTableRowsResult', ['sizes'], 'MEPPreferenceTableSizes', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'MEPPreferenceRowDetails', ['key'], 'MEPPreferenceRowKey', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'MEPPreferenceRowDetails', ['values'], 'MEPPreferenceRowValues', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'MEPRoutingNodeParameters', ['preferredTransitionPlacement'], 'MEPPreferredTransitionPlacement', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'MEPRoutingSegmentParameters', ['connectionStyle'], 'MEPConnectionStyle', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'MEPRoutingParameters', ['elbowParameters'], 'MEPElbowParameters', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'MEPRoutingParameters', ['transitionParameters'], 'MEPTransitionParameters', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'OpeningSymbolParameters', ['unCutSymbolParameters', 'items'], 'OpeningSymbolParameter', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'GetStoryControlPrimitivesResult', ['primitives', 'items'], 'DrawingPrimitive', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'GetVisibleSkinStatusParameters', ['structureDisplay'], 'PartialStructureDisplay', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'OpeningExtrusionParametersUpdate', ['constraint'], 'OpeningConstraint', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'OpeningExtrusionParametersUpdate', ['limitType'], 'OpeningLimitType', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'OpeningExtrusionParametersUpdate', ['linkedStatus'], 'OpeningLinkedStatus', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'OpeningExtrusionParametersUpdate', ['shapeType'], 'OpeningShapeType', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'OpeningFloorPlanParameters', ['floorPlanDisplayMode'], 'OpeningFloorPlanDisplayMode', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'OpeningFloorPlanParameters', ['dividedOpeningMode'], 'OpeningDividedMode', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'OpeningFloorPlanParameters', ['openEdgeStyle'], 'OpeningEdgeStyle', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'OpeningFloorPlanParametersUpdate', ['floorPlanDisplayMode'], 'OpeningFloorPlanDisplayMode', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'OpeningFloorPlanParametersUpdate', ['dividedOpeningMode'], 'OpeningDividedMode', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'OpeningFloorPlanParametersUpdate', ['openEdgeStyle'], 'OpeningEdgeStyle', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, "OverriddenValue", ["color"], "ColorRGB", preserve_description=True)
+    replace_inline_schema_with_ref(master_defs, 'OpeningPlacementData', ['extrusionParameters'], 'OpeningExtrusionParametersUpdate', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'OpeningPlacementData', ['floorPlanParameters'], 'OpeningFloorPlanParametersUpdate', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'ReleaseElementStateParameters', ['stateId'], 'ElementStateId', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'SetDocumentFrom3DDefaultsParameters', ['intPlanConn'], 'Document3DPlanConnection', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'SetDocumentFrom3DDefaultsParameters', ['boundaryDisplay'], 'Document3DBoundaryDisplay', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'SetDocumentFrom3DDefaultsParameters', ['attributeOptions'], 'Document3DAttributeOptions', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'ElementUserDataUpdate', ['userData', 'items'], 'UserDataPair', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'GridSettingsUpdate', ['gridColor'], 'GridColorUpdate', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'SetMEPPreferenceTableRowsParameters', ['tableId'], 'MEPPreferenceTableId', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'MEPPreferenceRowUpdate', ['key'], 'MEPPreferenceRowKey', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'MEPPreferenceRowUpdate', ['values'], 'MEPPreferenceRowValues', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'MEPRoutingNodeParametersUpdate', ['elbow'], 'MEPElbowParameters', preserve_description=True)  # fmt: skip
+
+    # Name conditional alternatives while retaining each release-required field.
+    name_required_variants(master_defs, "FindModelViewOptionParameters", [], ["ModelViewOptionById", "ModelViewOptionByName"])  # fmt: skip
+    name_required_variants(master_defs, "SetActiveRenovationFilterParameters", [], ["ActiveRenovationFilterById", "ActiveRenovationFilterByName"])  # fmt: skip
+    name_required_variants(master_defs, "LibraryPartScriptData", [], ["LibraryPartScriptDataWithScripts", "LibraryPartScriptDataWithDeletions"])  # fmt: skip
+    name_required_variants(master_defs, "TextMeasurementData", [], ["TextMeasurementByFontIndex", "TextMeasurementByFontName"])  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'MEPRoutingNodeParametersUpdate', ['transition'], 'MEPTransitionDefaults', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'ElementMEPRoutingParameters', ['elbowParameters'], 'MEPElbowParameters', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'ElementMEPRoutingParameters', ['transitionParameters'], 'MEPTransitionDefaults', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'SetOpeningDefaultParameters', ['extrusionParameters'], 'OpeningExtrusionParametersUpdate', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'SetOpeningDefaultParameters', ['floorPlanParameters'], 'OpeningFloorPlanParametersUpdate', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'OpeningSymbolParametersUpdate', ['unCutSymbolParameters', 'items'], 'OpeningSymbolParameterUpdate', preserve_description=True)  # fmt: skip
+
+    # Scalar/enum names retain their domain instead of exposing generic helper names.
+    extract_inline_enum(master_defs, "OpeningSymbolParameter", ["type"], "OpeningSymbolParameterType")
+    extract_inline_schema(master_defs, "UserDataPair", ["key"], "UserDataKey")
+    replace_inline_schema_with_ref(master_defs, "UserDataKeysToDelete", ["items"], "UserDataKey")
+    replace_inline_schema_with_ref(master_defs, "ElementUserDataUpdate", ["keysToDelete", "items"], "UserDataKey")
+    replace_inline_schema_with_ref(master_defs, "GetElementUserDataParameters", ["keys", "items"], "UserDataKey")
+    extract_inline_schema(master_defs, "ModifyMEPPreferenceTablesParameters", ["referenceIdsToDelete", "items"], "MEPReferenceId")  # fmt: skip

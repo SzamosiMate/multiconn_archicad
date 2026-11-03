@@ -6,13 +6,112 @@ from typing import TYPE_CHECKING
 from pydantic import TypeAdapter
 
 from multiconn_archicad.models.tapir.commands import (
+    AddLoadCasesToLoadCombinationParameters,
+    AddLoadCasesToLoadCombinationResult,
+    ConvertAnalyticalLinksToNonShortestParameters,
+    ConvertAnalyticalLinksToNonShortestResult,
+    CreateAnalyticalLinksParameters,
+    CreateAnalyticalLinksResult,
+    CreateAnalyticalLoadCasesParameters,
+    CreateAnalyticalLoadCasesResult,
+    CreateAnalyticalLoadCombinationsParameters,
+    CreateAnalyticalLoadCombinationsResult,
+    CreateAnalyticalLoadGroupsParameters,
+    CreateAnalyticalLoadGroupsResult,
+    CreateAnalyticalLoadsParameters,
+    CreateAnalyticalLoadsResult,
+    CreateAnalyticalSupportsParameters,
+    CreateAnalyticalSupportsResult,
+    DeleteAnalyticalLoadCasesParameters,
+    DeleteAnalyticalLoadCasesResult,
+    DeleteAnalyticalLoadCombinationsParameters,
+    DeleteAnalyticalLoadCombinationsResult,
+    DeleteAnalyticalLoadGroupsParameters,
+    DeleteAnalyticalLoadGroupsResult,
+    GetAnalyticalLinksParameters,
+    GetAnalyticalLinksResult,
+    GetAnalyticalLoadCasesParameters,
+    GetAnalyticalLoadCasesResult,
+    GetAnalyticalLoadCombinationsResult,
+    GetAnalyticalLoadGroupsResult,
+    GetAnalyticalLoadsParameters,
+    GetAnalyticalLoadsResult,
+    GetAnalyticalMemberDetailsParameters,
+    GetAnalyticalMemberDetailsResult,
+    GetAnalyticalMemberPartGeometriesParameters,
+    GetAnalyticalMemberPartGeometriesResult,
+    GetAnalyticalMemberTypesOfElementsParameters,
+    GetAnalyticalMemberTypesOfElementsResult,
+    GetAnalyticalMembersParameters,
+    GetAnalyticalMembersResult,
     GetAnalyticalModelCheckTypeIdResult,
+    GetAnalyticalModelParameters,
+    GetAnalyticalModelResult,
+    GetAnalyticalModelVariationParameters,
+    GetAnalyticalModelVariationResult,
+    GetAnalyticalReleasesParameters,
+    GetAnalyticalReleasesResult,
+    GetAnalyticalSupportsParameters,
+    GetAnalyticalSupportsResult,
+    GetAnalyticalVisibilitySettingsResult,
     GetCurrentAnalyticalModelResult,
+    GetCustomCurveMemberStretchParameters,
+    GetCustomCurveMemberStretchResult,
+    GetLCSOfAnalyticalMembersParameters,
+    GetLCSOfAnalyticalMembersResult,
     SetAnalyticalGenerationSettingsToNoRuleResult,
+    SetAnalyticalReleasesParameters,
+    SetAnalyticalReleasesResult,
+    SetAnalyticalVisibilitySettingsParameters,
+    SetAnalyticalVisibilitySettingsResult,
+    SetCustomCurveMemberStretchParameters,
+    SetCustomCurveMemberStretchResult,
     UpdateAnalyticalModelParameters,
     UpdateAnalyticalModelResult,
 )
-from multiconn_archicad.models.tapir.types import FailedExecutionResult, GuidId, SuccessfulExecutionResult
+from multiconn_archicad.models.tapir.types import (
+    AnalyticalCurveMemberDetails,
+    AnalyticalCurveMemberStretch,
+    AnalyticalCurveMemberStretchUpdate,
+    AnalyticalEdgeLoadData,
+    AnalyticalEdgeLoadDetails,
+    AnalyticalLink,
+    AnalyticalLinkDetails,
+    AnalyticalLoadCase,
+    AnalyticalLoadCaseData,
+    AnalyticalLoadCaseIdArrayItem,
+    AnalyticalLoadCombination,
+    AnalyticalLoadCombinationData,
+    AnalyticalLoadCombinationIdArrayItem,
+    AnalyticalLoadFactor,
+    AnalyticalLoadGroup,
+    AnalyticalLoadGroupData,
+    AnalyticalLoadGroupIdArrayItem,
+    AnalyticalMemberCoordinateSystem,
+    AnalyticalMemberCoordinateSystemRequest,
+    AnalyticalMemberPartCurve,
+    AnalyticalMemberPartNode,
+    AnalyticalMemberPartRef,
+    AnalyticalMemberTypeResult,
+    AnalyticalModelVariation,
+    AnalyticalPointLoadData,
+    AnalyticalPointLoadDetails,
+    AnalyticalReleaseResult,
+    AnalyticalSegmentedSurfaceMemberDetails,
+    AnalyticalSupport,
+    AnalyticalSupportDetails,
+    AnalyticalSurfaceLoadData,
+    AnalyticalSurfaceLoadDetails,
+    AnalyticalSurfaceMemberDetails,
+    AnalyticalVisibilitySettings,
+    ConvertedAnalyticalLink,
+    ElementAnalyticalRelease,
+    ElementIdArrayItem,
+    ErrorItem,
+    FailedExecutionResult,
+    GuidId,
+    SuccessfulExecutionResult,
+)
 
 if TYPE_CHECKING:
     from multiconn_archicad.clients.core.core_commands import CoreCommands
@@ -21,6 +120,646 @@ if TYPE_CHECKING:
 class AnalyticalCommands:
     def __init__(self, core: CoreCommands):
         self._core = core
+
+    def add_load_cases_to_load_combination(
+        self, load_combination_id: GuidId, load_factors: list[AnalyticalLoadFactor]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Adds load cases with their factors to the given structural analysis load combination in
+        one undo step.
+
+        Args:
+            load_combination_id (GuidId): The identifier of the load combination to add the load
+                cases to.
+            load_factors (list[AnalyticalLoadFactor]): The load cases to add, with their
+                factors.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "loadCombinationId": load_combination_id,
+            "loadFactors": load_factors,
+        }
+        validated_params = AddLoadCasesToLoadCombinationParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "AddLoadCasesToLoadCombination", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = AddLoadCasesToLoadCombinationResult.model_validate(response_dict)
+        return validated_response.executionResults
+
+    def convert_analytical_links_to_non_shortest(
+        self, elements: list[ElementIdArrayItem], analytical_model_id: GuidId | None = None
+    ) -> list[ConvertedAnalyticalLink | ErrorItem]:
+        """
+        Converts the given shortest analytical links (associative to a curve member or a surface
+        member edge) to links connected to a fixed coordinate, in one undo step, and returns the
+        converted links. Available from Archicad 26.
+
+        Args:
+            elements (list[ElementIdArrayItem]): A list of elements.
+            analytical_model_id (GuidId | None): The identifier of the Structural Analytical
+                Model. The model of the current view is used when it is omitted; in Archicad 26
+                it is required.
+
+        Returns:
+            list[ConvertedAnalyticalLink | ErrorItem]: The link the API returns for each element
+                after the conversion, in the order of the input. An element that cannot be
+                converted is represented by an error object.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "analyticalModelId": analytical_model_id,
+            "elements": elements,
+        }
+        validated_params = ConvertAnalyticalLinksToNonShortestParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "ConvertAnalyticalLinksToNonShortest",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+        )
+        validated_response = ConvertAnalyticalLinksToNonShortestResult.model_validate(response_dict)
+        return validated_response.links
+
+    def create_analytical_links(self, links: list[AnalyticalLink]) -> list[ElementIdArrayItem | ErrorItem]:
+        """
+        Creates analytical links from their settings and connected member parts, as
+        GetAnalyticalLinks returns them, in one undo step. Available from Archicad 26.
+
+        Args:
+            links (list[AnalyticalLink]): The links to create, as GetAnalyticalLinks returns
+                them. Each is created from the defaults of the Analytical Link tool.
+
+        Returns:
+            list[ElementIdArrayItem | ErrorItem]: A list of element identifiers or errors.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "links": links,
+        }
+        validated_params = CreateAnalyticalLinksParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "CreateAnalyticalLinks", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = CreateAnalyticalLinksResult.model_validate(response_dict)
+        return validated_response.elements
+
+    def create_analytical_load_cases(
+        self, load_cases: list[AnalyticalLoadCaseData]
+    ) -> list[AnalyticalLoadCaseIdArrayItem | ErrorItem]:
+        """
+        Creates structural analysis load cases in the given load groups in one undo step and
+        returns their identifiers.
+
+        Args:
+            load_cases (list[AnalyticalLoadCaseData]): The load cases to create.
+
+        Returns:
+            list[AnalyticalLoadCaseIdArrayItem | ErrorItem]: The identifiers of the new load
+                cases, in the order of the input. A load case that could not be created is
+                represented by an error object.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "loadCases": load_cases,
+        }
+        validated_params = CreateAnalyticalLoadCasesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "CreateAnalyticalLoadCases", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = CreateAnalyticalLoadCasesResult.model_validate(response_dict)
+        return validated_response.loadCaseIds
+
+    def create_analytical_load_combinations(
+        self, load_combinations: list[AnalyticalLoadCombinationData]
+    ) -> list[AnalyticalLoadCombinationIdArrayItem | ErrorItem]:
+        """
+        Creates structural analysis load combinations, optionally with their load factors, in
+        one undo step and returns their identifiers. The combination type is available from
+        Archicad 27.
+
+        Args:
+            load_combinations (list[AnalyticalLoadCombinationData]): The load combinations to
+                create.
+
+        Returns:
+            list[AnalyticalLoadCombinationIdArrayItem | ErrorItem]: The identifiers of the new
+                load combinations, in the order of the input. A load combination that could not
+                be created is represented by an error object.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "loadCombinations": load_combinations,
+        }
+        validated_params = CreateAnalyticalLoadCombinationsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "CreateAnalyticalLoadCombinations",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+        )
+        validated_response = CreateAnalyticalLoadCombinationsResult.model_validate(response_dict)
+        return validated_response.loadCombinationIds
+
+    def create_analytical_load_groups(
+        self, load_groups: list[AnalyticalLoadGroupData]
+    ) -> list[AnalyticalLoadGroupIdArrayItem | ErrorItem]:
+        """
+        Creates structural analysis load groups in one undo step and returns their identifiers.
+
+        Args:
+            load_groups (list[AnalyticalLoadGroupData]): The load groups to create.
+
+        Returns:
+            list[AnalyticalLoadGroupIdArrayItem | ErrorItem]: The identifiers of the new load
+                groups, in the order of the input. A load group that could not be created is
+                represented by an error object.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "loadGroups": load_groups,
+        }
+        validated_params = CreateAnalyticalLoadGroupsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "CreateAnalyticalLoadGroups", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = CreateAnalyticalLoadGroupsResult.model_validate(response_dict)
+        return validated_response.loadGroupIds
+
+    def create_analytical_loads(
+        self, loads: list[AnalyticalEdgeLoadData | AnalyticalPointLoadData | AnalyticalSurfaceLoadData]
+    ) -> list[ElementIdArrayItem | ErrorItem]:
+        """
+        Creates analytical point, edge and surface loads from their settings, loaded member part
+        and custom data, as GetAnalyticalLoads returns them, in one undo step. Available from
+        Archicad 26.
+
+        Args:
+            loads (list[AnalyticalEdgeLoadData | AnalyticalPointLoadData |
+                AnalyticalSurfaceLoadData]): The loads to create, as GetAnalyticalLoads returns
+                them without their geometry. Each is created from the defaults of its tool. An
+                edge load needs the curve and a surface load the contour it is applied on, in
+                customData.
+
+        Returns:
+            list[ElementIdArrayItem | ErrorItem]: A list of element identifiers or errors.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "loads": loads,
+        }
+        validated_params = CreateAnalyticalLoadsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "CreateAnalyticalLoads", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = CreateAnalyticalLoadsResult.model_validate(response_dict)
+        return validated_response.elements
+
+    def create_analytical_supports(self, supports: list[AnalyticalSupport]) -> list[ElementIdArrayItem | ErrorItem]:
+        """
+        Creates analytical supports from their settings and supported member part, as
+        GetAnalyticalSupports returns them, in one undo step. Available from Archicad 26.
+
+        Args:
+            supports (list[AnalyticalSupport]): The supports to create, as GetAnalyticalSupports
+                returns them. Each is created from the defaults of the Analytical Support tool.
+
+        Returns:
+            list[ElementIdArrayItem | ErrorItem]: A list of element identifiers or errors.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "supports": supports,
+        }
+        validated_params = CreateAnalyticalSupportsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "CreateAnalyticalSupports", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = CreateAnalyticalSupportsResult.model_validate(response_dict)
+        return validated_response.elements
+
+    def delete_analytical_load_cases(
+        self, load_case_ids: list[AnalyticalLoadCaseIdArrayItem]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Deletes the given structural analysis load cases in one undo step.
+
+        Args:
+            load_case_ids (list[AnalyticalLoadCaseIdArrayItem]): The load cases to delete.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "loadCaseIds": load_case_ids,
+        }
+        validated_params = DeleteAnalyticalLoadCasesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "DeleteAnalyticalLoadCases", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = DeleteAnalyticalLoadCasesResult.model_validate(response_dict)
+        return validated_response.executionResults
+
+    def delete_analytical_load_combinations(
+        self, load_combination_ids: list[AnalyticalLoadCombinationIdArrayItem]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Deletes the given structural analysis load combinations in one undo step.
+
+        Args:
+            load_combination_ids (list[AnalyticalLoadCombinationIdArrayItem]): The load
+                combinations to delete.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "loadCombinationIds": load_combination_ids,
+        }
+        validated_params = DeleteAnalyticalLoadCombinationsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "DeleteAnalyticalLoadCombinations",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+        )
+        validated_response = DeleteAnalyticalLoadCombinationsResult.model_validate(response_dict)
+        return validated_response.executionResults
+
+    def delete_analytical_load_groups(
+        self, load_group_ids: list[AnalyticalLoadGroupIdArrayItem]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Deletes the given structural analysis load groups in one undo step.
+
+        Args:
+            load_group_ids (list[AnalyticalLoadGroupIdArrayItem]): The load groups to delete.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "loadGroupIds": load_group_ids,
+        }
+        validated_params = DeleteAnalyticalLoadGroupsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "DeleteAnalyticalLoadGroups", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = DeleteAnalyticalLoadGroupsResult.model_validate(response_dict)
+        return validated_response.executionResults
+
+    def get_analytical_links(
+        self, elements: list[ElementIdArrayItem], analytical_model_id: GuidId | None = None
+    ) -> list[AnalyticalLinkDetails | ErrorItem]:
+        """
+        Retrieves the settings, the connected member parts and the geometry of the given
+        analytical links. Available from Archicad 26.
+
+        Args:
+            elements (list[ElementIdArrayItem]): A list of elements.
+            analytical_model_id (GuidId | None): The identifier of the Structural Analytical
+                Model the geometry is read from. The model of the current view is used when it
+                is omitted; in Archicad 26 it is required.
+
+        Returns:
+            list[AnalyticalLinkDetails | ErrorItem]: The link and its geometry for each element,
+                in the order of the input. An element that is not an analytical link, or whose
+                link cannot be got, is represented by an error object.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "analyticalModelId": analytical_model_id,
+            "elements": elements,
+        }
+        validated_params = GetAnalyticalLinksParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetAnalyticalLinks", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetAnalyticalLinksResult.model_validate(response_dict)
+        return validated_response.links
+
+    def get_analytical_load_cases(self, load_group_id: GuidId | None = None) -> list[AnalyticalLoadCase | ErrorItem]:
+        """
+        Retrieves the structural analysis load cases of the given load group, or of the project
+        when no load group is given, with all their fields.
+
+        Args:
+            load_group_id (GuidId | None): The identifier of the load group to list the load
+                cases of. Every load case of the project is listed when it is omitted.
+
+        Returns:
+            list[AnalyticalLoadCase | ErrorItem]: The load cases. A load case that cannot be
+                read is represented by an error object.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "loadGroupId": load_group_id,
+        }
+        validated_params = GetAnalyticalLoadCasesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetAnalyticalLoadCases", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetAnalyticalLoadCasesResult.model_validate(response_dict)
+        return validated_response.loadCases
+
+    def get_analytical_load_combinations(self) -> list[AnalyticalLoadCombination | ErrorItem]:
+        """
+        Retrieves the structural analysis load combinations of the project with all their fields
+        and load factors.
+
+        Returns:
+            list[AnalyticalLoadCombination | ErrorItem]: The load combinations of the project. A
+                load combination that cannot be read is represented by an error object.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        response_dict = self._core.post_tapir_command("GetAnalyticalLoadCombinations")
+        validated_response = GetAnalyticalLoadCombinationsResult.model_validate(response_dict)
+        return validated_response.loadCombinations
+
+    def get_analytical_load_groups(self) -> list[AnalyticalLoadGroup | ErrorItem]:
+        """
+        Retrieves the structural analysis load groups of the project with all their fields.
+
+        Returns:
+            list[AnalyticalLoadGroup | ErrorItem]: The load groups of the project. A load group
+                that cannot be read is represented by an error object.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        response_dict = self._core.post_tapir_command("GetAnalyticalLoadGroups")
+        validated_response = GetAnalyticalLoadGroupsResult.model_validate(response_dict)
+        return validated_response.loadGroups
+
+    def get_analytical_loads(
+        self, elements: list[ElementIdArrayItem], analytical_model_id: GuidId | None = None
+    ) -> list[AnalyticalEdgeLoadDetails | AnalyticalPointLoadDetails | AnalyticalSurfaceLoadDetails | ErrorItem]:
+        """
+        Retrieves the settings, the loaded member part, the custom data (the curve of an edge
+        load, the contour of a surface load) and the geometry of the given analytical point,
+        edge and surface loads. Available from Archicad 26.
+
+        Args:
+            elements (list[ElementIdArrayItem]): A list of elements.
+            analytical_model_id (GuidId | None): The identifier of the Structural Analytical
+                Model the geometry is read from. The model of the current view is used when it
+                is omitted; in Archicad 26 it is required.
+
+        Returns:
+            list[AnalyticalEdgeLoadDetails | AnalyticalPointLoadDetails |
+                AnalyticalSurfaceLoadDetails | ErrorItem]: The load of each element, in the
+                order of the input, with its geometry in the Structural Analytical Model and,
+                for an edge or a surface load, its custom data (the curve or contour stored with
+                the element). An element that is not an analytical point, edge or surface load,
+                or whose load cannot be got, is represented by an error object.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "analyticalModelId": analytical_model_id,
+            "elements": elements,
+        }
+        validated_params = GetAnalyticalLoadsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetAnalyticalLoads", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetAnalyticalLoadsResult.model_validate(response_dict)
+        return validated_response.loads
+
+    def get_analytical_member_details(
+        self,
+        elements: list[ElementIdArrayItem],
+        analytical_model_id: GuidId | None = None,
+        segmentation_central_angle: None | float = None,
+    ) -> list[
+        AnalyticalCurveMemberDetails
+        | AnalyticalSegmentedSurfaceMemberDetails
+        | AnalyticalSurfaceMemberDetails
+        | ErrorItem
+    ]:
+        """
+        Retrieves the curve, surface or segmented surface member of the given elements in a
+        Structural Analytical Model, with their connections. Cross sections, curves, nodes and
+        surfaces are returned with every field the Archicad version has.
+
+        Args:
+            elements (list[ElementIdArrayItem]): A list of elements.
+            analytical_model_id (GuidId | None): The identifier of the Structural Analytical
+                Model. The model of the current view is used when it is omitted; before Archicad
+                27 it is required.
+            segmentation_central_angle (None | float): When given, surface members are read as
+                segmented surface members (for curved walls), each segment spanning at most this
+                central angle, in radians.
+
+        Returns:
+            list[AnalyticalCurveMemberDetails | AnalyticalSegmentedSurfaceMemberDetails |
+                AnalyticalSurfaceMemberDetails | ErrorItem]: The analytical member of each
+                element, in the order of the input. An element that is no member of the model,
+                or whose member cannot be read, is represented by an error object.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "analyticalModelId": analytical_model_id,
+            "elements": elements,
+            "segmentationCentralAngle": segmentation_central_angle,
+        }
+        validated_params = GetAnalyticalMemberDetailsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetAnalyticalMemberDetails", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetAnalyticalMemberDetailsResult.model_validate(response_dict)
+        return validated_response.analyticalMembers
+
+    def get_analytical_member_part_geometries(
+        self, member_part_refs: list[AnalyticalMemberPartRef], analytical_model_id: GuidId | None = None
+    ) -> list[AnalyticalMemberPartCurve | AnalyticalMemberPartNode | ErrorItem]:
+        """
+        Retrieves the node of the given analytical member vertices and the curve of the given
+        member edges. Available from Archicad 26.
+
+        Args:
+            member_part_refs (list[AnalyticalMemberPartRef]): The member parts to get the
+                geometry of: vertices (BegVertex, EndVertex, CustomVertex) give a node, edges
+                (Edge, RatioEdge, CustomEdge) a curve.
+            analytical_model_id (GuidId | None): The identifier of the Structural Analytical
+                Model. The model of the current view is used when it is omitted; in Archicad 26
+                it is required.
+
+        Returns:
+            list[AnalyticalMemberPartCurve | AnalyticalMemberPartNode | ErrorItem]: The node or
+                curve of each member part, in the order of the input. A member part the geometry
+                cannot be got for, a surface among them, is represented by an error object.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "analyticalModelId": analytical_model_id,
+            "memberPartRefs": member_part_refs,
+        }
+        validated_params = GetAnalyticalMemberPartGeometriesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetAnalyticalMemberPartGeometries",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+        )
+        validated_response = GetAnalyticalMemberPartGeometriesResult.model_validate(response_dict)
+        return validated_response.geometries
+
+    def get_analytical_member_types_of_elements(
+        self, elements: list[ElementIdArrayItem]
+    ) -> list[AnalyticalMemberTypeResult | ErrorItem]:
+        """
+        Retrieves the analytical member type (Beam, Column, Roof, Slab, Wall or Unknown) of the
+        given elements.
+
+        Args:
+            elements (list[ElementIdArrayItem]): A list of elements.
+
+        Returns:
+            list[AnalyticalMemberTypeResult | ErrorItem]: The analytical member type of each
+                element, in the order of the input. An element the type cannot be got for is
+                represented by an error object.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elements": elements,
+        }
+        validated_params = GetAnalyticalMemberTypesOfElementsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetAnalyticalMemberTypesOfElements",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+        )
+        validated_response = GetAnalyticalMemberTypesOfElementsResult.model_validate(response_dict)
+        return validated_response.memberTypesOfElements
+
+    def get_analytical_members(self, analytical_model_id: GuidId | None = None) -> GetAnalyticalMembersResult:
+        """
+        Lists the elements of the curve and surface members of the given Structural Analytical
+        Model, or of the model of the current view when no model is given (the model is required
+        before Archicad 27).
+
+        Args:
+            analytical_model_id (GuidId | None): The identifier of the Structural Analytical
+                Model. The model of the current view is used when it is omitted; before Archicad
+                27 it is required.
+
+        Returns:
+            GetAnalyticalMembersResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "analyticalModelId": analytical_model_id,
+        }
+        validated_params = GetAnalyticalMembersParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetAnalyticalMembers", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetAnalyticalMembersResult.model_validate(response_dict)
+        return validated_response
+
+    def get_analytical_model(self, variation: AnalyticalModelVariation) -> GuidId:
+        """
+        Retrieves the Structural Analytical Model of the given variation, as returned by
+        GetAnalyticalModelVariation.
+
+        Args:
+            variation (AnalyticalModelVariation)
+
+        Returns:
+            GuidId: The identifier of the Structural Analytical Model of the variation.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "variation": variation,
+        }
+        validated_params = GetAnalyticalModelParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetAnalyticalModel", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetAnalyticalModelResult.model_validate(response_dict)
+        return validated_response.analyticalModelId
 
     def get_analytical_model_check_type_id(self) -> GuidId:
         """
@@ -39,6 +778,120 @@ class AnalyticalCommands:
         validated_response = GetAnalyticalModelCheckTypeIdResult.model_validate(response_dict)
         return validated_response.modelCheckTypeId
 
+    def get_analytical_model_variation(self, analytical_model_id: GuidId | None = None) -> AnalyticalModelVariation:
+        """
+        Retrieves the variation of the given Structural Analytical Model, or of the model of the
+        current view when no model is given (the model is required before Archicad 27). The
+        fields of the variation depend on the Archicad version.
+
+        Args:
+            analytical_model_id (GuidId | None): The identifier of the Structural Analytical
+                Model. The model of the current view is used when it is omitted; before Archicad
+                27 it is required.
+
+        Returns:
+            AnalyticalModelVariation
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "analyticalModelId": analytical_model_id,
+        }
+        validated_params = GetAnalyticalModelVariationParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetAnalyticalModelVariation", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetAnalyticalModelVariationResult.model_validate(response_dict)
+        return validated_response.variation
+
+    def get_analytical_releases(
+        self, elements: list[ElementIdArrayItem], analytical_model_id: GuidId | None = None
+    ) -> list[AnalyticalReleaseResult | ErrorItem]:
+        """
+        Retrieves the releases of the given analytical members. Available from Archicad 26.
+
+        Args:
+            elements (list[ElementIdArrayItem]): A list of elements.
+            analytical_model_id (GuidId | None): The identifier of the Structural Analytical
+                Model. The model of the current view is used when it is omitted; in Archicad 26
+                it is required.
+
+        Returns:
+            list[AnalyticalReleaseResult | ErrorItem]: The release of each element, in the order
+                of the input. An element the release cannot be got for is represented by an
+                error object.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "analyticalModelId": analytical_model_id,
+            "elements": elements,
+        }
+        validated_params = GetAnalyticalReleasesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetAnalyticalReleases", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetAnalyticalReleasesResult.model_validate(response_dict)
+        return validated_response.releases
+
+    def get_analytical_supports(
+        self, elements: list[ElementIdArrayItem], analytical_model_id: GuidId | None = None
+    ) -> list[AnalyticalSupportDetails | ErrorItem]:
+        """
+        Retrieves the settings, the supported member part and the geometry of the given
+        analytical supports. Available from Archicad 26.
+
+        Args:
+            elements (list[ElementIdArrayItem]): A list of elements.
+            analytical_model_id (GuidId | None): The identifier of the Structural Analytical
+                Model the geometry is read from. The model of the current view is used when it
+                is omitted; in Archicad 26 it is required.
+
+        Returns:
+            list[AnalyticalSupportDetails | ErrorItem]: The support and its geometry for each
+                element, in the order of the input. An element that is not an analytical
+                support, or whose support cannot be got, is represented by an error object.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "analyticalModelId": analytical_model_id,
+            "elements": elements,
+        }
+        validated_params = GetAnalyticalSupportsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetAnalyticalSupports", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetAnalyticalSupportsResult.model_validate(response_dict)
+        return validated_response.supports
+
+    def get_analytical_visibility_settings(self) -> AnalyticalVisibilitySettings:
+        """
+        Retrieves the visibility settings of the Structural Analytical Model. Available from
+        Archicad 26.
+
+        Returns:
+            AnalyticalVisibilitySettings: The Structural Analytical Model visibility settings,
+                with every field.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        response_dict = self._core.post_tapir_command("GetAnalyticalVisibilitySettings")
+        validated_response = GetAnalyticalVisibilitySettingsResult.model_validate(response_dict)
+        return validated_response.visibilitySettings
+
     def get_current_analytical_model(self) -> GuidId:
         """
         Retrieves the Structural Analytical Model created for the current view. Available from
@@ -56,6 +909,67 @@ class AnalyticalCommands:
         validated_response = GetCurrentAnalyticalModelResult.model_validate(response_dict)
         return validated_response.analyticalModelId
 
+    def get_custom_curve_member_stretch(
+        self, elements: list[ElementIdArrayItem]
+    ) -> list[AnalyticalCurveMemberStretch | ErrorItem]:
+        """
+        Retrieves the lengths added to the start and end of the given curve members. Available
+        from Archicad 29.
+
+        Args:
+            elements (list[ElementIdArrayItem]): A list of elements.
+
+        Returns:
+            list[AnalyticalCurveMemberStretch | ErrorItem]: The custom stretch of the curve
+                member of each element, in the order of the input. An element the stretch cannot
+                be got for is represented by an error object.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elements": elements,
+        }
+        validated_params = GetCustomCurveMemberStretchParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetCustomCurveMemberStretch", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetCustomCurveMemberStretchResult.model_validate(response_dict)
+        return validated_response.stretches
+
+    def get_lcs_of_analytical_members(
+        self, member_parts: list[AnalyticalMemberCoordinateSystemRequest]
+    ) -> list[AnalyticalMemberCoordinateSystem | ErrorItem]:
+        """
+        Retrieves the local coordinate system of the given analytical member parts, optionally
+        in their intersection with another member part. Available from Archicad 26.
+
+        Args:
+            member_parts (list[AnalyticalMemberCoordinateSystemRequest]): The member parts to
+                get the local coordinate system of.
+
+        Returns:
+            list[AnalyticalMemberCoordinateSystem | ErrorItem]: The local coordinate system of
+                each member part, in the order of the input. A member part the coordinate system
+                cannot be got for is represented by an error object.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "memberParts": member_parts,
+        }
+        validated_params = GetLCSOfAnalyticalMembersParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetLCSOfAnalyticalMembers", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetLCSOfAnalyticalMembersResult.model_validate(response_dict)
+        return validated_response.localCoordinateSystems
+
     def set_analytical_generation_settings_to_no_rule(self) -> FailedExecutionResult | SuccessfulExecutionResult:
         """
         Sets the generation settings of the current Structural Analytical Model to no rules.
@@ -72,6 +986,97 @@ class AnalyticalCommands:
         response_dict = self._core.post_tapir_command("SetAnalyticalGenerationSettingsToNoRule")
         validated_response = TypeAdapter(SetAnalyticalGenerationSettingsToNoRuleResult).validate_python(response_dict)
         return validated_response
+
+    def set_analytical_releases(
+        self, releases: list[ElementAnalyticalRelease]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Replaces the releases of the given analytical members, in one undo step. Available from
+        Archicad 26.
+
+        Args:
+            releases (list[ElementAnalyticalRelease]): The element and its new release, as
+                GetAnalyticalReleases returns it. The release replaces the element's release as
+                a whole.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "releases": releases,
+        }
+        validated_params = SetAnalyticalReleasesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "SetAnalyticalReleases", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = SetAnalyticalReleasesResult.model_validate(response_dict)
+        return validated_response.executionResults
+
+    def set_analytical_visibility_settings(
+        self, visibility_settings: AnalyticalVisibilitySettings
+    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+        """
+        Changes the given fields of the Structural Analytical Model visibility settings; the
+        others keep their value. Available from Archicad 26.
+
+        Args:
+            visibility_settings (AnalyticalVisibilitySettings): The fields to change. The fields
+                left out keep their current value.
+
+        Returns:
+            FailedExecutionResult | SuccessfulExecutionResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "visibilitySettings": visibility_settings,
+        }
+        validated_params = SetAnalyticalVisibilitySettingsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "SetAnalyticalVisibilitySettings",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+        )
+        validated_response = TypeAdapter(SetAnalyticalVisibilitySettingsResult).validate_python(response_dict)
+        return validated_response
+
+    def set_custom_curve_member_stretch(
+        self, stretches: list[AnalyticalCurveMemberStretchUpdate]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Sets the lengths added to the start and end of the given curve members, in one undo
+        step. Available from Archicad 29.
+
+        Args:
+            stretches (list[AnalyticalCurveMemberStretchUpdate]): The element of the curve
+                member and the lengths to add to it.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "stretches": stretches,
+        }
+        validated_params = SetCustomCurveMemberStretchParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "SetCustomCurveMemberStretch", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = SetCustomCurveMemberStretchResult.model_validate(response_dict)
+        return validated_response.executionResults
 
     def update_analytical_model(
         self, analytical_model_id: GuidId | None = None

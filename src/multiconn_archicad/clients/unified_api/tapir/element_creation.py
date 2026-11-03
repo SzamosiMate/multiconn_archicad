@@ -46,6 +46,8 @@ from multiconn_archicad.models.tapir.commands import (
     CreateOpeningsResult,
     CreatePolylinesParameters,
     CreatePolylinesResult,
+    CreateRailingsParameters,
+    CreateRailingsResult,
     CreateRoofsParameters,
     CreateRoofsResult,
     CreateSlabsParameters,
@@ -88,6 +90,7 @@ from multiconn_archicad.models.tapir.types import (
     ObjectData,
     OpeningData,
     PolylineData,
+    RailingData,
     RoofData,
     SlabData,
     SplineData,
@@ -346,7 +349,8 @@ class ElementCreationCommands:
 
     def create_hatches(self, hatches_data: list[HatchData]) -> list[ElementIdArrayItem | ErrorItem]:
         """
-        Creates Hatch elements based on the given parameters.
+        Creates Hatch elements based on the given parameters. A hatch can have holes, in the
+        same format SetDetailsOfElements accepts for hatches.
 
         Args:
             hatches_data (list[HatchData]): Array of data to create Hatches.
@@ -623,6 +627,33 @@ class ElementCreationCommands:
             "CreatePolylines", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = CreatePolylinesResult.model_validate(response_dict)
+        return validated_response.elements
+
+    def create_railings(self, railings_data: list[RailingData]) -> list[ElementIdArrayItem | ErrorItem]:
+        """
+        Creates Railing elements along a reference polyline. Posts, rails, handrails, toprails,
+        panels and balusters come from the favorite or from the Railing tool defaults; Archicad
+        generates one node per vertex and one segment per pair of consecutive vertices.
+
+        Args:
+            railings_data (list[RailingData]): Array of data to create Railings.
+
+        Returns:
+            list[ElementIdArrayItem | ErrorItem]: A list of element identifiers or errors.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "railingsData": railings_data,
+        }
+        validated_params = CreateRailingsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "CreateRailings", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = CreateRailingsResult.model_validate(response_dict)
         return validated_response.elements
 
     def create_roofs(self, roofs_data: list[RoofData]) -> list[ElementIdArrayItem | ErrorItem]:

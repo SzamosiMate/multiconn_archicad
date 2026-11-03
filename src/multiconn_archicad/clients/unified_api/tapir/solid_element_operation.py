@@ -8,27 +8,39 @@ from pydantic import TypeAdapter
 from multiconn_archicad.models.tapir.commands import (
     CreateSolidElementLinksParameters,
     CreateSolidElementLinksResult,
+    CreateSolidOperationsParameters,
+    CreateSolidOperationsResult,
     GetElementTrimsParameters,
     GetElementTrimsResult,
+    GetMergedElementsParameters,
+    GetMergedElementsResult,
     GetSolidElementLinksParameters,
     GetSolidElementLinksResult,
+    MergeElementsParameters,
+    MergeElementsResult,
     RemoveElementTrimsParameters,
     RemoveElementTrimsResult,
     RemoveSolidElementLinksParameters,
     RemoveSolidElementLinksResult,
     TrimElementsParameters,
     TrimElementsResult,
+    UnmergeElementsParameters,
+    UnmergeElementsResult,
 )
 from multiconn_archicad.models.tapir.types import (
     ElementId,
     ElementIdArrayItem,
     ElementPair,
     ElementTrims,
+    ElementUnmergePair,
     ErrorItem,
     FailedExecutionResult,
+    MergedElements,
     SolidLinkData,
     SolidLinkReference,
     SolidLinksOfElement,
+    SolidOperationData,
+    SolidOperationResult,
     SuccessfulExecutionResult,
     TrimType,
 )
@@ -69,6 +81,36 @@ class SolidElementOperationCommands:
         validated_response = CreateSolidElementLinksResult.model_validate(response_dict)
         return validated_response.executionResults
 
+    def create_solid_operations(self, operations: list[SolidOperationData]) -> list[ErrorItem | SolidOperationResult]:
+        """
+        Runs a solid operation (subtraction, intersection, addition) on two morphs and returns
+        the resulting morphs, one item per operation. Unlike CreateSolidElementLinks this is not
+        a link: the target and the operator morph are replaced by the result. Morphs only; the
+        operations run in one undo step.
+
+        Args:
+            operations (list[SolidOperationData]): The solid operations to run, each on two
+                morphs. The target and the operator morph are replaced by the resulting morph.
+
+        Returns:
+            list[ErrorItem | SolidOperationResult]: One item per operation, in the order of the
+                input: the resulting morphs, or an error.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "operations": operations,
+        }
+        validated_params = CreateSolidOperationsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "CreateSolidOperations", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = CreateSolidOperationsResult.model_validate(response_dict)
+        return validated_response.results
+
     def get_element_trims(self, elements: list[ElementIdArrayItem]) -> list[ElementTrims | ErrorItem]:
         """
         Which roofs and shells trim each queried element, with the trim type, and which elements
@@ -97,6 +139,34 @@ class SolidElementOperationCommands:
         validated_response = GetElementTrimsResult.model_validate(response_dict)
         return validated_response.elementTrims
 
+    def get_merged_elements(self, elements: list[ElementIdArrayItem]) -> list[ErrorItem | MergedElements]:
+        """
+        Gets the elements each queried element is merged with, one item per queried element; an
+        unknown element is an error item.
+
+        Args:
+            elements (list[ElementIdArrayItem]): A list of elements.
+
+        Returns:
+            list[ErrorItem | MergedElements]: One item per queried element, in order: the
+                elements it is merged with. An unknown or deleted element is an error item, so
+                it cannot be mistaken for an element that is simply not merged.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elements": elements,
+        }
+        validated_params = GetMergedElementsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetMergedElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetMergedElementsResult.model_validate(response_dict)
+        return validated_response.elementMerges
+
     def get_solid_element_links(self, elements: list[ElementIdArrayItem]) -> list[SolidLinksOfElement]:
         """
         Returns solid element operation links for each queried element, grouped by role (target
@@ -124,6 +194,34 @@ class SolidElementOperationCommands:
         )
         validated_response = GetSolidElementLinksResult.model_validate(response_dict)
         return validated_response.solidLinks
+
+    def merge_elements(self, elements: list[ElementIdArrayItem]) -> FailedExecutionResult | SuccessfulExecutionResult:
+        """
+        Merges the given construction elements (the Merge command of Archicad, which cleans up
+        the junctions of slabs, beams, walls and similar elements). Undoable. The element types
+        are not filtered: Archicad reports the ones it cannot merge.
+
+        Args:
+            elements (list[ElementIdArrayItem]): The construction elements to merge together. At
+                least two.
+
+        Returns:
+            FailedExecutionResult | SuccessfulExecutionResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elements": elements,
+        }
+        validated_params = MergeElementsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "MergeElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = TypeAdapter(MergeElementsResult).validate_python(response_dict)
+        return validated_response
 
     def remove_element_trims(
         self, element_pairs: list[ElementPair]
@@ -219,3 +317,33 @@ class SolidElementOperationCommands:
         )
         validated_response = TypeAdapter(TrimElementsResult).validate_python(response_dict)
         return validated_response
+
+    def unmerge_elements(
+        self, element_pairs: list[ElementUnmergePair]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Removes the merge between the two elements of each given pair. Undoable; one execution
+        result per pair.
+
+        Args:
+            element_pairs (list[ElementUnmergePair]): The pairs of merged elements to separate.
+                The order within a pair does not matter.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elementPairs": element_pairs,
+        }
+        validated_params = UnmergeElementsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "UnmergeElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = UnmergeElementsResult.model_validate(response_dict)
+        return validated_response.executionResults
