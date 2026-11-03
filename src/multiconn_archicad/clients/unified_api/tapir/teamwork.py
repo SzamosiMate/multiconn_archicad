@@ -10,6 +10,9 @@ from multiconn_archicad.models.tapir.commands import (
     GetLockableObjectSetStatusResult,
     GetReservationStatusOfElementsParameters,
     GetReservationStatusOfElementsResult,
+    GetTeamworkOwnersOfDatabasesParameters,
+    GetTeamworkOwnersOfDatabasesResult,
+    GetTeamworkProjectInfoResult,
     GetTeamworkStatusResult,
     GrantElementsParameters,
     GrantElementsResult,
@@ -18,6 +21,8 @@ from multiconn_archicad.models.tapir.commands import (
     ReleaseHotlinkCacheManagementResult,
     ReleaseLockableObjectSetParameters,
     ReleaseLockableObjectSetResult,
+    RemoveLibrariesFromBIMcloudParameters,
+    RemoveLibrariesFromBIMcloudResult,
     ReserveElementsParameters,
     ReserveElementsResult,
     ReserveHotlinkCacheManagementResult,
@@ -25,13 +30,17 @@ from multiconn_archicad.models.tapir.commands import (
     ReserveLockableObjectSetResult,
     TeamworkReceiveResult,
     TeamworkSendResult,
+    UploadLibrariesToBIMcloudParameters,
+    UploadLibrariesToBIMcloudResult,
 )
 from multiconn_archicad.models.tapir.types import (
+    DatabaseIdArrayItem,
     ElementIdArrayItem,
     ElementReservationStatus,
     ErrorItem,
     FailedExecutionResult,
     SuccessfulExecutionResult,
+    User,
 )
 
 if TYPE_CHECKING:
@@ -104,6 +113,50 @@ class TeamworkCommands:
         )
         validated_response = GetReservationStatusOfElementsResult.model_validate(response_dict)
         return validated_response.reservationStatuses
+
+    def get_teamwork_owners_of_databases(self, databases: list[DatabaseIdArrayItem]) -> list[ErrorItem | User]:
+        """
+        Returns the Teamwork owner (user id and name) of each given database, e.g. of a layout
+        or a view database. The user id is 0 when nobody owns the database.
+
+        Args:
+            databases (list[DatabaseIdArrayItem]): A list of Archicad databases.
+
+        Returns:
+            list[ErrorItem | User]: The Teamwork owner of each given database, in the order of
+                the input. userId is 0 when nobody owns the database.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "databases": databases,
+        }
+        validated_params = GetTeamworkOwnersOfDatabasesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetTeamworkOwnersOfDatabases", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetTeamworkOwnersOfDatabasesResult.model_validate(response_dict)
+        return validated_response.owners
+
+    def get_teamwork_project_info(self) -> GetTeamworkProjectInfoResult:
+        """
+        Tells whether the opened project is a Teamwork project and whether it is online, and
+        returns its BIMcloud server, project name and the current user (id and name).
+
+        Returns:
+            GetTeamworkProjectInfoResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        response_dict = self._core.post_tapir_command("GetTeamworkProjectInfo")
+        validated_response = GetTeamworkProjectInfoResult.model_validate(response_dict)
+        return validated_response
 
     def get_teamwork_status(self) -> GetTeamworkStatusResult:
         """
@@ -229,6 +282,41 @@ class TeamworkCommands:
         validated_response = TypeAdapter(ReleaseLockableObjectSetResult).validate_python(response_dict)
         return validated_response
 
+    def remove_libraries_from_bi_mcloud(
+        self, library_names: list[str], server_url: str, parent_path: str
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Removes libraries, given by name, from a folder of a BIMcloud or Teamwork server.
+        Returns a result per library. Available from Archicad 29.
+
+        Args:
+            library_names (list[str]): The names of the libraries on the server to remove.
+            server_url (str): The URL of the BIMcloud or Teamwork server, e.g.
+                'https://bimcloud.example.com:22000'.
+            parent_path (str): The path of the folder on the server that holds the libraries, as
+                shown in BIMcloud Manager.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: One result per library, in
+                the order of the input.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "libraryNames": library_names,
+            "serverUrl": server_url,
+            "parentPath": parent_path,
+        }
+        validated_params = RemoveLibrariesFromBIMcloudParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "RemoveLibrariesFromBIMcloud", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = RemoveLibrariesFromBIMcloudResult.model_validate(response_dict)
+        return validated_response.executionResults
+
     def reserve_elements(self, elements: list[ElementIdArrayItem]) -> ReserveElementsResult:
         """
         Reserves elements in Teamwork mode.
@@ -336,3 +424,40 @@ class TeamworkCommands:
         response_dict = self._core.post_tapir_command("TeamworkSend")
         validated_response = TypeAdapter(TeamworkSendResult).validate_python(response_dict)
         return validated_response
+
+    def upload_libraries_to_bi_mcloud(
+        self, library_paths: list[str], server_url: str, parent_path: str
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Uploads local library folders or container files (.lcf) to a folder of a BIMcloud or
+        Teamwork server, as BIMcloud libraries. Returns a result per library. Available from
+        Archicad 29.
+
+        Args:
+            library_paths (list[str]): The paths of the local library folders or container files
+                (.lcf) to upload.
+            server_url (str): The URL of the BIMcloud or Teamwork server, e.g.
+                'https://bimcloud.example.com:22000'.
+            parent_path (str): The path of the folder on the server that holds the libraries, as
+                shown in BIMcloud Manager.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: One result per library, in
+                the order of the input.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "libraryPaths": library_paths,
+            "serverUrl": server_url,
+            "parentPath": parent_path,
+        }
+        validated_params = UploadLibrariesToBIMcloudParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "UploadLibrariesToBIMcloud", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = UploadLibrariesToBIMcloudResult.model_validate(response_dict)
+        return validated_response.executionResults

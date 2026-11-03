@@ -6,6 +6,10 @@ from typing import TYPE_CHECKING
 from pydantic import TypeAdapter
 
 from multiconn_archicad.models.tapir.commands import (
+    ActivateDesignOptionsInCombinationsParameters,
+    ActivateDesignOptionsInCombinationsResult,
+    CanMoveElementsToDesignOptionsParameters,
+    CanMoveElementsToDesignOptionsResult,
     CreateDesignOptionCombinationsParameters,
     CreateDesignOptionCombinationsResult,
     CreateDesignOptionSetsParameters,
@@ -29,6 +33,8 @@ from multiconn_archicad.models.tapir.commands import (
     GetDesignOptionsResult,
     GetElementsOfDesignOptionsParameters,
     GetElementsOfDesignOptionsResult,
+    GetHotlinkDesignOptionTableDetailsParameters,
+    GetHotlinkDesignOptionTableDetailsResult,
     MoveDesignOptionsToAnotherSetParameters,
     MoveDesignOptionsToAnotherSetResult,
     MoveElementsToDesignOptionsParameters,
@@ -39,11 +45,18 @@ from multiconn_archicad.models.tapir.commands import (
     RenameDesignOptionSetsResult,
     RenameDesignOptionsParameters,
     RenameDesignOptionsResult,
+    ReorderDesignOptionSetsParameters,
+    ReorderDesignOptionSetsResult,
+    ReorderDesignOptionsInSetParameters,
+    ReorderDesignOptionsInSetResult,
     SetActiveDesignOptionsInCombinationsParameters,
     SetActiveDesignOptionsInCombinationsResult,
+    SetDefaultDesignOptionParameters,
+    SetDefaultDesignOptionResult,
 )
 from multiconn_archicad.models.tapir.types import (
     ActiveDesignOptionsInCombination,
+    DesignOptionActivation,
     DesignOptionAndSetPair,
     DesignOptionCombinationData,
     DesignOptionCombinationDetails,
@@ -53,15 +66,21 @@ from multiconn_archicad.models.tapir.types import (
     DesignOptionDeactivation,
     DesignOptionDetails,
     DesignOptionForElement,
+    DesignOptionId,
     DesignOptionIdArrayItem,
+    DesignOptionMove,
+    DesignOptionMoveCapability,
     DesignOptionRename,
     DesignOptionSetIdArrayItem,
+    DesignOptionSetMove,
     DesignOptionSetRename,
     ElementDesignOptionPair,
     ElementIdArrayItem,
     ElementsOfDesignOption,
     ErrorItem,
     FailedExecutionResult,
+    HotlinkDesignOptionTableDetails,
+    HotlinkNodeReference,
     SuccessfulExecutionResult,
 )
 
@@ -72,6 +91,66 @@ if TYPE_CHECKING:
 class DesignOptionsCommands:
     def __init__(self, core: CoreCommands):
         self._core = core
+
+    def activate_design_options_in_combinations(
+        self, design_options_to_activate: list[DesignOptionActivation]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Activates one design option in each of the given combinations, without listing all
+        active design options of the combination. Available from Archicad 29.
+
+        Args:
+            design_options_to_activate (list[DesignOptionActivation]): The design options to
+                activate, each in the given combination.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "designOptionsToActivate": design_options_to_activate,
+        }
+        validated_params = ActivateDesignOptionsInCombinationsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "ActivateDesignOptionsInCombinations",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+        )
+        validated_response = ActivateDesignOptionsInCombinationsResult.model_validate(response_dict)
+        return validated_response.executionResults
+
+    def can_move_elements_to_design_options(
+        self, elements: list[ElementIdArrayItem]
+    ) -> list[DesignOptionMoveCapability]:
+        """
+        Checks whether the given elements can be moved to another design option or to the main
+        model, with the reason when they cannot. Available from Archicad 29.
+
+        Args:
+            elements (list[ElementIdArrayItem]): A list of elements.
+
+        Returns:
+            list[DesignOptionMoveCapability]: The result for each given element, in the order of
+                the input.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elements": elements,
+        }
+        validated_params = CanMoveElementsToDesignOptionsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "CanMoveElementsToDesignOptions", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = CanMoveElementsToDesignOptionsResult.model_validate(response_dict)
+        return validated_response.canMoveElements
 
     def create_design_option_combinations(
         self, design_option_combinations: list[DesignOptionCombinationData]
@@ -409,6 +488,39 @@ class DesignOptionsCommands:
         validated_response = GetElementsOfDesignOptionsResult.model_validate(response_dict)
         return validated_response.elementsOfDesignOptions
 
+    def get_hotlink_design_option_table_details(
+        self, hotlink_nodes: list[HotlinkNodeReference]
+    ) -> list[ErrorItem | HotlinkDesignOptionTableDetails]:
+        """
+        Reads the design option table of hotlink nodes: the design option sets, options and
+        combinations of the hotlinked source file, and which of them the node shows. Available
+        from Archicad 29.
+
+        Args:
+            hotlink_nodes (list[HotlinkNodeReference]): The hotlink nodes, from GetHotlinks or
+                CreateHotlinkNodes.
+
+        Returns:
+            list[ErrorItem | HotlinkDesignOptionTableDetails]: One item per requested node, in
+                order: the design options of the hotlinked source file and which of them the
+                node shows, or an error.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "hotlinkNodes": hotlink_nodes,
+        }
+        validated_params = GetHotlinkDesignOptionTableDetailsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetHotlinkDesignOptionTableDetails",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+        )
+        validated_response = GetHotlinkDesignOptionTableDetailsResult.model_validate(response_dict)
+        return validated_response.hotlinkDesignOptionTables
+
     def move_design_options_to_another_set(
         self, design_option_and_set_pairs: list[DesignOptionAndSetPair]
     ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
@@ -555,6 +667,66 @@ class DesignOptionsCommands:
         validated_response = RenameDesignOptionsResult.model_validate(response_dict)
         return validated_response.executionResults
 
+    def reorder_design_option_sets(
+        self, design_option_sets: list[DesignOptionSetMove]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Moves the given design option sets before another set or to the end of the list.
+        Available from Archicad 29.
+
+        Args:
+            design_option_sets (list[DesignOptionSetMove]): The design option sets to move, in
+                the order the moves are done.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "designOptionSets": design_option_sets,
+        }
+        validated_params = ReorderDesignOptionSetsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "ReorderDesignOptionSets", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = ReorderDesignOptionSetsResult.model_validate(response_dict)
+        return validated_response.executionResults
+
+    def reorder_design_options_in_set(
+        self, design_options: list[DesignOptionMove]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Moves the given design options before another design option of the same set or to the
+        end of their set. Available from Archicad 29.
+
+        Args:
+            design_options (list[DesignOptionMove]): The design options to move, in the order
+                the moves are done.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "designOptions": design_options,
+        }
+        validated_params = ReorderDesignOptionsInSetParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "ReorderDesignOptionsInSet", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = ReorderDesignOptionsInSetResult.model_validate(response_dict)
+        return validated_response.executionResults
+
     def set_active_design_options_in_combinations(
         self, active_design_options_in_combinations: list[ActiveDesignOptionsInCombination]
     ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
@@ -583,3 +755,32 @@ class DesignOptionsCommands:
         )
         validated_response = SetActiveDesignOptionsInCombinationsResult.model_validate(response_dict)
         return validated_response.executionResults
+
+    def set_default_design_option(
+        self, design_option_id: DesignOptionId | None = None
+    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+        """
+        Sets the given design option as the default, or the Main Model when no design option is
+        given. Available from Archicad 29.
+
+        Args:
+            design_option_id (DesignOptionId | None): The design option to set as the default.
+                When it is not given, the Main Model becomes the default.
+
+        Returns:
+            FailedExecutionResult | SuccessfulExecutionResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "designOptionId": design_option_id,
+        }
+        validated_params = SetDefaultDesignOptionParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "SetDefaultDesignOption", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = TypeAdapter(SetDefaultDesignOptionResult).validate_python(response_dict)
+        return validated_response

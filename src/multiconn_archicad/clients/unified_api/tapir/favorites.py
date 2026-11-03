@@ -6,18 +6,31 @@ from typing import TYPE_CHECKING
 from pydantic import TypeAdapter
 
 from multiconn_archicad.models.tapir.commands import (
+    ApplyFavoriteToToolDefaultParameters,
+    ApplyFavoriteToToolDefaultResult,
     ApplyFavoritesToElementDefaultsParameters,
     ApplyFavoritesToElementDefaultsResult,
     ApplyFavoritesToElementsParameters,
     ApplyFavoritesToElementsResult,
+    ChangeFavoriteParameters,
+    ChangeFavoriteResult,
+    CreateFavoriteFolderParameters,
+    CreateFavoriteFolderResult,
+    CreateFavoriteParameters,
+    CreateFavoriteResult,
     CreateFavoritesFromElementsParameters,
     CreateFavoritesFromElementsResult,
+    DeleteFavoriteFolderParameters,
+    DeleteFavoriteFolderResult,
     DeleteFavoritesParameters,
     DeleteFavoritesResult,
     ExportFavoritesParameters,
     ExportFavoritesResult,
     GetAllFavoritesParameters,
     GetAllFavoritesResult,
+    GetFavoriteDetailsParameters,
+    GetFavoriteDetailsResult,
+    GetFavoriteFoldersResult,
     GetFavoritePreviewImageParameters,
     GetFavoritePreviewImageResult,
     GetFavoriteSettingsParameters,
@@ -26,6 +39,12 @@ from multiconn_archicad.models.tapir.commands import (
     GetFavoritesByTypeResult,
     ImportFavoritesParameters,
     ImportFavoritesResult,
+    MoveFavoriteFolderParameters,
+    MoveFavoriteFolderResult,
+    MoveFavoritesParameters,
+    MoveFavoritesResult,
+    RenameFavoriteFolderParameters,
+    RenameFavoriteFolderResult,
     RenameFavoritesParameters,
     RenameFavoritesResult,
     UpdateFavoritesFromElementsParameters,
@@ -36,10 +55,15 @@ from multiconn_archicad.models.tapir.types import (
     ElementType,
     ErrorItem,
     FailedExecutionResult,
+    FavoriteConflictPolicy,
+    FavoriteDetails,
     FavoriteExportFormat,
+    FavoriteFolderDetails,
+    FavoriteImportFormat,
     FavoriteKeepField,
     FavoriteRename,
     FavoriteSettings,
+    FavoriteSource,
     FavoriteSummary,
     FavoritesFromElement,
     FavoritesFromElementUpdate,
@@ -57,6 +81,33 @@ if TYPE_CHECKING:
 class FavoritesCommands:
     def __init__(self, core: CoreCommands):
         self._core = core
+
+    def apply_favorite_to_tool_default(self, favorite_name: str) -> ElementType:
+        """
+        Makes the settings of the given Favorite the settings of its tool, and returns the
+        element type of that tool. Available from Archicad 29.
+
+        Args:
+            favorite_name (str): The name of the Favorite whose settings become the settings of
+                its tool.
+
+        Returns:
+            ElementType: The element type of the tool whose settings changed.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "favoriteName": favorite_name,
+        }
+        validated_params = ApplyFavoriteToToolDefaultParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "ApplyFavoriteToToolDefault", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = ApplyFavoriteToToolDefaultResult.model_validate(response_dict)
+        return validated_response.elementType
 
     def apply_favorites_to_element_defaults(
         self, favorites: list[str]
@@ -99,22 +150,28 @@ class FavoritesCommands:
         """
         Apply the given favorites to existing elements. Only settings-type parameters are
         changed - geometry (position, floor, and dimensions such as a Wall's height) is left
-        untouched, so applying a Favorite never moves or resizes the target element. For the
-        hierarchical types (Stair, Railing, Curtain Wall) the settings of the sub-elements are
-        not applied, because they are inseparable from the Favorite's own geometry. By default
-        settings, classifications, categories and properties are all applied; each can be opted
-        out of individually. keepFields lists fields of the target (its ID, layer, an opening's
-        width, height and sill height, a Wall's reference line location, height and top link)
-        that are copied back after the Favorite has been applied, so that e.g. only the library
-        part or the wall type changes.
+        untouched, so applying a Favorite never moves the target element. A Window or Door keeps
+        its wall, marker and placement, and takes the Favorite's library part and parameters,
+        size included. For the hierarchical types (Stair, Railing, Curtain Wall) the settings of
+        the sub-elements are not applied, because they are inseparable from the Favorite's own
+        geometry. By default settings, classifications, categories and properties are all
+        applied; each can be opted out of individually. keepFields lists fields of the target
+        (its ID, layer, an opening's width, height and sill height, a Wall's reference line
+        location, height and top link) that are copied back after the Favorite has been applied,
+        so that e.g. only the library part or the wall type changes.
 
         Args:
             favorites_to_apply (list[FavoritesToApplyItem])
             apply_settings (None | bool): Whether to apply the Favorite's settings-type
-                parameters (structure, materials, pens, etc. - never geometry). For the
-                hierarchical types (Stair, Railing, Curtain Wall) the settings of the sub-
+                parameters (structure, materials, pens, etc.). Geometry (position, floor, and
+                dimensions such as a Wall's height) is never applied - the element stays on its
+                own home story - except that a Window or Door takes the Favorite's library part
+                and parameters, size included, while keeping its wall, marker and placement. For
+                the hierarchical types (Stair, Railing, Curtain Wall) the settings of the sub-
                 elements are not applied, because they are inseparable from the Favorite's own
-                geometry. Default is true.
+                geometry. A Dimension's text size, text pen and text frame are not changed
+                (tested in Archicad 28): the dimension creation commands take textHeight and
+                textPen for them. Default is true.
             apply_classifications (None | bool): Whether to apply the Favorite's
                 classifications. Default is true.
             apply_categories (None | bool): Whether to apply the Favorite's element categories
@@ -157,6 +214,109 @@ class FavoritesCommands:
         validated_response = ApplyFavoritesToElementsResult.model_validate(response_dict)
         return validated_response.executionResults
 
+    def change_favorite(
+        self, favorite_name: str, source: FavoriteSource
+    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+        """
+        Gives an existing Favorite the settings of another Favorite or of the current Opening
+        tool default. Available from Archicad 29.
+
+        Args:
+            favorite_name (str): The name of the Favorite to change.
+            source (FavoriteSource)
+
+        Returns:
+            FailedExecutionResult | SuccessfulExecutionResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "favoriteName": favorite_name,
+            "source": source,
+        }
+        validated_params = ChangeFavoriteParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "ChangeFavorite", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = TypeAdapter(ChangeFavoriteResult).validate_python(response_dict)
+        return validated_response
+
+    def create_favorite(
+        self,
+        name: str,
+        source: FavoriteSource,
+        folder: None | list[str] = None,
+        conflict_policy: FavoriteConflictPolicy | None = None,
+    ) -> CreateFavoriteResult:
+        """
+        Creates a Favorite in the given folder from the settings of another Favorite or of the
+        current Opening tool default. conflictPolicy says what happens when the name is taken:
+        fail, skip, overwrite the existing Favorite's settings or create the new one under a
+        free name. Available from Archicad 29.
+
+        Args:
+            name (str): The name of the new Favorite.
+            source (FavoriteSource): Where the settings of the new Favorite come from: exactly
+                one of favoriteName and toolDefault.
+            folder (None | list[str]): The folder of the Favorites palette to create the
+                Favorite in, as the folder names from the root down. The folder must exist.
+                Empty or omitted = root.
+            conflict_policy (FavoriteConflictPolicy | None)
+
+        Returns:
+            CreateFavoriteResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "name": name,
+            "folder": folder,
+            "source": source,
+            "conflictPolicy": conflict_policy,
+        }
+        validated_params = CreateFavoriteParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "CreateFavorite", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = CreateFavoriteResult.model_validate(response_dict)
+        return validated_response
+
+    def create_favorite_folder(self, parent_path: list[str], name: str) -> FavoriteFolderDetails:
+        """
+        Creates a folder in the Favorites palette, in the parent folder given by its path.
+        Returns the new folder. Available from Archicad 29.
+
+        Args:
+            parent_path (list[str]): The path of the folder to create the new folder in, in the
+                format GetFavoriteFolders returns: the folder names from the root down. Empty
+                for the root folder.
+            name (str): The name of the new folder.
+
+        Returns:
+            FavoriteFolderDetails
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "parentPath": parent_path,
+            "name": name,
+        }
+        validated_params = CreateFavoriteFolderParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "CreateFavoriteFolder", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = CreateFavoriteFolderResult.model_validate(response_dict)
+        return validated_response.folder
+
     def create_favorites_from_elements(
         self, favorites_from_elements: list[FavoritesFromElement]
     ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
@@ -184,6 +344,39 @@ class FavoritesCommands:
         )
         validated_response = CreateFavoritesFromElementsResult.model_validate(response_dict)
         return validated_response.executionResults
+
+    def delete_favorite_folder(self, path: list[str], recursive: None | bool = None) -> FavoriteFolderDetails:
+        """
+        Deletes a folder of the Favorites palette given by its path. Archicad deletes the
+        folder's Favorites and subfolders with it, so a folder that is not empty is deleted only
+        if recursive is true. The root folder cannot be deleted. Returns the deleted folder.
+        Available from Archicad 29.
+
+        Args:
+            path (list[str]): The path of the folder to delete, in the format GetFavoriteFolders
+                returns: the folder names from the root down. The root folder cannot be deleted.
+            recursive (None | bool): Archicad deletes a folder together with everything in it:
+                its Favorites and its subfolders with their Favorites. A folder that is not
+                empty is deleted only if this is true. Default: false.
+
+        Returns:
+            FavoriteFolderDetails
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "path": path,
+            "recursive": recursive,
+        }
+        validated_params = DeleteFavoriteFolderParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "DeleteFavoriteFolder", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = DeleteFavoriteFolderResult.model_validate(response_dict)
+        return validated_response.deletedFolder
 
     def delete_favorites(self, favorites: list[str]) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
         """
@@ -274,6 +467,52 @@ class FavoritesCommands:
         )
         validated_response = GetAllFavoritesResult.model_validate(response_dict)
         return validated_response.favorites
+
+    def get_favorite_details(self, favorites: list[str]) -> list[ErrorItem | FavoriteDetails]:
+        """
+        Returns the classifications, property values and element category values stored in the
+        given favorites, so they can be audited before elements are placed. Each property value
+        comes with its evaluation status and default-value flag; the value itself is only
+        returned when it has been evaluated.
+
+        Args:
+            favorites (list[str]): A list of favorite names
+
+        Returns:
+            list[ErrorItem | FavoriteDetails]: The details of the given favorites, in the order
+                of the input, or an error for a favorite that could not be read.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "favorites": favorites,
+        }
+        validated_params = GetFavoriteDetailsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetFavoriteDetails", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetFavoriteDetailsResult.model_validate(response_dict)
+        return validated_response.favoriteDetails
+
+    def get_favorite_folders(self) -> FavoriteFolderDetails:
+        """
+        Returns the folder tree of the Favorites palette from its root folder: the name and path
+        of every folder and the names of the Favorites in it. Available from Archicad 29.
+
+        Returns:
+            FavoriteFolderDetails
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        response_dict = self._core.post_tapir_command("GetFavoriteFolders")
+        validated_response = GetFavoriteFoldersResult.model_validate(response_dict)
+        return validated_response.rootFolder
 
     def get_favorite_preview_image(
         self,
@@ -373,21 +612,34 @@ class FavoritesCommands:
     def import_favorites(
         self,
         path: str,
+        format: FavoriteImportFormat | None = None,
+        file_names: None | list[str] = None,
         target_folder: None | list[str] = None,
         import_folders: None | bool = None,
         conflict_policy: ConflictPolicy | None = None,
     ) -> None | str:
         """
-        Import Favorites from a .prefs file or folder into the current project.
+        Import Favorites from a .prefs file or folder into the current project. From Archicad 29
+        they can also be imported from a folder of Favorite files (xml format, all of them or
+        the given fileNames) or from a legacy .prf file (legacyPRF format), with the conflict
+        policies Error, Skip, OverwriteExisting and RenameNew.
 
         Args:
-            path (str): Absolute path on the AC host to a Favorites file (.prefs) or folder.
+            path (str): Absolute path on the AC host. With the prefs format: a Favorites file
+                (.prefs) or folder. With the xml format: the folder of Favorite files, as
+                ExportFavorites writes it. With the legacyPRF format: the .prf file.
+            format (FavoriteImportFormat | None)
+            file_names (None | list[str]): Only with the xml format: the names of the Favorite
+                files in the folder to import. Default: every Favorite file of the folder.
             target_folder (None | list[str]): Folder hierarchy under which to import. Empty =
-                root.
-            import_folders (None | bool): If true and `path` is a folder, the folder structure
-                is preserved.
-            conflict_policy (ConflictPolicy | None): How to resolve name conflicts. Default
-                Overwrite.
+                root. With the xml and legacyPRF formats the folder must exist, and omitting it
+                keeps the folders stored with the Favorites.
+            import_folders (None | bool): Only with the prefs format: if true and `path` is a
+                folder, the folder structure is preserved.
+            conflict_policy (ConflictPolicy | None): How to resolve name conflicts. The prefs
+                format takes Error, Skip, Overwrite or Append, default Overwrite. The xml and
+                legacyPRF formats take Error, Skip, OverwriteExisting or RenameNew, default
+                Error.
 
         Returns:
             None | str: Set when conflictPolicy=Error and a name collided; absent otherwise.
@@ -399,6 +651,8 @@ class FavoritesCommands:
         """
         params_dict = {
             "path": path,
+            "format": format,
+            "fileNames": file_names,
             "targetFolder": target_folder,
             "importFolders": import_folders,
             "conflictPolicy": conflict_policy,
@@ -409,6 +663,99 @@ class FavoritesCommands:
         )
         validated_response = ImportFavoritesResult.model_validate(response_dict)
         return validated_response.firstConflictName
+
+    def move_favorite_folder(self, folder: list[str], target_folder: list[str]) -> list[str]:
+        """
+        Moves a folder of the Favorites palette, with its Favorites and subfolders, into another
+        folder. Folders are given as their path of folder names from the root. Returns the new
+        path of the folder. Available from Archicad 29.
+
+        Args:
+            folder (list[str]): The folder of the Favorites palette to move, as the folder names
+                from the root down. The root folder cannot be moved.
+            target_folder (list[str]): The folder to move it into, as the folder names from the
+                root down. Empty = root. It cannot be the moved folder or one of its subfolders.
+
+        Returns:
+            list[str]: The new path of the moved folder, as the folder names from the root down.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "folder": folder,
+            "targetFolder": target_folder,
+        }
+        validated_params = MoveFavoriteFolderParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "MoveFavoriteFolder", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = MoveFavoriteFolderResult.model_validate(response_dict)
+        return validated_response.folder
+
+    def move_favorites(
+        self, favorites: list[str], target_path: list[str]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Moves Favorites given by their names into a folder of the Favorites palette given by its
+        path. Returns an execution result for each Favorite. Available from Archicad 29.
+
+        Args:
+            favorites (list[str]): A list of favorite names
+            target_path (list[str]): The path of the folder to move the Favorites into, in the
+                format GetFavoriteFolders returns: the folder names from the root down. Empty
+                for the root folder.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "favorites": favorites,
+            "targetPath": target_path,
+        }
+        validated_params = MoveFavoritesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "MoveFavorites", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = MoveFavoritesResult.model_validate(response_dict)
+        return validated_response.executionResults
+
+    def rename_favorite_folder(self, path: list[str], new_name: str) -> FavoriteFolderDetails:
+        """
+        Renames a folder of the Favorites palette given by its path. The root folder cannot be
+        renamed. Returns the renamed folder. Available from Archicad 29.
+
+        Args:
+            path (list[str]): The path of the folder to rename, in the format GetFavoriteFolders
+                returns: the folder names from the root down. The root folder cannot be renamed.
+            new_name (str): The new name of the folder.
+
+        Returns:
+            FavoriteFolderDetails
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "path": path,
+            "newName": new_name,
+        }
+        validated_params = RenameFavoriteFolderParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "RenameFavoriteFolder", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = RenameFavoriteFolderResult.model_validate(response_dict)
+        return validated_response.folder
 
     def rename_favorites(
         self, renames: list[FavoriteRename]

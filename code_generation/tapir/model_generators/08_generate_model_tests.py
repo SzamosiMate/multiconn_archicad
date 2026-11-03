@@ -20,6 +20,10 @@ SCHEMAS_TO_PATCH = {
     "CreateClassificationSystemsParameters",
     "CreateGraphicOverrideRulesParameters",
     "ModifyGraphicOverrideRulesParameters",
+    "CreateFavoriteFolderResult",
+    "DeleteFavoriteFolderResult",
+    "GetFavoriteFoldersResult",
+    "RenameFavoriteFolderResult",
 }
 
 
@@ -53,6 +57,14 @@ def patch_schema_definitions(definitions: dict, model_name_to_test: str) -> dict
     """
     patched_defs = copy.deepcopy(definitions)
     bound_graphic_override_criteria(patched_defs)
+
+    if model_name_to_test in {
+        "CreateFavoriteFolderResult",
+        "DeleteFavoriteFolderResult",
+        "GetFavoriteFoldersResult",
+        "RenameFavoriteFolderResult",
+    }:
+        patched_defs["FavoriteFolderDetails"]["properties"]["subFolders"] = {"type": "array", "maxItems": 0}
 
     if model_name_to_test == "GetHotlinksResult":
         if "Hotlink" in patched_defs and "properties" in patched_defs["Hotlink"]:

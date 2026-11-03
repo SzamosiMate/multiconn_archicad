@@ -14,12 +14,27 @@ from multiconn_archicad.models.tapir.commands import (
     DeleteClassificationItemsResult,
     DeleteClassificationSystemsParameters,
     DeleteClassificationSystemsResult,
+    GetAllClassificationSystemsResult,
+    GetClassificationItemParentsParameters,
+    GetClassificationItemParentsResult,
+    GetClassificationItemVisibilityParameters,
+    GetClassificationItemVisibilityResult,
+    GetClassificationOfAttributesInSystemParameters,
+    GetClassificationOfAttributesInSystemResult,
+    GetClassificationsOfAttributesParameters,
+    GetClassificationsOfAttributesResult,
     GetClassificationsOfElementDefaultsParameters,
     GetClassificationsOfElementDefaultsResult,
     GetClassificationsOfElementsParameters,
     GetClassificationsOfElementsResult,
+    GetClassificationsOfToolDefaultsParameters,
+    GetClassificationsOfToolDefaultsResult,
+    GetElementsByClassificationParameters,
+    GetElementsByClassificationResult,
     ImportClassificationsXmlParameters,
     ImportClassificationsXmlResult,
+    SetClassificationsOfAttributesParameters,
+    SetClassificationsOfAttributesResult,
     SetClassificationsOfElementDefaultsParameters,
     SetClassificationsOfElementDefaultsResult,
     SetClassificationsOfElementsParameters,
@@ -30,13 +45,25 @@ from multiconn_archicad.models.tapir.commands import (
     UpdateClassificationSystemsResult,
 )
 from multiconn_archicad.models.tapir.types import (
+    AttributeClassification,
+    AttributeClassifications,
+    AttributeIdArrayItem,
+    ClassificationId,
     ClassificationItemConflictPolicy,
+    ClassificationItemElements,
     ClassificationItemIdArrayItem,
+    ClassificationItemParent,
     ClassificationItemUpdate,
+    ClassificationItemVisibilities,
     ClassificationSystemConflictPolicy,
+    ClassificationSystemId,
     ClassificationSystemIdArrayItem,
+    ClassificationSystemSummary,
     ClassificationSystemUpdate,
     ClassificationSystemsWithItem,
+    ClassificationVisibilityAttribute,
+    ClassificationVisibilityElement,
+    ClassificationVisibilityToolDefault,
     ElementClassification,
     ElementClassificationItemArray,
     ElementDefaultClassification,
@@ -46,6 +73,7 @@ from multiconn_archicad.models.tapir.types import (
     FailedExecutionResult,
     NewClassificationItem,
     SuccessfulExecutionResult,
+    ToolDefaultClassifications,
 )
 
 if TYPE_CHECKING:
@@ -174,6 +202,162 @@ class ClassificationCommands:
         validated_response = DeleteClassificationSystemsResult.model_validate(response_dict)
         return validated_response.executionResults
 
+    def get_all_classification_systems(self) -> list[ClassificationSystemSummary]:
+        """
+        Returns the classification systems of the project with their guid, name, description,
+        source, version and date. Same output as the official GetAllClassificationSystems
+        command, so scripts can rely on Tapir commands only.
+
+        Returns:
+            list[ClassificationSystemSummary]: The classification systems of the project.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        response_dict = self._core.post_tapir_command("GetAllClassificationSystems")
+        validated_response = GetAllClassificationSystemsResult.model_validate(response_dict)
+        return validated_response.classificationSystems
+
+    def get_classification_item_parents(
+        self, classification_item_ids: list[ClassificationItemIdArrayItem]
+    ) -> list[ClassificationItemParent | ErrorItem]:
+        """
+        Returns the parent item and the classification system of the given Classification Items;
+        a top level item has no parent. The output is aligned with the input array of items.
+
+        Args:
+            classification_item_ids (list[ClassificationItemIdArrayItem]): A list of
+                classification item identifiers.
+
+        Returns:
+            list[ClassificationItemParent | ErrorItem]: The parent and the system of each given
+                item, in the order of the input. A non-existing item is an error item.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "classificationItemIds": classification_item_ids,
+        }
+        validated_params = GetClassificationItemParentsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetClassificationItemParents", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetClassificationItemParentsResult.model_validate(response_dict)
+        return validated_response.classificationItemParents
+
+    def get_classification_item_visibility(
+        self,
+        targets: list[
+            ClassificationVisibilityAttribute | ClassificationVisibilityElement | ClassificationVisibilityToolDefault
+        ],
+        classification_item_ids: list[ClassificationItemIdArrayItem],
+    ) -> list[ClassificationItemVisibilities | ErrorItem]:
+        """
+        Tells whether the given classification items are visible (offered) for the given
+        elements, element tool defaults and attributes, such as building materials. Non-existing
+        targets and classification items are reported as errors. Visibility does not tell
+        whether the target is classified with the item, and an item can be visible even if its
+        parent item is not.
+
+        Args:
+            targets (list[ClassificationVisibilityAttribute | ClassificationVisibilityElement |
+                ClassificationVisibilityToolDefault]): The elements, element tool defaults and
+                attributes to check the classification items for.
+            classification_item_ids (list[ClassificationItemIdArrayItem]): A list of
+                classification item identifiers.
+
+        Returns:
+            list[ClassificationItemVisibilities | ErrorItem]: One entry per target, in the order
+                of the input. A non-existing element or attribute, or an invalid element type,
+                is represented by an error object.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "targets": targets,
+            "classificationItemIds": classification_item_ids,
+        }
+        validated_params = GetClassificationItemVisibilityParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetClassificationItemVisibility",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+        )
+        validated_response = GetClassificationItemVisibilityResult.model_validate(response_dict)
+        return validated_response.classificationItemVisibilities
+
+    def get_classification_of_attributes_in_system(
+        self, attribute_ids: list[AttributeIdArrayItem], classification_system_id: ClassificationSystemId
+    ) -> list[ClassificationId | ErrorItem]:
+        """
+        Returns the classification of the given attributes (for example Building Materials) in
+        the given classification system. classificationItemId is omitted for an unclassified
+        attribute.
+
+        Args:
+            attribute_ids (list[AttributeIdArrayItem]): A list of attributes.
+            classification_system_id (ClassificationSystemId)
+
+        Returns:
+            list[ClassificationId | ErrorItem]: Order of the items is the same as in the input.
+                classificationItemId is omitted when the attribute is unclassified in the
+                system. Non-existing attributes or a non-existing classification system are
+                represented by error objects.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "attributeIds": attribute_ids,
+            "classificationSystemId": classification_system_id,
+        }
+        validated_params = GetClassificationOfAttributesInSystemParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetClassificationOfAttributesInSystem",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+        )
+        validated_response = GetClassificationOfAttributesInSystemResult.model_validate(response_dict)
+        return validated_response.attributeClassifications
+
+    def get_classifications_of_attributes(
+        self, attribute_ids: list[AttributeIdArrayItem]
+    ) -> list[AttributeClassifications | ErrorItem]:
+        """
+        Returns the classifications of the given attributes (building materials, composites,
+        surfaces, etc.) in every classification system they are classified in.
+
+        Args:
+            attribute_ids (list[AttributeIdArrayItem]): A list of attributes.
+
+        Returns:
+            list[AttributeClassifications | ErrorItem]: The classifications of the attributes,
+                in the order of the input. A non-existing attribute is represented by an error
+                object.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "attributeIds": attribute_ids,
+        }
+        validated_params = GetClassificationsOfAttributesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetClassificationsOfAttributes", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetClassificationsOfAttributesResult.model_validate(response_dict)
+        return validated_response.attributeClassifications
+
     def get_classifications_of_element_defaults(
         self, element_types: list[ElementType], classification_system_ids: list[ClassificationSystemIdArrayItem]
     ) -> list[ElementClassificationItemArray | ErrorItem]:
@@ -243,6 +427,71 @@ class ClassificationCommands:
         validated_response = GetClassificationsOfElementsResult.model_validate(response_dict)
         return validated_response.elementClassifications
 
+    def get_classifications_of_tool_defaults(
+        self, element_types: list[ElementType]
+    ) -> list[ErrorItem | ToolDefaultClassifications]:
+        """
+        Returns every classification of the tool defaults (the settings new elements get) of the
+        given element types, in all classification systems at once. Unlike
+        GetClassificationsOfElementDefaults it needs no list of classification systems; systems
+        in which a default is unclassified are left out.
+
+        Args:
+            element_types (list[ElementType]): The element types whose tool defaults (the
+                settings new elements get) are read.
+
+        Returns:
+            list[ErrorItem | ToolDefaultClassifications]: The classifications of the tool
+                defaults of each element type, in the order of the given element types. Invalid
+                element types are represented by error objects.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elementTypes": element_types,
+        }
+        validated_params = GetClassificationsOfToolDefaultsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetClassificationsOfToolDefaults",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+        )
+        validated_response = GetClassificationsOfToolDefaultsResult.model_validate(response_dict)
+        return validated_response.classificationsOfToolDefaults
+
+    def get_elements_by_classification(
+        self, classification_item_ids: list[ClassificationItemIdArrayItem]
+    ) -> list[ClassificationItemElements | ErrorItem]:
+        """
+        Returns the elements classified with the given classification items, one list per item,
+        so elements can be filtered by classification in a single call.
+
+        Args:
+            classification_item_ids (list[ClassificationItemIdArrayItem]): A list of
+                classification item identifiers.
+
+        Returns:
+            list[ClassificationItemElements | ErrorItem]: The elements classified with each
+                classification item, aligned with the input, or an error for a non-existing
+                classification item.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "classificationItemIds": classification_item_ids,
+        }
+        validated_params = GetElementsByClassificationParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetElementsByClassification", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetElementsByClassificationResult.model_validate(response_dict)
+        return validated_response.elementsOfClassificationItems
+
     def import_classifications_xml(
         self,
         xml: str,
@@ -277,6 +526,38 @@ class ClassificationCommands:
         )
         validated_response = ImportClassificationsXmlResult.model_validate(response_dict)
         return validated_response
+
+    def set_classifications_of_attributes(
+        self, attribute_classifications: list[AttributeClassification]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Sets the classifications of attributes (building materials, composites, surfaces, etc.).
+        The given item replaces the attribute's current item in the same classification system.
+        In order to set the classification of an attribute to unclassified in a system, omit the
+        classificationItemId field.
+
+        Args:
+            attribute_classifications (list[AttributeClassification]): The classifications to
+                set, one per attribute and classification system.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "attributeClassifications": attribute_classifications,
+        }
+        validated_params = SetClassificationsOfAttributesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "SetClassificationsOfAttributes", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = SetClassificationsOfAttributesResult.model_validate(response_dict)
+        return validated_response.executionResults
 
     def set_classifications_of_element_defaults(
         self, element_default_classifications: list[ElementDefaultClassification]

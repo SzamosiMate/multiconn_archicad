@@ -11,8 +11,17 @@ from multiconn_archicad.models.tapir.commands import (
     CreateGraphicalOverrideRuleParameters,
     CreateGraphicalOverrideRuleResult,
     GetGraphicalOverrideRulesResult,
+    GetGraphicalOverrideStyleOfElementsParameters,
+    GetGraphicalOverrideStyleOfElementsResult,
 )
-from multiconn_archicad.models.tapir.types import ColorRGB, GraphicalOverrideRuleDetails, GuidId
+from multiconn_archicad.models.tapir.types import (
+    ColorRGB,
+    ElementIdArrayItem,
+    ErrorItem,
+    GraphicalOverrideRuleDetails,
+    GraphicalOverrideStyle,
+    GuidId,
+)
 
 if TYPE_CHECKING:
     from multiconn_archicad.clients.core.core_commands import CoreCommands
@@ -121,3 +130,34 @@ class GraphicOverrideCommands:
         response_dict = self._core.post_tapir_command("GetGraphicalOverrideRules")
         validated_response = GetGraphicalOverrideRulesResult.model_validate(response_dict)
         return validated_response.rules
+
+    def get_graphical_override_style_of_elements(
+        self, elements: list[ElementIdArrayItem]
+    ) -> list[ErrorItem | GraphicalOverrideStyle]:
+        """
+        Returns the graphic override style each element is drawn with in the current window: for
+        every overridable member (line type, pens, fill types, surfaces, ...) whether the active
+        graphic override combination replaces it, and with what. Needs Archicad 27 or later.
+
+        Args:
+            elements (list[ElementIdArrayItem]): A list of elements.
+
+        Returns:
+            list[ErrorItem | GraphicalOverrideStyle]: The graphic override style of each element
+                in the current window, aligned with the input, or an error.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elements": elements,
+        }
+        validated_params = GetGraphicalOverrideStyleOfElementsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetGraphicalOverrideStyleOfElements",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+        )
+        validated_response = GetGraphicalOverrideStyleOfElementsResult.model_validate(response_dict)
+        return validated_response.styles

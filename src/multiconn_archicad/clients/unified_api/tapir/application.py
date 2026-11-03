@@ -8,26 +8,48 @@ from pydantic import TypeAdapter
 from multiconn_archicad.models.tapir.commands import (
     ChangeWindowParameters,
     ChangeWindowResult,
+    CloseWindowsParameters,
+    CloseWindowsResult,
+    DeleteGhostRecordsParameters,
+    DeleteGhostRecordsResult,
     Get3DCutawayStatusResult,
     GetAddOnVersionResult,
     GetArchicadLocationResult,
     GetArchicadReleaseInfoResult,
+    GetArchicadVisibilityResult,
     GetContainingDatabasesParameters,
     GetContainingDatabasesResult,
     GetCurrentWindowDrawingScaleResult,
     GetCurrentWindowTypeResult,
+    GetDialogAutoCloseResult,
+    GetEditModeStateResult,
     GetElementFromUserParameters,
     GetElementFromUserResult,
+    GetLineFromUserParameters,
+    GetLineFromUserResult,
     GetPointFromUserParameters,
     GetPointFromUserResult,
+    GetPolygonFromUserParameters,
+    GetPolygonFromUserResult,
+    GetPrinterAndPlotterInfoResult,
     GetPrinterInfoResult,
     GetProductVersionInfoResult,
     GetSpecialFoldersParameters,
     GetSpecialFoldersResult,
     GetUserGSIDResult,
+    ModelToScreenParameters,
+    ModelToScreenResult,
     QuitArchicadResult,
+    RebuildCurrentDatabaseResult,
+    RedrawCurrentDatabaseResult,
+    RunActionCenterChecksParameters,
+    RunActionCenterChecksResult,
+    ScreenToModelParameters,
+    ScreenToModelResult,
     Set3DCutawayStatusParameters,
     Set3DCutawayStatusResult,
+    SetArchicadVisibilityParameters,
+    SetArchicadVisibilityResult,
     SetCurrentWindowDrawingScaleParameters,
     SetCurrentWindowDrawingScaleResult,
     SetDialogAutoCloseParameters,
@@ -36,20 +58,26 @@ from multiconn_archicad.models.tapir.commands import (
     ShowAlertResult,
 )
 from multiconn_archicad.models.tapir.types import (
+    ActionCenterCheck,
     AlertType,
     ContainingDatabase,
+    Coordinate2D,
     Coordinate3D,
     DatabaseById,
     DatabaseByWindowType,
+    DatabaseIdArrayItem,
     ElementIdArrayItem,
     ElementType,
     ErrorItem,
     FailedExecutionResult,
     NavigatorItemIdArrayItem,
+    PolygonInputMethod,
+    ScreenPoint,
+    ScreenPointInput,
     SpecialFolderPath,
     SpecialFolderType,
     SuccessfulExecutionResult,
-    WindowType,
+    WindowToClose,
 )
 
 if TYPE_CHECKING:
@@ -65,8 +93,11 @@ class ApplicationCommands:
     ) -> FailedExecutionResult | SuccessfulExecutionResult:
         """
         Changes the current (active) window to the given window. A databaseId on its own is
-        enough; the window type is taken from the database. With windowType 'FloorPlan' and a
-        storyIndex it also activates that story on the floor plan.
+        enough; the window type is taken from the database. The databaseId of a worksheet or
+        detail whose window was never opened opens its Project Map item instead (from Archicad
+        27). With windowType 'FloorPlan' and a storyIndex it also activates that story on the
+        floor plan. windowType 'Report' on its own opens the Session Report window (from
+        Archicad 26); its text cannot be read through the Archicad API.
 
         Args:
             parameters (NavigatorItemIdArrayItem | DatabaseByWindowType | DatabaseById): Union
@@ -86,6 +117,66 @@ class ApplicationCommands:
         )
         validated_response = TypeAdapter(ChangeWindowResult).validate_python(response_dict)
         return validated_response
+
+    def close_windows(self, windows: list[WindowToClose]) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Closes the windows of the given databases (for example layouts, sections or details
+        opened earlier with ChangeWindow), with one execution result per window; a window
+        Archicad cannot close gets a failed result. Requires Archicad 27 or later.
+
+        Args:
+            windows (list[WindowToClose]): The windows to close.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "windows": windows,
+        }
+        validated_params = CloseWindowsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "CloseWindows", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = CloseWindowsResult.model_validate(response_dict)
+        return validated_response.executionResults
+
+    def delete_ghost_records(
+        self, databases: list[DatabaseIdArrayItem]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Deletes the trace (ghost) record of each given parent database, which removes the trace
+        reference shown in that database's window. A database without a trace reference gets a
+        failed execution result. Not undoable.
+
+        Args:
+            databases (list[DatabaseIdArrayItem]): The parent databases whose trace (ghost)
+                record is deleted, as returned by GetDatabaseIdFromNavigatorItemId or
+                GetContainingDatabases.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "databases": databases,
+        }
+        validated_params = DeleteGhostRecordsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "DeleteGhostRecords", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = DeleteGhostRecordsResult.model_validate(response_dict)
+        return validated_response.executionResults
 
     def get_3d_cutaway_status(self) -> Get3DCutawayStatusResult:
         """
@@ -153,6 +244,23 @@ class ApplicationCommands:
         validated_response = GetArchicadReleaseInfoResult.model_validate(response_dict)
         return validated_response
 
+    def get_archicad_visibility(self) -> bool:
+        """
+        Returns whether the Archicad application is shown or hidden. Supported on Windows only;
+        on macOS it returns an error.
+
+        Returns:
+            bool: True when the Archicad application is shown, false when it is hidden.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        response_dict = self._core.post_tapir_command("GetArchicadVisibility")
+        validated_response = GetArchicadVisibilityResult.model_validate(response_dict)
+        return validated_response.isVisible
+
     def get_containing_databases(self, elements: list[ElementIdArrayItem]) -> list[ContainingDatabase | ErrorItem]:
         """
         Returns the database (window type, database id and name) that contains each of the given
@@ -203,12 +311,15 @@ class ApplicationCommands:
         validated_response = GetCurrentWindowDrawingScaleResult.model_validate(response_dict)
         return validated_response.scale
 
-    def get_current_window_type(self) -> WindowType:
+    def get_current_window_type(self) -> GetCurrentWindowTypeResult:
         """
-        Returns the type of the current (active) window.
+        Returns the type of the current (active) window and, when it has one, the databaseId of
+        the database it shows, which ChangeWindow takes to bring the window back after a script
+        switched to another one. The saved view (View Map item) the window was opened from is
+        not returned, as Archicad does not tell which one it was.
 
         Returns:
-            WindowType
+            GetCurrentWindowTypeResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -217,7 +328,49 @@ class ApplicationCommands:
         """
         response_dict = self._core.post_tapir_command("GetCurrentWindowType")
         validated_response = GetCurrentWindowTypeResult.model_validate(response_dict)
-        return validated_response.currentWindowType
+        return validated_response
+
+    def get_dialog_auto_close(self) -> bool:
+        """
+        Tells whether the dialog auto close is on, the same state SetDialogAutoClose writes, so
+        a script can restore it afterwards. The state belongs to the running Archicad process:
+        it is off when Archicad starts (unless the TAPIR_DIALOG_AUTOCLOSE environment variable
+        is true), it stays as last set until Archicad quits, and it is shared by every add-on
+        and script in that Archicad.
+
+        Returns:
+            bool: Whether the dialog auto close is on: true while Archicad closes the dialogs it
+                would show with their default button instead of waiting for the user. This is
+                the same state SetDialogAutoClose writes.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        response_dict = self._core.post_tapir_command("GetDialogAutoClose")
+        validated_response = GetDialogAutoCloseResult.model_validate(response_dict)
+        return validated_response.enabled
+
+    def get_edit_mode_state(self) -> GetEditModeStateResult:
+        """
+        Tells whether Archicad is in a hierarchical editing mode (curtain wall, stair, beam or
+        column editing), and which element is being edited. Read only: it never enters, leaves
+        or cancels an editing mode. Commands that modify the project can fail while such a mode
+        is active. The overall inEditMode flag requires Archicad 29 or later; the command
+        requires Archicad 27 or later.
+
+        Returns:
+            GetEditModeStateResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        response_dict = self._core.post_tapir_command("GetEditModeState")
+        validated_response = GetEditModeStateResult.model_validate(response_dict)
+        return validated_response
 
     def get_element_from_user(
         self, prompt: None | str = None, element_types: None | list[ElementType] = None
@@ -256,6 +409,42 @@ class ApplicationCommands:
         validated_response = GetElementFromUserResult.model_validate(response_dict)
         return validated_response
 
+    def get_line_from_user(
+        self,
+        start_prompt: None | str = "Click the start point of the line",
+        end_prompt: None | str = "Click the end point of the line",
+        show_rubber_line_feedback: None | bool = True,
+    ) -> GetLineFromUserResult:
+        """
+        Waits for the user to input a line in the active Archicad window and returns start and
+        end coordinates.
+
+        Args:
+            start_prompt (None | str): Prompt for selecting the line start point.
+            end_prompt (None | str): Prompt for selecting the line end point.
+            show_rubber_line_feedback (None | bool): If true, draws a unit-square rubber
+                feedback around the cursor while input is active.
+
+        Returns:
+            GetLineFromUserResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "startPrompt": start_prompt,
+            "endPrompt": end_prompt,
+            "showRubberLineFeedback": show_rubber_line_feedback,
+        }
+        validated_params = GetLineFromUserParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetLineFromUser", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetLineFromUserResult.model_validate(response_dict)
+        return validated_response
+
     def get_point_from_user(self, prompt: None | str = None) -> Coordinate3D:
         """
         Asks the designer to click a point in the current window and returns it. Archicad waits
@@ -286,6 +475,58 @@ class ApplicationCommands:
         validated_response = GetPointFromUserResult.model_validate(response_dict)
         return validated_response.position
 
+    def get_polygon_from_user(
+        self,
+        start_prompt: None | str = "Click the start point of the polygon",
+        prompt: None | str = "Click polygon nodes and finish the input",
+        method: None | PolygonInputMethod = "General",
+    ) -> GetPolygonFromUserResult:
+        """
+        Waits for the user to input a polygon in the active Archicad window and returns its
+        points and arcs.
+
+        Args:
+            start_prompt (None | str): Prompt for selecting the polygon start point.
+            prompt (None | str): Prompt shown while placing the remaining polygon nodes.
+            method (None | PolygonInputMethod)
+
+        Returns:
+            GetPolygonFromUserResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "startPrompt": start_prompt,
+            "prompt": prompt,
+            "method": method,
+        }
+        validated_params = GetPolygonFromUserParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetPolygonFromUser", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetPolygonFromUserResult.model_validate(response_dict)
+        return validated_response
+
+    def get_printer_and_plotter_info(self) -> GetPrinterAndPlotterInfoResult:
+        """
+        Retrieves the printer selected in Archicad, with its name and orientation, and the
+        selected plotter, with its name and model.
+
+        Returns:
+            GetPrinterAndPlotterInfoResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        response_dict = self._core.post_tapir_command("GetPrinterAndPlotterInfo")
+        validated_response = GetPrinterAndPlotterInfoResult.model_validate(response_dict)
+        return validated_response
+
     def get_printer_info(self) -> GetPrinterInfoResult:
         """
         Retrieves Archicad's current print settings: the print area, grid, fixed text size and
@@ -306,8 +547,9 @@ class ApplicationCommands:
     def get_product_version_info(self) -> GetProductVersionInfoResult:
         """
         Retrieves the version information of the running Archicad: build number, language code,
-        product family and version text, plus the product name, product type and
-        main/update/hotfix versions from Archicad 29. Requires Archicad 28 or later.
+        product family and version text, plus the product name, product type, main/update/hotfix
+        versions, the available domains (Architecture, MEP) and the CEIP project identifier of
+        the open project from Archicad 29. Requires Archicad 28 or later.
 
         Returns:
             GetProductVersionInfoResult
@@ -365,6 +607,38 @@ class ApplicationCommands:
         validated_response = GetUserGSIDResult.model_validate(response_dict)
         return validated_response
 
+    def model_to_screen(self, coordinates: list[Coordinate3D]) -> list[ErrorItem | ScreenPoint]:
+        """
+        Converts model coordinates to pixel positions local to the current Archicad view window
+        (not global desktop coordinates), using the current window's size, drawing scale and
+        zoom. In a 3D window the coordinates are projected with the current camera; in other
+        windows z is disregarded. Available from Archicad 29.
+
+        Args:
+            coordinates (list[Coordinate3D]): Model coordinates in the current database
+                (meters). In a 3D window they are projected with the current camera; in other
+                windows z is disregarded.
+
+        Returns:
+            list[ErrorItem | ScreenPoint]: One item per input coordinate, in the same order: the
+                pixel position local to the current Archicad view window (not global desktop
+                coordinates), or an error.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "coordinates": coordinates,
+        }
+        validated_params = ModelToScreenParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "ModelToScreen", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = ModelToScreenResult.model_validate(response_dict)
+        return validated_response.screenPoints
+
     def quit_archicad(self) -> FailedExecutionResult | SuccessfulExecutionResult:
         """
         Performs a quit operation on the currently running Archicad instance.
@@ -380,6 +654,105 @@ class ApplicationCommands:
         response_dict = self._core.post_tapir_command("QuitArchicad")
         validated_response = TypeAdapter(QuitArchicadResult).validate_python(response_dict)
         return validated_response
+
+    def rebuild_current_database(self) -> FailedExecutionResult | SuccessfulExecutionResult:
+        """
+        Rebuilds the current database, the one the API works on (see ChangeWindow). Requires
+        Archicad 27 or later.
+
+        Returns:
+            FailedExecutionResult | SuccessfulExecutionResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        response_dict = self._core.post_tapir_command("RebuildCurrentDatabase")
+        validated_response = TypeAdapter(RebuildCurrentDatabaseResult).validate_python(response_dict)
+        return validated_response
+
+    def redraw_current_database(self) -> FailedExecutionResult | SuccessfulExecutionResult:
+        """
+        Redraws the current database, even when its window is in the background. Only the
+        visible region of its window is updated.
+
+        Returns:
+            FailedExecutionResult | SuccessfulExecutionResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        response_dict = self._core.post_tapir_command("RedrawCurrentDatabase")
+        validated_response = TypeAdapter(RedrawCurrentDatabaseResult).validate_python(response_dict)
+        return validated_response
+
+    def run_action_center_checks(
+        self, checks: None | list[ActionCenterCheck] = None
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Runs the given checks of the Action Center (by default the hotlink check). A successful
+        result means the check ran, not that nothing was found: Archicad does not report the
+        outcome to the caller, it shows the Action Center tab when the check found an issue.
+
+        Args:
+            checks (None | list[ActionCenterCheck]): The Action Center checks to run, in this
+                order. Omitted means ["Hotlinks"]. "Hotlinks" is available on every Archicad
+                version; "All", "Libraries", "Drawings" and "Licenses" only on Archicad 25,
+                later versions return an error for them in their execution result.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "checks": checks,
+        }
+        validated_params = RunActionCenterChecksParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "RunActionCenterChecks", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = RunActionCenterChecksResult.model_validate(response_dict)
+        return validated_response.executionResults
+
+    def screen_to_model(self, screen_points: list[ScreenPointInput]) -> list[Coordinate2D | ErrorItem]:
+        """
+        Converts pixel positions local to the current Archicad view window to 2D model
+        coordinates of the current database, using the current window's size, drawing scale and
+        zoom. It is a 2D mapping: it does not reconstruct a 3D point, and several model
+        coordinates can map to the same pixel.
+
+        Args:
+            screen_points (list[ScreenPointInput]): Pixel positions local to the current
+                Archicad view window (not global desktop coordinates).
+
+        Returns:
+            list[Coordinate2D | ErrorItem]: One item per input screen point, in the same order:
+                the 2D model coordinate in the current database (meters), or an error. This is a
+                2D mapping: it does not reconstruct a 3D point, and in a 3D window the result is
+                not a point of the model.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "screenPoints": screen_points,
+        }
+        validated_params = ScreenToModelParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "ScreenToModel", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = ScreenToModelResult.model_validate(response_dict)
+        return validated_response.coordinates
 
     def set_3d_cutaway_status(
         self, cutaway_enabled: None | bool = None, cutting_planes_visible: None | bool = None
@@ -411,6 +784,33 @@ class ApplicationCommands:
             "Set3DCutawayStatus", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = TypeAdapter(Set3DCutawayStatusResult).validate_python(response_dict)
+        return validated_response
+
+    def set_archicad_visibility(self, is_visible: bool) -> FailedExecutionResult | SuccessfulExecutionResult:
+        """
+        Hides or shows the Archicad application, e.g. to keep it out of the way while a batch
+        runs. A script that hides Archicad must show it again, also when the script fails (e.g.
+        in a finally block). Supported on Windows only; on macOS it returns an error.
+
+        Args:
+            is_visible (bool): True shows the Archicad application, false hides it.
+
+        Returns:
+            FailedExecutionResult | SuccessfulExecutionResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "isVisible": is_visible,
+        }
+        validated_params = SetArchicadVisibilityParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "SetArchicadVisibility", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = TypeAdapter(SetArchicadVisibilityResult).validate_python(response_dict)
         return validated_response
 
     def set_current_window_drawing_scale(

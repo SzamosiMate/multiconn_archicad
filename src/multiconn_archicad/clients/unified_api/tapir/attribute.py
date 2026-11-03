@@ -6,6 +6,8 @@ from typing import TYPE_CHECKING
 from pydantic import TypeAdapter
 
 from multiconn_archicad.models.tapir.commands import (
+    ConsolidateFillsResult,
+    ConsolidateLinesResult,
     CreateAttributeFoldersParameters,
     CreateAttributeFoldersResult,
     CreateBuildingMaterialsParameters,
@@ -16,6 +18,8 @@ from multiconn_archicad.models.tapir.commands import (
     CreateFillsResult,
     CreateGraphicOverrideCombinationsParameters,
     CreateGraphicOverrideCombinationsResult,
+    CreateGraphicOverrideRuleGroupsParameters,
+    CreateGraphicOverrideRuleGroupsResult,
     CreateGraphicOverrideRulesParameters,
     CreateGraphicOverrideRulesResult,
     CreateLayerCombinationsParameters,
@@ -44,6 +48,8 @@ from multiconn_archicad.models.tapir.commands import (
     DeleteGraphicOverrideRuleGroupsResult,
     DeleteGraphicOverrideRulesParameters,
     DeleteGraphicOverrideRulesResult,
+    DeleteUserDataOfAttributesParameters,
+    DeleteUserDataOfAttributesResult,
     GetAttributesByTypeParameters,
     GetAttributesByTypeResult,
     GetAttributesFromProjectParameters,
@@ -75,14 +81,23 @@ from multiconn_archicad.models.tapir.commands import (
     GetMEPSystemsResult,
     GetPenTablesParameters,
     GetPenTablesResult,
+    GetPensParameters,
+    GetPensResult,
     GetProfilesParameters,
     GetProfilesResult,
     GetSurfacesParameters,
     GetSurfacesResult,
+    GetUsedAttributesResult,
+    GetUserDataOfAttributesParameters,
+    GetUserDataOfAttributesResult,
     GetZoneCategoriesParameters,
     GetZoneCategoriesResult,
+    ModifyGraphicOverrideCombinationsParameters,
+    ModifyGraphicOverrideCombinationsResult,
     ModifyGraphicOverrideRulesParameters,
     ModifyGraphicOverrideRulesResult,
+    ModifyPensParameters,
+    ModifyPensResult,
     MoveAttributesAndFoldersParameters,
     MoveAttributesAndFoldersResult,
     MoveGraphicOverrideRulesParameters,
@@ -91,6 +106,12 @@ from multiconn_archicad.models.tapir.commands import (
     RenameAttributeFoldersResult,
     RenameGraphicOverrideRuleGroupsParameters,
     RenameGraphicOverrideRuleGroupsResult,
+    SetGraphicOverrideRuleGroupOrderParameters,
+    SetGraphicOverrideRuleGroupOrderResult,
+    SetGraphicOverrideRuleOrderParameters,
+    SetGraphicOverrideRuleOrderResult,
+    SetUserDataOfAttributesParameters,
+    SetUserDataOfAttributesResult,
 )
 from multiconn_archicad.models.tapir.types import (
     AttributeFolder,
@@ -98,6 +119,7 @@ from multiconn_archicad.models.tapir.types import (
     AttributeHeadersWrapper,
     AttributeIdArrayItem,
     AttributeType,
+    AttributeUserData,
     AttributesToDeleteItem,
     BuildingMaterialAttribute,
     BuildingMaterialAttributeField,
@@ -115,6 +137,7 @@ from multiconn_archicad.models.tapir.types import (
     GraphicOverrideCombinationData,
     GraphicOverrideCombinationDetails,
     GraphicOverrideCombinationIdArrayItem,
+    GraphicOverrideCombinationModificationData,
     GraphicOverrideRule,
     GraphicOverrideRuleData,
     GraphicOverrideRuleGroup,
@@ -122,6 +145,7 @@ from multiconn_archicad.models.tapir.types import (
     GraphicOverrideRuleIdArrayItem,
     GraphicOverrideRuleModificationData,
     GraphicOverrideRuleMove,
+    GraphicOverrideRuleOrder,
     GraphicOverrideRuleReference,
     LayerAttribute,
     LayerAttributeField,
@@ -134,9 +158,12 @@ from multiconn_archicad.models.tapir.types import (
     MEPSystemAttribute,
     MEPSystemAttributeField,
     MEPSystemData,
+    PenData,
     PenTableAttribute,
     PenTableAttributeField,
     PenTableData,
+    PenTablePen,
+    PenTarget,
     ProfileAttribute,
     ProfileAttributeField,
     ProfileData,
@@ -145,6 +172,7 @@ from multiconn_archicad.models.tapir.types import (
     SurfaceAttribute,
     SurfaceAttributeField,
     SurfaceData,
+    UserDataPair,
     ZoneCategoryAttribute,
     ZoneCategoryAttributeField,
     ZoneCategoryData,
@@ -157,6 +185,42 @@ if TYPE_CHECKING:
 class AttributeCommands:
     def __init__(self, core: CoreCommands):
         self._core = core
+
+    def consolidate_fills(self) -> ConsolidateFillsResult:
+        """
+        Runs the Fill Consolidation menu command of Archicad on the current window, as the menu
+        does, and reports whether it ran together with what Archicad answered. Available from
+        Archicad 27.
+
+        Returns:
+            ConsolidateFillsResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        response_dict = self._core.post_tapir_command("ConsolidateFills")
+        validated_response = ConsolidateFillsResult.model_validate(response_dict)
+        return validated_response
+
+    def consolidate_lines(self) -> ConsolidateLinesResult:
+        """
+        Runs the Line Consolidation menu command of Archicad on the current window, as the menu
+        does, and reports whether it ran together with what Archicad answered. Available from
+        Archicad 27.
+
+        Returns:
+            ConsolidateLinesResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        response_dict = self._core.post_tapir_command("ConsolidateLines")
+        validated_response = ConsolidateLinesResult.model_validate(response_dict)
+        return validated_response
 
     def create_attribute_folders(
         self, attribute_folders: list[AttributeFolder]
@@ -308,6 +372,36 @@ class AttributeCommands:
         )
         validated_response = CreateGraphicOverrideCombinationsResult.model_validate(response_dict)
         return validated_response.graphicOverrideCombinationIds
+
+    def create_graphic_override_rule_groups(
+        self, rule_group_names: list[str]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Creates empty graphic override rule groups. Available from Archicad 27.
+
+        Args:
+            rule_group_names (list[str]): The names of the rule groups to create, unique within
+                the project. The groups are created empty.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "ruleGroupNames": rule_group_names,
+        }
+        validated_params = CreateGraphicOverrideRuleGroupsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "CreateGraphicOverrideRuleGroups",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+        )
+        validated_response = CreateGraphicOverrideRuleGroupsResult.model_validate(response_dict)
+        return validated_response.executionResults
 
     def create_graphic_override_rules(
         self, graphic_override_rules: list[GraphicOverrideRuleData]
@@ -742,6 +836,35 @@ class AttributeCommands:
         validated_response = DeleteGraphicOverrideRulesResult.model_validate(response_dict)
         return validated_response.executionResults
 
+    def delete_user_data_of_attributes(
+        self, attribute_ids: list[AttributeIdArrayItem]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Removes the user data of attributes, every key at once. Archicad does not record this
+        change as an undo step, so Undo does not revert it.
+
+        Args:
+            attribute_ids (list[AttributeIdArrayItem]): A list of attributes.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: One result per attribute,
+                in the input order.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "attributeIds": attribute_ids,
+        }
+        validated_params = DeleteUserDataOfAttributesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "DeleteUserDataOfAttributes", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = DeleteUserDataOfAttributesResult.model_validate(response_dict)
+        return validated_response.executionResults
+
     def get_attributes_by_type(self, attribute_type: AttributeType) -> AttributeHeadersWrapper | ErrorItem:
         """
         Returns the details of every attribute of the given type. From Archicad 30 an attribute
@@ -776,12 +899,16 @@ class AttributeCommands:
         Reads the attributes of the given types from another project or template file without
         opening it, for example to compare them with the attributes of the open project. Nothing
         is imported into the open project. The names are the legacy 8-bit names, so non-ASCII
-        characters may not come through. Available from Archicad 27.
+        characters may not come through. Archicad does not read Layer, Surface, BuildingMaterial
+        and MEPSystem attributes from a file that is not open: these types get an error item
+        instead of an empty list. Available from Archicad 27.
 
         Args:
             project_file_path (str): The absolute path of the project or template file (for
                 example .pln or .tpl) to read the attributes from.
-            attribute_types (list[AttributeType]): The attribute types to read.
+            attribute_types (list[AttributeType]): The attribute types to read. Layer, Surface,
+                BuildingMaterial and MEPSystem cannot be read from a file that is not open; they
+                get an error item.
 
         Returns:
             ErrorItem | ProjectAttributes
@@ -1220,6 +1347,36 @@ class AttributeCommands:
         validated_response = GetPenTablesResult.model_validate(response_dict)
         return validated_response.penTables
 
+    def get_pens(self, indices: None | list[int] = None) -> list[ErrorItem | PenTablePen]:
+        """
+        Returns the given pens, or all of them, in effect in the current window: index, color,
+        width and description. It also works when the pens in effect are not a Pen Table
+        attribute. Available from Archicad 27.
+
+        Args:
+            indices (None | list[int]): The indices of the pens to return, from 1 to the number
+                of pens (GetCurrentPenTable returns penCount). If omitted, every pen is
+                returned.
+
+        Returns:
+            list[ErrorItem | PenTablePen]: The pens in effect in the current window, or errors.
+                The order is that of the given indices.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "indices": indices,
+        }
+        validated_params = GetPensParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetPens", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetPensResult.model_validate(response_dict)
+        return validated_response.pens
+
     def get_profiles(
         self, attribute_ids: list[AttributeIdArrayItem], fields: None | list[ProfileAttributeField] = None
     ) -> list[ErrorItem | ProfileAttribute]:
@@ -1284,6 +1441,56 @@ class AttributeCommands:
         validated_response = GetSurfacesResult.model_validate(response_dict)
         return validated_response.surfaces
 
+    def get_used_attributes(self) -> GetUsedAttributesResult:
+        """
+        Gets the attributes in use, as Archicad reports them for the usedAttributes JSON query:
+        parsed into usedAttributes when the report is a JSON object, otherwise as text in raw.
+        Helps to find the attributes DeleteAttributes can remove before a handover. Available
+        from Archicad 27.
+
+        Returns:
+            GetUsedAttributesResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        response_dict = self._core.post_tapir_command("GetUsedAttributes")
+        validated_response = GetUsedAttributesResult.model_validate(response_dict)
+        return validated_response
+
+    def get_user_data_of_attributes(
+        self, attribute_ids: list[AttributeIdArrayItem]
+    ) -> list[AttributeUserData | ErrorItem]:
+        """
+        Reads the key-value pairs stored on attributes by SetUserDataOfAttributes. An attribute
+        without user data returns no pairs; one holding user data in another layout returns an
+        error.
+
+        Args:
+            attribute_ids (list[AttributeIdArrayItem]): A list of attributes.
+
+        Returns:
+            list[AttributeUserData | ErrorItem]: One item per attribute, in the input order: the
+                pairs stored on the attribute (none when it holds no user data), or an error
+                when the attribute was not found or holds user data in another layout.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "attributeIds": attribute_ids,
+        }
+        validated_params = GetUserDataOfAttributesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetUserDataOfAttributes", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetUserDataOfAttributesResult.model_validate(response_dict)
+        return validated_response.userDataOfAttributes
+
     def get_zone_categories(
         self, attribute_ids: list[AttributeIdArrayItem], fields: None | list[ZoneCategoryAttributeField] = None
     ) -> list[ErrorItem | ZoneCategoryAttribute]:
@@ -1314,6 +1521,37 @@ class AttributeCommands:
         validated_response = GetZoneCategoriesResult.model_validate(response_dict)
         return validated_response.zoneCategories
 
+    def modify_graphic_override_combinations(
+        self, graphic_override_combinations: list[GraphicOverrideCombinationModificationData]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Modifies the name and/or the rules of graphic override combinations. Omitted fields are
+        kept. Available from Archicad 27.
+
+        Args:
+            graphic_override_combinations (list[GraphicOverrideCombinationModificationData]):
+                The graphic override combinations to modify.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "graphicOverrideCombinations": graphic_override_combinations,
+        }
+        validated_params = ModifyGraphicOverrideCombinationsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "ModifyGraphicOverrideCombinations",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+        )
+        validated_response = ModifyGraphicOverrideCombinationsResult.model_validate(response_dict)
+        return validated_response.executionResults
+
     def modify_graphic_override_rules(
         self, graphic_override_rules: list[GraphicOverrideRuleModificationData]
     ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
@@ -1343,6 +1581,41 @@ class AttributeCommands:
             "ModifyGraphicOverrideRules", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = ModifyGraphicOverrideRulesResult.model_validate(response_dict)
+        return validated_response.executionResults
+
+    def modify_pens(
+        self, pens: list[PenData], target: None | PenTarget = None
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Changes the color, width and description of single pens of the Pen Table in effect for
+        the model views (the default) or the layouts, keeping every other pen as it is. Only the
+        given fields of a listed pen are changed. In a Teamwork project the PenTables lockable
+        object set must be reserved first (see ReserveLockableObjectSet).
+
+        Args:
+            pens (list[PenData]): The pens to change in the active Pen Table. Only the given
+                fields (color, width, description) of a listed pen are changed; every other pen
+                of the table is left as it is.
+            target (None | PenTarget)
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "pens": pens,
+            "target": target,
+        }
+        validated_params = ModifyPensParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "ModifyPens", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = ModifyPensResult.model_validate(response_dict)
         return validated_response.executionResults
 
     def move_attributes_and_folders(
@@ -1473,4 +1746,109 @@ class AttributeCommands:
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
         )
         validated_response = RenameGraphicOverrideRuleGroupsResult.model_validate(response_dict)
+        return validated_response.executionResults
+
+    def set_graphic_override_rule_group_order(
+        self, rule_group_names: list[str]
+    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+        """
+        Sets the order of the graphic override rule groups, found by name. The groups not listed
+        keep their order and follow the listed ones. Available from Archicad 27.
+
+        Args:
+            rule_group_names (list[str]): The names of the rule groups in their new order. The
+                groups not listed keep their order and follow the listed ones.
+
+        Returns:
+            FailedExecutionResult | SuccessfulExecutionResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "ruleGroupNames": rule_group_names,
+        }
+        validated_params = SetGraphicOverrideRuleGroupOrderParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "SetGraphicOverrideRuleGroupOrder",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+        )
+        validated_response = TypeAdapter(SetGraphicOverrideRuleGroupOrderResult).validate_python(response_dict)
+        return validated_response
+
+    def set_graphic_override_rule_order(
+        self, graphic_override_rule_groups: list[GraphicOverrideRuleOrder]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Sets the order of the rules in graphic override rule groups, found by name. The listed
+        rules come first, in the given order; the other rules of the group keep their order
+        after them. Available from Archicad 27.
+
+        Args:
+            graphic_override_rule_groups (list[GraphicOverrideRuleOrder]): The rule groups to
+                reorder, in the shape GetGraphicOverrideRuleGroups returns them.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "graphicOverrideRuleGroups": graphic_override_rule_groups,
+        }
+        validated_params = SetGraphicOverrideRuleOrderParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "SetGraphicOverrideRuleOrder", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = SetGraphicOverrideRuleOrderResult.model_validate(response_dict)
+        return validated_response.executionResults
+
+    def set_user_data_of_attributes(
+        self,
+        attribute_ids: list[AttributeIdArrayItem],
+        pairs: None | list[UserDataPair] = None,
+        keys_to_delete: None | list[str] = None,
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Stores string values under keys in the user data of attributes, for scripts to keep
+        their own state on an attribute. The given pairs are merged into what each attribute
+        already holds: a key that exists gets the new value, other keys are left as they are,
+        and the keys listed in keysToDelete are removed. Prefix the keys with the script's name
+        so that scripts do not overwrite each other's data. User data in another layout is left
+        unchanged and reported as an error. Archicad does not record this change as an undo
+        step, so Undo does not revert it.
+
+        Args:
+            attribute_ids (list[AttributeIdArrayItem]): A list of attributes.
+            pairs (None | list[UserDataPair]): The key-value pairs to store on each attribute. A
+                key the attribute already holds gets the new value; other keys are left as they
+                are.
+            keys_to_delete (None | list[str]): The keys to remove from the user data. A key that
+                is not stored is ignored. Applied after pairs.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: One result per attribute,
+                in the input order.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "attributeIds": attribute_ids,
+            "pairs": pairs,
+            "keysToDelete": keys_to_delete,
+        }
+        validated_params = SetUserDataOfAttributesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "SetUserDataOfAttributes", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = SetUserDataOfAttributesResult.model_validate(response_dict)
         return validated_response.executionResults

@@ -21,6 +21,7 @@ def main() -> None:
         keep_model_order=False,
         use_union_operator=True,
         use_double_quotes=True,
+        # Keep scalar and collection schemas inlined into Pydantic fields.
         collapse_root_models=True,
         field_constraints=True,
         use_annotated=False,
