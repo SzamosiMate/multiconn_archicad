@@ -12,7 +12,7 @@ from types import UnionType
 from multiconn_archicad.models.tapir import commands as tapir_commands, types as tapir_types
 from multiconn_archicad.models.official import commands as official_commands, types as official_types
 
-from code_generation.shared.utils import bound_graphic_override_criteria, camel_to_snake
+from code_generation.shared.utils import bound_graphic_override_criteria, camel_to_snake, serialize_test_schema
 from code_generation.tapir.paths import tapir_paths
 from code_generation.official.paths import official_paths
 
@@ -129,7 +129,7 @@ class TestGenerator:
             "$defs": minimal_definitions,
             "$ref": f"#/$defs/{model_name}",
         }
-        return repr(json.dumps(temp_schema, separators=(",", ":")))
+        return repr(serialize_test_schema(temp_schema))
 
     def _generate_test_for_command(self, command_details: dict) -> str:
         source = command_details["source"]
@@ -143,12 +143,12 @@ class TestGenerator:
         if params_model_name:
             params_schema_str = self._get_minimal_schema_for_model(params_model_name, source)
             if params_schema_str != "None":
-                given_params.append(f"input_data=from_schema(json.loads({params_schema_str}))")
+                given_params.append(f"input_data=schema_strategy({params_schema_str})")
                 given_args.append("input_data: dict")
         if result_model_name:
             result_schema_str = self._get_minimal_schema_for_model(result_model_name, source)
             if result_schema_str != "None":
-                given_params.append(f"mock_response=from_schema(json.loads({result_schema_str}))")
+                given_params.append(f"mock_response=schema_strategy({result_schema_str})")
                 given_args.append("mock_response: dict")
 
         decorators = f"@given({', '.join(given_params)})" if given_params else ""
@@ -256,13 +256,12 @@ class TestGenerator:
 # Unit tests for all Unified API methods of the '{source}' source.
 import os
 import re
-import json
 from unittest.mock import MagicMock
 import pytest
 from pydantic import TypeAdapter
 from hypothesis import given, settings, HealthCheck
-from hypothesis_jsonschema import from_schema
 from tests.helpers import normalize_for_comparison
+from tests.schema_strategies import schema_strategy
 {import_block}
 from multiconn_archicad.models.{source} import commands, types
 NUM_EXAMPLES = int(os.getenv("HYPOTHESIS_NUM_EXAMPLES", 1))

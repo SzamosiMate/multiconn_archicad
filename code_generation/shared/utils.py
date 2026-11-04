@@ -1,6 +1,12 @@
+import json
 import re
 from copy import deepcopy
 from typing import Any
+
+
+def serialize_test_schema(schema: dict[str, Any]) -> str:
+    """Give identical test schemas the same strategy cache key."""
+    return json.dumps(schema, sort_keys=True, separators=(",", ":"))
 
 
 def camel_to_snake(name: str) -> str:
