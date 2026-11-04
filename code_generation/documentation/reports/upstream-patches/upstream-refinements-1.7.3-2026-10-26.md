@@ -13,6 +13,19 @@ Run started: **2026-10-26**. Endpoint completed: **publish and create the upstre
 The [active queue](../../schema-patch-tracking.md) holds source/PR state, deferred consumers and retirement conditions. The [condensed 1.7.3 generation record](../codegen/tapir-1.7.3.md#temporary) preserves the decisions; the expanded historical operation/path inventory remains at `776808e:code_generation/documentation/reports/codegen/tapir-1.7.3.md` in Git and is not repeated here.
 
 
+## Merge follow-up — 2026-11-04
+
+Merged upstream `main` at `173e4fa0fdd37653a55832b5a1ad8423196e2082` independently into [PR #1557](https://github.com/ENZYME-APD/tapir-archicad-automation/pull/1557) and published [6729a322](https://github.com/SzamosiMate/tapir-archicad-automation/commit/6729a322353207b3b2c965dd226224b908340592) with a normal push. The prior PR head `1cbfc84f0cac972605320bfd499d63389ee1a583` is the first parent. The proposal retains 92 new shared definitions and the existing deferrals.
+
+Rebuilt `DetailsOfElement` from the current inline response, preserving the optional info and unique ID fields and the current nested detail schemas. Retained the upstream baseline positioning explanation in `StairBaselineData`. Kept the shared reservation state and user references and preserved current upstream reservation wording. `ElementReservationStatus/properties/owner/description` is now "The Teamwork owner of the element. In Teamwork the owner is the user who has reserved the element, so this is the same user as reservedBy; kept for compatibility. Left out when the element is free." Combined the independent shared definition additions from both branches.
+
+The installed merge checker ran Tapir's generator afresh on the exact synthetic merge and its base. It found zero structural differences across 734 command inputs and responses and 684 existing common definitions. The renderer processed 1,356 schemas and 800 description pairs. Source and whitespace checks passed. The diff relative to upstream consists of schema edits and common-schema opt-ins. Build and live Archicad results in the historical sections apply to the earlier source snapshots.
+
+Updated description pairs follow. The appendix records the earlier wording for comparison.
+
+- `ModifyMEPRoutingElementsParameters/properties/routingElementsData/items/properties/connectionStyle/description` "New connection style applied to all segments."
+- `CommonSchemaDefinitions.json#/MEPConnectionStyle/description` "How the pieces of an MEP routing segment, or an MEP port, are connected. For pipes, the settings dialog of Archicad 29 shows SimpleBody as Welded, and Welded is refused on a pipe route."
+
 ## Rebase follow-up — 2026-11-02
 
 Rebased the existing PR independently onto upstream main `d3bc733d110895abd222e1f288cdf11b939523f4`; published fork head `1cbfc84f0cac972605320bfd499d63389ee1a583` with an explicit lease. GitHub reports the PR mergeable. A merge-tree check between the two rebased PR heads reports a conflict in `CommonSchemaDefinitions.json`; after either PR merges, reconcile the other against the new main. The rebased branch retains 92 new common definitions.

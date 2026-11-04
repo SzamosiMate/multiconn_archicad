@@ -23,3 +23,19 @@ Distinguish command wire behavior, schema acceptance, generated public API and p
 Use released unpatched schemas as evidence for current client input, and interpreted current source for proposed upstream contracts. Normalize Tapir `#/Name` references to MultiConn `#/$defs/Name` for comparison, preserving siblings and annotations. A generic expander does not necessarily reproduce Archicad or renderer behavior.
 
 Preserve `oneOf` versus `anyOf`, GUID-only versus error-union identifiers, and required versus optional variants. Similar generated Python is insufficient proof of equivalent schemas.
+
+## Merge check
+
+From the MultiConn checkout, pass the Tapir checkout and the already-fetched base ref. Use Python 3.12 or newer and Git with `merge-tree --write-tree` support.
+
+```text
+python .agents/skills/multiconn-upstream-patches/scripts/check_schema_merge.py --repo "<Tapir checkout>" --base upstream/main --head HEAD
+```
+
+Pass the actual fetched upstream ref or SHA if it has a different name. `--head` selects a committed proposal. Use `--scratch "<existing writable directory>"` when the system temporary directory is unavailable. The script prints the two commit IDs and synthetic merge tree. It generates both outputs with Tapir's generator and keeps the snapshots and merge objects in temporary storage. This avoids comparing stale files under `docs/archicad-addon` and leaves the checkouts and remote branches untouched.
+
+- Exit `0` means the input and response contracts and existing shared definitions compare equal. New named definitions are allowed and their references are checked.
+- Exit `1` reports structural differences by path. Review every difference, including any intended breaking correction. Match each intended change to its source evidence and report it explicitly. Do not waive a whole command when only one path was intended to change.
+- Exit `2` means the check could not finish, for example because the merge conflicts, the generator fails, a JSON key is duplicated, or a reference cannot resolve. Resolve the underlying problem and rerun the check.
+
+The comparison ignores prose annotations and handles the required-only object selectors used by Tapir. It follows references while comparing constraint siblings and recursive schemas. It checks the documentation generator's target Archicad version. Continue to review annotations, common-schema access and execution separately, and build or run live checks when the change warrants them.

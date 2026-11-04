@@ -3,6 +3,19 @@
 Run started **2026-10-20** using MultiConn's `multiconn-upstream-patches` skill and its default publish endpoint.
 
 
+## Merge follow-up — 2026-11-04
+
+Merged upstream `main` at `173e4fa0fdd37653a55832b5a1ad8423196e2082` independently into [PR #1386](https://github.com/ENZYME-APD/tapir-archicad-automation/pull/1386) and published [e72078d2](https://github.com/SzamosiMate/tapir-archicad-automation/commit/e72078d2440e70f57fbedfe6d861bc40b18acbdf) with a normal push. The prior PR head `c7d902d29356946b6433791413298ab36c84784c` is the first parent. The proposal retains 55 new shared definitions and the existing deferrals.
+
+Rebuilt `AxonometricProjectionParameters` from the current inline response, including required `projectionType` and `azimuth`. The shared description describes the projection, and the caller still documents when the field is present. Kept the new upstream graphic override criteria next to the named wall geometry references. Combined the independent shared definition additions from both branches.
+
+The installed merge checker ran Tapir's generator afresh on the exact synthetic merge and its base. It found zero structural differences across 734 command inputs and responses and 684 existing common definitions. The renderer processed 1,356 schemas and 826 description pairs. Source and whitespace checks passed. The diff relative to upstream consists of schema edits and common-schema opt-ins. Build and live Archicad results in the historical sections apply to the earlier source snapshots.
+
+Updated description pairs follow. The appendix records the earlier wording for comparison.
+
+- `GraphicOverrideCriterion/properties/elementType/description` "Matches elements created with this tool."
+- `CommonSchemaDefinitions.json#/GraphicOverrideElementType/description` "The tool an element was created with. Window, Door, Zone, Label, Object, Lamp and GridElement were checked on Archicad 27 and 29 against the override Archicad applies to each element; Skylight, CornerWindow, WallEnd and the MEP parts are recognized by Archicad but were not checked on elements. Sub-elements (curtain wall panels, stair treads, railing posts, ...) and groups are not offered by the criteria editor: a rule on CurtainWall, Stair or Railing applies to the whole element."
+
 ## Rebase follow-up — 2026-11-02
 
 Rebased the existing PR independently onto upstream main `d3bc733d110895abd222e1f288cdf11b939523f4`; published fork head `c7d902d29356946b6433791413298ab36c84784c` with an explicit lease. GitHub reports the PR mergeable. A merge-tree check between the two rebased PR heads reports a conflict in `CommonSchemaDefinitions.json`; after either PR merges, reconcile the other against the new main. The rebased branch retains 55 new common definitions.

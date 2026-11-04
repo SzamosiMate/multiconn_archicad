@@ -62,6 +62,8 @@ Create the PR only after the user approves the presented proposal and asks to su
 
 Interpret sources using Tapir's current documentation tooling in memory or isolated temporary output. Cache the baseline for the run. Check reference resolution, name collisions, command access to common definitions and the complete structural difference against that baseline. Do not hand-edit or commit generated docs.
 
+Before pushing a committed schema proposal, run the [schema merge check](scripts/check_schema_merge.py) against the fetched upstream base and proposal head. It generates schemas from the base and the synthetic merge in isolation. This catches schema regressions that Git can merge cleanly. Repeat it when the base or the proposal's schemas change, including after conflict resolution. See [merge check usage](references/schema-review.md#merge-check) for the command and how to review intentional changes.
+
 Equivalent changes preserve fields, types, requiredness, additional properties, bounds, enum order and union branches; review annotations separately. For a correction/tightening, allow only the justified acceptance change and explain it. Input validation can change behavior before unchanged execution code runs.
 
 Do not use indiscriminate expansion as proof: preserve reference siblings, recursive definitions and union semantics. Check the actual renderer when descriptions move. Run focused annotation/renderer checks after prose-only edits; repeat the full contract comparison when source contracts or the rebase baseline change. Distinguish source checks, SDK builds and live Archicad tests, and put their evidence/limitations in the run report.

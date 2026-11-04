@@ -15,9 +15,11 @@ different release.
   `Utilities API`, `Connection lifecycle`, `HTTP transports`, or `Fixes`. Include
   only sections that have substance. A small fix release can be a short paragraph
   and a few bullets. Do not force command sections onto a non-command release.
-- When new commands are added, use a two-column `Command | Description` table. Put the
-  exact command name in backticks and describe the action it enables in one
-  sentence. Group commands only when that makes a long list easier to read.
+- For 1 to 39 new commands, use a two-column `Command | Description` table.
+  Put the exact command name in backticks and describe its action in one sentence.
+- For 40 or more new commands, use a condensed `Category | New commands` table.
+  Count additions in each category against the previous release and give the
+  total. Keep individual command entries out of the inventory.
 - Describe changed behavior in plain, complete bullets. Do not prefix every
   bullet with a bold title, category label, or repeated command heading.
 - No emojis, decorative symbols, marketing language, or claims such as
