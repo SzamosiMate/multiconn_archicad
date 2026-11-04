@@ -14,7 +14,8 @@ Run commands from the repository root with the project environment active. On Wi
 | Regenerate Official models from downloaded inputs | `python -m code_generation.official.run_official_pipeline` |
 | Refresh Official downloaded inputs explicitly | `python -m code_generation.official.model_generators.01_crawl_site` |
 | Regenerate unified methods and method tests | `python -m code_generation.unified.api_generator.run_pipeline` |
-| Execute the full project test suite | `python -m pytest tests -q` |
+| Run the routine suite used by PR and main CI | `python -m pytest` |
+| Validate generated schemas after unified generation | `python -m pytest --schema-tests=deep tests/generated tests/code_generation` |
 
 The model pipelines generate tests; they do not execute pytest. Neither model pipeline automatically runs unified generation. Finish a Tapir update with unified generation and test execution after the model audit/repair loop is clean. Tapir fetching needs network access; mock HTTP integration tests need localhost socket access.
 
@@ -99,7 +100,9 @@ Hypothesis generation uses copied test schemas with targeted recursion bounds or
 
 After audit passes, review added/changed public models, consumers, alias preservation, requiredness, enum identity and return unwrapping. Distinguish the checked-in diff baseline, initial working changes and the actual previous client API. An upstream difference already corrected by a local patch is not a new client migration. Widening wire enum values can still replace a Python enum class and affect member equality or validation.
 
-Run pytest after unified generation. Scope full-suite collection to `tests/` to avoid scratch snapshots. Distinguish generated/mocked checks from live Archicad validation, formatting from lint, and same-process reproducibility from cross-process checks. Documentation-only changes do not require rerunning generation.
+Plain `pytest` runs the handwritten, integrity, and deterministic generated tests plus the fixed sample of generated property tests in `tests/conftest.py`. The generated sample uses one example per test. After unified generation, run the deep command above for every generated property test in the selected paths with a ten-example budget. For a Tapir-only update, select `tests/generated/test_generated_tapir_models.py`, `tests/generated/test_generated_tapir_methods.py`, `tests/generated/test_model_integrity.py`, and `tests/code_generation`. Include both APIs when shared generator logic changes. Use the deep option with a test ID to reproduce a case outside the routine sample.
+
+Distinguish generated/mocked checks from live Archicad validation, formatting from lint, and same-process reproducibility from cross-process checks. Documentation-only changes do not require rerunning generation.
 
 ## Output and record locations
 

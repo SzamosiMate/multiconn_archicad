@@ -3,7 +3,7 @@
 
 import pytest
 from pydantic import TypeAdapter
-from hypothesis import given, settings, HealthCheck
+from hypothesis import given
 from typeguard import check_type
 from tests.schema_strategies import schema_strategy
 
@@ -11,9 +11,6 @@ from tests.schema_strategies import schema_strategy
 import multiconn_archicad.models.tapir.commands as models
 import multiconn_archicad.dicts.tapir.commands as dicts
 
-# Increase deadline and disable the 'too_slow' health check for complex models.
-settings.register_profile("ci", deadline=1000, suppress_health_check=[HealthCheck.too_slow])
-settings.load_profile("ci")
 pytestmark = pytest.mark.generated
     
 

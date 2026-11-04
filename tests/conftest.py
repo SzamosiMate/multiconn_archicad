@@ -8,6 +8,7 @@ import concurrent.futures
 from pathlib import Path
 from typing import Dict, Any, Callable
 import pytest
+from hypothesis import HealthCheck, is_hypothesis_test, settings
 from pydantic import BaseModel
 
 import multiconn_archicad.orchestration.multi_conn as multi_conn
@@ -17,6 +18,57 @@ from multiconn_archicad.models import config
 from multiconn_archicad.models.mixins import _MODEL_KEYS_CACHE
 
 FIXTURES_DIR = Path(__file__).parent / "fixtures"
+
+# Pair representative command tests with their request and response model tests.
+SCHEMA_SMOKE_TESTS = {
+    "test_generated_official_methods.py": {
+        "test_get_classifications_of_elements_logic",
+        "test_get_elements_by_type_logic",
+        "test_get_navigator_item_tree_logic",
+        "test_get_property_values_of_elements_logic",
+    },
+    "test_generated_official_models.py": {
+        "test_instantiate_GetClassificationsOfElementsParameters",
+        "test_instantiate_GetClassificationsOfElementsResult",
+        "test_instantiate_GetElementsByTypeParameters",
+        "test_instantiate_GetElementsByTypeResult",
+        "test_instantiate_GetNavigatorItemTreeParameters",
+        "test_instantiate_GetNavigatorItemTreeResult",
+        "test_instantiate_GetPropertyValuesOfElementsParameters",
+        "test_instantiate_GetPropertyValuesOfElementsResult",
+    },
+    "test_generated_tapir_methods.py": {
+        "test_create_columns_logic",
+        "test_get_classifications_of_elements_logic",
+        "test_get_element_user_data_logic",
+        "test_get_favorite_folders_logic",
+        "test_get_mep_preference_table_rows_logic",
+        "test_measure_texts_logic",
+    },
+    "test_generated_tapir_models.py": {
+        "test_runtime_validation_CreateColumnsParameters",
+        "test_runtime_validation_CreateColumnsResult",
+        "test_runtime_validation_GetClassificationsOfElementsParameters",
+        "test_runtime_validation_GetClassificationsOfElementsResult",
+        "test_runtime_validation_GetElementUserDataParameters",
+        "test_runtime_validation_GetElementUserDataResult",
+        "test_runtime_validation_GetFavoriteFoldersResult",
+        "test_runtime_validation_GetMEPPreferenceTableRowsParameters",
+        "test_runtime_validation_GetMEPPreferenceTableRowsResult",
+        "test_runtime_validation_MeasureTextsParameters",
+        "test_runtime_validation_MeasureTextsResult",
+    },
+}
+
+
+def pytest_addoption(parser):
+    parser.addoption(
+        "--schema-tests",
+        choices=("routine", "deep"),
+        default="routine",
+        help="Run a sample of generated property tests (routine) or all selected generated property tests (deep).",
+    )
+
 
 class QuietThreadingHTTPServer(ThreadingHTTPServer):
     """A custom server that suppresses ONLY expected socket teardown errors."""
@@ -131,11 +183,30 @@ def isolate_executor(monkeypatch):
 
 
 def pytest_collection_modifyitems(config, items):
-    """ Dynamically apply the 'isolate_executor' fixture to all tests marked with 'integration'. """
+    deep = config.getoption("--schema-tests") == "deep"
+    budget = {"max_examples": 10 if deep else 1, "suppress_health_check": [HealthCheck.too_slow]}
+    generated_settings = {
+        "generated": settings(deadline=1000, **budget),
+        "generated_methods": settings(deadline=None, **budget),
+    }
+    selected, deselected = [], []
     for item in items:
-        if item.get_closest_marker("integration"):
-            if "isolate_executor" not in item.fixturenames:
-                item.fixturenames.append("isolate_executor")
+        if isinstance(item, pytest.Function) and is_hypothesis_test(item.obj):
+            schema_settings = next(
+                (value for marker, value in generated_settings.items() if item.get_closest_marker(marker)), None
+            )
+            if schema_settings is not None:
+                if not deep and item.name not in SCHEMA_SMOKE_TESTS.get(item.path.name, ()):
+                    deselected.append(item)
+                    continue
+                schema_settings(item.obj)
+        if item.get_closest_marker("integration") and "isolate_executor" not in item.fixturenames:
+            item.fixturenames.append("isolate_executor")
+        selected.append(item)
+
+    if deselected:
+        config.hook.pytest_deselected(items=deselected)
+        items[:] = selected
 
 
 @pytest.fixture
