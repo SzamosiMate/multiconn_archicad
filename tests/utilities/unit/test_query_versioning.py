@@ -1,6 +1,7 @@
 """Enforce numeric major/minor compatibility at the query execution boundary."""
 
 import pytest
+from pydantic import ValidationError
 
 from multiconn_archicad.utilities.queries import (
     QUERY_SCHEMA_VERSION,
@@ -18,6 +19,20 @@ def test_default_query_version_is_supported():
 
     assert query.schema_version == QUERY_SCHEMA_VERSION == "1.0"
     validate_query_version(query.schema_version)
+
+
+def test_persisted_queries_require_explicit_version():
+    query = Query.model_validate({"where": {"kind": "element_type", "types": ["Wall"]}})
+    context = {"require_schema_version": True}
+    assert Query.model_validate(query.model_dump(), context=context) == query
+    assert Query.model_validate_json(query.model_dump_json(), context=context) == query
+    with pytest.raises(ValidationError, match="schema_version"):
+        Query.model_validate(query.model_dump(exclude_defaults=True), context=context)
+    with pytest.raises(ValidationError, match="schema_version"):
+        Query.model_validate_json(query.model_dump_json(exclude_unset=True), context=context)
+    assert (
+        Query.model_validate({**query.model_dump(), "schema_version": "2.0"}, context=context).schema_version == "2.0"
+    )
 
 
 @pytest.mark.parametrize("requested", ["1.0", "1.3", "1.9", "1.10"])

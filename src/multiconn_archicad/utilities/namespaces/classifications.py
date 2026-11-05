@@ -42,7 +42,7 @@ class ClassificationUtilities:
 
         None selects every system in API order. Explicit identifiers select
         systems in request order, once each; [] returns an empty catalogue.
-        Missing systems raise KeyError before any trees are requested. Command
+        Missing systems are omitted. Command
         failures propagate. No element assignments are read by discovery.
         """
         requested = normalize_classification_system_ids(system_ids) if system_ids is not None else None
@@ -53,7 +53,11 @@ class ClassificationUtilities:
         selected = (
             systems
             if requested is None
-            else [by_id[guid] for guid in dict.fromkeys(item.classificationSystemId.guid for item in requested)]
+            else [
+                by_id[guid]
+                for guid in dict.fromkeys(item.classificationSystemId.guid for item in requested)
+                if guid in by_id
+            ]
         )
         fields = []
         for system in selected:
