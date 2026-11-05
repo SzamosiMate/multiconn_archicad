@@ -149,10 +149,12 @@ def test_explicit_discovery_selection_orders_and_deduplicates_tree_reads(api):
     assert api.official.classification.get_all_classifications_in_system.call_count == 2
 
 
-def test_missing_system_is_rejected_before_loading_any_trees(api):
-    with pytest.raises(KeyError):
-        api.utilities.classification.discover_query_fields([SYSTEM, MISSING])
-    api.official.classification.get_all_classifications_in_system.assert_not_called()
+def test_missing_system_is_omitted_and_existing_trees_are_loaded(api):
+    catalogue = api.utilities.classification.discover_query_fields([MISSING, SYSTEM, MISSING])
+    assert [field.system_id for field in catalogue] == [SYSTEM]
+    api.official.classification.get_all_classifications_in_system.assert_called_once_with(
+        official.ClassificationSystemId(guid=SYSTEM)
+    )
 
 
 def test_empty_discovery_selection_does_not_read_the_api(api):
@@ -391,6 +393,9 @@ def test_classification_filter_preserves_duplicates_and_unclassified_negative_ma
         Query(where=predicate("is not")),
     )
     assert [e.elementId.guid for e in result.successes] == [project.ids[4]]
+    project.api.official.classification.get_all_classifications_in_system.assert_called_once_with(
+        official.ClassificationSystemId(guid=SYSTEM)
+    )
     assert result.slots[-1].is_error
     assert result.slots[1].is_filtered and result.slots[2].is_filtered
     read_elements = project.api.tapir.classification.get_classifications_of_elements.call_args.args[0]

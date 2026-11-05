@@ -38,7 +38,8 @@ branch = field.descendant_ids(item_id, include_self=True)
 Discovery reads the system list once, then one complete tree per selected system.
 Explicit selections preserve first-request order and load duplicate systems only
 once. `None` selects all systems; `[]` returns an empty catalogue without API reads.
-A missing selected system raises `KeyError` before any tree is requested.
+Missing selected systems are omitted from the catalogue. Query validation reports
+references to them as `unknown_field` issues.
 
 The returned catalogue is a disconnected snapshot. Item lookup, descendant
 traversal, schema generation and search make no API calls. Re-run discovery to
@@ -136,8 +137,8 @@ validate_query(query, [catalogue]).raise_for_errors()
 Bound search/filter calls discover required metadata families and validate every
 branch before candidate listing or empty/impossible-population returns. Missing
 systems produce `unknown_field`; missing item operands produce `invalid_test`.
-Command/discovery failures raise. Each execution currently discovers the complete
-classification catalogue when classification fields are requested.
+Command/discovery failures raise. Each execution discovers trees only for the
+classification systems referenced by the query.
 
 The prepared ContextBuilder retains this metadata for execution through
 `CLASSIFICATION_FIELDS`, avoiding a second discovery. `CLASSIFICATION_VALUES`

@@ -44,4 +44,5 @@ if __name__ == "__main__":
     print(json.dumps(height.describe(), indent=2))
     serialized = query.model_dump_json(indent=2)
     print(serialized)
-    print(f"Round-trip valid: {Query.model_validate_json(serialized) == query}")
+    restored = Query.model_validate_json(serialized, context={"require_schema_version": True})
+    print(f"Round-trip valid: {restored == query}")

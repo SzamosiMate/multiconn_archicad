@@ -54,6 +54,10 @@ def test_unrelated_sources_share_a_context_and_deduplicate_keys_in_request_order
     builder.require(lengths, "wall")
     candidates = elements()
 
+    assert builder.requested_keys(lengths) == ("wall", "window")
+    assert builder.requested_keys(labels) == (5,)
+    assert builder.requested_keys(LengthSource()) == ()
+
     context = builder.build(MagicMock(), candidates)
 
     assert context.data(lengths) == {"wall": 4, "window": 6}

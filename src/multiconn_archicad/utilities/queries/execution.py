@@ -35,7 +35,8 @@ def validate_execution_query(api: UnifiedApi, query: Query) -> ContextBuilder:
         catalogues.append(api.utilities.property.discover_query_fields())
     classifications = None
     if builder.requires(CLASSIFICATION_FIELDS):
-        classifications = api.utilities.classification.discover_query_fields()
+        system_ids: tuple[UUID, ...] = builder.requested_keys(CLASSIFICATION_FIELDS)
+        classifications = api.utilities.classification.discover_query_fields(system_ids)
         catalogues.append(classifications)
     validate_query(query, catalogues).raise_for_errors()
     if classifications is not None:

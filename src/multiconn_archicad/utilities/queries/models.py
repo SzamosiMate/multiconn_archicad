@@ -10,11 +10,12 @@ Neither performs API reads.
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from collections.abc import Mapping
 from enum import StrEnum
-from typing import TYPE_CHECKING, Annotated, Literal, TypeAlias, assert_never, cast
+from typing import TYPE_CHECKING, Annotated, Any, Literal, TypeAlias, assert_never, cast
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, ValidationInfo, model_validator
 
 from multiconn_archicad.models.tapir.types import (
     ElementType,
@@ -470,6 +471,19 @@ class Query(_QueryModel):
 
     schema_version: str = QUERY_SCHEMA_VERSION
     where: Predicate
+
+    @model_validator(mode="before")
+    @classmethod
+    def require_explicit_version(cls, data: Any, info: ValidationInfo) -> Any:
+        """Require a version in input data when requested by the caller."""
+        if (
+            isinstance(info.context, Mapping)
+            and info.context.get("require_schema_version")
+            and isinstance(data, Mapping)
+            and "schema_version" not in data
+        ):
+            raise ValueError("schema_version must be explicitly supplied")
+        return data
 
 
 # Resolve the recursive predicate alias after all node classes are declared.

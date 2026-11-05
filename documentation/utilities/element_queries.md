@@ -61,7 +61,7 @@ query = Query(
 )
 
 serialized = query.model_dump_json(indent=2)
-restored = Query.model_validate_json(serialized)
+restored = Query.model_validate_json(serialized, context={"require_schema_version": True})
 assert restored == query
 ```
 
@@ -128,8 +128,13 @@ The Python example produces this JSON:
 }
 ```
 
-`Query.model_validate(payload)` parses a Python dictionary.
-`Query.model_validate_json(text)` parses JSON. `model_dump(mode="json")` returns a
+Use `Query.model_validate(payload, context={"require_schema_version": True})` or
+`Query.model_validate_json(text, context={"require_schema_version": True})` to
+require an explicit version when loading persisted data. Without this context,
+Pydantic validation retains the constructor default. The context checks presence,
+not compatibility: execution checks compatibility separately. `Query.model_json_schema()`
+describes the version as optional because JSON Schema cannot express this context.
+`model_dump(mode="json")` returns a
 dictionary containing JSON-compatible values, including strings for UUIDs and
 element types, and arrays for predicate collections.
 
@@ -189,8 +194,11 @@ unreleased schema sketch; the default version string remains `"1.0"`.
 - Property/boolean predicates in a union need an explicit `kind` in incoming
   dictionaries/JSON. Concrete Python constructors supply their own `kind` default.
 - `all`, `any`, and element-type collections must contain at least one item.
-- The envelope defaults to `schema_version: "1.0"`, from the public
-  `QUERY_SCHEMA_VERSION` constant. Parsing retains a plain string. Before any API
+- Python construction defaults to `schema_version: "1.0"`, from the public
+  `QUERY_SCHEMA_VERSION` constant. Validation with `require_schema_version` context
+  requires an explicit version;
+  do not omit it with `exclude_defaults` or `exclude_unset` when saving. Parsing
+  retains a plain string. Before any API
   reads, execution requires two non-negative integer components (`major.minor`),
   the same major as the executor, and an equal or older minor. Compare components
   numerically: a `1.10` executor accepts `1.9`. Breaking changes increment the
@@ -620,7 +628,7 @@ Parse the query first, then validate it against an existing catalogue:
 ```python
 from multiconn_archicad.utilities.queries import Query, validate_query
 
-query = Query.model_validate_json(saved_query_json)
+query = Query.model_validate_json(saved_query_json, context={"require_schema_version": True})
 catalogue = utilities.property.discover_query_fields()
 result = validate_query(query, [catalogue])
 
@@ -826,8 +834,8 @@ its query path. It requires no Archicad connection.
 
 The bound element utility validates queries, retrieves candidate/value data in
 batches, and evaluates the original tree. Calls are read-only and do not change
-selection. Supply a parsed `Query`; use `Query.model_validate()` or
-`Query.model_validate_json()` at dictionary/JSON boundaries.
+selection. Supply a parsed `Query`; use Pydantic validation with the
+`require_schema_version` context at persistence boundaries.
 
 The execution flow is:
 
@@ -953,7 +961,7 @@ query validation, without element-value reads.
 
 Queries with properties discover one fresh metadata catalogue before listing or
 evaluation, including when the candidate set is empty. Classification predicates
-similarly discover their metadata catalogue; type-only queries need neither.
+discover metadata only for referenced systems; type-only queries need neither.
 Predicates prepare requirements before validation. The same builder then carries
 validated classification fields into execution. Each execution reads distinct
 property GUIDs in one property-value batch and distinct classification systems in
