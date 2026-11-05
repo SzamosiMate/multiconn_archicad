@@ -73,7 +73,7 @@ def main() -> None:
         query = Query(where=ClassificationPredicate(field_id=system_id, test=test))
         validate_query(query, [catalogue]).raise_for_errors()
         serialized = query.model_dump_json()
-        assert Query.model_validate_json(serialized) == query
+        assert Query.model_validate_json(serialized, context={"require_schema_version": True}) == query
         print(serialized)
         print([query.where.evaluate(context, guid).value for guid in elements])
 

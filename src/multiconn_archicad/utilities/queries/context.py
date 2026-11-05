@@ -97,6 +97,13 @@ class ContextBuilder:
         """Report whether preparation has registered this source."""
         return source in self._requests
 
+    def requested_keys[Key: Hashable, Value](self, source: ContextSource[Key, Value]) -> tuple[Key, ...]:
+        """Return distinct requested keys in first-request order, without registering a source."""
+        request = self._requests.get(source)
+        if request is None:
+            return ()
+        return tuple(cast(_SourceRequest[Key, Value], request).keys)
+
     def provide[Key: Hashable, Value](self, source: ContextSource[Key, Value], key: Key, value: Value) -> None:
         """Reuse an already completed value instead of requesting it again."""
         self._request(source).provided[key] = value
