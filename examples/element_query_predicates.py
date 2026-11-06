@@ -14,6 +14,7 @@ from multiconn_archicad.utilities.queries import (
     AnyOf,
     ContextBuilder,
     ElementTypePredicate,
+    ElementTypeTest,
     EvaluationContext,
     NumberOperator,
     NumberTest,
@@ -33,7 +34,7 @@ def make_example_query() -> Query:
     return Query(
         where=AllOf(
             items=(
-                ElementTypePredicate(types=(ElementType.WALL,)),
+                ElementTypePredicate(test=ElementTypeTest(types=(ElementType.WALL,))),
                 AnyOf(
                     items=(
                         PropertyPredicate(

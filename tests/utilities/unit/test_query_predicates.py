@@ -9,6 +9,7 @@ from multiconn_archicad.utilities.queries import (
     AllOf,
     AnyOf,
     ElementTypePredicate,
+    ElementTypeTest,
     EvaluationContext,
     NumberOperator,
     NumberTest,
@@ -56,7 +57,7 @@ def nested_query() -> Query:
     return Query(
         where=AllOf(
             items=(
-                ElementTypePredicate(types=(ElementType.WALL,)),
+                ElementTypePredicate(test=ElementTypeTest(types=(ElementType.WALL,))),
                 AnyOf(items=(height_predicate(), description_predicate(TextOperator.STARTS_WITH, "External"))),
                 description_predicate(TextOperator.DOES_NOT_CONTAIN, "Temporary"),
             )
@@ -116,7 +117,7 @@ def test_condition_markers_are_false_leaves_in_real_groups(condition, group, sib
     node = group(
         items=(
             description_predicate(TextOperator.IS_NOT, "Temporary"),
-            ElementTypePredicate(types=(ElementType.WALL,)),
+            ElementTypePredicate(test=ElementTypeTest(types=(ElementType.WALL,))),
         )
     )
     context = make_context(
@@ -132,7 +133,7 @@ def test_condition_markers_are_false_leaves_in_real_groups(condition, group, sib
 
 @pytest.mark.parametrize("group", [AllOf, AnyOf])
 def test_decisive_sibling_does_not_hide_conversion_failure(group):
-    node = group(items=(ElementTypePredicate(types=(ElementType.WALL,)), height_predicate()))
+    node = group(items=(ElementTypePredicate(test=ElementTypeTest(types=(ElementType.WALL,))), height_predicate()))
     context = make_context(
         property_values={HEIGHT: BatchSlot.success("not a number")},
         type_matches={frozenset({ElementType.WALL}): group is AnyOf},
@@ -178,9 +179,9 @@ def test_property_only_query_needs_no_type_read():
 
 @pytest.mark.parametrize(("actual", "expected"), [(ElementType.WALL, True), (ElementType.SLAB, False)])
 def test_type_only_query_needs_no_property_reads(actual, expected):
-    node = ElementTypePredicate(types=(ElementType.WALL, ElementType.DOOR))
+    node = ElementTypePredicate(test=ElementTypeTest(types=(ElementType.WALL, ElementType.DOOR)))
 
-    result = node.evaluate(make_context(type_matches={node.candidate_types(): actual in node.types}), ELEMENT)
+    result = node.evaluate(make_context(type_matches={node.candidate_types(): actual in node.test.types}), ELEMENT)
 
     assert result.is_success
     assert result.value is expected
@@ -195,12 +196,12 @@ def test_missing_property_context_is_not_treated_as_an_unavailable_value():
 
 def test_missing_type_context_raises_an_execution_input_error():
     with pytest.raises(KeyError):
-        ElementTypePredicate(types=(ElementType.WALL,)).evaluate(EvaluationContext(), ELEMENT)
+        ElementTypePredicate(test=ElementTypeTest(types=(ElementType.WALL,))).evaluate(EvaluationContext(), ELEMENT)
 
 
 def test_multiple_type_predicates_use_their_own_membership_results():
-    wall = ElementTypePredicate(types=(ElementType.WALL,))
-    slab = ElementTypePredicate(types=(ElementType.SLAB,))
+    wall = ElementTypePredicate(test=ElementTypeTest(types=(ElementType.WALL,)))
+    slab = ElementTypePredicate(test=ElementTypeTest(types=(ElementType.SLAB,)))
     context = make_context(type_matches={wall.candidate_types(): False, slab.candidate_types(): True})
 
     assert wall.evaluate(context, ELEMENT).value is False
@@ -215,7 +216,7 @@ def test_unexpected_family_exception_propagates_through_a_group():
 
     node = AnyOf(
         items=(
-            ElementTypePredicate(types=(ElementType.WALL,)),
+            ElementTypePredicate(test=ElementTypeTest(types=(ElementType.WALL,))),
             PropertyPredicate(field_id=DESCRIPTION, test=BrokenTextTest(operator=TextOperator.IS, value="External")),
         )
     )

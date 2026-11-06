@@ -8,7 +8,10 @@ from pydantic import ValidationError
 
 from multiconn_archicad.models.tapir import types as tapir
 from multiconn_archicad.utilities.queries import (
+    BUILTIN_QUERY_FIELDS,
     AmbiguousPropertyTypeError,
+    ElementTypeInfo,
+    ElementTypeTest,
     FieldInfo,
     InvalidPropertyTestError,
     NumberTest,
@@ -20,6 +23,7 @@ from multiconn_archicad.utilities.queries import (
     UnsupportedPropertyTypeError,
 )
 from multiconn_archicad.utilities.queries import TestRegistry as Registry
+from multiconn_archicad.utilities.queries.editing import QueryRow, QueryRows, build_query
 
 pytestmark = pytest.mark.unit
 
@@ -40,6 +44,50 @@ def property_details(**changes) -> tapir.PropertyDetails:
     }
     data.update(changes)
     return tapir.PropertyDetails.model_validate(data)
+
+
+def test_describes_added_scalar_inputs_from_the_registered_test_schema():
+    class BoundedNumberTest(NumberTest):
+        limit: float = 10
+
+    info = PropertyInfo(property_details(), Registry(BoundedNumberTest))
+
+    description = info.describe_test_inputs(current_data={})
+    assert description is not None
+    operator, value, limit = description.fields
+    assert (operator.name, value.name, limit.name) == ("operator", "value", "limit")
+    assert (operator.required, value.required, limit.required) == (True, True, False)
+    assert description.definitions["NumberOperator"]["enum"] == list(info.operators())
+    assert value.schema["type"] == "number"
+    assert limit.schema["default"] == 10
+    description.definitions.clear()
+    value.schema.clear()
+
+    fresh_description = info.describe_test_inputs(current_data={})
+    assert fresh_description is not None
+    assert fresh_description.definitions["NumberOperator"]["enum"]
+    assert fresh_description.fields[1].schema["type"] == "number"
+
+
+def test_builtin_element_type_choices_compile_through_the_field_description():
+    field = next(field for field in BUILTIN_QUERY_FIELDS if isinstance(field, ElementTypeInfo))
+    assert field.reference == {"kind": "element_type"}
+    assert field.operators() == ()
+    description = field.describe_test_inputs(current_data={})
+    assert description is not None
+    (types_input,) = description.fields
+    assert types_input.name == "types"
+    assert types_input.required
+    choice = next(choice for choice in types_input.schema["oneOf"] if choice["title"] == "Wall")
+    assert choice["const"] == ["Wall"]
+
+    data = {"types": choice["const"]}
+    test = field.create_test(**data)
+    assert test == ElementTypeTest(types=(tapir.ElementType.WALL,))
+    row = QueryRow(predicate={**field.reference, "test": test.model_dump(mode="json")})
+    result = build_query(QueryRows(rows=[row]))
+    assert result.query is not None, result.issues
+    assert result.query.where.candidate_types() == frozenset({tapir.ElementType.WALL})
 
 
 @pytest.mark.parametrize(

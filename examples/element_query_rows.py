@@ -13,8 +13,15 @@ def main() -> None:
     )
     rows = QueryRows(
         rows=[
-            QueryRow(open_parentheses=1, predicate={"kind": "element_type", "types": ["Wall"]}, join_next="or"),
-            QueryRow(close_parentheses=1, predicate={"kind": "element_type", "types": ["Column"]}),
+            QueryRow(
+                open_parentheses=1,
+                predicate={"kind": "element_type", "test": {"kind": "element_type", "types": ["Wall"]}},
+                join_next="or",
+            ),
+            QueryRow(
+                close_parentheses=1,
+                predicate={"kind": "element_type", "test": {"kind": "element_type", "types": ["Column"]}},
+            ),
             height,
         ],
     )
