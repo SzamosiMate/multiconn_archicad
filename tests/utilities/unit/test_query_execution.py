@@ -15,6 +15,7 @@ from multiconn_archicad.utilities.queries import (
     BooleanOperator,
     BooleanTest,
     ElementTypePredicate,
+    ElementTypeTest,
     NumberOperator,
     NumberTest,
     PropertyPredicate,
@@ -46,7 +47,7 @@ def height_node():
 
 
 def type_node(*types):
-    return ElementTypePredicate(types=types)
+    return ElementTypePredicate(test=ElementTypeTest(types=types))
 
 
 def wall_query():

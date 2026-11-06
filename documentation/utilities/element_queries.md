@@ -36,6 +36,7 @@ from uuid import UUID
 from multiconn_archicad.utilities.queries import (
     AllOf,
     ElementTypePredicate,
+    ElementTypeTest,
     NumberOperator,
     NumberTest,
     PropertyPredicate,
@@ -47,7 +48,7 @@ from multiconn_archicad.utilities.queries import (
 query = Query(
     where=AllOf(
         items=(
-            ElementTypePredicate(types=("Wall",)),
+            ElementTypePredicate(test=ElementTypeTest(types=("Wall",))),
             PropertyPredicate(
                 field_id=UUID("22222222-2222-4222-8222-222222222222"),
                 test=NumberTest(operator=NumberOperator.GREATER_THAN, value=3),
@@ -66,13 +67,13 @@ assert restored == query
 ```
 
 The executable equivalent is [the schema example](../../examples/element_query_schema.py).
-`ElementTypePredicate` also accepts the existing Tapir `ElementType` enum members.
+`ElementTypeTest` also accepts the existing Tapir `ElementType` enum members.
 Python sequences supplied to collection fields become immutable tuples; the JSON
 representation uses arrays.
 
 ## Operator enums
 
-Each family declares one operator `StrEnum`: `TextOperator` or `NumberOperator`.
+Tests with operators declare an operator `StrEnum`, such as `TextOperator` or `NumberOperator`.
 Python code can use named members, while JSON uses their readable string values.
 Pydantic parses those values into enum members. `kind` remains a fixed `Literal`
 discriminator.
@@ -85,8 +86,8 @@ assert test.operator is NumberOperator.GREATER_THAN
 assert test.model_dump(mode="json")["operator"] == "is greater than"
 ```
 
-`operators()` iterates the enum declared by the model's `operator` field and
-returns a tuple of readable strings for UI/MCP consumers. JSON Schema represents
+`operators()` returns readable strings for UI/MCP consumers and an empty tuple
+for tests without operators, such as `ElementTypeTest`. JSON Schema represents
 operator enums in `$defs`, referenced from each test's operator field. There is
 no Literal-operator fallback, migration alias, or transitional schema support.
 This is an unreleased design; refactor its models and examples directly.
@@ -103,7 +104,10 @@ The Python example produces this JSON:
     "items": [
       {
         "kind": "element_type",
-        "types": ["Wall"]
+        "test": {
+          "kind": "element_type",
+          "types": ["Wall"]
+        }
       },
       {
         "kind": "property",
@@ -145,7 +149,7 @@ other groups. Negative comparisons use a test's operator:
 
 ```python
 from multiconn_archicad.utilities.queries import (
-    AllOf, AnyOf, ElementTypePredicate, PropertyPredicate, Query, TextTest,
+    AllOf, AnyOf, ElementTypePredicate, ElementTypeTest, PropertyPredicate, Query, TextTest,
 )
 
 query = Query(
@@ -153,8 +157,8 @@ query = Query(
         items=(
             AnyOf(
                 items=(
-                    ElementTypePredicate(types=("Door",)),
-                    ElementTypePredicate(types=("Window",)),
+                    ElementTypePredicate(test=ElementTypeTest(types=("Door",))),
+                    ElementTypePredicate(test=ElementTypeTest(types=("Window",))),
                 )
             ),
             PropertyPredicate(
@@ -170,7 +174,7 @@ This describes doors or windows whose referenced text property does not contain
 `Temporary`. An unavailable property makes that negative comparison false, just
 like every other implemented property operation. There is no general negation
 node and no automatic rewriting of saved `"not"` queries. This removes an initial,
-unreleased schema sketch; the default version string remains `"1.0"`.
+unreleased schema sketch.
 
 ## Structure-validation contract
 
@@ -499,6 +503,7 @@ flow with complete synthetic metadata, without a running Archicad.
 | `create_test(**data)` | Structure validation followed by property-context validation |
 | `validate(test)` | Check an existing test's family and property-context rules |
 | `test_schema()` | Metadata-aware schema, or `None` for an unsupported field |
+| `describe_test_inputs(current_data)` | Active inputs, requiredness, schema definitions and forbidden fields, or `None` for an unsupported field |
 | `describe()` | JSON-friendly reference, names, operators, test schema, and property measure type |
 
 The runtime `PropertyInfo` also exposes its selected `test_model` and a copy of
@@ -535,6 +540,44 @@ models. Classification fields use `group = Classifications` and `name = system
 name`, with all eight Archicad operations supported by ClassificationPredicate.
 See [Classification utilities](classifications.md) for full JSON/Python examples,
 operand rules and classification-specific Boolean behavior.
+
+### Editing inputs and built-in criteria
+
+Combine the field descriptors from your catalogues with `BUILTIN_QUERY_FIELDS`,
+which is available offline. Its element-type field has the reference
+`{"kind": "element_type"}` and uses `ElementTypeTest`. There is no project GUID
+or operator to supply.
+
+```python
+from multiconn_archicad.utilities.queries import BUILTIN_QUERY_FIELDS
+
+field = next(field for field in BUILTIN_QUERY_FIELDS if field.reference["kind"] == "element_type")
+description = field.describe_test_inputs(current_data={})
+assert description is not None
+(types_input,) = description.fields
+choice = next(option for option in types_input.schema["oneOf"] if option["title"] == "Wall")
+test = field.create_test(types=choice["const"])
+predicate_data = {**field.reference, "test": test.model_dump(mode="json")}
+```
+
+Each editor choice supplies a singleton list. Executable tests also accept
+multiple types for programmatic membership queries. Use OR rows to express
+alternatives in an editor with single-selection controls.
+
+`describe_test_inputs()` combines the selected test's class-level availability
+rules with the field's schema. Each input includes its name, requiredness, and
+schema fragment. `definitions` supplies shared schema references. Returned
+schemas are independent snapshots. Schema defaults are available in these
+fragments for the caller's input initialization policy.
+
+For classification tests, a known operator determines whether the value is
+required or forbidden. With an absent or unknown operator, the description
+shows just the operator and leaves all draft data intact. A consumer can use
+`validate_row()` to report an unknown operator. Validation of executable
+predicates remains the authority on whether values and combinations are valid.
+
+Element-type predicates use the nested test in both executable queries and
+saved row drafts.
 
 ## Batch property discovery
 
@@ -743,14 +786,14 @@ from unittest.mock import MagicMock
 from multiconn_archicad.models.tapir.types import ElementType
 from multiconn_archicad.utilities import BatchGrid, BatchRow, BatchSlot
 from multiconn_archicad.utilities.queries import (
-    AllOf, AnyOf, ContextBuilder, ElementTypePredicate,
+    AllOf, AnyOf, ContextBuilder, ElementTypePredicate, ElementTypeTest,
     NumberOperator, NumberTest, PropertyPredicate, Query, TextOperator, TextTest,
 )
 
 height_id = UUID("22222222-2222-4222-8222-222222222222")
 description_id = UUID("11111111-1111-4111-8111-111111111111")
 query = Query(where=AllOf(items=(
-    ElementTypePredicate(types=(ElementType.WALL,)),
+    ElementTypePredicate(test=ElementTypeTest(types=(ElementType.WALL,))),
     AnyOf(items=(
         PropertyPredicate(
             field_id=height_id,

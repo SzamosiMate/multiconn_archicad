@@ -13,6 +13,7 @@ from multiconn_archicad.utilities.queries import (
     BooleanOperator,
     BooleanTest,
     ElementTypePredicate,
+    ElementTypeTest,
     NumberTest,
     NumberOperator,
     PropertyPredicate,
@@ -32,7 +33,7 @@ def test_nested_query_round_trips_python_and_json_without_changing_the_tree():
         "where": {
             "kind": "all",
             "items": [
-                {"kind": "element_type", "types": ["Wall", "Slab"]},
+                {"kind": "element_type", "test": {"kind": "element_type", "types": ["Wall", "Slab"]}},
                 {
                     "kind": "any",
                     "items": [
@@ -57,7 +58,7 @@ def test_nested_query_round_trips_python_and_json_without_changing_the_tree():
     assert isinstance(query.where, AllOf)
     types, alternatives = query.where.items
     assert isinstance(types, ElementTypePredicate)
-    assert types.types == (ElementType.WALL, ElementType.SLAB)
+    assert types.test.types == (ElementType.WALL, ElementType.SLAB)
     assert isinstance(alternatives, AnyOf)
     number, text = alternatives.items
     assert isinstance(number, PropertyPredicate)
@@ -75,7 +76,7 @@ def test_python_constructors_supply_discriminators_and_version_defaults():
     query = Query(
         where=AllOf(
             items=(
-                ElementTypePredicate(types=(ElementType.WALL,)),
+                ElementTypePredicate(test=ElementTypeTest(types=(ElementType.WALL,))),
                 PropertyPredicate(
                     field_id=UUID(PROPERTY_ID),
                     test=NumberTest(operator="is greater than", value=3),
@@ -87,7 +88,7 @@ def test_python_constructors_supply_discriminators_and_version_defaults():
     payload = query.model_dump(mode="json")
     assert payload["schema_version"] == "1.0"
     assert payload["where"]["kind"] == "all"
-    assert payload["where"]["items"][0] == {"kind": "element_type", "types": ["Wall"]}
+    assert payload["where"]["items"][0] == {"kind": "element_type", "test": {"kind": "element_type", "types": ["Wall"]}}
     assert payload["where"]["items"][1]["test"] == {"kind": "number", "operator": "is greater than", "value": 3.0}
 
 
@@ -95,13 +96,14 @@ def test_python_constructors_supply_discriminators_and_version_defaults():
     "where",
     [
         {"kind": "unsupported"},
-        {"types": ["Wall"]},
-        {"kind": "element_type", "types": ["UnknownTool"]},
-        {"kind": "element_type", "types": []},
-        {"kind": "element_type", "types": ["Wall"], "extra": True},
+        {"test": {"kind": "element_type", "types": ["Wall"]}},
+        {"kind": "element_type", "types": ["Wall"]},
+        {"kind": "element_type", "test": {"kind": "element_type", "types": ["UnknownTool"]}},
+        {"kind": "element_type", "test": {"kind": "element_type", "types": []}},
+        {"kind": "element_type", "test": {"kind": "element_type", "types": ["Wall"]}, "extra": True},
         {"kind": "all", "items": []},
         {"kind": "any", "items": []},
-        {"kind": "not", "item": {"kind": "element_type", "types": ["Wall"]}},
+        {"kind": "not", "item": {"kind": "element_type", "test": {"kind": "element_type", "types": ["Wall"]}}},
         {"kind": "property", "field_id": "not-a-guid", "test": {"kind": "text", "operator": "is", "value": "x"}},
         {"kind": "property", "field_id": PROPERTY_ID, "test": {"kind": "enum", "operator": "is", "value": "A"}},
         {
@@ -142,7 +144,9 @@ def test_general_negation_is_rejected_inside_groups(group):
     payload = {
         "where": {
             "kind": group,
-            "items": [{"kind": "not", "item": {"kind": "element_type", "types": ["Wall"]}}],
+            "items": [
+                {"kind": "not", "item": {"kind": "element_type", "test": {"kind": "element_type", "types": ["Wall"]}}}
+            ],
         }
     }
 
@@ -154,7 +158,10 @@ def test_general_negation_is_rejected_inside_groups(group):
 
 def test_schema_version_is_preserved_as_a_plain_string():
     version = "1.1"
-    payload = {"schema_version": version, "where": {"kind": "element_type", "types": ["Wall"]}}
+    payload = {
+        "schema_version": version,
+        "where": {"kind": "element_type", "test": {"kind": "element_type", "types": ["Wall"]}},
+    }
 
     query = Query.model_validate(payload)
 
@@ -164,7 +171,9 @@ def test_schema_version_is_preserved_as_a_plain_string():
 
 def test_query_envelope_rejects_extra_fields():
     with pytest.raises(ValidationError):
-        Query.model_validate({"where": {"kind": "element_type", "types": ["Wall"]}, "limit": 10})
+        Query.model_validate(
+            {"where": {"kind": "element_type", "test": {"kind": "element_type", "types": ["Wall"]}}, "limit": 10}
+        )
 
 
 @pytest.mark.parametrize("value", [True, False, "3", None, float("nan"), float("inf"), -float("inf")])
@@ -188,17 +197,17 @@ def test_text_operands_require_strings(value):
 
 def test_models_and_collections_preserve_validated_state():
     source_types = ["Wall"]
-    node = ElementTypePredicate.model_validate({"types": source_types})
+    node = ElementTypePredicate.model_validate({"test": {"types": source_types}})
     source_items = [node]
     group = AllOf.model_validate({"items": source_items})
 
     source_types.append("InvalidTool")
     source_items.clear()
 
-    assert node.types == (ElementType.WALL,)
+    assert node.test.types == (ElementType.WALL,)
     assert group.items == (node,)
     with pytest.raises(ValidationError, match="frozen"):
-        node.types = ()
+        node.test.types = ()
     test = NumberTest(operator="is", value=3)
     with pytest.raises(ValidationError, match="frozen"):
         test.value = float("nan")

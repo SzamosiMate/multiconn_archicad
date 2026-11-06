@@ -3,17 +3,26 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
+from copy import deepcopy
 from dataclasses import dataclass
 from typing import Any, Generic, TypeVar
 from uuid import UUID
 
+from pydantic import JsonValue
+
 from multiconn_archicad.models.official import types as official
-from multiconn_archicad.models.tapir.types import PropertyDetails
+from multiconn_archicad.models.tapir.types import ElementType, PropertyDetails
 from multiconn_archicad.utilities.identifiers import ClassificationItemIdLike, normalize_classification_item_id
 
-from .errors import InvalidClassificationTestError, InvalidPropertyTestError, UnsupportedPropertyTypeError
-from .models import ClassificationTest, PropertyTestModel, TestModel
+from .errors import (
+    InvalidClassificationTestError,
+    InvalidFieldTestError,
+    InvalidPropertyTestError,
+    UnsupportedPropertyTypeError,
+)
+from .inputs import TestInput, TestInputs
+from .models import ClassificationTest, ElementTypeTest, PropertyTestModel, TestModel
 from .registry import TestRegistry
 
 TestT = TypeVar("TestT", bound=TestModel)
@@ -84,6 +93,23 @@ class FieldInfo(ABC, Generic[TestT]):
         """Describe the test and operand format, or return None when unsupported."""
         return self.test_model.model_json_schema() if self.supported else None
 
+    def describe_test_inputs(self, current_data: Mapping[str, JsonValue]) -> TestInputs | None:
+        """Resolve active inputs against this field's schema without editing the draft."""
+        schema = self.test_schema()
+        if schema is None:
+            return None
+
+        availability = self.test_model.input_availability(current_data)
+        snapshot = deepcopy(schema)
+        properties = snapshot["properties"]
+        return TestInputs(
+            fields=tuple(
+                TestInput(name, properties[name], name in availability.required) for name in availability.visible
+            ),
+            definitions=snapshot.get("$defs", {}),
+            forbidden_fields=availability.forbidden,
+        )
+
     def describe(self) -> dict[str, Any]:
         """Serialize discovery information without runtime classes or behavior."""
         return {
@@ -96,6 +122,38 @@ class FieldInfo(ABC, Generic[TestT]):
             "operators": list(self.operators()),
             "test_schema": self.test_schema(),
         }
+
+
+class ElementTypeInfo(FieldInfo[ElementTypeTest]):
+    """Describe the built-in element-type criterion without project metadata."""
+
+    @property
+    def name(self) -> str:
+        return "Element type"
+
+    @property
+    def group(self) -> str:
+        return "Built-in"
+
+    @property
+    def reference(self) -> dict[str, str]:
+        return {"kind": "element_type"}
+
+    @property
+    def test_model(self) -> type[ElementTypeTest]:
+        return ElementTypeTest
+
+    def validate(self, test: ElementTypeTest) -> None:
+        if not isinstance(test, self.test_model):
+            raise InvalidFieldTestError(f"{self.qualified_name} requires {self.test_model.__name__}")
+
+    def test_schema(self) -> dict[str, Any]:
+        """Offer each individual type as a named choice for one editor row."""
+        schema = self.test_model.model_json_schema()
+        schema["properties"]["types"]["oneOf"] = [
+            {"const": [element_type.value], "title": element_type.value} for element_type in ElementType
+        ]
+        return schema
 
 
 class _PropertyMetadata(FieldInfo[PropertyTestModel]):

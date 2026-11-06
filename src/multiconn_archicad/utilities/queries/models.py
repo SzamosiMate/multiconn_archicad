@@ -15,7 +15,7 @@ from enum import StrEnum
 from typing import TYPE_CHECKING, Annotated, Any, Literal, TypeAlias, assert_never, cast
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, ValidationInfo, model_validator
+from pydantic import BaseModel, ConfigDict, Field, JsonValue, ValidationInfo, model_validator
 
 from multiconn_archicad.models.tapir.types import (
     ElementType,
@@ -28,6 +28,7 @@ from multiconn_archicad.utilities.results.property_errors import PropertyUnavail
 
 from .errors import InvalidPropertyTestError
 from .context import ContextBuilder, EvaluationContext
+from .inputs import InputAvailability
 from .operators import BooleanOperator, ClassificationOperator, NumberOperator, TextOperator
 from .sources import CLASSIFICATION_FIELDS, CLASSIFICATION_VALUES, PROPERTY_VALUES, TYPE_MEMBERSHIP
 from .validation import FieldCheck, QueryValidationContext, QueryValidationIssue
@@ -48,9 +49,19 @@ class TestModel(_QueryModel, ABC):
 
     @classmethod
     def operators(cls) -> tuple[str, ...]:
-        """Return readable values from the test's declared operator StrEnum."""
-        operator_type = cast(type[StrEnum], cls.model_fields["operator"].annotation)
+        """Return the declared operator values, if this test uses operators."""
+        operator_field = cls.model_fields.get("operator")
+        if operator_field is None:
+            return ()
+        operator_type = cast(type[StrEnum], operator_field.annotation)
         return tuple(operator.value for operator in operator_type)
+
+    @classmethod
+    def input_availability(cls, current_data: Mapping[str, JsonValue]) -> InputAvailability:
+        """Describe ordinary inputs from the schema before the test is complete."""
+        schema = cls.model_json_schema()
+        visible = tuple(name for name in schema["properties"] if name != "kind")
+        return InputAvailability(visible, frozenset(schema.get("required", ())).intersection(visible))
 
 
 class ClassificationTest(TestModel):
@@ -78,6 +89,16 @@ class ClassificationTest(TestModel):
         }
     )
     value: UUID | None = Field(default=None, exclude_if=lambda value: value is None)
+
+    @classmethod
+    def input_availability(cls, current_data: Mapping[str, JsonValue]) -> InputAvailability:
+        operator = current_data.get("operator")
+        if not isinstance(operator, str) or operator not in cls.operators():
+            # Keep the operator editable. Strict validation reports unknown values.
+            return InputAvailability(("operator",), frozenset({"operator"}))
+        if ClassificationOperator(operator).requires_value:
+            return InputAvailability(("operator", "value"), frozenset({"operator", "value"}))
+        return InputAvailability(("operator",), frozenset({"operator"}), frozenset({"value"}))
 
     @model_validator(mode="after")
     def validate_operand(self) -> ClassificationTest:
@@ -358,11 +379,18 @@ class ClassificationPredicate(_QueryModel):
         return result
 
 
+class ElementTypeTest(TestModel):
+    """Specify the Archicad element types accepted by a membership test."""
+
+    kind: Literal["element_type"] = "element_type"
+    types: tuple[ElementType, ...] = Field(min_length=1)
+
+
 class ElementTypePredicate(_QueryModel):
     """Match one or more Archicad element types."""
 
     kind: Literal["element_type"] = "element_type"
-    types: tuple[ElementType, ...] = Field(min_length=1)
+    test: ElementTypeTest
 
     def validate_fields(
         self, context: QueryValidationContext, location: tuple[str | int, ...] = ("where",)
@@ -372,7 +400,7 @@ class ElementTypePredicate(_QueryModel):
 
     def candidate_types(self) -> frozenset[ElementType]:
         """Only the declared types can satisfy this predicate."""
-        return frozenset(self.types)
+        return frozenset(self.test.types)
 
     def prepare(self, builder: ContextBuilder) -> None:
         """Request membership for this distinct set of element types."""
