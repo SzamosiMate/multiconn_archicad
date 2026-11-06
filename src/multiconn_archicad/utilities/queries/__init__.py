@@ -1,6 +1,12 @@
 """Expose query definitions, test families, and field information."""
 
-from .discovery import ClassificationCatalogue, DiscoveredProperty, FieldCatalogue, PropertyCatalogue
+from .discovery import (
+    BUILTIN_QUERY_FIELDS,
+    ClassificationCatalogue,
+    DiscoveredProperty,
+    FieldCatalogue,
+    PropertyCatalogue,
+)
 from .errors import (
     InvalidFieldTestError,
     UnsupportedFieldTypeError,
@@ -11,7 +17,15 @@ from .errors import (
     UnsupportedQueryVersionError,
 )
 from .context import ContextBuilder, ContextSource, EvaluationContext
-from .fields import ClassificationInfo, ClassificationItemInfo, FieldInfo, PropertyInfo, UnsupportedPropertyInfo
+from .fields import (
+    ClassificationInfo,
+    ClassificationItemInfo,
+    ElementTypeInfo,
+    FieldInfo,
+    PropertyInfo,
+    UnsupportedPropertyInfo,
+)
+from .inputs import InputAvailability, TestInput, TestInputs
 
 from .models import (
     AllOf,
@@ -20,6 +34,7 @@ from .models import (
     ClassificationTest,
     ClassificationPredicate,
     ElementTypePredicate,
+    ElementTypeTest,
     NumberTest,
     Predicate,
     PropertyPredicate,
@@ -59,6 +74,7 @@ __all__ = [
     "AnyOf",
     "BooleanTest",
     "BooleanOperator",
+    "BUILTIN_QUERY_FIELDS",
     "ClassificationCatalogue",
     "ClassificationInfo",
     "ClassificationItemInfo",
@@ -72,13 +88,16 @@ __all__ = [
     "InvalidClassificationTestError",
     "ContextBuilder",
     "ContextSource",
+    "ElementTypeInfo",
     "ElementTypePredicate",
+    "ElementTypeTest",
     "EvaluationContext",
     "DiscoveredProperty",
     "FieldInfo",
     "FieldCheck",
     "FieldCatalogue",
     "FindElementsResult",
+    "InputAvailability",
     "InvalidPropertyTestError",
     "InvalidFieldTestError",
     "UnsupportedFieldTypeError",
@@ -101,6 +120,8 @@ __all__ = [
     "QueryValidationResult",
     "TextTest",
     "TextOperator",
+    "TestInput",
+    "TestInputs",
     "TestRegistry",
     "TestModel",
     "TYPE_MEMBERSHIP",

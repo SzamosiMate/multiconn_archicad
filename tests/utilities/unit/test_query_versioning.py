@@ -15,14 +15,18 @@ pytestmark = pytest.mark.unit
 
 
 def test_default_query_version_is_supported():
-    query = Query.model_validate({"where": {"kind": "element_type", "types": ["Wall"]}})
+    query = Query.model_validate(
+        {"where": {"kind": "element_type", "test": {"kind": "element_type", "types": ["Wall"]}}}
+    )
 
     assert query.schema_version == QUERY_SCHEMA_VERSION == "1.0"
     validate_query_version(query.schema_version)
 
 
 def test_persisted_queries_require_explicit_version():
-    query = Query.model_validate({"where": {"kind": "element_type", "types": ["Wall"]}})
+    query = Query.model_validate(
+        {"where": {"kind": "element_type", "test": {"kind": "element_type", "types": ["Wall"]}}}
+    )
     context = {"require_schema_version": True}
     assert Query.model_validate(query.model_dump(), context=context) == query
     assert Query.model_validate_json(query.model_dump_json(), context=context) == query

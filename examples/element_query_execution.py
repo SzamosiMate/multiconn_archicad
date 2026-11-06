@@ -9,6 +9,7 @@ from multiconn_archicad.models.tapir.types import ElementType
 from multiconn_archicad.utilities.queries import (
     AllOf,
     ElementTypePredicate,
+    ElementTypeTest,
     NumberOperator,
     NumberTest,
     PropertyPredicate,
@@ -69,7 +70,7 @@ def make_example_query() -> Query:
     return Query(
         where=AllOf(
             items=(
-                ElementTypePredicate(types=(ElementType.WALL,)),
+                ElementTypePredicate(test=ElementTypeTest(types=(ElementType.WALL,))),
                 PropertyPredicate(
                     field_id=UUID(HEIGHT), test=NumberTest(operator=NumberOperator.GREATER_THAN, value=3)
                 ),

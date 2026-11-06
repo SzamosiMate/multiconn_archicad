@@ -15,6 +15,7 @@ from multiconn_archicad.utilities.queries import (
     ContextBuilder,
     ContextSource,
     ElementTypePredicate,
+    ElementTypeTest,
     EvaluationContext,
     NumberOperator,
     NumberTest,
@@ -173,8 +174,8 @@ def test_nested_prepare_batches_properties_and_reuses_the_original_grid_and_slot
 
 
 def test_type_source_reads_distinct_sets_once_and_one_context_serves_multiple_elements():
-    wall = ElementTypePredicate(types=(tapir.ElementType.WALL,))
-    slab = ElementTypePredicate(types=(tapir.ElementType.SLAB,))
+    wall = ElementTypePredicate(test=ElementTypeTest(types=(tapir.ElementType.WALL,)))
+    slab = ElementTypePredicate(test=ElementTypeTest(types=(tapir.ElementType.SLAB,)))
     node = AnyOf(items=(wall, AllOf(items=(wall, slab))))
     builder = ContextBuilder()
     node.prepare(builder)
@@ -201,7 +202,7 @@ def test_new_predicate_can_prepare_a_new_source_without_changing_the_builder_or_
         def evaluate(self, context: EvaluationContext, element_id: UUID, *, path: str = "where") -> BatchSlot[bool]:
             return BatchSlot.success(context.data(source)["wall"] == 4)
 
-    node = AllOf(items=(CustomPredicate(types=(tapir.ElementType.WALL,)),))
+    node = AllOf(items=(CustomPredicate(test=ElementTypeTest(types=(tapir.ElementType.WALL,))),))
     builder = ContextBuilder()
     node.prepare(builder)
     context = builder.build(MagicMock(), elements())

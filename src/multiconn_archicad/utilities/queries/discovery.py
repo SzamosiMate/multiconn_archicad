@@ -15,13 +15,15 @@ from multiconn_archicad.utilities.identifiers import (
     normalize_property_id,
 )
 
-from .fields import ClassificationInfo, FieldInfo, PropertyInfo, UnsupportedPropertyInfo
+from .fields import ClassificationInfo, ElementTypeInfo, FieldInfo, PropertyInfo, UnsupportedPropertyInfo
 from .registry import TestRegistry
 from .errors import UnsupportedPropertyTypeError
 
 DiscoveredProperty: TypeAlias = PropertyInfo | UnsupportedPropertyInfo
 FieldT = TypeVar("FieldT", bound=FieldInfo[Any])
 IdT = TypeVar("IdT")
+
+BUILTIN_QUERY_FIELDS: tuple[FieldInfo[Any], ...] = (ElementTypeInfo(),)
 
 
 class FieldCatalogue(ABC, Generic[FieldT, IdT]):

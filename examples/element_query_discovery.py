@@ -7,6 +7,7 @@ from multiconn_archicad.models.tapir.types import ElementType
 from multiconn_archicad.utilities.queries import (
     AnyOf,
     ElementTypePredicate,
+    ElementTypeTest,
     NumberOperator,
     PropertyCatalogue,
     PropertyPredicate,
@@ -66,7 +67,7 @@ if __name__ == "__main__":
     invalid_query = Query(
         where=AnyOf(
             items=(
-                ElementTypePredicate(types=(ElementType.WALL,)),
+                ElementTypePredicate(test=ElementTypeTest(types=(ElementType.WALL,))),
                 PropertyPredicate.model_validate(
                     {**fire_rating.reference, "test": {"kind": "text", "operator": "is", "value": "REI 60"}}
                 ),

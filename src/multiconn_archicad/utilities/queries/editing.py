@@ -147,7 +147,9 @@ def _payload_location(payload: JsonValue, location: _Location) -> _Location:
 
 def _validate_row(row: QueryRow) -> tuple[Predicate | None, tuple[RowIssue, ...]]:
     if row.predicate.get("kind") in ("all", "any"):
-        return None, (RowIssue(row.row_id, ("predicate", "kind"), "group_in_row", "Use parentheses to group rows"),)
+        return None, (RowIssue(row.row_id, ("predicate", "kind"),
+                        "group_in_row", "A row must contain a single condition, not an AND/OR group. "
+                                        "Use parentheses and connectors to group rows."),)
 
     try:
         predicate = _predicate_adapter.validate_python(row.predicate)

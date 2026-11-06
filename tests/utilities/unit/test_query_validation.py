@@ -16,6 +16,7 @@ from multiconn_archicad.utilities.queries import (
     ClassificationPredicate,
     ClassificationTest,
     ElementTypePredicate,
+    ElementTypeTest,
     InvalidPropertyTestError,
     NumberTest,
     PropertyCatalogue,
@@ -131,7 +132,7 @@ def test_valid_nested_query_and_metadata_are_not_transformed(catalogue):
     query = Query(
         where=AllOf(
             items=(
-                ElementTypePredicate(types=(ElementType.WALL,)),
+                ElementTypePredicate(test=ElementTypeTest(types=(ElementType.WALL,))),
                 property_test(),
                 AnyOf(
                     items=(
@@ -192,7 +193,7 @@ def test_groups_check_all_branches_even_after_valid_or_invalid_siblings(catalogu
     query = Query(
         where=group(
             items=(
-                ElementTypePredicate(types=(ElementType.WALL,)),
+                ElementTypePredicate(test=ElementTypeTest(types=(ElementType.WALL,))),
                 property_test(MISSING),
                 property_test(test=TextTest(operator="is", value="3")),
             )
@@ -234,7 +235,7 @@ def test_subtree_validation_uses_supplied_location_without_accumulating_issues(c
 
 
 def test_element_type_queries_need_no_property_metadata():
-    query = Query(where=ElementTypePredicate(types=(ElementType.WALL,)))
+    query = Query(where=ElementTypePredicate(test=ElementTypeTest(types=(ElementType.WALL,))))
 
     assert validate_query(query, []).is_valid
 

@@ -30,6 +30,7 @@ from multiconn_archicad.utilities.queries import (
     AllOf,
     AnyOf,
     ElementTypePredicate,
+    ElementTypeTest,
     Query,
     QueryValidationError,
     validate_query,
@@ -141,6 +142,32 @@ def test_discovery_builds_uniform_ordered_fields_and_reads_each_system_once(api)
         call(official.ClassificationSystemId(guid=OTHER_SYSTEM)),
     ]
     api.tapir.classification.get_classifications_of_elements.assert_not_called()
+
+
+@pytest.mark.parametrize(
+    ("data", "visible", "forbidden"),
+    [
+        ({}, ("operator",), frozenset()),
+        ({"operator": "future operator", "value": str(CHILD)}, ("operator",), frozenset()),
+        ({"operator": ["is"]}, ("operator",), frozenset()),
+        ({"operator": "is in branch of"}, ("operator", "value"), frozenset()),
+        ({"operator": "has value", "value": str(CHILD)}, ("operator",), frozenset({"value"})),
+    ],
+)
+def test_input_description_resolves_active_operands_without_changing_the_draft(api, data, visible, forbidden):
+    field = api.utilities.classification.discover_query_fields([SYSTEM])[SYSTEM]
+    original = data.copy()
+
+    description = field.describe_test_inputs(current_data=data)
+
+    assert description is not None
+    assert tuple(spec.name for spec in description.fields) == visible
+    assert all(spec.required for spec in description.fields)
+    assert description.forbidden_fields == forbidden
+    assert description.definitions["ClassificationOperator"]["enum"] == list(field.operators())
+    if "value" in visible:
+        assert {"const": str(CHILD), "title": "Wall"} in description.fields[1].schema["oneOf"]
+    assert data == original
 
 
 def test_explicit_discovery_selection_orders_and_deduplicates_tree_reads(api):
@@ -406,7 +433,14 @@ def test_classification_filter_preserves_duplicates_and_unclassified_negative_ma
 
 def test_classification_errors_survive_decisive_boolean_siblings(query_project):
     project = query_project
-    query = Query(where=AnyOf(items=(ElementTypePredicate(types=(tapir.ElementType.WALL,)), predicate("has no value"))))
+    query = Query(
+        where=AnyOf(
+            items=(
+                ElementTypePredicate(test=ElementTypeTest(types=(tapir.ElementType.WALL,))),
+                predicate("has no value"),
+            )
+        )
+    )
     result = project.api.utilities.element.filter_elements_by_query_result([project.ids[-2]], query)
     assert result.slots[0].is_error
     assert "where.items[1].test" in result.slots[0].error.message
@@ -421,8 +455,8 @@ def test_unknown_classification_references_validate_before_listing_or_empty_retu
     query = Query(
         where=AllOf(
             items=(
-                ElementTypePredicate(types=(tapir.ElementType.WALL,)),
-                ElementTypePredicate(types=(tapir.ElementType.SLAB,)),
+                ElementTypePredicate(test=ElementTypeTest(types=(tapir.ElementType.WALL,))),
+                ElementTypePredicate(test=ElementTypeTest(types=(tapir.ElementType.SLAB,))),
                 predicate(system_id=MISSING) if missing_system else predicate(value=MISSING),
             )
         )
@@ -506,7 +540,9 @@ def test_mixed_query_validation_collects_property_and_classification_issues(quer
 
 def test_type_bounds_narrow_before_classification_assignment_reads(query_project):
     project = query_project
-    query = Query(where=AllOf(items=(ElementTypePredicate(types=(tapir.ElementType.WALL,)), predicate())))
+    query = Query(
+        where=AllOf(items=(ElementTypePredicate(test=ElementTypeTest(types=(tapir.ElementType.WALL,))), predicate()))
+    )
     result = project.api.utilities.element.filter_elements_by_query_result(project.ids, query)
     assert result.slots[3].is_filtered
     elements = project.api.tapir.classification.get_classifications_of_elements.call_args.args[0]

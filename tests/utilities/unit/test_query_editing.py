@@ -7,14 +7,22 @@ from pydantic import ValidationError
 from pydantic_core import PydanticSerializationError
 
 from multiconn_archicad.models.tapir.types import ElementType
-from multiconn_archicad.utilities.queries import QUERY_SCHEMA_VERSION, AllOf, AnyOf, ElementTypePredicate
+from multiconn_archicad.utilities.queries import (
+    QUERY_SCHEMA_VERSION,
+    AllOf,
+    AnyOf,
+    ElementTypePredicate,
+    ElementTypeTest,
+)
 from multiconn_archicad.utilities.queries.editing import QueryRow, QueryRows, build_query, validate_row
 
 pytestmark = pytest.mark.unit
 
 
 def _type_row(element_type: str, **syntax) -> QueryRow:
-    return QueryRow(predicate={"kind": "element_type", "types": [element_type]}, **syntax)
+    return QueryRow(
+        predicate={"kind": "element_type", "test": {"kind": "element_type", "types": [element_type]}}, **syntax
+    )
 
 
 def test_compiles_and_before_or_and_ignores_the_last_connector():
@@ -29,16 +37,16 @@ def test_compiles_and_before_or_and_ignores_the_last_connector():
     assert result.query.schema_version == QUERY_SCHEMA_VERSION
     assert result.query.where == AnyOf(
         items=(
-            ElementTypePredicate(types=(ElementType.WALL,)),
+            ElementTypePredicate(test=ElementTypeTest(types=(ElementType.WALL,))),
             AllOf(
                 items=(
-                    ElementTypePredicate(types=(ElementType.SLAB,)),
-                    ElementTypePredicate(types=(ElementType.BEAM,)),
+                    ElementTypePredicate(test=ElementTypeTest(types=(ElementType.SLAB,))),
+                    ElementTypePredicate(test=ElementTypeTest(types=(ElementType.BEAM,))),
                 )
             ),
         )
     )
-    assert result.row_id_at(("where", "items", 1, "items", 0, "types", 0)) == slab.row_id
+    assert result.row_id_at(("where", "items", 1, "items", 0, "test", "types", 0)) == slab.row_id
     assert result.row_id_at(("where",)) is None
     assert beam.join_next == "or"
 
@@ -58,14 +66,14 @@ def test_parentheses_close_before_the_outgoing_connector_and_preserve_nested_gro
                 items=(
                     AnyOf(
                         items=(
-                            ElementTypePredicate(types=(ElementType.WALL,)),
-                            ElementTypePredicate(types=(ElementType.SLAB,)),
+                            ElementTypePredicate(test=ElementTypeTest(types=(ElementType.WALL,))),
+                            ElementTypePredicate(test=ElementTypeTest(types=(ElementType.SLAB,))),
                         )
                     ),
-                    ElementTypePredicate(types=(ElementType.BEAM,)),
+                    ElementTypePredicate(test=ElementTypeTest(types=(ElementType.BEAM,))),
                 )
             ),
-            ElementTypePredicate(types=(ElementType.COLUMN,)),
+            ElementTypePredicate(test=ElementTypeTest(types=(ElementType.COLUMN,))),
         )
     )
     assert result.row_id_at(("where", "items", 0, "items", 0, "items", 1)) == slab.row_id
