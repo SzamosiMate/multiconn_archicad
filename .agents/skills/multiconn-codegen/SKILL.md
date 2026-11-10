@@ -93,6 +93,8 @@ Do not encode a subjective judgment as a narrow deterministic special case. Reso
 
 After the deterministic audit passes, inspect every added or structurally changed public model in schema context. Trace its consumers, compare it with existing public types, and repair clear semantic problems at the schema-patching or generator source. This review is required even when the audit reports no errors.
 
+For a suspected rename, duplicate, or retired extraction, run `python -m code_generation.shared.schema_match <schema.json> <definition> --path /properties/<field> --against <candidate-schema.json>`. Omit `--path` for a named definition and `--against` to search the same snapshot. Use `--candidate <name>` to inspect structural differences against a specific definition. The report separates annotations from structural differences and lists reference sites. Check the command and field context before reusing a name or retiring a patch. Equal schemas can represent different concepts, such as `ElementId` and `AttributeId`.
+
 Known semantic error types are:
 
 - context-free or overly broad names that should include their domain or role;
