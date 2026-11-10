@@ -7,7 +7,7 @@ from types import UnionType
 from typing import Any, get_args, get_origin, Union, Annotated
 
 from code_generation.shared.utils import camel_to_snake
-from code_generation.unified.api_generator.shipped_signatures import load_shipped_signatures
+from code_generation.unified.api_generator.shipped_signatures import ShippedMethod, load_shipped_signatures
 
 from multiconn_archicad.models.official import commands as official_commands
 from multiconn_archicad.models.official import types as official_types
@@ -19,6 +19,8 @@ MODEL_MODULES = {
     "tapir": {"commands": tapir_commands, "types": tapir_types},
     "official": {"commands": official_commands, "types": official_types},
 }
+EXECUTION_RESULT_RETURN = "FailedExecutionResult | SuccessfulExecutionResult"
+EXECUTION_RESULTS_RETURN = f"list[{EXECUTION_RESULT_RETURN}]"
 
 
 def main():
@@ -36,18 +38,23 @@ def main():
     print("Generating method code and tracking dependencies for each command...")
     total_commands = 0
     for source, groups in organized_commands.items():
-        for commands in groups.values():
+        for group_name, commands in groups.items():
+            methods = []
             for command in commands:
                 total_commands += 1
                 try:
                     generated_data = generate_method_code(command, shipped_signatures[source].get(command["name"]))
-                    command.update(generated_data)
+                    companion = generated_data.pop("dry_run_companion", None)
+                    methods.append({**command, **generated_data})
+                    if companion:
+                        methods.append({**command, **companion})
                 except Exception as e:
                     print(
                         f"❌ FATAL: Failed to generate code for command '{command['name']}'. Error: {e}",
                         file=sys.stderr,
                     )
                     raise
+            groups[group_name] = methods
     print(f"✅ Successfully generated code for {total_commands} commands.")
     with open(args.output_file, "w", encoding="utf-8") as f:
         json.dump(organized_commands, f, indent=2)
@@ -61,7 +68,9 @@ def is_union(obj: Any) -> bool:
     return origin is Union or origin is UnionType
 
 
-def generate_method_code(command_details: dict[str, Any], shipped_parameters: list[str] | None = None) -> dict:
+def generate_method_code(
+    command_details: dict[str, Any], shipped_methods: dict[str, ShippedMethod] | None = None
+) -> dict:
     """
     Orchestrates the generation of a single API method, handling special cases
     and falling back to a standard generation process.
@@ -79,6 +88,35 @@ def generate_method_code(command_details: dict[str, Any], shipped_parameters: li
     result_model = get_model_class(f"{command_name}Result", source, dependencies)
 
     _check_for_unhandled_patterns(params_model)
+
+    shipped_methods = shipped_methods or {}
+    shipped = shipped_methods.get(snake_name)
+    shipped_parameters = shipped["parameters"] if shipped else None
+    if (
+        source == "tapir"
+        and shipped is not None
+        and shipped["returns"] in (EXECUTION_RESULT_RETURN, EXECUTION_RESULTS_RETURN)
+        and "dry_run" not in shipped["parameters"]
+        and "dryRun" in getattr(params_model, "model_fields", {})
+        and "dryRun" in getattr(result_model, "model_fields", {})
+    ):
+        dry_name = f"{snake_name}_dry_run"
+        dry_parameters = shipped_methods.get(dry_name, shipped)["parameters"]
+        companion = _generate_standard_method(
+            command_details, dry_name, params_model, result_model, dependencies, dry_parameters, dry_run=True
+        )
+        ordinary = _generate_standard_method(
+            command_details,
+            snake_name,
+            params_model,
+            result_model,
+            dependencies,
+            shipped_parameters,
+            dry_run=False,
+            legacy_return=shipped["returns"],
+        )
+        ordinary["dry_run_companion"] = companion
+        return ordinary
 
     return _generate_standard_method(
         command_details, snake_name, params_model, result_model, dependencies, shipped_parameters
@@ -162,6 +200,9 @@ def _generate_standard_method(
     result_model: Any,
     dependencies: dict,
     shipped_parameters: list[str] | None,
+    *,
+    dry_run: bool | None = None,
+    legacy_return: str | None = None,
 ) -> dict:
     """Generates method code for a standard, straightforward command."""
     final_return_type_hint = "None"
@@ -176,7 +217,16 @@ def _generate_standard_method(
     params_model_name = f"{command_name}Parameters" if params_model else None
     result_model_name = f"{command_name}Result" if result_model else None
 
-    if result_model:
+    if legacy_return:
+        final_return_type_hint = legacy_return
+        dependencies["types"].update({"ExecutionResult", "FailedExecutionResult", "SuccessfulExecutionResult"})
+        if legacy_return == EXECUTION_RESULTS_RETURN:
+            alias_property_name = "executionResults"
+            field_info = result_model.model_fields[alias_property_name]
+            return_doc_info = (legacy_return, field_info.description)
+        else:
+            return_doc_info = (legacy_return, None)
+    elif result_model:
         # Check if the result model is just a wrapper for a single field (alias)
         if inspect.isclass(result_model) and hasattr(result_model, "model_fields") and not result_model.model_fields:
             final_return_type_hint = "None"
@@ -194,9 +244,12 @@ def _generate_standard_method(
             return_doc_info = (final_return_type_hint, None)
 
     signature, param_docs = _build_signature_and_docs(
-        snake_name, params_model, final_return_type_hint, dependencies, shipped_parameters
+        snake_name, params_model, final_return_type_hint, dependencies, shipped_parameters, dry_run
     )
-    docstring = _build_docstring(command_details["description"], param_docs, return_doc_info)
+    description = command_details["description"]
+    if dry_run is True:
+        description = f"Preview this command without applying its changes. {description}"
+    docstring = _build_docstring(description, param_docs, return_doc_info)
 
     body = _build_body(
         command_details["name"],
@@ -206,6 +259,8 @@ def _generate_standard_method(
         result_model,
         result_model_name,
         alias_property_name,
+        dry_run=dry_run,
+        legacy_return=legacy_return,
     )
 
     generated = {
@@ -216,6 +271,9 @@ def _generate_standard_method(
     }
     if dependencies["collections_abc"]:
         generated["collections_abc_dependencies"] = sorted(dependencies["collections_abc"])
+    if dry_run is not None:
+        generated["dry_run"] = dry_run
+        generated["python_name"] = snake_name
     return generated
 
 
@@ -253,6 +311,7 @@ def _build_signature_and_docs(
     return_type_hint: str,
     dependencies: dict,
     shipped_parameters: list[str] | None = None,
+    dry_run: bool | None = None,
 ) -> tuple[str, list[str]]:
     """Builds the method signature and the parameter documentation lines."""
     if params_model is None:
@@ -278,9 +337,12 @@ def _build_signature_and_docs(
 
     signature_parts, param_docs = ["self"], []
     if params_model:
-        positional, keyword_only = _order_parameters(
-            list(inspect.signature(params_model).parameters.values()), shipped_parameters
-        )
+        params = [
+            param
+            for param in inspect.signature(params_model).parameters.values()
+            if dry_run is None or param.name != "dryRun"
+        ]
+        positional, keyword_only = _order_parameters(params, shipped_parameters)
 
         for index, param in enumerate(positional + keyword_only):
             if index == len(positional):
@@ -346,6 +408,9 @@ def _build_body(
     validation_model: Any,
     validation_model_name: str | None,
     alias_property_name: str | None,
+    *,
+    dry_run: bool | None = None,
+    legacy_return: str | None = None,
 ) -> str:
     """Constructs the method body, creating the params dict and handling alias returns."""
     core_call_method = "post_tapir_command" if source == "tapir" else "post_command"
@@ -357,6 +422,10 @@ def _build_body(
         else:
             params_map_lines = ["{"]
             for param in inspect.signature(params_model).parameters.values():
+                if param.name == "dryRun" and dry_run is not None:
+                    if dry_run:
+                        params_map_lines.append("    'dryRun': True,")
+                    continue
                 params_map_lines.append(f"    '{param.name}': {camel_to_snake(param.name)},")
             params_map_lines.append("}")
             params_map = "\n    ".join(params_map_lines)
@@ -377,6 +446,15 @@ def _build_body(
         body_lines.append("return None")
     else:
         body_lines.append(f"response_dict = {call_expression}")
+
+        if legacy_return:
+            if alias_property_name:
+                body_lines.append(
+                    f"return TypeAdapter(list[ExecutionResult]).validate_python(response_dict.get({alias_property_name!r}))"
+                )
+            else:
+                body_lines.append("return TypeAdapter(ExecutionResult).validate_python(response_dict)")
+            return "\n".join(body_lines)
 
         if is_union(validation_model):
             body_lines.append(
