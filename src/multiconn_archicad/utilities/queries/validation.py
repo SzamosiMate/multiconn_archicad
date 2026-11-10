@@ -8,10 +8,10 @@ from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Literal, TypeAlias, Protocol
 from uuid import UUID
 
+from .catalogue import FieldCatalogue, QueryFieldCatalogue
 from .errors import InvalidFieldTestError, UnsupportedFieldTypeError
 
 if TYPE_CHECKING:
-    from .discovery import FieldCatalogue
     from .fields import FieldInfo
     from .models import Query, TestModel
 
@@ -157,21 +157,20 @@ class QueryValidationContext:
     resolves references without traversal, API reads or accumulated issues.
     """
 
-    catalogues: Mapping[str, FieldCatalogue[Any, Any]]
+    catalogue: QueryFieldCatalogue
 
-    def __init__(self, catalogues: Sequence[FieldCatalogue[Any, Any]]):
-        by_kind: dict[str, FieldCatalogue[Any, Any]] = {}
-        for catalogue in catalogues:
-            if catalogue.kind in by_kind:
-                raise ValueError(f"Multiple catalogues for field kind {catalogue.kind!r}")
-            by_kind[catalogue.kind] = catalogue
-        object.__setattr__(self, "catalogues", MappingProxyType(by_kind))
+    def __init__(self, catalogues: QueryFieldCatalogue | Sequence[FieldCatalogue[Any, Any]]):
+        catalogue = catalogues if isinstance(catalogues, QueryFieldCatalogue) else QueryFieldCatalogue(catalogues)
+        object.__setattr__(self, "catalogue", catalogue)
+
+    @property
+    def catalogues(self) -> Mapping[str, FieldCatalogue[Any, Any]]:
+        return self.catalogue.catalogues
 
     def check_field[TestT: TestModel](self, check: FieldCheck[TestT]) -> tuple[QueryValidationIssue, ...]:
         """Dispatch a missing reference or a resolved field's test check."""
         predicate = check.predicate
-        catalogue = self.catalogues.get(predicate.kind)
-        field = catalogue.get_field(predicate.field_id) if catalogue is not None else None
+        field = self.catalogue.resolve({"kind": predicate.kind, "field_id": predicate.field_id})
         if field is None:
             return (_unknown_field_issue(check),)
         return _check_known_field(field, check)
@@ -179,7 +178,7 @@ class QueryValidationContext:
 
 def validate_query(
     query: Query,
-    catalogues: Sequence[FieldCatalogue[Any, Any]],
+    catalogues: QueryFieldCatalogue | Sequence[FieldCatalogue[Any, Any]],
 ) -> QueryValidationResult:
     """Check every branch against supplied metadata, without API or value reads.
 

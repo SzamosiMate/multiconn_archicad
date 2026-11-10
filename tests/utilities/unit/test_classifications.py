@@ -363,7 +363,8 @@ def query_project(api):
     ]
     api.tapir.classification.get_classifications_of_elements.side_effect = reads
     property_id = UUID(int=500)
-    api.tapir.application.get_add_on_version.return_value = "1.7.3"
+    api.read_header_metadata.return_value = None
+    api.tapir.application.get_add_on_version.return_value = "2.0.0"
     api.tapir.property.get_all_properties.return_value = GetAllPropertiesResult.model_validate(
         {
             "properties": [
