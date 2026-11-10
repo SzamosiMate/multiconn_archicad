@@ -25,6 +25,7 @@ def _error(message: str, available: bool | None = None) -> tapir.PropertyValueEr
 @pytest.fixture
 def api():
     api = MagicMock()
+    api.read_header_metadata.return_value = None
     api.tapir.application.get_add_on_version.return_value = "1.7.3"
     return api
 

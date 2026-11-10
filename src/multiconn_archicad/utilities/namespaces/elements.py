@@ -20,6 +20,9 @@ from multiconn_archicad.utilities.results.batch_results import (
 )
 from multiconn_archicad.utilities.results.query_results import FindElementsResult
 from multiconn_archicad.utilities.queries import Query
+from multiconn_archicad.utilities.queries.catalogue import QueryFieldCatalogue
+from multiconn_archicad.utilities.queries.discovery import discover_row_catalogue
+from multiconn_archicad.utilities.queries.editing import QueryRow
 from multiconn_archicad.utilities.queries.execution import (
     evaluate_query_candidates,
     list_query_candidates,
@@ -62,6 +65,10 @@ class ElementUtilities:
     def __init__(self, api: UnifiedApi):
         """Bind element operations to ``api``."""
         self._api = api
+
+    def discover_query_fields(self, rows: Sequence[QueryRow] | None = None) -> QueryFieldCatalogue:
+        """Discover browse choices, or resolve only the references in supplied rows."""
+        return discover_row_catalogue(self._api, None if rows is None else (row.predicate for row in rows))
 
     def find_elements(
         self,

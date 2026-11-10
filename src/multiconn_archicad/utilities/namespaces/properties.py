@@ -29,6 +29,7 @@ from multiconn_archicad.utilities.results.batch_results import (
     SlotState,
 )
 from multiconn_archicad.utilities.results.property_errors import PropertyUnavailableError, PropertyUndefinedError
+from multiconn_archicad.utilities.server_versions import read_tapir_version
 
 if TYPE_CHECKING:
     from multiconn_archicad.clients.unified_api.api import UnifiedApi
@@ -252,6 +253,7 @@ class PropertyUtilities:
         self,
         *,
         registry: TestRegistry | None = None,
+        property_ids: Sequence[PropertyIdLike] | None = None,
     ) -> PropertyCatalogue:
         """Fetch one fresh Tapir property batch and adapt it for query discovery.
 
@@ -262,7 +264,12 @@ class PropertyUtilities:
         """
         if registry is None:
             registry = TestRegistry.from_union(PropertyTest)
-        result = self._api.tapir.property.get_all_properties()
+        if property_ids is None:
+            result = self._api.tapir.property.get_all_properties()
+        elif property_ids:
+            result = self._api.tapir.property.get_all_properties(properties=normalize_property_ids(property_ids))
+        else:
+            return PropertyCatalogue((), registry)
         return PropertyCatalogue(result.properties, registry)
 
     def _get_raw_property_values(
@@ -270,7 +277,7 @@ class PropertyUtilities:
     ) -> list[tapir.ErrorItem | tapir.PropertyValuesArrayItem]:
         normalized_elements = normalize_element_ids(elements)
         normalized_properties = normalize_property_ids(properties)
-        version = Version(self._api.tapir.application.get_add_on_version())
+        version = Version(read_tapir_version(self._api, self._api.read_header_metadata()))
         if version >= Version("1.7.3"):
             return self._api.tapir.property.get_property_values_of_elements(
                 normalized_elements, normalized_properties, include_availability=True

@@ -2,12 +2,16 @@
 
 from __future__ import annotations
 
-from abc import ABC, abstractmethod
-from collections.abc import Iterable, Iterator
-from typing import Any, Generic, TypeAlias, TypeVar
+from collections.abc import Iterable, Iterator, Mapping, Sequence
+from typing import TYPE_CHECKING, Any, TypeAlias
 from uuid import UUID
 
-from multiconn_archicad.models.tapir.types import PropertyDetails
+from multiconn_archicad.models.tapir.types import (
+    ElementType,
+    PropertyDetails,
+    ToolDefaultProperties,
+    ToolDefaultPropertyFilter,
+)
 from multiconn_archicad.utilities.identifiers import (
     ClassificationSystemIdLike,
     PropertyIdLike,
@@ -15,90 +19,20 @@ from multiconn_archicad.utilities.identifiers import (
     normalize_property_id,
 )
 
+from multiconn_archicad.utilities.server_versions import read_archicad_major
+
+from .catalogue import FieldCatalogue, QueryFieldCatalogue, _reference_key
 from .fields import ClassificationInfo, ElementTypeInfo, FieldInfo, PropertyInfo, UnsupportedPropertyInfo
 from .registry import TestRegistry
 from .errors import UnsupportedPropertyTypeError
+from .versioning import require_query_tapir_version
+
+if TYPE_CHECKING:
+    from multiconn_archicad.clients.unified_api.api import UnifiedApi
 
 DiscoveredProperty: TypeAlias = PropertyInfo | UnsupportedPropertyInfo
-FieldT = TypeVar("FieldT", bound=FieldInfo[Any])
-IdT = TypeVar("IdT")
 
 BUILTIN_QUERY_FIELDS: tuple[FieldInfo[Any], ...] = (ElementTypeInfo(),)
-
-
-class FieldCatalogue(ABC, Generic[FieldT, IdT]):
-    """Keep ordered field snapshots with shared lookup, search and descriptions.
-
-    Subclasses adapt metadata to UUID/field pairs and normalize their accepted
-    identifier inputs. Catalogues retain no API connection or live cache.
-    """
-
-    def __init__(self, fields: Iterable[tuple[UUID, FieldT]]):
-        self._by_id: dict[UUID, FieldT] = {}
-        for guid, field in fields:
-            if guid in self._by_id:
-                raise ValueError(f"Duplicate field GUID in catalogue: {guid}")
-            self._by_id[guid] = field
-
-    @property
-    @abstractmethod
-    def kind(self) -> str:
-        """Identify the predicate kind whose fields this catalogue contains."""
-        ...
-
-    @staticmethod
-    @abstractmethod
-    def _normalize_id(identifier: IdT) -> UUID:
-        """Normalize a source-specific identifier for catalogue lookup."""
-        ...
-
-    @property
-    def fields(self) -> tuple[FieldT, ...]:
-        return tuple(self._by_id.values())
-
-    @property
-    def supported(self) -> tuple[FieldT, ...]:
-        return tuple(field for field in self if field.supported)
-
-    @property
-    def unsupported(self) -> tuple[FieldT, ...]:
-        return tuple(field for field in self if not field.supported)
-
-    def __iter__(self) -> Iterator[FieldT]:
-        return iter(self._by_id.values())
-
-    def __len__(self) -> int:
-        return len(self._by_id)
-
-    def __getitem__(self, identifier: IdT) -> FieldT:
-        return self._by_id[self._normalize_id(identifier)]
-
-    def get(self, identifier: IdT) -> FieldT | None:
-        return self._by_id.get(self._normalize_id(identifier))
-
-    def get_field(self, field_id: UUID) -> FieldT | None:
-        """Look up a query field by its normalized identity."""
-        return self._by_id.get(field_id)
-
-    def search(
-        self,
-        text: str = "",
-        *,
-        group: str | None = None,
-        supported_only: bool = False,
-    ) -> tuple[FieldT, ...]:
-        """Find case-insensitive label substrings, optionally within an exact group."""
-        needle = text.casefold()
-        return tuple(
-            field
-            for field in self
-            if (not supported_only or field.supported)
-            and (group is None or field.group == group)
-            and needle in field.qualified_name.casefold()
-        )
-
-    def describe(self) -> dict[str, Any]:
-        return {"fields": [field.describe() for field in self]}
 
 
 class PropertyCatalogue(FieldCatalogue[DiscoveredProperty, PropertyIdLike]):
@@ -147,3 +81,52 @@ class ClassificationCatalogue(FieldCatalogue[ClassificationInfo, ClassificationS
     @staticmethod
     def _normalize_id(identifier: ClassificationSystemIdLike) -> UUID:
         return normalize_classification_system_id(identifier).classificationSystemId.guid
+
+
+def _legacy_browsable_property_ids(api: UnifiedApi) -> set[UUID]:
+    """Exclude fundamental built-ins from the picker on Archicad 26/27."""
+    ids = {item.propertyId.guid for item in api.official.property.get_all_property_ids()}
+    defaults = api.tapir.property.get_properties_of_tool_defaults(
+        [kind for kind in ElementType if kind is not ElementType.UNKNOWN],
+        filter=ToolDefaultPropertyFilter.USER_LEVEL_BUILT_IN,
+    )
+    for result in defaults:
+        if isinstance(result, ToolDefaultProperties):
+            ids.update(prop.propertyId.guid for prop in result.properties)
+    return ids
+
+
+def discover_query_catalogue(
+    api: UnifiedApi,
+    *,
+    property_ids: Sequence[UUID] | None,
+    classification_ids: Sequence[UUID] | None,
+    browse_ids_by_kind: Mapping[str, set[UUID]] | None = None,
+) -> QueryFieldCatalogue:
+    catalogues: list[FieldCatalogue[Any, Any]] = []
+    if property_ids is None or property_ids:
+        catalogues.append(api.utilities.property.discover_query_fields(property_ids=property_ids))
+    if classification_ids is None or classification_ids:
+        catalogues.append(api.utilities.classification.discover_query_fields(classification_ids))
+    return QueryFieldCatalogue(catalogues, fields=BUILTIN_QUERY_FIELDS, browse_ids_by_kind=browse_ids_by_kind)
+
+
+def discover_row_catalogue(api: UnifiedApi, references: Iterable[Mapping[str, object]] | None) -> QueryFieldCatalogue:
+    metadata = api.read_header_metadata()
+    require_query_tapir_version(api, metadata)
+    if references is None:
+        browse_ids_by_kind = None
+        if read_archicad_major(api, metadata) < 28:
+            browse_ids_by_kind = {"property": _legacy_browsable_property_ids(api)}
+        return discover_query_catalogue(
+            api, property_ids=None, classification_ids=None, browse_ids_by_kind=browse_ids_by_kind
+        )
+    ids_by_kind: dict[str, list[UUID]] = {}
+    for reference in references:
+        key = _reference_key(reference)
+        if key is not None and key[1] is not None:
+            kind, field_id = key
+            ids_by_kind.setdefault(kind, []).append(field_id)
+    return discover_query_catalogue(
+        api, property_ids=ids_by_kind.get("property", ()), classification_ids=ids_by_kind.get("classification", ())
+    )

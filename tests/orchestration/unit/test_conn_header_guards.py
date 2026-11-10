@@ -1,6 +1,9 @@
 from dataclasses import replace
+from unittest.mock import Mock
 
 import pytest
+from multiconn_archicad.clients.core.core_commands import CoreCommands
+from multiconn_archicad.clients.unified_api.api import UnifiedApi
 from multiconn_archicad.orchestration.header_state import HeaderState
 from multiconn_archicad.orchestration.conn_header import (
     ConnHeader,
@@ -23,9 +26,55 @@ from multiconn_archicad.orchestration.basic_types import (
     TeamworkCredentials,
 )
 from multiconn_archicad.constants import SUPPORTED_TAPIR_VERSION
-from multiconn_archicad.errors import HeaderUnassignedError
+from multiconn_archicad.errors import HeaderUnassignedError, MulticonnArchicadError
+from multiconn_archicad.utilities.server_versions import read_archicad_major, read_tapir_version
 
 pytestmark = pytest.mark.unit
+
+
+def test_standalone_unified_api_reads_versions_on_demand(monkeypatch):
+    product = Mock(return_value={"version": 28, "buildNumber": 3001, "languageCode": "INT"})
+    tapir = Mock(return_value={"version": "2.0.0"})
+    monkeypatch.setattr(CoreCommands, "post_command", product)
+    monkeypatch.setattr(CoreCommands, "post_tapir_command", tapir)
+
+    api = UnifiedApi(CoreCommands(Port(19723)))
+    assert api.read_header_metadata() is None
+    product.assert_not_called()
+    tapir.assert_not_called()
+
+    assert read_tapir_version(api, api.read_header_metadata()) == "2.0.0"
+    product.assert_not_called()
+    assert read_archicad_major(api, api.read_header_metadata()) == 28
+    product.assert_called_once_with("API.GetProductInfo")
+    tapir.assert_called_once_with("GetAddOnVersion")
+
+
+def test_header_api_reads_current_metadata_and_rejects_a_previous_binding(ready_session_header):
+    header = ready_session_header
+    api = header.unified
+    metadata = api.read_header_metadata()
+    assert metadata is header.latest_metadata
+
+    token = header._state.begin_fetch()
+    with pytest.raises(MulticonnArchicadError, match="Current connection metadata is unavailable"):
+        api.read_header_metadata()
+    assert header.tapir_info == metadata.tapir_info
+
+    refreshed = replace(metadata, tapir_info=TapirInfo(version="2.1.0"))
+    header._state.complete(token, refreshed)
+    assert api.read_header_metadata() is refreshed
+
+    failed = replace(refreshed, tapir_info=APIResponseError(message="Tapir version read failed"))
+    header._state.complete(header._state.begin_fetch(), failed)
+    assert header.tapir_info == refreshed.tapir_info
+    with pytest.raises(MulticonnArchicadError, match="Tapir version read failed"):
+        read_tapir_version(api, api.read_header_metadata())
+
+    header.unassign()
+    header.port = Port(19724)
+    with pytest.raises(HeaderUnassignedError, match="previous connection"):
+        api.read_header_metadata()
 
 
 def _with_metadata(header, **fields):

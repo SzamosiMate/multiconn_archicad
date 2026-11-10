@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 from uuid import UUID
 
 from multiconn_archicad.models.tapir import types as tapir
@@ -11,14 +11,15 @@ from multiconn_archicad.utilities.results.batch_results import BatchResult, Batc
 from multiconn_archicad.utilities.results.query_results import FindElementsResult
 
 from .context import ContextBuilder, EvaluationContext
+from .discovery import discover_query_catalogue
+from .fields import ClassificationInfo
 from .models import Predicate, Query
 from .sources import CLASSIFICATION_FIELDS, PROPERTY_VALUES, TYPE_MEMBERSHIP
 from .validation import validate_query
-from .versioning import validate_query_version
+from .versioning import require_query_tapir_version, validate_query_version
 
 if TYPE_CHECKING:
     from multiconn_archicad.clients.unified_api.api import UnifiedApi
-    from .discovery import FieldCatalogue
 
 
 def validate_execution_query(api: UnifiedApi, query: Query) -> ContextBuilder:
@@ -26,22 +27,20 @@ def validate_execution_query(api: UnifiedApi, query: Query) -> ContextBuilder:
     if not isinstance(query, Query):
         raise TypeError("Expected a Query instance; parse query JSON with Query.model_validate_json() first")
     validate_query_version(query.schema_version)
+    require_query_tapir_version(api, api.read_header_metadata())
     # Discover only the field families requested by prepare(). Keep the same
     # builder so execution reuses validated classification metadata.
     builder = ContextBuilder()
     query.where.prepare(builder)
-    catalogues: list[FieldCatalogue[Any, Any]] = []
-    if builder.requires(PROPERTY_VALUES):
-        catalogues.append(api.utilities.property.discover_query_fields())
-    classifications = None
-    if builder.requires(CLASSIFICATION_FIELDS):
-        system_ids: tuple[UUID, ...] = builder.requested_keys(CLASSIFICATION_FIELDS)
-        classifications = api.utilities.classification.discover_query_fields(system_ids)
-        catalogues.append(classifications)
-    validate_query(query, catalogues).raise_for_errors()
-    if classifications is not None:
-        for field in classifications:
-            builder.provide(CLASSIFICATION_FIELDS, field.system_id, field)
+    system_ids = builder.requested_keys(CLASSIFICATION_FIELDS)
+    catalogue = discover_query_catalogue(
+        api, property_ids=builder.requested_keys(PROPERTY_VALUES), classification_ids=system_ids
+    )
+    validate_query(query, catalogue).raise_for_errors()
+    for system_id in system_ids:
+        field = catalogue.resolve({"kind": "classification", "field_id": system_id})
+        if isinstance(field, ClassificationInfo):
+            builder.provide(CLASSIFICATION_FIELDS, system_id, field)
     return builder
 
 
