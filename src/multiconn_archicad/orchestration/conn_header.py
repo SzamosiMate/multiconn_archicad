@@ -21,7 +21,13 @@ from multiconn_archicad.orchestration.basic_types import (
     SoloProjectID,
     TeamworkProjectID,
 )
-from multiconn_archicad.errors import RequestError, ArchicadAPIError, HeaderUnassignedError, AddOnCommandUnavailable
+from multiconn_archicad.errors import (
+    AddOnCommandUnavailable,
+    ArchicadAPIError,
+    HeaderUnassignedError,
+    MulticonnArchicadError,
+    RequestError,
+)
 from multiconn_archicad.clients.standard_connection import StandardConnection
 from multiconn_archicad.clients.unified_api.api import UnifiedApi
 from multiconn_archicad.orchestration.system.thread_utils import EXECUTOR
@@ -66,10 +72,21 @@ class ConnHeader:
 
         self._core: CoreCommands | None = CoreCommands(port) if port else None
         self._standard: StandardConnection | None = StandardConnection(port) if port else None
-        self._unified: UnifiedApi | None = UnifiedApi(self.core) if self._core else None
+        self._unified: UnifiedApi | None = self._make_unified_api(self._core) if self._core else None
 
         if initialize and port:
             self.refresh_metadata()
+
+    def _make_unified_api(self, core: CoreCommands) -> UnifiedApi:
+        def read_metadata() -> HeaderMetadata:
+            metadata = self.latest_metadata
+            if self._core is not core:
+                raise HeaderUnassignedError("This API belongs to a previous connection.")
+            if metadata is None:
+                raise MulticonnArchicadError("Current connection metadata is unavailable.")
+            return metadata
+
+        return UnifiedApi(core, read_header_metadata=read_metadata)
 
     def _bind(self, *, events: ConnectionEvents, ui_mode: bool) -> None:
         """Configure an adopted header before registration and metadata fetching."""
@@ -104,7 +121,7 @@ class ConnHeader:
         if port:
             self._core = CoreCommands(port)
             self._standard = StandardConnection(port)
-            self._unified = UnifiedApi(self.core)
+            self._unified = self._make_unified_api(self._core)
             self._state.assign()
         else:
             self.unassign()

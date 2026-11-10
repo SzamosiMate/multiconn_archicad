@@ -12,7 +12,7 @@ from uuid import UUID
 from pydantic import JsonValue
 
 from multiconn_archicad.models.official import types as official
-from multiconn_archicad.models.tapir.types import ElementType, PropertyDetails
+from multiconn_archicad.models.tapir.types import ElementType, PropertyDetails, PropertyType
 from multiconn_archicad.utilities.identifiers import ClassificationItemIdLike, normalize_classification_item_id
 
 from .errors import (
@@ -56,6 +56,11 @@ class FieldInfo(ABC, Generic[TestT]):
     def group(self) -> str:
         """Return the field's UI grouping name."""
         ...
+
+    @property
+    def group_path(self) -> tuple[str, ...]:
+        """Return the group hierarchy used when browsing query criteria."""
+        return (self.group or "Ungrouped",)
 
     @property
     def qualified_name(self) -> str:
@@ -133,7 +138,7 @@ class ElementTypeInfo(FieldInfo[ElementTypeTest]):
 
     @property
     def group(self) -> str:
-        return "Built-in"
+        return "Main"
 
     @property
     def reference(self) -> dict[str, str]:
@@ -171,6 +176,11 @@ class _PropertyMetadata(FieldInfo[PropertyTestModel]):
     def group(self) -> str:
         """Return the upstream group unchanged."""
         return self._details.propertyGroupName
+
+    @property
+    def group_path(self) -> tuple[str, ...]:
+        origin = "User-defined Properties" if self._details.propertyType is PropertyType.CUSTOM else "Built-in Properties"
+        return (origin, *super().group_path)
 
     @property
     def property_id(self) -> UUID:

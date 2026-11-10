@@ -1,10 +1,10 @@
 """Expose query definitions, test families, and field information."""
 
+from .catalogue import FieldCatalogue, QueryFieldCatalogue, QueryFieldEntry
 from .discovery import (
     BUILTIN_QUERY_FIELDS,
     ClassificationCatalogue,
     DiscoveredProperty,
-    FieldCatalogue,
     PropertyCatalogue,
 )
 from .errors import (
@@ -113,6 +113,8 @@ __all__ = [
     "PropertyTest",
     "PropertyTestModel",
     "Query",
+    "QueryFieldCatalogue",
+    "QueryFieldEntry",
     "QUERY_SCHEMA_VERSION",
     "QueryValidationContext",
     "QueryValidationError",

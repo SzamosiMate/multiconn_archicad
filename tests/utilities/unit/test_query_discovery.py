@@ -3,12 +3,16 @@
 import json
 from pathlib import Path
 from unittest.mock import MagicMock, call
-from uuid import UUID
+from uuid import UUID, uuid4
 
 import pytest
 
 from multiconn_archicad.models.tapir.commands import GetAllPropertiesResult
 from multiconn_archicad.models.tapir.types import PropertyDetails, PropertyType, PropertyValueType
+from multiconn_archicad.models.tapir import types as tapir
+from multiconn_archicad.orchestration.basic_types import PendingResponse, ProductInfo, TapirInfo
+from multiconn_archicad.orchestration.header_state import HeaderMetadata
+from multiconn_archicad.utilities.api import Utilities
 from multiconn_archicad.utilities.namespaces.properties import PropertyUtilities
 from multiconn_archicad.utilities.queries import (
     AmbiguousPropertyTypeError,
@@ -22,6 +26,7 @@ from multiconn_archicad.utilities.queries import (
     UnsupportedPropertyTypeError,
 )
 from multiconn_archicad.utilities.queries import TestRegistry as Registry
+from multiconn_archicad.utilities.queries.editing import QueryRow
 
 pytestmark = pytest.mark.unit
 
@@ -51,6 +56,85 @@ def test_catalogue_preserves_order_names_and_distinct_builtin_identities(metadat
     assert len(catalogue.unsupported) == 3
     assert all(isinstance(field, PropertyInfo) for field in catalogue.supported)
     assert all(isinstance(field, UnsupportedPropertyInfo) for field in catalogue.unsupported)
+
+
+@pytest.mark.parametrize("archicad_major", [26, 27])
+def test_browse_scope_hides_fundamental_fields_but_resolves_exact_references(metadata, archicad_major):
+    custom = metadata[0].model_copy(
+        update={
+            "propertyId": tapir.PropertyId(guid=uuid4()),
+            "propertyType": PropertyType.CUSTOM,
+            "propertyName": "Custom element tag",
+        }
+    )
+    api = MagicMock()
+    api.utilities = Utilities(api)
+    api.read_header_metadata.return_value = None
+    api.tapir.application.get_add_on_version.return_value = "2.0.0"
+    api.official.basic.get_product_info.return_value.version = archicad_major
+    api.tapir.property.get_all_properties.return_value = GetAllPropertiesResult(properties=[*metadata, custom])
+    api.official.property.get_all_property_ids.return_value = [
+        tapir.PropertyIdArrayItem(propertyId=custom.propertyId),
+    ]
+    api.tapir.property.get_properties_of_tool_defaults.return_value = [
+        tapir.ToolDefaultProperties(
+            properties=[
+                tapir.ToolDefaultProperty(
+                    propertyId=tapir.PropertyId(guid=ELEMENT_ID),
+                    propertyName="Element ID",
+                    propertyGroupId=tapir.PropertyGroupId(guid=uuid4()),
+                )
+            ]
+        ),
+        tapir.ErrorItem(error=tapir.Error(code=1, message="No tool default")),
+    ]
+    api.official.classification.get_all_classification_systems.return_value = []
+
+    catalogue = api.utilities.element.discover_query_fields()
+    entries = {entry.field.qualified_name: entry.group_path for entry in catalogue.browse_fields()}
+    assert entries["General Parameters / Element ID"] == ("Built-in Properties", "General Parameters")
+    assert "GeneralElemProperties / ElementID" not in entries
+    assert ("User-defined Properties", custom.propertyGroupName) in entries.values()
+    reference = {"kind": "property", "field_id": str(SDK_ELEMENT_ID)}
+    assert catalogue.resolve(reference).property_id == SDK_ELEMENT_ID
+    assert catalogue.resolve({"kind": "property", "field_id": str(MISSING)}) is None
+
+    api.tapir.property.get_all_properties.reset_mock()
+    api.official.property.get_all_property_ids.reset_mock()
+    api.tapir.property.get_properties_of_tool_defaults.reset_mock()
+    api.official.basic.get_product_info.reset_mock()
+    scoped = api.utilities.element.discover_query_fields([QueryRow(predicate=reference)])
+    api.tapir.property.get_all_properties.assert_called_once_with(
+        properties=[tapir.PropertyIdArrayItem(propertyId=tapir.PropertyId(guid=SDK_ELEMENT_ID))],
+    )
+    assert scoped.resolve(reference).property_id == SDK_ELEMENT_ID
+    api.official.basic.get_product_info.assert_not_called()
+    api.official.property.get_all_property_ids.assert_not_called()
+    api.tapir.property.get_properties_of_tool_defaults.assert_not_called()
+
+
+@pytest.mark.parametrize("archicad_major", [28, 29])
+def test_browse_scope_uses_all_properties_directly_from_archicad_28(metadata, archicad_major):
+    api = MagicMock()
+    api.utilities = Utilities(api)
+    api.read_header_metadata.return_value = HeaderMetadata(
+        product_info=ProductInfo(version=archicad_major, buildNumber=3001, languageCode="INT"),
+        tapir_info=TapirInfo(version="2.0.0"),
+        archicad_id=PendingResponse(),
+        archicad_location=PendingResponse(),
+    )
+    api.tapir.property.get_all_properties.return_value = GetAllPropertiesResult(properties=[metadata[0]])
+    api.official.classification.get_all_classification_systems.return_value = []
+
+    catalogue = api.utilities.element.discover_query_fields()
+
+    assert any(entry.field.qualified_name == "General Parameters / Element ID" for entry in catalogue.browse_fields())
+    api.tapir.property.get_all_properties.assert_called_once_with()
+    api.read_header_metadata.assert_called_once_with()
+    api.tapir.application.get_add_on_version.assert_not_called()
+    api.official.basic.get_product_info.assert_not_called()
+    api.official.property.get_all_property_ids.assert_not_called()
+    api.tapir.property.get_properties_of_tool_defaults.assert_not_called()
 
 
 @pytest.mark.parametrize("source", ["Custom", "StaticBuiltIn", "DynamicBuiltIn"])

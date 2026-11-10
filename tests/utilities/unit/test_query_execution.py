@@ -5,7 +5,7 @@ from uuid import UUID, uuid4
 
 import pytest
 
-from multiconn_archicad.errors import BatchOperationError, RequestError, TapirCommandError
+from multiconn_archicad.errors import BatchOperationError, MulticonnArchicadError, RequestError, TapirCommandError
 from multiconn_archicad.models.tapir import types as tapir
 from multiconn_archicad.models.tapir.commands import GetAllPropertiesResult
 from multiconn_archicad.utilities.api import Utilities
@@ -85,7 +85,8 @@ class FakeProject:
                 UNDEFINED: "<Undefined>",
                 UNAVAILABLE: cell_error("Not available or not evaluated property", False),
             }.get(guid, "False")
-        self.api.tapir.application.get_add_on_version.return_value = "1.7.3"
+        self.api.read_header_metadata.return_value = None
+        self.api.tapir.application.get_add_on_version.return_value = "2.0.0"
         common = {
             "propertyType": "Custom",
             "propertyGroupName": "Example",
@@ -519,6 +520,23 @@ def test_query_json_must_be_parsed_before_calling_the_utility(project, entry):
     with pytest.raises(TypeError, match="Expected a Query instance"):
         invoke(project, entry, {"where": {"kind": "unsupported"}})
     project.api.tapir.property.get_all_properties.assert_not_called()
+
+
+def test_query_requires_supported_tapir_before_discovery(project):
+    project.api.tapir.application.get_add_on_version.return_value = "1.8.0"
+    with pytest.raises(MulticonnArchicadError, match="require Tapir 2.0.0 or newer"):
+        project.api.utilities.element.find_elements(wall_query())
+    project.api.tapir.property.get_all_properties.assert_not_called()
+
+
+def test_execution_requests_exact_property_ids_without_browse_filters(project):
+    query = Query(where=AllOf(items=(height_node(), height_node())))
+    project.api.utilities.element.find_elements(query)
+    project.api.tapir.property.get_all_properties.assert_called_once_with(
+        properties=[tapir.PropertyIdArrayItem(propertyId=tapir.PropertyId(guid=HEIGHT))],
+    )
+    project.api.tapir.property.get_properties_of_tool_defaults.assert_not_called()
+    project.api.official.basic.get_product_info.assert_not_called()
 
 
 @pytest.mark.parametrize("entry", ["find_elements", "find_elements_result"])
