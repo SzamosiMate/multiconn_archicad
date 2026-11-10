@@ -7,6 +7,7 @@ from types import UnionType
 from typing import Any, get_args, get_origin, Union, Annotated
 
 from code_generation.shared.utils import camel_to_snake
+from code_generation.unified.api_generator.shipped_signatures import load_shipped_signatures
 
 from multiconn_archicad.models.official import commands as official_commands
 from multiconn_archicad.models.official import types as official_types
@@ -30,6 +31,7 @@ def main():
     print(f"Reading organized command data from: {args.input_file}")
     with open(args.input_file, "r", encoding="utf-8") as f:
         organized_commands = json.load(f)
+    shipped_signatures = load_shipped_signatures()
 
     print("Generating method code and tracking dependencies for each command...")
     total_commands = 0
@@ -38,7 +40,7 @@ def main():
             for command in commands:
                 total_commands += 1
                 try:
-                    generated_data = generate_method_code(command)
+                    generated_data = generate_method_code(command, shipped_signatures[source].get(command["name"]))
                     command.update(generated_data)
                 except Exception as e:
                     print(
@@ -59,12 +61,12 @@ def is_union(obj: Any) -> bool:
     return origin is Union or origin is UnionType
 
 
-def generate_method_code(command_details: dict[str, Any]) -> dict:
+def generate_method_code(command_details: dict[str, Any], shipped_parameters: list[str] | None = None) -> dict:
     """
     Orchestrates the generation of a single API method, handling special cases
     and falling back to a standard generation process.
     """
-    dependencies = {"commands": set(), "types": set()}
+    dependencies = {"commands": set(), "types": set(), "collections_abc": set()}
     original_cmd_name = command_details["name"]
     source = command_details["source"]
     command_name = original_cmd_name.removeprefix("API.") if source == "official" else original_cmd_name
@@ -78,7 +80,9 @@ def generate_method_code(command_details: dict[str, Any]) -> dict:
 
     _check_for_unhandled_patterns(params_model)
 
-    return _generate_standard_method(command_details, snake_name, params_model, result_model, dependencies)
+    return _generate_standard_method(
+        command_details, snake_name, params_model, result_model, dependencies, shipped_parameters
+    )
 
 
 def _handle_special_cases(command_name: str, command_details: dict[str, Any], dependencies: dict) -> dict | None:
@@ -152,7 +156,12 @@ def _check_for_unhandled_patterns(params_model: Any) -> None:
 
 
 def _generate_standard_method(
-    command_details: dict[str, Any], snake_name: str, params_model: Any, result_model: Any, dependencies: dict
+    command_details: dict[str, Any],
+    snake_name: str,
+    params_model: Any,
+    result_model: Any,
+    dependencies: dict,
+    shipped_parameters: list[str] | None,
 ) -> dict:
     """Generates method code for a standard, straightforward command."""
     final_return_type_hint = "None"
@@ -184,7 +193,9 @@ def _generate_standard_method(
             final_return_type_hint = get_clean_type_hint(result_model, dependencies)
             return_doc_info = (final_return_type_hint, None)
 
-    signature, param_docs = _build_signature_and_docs(snake_name, params_model, final_return_type_hint, dependencies)
+    signature, param_docs = _build_signature_and_docs(
+        snake_name, params_model, final_return_type_hint, dependencies, shipped_parameters
+    )
     docstring = _build_docstring(command_details["description"], param_docs, return_doc_info)
 
     body = _build_body(
@@ -197,16 +208,51 @@ def _generate_standard_method(
         alias_property_name,
     )
 
-    return {
+    generated = {
         "method_code": f"{signature}\n{textwrap.indent(docstring, '    ')}\n{textwrap.indent(body, '    ')}",
         "command_model_dependencies": sorted(list(dependencies["commands"])),
         "type_model_dependencies": sorted(list(dependencies["types"])),
         "alias_property_name": alias_property_name,
     }
+    if dependencies["collections_abc"]:
+        generated["collections_abc_dependencies"] = sorted(dependencies["collections_abc"])
+    return generated
+
+
+def _order_parameters(
+    params: list[inspect.Parameter], shipped_parameters: list[str] | None
+) -> tuple[list[inspect.Parameter], list[inspect.Parameter]]:
+    if shipped_parameters is None:
+        return sorted(params, key=lambda param: param.default is not inspect.Parameter.empty), []
+
+    remaining = {camel_to_snake(param.name): param for param in params}
+    boundary = shipped_parameters.index("*") if "*" in shipped_parameters else len(shipped_parameters)
+    positional = [remaining.pop(name) for name in shipped_parameters[:boundary] if name in remaining]
+    keyword_only = [remaining.pop(name) for name in shipped_parameters[boundary + 1 :] if name in remaining]
+    keyword_only.extend(remaining.values())
+    # Report incompatible requiredness changes instead of silently reordering positional slots.
+    inspect.Signature(
+        [param.replace(kind=inspect.Parameter.POSITIONAL_OR_KEYWORD) for param in positional]
+        + [param.replace(kind=inspect.Parameter.KEYWORD_ONLY) for param in keyword_only]
+    )
+    return positional, keyword_only
+
+
+def _get_parameter_type_hint(annotation: Any, dependencies: dict) -> str:
+    property_value_input = getattr(tapir_types, "ElementPropertyValueInput", None)
+    if property_value_input is not None and annotation == list[property_value_input]:
+        dependencies["collections_abc"].add("Sequence")
+        dependencies["types"].add("ElementPropertyValueInput")
+        return "Sequence[ElementPropertyValueInput]"
+    return get_clean_type_hint(annotation, dependencies)
 
 
 def _build_signature_and_docs(
-    snake_name: str, params_model: Any, return_type_hint: str, dependencies: dict
+    snake_name: str,
+    params_model: Any,
+    return_type_hint: str,
+    dependencies: dict,
+    shipped_parameters: list[str] | None = None,
 ) -> tuple[str, list[str]]:
     """Builds the method signature and the parameter documentation lines."""
     if params_model is None:
@@ -232,13 +278,15 @@ def _build_signature_and_docs(
 
     signature_parts, param_docs = ["self"], []
     if params_model:
-        sig = inspect.signature(params_model)
-        required_params = [p for p in sig.parameters.values() if p.default is inspect.Parameter.empty]
-        optional_params = [p for p in sig.parameters.values() if p.default is not inspect.Parameter.empty]
+        positional, keyword_only = _order_parameters(
+            list(inspect.signature(params_model).parameters.values()), shipped_parameters
+        )
 
-        for param in required_params + optional_params:
+        for index, param in enumerate(positional + keyword_only):
+            if index == len(positional):
+                signature_parts.append("*")
             param_name_snake = camel_to_snake(param.name)
-            type_hint = get_clean_type_hint(param.annotation, dependencies)
+            type_hint = _get_parameter_type_hint(param.annotation, dependencies)
 
             if param.default is inspect.Parameter.empty:
                 signature_parts.append(f"{param_name_snake}: {type_hint}")
