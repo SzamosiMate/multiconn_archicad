@@ -114,11 +114,13 @@ class TestGenerator:
         except AttributeError:
             return getattr(MODEL_MAP[source]["types"], name)
 
-    def _get_minimal_schema_for_model(self, model_name: str, source: str) -> str:
+    def _get_minimal_schema_for_model(self, model_name: str, source: str, response_override: dict | None = None) -> str:
         master_schema = self._master_schemas[source]
         all_definitions = master_schema.get("$defs", {})
 
         all_definitions = patch_recursive_schemas(all_definitions, model_name, source)
+        if response_override is not None:
+            all_definitions[model_name] = response_override
 
         minimal_definitions = {}
         collect_dependencies_recursively(model_name, all_definitions, minimal_definitions, set())
@@ -137,7 +139,11 @@ class TestGenerator:
         deps = command_details.get("command_model_dependencies", [])
         params_model_name = next((d for d in deps if d.endswith("Parameters")), None)
         result_model_name = next((d for d in deps if d.endswith("Result")), None)
-        snake_name = camel_to_snake(cmd_name.removeprefix("API.") if source == "official" else cmd_name)
+        snake_name = command_details.get("python_name") or camel_to_snake(
+            cmd_name.removeprefix("API.") if source == "official" else cmd_name
+        )
+        dry_run = command_details.get("dry_run")
+        alias_prop = command_details.get("alias_property_name")
 
         given_params, given_args = [], []
         if params_model_name:
@@ -146,7 +152,18 @@ class TestGenerator:
                 given_params.append(f"input_data=schema_strategy({params_schema_str})")
                 given_args.append("input_data: dict")
         if result_model_name:
-            result_schema_str = self._get_minimal_schema_for_model(result_model_name, source)
+            response_override = None
+            if dry_run is False:
+                execution_result = {"$ref": "#/$defs/ExecutionResult"}
+                response_override = execution_result
+                if alias_prop:
+                    response_override = {
+                        "type": "object",
+                        "properties": {alias_prop: {"type": "array", "items": execution_result}},
+                        "required": [alias_prop],
+                        "additionalProperties": False,
+                    }
+            result_schema_str = self._get_minimal_schema_for_model(result_model_name, source, response_override)
             if result_schema_str != "None":
                 given_params.append(f"mock_response=schema_strategy({result_schema_str})")
                 given_args.append("mock_response: dict")
@@ -161,7 +178,6 @@ class TestGenerator:
         has_params = "input_data: dict" in given_args
         has_result = "mock_response: dict" in given_args
         core_method = "post_tapir_command" if source == "tapir" else "post_command"
-        alias_prop = command_details.get("alias_property_name")
 
         params_obj = self._get_model_object(params_model_name, source) if params_model_name else None
         is_params_union = is_union(params_obj) if params_obj else False
@@ -169,6 +185,8 @@ class TestGenerator:
         body_lines = ["# 1. ARRANGE"]
         body_lines.append(f"command_group = {aliased_class_name}(core=MagicMock())")
         if has_result:
+            if dry_run is True:
+                body_lines.append("mock_response = {**mock_response, 'dryRun': True}")
             body_lines.append(f"command_group._core.{core_method}.return_value = mock_response")
         else:
             body_lines.append(f"command_group._core.{core_method}.return_value = {{'success': True}}")
@@ -178,12 +196,18 @@ class TestGenerator:
             if is_params_union:
                 body_lines.append(f"result = command_group.{snake_name}(parameters=input_data)")
             else:
+                if dry_run is not None:
+                    body_lines.append(
+                        "input_data = {key: value for key, value in input_data.items() if key != 'dryRun'}"
+                    )
                 body_lines.append("kwargs = {camel_to_snake(k): v for k, v in input_data.items()}")
                 if snake_name == "rename_navigator_item":
                     body_lines.append(
                         "if not kwargs.get('new_name') and not kwargs.get('new_id'): kwargs['new_name'] = 'default_name'"
                     )
                 body_lines.append(f"result = command_group.{snake_name}(**kwargs)")
+                if dry_run is True:
+                    body_lines.append("input_data['dryRun'] = True")
         else:
             body_lines.append(f"result = command_group.{snake_name}()")
 
@@ -210,6 +234,8 @@ class TestGenerator:
                 body_lines.append(
                     f"assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('{alias_prop}'))"
                 )
+            elif dry_run is False:
+                body_lines.append("assert result == TypeAdapter(types.ExecutionResult).validate_python(mock_response)")
             else:
                 result_obj = self._get_model_object(result_model_name, source)
                 if hasattr(result_obj, "model_fields") and not result_obj.model_fields:
