@@ -1,6 +1,7 @@
 """Expose query definitions, test families, and field information."""
 
 from .catalogue import FieldCatalogue, QueryFieldCatalogue, QueryFieldEntry
+from .element_types import TYPES_2D, TYPES_3D, TYPES_3D_COMPONENTS, TYPES_3D_WITH_COMPONENTS
 from .discovery import (
     BUILTIN_QUERY_FIELDS,
     ClassificationCatalogue,
@@ -126,6 +127,10 @@ __all__ = [
     "TestInputs",
     "TestRegistry",
     "TestModel",
+    "TYPES_2D",
+    "TYPES_3D",
+    "TYPES_3D_COMPONENTS",
+    "TYPES_3D_WITH_COMPONENTS",
     "TYPE_MEMBERSHIP",
     "TypeMembershipSource",
     "UnsupportedPropertyInfo",
