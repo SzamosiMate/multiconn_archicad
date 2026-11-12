@@ -5,8 +5,10 @@ This document defines the architectural boundaries, design patterns, coding conv
 The classification namespace (`api.utilities.classification`) provides field/tree
 discovery and aligned assignment reads. Query tests live in `queries.models`,
 field descriptors in `queries.fields`, and catalogues in `queries.discovery`.
-Only the namespace performs API calls. Properties and classifications share
-`TestModel`, `FieldInfo` and `FieldCatalogue` behavior.
+Bound utility namespaces and query context sources perform API calls. Field
+descriptors, input descriptions, and row compilation operate on supplied data.
+Properties and classifications share `TestModel`, `FieldInfo` and
+`FieldCatalogue` behavior.
 The predicate tree follows the Composite pattern: leaves implement their own
 operations and groups delegate to children. Field validation (`validate_fields`),
 requirement preparation (`prepare`), candidate type bounds (`candidate_types`)
@@ -17,7 +19,10 @@ without importing concrete models or catalogues. During validation the context
 resolves fields by catalogue kind and normalized UUID, so predicate models do
 not import catalogue implementations.
 See [Classification utilities](classifications.md) for metadata, assignment reads,
-query operators, validation and shared-context execution.
+query operators, validation and shared-context execution. Start with the
+[element query guide](element_queries.md) for scripts, the
+[reference](element_query_reference.md) for current contracts, or
+[editor integration](element_query_editing.md) for field/schema/row APIs.
 
 All contributions to `utilities` must adhere to these guidelines.
 
@@ -163,7 +168,8 @@ Centralizes type coercion across all utilities.
 * `find_elements_result(query, *, databases=None, filters=None)` returns `FindElementsResult(candidates, outcomes)`: unique candidates in first-listing order, captured before subsequent narrowing, and one aligned `BatchResult` slot per candidate. The concise method returns its successful matches without raising for per-element errors. Both methods enforce the query schema version before any API reads: the major must match and the minor must be equal or older. Parsing retains the plain version string for inspection.
 * `filter_elements_by_query_result(elements, query)` evaluates the supplied population with aligned success/filtered/error slots and preserves duplicate positions. Its strict `filter_elements_by_query` companion raises on per-element errors. Both share metadata validation, batched reads, and predicate evaluation with search through `queries/execution.py`; they do not change selection or cache CAD state.
 * `set_selected_elements(elements)` replaces the current selection, accepting any `ElementIdLike` sequence. It compares GUIDs and sends only additions and removals in one command; if the sets already match, it sends no change command. The standard method raises on per-element failures. `set_selected_elements_result(elements)` returns a result aligned with the requested elements, counting already-selected elements as successes and preserving add failures; removal failures raise because the requested selection was not reached.
-* `get_3d_elements()` queries the immutable `TYPES_3D` list with Tapir's `IS_INDEPENDENT` filter. This includes doors, windows, and openings while excluding component subelement types. It adds no current-view visibility or editability filters.
+* Query search defaults to the explicit main/floor-plan database and `IncludeSubElemObjects` plus `IsIndependent`, independently of the active window. Supplied-population filtering does not list a new database population. See the [scope and override contract](element_query_reference.md#search-scope-and-candidate-collection).
+* `get_3d_elements()` queries the immutable `TYPES_3D` tuple with both flags on Tapir 1.5.3+ and `IsIndependent` alone on older versions. This includes doors, windows, and openings while excluding explicit component types through the whitelist. It retains its existing current-database behavior and adds no visibility or editability filter.
 * The result is a plain element list in type/API order. Command-level failures are raised by the core API client.
 * `filter_elements_by_property_values(elements, property_id, values)` filters an explicit population using exact display-string matches. Its `_result` companion preserves input alignment: matches hold element IDs, nonmatches are `FILTERED`, and property-read failures remain errors.
 * `group_elements_by_property_value(elements, property_id)` returns a dictionary of display strings to element lists. It raises if a property read fails. Grouping preserves duplicate elements, first-seen key order and per-group input order. Empty display strings are valid values.

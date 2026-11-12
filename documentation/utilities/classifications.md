@@ -15,7 +15,9 @@ Classification support uses the same query modules and abstractions as propertie
   `FieldCatalogue`, sharing ordered storage, duplicate checking, lookup, search,
   support filtering and descriptions. Each source normalizes its own identifiers.
 
-The former `queries/classifications.py` module has been removed.
+For a first script, see the [element query guide](element_queries.md). The
+[query reference](element_query_reference.md) defines shared execution contracts;
+[editor integration](element_query_editing.md) covers field/input descriptions.
 
 ## Metadata and field discovery
 
@@ -108,8 +110,11 @@ diagnostics = api.utilities.element.find_elements_result(query)
 ```
 
 The same predicate works inside `AllOf`/`AnyOf` and with supplied-population
-filtering. It imposes no element-type bound. Search listing and database/filter
-scope follow the existing element-query APIs, including subelements.
+filtering. It imposes no element-type bound. Search defaults to the main/floor-plan
+database with `IncludeSubElemObjects` and `IsIndependent`. Explicit component
+types can remain candidates; independence is not a general component exclusion.
+Supplied-ID filtering evaluates its input without a new floor-plan listing. See
+[search scope](element_query_reference.md#search-scope-and-candidate-collection).
 
 The equivalent presence-test JSON is:
 

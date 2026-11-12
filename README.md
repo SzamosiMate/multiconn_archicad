@@ -120,7 +120,7 @@ def run(conn: MultiConn | ConnHeader) -> dict[str, Any]:
 
 The `unified` namespace is the modern, high-level, and recommended way to execute commands. It provides a type-safe and pythonic interface that unifies both the Official and Tapir APIs into a single, easy-to-use framework.
 
-For higher-level element, attribute, and property helpers under `conn.unified.utilities`, see the [utility usage patterns](documentation/utilities/usage_patterns.md).
+For higher-level helpers under `conn.unified.utilities`, start with [element queries](documentation/utilities/element_queries.md) or [utility usage patterns](documentation/utilities/usage_patterns.md). The [documentation index](documentation/README.md) separates usage guides, API contracts, and development plans.
 
 **Key Benefits:**
 
