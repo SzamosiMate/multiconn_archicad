@@ -91,3 +91,6 @@ TYPES_2D: tuple[tapir.ElementType, ...] = (
     tapir.ElementType.CHANGE_MARKER,
 )
 """Drafting, annotation, marker, drawing, and individual-camera types."""
+
+TYPES_ALL: tuple[tapir.ElementType, ...] = TYPES_3D_WITH_COMPONENTS + TYPES_2D
+"""All preset types, including components, excluding containers and Unknown."""
