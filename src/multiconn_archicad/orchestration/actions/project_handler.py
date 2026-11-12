@@ -126,12 +126,8 @@ class OpenProject:
         if not has_project_identity(header):
             raise NotFullyInitializedError(f"Cannot open project from partially initializer header {header}")
         if isinstance(header.archicad_id, TeamworkProjectID):
-            if project_params.teamwork_credentials:
-                assert project_params.teamwork_credentials.password, "You must supply a valid password!"
-            else:
-                assert header.archicad_id.teamworkCredentials.password, (
-                    "You must supply a valid password!"
-                )
+            credentials = project_params.teamwork_credentials or header.archicad_id.teamworkCredentials
+            assert credentials and credentials.password, "You must supply a valid password!"
         port = self.multi_conn.find_archicad.from_header(header)
         if port:
             raise ProjectAlreadyOpenError(f"Project is already open at port: {port}")
