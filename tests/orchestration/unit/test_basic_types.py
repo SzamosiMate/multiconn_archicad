@@ -334,6 +334,38 @@ def test_teamwork_project_id_match_project_location_invalid():
         TeamworkProjectID.match_project_location("invalid://format")
 
 
+@pytest.mark.parametrize("server", ["http://bim.example.com:22222", "https://bim.example.com"])
+def test_teamwork_location_without_credentials(server):
+    from urllib.parse import quote
+
+    location = f"teamwork://{quote(quote(server, safe=''), safe='')}/{quote(quote('Projects/House', safe=''), safe='')}"
+    project_id = ArchiCadID.model_validate({
+        "isUntitled": False,
+        "isTeamwork": True,
+        "projectLocation": location,
+        "projectName": "House",
+    })
+    assert isinstance(project_id, TeamworkProjectID)
+    assert project_id.serverAddress == server
+    assert project_id.projectPath == "Projects/House"
+    assert project_id.teamworkCredentials is None
+    assert TeamworkProjectID.model_validate_json(project_id.model_dump_json()) == project_id
+    with pytest.raises(ValueError, match="Missing password"):
+        project_id.get_project_location()
+    supplied = TeamworkCredentials(username="user", password="secret")
+    assert "user:secret@" in project_id.get_project_location(supplied)
+
+
+def test_teamwork_location_without_credentials_preserves_explicit_credentials():
+    project = TeamworkProjectID.model_validate({
+        "projectLocation": "teamwork://https://bim.example.com/Projects/House",
+        "projectName": "House",
+        "teamworkCredentials": {"username": "user", "password": "secret"},
+    })
+    assert project.teamworkCredentials.username == "user"
+    assert project.teamworkCredentials.password.get_secret_value() == "secret"
+
+
 def test_teamwork_project_id_to_dict(teamwork_project_id):
     expected_dict = {
         "project_type": "teamwork",

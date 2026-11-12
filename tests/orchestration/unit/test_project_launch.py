@@ -65,3 +65,31 @@ def test_launch_preserves_arguments(monkeypatch, system, executable, project_pat
         expected_args.append("-demo")
     popen.assert_called_once_with(expected_args, start_new_session=True, shell=False, text=True)
     multi_conn.dialog_handler.start.assert_called_once_with(popen.return_value)
+
+
+@pytest.mark.parametrize("stored_credentials", [None, {"username": "stored", "password": None}])
+def test_open_serialized_teamwork_header_with_runtime_credentials(monkeypatch, stored_credentials):
+    popen = MagicMock()
+    monkeypatch.setattr("multiconn_archicad.orchestration.actions.project_handler.subprocess", MagicMock(Popen=popen))
+    identity = {
+        "project_type": "teamwork",
+        "projectPath": "Projects/House",
+        "projectName": "House",
+        "serverAddress": "https://bim.example.com",
+    }
+    if stored_credentials is not None:
+        identity["teamworkCredentials"] = stored_credentials
+    header = ConnHeader.from_dict({
+        "productInfo": {"version": 29, "buildNumber": 3000, "languageCode": "INT"},
+        "archicadId": identity,
+        "archicadLocation": {"archicadLocation": "C:/Archicad/ARCHICAD.exe"},
+    })
+    multi_conn = MagicMock()
+    multi_conn.find_archicad.from_header.return_value = None
+    action = OpenProject(multi_conn)
+    with pytest.raises(AssertionError, match="supply a valid password"):
+        action._check_input(ProjectParams(header, None, False))
+    credentials = TeamworkCredentials(username="runtime", password="secret")
+    params = action._check_input(ProjectParams(header, credentials, False))
+    action._open_project(params)
+    assert popen.call_args.args[0][1].startswith("teamwork://runtime:secret@")

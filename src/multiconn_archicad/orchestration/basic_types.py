@@ -168,7 +168,7 @@ class TeamworkProjectID(ArchiCadID):
     project_type: Literal["teamwork"] = "teamwork"
     projectPath: str
     serverAddress: str
-    teamworkCredentials: TeamworkCredentials
+    teamworkCredentials: TeamworkCredentials | None = None
     projectName: str
 
     @model_validator(mode="before")
@@ -180,13 +180,11 @@ class TeamworkProjectID(ArchiCadID):
             match = cls.match_project_location(data.pop("projectLocation"))
             data.setdefault("serverAddress", match.group("serverAddress"))
             data.setdefault("projectPath", match.group("projectPath"))
-            data.setdefault(
-                "teamworkCredentials",
-                TeamworkCredentials(
-                    username=match.group("username"),
-                    password=match.group("password"),
-                ),
-            )
+            if match.group("username") is not None:
+                data.setdefault(
+                    "teamworkCredentials",
+                    TeamworkCredentials(username=match.group("username"), password=match.group("password")),
+                )
         return data
 
     def __eq__(self, other: Any) -> bool:
@@ -200,7 +198,7 @@ class TeamworkProjectID(ArchiCadID):
 
     def get_project_location(self, teamwork_credentials: TeamworkCredentials | None = None) -> str:
         creds = teamwork_credentials or self.teamworkCredentials
-        if not creds.password:
+        if creds is None or not creds.password:
             raise ValueError("Missing password in teamwork credentials.")
         raw_password = (
             creds.password.get_secret_value()
@@ -220,7 +218,7 @@ class TeamworkProjectID(ArchiCadID):
     def match_project_location(project_location: str) -> re.Match[str]:
         project_location = unquote(unquote(project_location))
         pattern = re.compile(
-            r"teamwork://(?P<username>[^:]+):(?P<password>[^@]+)@(?P<serverAddress>https?://[^/]+)/(?P<projectPath>.*)?"
+            r"teamwork://(?:(?P<username>[^:]+):(?P<password>[^@]+)@)?(?P<serverAddress>https?://[^/]+)/(?P<projectPath>.*)?"
         )
         match = pattern.match(project_location)
         if not match:
