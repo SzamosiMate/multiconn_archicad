@@ -25,7 +25,7 @@ def fake_command(command: str, parameters: dict | None = None) -> dict:
     """Return representative JSON through the normal generated client parsers."""
     parameters = parameters or {}
     if command == "GetAddOnVersion":
-        return {"version": "1.7.3"}
+        return {"version": "2.0.0"}
     if command == "GetAllProperties":
         return {
             "properties": [
