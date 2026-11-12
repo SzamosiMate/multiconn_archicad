@@ -22,6 +22,14 @@ if TYPE_CHECKING:
     from multiconn_archicad.clients.unified_api.api import UnifiedApi
 
 
+# Tapir DatabaseIdResolver maps this fixed ID to the main/floor-plan database.
+_FLOOR_PLAN_DATABASE_ID = UUID("d5d16dd4-093f-4674-895d-410d634d8c7e")
+_DEFAULT_LISTING_FILTERS = (
+    tapir.ElementFilter.INCLUDE_SUB_ELEM_OBJECTS,
+    tapir.ElementFilter.IS_INDEPENDENT,
+)
+
+
 def validate_execution_query(api: UnifiedApi, query: Query) -> ContextBuilder:
     """Check the complete query before narrowing candidates or skipping reads."""
     if not isinstance(query, Query):
@@ -66,8 +74,12 @@ def list_query_candidates(
     type_bound = query.where.candidate_types()
     if type_bound == frozenset():
         return []
-    database_list = list(databases) if databases is not None else None
-    filter_list = list(filters) if filters is not None else None
+    database_list = (
+        list(databases)
+        if databases is not None
+        else [tapir.DatabaseIdArrayItem(databaseId=tapir.DatabaseId(guid=_FLOOR_PLAN_DATABASE_ID))]
+    )
+    filter_list = list(filters) if filters is not None else list(_DEFAULT_LISTING_FILTERS)
     elements: list[tapir.ElementIdArrayItem] = []
 
     if type_bound is None:
