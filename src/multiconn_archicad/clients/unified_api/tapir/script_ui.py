@@ -5,8 +5,42 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 from pydantic import TypeAdapter
 
-from multiconn_archicad.models.tapir.commands import GetScriptUIResultResult, ShowScriptUIParameters, ShowScriptUIResult
-from multiconn_archicad.models.tapir.types import FailedExecutionResult, SuccessfulExecutionResult
+from multiconn_archicad.models.tapir.commands import (
+    GetScriptUIResultParameters,
+    GetScriptUIResultResult,
+    OpenSettingsDialogParameters,
+    OpenSettingsDialogResult,
+    PickAttributeFolderParameters,
+    PickAttributeFolderResult,
+    PickAttributeParameters,
+    PickAttributeResult,
+    PickLibraryFolderParameters,
+    PickLibraryFolderResult,
+    PickLibraryPartFileParameters,
+    PickLibraryPartFileResult,
+    PickLibraryPartParameters,
+    PickLibraryPartResult,
+    PickLibraryPartSaveLocationParameters,
+    PickLibraryPartSaveLocationResult,
+    PickPictureFileResult,
+    PickZoneStampOrLabelFileParameters,
+    PickZoneStampOrLabelFileResult,
+    ShowIFCExportSettingsParameters,
+    ShowIFCExportSettingsResult,
+    ShowScriptUIParameters,
+    ShowScriptUIResult,
+)
+from multiconn_archicad.models.tapir.types import (
+    AttributeId,
+    ElementType,
+    FailedExecutionResult,
+    LibraryPartPickerElementType,
+    LibraryPartSaveLocationType,
+    NavigatorItemId,
+    ObjectType,
+    PickableAttributeType,
+    ScriptUIShown,
+)
 
 if TYPE_CHECKING:
     from multiconn_archicad.clients.core.core_commands import CoreCommands
@@ -16,11 +50,24 @@ class ScriptUiCommands:
     def __init__(self, core: CoreCommands):
         self._core = core
 
-    def get_script_ui_result(self) -> GetScriptUIResultResult:
+    def get_script_ui_result(
+        self, *, ui_id: None | int = None, script_id: None | str = None
+    ) -> GetScriptUIResultResult:
         """
-        Retrieves and clears the result last submitted from the Script UI palette's page (via
-        window.ACAPI.SubmitResult), if any, and reports whether the palette is still open, so a
-        waiting script can stop when the user closes it.
+        Retrieves and clears the result last submitted from a Script UI window's page (via
+        window.ACAPI.SubmitResult), if any, and reports whether the window is still open, so a
+        waiting script can stop when the user closes it. The window is picked by uiId or
+        scriptId; without them the first window is used.
+
+        Args:
+            ui_id (None | int): The window to use, as returned by ShowScriptUI (1 to 8). Takes
+                precedence over scriptId.
+            script_id (None | str): Any text that identifies the calling script, so it uses its
+                own window: ShowScriptUI gives a script without a window a free one, preferring
+                the closed windows. The Tapir palette gives each script it starts its own id in
+                the TAPIR_SCRIPT_ID environment variable, which aclib passes here automatically;
+                that script's window is titled with its name and is freed when it ends. Without
+                uiId and scriptId the first window is used.
 
         Returns:
             GetScriptUIResultResult
@@ -30,8 +77,322 @@ class ScriptUiCommands:
             RequestError: If there is a network or connection error.
             pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
-        response_dict = self._core.post_tapir_command("GetScriptUIResult")
+        params_dict = {
+            "uiId": ui_id,
+            "scriptId": script_id,
+        }
+        validated_params = GetScriptUIResultParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetScriptUIResult", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
         validated_response = GetScriptUIResultResult.model_validate(response_dict)
+        return validated_response
+
+    def open_settings_dialog(self, element_type: ElementType | None = None) -> bool:
+        """
+        Opens Archicad's settings dialog of the selected elements or the current tool (Archicad
+        28 and later), or the default settings dialog of the given element type, waits for the
+        user and reports whether the dialog was closed with OK or Cancel.
+
+        Args:
+            element_type (ElementType | None): Opens the default settings dialog of this tool.
+                Without it, Archicad 28 and later open the settings of the selected elements, or
+                of the current tool when nothing is selected; Archicad 25 to 27 open the default
+                settings of the current tool.
+
+        Returns:
+            bool: True when the user closed the dialog with Cancel, false when with OK.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elementType": element_type,
+        }
+        validated_params = OpenSettingsDialogParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "OpenSettingsDialog", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = OpenSettingsDialogResult.model_validate(response_dict)
+        return validated_response.cancelled
+
+    def pick_attribute(
+        self, attribute_type: PickableAttributeType, attribute_id: AttributeId | None = None, title: None | str = None
+    ) -> PickAttributeResult:
+        """
+        Opens a small dialog with Archicad's attribute picker for the given attribute type
+        (layer, building material, composite, profile or surface; fill and line from Archicad
+        27), waits for the user and returns the chosen attribute, or cancelled. Available from
+        Archicad 26.
+
+        Args:
+            attribute_type (PickableAttributeType): The type of the attribute to pick. Fill and
+                Line need Archicad 27 or newer. Composite lists the composites only.
+            attribute_id (AttributeId | None): The attribute selected when the dialog opens.
+                Without it the picker starts empty and OK is enabled once the user has picked an
+                attribute.
+            title (None | str): The title of the dialog. Default: Pick Attribute.
+
+        Returns:
+            PickAttributeResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "attributeType": attribute_type,
+            "attributeId": attribute_id,
+            "title": title,
+        }
+        validated_params = PickAttributeParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "PickAttribute", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = PickAttributeResult.model_validate(response_dict)
+        return validated_response
+
+    def pick_attribute_folder(
+        self, attribute_type: PickableAttributeType, title: None | str = None
+    ) -> PickAttributeFolderResult:
+        """
+        Opens a small dialog with Archicad's attribute folder picker for the given attribute
+        type, waits for the user and returns the chosen folder as its path from the root folder,
+        or cancelled. Available from Archicad 26.
+
+        Args:
+            attribute_type (PickableAttributeType)
+            title (None | str): The title of the dialog. Default: Pick Attribute Folder.
+
+        Returns:
+            PickAttributeFolderResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "attributeType": attribute_type,
+            "title": title,
+        }
+        validated_params = PickAttributeFolderParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "PickAttributeFolder", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = PickAttributeFolderResult.model_validate(response_dict)
+        return validated_response
+
+    def pick_library_folder(self, default_name: None | str = None) -> PickLibraryFolderResult:
+        """
+        Opens Archicad's dialog for choosing or creating a library folder, waits for the user
+        and returns the location of the folder, or reports that the user cancelled. The folder
+        is not added to the libraries of the project.
+
+        Args:
+            default_name (None | str): The default name the dialog offers for a new library
+                folder. Default: New Library.
+
+        Returns:
+            PickLibraryFolderResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "defaultName": default_name,
+        }
+        validated_params = PickLibraryFolderParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "PickLibraryFolder", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = PickLibraryFolderResult.model_validate(response_dict)
+        return validated_response
+
+    def pick_library_part(
+        self, element_type: LibraryPartPickerElementType | None = None, subtype_un_id: None | str = None
+    ) -> PickLibraryPartResult:
+        """
+        Opens Archicad's Object, Lamp, Window or Door Settings dialog, optionally limited to a
+        library part subtype, lets the user pick a library part and set its parameters, and
+        returns the chosen library part with its GDL parameters, or that the user cancelled.
+        Places nothing.
+
+        Args:
+            element_type (LibraryPartPickerElementType | None)
+            subtype_un_id (None | str): Limits the dialog to the library parts of this subtype:
+                the unique ID of the subtype library part, its main and revision GUID in the
+                form {main}-{revision}.
+
+        Returns:
+            PickLibraryPartResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elementType": element_type,
+            "subtypeUnID": subtype_un_id,
+        }
+        validated_params = PickLibraryPartParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "PickLibraryPart", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = PickLibraryPartResult.model_validate(response_dict)
+        return validated_response
+
+    def pick_library_part_file(self, general_gdl_objects_only: None | bool = None) -> PickLibraryPartFileResult:
+        """
+        Opens Archicad's Open Library Part dialog, waits for the user and returns the location
+        of the chosen library part, or reports that the user cancelled.
+
+        Args:
+            general_gdl_objects_only (None | bool): Sets the dialog's file filter to General GDL
+                Objects. Default: false.
+
+        Returns:
+            PickLibraryPartFileResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "generalGDLObjectsOnly": general_gdl_objects_only,
+        }
+        validated_params = PickLibraryPartFileParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "PickLibraryPartFile", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = PickLibraryPartFileResult.model_validate(response_dict)
+        return validated_response
+
+    def pick_library_part_save_location(
+        self,
+        default_path: None | str = None,
+        library_part_type: LibraryPartSaveLocationType | None = None,
+        browse_for_folder: None | bool = None,
+        title: None | str = None,
+    ) -> PickLibraryPartSaveLocationResult:
+        """
+        Opens Archicad's Save Library Part dialog (object, door or window), waits for the user
+        and returns the location chosen to save the library part to, or reports that the user
+        cancelled. Nothing is saved.
+
+        Args:
+            default_path (None | str): The location (library folder and file name) the dialog
+                starts from. Default: <libraryPartType>.gsm in the embedded library of the
+                project.
+            library_part_type (LibraryPartSaveLocationType | None)
+            browse_for_folder (None | bool): Lets the user save outside the embedded library.
+                Default: false.
+            title (None | str): The title of the dialog. Default: Archicad's own title.
+
+        Returns:
+            PickLibraryPartSaveLocationResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "defaultPath": default_path,
+            "libraryPartType": library_part_type,
+            "browseForFolder": browse_for_folder,
+            "title": title,
+        }
+        validated_params = PickLibraryPartSaveLocationParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "PickLibraryPartSaveLocation", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = PickLibraryPartSaveLocationResult.model_validate(response_dict)
+        return validated_response
+
+    def pick_picture_file(self) -> PickPictureFileResult:
+        """
+        Opens Archicad's Open Picture dialog (the one of the texture settings), waits for the
+        user and returns the location of the chosen picture, or reports that the user cancelled.
+        Archicad adds the chosen picture to the embedded library when it is not in it yet.
+
+        Returns:
+            PickPictureFileResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        response_dict = self._core.post_tapir_command("PickPictureFile")
+        validated_response = PickPictureFileResult.model_validate(response_dict)
+        return validated_response
+
+    def pick_zone_stamp_or_label_file(self, object_type: None | ObjectType = None) -> PickZoneStampOrLabelFileResult:
+        """
+        Opens Archicad's dialog for opening a zone stamp or label library part, waits for the
+        user and returns the location of the chosen file, or reports that the user cancelled.
+
+        Args:
+            object_type (None | ObjectType): The type of library part the dialog lets the user
+                open. Default: Label.
+
+        Returns:
+            PickZoneStampOrLabelFileResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "objectType": object_type,
+        }
+        validated_params = PickZoneStampOrLabelFileParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "PickZoneStampOrLabelFile", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = PickZoneStampOrLabelFileResult.model_validate(response_dict)
+        return validated_response
+
+    def show_ifc_export_settings(
+        self, navigator_item_id: NavigatorItemId | None = None, translator_name: None | str = None
+    ) -> ShowIFCExportSettingsResult:
+        """
+        Opens Archicad's IFC export settings dialog, where the user picks a view and an IFC
+        export translator, waits for the user and returns the chosen view and translator, or
+        cancelled. Available from Archicad 28.
+
+        Args:
+            navigator_item_id (NavigatorItemId | None): Optional: the view (an item of the View
+                Map) the dialog starts with.
+            translator_name (None | str): Optional: the name of the IFC export translator the
+                dialog starts with, as GetIFCExportTranslators lists them.
+
+        Returns:
+            ShowIFCExportSettingsResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "navigatorItemId": navigator_item_id,
+            "translatorName": translator_name,
+        }
+        validated_params = ShowIFCExportSettingsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "ShowIFCExportSettings", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = ShowIFCExportSettingsResult.model_validate(response_dict)
         return validated_response
 
     def show_script_ui(
@@ -49,10 +410,14 @@ class ScriptUiCommands:
         allow_self_signed_certificates: None | bool = None,
         clear_cookies: None | bool = None,
         auto_height: None | bool = None,
-    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+        *,
+        ui_id: None | int = None,
+        script_id: None | str = None,
+    ) -> FailedExecutionResult | ScriptUIShown:
         """
         Shows the given HTML content in a native Archicad palette (a tkinter alternative for
-        Python scripts).
+        Python scripts) and returns the uiId of its window. Each script can have its own window,
+        picked by uiId or scriptId; without them the first window is used.
 
         Args:
             html_content (str): The full HTML document to display in the Script UI palette.
@@ -80,9 +445,17 @@ class ScriptUiCommands:
                 Defaults to false.
             auto_height (None | bool): Automatically resizes the palette's height to fit the
                 page content as it changes. Defaults to false.
+            ui_id (None | int): The window to use, as returned by ShowScriptUI (1 to 8). Takes
+                precedence over scriptId.
+            script_id (None | str): Any text that identifies the calling script, so it uses its
+                own window: ShowScriptUI gives a script without a window a free one, preferring
+                the closed windows. The Tapir palette gives each script it starts its own id in
+                the TAPIR_SCRIPT_ID environment variable, which aclib passes here automatically;
+                that script's window is titled with its name and is freed when it ends. Without
+                uiId and scriptId the first window is used.
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            FailedExecutionResult | ScriptUIShown
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -103,6 +476,8 @@ class ScriptUiCommands:
             "allowSelfSignedCertificates": allow_self_signed_certificates,
             "clearCookies": clear_cookies,
             "autoHeight": auto_height,
+            "uiId": ui_id,
+            "scriptId": script_id,
         }
         validated_params = ShowScriptUIParameters(**params_dict)
         response_dict = self._core.post_tapir_command(

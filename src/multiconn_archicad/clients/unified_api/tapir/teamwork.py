@@ -10,9 +10,13 @@ from multiconn_archicad.models.tapir.commands import (
     GetLockableObjectSetStatusResult,
     GetReservationStatusOfElementsParameters,
     GetReservationStatusOfElementsResult,
+    GetTeamworkAccessRightsParameters,
+    GetTeamworkAccessRightsResult,
     GetTeamworkOwnersOfDatabasesParameters,
     GetTeamworkOwnersOfDatabasesResult,
     GetTeamworkProjectInfoResult,
+    GetTeamworkRightsOfObjectsParameters,
+    GetTeamworkRightsOfObjectsResult,
     GetTeamworkStatusResult,
     GrantElementsParameters,
     GrantElementsResult,
@@ -34,11 +38,14 @@ from multiconn_archicad.models.tapir.commands import (
     UploadLibrariesToBIMcloudResult,
 )
 from multiconn_archicad.models.tapir.types import (
+    AccessRight,
     DatabaseIdArrayItem,
     ElementIdArrayItem,
     ElementReservationStatus,
     ErrorItem,
     FailedExecutionResult,
+    GuidId,
+    Rights,
     SuccessfulExecutionResult,
     User,
 )
@@ -90,7 +97,8 @@ class TeamworkCommands:
         """
         Returns the Teamwork reservation status of elements without reserving them: whether each
         element is free, reserved by the current user or reserved by another user, with the
-        reserving user and the element's owner.
+        reserving user. New elements stay reserved by the user who created them until they are
+        released.
 
         Args:
             elements (list[ElementIdArrayItem]): A list of elements.
@@ -113,6 +121,36 @@ class TeamworkCommands:
         )
         validated_response = GetReservationStatusOfElementsResult.model_validate(response_dict)
         return validated_response.reservationStatuses
+
+    def get_teamwork_access_rights(self, access_rights: None | list[str] = None) -> list[AccessRight]:
+        """
+        Returns whether the role of the current user has the given Teamwork access rights
+        (API_TWAccessRights names without the API prefix, e.g. LayersCreate), all of them when
+        no names are given.
+
+        Args:
+            access_rights (None | list[str]): The names of the access rights to check, the
+                API_TWAccessRights enumerators without the API prefix, e.g. LayersCreate or
+                LibraryPartDeleteModify. All rights available in this Archicad version are
+                checked when omitted.
+
+        Returns:
+            list[AccessRight]: The rights of the current user, in the requested order.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "accessRights": access_rights,
+        }
+        validated_params = GetTeamworkAccessRightsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetTeamworkAccessRights", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetTeamworkAccessRightsResult.model_validate(response_dict)
+        return validated_response.accessRights
 
     def get_teamwork_owners_of_databases(self, databases: list[DatabaseIdArrayItem]) -> list[ErrorItem | User]:
         """
@@ -157,6 +195,32 @@ class TeamworkCommands:
         response_dict = self._core.post_tapir_command("GetTeamworkProjectInfo")
         validated_response = GetTeamworkProjectInfoResult.model_validate(response_dict)
         return validated_response
+
+    def get_teamwork_rights_of_objects(self, object_ids: list[GuidId]) -> list[ErrorItem | Rights]:
+        """
+        Returns for each given object, for example an element, whether the current Teamwork user
+        has the right to create objects of its kind and to delete or modify it.
+
+        Args:
+            object_ids (list[GuidId]): The objects to check, by guid, for example element guids.
+
+        Returns:
+            list[ErrorItem | Rights]: One item per input object, in the same order.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "objectIds": object_ids,
+        }
+        validated_params = GetTeamworkRightsOfObjectsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetTeamworkRightsOfObjects", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetTeamworkRightsOfObjectsResult.model_validate(response_dict)
+        return validated_response.rights
 
     def get_teamwork_status(self) -> GetTeamworkStatusResult:
         """
@@ -210,7 +274,8 @@ class TeamworkCommands:
 
     def release_elements(self, elements: list[ElementIdArrayItem]) -> FailedExecutionResult | SuccessfulExecutionResult:
         """
-        Releases elements in Teamwork mode.
+        Releases elements in Teamwork mode. Fails, naming them, when any of the given GUIDs is
+        not an element; the other elements are released.
 
         Args:
             elements (list[ElementIdArrayItem]): A list of elements.
@@ -319,7 +384,9 @@ class TeamworkCommands:
 
     def reserve_elements(self, elements: list[ElementIdArrayItem]) -> ReserveElementsResult:
         """
-        Reserves elements in Teamwork mode.
+        Reserves elements in Teamwork mode. GUIDs that are not elements (navigator items,
+        layouts, databases) cannot be reserved with it: they are returned in notElements and the
+        execution result fails.
 
         Args:
             elements (list[ElementIdArrayItem]): A list of elements.

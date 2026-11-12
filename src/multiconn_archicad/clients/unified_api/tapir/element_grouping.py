@@ -44,6 +44,7 @@ from multiconn_archicad.models.tapir.types import (
     ElementSetsOfElement,
     ElementsWrapper,
     ErrorItem,
+    ExecutionResult,
     FailedExecutionResult,
     GroupIdArrayItem,
     GroupUserDataResult,
@@ -117,7 +118,9 @@ class ElementGroupingCommands:
         """
         Deletes the given element sets. The elements of a set are not deleted. Only element sets
         created by the Tapir Add-On can be deleted; sets created by other add-ons are reported
-        as failed.
+        as failed. With dryRun true nothing is deleted and no undo step is created: the response
+        has dryRun set to true, and each element set that a real run would delete gets
+        wouldDelete.
 
         Args:
             element_sets (list[ElementSetIdArrayItem]): The element sets to delete, as returned
@@ -125,8 +128,9 @@ class ElementGroupingCommands:
                 the Tapir Add-On can be deleted. The elements of a deleted set are not deleted.
 
         Returns:
-            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
-                results.
+            list[FailedExecutionResult | SuccessfulExecutionResult]: One result for each input
+                element set, in the order of the input. On a dry run an element set that exists
+                and was created by the Tapir Add-On gets wouldDelete.
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -140,8 +144,39 @@ class ElementGroupingCommands:
         response_dict = self._core.post_tapir_command(
             "DeleteElementSets", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
+        return TypeAdapter(list[ExecutionResult]).validate_python(response_dict.get("executionResults"))
+
+    def delete_element_sets_dry_run(self, element_sets: list[ElementSetIdArrayItem]) -> DeleteElementSetsResult:
+        """
+        Preview this command without applying its changes. Deletes the given element sets. The
+        elements of a set are not deleted. Only element sets created by the Tapir Add-On can be
+        deleted; sets created by other add-ons are reported as failed. With dryRun true nothing
+        is deleted and no undo step is created: the response has dryRun set to true, and each
+        element set that a real run would delete gets wouldDelete.
+
+        Args:
+            element_sets (list[ElementSetIdArrayItem]): The element sets to delete, as returned
+                by CreateElementSets or GetElementSetsOfElements. Only element sets created by
+                the Tapir Add-On can be deleted. The elements of a deleted set are not deleted.
+
+        Returns:
+            DeleteElementSetsResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elementSets": element_sets,
+            "dryRun": True,
+        }
+        validated_params = DeleteElementSetsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "DeleteElementSets", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
         validated_response = DeleteElementSetsResult.model_validate(response_dict)
-        return validated_response.executionResults
+        return validated_response
 
     def get_all_elements_of_groups(self, groups: list[GroupIdArrayItem]) -> list[ElementsWrapper | ErrorItem]:
         """

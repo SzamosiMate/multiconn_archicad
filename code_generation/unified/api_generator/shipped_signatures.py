@@ -1,10 +1,11 @@
-"""Extract the positional and keyword-only parameters from a shipped Unified API."""
+"""Extract the parameters and return annotations from a shipped Unified API."""
 
 import argparse
 import ast
 import json
 from pathlib import Path
 import subprocess
+from typing import TypedDict
 
 
 BASELINE_PATH = Path(__file__).with_name("shipped_signatures.json")
@@ -12,7 +13,12 @@ API_PATH = "src/multiconn_archicad/clients/unified_api"
 CORE_METHODS = {"tapir": "post_tapir_command", "official": "post_command"}
 
 
-def extract_signatures(source_text: str, core_method: str) -> dict[str, list[str]]:
+class ShippedMethod(TypedDict):
+    parameters: list[str]
+    returns: str | None
+
+
+def extract_signatures(source_text: str, core_method: str) -> dict[str, dict[str, ShippedMethod]]:
     signatures = {}
     for node in ast.parse(source_text).body:
         if not isinstance(node, ast.ClassDef):
@@ -34,16 +40,20 @@ def extract_signatures(source_text: str, core_method: str) -> dict[str, list[str
             if len(calls) != 1 or args.posonlyargs or args.vararg or args.kwarg:
                 raise ValueError(f"Unsupported shipped method signature or command call: {method.name}")
             command = calls[0]
-            if command in signatures:
-                raise ValueError(f"Duplicate shipped command: {command}")
+            methods = signatures.setdefault(command, {})
+            if method.name in methods:
+                raise ValueError(f"Duplicate shipped method: {command}.{method.name}")
             params = [arg.arg for arg in args.args[1:]]
             if args.kwonlyargs:
                 params.extend(["*", *(arg.arg for arg in args.kwonlyargs)])
-            signatures[command] = params
+            methods[method.name] = {
+                "parameters": params,
+                "returns": ast.unparse(method.returns) if method.returns else None,
+            }
     return signatures
 
 
-def load_shipped_signatures() -> dict[str, dict[str, list[str]]]:
+def load_shipped_signatures() -> dict[str, dict[str, dict[str, ShippedMethod]]]:
     return json.loads(BASELINE_PATH.read_text(encoding="utf-8"))["commands"]
 
 
@@ -59,14 +69,16 @@ def main() -> None:
     revision = git("rev-parse", "--verify", f"refs/tags/{release}^{{commit}}").strip()
     sources = {}
     for source, core_method in CORE_METHODS.items():
-        signatures: dict[str, list[str]] = {}
+        signatures: dict[str, dict[str, ShippedMethod]] = {}
         for path in git("ls-tree", "-r", "--name-only", revision, f"{API_PATH}/{source}").splitlines():
             if not path.endswith(".py"):
                 continue
             extracted = extract_signatures(git("show", f"{revision}:{path}"), core_method)
-            if signatures.keys() & extracted.keys():
-                raise ValueError(f"Duplicate shipped commands in {path}")
-            signatures.update(extracted)
+            for command, methods in extracted.items():
+                previous = signatures.setdefault(command, {})
+                if previous.keys() & methods.keys():
+                    raise ValueError(f"Duplicate shipped methods for {command} in {path}")
+                previous.update(methods)
         if not signatures:
             raise ValueError(f"No shipped {source} signatures found in {release}")
         sources[source] = dict(sorted(signatures.items()))

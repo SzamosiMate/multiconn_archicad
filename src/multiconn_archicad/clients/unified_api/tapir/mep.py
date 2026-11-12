@@ -20,12 +20,16 @@ from multiconn_archicad.models.tapir.commands import (
     CreateElectricalPanelsResult,
     CreateMEPElementsParameters,
     CreateMEPElementsResult,
+    CreateMEPFlexibleSegmentsParameters,
+    CreateMEPFlexibleSegmentsResult,
     CreateMEPPhysicalSystemsParameters,
     CreateMEPPhysicalSystemsResult,
     CreateMEPRoutingElementsParameters,
     CreateMEPRoutingElementsResult,
     CreateMEPSystemGroupsParameters,
     CreateMEPSystemGroupsResult,
+    CreateMEPTakeOffsParameters,
+    CreateMEPTakeOffsResult,
     DeleteElectricalCircuitsParameters,
     DeleteElectricalCircuitsResult,
     DeleteMEPPhysicalSystemsParameters,
@@ -37,11 +41,14 @@ from multiconn_archicad.models.tapir.commands import (
     GetElectricalPanelsParameters,
     GetElectricalPanelsResult,
     GetElectricalProjectSettingsResult,
+    GetMEPDistributionSystemsParameters,
     GetMEPDistributionSystemsResult,
     GetMEPElementDetailsParameters,
     GetMEPElementDetailsResult,
     GetMEPElementsParameters,
     GetMEPElementsResult,
+    GetMEPPhysicalSystemsOfElementsParameters,
+    GetMEPPhysicalSystemsOfElementsResult,
     GetMEPPortsParameters,
     GetMEPPortsResult,
     GetMEPPreferenceTablesParameters,
@@ -51,6 +58,8 @@ from multiconn_archicad.models.tapir.commands import (
     GetMEPRoutingParametersParameters,
     GetMEPRoutingParametersResult,
     GetMEPSystemGroupsResult,
+    GetMEPToolDefaultsParameters,
+    GetMEPToolDefaultsResult,
     ModifyElectricalCircuitsParameters,
     ModifyElectricalCircuitsResult,
     ModifyElectricalDevicesParameters,
@@ -59,6 +68,8 @@ from multiconn_archicad.models.tapir.commands import (
     ModifyElectricalPanelsResult,
     ModifyElectricalProjectSettingsParameters,
     ModifyElectricalProjectSettingsResult,
+    ModifyMEPElementsParameters,
+    ModifyMEPElementsResult,
     ModifyMEPPhysicalSystemsParameters,
     ModifyMEPPhysicalSystemsResult,
     ModifyMEPPortsParameters,
@@ -71,6 +82,8 @@ from multiconn_archicad.models.tapir.commands import (
     ModifyMEPSystemGroupsResult,
     SetMEPRoutingParametersParameters,
     SetMEPRoutingParametersResult,
+    TransferMEPSettingsParameters,
+    TransferMEPSettingsResult,
 )
 from multiconn_archicad.models.tapir.types import (
     ElectricalCircuitConnectionData,
@@ -85,6 +98,7 @@ from multiconn_archicad.models.tapir.types import (
     ElectricalPanelDetails,
     ElectricalPanelModificationData,
     ElectricalWiringType,
+    ElementId,
     ElementIdArrayItem,
     ElementMEPRoutingParameters,
     ErrorItem,
@@ -95,11 +109,14 @@ from multiconn_archicad.models.tapir.types import (
     MEPElement,
     MEPElementData,
     MEPElementDetails,
+    MEPElementModificationData,
     MEPElementPorts,
     MEPElementType,
+    MEPFlexibleSegmentCreationData,
     MEPPhysicalSystemData,
     MEPPhysicalSystemIdArrayItem,
     MEPPhysicalSystemModificationData,
+    MEPPhysicalSystemsOfElement,
     MEPPortConnectability,
     MEPPortModificationData,
     MEPPortPair,
@@ -114,6 +131,7 @@ from multiconn_archicad.models.tapir.types import (
     MEPSystemGroupDetails,
     MEPSystemGroupIdArrayItem,
     MEPSystemGroupModificationData,
+    MEPTakeOffCreationData,
     SuccessfulExecutionResult,
 )
 
@@ -155,8 +173,11 @@ class MepCommands:
     def connect_mep_elements(self, connections_data: list[MEPConnectionData]) -> list[ErrorItem | MEPConnectionResult]:
         """
         Connects MEP routing elements to other MEP elements or routes. Merges routes, splits
-        routes or creates branch elements as needed. Archicad 27 does not report the merged,
-        split or created elements. Available from Archicad 27.
+        routes or creates branch elements as needed. The first or last node of the 'connectToId'
+        route must lie exactly on the 'routingElementId' route, so for a tee pass the main route
+        as 'routingElementId' and the branch as 'connectToId'. A failed connection says which
+        condition is not met. Archicad 27 does not report the merged, split or created elements.
+        Available from Archicad 27.
 
         Args:
             connections_data (list[MEPConnectionData]): Array of connections to create.
@@ -304,7 +325,8 @@ class MepCommands:
     def create_mep_elements(self, elements_data: list[MEPElementData]) -> list[ElementIdArrayItem | ErrorItem]:
         """
         Creates MEP elements (Terminal, Accessory, Equipment or Fitting) at the given positions,
-        optionally with a changed insulation that applies only to what is placed. Available from
+        optionally with another library part, size (from Archicad 30), MEP system, port sizes
+        and shapes and a changed insulation, which apply only to what is placed. Available from
         Archicad 28.
 
         Args:
@@ -326,6 +348,38 @@ class MepCommands:
             "CreateMEPElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = CreateMEPElementsResult.model_validate(response_dict)
+        return validated_response.elements
+
+    def create_mep_flexible_segments(
+        self, flexible_segments_data: list[MEPFlexibleSegmentCreationData]
+    ) -> list[ElementIdArrayItem | ErrorItem]:
+        """
+        Creates MEP flexible segments through the given control points, or along a polyline of
+        alternating line and spline parts (Piping), with the current settings of the Flexible
+        Segment tool of their domain, optionally with the orientation (control points) or
+        direction (polyline) at both ends. Available from Archicad 28.
+
+        Args:
+            flexible_segments_data (list[MEPFlexibleSegmentCreationData]): Array of data to
+                place MEP flexible segments with the current settings of the Flexible Segment
+                tool of their domain (see GetMEPToolDefaults).
+
+        Returns:
+            list[ElementIdArrayItem | ErrorItem]: A list of element identifiers or errors.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "flexibleSegmentsData": flexible_segments_data,
+        }
+        validated_params = CreateMEPFlexibleSegmentsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "CreateMEPFlexibleSegments", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = CreateMEPFlexibleSegmentsResult.model_validate(response_dict)
         return validated_response.elements
 
     def create_mep_physical_systems(
@@ -416,6 +470,40 @@ class MepCommands:
         )
         validated_response = CreateMEPSystemGroupsResult.model_validate(response_dict)
         return validated_response.systemGroups
+
+    def create_mep_take_offs(
+        self, take_offs_data: list[MEPTakeOffCreationData]
+    ) -> list[ElementIdArrayItem | ErrorItem]:
+        """
+        Creates MEP take-offs on the given routing segments, at a distance from the beginning of
+        the segment (not more than its length) and optionally rotated around its axis by a
+        multiple of 90 degrees, with the current settings of the Take-Off tool of their domain
+        (by default the domain of the segment's routing element), optionally with their length
+        and without insulation, which apply only to what is created. Archicad only has
+        Ventilation take-offs. Available from Archicad 28.
+
+        Args:
+            take_offs_data (list[MEPTakeOffCreationData]): Array of data to create MEP take-offs
+                on routing segments with the current settings of the Take-Off tool of their
+                domain.
+
+        Returns:
+            list[ElementIdArrayItem | ErrorItem]: A list of element identifiers or errors.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "takeOffsData": take_offs_data,
+        }
+        validated_params = CreateMEPTakeOffsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "CreateMEPTakeOffs", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = CreateMEPTakeOffsResult.model_validate(response_dict)
+        return validated_response.elements
 
     def delete_electrical_circuits(
         self, electrical_circuits: list[ElementIdArrayItem]
@@ -593,10 +681,17 @@ class MepCommands:
         validated_response = GetElectricalProjectSettingsResult.model_validate(response_dict)
         return validated_response
 
-    def get_mep_distribution_systems(self) -> GetMEPDistributionSystemsResult:
+    def get_mep_distribution_systems(self, *, include_tree: None | bool = None) -> GetMEPDistributionSystemsResult:
         """
         Retrieves the MEP distribution systems of the project with their domain, MEP system
-        attribute and member elements. Available from Archicad 28.
+        attribute, member elements, physical systems (from Archicad 29) and optionally their
+        tree: the elements from the root element on, each with its previous and next elements
+        and the connecting ports. Available from Archicad 28.
+
+        Args:
+            include_tree (None | bool): Whether to return the tree of each system: its elements
+                from the root element on, each with the element it is connected to on the way
+                from the root. False when not given.
 
         Returns:
             GetMEPDistributionSystemsResult
@@ -606,18 +701,24 @@ class MepCommands:
             RequestError: If there is a network or connection error.
             pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
-        response_dict = self._core.post_tapir_command("GetMEPDistributionSystems")
+        params_dict = {
+            "includeTree": include_tree,
+        }
+        validated_params = GetMEPDistributionSystemsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetMEPDistributionSystems", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
         validated_response = GetMEPDistributionSystemsResult.model_validate(response_dict)
         return validated_response
 
     def get_mep_element_details(self, elements: list[ElementIdArrayItem]) -> list[ErrorItem | MEPElementDetails]:
         """
         Retrieves the type-specific details of the given MEP elements: insulation thickness and
-        routing segment of rigid segments, control points of flexible segments, radius factor,
-        insulation thickness, preference table and routing node of elbows (from Archicad 29),
-        angle, length and insulation thickness of branches, and offsets, wider and narrower
-        ports, insulation thickness, routing node and (from Archicad 29) preference table of
-        transitions. Available from Archicad 28.
+        routing segment of rigid segments, control points and polyline of flexible segments,
+        radius factor, insulation thickness, preference table and routing node of elbows (from
+        Archicad 29), angle, length and insulation thickness of branches, and offsets, wider and
+        narrower ports, insulation thickness, routing node and (from Archicad 29) preference
+        table of transitions. Available from Archicad 28.
 
         Args:
             elements (list[ElementIdArrayItem]): A list of elements.
@@ -646,10 +747,11 @@ class MepCommands:
         self, element_types: None | list[MEPElementType] = None, domains: None | list[MEPDomain] = None
     ) -> list[MEPElement]:
         """
-        Retrieves the MEP (Mechanical, Electrical, Plumbing) elements of the project, optionally
-        filtered by type and domain. MEP elements are ordinary elements, so the generic element
-        commands work on them as well (for example they can be deleted with the DeleteElements
-        command). Available from Archicad 28.
+        Retrieves the MEP (Mechanical, Electrical, Plumbing) elements of the project (every
+        element the MEP API lists, and from Archicad 30 the electrical panels and devices),
+        optionally filtered by type and domain. MEP elements are ordinary elements, so the
+        generic element commands work on them as well (for example they can be deleted with the
+        DeleteElements command). Available from Archicad 28.
 
         Args:
             element_types (None | list[MEPElementType]): Optional filter for the MEP element
@@ -675,13 +777,44 @@ class MepCommands:
         validated_response = GetMEPElementsResult.model_validate(response_dict)
         return validated_response.elements
 
+    def get_mep_physical_systems_of_elements(
+        self, elements: list[ElementIdArrayItem]
+    ) -> list[MEPPhysicalSystemsOfElement]:
+        """
+        Returns the physical systems each of the given MEP elements is part of. Available from
+        Archicad 29.
+
+        Args:
+            elements (list[ElementIdArrayItem]): A list of elements.
+
+        Returns:
+            list[MEPPhysicalSystemsOfElement]: The physical systems of each given element, in
+                the order of the elements.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elements": elements,
+        }
+        validated_params = GetMEPPhysicalSystemsOfElementsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetMEPPhysicalSystemsOfElements",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+        )
+        validated_response = GetMEPPhysicalSystemsOfElementsResult.model_validate(response_dict)
+        return validated_response.physicalSystemsOfElements
+
     def get_mep_ports(self, elements: list[ElementIdArrayItem]) -> list[ErrorItem | MEPElementPorts]:
         """
         Retrieves the ports of the given MEP elements including position, shape, size,
-        connection status and connection style (from Archicad 30), the flow direction of piping
-        and ventilation ports, the nominal size of piping ports (from Archicad 30), and the
-        outer diameter, wall thickness and flange size (Archicad 30) of piping and ventilation
-        ports. Available from Archicad 28.
+        connection status (Archicad 27: whether the port is connected, from Archicad 28: whether
+        it is physically connected) and connection style (from Archicad 30), the flow direction
+        of piping and ventilation ports (from Archicad 28), the nominal size of piping ports
+        (from Archicad 30), and the outer diameter, wall thickness and flange size (Archicad 30)
+        of piping and ventilation ports. Available from Archicad 27.
 
         Args:
             elements (list[ElementIdArrayItem]): A list of elements.
@@ -720,7 +853,7 @@ class MepCommands:
         as ModifyMEPPreferenceTables expects it. Available from Archicad 28.
 
         Args:
-            domain (MEPPreferenceTableDomain)
+            domain (MEPPreferenceTableDomain): The MEP domain of the segment preference tables.
             include_fitting_tables (None | bool): Also return the elbow, branch and transition
                 preference tables. Defaults to false. Ignored for the CableCarrier domain.
 
@@ -753,9 +886,9 @@ class MepCommands:
         display option, show projection and on-story visibility, from Archicad 29), route
         polyline, segments with cross section data (shape, size, preference table and reference
         id), begin and end nodes, anchor, reference line offsets, wall thickness, flange size,
-        connection style and rigid segments, and nodes with their incoming and outgoing
-        segments, preferred transition placement, elbows and transitions. Available from
-        Archicad 28.
+        connection style, insulation thickness and rigid segments, and nodes with their incoming
+        and outgoing segments, preferred transition placement, elbows and transitions. Available
+        from Archicad 28.
 
         Args:
             elements (list[ElementIdArrayItem]): A list of elements.
@@ -828,6 +961,39 @@ class MepCommands:
         response_dict = self._core.post_tapir_command("GetMEPSystemGroups")
         validated_response = GetMEPSystemGroupsResult.model_validate(response_dict)
         return validated_response.systemGroups
+
+    def get_mep_tool_defaults(self, domains: None | list[MEPDomain] = None) -> GetMEPToolDefaultsResult:
+        """
+        Retrieves the current settings of the MEP tools per domain, without changing them: the
+        routing tool (MEP system, branch preference table, floor plan display settings from
+        Archicad 29, and its segment, node, elbow (Archicad 27 and from Archicad 29) and
+        transition defaults), its rigid segment and branch defaults, the flexible segment tool,
+        the library part, insulation and port settings of the terminal, accessory, fitting and
+        equipment tools, and from Archicad 30 the electrical panel tool with its number of
+        circuit defaults. Archicad 27 gives fewer settings, and only the shape of the ports.
+        Available from Archicad 27.
+
+        Args:
+            domains (None | list[MEPDomain]): The domains to return the tool defaults of. All
+                three when not given.
+
+        Returns:
+            GetMEPToolDefaultsResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "domains": domains,
+        }
+        validated_params = GetMEPToolDefaultsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetMEPToolDefaults", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetMEPToolDefaultsResult.model_validate(response_dict)
+        return validated_response
 
     def modify_electrical_circuits(
         self, electrical_circuits_data: list[ElectricalCircuitModificationData]
@@ -973,6 +1139,41 @@ class MepCommands:
         validated_response = TypeAdapter(ModifyElectricalProjectSettingsResult).validate_python(response_dict)
         return validated_response
 
+    def modify_mep_elements(
+        self, elements: list[MEPElementModificationData]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Modifies placed MEP elements: the anchor point, orientation and library part of
+        terminals, accessories, equipment, fittings and flexible segments, the control points,
+        polyline (Piping, from Archicad 28), and width and height of flexible segments. Only the
+        given fields are changed, in one undo step with one execution result per element; an
+        item with a field that does not fit its element changes nothing. Archicad reports a
+        'libraryPartId' it does not find only after the item's other changes were made, so that
+        item's error says which changes stayed. Available from Archicad 27.
+
+        Args:
+            elements (list[MEPElementModificationData]): The MEP elements to modify, each with
+                the fields to change. Only the given fields are changed.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elements": elements,
+        }
+        validated_params = ModifyMEPElementsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "ModifyMEPElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = ModifyMEPElementsResult.model_validate(response_dict)
+        return validated_response.executionResults
+
     def modify_mep_physical_systems(
         self, physical_systems_data: list[MEPPhysicalSystemModificationData]
     ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
@@ -1043,17 +1244,19 @@ class MepCommands:
         tables_to_delete: None | list[str] = None,
         reference_ids_to_delete: None | list[int] = None,
         angles_to_delete: None | list[float] = None,
+        *,
+        angles_to_add: None | list[float] = None,
     ) -> ModifyMEPPreferenceTablesResult:
         """
         Modifies the MEP preference tables of a domain, in the shape GetMEPPreferenceTables
         returns them: adds tables, changes their names, segmentation lengths (from Archicad 29)
         and row values and descriptions, deletes or empties rows, adds rows to the rectangular
-        duct and cable carrier tables, deletes tables, and deletes reference ids from the
-        reference set and angles from the angle set (from Archicad 29). Each table is changed in
-        one undoable step. Available from Archicad 28.
+        duct and cable carrier tables, deletes tables, deletes reference ids from the reference
+        set, and adds and deletes angles of the angle set (from Archicad 29). Each table is
+        changed in one undoable step. Available from Archicad 28.
 
         Args:
-            domain (MEPPreferenceTableDomain)
+            domain (MEPPreferenceTableDomain): The MEP domain of the segment preference tables.
             tables_to_add (None | list[MEPPreferenceTableAddition]): New tables to add to the
                 domain, before the other changes.
             tables (None | list[MEPPreferenceTableChange]): The tables of the domain to change,
@@ -1066,6 +1269,10 @@ class MepCommands:
             angles_to_delete (None | list[float]): Angles to delete from the angle set of the
                 Piping or Ventilation domain, as GetMEPPreferenceTables returns them. Available
                 from Archicad 29.
+            angles_to_add (None | list[float]): Angles in degrees, between 1 and 90, to add to
+                the angle set of the Piping or Ventilation domain, so that elbow and branch rows
+                can have them. They are added before the tables are changed. Available from
+                Archicad 29.
 
         Returns:
             ModifyMEPPreferenceTablesResult
@@ -1081,6 +1288,7 @@ class MepCommands:
             "tables": tables,
             "tablesToDelete": tables_to_delete,
             "referenceIdsToDelete": reference_ids_to_delete,
+            "anglesToAdd": angles_to_add,
             "anglesToDelete": angles_to_delete,
         }
         validated_params = ModifyMEPPreferenceTablesParameters(**params_dict)
@@ -1098,7 +1306,8 @@ class MepCommands:
         display settings (cut plane position, floor plan display option, show projection and on-
         story visibility, from Archicad 29), cross section data (shape, size, preference table
         and reference id), anchor, reference line offsets, wall thickness, flange size and
-        connection style of all segments, preferred transition placement of all nodes, and node
+        connection style of all segments, preferred transition placement of all nodes,
+        insulation thickness of the whole route (segments, elbows and transitions), and node
         positions. Available from Archicad 28.
 
         Args:
@@ -1161,8 +1370,10 @@ class MepCommands:
         (cross section and preference table) and, from Archicad 29, the routing node parameters
         (elbow radius factor and preference table, transition preference table) of routing
         elements, and the elbow and transition parameters of routing nodes (from Archicad 29).
-        Only the given keys are changed, in one undo step with one execution result per element.
-        Available from Archicad 28.
+        Only the given keys are changed, with one execution result per element. A changed
+        preference table is also set on each of the route's segments and nodes and injected into
+        them, because Archicad 29 can otherwise keep the old one; the item fails if they still
+        report the old table. Available from Archicad 28.
 
         Args:
             elements (list[ElementMEPRoutingParameters]): The routing parameters to change. Only
@@ -1187,4 +1398,41 @@ class MepCommands:
             "SetMEPRoutingParameters", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = SetMEPRoutingParametersResult.model_validate(response_dict)
+        return validated_response.executionResults
+
+    def transfer_mep_settings(
+        self, source_element_id: ElementId, target_elements: list[ElementIdArrayItem]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Picks up the settings of an MEP element and injects them into other MEP elements of the
+        same type and domain, like Archicad's pick up and inject parameters. Works for routing
+        elements, terminals, accessories, equipment, fittings, flexible segments, branches,
+        take-offs and (from Archicad 30) electrical panels and devices. Each target is changed
+        in its own undoable step. Available from Archicad 28.
+
+        Args:
+            source_element_id (ElementId): The MEP element to pick up the settings from: a
+                routing element, terminal, accessory, equipment, fitting, flexible segment,
+                branch, take-off, or (from Archicad 30) electrical panel or device.
+            target_elements (list[ElementIdArrayItem]): The MEP elements to inject the settings
+                into. Each must be of the type and domain of the source element.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "sourceElementId": source_element_id,
+            "targetElements": target_elements,
+        }
+        validated_params = TransferMEPSettingsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "TransferMEPSettings", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = TransferMEPSettingsResult.model_validate(response_dict)
         return validated_response.executionResults

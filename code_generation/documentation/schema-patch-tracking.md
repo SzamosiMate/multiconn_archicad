@@ -1,8 +1,20 @@
 # Active Tapir schema refinements
 
-Client release: **Tapir 1.8.0**. Released documentation checked: **2026-11-02**. This file contains open sharing candidates awaiting released documentation. Remove an entry only after the fetched release contains equivalent definitions and references; historical decisions remain in reports and Git.
+Client target: **Tapir 2.0.0**. Released documentation checked: **2026-11-10**. The active operations live in [the patch source](../shared/schema_patching.py). The dated sections below preserve the candidate batches at their stated baselines. See the [2.0.0 adoption record](reports/codegen/tapir-2.0.0.md) for released definitions, compatibility aliases and follow-up.
+
+## Tapir 2.0.0 adoption — 2026-11-10
+
+The released documentation incorporates many named MEP, electrical, analytical, library, IFC and project contracts. The operations removed from [the patch source](../shared/schema_patching.py) are retired for this release. Keep the [Python aliases](../shared/model_aliases.py) for released names that differ from the 1.8.0 client names.
+
+The remaining naming and sharing calls require equivalent released definitions **and** references from the listed consumers before retirement. Preserve required fields, constraints and union alternatives. This includes the renamed library script update's `anyOf`, the nested library inventory type enum, and the IFC classification reference's nested source. Creation and modification names stay in their existing Permanent lists.
+
+Seven Breaking source-review calls add the object type to closed records with required fields. They cover element classifications, property-value readbacks, library part details and subtype readbacks, and both hotlink design-option selector branches. Retire them when the released documentation types the same records as objects. The path guards and call sites are in [the patch source](../shared/schema_patching.py).
+
+`FavoriteContents.properties.classifications` references the wrapped `ClassificationIdsOrErrors` union, while its description refers to element classification reads, which use direct IDs. The client follows the released reference for this new consumer. Confirm which shape is emitted before proposing a schema change.
 
 ## Classification assignment response correction — 2026-11-01
+
+**Retired in Tapir 2.0.0.** The released `ElementClassificationItemArray.properties.classificationIds.items.oneOf` now references `ClassificationId` directly, covering element and element-default reads. `GetClassificationOfAttributesInSystemResult.properties.attributeClassifications` still reaches the wrapped `ClassificationIdArrayItem` through `ClassificationIdsOrErrors`. Removing the global rewrite restores that documented wrapper for the attribute consumer.
 
 One Breaking source-review correction changes `ClassificationIdOrError/oneOf/0`
 from `ClassificationIdArrayItem` to `ClassificationId`. Element and element-default

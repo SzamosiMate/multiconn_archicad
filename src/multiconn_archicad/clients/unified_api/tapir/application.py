@@ -10,15 +10,22 @@ from multiconn_archicad.models.tapir.commands import (
     ChangeWindowResult,
     CloseWindowsParameters,
     CloseWindowsResult,
+    ConvertImagesParameters,
+    ConvertImagesResult,
     DeleteGhostRecordsParameters,
     DeleteGhostRecordsResult,
     Get3DCutawayStatusResult,
     GetAddOnVersionResult,
+    GetArcFromUserParameters,
+    GetArcFromUserResult,
+    GetArchicadLicenseInfoResult,
     GetArchicadLocationResult,
     GetArchicadReleaseInfoResult,
     GetArchicadVisibilityResult,
+    GetCommandsResult,
     GetContainingDatabasesParameters,
     GetContainingDatabasesResult,
+    GetCurrentToolResult,
     GetCurrentWindowDrawingScaleResult,
     GetCurrentWindowTypeResult,
     GetDialogAutoCloseResult,
@@ -27,6 +34,7 @@ from multiconn_archicad.models.tapir.commands import (
     GetElementFromUserResult,
     GetLineFromUserParameters,
     GetLineFromUserResult,
+    GetMagicWandSettingsResult,
     GetPointFromUserParameters,
     GetPointFromUserResult,
     GetPolygonFromUserParameters,
@@ -36,6 +44,8 @@ from multiconn_archicad.models.tapir.commands import (
     GetProductVersionInfoResult,
     GetSpecialFoldersParameters,
     GetSpecialFoldersResult,
+    GetToolboxItemsParameters,
+    GetToolboxItemsResult,
     GetUserGSIDResult,
     ModelToScreenParameters,
     ModelToScreenResult,
@@ -50,17 +60,22 @@ from multiconn_archicad.models.tapir.commands import (
     Set3DCutawayStatusResult,
     SetArchicadVisibilityParameters,
     SetArchicadVisibilityResult,
+    SetCurrentToolParameters,
+    SetCurrentToolResult,
     SetCurrentWindowDrawingScaleParameters,
     SetCurrentWindowDrawingScaleResult,
     SetDialogAutoCloseParameters,
     SetDialogAutoCloseResult,
     ShowAlertParameters,
     ShowAlertResult,
+    ShowNotificationBubbleParameters,
+    ShowNotificationBubbleResult,
 )
 from multiconn_archicad.models.tapir.types import (
     ActionCenterCheck,
     AlertType,
     ContainingDatabase,
+    ConvertedImage,
     Coordinate2D,
     Coordinate3D,
     DatabaseById,
@@ -70,13 +85,21 @@ from multiconn_archicad.models.tapir.types import (
     ElementType,
     ErrorItem,
     FailedExecutionResult,
+    ImageConversionInput,
+    InputConstraint,
     NavigatorItemIdArrayItem,
+    NotificationBubbleIconInput,
+    NotificationBubbleLargeIconInput,
+    NotificationBubbleOffsetInput,
+    NotificationBubbleScreenPoint,
     PolygonInputMethod,
     ScreenPoint,
     ScreenPointInput,
+    SnapFilter,
     SpecialFolderPath,
     SpecialFolderType,
     SuccessfulExecutionResult,
+    TapirCommandDescription,
     WindowToClose,
 )
 
@@ -146,6 +169,35 @@ class ApplicationCommands:
         validated_response = CloseWindowsResult.model_validate(response_dict)
         return validated_response.executionResults
 
+    def convert_images(self, images: list[ImageConversionInput]) -> list[ConvertedImage | ErrorItem]:
+        """
+        Converts base64 encoded images from one image format to another with Archicad's own
+        image converters, for example a PNG preview image to JPEG. The formats are Bitmap, GIF,
+        TIFF, JPEG and PNG, or the MIME type of another format Archicad can read or write. The
+        output is aligned with the input array of images. Changes nothing in the project.
+
+        Args:
+            images (list[ImageConversionInput]): The images to convert.
+
+        Returns:
+            list[ConvertedImage | ErrorItem]: The converted images in the order of the input, or
+                an error.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "images": images,
+        }
+        validated_params = ConvertImagesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "ConvertImages", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = ConvertImagesResult.model_validate(response_dict)
+        return validated_response.images
+
     def delete_ghost_records(
         self, databases: list[DatabaseIdArrayItem]
     ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
@@ -211,6 +263,86 @@ class ApplicationCommands:
         validated_response = GetAddOnVersionResult.model_validate(response_dict)
         return validated_response.version
 
+    def get_arc_from_user(
+        self,
+        center_prompt: None | str = "Click the center of the arc",
+        start_prompt: None | str = "Click the start point of the arc",
+        end_prompt: None | str = "Click the end point of the arc",
+        show_rubber_arc_feedback: None | bool = True,
+        snap_filter: None | SnapFilter = None,
+        constraint: InputConstraint | None = None,
+    ) -> GetArcFromUserResult:
+        """
+        Asks the designer to draw an arc in the current window - its center, its start point
+        (which sets the radius) and its end point - with a rubber-band circle shown while
+        drawing, and returns its center, radius, start and end angles, the angle it turns
+        through, its direction and its start and end points. Archicad waits for the clicks or
+        for Escape, and every other JSON command queues behind this one until then; cancelling
+        returns cancelled.
+
+        Args:
+            center_prompt (None | str): Prompt for clicking the center of the arc. Single-byte
+                text: the control box takes a char field.
+            start_prompt (None | str): Prompt for clicking the start point of the arc, which
+                also sets its radius.
+            end_prompt (None | str): Prompt for clicking the end point of the arc. Archicad
+                draws the arc while the cursor moves; the direction the cursor goes around the
+                center decides whether the arc is clockwise.
+            show_rubber_arc_feedback (None | bool): If true, also draws the whole circle of the
+                arc while the start and end points are chosen: its radius follows the cursor
+                until the start point is clicked. Drawn in 2D windows only; the 3D window shows
+                Archicad's default feedback.
+            snap_filter (None | SnapFilter): Which points and lines of the elements the cursor
+                snaps to for the center and the start point. Archicad's arc input has no snap
+                filter, so the end point snaps as usual. Default: Archicad's usual snapping.
+            constraint (InputConstraint | None): Constrains every click: the center, the start
+                point and the end point. With fromLastPoint the start point is measured from the
+                center (type Distance fixes the radius, type Angle the direction of the start
+                point) and the end point from the start point. Default: no constraint.
+
+        Returns:
+            GetArcFromUserResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "centerPrompt": center_prompt,
+            "startPrompt": start_prompt,
+            "endPrompt": end_prompt,
+            "showRubberArcFeedback": show_rubber_arc_feedback,
+            "snapFilter": snap_filter,
+            "constraint": constraint,
+        }
+        validated_params = GetArcFromUserParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetArcFromUser", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetArcFromUserResult.model_validate(response_dict)
+        return validated_response
+
+    def get_archicad_license_info(self) -> GetArchicadLicenseInfoResult:
+        """
+        Retrieves the license the running Archicad runs on: its type (Full, Education, Trial,
+        Demo, Start or BIMcloud Team Client), the raw protection mode with its bits by name, and
+        the highest Software Service Agreement (SSA) level of the license, so a script can warn
+        before it uses a feature the license lacks. The SSA level is not available in Archicad
+        25.
+
+        Returns:
+            GetArchicadLicenseInfoResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        response_dict = self._core.post_tapir_command("GetArchicadLicenseInfo")
+        validated_response = GetArchicadLicenseInfoResult.model_validate(response_dict)
+        return validated_response
+
     def get_archicad_location(self) -> str:
         """
         Retrieves the location of the currently running Archicad executable.
@@ -261,6 +393,25 @@ class ApplicationCommands:
         validated_response = GetArchicadVisibilityResult.model_validate(response_dict)
         return validated_response.isVisible
 
+    def get_commands(self) -> list[TapirCommandDescription]:
+        """
+        Retrieves every command of the Tapir Add-On with its command group, the Tapir version it
+        was introduced in and its description, so a script can check that a command exists
+        before calling it.
+
+        Returns:
+            list[TapirCommandDescription]: Every command of the Tapir Add-On, in the order of
+                the command reference.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        response_dict = self._core.post_tapir_command("GetCommands")
+        validated_response = GetCommandsResult.model_validate(response_dict)
+        return validated_response.commands
+
     def get_containing_databases(self, elements: list[ElementIdArrayItem]) -> list[ContainingDatabase | ErrorItem]:
         """
         Returns the database (window type, database id and name) that contains each of the given
@@ -289,6 +440,25 @@ class ApplicationCommands:
         )
         validated_response = GetContainingDatabasesResult.model_validate(response_dict)
         return validated_response.databases
+
+    def get_current_tool(self) -> GetCurrentToolResult:
+        """
+        Returns the tool active in the Toolbox: its element type, its variation (the subtype,
+        e.g. Door, Skylight or a library part subtype of an add-on) and, for the tools of add-
+        ons, its class id, in the form SetCurrentTool accepts. Nothing is returned when the
+        active tool makes no element, e.g. the Arrow or the Marquee.
+
+        Returns:
+            GetCurrentToolResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        response_dict = self._core.post_tapir_command("GetCurrentTool")
+        validated_response = GetCurrentToolResult.model_validate(response_dict)
+        return validated_response
 
     def get_current_window_drawing_scale(self) -> float:
         """
@@ -373,7 +543,12 @@ class ApplicationCommands:
         return validated_response
 
     def get_element_from_user(
-        self, prompt: None | str = None, element_types: None | list[ElementType] = None
+        self,
+        prompt: None | str = None,
+        element_types: None | list[ElementType] = None,
+        *,
+        snap_filter: None | SnapFilter = None,
+        constraint: InputConstraint | None = None,
     ) -> GetElementFromUserResult:
         """
         Asks the designer to click an element in the current window and returns its id, its type
@@ -389,6 +564,11 @@ class ApplicationCommands:
             element_types (None | list[ElementType]): Only an element of one of these types is
                 accepted. A click on empty space or on an element of another type asks for the
                 click again. Default: any element.
+            snap_filter (None | SnapFilter): Which points and lines of the elements the cursor
+                snaps to, for example only the points and edges of the element types asked for.
+                Default: Archicad's usual snapping.
+            constraint (InputConstraint | None): Constrains every click, for example to a fixed
+                X coordinate or to a direction. Default: no constraint.
 
         Returns:
             GetElementFromUserResult
@@ -401,6 +581,8 @@ class ApplicationCommands:
         params_dict = {
             "prompt": prompt,
             "elementTypes": element_types,
+            "snapFilter": snap_filter,
+            "constraint": constraint,
         }
         validated_params = GetElementFromUserParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
@@ -414,6 +596,9 @@ class ApplicationCommands:
         start_prompt: None | str = "Click the start point of the line",
         end_prompt: None | str = "Click the end point of the line",
         show_rubber_line_feedback: None | bool = True,
+        *,
+        snap_filter: None | SnapFilter = None,
+        constraint: InputConstraint | None = None,
     ) -> GetLineFromUserResult:
         """
         Waits for the user to input a line in the active Archicad window and returns start and
@@ -424,6 +609,11 @@ class ApplicationCommands:
             end_prompt (None | str): Prompt for selecting the line end point.
             show_rubber_line_feedback (None | bool): If true, draws a unit-square rubber
                 feedback around the cursor while input is active.
+            snap_filter (None | SnapFilter): Which points and lines of the elements the cursor
+                snaps to, for both points. Default: Archicad's usual snapping.
+            constraint (InputConstraint | None): Constrains the end point, for example to a
+                direction from the start point (type Angle with fromLastPoint). The start point
+                is not constrained. Default: no constraint.
 
         Returns:
             GetLineFromUserResult
@@ -437,6 +627,8 @@ class ApplicationCommands:
             "startPrompt": start_prompt,
             "endPrompt": end_prompt,
             "showRubberLineFeedback": show_rubber_line_feedback,
+            "snapFilter": snap_filter,
+            "constraint": constraint,
         }
         validated_params = GetLineFromUserParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
@@ -445,7 +637,32 @@ class ApplicationCommands:
         validated_response = GetLineFromUserResult.model_validate(response_dict)
         return validated_response
 
-    def get_point_from_user(self, prompt: None | str = None) -> Coordinate3D:
+    def get_magic_wand_settings(self) -> GetMagicWandSettingsResult:
+        """
+        Returns the settings of Archicad's Magic Wand Settings dialog: how curves are
+        approximated with straight segments (a number of segments along arcs or circles, a
+        largest deviation from the curve, or a segment length) and the trace method. Useful to
+        know how the Magic Wand will trace a curve. Changes nothing in the project.
+
+        Returns:
+            GetMagicWandSettingsResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        response_dict = self._core.post_tapir_command("GetMagicWandSettings")
+        validated_response = GetMagicWandSettingsResult.model_validate(response_dict)
+        return validated_response
+
+    def get_point_from_user(
+        self,
+        prompt: None | str = None,
+        *,
+        snap_filter: None | SnapFilter = None,
+        constraint: InputConstraint | None = None,
+    ) -> Coordinate3D:
         """
         Asks the designer to click a point in the current window and returns it. Archicad waits
         for the click or for Escape, and every other JSON command queues behind this one until
@@ -456,6 +673,10 @@ class ApplicationCommands:
                 Single-byte text: the box takes a char field. Archicad's main thread waits for
                 the click or for Escape, and every other JSON command queues behind this one
                 until then.
+            snap_filter (None | SnapFilter): Which points and lines of the elements the cursor
+                snaps to. Default: Archicad's usual snapping.
+            constraint (InputConstraint | None): Constrains the click, for example to a fixed X
+                coordinate or to a direction. Default: no constraint.
 
         Returns:
             Coordinate3D: The clicked point in the project's coordinates.
@@ -467,6 +688,8 @@ class ApplicationCommands:
         """
         params_dict = {
             "prompt": prompt,
+            "snapFilter": snap_filter,
+            "constraint": constraint,
         }
         validated_params = GetPointFromUserParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
@@ -480,6 +703,9 @@ class ApplicationCommands:
         start_prompt: None | str = "Click the start point of the polygon",
         prompt: None | str = "Click polygon nodes and finish the input",
         method: None | PolygonInputMethod = "General",
+        *,
+        snap_filter: None | SnapFilter = None,
+        constraint: InputConstraint | None = None,
     ) -> GetPolygonFromUserResult:
         """
         Waits for the user to input a polygon in the active Archicad window and returns its
@@ -489,6 +715,12 @@ class ApplicationCommands:
             start_prompt (None | str): Prompt for selecting the polygon start point.
             prompt (None | str): Prompt shown while placing the remaining polygon nodes.
             method (None | PolygonInputMethod)
+            snap_filter (None | SnapFilter): Which points and lines of the elements the cursor
+                snaps to for the start point. Archicad's polygon input has no snap filter, so
+                the other nodes snap as usual. Default: Archicad's usual snapping.
+            constraint (InputConstraint | None): Constrains the nodes after the start point, for
+                example to a direction from the previous node (type Angle with fromLastPoint).
+                The start point is not constrained. Default: no constraint.
 
         Returns:
             GetPolygonFromUserResult
@@ -502,6 +734,8 @@ class ApplicationCommands:
             "startPrompt": start_prompt,
             "prompt": prompt,
             "method": method,
+            "snapFilter": snap_filter,
+            "constraint": constraint,
         }
         validated_params = GetPolygonFromUserParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
@@ -590,6 +824,34 @@ class ApplicationCommands:
         )
         validated_response = GetSpecialFoldersResult.model_validate(response_dict)
         return validated_response.folderPaths
+
+    def get_toolbox_items(self, include_hidden: None | bool = None) -> GetToolboxItemsResult:
+        """
+        Lists the tools of the Toolbox, the tools of add-ons included, in the form
+        SetCurrentTool accepts, and the active tool. includeHidden also lists the tools without
+        an icon, e.g. the Slab Accessory.
+
+        Args:
+            include_hidden (None | bool): Also list the tools that have no icon in the Toolbox
+                but can be active, e.g. the Slab Accessory. Default: false.
+
+        Returns:
+            GetToolboxItemsResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "includeHidden": include_hidden,
+        }
+        validated_params = GetToolboxItemsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetToolboxItems", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetToolboxItemsResult.model_validate(response_dict)
+        return validated_response
 
     def get_user_gsid(self) -> GetUserGSIDResult:
         """
@@ -813,6 +1075,43 @@ class ApplicationCommands:
         validated_response = TypeAdapter(SetArchicadVisibilityResult).validate_python(response_dict)
         return validated_response
 
+    def set_current_tool(
+        self, element_type: ElementType | None = None, variation: None | str = None, class_id: None | UUID = None
+    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+        """
+        Activates a tool in the Toolbox, given as GetCurrentTool or GetToolboxItems returns it;
+        an empty input activates the Arrow. Archicad switches the tool once it processes its
+        events, so GetCurrentTool may still return the previous tool right after this command.
+
+        Args:
+            element_type (ElementType | None): The element type of the tool. Unknown for the
+                tools of add-ons, which classId identifies.
+            variation (None | str): The four-character subtype of the tool, e.g. DOOR, SKYL,
+                CRWD, or the signature of a library part subtype registered by an add-on.
+                Missing for the generic tool of the element type.
+            class_id (None | UUID): The class id (a guid) of the tool of an add-on, whose
+                elementType is Unknown. Archicad 26 and later.
+
+        Returns:
+            FailedExecutionResult | SuccessfulExecutionResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elementType": element_type,
+            "variation": variation,
+            "classId": class_id,
+        }
+        validated_params = SetCurrentToolParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "SetCurrentTool", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = TypeAdapter(SetCurrentToolResult).validate_python(response_dict)
+        return validated_response
+
     def set_current_window_drawing_scale(
         self, scale: float, rebuild: None | bool = False
     ) -> FailedExecutionResult | SuccessfulExecutionResult:
@@ -924,3 +1223,73 @@ class ApplicationCommands:
         )
         validated_response = ShowAlertResult.model_validate(response_dict)
         return validated_response.clickedButton
+
+    def show_notification_bubble(
+        self,
+        message: str,
+        icon: None | NotificationBubbleIconInput = None,
+        timeout_milliseconds: None | int = None,
+        coordinate: Coordinate3D | None = None,
+        screen_point: None | NotificationBubbleScreenPoint = None,
+        offset: None | NotificationBubbleOffsetInput = None,
+        large_icon: None | NotificationBubbleLargeIconInput = None,
+        redraw_count_limit: None | int = None,
+        disabled: None | bool = None,
+    ) -> ShowNotificationBubbleResult:
+        """
+        Shows a non-blocking notification bubble with a message in the current Archicad window,
+        e.g. to report progress or a result without stopping the user as ShowAlert does. The
+        bubble disappears by itself after the timeout. It is shown at a model coordinate or a
+        pixel position of the current view, by default at the center of the current 2D view.
+        Optionally it gets a large icon, is shown at most a given number of times, or is turned
+        off, until the user runs 'Enable all informational messages'. Returns the bubble's
+        settings read back from Archicad. Requires Archicad 29 or later.
+
+        Args:
+            message (str): The text of the notification bubble.
+            icon (None | NotificationBubbleIconInput)
+            timeout_milliseconds (None | int): How long the bubble stays, in milliseconds.
+                Default: Archicad's default, 1000 (1 second).
+            coordinate (Coordinate3D | None): The model coordinate in the current database
+                (meters) where the bubble is shown, converted like ModelToScreen does: in a 3D
+                window it is projected with the current camera, in other windows z is
+                disregarded. Do not give it together with screenPoint. When neither is given,
+                the bubble is shown at the center of the current view in 2D windows and at the
+                project's local origin otherwise.
+            screen_point (None | NotificationBubbleScreenPoint)
+            offset (None | NotificationBubbleOffsetInput)
+            large_icon (None | NotificationBubbleLargeIconInput)
+            redraw_count_limit (None | int): Shows the bubble at most this many times. After
+                that it does not appear again, for any later ShowNotificationBubble call, until
+                the user runs the 'Enable all informational messages' command in Archicad. Not
+                set by default.
+            disabled (None | bool): True turns the bubble off instead of showing it: it does not
+                appear again, for any later ShowNotificationBubble call, until the user runs the
+                'Enable all informational messages' command in Archicad. False (the default)
+                changes nothing.
+
+        Returns:
+            ShowNotificationBubbleResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "message": message,
+            "icon": icon,
+            "timeoutMilliseconds": timeout_milliseconds,
+            "coordinate": coordinate,
+            "screenPoint": screen_point,
+            "offset": offset,
+            "largeIcon": large_icon,
+            "redrawCountLimit": redraw_count_limit,
+            "disabled": disabled,
+        }
+        validated_params = ShowNotificationBubbleParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "ShowNotificationBubble", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = ShowNotificationBubbleResult.model_validate(response_dict)
+        return validated_response

@@ -48,7 +48,7 @@ from multiconn_archicad.models.tapir.types import (
     AttributeClassification,
     AttributeClassifications,
     AttributeIdArrayItem,
-    ClassificationId,
+    ClassificationIdArrayItem,
     ClassificationItemConflictPolicy,
     ClassificationItemElements,
     ClassificationItemIdArrayItem,
@@ -70,6 +70,7 @@ from multiconn_archicad.models.tapir.types import (
     ElementIdArrayItem,
     ElementType,
     ErrorItem,
+    ExecutionResult,
     FailedExecutionResult,
     NewClassificationItem,
     SuccessfulExecutionResult,
@@ -86,7 +87,7 @@ class ClassificationCommands:
 
     def create_classification_items(
         self, new_classification_items: list[NewClassificationItem]
-    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+    ) -> CreateClassificationItemsResult:
         """
         Creates Classification Items in the given Classification Systems based on the given
         parameters.
@@ -96,8 +97,7 @@ class ClassificationCommands:
                 items.
 
         Returns:
-            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
-                results.
+            CreateClassificationItemsResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -112,11 +112,11 @@ class ClassificationCommands:
             "CreateClassificationItems", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = CreateClassificationItemsResult.model_validate(response_dict)
-        return validated_response.executionResults
+        return validated_response
 
     def create_classification_systems(
         self, classification_systems_with_items: list[ClassificationSystemsWithItem]
-    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+    ) -> CreateClassificationSystemsResult:
         """
         Creates Classification Systems including Classification Items based on the given
         parameters.
@@ -126,8 +126,7 @@ class ClassificationCommands:
                 Classification systems with items.
 
         Returns:
-            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
-                results.
+            CreateClassificationSystemsResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -142,21 +141,25 @@ class ClassificationCommands:
             "CreateClassificationSystems", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = CreateClassificationSystemsResult.model_validate(response_dict)
-        return validated_response.executionResults
+        return validated_response
 
     def delete_classification_items(
         self, classification_item_ids: list[ClassificationItemIdArrayItem]
     ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
         """
-        Deletes the given Classification Items.
+        Deletes the given Classification Items. With dryRun true nothing is deleted and no undo
+        step is created: the response has dryRun set to true, and each classification item that
+        exists gets wouldDelete.
 
         Args:
             classification_item_ids (list[ClassificationItemIdArrayItem]): A list of
                 classification item identifiers.
 
         Returns:
-            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
-                results.
+            list[FailedExecutionResult | SuccessfulExecutionResult]: One result for each input
+                classification item, in the order of the input. On a dry run a classification
+                item that exists gets wouldDelete; Archicad can still refuse to delete one that
+                exists.
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -170,22 +173,56 @@ class ClassificationCommands:
         response_dict = self._core.post_tapir_command(
             "DeleteClassificationItems", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
+        return TypeAdapter(list[ExecutionResult]).validate_python(response_dict.get("executionResults"))
+
+    def delete_classification_items_dry_run(
+        self, classification_item_ids: list[ClassificationItemIdArrayItem]
+    ) -> DeleteClassificationItemsResult:
+        """
+        Preview this command without applying its changes. Deletes the given Classification
+        Items. With dryRun true nothing is deleted and no undo step is created: the response has
+        dryRun set to true, and each classification item that exists gets wouldDelete.
+
+        Args:
+            classification_item_ids (list[ClassificationItemIdArrayItem]): A list of
+                classification item identifiers.
+
+        Returns:
+            DeleteClassificationItemsResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "classificationItemIds": classification_item_ids,
+            "dryRun": True,
+        }
+        validated_params = DeleteClassificationItemsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "DeleteClassificationItems", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
         validated_response = DeleteClassificationItemsResult.model_validate(response_dict)
-        return validated_response.executionResults
+        return validated_response
 
     def delete_classification_systems(
         self, classification_system_ids: list[ClassificationSystemIdArrayItem]
     ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
         """
-        Deletes the given Classification Systems.
+        Deletes the given Classification Systems. With dryRun true nothing is deleted and no
+        undo step is created: the response has dryRun set to true, and each classification
+        system that exists gets wouldDelete.
 
         Args:
             classification_system_ids (list[ClassificationSystemIdArrayItem]): A list of
                 classification system identifiers.
 
         Returns:
-            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
-                results.
+            list[FailedExecutionResult | SuccessfulExecutionResult]: One result for each input
+                classification system, in the order of the input. On a dry run a classification
+                system that exists gets wouldDelete; Archicad can still refuse to delete one
+                that exists.
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -199,8 +236,38 @@ class ClassificationCommands:
         response_dict = self._core.post_tapir_command(
             "DeleteClassificationSystems", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
+        return TypeAdapter(list[ExecutionResult]).validate_python(response_dict.get("executionResults"))
+
+    def delete_classification_systems_dry_run(
+        self, classification_system_ids: list[ClassificationSystemIdArrayItem]
+    ) -> DeleteClassificationSystemsResult:
+        """
+        Preview this command without applying its changes. Deletes the given Classification
+        Systems. With dryRun true nothing is deleted and no undo step is created: the response
+        has dryRun set to true, and each classification system that exists gets wouldDelete.
+
+        Args:
+            classification_system_ids (list[ClassificationSystemIdArrayItem]): A list of
+                classification system identifiers.
+
+        Returns:
+            DeleteClassificationSystemsResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "classificationSystemIds": classification_system_ids,
+            "dryRun": True,
+        }
+        validated_params = DeleteClassificationSystemsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "DeleteClassificationSystems", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
         validated_response = DeleteClassificationSystemsResult.model_validate(response_dict)
-        return validated_response.executionResults
+        return validated_response
 
     def get_all_classification_systems(self) -> list[ClassificationSystemSummary]:
         """
@@ -295,7 +362,7 @@ class ClassificationCommands:
 
     def get_classification_of_attributes_in_system(
         self, attribute_ids: list[AttributeIdArrayItem], classification_system_id: ClassificationSystemId
-    ) -> list[ClassificationId | ErrorItem]:
+    ) -> list[ClassificationIdArrayItem | ErrorItem]:
         """
         Returns the classification of the given attributes (for example Building Materials) in
         the given classification system. classificationItemId is omitted for an unclassified
@@ -306,9 +373,9 @@ class ClassificationCommands:
             classification_system_id (ClassificationSystemId)
 
         Returns:
-            list[ClassificationId | ErrorItem]: Order of the items is the same as in the input.
-                classificationItemId is omitted when the attribute is unclassified in the
-                system. Non-existing attributes or a non-existing classification system are
+            list[ClassificationIdArrayItem | ErrorItem]: Order of the items is the same as in
+                the input. classificationItemId is omitted when the attribute is unclassified in
+                the system. Non-existing attributes or a non-existing classification system are
                 represented by error objects.
 
         Raises:
@@ -597,15 +664,24 @@ class ClassificationCommands:
         """
         Sets the classifications of elements. In order to set the classification of an element
         to unclassified, omit the classificationItemId field. It works for subelements of
-        hierarchal elements also.
+        hierarchal elements also. With dryRun true nothing is changed and no undo step is
+        created: the response has dryRun set to true, and each item that passes the checks made
+        before writing gets wouldChange, with the element's classification in the system now
+        (oldValue) and the one a real run would set (newValue).
 
         Args:
             element_classifications (list[ElementClassification]): A list of element
                 classification identifiers.
 
         Returns:
-            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
-                results.
+            list[FailedExecutionResult | SuccessfulExecutionResult]: One result for each item of
+                elementClassifications, in the order of the input. On a dry run an item that
+                passes every check made before writing (the classification item and its system
+                exist, the element's classification in that system can be read) gets
+                wouldChange: oldValue is the element's classificationId in the system now and
+                newValue the one a real run would set, both as GetClassificationsOfElements
+                gives them (without classificationItemId when the element is or would be
+                unclassified in the system). Archicad can still refuse an item that passes them.
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -619,8 +695,42 @@ class ClassificationCommands:
         response_dict = self._core.post_tapir_command(
             "SetClassificationsOfElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
+        return TypeAdapter(list[ExecutionResult]).validate_python(response_dict.get("executionResults"))
+
+    def set_classifications_of_elements_dry_run(
+        self, element_classifications: list[ElementClassification]
+    ) -> SetClassificationsOfElementsResult:
+        """
+        Preview this command without applying its changes. Sets the classifications of elements.
+        In order to set the classification of an element to unclassified, omit the
+        classificationItemId field. It works for subelements of hierarchal elements also. With
+        dryRun true nothing is changed and no undo step is created: the response has dryRun set
+        to true, and each item that passes the checks made before writing gets wouldChange, with
+        the element's classification in the system now (oldValue) and the one a real run would
+        set (newValue).
+
+        Args:
+            element_classifications (list[ElementClassification]): A list of element
+                classification identifiers.
+
+        Returns:
+            SetClassificationsOfElementsResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elementClassifications": element_classifications,
+            "dryRun": True,
+        }
+        validated_params = SetClassificationsOfElementsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "SetClassificationsOfElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
         validated_response = SetClassificationsOfElementsResult.model_validate(response_dict)
-        return validated_response.executionResults
+        return validated_response
 
     def update_classification_items(
         self, classification_items: list[ClassificationItemUpdate]

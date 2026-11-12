@@ -1,0 +1,14 @@
+# Tapir 2.0.0
+
+The checked-in and initial generated outputs both targeted Tapir 1.8.0 at `a04ecc371134f1cf92aba125a1cdb727cdb870a8`. The branch started at `origin/main` and contained no commits ahead of that base. Input is the two documentation files from the [Tapir 2.0.0 release tag](https://github.com/ENZYME-APD/tapir-archicad-automation/releases/tag/2.0.0). The pre-existing staged upstream report is separate from this client update.
+
+- Commands **641 → 789**. **148 added**, **0 removed**, **121** existing commands changed in expanded request or response schemas. **82** existing commands changed their immediate schema or reference structure. The direct and expanded counts overlap.
+- Public Pydantic type declarations **+436**, **−0**, **96** changed structurally. TypedDict declarations **+377**, **−0**, **93** changed structurally. Counts exclude command models and annotation-only changes.
+- Permanent **100 → 88**, with **9 added**, **21 retired**, and **79 unchanged**. Temporary **611 → 564**, with **204 added**, **251 retired**, **10 revised**, and **350 unchanged**. Breaking source review adds 7 closed-record constraints and retires the classification correction. Counts are expanded helper operations, with each conditional naming call counted once.
+- **15** existing Unified API methods with caller migrations.
+
+- Adopt released names and references for MEP, electrical, analytical, IFC, project, library, attribute and other APIs. Keep prior Python imports as [compatibility aliases](../../../shared/model_aliases.py) where the same contracts have different names. Keep overlapping read and write shapes separate when they differ in requiredness or enum values.
+- The released element and element-default classification arrays directly reference `ClassificationId`. Retiring the global correction lets attribute classification reads use the documented `ClassificationIdArrayItem` wrapper again. The new Favorites contents schema also references the wrapped union, while its prose points to element classification reads. Track that documentation ambiguity separately. Add explicit object types to seven closed records to make JSON Schema agree with both generated representations.
+- The generator adds `_dry_run` companions for 20 shipped methods and preserves their ordinary execution-result contracts. The property setter accepts a sequence of `ElementPropertyValueInput` and ordinary writes use the preserved `ElementPropertyValue` constructor.
+- Unified generation preserves shipped positional order using the [v0.9.7 snapshot](../../../unified/api_generator/shipped_signatures.json). Newly added options on shipped methods are keyword-only.
+- [Active patch tracking](../../schema-patch-tracking.md#tapir-200-adoption--2026-11-10) and [patch source](../../../shared/schema_patching.py) record the remaining naming and sharing candidates.

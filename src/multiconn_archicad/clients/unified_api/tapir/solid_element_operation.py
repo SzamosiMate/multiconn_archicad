@@ -34,6 +34,7 @@ from multiconn_archicad.models.tapir.types import (
     ElementTrims,
     ElementUnmergePair,
     ErrorItem,
+    ExecutionResult,
     FailedExecutionResult,
     MergedElements,
     SolidLinkData,
@@ -199,7 +200,9 @@ class SolidElementOperationCommands:
         """
         Merges the given construction elements (the Merge command of Archicad, which cleans up
         the junctions of slabs, beams, walls and similar elements). Undoable. The element types
-        are not filtered: Archicad reports the ones it cannot merge.
+        are not filtered: Archicad reports the ones it cannot merge. The merge is read back:
+        when Archicad records no merge between the given elements (it decides which elements and
+        type combinations it merges), the result is a failure, not a success.
 
         Args:
             elements (list[ElementIdArrayItem]): The construction elements to merge together. At
@@ -227,15 +230,22 @@ class SolidElementOperationCommands:
         self, element_pairs: list[ElementPair]
     ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
         """
-        Removes the trim between an element and the roof or shell trimming it.
+        Removes the trim between an element and the roof or shell trimming it. The Archicad API
+        removes the trimming connection between the two elements, so when they trim each other
+        (two roofs or shells) both directions are removed; trim the other direction again with
+        TrimElements to keep it. With dryRun true nothing is removed and no undo step is
+        created: the response has dryRun set to true, and each pair whose element is trimmed by
+        its trimming element gets wouldDelete.
 
         Args:
             element_pairs (list[ElementPair]): The trimmed element and the roof or shell
-                trimming it, per pair.
+                trimming it, per pair. The trimming connection between the two is removed: when
+                they trim each other, both directions are removed.
 
         Returns:
-            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
-                results.
+            list[FailedExecutionResult | SuccessfulExecutionResult]: One result for each input
+                pair, in the order of the input. On a dry run a pair whose element is trimmed by
+                the trimming element gets wouldDelete.
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -249,22 +259,58 @@ class SolidElementOperationCommands:
         response_dict = self._core.post_tapir_command(
             "RemoveElementTrims", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
+        return TypeAdapter(list[ExecutionResult]).validate_python(response_dict.get("executionResults"))
+
+    def remove_element_trims_dry_run(self, element_pairs: list[ElementPair]) -> RemoveElementTrimsResult:
+        """
+        Preview this command without applying its changes. Removes the trim between an element
+        and the roof or shell trimming it. The Archicad API removes the trimming connection
+        between the two elements, so when they trim each other (two roofs or shells) both
+        directions are removed; trim the other direction again with TrimElements to keep it.
+        With dryRun true nothing is removed and no undo step is created: the response has dryRun
+        set to true, and each pair whose element is trimmed by its trimming element gets
+        wouldDelete.
+
+        Args:
+            element_pairs (list[ElementPair]): The trimmed element and the roof or shell
+                trimming it, per pair. The trimming connection between the two is removed: when
+                they trim each other, both directions are removed.
+
+        Returns:
+            RemoveElementTrimsResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elementPairs": element_pairs,
+            "dryRun": True,
+        }
+        validated_params = RemoveElementTrimsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "RemoveElementTrims", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
         validated_response = RemoveElementTrimsResult.model_validate(response_dict)
-        return validated_response.executionResults
+        return validated_response
 
     def remove_solid_element_links(
         self, solid_links: list[SolidLinkReference]
     ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
         """
-        Removes solid element operation links between target and operator elements.
+        Removes solid element operation links between target and operator elements. With dryRun
+        true nothing is removed and no undo step is created: the response has dryRun set to
+        true, and each link that exists gets wouldDelete.
 
         Args:
             solid_links (list[SolidLinkReference]): List of solid element operation links to
                 remove.
 
         Returns:
-            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
-                results.
+            list[FailedExecutionResult | SuccessfulExecutionResult]: One result for each input
+                link, in the order of the input. On a dry run a link that exists (the operator
+                is linked to the target) gets wouldDelete.
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -278,8 +324,39 @@ class SolidElementOperationCommands:
         response_dict = self._core.post_tapir_command(
             "RemoveSolidElementLinks", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
+        return TypeAdapter(list[ExecutionResult]).validate_python(response_dict.get("executionResults"))
+
+    def remove_solid_element_links_dry_run(
+        self, solid_links: list[SolidLinkReference]
+    ) -> RemoveSolidElementLinksResult:
+        """
+        Preview this command without applying its changes. Removes solid element operation links
+        between target and operator elements. With dryRun true nothing is removed and no undo
+        step is created: the response has dryRun set to true, and each link that exists gets
+        wouldDelete.
+
+        Args:
+            solid_links (list[SolidLinkReference]): List of solid element operation links to
+                remove.
+
+        Returns:
+            RemoveSolidElementLinksResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "solidLinks": solid_links,
+            "dryRun": True,
+        }
+        validated_params = RemoveSolidElementLinksParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "RemoveSolidElementLinks", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
         validated_response = RemoveSolidElementLinksResult.model_validate(response_dict)
-        return validated_response.executionResults
+        return validated_response
 
     def trim_elements(
         self,
@@ -289,13 +366,22 @@ class SolidElementOperationCommands:
     ) -> FailedExecutionResult | SuccessfulExecutionResult:
         """
         Trims construction elements with a roof or shell: the roofs and shells in the list, or
-        one given trimming element with a trim type.
+        one given trimming element with a trim type. With several roofs or shells in the list
+        Archicad decides which of them trims which element (they may also trim each other), so
+        not every element is necessarily trimmed by each; to trim each element with each roof or
+        shell, call it once per roof or shell with trimmingElement, and check the result with
+        GetElementTrims.
 
         Args:
             elements (list[ElementIdArrayItem]): The construction elements to trim. Without
-                trimmingElement the roofs and shells among them do the trimming.
+                trimmingElement the roofs and shells among them do the trimming: Archicad
+                decides which roof or shell trims which element and with which trim type, and
+                may trim the roofs and shells with each other, so not every element is
+                necessarily trimmed by every roof or shell. The call reports no result per pair;
+                read them back with GetElementTrims. For a known result, use trimmingElement and
+                call the command once per roof or shell.
             trimming_element (ElementId | None): Optional. The roof or shell that trims every
-                element in the list.
+                element in the list, with trimType.
             trim_type (None | TrimType): Used with trimmingElement; defaults to KeepInside.
 
         Returns:

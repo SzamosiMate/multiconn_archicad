@@ -18,10 +18,14 @@ from multiconn_archicad.models.tapir.commands import (
     Create3DStylesResult,
     CreateAddOnViewpointsParameters,
     CreateAddOnViewpointsResult,
+    CreateDetailMarkersParameters,
+    CreateDetailMarkersResult,
     CreateDetailsParameters,
     CreateDetailsResult,
     CreateDrawingsParameters,
     CreateDrawingsResult,
+    CreateElevationsParameters,
+    CreateElevationsResult,
     CreateInteriorElevationsParameters,
     CreateInteriorElevationsResult,
     CreateLayoutParameters,
@@ -34,6 +38,8 @@ from multiconn_archicad.models.tapir.commands import (
     CreateViewMapFolderResult,
     CreateViewsInViewMapParameters,
     CreateViewsInViewMapResult,
+    CreateWorksheetMarkersParameters,
+    CreateWorksheetMarkersResult,
     CreateWorksheetsParameters,
     CreateWorksheetsResult,
     DeleteNavigatorItemsParameters,
@@ -43,9 +49,12 @@ from multiconn_archicad.models.tapir.commands import (
     FitInWindowParameters,
     FitInWindowResult,
     Get3DCutPlanesResult,
+    Get3DDocumentSettingsParameters,
+    Get3DDocumentSettingsResult,
     Get3DProjectionSettingsResult,
     Get3DStyleDetailsParameters,
     Get3DStyleDetailsResult,
+    Get3DStylesResult,
     Get3DWindowSettingsResult,
     GetActiveGraphicalOverrideCombinationResult,
     GetAddOnViewpointChildrenParameters,
@@ -53,6 +62,7 @@ from multiconn_archicad.models.tapir.commands import (
     GetAddOnViewpointRootsResult,
     GetAddOnViewpointsParameters,
     GetAddOnViewpointsResult,
+    GetCamerasResult,
     GetDatabaseIdFromNavigatorItemIdParameters,
     GetDatabaseIdFromNavigatorItemIdResult,
     GetDatabasesParameters,
@@ -67,27 +77,41 @@ from multiconn_archicad.models.tapir.commands import (
     GetLayoutSettingsResult,
     GetLayoutSubsetSettingsParameters,
     GetLayoutSubsetSettingsResult,
+    GetModelViewOptionDetailsParameters,
+    GetModelViewOptionDetailsResult,
     GetModelViewOptionsResult,
     GetNavigatorItemTreeParameters,
     GetNavigatorItemTreeResult,
     GetNavigatorParentItemsParameters,
     GetNavigatorParentItemsResult,
+    GetPublisherSetsResult,
     GetRenovationFiltersResult,
+    GetSchedulesResult,
+    GetSectionsAndElevationsDetailsParameters,
+    GetSectionsAndElevationsDetailsResult,
     GetStructureDisplayResult,
     GetView2DTransformationsParameters,
     GetView2DTransformationsResult,
     GetViewOptionsResult,
     GetViewSettingsParameters,
     GetViewSettingsResult,
+    ModifyDetailMarkersParameters,
+    ModifyDetailMarkersResult,
+    ModifySectionsParameters,
+    ModifySectionsResult,
     MoveNavigatorItemParameters,
     MoveNavigatorItemResult,
     PublishPublisherSetParameters,
     RenameNavigatorItemParameters,
     RenameNavigatorItemResult,
+    ReorderNavigatorItemsParameters,
+    ReorderNavigatorItemsResult,
     ResetZoomParameters,
     ResetZoomResult,
     Set3DCutPlanesParameters,
     Set3DCutPlanesResult,
+    Set3DDocumentSettingsParameters,
+    Set3DDocumentSettingsResult,
     Set3DFilterAndCutSettingsParameters,
     Set3DProjectionSettingsParameters,
     Set3DProjectionSettingsResult,
@@ -97,6 +121,8 @@ from multiconn_archicad.models.tapir.commands import (
     SetActiveGraphicalOverrideCombinationResult,
     SetActiveRenovationFilterParameters,
     SetActiveRenovationFilterResult,
+    SetCurrent3DStyleParameters,
+    SetCurrent3DStyleResult,
     SetDocumentFrom3DDefaultsParameters,
     SetDocumentFrom3DDefaultsResult,
     SetGhostStorySettingsParameters,
@@ -106,6 +132,8 @@ from multiconn_archicad.models.tapir.commands import (
     SetLayoutSettingsResult,
     SetMasterLayoutContextParameters,
     SetMasterLayoutContextResult,
+    SetSectionsAndElevationsDetailsParameters,
+    SetSectionsAndElevationsDetailsResult,
     SetStructureDisplayParameters,
     SetStructureDisplayResult,
     SetViewOptionsParameters,
@@ -115,12 +143,17 @@ from multiconn_archicad.models.tapir.commands import (
     SetViewSettingsResult,
     SetZoomParameters,
     SetZoomResult,
+    ShowElementsIn3DParameters,
+    ShowElementsIn3DResult,
+    StoreViewSettingsParameters,
+    StoreViewSettingsResult,
     UpdateDrawingsParameters,
     UpdateDrawingsResult,
     ZoomToElementsParameters,
     ZoomToElementsResult,
 )
 from multiconn_archicad.models.tapir.types import (
+    Action,
     ActiveGraphicalOverrideCombinationById,
     ActiveGraphicalOverrideCombinationByName,
     ActiveRenovationFilterById,
@@ -130,8 +163,11 @@ from multiconn_archicad.models.tapir.types import (
     AddOnViewpointId,
     AddOnViewpointIdArrayItem,
     AddOnViewpointModificationData,
+    AxonometricProjectionSettings,
+    CameraSet,
     ColorRGB,
     CreatedDatabase,
+    CreatedLayoutWithPlacementError,
     CustomSchemeItem,
     CutPlane,
     DatabaseDetails,
@@ -139,15 +175,19 @@ from multiconn_archicad.models.tapir.types import (
     DatabaseIdArrayItem,
     DatabaseType,
     DetailData,
+    DetailMarkerData,
+    DetailMarkersWithDetail,
     Document3DAttributeOptions,
     Document3DBoundaryDisplay,
     Document3DPlanConnection,
+    Document3DSettings,
     DrawingContentBox,
     DrawingData,
     DrawingNumberingGridLine,
     DrawingsWithNewLink,
     ElementIdArrayItem,
     ElementType,
+    ElevationData,
     ErrorItem,
     FailedExecutionResult,
     Filter3DSettingsUpdate,
@@ -161,6 +201,9 @@ from multiconn_archicad.models.tapir.types import (
     ModelViewOption,
     ModelViewOptionById,
     ModelViewOptionByName,
+    ModelViewOptionDetails,
+    ModelViewOptionDetailsById,
+    ModelViewOptionDetailsByName,
     NavigatorItem,
     NavigatorItemId,
     NavigatorItemIdArrayItem,
@@ -169,8 +212,13 @@ from multiconn_archicad.models.tapir.types import (
     NavigatorMapId,
     NavigatorParentItem,
     PartialStructureDisplay,
-    PerspectiveProjectionParameters,
+    PerspectiveProjectionSettings,
+    PublisherSet,
+    ScheduleSummary,
     SectionData,
+    SectionElevationDetails,
+    SectionOrElevationDetailsUpdate,
+    SectionsWithDetail,
     Style3DDetails,
     SubsetData,
     SuccessfulExecutionResult,
@@ -180,6 +228,7 @@ from multiconn_archicad.models.tapir.types import (
     ViewSettings,
     ViewTransformations,
     WorksheetData,
+    WorksheetMarkerData,
     Zoom,
 )
 
@@ -375,6 +424,35 @@ class NavigatorCommands:
         validated_response = CreateAddOnViewpointsResult.model_validate(response_dict)
         return validated_response.viewpoints
 
+    def create_detail_markers(
+        self, detail_markers_data: list[DetailMarkerData]
+    ) -> list[ElementIdArrayItem | ErrorItem]:
+        """
+        Places Detail markers with their clip polygon in the current floor plan, section or
+        elevation, each with a new Detail viewpoint, like the Detail tool. GetDetailsOfElements
+        reads them back.
+
+        Args:
+            detail_markers_data (list[DetailMarkerData])
+
+        Returns:
+            list[ElementIdArrayItem | ErrorItem]: A list of element identifiers or errors.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "detailMarkersData": detail_markers_data,
+        }
+        validated_params = CreateDetailMarkersParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "CreateDetailMarkers", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = CreateDetailMarkersResult.model_validate(response_dict)
+        return validated_response.elements
+
     def create_details(self, details_data: list[DetailData]) -> list[CreatedDatabase | ErrorItem]:
         """
         Creates independent Detail databases. Returns the databaseId and the Project Map
@@ -426,6 +504,32 @@ class NavigatorCommands:
         validated_response = CreateDrawingsResult.model_validate(response_dict)
         return validated_response.elements
 
+    def create_elevations(self, elevations_data: list[ElevationData]) -> list[ElementIdArrayItem | ErrorItem]:
+        """
+        Creates Elevation elements on the floor plan. The floor plan must be the active window:
+        creation fails while a Section or Elevation window is active.
+
+        Args:
+            elevations_data (list[ElevationData])
+
+        Returns:
+            list[ElementIdArrayItem | ErrorItem]: A list of element identifiers or errors.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elevationsData": elevations_data,
+        }
+        validated_params = CreateElevationsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "CreateElevations", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = CreateElevationsResult.model_validate(response_dict)
+        return validated_response.elements
+
     def create_interior_elevations(
         self, interior_elevations_data: list[InteriorElevationData]
     ) -> list[ElementIdArrayItem | ErrorItem]:
@@ -456,20 +560,22 @@ class NavigatorCommands:
         validated_response = CreateInteriorElevationsResult.model_validate(response_dict)
         return validated_response.elements
 
-    def create_layout(self, layouts_data: list[LayoutData]) -> list[DatabaseIdArrayItem | ErrorItem]:
+    def create_layout(
+        self, layouts_data: list[LayoutData]
+    ) -> list[CreatedLayoutWithPlacementError | DatabaseIdArrayItem | ErrorItem]:
         """
         Creates Layouts and their backing master layouts. Archicad inserts a new layout at the
         first place of its subset, renumbering the sheets after it; previousNavigatorItemId or
         position 'last' places it after an existing sheet or at the end instead. A custom layout
         number does not leave the layout out of the numbering;
-        layoutParameters.doNotIncludeInNumbering does.
+        layoutParameters.doNotIncludeInNumbering does. A layout that was created but could not
+        be placed is returned with both its databaseId and the error.
 
         Args:
             layouts_data (list[LayoutData])
 
         Returns:
-            list[DatabaseIdArrayItem | ErrorItem]: A list of Archicad database identifiers or
-                errors.
+            list[CreatedLayoutWithPlacementError | DatabaseIdArrayItem | ErrorItem]
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -515,7 +621,8 @@ class NavigatorCommands:
         """
         Creates Section elements on the floor plan. A section looks to the left of its start to
         end direction, with its depth line that far on that side. GetDetailsOfElements reads the
-        geometry of existing sections back.
+        geometry of existing sections back. The floor plan must be the active window: creation
+        fails while a Section or Elevation window is active.
 
         Args:
             sections_data (list[SectionData])
@@ -595,6 +702,35 @@ class NavigatorCommands:
         validated_response = CreateViewsInViewMapResult.model_validate(response_dict)
         return validated_response.navigatorItems
 
+    def create_worksheet_markers(
+        self, worksheet_markers_data: list[WorksheetMarkerData]
+    ) -> list[ElementIdArrayItem | ErrorItem]:
+        """
+        Places Worksheet markers with their clip polygon in the current floor plan, section or
+        elevation, each with a new Worksheet viewpoint, like the Worksheet tool.
+        GetDetailsOfElements reads them back.
+
+        Args:
+            worksheet_markers_data (list[WorksheetMarkerData])
+
+        Returns:
+            list[ElementIdArrayItem | ErrorItem]: A list of element identifiers or errors.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "worksheetMarkersData": worksheet_markers_data,
+        }
+        validated_params = CreateWorksheetMarkersParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "CreateWorksheetMarkers", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = CreateWorksheetMarkersResult.model_validate(response_dict)
+        return validated_response.elements
+
     def create_worksheets(self, worksheets_data: list[WorksheetData]) -> list[CreatedDatabase | ErrorItem]:
         """
         Creates independent Worksheet databases. Returns the databaseId and the Project Map
@@ -622,19 +758,29 @@ class NavigatorCommands:
         return validated_response.databases
 
     def delete_navigator_items(
-        self, navigator_item_ids: list[NavigatorItemIdArrayItem]
+        self, navigator_item_ids: list[NavigatorItemIdArrayItem], *, dry_run: None | bool = None
     ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
         """
         Deletes navigator items from the navigator tree: views and folders of the View Map,
         layouts and master layouts of the Layout Book, and independent worksheets and details of
-        the Project Map. Layout subsets and marker-linked worksheets and details cannot be
-        deleted. An item that Archicad refuses to delete (in a Teamwork project: it is not
-        reserved or the user has no right to delete it) is reported as a failed execution
-        result.
+        the Project Map. Layout subsets, View Map folders that are not empty, the other Project
+        Map items and marker-linked worksheets and details cannot be deleted; the failed
+        execution result says which case applies. An item that Archicad refuses to delete (in a
+        Teamwork project: it is not reserved or the user has no right to delete it) is reported
+        as a failed execution result. dryRun reports the result of the checks made before
+        deleting (item not found, layout subset, View Map folder that is not empty) without
+        deleting anything.
 
         Args:
             navigator_item_ids (list[NavigatorItemIdArrayItem]): A list of navigator item
                 identifiers.
+            dry_run (None | bool): If true, nothing is deleted: each execution result says what
+                the deletion would do for that item, from the checks made before deleting
+                (corrupt id, item not found, layout subset, View Map folder that is not empty).
+                Archicad can still refuse an item that passes them: a Project Map item other
+                than an independent worksheet, detail or viewpoint created by the Tapir Add-On,
+                a marker-linked worksheet or detail, or in a Teamwork project an item that is
+                not reserved. Default is false.
 
         Returns:
             list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
@@ -647,6 +793,7 @@ class NavigatorCommands:
         """
         params_dict = {
             "navigatorItemIds": navigator_item_ids,
+            "dryRun": dry_run,
         }
         validated_params = DeleteNavigatorItemsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
@@ -660,8 +807,8 @@ class NavigatorCommands:
     ) -> FindModelViewOptionResult:
         """
         Finds a model view option combination by id or by name and returns its index, id, name
-        and flags. The index is the one Archicad uses to switch the model view options of a
-        window to the combination. Available from Archicad 27.
+        and flags. The index is the one SetViewOptions takes to switch the model view options of
+        a window to the combination. Available from Archicad 27.
 
         Args:
             parameters (ModelViewOptionById | ModelViewOptionByName): Union model configuration
@@ -726,6 +873,35 @@ class NavigatorCommands:
         validated_response = Get3DCutPlanesResult.model_validate(response_dict)
         return validated_response
 
+    def get_3d_document_settings(self, navigator_item_id: NavigatorItemId) -> Document3DSettings:
+        """
+        Gets the settings of a 3D Document, given by its navigator item: the element and story
+        filter, the 3D cut, the projection, the window and zoom, the uniform cut and uncut
+        surface attributes, the source and the boundary contours, with the field names of
+        API_DocumentFrom3DType.
+
+        Args:
+            navigator_item_id (NavigatorItemId): The navigator item of the 3D Document, from the
+                Project Map or the View Map.
+
+        Returns:
+            Document3DSettings
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "navigatorItemId": navigator_item_id,
+        }
+        validated_params = Get3DDocumentSettingsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "Get3DDocumentSettings", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = Get3DDocumentSettingsResult.model_validate(response_dict)
+        return validated_response.settings
+
     def get_3d_filter_and_cut_settings(self) -> None:
         """
         Gets the 'Filter and Cut Elements in 3D' settings of the 3D window: the stories shown,
@@ -743,7 +919,8 @@ class NavigatorCommands:
         """
         Gets the 3D projection settings of the 3D window: whether it is perspective or
         axonometric, the camera and target position, view cone, roll angle, distance and azimuth
-        of a perspective, or the transformation matrix of an axonometry.
+        of a perspective, or the projection type, azimuth and transformation matrix of an
+        axonometry, and the sun position of either (date and time or azimuth and altitude).
 
         Returns:
             Get3DProjectionSettingsResult
@@ -785,6 +962,23 @@ class NavigatorCommands:
         )
         validated_response = Get3DStyleDetailsResult.model_validate(response_dict)
         return validated_response.styles
+
+    def get_3d_styles(self) -> Get3DStylesResult:
+        """
+        Gets the names of the 3D styles of the project and the name of the current one, which
+        the 3D window uses.
+
+        Returns:
+            Get3DStylesResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        response_dict = self._core.post_tapir_command("Get3DStyles")
+        validated_response = Get3DStylesResult.model_validate(response_dict)
+        return validated_response
 
     def get_3d_window_settings(self) -> Get3DWindowSettingsResult:
         """
@@ -896,6 +1090,29 @@ class NavigatorCommands:
         )
         validated_response = GetAddOnViewpointsResult.model_validate(response_dict)
         return validated_response.viewpoints
+
+    def get_cameras(self) -> list[CameraSet]:
+        """
+        Gets the Camera Sets (camera paths) of the project with their name, whether the set is
+        the active one, its current camera, and its cameras in path order. Each camera has its
+        element id, whether it is active in the path, and its perspective: camera and target
+        position, distance, azimuth, view cone, roll angle, two-point perspective and sun, in
+        the shape Set3DProjectionSettings accepts, so passing a camera's perspective there shows
+        its view in the 3D window. Archicad cameras are always perspective; they have no name of
+        their own.
+
+        Returns:
+            list[CameraSet]: The Camera Sets (camera paths) of the project, each with its
+                cameras.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        response_dict = self._core.post_tapir_command("GetCameras")
+        validated_response = GetCamerasResult.model_validate(response_dict)
+        return validated_response.cameraSets
 
     def get_database_id_from_navigator_item_id(
         self, navigator_item_ids: list[NavigatorItemIdArrayItem]
@@ -1124,6 +1341,43 @@ class NavigatorCommands:
         validated_response = GetLayoutSubsetSettingsResult.model_validate(response_dict)
         return validated_response.subsetSettings
 
+    def get_model_view_option_details(
+        self, model_view_options: None | list[ModelViewOptionDetailsById | ModelViewOptionDetailsByName] = None
+    ) -> list[ErrorItem | ModelViewOptionDetails]:
+        """
+        Gets the settings stored in model view option combinations (Document > Model View >
+        Model View Options), all of them or the ones given by id or by name: the model view
+        options in the fields of GetViewOptions, and the options library parts add to the
+        combination (gdlOptions) with their GDL parameter values. Read-only: the Archicad API
+        has no function to change, rename or create a stored combination; SetViewOptions changes
+        the options of the current window. Available from Archicad 27.
+
+        Args:
+            model_view_options (None | list[ModelViewOptionDetailsById |
+                ModelViewOptionDetailsByName]): The model view option combinations to read, each
+                given by id or by name. When omitted, every combination of the project is
+                returned.
+
+        Returns:
+            list[ErrorItem | ModelViewOptionDetails]: The settings of each model view option
+                combination, in the order of the input, or in the order of the project when no
+                input is given.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "modelViewOptions": model_view_options,
+        }
+        validated_params = GetModelViewOptionDetailsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetModelViewOptionDetails", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetModelViewOptionDetailsResult.model_validate(response_dict)
+        return validated_response.modelViewOptionDetails
+
     def get_model_view_options(self) -> list[ModelViewOption]:
         """
         Gets all model view options
@@ -1208,6 +1462,24 @@ class NavigatorCommands:
         validated_response = GetNavigatorParentItemsResult.model_validate(response_dict)
         return validated_response.parentItems
 
+    def get_publisher_sets(self) -> list[PublisherSet]:
+        """
+        Returns the publisher sets of the project with their saved output: the local or LAN
+        path, the Teamwork file server path, or the Internet host and directory name.
+
+        Returns:
+            list[PublisherSet]: The publisher sets of the project, in the order of the Publisher
+                Sets map.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        response_dict = self._core.post_tapir_command("GetPublisherSets")
+        validated_response = GetPublisherSetsResult.model_validate(response_dict)
+        return validated_response.publisherSets
+
     def get_renovation_filters(self) -> GetRenovationFiltersResult:
         """
         Gets the renovation filters of the project, and the one the current window uses
@@ -1226,6 +1498,55 @@ class NavigatorCommands:
         response_dict = self._core.post_tapir_command("GetRenovationFilters")
         validated_response = GetRenovationFiltersResult.model_validate(response_dict)
         return validated_response
+
+    def get_schedules(self) -> list[ScheduleSummary]:
+        """
+        Returns the Interactive Schedules of the Project Map: navigator item id, name, ID and
+        the folders they are in. Archicad's API does not give the rows of a schedule nor export
+        it; to export one, put it in a publisher set with a spreadsheet format in Archicad and
+        run PublishPublisherSet.
+
+        Returns:
+            list[ScheduleSummary]: The Interactive Schedules of the Project Map, in navigator
+                order.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        response_dict = self._core.post_tapir_command("GetSchedules")
+        validated_response = GetSchedulesResult.model_validate(response_dict)
+        return validated_response.schedules
+
+    def get_sections_and_elevations_details(
+        self, elements: list[ElementIdArrayItem]
+    ) -> list[ErrorItem | SectionElevationDetails]:
+        """
+        Gets every configurable setting of the given Section and Elevation elements, with their
+        name and reference ID.
+
+        Args:
+            elements (list[ElementIdArrayItem]): A list of elements.
+
+        Returns:
+            list[ErrorItem | SectionElevationDetails]
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elements": elements,
+        }
+        validated_params = GetSectionsAndElevationsDetailsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetSectionsAndElevationsDetails",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+        )
+        validated_response = GetSectionsAndElevationsDetailsResult.model_validate(response_dict)
+        return validated_response.detailsOfElements
 
     def get_structure_display(self) -> GetStructureDisplayResult:
         """
@@ -1281,7 +1602,7 @@ class NavigatorCommands:
     def get_view_options(self) -> GetViewOptionsResult:
         """
         Gets the model view options and on-screen view options of the current plan window, and
-        the index of the model view option combination it applies.
+        the index and name of the model view option combination it applies.
 
         Returns:
             GetViewOptionsResult
@@ -1320,6 +1641,70 @@ class NavigatorCommands:
         )
         validated_response = GetViewSettingsResult.model_validate(response_dict)
         return validated_response.viewSettings
+
+    def modify_detail_markers(
+        self, detail_markers_with_details: list[DetailMarkersWithDetail]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Changes the name, the reference ID, the clip polygon, the boundary's pen and line type,
+        the marker symbol's angle, always-horizontal setting and pen of Detail and Worksheet
+        markers. Not written: the base point (Archicad places it at the center of the clip
+        polygon's bounding box when the marker is created), the viewpoint the marker refers to,
+        and the marker symbol's other settings, which are parameters of the library part placed
+        as the marker (markerId in GetDetailsOfElements). A value Archicad did not apply gets a
+        failed execution result.
+
+        Args:
+            detail_markers_with_details (list[DetailMarkersWithDetail])
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "detailMarkersWithDetails": detail_markers_with_details,
+        }
+        validated_params = ModifyDetailMarkersParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "ModifyDetailMarkers", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = ModifyDetailMarkersResult.model_validate(response_dict)
+        return validated_response.executionResults
+
+    def modify_sections(
+        self, sections_with_details: list[SectionsWithDetail]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Changes the name and the reference ID of Section and Elevation elements, which the
+        Project Map and the markers show. GetDetailsOfElements reads those of a Section back as
+        name and idStr.
+
+        Args:
+            sections_with_details (list[SectionsWithDetail])
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "sectionsWithDetails": sections_with_details,
+        }
+        validated_params = ModifySectionsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "ModifySections", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = ModifySectionsResult.model_validate(response_dict)
+        return validated_response.executionResults
 
     def move_navigator_item(
         self,
@@ -1401,18 +1786,20 @@ class NavigatorCommands:
         custom_name: None | bool = None,
     ) -> FailedExecutionResult | SuccessfulExecutionResult:
         """
-        Renames a navigator item or changes its ID. newId sets the custom layout number of a
-        layout and the custom ID of any other item. For a Project Map section, elevation, detail
-        or worksheet the name and ID of the element behind the viewpoint are changed, for an
-        interior elevation those of the segment the item stands for; the change is undone when
-        the item does not show the new name. The name and ID of other Project Map items
+        Renames a navigator item or changes its ID. Renaming the Layout Book item of a placed
+        Drawing also sets the custom name of the Drawing. newId sets the custom layout number of
+        a layout and the custom ID of any other item. For a Project Map section, elevation,
+        detail or worksheet the name and ID of the element behind the viewpoint are changed, for
+        an interior elevation those of the segment the item stands for; the change is undone
+        when the item does not show the new name. The name and ID of other Project Map items
         (stories, schedules, ...) cannot be changed. Fails when Archicad refuses the change or
         does not apply the new name or ID. With customName false the item drops its custom name
         and follows its Project Map source again.
 
         Args:
             navigator_item_id (NavigatorItemId)
-            new_name (None | str)
+            new_name (None | str): The new name of the item. On the Layout Book item of a placed
+                Drawing it is also set as the custom name of the Drawing (nameType CustomName).
             new_id (None | str): The new ID of the item. On a layout it is the custom layout
                 number (customLayoutNumbering is switched on); on a Project Map section,
                 elevation, interior elevation, detail or worksheet it is the reference ID of the
@@ -1442,6 +1829,41 @@ class NavigatorCommands:
         )
         validated_response = TypeAdapter(RenameNavigatorItemResult).validate_python(response_dict)
         return validated_response
+
+    def reorder_navigator_items(
+        self, parent_navigator_item_id: NavigatorItemId, ordered_navigator_item_ids: list[NavigatorItemIdArrayItem]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Reorders the children of a navigator item to match the given order. Works around
+        MoveNavigatorItem being unable to reposition an item within its current parent, by
+        bouncing it through a sibling.
+
+        Args:
+            parent_navigator_item_id (NavigatorItemId): The folder whose children should be
+                reordered.
+            ordered_navigator_item_ids (list[NavigatorItemIdArrayItem]): The complete, desired
+                order of every child of parentNavigatorItemId. Every current child must be
+                listed.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "parentNavigatorItemId": parent_navigator_item_id,
+            "orderedNavigatorItemIds": ordered_navigator_item_ids,
+        }
+        validated_params = ReorderNavigatorItemsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "ReorderNavigatorItems", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = ReorderNavigatorItemsResult.model_validate(response_dict)
+        return validated_response.executionResults
 
     def reset_zoom(self, number_of_steps_back: None | int = None) -> FailedExecutionResult | SuccessfulExecutionResult:
         """
@@ -1498,6 +1920,41 @@ class NavigatorCommands:
         validated_response = TypeAdapter(Set3DCutPlanesResult).validate_python(response_dict)
         return validated_response
 
+    def set_3d_document_settings(
+        self, navigator_item_id: NavigatorItemId, settings: Document3DSettings
+    ) -> Document3DSettings:
+        """
+        Changes the given settings of a 3D Document, given by its navigator item, in the form
+        Get3DDocumentSettings returns; the settings not given are kept. Returns the settings
+        read back after the change.
+
+        Args:
+            navigator_item_id (NavigatorItemId): The navigator item of the 3D Document, from the
+                Project Map or the View Map.
+            settings (Document3DSettings): The settings to change, in the form
+                Get3DDocumentSettings returns. Only the given keys are changed; arrays other
+                than elemTypeFilter are replaced.
+
+        Returns:
+            Document3DSettings: The settings of the 3D Document, with the field names of
+                API_DocumentFrom3DType.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "navigatorItemId": navigator_item_id,
+            "settings": settings,
+        }
+        validated_params = Set3DDocumentSettingsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "Set3DDocumentSettings", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = Set3DDocumentSettingsResult.model_validate(response_dict)
+        return validated_response.settings
+
     def set_3d_filter_and_cut_settings(self, settings: Filter3DSettingsUpdate, rebuild: None | bool = None) -> None:
         """
         Changes the 'Filter and Cut Elements in 3D' settings of the 3D window; only the given
@@ -1525,15 +1982,20 @@ class NavigatorCommands:
         return None
 
     def set_3d_projection_settings(
-        self, perspective: PerspectiveProjectionParameters
+        self, parameters: PerspectiveProjectionSettings | AxonometricProjectionSettings
     ) -> FailedExecutionResult | SuccessfulExecutionResult:
         """
-        Sets a perspective projection for the 3D window. Every perspective parameter is
-        required: read a known good set with Get3DProjectionSettings and pass it back, with the
-        values to change replaced.
+        Sets a perspective or an axonometric projection for the 3D window. Every perspective
+        parameter but sun is required: read a known good set with Get3DProjectionSettings and
+        pass it back, with the values to change replaced. An axonometry changes only the values
+        given: the projection type, the azimuth, the transformation matrix and the sun. The sun
+        of either changes only the values given in it and is kept when sun is missing. The 3D
+        window shows the change after a rebuild (RebuildView), e.g. before
+        SaveCurrentWindowAsImage.
 
         Args:
-            perspective (PerspectiveProjectionParameters)
+            parameters (PerspectiveProjectionSettings | AxonometricProjectionSettings): Union
+                model configuration parameters.
 
         Returns:
             FailedExecutionResult | SuccessfulExecutionResult
@@ -1543,10 +2005,7 @@ class NavigatorCommands:
             RequestError: If there is a network or connection error.
             pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
-        params_dict = {
-            "perspective": perspective,
-        }
-        validated_params = Set3DProjectionSettingsParameters(**params_dict)
+        validated_params = TypeAdapter(Set3DProjectionSettingsParameters).validate_python(parameters)
         response_dict = self._core.post_tapir_command(
             "Set3DProjectionSettings", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
@@ -1655,6 +2114,33 @@ class NavigatorCommands:
         validated_response = TypeAdapter(SetActiveRenovationFilterResult).validate_python(response_dict)
         return validated_response
 
+    def set_current_3d_style(self, style_name: str) -> FailedExecutionResult | SuccessfulExecutionResult:
+        """
+        Meant to make the given 3D style, one of the names Get3DStyles returns, the current one.
+        Not available yet: it checks the name, then refuses, because Archicad's API function for
+        it crashes Archicad.
+
+        Args:
+            style_name (str): The name of an existing 3D style, as Get3DStyles returns it.
+
+        Returns:
+            FailedExecutionResult | SuccessfulExecutionResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "styleName": style_name,
+        }
+        validated_params = SetCurrent3DStyleParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "SetCurrent3DStyle", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = TypeAdapter(SetCurrent3DStyleResult).validate_python(response_dict)
+        return validated_response
+
     def set_document_from_3d_defaults(
         self,
         name: None | str = None,
@@ -1682,21 +2168,18 @@ class NavigatorCommands:
             vect_3d_hatching (None | bool): Vectorial 3D hatching.
             vect_sun_shadow (None | bool): Vectorial sun shadows.
             must_be_transparent (None | bool): Transparency of the model.
-            int_plan_conn (Document3DPlanConnection | None): The connection of the 3D Document
-                to the model.
+            int_plan_conn (Document3DPlanConnection | None)
             material_from_3d (None | bool): Use the surfaces of the 3D model; when false, cMater
                 is used for every element.
             conture_off (None | bool): Contours off.
             c_mater (None | int): The index of the uniform surface (material), used when
                 materialFrom3D is false.
-            boundary_display (Document3DBoundaryDisplay | None): How the boundary contours are
-                displayed.
+            boundary_display (Document3DBoundaryDisplay | None)
             boundary_pen (None | int): The pen of the boundary contours, used with
                 OverrideContours.
             boundary_line_type (None | int): The index of the line type of the boundary
                 contours, used with OverrideContours.
-            attribute_options (Document3DAttributeOptions | None): The uniform attribute options
-                (cut and uncut surfaces, shading, hidden edges).
+            attribute_options (Document3DAttributeOptions | None)
 
         Returns:
             FailedExecutionResult | SuccessfulExecutionResult
@@ -1806,7 +2289,9 @@ class NavigatorCommands:
     ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
         """
         Sets settings of layouts, including their master layout and Layout Info Panel custom
-        data fields.
+        data fields. In Teamwork the layout settings must be reserved first in Archicad (Layout
+        Book > Reserve Layout Settings); the Archicad API cannot reserve them, and
+        ReserveElements does not. GetTeamworkOwnersOfDatabases shows who holds a layout.
 
         Args:
             layouts_data (list[LayoutSettingsData])
@@ -1860,6 +2345,37 @@ class NavigatorCommands:
         validated_response = TypeAdapter(SetMasterLayoutContextResult).validate_python(response_dict)
         return validated_response
 
+    def set_sections_and_elevations_details(
+        self, elements_with_details: list[SectionOrElevationDetailsUpdate]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Sets settings of the given Section and Elevation elements: pens, line types, horizontal
+        and vertical range, model effects, story handles and markers. The name and the reference
+        ID are changed with ModifySections.
+
+        Args:
+            elements_with_details (list[SectionOrElevationDetailsUpdate])
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elementsWithDetails": elements_with_details,
+        }
+        validated_params = SetSectionsAndElevationsDetailsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "SetSectionsAndElevationsDetails",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+        )
+        validated_response = SetSectionsAndElevationsDetailsResult.model_validate(response_dict)
+        return validated_response.executionResults
+
     def set_structure_display(
         self, structure_display: PartialStructureDisplay
     ) -> FailedExecutionResult | SuccessfulExecutionResult:
@@ -1895,12 +2411,17 @@ class NavigatorCommands:
     ) -> None:
         """
         Switches the current plan window to a model view option combination by index, and/or
-        changes the given model view options and on-screen view options.
+        changes the given model view options and on-screen view options. With an index, the
+        model view options stored in the combination apply.
 
         Args:
             model_view_option_index (None | int): Switches the window to the model view option
-                combination with this index (see GetModelViewOptions, starting from 1). Without
-                viewOptions only the combination is switched.
+                combination with this index, as GetViewOptions, FindModelViewOption and
+                GetModelViewOptionDetails return it. Archicad then applies the model view
+                options stored in the combination: viewOptions.modelViewOptions are not applied
+                together with an index, viewOptions.onScreenViewOptions are. Archicad may
+                renumber the combinations when the view options of a window change, so look the
+                index up by name with FindModelViewOption right before switching.
             view_options (None | ViewOptionsUpdate)
 
         Raises:
@@ -1999,6 +2520,65 @@ class NavigatorCommands:
             "SetZoom", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = TypeAdapter(SetZoomResult).validate_python(response_dict)
+        return validated_response
+
+    def show_elements_in_3d(
+        self, elements: None | list[ElementIdArrayItem] = None
+    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+        """
+        Opens the 3D window on the given elements, as Show Selection in 3D does: they become the
+        selection and only they are shown. Without elements it shows every element, as Show All
+        in 3D does.
+
+        Args:
+            elements (None | list[ElementIdArrayItem]): The elements to show in 3D. They become
+                the selection, replacing the current one. Missing or empty: every element is
+                shown, as Show All in 3D does.
+
+        Returns:
+            FailedExecutionResult | SuccessfulExecutionResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elements": elements,
+        }
+        validated_params = ShowElementsIn3DParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "ShowElementsIn3D", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = TypeAdapter(ShowElementsIn3DResult).validate_python(response_dict)
+        return validated_response
+
+    def store_view_settings(self, action: Action) -> FailedExecutionResult | SuccessfulExecutionResult:
+        """
+        Stores the current view settings (action Store) and puts them back later (action
+        Restore), for example before and after a script that changes the view. The two must be
+        called in pairs and cannot be stacked. Restoring may rebuild the view.
+
+        Args:
+            action (Action): Store saves the current view settings, Restore puts the stored ones
+                back. Call them in pairs: a second Store before a Restore is refused.
+
+        Returns:
+            FailedExecutionResult | SuccessfulExecutionResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "action": action,
+        }
+        validated_params = StoreViewSettingsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "StoreViewSettings", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = TypeAdapter(StoreViewSettingsResult).validate_python(response_dict)
         return validated_response
 
     def update_drawings(self, elements: list[ElementIdArrayItem]) -> FailedExecutionResult | SuccessfulExecutionResult:
