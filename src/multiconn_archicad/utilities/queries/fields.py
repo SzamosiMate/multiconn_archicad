@@ -21,7 +21,7 @@ from .errors import (
     InvalidPropertyTestError,
     UnsupportedPropertyTypeError,
 )
-from .element_types import TYPES_2D, TYPES_3D, TYPES_3D_COMPONENTS, TYPES_3D_WITH_COMPONENTS
+from .element_types import TYPES_2D, TYPES_3D, TYPES_3D_COMPONENTS, TYPES_3D_WITH_COMPONENTS, TYPES_ALL
 from .inputs import TestInput, TestInputs
 from .models import ClassificationTest, ElementTypeTest, PropertyTestModel, TestModel
 from .registry import TestRegistry
@@ -162,15 +162,18 @@ class ElementTypeInfo(FieldInfo[ElementTypeTest]):
         description = super().describe_test_inputs(current_data)
         assert description is not None
         (types_input,) = description.fields
-        choices = [{"const": [element_type.value], "title": element_type.value} for element_type in ElementType]
-        choices.extend(
+        choices = [
             {"const": [element_type.value for element_type in types], "title": title}
             for title, types in (
-                ("3D elements", TYPES_3D),
-                ("3D components", TYPES_3D_COMPONENTS),
-                ("3D elements with components", TYPES_3D_WITH_COMPONENTS),
-                ("2D elements", TYPES_2D),
+                ("All Types", TYPES_ALL),
+                ("3D Types", TYPES_3D),
+                ("2D Types", TYPES_2D),
+                ("3D Component Types", TYPES_3D_COMPONENTS),
+                ("3D Types with Components", TYPES_3D_WITH_COMPONENTS),
             )
+        ]
+        choices.extend(
+            {"const": [element_type.value], "title": element_type.value} for element_type in ElementType
         )
         return replace(
             description,
