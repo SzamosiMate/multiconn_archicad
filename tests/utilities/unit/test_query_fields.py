@@ -11,6 +11,10 @@ from multiconn_archicad.utilities.queries import (
     BUILTIN_QUERY_FIELDS,
     AmbiguousPropertyTypeError,
     ElementTypeInfo,
+    TYPES_2D,
+    TYPES_3D,
+    TYPES_3D_COMPONENTS,
+    TYPES_3D_WITH_COMPONENTS,
     ElementTypeTest,
     FieldInfo,
     InvalidPropertyTestError,
@@ -88,6 +92,60 @@ def test_builtin_element_type_choices_compile_through_the_field_description():
     result = build_query(QueryRows(rows=[row]))
     assert result.query is not None, result.issues
     assert result.query.where.candidate_types() == frozenset({tapir.ElementType.WALL})
+
+
+@pytest.mark.parametrize(
+    ("title", "types"),
+    [
+        ("3D elements", TYPES_3D),
+        ("3D components", TYPES_3D_COMPONENTS),
+        ("3D elements with components", TYPES_3D_WITH_COMPONENTS),
+        ("2D elements", TYPES_2D),
+    ],
+)
+def test_element_type_presets_compile_and_save_concrete_types(title, types):
+    field = ElementTypeInfo()
+    description = field.describe_test_inputs(current_data={})
+    (types_input,) = description.fields
+    choice = next(choice for choice in types_input.schema["oneOf"] if choice["title"] == title)
+    assert choice["const"] == [element_type.value for element_type in types]
+    test = field.create_test(types=choice["const"])
+    row = QueryRow(predicate={**field.reference, "test": test.model_dump(mode="json")})
+    saved = QueryRows(rows=[row]).model_dump_json()
+
+    restored = QueryRows.model_validate_json(saved, context={"require_schema_version": True})
+    result = build_query(restored)
+
+    assert result.query is not None, result.issues
+    assert result.query.where.test.types == types
+    assert result.query.where.candidate_types() == frozenset(types)
+    assert "types" in restored.rows[0].predicate["test"]
+
+
+def test_element_type_editor_choices_do_not_restrict_the_test_schema():
+    from jsonschema import Draft202012Validator
+
+    field = ElementTypeInfo()
+    schema = field.test_schema()
+    validator = Draft202012Validator(schema)
+    payload = {"kind": "element_type", "types": ["Wall", "Window"]}
+
+    assert "oneOf" not in schema["properties"]["types"]
+    validator.validate(payload)
+    assert field.create_test(**payload).types == (tapir.ElementType.WALL, tapir.ElementType.WINDOW)
+    assert not validator.is_valid({"kind": "element_type", "types": ["NotAnElementType"]})
+
+
+def test_element_type_preset_descriptions_are_independent_snapshots():
+    field = ElementTypeInfo()
+    first = field.describe_test_inputs(current_data={})
+    choice = next(option for option in first.fields[0].schema["oneOf"] if option["title"] == "3D elements")
+    choice["const"].clear()
+
+    second = field.describe_test_inputs(current_data={})
+
+    fresh = next(option for option in second.fields[0].schema["oneOf"] if option["title"] == "3D elements")
+    assert fresh["const"] == [element_type.value for element_type in TYPES_3D]
 
 
 @pytest.mark.parametrize(

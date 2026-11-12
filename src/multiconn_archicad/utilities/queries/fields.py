@@ -5,7 +5,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from collections.abc import Mapping, Sequence
 from copy import deepcopy
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import Any, Generic, TypeVar
 from uuid import UUID
 
@@ -21,6 +21,7 @@ from .errors import (
     InvalidPropertyTestError,
     UnsupportedPropertyTypeError,
 )
+from .element_types import TYPES_2D, TYPES_3D, TYPES_3D_COMPONENTS, TYPES_3D_WITH_COMPONENTS
 from .inputs import TestInput, TestInputs
 from .models import ClassificationTest, ElementTypeTest, PropertyTestModel, TestModel
 from .registry import TestRegistry
@@ -153,12 +154,28 @@ class ElementTypeInfo(FieldInfo[ElementTypeTest]):
             raise InvalidFieldTestError(f"{self.qualified_name} requires {self.test_model.__name__}")
 
     def test_schema(self) -> dict[str, Any]:
-        """Offer each individual type as a named choice for one editor row."""
-        schema = self.test_model.model_json_schema()
-        schema["properties"]["types"]["oneOf"] = [
-            {"const": [element_type.value], "title": element_type.value} for element_type in ElementType
-        ]
-        return schema
+        """Describe all valid concrete type combinations, independently of editor presets."""
+        return self.test_model.model_json_schema()
+
+    def describe_test_inputs(self, current_data: Mapping[str, JsonValue]) -> TestInputs:
+        """Offer individual types and named type sets in one single-choice input."""
+        description = super().describe_test_inputs(current_data)
+        assert description is not None
+        (types_input,) = description.fields
+        choices = [{"const": [element_type.value], "title": element_type.value} for element_type in ElementType]
+        choices.extend(
+            {"const": [element_type.value for element_type in types], "title": title}
+            for title, types in (
+                ("3D elements", TYPES_3D),
+                ("3D components", TYPES_3D_COMPONENTS),
+                ("3D elements with components", TYPES_3D_WITH_COMPONENTS),
+                ("2D elements", TYPES_2D),
+            )
+        )
+        return replace(
+            description,
+            fields=(replace(types_input, schema={**types_input.schema, "oneOf": choices}),),
+        )
 
 
 class _PropertyMetadata(FieldInfo[PropertyTestModel]):
