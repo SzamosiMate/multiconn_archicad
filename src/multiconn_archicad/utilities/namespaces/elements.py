@@ -6,6 +6,8 @@ from collections.abc import Sequence
 from typing import TYPE_CHECKING
 from uuid import UUID
 
+from packaging.version import Version
+
 from multiconn_archicad.models.official import types as official
 from multiconn_archicad.models.tapir import types as tapir
 from multiconn_archicad.utilities.identifiers import (
@@ -19,7 +21,8 @@ from multiconn_archicad.utilities.results.batch_results import (
     BatchSlot,
 )
 from multiconn_archicad.utilities.results.query_results import FindElementsResult
-from multiconn_archicad.utilities.queries import Query
+from multiconn_archicad.utilities.server_versions import read_tapir_version
+from multiconn_archicad.utilities.queries import Query, TYPES_3D
 from multiconn_archicad.utilities.queries.catalogue import QueryFieldCatalogue
 from multiconn_archicad.utilities.queries.discovery import discover_row_catalogue
 from multiconn_archicad.utilities.queries.editing import QueryRow
@@ -31,29 +34,6 @@ from multiconn_archicad.utilities.queries.execution import (
 
 if TYPE_CHECKING:
     from multiconn_archicad.clients.unified_api.api import UnifiedApi
-
-
-TYPES_3D: tuple[tapir.ElementType, ...] = (
-    tapir.ElementType.WALL,
-    tapir.ElementType.COLUMN,
-    tapir.ElementType.BEAM,
-    tapir.ElementType.WINDOW,
-    tapir.ElementType.DOOR,
-    tapir.ElementType.OBJECT,
-    tapir.ElementType.LAMP,
-    tapir.ElementType.SLAB,
-    tapir.ElementType.ROOF,
-    tapir.ElementType.MESH,
-    tapir.ElementType.ZONE,
-    tapir.ElementType.CURTAIN_WALL,
-    tapir.ElementType.SHELL,
-    tapir.ElementType.SKYLIGHT,
-    tapir.ElementType.MORPH,
-    tapir.ElementType.STAIR,
-    tapir.ElementType.RAILING,
-    tapir.ElementType.OPENING,
-)
-"""Ordered main 3D element types, excluding component subelement types."""
 
 
 class ElementUtilities:
@@ -195,11 +175,16 @@ class ElementUtilities:
         The list includes doors, windows, and openings, but excludes component
         subelements.
         """
+        version = Version(read_tapir_version(self._api, self._api.read_header_metadata()))
+        filters: tuple[tapir.ElementFilter, ...] = (tapir.ElementFilter.IS_INDEPENDENT,)
+        # IncludeSubElemObjects was introduced in Tapir 1.5.3 (PR #419).
+        if version >= Version("1.5.3"):
+            filters = (tapir.ElementFilter.INCLUDE_SUB_ELEM_OBJECTS, *filters)
         elements: list[tapir.ElementIdArrayItem] = []
         for element_type in TYPES_3D:
             response = self._api.tapir.element.get_elements_by_type(
                 element_type,
-                filters=[tapir.ElementFilter.IS_INDEPENDENT],
+                filters=list(filters),
             )
             elements.extend(response.elements)
         return elements

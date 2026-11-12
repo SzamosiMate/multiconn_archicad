@@ -1,16 +1,13 @@
 # Element query definitions
 
-Stages 1-10 provide query models, JSON serialization, JSON Schema, test-family
-behavior, uniform field information, batch property discovery, and query-wide
-context validation, plus individual property comparisons. The catalogue,
-validator, and comparisons can use supplied metadata/values offline. The bound
-property utility can fetch a fresh metadata/value batch from Archicad. The query
-tree can evaluate supplied per-element data. The bound element utility searches
-Archicad directly or filters an existing population with the same query.
+Element queries describe criteria for finding elements in Archicad or filtering a
+supplied population. The library provides executable query models, editable rows,
+field discovery, validation, and batch evaluation. You can also compile rows and
+validate or evaluate queries offline with supplied metadata and values.
 
 Import the public models from `multiconn_archicad.utilities.queries`.
 
-## Stage 7 behavior decisions
+## Comparison and Boolean behavior
 
 The query contract follows Archicad Find and Select: normal AND/OR, negative operators
 on individual tests, case-insensitive text with significant whitespace, and
@@ -21,9 +18,8 @@ All six common user-defined-property state operations are deferred.
 Text, numeric and Boolean comparisons, property-condition handling, and recursive group
 evaluation and the bound execution APIs are implemented. General
 `Negate` / `"not"` predicates have been removed; JSON using `"kind": "not"` is
-rejected at any depth. The complete record of
-default/custom/undefined behavior, Tapir error paths, and retrieval limits is in the
-[stage 7 reference](../../docs/ELEMENT_QUERY_ARCHICAD_BEHAVIOR.md).
+rejected at any depth. See [Execution and result contract](#execution-and-result-contract)
+for property availability and error handling.
 
 ## Constructing a query in Python
 
@@ -579,6 +575,57 @@ predicates remains the authority on whether values and combinations are valid.
 Element-type predicates use the nested test in both executable queries and
 saved row drafts.
 
+## Discovering and editing query criteria
+
+Use the bound element utility when building a picker that combines properties,
+classifications, and built-in criteria. Each browse entry carries its field
+descriptor and display group path.
+
+```python
+elements = api.utilities.element
+catalogue = elements.discover_query_fields()
+
+for entry in catalogue.browse_fields():
+    print(" / ".join((*entry.group_path, entry.field.name)))
+```
+
+Archicad 28 and later use one Tapir `GetAllProperties` call for property discovery.
+On 26 and 27 the browse view uses official property IDs and Tapir user-level tool
+defaults to hide fundamental built-ins. Browse visibility does not affect exact
+GUID lookup. Different GUIDs can share a display label.
+
+Use `elements.discover_query_fields(draft.rows)` when loading or compiling
+existing rows. It requests the referenced property IDs and classification systems.
+The returned `QueryFieldCatalogue.resolve(reference)` can look up the exact field
+for a row. Query execution applies the same exact-reference policy and validates
+against current metadata. Query discovery and execution require Tapir 2.0.0 or
+later. Version helpers use current header metadata when the API is bound to a
+`ConnHeader`. Standalone clients read the versions through the existing commands.
+
+`QueryRows` is the editable document. Its predicates can hold unfinished input.
+At persistence boundaries, load it with the same explicit schema-version context
+used for `Query`. Row IDs are runtime-only. The final row retains its AND/OR
+connector for editing and reordering, and the compiler ignores that connector.
+
+```python
+from multiconn_archicad.utilities.queries import validate_query
+from multiconn_archicad.utilities.queries.editing import QueryRows, build_query
+
+draft = QueryRows.model_validate_json(saved_rows_json, context={"require_schema_version": True})
+built = build_query(draft)
+if built.query is None:
+    for issue in built.issues:
+        print(issue.row_id, issue.location, issue.message)
+else:
+    catalogue = elements.discover_query_fields(draft.rows)
+    validate_query(built.query, catalogue).raise_for_errors()
+```
+
+`build_query()` compiles the draft without connecting to Archicad. The build
+result can map query locations back to rows with `row_id_at()`. Use
+`validate_row()` for local editing feedback and the bound query methods for
+execution-time validation. See the [offline row example](../../examples/element_query_rows.py).
+
 ## Batch property discovery
 
 For an existing `Utilities` instance bound to one `UnifiedApi`:
@@ -597,9 +644,9 @@ else:
 ```
 
 `discover_query_fields()` calls Tapir `GetAllProperties` once and adapts the full
-metadata batch. It reads no element values and does not use official property
-name resolution. Both built-in and custom properties retain their upstream names,
-groups, GUIDs, source types, measures, and other metadata.
+metadata batch. Pass `property_ids=...` to request only the specified definitions.
+Discovery reads no element values. Built-in and custom properties retain their
+upstream names, groups, GUIDs, source types, measures, and other metadata.
 
 The catalogue is a metadata snapshot with no project or connection binding.
 Explicitly call discovery again after switching projects or changing metadata.
@@ -693,11 +740,10 @@ all bound search/filter methods run that check automatically before metadata
 reads or empty-population shortcuts. Parsing alone can retain an unsupported
 query version for inspection.
 
-Pass catalogues as one explicit sequence, for example
+Pass a `QueryFieldCatalogue` or a sequence of field catalogues, for example
 `validate_query(query, [property_catalogue, classification_catalogue])`.
-Their order does not matter. Use an empty sequence for queries needing no field
-metadata. The execution layer assembles this sequence from the field families
-requested by `prepare()`; validation itself never discovers catalogues.
+Use an empty sequence for queries needing no field metadata. The execution layer
+discovers the field families requested by `prepare()`.
 Both property and classification predicates use `field_id`. For a property this
 is its property GUID; for a classification it is the system GUID, while the test
 operand identifies a classification item when required. Field descriptor
@@ -966,8 +1012,8 @@ represent every project element or errors that upstream commands did not expose.
 The two-field shape can support a future generic handle adapter that pages by
 original index; no MCP handle system is implemented here.
 
-Both search methods accept the same `query`, `databases`, and `filters` arguments,
-with typed database wrappers and `ElementFilter` members used by Tapir listing commands.
+Both search methods currently accept `query` and optional `databases` and `filters`
+listing arguments. Supply Tapir database wrappers and `ElementFilter` members.
 For example:
 
 ```python
@@ -979,11 +1025,12 @@ matches = api.utilities.element.find_elements(
 )
 ```
 
-Search derives safe type bounds from the existing query: type predicates supply
-sets, AND intersects bounds, and OR unions them. Property predicates provide no
-type restriction. An unrestricted OR branch requires unrestricted listing.
-Use `GetElementsByType` for finite bounds, `GetAllElements` for unrestricted
-bounds, and no listing for an empty bound. Validate the entire query first.
+The current executor derives a type bound from the query. Type predicates supply
+sets, AND intersects bounds, and OR unions them. An unrestricted OR branch
+requires unrestricted listing. The executor uses `GetElementsByType` for finite
+bounds, `GetAllElements` for unrestricted bounds, and skips listing for an empty
+bound after validating the query. See the [cross-database review](element_queries_plan.md#candidate-listing-and-public-search-contract)
+for the section and elevation limitation.
 
 Keep every type predicate in the original tree. For example,
 `(Wall AND ID starts W) OR (Slab AND ID starts S)` can retrieve only walls/slabs,
@@ -994,8 +1041,8 @@ default follows Tapir's current database rather than implying every database.
 Type calls follow `ElementType` declaration order; each response keeps its upstream
 order. Shared execution deduplicates GUIDs by first occurrence, once for reads
 and evaluation. This is necessary because section elements can map to the same
-owner and multiple databases can return that owner. Every listing/database
-failure raises, even if other databases returned elements.
+owner and multiple databases can return that owner. Reported per-database
+failures raise even if other databases returned elements.
 
 The supplied-population filter preserves input order and duplicate candidates,
 with one result slot per position. Repeated reads may be deduplicated internally
@@ -1062,5 +1109,10 @@ Numeric finiteness is also
 enforced by Pydantic at runtime; consumers must validate submitted queries rather
 than relying on JSON Schema alone.
 
-See the [staged implementation plan](../../docs/ELEMENT_QUERY_IMPLEMENTATION_PLAN.md)
-for family behavior, property discovery, context validation, and execution.
+## Continuing the unreleased query pilot
+
+The TSPC element selector consumes this library's catalogue and editable rows. It offers an explicit Resolve Query preview and Select Elements action; script execution resolves the query afresh.
+
+The [engine implementation plan](element_queries_plan.md) owns current engine decisions, deferred work, live filtering/timing evidence, database scope, and the criteria backlog. It supersedes the earlier notes that placed database selection outside the query tree and proposed duplicate top-level ErrorItem handling. Planned defaults and predicates are not descriptions of implemented behavior; the execution API above remains the current contract.
+
+The sibling consumer's [widget plan](../../../TSPC-python-scripts/ai%20prompt/ELEMENT_QUERY_UI_PLAN.md) owns controls, binding, preview, selection, and widget verification.

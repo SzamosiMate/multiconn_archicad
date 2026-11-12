@@ -5,11 +5,12 @@ from uuid import UUID, uuid4
 
 import pytest
 
-from multiconn_archicad.errors import BatchOperationError
+from multiconn_archicad.errors import BatchOperationError, RequestError
 from multiconn_archicad.models.official import types as official
 from multiconn_archicad.models.tapir.commands import ChangeSelectionOfElementsResult
 from multiconn_archicad.models.tapir import types as tapir
-from multiconn_archicad.utilities.namespaces.elements import TYPES_3D, ElementUtilities
+from multiconn_archicad.utilities.namespaces.elements import ElementUtilities
+from multiconn_archicad.utilities.queries import TYPES_3D
 from multiconn_archicad.utilities.results.batch_results import BatchResult, SlotState
 
 
@@ -80,17 +81,63 @@ def test_set_selected_elements_raises_if_clearing_fails():
     api.tapir.element.change_selection_of_elements.assert_called_once()
 
 
-def test_get_3d_elements_returns_list_in_type_order():
+@pytest.mark.parametrize(
+    ("version", "include_subelements"),
+    [
+        ("1.4.0", False),
+        ("1.5.2", False),
+        ("1.5.3rc1", False),
+        ("1.5.3", True),
+        ("1.5.10", True),
+        ("1.7.1", True),
+        ("2.0.0", True),
+    ],
+)
+def test_get_3d_elements_preserves_main_type_order_and_uses_version_supported_filters(version, include_subelements):
     api = MagicMock()
+    api.read_header_metadata.return_value = None
+    api.tapir.application.get_add_on_version.return_value = version
     responses = {element_type: _elements_response(_element()) for element_type in TYPES_3D}
     api.tapir.element.get_elements_by_type.side_effect = lambda element_type, **_: responses[element_type]
 
     result = ElementUtilities(api).get_3d_elements()
 
+    expected_filters = [tapir.ElementFilter.IS_INDEPENDENT]
+    if include_subelements:
+        expected_filters.insert(0, tapir.ElementFilter.INCLUDE_SUB_ELEM_OBJECTS)
     calls = api.tapir.element.get_elements_by_type.call_args_list
     assert tuple(call.args[0] for call in calls) == TYPES_3D
-    assert all(call.kwargs == {"filters": [tapir.ElementFilter.IS_INDEPENDENT]} for call in calls)
-    assert result == [element for response in responses.values() for element in response.elements]
+    assert all(call.kwargs == {"filters": expected_filters} for call in calls)
+    assert result == [item for response in responses.values() for item in response.elements]
+    api.read_header_metadata.assert_called_once_with()
+    api.tapir.application.get_add_on_version.assert_called_once_with()
+
+
+def test_get_3d_elements_reuses_header_version_without_a_command_read():
+    api = MagicMock()
+    api.read_header_metadata.return_value.tapir_info.version = "1.5.3"
+    api.tapir.element.get_elements_by_type.return_value = _elements_response()
+
+    assert ElementUtilities(api).get_3d_elements() == []
+
+    api.tapir.application.get_add_on_version.assert_not_called()
+    assert all(
+        call.kwargs["filters"] == [tapir.ElementFilter.INCLUDE_SUB_ELEM_OBJECTS, tapir.ElementFilter.IS_INDEPENDENT]
+        for call in api.tapir.element.get_elements_by_type.call_args_list
+    )
+
+
+def test_get_3d_elements_does_not_list_if_the_version_read_fails():
+    api = MagicMock()
+    api.read_header_metadata.return_value = None
+    error = RequestError("Disconnected")
+    api.tapir.application.get_add_on_version.side_effect = error
+
+    with pytest.raises(RequestError) as caught:
+        ElementUtilities(api).get_3d_elements()
+
+    assert caught.value is error
+    api.tapir.element.get_elements_by_type.assert_not_called()
 
 
 def test_filter_elements_by_property_values_preserves_alignment_and_skips_empty_searches():
@@ -136,6 +183,8 @@ def test_grouping_keeps_duplicates_and_empty_keys():
 
 
 def _configure_3d_population(api: MagicMock, elements: list[tapir.ElementIdArrayItem]) -> None:
+    api.read_header_metadata.return_value = None
+    api.tapir.application.get_add_on_version.return_value = "2.0.0"
     api.tapir.element.get_elements_by_type.side_effect = lambda element_type, **_: (
         _elements_response(*elements) if element_type is tapir.ElementType.WALL else _elements_response()
     )
