@@ -38,6 +38,14 @@ def element(guid):
     return tapir.ElementIdArrayItem(elementId=tapir.ElementId(guid=guid))
 
 
+def floor_plan_database():
+    return tapir.DatabaseIdArrayItem(databaseId=tapir.DatabaseId(guid=UUID("d5d16dd4-093f-4674-895d-410d634d8c7e")))
+
+
+def default_listing_filters():
+    return [tapir.ElementFilter.INCLUDE_SUB_ELEM_OBJECTS, tapir.ElementFilter.IS_INDEPENDENT]
+
+
 def cell_error(message, available=None):
     return tapir.PropertyValueErrorItem(error=tapir.Error(code=7, message=message), isAvailable=available)
 
@@ -244,7 +252,7 @@ def test_typed_search_uses_filter_elements_and_omits_per_element_failures(projec
     result = project.api.utilities.element.find_elements(wall_query())
     assert guids(result) == [TALL]
     project.api.tapir.element.get_elements_by_type.assert_called_once_with(
-        tapir.ElementType.WALL, databases=None, filters=None
+        tapir.ElementType.WALL, databases=[floor_plan_database()], filters=default_listing_filters()
     )
     project.api.tapir.element.get_all_elements.assert_not_called()
     project.api.tapir.element.get_details_of_elements.assert_not_called()
@@ -278,10 +286,72 @@ def test_filter_retains_alignment_duplicates_and_errors_and_plain_filter_raises(
 def test_unrestricted_property_search_uses_one_all_listing_and_no_type_read(project):
     result = project.api.utilities.element.find_elements(Query(where=height_node()))
     assert guids(result) == [TALL, SLAB]
-    project.api.tapir.element.get_all_elements.assert_called_once_with(databases=None, filters=None)
+    project.api.tapir.element.get_all_elements.assert_called_once_with(
+        databases=[floor_plan_database()], filters=default_listing_filters()
+    )
     project.api.tapir.element.get_elements_by_type.assert_not_called()
     project.api.tapir.element.get_details_of_elements.assert_not_called()
     project.api.tapir.element.filter_elements.assert_not_called()
+
+
+@pytest.mark.parametrize("entry", ["find_elements", "find_elements_result"])
+@pytest.mark.parametrize("typed", [True, False])
+def test_default_search_uses_floor_plan_instead_of_the_active_database(project, entry, typed):
+    def list_in_database(*args, databases=None, filters=None):
+        ids = [TALL] if databases == [floor_plan_database()] else [SLAB]
+        return project.listing(ids, databases)
+
+    project.api.tapir.element.get_all_elements.side_effect = list_in_database
+    project.api.tapir.element.get_elements_by_type.side_effect = list_in_database
+    query = Query(where=type_node(tapir.ElementType.WALL) if typed else height_node())
+
+    result = getattr(project.api.utilities.element, entry)(query)
+    matches = result.outcomes.successes if entry == "find_elements_result" else result
+
+    assert guids(matches) == [TALL]
+    listing = project.api.tapir.element.get_elements_by_type if typed else project.api.tapir.element.get_all_elements
+    assert listing.call_args.kwargs == {
+        "databases": [floor_plan_database()],
+        "filters": default_listing_filters(),
+    }
+    project.api.tapir.application.get_current_window_type.assert_not_called()
+
+
+@pytest.mark.parametrize("typed", [True, False])
+@pytest.mark.parametrize("override", ["databases", "filters", "both"])
+def test_explicit_listing_options_override_only_the_supplied_defaults(project, typed, override):
+    database = tapir.DatabaseIdArrayItem(databaseId=tapir.DatabaseId(guid=uuid4()))
+    filters = (tapir.ElementFilter.INCLUDE_SUB_ELEM_OBJECTS,)
+    options = {}
+    if override in ("databases", "both"):
+        options["databases"] = (database,)
+    if override in ("filters", "both"):
+        options["filters"] = filters
+    query = Query(where=type_node(tapir.ElementType.WALL) if typed else height_node())
+
+    project.api.utilities.element.find_elements_result(query, **options)
+
+    listing = project.api.tapir.element.get_elements_by_type if typed else project.api.tapir.element.get_all_elements
+    assert listing.call_args.kwargs == {
+        "databases": [database] if "databases" in options else [floor_plan_database()],
+        "filters": list(filters) if "filters" in options else default_listing_filters(),
+    }
+
+
+def test_listing_defaults_are_fresh_for_each_search(project):
+    query = Query(where=height_node())
+    project.api.utilities.element.find_elements(query)
+    first = project.api.tapir.element.get_all_elements.call_args.kwargs
+    first["databases"][0].databaseId.guid = uuid4()
+    first["databases"].clear()
+    first["filters"].clear()
+
+    project.api.utilities.element.find_elements(query)
+
+    assert project.api.tapir.element.get_all_elements.call_args.kwargs == {
+        "databases": [floor_plan_database()],
+        "filters": default_listing_filters(),
+    }
 
 
 def test_type_bound_excludes_nonmatching_inputs_before_property_reads(project):
@@ -347,9 +417,7 @@ def test_typed_branches_keep_their_type_predicates_and_use_consistent_scope(proj
         return AllOf(
             items=(
                 type_node(kind),
-                PropertyPredicate(
-                    field_id=DESCRIPTION, test=TextTest(operator=TextOperator.STARTS_WITH, value=prefix)
-                ),
+                PropertyPredicate(field_id=DESCRIPTION, test=TextTest(operator=TextOperator.STARTS_WITH, value=prefix)),
             )
         )
 
@@ -545,9 +613,7 @@ def test_search_does_not_swallow_unexpected_evaluator_exceptions(project, entry)
         def evaluate(self, raw_value):
             raise RuntimeError("Evaluator bug")
 
-    query = Query(
-        where=PropertyPredicate(field_id=HEIGHT, test=BrokenNumberTest(operator=NumberOperator.IS, value=3))
-    )
+    query = Query(where=PropertyPredicate(field_id=HEIGHT, test=BrokenNumberTest(operator=NumberOperator.IS, value=3)))
 
     with pytest.raises(RuntimeError, match="Evaluator bug"):
         invoke(project, entry, query)
