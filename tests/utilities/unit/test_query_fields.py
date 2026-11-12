@@ -11,6 +11,7 @@ from multiconn_archicad.utilities.queries import (
     BUILTIN_QUERY_FIELDS,
     AmbiguousPropertyTypeError,
     ElementTypeInfo,
+    TYPES_ALL,
     TYPES_2D,
     TYPES_3D,
     TYPES_3D_COMPONENTS,
@@ -82,6 +83,9 @@ def test_builtin_element_type_choices_compile_through_the_field_description():
     (types_input,) = description.fields
     assert types_input.name == "types"
     assert types_input.required
+    assert [choice["title"] for choice in types_input.schema["oneOf"][:5]] == (
+        ["All Types", "3D Types", "2D Types", "3D Component Types", "3D Types with Components"]
+    )
     choice = next(choice for choice in types_input.schema["oneOf"] if choice["title"] == "Wall")
     assert choice["const"] == ["Wall"]
 
@@ -97,10 +101,11 @@ def test_builtin_element_type_choices_compile_through_the_field_description():
 @pytest.mark.parametrize(
     ("title", "types"),
     [
-        ("3D elements", TYPES_3D),
-        ("3D components", TYPES_3D_COMPONENTS),
-        ("3D elements with components", TYPES_3D_WITH_COMPONENTS),
-        ("2D elements", TYPES_2D),
+        ("All Types", TYPES_ALL),
+        ("3D Types", TYPES_3D),
+        ("3D Component Types", TYPES_3D_COMPONENTS),
+        ("3D Types with Components", TYPES_3D_WITH_COMPONENTS),
+        ("2D Types", TYPES_2D),
     ],
 )
 def test_element_type_presets_compile_and_save_concrete_types(title, types):
@@ -139,12 +144,12 @@ def test_element_type_editor_choices_do_not_restrict_the_test_schema():
 def test_element_type_preset_descriptions_are_independent_snapshots():
     field = ElementTypeInfo()
     first = field.describe_test_inputs(current_data={})
-    choice = next(option for option in first.fields[0].schema["oneOf"] if option["title"] == "3D elements")
+    choice = next(option for option in first.fields[0].schema["oneOf"] if option["title"] == "3D Types")
     choice["const"].clear()
 
     second = field.describe_test_inputs(current_data={})
 
-    fresh = next(option for option in second.fields[0].schema["oneOf"] if option["title"] == "3D elements")
+    fresh = next(option for option in second.fields[0].schema["oneOf"] if option["title"] == "3D Types")
     assert fresh["const"] == [element_type.value for element_type in TYPES_3D]
 
 
