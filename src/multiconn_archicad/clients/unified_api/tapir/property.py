@@ -5,9 +5,13 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 from pydantic import TypeAdapter
 
+from collections.abc import Sequence
+
 from multiconn_archicad.models.tapir.commands import (
     AddPropertyToAttributesParameters,
     AddPropertyToAttributesResult,
+    CheckPropertyValuesParameters,
+    CheckPropertyValuesResult,
     CreatePropertyDefinitionsParameters,
     CreatePropertyDefinitionsResult,
     CreatePropertyGroupsParameters,
@@ -18,14 +22,26 @@ from multiconn_archicad.models.tapir.commands import (
     DeletePropertyGroupsResult,
     GetAllPropertiesParameters,
     GetAllPropertiesResult,
+    GetComponentsOfElementsParameters,
+    GetComponentsOfElementsResult,
     GetPropertiesOfToolDefaultsParameters,
     GetPropertiesOfToolDefaultsResult,
     GetPropertyAvailabilityOfDefaultsParameters,
     GetPropertyAvailabilityOfDefaultsResult,
     GetPropertyDefinitionsOfAttributesParameters,
     GetPropertyDefinitionsOfAttributesResult,
+    GetPropertyDefinitionsOfElementComponentsParameters,
+    GetPropertyDefinitionsOfElementComponentsResult,
+    GetPropertyEditabilityParameters,
+    GetPropertyEditabilityResult,
+    GetPropertyExpressionReferencesParameters,
+    GetPropertyExpressionReferencesResult,
     GetPropertyValuesOfAttributesParameters,
     GetPropertyValuesOfAttributesResult,
+    GetPropertyValuesOfElementComponentsParameters,
+    GetPropertyValuesOfElementComponentsResult,
+    GetPropertyValuesOfElementDefaultsParameters,
+    GetPropertyValuesOfElementDefaultsResult,
     GetPropertyValuesOfElementsParameters,
     GetPropertyValuesOfElementsResult,
     ImportPropertiesXmlParameters,
@@ -38,10 +54,16 @@ from multiconn_archicad.models.tapir.commands import (
     ModifyPropertyValueOfElementsResult,
     RemovePropertyFromAttributesParameters,
     RemovePropertyFromAttributesResult,
+    SearchPropertiesParameters,
+    SearchPropertiesResult,
     SetBuiltInPropertyValuesOfAttributesParameters,
     SetBuiltInPropertyValuesOfAttributesResult,
+    SetPropertyValueOfAttributesParameters,
+    SetPropertyValueOfAttributesResult,
     SetPropertyValuesOfAttributesParameters,
     SetPropertyValuesOfAttributesResult,
+    SetPropertyValuesOfElementDefaultsParameters,
+    SetPropertyValuesOfElementDefaultsResult,
     SetPropertyValuesOfElementsParameters,
     SetPropertyValuesOfElementsResult,
     UpdatePropertyDefinitionsParameters,
@@ -56,26 +78,41 @@ from multiconn_archicad.models.tapir.types import (
     AttributePropertyIds,
     AttributePropertyValue,
     AttributePropertyValuesResult,
+    CollectionType,
+    ComponentPropertyDefinitions,
     DefaultPropertyAvailability,
+    ElementComponentIdArrayItem,
+    ElementComponentsArrayItem,
+    ElementDefaultPropertyValue,
     ElementIdArrayItem,
-    ElementPropertyValue,
+    ElementPropertyValueInput,
     ElementType,
     ErrorItem,
+    ExecutionResult,
     FailedExecutionResult,
+    Filter,
     PropertyDefinitionArrayItem,
     PropertyDefinitionType,
     PropertyDefinitionUpdate,
+    PropertyDetails,
     PropertyGroupArrayItem,
     PropertyGroupIdArrayItem,
     PropertyGroupUpdate,
     PropertyId,
     PropertyIdArrayItem,
     PropertyImportConflictPolicy,
+    PropertyType,
     PropertyValue,
+    PropertyValueArrayItem,
+    PropertyValueCheck,
+    PropertyValueCheckInput,
+    PropertyValueErrorItem,
     PropertyValuesArrayItem,
+    References,
     SuccessfulExecutionResult,
     ToolDefaultProperties,
     ToolDefaultPropertyFilter,
+    ValueType,
 )
 
 if TYPE_CHECKING:
@@ -117,6 +154,36 @@ class PropertyCommands:
         )
         validated_response = TypeAdapter(AddPropertyToAttributesResult).validate_python(response_dict)
         return validated_response
+
+    def check_property_values(
+        self, property_values: list[PropertyValueCheckInput]
+    ) -> list[ErrorItem | PropertyValueCheck]:
+        """
+        Checks whether the given values are acceptable for the given property definitions,
+        without changing anything.
+
+        Args:
+            property_values (list[PropertyValueCheckInput]): The values to check, each with the
+                property definition it is checked against.
+
+        Returns:
+            list[ErrorItem | PropertyValueCheck]: One item for each value, in the order of the
+                input: whether it is acceptable, or an error if the property was not found.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "propertyValues": property_values,
+        }
+        validated_params = CheckPropertyValuesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "CheckPropertyValues", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = CheckPropertyValuesResult.model_validate(response_dict)
+        return validated_response.results
 
     def create_property_definitions(
         self, property_definitions: list[PropertyDefinitionArrayItem]
@@ -176,14 +243,18 @@ class PropertyCommands:
         self, property_ids: list[PropertyIdArrayItem]
     ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
         """
-        Deletes the given Custom Property Definitions.
+        Deletes the given Custom Property Definitions. With dryRun true nothing is deleted and
+        no undo step is created: the response has dryRun set to true, and each property that
+        exists gets wouldDelete.
 
         Args:
             property_ids (list[PropertyIdArrayItem]): The identifiers of properties to delete.
 
         Returns:
-            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
-                results.
+            list[FailedExecutionResult | SuccessfulExecutionResult]: One result for each input
+                property, in the order of the input. On a dry run a property that exists gets
+                wouldDelete; Archicad can still refuse to delete one that exists (for example a
+                built-in property).
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -197,22 +268,55 @@ class PropertyCommands:
         response_dict = self._core.post_tapir_command(
             "DeletePropertyDefinitions", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
+        return TypeAdapter(list[ExecutionResult]).validate_python(response_dict.get("executionResults"))
+
+    def delete_property_definitions_dry_run(
+        self, property_ids: list[PropertyIdArrayItem]
+    ) -> DeletePropertyDefinitionsResult:
+        """
+        Preview this command without applying its changes. Deletes the given Custom Property
+        Definitions. With dryRun true nothing is deleted and no undo step is created: the
+        response has dryRun set to true, and each property that exists gets wouldDelete.
+
+        Args:
+            property_ids (list[PropertyIdArrayItem]): The identifiers of properties to delete.
+
+        Returns:
+            DeletePropertyDefinitionsResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "propertyIds": property_ids,
+            "dryRun": True,
+        }
+        validated_params = DeletePropertyDefinitionsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "DeletePropertyDefinitions", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
         validated_response = DeletePropertyDefinitionsResult.model_validate(response_dict)
-        return validated_response.executionResults
+        return validated_response
 
     def delete_property_groups(
         self, property_group_ids: list[PropertyGroupIdArrayItem]
     ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
         """
-        Deletes the given Custom Property Groups.
+        Deletes the given Custom Property Groups. With dryRun true nothing is deleted and no
+        undo step is created: the response has dryRun set to true, and each property group that
+        exists gets wouldDelete.
 
         Args:
             property_group_ids (list[PropertyGroupIdArrayItem]): The identifiers of property
                 groups to delete.
 
         Returns:
-            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
-                results.
+            list[FailedExecutionResult | SuccessfulExecutionResult]: One result for each input
+                property group, in the order of the input. On a dry run a property group that
+                exists gets wouldDelete; Archicad can still refuse to delete one that exists
+                (for example a built-in group).
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -226,8 +330,38 @@ class PropertyCommands:
         response_dict = self._core.post_tapir_command(
             "DeletePropertyGroups", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
+        return TypeAdapter(list[ExecutionResult]).validate_python(response_dict.get("executionResults"))
+
+    def delete_property_groups_dry_run(
+        self, property_group_ids: list[PropertyGroupIdArrayItem]
+    ) -> DeletePropertyGroupsResult:
+        """
+        Preview this command without applying its changes. Deletes the given Custom Property
+        Groups. With dryRun true nothing is deleted and no undo step is created: the response
+        has dryRun set to true, and each property group that exists gets wouldDelete.
+
+        Args:
+            property_group_ids (list[PropertyGroupIdArrayItem]): The identifiers of property
+                groups to delete.
+
+        Returns:
+            DeletePropertyGroupsResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "propertyGroupIds": property_group_ids,
+            "dryRun": True,
+        }
+        validated_params = DeletePropertyGroupsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "DeletePropertyGroups", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
         validated_response = DeletePropertyGroupsResult.model_validate(response_dict)
-        return validated_response.executionResults
+        return validated_response
 
     def get_all_properties(
         self,
@@ -268,6 +402,39 @@ class PropertyCommands:
         )
         validated_response = GetAllPropertiesResult.model_validate(response_dict)
         return validated_response
+
+    def get_components_of_elements(
+        self, elements: list[ElementIdArrayItem]
+    ) -> list[ElementComponentsArrayItem | ErrorItem]:
+        """
+        Returns the components of the elements: the building material skins of composite walls,
+        slabs, roofs and shells, and the parts of complex profile walls, beams and columns. The
+        components have their own property values (building material, thickness, area, volume
+        and the properties of the building material); read them with
+        GetPropertyValuesOfElementComponents.
+
+        Args:
+            elements (list[ElementIdArrayItem]): A list of elements.
+
+        Returns:
+            list[ElementComponentsArrayItem | ErrorItem]: The components of each element, in the
+                order of the given elements. Each component id carries the element id too, so
+                the items can be passed on to GetPropertyValuesOfElementComponents as they are.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elements": elements,
+        }
+        validated_params = GetComponentsOfElementsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetComponentsOfElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetComponentsOfElementsResult.model_validate(response_dict)
+        return validated_response.componentsOfElements
 
     def get_properties_of_tool_defaults(
         self,
@@ -353,7 +520,7 @@ class PropertyCommands:
 
         Args:
             attribute_ids (list[AttributeIdArrayItem]): A list of attributes.
-            filter (AttributePropertyDefinitionFilter | None)
+            filter (AttributePropertyDefinitionFilter | None): The default is UserDefined.
 
         Returns:
             list[AttributePropertyIds | ErrorItem]: The property definitions of each attribute,
@@ -375,6 +542,116 @@ class PropertyCommands:
         )
         validated_response = GetPropertyDefinitionsOfAttributesResult.model_validate(response_dict)
         return validated_response.propertyDefinitionsOfAttributes
+
+    def get_property_definitions_of_element_components(
+        self, element_components: list[ElementComponentIdArrayItem], filter: Filter | None = None
+    ) -> list[ComponentPropertyDefinitions | ErrorItem]:
+        """
+        Returns the property definitions available on the given element components, optionally
+        filtered to user defined or built-in ones.
+
+        Args:
+            element_components (list[ElementComponentIdArrayItem]): A list of element
+                components.
+            filter (Filter | None): Which property definitions to return: the user defined
+                (Custom) ones, the built-in ones, or all. The default is All.
+
+        Returns:
+            list[ComponentPropertyDefinitions | ErrorItem]: The property definitions available
+                on each element component, in the order of the given element components.
+                GetAllProperties returns the full details of a property.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elementComponents": element_components,
+            "filter": filter,
+        }
+        validated_params = GetPropertyDefinitionsOfElementComponentsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetPropertyDefinitionsOfElementComponents",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+        )
+        validated_response = GetPropertyDefinitionsOfElementComponentsResult.model_validate(response_dict)
+        return validated_response.propertyDefinitionsOfElementComponents
+
+    def get_property_editability(
+        self,
+        properties: list[PropertyIdArrayItem],
+        elements: None | list[ElementIdArrayItem] = None,
+        element_types: None | list[ElementType] = None,
+        property_definition_defaults: None | bool = None,
+    ) -> GetPropertyEditabilityResult:
+        """
+        Tells whether the values of the given properties can be modified, and whether the
+        properties are visible, for the given elements. Also tells whether they can be modified
+        in the tool defaults of element types (from Archicad 26) and in the default values of
+        the property definitions themselves. Unknown elements, element types and properties are
+        reported as errors, not as locked properties.
+
+        Args:
+            properties (list[PropertyIdArrayItem]): A list of property identifiers.
+            elements (None | list[ElementIdArrayItem]): Checks whether the value of each
+                property can be modified for these elements, and whether each property is
+                visible for them.
+            element_types (None | list[ElementType]): Checks whether the value of each property
+                can be modified in the tool default of these element types.
+            property_definition_defaults (None | bool): When true, checks whether the default
+                value of each property definition can be modified. This is the default value of
+                the property definition itself, not the tool default of an element type.
+
+        Returns:
+            GetPropertyEditabilityResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "properties": properties,
+            "elements": elements,
+            "elementTypes": element_types,
+            "propertyDefinitionDefaults": property_definition_defaults,
+        }
+        validated_params = GetPropertyEditabilityParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetPropertyEditability", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetPropertyEditabilityResult.model_validate(response_dict)
+        return validated_response
+
+    def get_property_expression_references(
+        self, property_ids: list[PropertyIdArrayItem]
+    ) -> list[ErrorItem | References]:
+        """
+        Returns the strings that refer to the given properties in property expressions.
+
+        Args:
+            property_ids (list[PropertyIdArrayItem]): A list of property identifiers.
+
+        Returns:
+            list[ErrorItem | References]: One item for each property, in the order of the input:
+                its expression reference, or an error.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "propertyIds": property_ids,
+        }
+        validated_params = GetPropertyExpressionReferencesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetPropertyExpressionReferences",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+        )
+        validated_response = GetPropertyExpressionReferencesResult.model_validate(response_dict)
+        return validated_response.references
 
     def get_property_values_of_attributes(
         self,
@@ -417,11 +694,85 @@ class PropertyCommands:
         validated_response = GetPropertyValuesOfAttributesResult.model_validate(response_dict)
         return validated_response.propertyValuesForAttributes
 
+    def get_property_values_of_element_components(
+        self, element_components: list[ElementComponentIdArrayItem], properties: list[PropertyIdArrayItem]
+    ) -> list[ErrorItem | PropertyValuesArrayItem]:
+        """
+        Returns the property values of the given element components for the given properties, in
+        the shape of GetPropertyValuesOfElements. Use GetComponentsOfElements to list the
+        components of an element.
+
+        Args:
+            element_components (list[ElementComponentIdArrayItem]): A list of element
+                components.
+            properties (list[PropertyIdArrayItem]): A list of property identifiers.
+
+        Returns:
+            list[ErrorItem | PropertyValuesArrayItem]: The order of the outer list is that of
+                the given element components. The order of the inner lists are that of the given
+                properties. The items have the shape of GetPropertyValuesOfElements.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elementComponents": element_components,
+            "properties": properties,
+        }
+        validated_params = GetPropertyValuesOfElementComponentsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetPropertyValuesOfElementComponents",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+        )
+        validated_response = GetPropertyValuesOfElementComponentsResult.model_validate(response_dict)
+        return validated_response.propertyValuesForElementComponents
+
+    def get_property_values_of_element_defaults(
+        self, element_type: ElementType, properties: list[PropertyIdArrayItem]
+    ) -> list[PropertyValueArrayItem | PropertyValueErrorItem]:
+        """
+        Returns the values of the given properties in the current tool default of an element
+        type, which new elements of that type get. It reads the native tool default of the
+        generic variation of the type, not a Favorite that is not applied. A property that is
+        not available for the tool default is reported as an error.
+
+        Args:
+            element_type (ElementType): The element type whose current tool default is read.
+                This is the native tool default of the generic variation of the type, a Favorite
+                counts only after it was applied.
+            properties (list[PropertyIdArrayItem]): A list of property identifiers.
+
+        Returns:
+            list[PropertyValueArrayItem | PropertyValueErrorItem]: The order is that of the
+                given properties. A property that is not available for the tool default is an
+                error item.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elementType": element_type,
+            "properties": properties,
+        }
+        validated_params = GetPropertyValuesOfElementDefaultsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetPropertyValuesOfElementDefaults",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+        )
+        validated_response = GetPropertyValuesOfElementDefaultsResult.model_validate(response_dict)
+        return validated_response.propertyValues
+
     def get_property_values_of_elements(
         self,
         elements: list[ElementIdArrayItem],
         properties: list[PropertyIdArrayItem],
         include_availability: None | bool = None,
+        *,
+        use_si_units: None | bool = False,
     ) -> list[ErrorItem | PropertyValuesArrayItem]:
         """
         Returns the property values of the elements for the given property. It works for
@@ -434,6 +785,8 @@ class PropertyCommands:
             include_availability (None | bool): Adds isAvailable to each property value or
                 error, telling whether the property is available for the element (for example by
                 its classification). Default is false.
+            use_si_units (None | bool): Returns precise, locale-independent numeric strings in
+                SI units, except degrees for angles. Default is false.
 
         Returns:
             list[ErrorItem | PropertyValuesArrayItem]: The order of the outer list is that of
@@ -449,6 +802,7 @@ class PropertyCommands:
             "elements": elements,
             "properties": properties,
             "includeAvailability": include_availability,
+            "useSIUnits": use_si_units,
         }
         validated_params = GetPropertyValuesOfElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
@@ -491,8 +845,8 @@ class PropertyCommands:
         self, elements: list[ElementIdArrayItem], property_id: PropertyId
     ) -> FailedExecutionResult | SuccessfulExecutionResult:
         """
-        Makes a property definition available for all the given elements. Available only in
-        Archicad 27.
+        Makes a property definition available for all the given elements. Available in Archicad
+        25, 26 and 27.
 
         Args:
             elements (list[ElementIdArrayItem]): The elements to make the property available
@@ -523,8 +877,8 @@ class PropertyCommands:
         self, elements: list[ElementIdArrayItem], property_id: PropertyId
     ) -> FailedExecutionResult | SuccessfulExecutionResult:
         """
-        Makes a property definition unavailable for all the given elements. Available only in
-        Archicad 27.
+        Makes a property definition unavailable for all the given elements. Available in
+        Archicad 25, 26 and 27.
 
         Args:
             elements (list[ElementIdArrayItem]): The elements to make the property unavailable
@@ -556,8 +910,7 @@ class PropertyCommands:
     ) -> FailedExecutionResult | SuccessfulExecutionResult:
         """
         Sets one property value on all the given elements in a single step. If the property is
-        not available for any of the elements, none of them is changed. Available from Archicad
-        27.
+        not available for any of the elements, none of them is changed.
 
         Args:
             elements (list[ElementIdArrayItem]): The elements to set the value on. The property
@@ -590,7 +943,9 @@ class PropertyCommands:
     ) -> FailedExecutionResult | SuccessfulExecutionResult:
         """
         Makes a custom property unavailable for the given attributes (for example Building
-        Materials), in one undo step. Available in Archicad 25, 26 and 27 only.
+        Materials), in one undo step. Available in Archicad 25, 26 and 27 only. With dryRun true
+        nothing is changed and no undo step is created: the response has dryRun set to true, and
+        wouldDelete when the property and every attribute exist.
 
         Args:
             property_id (PropertyId)
@@ -613,8 +968,97 @@ class PropertyCommands:
         response_dict = self._core.post_tapir_command(
             "RemovePropertyFromAttributes", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
-        validated_response = TypeAdapter(RemovePropertyFromAttributesResult).validate_python(response_dict)
+        return TypeAdapter(ExecutionResult).validate_python(response_dict)
+
+    def remove_property_from_attributes_dry_run(
+        self, property_id: PropertyId, attribute_ids: list[AttributeIdArrayItem]
+    ) -> RemovePropertyFromAttributesResult:
+        """
+        Preview this command without applying its changes. Makes a custom property unavailable
+        for the given attributes (for example Building Materials), in one undo step. Available
+        in Archicad 25, 26 and 27 only. With dryRun true nothing is changed and no undo step is
+        created: the response has dryRun set to true, and wouldDelete when the property and
+        every attribute exist.
+
+        Args:
+            property_id (PropertyId)
+            attribute_ids (list[AttributeIdArrayItem]): The attributes (for example Building
+                Materials) to make the property unavailable for.
+
+        Returns:
+            RemovePropertyFromAttributesResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "propertyId": property_id,
+            "attributeIds": attribute_ids,
+            "dryRun": True,
+        }
+        validated_params = RemovePropertyFromAttributesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "RemovePropertyFromAttributes", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = RemovePropertyFromAttributesResult.model_validate(response_dict)
         return validated_response
+
+    def search_properties(
+        self,
+        query: None | str = None,
+        property_group: None | str = None,
+        property_type: None | PropertyType = None,
+        value_type: None | ValueType = None,
+        collection_type: CollectionType | None = None,
+        include_enum_values: None | bool = None,
+        include_availability: None | bool = None,
+        limit: None | int = None,
+    ) -> list[PropertyDetails]:
+        """
+        Searches properties by name or group substring with optional filtering by property type,
+        value type, and collection type.
+
+        Args:
+            query (None | str): Case-insensitive substring to search in property name or
+                property group name.
+            property_group (None | str): Optional case-insensitive substring to filter by
+                property group name.
+            property_type (None | PropertyType): Optional filter by property definition type.
+            value_type (None | ValueType): Optional filter by property value type.
+            collection_type (CollectionType | None): Optional filter by property collection
+                type.
+            include_enum_values (None | bool): If true, includes possibleEnumValues for
+                enumeration properties. Default is false to minimize token footprint.
+            include_availability (None | bool): If true, includes classification availability.
+                Default is false to minimize token footprint.
+            limit (None | int): Maximum number of matching properties to return.
+
+        Returns:
+            list[PropertyDetails]: A list of property details matching the search criteria.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "query": query,
+            "propertyGroup": property_group,
+            "propertyType": property_type,
+            "valueType": value_type,
+            "collectionType": collection_type,
+            "includeEnumValues": include_enum_values,
+            "includeAvailability": include_availability,
+            "limit": limit,
+        }
+        validated_params = SearchPropertiesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "SearchProperties", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = SearchPropertiesResult.model_validate(response_dict)
+        return validated_response.properties
 
     def set_built_in_property_values_of_attributes(
         self, attributes: list[AttributeBuiltInPropertyValues]
@@ -650,6 +1094,40 @@ class PropertyCommands:
         validated_response = SetBuiltInPropertyValuesOfAttributesResult.model_validate(response_dict)
         return validated_response.executionResults
 
+    def set_property_value_of_attributes(
+        self, property_id: PropertyId, property_value: PropertyValue, attribute_ids: list[AttributeIdArrayItem]
+    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+        """
+        Sets one property value on several attributes (for example Building Materials) in one
+        undo step. If the property is not available for any of the given attributes, no
+        attribute is changed.
+
+        Args:
+            property_id (PropertyId)
+            property_value (PropertyValue)
+            attribute_ids (list[AttributeIdArrayItem]): The attributes to set the value on. The
+                property must be available for every one of them.
+
+        Returns:
+            FailedExecutionResult | SuccessfulExecutionResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "propertyId": property_id,
+            "propertyValue": property_value,
+            "attributeIds": attribute_ids,
+        }
+        validated_params = SetPropertyValueOfAttributesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "SetPropertyValueOfAttributes", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = TypeAdapter(SetPropertyValueOfAttributesResult).validate_python(response_dict)
+        return validated_response
+
     def set_property_values_of_attributes(
         self, attribute_property_values: list[AttributePropertyValue]
     ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
@@ -679,20 +1157,70 @@ class PropertyCommands:
         validated_response = SetPropertyValuesOfAttributesResult.model_validate(response_dict)
         return validated_response.executionResults
 
-    def set_property_values_of_elements(
-        self, element_property_values: list[ElementPropertyValue]
+    def set_property_values_of_element_defaults(
+        self, element_default_property_values: list[ElementDefaultPropertyValue]
     ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
         """
-        Sets the property values of elements. It works for subelements of hierarchal elements
-        also.
+        Sets the property values of the tool defaults (the settings new elements get) of element
+        types, so every element placed afterwards gets them, without saving and applying a
+        favorite.
 
         Args:
-            element_property_values (list[ElementPropertyValue]): A list of element property
-                values.
+            element_default_property_values (list[ElementDefaultPropertyValue]): The property
+                values to set on the tool defaults (the settings new elements get) of element
+                types.
 
         Returns:
             list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
                 results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elementDefaultPropertyValues": element_default_property_values,
+        }
+        validated_params = SetPropertyValuesOfElementDefaultsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "SetPropertyValuesOfElementDefaults",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+        )
+        validated_response = SetPropertyValuesOfElementDefaultsResult.model_validate(response_dict)
+        return validated_response.executionResults
+
+    def set_property_values_of_elements(
+        self, element_property_values: Sequence[ElementPropertyValueInput]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Sets the property values of elements. It works for subelements of hierarchal elements
+        also. With valueStatus an element's value can also be reset to the default value of the
+        property (Default) or made undefined (UserUndefined, from 1.8.1). With dryRun true
+        nothing is changed and no undo step is created: the response has dryRun set to true, and
+        each item that passes the checks made before writing gets wouldChange, with the
+        element's value now (oldValue) and the value a real run would write (newValue), both as
+        GetPropertyValuesOfElements gives them.
+
+        Args:
+            element_property_values (Sequence[ElementPropertyValueInput]): A single real value
+                accepts '.' or ',' as the decimal separator, so the value strings
+                GetPropertyValuesOfElements returns can be written back: when both appear the
+                last one is the decimal separator, a separator that appears more than once
+                groups thousands, and a single separator is the decimal one. Unitless real and
+                integer lists accept semicolon-separated numbers; an empty string sets an empty
+                list. Invalid items reject the entire property write.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: One result for each item of
+                elementPropertyValues, in the order of the input. On a dry run an item that
+                passes every check made before writing (the property values of the element can
+                be read, the value is editable for the element and converts to the property's
+                type) gets wouldChange: oldValue is the element's value now as
+                GetPropertyValuesOfElements gives it (left out when the property is not
+                available or not evaluated for the element), newValue the value that would be
+                written in the same format (left out for valueStatus Default). Archicad can
+                still refuse a value that passes them.
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -706,8 +1234,47 @@ class PropertyCommands:
         response_dict = self._core.post_tapir_command(
             "SetPropertyValuesOfElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
+        return TypeAdapter(list[ExecutionResult]).validate_python(response_dict.get("executionResults"))
+
+    def set_property_values_of_elements_dry_run(
+        self, element_property_values: Sequence[ElementPropertyValueInput]
+    ) -> SetPropertyValuesOfElementsResult:
+        """
+        Preview this command without applying its changes. Sets the property values of elements.
+        It works for subelements of hierarchal elements also. With valueStatus an element's
+        value can also be reset to the default value of the property (Default) or made undefined
+        (UserUndefined, from 1.8.1). With dryRun true nothing is changed and no undo step is
+        created: the response has dryRun set to true, and each item that passes the checks made
+        before writing gets wouldChange, with the element's value now (oldValue) and the value a
+        real run would write (newValue), both as GetPropertyValuesOfElements gives them.
+
+        Args:
+            element_property_values (Sequence[ElementPropertyValueInput]): A single real value
+                accepts '.' or ',' as the decimal separator, so the value strings
+                GetPropertyValuesOfElements returns can be written back: when both appear the
+                last one is the decimal separator, a separator that appears more than once
+                groups thousands, and a single separator is the decimal one. Unitless real and
+                integer lists accept semicolon-separated numbers; an empty string sets an empty
+                list. Invalid items reject the entire property write.
+
+        Returns:
+            SetPropertyValuesOfElementsResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elementPropertyValues": element_property_values,
+            "dryRun": True,
+        }
+        validated_params = SetPropertyValuesOfElementsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "SetPropertyValuesOfElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
         validated_response = SetPropertyValuesOfElementsResult.model_validate(response_dict)
-        return validated_response.executionResults
+        return validated_response
 
     def update_property_definitions(
         self, property_definitions: list[PropertyDefinitionUpdate]

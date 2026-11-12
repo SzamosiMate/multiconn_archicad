@@ -1,6 +1,15 @@
 """Python compatibility names emitted by both Tapir model splitters."""
 
 TAPIR_TYPE_ALIASES = {
+    "Angle": "AngleUnitFormat",
+    "Area": "CalculationUnitAreaFormat",
+    "ConflictPolicy": "FavoriteImportConflictPolicy",
+    "FavoritesFromElement": "FavoriteFromElement",
+    "FavoritesToApplyItem": "FavoriteToApply",
+    "LibraryPart": "AvailableLibraryPart",
+    "Settings": "CollisionCheckSettings",
+    "SkippedSampleItem": "SkippedLibraryPart",
+    "Volume": "CalculationUnitVolumeFormat",
     "GraphicOverrideRuleDetails": "GraphicOverrideRule",
     "MarkerGDLParameterDetails": "StoredGDLParameter",
     "MEPDomains": "MEPDomain",
@@ -9,6 +18,11 @@ TAPIR_TYPE_ALIASES = {
     "Level": "RoofLevel",
     "PivotLine": "RoofPivotLine",
     "PropertyExpressionUpdate": "PropertyDefinitionUpdate",
+    "ElementIFCClassificationReferenceData": "ElementIFCClassificationReferenceUpdate",
+    "FavoriteConflictPolicy": "FavoriteCreationConflictPolicy",
+    "FavoriteSource": "FavoriteSettingsSource",
+    "LibraryPartMetadataData": "LibraryPartMetadataUpdate",
+    "LibraryPartScriptData": "LibraryPartScriptsUpdate",
 }
 
 

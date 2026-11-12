@@ -33,12 +33,14 @@ from multiconn_archicad.models.tapir.commands import (
     DeleteProjectInfoGroupsResult,
     FindDimensionStandardParameters,
     FindDimensionStandardResult,
+    GetAllAutoTextKeysResult,
     GetAutoIntersectResult,
     GetAutoTextKeysParameters,
     GetAutoTextKeysResult,
     GetAutoTextNameParameters,
     GetAutoTextNameResult,
     GetCalculationUnitsResult,
+    GetCoordinateOriginsResult,
     GetCurrentViewImageParameters,
     GetCurrentViewImageResult,
     GetDimensionStandardsParameters,
@@ -69,6 +71,10 @@ from multiconn_archicad.models.tapir.commands import (
     GetStoriesResult,
     GetSunSettingsResult,
     GetSurveyPointTransformationResult,
+    InterpretAutoTextsParameters,
+    InterpretAutoTextsResult,
+    MoveProjectInfoFieldsParameters,
+    MoveProjectInfoFieldsResult,
     MoveProjectInfoGroupsParameters,
     MoveProjectInfoGroupsResult,
     NewProjectParameters,
@@ -81,8 +87,12 @@ from multiconn_archicad.models.tapir.commands import (
     PrintViewResult,
     RebuildViewParameters,
     RebuildViewResult,
+    RenameProjectInfoFieldsParameters,
+    RenameProjectInfoFieldsResult,
     RenameProjectInfoGroupsParameters,
     RenameProjectInfoGroupsResult,
+    ResolveNamesParameters,
+    ResolveNamesResult,
     SaveAsModuleFileParameters,
     SaveAsModuleFileResult,
     SaveCurrentWindowAsImageParameters,
@@ -112,10 +122,13 @@ from multiconn_archicad.models.tapir.commands import (
     UpdateHotlinksResult,
 )
 from multiconn_archicad.models.tapir.types import (
+    AutoText,
     AutoTextKey,
     AutoTextName,
     CalculationUnitPreferencesUpdate,
     ConvertedUnitValue,
+    CreatedProjectInfoField,
+    DimensionAppearance,
     DimensionPreferencesUpdate,
     DimensionStandard,
     ElementId,
@@ -123,6 +136,7 @@ from multiconn_archicad.models.tapir.types import (
     ElementType,
     ErrorItem,
     FailedExecutionResult,
+    FloorPlanCutPlanePreferencesUpdate,
     Hotlink,
     HotlinkInstanceChange,
     HotlinkInstanceCreation,
@@ -136,6 +150,8 @@ from multiconn_archicad.models.tapir.types import (
     HotlinkSourceStatusResult,
     ImageColorDepth,
     ImageFormat,
+    InterpretedAutoText,
+    NameToResolve,
     NoteAutoTextKeyword,
     NoteAutotextDetails,
     PhotoRenderFormat,
@@ -144,6 +160,9 @@ from multiconn_archicad.models.tapir.types import (
     PrintArea,
     ProjectInfoField,
     ProjectInfoFieldData,
+    ProjectInfoFieldIdArrayItem,
+    ProjectInfoFieldMove,
+    ProjectInfoFieldRename,
     ProjectInfoGroup,
     ProjectInfoGroupData,
     ProjectInfoGroupIdArrayItem,
@@ -151,7 +170,9 @@ from multiconn_archicad.models.tapir.types import (
     ProjectInfoGroupRename,
     ProjectLocationUpdate,
     ProjectPreferenceType,
+    ProjectReferenceLevelsUpdate,
     RenovationStatusName,
+    ResolvedName,
     StorySettings,
     SuccessfulExecutionResult,
     SunDateTimeUpdate,
@@ -405,16 +426,20 @@ class ProjectCommands:
         validated_response = CreateHotlinkNodesResult.model_validate(response_dict)
         return validated_response.hotlinkNodes
 
-    def create_project_info_fields(self, project_info_fields: list[ProjectInfoFieldData]) -> list[ProjectInfoField]:
+    def create_project_info_fields(
+        self, project_info_fields: list[ProjectInfoFieldData]
+    ) -> list[CreatedProjectInfoField | ErrorItem]:
         """
-        Creates one or more custom project info fields.
+        Creates one or more custom project info fields. From Archicad 30 the Project Info group
+        of each field can be given; without it the field goes to the first group.
 
         Args:
             project_info_fields (list[ProjectInfoFieldData]): Array of custom project info
                 fields to create.
 
         Returns:
-            list[ProjectInfoField]: A list of project info fields.
+            list[CreatedProjectInfoField | ErrorItem]: A list of created project info fields or
+                errors, one per requested field.
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -495,14 +520,25 @@ class ProjectCommands:
         return validated_response.executionResults
 
     def delete_project_info_fields(
-        self, project_info_ids: list[str]
+        self,
+        project_info_ids: None | list[str] = None,
+        *,
+        project_info_field_ids: None | list[ProjectInfoFieldIdArrayItem] = None,
     ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
         """
-        Deletes one or more custom project info fields. Hardcoded fields cannot be deleted.
+        Deletes one or more custom project info fields, by their autotext keys or, from Archicad
+        30, by the ids of the fields of the Project Info groups. Hardcoded fields cannot be
+        deleted.
 
         Args:
-            project_info_ids (list[str]): List of project info field ids to delete. Only custom
-                fields (ids starting with 'autotext-') can be deleted.
+            project_info_ids (None | list[str]): List of project info field ids (autotext keys,
+                as GetProjectInfoFields returns them) to delete. Only custom fields can be
+                deleted. On Archicad 30 a key is matched to the field by its name, so it fails
+                when more than one field has the name; delete such a field by its
+                projectInfoFieldId instead.
+            project_info_field_ids (None | list[ProjectInfoFieldIdArrayItem]): List of fields of
+                the Project Info groups to delete, by the ids GetProjectInfoGroups returns.
+                Available from Archicad 30. Their results follow the results of projectInfoIds.
 
         Returns:
             list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
@@ -515,6 +551,7 @@ class ProjectCommands:
         """
         params_dict = {
             "projectInfoIds": project_info_ids,
+            "projectInfoFieldIds": project_info_field_ids,
         }
         validated_params = DeleteProjectInfoFieldsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
@@ -579,6 +616,23 @@ class ProjectCommands:
         )
         validated_response = FindDimensionStandardResult.model_validate(response_dict)
         return validated_response
+
+    def get_all_auto_text_keys(self) -> list[AutoText]:
+        """
+        Retrieves every autotext key Archicad knows (not only the property-based ones returned
+        by GetAutoTextKeys) with its current value, resolved without an element context.
+
+        Returns:
+            list[AutoText]
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        response_dict = self._core.post_tapir_command("GetAllAutoTextKeys")
+        validated_response = GetAllAutoTextKeysResult.model_validate(response_dict)
+        return validated_response.autoTexts
 
     def get_auto_intersect(self) -> bool:
         """
@@ -675,6 +729,24 @@ class ProjectCommands:
         validated_response = GetCalculationUnitsResult.model_validate(response_dict)
         return validated_response
 
+    def get_coordinate_origins(self) -> GetCoordinateOriginsResult:
+        """
+        Gets the offset of the virtual coordinate system origin from the world origin, and the
+        user origin of the current database. Use it to tell which origin the coordinates of
+        different sources (elements, views, survey point) are relative to.
+
+        Returns:
+            GetCoordinateOriginsResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        response_dict = self._core.post_tapir_command("GetCoordinateOrigins")
+        validated_response = GetCoordinateOriginsResult.model_validate(response_dict)
+        return validated_response
+
     def get_current_view_image(
         self, source: None | ViewImageSource = None, format: None | ViewImageFormat = None
     ) -> GetCurrentViewImageResult:
@@ -684,8 +756,8 @@ class ProjectCommands:
         30.
 
         Args:
-            source (None | ViewImageSource)
-            format (None | ViewImageFormat)
+            source (None | ViewImageSource): Optional, 3DWindow by default.
+            format (None | ViewImageFormat): Optional, png by default.
 
         Returns:
             GetCurrentViewImageResult
@@ -737,7 +809,9 @@ class ProjectCommands:
     def get_export_tolerance(self) -> float:
         """
         Gets the export tolerance: the largest distance allowed between an arc and the straight
-        segments that replace it when curves are segmented for export.
+        segments that replace it when curves are segmented for export. Archicad only provides
+        this value while an export is in progress, so outside an export the command returns an
+        error saying so.
 
         Returns:
             float: The largest distance allowed between an arc and the straight segments that
@@ -934,15 +1008,22 @@ class ProjectCommands:
         validated_response = GetNoteAutoTextKeywordsResult.model_validate(response_dict)
         return validated_response.keywords
 
-    def get_note_autotexts(self, note_owner_type: ElementType) -> list[NoteAutotextDetails]:
+    def get_note_autotexts(
+        self, note_owner_type: ElementType, *, dimension_appearance: DimensionAppearance | None = None
+    ) -> list[NoteAutotextDetails]:
         """
         Retrieves the autotexts available in the notes of an element type (e.g. a Dimension),
         each with the element types it is available for. The autotexts are identified by the
-        numeric value of their API_NoteAutotextID. Needs Archicad 26 or later.
+        numeric value of their API_NoteAutotextID. For a Dimension, the optional
+        dimensionAppearance (Linear by default) chooses the dimension type. Needs Archicad 26 or
+        later.
 
         Args:
             note_owner_type (ElementType): The type of the element that owns the note, e.g.
                 'Dimension', 'RadialDimension', 'LevelDimension' or 'AngleDimension'.
+            dimension_appearance (DimensionAppearance | None): Optional dimension type, as in
+                the Dimension Settings, whose note autotexts are listed when noteOwnerType is
+                'Dimension'. Defaults to Linear. Not allowed with other owner types.
 
         Returns:
             list[NoteAutotextDetails]: The autotexts available in the notes of the given owner
@@ -955,6 +1036,7 @@ class ProjectCommands:
         """
         params_dict = {
             "noteOwnerType": note_owner_type,
+            "dimensionAppearance": dimension_appearance,
         }
         validated_params = GetNoteAutotextsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
@@ -1037,7 +1119,8 @@ class ProjectCommands:
     ) -> GetProjectPreferencesResult:
         """
         Gets pages of the project preferences (Options > Project Preferences): the working
-        units, the dimensions, the calculation units and the zones. Further pages may follow.
+        units, the dimensions, the calculation units, the zones and the reference levels, and
+        the Floor Plan Cut Plane Settings. Further pages may follow.
 
         Args:
             preference_types (None | list[ProjectPreferenceType]): The preference pages to get.
@@ -1061,15 +1144,14 @@ class ProjectCommands:
         validated_response = GetProjectPreferencesResult.model_validate(response_dict)
         return validated_response
 
-    def get_rendering_scenes(self) -> list[str]:
+    def get_rendering_scenes(self) -> GetRenderingScenesResult:
         """
-        Gets the names of the rendering scenes of the project, as the Scene list of the
-        PhotoRendering Settings palette shows them.
+        Gets the names of the rendering scenes of the project (the Scene list of the
+        PhotoRendering Settings palette), the most recently used first, and the name of the
+        current scene.
 
         Returns:
-            list[str]: The names of the rendering scenes of the project, in the order of the
-                Scene list of the PhotoRendering Settings palette. The API does not tell which
-                one is current.
+            GetRenderingScenesResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -1078,7 +1160,7 @@ class ProjectCommands:
         """
         response_dict = self._core.post_tapir_command("GetRenderingScenes")
         validated_response = GetRenderingScenesResult.model_validate(response_dict)
-        return validated_response.sceneNames
+        return validated_response
 
     def get_renovation_status_names(self) -> list[ErrorItem | RenovationStatusName]:
         """
@@ -1151,6 +1233,74 @@ class ProjectCommands:
         validated_response = GetSurveyPointTransformationResult.model_validate(response_dict)
         return validated_response
 
+    def interpret_auto_texts(
+        self, auto_texts: list[str], element_id: ElementId | None = None
+    ) -> list[ErrorItem | InterpretedAutoText]:
+        """
+        Resolves one or more autotexts (e.g. '<LAYOUTID>') to their values, optionally in the
+        context of an element, so a key can be tested before it is written into a Text or Label.
+
+        Args:
+            auto_texts (list[str]): The autotexts to resolve, either as they are written in the
+                content of a Text or Label element, e.g. '<LAYOUTID>' or
+                '<PROPERTY-69A58F6F-DD3B-478D-B5EF-09A16BD0C548>', or as bare keys without the
+                surrounding '<' and '>', e.g. 'LAYOUTID'.
+            element_id (ElementId | None): Optional. The element in whose context the autotexts
+                are resolved, e.g. a Text on a layout for layout autotexts. When omitted, they
+                are resolved without an element context.
+
+        Returns:
+            list[ErrorItem | InterpretedAutoText]: One result per input autotext, in the same
+                order.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "autoTexts": auto_texts,
+            "elementId": element_id,
+        }
+        validated_params = InterpretAutoTextsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "InterpretAutoTexts", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = InterpretAutoTextsResult.model_validate(response_dict)
+        return validated_response.values
+
+    def move_project_info_fields(
+        self, project_info_fields: list[ProjectInfoFieldMove]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Moves fields of the Project Info groups to a group, before another field of it or to its
+        end. A subfield of a calculated field moves with its parent field. Available from
+        Archicad 30.
+
+        Args:
+            project_info_fields (list[ProjectInfoFieldMove]): The fields of the Project Info
+                groups to move, in the order the moves are made. A subfield of a calculated
+                field cannot be moved on its own, it moves with its parent field.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "projectInfoFields": project_info_fields,
+        }
+        validated_params = MoveProjectInfoFieldsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "MoveProjectInfoFields", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = MoveProjectInfoFieldsResult.model_validate(response_dict)
+        return validated_response.executionResults
+
     def move_project_info_groups(
         self, project_info_groups: list[ProjectInfoGroupMove]
     ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
@@ -1213,7 +1363,9 @@ class ProjectCommands:
 
     def open_project(self, project_file_path: str) -> FailedExecutionResult | SuccessfulExecutionResult:
         """
-        Opens the given project.
+        Opens the given project. The unsaved changes of the open project are discarded without
+        asking: Archicad has no query for them, so call SaveProject first when they must be
+        kept.
 
         Args:
             project_file_path (str): The target project file to open.
@@ -1237,21 +1389,45 @@ class ProjectCommands:
         return validated_response
 
     def photo_render(
-        self, image_file_path: str, format: None | PhotoRenderFormat = None, scene_name: None | str = None
+        self,
+        image_file_path: str,
+        format: None | PhotoRenderFormat = None,
+        scene_name: None | str = None,
+        *,
+        overwrite: None | bool = None,
+        width: None | int = None,
+        height: None | int = None,
+        resolution: None | int = None,
     ) -> FailedExecutionResult | SuccessfulExecutionResult:
         """
         Renders the 3D model with the current rendering scene, or with the given one, as
         Document > Creative Imaging > PhotoRender Projection does, and saves the image to a file
-        (png, jpg, bmp, tiff or gif). The image size and quality come from the scene.
+        (png, jpg, bmp, tiff or gif). The image size, resolution and quality come from the
+        scene; a width, height or resolution given here is used for this render only, the scene
+        is not changed. With overwrite false it refuses to replace an existing file.
 
         Args:
             image_file_path (str): Absolute path of the image file to write. An existing file is
-                overwritten.
+                overwritten, unless overwrite is false.
             format (None | PhotoRenderFormat)
             scene_name (None | str): Optional. The rendering scene to render with, one of the
                 names GetRenderingScenes returns. It is made the current scene first, as
                 SetCurrentRenderingScene does, and stays current afterwards. Omitted, the
                 current scene is used.
+            overwrite (None | bool): Optional, true by default. false refuses to render when a
+                file already exists at imageFilePath, and writes nothing.
+            width (None | int): Optional. The width of the image in pixels (the Size field of
+                the PhotoRendering Settings palette). Omitted, the width of the scene is used.
+                The image settings of the scene are changed for this render only and restored
+                afterwards.
+            height (None | int): Optional. The height of the image in pixels (the Size field of
+                the PhotoRendering Settings palette). Omitted, the height of the scene is used.
+                The image settings of the scene are changed for this render only and restored
+                afterwards.
+            resolution (None | int): Optional. The resolution of the image in dpi (the
+                Resolution field of the PhotoRendering Settings palette). Omitted, the
+                resolution of the scene is used. The image settings of the scene are changed for
+                this render only and restored afterwards.
 
         Returns:
             FailedExecutionResult | SuccessfulExecutionResult
@@ -1263,8 +1439,12 @@ class ProjectCommands:
         """
         params_dict = {
             "imageFilePath": image_file_path,
+            "overwrite": overwrite,
             "format": format,
             "sceneName": scene_name,
+            "width": width,
+            "height": height,
+            "resolution": resolution,
         }
         validated_params = PhotoRenderParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
@@ -1336,6 +1516,37 @@ class ProjectCommands:
         validated_response = TypeAdapter(RebuildViewResult).validate_python(response_dict)
         return validated_response
 
+    def rename_project_info_fields(
+        self, project_info_fields: list[ProjectInfoFieldRename]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Renames custom fields of the Project Info groups. Fixed (built-in) fields cannot be
+        renamed. Available from Archicad 30.
+
+        Args:
+            project_info_fields (list[ProjectInfoFieldRename]): The fields of the Project Info
+                groups to rename, each with its new name. Fixed (built-in) fields cannot be
+                renamed.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "projectInfoFields": project_info_fields,
+        }
+        validated_params = RenameProjectInfoFieldsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "RenameProjectInfoFields", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = RenameProjectInfoFieldsResult.model_validate(response_dict)
+        return validated_response.executionResults
+
     def rename_project_info_groups(
         self, project_info_groups: list[ProjectInfoGroupRename]
     ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
@@ -1365,20 +1576,66 @@ class ProjectCommands:
         validated_response = RenameProjectInfoGroupsResult.model_validate(response_dict)
         return validated_response.executionResults
 
+    def resolve_names(self, names: list[NameToResolve], max_close_matches: None | int = None) -> list[ResolvedName]:
+        """
+        Looks up words or phrases (for example from a user's question) among the names of the
+        open project before they are passed to other commands: stories, layers, layer
+        combinations, building materials, composites, profiles, surfaces, fills, lines, zone
+        categories, element types (by API name and, from Archicad 27, by the name the Archicad
+        interface shows), properties (by name, and by group and name together) and
+        classifications (systems by name and version, items of every system by name and ID). For
+        each name it returns 'found' with the items named exactly so, 'closeMatches' with the
+        nearest names, best first (ranked by differences in case, accents, spacing and
+        separators, shared words, one name containing the other and a few differing characters),
+        or 'notFound' when nothing in the project is close, meaning the project has no such item
+        and it must not be guessed. Each match carries what the other commands take: the story
+        index, the attribute id and index, the elementType, the propertyId (with the property's
+        group, value type and the classification items a custom property is available for), or
+        the classificationSystemId and classificationItemId. Matching is lexical and
+        deterministic. Read only.
+
+        Args:
+            names (list[NameToResolve]): The words or phrases to look up in the open project,
+                for example taken from a user's question.
+            max_close_matches (None | int): The most close matches returned for one word, best
+                first. The default is 5.
+
+        Returns:
+            list[ResolvedName]: One result for each of the given names, in the same order.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "names": names,
+            "maxCloseMatches": max_close_matches,
+        }
+        validated_params = ResolveNamesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "ResolveNames", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = ResolveNamesResult.model_validate(response_dict)
+        return validated_response.results
+
     def save_as_module_file(
-        self, module_file_path: str, elements: None | list[ElementIdArrayItem] = None
+        self, module_file_path: str, elements: None | list[ElementIdArrayItem] = None, *, overwrite: None | bool = None
     ) -> FailedExecutionResult | SuccessfulExecutionResult:
         """
         Saves the given elements, or the current selection, as a hotlink module (.mod) file.
+        With overwrite false it refuses to replace an existing file.
 
         Args:
             module_file_path (str): Absolute path of the .mod file to write. An existing file is
-                overwritten. The current window must be a floor plan, section, elevation or
-                detail.
+                overwritten, unless overwrite is false. The current window must be a floor plan,
+                section, elevation or detail.
             elements (None | list[ElementIdArrayItem]): Optional. The elements that go into the
                 module; omitted, the current selection does, as Save Selection as Module would.
                 Pass GetAllElements for the whole project. Archicad 25 and 26 support the
                 selection form only.
+            overwrite (None | bool): Optional, true by default. false refuses to save when a
+                file already exists at moduleFilePath, and writes nothing.
 
         Returns:
             FailedExecutionResult | SuccessfulExecutionResult
@@ -1390,6 +1647,7 @@ class ProjectCommands:
         """
         params_dict = {
             "moduleFilePath": module_file_path,
+            "overwrite": overwrite,
             "elements": elements,
         }
         validated_params = SaveAsModuleFileParameters(**params_dict)
@@ -1406,15 +1664,18 @@ class ProjectCommands:
         color_depth: ImageColorDepth | None = None,
         dithered: None | bool = None,
         entire_drawing: None | bool = None,
+        *,
+        overwrite: None | bool = None,
     ) -> SaveCurrentWindowAsImageResult:
         """
         Saves what the current window shows as an image file (png, jpg, bmp, tiff or gif), as
         File > Save as does with a picture format. Master layout windows are not supported: save
-        a layout that uses the master layout instead.
+        a layout that uses the master layout instead. With overwrite false it refuses to replace
+        an existing file.
 
         Args:
             image_file_path (str): Absolute path of the image file to write. An existing file is
-                overwritten.
+                overwritten, unless overwrite is false.
             format (ImageFormat | None)
             color_depth (ImageColorDepth | None)
             dithered (None | bool): Optional, false by default. Whether the image is dithered
@@ -1422,6 +1683,8 @@ class ProjectCommands:
             entire_drawing (None | bool): Optional, false by default. Whether the image covers
                 the entire drawing of a 2D window instead of its current zoom, as the Entire
                 Drawing option of the Save as picture dialog does.
+            overwrite (None | bool): Optional, true by default. false refuses to save when a
+                file already exists at imageFilePath, and writes nothing.
 
         Returns:
             SaveCurrentWindowAsImageResult
@@ -1433,6 +1696,7 @@ class ProjectCommands:
         """
         params_dict = {
             "imageFilePath": image_file_path,
+            "overwrite": overwrite,
             "format": format,
             "colorDepth": color_depth,
             "dithered": dithered,
@@ -1445,17 +1709,24 @@ class ProjectCommands:
         validated_response = SaveCurrentWindowAsImageResult.model_validate(response_dict)
         return validated_response
 
-    def save_project(self, project_path: None | str = None) -> FailedExecutionResult | SuccessfulExecutionResult:
+    def save_project(
+        self, project_path: None | str = None, *, overwrite: None | bool = None
+    ) -> FailedExecutionResult | SuccessfulExecutionResult:
         """
-        Saves the currently opened project.
+        Saves the currently opened project, in place or to a given path. With overwrite false it
+        refuses to replace an existing file at the path.
 
         Args:
             project_path (None | str): Optional. Full path of a .pln file to save the project
                 to, as File > Save As does: the open project then refers to that file. This
                 saves an untitled project, or one opened from an older Archicad version, which
-                cannot be saved in place. An existing file at the path is overwritten. When
-                omitted, or when it is the project's own file, the project is saved in place,
-                which keeps the refusal of a project opened read-only.
+                cannot be saved in place. An existing file at the path is overwritten, unless
+                overwrite is false. When omitted, or when it is the project's own file, the
+                project is saved in place, which keeps the refusal of a project opened read-
+                only.
+            overwrite (None | bool): Optional, true by default. Only together with projectPath:
+                false refuses to save when a file already exists at projectPath, the project's
+                own file included, and writes nothing.
 
         Returns:
             FailedExecutionResult | SuccessfulExecutionResult
@@ -1467,6 +1738,7 @@ class ProjectCommands:
         """
         params_dict = {
             "projectPath": project_path,
+            "overwrite": overwrite,
         }
         validated_params = SaveProjectParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
@@ -1482,13 +1754,17 @@ class ProjectCommands:
         include_properties: None | bool = None,
         include_textures: None | bool = None,
         include_background_picture: None | bool = None,
+        *,
+        overwrite: None | bool = None,
     ) -> FailedExecutionResult | SuccessfulExecutionResult:
         """
         Saves the open project as an archive (.pla) file, with the library parts it uses inside.
+        With overwrite false it refuses to replace an existing file.
 
         Args:
             archive_file_path (str): Absolute path of the .pla archive to write. An existing
-                file is overwritten. The archive becomes the open project, as Save As does.
+                file is overwritten, unless overwrite is false. The archive becomes the open
+                project, as Save As does.
             include_library_parts (None | bool): Optional, true by default. Whether the library
                 parts the project uses go into the archive, which makes the archive usable as a
                 linked library of another project.
@@ -1498,6 +1774,8 @@ class ProjectCommands:
                 textures go into the archive.
             include_background_picture (None | bool): Optional, false by default. Whether the
                 background picture goes into the archive.
+            overwrite (None | bool): Optional, true by default. false refuses to save when a
+                file already exists at archiveFilePath, and writes nothing.
 
         Returns:
             FailedExecutionResult | SuccessfulExecutionResult
@@ -1509,6 +1787,7 @@ class ProjectCommands:
         """
         params_dict = {
             "archiveFilePath": archive_file_path,
+            "overwrite": overwrite,
             "includeLibraryParts": include_library_parts,
             "includeProperties": include_properties,
             "includeTextures": include_textures,
@@ -1706,7 +1985,10 @@ class ProjectCommands:
     ) -> FailedExecutionResult | SuccessfulExecutionResult:
         """
         Changes the Project Notes of the project (File > Info > Project Notes). Only the given
-        fields are changed; texts longer than the field Archicad stores are truncated.
+        fields are changed; texts longer than the field Archicad stores are truncated. architect
+        and draftsmen are full names that Archicad keeps as name parts: a new name is stored in
+        the given name with the other parts cleared, and the parts of a name that is not given
+        or not changed are kept.
 
         Args:
             client (None | str): Client.
@@ -1716,8 +1998,13 @@ class ProjectCommands:
             city (None | str): City.
             country (None | str): Country.
             postal_code (None | str): Postal code.
-            architect (None | str): Architect.
-            draftsmen (None | str): Draftsmen.
+            architect (None | str): Architect: the full name of the Project Info contact.
+                Archicad keeps it as name parts (title prefix, given, middle and family name,
+                title suffix); SetProjectNotes puts a new value into the given name and clears
+                the other parts, so it reads back unchanged. Use SetProjectInfoField to set the
+                parts.
+            draftsmen (None | str): Draftsmen: the full name of the Project Info CAD technician,
+                kept as name parts like architect.
             project_status (None | str): Project status.
             date_of_issue (None | str): Date of issue (free text, as typed in Project Notes).
             keywords (None | str): Keywords.
@@ -1759,19 +2046,24 @@ class ProjectCommands:
         dimensions: DimensionPreferencesUpdate | None = None,
         calculation_units: CalculationUnitPreferencesUpdate | None = None,
         zones: None | ZonePreferencesUpdate = None,
+        *,
+        reference_levels: None | ProjectReferenceLevelsUpdate = None,
+        floor_plan_cut_plane: FloorPlanCutPlanePreferencesUpdate | None = None,
     ) -> SetProjectPreferencesResult:
         """
         Changes pages of the project preferences (Options > Project Preferences): the working
-        units, the dimensions, the calculation units and the zones. Only the given fields
-        change, the rest of each page keeps its value. In Teamwork the PreferencesDialog
-        lockable object set has to be reserved first (ReserveLockableObjectSet). Available from
-        Archicad 27.
+        units, the dimensions, the calculation units, the zones and the reference levels, and
+        the Floor Plan Cut Plane Settings. Only the given fields change, the rest of each page
+        keeps its value. In Teamwork the PreferencesDialog lockable object set has to be
+        reserved first (ReserveLockableObjectSet). Available from Archicad 27.
 
         Args:
             working_units (None | WorkingUnitPreferencesUpdate)
             dimensions (DimensionPreferencesUpdate | None)
             calculation_units (CalculationUnitPreferencesUpdate | None)
             zones (None | ZonePreferencesUpdate)
+            reference_levels (None | ProjectReferenceLevelsUpdate)
+            floor_plan_cut_plane (FloorPlanCutPlanePreferencesUpdate | None)
 
         Returns:
             SetProjectPreferencesResult
@@ -1786,6 +2078,8 @@ class ProjectCommands:
             "dimensions": dimensions,
             "calculationUnits": calculation_units,
             "zones": zones,
+            "referenceLevels": reference_levels,
+            "floorPlanCutPlane": floor_plan_cut_plane,
         }
         validated_params = SetProjectPreferencesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(

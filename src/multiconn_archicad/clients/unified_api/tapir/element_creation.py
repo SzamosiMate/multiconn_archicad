@@ -46,10 +46,16 @@ from multiconn_archicad.models.tapir.commands import (
     CreateOpeningsResult,
     CreatePolylinesParameters,
     CreatePolylinesResult,
+    CreateRailingsFromPolylineParameters,
+    CreateRailingsFromPolylineResult,
     CreateRailingsParameters,
     CreateRailingsResult,
     CreateRoofsParameters,
     CreateRoofsResult,
+    CreateShellsParameters,
+    CreateShellsResult,
+    CreateSkylightsParameters,
+    CreateSkylightsResult,
     CreateSlabsParameters,
     CreateSlabsResult,
     CreateSplinesParameters,
@@ -75,6 +81,7 @@ from multiconn_archicad.models.tapir.types import (
     CircleData,
     ColumnData,
     CurtainWallData,
+    DatabaseId,
     DoorData,
     ElementIdArrayItem,
     ErrorItem,
@@ -91,7 +98,10 @@ from multiconn_archicad.models.tapir.types import (
     OpeningData,
     PolylineData,
     RailingData,
+    RailingFromPolylineData,
     RoofData,
+    ShellData,
+    SkylightData,
     SlabData,
     SplineData,
     StairData,
@@ -111,12 +121,21 @@ class ElementCreationCommands:
     def __init__(self, core: CoreCommands):
         self._core = core
 
-    def create_arcs(self, arcs_data: list[ArcData]) -> list[ElementIdArrayItem | ErrorItem]:
+    def create_arcs(
+        self, arcs_data: list[ArcData], *, database_id: DatabaseId | None = None
+    ) -> list[ElementIdArrayItem | ErrorItem]:
         """
         Creates Arc elements based on the given parameters.
 
         Args:
             arcs_data (list[ArcData]): Array of data to create Arcs.
+            database_id (DatabaseId | None): Optional database to create the elements in, e.g. a
+                worksheet, a detail or a layout (see GetDatabases, or the databaseId
+                CreateWorksheets and CreateDetails return). The front window stays as it is: a
+                worksheet or detail whose window was never opened is opened once on Archicad 27
+                and later, and the front window is brought back. Without it the elements are
+                created in the current database. If Archicad cannot switch to it, nothing is
+                created and the call fails.
 
         Returns:
             list[ElementIdArrayItem | ErrorItem]: A list of element identifiers or errors.
@@ -128,6 +147,7 @@ class ElementCreationCommands:
         """
         params_dict = {
             "arcsData": arcs_data,
+            "databaseId": database_id,
         }
         validated_params = CreateArcsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
@@ -140,8 +160,9 @@ class ElementCreationCommands:
         self, dimensions_data: list[AssociativeDimensionData]
     ) -> list[ElementIdArrayItem | ErrorItem]:
         """
-        Creates associative linear dimensions from explicit witness point references. A witness
-        point can also be static, given by its coordinate instead of an element.
+        Creates associative dimensions from explicit witness point references: linear by
+        default, or cumulative, baseline or elevation dimensions (appearance). A witness point
+        can also be static, given by its coordinate instead of an element.
 
         Args:
             dimensions_data (list[AssociativeDimensionData])
@@ -168,9 +189,12 @@ class ElementCreationCommands:
         self, dimensions_data: list[AssociativeDimensionOnSectionData]
     ) -> list[ElementIdArrayItem | ErrorItem]:
         """
-        Creates associative linear dimensions on section elements using common wall, slab, beam,
-        column and opening presets. The preset points of multiple section elements can be merged
-        into one continuous dimension chain via sectionElementIds.
+        Creates associative dimensions on section elements using common wall, slab, beam,
+        column, door and window presets: linear by default, or cumulative, baseline or elevation
+        dimensions (appearance), e.g. level marks. The preset points of multiple section
+        elements can be merged into one continuous dimension chain via sectionElementIds. For
+        Opening tool elements, which Archicad does not associate with dimensions, the
+        OpeningEdges preset places fixed points at their edges instead.
 
         Args:
             dimensions_data (list[AssociativeDimensionOnSectionData])
@@ -196,7 +220,11 @@ class ElementCreationCommands:
 
     def create_beams(self, beams_data: list[BeamData]) -> list[ElementIdArrayItem | ErrorItem]:
         """
-        Creates Beam elements based on the given parameters.
+        Creates Beam elements based on the given parameters. Takes the same cut fill pens and
+        cover fill as ModifyBeams, besides the position, shape, slant and cross section;
+        settings not given come from the Beam tool defaults or the favorite. Not written by
+        either command: the surfaces of the beam segments, and the cut fill pens before Archicad
+        27.
 
         Args:
             beams_data (list[BeamData])
@@ -219,12 +247,21 @@ class ElementCreationCommands:
         validated_response = CreateBeamsResult.model_validate(response_dict)
         return validated_response.elements
 
-    def create_circles(self, circles_data: list[CircleData]) -> list[ElementIdArrayItem | ErrorItem]:
+    def create_circles(
+        self, circles_data: list[CircleData], *, database_id: DatabaseId | None = None
+    ) -> list[ElementIdArrayItem | ErrorItem]:
         """
         Creates Circle elements based on the given parameters.
 
         Args:
             circles_data (list[CircleData]): Array of data to create Circles.
+            database_id (DatabaseId | None): Optional database to create the elements in, e.g. a
+                worksheet, a detail or a layout (see GetDatabases, or the databaseId
+                CreateWorksheets and CreateDetails return). The front window stays as it is: a
+                worksheet or detail whose window was never opened is opened once on Archicad 27
+                and later, and the front window is brought back. Without it the elements are
+                created in the current database. If Archicad cannot switch to it, nothing is
+                created and the call fails.
 
         Returns:
             list[ElementIdArrayItem | ErrorItem]: A list of element identifiers or errors.
@@ -236,6 +273,7 @@ class ElementCreationCommands:
         """
         params_dict = {
             "circlesData": circles_data,
+            "databaseId": database_id,
         }
         validated_params = CreateCirclesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
@@ -246,7 +284,11 @@ class ElementCreationCommands:
 
     def create_columns(self, columns_data: list[ColumnData]) -> list[ElementIdArrayItem | ErrorItem]:
         """
-        Creates Column elements based on the given parameters.
+        Creates Column elements based on the given parameters. Takes the same cut fill pens and
+        cover fill as ModifyColumns, besides the position, size, slant, cross section and
+        veneer; settings not given come from the Column tool defaults or the favorite. Not
+        written by either command: the surfaces of the column segments, and the cut fill pens
+        before Archicad 27.
 
         Args:
             columns_data (list[ColumnData]): Array of data to create Columns.
@@ -347,13 +389,22 @@ class ElementCreationCommands:
         validated_response = CreateGridElementsResult.model_validate(response_dict)
         return validated_response
 
-    def create_hatches(self, hatches_data: list[HatchData]) -> list[ElementIdArrayItem | ErrorItem]:
+    def create_hatches(
+        self, hatches_data: list[HatchData], *, database_id: DatabaseId | None = None
+    ) -> list[ElementIdArrayItem | ErrorItem]:
         """
         Creates Hatch elements based on the given parameters. A hatch can have holes, in the
         same format SetDetailsOfElements accepts for hatches.
 
         Args:
             hatches_data (list[HatchData]): Array of data to create Hatches.
+            database_id (DatabaseId | None): Optional database to create the elements in, e.g. a
+                worksheet, a detail or a layout (see GetDatabases, or the databaseId
+                CreateWorksheets and CreateDetails return). The front window stays as it is: a
+                worksheet or detail whose window was never opened is opened once on Archicad 27
+                and later, and the front window is brought back. Without it the elements are
+                created in the current database. If Archicad cannot switch to it, nothing is
+                created and the call fails.
 
         Returns:
             list[ElementIdArrayItem | ErrorItem]: A list of element identifiers or errors.
@@ -365,6 +416,7 @@ class ElementCreationCommands:
         """
         params_dict = {
             "hatchesData": hatches_data,
+            "databaseId": database_id,
         }
         validated_params = CreateHatchesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
@@ -373,12 +425,21 @@ class ElementCreationCommands:
         validated_response = CreateHatchesResult.model_validate(response_dict)
         return validated_response.elements
 
-    def create_hotspots(self, hotspots_data: list[HotspotData]) -> list[ElementIdArrayItem | ErrorItem]:
+    def create_hotspots(
+        self, hotspots_data: list[HotspotData], *, database_id: DatabaseId | None = None
+    ) -> list[ElementIdArrayItem | ErrorItem]:
         """
         Creates Hotspot elements based on the given parameters.
 
         Args:
             hotspots_data (list[HotspotData]): Array of data to create Hotspots.
+            database_id (DatabaseId | None): Optional database to create the elements in, e.g. a
+                worksheet, a detail or a layout (see GetDatabases, or the databaseId
+                CreateWorksheets and CreateDetails return). The front window stays as it is: a
+                worksheet or detail whose window was never opened is opened once on Archicad 27
+                and later, and the front window is brought back. Without it the elements are
+                created in the current database. If Archicad cannot switch to it, nothing is
+                created and the call fails.
 
         Returns:
             list[ElementIdArrayItem | ErrorItem]: A list of element identifiers or errors.
@@ -390,6 +451,7 @@ class ElementCreationCommands:
         """
         params_dict = {
             "hotspotsData": hotspots_data,
+            "databaseId": database_id,
         }
         validated_params = CreateHotspotsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
@@ -398,12 +460,21 @@ class ElementCreationCommands:
         validated_response = CreateHotspotsResult.model_validate(response_dict)
         return validated_response.elements
 
-    def create_labels(self, labels_data: list[LabelData]) -> list[ElementIdArrayItem | ErrorItem]:
+    def create_labels(
+        self, labels_data: list[LabelData], *, database_id: DatabaseId | None = None
+    ) -> list[ElementIdArrayItem | ErrorItem]:
         """
         Creates Label elements based on the given parameters.
 
         Args:
             labels_data (list[LabelData]): Array of data to create Labels.
+            database_id (DatabaseId | None): Optional database to create the elements in, e.g. a
+                worksheet, a detail or a layout (see GetDatabases, or the databaseId
+                CreateWorksheets and CreateDetails return). The front window stays as it is: a
+                worksheet or detail whose window was never opened is opened once on Archicad 27
+                and later, and the front window is brought back. Without it the elements are
+                created in the current database. If Archicad cannot switch to it, nothing is
+                created and the call fails.
 
         Returns:
             list[ElementIdArrayItem | ErrorItem]: A list of element identifiers or errors.
@@ -415,6 +486,7 @@ class ElementCreationCommands:
         """
         params_dict = {
             "labelsData": labels_data,
+            "databaseId": database_id,
         }
         validated_params = CreateLabelsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
@@ -423,12 +495,25 @@ class ElementCreationCommands:
         validated_response = CreateLabelsResult.model_validate(response_dict)
         return validated_response.elements
 
-    def create_lamps(self, lamps_data: list[LampData]) -> list[ElementIdArrayItem | ErrorItem]:
+    def create_lamps(
+        self, lamps_data: list[LampData], *, database_id: DatabaseId | None = None
+    ) -> list[ElementIdArrayItem | ErrorItem]:
         """
-        Creates Lamp elements based on the given parameters.
+        Creates Lamp elements based on the given parameters. A library part named in
+        libraryPartName starts from its own default size and GDL parameters, not from those of
+        the part the Lamp tool holds; the dimensions and the GDL parameters given (by name, in
+        parameters) override them. layerIndex places the element on a layer. With databaseId the
+        lamps are placed in that database, e.g. a worksheet, instead of the current one.
 
         Args:
             lamps_data (list[LampData]): Array of data to create Lamps.
+            database_id (DatabaseId | None): Optional database to place the elements in, e.g. a
+                worksheet or a detail (see GetDatabases, or the databaseId CreateWorksheets and
+                CreateDetails return), for a legend of symbols. The front window stays as it is:
+                a worksheet or detail whose window was never opened is opened once on Archicad
+                27 and later, and the front window is brought back. Without it the elements are
+                placed in the current database. If Archicad cannot switch to it, nothing is
+                created and the call fails.
 
         Returns:
             list[ElementIdArrayItem | ErrorItem]: A list of element identifiers or errors.
@@ -440,6 +525,7 @@ class ElementCreationCommands:
         """
         params_dict = {
             "lampsData": lamps_data,
+            "databaseId": database_id,
         }
         validated_params = CreateLampsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
@@ -479,12 +565,21 @@ class ElementCreationCommands:
         validated_response = CreateLevelDimensionsResult.model_validate(response_dict)
         return validated_response.elements
 
-    def create_line_elements(self, lines_data: list[LineElementData]) -> list[ElementIdArrayItem | ErrorItem]:
+    def create_line_elements(
+        self, lines_data: list[LineElementData], *, database_id: DatabaseId | None = None
+    ) -> list[ElementIdArrayItem | ErrorItem]:
         """
         Creates Line elements based on the given parameters.
 
         Args:
             lines_data (list[LineElementData]): Array of data to create Lines.
+            database_id (DatabaseId | None): Optional database to create the elements in, e.g. a
+                worksheet, a detail or a layout (see GetDatabases, or the databaseId
+                CreateWorksheets and CreateDetails return). The front window stays as it is: a
+                worksheet or detail whose window was never opened is opened once on Archicad 27
+                and later, and the front window is brought back. Without it the elements are
+                created in the current database. If Archicad cannot switch to it, nothing is
+                created and the call fails.
 
         Returns:
             list[ElementIdArrayItem | ErrorItem]: A list of element identifiers or errors.
@@ -496,6 +591,7 @@ class ElementCreationCommands:
         """
         params_dict = {
             "linesData": lines_data,
+            "databaseId": database_id,
         }
         validated_params = CreateLineElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
@@ -531,7 +627,9 @@ class ElementCreationCommands:
 
     def create_morphs(self, morphs_data: list[MorphData]) -> list[ElementIdArrayItem | ErrorItem]:
         """
-        Creates Morph elements from simple box definitions.
+        Creates Morph elements from simple box definitions or arbitrary bodies. Each item may
+        name a favorite (favoriteName) to start from, a layer (layerIndex) and an Element ID
+        (id); the given geometry and floor are kept.
 
         Args:
             morphs_data (list[MorphData])
@@ -554,12 +652,25 @@ class ElementCreationCommands:
         validated_response = CreateMorphsResult.model_validate(response_dict)
         return validated_response.elements
 
-    def create_objects(self, objects_data: list[ObjectData]) -> list[ElementIdArrayItem | ErrorItem]:
+    def create_objects(
+        self, objects_data: list[ObjectData], *, database_id: DatabaseId | None = None
+    ) -> list[ElementIdArrayItem | ErrorItem]:
         """
-        Creates Object elements based on the given parameters.
+        Creates Object elements based on the given parameters. A library part named in
+        libraryPartName starts from its own default size and GDL parameters, not from those of
+        the part the Object tool holds; the dimensions and the GDL parameters given (by name, in
+        parameters) override them. layerIndex places the element on a layer. With databaseId the
+        objects are placed in that database, e.g. a worksheet, instead of the current one.
 
         Args:
             objects_data (list[ObjectData]): Array of data to create Objects.
+            database_id (DatabaseId | None): Optional database to place the elements in, e.g. a
+                worksheet or a detail (see GetDatabases, or the databaseId CreateWorksheets and
+                CreateDetails return), for a legend of symbols. The front window stays as it is:
+                a worksheet or detail whose window was never opened is opened once on Archicad
+                27 and later, and the front window is brought back. Without it the elements are
+                placed in the current database. If Archicad cannot switch to it, nothing is
+                created and the call fails.
 
         Returns:
             list[ElementIdArrayItem | ErrorItem]: A list of element identifiers or errors.
@@ -571,6 +682,7 @@ class ElementCreationCommands:
         """
         params_dict = {
             "objectsData": objects_data,
+            "databaseId": database_id,
         }
         validated_params = CreateObjectsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
@@ -604,12 +716,21 @@ class ElementCreationCommands:
         validated_response = CreateOpeningsResult.model_validate(response_dict)
         return validated_response.elements
 
-    def create_polylines(self, polylines_data: list[PolylineData]) -> list[ElementIdArrayItem | ErrorItem]:
+    def create_polylines(
+        self, polylines_data: list[PolylineData], *, database_id: DatabaseId | None = None
+    ) -> list[ElementIdArrayItem | ErrorItem]:
         """
         Creates Polyline elements based on the given parameters.
 
         Args:
             polylines_data (list[PolylineData]): Array of data to create Polylines.
+            database_id (DatabaseId | None): Optional database to create the elements in, e.g. a
+                worksheet, a detail or a layout (see GetDatabases, or the databaseId
+                CreateWorksheets and CreateDetails return). The front window stays as it is: a
+                worksheet or detail whose window was never opened is opened once on Archicad 27
+                and later, and the front window is brought back. Without it the elements are
+                created in the current database. If Archicad cannot switch to it, nothing is
+                created and the call fails.
 
         Returns:
             list[ElementIdArrayItem | ErrorItem]: A list of element identifiers or errors.
@@ -621,6 +742,7 @@ class ElementCreationCommands:
         """
         params_dict = {
             "polylinesData": polylines_data,
+            "databaseId": database_id,
         }
         validated_params = CreatePolylinesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
@@ -632,8 +754,9 @@ class ElementCreationCommands:
     def create_railings(self, railings_data: list[RailingData]) -> list[ElementIdArrayItem | ErrorItem]:
         """
         Creates Railing elements along a reference polyline. Posts, rails, handrails, toprails,
-        panels and balusters come from the favorite or from the Railing tool defaults; Archicad
-        generates one node per vertex and one segment per pair of consecutive vertices.
+        panels and balusters come from the favorite, from an existing railing
+        (templateElementId) or from the Railing tool defaults; Archicad generates one node per
+        vertex and one segment per pair of consecutive vertices.
 
         Args:
             railings_data (list[RailingData]): Array of data to create Railings.
@@ -654,6 +777,35 @@ class ElementCreationCommands:
             "CreateRailings", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = CreateRailingsResult.model_validate(response_dict)
+        return validated_response.elements
+
+    def create_railings_from_polyline(
+        self, railings_data: list[RailingFromPolylineData]
+    ) -> list[ElementIdArrayItem | ErrorItem]:
+        """
+        Creates Railing elements along a 3D reference polyline: each node has its own elevation
+        and segments can be arcs. Posts, rails, handrails, toprails, panels and balusters come
+        from the favorite or from the Railing tool defaults.
+
+        Args:
+            railings_data (list[RailingFromPolylineData]): Array of data to create Railings.
+
+        Returns:
+            list[ElementIdArrayItem | ErrorItem]: A list of element identifiers or errors.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "railingsData": railings_data,
+        }
+        validated_params = CreateRailingsFromPolylineParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "CreateRailingsFromPolyline", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = CreateRailingsFromPolylineResult.model_validate(response_dict)
         return validated_response.elements
 
     def create_roofs(self, roofs_data: list[RoofData]) -> list[ElementIdArrayItem | ErrorItem]:
@@ -683,9 +835,70 @@ class ElementCreationCommands:
         validated_response = CreateRoofsResult.model_validate(response_dict)
         return validated_response.elements
 
+    def create_shells(self, shells_data: list[ShellData]) -> list[ElementIdArrayItem | ErrorItem]:
+        """
+        Creates extruded, revolved and ruled Shell elements from profile polylines, with
+        thickness, structure, an optional clipping contour and holes.
+
+        Args:
+            shells_data (list[ShellData]): Array of data to create Shells.
+
+        Returns:
+            list[ElementIdArrayItem | ErrorItem]: A list of element identifiers or errors.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "shellsData": shells_data,
+        }
+        validated_params = CreateShellsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "CreateShells", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = CreateShellsResult.model_validate(response_dict)
+        return validated_response.elements
+
+    def create_skylights(self, skylights_data: list[SkylightData]) -> list[ElementIdArrayItem | ErrorItem]:
+        """
+        Creates Skylight elements with a roof or shell owner and a floor plan anchor position.
+        It takes the same settings as ModifySkylights (anchor point, fix mode, width, height,
+        azimuth and elevation angles, mirroring, floor plan display, pens, line types, section
+        fill, surface and the library part flags) and optionally a library part; the settings
+        not given come from the Skylight tool defaults or a favorite. Surface placement is
+        handled by Archicad and has not yet been verified for this command.
+
+        Args:
+            skylights_data (list[SkylightData]): Array of data to create Skylights.
+
+        Returns:
+            list[ElementIdArrayItem | ErrorItem]: A list of element identifiers or errors.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "skylightsData": skylights_data,
+        }
+        validated_params = CreateSkylightsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "CreateSkylights", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = CreateSkylightsResult.model_validate(response_dict)
+        return validated_response.elements
+
     def create_slabs(self, slabs_data: list[SlabData]) -> list[ElementIdArrayItem | ErrorItem]:
         """
-        Creates Slab elements based on the given parameters.
+        Creates Slab elements based on the given parameters. Takes the same surfaces (top, side,
+        bottom), cut fill pens and floor fill as ModifySlabs, besides the outline, holes, level
+        and structure; settings not given come from the Slab tool defaults or the favorite. Not
+        written by either command: the surface of a single edge, and the cut fill pens before
+        Archicad 27; of the floor fill orientation Archicad applies only the type through the
+        API.
 
         Args:
             slabs_data (list[SlabData]): Array of data to create Slabs.
@@ -708,7 +921,9 @@ class ElementCreationCommands:
         validated_response = CreateSlabsResult.model_validate(response_dict)
         return validated_response.elements
 
-    def create_splines(self, splines_data: list[SplineData]) -> list[ElementIdArrayItem | ErrorItem]:
+    def create_splines(
+        self, splines_data: list[SplineData], *, database_id: DatabaseId | None = None
+    ) -> list[ElementIdArrayItem | ErrorItem]:
         """
         Creates Spline elements based on the given parameters.
 
@@ -716,6 +931,13 @@ class ElementCreationCommands:
             splines_data (list[SplineData]): Array of data to create Splines. Only auto-smoothed
                 curves are supported (bezier handle positions are calculated automatically by
                 Archicad from the point positions).
+            database_id (DatabaseId | None): Optional database to create the elements in, e.g. a
+                worksheet, a detail or a layout (see GetDatabases, or the databaseId
+                CreateWorksheets and CreateDetails return). The front window stays as it is: a
+                worksheet or detail whose window was never opened is opened once on Archicad 27
+                and later, and the front window is brought back. Without it the elements are
+                created in the current database. If Archicad cannot switch to it, nothing is
+                created and the call fails.
 
         Returns:
             list[ElementIdArrayItem | ErrorItem]: A list of element identifiers or errors.
@@ -727,6 +949,7 @@ class ElementCreationCommands:
         """
         params_dict = {
             "splinesData": splines_data,
+            "databaseId": database_id,
         }
         validated_params = CreateSplinesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
@@ -737,7 +960,12 @@ class ElementCreationCommands:
 
     def create_stairs(self, stairs_data: list[StairData]) -> list[ElementIdArrayItem | ErrorItem]:
         """
-        Creates Stair elements based on the given baseline and parameters.
+        Creates Stair elements based on the given baseline and parameters, optionally with the
+        segment type of each baseline edge and the turn at each baseline point (landings and
+        winders). Accepts the same settings as ModifyStairs: the step values with their locks,
+        the finish and structure visibility, the extra treads, the walking line, the numbering,
+        the walking direction, and the tread, riser and structure settings of the flights and
+        the landings; settings not given come from the Stair tool defaults or the favorite.
 
         Args:
             stairs_data (list[StairData]): Array of data to create Stair elements.
@@ -761,7 +989,7 @@ class ElementCreationCommands:
         return validated_response.elements
 
     def create_texts(
-        self, texts_data: list[TextDataWithRuns | TextDataWithText]
+        self, texts_data: list[TextDataWithRuns | TextDataWithText], *, database_id: DatabaseId | None = None
     ) -> list[ElementIdArrayItem | ErrorItem]:
         """
         Creates standalone Text elements based on the given parameters.
@@ -769,6 +997,13 @@ class ElementCreationCommands:
         Args:
             texts_data (list[TextDataWithRuns | TextDataWithText]): Array of data to create
                 Texts.
+            database_id (DatabaseId | None): Optional database to create the elements in, e.g. a
+                worksheet, a detail or a layout (see GetDatabases, or the databaseId
+                CreateWorksheets and CreateDetails return). The front window stays as it is: a
+                worksheet or detail whose window was never opened is opened once on Archicad 27
+                and later, and the front window is brought back. Without it the elements are
+                created in the current database. If Archicad cannot switch to it, nothing is
+                created and the call fails.
 
         Returns:
             list[ElementIdArrayItem | ErrorItem]: A list of element identifiers or errors.
@@ -780,6 +1015,7 @@ class ElementCreationCommands:
         """
         params_dict = {
             "textsData": texts_data,
+            "databaseId": database_id,
         }
         validated_params = CreateTextsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
@@ -817,7 +1053,14 @@ class ElementCreationCommands:
 
     def create_walls(self, walls_data: list[WallData]) -> list[ElementIdArrayItem | ErrorItem]:
         """
-        Creates Wall elements based on the given parameters.
+        Creates Wall elements based on the given parameters. Takes the same wall settings as
+        ModifyWalls, applied by the same code, except geometryType and profileType, which the
+        new wall takes from the favorite or the Wall tool defaults (its plan outline is always
+        Straight), and bottomOffset, which comes from zCoordinate. Neither command can write a
+        Polygonal outline (it needs an outline polygon, which these commands do not take),
+        connectionPriority or junctionSequence (Archicad ignores writes to them;
+        GetDetailsOfElements reads them), and on Archicad 29 any story visibility other than
+        'Home story only' and 'All relevant stories'.
 
         Args:
             walls_data (list[WallData])
@@ -867,7 +1110,12 @@ class ElementCreationCommands:
 
     def create_zones(self, zones_data: list[ZoneData]) -> list[ElementIdArrayItem | ErrorItem]:
         """
-        Creates Zone elements based on the given parameters.
+        Creates Zone elements based on the given parameters. Takes the same zone settings as
+        ModifyZones (name, number, category, zone stamp, levels, contour line and cover fill),
+        applied by the same helpers; the polygon or reference point is only set here. An item
+        whose area would overlap an existing Zone on the same story fails with an error naming
+        that Zone instead of opening Archicad's modal overlap warning, unless its allowOverlap
+        is true.
 
         Args:
             zones_data (list[ZoneData]): Array of data to create Zones.

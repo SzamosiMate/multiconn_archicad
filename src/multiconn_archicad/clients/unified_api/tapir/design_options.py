@@ -26,6 +26,8 @@ from multiconn_archicad.models.tapir.commands import (
     DeleteDesignOptionsResult,
     DuplicateDesignOptionCombinationsParameters,
     DuplicateDesignOptionCombinationsResult,
+    GetDesignOptionCombinationOfViewsParameters,
+    GetDesignOptionCombinationOfViewsResult,
     GetDesignOptionCombinationsResult,
     GetDesignOptionForElementsParameters,
     GetDesignOptionForElementsResult,
@@ -35,6 +37,8 @@ from multiconn_archicad.models.tapir.commands import (
     GetElementsOfDesignOptionsResult,
     GetHotlinkDesignOptionTableDetailsParameters,
     GetHotlinkDesignOptionTableDetailsResult,
+    GetHotlinkDesignOptionTablesParameters,
+    GetHotlinkDesignOptionTablesResult,
     MoveDesignOptionsToAnotherSetParameters,
     MoveDesignOptionsToAnotherSetResult,
     MoveElementsToDesignOptionsParameters,
@@ -53,6 +57,10 @@ from multiconn_archicad.models.tapir.commands import (
     SetActiveDesignOptionsInCombinationsResult,
     SetDefaultDesignOptionParameters,
     SetDefaultDesignOptionResult,
+    SetDesignOptionCombinationOfViewsParameters,
+    SetDesignOptionCombinationOfViewsResult,
+    SetHotlinkDesignOptionTablesParameters,
+    SetHotlinkDesignOptionTablesResult,
 )
 from multiconn_archicad.models.tapir.types import (
     ActiveDesignOptionsInCombination,
@@ -79,9 +87,16 @@ from multiconn_archicad.models.tapir.types import (
     ElementsOfDesignOption,
     ErrorItem,
     FailedExecutionResult,
+    HotlinkDesignOptionTable,
     HotlinkDesignOptionTableDetails,
+    HotlinkDesignOptionTableUpdate,
+    HotlinkDesignOptionsByElement,
+    HotlinkDesignOptionsByNode,
     HotlinkNodeReference,
+    NavigatorItemIdArrayItem,
+    NavigatorItemIdsWithCombinationItem,
     SuccessfulExecutionResult,
+    ViewDesignOptionCombination,
 )
 
 if TYPE_CHECKING:
@@ -385,6 +400,37 @@ class DesignOptionsCommands:
         validated_response = DuplicateDesignOptionCombinationsResult.model_validate(response_dict)
         return validated_response.designOptionCombinationIdsOrErrors
 
+    def get_design_option_combination_of_views(
+        self, navigator_item_ids: list[NavigatorItemIdArrayItem]
+    ) -> list[ErrorItem | ViewDesignOptionCombination]:
+        """
+        Retrieves which design option combination the given views show: only the main model, a
+        combination, a custom set of design options or a deleted combination. Available from
+        Archicad 27.
+
+        Args:
+            navigator_item_ids (list[NavigatorItemIdArrayItem]): The navigator items of the
+                views (View Map items).
+
+        Returns:
+            list[ErrorItem | ViewDesignOptionCombination]
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "navigatorItemIds": navigator_item_ids,
+        }
+        validated_params = GetDesignOptionCombinationOfViewsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetDesignOptionCombinationOfViews",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+        )
+        validated_response = GetDesignOptionCombinationOfViewsResult.model_validate(response_dict)
+        return validated_response.designOptionCombinationOfViews
+
     def get_design_option_combinations(self) -> list[DesignOptionCombinationDetails]:
         """
         Retrieves information about existing design option combinations.
@@ -519,6 +565,39 @@ class DesignOptionsCommands:
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
         )
         validated_response = GetHotlinkDesignOptionTableDetailsResult.model_validate(response_dict)
+        return validated_response.hotlinkDesignOptionTables
+
+    def get_hotlink_design_option_tables(
+        self, hotlinks: list[HotlinkDesignOptionsByElement | HotlinkDesignOptionsByNode]
+    ) -> list[ErrorItem | HotlinkDesignOptionTable]:
+        """
+        Retrieves the design option table of the given hotlink nodes and placed hotlink
+        instances: the filter mode (main model only, by options or by combination), the design
+        option sets, options and combinations of the hotlinked module and which of them are
+        active. Available from Archicad 29.
+
+        Args:
+            hotlinks (list[HotlinkDesignOptionsByElement | HotlinkDesignOptionsByNode]): The
+                hotlink nodes (hotlinkNodeId from GetHotlinks) and placed hotlink instances
+                (elementId of a Hotlink element) to read the design option table of.
+
+        Returns:
+            list[ErrorItem | HotlinkDesignOptionTable]: The design option tables, in the order
+                of the given hotlinks.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "hotlinks": hotlinks,
+        }
+        validated_params = GetHotlinkDesignOptionTablesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetHotlinkDesignOptionTables", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetHotlinkDesignOptionTablesResult.model_validate(response_dict)
         return validated_response.hotlinkDesignOptionTables
 
     def move_design_options_to_another_set(
@@ -784,3 +863,67 @@ class DesignOptionsCommands:
         )
         validated_response = TypeAdapter(SetDefaultDesignOptionResult).validate_python(response_dict)
         return validated_response
+
+    def set_design_option_combination_of_views(
+        self, navigator_item_ids_with_combination: list[NavigatorItemIdsWithCombinationItem]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Sets the design option combination the given views show, or makes them show only the
+        main model. Available from Archicad 27.
+
+        Args:
+            navigator_item_ids_with_combination (list[NavigatorItemIdsWithCombinationItem]): The
+                views (View Map navigator items), each with either a 'designOptionCombinationId'
+                or 'mainModelOnly': true.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "navigatorItemIdsWithCombination": navigator_item_ids_with_combination,
+        }
+        validated_params = SetDesignOptionCombinationOfViewsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "SetDesignOptionCombinationOfViews",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+        )
+        validated_response = SetDesignOptionCombinationOfViewsResult.model_validate(response_dict)
+        return validated_response.executionResults
+
+    def set_hotlink_design_option_tables(
+        self, hotlink_instances: list[HotlinkDesignOptionTableUpdate]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Sets the filter mode, the active combination and the active option of sets in the design
+        option table of the given placed hotlink instances. Available from Archicad 29.
+
+        Args:
+            hotlink_instances (list[HotlinkDesignOptionTableUpdate]): The placed hotlink
+                instances to change the design option table of. Every field but elementId is
+                optional; what is omitted keeps its current value. The changes are applied in
+                the order filterMode, activeDesignOptionCombination, activeDesignOptions.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "hotlinkInstances": hotlink_instances,
+        }
+        validated_params = SetHotlinkDesignOptionTablesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "SetHotlinkDesignOptionTables", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = SetHotlinkDesignOptionTablesResult.model_validate(response_dict)
+        return validated_response.executionResults

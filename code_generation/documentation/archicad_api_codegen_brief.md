@@ -14,6 +14,7 @@ Run commands from the repository root with the project environment active. On Wi
 | Regenerate Official models from downloaded inputs | `python -m code_generation.official.run_official_pipeline` |
 | Refresh Official downloaded inputs explicitly | `python -m code_generation.official.model_generators.01_crawl_site` |
 | Regenerate unified methods and method tests | `python -m code_generation.unified.api_generator.run_pipeline` |
+| Refresh the shipped Unified API signatures after a release | `python -m code_generation.unified.api_generator.shipped_signatures <release-tag>` |
 | Run the routine suite used by PR and main CI | `python -m pytest` |
 | Validate generated schemas after unified generation | `python -m pytest --schema-tests=deep tests/generated tests/code_generation` |
 
@@ -83,6 +84,10 @@ The Official runner does not currently include the Tapir strict-audit or complet
 5. **Generate method tests.** Generate Official/Tapir tests using schema-derived input/response data and mocked core command methods.
 
 Parameters serialize in JSON mode with wire aliases and omitted `None` values. Official calls route through `post_command`; Tapir calls use `post_tapir_command`. Responses are validated through models or `TypeAdapter`, including aliases and unions.
+
+The method generator reads a checked-in snapshot keyed by provider, wire command, and Python method name. Existing positional arguments keep their published order, and shipped keyword-only arguments retain that kind. New fields on an existing method are keyword-only. Commands absent from the snapshot use the normal required-first order. Model changes that replace the call shape, such as a new top-level parameter union, still require compatibility review. Refresh the snapshot from a shipped MultiConn tag when adopting a new baseline. [Shipped signatures](../unified/api_generator/shipped_signatures.json)
+
+When a Tapir command adds dry-run input and response fields to a shipped execution-result method, the generator preserves its ordinary call and return type. A companion `_dry_run` method sends `dryRun=True` to the same wire command and returns its full preview response. The snapshot records both Python methods when they share the command.
 
 Return shape is part of the Python API: a one-field response model is unwrapped, a multi-field model is returned as a model, an empty response model yields `None`, and alias/union results are validated directly. An optional second response field can therefore change a unified return shape even when upstream acceptance changes additively. Review behavior as well as annotations.
 

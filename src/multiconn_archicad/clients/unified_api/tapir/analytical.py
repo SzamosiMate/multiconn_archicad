@@ -22,6 +22,8 @@ from multiconn_archicad.models.tapir.commands import (
     CreateAnalyticalLoadsResult,
     CreateAnalyticalSupportsParameters,
     CreateAnalyticalSupportsResult,
+    CreateElementsFromAnalyticalMembersParameters,
+    CreateElementsFromAnalyticalMembersResult,
     DeleteAnalyticalLoadCasesParameters,
     DeleteAnalyticalLoadCasesResult,
     DeleteAnalyticalLoadCombinationsParameters,
@@ -106,6 +108,10 @@ from multiconn_archicad.models.tapir.types import (
     AnalyticalVisibilitySettings,
     ConvertedAnalyticalLink,
     ElementAnalyticalRelease,
+    ElementFromAnalyticalMember,
+    ElementFromCurveMemberData,
+    ElementFromSegmentedSurfaceMembersData,
+    ElementFromSurfaceMemberData,
     ElementIdArrayItem,
     ErrorItem,
     FailedExecutionResult,
@@ -367,6 +373,47 @@ class AnalyticalCommands:
             "CreateAnalyticalSupports", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = CreateAnalyticalSupportsResult.model_validate(response_dict)
+        return validated_response.elements
+
+    def create_elements_from_analytical_members(
+        self,
+        members: list[
+            ElementFromCurveMemberData | ElementFromSegmentedSurfaceMembersData | ElementFromSurfaceMemberData
+        ],
+    ) -> list[ElementFromAnalyticalMember | ErrorItem]:
+        """
+        Creates elements (beams, columns, walls, slabs, roofs) from the given curve, surface or
+        segmented surface members, in the form GetAnalyticalMemberDetails returns them,
+        optionally with the settings of a favorite, in one undo step. Returns the new elements
+        and, from Archicad 26, the mapping of their edges and vertices to member parts.
+
+        Args:
+            members (list[ElementFromCurveMemberData | ElementFromSegmentedSurfaceMembersData |
+                ElementFromSurfaceMemberData]): The analytical members to create elements from,
+                in the form GetAnalyticalMemberDetails returns them, so a member read there can
+                be passed on as it is. The elemGuid of a member is ignored. A curve member needs
+                analyticalMemberType and curve, a surface member (or segment)
+                analyticalMemberType and contour; the other fields are zero when left out.
+
+        Returns:
+            list[ElementFromAnalyticalMember | ErrorItem]: The new element of each member, in
+                the order of the input. A member no element could be created from is represented
+                by an error object.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "members": members,
+        }
+        validated_params = CreateElementsFromAnalyticalMembersParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "CreateElementsFromAnalyticalMembers",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+        )
+        validated_response = CreateElementsFromAnalyticalMembersResult.model_validate(response_dict)
         return validated_response.elements
 
     def delete_analytical_load_cases(

@@ -8,6 +8,7 @@ from pydantic import TypeAdapter
 from multiconn_archicad.models.tapir.commands import (
     GetElementsByIFCIdsParameters,
     GetElementsByIFCIdsResult,
+    GetIFCAssignmentsResult,
     GetIFCAttributesOfElementsParameters,
     GetIFCAttributesOfElementsResult,
     GetIFCClassificationReferencesOfElementsParameters,
@@ -17,6 +18,8 @@ from multiconn_archicad.models.tapir.commands import (
     GetIFCIdsOfElementsResult,
     GetIFCPropertiesOfElementsParameters,
     GetIFCPropertiesOfElementsResult,
+    GetIFCSpatialStructureParameters,
+    GetIFCSpatialStructureResult,
     GetIFCTypeOfElementsParameters,
     GetIFCTypeOfElementsResult,
     IFCFileOperationParameters,
@@ -35,8 +38,8 @@ from multiconn_archicad.models.tapir.commands import (
 from multiconn_archicad.models.tapir.types import (
     ElementIFCAttributeValue,
     ElementIFCAttributes,
-    ElementIFCClassificationReferenceData,
     ElementIFCClassificationReferenceRemoval,
+    ElementIFCClassificationReferenceUpdate,
     ElementIFCClassificationReferences,
     ElementIFCIds,
     ElementIFCProperties,
@@ -46,6 +49,7 @@ from multiconn_archicad.models.tapir.types import (
     ElementIdArrayItem,
     ElementsByIFCId,
     ErrorItem,
+    ExecutionResult,
     FailedExecutionResult,
     FileType,
     IFCElementsToExport,
@@ -91,6 +95,25 @@ class IfcCommands:
         validated_response = GetElementsByIFCIdsResult.model_validate(response_dict)
         return validated_response.elementsByIFCIds
 
+    def get_ifc_assignments(self) -> GetIFCAssignmentsResult:
+        """
+        Returns the IFC assignments of the project: the root IFC groups, and for each object the
+        objects assigned to it (children) and the objects it is assigned to (parents). Each
+        object is given by its hash value, its element where it belongs to one, its IFC type and
+        its GlobalId. Available from Archicad 28.
+
+        Returns:
+            GetIFCAssignmentsResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        response_dict = self._core.post_tapir_command("GetIFCAssignments")
+        validated_response = GetIFCAssignmentsResult.model_validate(response_dict)
+        return validated_response
+
     def get_ifc_attributes_of_elements(
         self, elements: list[ElementIdArrayItem], stored_only: None | bool = None
     ) -> list[ElementIFCAttributes | ErrorItem]:
@@ -131,11 +154,11 @@ class IfcCommands:
     ) -> list[ElementIFCClassificationReferences | ErrorItem]:
         """
         Retrieves the IFC classification references of the given elements, subelements included:
-        identification, name, location, description (from Archicad 29), the referenced
-        classification (name, source, edition) and whether the reference comes from the preview
-        translator or is stored locally. On Archicad 25, 26 and 27 the source is not given, the
-        referenced classification also has its edition date, description and location, and
-        storedOnly returns only the references stored on the elements.
+        identification, name, location, description and sort (from Archicad 29), the name of the
+        IfcRelAssociatesClassification (from Archicad 28), the referenced classification (name,
+        source, edition, edition date, description and location) and whether the reference comes
+        from the preview translator or is stored locally. On Archicad 25, 26 and 27 the source
+        is not given and storedOnly returns only the references stored on the elements.
 
         Args:
             elements (list[ElementIdArrayItem]): A list of elements.
@@ -166,12 +189,16 @@ class IfcCommands:
 
     def get_ifc_export_translators(self) -> list[IFCExportTranslator]:
         """
-        Lists the IFC export translators of the project, the preview translator first. Pass one
-        of the names to IFCFileOperation as translatorName.
+        Lists the IFC export translators of the project in the order of Archicad's translator
+        list. preview marks the first one, which the Archicad API documents as the preview
+        translator; no API identifies the preview translator otherwise, and in some projects the
+        IFC Translators dialog shows another one as preview. Pass one of the names to
+        IFCFileOperation as translatorName.
 
         Returns:
-            list[IFCExportTranslator]: The IFC export translators of the project, the preview
-                translator first.
+            list[IFCExportTranslator]: The IFC export translators of the project, in the order
+                of Archicad's translator list. The first one, which the Archicad API documents
+                as the preview translator, has preview true.
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -237,6 +264,36 @@ class IfcCommands:
         validated_response = GetIFCPropertiesOfElementsResult.model_validate(response_dict)
         return validated_response.elementIFCProperties
 
+    def get_ifc_spatial_structure(
+        self, elements: None | list[ElementIdArrayItem] = None
+    ) -> GetIFCSpatialStructureResult:
+        """
+        Returns the IfcProject, IfcSite and IfcBuilding objects of the project's IFC model (hash
+        value, IFC type and GlobalId), and for the given elements the index of the story they
+        are assigned to in the IFC model. Available from Archicad 28.
+
+        Args:
+            elements (None | list[ElementIdArrayItem]): Elements to get the IFC story index of.
+                Optional.
+
+        Returns:
+            GetIFCSpatialStructureResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elements": elements,
+        }
+        validated_params = GetIFCSpatialStructureParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetIFCSpatialStructure", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetIFCSpatialStructureResult.model_validate(response_dict)
+        return validated_response
+
     def get_ifc_type_of_elements(self, elements: list[ElementIdArrayItem]) -> list[ElementIFCType | ErrorItem]:
         """
         Retrieves the IFC types of the given elements.
@@ -269,14 +326,20 @@ class IfcCommands:
         file_type: FileType | None = None,
         translator_name: None | str = None,
         elements_to_export: IFCElementsToExport | None = None,
+        *,
+        overwrite: None | bool = None,
+        story_index: None | int = None,
     ) -> FailedExecutionResult | SuccessfulExecutionResult:
         """
         Executes an IFC file operation: opens or merges an IFC file, or saves the project as an
-        IFC file. A save can name the export translator to use.
+        IFC file. A save can name the export translator to use, a merge the story the IFC file's
+        first storey is placed on. With overwrite false a save refuses to replace an existing
+        file.
 
         Args:
             method (Method): The file operation method to use.
-            ifc_file_path (str): The target IFC file to use.
+            ifc_file_path (str): The target IFC file to use. The save method overwrites an
+                existing file, unless overwrite is false.
             file_type (FileType | None): The type of the IFC file. The default is 'ifc'.
             translator_name (None | str): Only for the save method: the name of the IFC export
                 translator to save with, as GetIFCExportTranslators lists them. Without it the
@@ -284,6 +347,13 @@ class IfcCommands:
                 a fileType of ifc or ifczip (ifc or ifcxml on Archicad 25 and 26).
             elements_to_export (IFCElementsToExport | None): Only for the save method, and only
                 together with translatorName. The default is VisibleElementsOnAllStories.
+            overwrite (None | bool): Optional, true by default. Only for the save method: false
+                refuses to save when a file already exists at ifcFilePath, and writes nothing.
+            story_index (None | int): Only for the merge method: the story the first storey of
+                the IFC file is placed on, the IFC's other storeys follow on the stories above
+                it. Without it Archicad uses the active story of the floor plan. The active
+                story and the current window are restored after the merge. See GetStories for
+                the valid story indices.
 
         Returns:
             FailedExecutionResult | SuccessfulExecutionResult
@@ -296,9 +366,11 @@ class IfcCommands:
         params_dict = {
             "method": method,
             "ifcFilePath": ifc_file_path,
+            "overwrite": overwrite,
             "fileType": file_type,
             "translatorName": translator_name,
             "elementsToExport": elements_to_export,
+            "storyIndex": story_index,
         }
         validated_params = IFCFileOperationParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
@@ -314,7 +386,9 @@ class IfcCommands:
         Removes IFC classification references stored on elements, given by the name of their
         classification and optionally their identification; without identification every stored
         reference of that classification is removed. Available only in Archicad 25, 26 and 27
-        for now.
+        for now. With dryRun true nothing is removed and no undo step is created: the response
+        has dryRun set to true, and each element that has a matching stored reference gets
+        wouldDelete.
 
         Args:
             element_ifc_classification_references
@@ -324,8 +398,10 @@ class IfcCommands:
                 be removed.
 
         Returns:
-            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
-                results.
+            list[FailedExecutionResult | SuccessfulExecutionResult]: One result for each input
+                item, in the order of the input. On a dry run an element that has a stored IFC
+                classification reference of the given classification (and identification, when
+                given) gets wouldDelete.
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -340,23 +416,63 @@ class IfcCommands:
             "RemoveIFCClassificationReferencesOfElements",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
         )
+        return TypeAdapter(list[ExecutionResult]).validate_python(response_dict.get("executionResults"))
+
+    def remove_ifc_classification_references_of_elements_dry_run(
+        self, element_ifc_classification_references: list[ElementIFCClassificationReferenceRemoval]
+    ) -> RemoveIFCClassificationReferencesOfElementsResult:
+        """
+        Preview this command without applying its changes. Removes IFC classification references
+        stored on elements, given by the name of their classification and optionally their
+        identification; without identification every stored reference of that classification is
+        removed. Available only in Archicad 25, 26 and 27 for now. With dryRun true nothing is
+        removed and no undo step is created: the response has dryRun set to true, and each
+        element that has a matching stored reference gets wouldDelete.
+
+        Args:
+            element_ifc_classification_references
+                (list[ElementIFCClassificationReferenceRemoval]): The IFC classification
+                references to remove from the elements. Only references stored on the elements
+                (the ones GetIFCClassificationReferencesOfElements returns with storedOnly) can
+                be removed.
+
+        Returns:
+            RemoveIFCClassificationReferencesOfElementsResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elementIFCClassificationReferences": element_ifc_classification_references,
+            "dryRun": True,
+        }
+        validated_params = RemoveIFCClassificationReferencesOfElementsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "RemoveIFCClassificationReferencesOfElements",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+        )
         validated_response = RemoveIFCClassificationReferencesOfElementsResult.model_validate(response_dict)
-        return validated_response.executionResults
+        return validated_response
 
     def remove_ifc_properties_of_elements(
         self, element_ifc_properties: list[ElementIFCPropertyRemoval]
     ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
         """
         Removes local IFC properties, given by property set and property name, from elements.
-        Available only in Archicad 25, 26 and 27 for now.
+        Available only in Archicad 25, 26 and 27 for now. With dryRun true nothing is removed
+        and no undo step is created: the response has dryRun set to true, and each element that
+        has the local IFC property gets wouldDelete.
 
         Args:
             element_ifc_properties (list[ElementIFCPropertyRemoval]): The local IFC properties
                 to remove.
 
         Returns:
-            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
-                results.
+            list[FailedExecutionResult | SuccessfulExecutionResult]: One result for each input
+                item, in the order of the input. On a dry run an element that has the local IFC
+                property gets wouldDelete.
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -370,8 +486,40 @@ class IfcCommands:
         response_dict = self._core.post_tapir_command(
             "RemoveIFCPropertiesOfElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
+        return TypeAdapter(list[ExecutionResult]).validate_python(response_dict.get("executionResults"))
+
+    def remove_ifc_properties_of_elements_dry_run(
+        self, element_ifc_properties: list[ElementIFCPropertyRemoval]
+    ) -> RemoveIFCPropertiesOfElementsResult:
+        """
+        Preview this command without applying its changes. Removes local IFC properties, given
+        by property set and property name, from elements. Available only in Archicad 25, 26 and
+        27 for now. With dryRun true nothing is removed and no undo step is created: the
+        response has dryRun set to true, and each element that has the local IFC property gets
+        wouldDelete.
+
+        Args:
+            element_ifc_properties (list[ElementIFCPropertyRemoval]): The local IFC properties
+                to remove.
+
+        Returns:
+            RemoveIFCPropertiesOfElementsResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elementIFCProperties": element_ifc_properties,
+            "dryRun": True,
+        }
+        validated_params = RemoveIFCPropertiesOfElementsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "RemoveIFCPropertiesOfElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
         validated_response = RemoveIFCPropertiesOfElementsResult.model_validate(response_dict)
-        return validated_response.executionResults
+        return validated_response
 
     def set_ifc_attributes_of_elements(
         self, element_ifc_attribute_values: list[ElementIFCAttributeValue]
@@ -405,7 +553,7 @@ class IfcCommands:
         return validated_response.executionResults
 
     def set_ifc_classification_references_of_elements(
-        self, element_ifc_classification_references: list[ElementIFCClassificationReferenceData]
+        self, element_ifc_classification_references: list[ElementIFCClassificationReferenceUpdate]
     ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
         """
         Stores IFC classification references (identification, name, location and the referenced
@@ -413,8 +561,9 @@ class IfcCommands:
         elements. Available only in Archicad 25, 26 and 27 for now.
 
         Args:
-            element_ifc_classification_references (list[ElementIFCClassificationReferenceData]):
-                The IFC classification references to store on the elements.
+            element_ifc_classification_references
+                (list[ElementIFCClassificationReferenceUpdate]): The IFC classification
+                references to store on the elements.
 
         Returns:
             list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution

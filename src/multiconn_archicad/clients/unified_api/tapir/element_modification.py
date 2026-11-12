@@ -6,10 +6,14 @@ from typing import TYPE_CHECKING
 from pydantic import TypeAdapter
 
 from multiconn_archicad.models.tapir.commands import (
+    ModifyAssociativeDimensionsParameters,
+    ModifyAssociativeDimensionsResult,
     ModifyBeamsParameters,
     ModifyBeamsResult,
     ModifyColumnsParameters,
     ModifyColumnsResult,
+    ModifyCurtainWallFramesParameters,
+    ModifyCurtainWallFramesResult,
     ModifyCurtainWallsParameters,
     ModifyCurtainWallsResult,
     ModifyDoorsParameters,
@@ -18,18 +22,28 @@ from multiconn_archicad.models.tapir.commands import (
     ModifyLabelsResult,
     ModifyLampsParameters,
     ModifyLampsResult,
+    ModifyLevelDimensionsParameters,
+    ModifyLevelDimensionsResult,
     ModifyMeshesParameters,
     ModifyMeshesResult,
     ModifyMorphsParameters,
     ModifyMorphsResult,
     ModifyObjectsParameters,
     ModifyObjectsResult,
+    ModifyOpeningsParameters,
+    ModifyOpeningsResult,
+    ModifyRailingsParameters,
+    ModifyRailingsResult,
     ModifyRoofsParameters,
     ModifyRoofsResult,
     ModifyShellsParameters,
     ModifyShellsResult,
+    ModifySkylightsParameters,
+    ModifySkylightsResult,
     ModifySlabsParameters,
     ModifySlabsResult,
+    ModifyStairsParameters,
+    ModifyStairsResult,
     ModifyTextsParameters,
     ModifyTextsResult,
     ModifyWallsParameters,
@@ -40,19 +54,26 @@ from multiconn_archicad.models.tapir.commands import (
     ModifyZonesResult,
 )
 from multiconn_archicad.models.tapir.types import (
+    AssociativeDimensionWithDetails,
     BeamWithDetails,
     ColumnWithDetails,
+    CurtainWallFrameWithDetails,
     CurtainWallWithDetails,
     DoorWithDetails,
     FailedExecutionResult,
     LabelsWithDetail,
     LampWithDetails,
+    LevelDimensionsWithDetail,
     MeshWithDetails,
     MorphWithDetails,
     ObjectWithDetails,
+    OpeningsWithDetail,
+    RailingsWithDetail,
     RoofWithDetails,
     ShellWithDetails,
+    SkylightsWithDetail,
     SlabWithDetails,
+    StairWithDetails,
     SuccessfulExecutionResult,
     TextsWithDetail,
     WallWithDetails,
@@ -68,11 +89,52 @@ class ElementModificationCommands:
     def __init__(self, core: CoreCommands):
         self._core = core
 
+    def modify_associative_dimensions(
+        self, dimensions_with_details: list[AssociativeDimensionWithDetails]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Changes the settings of existing linear dimensions (the Dimension tool's elements, also
+        in sections): the dimension type, the elevation origin, the line pen, the marker type
+        and pen, the text height, pen and frame and the witness line form and value, with the
+        same keys as the dimension creation commands. The text and witness line settings are
+        applied to every witness point. Not written: the witness points, the dimension line
+        position and direction (use MoveElements), the marker size, the text content and
+        position, the witness extension line, the layout and the hole and composite wall
+        dimensioning settings.
+
+        Args:
+            dimensions_with_details (list[AssociativeDimensionWithDetails]): The linear
+                dimensions to change (the Dimension tool's elements, also those placed in
+                sections), each with the settings to change. Only the given settings are
+                changed.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "dimensionsWithDetails": dimensions_with_details,
+        }
+        validated_params = ModifyAssociativeDimensionsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "ModifyAssociativeDimensions", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = ModifyAssociativeDimensionsResult.model_validate(response_dict)
+        return validated_response.executionResults
+
     def modify_beams(
         self, beams_with_details: list[BeamWithDetails]
     ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
         """
-        Modifies Beam elements based on the given parameters.
+        Modifies Beam elements based on the given parameters. CreateBeams takes the same cut
+        fill pens and cover fill, and the same absolute zCoordinate of the reference line (with
+        an optional floorIndex). Not written: the surfaces of the beam segments, and the cut
+        fill pens before Archicad 27.
 
         Args:
             beams_with_details (list[BeamWithDetails])
@@ -100,7 +162,9 @@ class ElementModificationCommands:
         self, columns_with_details: list[ColumnWithDetails]
     ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
         """
-        Modifies Column elements based on the given parameters.
+        Modifies Column elements based on the given parameters. CreateColumns takes the same cut
+        fill pens and cover fill. Not written: the surfaces of the column segments, and the cut
+        fill pens before Archicad 27.
 
         Args:
             columns_with_details (list[ColumnWithDetails])
@@ -122,6 +186,39 @@ class ElementModificationCommands:
             "ModifyColumns", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = ModifyColumnsResult.model_validate(response_dict)
+        return validated_response.executionResults
+
+    def modify_curtain_wall_frames(
+        self, frames_with_details: list[CurtainWallFrameWithDetails]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        EXPERIMENTAL. Modifies single Curtain Wall Frames by their GUID: the frame contour (a1,
+        a2, b1, b2), the frame class and the frame type. ACAPI_Element_Change does not take a
+        frame on its own, so the change is written through the memo of the owner curtain wall,
+        and read back to check that Archicad applied it.
+
+        Args:
+            frames_with_details (list[CurtainWallFrameWithDetails]): Curtain Wall Frames to
+                modify (the GUIDs from GetSubelementsOfHierarchicalElements), with the fields to
+                change. Only the given fields are changed. EXPERIMENTAL.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "framesWithDetails": frames_with_details,
+        }
+        validated_params = ModifyCurtainWallFramesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "ModifyCurtainWallFrames", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = ModifyCurtainWallFramesResult.model_validate(response_dict)
         return validated_response.executionResults
 
     def modify_curtain_walls(
@@ -253,6 +350,40 @@ class ElementModificationCommands:
         validated_response = ModifyLampsResult.model_validate(response_dict)
         return validated_response.executionResults
 
+    def modify_level_dimensions(
+        self, level_dimensions_with_details: list[LevelDimensionsWithDetail]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Changes existing Level Dimension elements: the position of the marker and the settings
+        CreateLevelDimensions takes (pen, text height and pen, marker type and size, plus sign,
+        angle, origin), with the same keys. Not written: the parent element and the static level
+        (delete and recreate the dimension to change them), the text content and the hide-with-
+        base-element setting.
+
+        Args:
+            level_dimensions_with_details (list[LevelDimensionsWithDetail]): The Level
+                Dimensions to change, each with the settings to change. Only the given settings
+                are changed.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "levelDimensionsWithDetails": level_dimensions_with_details,
+        }
+        validated_params = ModifyLevelDimensionsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "ModifyLevelDimensions", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = ModifyLevelDimensionsResult.model_validate(response_dict)
+        return validated_response.executionResults
+
     def modify_meshes(
         self, meshes_data: list[MeshWithDetails]
     ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
@@ -339,11 +470,76 @@ class ElementModificationCommands:
         validated_response = ModifyObjectsResult.model_validate(response_dict)
         return validated_response.executionResults
 
+    def modify_openings(
+        self, openings_with_details: list[OpeningsWithDetail]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Modifies Opening elements: the width, the height and the base point CreateOpenings
+        takes. Needs Archicad 28 or earlier; in Archicad 29 and later every item fails with a
+        message pointing to SetOpeningDetails, which changes the size and the position of an
+        opening there.
+
+        Args:
+            openings_with_details (list[OpeningsWithDetail])
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "openingsWithDetails": openings_with_details,
+        }
+        validated_params = ModifyOpeningsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "ModifyOpenings", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = ModifyOpeningsResult.model_validate(response_dict)
+        return validated_response.executionResults
+
+    def modify_railings(
+        self, railings_with_details: list[RailingsWithDetail]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Modifies Railing elements in place: the height of their segments, the bottom offset and
+        the home story. The reference line, the nodes and segments, and the posts, rails and
+        panels stay as they are. Each railing is read back after the change, and a value
+        Archicad did not apply gets a failed execution result.
+
+        Args:
+            railings_with_details (list[RailingsWithDetail])
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "railingsWithDetails": railings_with_details,
+        }
+        validated_params = ModifyRailingsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "ModifyRailings", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = ModifyRailingsResult.model_validate(response_dict)
+        return validated_response.executionResults
+
     def modify_roofs(
         self, roofs_with_details: list[RoofWithDetails]
     ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
         """
-        Modifies multi-plane Roof elements based on the given parameters.
+        Modifies single-plane and multi-plane Roof elements based on the given parameters. The
+        plan outline, level, thickness and structure apply to both; angle, pivotLine and
+        edgeTrims (the cut of each polygon edge) only to single-plane roofs; levels,
+        eavesOverhang and pivotEdges only to multi-plane roofs.
 
         Args:
             roofs_with_details (list[RoofWithDetails])
@@ -396,11 +592,52 @@ class ElementModificationCommands:
         validated_response = ModifyShellsResult.model_validate(response_dict)
         return validated_response.executionResults
 
+    def modify_skylights(
+        self, skylights_with_details: list[SkylightsWithDetail]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Modifies Skylight elements: anchor position and anchor point, fix mode, width, height,
+        azimuth and elevation angles, mirroring, floor plan display option, pens, line types,
+        section fill and pens, surface and the use-the-library-part's-settings flags - the same
+        settings CreateSkylights takes and GetDetailsOfElements returns. Only the given settings
+        change. Not written by this command: the owner roof or shell, the anchor level and the
+        vertical link (Archicad places the skylight on its owner), the plane of a multi-plane
+        roof it sits on, the dimension marker (a separate element) and the library part's own
+        parameters (use SetGDLParametersOfElements). Archicad may set the elevation angle again
+        from the owner.
+
+        Args:
+            skylights_with_details (list[SkylightsWithDetail]): The skylights to modify, each
+                with the settings to change. The settings not given stay as they are.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "skylightsWithDetails": skylights_with_details,
+        }
+        validated_params = ModifySkylightsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "ModifySkylights", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = ModifySkylightsResult.model_validate(response_dict)
+        return validated_response.executionResults
+
     def modify_slabs(
         self, slabs_with_details: list[SlabWithDetails]
     ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
         """
-        Modifies Slab elements based on the given parameters.
+        Modifies Slab elements based on the given parameters. CreateSlabs takes the same
+        surfaces, cut fill pens and floor fill. Not written: the surface of a single edge, and
+        the cut fill pens before Archicad 27. Of the cover fill orientation, Archicad applies
+        only the type to a Slab through the API; a given origin or distortion matrix that did
+        not stick gets a failed execution result, while the other details are applied.
 
         Args:
             slabs_with_details (list[SlabWithDetails])
@@ -424,6 +661,48 @@ class ElementModificationCommands:
         validated_response = ModifySlabsResult.model_validate(response_dict)
         return validated_response.executionResults
 
+    def modify_stairs(
+        self, stairs_with_details: list[StairWithDetails]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Modifies Stair elements in place, keeping their baseline and position: the flight width,
+        total height, number of steps, riser height and going with their locks, the finish and
+        structure visibility, the extra top and bottom treads, the walking line position and
+        offset, the step numbering, the walking direction, the uniform finish, monolith and
+        draining settings, and for the flights and the landings the tread and riser settings
+        (presence, thickness, offset, nosing, riser cross section and position) and the
+        structure of each side (presence, type, underside shape and thickness). CreateStairs
+        accepts the same settings. Only the given settings are changed. Archicad solves the
+        stair again within its baseline, so it may adjust the step values; read them back with
+        GetDetailsOfElements. Not written by this command: the baseline with its landings and
+        winders, the top link, the floor plan display (symbol and marker layout), the headroom
+        and the stair rules; the subelements (treads, risers, structures) take the per-part
+        settings above and cannot be written one by one through the API.
+
+        Args:
+            stairs_with_details (list[StairWithDetails]): Array of Stair elements to modify,
+                with the settings to change. Only the given settings are changed; the baseline,
+                the position and the omitted settings are kept.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "stairsWithDetails": stairs_with_details,
+        }
+        validated_params = ModifyStairsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "ModifyStairs", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = ModifyStairsResult.model_validate(response_dict)
+        return validated_response.executionResults
+
     def modify_texts(
         self, texts_with_details: list[TextsWithDetail]
     ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
@@ -434,10 +713,11 @@ class ElementModificationCommands:
             texts_with_details (list[TextsWithDetail]): Array of Text elements to modify, with
                 the fields to change. Only provided fields are changed; omitted fields are left
                 as-is. A change of the text, the runs, or a run-level style field (pen, font,
-                faces, height, effects) rebuilds the content as one paragraph, which makes the
-                element auto-width (word wrap off), as SetDetailsOfElements does, and on a
-                multi-run text applies that style to every run; the other style fields leave the
-                content as it is.
+                faces, height, effects) rebuilds the content as one paragraph, as
+                SetDetailsOfElements does, and on a multi-run text applies that style to every
+                run; a text that wraps keeps its wrap width through the rebuild unless the same
+                item gives a width. The other style fields and a width leave the content as it
+                is.
 
         Returns:
             list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
@@ -462,7 +742,13 @@ class ElementModificationCommands:
         self, walls_with_details: list[WallWithDetails]
     ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
         """
-        Modifies Wall elements based on the given parameters.
+        Modifies Wall elements based on the given parameters. Takes the same wall settings as
+        CreateWalls, applied by the same code, plus geometryType (Straight or Trapezoid),
+        profileType and bottomOffset. Neither command can write a Polygonal outline (it needs an
+        outline polygon, which these commands do not take), connectionPriority or
+        junctionSequence (Archicad ignores writes to them; GetDetailsOfElements reads them), and
+        on Archicad 29 any story visibility other than 'Home story only' and 'All relevant
+        stories'.
 
         Args:
             walls_with_details (list[WallWithDetails])
@@ -519,7 +805,10 @@ class ElementModificationCommands:
     ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
         """
         Modifies Zone elements: name, number, category, zone stamp, height, base offset, top
-        link and floor thickness. Only the given fields are changed; the polygon is kept.
+        link, floor thickness, contour line and cover fill - the same settings as CreateZones,
+        applied by the same helpers. Only the given fields are changed. The polygon of a manual
+        zone cannot be changed here (the change takes no polygon memo), nor the reference point
+        of an automatic one (SetDetailsOfElements moves it).
 
         Args:
             zones_with_details (list[ZoneWithDetails]): Array of Zone elements to modify, with

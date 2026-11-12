@@ -6,6 +6,8 @@ from typing import TYPE_CHECKING
 from pydantic import TypeAdapter
 
 from multiconn_archicad.models.tapir.commands import (
+    ActivateLayerCombinationParameters,
+    ActivateLayerCombinationResult,
     ConsolidateFillsResult,
     ConsolidateLinesResult,
     CreateAttributeFoldersParameters,
@@ -38,6 +40,8 @@ from multiconn_archicad.models.tapir.commands import (
     CreateSurfacesResult,
     CreateZoneCategoriesParameters,
     CreateZoneCategoriesResult,
+    DeleteAndReplaceAttributesParameters,
+    DeleteAndReplaceAttributesResult,
     DeleteAttributeFoldersParameters,
     DeleteAttributeFoldersResult,
     DeleteAttributesParameters,
@@ -50,6 +54,8 @@ from multiconn_archicad.models.tapir.commands import (
     DeleteGraphicOverrideRulesResult,
     DeleteUserDataOfAttributesParameters,
     DeleteUserDataOfAttributesResult,
+    GetAttributeIndexesParameters,
+    GetAttributeIndexesResult,
     GetAttributesByTypeParameters,
     GetAttributesByTypeResult,
     GetAttributesFromProjectParameters,
@@ -70,15 +76,20 @@ from multiconn_archicad.models.tapir.commands import (
     GetGraphicOverrideRuleGroupsResult,
     GetGraphicOverrideRulesByNameParameters,
     GetGraphicOverrideRulesByNameResult,
+    GetGraphicOverrideRulesParameters,
     GetGraphicOverrideRulesResult,
     GetLayerCombinationsParameters,
     GetLayerCombinationsResult,
+    GetLayerOfElementDefaultsParameters,
+    GetLayerOfElementDefaultsResult,
     GetLayersParameters,
     GetLayersResult,
     GetLinesParameters,
     GetLinesResult,
     GetMEPSystemsParameters,
     GetMEPSystemsResult,
+    GetMissingAttributesParameters,
+    GetMissingAttributesResult,
     GetPenTablesParameters,
     GetPenTablesResult,
     GetPensParameters,
@@ -87,11 +98,15 @@ from multiconn_archicad.models.tapir.commands import (
     GetProfilesResult,
     GetSurfacesParameters,
     GetSurfacesResult,
+    GetUnusedAttributesParameters,
+    GetUnusedAttributesResult,
     GetUsedAttributesResult,
     GetUserDataOfAttributesParameters,
     GetUserDataOfAttributesResult,
     GetZoneCategoriesParameters,
     GetZoneCategoriesResult,
+    ImportAttributesFromProjectParameters,
+    ImportAttributesFromProjectResult,
     ModifyGraphicOverrideCombinationsParameters,
     ModifyGraphicOverrideCombinationsResult,
     ModifyGraphicOverrideRulesParameters,
@@ -102,14 +117,24 @@ from multiconn_archicad.models.tapir.commands import (
     MoveAttributesAndFoldersResult,
     MoveGraphicOverrideRulesParameters,
     MoveGraphicOverrideRulesResult,
+    ReindexAttributesParameters,
+    ReindexAttributesResult,
+    ReindexLayersParameters,
+    ReindexLayersResult,
     RenameAttributeFoldersParameters,
     RenameAttributeFoldersResult,
+    RenameAttributesParameters,
+    RenameAttributesResult,
     RenameGraphicOverrideRuleGroupsParameters,
     RenameGraphicOverrideRuleGroupsResult,
     SetGraphicOverrideRuleGroupOrderParameters,
     SetGraphicOverrideRuleGroupOrderResult,
     SetGraphicOverrideRuleOrderParameters,
     SetGraphicOverrideRuleOrderResult,
+    SetLayerOfElementDefaultsParameters,
+    SetLayerOfElementDefaultsResult,
+    SetPensParameters,
+    SetPensResult,
     SetUserDataOfAttributesParameters,
     SetUserDataOfAttributesResult,
 )
@@ -117,8 +142,14 @@ from multiconn_archicad.models.tapir.types import (
     AttributeFolder,
     AttributeFolderRename,
     AttributeHeadersWrapper,
+    AttributeId,
     AttributeIdArrayItem,
+    AttributeIndexSummary,
+    AttributeReindexData,
+    AttributeReindexResult,
+    AttributeRename,
     AttributeType,
+    AttributeUsageType,
     AttributeUserData,
     AttributesToDeleteItem,
     BuildingMaterialAttribute,
@@ -128,7 +159,10 @@ from multiconn_archicad.models.tapir.types import (
     CompositeAttribute,
     CompositeAttributeField,
     CompositeData,
+    DeleteAndReplaceAttributeData,
+    ElementType,
     ErrorItem,
+    ExecutionResult,
     FailedExecutionResult,
     FillAttribute,
     FillAttributeField,
@@ -147,17 +181,23 @@ from multiconn_archicad.models.tapir.types import (
     GraphicOverrideRuleMove,
     GraphicOverrideRuleOrder,
     GraphicOverrideRuleReference,
+    ImportedAttributesByType,
+    Layer,
     LayerAttribute,
     LayerAttributeField,
     LayerCombinationAttribute,
     LayerCombinationDataArrayItem,
     LayerData,
+    Layers,
+    LayersOfElementDefault,
+    LayersOfElementDefaults,
     LineAttribute,
     LineAttributeField,
     LineData,
     MEPSystemAttribute,
     MEPSystemAttributeField,
     MEPSystemData,
+    MissingAttributeSource,
     PenData,
     PenTableAttribute,
     PenTableAttributeField,
@@ -168,6 +208,8 @@ from multiconn_archicad.models.tapir.types import (
     ProfileAttributeField,
     ProfileData,
     ProjectAttributes,
+    ReindexableAttributeType,
+    ReplaceableAttributeType,
     SuccessfulExecutionResult,
     SurfaceAttribute,
     SurfaceAttributeField,
@@ -185,6 +227,34 @@ if TYPE_CHECKING:
 class AttributeCommands:
     def __init__(self, core: CoreCommands):
         self._core = core
+
+    def activate_layer_combination(
+        self, attribute_id: AttributeId
+    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+        """
+        Activates the given layer combination in the current window, like choosing it in the
+        Quick Layers palette. Saved views are not changed.
+
+        Args:
+            attribute_id (AttributeId)
+
+        Returns:
+            FailedExecutionResult | SuccessfulExecutionResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "attributeId": attribute_id,
+        }
+        validated_params = ActivateLayerCombinationParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "ActivateLayerCombination", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = TypeAdapter(ActivateLayerCombinationResult).validate_python(response_dict)
+        return validated_response
 
     def consolidate_fills(self) -> ConsolidateFillsResult:
         """
@@ -679,21 +749,83 @@ class AttributeCommands:
         validated_response = CreateZoneCategoriesResult.model_validate(response_dict)
         return validated_response.attributeIds
 
+    def delete_and_replace_attributes(
+        self,
+        attribute_type: ReplaceableAttributeType,
+        attributes: list[DeleteAndReplaceAttributeData],
+        dry_run: None | bool = None,
+    ) -> DeleteAndReplaceAttributesResult:
+        """
+        Deletes fills, line types, surfaces or building materials and replaces each by another
+        attribute of the same type wherever it was used, like Delete and Replace in the
+        Attribute Manager. Every reference is rewritten to the replacement, the way
+        ReindexAttributes rewrites them: the fields of the elements in the floor plan and in
+        every view and layout, the parameters of library part based elements, their memo data,
+        the tool defaults, the Favorites, the other attributes that refer to it (composites,
+        building materials, surfaces, profiles, MEP systems) and the graphic override rules.
+        Elements on a hidden or locked layer are changed too: their layers are shown and
+        unlocked for the change and put back afterwards (in the current window). If an element
+        cannot be changed (it is locked itself, or not reserved in Teamwork), everything is put
+        back and that attribute is not deleted. Elements from hotlinked modules cannot be
+        changed and are listed. Indices typed into GDL scripts are not found, and the frame and
+        panel classes of curtain wall Favorites and of the Curtain Wall tool default keep the
+        deleted attribute (named in the warnings). If a tool default, Favorite, attribute or
+        rule cannot be rewritten to the replacement, it keeps a copy of the deleted attribute
+        with its name and a new attribute id, named in the warnings. The whole call is one undo
+        step. With dryRun true nothing is changed and no undo step is created: the response has
+        dryRun set to true, and each attribute that passes the checks gets wouldDelete and lists
+        every reference a real run would rewrite (elements, tool defaults, Favorites, other
+        attributes, graphic override rules, elements from hotlinked modules). Available from
+        Archicad 27.
+
+        Args:
+            attribute_type (ReplaceableAttributeType)
+            attributes (list[DeleteAndReplaceAttributeData]): The attributes to delete, each
+                with the attribute that takes its place, handled in the given order.
+            dry_run (None | bool): If true, the command makes all the checks of a real run and
+                resolves the same targets, with the same errors, but changes nothing in the
+                project and creates no undo step. The response is that of a real run with
+                "dryRun": true added, and says for each target what the real run would do.
+                Default is false.
+
+        Returns:
+            DeleteAndReplaceAttributesResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "attributeType": attribute_type,
+            "attributes": attributes,
+            "dryRun": dry_run,
+        }
+        validated_params = DeleteAndReplaceAttributesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "DeleteAndReplaceAttributes", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = DeleteAndReplaceAttributesResult.model_validate(response_dict)
+        return validated_response
+
     def delete_attribute_folders(
         self, attribute_folders: list[AttributeFolder]
     ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
         """
         Deletes attribute folders, each given by attribute type and path, together with all the
         subfolders and deletable attributes they contain (a folder holding an attribute that
-        cannot be deleted is kept). The root folder cannot be deleted. Available from Archicad
-        26.
+        cannot be deleted is kept). The root folder cannot be deleted. With dryRun true nothing
+        is deleted: the response has dryRun set to true, and each folder that exists and is not
+        the root folder gets wouldDelete. Available from Archicad 26.
 
         Args:
             attribute_folders (list[AttributeFolder]): A list of attribute folders.
 
         Returns:
-            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
-                results.
+            list[FailedExecutionResult | SuccessfulExecutionResult]: One result for each input
+                folder, in the order of the input. On a dry run a folder that is not the root
+                folder and exists gets wouldDelete; Archicad can still refuse to delete a folder
+                that passes these checks.
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -707,21 +839,58 @@ class AttributeCommands:
         response_dict = self._core.post_tapir_command(
             "DeleteAttributeFolders", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
+        return TypeAdapter(list[ExecutionResult]).validate_python(response_dict.get("executionResults"))
+
+    def delete_attribute_folders_dry_run(
+        self, attribute_folders: list[AttributeFolder]
+    ) -> DeleteAttributeFoldersResult:
+        """
+        Preview this command without applying its changes. Deletes attribute folders, each given
+        by attribute type and path, together with all the subfolders and deletable attributes
+        they contain (a folder holding an attribute that cannot be deleted is kept). The root
+        folder cannot be deleted. With dryRun true nothing is deleted: the response has dryRun
+        set to true, and each folder that exists and is not the root folder gets wouldDelete.
+        Available from Archicad 26.
+
+        Args:
+            attribute_folders (list[AttributeFolder]): A list of attribute folders.
+
+        Returns:
+            DeleteAttributeFoldersResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "attributeFolders": attribute_folders,
+            "dryRun": True,
+        }
+        validated_params = DeleteAttributeFoldersParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "DeleteAttributeFolders", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
         validated_response = DeleteAttributeFoldersResult.model_validate(response_dict)
-        return validated_response.executionResults
+        return validated_response
 
     def delete_attributes(
         self, attributes_to_delete: list[AttributesToDeleteItem]
     ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
         """
-        Deletes the given attributes.
+        Deletes the given attributes. Returns an execution result for each input item. With
+        dryRun true nothing is deleted: the response has dryRun set to true, and each attribute
+        that passes the checks made before deleting (valid attribute type, attribute exists)
+        gets wouldDelete.
 
         Args:
             attributes_to_delete (list[AttributesToDeleteItem]): Array of attributes to delete.
 
         Returns:
-            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
-                results.
+            list[FailedExecutionResult | SuccessfulExecutionResult]: One result for each input
+                attribute, in the order of the input. On a dry run an attribute that passes the
+                checks made before deleting (valid attributeType, attribute found) gets
+                wouldDelete; Archicad can still refuse to delete an attribute that passes them.
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -735,8 +904,36 @@ class AttributeCommands:
         response_dict = self._core.post_tapir_command(
             "DeleteAttributes", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
+        return TypeAdapter(list[ExecutionResult]).validate_python(response_dict.get("executionResults"))
+
+    def delete_attributes_dry_run(self, attributes_to_delete: list[AttributesToDeleteItem]) -> DeleteAttributesResult:
+        """
+        Preview this command without applying its changes. Deletes the given attributes. Returns
+        an execution result for each input item. With dryRun true nothing is deleted: the
+        response has dryRun set to true, and each attribute that passes the checks made before
+        deleting (valid attribute type, attribute exists) gets wouldDelete.
+
+        Args:
+            attributes_to_delete (list[AttributesToDeleteItem]): Array of attributes to delete.
+
+        Returns:
+            DeleteAttributesResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "attributesToDelete": attributes_to_delete,
+            "dryRun": True,
+        }
+        validated_params = DeleteAttributesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "DeleteAttributes", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
         validated_response = DeleteAttributesResult.model_validate(response_dict)
-        return validated_response.executionResults
+        return validated_response
 
     def delete_graphic_override_combinations(
         self, graphic_override_combination_ids: list[GraphicOverrideCombinationIdArrayItem]
@@ -841,14 +1038,15 @@ class AttributeCommands:
     ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
         """
         Removes the user data of attributes, every key at once. Archicad does not record this
-        change as an undo step, so Undo does not revert it.
+        change as an undo step, so Undo does not revert it. With dryRun true nothing is removed:
+        the response has dryRun set to true, and each attribute that exists gets wouldDelete.
 
         Args:
             attribute_ids (list[AttributeIdArrayItem]): A list of attributes.
 
         Returns:
             list[FailedExecutionResult | SuccessfulExecutionResult]: One result per attribute,
-                in the input order.
+                in the input order. On a dry run an attribute that exists gets wouldDelete.
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -862,14 +1060,72 @@ class AttributeCommands:
         response_dict = self._core.post_tapir_command(
             "DeleteUserDataOfAttributes", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
+        return TypeAdapter(list[ExecutionResult]).validate_python(response_dict.get("executionResults"))
+
+    def delete_user_data_of_attributes_dry_run(
+        self, attribute_ids: list[AttributeIdArrayItem]
+    ) -> DeleteUserDataOfAttributesResult:
+        """
+        Preview this command without applying its changes. Removes the user data of attributes,
+        every key at once. Archicad does not record this change as an undo step, so Undo does
+        not revert it. With dryRun true nothing is removed: the response has dryRun set to true,
+        and each attribute that exists gets wouldDelete.
+
+        Args:
+            attribute_ids (list[AttributeIdArrayItem]): A list of attributes.
+
+        Returns:
+            DeleteUserDataOfAttributesResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "attributeIds": attribute_ids,
+            "dryRun": True,
+        }
+        validated_params = DeleteUserDataOfAttributesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "DeleteUserDataOfAttributes", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
         validated_response = DeleteUserDataOfAttributesResult.model_validate(response_dict)
-        return validated_response.executionResults
+        return validated_response
+
+    def get_attribute_indexes(self, attribute_types: list[AttributeType]) -> AttributeIndexSummary | ErrorItem:
+        """
+        Reports for each given attribute type how many attributes there are, the first valid and
+        the highest index in use, and the free indexes between them (for example those of
+        deleted attributes). Available from Archicad 27.
+
+        Args:
+            attribute_types (list[AttributeType]): The attribute types to report the indexes of.
+
+        Returns:
+            AttributeIndexSummary | ErrorItem
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "attributeTypes": attribute_types,
+        }
+        validated_params = GetAttributeIndexesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetAttributeIndexes", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = TypeAdapter(GetAttributeIndexesResult).validate_python(response_dict)
+        return validated_response
 
     def get_attributes_by_type(self, attribute_type: AttributeType) -> AttributeHeadersWrapper | ErrorItem:
         """
-        Returns the details of every attribute of the given type. From Archicad 30 an attribute
-        that Archicad keeps a creation record of also carries creationInfo: how (method), from
-        where (source), by whom and when it was created.
+        Returns the details of every attribute of the given type, including the path of the
+        attribute folder holding it (Archicad 26 and newer). From Archicad 30 an attribute that
+        Archicad keeps a creation record of also carries creationInfo: how (method), from where
+        (source), by whom and when it was created.
 
         Args:
             attribute_type (AttributeType)
@@ -1149,10 +1405,17 @@ class AttributeCommands:
         validated_response = GetGraphicOverrideRuleGroupsResult.model_validate(response_dict)
         return validated_response.graphicOverrideRuleGroups
 
-    def get_graphic_override_rules(self) -> list[GraphicOverrideRule]:
+    def get_graphic_override_rules(self, *, include_criterion: None | bool = None) -> list[GraphicOverrideRule]:
         """
         Gets all graphic override rules of the project, with their rule group, criterion and
-        style. Available from Archicad 27.
+        style. With includeCriterion the criterion also comes as structured conditions, which
+        CreateGraphicOverrideRules and ModifyGraphicOverrideRules take back. Available from
+        Archicad 27.
+
+        Args:
+            include_criterion (None | bool): Also return each rule's criterion as structured
+                conditions ('criterion'), in the shape CreateGraphicOverrideRules and
+                ModifyGraphicOverrideRules take. Default: false.
 
         Returns:
             list[GraphicOverrideRule]: The graphic override rules of the project.
@@ -1162,21 +1425,31 @@ class AttributeCommands:
             RequestError: If there is a network or connection error.
             pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
-        response_dict = self._core.post_tapir_command("GetGraphicOverrideRules")
+        params_dict = {
+            "includeCriterion": include_criterion,
+        }
+        validated_params = GetGraphicOverrideRulesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetGraphicOverrideRules", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
         validated_response = GetGraphicOverrideRulesResult.model_validate(response_dict)
         return validated_response.graphicOverrideRules
 
     def get_graphic_override_rules_by_name(
-        self, graphic_override_rules: list[GraphicOverrideRuleReference]
+        self, graphic_override_rules: list[GraphicOverrideRuleReference], *, include_criterion: None | bool = None
     ) -> list[ErrorItem | GraphicOverrideRule]:
         """
         Gets graphic override rules by name, with their rule group, criterion and style. The
-        rule group narrows the search; without it the rule is searched in every rule group.
-        Available from Archicad 27.
+        rule group narrows the search; without it the rule is searched in every rule group. With
+        includeCriterion the criterion also comes as structured conditions. Available from
+        Archicad 27.
 
         Args:
             graphic_override_rules (list[GraphicOverrideRuleReference]): The graphic override
                 rules to get, by name.
+            include_criterion (None | bool): Also return each rule's criterion as structured
+                conditions ('criterion'), in the shape CreateGraphicOverrideRules and
+                ModifyGraphicOverrideRules take. Default: false.
 
         Returns:
             list[ErrorItem | GraphicOverrideRule]: The rules, or errors, in the order of the
@@ -1189,6 +1462,7 @@ class AttributeCommands:
         """
         params_dict = {
             "graphicOverrideRules": graphic_override_rules,
+            "includeCriterion": include_criterion,
         }
         validated_params = GetGraphicOverrideRulesByNameParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
@@ -1223,6 +1497,36 @@ class AttributeCommands:
         )
         validated_response = GetLayerCombinationsResult.model_validate(response_dict)
         return validated_response.layerCombinations
+
+    def get_layer_of_element_defaults(
+        self, element_types: list[ElementType]
+    ) -> list[ErrorItem | LayersOfElementDefaults]:
+        """
+        Returns the layer of the tool defaults of the given element types: the layer new
+        elements of that type are placed on.
+
+        Args:
+            element_types (list[ElementType]): The element types whose tool defaults are read.
+
+        Returns:
+            list[ErrorItem | LayersOfElementDefaults]: One item per element type, in the input
+                order: the layer of its tool defaults, or an error when the type is unknown or
+                has no tool defaults.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elementTypes": element_types,
+        }
+        validated_params = GetLayerOfElementDefaultsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetLayerOfElementDefaults", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetLayerOfElementDefaultsResult.model_validate(response_dict)
+        return validated_response.layersOfElementDefaults
 
     def get_layers(
         self, attribute_ids: list[AttributeIdArrayItem], fields: None | list[LayerAttributeField] = None
@@ -1315,6 +1619,67 @@ class AttributeCommands:
         )
         validated_response = GetMEPSystemsResult.model_validate(response_dict)
         return validated_response.mepSystems
+
+    def get_missing_attributes(
+        self,
+        attribute_types: None | list[AttributeUsageType] = None,
+        sources: None | list[MissingAttributeSource] = None,
+    ) -> GetMissingAttributesResult:
+        """
+        Lists the references of placed elements to layers, fills, surfaces, building materials,
+        composites, profiles, line types, pen tables and zone categories that do not exist in
+        the project, for the given types or all of them, and of the tool defaults, Favorites,
+        graphic override rules, Model View Options combinations and attributes: the structured
+        counterpart of the missing attributes report of Archicad's GDL palette. Every element of
+        the floor plan and of every view and layout (hotlinked ones too) is checked, and so is
+        every tool default and Favorite (with its sub-elements): its layer, its attribute fields
+        and memo data as ReindexAttributes finds them, its composite or profile when its
+        structure type uses one, a drawing's own pen table, and its library part parameters of
+        attribute types; of every graphic override rule the line type, fill and surface it
+        overrides with; of every Model View Options combination the surfaces and line types of
+        the stair and railing schemes and the library part settings' GDL parameters of attribute
+        types; of every composite the building materials of its skins and the line types of its
+        separators, of every building material its cut fill and cut surface, of every surface
+        the fill of its vectorial hatching, of every MEP system its fill, center line type and
+        surfaces, and of every profile the building material, surface or fill of each skin and
+        its contour, cut end and edge line types. The sources input limits the check to
+        elements, tool defaults, Favorites, graphic override rules, Model View Options or
+        attributes. Each item names the source; for an element the element (and the element it
+        is part of, for a curtain wall frame, a column segment, ...) and the story or view it
+        sits on, for a tool default the tool, for a Favorite its name and tool, for a graphic
+        override rule its guid and name, for a Model View Options combination its guid and name
+        (and the library part option set), for an attribute its type, guid and name; then the
+        attribute type, the missing index and the field or GDL parameter that holds it. Index 0
+        counts as no attribute. Read only. Available from Archicad 27.
+
+        Args:
+            attribute_types (None | list[AttributeUsageType]): The attribute types to check. All
+                of them when omitted.
+            sources (None | list[MissingAttributeSource]): What to check: the placed elements
+                (element), the tool default settings (toolDefault), the Favorites (favorite),
+                the graphic override rules (overrideRule), the Model View Options combinations
+                (modelViewOption) and the attributes that refer to other attributes (attribute:
+                composites, building materials, surfaces, MEP systems and profiles). All of them
+                when omitted.
+
+        Returns:
+            GetMissingAttributesResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "attributeTypes": attribute_types,
+            "sources": sources,
+        }
+        validated_params = GetMissingAttributesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetMissingAttributes", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetMissingAttributesResult.model_validate(response_dict)
+        return validated_response
 
     def get_pen_tables(
         self, attribute_ids: list[AttributeIdArrayItem], fields: None | list[PenTableAttributeField] = None
@@ -1441,12 +1806,51 @@ class AttributeCommands:
         validated_response = GetSurfacesResult.model_validate(response_dict)
         return validated_response.surfaces
 
+    def get_unused_attributes(self, types: None | list[AttributeUsageType] = None) -> GetUnusedAttributesResult:
+        """
+        Lists the unused layers, fills, surfaces, building materials, composites, profiles, line
+        types, pen tables and zone categories (index, id and name), for the given types or all
+        of them. The Archicad API has no function that tells which attributes are unused (only
+        how many per type), so every reference is collected: the elements of the floor plan and
+        of every view and layout (hotlinked ones too), with their library part parameters and
+        memo data, the tool defaults, the Favorites, the other attributes (composites, building
+        materials, surfaces, profiles, MEP systems) and the graphic override rules, the way
+        ReindexAttributes finds them; for layers the layer of each element, tool default and
+        Favorite; for composites and profiles the walls, slabs, roofs, shells, column and beam
+        segments whose structure type uses them; for pen tables the current pen table and the
+        drawings set to a pen table of their own. An attribute that only an unused attribute
+        refers to counts as used. Indices typed into GDL scripts and the pen tables saved with
+        views are not found. Each type also reports Archicad's own count of the attributes in
+        use (archicadUsedCount, see GetUsedAttributes), so a difference shows. Read only.
+        Available from Archicad 27.
+
+        Args:
+            types (None | list[AttributeUsageType]): The attribute types to check. All of them
+                when omitted.
+
+        Returns:
+            GetUnusedAttributesResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "types": types,
+        }
+        validated_params = GetUnusedAttributesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetUnusedAttributes", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetUnusedAttributesResult.model_validate(response_dict)
+        return validated_response
+
     def get_used_attributes(self) -> GetUsedAttributesResult:
         """
-        Gets the attributes in use, as Archicad reports them for the usedAttributes JSON query:
-        parsed into usedAttributes when the report is a JSON object, otherwise as text in raw.
-        Helps to find the attributes DeleteAttributes can remove before a handover. Available
-        from Archicad 27.
+        Gets how many attributes of each type are in use (layers, lines, fills, composites,
+        surfaces, ...), as Archicad reports them for the usedAttributes JSON query: the counts
+        in usedAttributes, the report as text in raw. Available from Archicad 27.
 
         Returns:
             GetUsedAttributesResult
@@ -1520,6 +1924,80 @@ class AttributeCommands:
         )
         validated_response = GetZoneCategoriesResult.model_validate(response_dict)
         return validated_response.zoneCategories
+
+    def import_attributes_from_project(
+        self,
+        project_file_path: str,
+        attribute_types: list[AttributeType],
+        attribute_names: None | list[str] = None,
+        overwrite_existing: None | bool = None,
+        dry_run: None | bool = None,
+        references_by_index: None | bool = None,
+    ) -> ErrorItem | ImportedAttributesByType:
+        """
+        Imports Line, Fill, ZoneCategory, PenTable, OperationProfile, Composite, Profile and
+        LayerCombination attributes from another project or template file into the open project,
+        with their complete definition (symbol and percent fills included), like Append or
+        Overwrite by name in Archicad's Attribute Manager. The lines and fills a composite or
+        profile uses are matched by name; its building materials and surfaces, and the layers of
+        a layer combination, keep their index only with referencesByIndex, since Archicad does
+        not read these types from a closed file. An attribute with a reference that cannot be
+        mapped is not imported. A new attribute gets a new guid: Archicad does not hand out the
+        guids stored in the source file. An attribute whose name already exists is skipped, or
+        overwritten in place with overwriteExisting. dryRun reports what would happen without
+        changing anything. The names are the legacy 8-bit names of the source file. Available
+        from Archicad 27.
+
+        Args:
+            project_file_path (str): The absolute path of the project or template file (for
+                example .pln or .tpl) to import the attributes from.
+            attribute_types (list[AttributeType]): The attribute types to import, in this order.
+                Line, Fill, ZoneCategory, PenTable, OperationProfile, Composite, Profile and
+                LayerCombination can be imported. Layer, Surface, BuildingMaterial and MEPSystem
+                fail with an error item: Archicad does not read them from a closed file. A
+                Composite, Profile or LayerCombination refers to other attributes, see
+                referencesByIndex; list Line and Fill before them to import the lines and fills
+                they use.
+            attribute_names (None | list[str]): Import only the attributes with these names. All
+                attributes of the given types are imported when it is omitted.
+            overwrite_existing (None | bool): What happens to an attribute whose name already
+                exists in the open project. false (default): it is skipped and the existing
+                attribute is kept. true: the existing attribute is overwritten with the imported
+                definition and keeps its index and guid.
+            dry_run (None | bool): If true, nothing is changed: the response reports what an
+                import would do.
+            references_by_index (None | bool): How the BuildingMaterial, Surface and Layer
+                references of an imported Composite, Profile or LayerCombination are mapped.
+                Archicad does not read these attributes from a closed file, so their names are
+                unknown and they cannot be matched by name. false (default): an attribute with
+                such a reference is not imported (result failed). true: the reference keeps its
+                index and refers to the attribute with that index in the open project, which is
+                right only when both files share these attributes at the same indexes, for
+                example because they come from the same template. Line and Fill references are
+                always matched by name.
+
+        Returns:
+            ErrorItem | ImportedAttributesByType
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "projectFilePath": project_file_path,
+            "attributeTypes": attribute_types,
+            "attributeNames": attribute_names,
+            "overwriteExisting": overwrite_existing,
+            "dryRun": dry_run,
+            "referencesByIndex": references_by_index,
+        }
+        validated_params = ImportAttributesFromProjectParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "ImportAttributesFromProject", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = TypeAdapter(ImportAttributesFromProjectResult).validate_python(response_dict)
+        return validated_response
 
     def modify_graphic_override_combinations(
         self, graphic_override_combinations: list[GraphicOverrideCombinationModificationData]
@@ -1627,7 +2105,8 @@ class AttributeCommands:
         """
         Moves attributes and attribute folders (with their contents) into the target folder,
         which must be of the same attribute type; an empty target path is the root folder.
-        Returns one execution result per attribute and per folder. Available from Archicad 26.
+        Returns one execution result per attribute and per folder; an attribute or folder that
+        is already directly in the target folder counts as moved. Available from Archicad 26.
 
         Args:
             target_folder (AttributeFolder): The folder to move the attributes and folders into.
@@ -1687,6 +2166,124 @@ class AttributeCommands:
         validated_response = MoveGraphicOverrideRulesResult.model_validate(response_dict)
         return validated_response.executionResults
 
+    def reindex_attributes(
+        self,
+        attribute_type: ReindexableAttributeType,
+        attributes: list[AttributeReindexData],
+        dry_run: None | bool = None,
+        max_placeholders: None | int = None,
+    ) -> list[AttributeReindexResult | ErrorItem]:
+        """
+        Moves fills, line types, surfaces, building materials and zone categories to new
+        indices, the way ReindexLayers moves layers. Archicad cannot renumber an attribute, so
+        the attribute is recreated at its new index (free indices below it are filled with
+        temporary attributes, which are deleted again) and every reference to the old index is
+        rewritten to the new one: the fields of the elements in the floor plan and in every view
+        and layout, the parameters of library part based elements, the memo data of roofs,
+        slabs, meshes, morphs, curtain walls, beams, columns, stairs and interior elevations,
+        the tool defaults, the Favorites (with their sub-elements: a curtain wall's frame and
+        panel classes, a stair's structures), the other attributes that refer to it (composites,
+        building materials, surfaces, profiles, MEP systems) and the graphic override rules.
+        Only then is the old attribute deleted. The new attribute has a new attribute id
+        (Archicad does not keep a given id); its name, definition and attribute folder are the
+        old ones. Elements on a hidden or locked layer cannot be changed, so their layers are
+        shown and unlocked for the move and put back afterwards (in the current window, as
+        Archicad keeps these flags per window). If an element still cannot be changed (it is
+        locked itself, or not reserved in Teamwork), everything is put back and that attribute
+        is not moved. Elements from hotlinked modules cannot be changed and are listed; their
+        module file has to be reindexed on its own. Indices typed into GDL scripts are not
+        found, and the frame and panel classes of curtain wall Favorites and of the Curtain Wall
+        tool default keep the old index (Archicad does not take them from ACAPI_Favorite_Change,
+        so such Favorites are left as they are and named in the warnings). dryRun lists every
+        reference without changing anything. The whole call is one undo step. Pens, layers (see
+        ReindexLayers) and the other attribute types are not supported. Available from Archicad
+        27.
+
+        Args:
+            attribute_type (ReindexableAttributeType)
+            attributes (list[AttributeReindexData]): The attributes to move to a new index,
+                handled in the given order.
+            dry_run (None | bool): Only list every reference to each attribute (elements, tool
+                defaults, Favorites, other attributes, graphic override rules, elements from
+                hotlinked modules) without changing anything. The default is false.
+            max_placeholders (None | int): Every free index below newIndex is filled with a
+                temporary attribute first, so a newIndex far above the highest index in use
+                takes long. An attribute that needs more temporary attributes than this is not
+                moved. The default is 1000.
+
+        Returns:
+            list[AttributeReindexResult | ErrorItem]: One item per requested attribute, in the
+                same order.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "attributeType": attribute_type,
+            "attributes": attributes,
+            "dryRun": dry_run,
+            "maxPlaceholders": max_placeholders,
+        }
+        validated_params = ReindexAttributesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "ReindexAttributes", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = ReindexAttributesResult.model_validate(response_dict)
+        return validated_response.attributes
+
+    def reindex_layers(
+        self, layers: list[Layer], dry_run: None | bool = None, max_placeholders: None | int = None
+    ) -> list[ErrorItem | Layers]:
+        """
+        Moves layers to new indices. Archicad cannot renumber an attribute, so each layer is
+        recreated at its new index (free indices below it are filled with temporary layers,
+        which are deleted again), gets the old layer's state in every layer combination, and
+        then every element of the old layer is moved to it, in the floor plan and in every view
+        and layout database, with the tool defaults on that layer. Only when the old layer is
+        empty everywhere is it deleted, and the new layer gets its name, flags and folder. If an
+        element cannot be moved (it is locked, not reserved in Teamwork, or comes from a
+        hotlinked module), that layer is left as it was. The new layer has a new attribute id;
+        Favorites that use the layer are not updated. Archicad keeps the shown, locked and
+        wireframe state of a layer per open window: the new layer gets the old one's state in
+        the current window and in every layer combination, and starts shown and unlocked in the
+        other open windows. The model elements that sections, elevations, interior elevations
+        and 3D documents show of the layer come back on the new layer when those views are
+        rebuilt (listed as viewsToRebuild). dryRun lists the elements and tool defaults on each
+        layer without changing anything. The whole call is one undo step. Available from
+        Archicad 27.
+
+        Args:
+            layers (list[Layer]): The layers to move to a new index, handled in the given order.
+            dry_run (None | bool): Only list what would change (the elements on each layer, the
+                tools whose default layer it is, the elements that block the move) without
+                changing anything. The default is false.
+            max_placeholders (None | int): Every free index below newIndex is filled with a
+                temporary layer first (about 20 ms each), so a newIndex far above the highest
+                index in use takes long. A layer that needs more temporary layers than this is
+                not moved. The default is 1000.
+
+        Returns:
+            list[ErrorItem | Layers]: One item per requested layer, in the same order.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "layers": layers,
+            "dryRun": dry_run,
+            "maxPlaceholders": max_placeholders,
+        }
+        validated_params = ReindexLayersParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "ReindexLayers", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = ReindexLayersResult.model_validate(response_dict)
+        return validated_response.layers
+
     def rename_attribute_folders(
         self, attribute_folders: list[AttributeFolderRename]
     ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
@@ -1715,6 +2312,38 @@ class AttributeCommands:
             "RenameAttributeFolders", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = RenameAttributeFoldersResult.model_validate(response_dict)
+        return validated_response.executionResults
+
+    def rename_attributes(
+        self, attributes: list[AttributeRename]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Renames attributes of any type (layers, layer combinations, composites, surfaces, ...).
+        Each attribute keeps its index, its id and its settings. A new name that another
+        attribute of the same type already has is refused, and so is renaming the attributes
+        Archicad does not allow to change (the built-in Archicad Layer, the Solid and Empty
+        fills).
+
+        Args:
+            attributes (list[AttributeRename]): The attributes to rename, of any type.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: One result per attribute,
+                in the input order.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "attributes": attributes,
+        }
+        validated_params = RenameAttributesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "RenameAttributes", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = RenameAttributesResult.model_validate(response_dict)
         return validated_response.executionResults
 
     def rename_graphic_override_rule_groups(
@@ -1807,6 +2436,68 @@ class AttributeCommands:
             "SetGraphicOverrideRuleOrder", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = SetGraphicOverrideRuleOrderResult.model_validate(response_dict)
+        return validated_response.executionResults
+
+    def set_layer_of_element_defaults(
+        self, layers_of_element_defaults: list[LayersOfElementDefault]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Sets the layer of the tool defaults of the given element types, so new elements of that
+        type are placed on it. Only the layer of the defaults is changed.
+
+        Args:
+            layers_of_element_defaults (list[LayersOfElementDefault]): The element types whose
+                tool defaults get a new layer.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: One result per item, in the
+                input order.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "layersOfElementDefaults": layers_of_element_defaults,
+        }
+        validated_params = SetLayerOfElementDefaultsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "SetLayerOfElementDefaults", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = SetLayerOfElementDefaultsResult.model_validate(response_dict)
+        return validated_response.executionResults
+
+    def set_pens(self, pens: list[PenData]) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Changes the color, width and description of the given pens in effect in the current
+        window, the pens GetPens returns, in one undo step. Only the given fields of a listed
+        pen are changed; each pen gets its own execution result. In a Teamwork project the
+        PenTables lockable object set must be reserved first (see ReserveLockableObjectSet).
+        Available from Archicad 27.
+
+        Args:
+            pens (list[PenData]): The pens to change among the pens in effect in the current
+                window, the ones GetPens returns. Only the given fields (color, width,
+                description) of a listed pen are changed.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "pens": pens,
+        }
+        validated_params = SetPensParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "SetPens", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = SetPensResult.model_validate(response_dict)
         return validated_response.executionResults
 
     def set_user_data_of_attributes(

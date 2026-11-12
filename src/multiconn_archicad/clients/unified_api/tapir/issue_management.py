@@ -31,6 +31,7 @@ from multiconn_archicad.models.tapir.commands import (
 from multiconn_archicad.models.tapir.types import (
     Comment,
     ElementIdArrayItem,
+    ExecutionResult,
     FailedExecutionResult,
     Issue,
     IssueCommentStatus,
@@ -145,7 +146,8 @@ class IssueManagementCommands:
         self, issue_id: IssueId, accept_all_elements: None | bool = None
     ) -> FailedExecutionResult | SuccessfulExecutionResult:
         """
-        Deletes the specified issue.
+        Deletes the specified issue. With dryRun true nothing is deleted and no undo step is
+        created: the response has dryRun set to true, and wouldDelete when the issue exists.
 
         Args:
             issue_id (IssueId)
@@ -168,7 +170,37 @@ class IssueManagementCommands:
         response_dict = self._core.post_tapir_command(
             "DeleteIssue", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
-        validated_response = TypeAdapter(DeleteIssueResult).validate_python(response_dict)
+        return TypeAdapter(ExecutionResult).validate_python(response_dict)
+
+    def delete_issue_dry_run(self, issue_id: IssueId, accept_all_elements: None | bool = None) -> DeleteIssueResult:
+        """
+        Preview this command without applying its changes. Deletes the specified issue. With
+        dryRun true nothing is deleted and no undo step is created: the response has dryRun set
+        to true, and wouldDelete when the issue exists.
+
+        Args:
+            issue_id (IssueId)
+            accept_all_elements (None | bool): Accept all creation/deletion/modification of the
+                deleted issue. By default false.
+
+        Returns:
+            DeleteIssueResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "issueId": issue_id,
+            "acceptAllElements": accept_all_elements,
+            "dryRun": True,
+        }
+        validated_params = DeleteIssueParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "DeleteIssue", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = DeleteIssueResult.model_validate(response_dict)
         return validated_response
 
     def detach_elements_from_issue(
@@ -206,17 +238,23 @@ class IssueManagementCommands:
         use_external_id: bool,
         align_by_survey_point: bool,
         issues: None | list[IssueIdArrayItem] = None,
+        *,
+        overwrite: None | bool = None,
     ) -> FailedExecutionResult | SuccessfulExecutionResult:
         """
-        Exports specified issues to a BCF file.
+        Exports specified issues to a BCF file. With overwrite false it refuses to replace an
+        existing file.
 
         Args:
-            export_path (str): The os path to the bcf file, including it's name.
+            export_path (str): The os path to the bcf file, including it's name. An existing
+                file is overwritten, unless overwrite is false.
             use_external_id (bool): Use external IFC ID or Archicad IFC ID as referenced in BCF
                 topics.
             align_by_survey_point (bool): Align BCF views by Archicad Survey Point or Archicad
                 Project Origin.
             issues (None | list[IssueIdArrayItem]): Leave it empty to export all issues.
+            overwrite (None | bool): Optional, true by default. false refuses to export when a
+                file already exists at exportPath, and writes nothing.
 
         Returns:
             FailedExecutionResult | SuccessfulExecutionResult
@@ -229,6 +267,7 @@ class IssueManagementCommands:
         params_dict = {
             "issues": issues,
             "exportPath": export_path,
+            "overwrite": overwrite,
             "useExternalId": use_external_id,
             "alignBySurveyPoint": align_by_survey_point,
         }

@@ -6,6 +6,12 @@
         "version": "1.8.0"
     },
     {
+        "name": "ActivateLayerCombination",
+        "group": "Attribute Commands",
+        "description": "Activates the given layer combination in the current window, like choosing it in the Quick Layers palette. Saved views are not changed.",
+        "version": "2.0.0"
+    },
+    {
         "name": "AddCommentToIssue",
         "group": "Issue Management Commands",
         "description": "Adds a new comment to the specified issue.",
@@ -42,6 +48,12 @@
         "version": "1.7.3"
     },
     {
+        "name": "AlignElements",
+        "group": "Element Commands",
+        "description": "Aligns elements on the floor plan or in the current 2D view to one edge of their plan bounding boxes (left, right, top or bottom) or to their middle (centerX, centerY), either of the whole set or of a reference element, by moving them in one undo step. The bounding boxes are those Get2DBoundingBoxes returns. Supported types: Wall, Column, Beam, Slab, Roof, Shell, Morph, Mesh, Zone, Object, Lamp, Stair, Railing, CurtainWall, Line, PolyLine, Arc, Circle, Spline, Hatch, Text and Hotspot. An element of another type (doors, windows and openings, which only slide along their host, subelements, dimensions, labels, ...) or one that cannot be edited gets a failed execution result naming the reason, and the other elements are still aligned.",
+        "version": "2.0.0"
+    },
+    {
         "name": "ApplyFavoriteToToolDefault",
         "group": "Favorites Commands",
         "description": "Makes the settings of the given Favorite the settings of its tool, and returns the element type of that tool. Available from Archicad 29.",
@@ -56,7 +68,7 @@
     {
         "name": "ApplyFavoritesToElements",
         "group": "Favorites Commands",
-        "description": "Apply the given favorites to existing elements. Only settings-type parameters are changed - geometry (position, floor, and dimensions such as a Wall's height) is left untouched, so applying a Favorite never moves the target element. A Window or Door keeps its wall, marker and placement, and takes the Favorite's library part and parameters, size included. For the hierarchical types (Stair, Railing, Curtain Wall) the settings of the sub-elements are not applied, because they are inseparable from the Favorite's own geometry. By default settings, classifications, categories and properties are all applied; each can be opted out of individually. keepFields lists fields of the target (its ID, layer, an opening's width, height and sill height, a Wall's reference line location, height and top link) that are copied back after the Favorite has been applied, so that e.g. only the library part or the wall type changes.",
+        "description": "Apply the given favorites to existing elements. Only settings-type parameters are changed - geometry (position, floor, and dimensions such as a Wall's height) is left untouched, so applying a Favorite never moves the target element. A Window or Door keeps its wall, marker and placement, and takes the Favorite's library part and parameters, size included. For the hierarchical types (Stair, Railing, Curtain Wall) the settings of the sub-elements are not applied, because they are inseparable from the Favorite's own geometry. By default settings, classifications, categories and properties are all applied; each can be opted out of individually. keepFields lists fields of the target (its ID, layer, an opening's width, height and sill height, a Wall's reference line location, height and top link) that are copied back after the Favorite has been applied, so that e.g. only the library part or the wall type changes. With favorite instead of favoritesToApply, one Favorite is read once and applied to the given elements, or to every element of its type that matches the filter.",
         "version": "1.5.4"
     },
     {
@@ -162,6 +174,12 @@
         "version": "1.8.0"
     },
     {
+        "name": "CheckPropertyValues",
+        "group": "Property Commands",
+        "description": "Checks whether the given values are acceptable for the given property definitions, without changing anything.",
+        "version": "2.0.0"
+    },
+    {
         "name": "CloneProjectMapItemToViewMap",
         "group": "Navigator Commands",
         "description": "Clones Project Map viewpoints into a specified View Map folder.",
@@ -180,9 +198,15 @@
         "version": "1.8.0"
     },
     {
+        "name": "CompareLibraryPartUnIds",
+        "group": "Library Commands",
+        "description": "Compares two library part unique IDs with Archicad's own comparison and tells whether their main and revision GUIDs are the same.",
+        "version": "2.0.0"
+    },
+    {
         "name": "ConnectMEPElements",
         "group": "MEP Commands",
-        "description": "Connects MEP routing elements to other MEP elements or routes. Merges routes, splits routes or creates branch elements as needed. Archicad 27 does not report the merged, split or created elements. Available from Archicad 27.",
+        "description": "Connects MEP routing elements to other MEP elements or routes. Merges routes, splits routes or creates branch elements as needed. The first or last node of the 'connectToId' route must lie exactly on the 'routingElementId' route, so for a tee pass the main route as 'routingElementId' and the branch as 'connectToId'. A failed connection says which condition is not met. Archicad 27 does not report the merged, split or created elements. Available from Archicad 27.",
         "version": "1.5.6"
     },
     {
@@ -210,6 +234,12 @@
         "version": "1.8.0"
     },
     {
+        "name": "ConvertImages",
+        "group": "Application Commands",
+        "description": "Converts base64 encoded images from one image format to another with Archicad's own image converters, for example a PNG preview image to JPEG. The formats are Bitmap, GIF, TIFF, JPEG and PNG, or the MIME type of another format Archicad can read or write. The output is aligned with the input array of images. Changes nothing in the project.",
+        "version": "2.0.0"
+    },
+    {
         "name": "ConvertRevealOffsets",
         "group": "Element Commands",
         "description": "Converts the reveal depth offset of windows and doors placed in walls between the two references Archicad uses: measured from the core skin of a composite wall, or from the wall side. Give exactly one of coreOffset or sideOffset per opening; both values are returned. For walls with a basic structure the two values are equal. The output is aligned with the input array of openings. Available from Archicad 27.",
@@ -222,10 +252,28 @@
         "version": "1.8.0"
     },
     {
+        "name": "CopyElements",
+        "group": "Element Commands",
+        "description": "Copies elements by an offset, like dragging a copy in Archicad, keeping all their settings. With count, copy n is moved by n times the offset, which makes a linear array. Returns the new elements of each given element, in the order of the given ones; an element Archicad cannot copy (a part of a curtain wall, stair or railing, a locked element or one on a hidden or locked layer, ...) gets an error naming the reason, and the other elements are still copied. All copies are one undo step.",
+        "version": "2.0.0"
+    },
+    {
+        "name": "CopyElementsToDatabase",
+        "group": "Element Commands",
+        "description": "Copies 2D elements (lines, polylines, arcs, circles, splines, hotspots, texts, hatches, independent labels) from one database into another, e.g. from a worksheet into another worksheet, a detail or a layout, optionally moved by an offset. Returns the new elements in the order of the given ones.",
+        "version": "2.0.0"
+    },
+    {
         "name": "CopyFilesIntoEmbeddedLibrary",
         "group": "Library Commands",
         "description": "Copies the given files, keeping their names, into a folder of the embedded library with one library operation. The target folder is created when it is missing. With overwriteIfExists an item of the same name in that folder is replaced.",
         "version": "1.7.3"
+    },
+    {
+        "name": "CopyLibraryParts",
+        "group": "Library Commands",
+        "description": "Copies loaded library parts, given by name or by an element placed from them, under a new file name into a folder, by default the embedded library. The copy gets a new unique ID unless the main GUID is kept. An existing file is never overwritten. The libraries are reloaded once afterwards, so the copies can be found by name. Available from Archicad 28.",
+        "version": "2.0.0"
     },
     {
         "name": "Create3DStyles",
@@ -284,13 +332,13 @@
     {
         "name": "CreateAssociativeDimensions",
         "group": "Element Commands",
-        "description": "Creates associative linear dimensions from explicit witness point references. A witness point can also be static, given by its coordinate instead of an element.",
+        "description": "Creates associative dimensions from explicit witness point references: linear by default, or cumulative, baseline or elevation dimensions (appearance). A witness point can also be static, given by its coordinate instead of an element.",
         "version": "1.4.0"
     },
     {
         "name": "CreateAssociativeDimensionsOnSection",
         "group": "Element Commands",
-        "description": "Creates associative linear dimensions on section elements using common wall, slab, beam, column and opening presets. The preset points of multiple section elements can be merged into one continuous dimension chain via sectionElementIds.",
+        "description": "Creates associative dimensions on section elements using common wall, slab, beam, column, door and window presets: linear by default, or cumulative, baseline or elevation dimensions (appearance), e.g. level marks. The preset points of multiple section elements can be merged into one continuous dimension chain via sectionElementIds. For Opening tool elements, which Archicad does not associate with dimensions, the OpeningEdges preset places fixed points at their edges instead.",
         "version": "1.4.0"
     },
     {
@@ -302,7 +350,7 @@
     {
         "name": "CreateBeams",
         "group": "Element Commands",
-        "description": "Creates Beam elements based on the given parameters.",
+        "description": "Creates Beam elements based on the given parameters. Takes the same cut fill pens and cover fill as ModifyBeams, besides the position, shape, slant and cross section; settings not given come from the Beam tool defaults or the favorite. Not written by either command: the surfaces of the beam segments, and the cut fill pens before Archicad 27.",
         "version": "1.4.0"
     },
     {
@@ -332,7 +380,7 @@
     {
         "name": "CreateColumns",
         "group": "Element Commands",
-        "description": "Creates Column elements based on the given parameters.",
+        "description": "Creates Column elements based on the given parameters. Takes the same cut fill pens and cover fill as ModifyColumns, besides the position, size, slant, cross section and veneer; settings not given come from the Column tool defaults or the favorite. Not written by either command: the surfaces of the column segments, and the cut fill pens before Archicad 27.",
         "version": "1.0.3"
     },
     {
@@ -364,6 +412,12 @@
         "group": "Design Options Commands",
         "description": "Creates new design options with the given parameters. Available from Archicad 29.",
         "version": "1.5.1"
+    },
+    {
+        "name": "CreateDetailMarkers",
+        "group": "Navigator Commands",
+        "description": "Places Detail markers with their clip polygon in the current floor plan, section or elevation, each with a new Detail viewpoint, like the Detail tool. GetDetailsOfElements reads them back.",
+        "version": "2.0.0"
     },
     {
         "name": "CreateDetails",
@@ -406,6 +460,18 @@
         "group": "Element grouping Commands",
         "description": "Creates element sets of the given elements. An element set is a hidden, persistent collection of elements (it is not a group and has no effect on selection or editing).",
         "version": "1.8.0"
+    },
+    {
+        "name": "CreateElementsFromAnalyticalMembers",
+        "group": "Analytical Commands",
+        "description": "Creates elements (beams, columns, walls, slabs, roofs) from the given curve, surface or segmented surface members, in the form GetAnalyticalMemberDetails returns them, optionally with the settings of a favorite, in one undo step. Returns the new elements and, from Archicad 26, the mapping of their edges and vertices to member parts.",
+        "version": "2.0.0"
+    },
+    {
+        "name": "CreateElevations",
+        "group": "Navigator Commands",
+        "description": "Creates Elevation elements on the floor plan. The floor plan must be the active window: creation fails while a Section or Elevation window is active.",
+        "version": "2.0.0"
     },
     {
         "name": "CreateFavorite",
@@ -542,7 +608,7 @@
     {
         "name": "CreateLamps",
         "group": "Element Commands",
-        "description": "Creates Lamp elements based on the given parameters.",
+        "description": "Creates Lamp elements based on the given parameters. A library part named in libraryPartName starts from its own default size and GDL parameters, not from those of the part the Lamp tool holds; the dimensions and the GDL parameters given (by name, in parameters) override them. layerIndex places the element on a layer. With databaseId the lamps are placed in that database, e.g. a worksheet, instead of the current one.",
         "version": "1.5.7"
     },
     {
@@ -560,7 +626,7 @@
     {
         "name": "CreateLayout",
         "group": "Navigator Commands",
-        "description": "Creates Layouts and their backing master layouts. Archicad inserts a new layout at the first place of its subset, renumbering the sheets after it; previousNavigatorItemId or position 'last' places it after an existing sheet or at the end instead. A custom layout number does not leave the layout out of the numbering; layoutParameters.doNotIncludeInNumbering does.",
+        "description": "Creates Layouts and their backing master layouts. Archicad inserts a new layout at the first place of its subset, renumbering the sheets after it; previousNavigatorItemId or position 'last' places it after an existing sheet or at the end instead. A custom layout number does not leave the layout out of the numbering; layoutParameters.doNotIncludeInNumbering does. A layout that was created but could not be placed is returned with both its databaseId and the error.",
         "version": "1.4.0"
     },
     {
@@ -580,6 +646,12 @@
         "group": "Library Commands",
         "description": "Creates a new library part file (.gsm) of the given loaded subtype, inheriting its parameters, and reports whether it is loaded with its index and names. Available from Archicad 28.",
         "version": "1.8.0"
+    },
+    {
+        "name": "CreateLibraryPartFromElements",
+        "group": "Library Commands",
+        "description": "Creates a library part in the embedded library (or in a given local library folder, which is added to the loaded libraries when needed) whose 2D symbol is a copy of the given 2D drawing elements (lines, polylines, arcs, circles, splines, fills, texts and hotspots), under the given parent subtype, with optional master, 2D, 3D and parameter scripts, comment and keywords. A and B are taken from the extent of the symbol. The elements themselves are not changed.",
+        "version": "2.0.0"
     },
     {
         "name": "CreateLibraryParts",
@@ -602,8 +674,14 @@
     {
         "name": "CreateMEPElements",
         "group": "MEP Commands",
-        "description": "Creates MEP elements (Terminal, Accessory, Equipment or Fitting) at the given positions, optionally with a changed insulation that applies only to what is placed. Available from Archicad 28.",
+        "description": "Creates MEP elements (Terminal, Accessory, Equipment or Fitting) at the given positions, optionally with another library part, size (from Archicad 30), MEP system, port sizes and shapes and a changed insulation, which apply only to what is placed. Available from Archicad 28.",
         "version": "1.5.6"
+    },
+    {
+        "name": "CreateMEPFlexibleSegments",
+        "group": "MEP Commands",
+        "description": "Creates MEP flexible segments through the given control points, or along a polyline of alternating line and spline parts (Piping), with the current settings of the Flexible Segment tool of their domain, optionally with the orientation (control points) or direction (polyline) at both ends. Available from Archicad 28.",
+        "version": "2.0.0"
     },
     {
         "name": "CreateMEPPhysicalSystems",
@@ -636,6 +714,12 @@
         "version": "1.5.4"
     },
     {
+        "name": "CreateMEPTakeOffs",
+        "group": "MEP Commands",
+        "description": "Creates MEP take-offs on the given routing segments, at a distance from the beginning of the segment (not more than its length) and optionally rotated around its axis by a multiple of 90 degrees, with the current settings of the Take-Off tool of their domain (by default the domain of the segment's routing element), optionally with their length and without insulation, which apply only to what is created. Archicad only has Ventilation take-offs. Available from Archicad 28.",
+        "version": "2.0.0"
+    },
+    {
         "name": "CreateMeshes",
         "group": "Element Commands",
         "description": "Creates Mesh elements based on the given parameters.",
@@ -644,13 +728,13 @@
     {
         "name": "CreateMorphs",
         "group": "Element Commands",
-        "description": "Creates Morph elements from simple box definitions.",
+        "description": "Creates Morph elements from simple box definitions or arbitrary bodies. Each item may name a favorite (favoriteName) to start from, a layer (layerIndex) and an Element ID (id); the given geometry and floor are kept.",
         "version": "1.4.0"
     },
     {
         "name": "CreateObjects",
         "group": "Element Commands",
-        "description": "Creates Object elements based on the given parameters.",
+        "description": "Creates Object elements based on the given parameters. A library part named in libraryPartName starts from its own default size and GDL parameters, not from those of the part the Object tool holds; the dimensions and the GDL parameters given (by name, in parameters) override them. layerIndex places the element on a layer. With databaseId the objects are placed in that database, e.g. a worksheet, instead of the current one.",
         "version": "1.5.7"
     },
     {
@@ -680,7 +764,7 @@
     {
         "name": "CreateProjectInfoFields",
         "group": "Project Commands",
-        "description": "Creates one or more custom project info fields.",
+        "description": "Creates one or more custom project info fields. From Archicad 30 the Project Info group of each field can be given; without it the field goes to the first group.",
         "version": "1.5.2"
     },
     {
@@ -704,8 +788,14 @@
     {
         "name": "CreateRailings",
         "group": "Element Commands",
-        "description": "Creates Railing elements along a reference polyline. Posts, rails, handrails, toprails, panels and balusters come from the favorite or from the Railing tool defaults; Archicad generates one node per vertex and one segment per pair of consecutive vertices.",
+        "description": "Creates Railing elements along a reference polyline. Posts, rails, handrails, toprails, panels and balusters come from the favorite, from an existing railing (templateElementId) or from the Railing tool defaults; Archicad generates one node per vertex and one segment per pair of consecutive vertices.",
         "version": "1.8.0"
+    },
+    {
+        "name": "CreateRailingsFromPolyline",
+        "group": "Element Commands",
+        "description": "Creates Railing elements along a 3D reference polyline: each node has its own elevation and segments can be arcs. Posts, rails, handrails, toprails, panels and balusters come from the favorite or from the Railing tool defaults.",
+        "version": "2.0.0"
     },
     {
         "name": "CreateRoofs",
@@ -716,13 +806,25 @@
     {
         "name": "CreateSections",
         "group": "Navigator Commands",
-        "description": "Creates Section elements on the floor plan. A section looks to the left of its start to end direction, with its depth line that far on that side. GetDetailsOfElements reads the geometry of existing sections back.",
+        "description": "Creates Section elements on the floor plan. A section looks to the left of its start to end direction, with its depth line that far on that side. GetDetailsOfElements reads the geometry of existing sections back. The floor plan must be the active window: creation fails while a Section or Elevation window is active.",
         "version": "1.5.0"
+    },
+    {
+        "name": "CreateShells",
+        "group": "Element Commands",
+        "description": "Creates extruded, revolved and ruled Shell elements from profile polylines, with thickness, structure, an optional clipping contour and holes.",
+        "version": "2.0.0"
+    },
+    {
+        "name": "CreateSkylights",
+        "group": "Element Commands",
+        "description": "Creates Skylight elements with a roof or shell owner and a floor plan anchor position. It takes the same settings as ModifySkylights (anchor point, fix mode, width, height, azimuth and elevation angles, mirroring, floor plan display, pens, line types, section fill, surface and the library part flags) and optionally a library part; the settings not given come from the Skylight tool defaults or a favorite. Surface placement is handled by Archicad and has not yet been verified for this command.",
+        "version": "2.0.0"
     },
     {
         "name": "CreateSlabs",
         "group": "Element Commands",
-        "description": "Creates Slab elements based on the given parameters.",
+        "description": "Creates Slab elements based on the given parameters. Takes the same surfaces (top, side, bottom), cut fill pens and floor fill as ModifySlabs, besides the outline, holes, level and structure; settings not given come from the Slab tool defaults or the favorite. Not written by either command: the surface of a single edge, and the cut fill pens before Archicad 27; of the floor fill orientation Archicad applies only the type through the API.",
         "version": "1.0.3"
     },
     {
@@ -746,7 +848,7 @@
     {
         "name": "CreateStairs",
         "group": "Element Commands",
-        "description": "Creates Stair elements based on the given baseline and parameters.",
+        "description": "Creates Stair elements based on the given baseline and parameters, optionally with the segment type of each baseline edge and the turn at each baseline point (landings and winders). Accepts the same settings as ModifyStairs: the step values with their locks, the finish and structure visibility, the extra treads, the walking line, the numbering, the walking direction, and the tread, riser and structure settings of the flights and the landings; settings not given come from the Stair tool defaults or the favorite.",
         "version": "1.5.0"
     },
     {
@@ -782,7 +884,7 @@
     {
         "name": "CreateWalls",
         "group": "Element Commands",
-        "description": "Creates Wall elements based on the given parameters.",
+        "description": "Creates Wall elements based on the given parameters. Takes the same wall settings as ModifyWalls, applied by the same code, except geometryType and profileType, which the new wall takes from the favorite or the Wall tool defaults (its plan outline is always Straight), and bottomOffset, which comes from zCoordinate. Neither command can write a Polygonal outline (it needs an outline polygon, which these commands do not take), connectionPriority or junctionSequence (Archicad ignores writes to them; GetDetailsOfElements reads them), and on Archicad 29 any story visibility other than 'Home story only' and 'All relevant stories'.",
         "version": "1.4.0"
     },
     {
@@ -790,6 +892,12 @@
         "group": "Element Commands",
         "description": "Creates Window elements in host walls based on the given parameters.",
         "version": "1.4.0"
+    },
+    {
+        "name": "CreateWorksheetMarkers",
+        "group": "Navigator Commands",
+        "description": "Places Worksheet markers with their clip polygon in the current floor plan, section or elevation, each with a new Worksheet viewpoint, like the Worksheet tool. GetDetailsOfElements reads them back.",
+        "version": "2.0.0"
     },
     {
         "name": "CreateWorksheets",
@@ -806,7 +914,7 @@
     {
         "name": "CreateZones",
         "group": "Element Commands",
-        "description": "Creates Zone elements based on the given parameters.",
+        "description": "Creates Zone elements based on the given parameters. Takes the same zone settings as ModifyZones (name, number, category, zone stamp, levels, contour line and cover fill), applied by the same helpers; the polygon or reference point is only set here. An item whose area would overlap an existing Zone on the same story fails with an error naming that Zone instead of opening Archicad's modal overlap warning, unless its allowOverlap is true.",
         "version": "1.1.8"
     },
     {
@@ -834,27 +942,33 @@
         "version": "1.8.0"
     },
     {
+        "name": "DeleteAndReplaceAttributes",
+        "group": "Attribute Commands",
+        "description": "Deletes fills, line types, surfaces or building materials and replaces each by another attribute of the same type wherever it was used, like Delete and Replace in the Attribute Manager. Every reference is rewritten to the replacement, the way ReindexAttributes rewrites them: the fields of the elements in the floor plan and in every view and layout, the parameters of library part based elements, their memo data, the tool defaults, the Favorites, the other attributes that refer to it (composites, building materials, surfaces, profiles, MEP systems) and the graphic override rules. Elements on a hidden or locked layer are changed too: their layers are shown and unlocked for the change and put back afterwards (in the current window). If an element cannot be changed (it is locked itself, or not reserved in Teamwork), everything is put back and that attribute is not deleted. Elements from hotlinked modules cannot be changed and are listed. Indices typed into GDL scripts are not found, and the frame and panel classes of curtain wall Favorites and of the Curtain Wall tool default keep the deleted attribute (named in the warnings). If a tool default, Favorite, attribute or rule cannot be rewritten to the replacement, it keeps a copy of the deleted attribute with its name and a new attribute id, named in the warnings. The whole call is one undo step. With dryRun true nothing is changed and no undo step is created: the response has dryRun set to true, and each attribute that passes the checks gets wouldDelete and lists every reference a real run would rewrite (elements, tool defaults, Favorites, other attributes, graphic override rules, elements from hotlinked modules). Available from Archicad 27.",
+        "version": "2.0.0"
+    },
+    {
         "name": "DeleteAttributeFolders",
         "group": "Attribute Commands",
-        "description": "Deletes attribute folders, each given by attribute type and path, together with all the subfolders and deletable attributes they contain (a folder holding an attribute that cannot be deleted is kept). The root folder cannot be deleted. Available from Archicad 26.",
+        "description": "Deletes attribute folders, each given by attribute type and path, together with all the subfolders and deletable attributes they contain (a folder holding an attribute that cannot be deleted is kept). The root folder cannot be deleted. With dryRun true nothing is deleted: the response has dryRun set to true, and each folder that exists and is not the root folder gets wouldDelete. Available from Archicad 26.",
         "version": "1.7.3"
     },
     {
         "name": "DeleteAttributes",
         "group": "Attribute Commands",
-        "description": "Deletes the given attributes.",
+        "description": "Deletes the given attributes. Returns an execution result for each input item. With dryRun true nothing is deleted: the response has dryRun set to true, and each attribute that passes the checks made before deleting (valid attribute type, attribute exists) gets wouldDelete.",
         "version": "1.5.4"
     },
     {
         "name": "DeleteClassificationItems",
         "group": "Classification Commands",
-        "description": "Deletes the given Classification Items.",
+        "description": "Deletes the given Classification Items. With dryRun true nothing is deleted and no undo step is created: the response has dryRun set to true, and each classification item that exists gets wouldDelete.",
         "version": "1.5.2"
     },
     {
         "name": "DeleteClassificationSystems",
         "group": "Classification Commands",
-        "description": "Deletes the given Classification Systems.",
+        "description": "Deletes the given Classification Systems. With dryRun true nothing is deleted and no undo step is created: the response has dryRun set to true, and each classification system that exists gets wouldDelete.",
         "version": "1.5.2"
     },
     {
@@ -884,13 +998,13 @@
     {
         "name": "DeleteElementSets",
         "group": "Element grouping Commands",
-        "description": "Deletes the given element sets. The elements of a set are not deleted. Only element sets created by the Tapir Add-On can be deleted; sets created by other add-ons are reported as failed.",
+        "description": "Deletes the given element sets. The elements of a set are not deleted. Only element sets created by the Tapir Add-On can be deleted; sets created by other add-ons are reported as failed. With dryRun true nothing is deleted and no undo step is created: the response has dryRun set to true, and each element set that a real run would delete gets wouldDelete.",
         "version": "1.8.0"
     },
     {
         "name": "DeleteElements",
         "group": "Element Commands",
-        "description": "Deletes elements. The zones of the call are deleted before all the other elements, so an automatic zone deleted together with its bounding walls is gone before its boundary is; deleting the boundary of an automatic zone without the zone itself can open Archicad's modal 'No closed polygon found' dialog, which blocks the command until someone clicks it in Archicad. Returns an execution result for each input element: an element that could not be deleted (for example because its layer is locked) or a guid that is not in the project gets a failed execution result instead of being skipped silently, and does not stop the other elements from being deleted.",
+        "description": "Deletes elements. The zones of the call are deleted before all the other elements, so an automatic zone deleted together with its bounding walls is gone before its boundary is; deleting the boundary of an automatic zone without the zone itself can open Archicad's modal 'No closed polygon found' dialog, which blocks the command until someone clicks it in Archicad. Returns an execution result for each input element: an element that could not be deleted (for example because its layer is locked) or a guid that is not in the project gets a failed execution result instead of being skipped silently, and does not stop the other elements from being deleted. With dryRun true nothing is deleted and no undo step is created: the response has dryRun set to true, and each element that passes the checks made before deleting gets wouldDelete, so a script can preview a deletion before making it.",
         "version": "1.2.1"
     },
     {
@@ -910,6 +1024,12 @@
         "group": "Favorites Commands",
         "description": "Delete existing favorites.",
         "version": "1.5.4"
+    },
+    {
+        "name": "DeleteFavoritesWithManager",
+        "group": "Favorites Commands",
+        "description": "Deletes the given Favorites through the Favorite manager, each found by name, optionally only in the given folder. One execution result for each. Available from Archicad 29.",
+        "version": "2.0.0"
     },
     {
         "name": "DeleteGhostRecords",
@@ -944,7 +1064,7 @@
     {
         "name": "DeleteIssue",
         "group": "Issue Management Commands",
-        "description": "Deletes the specified issue.",
+        "description": "Deletes the specified issue. With dryRun true nothing is deleted and no undo step is created: the response has dryRun set to true, and wouldDelete when the issue exists.",
         "version": "1.0.2"
     },
     {
@@ -972,9 +1092,15 @@
         "version": "1.8.0"
     },
     {
+        "name": "DeleteModulData",
+        "group": "Project Data Commands",
+        "description": "Deletes the module data with the given names. Deleting module data is not an undoable step.",
+        "version": "2.0.0"
+    },
+    {
         "name": "DeleteNavigatorItems",
         "group": "Navigator Commands",
-        "description": "Deletes navigator items from the navigator tree: views and folders of the View Map, layouts and master layouts of the Layout Book, and independent worksheets and details of the Project Map. Layout subsets and marker-linked worksheets and details cannot be deleted. An item that Archicad refuses to delete (in a Teamwork project: it is not reserved or the user has no right to delete it) is reported as a failed execution result.",
+        "description": "Deletes navigator items from the navigator tree: views and folders of the View Map, layouts and master layouts of the Layout Book, and independent worksheets and details of the Project Map. Layout subsets, View Map folders that are not empty, the other Project Map items and marker-linked worksheets and details cannot be deleted; the failed execution result says which case applies. An item that Archicad refuses to delete (in a Teamwork project: it is not reserved or the user has no right to delete it) is reported as a failed execution result. dryRun reports the result of the checks made before deleting (item not found, layout subset, View Map folder that is not empty) without deleting anything.",
         "version": "1.1.7"
     },
     {
@@ -986,7 +1112,7 @@
     {
         "name": "DeleteProjectInfoFields",
         "group": "Project Commands",
-        "description": "Deletes one or more custom project info fields. Hardcoded fields cannot be deleted.",
+        "description": "Deletes one or more custom project info fields, by their autotext keys or, from Archicad 30, by the ids of the fields of the Project Info groups. Hardcoded fields cannot be deleted.",
         "version": "1.5.4"
     },
     {
@@ -998,32 +1124,50 @@
     {
         "name": "DeletePropertyDefinitions",
         "group": "Property Commands",
-        "description": "Deletes the given Custom Property Definitions.",
+        "description": "Deletes the given Custom Property Definitions. With dryRun true nothing is deleted and no undo step is created: the response has dryRun set to true, and each property that exists gets wouldDelete.",
         "version": "1.0.9"
     },
     {
         "name": "DeletePropertyGroups",
         "group": "Property Commands",
-        "description": "Deletes the given Custom Property Groups.",
+        "description": "Deletes the given Custom Property Groups. With dryRun true nothing is deleted and no undo step is created: the response has dryRun set to true, and each property group that exists gets wouldDelete.",
         "version": "1.0.9"
     },
     {
         "name": "DeleteSelectedElements",
         "group": "Element Commands",
-        "description": "Deletes the currently selected elements in one undo step, the same as pressing the Delete key.",
+        "description": "Deletes the currently selected elements in one undo step, the same as pressing the Delete key. With dryRun true nothing is deleted and no undo step is created: the response has dryRun set to true and lists the selected elements, with wouldDelete when there is at least one, or fails when one of them cannot be edited (Archicad then deletes none of them).",
         "version": "1.7.3"
     },
     {
         "name": "DeleteUserDataOfAttributes",
         "group": "Attribute Commands",
-        "description": "Removes the user data of attributes, every key at once. Archicad does not record this change as an undo step, so Undo does not revert it.",
+        "description": "Removes the user data of attributes, every key at once. Archicad does not record this change as an undo step, so Undo does not revert it. With dryRun true nothing is removed: the response has dryRun set to true, and each attribute that exists gets wouldDelete.",
         "version": "1.8.0"
+    },
+    {
+        "name": "DeleteUserDataOfElements",
+        "group": "Element Commands",
+        "description": "Deletes the user data this add-on stored on the given elements. Archicad keeps the user data of an element per add-on, so the data of other add-ons is left as it is. All deletions are one undo step. The output has one execution result per element, aligned with the input array of elements. With dryRun true nothing is deleted and no undo step is created: the response has dryRun set to true, and each element that exists gets wouldDelete.",
+        "version": "2.0.0"
+    },
+    {
+        "name": "DeselectAll",
+        "group": "Element Commands",
+        "description": "Clears the selection in the current window.",
+        "version": "2.0.0"
     },
     {
         "name": "DetachElementsFromIssue",
         "group": "Issue Management Commands",
         "description": "Detaches elements from the specified issue.",
         "version": "1.0.6"
+    },
+    {
+        "name": "DistributeElements",
+        "group": "Element Commands",
+        "description": "Distributes 3 or more elements on the floor plan or in the current 2D view evenly along X (horizontal) or Y (vertical), with equal distances between the middles of their plan bounding boxes (centers) or equal space between the boxes (gaps), by moving them in one undo step. The elements are taken in the order of their middles along the direction, and the two outermost stay where they are. The bounding boxes are those Get2DBoundingBoxes returns. Supported types: Wall, Column, Beam, Slab, Roof, Shell, Morph, Mesh, Zone, Object, Lamp, Stair, Railing, CurtainWall, Line, PolyLine, Arc, Circle, Spline, Hatch, Text and Hotspot. An element of another type (doors, windows and openings, which only slide along their host, subelements, dimensions, labels, ...) or one that cannot be edited gets a failed execution result naming the reason, and the other elements are still distributed.",
+        "version": "2.0.0"
     },
     {
         "name": "DuplicateDesignOptionCombinations",
@@ -1034,25 +1178,31 @@
     {
         "name": "EditHierarchicalElement",
         "group": "Element Commands",
-        "description": "Opens the given hierarchical element (Curtain Wall, Stair, Railing, Beam or Column) in its hierarchical 3D editing mode, as the Edit button of the element does. Fails when Archicad is already in an editing mode. Leave the mode with FinishHierarchicalEditing. Requires Archicad 27 or later.",
+        "description": "Opens the given hierarchical element (Curtain Wall, Stair, Railing, Beam or Column) in its hierarchical 3D editing mode, as the Edit button of the element does. Fails when Archicad is already in an editing mode. Limitation: while the editing mode is open, Archicad refuses every JSON command, this add-on's included, with error 4001 (ongoing user input), FinishHierarchicalEditing included, so the mode can only be left in Archicad, with the button of its edit mode palette (reported for Archicad 29). Requires Archicad 27 or later.",
         "version": "1.8.0"
+    },
+    {
+        "name": "ElevateElements",
+        "group": "Element Commands",
+        "description": "Moves elements vertically by a given offset in meters, like Edit > Move > Elevate. An element that cannot be edited (its layer is hidden or locked, it is locked, or it is not available in teamwork) gets a failed execution result naming the reason instead of being skipped silently.",
+        "version": "2.0.0"
     },
     {
         "name": "ExportFavorites",
         "group": "Favorites Commands",
-        "description": "Export the project's Favorites to a .prefs file or folder. From Archicad 29 they can also be exported to a folder of Favorite files (xml format) or to a legacy .prf file (legacyPRF format).",
+        "description": "Export the project's Favorites to a .prefs file or folder. From Archicad 29 they can also be exported to a folder of Favorite files (xml format) or to a legacy .prf file (legacyPRF format). With overwrite false an export to a single file refuses to replace an existing file.",
         "version": "1.5.0"
     },
     {
         "name": "ExportIssuesToBCF",
         "group": "Issue Management Commands",
-        "description": "Exports specified issues to a BCF file.",
+        "description": "Exports specified issues to a BCF file. With overwrite false it refuses to replace an existing file.",
         "version": "1.0.6"
     },
     {
         "name": "FilterElements",
         "group": "Element Commands",
-        "description": "Keeps the elements that match all the given criteria: Archicad's flag filters (filters), layer (layerIndices), home story (floorIndices) and element type (elementTypes). Within one criterion any of the listed values matches; an omitted criterion does not filter.",
+        "description": "Keeps the elements that match all the given criteria: Archicad's flag filters (filters), layer (layerIndices), home story (floorIndices), element type (elementTypes) and hotlink (fromHotlink, hotlinkIds). Within one criterion any of the listed values matches; an omitted criterion does not filter.",
         "version": "1.0.7"
     },
     {
@@ -1062,15 +1212,21 @@
         "version": "1.8.0"
     },
     {
+        "name": "FindLibraryParts",
+        "group": "Library Commands",
+        "description": "Finds loaded library parts with the Library Manager: all of them, GDL objects, images or text files, optionally only those whose name contains a text. Returns the name, path and index of each. Available from Archicad 28.",
+        "version": "2.0.0"
+    },
+    {
         "name": "FindModelViewOption",
         "group": "Navigator Commands",
-        "description": "Finds a model view option combination by id or by name and returns its index, id, name and flags. The index is the one Archicad uses to switch the model view options of a window to the combination. Available from Archicad 27.",
+        "description": "Finds a model view option combination by id or by name and returns its index, id, name and flags. The index is the one SetViewOptions takes to switch the model view options of a window to the combination. Available from Archicad 27.",
         "version": "1.8.0"
     },
     {
         "name": "FinishHierarchicalEditing",
         "group": "Element Commands",
-        "description": "Finishes the current hierarchical editing mode (Curtain Wall, Stair, Railing, Beam or Column): accept true keeps the changes (OK), accept false discards them (Cancel). The accept parameter is required, so changes are never discarded silently. Fails when Archicad is not in such an editing mode. Requires Archicad 27 or later.",
+        "description": "Finishes the current hierarchical editing mode (Curtain Wall, Stair, Railing, Beam or Column): accept true keeps the changes (OK), accept false discards them (Cancel). The accept parameter is required, so changes are never discarded silently. Fails when Archicad is not in such an editing mode. Limitation: while an editing mode is open, Archicad refuses JSON commands with error 4001 (ongoing user input) before they run, so this command cannot leave a mode opened by EditHierarchicalElement or in Archicad (reported for Archicad 29); leave it in Archicad instead. Requires Archicad 27 or later.",
         "version": "1.8.0"
     },
     {
@@ -1086,9 +1242,15 @@
         "version": "1.0.7"
     },
     {
+        "name": "Get2DBoundingBoxes",
+        "group": "Element Commands",
+        "description": "Get the 2D bounding box of elements as Archicad draws them, in the coordinates of the database the element is in: the floor plan, a section, a worksheet, a layout or a master layout. Works for 2D elements (Line, PolyLine, Arc, Hatch, Text, Label, Dimension, Drawing ...) as well as for model elements; a Text's box covers its drawn lines, a Drawing's box its frame with the title. The current window does not need to show the element. The output is the array of the bounding boxes respective to the input array of elements.",
+        "version": "2.0.0"
+    },
+    {
         "name": "Get3DBoundingBoxes",
         "group": "Element Commands",
-        "description": "Get the 3D bounding box of elements. The bounding box is calculated from the global origin in the 3D view. The output is the array of the bounding boxes respective to the input array of elements. An element without 3D geometry of its own gets an error item instead of a bounding box.",
+        "description": "Get the 3D bounding box of elements. The bounding box is calculated from the global origin in the 3D view. The output is the array of the bounding boxes respective to the input array of elements. An element without 3D geometry of its own gets an error item instead of a bounding box. Walls, Slabs, Roofs, Zones and Stairs are measured on their 3D model, so the box of a Wall includes its connections to other walls. The current window does not need to show the element: it works with a layout or a section open as well.",
         "version": "1.1.2"
     },
     {
@@ -1102,6 +1264,12 @@
         "group": "Application Commands",
         "description": "Returns whether 3D Cutaway is on and whether the cutting planes are shown in the 3D window. In Archicad 25-27 the 3D window may need to be open.",
         "version": "1.7.3"
+    },
+    {
+        "name": "Get3DDocumentSettings",
+        "group": "Navigator Commands",
+        "description": "Gets the settings of a 3D Document, given by its navigator item: the element and story filter, the 3D cut, the projection, the window and zoom, the uniform cut and uncut surface attributes, the source and the boundary contours, with the field names of API_DocumentFrom3DType.",
+        "version": "2.0.0"
     },
     {
         "name": "Get3DFilterAndCutSettings",
@@ -1118,13 +1286,13 @@
     {
         "name": "Get3DModelCounts",
         "group": "Element Commands",
-        "description": "Gets the number of components of each type (bodies, polygons, polygon edges, edges, vertices, normal vectors, materials and lights) in the 3D model Archicad currently holds, as ACAPI_ModelAccess_GetNum counts them. A type that cannot be counted gets an error item. Available from Archicad 27.",
+        "description": "Gets the number of components of each type (bodies, polygons, polygon edges, edges, vertices, normal vectors, materials and lights) in the 3D model Archicad currently holds. Bodies, materials and lights are counted with ACAPI_ModelAccess_GetNum; the polygons, polygon edges, edges, vertices and normal vectors, which that function refuses to count, are summed over the bodies. A type that cannot be counted gets an error item. Available from Archicad 27.",
         "version": "1.8.0"
     },
     {
         "name": "Get3DProjectionSettings",
         "group": "Navigator Commands",
-        "description": "Gets the 3D projection settings of the 3D window: whether it is perspective or axonometric, the camera and target position, view cone, roll angle, distance and azimuth of a perspective, or the transformation matrix of an axonometry.",
+        "description": "Gets the 3D projection settings of the 3D window: whether it is perspective or axonometric, the camera and target position, view cone, roll angle, distance and azimuth of a perspective, or the projection type, azimuth and transformation matrix of an axonometry, and the sun position of either (date and time or azimuth and altitude).",
         "version": "1.7.2"
     },
     {
@@ -1132,6 +1300,12 @@
         "group": "Navigator Commands",
         "description": "Gets the settings of 3D styles by name (an empty name or no names means the current 3D style): rendering engine, model type, monochrome and background colors, contours, shadows and hatching. Available from Archicad 27.",
         "version": "1.7.3"
+    },
+    {
+        "name": "Get3DStyles",
+        "group": "Navigator Commands",
+        "description": "Gets the names of the 3D styles of the project and the name of the current one, which the 3D window uses.",
+        "version": "2.0.0"
     },
     {
         "name": "Get3DWindowSettings",
@@ -1168,6 +1342,12 @@
         "group": "Navigator Commands",
         "description": "Returns the details of the given add-on viewpoint items: their parent, type (Root, Group or Leaf), ID, name, view settings flags and attached data (base64 encoded). The output is aligned with the input array; an item that cannot be read gets an error. Available from Archicad 27.",
         "version": "1.8.0"
+    },
+    {
+        "name": "GetAllAutoTextKeys",
+        "group": "Project Commands",
+        "description": "Retrieves every autotext key Archicad knows (not only the property-based ones returned by GetAutoTextKeys) with its current value, resolved without an element context.",
+        "version": "2.0.0"
     },
     {
         "name": "GetAllClassificationSystems",
@@ -1290,6 +1470,18 @@
         "version": "1.8.0"
     },
     {
+        "name": "GetArcFromUser",
+        "group": "Application Commands",
+        "description": "Asks the designer to draw an arc in the current window - its center, its start point (which sets the radius) and its end point - with a rubber-band circle shown while drawing, and returns its center, radius, start and end angles, the angle it turns through, its direction and its start and end points. Archicad waits for the clicks or for Escape, and every other JSON command queues behind this one until then; cancelling returns cancelled.",
+        "version": "2.0.0"
+    },
+    {
+        "name": "GetArchicadLicenseInfo",
+        "group": "Application Commands",
+        "description": "Retrieves the license the running Archicad runs on: its type (Full, Education, Trial, Demo, Start or BIMcloud Team Client), the raw protection mode with its bits by name, and the highest Software Service Agreement (SSA) level of the license, so a script can warn before it uses a feature the license lacks. The SSA level is not available in Archicad 25.",
+        "version": "2.0.0"
+    },
+    {
         "name": "GetArchicadLocation",
         "group": "Application Commands",
         "description": "Retrieves the location of the currently running Archicad executable.",
@@ -1308,9 +1500,15 @@
         "version": "1.8.0"
     },
     {
+        "name": "GetAttributeIndexes",
+        "group": "Attribute Commands",
+        "description": "Reports for each given attribute type how many attributes there are, the first valid and the highest index in use, and the free indexes between them (for example those of deleted attributes). Available from Archicad 27.",
+        "version": "2.0.0"
+    },
+    {
         "name": "GetAttributesByType",
         "group": "Attribute Commands",
-        "description": "Returns the details of every attribute of the given type. From Archicad 30 an attribute that Archicad keeps a creation record of also carries creationInfo: how (method), from where (source), by whom and when it was created.",
+        "description": "Returns the details of every attribute of the given type, including the path of the attribute folder holding it (Archicad 26 and newer). From Archicad 30 an attribute that Archicad keeps a creation record of also carries creationInfo: how (method), from where (source), by whom and when it was created.",
         "version": "1.1.3"
     },
     {
@@ -1368,10 +1566,22 @@
         "version": "1.5.4"
     },
     {
+        "name": "GetCalculatedParametersOfCurtainWallSubElements",
+        "group": "Element Commands",
+        "description": "Gets the GDL parameters (name, type, value) of the given Curtain Wall Frame, Panel, Junction and Accessory elements as Archicad calculated them for their place in the curtain wall. GetGDLParametersOfElements returns the parameters the sub-element was set up with instead.",
+        "version": "2.0.0"
+    },
+    {
         "name": "GetCalculationUnits",
         "group": "Project Commands",
         "description": "Gets the project calculation units.",
         "version": "1.4.0"
+    },
+    {
+        "name": "GetCameras",
+        "group": "Navigator Commands",
+        "description": "Gets the Camera Sets (camera paths) of the project with their name, whether the set is the active one, its current camera, and its cameras in path order. Each camera has its element id, whether it is active in the path, and its perspective: camera and target position, distance, azimuth, view cone, roll angle, two-point perspective and sun, in the shape Set3DProjectionSettings accepts, so passing a camera's perspective there shows its view in the 3D window. Archicad cameras are always perspective; they have no name of their own.",
+        "version": "2.0.0"
     },
     {
         "name": "GetCategoryValuesOfDefaults",
@@ -1434,10 +1644,22 @@
         "version": "1.2.2"
     },
     {
+        "name": "GetCommands",
+        "group": "Application Commands",
+        "description": "Retrieves every command of the Tapir Add-On with its command group, the Tapir version it was introduced in and its description, so a script can check that a command exists before calling it.",
+        "version": "2.0.0"
+    },
+    {
         "name": "GetCommentsFromIssue",
         "group": "Issue Management Commands",
         "description": "Retrieves comments information from the specified issue.",
         "version": "1.0.6"
+    },
+    {
+        "name": "GetComponentsOfElements",
+        "group": "Property Commands",
+        "description": "Returns the components of the elements: the building material skins of composite walls, slabs, roofs and shells, and the parts of complex profile walls, beams and columns. The components have their own property values (building material, thickness, area, volume and the properties of the building material); read them with GetPropertyValuesOfElementComponents.",
+        "version": "2.0.0"
     },
     {
         "name": "GetComposites",
@@ -1456,6 +1678,12 @@
         "group": "Application Commands",
         "description": "Returns the database (window type, database id and name) that contains each of the given elements, from any database, not only the current one. Pass the windowType and databaseId to ChangeWindow to open it, for example to find an element placed on a layout.",
         "version": "1.7.3"
+    },
+    {
+        "name": "GetCoordinateOrigins",
+        "group": "Project Commands",
+        "description": "Gets the offset of the virtual coordinate system origin from the world origin, and the user origin of the current database. Use it to tell which origin the coordinates of different sources (elements, views, survey point) are relative to.",
+        "version": "2.0.0"
     },
     {
         "name": "GetCurrentAnalyticalModel",
@@ -1480,6 +1708,12 @@
         "group": "Revision Management Commands",
         "description": "Retrieves all changes belong to the last revision of the given layouts.",
         "version": "1.1.9"
+    },
+    {
+        "name": "GetCurrentTool",
+        "group": "Application Commands",
+        "description": "Returns the tool active in the Toolbox: its element type, its variation (the subtype, e.g. Door, Skylight or a library part subtype of an add-on) and, for the tools of add-ons, its class id, in the form SetCurrentTool accepts. Nothing is returned when the active tool makes no element, e.g. the Arrow or the Marquee.",
+        "version": "2.0.0"
     },
     {
         "name": "GetCurrentViewImage",
@@ -1514,7 +1748,7 @@
     {
         "name": "GetCutPolygonsOfElements",
         "group": "Element Commands",
-        "description": "Cuts each body of the 3D model of the given elements with a plane and returns, for each body, its building material, the area of the cut surface and its polygons (outline and holes) in 2D coordinates of the plane. The 3D model is generated with separate components in a temporary sight, so a composite structure has one body per skin and the 3D window is not changed. The output is aligned with the input array of elements. Available from Archicad 28.",
+        "description": "Cuts each body of the 3D model of the given elements with a plane and returns, for each body, its building material, the area of the cut surface and its polygons (outline and holes) in 2D coordinates of the plane. From Archicad 28 the 3D model is generated with separate components in a temporary sight, so a composite structure has one body per skin and the 3D window is not changed. Before Archicad 28 the bodies are those of the element's 3D model (a composite structure is one body) and their building materials are left out. The output is aligned with the input array of elements.",
         "version": "1.8.0"
     },
     {
@@ -1534,6 +1768,12 @@
         "group": "Element Commands",
         "description": "Gets the descriptors of the given elements: the listing descriptors in the property objects of each element, with the library part that declares them (index, name and guid), their listing database set and index, and their status (Normal, Deleted or Local). The output is aligned with the input array of elements.",
         "version": "1.8.0"
+    },
+    {
+        "name": "GetDesignOptionCombinationOfViews",
+        "group": "Design Options Commands",
+        "description": "Retrieves which design option combination the given views show: only the main model, a combination, a custom set of design options or a deleted combination. Available from Archicad 27.",
+        "version": "2.0.0"
     },
     {
         "name": "GetDesignOptionCombinations",
@@ -1562,7 +1802,7 @@
     {
         "name": "GetDetailsOfElements",
         "group": "Element Commands",
-        "description": "Gets the details of the given elements (geometry parameters etc). Use the optional fields parameter to return only the fields you need and skip the computation of the others (for example floorPlanPolygons). An element of another database (a layout, a section, a worksheet ...) returns only its header fields (type, floor index, layer, draw index) with fromOtherDatabase set to true.",
+        "description": "Gets the details of elements (geometry parameters etc). When elements is omitted, all elements matching the optional server-side filter (types, floorIndices, layerIndices) are queried; an empty elements list returns no details. Use the optional fields parameter to return only the fields you need (e.g. elementId, type, id, floorIndex) and skip the computation of the others (for example floorPlanPolygons). Use the optional additionalFields parameter to also get the info string, the compound info string, the library part unique ID and the creator tool unique ID. An element of another database (a layout, a section, a worksheet ...) returns only its header fields (type, floor index, layer, draw index) with fromOtherDatabase set to true.",
         "version": "1.5.7"
     },
     {
@@ -1574,7 +1814,7 @@
     {
         "name": "GetDimensionData",
         "group": "Element Commands",
-        "description": "Gets witness point data (coordinates, measured values) from existing dimension chains.",
+        "description": "Gets the data of existing dimension chains: the line pen, the marker type and pen and the default witness line, and per witness point the coordinates, measured value, witness line and the text height, pen and frame.",
         "version": "1.5.0"
     },
     {
@@ -1610,7 +1850,7 @@
     {
         "name": "GetDrawingPrimitivesOfElements",
         "group": "Element Commands",
-        "description": "Returns the 2D drawing primitives (points, lines, arcs, texts, polylines, triangles, polygons, pictures) Archicad draws each given floor plan element from, in drawing order, as ACAPI_DrawingPrimitive_ShapePrimsExt decomposes it on every story and unclipped. Control items (type Ctrl_*) mark the beginning and the end of sub-parts such as hatches and texts. The floor plan must be the current database. The output is aligned with the input array of elements.",
+        "description": "Returns the 2D drawing primitives (points, lines, arcs, texts, polylines, triangles, polygons, pictures) Archicad draws each given floor plan element from, in drawing order, as ACAPI_DrawingPrimitive_ShapePrimsExt decomposes it on every story and unclipped. Control items (type Ctrl_*) mark the beginning and the end of sub-parts such as hatches and texts. Texts are returned without their content and polylines without their vertices. A Ctrl_ElementRef item names the element it refers to: the drawing of a Wall ends with one for each Window and Door in it, while Windows and Doors give no primitives of their own. The floor plan must be the current database. The output is aligned with the input array of elements.",
         "version": "1.8.0"
     },
     {
@@ -1658,7 +1898,7 @@
     {
         "name": "GetElementChangesSince",
         "group": "Element Commands",
-        "description": "Returns the new, modified and deleted elements between a state captured by CaptureElementState and either another captured state (toStateId) or the current state of the project. Scripts that keep an external copy of the model use it to sync only what changed instead of re-reading every element. Fails for a stateId that is unknown - never captured, released, or lost because the project was closed or Archicad restarted.",
+        "description": "Returns the new, modified and deleted elements between a state captured by CaptureElementState and either another captured state (toStateId) or the current state of the project. Scripts that keep an external copy of the model use it to sync only what changed instead of re-reading every element. The changes come from Archicad's element difference generator, which tracks the model elements: 2D elements such as texts, labels and hatches can be missing from the lists, so read those directly. Fails for a stateId that is unknown - never captured, released, or lost because the project was closed or Archicad restarted.",
         "version": "1.8.0"
     },
     {
@@ -1722,6 +1962,12 @@
         "version": "1.8.0"
     },
     {
+        "name": "GetElementsByCriteria",
+        "group": "Element Commands",
+        "description": "Returns the elements, or with countOnly only their number, that match all the given criteria: element types, home stories, layers, Archicad's element filter flags and property criteria (a value compared in internal units, or a value status such as hasValue, isUserUndefined, isNotAvailable, isDefault or hasCustomValue). An unknown type, property or operator is an error, not ignored. Objects that belong to another element (zone stamps, the parts of stairs and railings) are left out unless the IncludeSubElemObjects filter is given.",
+        "version": "2.0.0"
+    },
+    {
         "name": "GetElementsByIFCIds",
         "group": "IFC Commands",
         "description": "Retrieves the elements by the given IFC identifiers. Accepts IFC GlobalIds in every Archicad version.",
@@ -1760,8 +2006,20 @@
     {
         "name": "GetExportTolerance",
         "group": "Project Commands",
-        "description": "Gets the export tolerance: the largest distance allowed between an arc and the straight segments that replace it when curves are segmented for export.",
+        "description": "Gets the export tolerance: the largest distance allowed between an arc and the straight segments that replace it when curves are segmented for export. Archicad only provides this value while an export is in progress, so outside an export the command returns an error saying so.",
         "version": "1.8.0"
+    },
+    {
+        "name": "GetFavoriteContents",
+        "group": "Favorites Commands",
+        "description": "Returns the Favorites of a folder of the Favorites palette and of its subfolders (every Favorite when no folder is given), each with its folder path, classifications, element category values and property values, read through the Favorite manager. Available from Archicad 29.",
+        "version": "2.0.0"
+    },
+    {
+        "name": "GetFavoriteDefaults",
+        "group": "Favorites Commands",
+        "description": "Reads the element default stored in each given Favorite through the Favorite manager, without applying it or placing an element: the element type, the layer, the element ID, the folder, the library part and GDL parameters, the marker of every element type that has one, and the sub-elements with each of their kinds (Curtain Wall frames and panels, Stair treads and risers, Railing posts and rails, markers ...). Available from Archicad 29.",
+        "version": "2.0.0"
     },
     {
         "name": "GetFavoriteDetails",
@@ -1806,10 +2064,28 @@
         "version": "1.7.3"
     },
     {
+        "name": "GetGDLDate",
+        "group": "Library Commands",
+        "description": "Gets the date GDL scripts see: year, month, day, hour, minute and second.",
+        "version": "2.0.0"
+    },
+    {
         "name": "GetGDLParametersOfElements",
         "group": "Element Commands",
         "description": "Gets all the GDL parameters (name, type, value) of the given elements.",
         "version": "1.5.7"
+    },
+    {
+        "name": "GetGDLParametersOfLibraryParts",
+        "group": "Library Commands",
+        "description": "Gets the default GDL parameters (name, display name, type, array dimensions, value, flags) of the given library parts by name, read from the library part without placing it or changing any defaults. The output is in the format of GetGDLParametersOfElements, without isLocked and possibleValues, which need a placed element. To read a part by its file name, as SetLibraryPartParameters writes it, use GetLibraryPartParameterValues.",
+        "version": "2.0.0"
+    },
+    {
+        "name": "GetGDLUserGlobals",
+        "group": "Library Commands",
+        "description": "Returns the current GDL global variables the GDL interpreter gets, with their names, types and values. Available from Archicad 28.",
+        "version": "2.0.0"
     },
     {
         "name": "GetGeoLocation",
@@ -1838,13 +2114,13 @@
     {
         "name": "GetGraphicOverrideRules",
         "group": "Attribute Commands",
-        "description": "Gets all graphic override rules of the project, with their rule group, criterion and style. Available from Archicad 27.",
+        "description": "Gets all graphic override rules of the project, with their rule group, criterion and style. With includeCriterion the criterion also comes as structured conditions, which CreateGraphicOverrideRules and ModifyGraphicOverrideRules take back. Available from Archicad 27.",
         "version": "1.7.2"
     },
     {
         "name": "GetGraphicOverrideRulesByName",
         "group": "Attribute Commands",
-        "description": "Gets graphic override rules by name, with their rule group, criterion and style. The rule group narrows the search; without it the rule is searched in every rule group. Available from Archicad 27.",
+        "description": "Gets graphic override rules by name, with their rule group, criterion and style. The rule group narrows the search; without it the rule is searched in every rule group. With includeCriterion the criterion also comes as structured conditions. Available from Archicad 27.",
         "version": "1.7.3"
     },
     {
@@ -1896,6 +2172,12 @@
         "version": "1.8.0"
     },
     {
+        "name": "GetHotlinkDesignOptionTables",
+        "group": "Design Options Commands",
+        "description": "Retrieves the design option table of the given hotlink nodes and placed hotlink instances: the filter mode (main model only, by options or by combination), the design option sets, options and combinations of the hotlinked module and which of them are active. Available from Archicad 29.",
+        "version": "2.0.0"
+    },
+    {
         "name": "GetHotlinkOwnersOfElements",
         "group": "Project Commands",
         "description": "Tells for each element whether it comes from a hotlinked module, and returns the hotlink element that contains it and the hotlink instance it belongs to. Available from Archicad 27.",
@@ -1926,6 +2208,12 @@
         "version": "1.8.0"
     },
     {
+        "name": "GetIFCAssignments",
+        "group": "IFC Commands",
+        "description": "Returns the IFC assignments of the project: the root IFC groups, and for each object the objects assigned to it (children) and the objects it is assigned to (parents). Each object is given by its hash value, its element where it belongs to one, its IFC type and its GlobalId. Available from Archicad 28.",
+        "version": "2.0.0"
+    },
+    {
         "name": "GetIFCAttributesOfElements",
         "group": "IFC Commands",
         "description": "Retrieves the IFC attributes (Name, Description, ObjectType, Tag, PredefinedType, LongName, ...) of the given elements, subelements included: the name, the IFC value type and the value of each attribute. On Archicad 25, 26 and 27 storedOnly returns only the attributes stored on the elements.",
@@ -1934,13 +2222,13 @@
     {
         "name": "GetIFCClassificationReferencesOfElements",
         "group": "IFC Commands",
-        "description": "Retrieves the IFC classification references of the given elements, subelements included: identification, name, location, description (from Archicad 29), the referenced classification (name, source, edition) and whether the reference comes from the preview translator or is stored locally. On Archicad 25, 26 and 27 the source is not given, the referenced classification also has its edition date, description and location, and storedOnly returns only the references stored on the elements.",
+        "description": "Retrieves the IFC classification references of the given elements, subelements included: identification, name, location, description and sort (from Archicad 29), the name of the IfcRelAssociatesClassification (from Archicad 28), the referenced classification (name, source, edition, edition date, description and location) and whether the reference comes from the preview translator or is stored locally. On Archicad 25, 26 and 27 the source is not given and storedOnly returns only the references stored on the elements.",
         "version": "1.8.0"
     },
     {
         "name": "GetIFCExportTranslators",
         "group": "IFC Commands",
-        "description": "Lists the IFC export translators of the project, the preview translator first. Pass one of the names to IFCFileOperation as translatorName.",
+        "description": "Lists the IFC export translators of the project in the order of Archicad's translator list. preview marks the first one, which the Archicad API documents as the preview translator; no API identifies the preview translator otherwise, and in some projects the IFC Translators dialog shows another one as preview. Pass one of the names to IFCFileOperation as translatorName.",
         "version": "1.6.0"
     },
     {
@@ -1954,6 +2242,12 @@
         "group": "IFC Commands",
         "description": "Retrieves the IFC properties of the given elements.",
         "version": "1.5.1"
+    },
+    {
+        "name": "GetIFCSpatialStructure",
+        "group": "IFC Commands",
+        "description": "Returns the IfcProject, IfcSite and IfcBuilding objects of the project's IFC model (hash value, IFC type and GlobalId), and for the given elements the index of the story they are assigned to in the IFC model. Available from Archicad 28.",
+        "version": "2.0.0"
     },
     {
         "name": "GetIFCTypeOfElements",
@@ -1992,10 +2286,22 @@
         "version": "1.8.0"
     },
     {
+        "name": "GetLastValidEmbeddedLibraryPartName",
+        "group": "Library Commands",
+        "description": "Gets the name and file path of the last valid library part of the embedded library.",
+        "version": "2.0.0"
+    },
+    {
         "name": "GetLayerCombinations",
         "group": "Attribute Commands",
         "description": "Returns the details of layer combination attributes.",
         "version": "1.2.4"
+    },
+    {
+        "name": "GetLayerOfElementDefaults",
+        "group": "Attribute Commands",
+        "description": "Returns the layer of the tool defaults of the given element types: the layer new elements of that type are placed on.",
+        "version": "2.0.0"
     },
     {
         "name": "GetLayers",
@@ -2034,10 +2340,46 @@
         "version": "1.0.1"
     },
     {
+        "name": "GetLibrariesOfLibParts",
+        "group": "Library Commands",
+        "description": "Gets the library of each given library part (by file name or guid): display name, location, embedded/built-in/package/local/missing flags and the Library Manager tree path. Available from Archicad 29.",
+        "version": "2.0.0"
+    },
+    {
+        "name": "GetLibraryPart2DPrimitives",
+        "group": "Library Commands",
+        "description": "Gets the lines, arcs and polygons (with their holes, and whether they are fills) of the 2D symbol of a loaded library part, drawn with its default parameters or with the parameters of a placed instance.",
+        "version": "2.0.0"
+    },
+    {
         "name": "GetLibraryPartCustomSection",
         "group": "Library Commands",
         "description": "Gets a custom section of a loaded library part by its section identifier and index: whether it exists, its data version and its content as base64. Available from Archicad 28.",
         "version": "1.8.0"
+    },
+    {
+        "name": "GetLibraryPartDetails",
+        "group": "Library Commands",
+        "description": "Gets the details of loaded library parts, by name or index: path, library tree path, containing library, and for GDL objects the GUID, subtype, license, UI default flag, which scripts and pictures they have, and optionally the interface and migration scripts. Can also tell whether each one is in the subtype of another library part. Available from Archicad 28.",
+        "version": "2.0.0"
+    },
+    {
+        "name": "GetLibraryPartFileInfo",
+        "group": "Library Commands",
+        "description": "Reads library part files (.gsm) without loading them into the libraries of the project: the unique ID of the part, the unique ID of its subtype and its master, parameter, 2D, 3D and properties scripts. Password protected parts need their password. Available from Archicad 28.",
+        "version": "2.0.0"
+    },
+    {
+        "name": "GetLibraryPartIdentities",
+        "group": "Library Commands",
+        "description": "Gets the unique ID (main and revision GUID), the reference GUID and the Teamwork lock status of library parts given by index or file path, and whether they are in a server library.",
+        "version": "2.0.0"
+    },
+    {
+        "name": "GetLibraryPartMetadata",
+        "group": "Library Commands",
+        "description": "Returns the description, keywords, author and placeable, password protected and hierarchical pages flags of loaded library parts, given by file name. Use it to search library parts by description or keywords and to tell placeable parts from macros. Available from Archicad 28.",
+        "version": "2.0.0"
     },
     {
         "name": "GetLibraryPartOriginalLocations",
@@ -2046,10 +2388,40 @@
         "version": "1.8.0"
     },
     {
+        "name": "GetLibraryPartParameterValues",
+        "group": "Library Commands",
+        "description": "Returns the parameters of loaded library parts, given by their file name as GetAvailableLibraryParts returns it, with their default values and descriptions, in the format of GetGDLParametersOfElements: the read counterpart of SetLibraryPartParameters. Unlike GetGDLParametersOfLibraryParts, which finds a part by its name and also returns the index, flags and value descriptions of each parameter, it reads through the Library Manager. Available from Archicad 28.",
+        "version": "2.0.0"
+    },
+    {
         "name": "GetLibraryPartPictures",
         "group": "Library Commands",
         "description": "Gets the preview picture and the GDL pictures of a loaded library part as base64 encoded PNGs, and from Archicad 29 also their dark user interface variants. Available from Archicad 28.",
         "version": "1.8.0"
+    },
+    {
+        "name": "GetLibraryPartScripts",
+        "group": "Library Commands",
+        "description": "Gets the master, parameter, 2D, 3D and properties scripts of loaded library parts, given by name or by an element placed from them, with the unique ID of each part. A script section the part does not have is reported as not present. Password protected parts need their password. Available from Archicad 28.",
+        "version": "2.0.0"
+    },
+    {
+        "name": "GetLibraryPartSection",
+        "group": "Library Commands",
+        "description": "Reads the text of a text section (a script or the comment) of a library part given by index, without opening it in the GDL editor. Takes the password of a protected library part.",
+        "version": "2.0.0"
+    },
+    {
+        "name": "GetLibraryPartSections",
+        "group": "Library Commands",
+        "description": "Lists the sections of library parts given by index: their four-character type code, sub-identifier, size and whether they are text (scripts, comments) or binary (previews).",
+        "version": "2.0.0"
+    },
+    {
+        "name": "GetLibraryPartTypeDetails",
+        "group": "Library Commands",
+        "description": "Returns the type details of the given library parts (ACAPI_LibraryPart_GetDetails): full unique ID and its direct parent's, type, the detail flags of objects, lamps, labels and zones, the frame and orientation settings of doors and windows, and the element type and variation of the tool that places the library part. For their path, library, GUID, license and scripts see GetLibraryPartDetails.",
+        "version": "2.0.0"
     },
     {
         "name": "GetLineFromUser",
@@ -2084,25 +2456,31 @@
     {
         "name": "GetMEPDistributionSystems",
         "group": "MEP Commands",
-        "description": "Retrieves the MEP distribution systems of the project with their domain, MEP system attribute and member elements. Available from Archicad 28.",
+        "description": "Retrieves the MEP distribution systems of the project with their domain, MEP system attribute, member elements, physical systems (from Archicad 29) and optionally their tree: the elements from the root element on, each with its previous and next elements and the connecting ports. Available from Archicad 28.",
         "version": "1.5.6"
     },
     {
         "name": "GetMEPElementDetails",
         "group": "MEP Commands",
-        "description": "Retrieves the type-specific details of the given MEP elements: insulation thickness and routing segment of rigid segments, control points of flexible segments, radius factor, insulation thickness, preference table and routing node of elbows (from Archicad 29), angle, length and insulation thickness of branches, and offsets, wider and narrower ports, insulation thickness, routing node and (from Archicad 29) preference table of transitions. Available from Archicad 28.",
+        "description": "Retrieves the type-specific details of the given MEP elements: insulation thickness and routing segment of rigid segments, control points and polyline of flexible segments, radius factor, insulation thickness, preference table and routing node of elbows (from Archicad 29), angle, length and insulation thickness of branches, and offsets, wider and narrower ports, insulation thickness, routing node and (from Archicad 29) preference table of transitions. Available from Archicad 28.",
         "version": "1.8.0"
     },
     {
         "name": "GetMEPElements",
         "group": "MEP Commands",
-        "description": "Retrieves the MEP (Mechanical, Electrical, Plumbing) elements of the project, optionally filtered by type and domain. MEP elements are ordinary elements, so the generic element commands work on them as well (for example they can be deleted with the DeleteElements command). Available from Archicad 28.",
+        "description": "Retrieves the MEP (Mechanical, Electrical, Plumbing) elements of the project (every element the MEP API lists, and from Archicad 30 the electrical panels and devices), optionally filtered by type and domain. MEP elements are ordinary elements, so the generic element commands work on them as well (for example they can be deleted with the DeleteElements command). Available from Archicad 28.",
         "version": "1.5.6"
+    },
+    {
+        "name": "GetMEPPhysicalSystemsOfElements",
+        "group": "MEP Commands",
+        "description": "Returns the physical systems each of the given MEP elements is part of. Available from Archicad 29.",
+        "version": "2.0.0"
     },
     {
         "name": "GetMEPPorts",
         "group": "MEP Commands",
-        "description": "Retrieves the ports of the given MEP elements including position, shape, size, connection status and connection style (from Archicad 30), the flow direction of piping and ventilation ports, the nominal size of piping ports (from Archicad 30), and the outer diameter, wall thickness and flange size (Archicad 30) of piping and ventilation ports. Available from Archicad 28.",
+        "description": "Retrieves the ports of the given MEP elements including position, shape, size, connection status (Archicad 27: whether the port is connected, from Archicad 28: whether it is physically connected) and connection style (from Archicad 30), the flow direction of piping and ventilation ports (from Archicad 28), the nominal size of piping ports (from Archicad 30), and the outer diameter, wall thickness and flange size (Archicad 30) of piping and ventilation ports. Available from Archicad 27.",
         "version": "1.5.6"
     },
     {
@@ -2126,7 +2504,7 @@
     {
         "name": "GetMEPRoutingElements",
         "group": "MEP Commands",
-        "description": "Retrieves the details of the given MEP routing elements: domain, MEP system, offset from the home story, branch preference table, the ports logically connected at the route's beginning and end, the floor plan display settings (cut plane position, floor plan display option, show projection and on-story visibility, from Archicad 29), route polyline, segments with cross section data (shape, size, preference table and reference id), begin and end nodes, anchor, reference line offsets, wall thickness, flange size, connection style and rigid segments, and nodes with their incoming and outgoing segments, preferred transition placement, elbows and transitions. Available from Archicad 28.",
+        "description": "Retrieves the details of the given MEP routing elements: domain, MEP system, offset from the home story, branch preference table, the ports logically connected at the route's beginning and end, the floor plan display settings (cut plane position, floor plan display option, show projection and on-story visibility, from Archicad 29), route polyline, segments with cross section data (shape, size, preference table and reference id), begin and end nodes, anchor, reference line offsets, wall thickness, flange size, connection style, insulation thickness and rigid segments, and nodes with their incoming and outgoing segments, preferred transition placement, elbows and transitions. Available from Archicad 28.",
         "version": "1.5.6"
     },
     {
@@ -2148,6 +2526,18 @@
         "version": "1.5.4"
     },
     {
+        "name": "GetMEPToolDefaults",
+        "group": "MEP Commands",
+        "description": "Retrieves the current settings of the MEP tools per domain, without changing them: the routing tool (MEP system, branch preference table, floor plan display settings from Archicad 29, and its segment, node, elbow (Archicad 27 and from Archicad 29) and transition defaults), its rigid segment and branch defaults, the flexible segment tool, the library part, insulation and port settings of the terminal, accessory, fitting and equipment tools, and from Archicad 30 the electrical panel tool with its number of circuit defaults. Archicad 27 gives fewer settings, and only the shape of the ports. Available from Archicad 27.",
+        "version": "2.0.0"
+    },
+    {
+        "name": "GetMagicWandSettings",
+        "group": "Application Commands",
+        "description": "Returns the settings of Archicad's Magic Wand Settings dialog: how curves are approximated with straight segments (a number of segments along arcs or circles, a largest deviation from the curve, or a segment length) and the trace method. Useful to know how the Magic Wand will trace a curve. Changes nothing in the project.",
+        "version": "2.0.0"
+    },
+    {
         "name": "GetMainGroups",
         "group": "Element grouping Commands",
         "description": "Gets the top level group of each given group. A group that is not nested in another group is its own top level group.",
@@ -2160,16 +2550,52 @@
         "version": "1.7.1"
     },
     {
+        "name": "GetMarquee",
+        "group": "Element Commands",
+        "description": "Gets the marquee of the current window: its shape (rectangle, rotated rectangle or polygon), whether it is multi-story, and its outline as a polygon. Returns the type 'none' when there is no marquee.",
+        "version": "2.0.0"
+    },
+    {
         "name": "GetMergedElements",
         "group": "Solid Element Operation Commands",
         "description": "Gets the elements each queried element is merged with, one item per queried element; an unknown element is an error item.",
         "version": "1.8.0"
     },
     {
+        "name": "GetMissingAttributes",
+        "group": "Attribute Commands",
+        "description": "Lists the references of placed elements to layers, fills, surfaces, building materials, composites, profiles, line types, pen tables and zone categories that do not exist in the project, for the given types or all of them, and of the tool defaults, Favorites, graphic override rules, Model View Options combinations and attributes: the structured counterpart of the missing attributes report of Archicad's GDL palette. Every element of the floor plan and of every view and layout (hotlinked ones too) is checked, and so is every tool default and Favorite (with its sub-elements): its layer, its attribute fields and memo data as ReindexAttributes finds them, its composite or profile when its structure type uses one, a drawing's own pen table, and its library part parameters of attribute types; of every graphic override rule the line type, fill and surface it overrides with; of every Model View Options combination the surfaces and line types of the stair and railing schemes and the library part settings' GDL parameters of attribute types; of every composite the building materials of its skins and the line types of its separators, of every building material its cut fill and cut surface, of every surface the fill of its vectorial hatching, of every MEP system its fill, center line type and surfaces, and of every profile the building material, surface or fill of each skin and its contour, cut end and edge line types. The sources input limits the check to elements, tool defaults, Favorites, graphic override rules, Model View Options or attributes. Each item names the source; for an element the element (and the element it is part of, for a curtain wall frame, a column segment, ...) and the story or view it sits on, for a tool default the tool, for a Favorite its name and tool, for a graphic override rule its guid and name, for a Model View Options combination its guid and name (and the library part option set), for an attribute its type, guid and name; then the attribute type, the missing index and the field or GDL parameter that holds it. Index 0 counts as no attribute. Read only. Available from Archicad 27.",
+        "version": "2.0.0"
+    },
+    {
+        "name": "GetMissingLibPartNames",
+        "group": "Library Commands",
+        "description": "Gets the library part name of the given placed Object, Lamp, Window or Door elements, even if the library containing the part is not loaded. Use it to find the parts of elements that are shown as dots because their library part is missing.",
+        "version": "2.0.0"
+    },
+    {
+        "name": "GetModelExtent",
+        "group": "Element Commands",
+        "description": "Returns the 3D extent (xMin, yMin, zMin, xMax, yMax, zMax) of the current database, the region Archicad's Fit in Window would show.",
+        "version": "2.0.0"
+    },
+    {
+        "name": "GetModelViewOptionDetails",
+        "group": "Navigator Commands",
+        "description": "Gets the settings stored in model view option combinations (Document > Model View > Model View Options), all of them or the ones given by id or by name: the model view options in the fields of GetViewOptions, and the options library parts add to the combination (gdlOptions) with their GDL parameter values. Read-only: the Archicad API has no function to change, rename or create a stored combination; SetViewOptions changes the options of the current window. Available from Archicad 27.",
+        "version": "2.0.0"
+    },
+    {
         "name": "GetModelViewOptions",
         "group": "Navigator Commands",
         "description": "Gets all model view options",
         "version": "1.1.4"
+    },
+    {
+        "name": "GetModulData",
+        "group": "Project Data Commands",
+        "description": "Gets the module data Tapir stored in the project with StoreModulData: the given names, or all of them, with their data version and, unless includeContent is false, their content. Module data are the custom data sections of Archicad's ModulData Manager: text saved in the project file under a name, kept apart from project data (SetProjectData).",
+        "version": "2.0.0"
     },
     {
         "name": "GetNavigatorItemTree",
@@ -2192,7 +2618,7 @@
     {
         "name": "GetNoteAutotexts",
         "group": "Project Commands",
-        "description": "Retrieves the autotexts available in the notes of an element type (e.g. a Dimension), each with the element types it is available for. The autotexts are identified by the numeric value of their API_NoteAutotextID. Needs Archicad 26 or later.",
+        "description": "Retrieves the autotexts available in the notes of an element type (e.g. a Dimension), each with the element types it is available for. The autotexts are identified by the numeric value of their API_NoteAutotextID. For a Dimension, the optional dimensionAppearance (Linear by default) chooses the dimension type. Needs Archicad 26 or later.",
         "version": "1.8.0"
     },
     {
@@ -2312,7 +2738,7 @@
     {
         "name": "GetProjectPreferences",
         "group": "Project Commands",
-        "description": "Gets pages of the project preferences (Options > Project Preferences): the working units, the dimensions, the calculation units and the zones. Further pages may follow.",
+        "description": "Gets pages of the project preferences (Options > Project Preferences): the working units, the dimensions, the calculation units, the zones and the reference levels, and the Floor Plan Cut Plane Settings. Further pages may follow.",
         "version": "1.7.3"
     },
     {
@@ -2334,6 +2760,24 @@
         "version": "1.7.3"
     },
     {
+        "name": "GetPropertyDefinitionsOfElementComponents",
+        "group": "Property Commands",
+        "description": "Returns the property definitions available on the given element components, optionally filtered to user defined or built-in ones.",
+        "version": "2.0.0"
+    },
+    {
+        "name": "GetPropertyEditability",
+        "group": "Property Commands",
+        "description": "Tells whether the values of the given properties can be modified, and whether the properties are visible, for the given elements. Also tells whether they can be modified in the tool defaults of element types (from Archicad 26) and in the default values of the property definitions themselves. Unknown elements, element types and properties are reported as errors, not as locked properties.",
+        "version": "2.0.0"
+    },
+    {
+        "name": "GetPropertyExpressionReferences",
+        "group": "Property Commands",
+        "description": "Returns the strings that refer to the given properties in property expressions.",
+        "version": "2.0.0"
+    },
+    {
         "name": "GetPropertyObjectsOfElements",
         "group": "Element Commands",
         "description": "Gets the property objects of the given elements: the library parts of the old listing system (used by projects migrated from older Archicad versions) linked to each element by criteria or individually, with the library part's index (the same as the index returned by GetAvailableLibraryParts), name and guid. The output is aligned with the input array of elements.",
@@ -2346,10 +2790,28 @@
         "version": "1.1.8"
     },
     {
+        "name": "GetPropertyValuesOfElementComponents",
+        "group": "Property Commands",
+        "description": "Returns the property values of the given element components for the given properties, in the shape of GetPropertyValuesOfElements. Use GetComponentsOfElements to list the components of an element.",
+        "version": "2.0.0"
+    },
+    {
+        "name": "GetPropertyValuesOfElementDefaults",
+        "group": "Property Commands",
+        "description": "Returns the values of the given properties in the current tool default of an element type, which new elements of that type get. It reads the native tool default of the generic variation of the type, not a Favorite that is not applied. A property that is not available for the tool default is reported as an error.",
+        "version": "2.0.0"
+    },
+    {
         "name": "GetPropertyValuesOfElements",
         "group": "Property Commands",
         "description": "Returns the property values of the elements for the given property. It works for subelements of hierarchal elements also. With includeAvailability it also tells whether each property is available for the element.",
         "version": "1.0.6"
+    },
+    {
+        "name": "GetPublisherSets",
+        "group": "Navigator Commands",
+        "description": "Returns the publisher sets of the project with their saved output: the local or LAN path, the Teamwork file server path, or the Internet host and directory name.",
+        "version": "2.0.0"
     },
     {
         "name": "GetQuantitiesOfElements",
@@ -2366,7 +2828,7 @@
     {
         "name": "GetRenderingScenes",
         "group": "Project Commands",
-        "description": "Gets the names of the rendering scenes of the project, as the Scene list of the PhotoRendering Settings palette shows them.",
+        "description": "Gets the names of the rendering scenes of the project (the Scene list of the PhotoRendering Settings palette), the most recently used first, and the name of the current scene.",
         "version": "1.8.0"
     },
     {
@@ -2384,7 +2846,7 @@
     {
         "name": "GetReservationStatusOfElements",
         "group": "Teamwork Commands",
-        "description": "Returns the Teamwork reservation status of elements without reserving them: whether each element is free, reserved by the current user or reserved by another user, with the reserving user and the element's owner.",
+        "description": "Returns the Teamwork reservation status of elements without reserving them: whether each element is free, reserved by the current user or reserved by another user, with the reserving user. New elements stay reserved by the user who created them until they are released.",
         "version": "1.7.3"
     },
     {
@@ -2412,15 +2874,27 @@
         "version": "1.1.9"
     },
     {
+        "name": "GetRoofPlanes",
+        "group": "Element Commands",
+        "description": "Gets the single planes of roofs, without changing the roofs. A multi-plane roof is decomposed by Archicad into its planes, each returned with its part identifier and its details as a single-plane roof (slope, pivot line, level, outline with arcs and holes); a single-plane roof is returned as its only plane. The output is aligned with the input array of elements.",
+        "version": "2.0.0"
+    },
+    {
         "name": "GetRoomImage",
         "group": "Element Commands",
         "description": "Returns the room image of the given zone.",
         "version": "1.2.7"
     },
     {
+        "name": "GetSchedules",
+        "group": "Navigator Commands",
+        "description": "Returns the Interactive Schedules of the Project Map: navigator item id, name, ID and the folders they are in. Archicad's API does not give the rows of a schedule nor export it; to export one, put it in a publisher set with a spreadsheet format in Archicad and run PublishPublisherSet.",
+        "version": "2.0.0"
+    },
+    {
         "name": "GetScriptUIResult",
         "group": "Script UI Commands",
-        "description": "Retrieves and clears the result last submitted from the Script UI palette's page (via window.ACAPI.SubmitResult), if any, and reports whether the palette is still open, so a waiting script can stop when the user closes it.",
+        "description": "Retrieves and clears the result last submitted from a Script UI window's page (via window.ACAPI.SubmitResult), if any, and reports whether the window is still open, so a waiting script can stop when the user closes it. The window is picked by uiId or scriptId; without them the first window is used.",
         "version": "1.5.4"
     },
     {
@@ -2430,16 +2904,34 @@
         "version": "1.5.8"
     },
     {
+        "name": "GetSectionsAndElevationsDetails",
+        "group": "Navigator Commands",
+        "description": "Gets every configurable setting of the given Section and Elevation elements, with their name and reference ID.",
+        "version": "2.0.0"
+    },
+    {
         "name": "GetSelectedElements",
         "group": "Element Commands",
         "description": "Gets the list of the currently selected elements.",
         "version": "0.1.0"
     },
     {
+        "name": "GetShapePrimitivesOfElements",
+        "group": "Element Commands",
+        "description": "Returns the 2D drawing primitives of each given floor plan element in the same format as GetDrawingPrimitivesOfElements, but drawn as ACAPI_DrawingPrimitive_ShapePrims draws it by default (on the current story, clipped as Archicad clips it) instead of on every story and unclipped. With includeMarkers the objects attached to the elements (window and door markers, drawing titles, ...) are drawn with them or left out; Archicad's setting is changed back afterwards. An element on another story gets an error item. The floor plan must be the current database. The output is aligned with the input array of elements.",
+        "version": "2.0.0"
+    },
+    {
         "name": "GetSkylightHolePolygons",
         "group": "Element Commands",
         "description": "Gets the polygon of the hole each given Skylight cuts into its host Roof or Shell: the outline and any holes of it as 2D coordinates. The output is aligned with the input array of elements; an element that is not a Skylight gets an error item.",
         "version": "1.8.0"
+    },
+    {
+        "name": "GetSnapPointsOfElements",
+        "group": "Element Commands",
+        "description": "Gets the snap points (hotspots) of the given elements, of any element type: the points of an element that the cursor snaps to and dimensions attach to (for example the endpoints of a Wall's reference line or the vertices of a Slab), in world coordinates, each with the neig kind and subindex identifying which point of the element it is. For the 2D hotspots of library part instances see GetHotspotsOfElements. The output is aligned with the input array of elements.",
+        "version": "2.0.0"
     },
     {
         "name": "GetSolidElementLinks",
@@ -2452,6 +2944,12 @@
         "group": "Application Commands",
         "description": "Retrieves the filesystem paths of the special folders of the running Archicad (preferences, cache, data, temporary, application, defaults, templates, help, embedded project library, etc.).",
         "version": "1.5.6"
+    },
+    {
+        "name": "GetSplineMaxDistances",
+        "group": "Element Commands",
+        "description": "Measures how far the given 2D coordinates are from a segment of a Spline element, between two of its fit points, with its own Bezier handles: returns the largest distance, for example to check how well a polyline follows the spline. The output is aligned with the input array. Changes nothing in the project.",
+        "version": "2.0.0"
     },
     {
         "name": "GetStories",
@@ -2514,6 +3012,12 @@
         "version": "1.5.6"
     },
     {
+        "name": "GetTeamworkAccessRights",
+        "group": "Teamwork Commands",
+        "description": "Returns whether the role of the current user has the given Teamwork access rights (API_TWAccessRights names without the API prefix, e.g. LayersCreate), all of them when no names are given.",
+        "version": "2.0.0"
+    },
+    {
         "name": "GetTeamworkOwnersOfDatabases",
         "group": "Teamwork Commands",
         "description": "Returns the Teamwork owner (user id and name) of each given database, e.g. of a layout or a view database. The user id is 0 when nobody owns the database.",
@@ -2524,6 +3028,12 @@
         "group": "Teamwork Commands",
         "description": "Tells whether the opened project is a Teamwork project and whether it is online, and returns its BIMcloud server, project name and the current user (id and name).",
         "version": "1.8.0"
+    },
+    {
+        "name": "GetTeamworkRightsOfObjects",
+        "group": "Teamwork Commands",
+        "description": "Returns for each given object, for example an element, whether the current Teamwork user has the right to create objects of its kind and to delete or modify it.",
+        "version": "2.0.0"
     },
     {
         "name": "GetTeamworkStatus",
@@ -2538,15 +3048,33 @@
         "version": "1.8.0"
     },
     {
+        "name": "GetToolboxItems",
+        "group": "Application Commands",
+        "description": "Lists the tools of the Toolbox, the tools of add-ons included, in the form SetCurrentTool accepts, and the active tool. includeHidden also lists the tools without an icon, e.g. the Slab Accessory.",
+        "version": "2.0.0"
+    },
+    {
         "name": "GetURLReferencesOfElements",
         "group": "Element Commands",
         "description": "Gets the web link (URL reference) of the given elements: a URL with a description, shown in Archicad in the element's settings under Element Information > Link. An element without a link gets the error APIERR_NOUSERDATA.",
         "version": "1.8.0"
     },
     {
+        "name": "GetUnusedAttributes",
+        "group": "Attribute Commands",
+        "description": "Lists the unused layers, fills, surfaces, building materials, composites, profiles, line types, pen tables and zone categories (index, id and name), for the given types or all of them. The Archicad API has no function that tells which attributes are unused (only how many per type), so every reference is collected: the elements of the floor plan and of every view and layout (hotlinked ones too), with their library part parameters and memo data, the tool defaults, the Favorites, the other attributes (composites, building materials, surfaces, profiles, MEP systems) and the graphic override rules, the way ReindexAttributes finds them; for layers the layer of each element, tool default and Favorite; for composites and profiles the walls, slabs, roofs, shells, column and beam segments whose structure type uses them; for pen tables the current pen table and the drawings set to a pen table of their own. An attribute that only an unused attribute refers to counts as used. Indices typed into GDL scripts and the pen tables saved with views are not found. Each type also reports Archicad's own count of the attributes in use (archicadUsedCount, see GetUsedAttributes), so a difference shows. Read only. Available from Archicad 27.",
+        "version": "2.0.0"
+    },
+    {
+        "name": "GetUnusedLibraryParts",
+        "group": "Library Commands",
+        "description": "Lists the loaded library parts that no element of the project is placed from. Read only. The Archicad API does not tell which library parts are used, so every element of the floor plan and of every view and layout is checked: objects, lamps, doors, windows, skylights, zone stamps, symbol labels, drawing titles, curtain wall parts, and the markers of doors, windows, skylights, sections, elevations, details and worksheets. A library part used only in another way (called as a macro, linked as a property object, as an interior elevation marker, in stairs and railings, in the tool defaults or in Favorites) is listed as unused. Library parts that cannot be placed (e.g. macros) are only listed with includeNotPlaceable.",
+        "version": "2.0.0"
+    },
+    {
         "name": "GetUsedAttributes",
         "group": "Attribute Commands",
-        "description": "Gets the attributes in use, as Archicad reports them for the usedAttributes JSON query: parsed into usedAttributes when the report is a JSON object, otherwise as text in raw. Helps to find the attributes DeleteAttributes can remove before a handover. Available from Archicad 27.",
+        "description": "Gets how many attributes of each type are in use (layers, lines, fills, composites, surfaces, ...), as Archicad reports them for the usedAttributes JSON query: the counts in usedAttributes, the report as text in raw. Available from Archicad 27.",
         "version": "1.8.0"
     },
     {
@@ -2576,7 +3104,7 @@
     {
         "name": "GetViewOptions",
         "group": "Navigator Commands",
-        "description": "Gets the model view options and on-screen view options of the current plan window, and the index of the model view option combination it applies.",
+        "description": "Gets the model view options and on-screen view options of the current plan window, and the index and name of the model view option combination it applies.",
         "version": "1.8.0"
     },
     {
@@ -2636,8 +3164,14 @@
     {
         "name": "IFCFileOperation",
         "group": "IFC Commands",
-        "description": "Executes an IFC file operation: opens or merges an IFC file, or saves the project as an IFC file. A save can name the export translator to use.",
+        "description": "Executes an IFC file operation: opens or merges an IFC file, or saves the project as an IFC file. A save can name the export translator to use, a merge the story the IFC file's first storey is placed on. With overwrite false a save refuses to replace an existing file.",
         "version": "1.2.6"
+    },
+    {
+        "name": "ImportAttributesFromProject",
+        "group": "Attribute Commands",
+        "description": "Imports Line, Fill, ZoneCategory, PenTable, OperationProfile, Composite, Profile and LayerCombination attributes from another project or template file into the open project, with their complete definition (symbol and percent fills included), like Append or Overwrite by name in Archicad's Attribute Manager. The lines and fills a composite or profile uses are matched by name; its building materials and surfaces, and the layers of a layer combination, keep their index only with referencesByIndex, since Archicad does not read these types from a closed file. An attribute with a reference that cannot be mapped is not imported. A new attribute gets a new guid: Archicad does not hand out the guids stored in the source file. An attribute whose name already exists is skipped, or overwritten in place with overwriteExisting. dryRun reports what would happen without changing anything. The names are the legacy 8-bit names of the source file. Available from Archicad 27.",
+        "version": "2.0.0"
     },
     {
         "name": "ImportClassificationsXml",
@@ -2648,7 +3182,7 @@
     {
         "name": "ImportFavorites",
         "group": "Favorites Commands",
-        "description": "Import Favorites from a .prefs file or folder into the current project. From Archicad 29 they can also be imported from a folder of Favorite files (xml format, all of them or the given fileNames) or from a legacy .prf file (legacyPRF format), with the conflict policies Error, Skip, OverwriteExisting and RenameNew.",
+        "description": "Import Favorites from a .prefs file or folder into the current project. From Archicad 29 they can also be imported from a folder of Favorite files (xml format, all of them or the given fileNames) or from a legacy .prf file (legacyPRF format), with the conflict policies Error, Skip, OverwriteExisting and RenameNew. In a Teamwork project the Favorites lockable object set must be reserved first (see ReserveLockableObjectSet).",
         "version": "1.5.0"
     },
     {
@@ -2668,6 +3202,24 @@
         "group": "Property Commands",
         "description": "Imports a Property Manager XML export, with the given policy for names that already exist. Returns the property definitions it created and removed.",
         "version": "1.6.0"
+    },
+    {
+        "name": "InterpretAutoTexts",
+        "group": "Project Commands",
+        "description": "Resolves one or more autotexts (e.g. '<LAYOUTID>') to their values, optionally in the context of an element, so a key can be tested before it is written into a Text or Label.",
+        "version": "2.0.0"
+    },
+    {
+        "name": "InterpretGDLScript3D",
+        "group": "Library Commands",
+        "description": "Runs a GDL 3D script, given as text or as the master and 3D scripts of a loaded library part with its default parameters, with the settings of the GDL editor, and returns whether it ran without a GDL error, how many 3D model elements it generated and their bounding box. The API returns no GDL error message or line number.",
+        "version": "2.0.0"
+    },
+    {
+        "name": "IsLibraryPartSubtypeOf",
+        "group": "Library Commands",
+        "description": "Checks for each of the given library parts whether the given ancestor is anywhere up its subtype hierarchy (e.g. whether a part is a kind of furniture), independent of its name. A library part is not a subtype of itself. With matchAncestorByMainId any revision of the ancestor matches.",
+        "version": "2.0.0"
     },
     {
         "name": "IsUsableGDLString",
@@ -2690,13 +3242,13 @@
     {
         "name": "MakePropertyAvailableForElements",
         "group": "Property Commands",
-        "description": "Makes a property definition available for all the given elements. Available only in Archicad 27.",
+        "description": "Makes a property definition available for all the given elements. Available in Archicad 25, 26 and 27.",
         "version": "1.7.3"
     },
     {
         "name": "MakePropertyUnavailableForElements",
         "group": "Property Commands",
-        "description": "Makes a property definition unavailable for all the given elements. Available only in Archicad 27.",
+        "description": "Makes a property definition unavailable for all the given elements. Available in Archicad 25, 26 and 27.",
         "version": "1.7.3"
     },
     {
@@ -2708,7 +3260,7 @@
     {
         "name": "MergeElements",
         "group": "Solid Element Operation Commands",
-        "description": "Merges the given construction elements (the Merge command of Archicad, which cleans up the junctions of slabs, beams, walls and similar elements). Undoable. The element types are not filtered: Archicad reports the ones it cannot merge.",
+        "description": "Merges the given construction elements (the Merge command of Archicad, which cleans up the junctions of slabs, beams, walls and similar elements). Undoable. The element types are not filtered: Archicad reports the ones it cannot merge. The merge is read back: when Archicad records no merge between the given elements (it decides which elements and type combinations it merges), the result is a failure, not a success.",
         "version": "1.8.0"
     },
     {
@@ -2724,22 +3276,40 @@
         "version": "1.8.0"
     },
     {
+        "name": "ModifyAssociativeDimensions",
+        "group": "Element Commands",
+        "description": "Changes the settings of existing linear dimensions (the Dimension tool's elements, also in sections): the dimension type, the elevation origin, the line pen, the marker type and pen, the text height, pen and frame and the witness line form and value, with the same keys as the dimension creation commands. The text and witness line settings are applied to every witness point. Not written: the witness points, the dimension line position and direction (use MoveElements), the marker size, the text content and position, the witness extension line, the layout and the hole and composite wall dimensioning settings.",
+        "version": "2.0.0"
+    },
+    {
         "name": "ModifyBeams",
         "group": "Element Commands",
-        "description": "Modifies Beam elements based on the given parameters.",
+        "description": "Modifies Beam elements based on the given parameters. CreateBeams takes the same cut fill pens and cover fill, and the same absolute zCoordinate of the reference line (with an optional floorIndex). Not written: the surfaces of the beam segments, and the cut fill pens before Archicad 27.",
         "version": "1.4.0"
     },
     {
         "name": "ModifyColumns",
         "group": "Element Commands",
-        "description": "Modifies Column elements based on the given parameters.",
+        "description": "Modifies Column elements based on the given parameters. CreateColumns takes the same cut fill pens and cover fill. Not written: the surfaces of the column segments, and the cut fill pens before Archicad 27.",
         "version": "1.4.0"
+    },
+    {
+        "name": "ModifyCurtainWallFrames",
+        "group": "Element Commands",
+        "description": "EXPERIMENTAL. Modifies single Curtain Wall Frames by their GUID: the frame contour (a1, a2, b1, b2), the frame class and the frame type. ACAPI_Element_Change does not take a frame on its own, so the change is written through the memo of the owner curtain wall, and read back to check that Archicad applied it.",
+        "version": "2.0.0"
     },
     {
         "name": "ModifyCurtainWalls",
         "group": "Element Commands",
         "description": "Modifies Curtain Wall elements in place, keeping their GUID, properties and classifications: the height, the bottom elevation and story, the reference line (with the same number of segments), and the column (primary) and row (secondary) pattern with its cell assignments, in the fields of CreateCurtainWalls.",
         "version": "1.8.0"
+    },
+    {
+        "name": "ModifyDetailMarkers",
+        "group": "Navigator Commands",
+        "description": "Changes the name, the reference ID, the clip polygon, the boundary's pen and line type, the marker symbol's angle, always-horizontal setting and pen of Detail and Worksheet markers. Not written: the base point (Archicad places it at the center of the clip polygon's bounding box when the marker is created), the viewpoint the marker refers to, and the marker symbol's other settings, which are parameters of the library part placed as the marker (markerId in GetDetailsOfElements). A value Archicad did not apply gets a failed execution result.",
+        "version": "2.0.0"
     },
     {
         "name": "ModifyDoors",
@@ -2808,6 +3378,24 @@
         "version": "1.5.7"
     },
     {
+        "name": "ModifyLevelDimensions",
+        "group": "Element Commands",
+        "description": "Changes existing Level Dimension elements: the position of the marker and the settings CreateLevelDimensions takes (pen, text height and pen, marker type and size, plus sign, angle, origin), with the same keys. Not written: the parent element and the static level (delete and recreate the dimension to change them), the text content and the hide-with-base-element setting.",
+        "version": "2.0.0"
+    },
+    {
+        "name": "ModifyLibraryList",
+        "group": "Library Commands",
+        "description": "Adds libraries by path and removes loaded libraries by name or path, in one change of the library list. Returns the result of each addition and removal. Available from Archicad 28.",
+        "version": "2.0.0"
+    },
+    {
+        "name": "ModifyMEPElements",
+        "group": "MEP Commands",
+        "description": "Modifies placed MEP elements: the anchor point, orientation and library part of terminals, accessories, equipment, fittings and flexible segments, the control points, polyline (Piping, from Archicad 28), and width and height of flexible segments. Only the given fields are changed, in one undo step with one execution result per element; an item with a field that does not fit its element changes nothing. Archicad reports a 'libraryPartId' it does not find only after the item's other changes were made, so that item's error says which changes stayed. Available from Archicad 27.",
+        "version": "2.0.0"
+    },
+    {
         "name": "ModifyMEPPhysicalSystems",
         "group": "MEP Commands",
         "description": "Modifies MEP physical systems: name, root element and the MEP system used as their category. Only the given fields are changed. Available from Archicad 29.",
@@ -2822,13 +3410,13 @@
     {
         "name": "ModifyMEPPreferenceTables",
         "group": "MEP Commands",
-        "description": "Modifies the MEP preference tables of a domain, in the shape GetMEPPreferenceTables returns them: adds tables, changes their names, segmentation lengths (from Archicad 29) and row values and descriptions, deletes or empties rows, adds rows to the rectangular duct and cable carrier tables, deletes tables, and deletes reference ids from the reference set and angles from the angle set (from Archicad 29). Each table is changed in one undoable step. Available from Archicad 28.",
+        "description": "Modifies the MEP preference tables of a domain, in the shape GetMEPPreferenceTables returns them: adds tables, changes their names, segmentation lengths (from Archicad 29) and row values and descriptions, deletes or empties rows, adds rows to the rectangular duct and cable carrier tables, deletes tables, deletes reference ids from the reference set, and adds and deletes angles of the angle set (from Archicad 29). Each table is changed in one undoable step. Available from Archicad 28.",
         "version": "1.8.0"
     },
     {
         "name": "ModifyMEPRoutingElements",
         "group": "MEP Commands",
-        "description": "Modifies the given MEP routing elements: MEP system, branch preference table, floor plan display settings (cut plane position, floor plan display option, show projection and on-story visibility, from Archicad 29), cross section data (shape, size, preference table and reference id), anchor, reference line offsets, wall thickness, flange size and connection style of all segments, preferred transition placement of all nodes, and node positions. Available from Archicad 28.",
+        "description": "Modifies the given MEP routing elements: MEP system, branch preference table, floor plan display settings (cut plane position, floor plan display option, show projection and on-story visibility, from Archicad 29), cross section data (shape, size, preference table and reference id), anchor, reference line offsets, wall thickness, flange size and connection style of all segments, preferred transition placement of all nodes, insulation thickness of the whole route (segments, elbows and transitions), and node positions. Available from Archicad 28.",
         "version": "1.5.6"
     },
     {
@@ -2856,6 +3444,12 @@
         "version": "1.5.7"
     },
     {
+        "name": "ModifyOpenings",
+        "group": "Element Commands",
+        "description": "Modifies Opening elements: the width, the height and the base point CreateOpenings takes. Needs Archicad 28 or earlier; in Archicad 29 and later every item fails with a message pointing to SetOpeningDetails, which changes the size and the position of an opening there.",
+        "version": "2.0.0"
+    },
+    {
         "name": "ModifyPens",
         "group": "Attribute Commands",
         "description": "Changes the color, width and description of single pens of the Pen Table in effect for the model views (the default) or the layouts, keeping every other pen as it is. Only the given fields of a listed pen are changed. In a Teamwork project the PenTables lockable object set must be reserved first (see ReserveLockableObjectSet).",
@@ -2864,8 +3458,14 @@
     {
         "name": "ModifyPropertyValueOfElements",
         "group": "Property Commands",
-        "description": "Sets one property value on all the given elements in a single step. If the property is not available for any of the elements, none of them is changed. Available from Archicad 27.",
+        "description": "Sets one property value on all the given elements in a single step. If the property is not available for any of the elements, none of them is changed.",
         "version": "1.8.0"
+    },
+    {
+        "name": "ModifyRailings",
+        "group": "Element Commands",
+        "description": "Modifies Railing elements in place: the height of their segments, the bottom offset and the home story. The reference line, the nodes and segments, and the posts, rails and panels stay as they are. Each railing is read back after the change, and a value Archicad did not apply gets a failed execution result.",
+        "version": "2.0.0"
     },
     {
         "name": "ModifyRevisionIssues",
@@ -2876,8 +3476,14 @@
     {
         "name": "ModifyRoofs",
         "group": "Element Commands",
-        "description": "Modifies multi-plane Roof elements based on the given parameters.",
+        "description": "Modifies single-plane and multi-plane Roof elements based on the given parameters. The plan outline, level, thickness and structure apply to both; angle, pivotLine and edgeTrims (the cut of each polygon edge) only to single-plane roofs; levels, eavesOverhang and pivotEdges only to multi-plane roofs.",
         "version": "1.4.0"
+    },
+    {
+        "name": "ModifySections",
+        "group": "Navigator Commands",
+        "description": "Changes the name and the reference ID of Section and Elevation elements, which the Project Map and the markers show. GetDetailsOfElements reads those of a Section back as name and idStr.",
+        "version": "2.0.0"
     },
     {
         "name": "ModifyShells",
@@ -2886,10 +3492,22 @@
         "version": "1.8.0"
     },
     {
+        "name": "ModifySkylights",
+        "group": "Element Commands",
+        "description": "Modifies Skylight elements: anchor position and anchor point, fix mode, width, height, azimuth and elevation angles, mirroring, floor plan display option, pens, line types, section fill and pens, surface and the use-the-library-part's-settings flags - the same settings CreateSkylights takes and GetDetailsOfElements returns. Only the given settings change. Not written by this command: the owner roof or shell, the anchor level and the vertical link (Archicad places the skylight on its owner), the plane of a multi-plane roof it sits on, the dimension marker (a separate element) and the library part's own parameters (use SetGDLParametersOfElements). Archicad may set the elevation angle again from the owner.",
+        "version": "2.0.0"
+    },
+    {
         "name": "ModifySlabs",
         "group": "Element Commands",
-        "description": "Modifies Slab elements based on the given parameters.",
+        "description": "Modifies Slab elements based on the given parameters. CreateSlabs takes the same surfaces, cut fill pens and floor fill. Not written: the surface of a single edge, and the cut fill pens before Archicad 27. Of the cover fill orientation, Archicad applies only the type to a Slab through the API; a given origin or distortion matrix that did not stick gets a failed execution result, while the other details are applied.",
         "version": "1.4.0"
+    },
+    {
+        "name": "ModifyStairs",
+        "group": "Element Commands",
+        "description": "Modifies Stair elements in place, keeping their baseline and position: the flight width, total height, number of steps, riser height and going with their locks, the finish and structure visibility, the extra top and bottom treads, the walking line position and offset, the step numbering, the walking direction, the uniform finish, monolith and draining settings, and for the flights and the landings the tread and riser settings (presence, thickness, offset, nosing, riser cross section and position) and the structure of each side (presence, type, underside shape and thickness). CreateStairs accepts the same settings. Only the given settings are changed. Archicad solves the stair again within its baseline, so it may adjust the step values; read them back with GetDetailsOfElements. Not written by this command: the baseline with its landings and winders, the top link, the floor plan display (symbol and marker layout), the headroom and the stair rules; the subelements (treads, risers, structures) take the per-part settings above and cannot be written one by one through the API.",
+        "version": "2.0.0"
     },
     {
         "name": "ModifyTexts",
@@ -2900,7 +3518,7 @@
     {
         "name": "ModifyWalls",
         "group": "Element Commands",
-        "description": "Modifies Wall elements based on the given parameters.",
+        "description": "Modifies Wall elements based on the given parameters. Takes the same wall settings as CreateWalls, applied by the same code, plus geometryType (Straight or Trapezoid), profileType and bottomOffset. Neither command can write a Polygonal outline (it needs an outline polygon, which these commands do not take), connectionPriority or junctionSequence (Archicad ignores writes to them; GetDetailsOfElements reads them), and on Archicad 29 any story visibility other than 'Home story only' and 'All relevant stories'.",
         "version": "1.4.0"
     },
     {
@@ -2912,13 +3530,13 @@
     {
         "name": "ModifyZones",
         "group": "Element Commands",
-        "description": "Modifies Zone elements: name, number, category, zone stamp, height, base offset, top link and floor thickness. Only the given fields are changed; the polygon is kept.",
+        "description": "Modifies Zone elements: name, number, category, zone stamp, height, base offset, top link, floor thickness, contour line and cover fill - the same settings as CreateZones, applied by the same helpers. Only the given fields are changed. The polygon of a manual zone cannot be changed here (the change takes no polygon memo), nor the reference point of an automatic one (SetDetailsOfElements moves it).",
         "version": "1.8.0"
     },
     {
         "name": "MoveAttributesAndFolders",
         "group": "Attribute Commands",
-        "description": "Moves attributes and attribute folders (with their contents) into the target folder, which must be of the same attribute type; an empty target path is the root folder. Returns one execution result per attribute and per folder. Available from Archicad 26.",
+        "description": "Moves attributes and attribute folders (with their contents) into the target folder, which must be of the same attribute type; an empty target path is the root folder. Returns one execution result per attribute and per folder; an attribute or folder that is already directly in the target folder counts as moved. Available from Archicad 26.",
         "version": "1.7.3"
     },
     {
@@ -2964,6 +3582,12 @@
         "version": "1.1.7"
     },
     {
+        "name": "MoveProjectInfoFields",
+        "group": "Project Commands",
+        "description": "Moves fields of the Project Info groups to a group, before another field of it or to its end. A subfield of a calculated field moves with its parent field. Available from Archicad 30.",
+        "version": "2.0.0"
+    },
+    {
         "name": "MoveProjectInfoGroups",
         "group": "Project Commands",
         "description": "Moves Project Info groups before another group, or to the end of the group list when no other group is given. Available from Archicad 30.",
@@ -2984,14 +3608,68 @@
     {
         "name": "OpenProject",
         "group": "Project Commands",
-        "description": "Opens the given project.",
+        "description": "Opens the given project. The unsaved changes of the open project are discarded without asking: Archicad has no query for them, so call SaveProject first when they must be kept.",
         "version": "1.0.7"
+    },
+    {
+        "name": "OpenSettingsDialog",
+        "group": "Script UI Commands",
+        "description": "Opens Archicad's settings dialog of the selected elements or the current tool (Archicad 28 and later), or the default settings dialog of the given element type, waits for the user and reports whether the dialog was closed with OK or Cancel.",
+        "version": "2.0.0"
     },
     {
         "name": "PhotoRender",
         "group": "Project Commands",
-        "description": "Renders the 3D model with the current rendering scene, or with the given one, as Document > Creative Imaging > PhotoRender Projection does, and saves the image to a file (png, jpg, bmp, tiff or gif). The image size and quality come from the scene.",
+        "description": "Renders the 3D model with the current rendering scene, or with the given one, as Document > Creative Imaging > PhotoRender Projection does, and saves the image to a file (png, jpg, bmp, tiff or gif). The image size, resolution and quality come from the scene; a width, height or resolution given here is used for this render only, the scene is not changed. With overwrite false it refuses to replace an existing file.",
         "version": "1.8.0"
+    },
+    {
+        "name": "PickAttribute",
+        "group": "Script UI Commands",
+        "description": "Opens a small dialog with Archicad's attribute picker for the given attribute type (layer, building material, composite, profile or surface; fill and line from Archicad 27), waits for the user and returns the chosen attribute, or cancelled. Available from Archicad 26.",
+        "version": "2.0.0"
+    },
+    {
+        "name": "PickAttributeFolder",
+        "group": "Script UI Commands",
+        "description": "Opens a small dialog with Archicad's attribute folder picker for the given attribute type, waits for the user and returns the chosen folder as its path from the root folder, or cancelled. Available from Archicad 26.",
+        "version": "2.0.0"
+    },
+    {
+        "name": "PickLibraryFolder",
+        "group": "Script UI Commands",
+        "description": "Opens Archicad's dialog for choosing or creating a library folder, waits for the user and returns the location of the folder, or reports that the user cancelled. The folder is not added to the libraries of the project.",
+        "version": "2.0.0"
+    },
+    {
+        "name": "PickLibraryPart",
+        "group": "Script UI Commands",
+        "description": "Opens Archicad's Object, Lamp, Window or Door Settings dialog, optionally limited to a library part subtype, lets the user pick a library part and set its parameters, and returns the chosen library part with its GDL parameters, or that the user cancelled. Places nothing.",
+        "version": "2.0.0"
+    },
+    {
+        "name": "PickLibraryPartFile",
+        "group": "Script UI Commands",
+        "description": "Opens Archicad's Open Library Part dialog, waits for the user and returns the location of the chosen library part, or reports that the user cancelled.",
+        "version": "2.0.0"
+    },
+    {
+        "name": "PickLibraryPartSaveLocation",
+        "group": "Script UI Commands",
+        "description": "Opens Archicad's Save Library Part dialog (object, door or window), waits for the user and returns the location chosen to save the library part to, or reports that the user cancelled. Nothing is saved.",
+        "version": "2.0.0"
+    },
+    {
+        "name": "PickPictureFile",
+        "group": "Script UI Commands",
+        "description": "Opens Archicad's Open Picture dialog (the one of the texture settings), waits for the user and returns the location of the chosen picture, or reports that the user cancelled. Archicad adds the chosen picture to the embedded library when it is not in it yet.",
+        "version": "2.0.0"
+    },
+    {
+        "name": "PickZoneStampOrLabelFile",
+        "group": "Script UI Commands",
+        "description": "Opens Archicad's dialog for opening a zone stamp or label library part, waits for the user and returns the location of the chosen file, or reports that the user cancelled.",
+        "version": "2.0.0"
     },
     {
         "name": "PlaceOpenings",
@@ -3016,6 +3694,12 @@
         "group": "Application Commands",
         "description": "Performs a quit operation on the currently running Archicad instance.",
         "version": "0.1.0"
+    },
+    {
+        "name": "ReadFavoritesFile",
+        "group": "Favorites Commands",
+        "description": "Read the Favorites of a .prefs file or folder without importing them, returning the name, element type and folder of each. Nothing in the project changes, so the result can be compared with the project's Favorites before ImportFavorites.",
+        "version": "2.0.0"
     },
     {
         "name": "RebuildCurrentDatabase",
@@ -3054,6 +3738,18 @@
         "version": "1.7.3"
     },
     {
+        "name": "ReindexAttributes",
+        "group": "Attribute Commands",
+        "description": "Moves fills, line types, surfaces, building materials and zone categories to new indices, the way ReindexLayers moves layers. Archicad cannot renumber an attribute, so the attribute is recreated at its new index (free indices below it are filled with temporary attributes, which are deleted again) and every reference to the old index is rewritten to the new one: the fields of the elements in the floor plan and in every view and layout, the parameters of library part based elements, the memo data of roofs, slabs, meshes, morphs, curtain walls, beams, columns, stairs and interior elevations, the tool defaults, the Favorites (with their sub-elements: a curtain wall's frame and panel classes, a stair's structures), the other attributes that refer to it (composites, building materials, surfaces, profiles, MEP systems) and the graphic override rules. Only then is the old attribute deleted. The new attribute has a new attribute id (Archicad does not keep a given id); its name, definition and attribute folder are the old ones. Elements on a hidden or locked layer cannot be changed, so their layers are shown and unlocked for the move and put back afterwards (in the current window, as Archicad keeps these flags per window). If an element still cannot be changed (it is locked itself, or not reserved in Teamwork), everything is put back and that attribute is not moved. Elements from hotlinked modules cannot be changed and are listed; their module file has to be reindexed on its own. Indices typed into GDL scripts are not found, and the frame and panel classes of curtain wall Favorites and of the Curtain Wall tool default keep the old index (Archicad does not take them from ACAPI_Favorite_Change, so such Favorites are left as they are and named in the warnings). dryRun lists every reference without changing anything. The whole call is one undo step. Pens, layers (see ReindexLayers) and the other attribute types are not supported. Available from Archicad 27.",
+        "version": "2.0.0"
+    },
+    {
+        "name": "ReindexLayers",
+        "group": "Attribute Commands",
+        "description": "Moves layers to new indices. Archicad cannot renumber an attribute, so each layer is recreated at its new index (free indices below it are filled with temporary layers, which are deleted again), gets the old layer's state in every layer combination, and then every element of the old layer is moved to it, in the floor plan and in every view and layout database, with the tool defaults on that layer. Only when the old layer is empty everywhere is it deleted, and the new layer gets its name, flags and folder. If an element cannot be moved (it is locked, not reserved in Teamwork, or comes from a hotlinked module), that layer is left as it was. The new layer has a new attribute id; Favorites that use the layer are not updated. Archicad keeps the shown, locked and wireframe state of a layer per open window: the new layer gets the old one's state in the current window and in every layer combination, and starts shown and unlocked in the other open windows. The model elements that sections, elevations, interior elevations and 3D documents show of the layer come back on the new layer when those views are rebuilt (listed as viewsToRebuild). dryRun lists the elements and tool defaults on each layer without changing anything. The whole call is one undo step. Available from Archicad 27.",
+        "version": "2.0.0"
+    },
+    {
         "name": "ReleaseElementState",
         "group": "Element Commands",
         "description": "Frees a state captured by CaptureElementState. Every state is freed anyway when the project is closed or Archicad quits.",
@@ -3062,7 +3758,7 @@
     {
         "name": "ReleaseElements",
         "group": "Teamwork Commands",
-        "description": "Releases elements in Teamwork mode.",
+        "description": "Releases elements in Teamwork mode. Fails, naming them, when any of the given GUIDs is not an element; the other elements are released.",
         "version": "1.1.4"
     },
     {
@@ -3098,19 +3794,19 @@
     {
         "name": "RemoveElementTrims",
         "group": "Solid Element Operation Commands",
-        "description": "Removes the trim between an element and the roof or shell trimming it.",
+        "description": "Removes the trim between an element and the roof or shell trimming it. The Archicad API removes the trimming connection between the two elements, so when they trim each other (two roofs or shells) both directions are removed; trim the other direction again with TrimElements to keep it. With dryRun true nothing is removed and no undo step is created: the response has dryRun set to true, and each pair whose element is trimmed by its trimming element gets wouldDelete.",
         "version": "1.5.9"
     },
     {
         "name": "RemoveIFCClassificationReferencesOfElements",
         "group": "IFC Commands",
-        "description": "Removes IFC classification references stored on elements, given by the name of their classification and optionally their identification; without identification every stored reference of that classification is removed. Available only in Archicad 25, 26 and 27 for now.",
+        "description": "Removes IFC classification references stored on elements, given by the name of their classification and optionally their identification; without identification every stored reference of that classification is removed. Available only in Archicad 25, 26 and 27 for now. With dryRun true nothing is removed and no undo step is created: the response has dryRun set to true, and each element that has a matching stored reference gets wouldDelete.",
         "version": "1.8.0"
     },
     {
         "name": "RemoveIFCPropertiesOfElements",
         "group": "IFC Commands",
-        "description": "Removes local IFC properties, given by property set and property name, from elements. Available only in Archicad 25, 26 and 27 for now.",
+        "description": "Removes local IFC properties, given by property set and property name, from elements. Available only in Archicad 25, 26 and 27 for now. With dryRun true nothing is removed and no undo step is created: the response has dryRun set to true, and each element that has the local IFC property gets wouldDelete.",
         "version": "1.7.3"
     },
     {
@@ -3122,13 +3818,13 @@
     {
         "name": "RemovePropertyFromAttributes",
         "group": "Property Commands",
-        "description": "Makes a custom property unavailable for the given attributes (for example Building Materials), in one undo step. Available in Archicad 25, 26 and 27 only.",
+        "description": "Makes a custom property unavailable for the given attributes (for example Building Materials), in one undo step. Available in Archicad 25, 26 and 27 only. With dryRun true nothing is changed and no undo step is created: the response has dryRun set to true, and wouldDelete when the property and every attribute exist.",
         "version": "1.7.3"
     },
     {
         "name": "RemoveSolidElementLinks",
         "group": "Solid Element Operation Commands",
-        "description": "Removes solid element operation links between target and operator elements.",
+        "description": "Removes solid element operation links between target and operator elements. With dryRun true nothing is removed and no undo step is created: the response has dryRun set to true, and each link that exists gets wouldDelete.",
         "version": "1.5.4"
     },
     {
@@ -3136,6 +3832,12 @@
         "group": "Attribute Commands",
         "description": "Renames attribute folders, each given by attribute type and path, to the given new names. The root folder cannot be renamed. Available from Archicad 26.",
         "version": "1.7.3"
+    },
+    {
+        "name": "RenameAttributes",
+        "group": "Attribute Commands",
+        "description": "Renames attributes of any type (layers, layer combinations, composites, surfaces, ...). Each attribute keeps its index, its id and its settings. A new name that another attribute of the same type already has is refused, and so is renaming the attributes Archicad does not allow to change (the built-in Archicad Layer, the Solid and Empty fills).",
+        "version": "2.0.0"
     },
     {
         "name": "RenameDesignOptionCombinations",
@@ -3176,8 +3878,14 @@
     {
         "name": "RenameNavigatorItem",
         "group": "Navigator Commands",
-        "description": "Renames a navigator item or changes its ID. newId sets the custom layout number of a layout and the custom ID of any other item. For a Project Map section, elevation, detail or worksheet the name and ID of the element behind the viewpoint are changed, for an interior elevation those of the segment the item stands for; the change is undone when the item does not show the new name. The name and ID of other Project Map items (stories, schedules, ...) cannot be changed. Fails when Archicad refuses the change or does not apply the new name or ID. With customName false the item drops its custom name and follows its Project Map source again.",
+        "description": "Renames a navigator item or changes its ID. Renaming the Layout Book item of a placed Drawing also sets the custom name of the Drawing. newId sets the custom layout number of a layout and the custom ID of any other item. For a Project Map section, elevation, detail or worksheet the name and ID of the element behind the viewpoint are changed, for an interior elevation those of the segment the item stands for; the change is undone when the item does not show the new name. The name and ID of other Project Map items (stories, schedules, ...) cannot be changed. Fails when Archicad refuses the change or does not apply the new name or ID. With customName false the item drops its custom name and follows its Project Map source again.",
         "version": "1.1.7"
+    },
+    {
+        "name": "RenameProjectInfoFields",
+        "group": "Project Commands",
+        "description": "Renames custom fields of the Project Info groups. Fixed (built-in) fields cannot be renamed. Available from Archicad 30.",
+        "version": "2.0.0"
     },
     {
         "name": "RenameProjectInfoGroups",
@@ -3198,6 +3906,12 @@
         "version": "1.8.0"
     },
     {
+        "name": "ReorderNavigatorItems",
+        "group": "Navigator Commands",
+        "description": "Reorders the children of a navigator item to match the given order. Works around MoveNavigatorItem being unable to reposition an item within its current parent, by bouncing it through a sibling.",
+        "version": "2.0.0"
+    },
+    {
         "name": "RequestProjectData",
         "group": "Project Data Commands",
         "description": "Requests the project data with the given names in Teamwork from the users who have reserved it, with an optional message.",
@@ -3206,7 +3920,7 @@
     {
         "name": "ReserveElements",
         "group": "Teamwork Commands",
-        "description": "Reserves elements in Teamwork mode.",
+        "description": "Reserves elements in Teamwork mode. GUIDs that are not elements (navigator items, layouts, databases) cannot be reserved with it: they are returned in notElements and the execution result fails.",
         "version": "1.1.4"
     },
     {
@@ -3240,6 +3954,18 @@
         "version": "1.7.3"
     },
     {
+        "name": "ResolveNames",
+        "group": "Project Commands",
+        "description": "Looks up words or phrases (for example from a user's question) among the names of the open project before they are passed to other commands: stories, layers, layer combinations, building materials, composites, profiles, surfaces, fills, lines, zone categories, element types (by API name and, from Archicad 27, by the name the Archicad interface shows), properties (by name, and by group and name together) and classifications (systems by name and version, items of every system by name and ID). For each name it returns 'found' with the items named exactly so, 'closeMatches' with the nearest names, best first (ranked by differences in case, accents, spacing and separators, shared words, one name containing the other and a few differing characters), or 'notFound' when nothing in the project is close, meaning the project has no such item and it must not be guessed. Each match carries what the other commands take: the story index, the attribute id and index, the elementType, the propertyId (with the property's group, value type and the classification items a custom property is available for), or the classificationSystemId and classificationItemId. Matching is lexical and deterministic. Read only.",
+        "version": "2.0.0"
+    },
+    {
+        "name": "RotateCopyElements",
+        "group": "Element Commands",
+        "description": "Copies elements rotated around a center on the floor plan by an angle in radians, like rotating a copy in Archicad, keeping all their settings. With count, copy n is rotated by n times the angle, which makes a circular array. Returns the new elements of each given element, in the order of the given ones; an element Archicad cannot copy gets an error naming the reason, and the other elements are still copied. All copies are one undo step.",
+        "version": "2.0.0"
+    },
+    {
         "name": "RotateElements",
         "group": "Element Commands",
         "description": "Rotates elements around a reference point. An element that cannot be edited (its layer is hidden or locked, it is locked, or it is not available in teamwork) gets a failed execution result naming the reason instead of being skipped silently.",
@@ -3260,32 +3986,56 @@
     {
         "name": "SaveAsModuleFile",
         "group": "Project Commands",
-        "description": "Saves the given elements, or the current selection, as a hotlink module (.mod) file.",
+        "description": "Saves the given elements, or the current selection, as a hotlink module (.mod) file. With overwrite false it refuses to replace an existing file.",
         "version": "1.5.9"
     },
     {
         "name": "SaveCurrentWindowAsImage",
         "group": "Project Commands",
-        "description": "Saves what the current window shows as an image file (png, jpg, bmp, tiff or gif), as File > Save as does with a picture format. Master layout windows are not supported: save a layout that uses the master layout instead.",
+        "description": "Saves what the current window shows as an image file (png, jpg, bmp, tiff or gif), as File > Save as does with a picture format. Master layout windows are not supported: save a layout that uses the master layout instead. With overwrite false it refuses to replace an existing file.",
         "version": "1.7.2"
     },
     {
         "name": "SaveProject",
         "group": "Project Commands",
-        "description": "Saves the currently opened project.",
+        "description": "Saves the currently opened project, in place or to a given path. With overwrite false it refuses to replace an existing file at the path.",
         "version": "1.3.1"
     },
     {
         "name": "SaveProjectAsArchive",
         "group": "Project Commands",
-        "description": "Saves the open project as an archive (.pla) file, with the library parts it uses inside.",
+        "description": "Saves the open project as an archive (.pla) file, with the library parts it uses inside. With overwrite false it refuses to replace an existing file.",
         "version": "1.6.0"
+    },
+    {
+        "name": "ScaleElements",
+        "group": "Element Commands",
+        "description": "Scales elements on the floor plan or in the current 2D view by a factor around a center point with Archicad's Resize edit, in one undo step. Resize scales X and Y by the same ratio, so factorY, if given, must equal factor. Supported types: Wall, Column, Beam, Slab, Roof, Mesh, Zone, Line, PolyLine, Arc, Circle, Spline, Hatch and Hotspot. An element of another type (library parts such as objects, lamps, doors and windows, stairs, railings, curtain walls, shells, morphs, texts, subelements, dimensions, labels, ...) or one that cannot be edited gets a failed execution result naming the reason, and the other elements are still scaled.",
+        "version": "2.0.0"
     },
     {
         "name": "ScreenToModel",
         "group": "Application Commands",
         "description": "Converts pixel positions local to the current Archicad view window to 2D model coordinates of the current database, using the current window's size, drawing scale and zoom. It is a 2D mapping: it does not reconstruct a 3D point, and several model coordinates can map to the same pixel.",
         "version": "1.8.0"
+    },
+    {
+        "name": "SearchFavorites",
+        "group": "Favorites Commands",
+        "description": "Searches project favorites by keyword (matching favorite name or folder) and/or element type.",
+        "version": "2.0.0"
+    },
+    {
+        "name": "SearchLibraryParts",
+        "group": "Library Commands",
+        "description": "Finds the loaded library parts derived from an ancestor library part (by its unique ID) whose name matches a pattern with * wildcards. Archicad returns at most 50 of them.",
+        "version": "2.0.0"
+    },
+    {
+        "name": "SearchProperties",
+        "group": "Property Commands",
+        "description": "Searches properties by name or group substring with optional filtering by property type, value type, and collection type.",
+        "version": "2.0.0"
     },
     {
         "name": "Set3DCutPlanes",
@@ -3300,6 +4050,12 @@
         "version": "1.7.3"
     },
     {
+        "name": "Set3DDocumentSettings",
+        "group": "Navigator Commands",
+        "description": "Changes the given settings of a 3D Document, given by its navigator item, in the form Get3DDocumentSettings returns; the settings not given are kept. Returns the settings read back after the change.",
+        "version": "2.0.0"
+    },
+    {
         "name": "Set3DFilterAndCutSettings",
         "group": "Navigator Commands",
         "description": "Changes the 'Filter and Cut Elements in 3D' settings of the 3D window; only the given fields and the listed element types change. Returns the settings read back after the change. Available from Archicad 27.",
@@ -3308,7 +4064,7 @@
     {
         "name": "Set3DProjectionSettings",
         "group": "Navigator Commands",
-        "description": "Sets a perspective projection for the 3D window. Every perspective parameter is required: read a known good set with Get3DProjectionSettings and pass it back, with the values to change replaced.",
+        "description": "Sets a perspective or an axonometric projection for the 3D window. Every perspective parameter but sun is required: read a known good set with Get3DProjectionSettings and pass it back, with the values to change replaced. An axonometry changes only the values given: the projection type, the azimuth, the transformation matrix and the sun. The sun of either changes only the values given in it and is kept when sun is missing. The 3D window shows the change after a rebuild (RebuildView), e.g. before SaveCurrentWindowAsImage.",
         "version": "1.7.2"
     },
     {
@@ -3374,7 +4130,7 @@
     {
         "name": "SetCategoryValuesOfElements",
         "group": "Element Commands",
-        "description": "Sets the category values (Structural Function, Position, Renovation Status ...) of the given elements, one element and one category per item, in a single undoable step. The value must belong to the given category, as GetElementCategories lists them; an element without that category gets a failed execution result. The names are localized: use the type and the categoryValueId in scripts.",
+        "description": "Sets the category values (Structural Function, Position, Renovation Status ...) of the given elements, one element and one category per item, in a single undoable step. The value must belong to the given category, as GetElementCategories lists them; an element without that category gets a failed execution result. The names are localized: use the type and the categoryValueId in scripts. With dryRun true nothing is changed and no undo step is created: the response has dryRun set to true, and each item that passes the checks made before writing gets wouldChange, with the element's value in the category now (oldValue) and the value a real run would set (newValue).",
         "version": "1.7.3"
     },
     {
@@ -3392,14 +4148,26 @@
     {
         "name": "SetClassificationsOfElements",
         "group": "Classification Commands",
-        "description": "Sets the classifications of elements. In order to set the classification of an element to unclassified, omit the classificationItemId field. It works for subelements of hierarchal elements also.",
+        "description": "Sets the classifications of elements. In order to set the classification of an element to unclassified, omit the classificationItemId field. It works for subelements of hierarchal elements also. With dryRun true nothing is changed and no undo step is created: the response has dryRun set to true, and each item that passes the checks made before writing gets wouldChange, with the element's classification in the system now (oldValue) and the one a real run would set (newValue).",
         "version": "1.0.7"
+    },
+    {
+        "name": "SetCurrent3DStyle",
+        "group": "Navigator Commands",
+        "description": "Meant to make the given 3D style, one of the names Get3DStyles returns, the current one. Not available yet: it checks the name, then refuses, because Archicad's API function for it crashes Archicad.",
+        "version": "2.0.0"
     },
     {
         "name": "SetCurrentRenderingScene",
         "group": "Project Commands",
         "description": "Makes the given rendering scene the current one, as selecting it in the PhotoRendering Settings palette does.",
         "version": "1.8.0"
+    },
+    {
+        "name": "SetCurrentTool",
+        "group": "Application Commands",
+        "description": "Activates a tool in the Toolbox, given as GetCurrentTool or GetToolboxItems returns it; an empty input activates the Arrow. Archicad switches the tool once it processes its events, so GetCurrentTool may still return the previous tool right after this command.",
+        "version": "2.0.0"
     },
     {
         "name": "SetCurrentWindowDrawingScale",
@@ -3420,9 +4188,15 @@
         "version": "1.8.0"
     },
     {
+        "name": "SetDesignOptionCombinationOfViews",
+        "group": "Design Options Commands",
+        "description": "Sets the design option combination the given views show, or makes them show only the main model. Available from Archicad 27.",
+        "version": "2.0.0"
+    },
+    {
         "name": "SetDetailsOfElements",
         "group": "Element Commands",
-        "description": "Sets the details of the given elements (floor, layer, order, Element ID etc).",
+        "description": "Sets the details of the given elements. Every element type: Element ID (id), story (floorIndex), layer (layerIndex) and display order (drawIndex). In typeSpecificDetails: Wall - start and end point, height, base offset, and the start and end thickness of a trapezoid wall; Zone - the ZoneSettings fields (the same as ModifyZones); Line - start and end point, pen, line type, room separator; Arc and Circle - origin, radius, angle, ratio, start and end angle (arcs only), reflected, pen, line type, room separator; Polyline - points and arcs, pen, line type, room separator; Spline - pen, line type, room separator; Hatch - outline, holes, contour pen, fill pen and background pen or colors, fill or building material, area display, room special and fill orientation; Hotspot - position, height, pen; Text - text, position, angle, height, justification; Label - the text of a text label; Drawing - position, angle, ratio, model offset, clip polygon (isCutWithFrame), name, ID and numbering, scale in Autotext, border, title library part, pen table (penTableUsageMode, penTableIndex), colorMode, isTransparentBackground, rasterizeDPI and the anchor (anchorPoint, useOwnOriginAsAnchor). Not written, because the Archicad API does not take them: the geometry of a Spline, the source of a Drawing (use ChangeDrawingLink), the Drawing Manager's update type and stored in project, and often a placed Drawing's drawingScale, which comes from its source view (the element's result then names the kept value). Other wall, slab, column, beam, stair and object settings are written by their Modify commands. An element Archicad does not let you edit (its layer is hidden or locked, it is locked, or it is not reserved by you in teamwork) gets a failed execution result naming the reason; a Drawing setting Archicad kept unchanged is named in a failed execution result too.",
         "version": "1.0.7"
     },
     {
@@ -3456,9 +4230,15 @@
         "version": "1.8.0"
     },
     {
+        "name": "SetGDLDate",
+        "group": "Library Commands",
+        "description": "Sets the date GDL scripts see: year, month, day, hour, minute and second, as GetGDLDate returns them. Useful to test date-dependent library parts; set the value read with GetGDLDate back to restore it.",
+        "version": "2.0.0"
+    },
+    {
         "name": "SetGDLParametersOfElements",
         "group": "Element Commands",
-        "description": "Sets the given GDL parameters of the given elements. An element Archicad does not let the user edit (its layer locked, the element locked, or not reserved by the user in Teamwork) gets a failed execution result naming that reason, whatever the parameter. The parameters are read back after the change, and a written parameter Archicad did not keep (e.g. one it sets from the element's own settings, like AC_TextSize_1 of a label) gives a failed execution result naming it.",
+        "description": "Sets the given GDL parameters of the given elements. An element Archicad does not let the user edit (its layer locked, the element locked, or not reserved by the user in Teamwork) gets a failed execution result naming that reason, whatever the parameter. On a Curtain Wall Frame, A, B, ac_frameWidth and ac_frameDepth mirror the frame's contour, which Archicad derives from the frame's settings, so they are rejected instead of reporting a change that does not take effect; a frame without a library part (an invisible Boundary frame, for example) has no GDL parameters. The parameters are read back after the change, and a written parameter Archicad did not keep (e.g. one it sets from the element's own settings, like AC_TextSize_1 of a label) gives a failed execution result naming it. With dryRun true no element is changed and no undo step is created: the parameters are written to the element's parameter list and its Parameter Script runs as in a real run, the response has dryRun set to true, and each element that passes the checks made before changing it gets wouldChange, listing the parameters a real run would change (the given ones and the ones the Parameter Script changes with them) with their old and new values.",
         "version": "1.5.7"
     },
     {
@@ -3492,6 +4272,12 @@
         "version": "1.8.0"
     },
     {
+        "name": "SetHotlinkDesignOptionTables",
+        "group": "Design Options Commands",
+        "description": "Sets the filter mode, the active combination and the active option of sets in the design option table of the given placed hotlink instances. Available from Archicad 29.",
+        "version": "2.0.0"
+    },
+    {
         "name": "SetIFCAttributesOfElements",
         "group": "IFC Commands",
         "description": "Sets the values of IFC attributes (Name, Description, ObjectType, Tag, ...) of elements. The attribute must be one GetIFCAttributesOfElements returns for the element; its IFC value type is kept. Available only in Archicad 25, 26 and 27 for now.",
@@ -3516,9 +4302,15 @@
         "version": "1.8.0"
     },
     {
+        "name": "SetLayerOfElementDefaults",
+        "group": "Attribute Commands",
+        "description": "Sets the layer of the tool defaults of the given element types, so new elements of that type are placed on it. Only the layer of the defaults is changed.",
+        "version": "2.0.0"
+    },
+    {
         "name": "SetLayoutSettings",
         "group": "Navigator Commands",
-        "description": "Sets settings of layouts, including their master layout and Layout Info Panel custom data fields.",
+        "description": "Sets settings of layouts, including their master layout and Layout Info Panel custom data fields. In Teamwork the layout settings must be reserved first in Archicad (Layout Book > Reserve Layout Settings); the Archicad API cannot reserve them, and ReserveElements does not. GetTeamworkOwnersOfDatabases shows who holds a layout.",
         "version": "1.1.7"
     },
     {
@@ -3538,6 +4330,18 @@
         "group": "Library Commands",
         "description": "Sets the author, keywords, license, license version, password and the placeable, UI default, subtype and hierarchical pages flags of loaded library parts. Only the given fields are changed. A library part that is not editable (e.g. a part of a library package or a read-only library) is refused and left unchanged. Available from Archicad 28.",
         "version": "1.8.0"
+    },
+    {
+        "name": "SetLibraryPartParameters",
+        "group": "Library Commands",
+        "description": "Sets the parameter values, and optionally the parameter descriptions, of loaded library parts, in the format of SetGDLParametersOfElements. Only the given parameters are changed; with merge, the changed list is merged into the parameters of the part instead of replacing them. A library part that is not editable, or with an invalid value given, is left unchanged. Available from Archicad 28.",
+        "version": "2.0.0"
+    },
+    {
+        "name": "SetLibraryPartPictureImages",
+        "group": "Library Commands",
+        "description": "Sets the preview picture and the GDL pictures of a loaded library part from base64 encoded PNGs, and from Archicad 29 also their dark user interface variants. All pictures are set in one step; an invalid picture changes nothing. A library part that is not editable is refused and left unchanged. Available from Archicad 28.",
+        "version": "2.0.0"
     },
     {
         "name": "SetLibraryPartPictures",
@@ -3566,14 +4370,26 @@
     {
         "name": "SetMEPRoutingParameters",
         "group": "MEP Commands",
-        "description": "Sets the routing parameters of placed MEP elements: the routing segment parameters (cross section and preference table) and, from Archicad 29, the routing node parameters (elbow radius factor and preference table, transition preference table) of routing elements, and the elbow and transition parameters of routing nodes (from Archicad 29). Only the given keys are changed, in one undo step with one execution result per element. Available from Archicad 28.",
+        "description": "Sets the routing parameters of placed MEP elements: the routing segment parameters (cross section and preference table) and, from Archicad 29, the routing node parameters (elbow radius factor and preference table, transition preference table) of routing elements, and the elbow and transition parameters of routing nodes (from Archicad 29). Only the given keys are changed, with one execution result per element. A changed preference table is also set on each of the route's segments and nodes and injected into them, because Archicad 29 can otherwise keep the old one; the item fails if they still report the old table. Available from Archicad 28.",
         "version": "1.8.0"
+    },
+    {
+        "name": "SetMarkerLibraryPartOfElements",
+        "group": "Element Commands",
+        "description": "Changes which library part the marker of the given Window and Door elements uses, given by its name (find the available ones with GetAvailableLibraryParts); only a marker library part for the opening's type is accepted. The marker gets the new library part's default parameters, which SetMarkerParametersOfElements can change afterwards; the opening's own settings are left as they are.",
+        "version": "2.0.0"
     },
     {
         "name": "SetMarkerParametersOfElements",
         "group": "Element Commands",
         "description": "Sets the given GDL parameters of the marker of the given Window and Door elements. The opening's own settings and the other marker parameters are left as they are.",
         "version": "1.7.1"
+    },
+    {
+        "name": "SetMarquee",
+        "group": "Element Commands",
+        "description": "Draws a marquee in the current window from a polygon or a box (optionally rotated), single- or multi-story. Called without polygon and box it removes the marquee.",
+        "version": "2.0.0"
     },
     {
         "name": "SetMasterLayoutContext",
@@ -3606,6 +4422,12 @@
         "version": "1.8.0"
     },
     {
+        "name": "SetPens",
+        "group": "Attribute Commands",
+        "description": "Changes the color, width and description of the given pens in effect in the current window, the pens GetPens returns, in one undo step. Only the given fields of a listed pen are changed; each pen gets its own execution result. In a Teamwork project the PenTables lockable object set must be reserved first (see ReserveLockableObjectSet). Available from Archicad 27.",
+        "version": "2.0.0"
+    },
+    {
         "name": "SetPlaceSettings",
         "group": "Project Commands",
         "description": "Changes the place settings of the project: location (longitude, latitude, altitude, north), date, time, summer time and time zone. Only the given fields change. Returns the settings read back, with the sun position Archicad calculated for them. Available from Archicad 27.",
@@ -3626,14 +4448,20 @@
     {
         "name": "SetProjectNotes",
         "group": "Project Commands",
-        "description": "Changes the Project Notes of the project (File > Info > Project Notes). Only the given fields are changed; texts longer than the field Archicad stores are truncated.",
+        "description": "Changes the Project Notes of the project (File > Info > Project Notes). Only the given fields are changed; texts longer than the field Archicad stores are truncated. architect and draftsmen are full names that Archicad keeps as name parts: a new name is stored in the given name with the other parts cleared, and the parts of a name that is not given or not changed are kept.",
         "version": "1.7.3"
     },
     {
         "name": "SetProjectPreferences",
         "group": "Project Commands",
-        "description": "Changes pages of the project preferences (Options > Project Preferences): the working units, the dimensions, the calculation units and the zones. Only the given fields change, the rest of each page keeps its value. In Teamwork the PreferencesDialog lockable object set has to be reserved first (ReserveLockableObjectSet). Available from Archicad 27.",
+        "description": "Changes pages of the project preferences (Options > Project Preferences): the working units, the dimensions, the calculation units, the zones and the reference levels, and the Floor Plan Cut Plane Settings. Only the given fields change, the rest of each page keeps its value. In Teamwork the PreferencesDialog lockable object set has to be reserved first (ReserveLockableObjectSet). Available from Archicad 27.",
         "version": "1.7.3"
+    },
+    {
+        "name": "SetPropertyValueOfAttributes",
+        "group": "Property Commands",
+        "description": "Sets one property value on several attributes (for example Building Materials) in one undo step. If the property is not available for any of the given attributes, no attribute is changed.",
+        "version": "2.0.0"
     },
     {
         "name": "SetPropertyValuesOfAttributes",
@@ -3642,10 +4470,22 @@
         "version": "1.1.8"
     },
     {
+        "name": "SetPropertyValuesOfElementDefaults",
+        "group": "Property Commands",
+        "description": "Sets the property values of the tool defaults (the settings new elements get) of element types, so every element placed afterwards gets them, without saving and applying a favorite.",
+        "version": "2.0.0"
+    },
+    {
         "name": "SetPropertyValuesOfElements",
         "group": "Property Commands",
-        "description": "Sets the property values of elements. It works for subelements of hierarchal elements also.",
+        "description": "Sets the property values of elements. It works for subelements of hierarchal elements also. With valueStatus an element's value can also be reset to the default value of the property (Default) or made undefined (UserUndefined, from 1.8.1). With dryRun true nothing is changed and no undo step is created: the response has dryRun set to true, and each item that passes the checks made before writing gets wouldChange, with the element's value now (oldValue) and the value a real run would write (newValue), both as GetPropertyValuesOfElements gives them.",
         "version": "1.0.6"
+    },
+    {
+        "name": "SetSectionsAndElevationsDetails",
+        "group": "Navigator Commands",
+        "description": "Sets settings of the given Section and Elevation elements: pens, line types, horizontal and vertical range, model effects, story handles and markers. The name and the reference ID are changed with ModifySections.",
+        "version": "2.0.0"
     },
     {
         "name": "SetStories",
@@ -3686,7 +4526,7 @@
     {
         "name": "SetViewOptions",
         "group": "Navigator Commands",
-        "description": "Switches the current plan window to a model view option combination by index, and/or changes the given model view options and on-screen view options.",
+        "description": "Switches the current plan window to a model view option combination by index, and/or changes the given model view options and on-screen view options. With an index, the model view options stored in the combination apply.",
         "version": "1.8.0"
     },
     {
@@ -3720,9 +4560,27 @@
         "version": "1.5.6"
     },
     {
+        "name": "ShowElementsIn3D",
+        "group": "Navigator Commands",
+        "description": "Opens the 3D window on the given elements, as Show Selection in 3D does: they become the selection and only they are shown. Without elements it shows every element, as Show All in 3D does.",
+        "version": "2.0.0"
+    },
+    {
+        "name": "ShowIFCExportSettings",
+        "group": "Script UI Commands",
+        "description": "Opens Archicad's IFC export settings dialog, where the user picks a view and an IFC export translator, waits for the user and returns the chosen view and translator, or cancelled. Available from Archicad 28.",
+        "version": "2.0.0"
+    },
+    {
+        "name": "ShowNotificationBubble",
+        "group": "Application Commands",
+        "description": "Shows a non-blocking notification bubble with a message in the current Archicad window, e.g. to report progress or a result without stopping the user as ShowAlert does. The bubble disappears by itself after the timeout. It is shown at a model coordinate or a pixel position of the current view, by default at the center of the current 2D view. Optionally it gets a large icon, is shown at most a given number of times, or is turned off, until the user runs 'Enable all informational messages'. Returns the bubble's settings read back from Archicad. Requires Archicad 29 or later.",
+        "version": "2.0.0"
+    },
+    {
         "name": "ShowScriptUI",
         "group": "Script UI Commands",
-        "description": "Shows the given HTML content in a native Archicad palette (a tkinter alternative for Python scripts).",
+        "description": "Shows the given HTML content in a native Archicad palette (a tkinter alternative for Python scripts) and returns the uiId of its window. Each script can have its own window, picked by uiId or scriptId; without them the first window is used.",
         "version": "1.5.4"
     },
     {
@@ -3730,6 +4588,24 @@
         "group": "Element Commands",
         "description": "Runs the Archicad stair solver on the given Stair baselines and parameters without creating any element. Returns for each one whether the baseline was already correct, could be solved or could not be solved, with the baseline and the main stair settings after solving. Available from Archicad 27.",
         "version": "1.7.3"
+    },
+    {
+        "name": "SplitElements",
+        "group": "Element Commands",
+        "description": "Splits each given element along a line (the infinite line through its begin and end point, like Archicad's Split command). The original element keeps one part, copies of it (Drag a Copy, so they keep the layer, classifications, properties and every other setting) get the others; all are returned, the original first. Supports straight walls without doors, windows or openings, straight unslanted single segment beams without holes or openings, and lines (their arrows stay at the original ends), which are split in two, the original keeping the part from its begin point; and slabs, meshes without level lines or points, fills and single contour polylines, whose polygon (holes and arcs included) or points are cut along the line into one part per piece, the original keeping the largest piece (a polyline: the piece with its begin point). Slab edges keep their trim and side surface, the edges along the line are vertical; the corners a mesh gets on the line take their height from the edge they lie on. An element the line does not cross is reported as notCut, an unsupported one as an error naming its type. One undo step.",
+        "version": "2.0.0"
+    },
+    {
+        "name": "StoreModulData",
+        "group": "Project Data Commands",
+        "description": "Creates or overwrites module data: text (for example JSON) saved in the project under a name, with an optional data version. Prefix the names with the name of your tool (for example 'my-tool/settings') so scripts do not overwrite each other's data. Storing module data is not an undoable step.",
+        "version": "2.0.0"
+    },
+    {
+        "name": "StoreViewSettings",
+        "group": "Navigator Commands",
+        "description": "Stores the current view settings (action Store) and puts them back later (action Restore), for example before and after a script that changes the view. The two must be called in pairs and cannot be stacked. Restoring may rebuild the view.",
+        "version": "2.0.0"
     },
     {
         "name": "TeamworkReceive",
@@ -3744,6 +4620,12 @@
         "version": "0.1.0"
     },
     {
+        "name": "TransferMEPSettings",
+        "group": "MEP Commands",
+        "description": "Picks up the settings of an MEP element and injects them into other MEP elements of the same type and domain, like Archicad's pick up and inject parameters. Works for routing elements, terminals, accessories, equipment, fittings, flexible segments, branches, take-offs and (from Archicad 30) electrical panels and devices. Each target is changed in its own undoable step. Available from Archicad 28.",
+        "version": "2.0.0"
+    },
+    {
         "name": "TriangulatePolygonsOfElements",
         "group": "Element Commands",
         "description": "Triangulates the plan polygon of the given elements, holes excluded, as Archicad does it: the outline of a Slab, Zone, Hatch or Mesh and the polygon of a Roof. Each triangle is given by the 2D coordinates of its three vertices. With convex: true, the faces of the 3D model of the elements (of any type) are decomposed into convex polygons instead, given by the 3D coordinates of their vertices. The output is aligned with the input array of elements; an element of another type gets an error item.",
@@ -3752,7 +4634,7 @@
     {
         "name": "TrimElements",
         "group": "Solid Element Operation Commands",
-        "description": "Trims construction elements with a roof or shell: the roofs and shells in the list, or one given trimming element with a trim type.",
+        "description": "Trims construction elements with a roof or shell: the roofs and shells in the list, or one given trimming element with a trim type. With several roofs or shells in the list Archicad decides which of them trims which element (they may also trim each other), so not every element is necessarily trimmed by each; to trim each element with each roof or shell, call it once per roof or shell with trimmingElement, and check the result with GetElementTrims.",
         "version": "1.5.9"
     },
     {
@@ -3816,6 +4698,12 @@
         "version": "1.7.1"
     },
     {
+        "name": "UpdateLibraryPartSections",
+        "group": "Library Commands",
+        "description": "Replaces the text of existing sections (scripts, comment, keywords, copyright) of a loaded library part, found by its name. Each section is read back after the update, and the output has one execution result per section.",
+        "version": "2.0.0"
+    },
+    {
         "name": "UpdatePropertyDefinitions",
         "group": "Property Commands",
         "description": "Updates existing Custom Property Definitions in place, keeping their guid: name, description, group, default value or expressions, availability, and enum options (add, rename, remove, reorder).",
@@ -3830,7 +4718,7 @@
     {
         "name": "UpdateZones",
         "group": "Element Commands",
-        "description": "Updates all Zones (recalculates their geometry, updates their Zone Stamps and the connected elements).",
+        "description": "Updates Zones (recalculates their geometry, updates their Zone Stamps and the connected elements): the selected Zones, every Zone when nothing is selected, or the Zones given in zones. Archicad runs the update right after the command has returned, on the Zones selected at that moment, so the new geometry can only be read with a later command.",
         "version": "1.5.4"
     },
     {

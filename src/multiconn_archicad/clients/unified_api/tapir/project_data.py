@@ -6,8 +6,12 @@ from typing import TYPE_CHECKING
 from pydantic import TypeAdapter
 
 from multiconn_archicad.models.tapir.commands import (
+    DeleteModulDataParameters,
+    DeleteModulDataResult,
     DeleteProjectDataParameters,
     DeleteProjectDataResult,
+    GetModulDataParameters,
+    GetModulDataResult,
     GetProjectDataKeysResult,
     GetProjectDataParameters,
     GetProjectDataResult,
@@ -21,10 +25,14 @@ from multiconn_archicad.models.tapir.commands import (
     ReserveProjectDataResult,
     SetProjectDataParameters,
     SetProjectDataResult,
+    StoreModulDataParameters,
+    StoreModulDataResult,
 )
 from multiconn_archicad.models.tapir.types import (
     ErrorItem,
     FailedExecutionResult,
+    ModulData,
+    ModuleDataEntry,
     ProjectDataKey,
     ProjectDataValue,
     ProjectDataValueData,
@@ -38,6 +46,34 @@ if TYPE_CHECKING:
 class ProjectDataCommands:
     def __init__(self, core: CoreCommands):
         self._core = core
+
+    def delete_modul_data(self, names: list[str]) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Deletes the module data with the given names. Deleting module data is not an undoable
+        step.
+
+        Args:
+            names (list[str]): The names of the module data to delete; the empty name is the
+                default section.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "names": names,
+        }
+        validated_params = DeleteModulDataParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "DeleteModulData", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = DeleteModulDataResult.model_validate(response_dict)
+        return validated_response.executionResults
 
     def delete_project_data(self, names: list[str]) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
         """
@@ -64,6 +100,43 @@ class ProjectDataCommands:
         )
         validated_response = DeleteProjectDataResult.model_validate(response_dict)
         return validated_response.executionResults
+
+    def get_modul_data(
+        self, names: None | list[str] = None, include_content: None | bool = None
+    ) -> list[ErrorItem | ModulData]:
+        """
+        Gets the module data Tapir stored in the project with StoreModulData: the given names,
+        or all of them, with their data version and, unless includeContent is false, their
+        content. Module data are the custom data sections of Archicad's ModulData Manager: text
+        saved in the project file under a name, kept apart from project data (SetProjectData).
+
+        Args:
+            names (None | list[str]): The names of the module data to get; the empty name is the
+                default section. When omitted, every module data Tapir stored in the project is
+                returned.
+            include_content (None | bool): Whether the content is returned too. When false, only
+                the names and data versions are read, without loading the data. The default is
+                true.
+
+        Returns:
+            list[ErrorItem | ModulData]: The module data in the order of the given names (or of
+                the list Archicad returns), or an error for a name that has no module data.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "names": names,
+            "includeContent": include_content,
+        }
+        validated_params = GetModulDataParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetModulData", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetModulDataResult.model_validate(response_dict)
+        return validated_response.modulData
 
     def get_project_data(self, names: list[str]) -> list[ErrorItem | ProjectDataValue]:
         """
@@ -257,4 +330,37 @@ class ProjectDataCommands:
             "SetProjectData", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = SetProjectDataResult.model_validate(response_dict)
+        return validated_response.executionResults
+
+    def store_modul_data(
+        self, modul_data: list[ModuleDataEntry]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Creates or overwrites module data: text (for example JSON) saved in the project under a
+        name, with an optional data version. Prefix the names with the name of your tool (for
+        example 'my-tool/settings') so scripts do not overwrite each other's data. Storing
+        module data is not an undoable step.
+
+        Args:
+            modul_data (list[ModuleDataEntry]): The module data to create or to overwrite.
+                Prefix the names with the name of your tool (for example 'my-tool/settings') so
+                different scripts do not overwrite each other's data.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "modulData": modul_data,
+        }
+        validated_params = StoreModulDataParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "StoreModulData", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = StoreModulDataResult.model_validate(response_dict)
         return validated_response.executionResults

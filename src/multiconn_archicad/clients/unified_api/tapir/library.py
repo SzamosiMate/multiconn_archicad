@@ -11,58 +11,153 @@ from multiconn_archicad.models.tapir.commands import (
     AddLibrariesParameters,
     AddLibrariesResult,
     CheckLibrariesResult,
+    CompareLibraryPartUnIdsParameters,
+    CompareLibraryPartUnIdsResult,
     CopyFilesIntoEmbeddedLibraryParameters,
     CopyFilesIntoEmbeddedLibraryResult,
+    CopyLibraryPartsParameters,
+    CopyLibraryPartsResult,
     CreateFolderInEmbeddedLibraryParameters,
     CreateFolderInEmbeddedLibraryResult,
+    CreateLibraryPartFromElementsParameters,
+    CreateLibraryPartFromElementsResult,
     CreateLibraryPartParameters,
     CreateLibraryPartResult,
     CreateLibraryPartsParameters,
     CreateLibraryPartsResult,
     DeleteEmbeddedLibraryItemsParameters,
     DeleteEmbeddedLibraryItemsResult,
+    FindLibraryPartsParameters,
+    FindLibraryPartsResult,
     GetAvailableLibraryPartsParameters,
     GetAvailableLibraryPartsResult,
+    GetGDLDateResult,
+    GetGDLParametersOfLibraryPartsParameters,
+    GetGDLParametersOfLibraryPartsResult,
+    GetGDLUserGlobalsResult,
+    GetLastValidEmbeddedLibraryPartNameResult,
+    GetLibrariesOfLibPartsParameters,
+    GetLibrariesOfLibPartsResult,
     GetLibrariesResult,
+    GetLibraryPart2DPrimitivesParameters,
+    GetLibraryPart2DPrimitivesResult,
     GetLibraryPartCustomSectionParameters,
     GetLibraryPartCustomSectionResult,
+    GetLibraryPartDetailsParameters,
+    GetLibraryPartDetailsResult,
+    GetLibraryPartFileInfoParameters,
+    GetLibraryPartFileInfoResult,
+    GetLibraryPartIdentitiesParameters,
+    GetLibraryPartIdentitiesResult,
+    GetLibraryPartMetadataParameters,
+    GetLibraryPartMetadataResult,
     GetLibraryPartOriginalLocationsParameters,
     GetLibraryPartOriginalLocationsResult,
+    GetLibraryPartParameterValuesParameters,
+    GetLibraryPartParameterValuesResult,
     GetLibraryPartPicturesParameters,
     GetLibraryPartPicturesResult,
+    GetLibraryPartScriptsParameters,
+    GetLibraryPartScriptsResult,
+    GetLibraryPartSectionParameters,
+    GetLibraryPartSectionResult,
+    GetLibraryPartSectionsParameters,
+    GetLibraryPartSectionsResult,
+    GetLibraryPartTypeDetailsParameters,
+    GetLibraryPartTypeDetailsResult,
+    GetMissingLibPartNamesParameters,
+    GetMissingLibPartNamesResult,
+    GetUnusedLibraryPartsParameters,
+    GetUnusedLibraryPartsResult,
+    InterpretGDLScript3DParameters,
+    InterpretGDLScript3DResult,
+    IsLibraryPartSubtypeOfParameters,
+    IsLibraryPartSubtypeOfResult,
     IsUsableGDLStringParameters,
     IsUsableGDLStringResult,
+    ModifyLibraryListParameters,
+    ModifyLibraryListResult,
     OpenLibraryPartInEditorParameters,
     OpenLibraryPartInEditorResult,
     ReloadLibrariesResult,
     ResetLibrariesResult,
+    SearchLibraryPartsParameters,
+    SearchLibraryPartsResult,
+    SetGDLDateParameters,
+    SetGDLDateResult,
     SetLibrariesParameters,
     SetLibrariesResult,
     SetLibraryPartCustomSectionParameters,
     SetLibraryPartCustomSectionResult,
     SetLibraryPartMetadataParameters,
     SetLibraryPartMetadataResult,
+    SetLibraryPartParametersParameters,
+    SetLibraryPartParametersResult,
+    SetLibraryPartPictureImagesParameters,
+    SetLibraryPartPictureImagesResult,
     SetLibraryPartPicturesParameters,
     SetLibraryPartPicturesResult,
     SetLibraryPartScriptsParameters,
     SetLibraryPartScriptsResult,
+    UpdateLibraryPartSectionsParameters,
+    UpdateLibraryPartSectionsResult,
 )
 from multiconn_archicad.models.tapir.types import (
+    ElementId,
+    ElementIdArrayItem,
     EmbeddedLibraryFile,
     EmbeddedLibraryItem,
     ErrorItem,
     FailedExecutionResult,
+    FoundLibraryPart,
+    GDLDate,
+    GDLUserGlobal,
     Library,
     LibraryFileAddition,
     LibraryLocation,
+    LibraryOfLibraryPart,
+    LibraryPart2DPrimitive,
     LibraryPartByIndex,
+    LibraryPartCopyData,
     LibraryPartCreationDetails,
     LibraryPartData,
-    LibraryPartMetadataData,
+    LibraryPartDetails,
+    LibraryPartFileInfo,
+    LibraryPartGDLParameterQuery,
+    LibraryPartGDLParameters,
+    LibraryPartIdentifierByIndex,
+    LibraryPartIdentifierByName,
+    LibraryPartIdentifierByUniqueId,
+    LibraryPartIdentity,
+    LibraryPartIndexAndPassword,
+    LibraryPartKind,
+    LibraryPartLookupByIndex,
+    LibraryPartLookupByPath,
+    LibraryPartMetadataDetails,
+    LibraryPartMetadataUpdate,
+    LibraryPartName,
+    LibraryPartNameOrGuid,
     LibraryPartOriginalLocation,
+    LibraryPartParameterValues,
+    LibraryPartParameterValuesByName,
+    LibraryPartParametersUpdate,
+    LibraryPartReadableScriptType,
     LibraryPartScriptDataWithDeletions,
     LibraryPartScriptDataWithScripts,
+    LibraryPartScriptQueryByElement,
+    LibraryPartScriptQueryByName,
+    LibraryPartScriptsByIndex,
+    LibraryPartScriptsByName,
+    LibraryPartScriptsDetails,
+    LibraryPartSearchResult,
+    LibraryPartSectionUpdate,
+    LibraryPartSections,
     LibraryPartType,
+    LibraryPartTypeDetails,
+    LibraryRemovalByName,
+    LibraryRemovalByPath,
+    MissingLibraryPartName,
+    Scripts,
     SuccessfulExecutionResult,
 )
 
@@ -153,6 +248,35 @@ class LibraryCommands:
         validated_response = TypeAdapter(CheckLibrariesResult).validate_python(response_dict)
         return validated_response
 
+    def compare_library_part_un_ids(self, un_id_1: str, un_id_2: str) -> CompareLibraryPartUnIdsResult:
+        """
+        Compares two library part unique IDs with Archicad's own comparison and tells whether
+        their main and revision GUIDs are the same.
+
+        Args:
+            un_id_1 (str): A library part unique ID, '{main GUID}-{revision GUID}', as
+                GetLibraryPartIdentities returns it.
+            un_id_2 (str): The library part unique ID to compare unId1 with.
+
+        Returns:
+            CompareLibraryPartUnIdsResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "unId1": un_id_1,
+            "unId2": un_id_2,
+        }
+        validated_params = CompareLibraryPartUnIdsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "CompareLibraryPartUnIds", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = CompareLibraryPartUnIdsResult.model_validate(response_dict)
+        return validated_response
+
     def copy_files_into_embedded_library(
         self,
         files: list[EmbeddedLibraryFile],
@@ -191,6 +315,36 @@ class LibraryCommands:
             "CopyFilesIntoEmbeddedLibrary", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = TypeAdapter(CopyFilesIntoEmbeddedLibraryResult).validate_python(response_dict)
+        return validated_response
+
+    def copy_library_parts(self, library_parts: list[LibraryPartCopyData]) -> CopyLibraryPartsResult:
+        """
+        Copies loaded library parts, given by name or by an element placed from them, under a
+        new file name into a folder, by default the embedded library. The copy gets a new unique
+        ID unless the main GUID is kept. An existing file is never overwritten. The libraries
+        are reloaded once afterwards, so the copies can be found by name. Available from
+        Archicad 28.
+
+        Args:
+            library_parts (list[LibraryPartCopyData]): The library parts to copy, each given by
+                its name or by an element placed from it, with the name of the copy.
+
+        Returns:
+            CopyLibraryPartsResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "libraryParts": library_parts,
+        }
+        validated_params = CopyLibraryPartsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "CopyLibraryParts", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = CopyLibraryPartsResult.model_validate(response_dict)
         return validated_response
 
     def create_folder_in_embedded_library(self, folder_path: str) -> FailedExecutionResult | SuccessfulExecutionResult:
@@ -252,6 +406,84 @@ class LibraryCommands:
             "CreateLibraryPart", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = CreateLibraryPartResult.model_validate(response_dict)
+        return validated_response
+
+    def create_library_part_from_elements(
+        self,
+        name: str,
+        elements: list[ElementIdArrayItem],
+        parent_id: None | str = None,
+        parent_name: None | str = None,
+        folder: None | str = None,
+        library_folder: None | str = None,
+        overwrite: None | bool = None,
+        placeable: None | bool = None,
+        scripts: None | Scripts = None,
+        comment: None | str = None,
+        keywords: None | str = None,
+    ) -> CreateLibraryPartFromElementsResult:
+        """
+        Creates a library part in the embedded library (or in a given local library folder,
+        which is added to the loaded libraries when needed) whose 2D symbol is a copy of the
+        given 2D drawing elements (lines, polylines, arcs, circles, splines, fills, texts and
+        hotspots), under the given parent subtype, with optional master, 2D, 3D and parameter
+        scripts, comment and keywords. A and B are taken from the extent of the symbol. The
+        elements themselves are not changed.
+
+        Args:
+            name (str): The name of the new library part, as shown in the library and used by
+                CreateObjects as libraryPartName.
+            elements (list[ElementIdArrayItem]): The 2D drawing elements (lines, polylines,
+                arcs, circles, splines, fills, texts and hotspots) whose copies make up the 2D
+                symbol of the new library part. They keep their plan coordinates, so the project
+                origin becomes the origin of the symbol. The elements themselves are not
+                changed.
+            parent_id (None | str): The parent subtype of the new library part: its unique ID
+                ('{main}-{revision}') or its main GUID, as GetAvailableLibraryParts reports it.
+                Either parentId or parentName is required.
+            parent_name (None | str): The document name of the parent subtype, e.g. 'General
+                Object' or 'Model Element'; used when parentId is not given.
+            folder (None | str): Optional. The folder of the new .gsm file, relative to the
+                embedded library (or to libraryFolder), created when missing. By default the
+                embedded library (or libraryFolder) itself.
+            library_folder (None | str): Optional. The absolute path of a local library folder
+                to create the library part in instead of the embedded library. A folder that is
+                not one of the loaded libraries yet is added to them first, and stays added.
+            overwrite (None | bool): Optional. When true, a library part file of the same name
+                in the folder is overwritten. By default false: the new library part then gets a
+                unique name, which the response returns.
+            placeable (None | bool): Optional. Whether the new library part can be placed. True
+                by default.
+            scripts (None | Scripts): Optional. The GDL scripts of the new library part.
+            comment (None | str): Optional. The comment (description) of the library part.
+            keywords (None | str): Optional. The keywords of the library part.
+
+        Returns:
+            CreateLibraryPartFromElementsResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "name": name,
+            "elements": elements,
+            "parentId": parent_id,
+            "parentName": parent_name,
+            "folder": folder,
+            "libraryFolder": library_folder,
+            "overwrite": overwrite,
+            "placeable": placeable,
+            "scripts": scripts,
+            "comment": comment,
+            "keywords": keywords,
+        }
+        validated_params = CreateLibraryPartFromElementsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "CreateLibraryPartFromElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = CreateLibraryPartFromElementsResult.model_validate(response_dict)
         return validated_response
 
     def create_library_parts(
@@ -323,6 +555,41 @@ class LibraryCommands:
         validated_response = DeleteEmbeddedLibraryItemsResult.model_validate(response_dict)
         return validated_response.executionResults
 
+    def find_library_parts(
+        self, kind: LibraryPartKind | None = None, name_contains: None | str = None, first_only: None | bool = None
+    ) -> list[FoundLibraryPart]:
+        """
+        Finds loaded library parts with the Library Manager: all of them, GDL objects, images or
+        text files, optionally only those whose name contains a text. Returns the name, path and
+        index of each. Available from Archicad 28.
+
+        Args:
+            kind (LibraryPartKind | None)
+            name_contains (None | str): Optional. Only library parts whose name contains this
+                text, ignoring case.
+            first_only (None | bool): Optional. When true, only the first matching library part
+                is returned. By default false.
+
+        Returns:
+            list[FoundLibraryPart]: The matching library parts.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "kind": kind,
+            "nameContains": name_contains,
+            "firstOnly": first_only,
+        }
+        validated_params = FindLibraryPartsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "FindLibraryParts", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = FindLibraryPartsResult.model_validate(response_dict)
+        return validated_response.libraryParts
+
     def get_available_library_parts(
         self, filter_by_type_id: LibraryPartType | None = None
     ) -> GetAvailableLibraryPartsResult:
@@ -352,6 +619,91 @@ class LibraryCommands:
         validated_response = GetAvailableLibraryPartsResult.model_validate(response_dict)
         return validated_response
 
+    def get_gdl_date(self) -> GDLDate:
+        """
+        Gets the date GDL scripts see: year, month, day, hour, minute and second.
+
+        Returns:
+            GDLDate
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        response_dict = self._core.post_tapir_command("GetGDLDate")
+        validated_response = GetGDLDateResult.model_validate(response_dict)
+        return validated_response.date
+
+    def get_gdl_parameters_of_library_parts(
+        self, library_parts: list[LibraryPartGDLParameterQuery]
+    ) -> list[ErrorItem | LibraryPartGDLParameters]:
+        """
+        Gets the default GDL parameters (name, display name, type, array dimensions, value,
+        flags) of the given library parts by name, read from the library part without placing it
+        or changing any defaults. The output is in the format of GetGDLParametersOfElements,
+        without isLocked and possibleValues, which need a placed element. To read a part by its
+        file name, as SetLibraryPartParameters writes it, use GetLibraryPartParameterValues.
+
+        Args:
+            library_parts (list[LibraryPartGDLParameterQuery]): The library parts to read the
+                default GDL parameters of.
+
+        Returns:
+            list[ErrorItem | LibraryPartGDLParameters]: The default GDL parameters of each given
+                library part, in the order of the input, or an error for a name that no loaded
+                library part has.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "libraryParts": library_parts,
+        }
+        validated_params = GetGDLParametersOfLibraryPartsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetGDLParametersOfLibraryParts", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetGDLParametersOfLibraryPartsResult.model_validate(response_dict)
+        return validated_response.gdlParametersOfLibraryParts
+
+    def get_gdl_user_globals(self) -> list[GDLUserGlobal]:
+        """
+        Returns the current GDL global variables the GDL interpreter gets, with their names,
+        types and values. Available from Archicad 28.
+
+        Returns:
+            list[GDLUserGlobal]: The GDL parameters, in the format GetGDLParametersOfElements
+                uses. Separators, titles and dictionary parameters have no value here and are
+                left out.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        response_dict = self._core.post_tapir_command("GetGDLUserGlobals")
+        validated_response = GetGDLUserGlobalsResult.model_validate(response_dict)
+        return validated_response.globals
+
+    def get_last_valid_embedded_library_part_name(self) -> GetLastValidEmbeddedLibraryPartNameResult:
+        """
+        Gets the name and file path of the last valid library part of the embedded library.
+
+        Returns:
+            GetLastValidEmbeddedLibraryPartNameResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        response_dict = self._core.post_tapir_command("GetLastValidEmbeddedLibraryPartName")
+        validated_response = GetLastValidEmbeddedLibraryPartNameResult.model_validate(response_dict)
+        return validated_response
+
     def get_libraries(self) -> list[Library]:
         """
         Gets the list of loaded libraries. From Archicad 28 a library package also gets its
@@ -368,6 +720,73 @@ class LibraryCommands:
         response_dict = self._core.post_tapir_command("GetLibraries")
         validated_response = GetLibrariesResult.model_validate(response_dict)
         return validated_response.libraries
+
+    def get_libraries_of_lib_parts(self, library_parts: list[LibraryPartNameOrGuid]) -> list[LibraryOfLibraryPart]:
+        """
+        Gets the library of each given library part (by file name or guid): display name,
+        location, embedded/built-in/package/local/missing flags and the Library Manager tree
+        path. Available from Archicad 29.
+
+        Args:
+            library_parts (list[LibraryPartNameOrGuid]): Library parts to look up, each given by
+                exactly one of name and guid.
+
+        Returns:
+            list[LibraryOfLibraryPart]: One entry per input library part, in the same order.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "libraryParts": library_parts,
+        }
+        validated_params = GetLibrariesOfLibPartsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetLibrariesOfLibParts", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetLibrariesOfLibPartsResult.model_validate(response_dict)
+        return validated_response.libraries
+
+    def get_library_part_2d_primitives(
+        self, name: str, element_id: ElementId | None = None, gdl_context: None | int = None
+    ) -> list[LibraryPart2DPrimitive]:
+        """
+        Gets the lines, arcs and polygons (with their holes, and whether they are fills) of the
+        2D symbol of a loaded library part, drawn with its default parameters or with the
+        parameters of a placed instance.
+
+        Args:
+            name (str): The name of the loaded library part, without the file extension (a
+                trailing '.gsm' is accepted too).
+            element_id (ElementId | None): Optional. A placed instance of the library part whose
+                parameters are used for drawing the symbol. Without it the default parameters of
+                the library part are used.
+            gdl_context (None | int): Optional. The GDL context the 2D symbol is drawn in, the
+                value of the GLOB_CONTEXT GDL global (2 is the floor plan). Default value is 2.
+
+        Returns:
+            list[LibraryPart2DPrimitive]: The lines, arcs and polygons of the 2D symbol, in the
+                order Archicad draws them, in the coordinate system of the library part. Other
+                primitives (texts, hotspots, ...) are not returned.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "name": name,
+            "elementId": element_id,
+            "gdlContext": gdl_context,
+        }
+        validated_params = GetLibraryPart2DPrimitivesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetLibraryPart2DPrimitives", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetLibraryPart2DPrimitivesResult.model_validate(response_dict)
+        return validated_response.primitives
 
     def get_library_part_custom_section(
         self, name: str, section_id: int, index: None | int = None
@@ -406,6 +825,150 @@ class LibraryCommands:
         validated_response = GetLibraryPartCustomSectionResult.model_validate(response_dict)
         return validated_response
 
+    def get_library_part_details(
+        self,
+        library_parts: list[LibraryPartScriptsByIndex | LibraryPartScriptsByName],
+        sub_type_of: None | str = None,
+        include_scripts: None | bool = None,
+    ) -> list[ErrorItem | LibraryPartDetails]:
+        """
+        Gets the details of loaded library parts, by name or index: path, library tree path,
+        containing library, and for GDL objects the GUID, subtype, license, UI default flag,
+        which scripts and pictures they have, and optionally the interface and migration
+        scripts. Can also tell whether each one is in the subtype of another library part.
+        Available from Archicad 28.
+
+        Args:
+            library_parts (list[LibraryPartScriptsByIndex | LibraryPartScriptsByName]): The
+                library parts to read, each by its name or by its index.
+            sub_type_of (None | str): Optional. The name of another loaded library part, e.g. a
+                subtype template. When given, the isInSubTypeOf field of each library part tells
+                whether it is in that subtype.
+            include_scripts (None | bool): Optional. When true, the interface script and the
+                forward and backward migration scripts are returned too. By default false.
+
+        Returns:
+            list[ErrorItem | LibraryPartDetails]: The details of each given library part, or an
+                error, in the order of the input. A field is omitted when Archicad cannot return
+                it for that library part.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "libraryParts": library_parts,
+            "subTypeOf": sub_type_of,
+            "includeScripts": include_scripts,
+        }
+        validated_params = GetLibraryPartDetailsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetLibraryPartDetails", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetLibraryPartDetailsResult.model_validate(response_dict)
+        return validated_response.libraryParts
+
+    def get_library_part_file_info(
+        self, files: list[str], scripts: None | list[LibraryPartReadableScriptType] = None, password: None | str = None
+    ) -> list[ErrorItem | LibraryPartFileInfo]:
+        """
+        Reads library part files (.gsm) without loading them into the libraries of the project:
+        the unique ID of the part, the unique ID of its subtype and its master, parameter, 2D,
+        3D and properties scripts. Password protected parts need their password. Available from
+        Archicad 28.
+
+        Args:
+            files (list[str]): The absolute paths of the library part files (.gsm) to read. The
+                files are read without loading them into the libraries of the project.
+            scripts (None | list[LibraryPartReadableScriptType]): The scripts to read. All five
+                by default.
+            password (None | str): The password of password protected library parts. Reading a
+                script of a protected part without the right password is an error for that file.
+
+        Returns:
+            list[ErrorItem | LibraryPartFileInfo]: The information of the files in the order of
+                the input, or an error for a file that cannot be read.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "files": files,
+            "scripts": scripts,
+            "password": password,
+        }
+        validated_params = GetLibraryPartFileInfoParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetLibraryPartFileInfo", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetLibraryPartFileInfoResult.model_validate(response_dict)
+        return validated_response.files
+
+    def get_library_part_identities(
+        self, library_parts: list[LibraryPartLookupByIndex | LibraryPartLookupByPath]
+    ) -> list[ErrorItem | LibraryPartIdentity]:
+        """
+        Gets the unique ID (main and revision GUID), the reference GUID and the Teamwork lock
+        status of library parts given by index or file path, and whether they are in a server
+        library.
+
+        Args:
+            library_parts (list[LibraryPartLookupByIndex | LibraryPartLookupByPath]): The
+                library parts, each given by its index or by the path of its file.
+
+        Returns:
+            list[ErrorItem | LibraryPartIdentity]: One item for each given library part, in the
+                same order.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "libraryParts": library_parts,
+        }
+        validated_params = GetLibraryPartIdentitiesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetLibraryPartIdentities", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetLibraryPartIdentitiesResult.model_validate(response_dict)
+        return validated_response.identities
+
+    def get_library_part_metadata(
+        self, library_parts: list[LibraryPartName]
+    ) -> list[ErrorItem | LibraryPartMetadataDetails]:
+        """
+        Returns the description, keywords, author and placeable, password protected and
+        hierarchical pages flags of loaded library parts, given by file name. Use it to search
+        library parts by description or keywords and to tell placeable parts from macros.
+        Available from Archicad 28.
+
+        Args:
+            library_parts (list[LibraryPartName]): The library parts to read the metadata of.
+
+        Returns:
+            list[ErrorItem | LibraryPartMetadataDetails]: The metadata of each given library
+                part, or an error, in the order of the input.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "libraryParts": library_parts,
+        }
+        validated_params = GetLibraryPartMetadataParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetLibraryPartMetadata", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetLibraryPartMetadataResult.model_validate(response_dict)
+        return validated_response.libraryParts
+
     def get_library_part_original_locations(
         self, library_parts: list[LibraryPartByIndex]
     ) -> list[ErrorItem | LibraryPartOriginalLocation]:
@@ -437,6 +1000,40 @@ class LibraryCommands:
         validated_response = GetLibraryPartOriginalLocationsResult.model_validate(response_dict)
         return validated_response.locations
 
+    def get_library_part_parameter_values(
+        self, library_parts: list[LibraryPartParameterValuesByName]
+    ) -> list[ErrorItem | LibraryPartParameterValues]:
+        """
+        Returns the parameters of loaded library parts, given by their file name as
+        GetAvailableLibraryParts returns it, with their default values and descriptions, in the
+        format of GetGDLParametersOfElements: the read counterpart of SetLibraryPartParameters.
+        Unlike GetGDLParametersOfLibraryParts, which finds a part by its name and also returns
+        the index, flags and value descriptions of each parameter, it reads through the Library
+        Manager. Available from Archicad 28.
+
+        Args:
+            library_parts (list[LibraryPartParameterValuesByName]): The library parts to read.
+
+        Returns:
+            list[ErrorItem | LibraryPartParameterValues]: The default parameters of each given
+                library part, in the order of the input, or an error for a library part that
+                could not be read.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "libraryParts": library_parts,
+        }
+        validated_params = GetLibraryPartParameterValuesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetLibraryPartParameterValues", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetLibraryPartParameterValuesResult.model_validate(response_dict)
+        return validated_response.libraryParts
+
     def get_library_part_pictures(self, name: str) -> GetLibraryPartPicturesResult:
         """
         Gets the preview picture and the GDL pictures of a loaded library part as base64 encoded
@@ -465,6 +1062,303 @@ class LibraryCommands:
         validated_response = GetLibraryPartPicturesResult.model_validate(response_dict)
         return validated_response
 
+    def get_library_part_scripts(
+        self,
+        library_parts: list[LibraryPartScriptQueryByElement | LibraryPartScriptQueryByName],
+        scripts: None | list[LibraryPartReadableScriptType] = None,
+        password: None | str = None,
+    ) -> list[ErrorItem | LibraryPartScriptsDetails]:
+        """
+        Gets the master, parameter, 2D, 3D and properties scripts of loaded library parts, given
+        by name or by an element placed from them, with the unique ID of each part. A script
+        section the part does not have is reported as not present. Password protected parts need
+        their password. Available from Archicad 28.
+
+        Args:
+            library_parts (list[LibraryPartScriptQueryByElement |
+                LibraryPartScriptQueryByName]): The library parts to read, each given by its
+                name or by an element placed from it.
+            scripts (None | list[LibraryPartReadableScriptType]): The scripts to read. All five
+                by default.
+            password (None | str): The password of password protected library parts. Reading a
+                script of a protected part without the right password is an error for that part.
+
+        Returns:
+            list[ErrorItem | LibraryPartScriptsDetails]: The scripts of the library parts in the
+                order of the input, or an error for a library part that cannot be read.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "libraryParts": library_parts,
+            "scripts": scripts,
+            "password": password,
+        }
+        validated_params = GetLibraryPartScriptsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetLibraryPartScripts", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetLibraryPartScriptsResult.model_validate(response_dict)
+        return validated_response.libraryParts
+
+    def get_library_part_section(
+        self, index: int, section_type: str, sub_ident: None | int = None, password: None | str = None
+    ) -> str:
+        """
+        Reads the text of a text section (a script or the comment) of a library part given by
+        index, without opening it in the GDL editor. Takes the password of a protected library
+        part.
+
+        Args:
+            index (int): The index of a loaded library part, as GetAvailableLibraryParts returns
+                it.
+            section_type (str): The four-character code of the section type, as
+                GetLibraryPartSections returns it. A shorter code is padded with spaces.
+            sub_ident (None | int): The sub-identifier of the section, as GetLibraryPartSections
+                returns it. 0 when not given.
+            password (None | str): The password of a protected library part.
+
+        Returns:
+            str: The text of the section.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "index": index,
+            "sectionType": section_type,
+            "subIdent": sub_ident,
+            "password": password,
+        }
+        validated_params = GetLibraryPartSectionParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetLibraryPartSection", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetLibraryPartSectionResult.model_validate(response_dict)
+        return validated_response.content
+
+    def get_library_part_sections(
+        self, library_parts: list[LibraryPartIndexAndPassword]
+    ) -> list[ErrorItem | LibraryPartSections]:
+        """
+        Lists the sections of library parts given by index: their four-character type code, sub-
+        identifier, size and whether they are text (scripts, comments) or binary (previews).
+
+        Args:
+            library_parts (list[LibraryPartIndexAndPassword]): The library parts to list the
+                sections of.
+
+        Returns:
+            list[ErrorItem | LibraryPartSections]: One item for each given library part, in the
+                same order.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "libraryParts": library_parts,
+        }
+        validated_params = GetLibraryPartSectionsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetLibraryPartSections", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetLibraryPartSectionsResult.model_validate(response_dict)
+        return validated_response.libraryParts
+
+    def get_library_part_type_details(
+        self,
+        library_parts: list[
+            LibraryPartIdentifierByIndex | LibraryPartIdentifierByName | LibraryPartIdentifierByUniqueId
+        ],
+    ) -> list[ErrorItem | LibraryPartTypeDetails]:
+        """
+        Returns the type details of the given library parts (ACAPI_LibraryPart_GetDetails): full
+        unique ID and its direct parent's, type, the detail flags of objects, lamps, labels and
+        zones, the frame and orientation settings of doors and windows, and the element type and
+        variation of the tool that places the library part. For their path, library, GUID,
+        license and scripts see GetLibraryPartDetails.
+
+        Args:
+            library_parts (list[LibraryPartIdentifierByIndex | LibraryPartIdentifierByName |
+                LibraryPartIdentifierByUniqueId]): The library parts to get the details of.
+
+        Returns:
+            list[ErrorItem | LibraryPartTypeDetails]: The details of the library parts, in the
+                order of the input, or an error for a library part that was not found.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "libraryParts": library_parts,
+        }
+        validated_params = GetLibraryPartTypeDetailsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetLibraryPartTypeDetails", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetLibraryPartTypeDetailsResult.model_validate(response_dict)
+        return validated_response.libraryParts
+
+    def get_missing_lib_part_names(
+        self, elements: list[ElementIdArrayItem]
+    ) -> list[ErrorItem | MissingLibraryPartName]:
+        """
+        Gets the library part name of the given placed Object, Lamp, Window or Door elements,
+        even if the library containing the part is not loaded. Use it to find the parts of
+        elements that are shown as dots because their library part is missing.
+
+        Args:
+            elements (list[ElementIdArrayItem]): A list of elements.
+
+        Returns:
+            list[ErrorItem | MissingLibraryPartName]: The library part name of each given
+                element, in the order of the input, or an error.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elements": elements,
+        }
+        validated_params = GetMissingLibPartNamesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetMissingLibPartNames", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetMissingLibPartNamesResult.model_validate(response_dict)
+        return validated_response.libPartNames
+
+    def get_unused_library_parts(
+        self, filter_by_type_id: LibraryPartType | None = None, include_not_placeable: None | bool = None
+    ) -> GetUnusedLibraryPartsResult:
+        """
+        Lists the loaded library parts that no element of the project is placed from. Read only.
+        The Archicad API does not tell which library parts are used, so every element of the
+        floor plan and of every view and layout is checked: objects, lamps, doors, windows,
+        skylights, zone stamps, symbol labels, drawing titles, curtain wall parts, and the
+        markers of doors, windows, skylights, sections, elevations, details and worksheets. A
+        library part used only in another way (called as a macro, linked as a property object,
+        as an interior elevation marker, in stairs and railings, in the tool defaults or in
+        Favorites) is listed as unused. Library parts that cannot be placed (e.g. macros) are
+        only listed with includeNotPlaceable.
+
+        Args:
+            filter_by_type_id (LibraryPartType | None): Optional. Only list the unused library
+                parts of this type (the typeId of GetAvailableLibraryParts).
+            include_not_placeable (None | bool): Also list the library parts that cannot be
+                placed (macros, pictures, property objects, list schemes and the like), which
+                are never placed on their own. Default: false.
+
+        Returns:
+            GetUnusedLibraryPartsResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "filterByTypeId": filter_by_type_id,
+            "includeNotPlaceable": include_not_placeable,
+        }
+        validated_params = GetUnusedLibraryPartsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetUnusedLibraryParts", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = GetUnusedLibraryPartsResult.model_validate(response_dict)
+        return validated_response
+
+    def interpret_gdl_script_3d(
+        self, script: None | str = None, library_part_name: None | str = None
+    ) -> InterpretGDLScript3DResult:
+        """
+        Runs a GDL 3D script, given as text or as the master and 3D scripts of a loaded library
+        part with its default parameters, with the settings of the GDL editor, and returns
+        whether it ran without a GDL error, how many 3D model elements it generated and their
+        bounding box. The API returns no GDL error message or line number.
+
+        Args:
+            script (None | str): The GDL 3D script to run. Either script or libraryPartName is
+                required.
+            library_part_name (None | str): A loaded library part, by its fileName (with
+                extension) or documentName as GetAvailableLibraryParts returns them. Its default
+                parameters are used; without script, its master script followed by its 3D script
+                is run.
+
+        Returns:
+            InterpretGDLScript3DResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "script": script,
+            "libraryPartName": library_part_name,
+        }
+        validated_params = InterpretGDLScript3DParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "InterpretGDLScript3D", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = InterpretGDLScript3DResult.model_validate(response_dict)
+        return validated_response
+
+    def is_library_part_subtype_of(
+        self,
+        library_parts: list[
+            LibraryPartIdentifierByIndex | LibraryPartIdentifierByName | LibraryPartIdentifierByUniqueId
+        ],
+        ancestor: LibraryPartIdentifierByIndex | LibraryPartIdentifierByName | LibraryPartIdentifierByUniqueId,
+        match_ancestor_by_main_id: None | bool = None,
+    ) -> IsLibraryPartSubtypeOfResult:
+        """
+        Checks for each of the given library parts whether the given ancestor is anywhere up its
+        subtype hierarchy (e.g. whether a part is a kind of furniture), independent of its name.
+        A library part is not a subtype of itself. With matchAncestorByMainId any revision of
+        the ancestor matches.
+
+        Args:
+            library_parts (list[LibraryPartIdentifierByIndex | LibraryPartIdentifierByName |
+                LibraryPartIdentifierByUniqueId]): The library parts to check.
+            ancestor (LibraryPartIdentifierByIndex | LibraryPartIdentifierByName |
+                LibraryPartIdentifierByUniqueId): The subtype to check against. Given by unId,
+                it is used as it is, without checking that such a library part is loaded.
+            match_ancestor_by_main_id (None | bool): Optional, false by default. When true, only
+                the main GUID of the ancestor's unique ID is compared, so any revision of the
+                ancestor matches; when false, the full unique ID (main and revision GUID) must
+                match.
+
+        Returns:
+            IsLibraryPartSubtypeOfResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "libraryParts": library_parts,
+            "ancestor": ancestor,
+            "matchAncestorByMainId": match_ancestor_by_main_id,
+        }
+        validated_params = IsLibraryPartSubtypeOfParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "IsLibraryPartSubtypeOf", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = IsLibraryPartSubtypeOfResult.model_validate(response_dict)
+        return validated_response
+
     def is_usable_gdl_string(self, strings: list[str]) -> list[bool]:
         """
         Checks whether each of the given strings is usable in GDL, e.g. before writing it into a
@@ -491,6 +1385,41 @@ class LibraryCommands:
         )
         validated_response = IsUsableGDLStringResult.model_validate(response_dict)
         return validated_response.results
+
+    def modify_library_list(
+        self,
+        add: None | list[LibraryLocation] = None,
+        remove: None | list[LibraryRemovalByName | LibraryRemovalByPath] = None,
+    ) -> ModifyLibraryListResult:
+        """
+        Adds libraries by path and removes loaded libraries by name or path, in one change of
+        the library list. Returns the result of each addition and removal. Available from
+        Archicad 28.
+
+        Args:
+            add (None | list[LibraryLocation]): Library folders or container files to add, by
+                absolute path.
+            remove (None | list[LibraryRemovalByName | LibraryRemovalByPath]): Loaded libraries
+                to remove, each by its name or by its path.
+
+        Returns:
+            ModifyLibraryListResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "add": add,
+            "remove": remove,
+        }
+        validated_params = ModifyLibraryListParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "ModifyLibraryList", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = ModifyLibraryListResult.model_validate(response_dict)
+        return validated_response
 
     def open_library_part_in_editor(self, name: str) -> FailedExecutionResult | SuccessfulExecutionResult:
         """
@@ -550,6 +1479,64 @@ class LibraryCommands:
         """
         response_dict = self._core.post_tapir_command("ResetLibraries")
         validated_response = TypeAdapter(ResetLibrariesResult).validate_python(response_dict)
+        return validated_response
+
+    def search_library_parts(self, ancestor_un_id: str, pattern: str) -> list[LibraryPartSearchResult]:
+        """
+        Finds the loaded library parts derived from an ancestor library part (by its unique ID)
+        whose name matches a pattern with * wildcards. Archicad returns at most 50 of them.
+
+        Args:
+            ancestor_un_id (str): The unique ID of the ancestor library part, '{main
+                GUID}-{revision GUID}', as GetLibraryPartIdentities returns it. Only the library
+                parts derived from it are found.
+            pattern (str): The name pattern to match, with * as wildcard, for example 'Chair*'.
+                Use '*' to find every library part derived from the ancestor.
+
+        Returns:
+            list[LibraryPartSearchResult]: The library parts found. Archicad returns at most 50.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "ancestorUnId": ancestor_un_id,
+            "pattern": pattern,
+        }
+        validated_params = SearchLibraryPartsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "SearchLibraryParts", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = SearchLibraryPartsResult.model_validate(response_dict)
+        return validated_response.libraryParts
+
+    def set_gdl_date(self, date: GDLDate) -> FailedExecutionResult | SuccessfulExecutionResult:
+        """
+        Sets the date GDL scripts see: year, month, day, hour, minute and second, as GetGDLDate
+        returns them. Useful to test date-dependent library parts; set the value read with
+        GetGDLDate back to restore it.
+
+        Args:
+            date (GDLDate): The date GDL scripts should see, in the format GetGDLDate returns.
+
+        Returns:
+            FailedExecutionResult | SuccessfulExecutionResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "date": date,
+        }
+        validated_params = SetGDLDateParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "SetGDLDate", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = TypeAdapter(SetGDLDateResult).validate_python(response_dict)
         return validated_response
 
     def set_libraries(self, libraries: list[LibraryLocation]) -> FailedExecutionResult | SuccessfulExecutionResult:
@@ -632,7 +1619,7 @@ class LibraryCommands:
         return validated_response
 
     def set_library_part_metadata(
-        self, library_parts: list[LibraryPartMetadataData]
+        self, library_parts: list[LibraryPartMetadataUpdate]
     ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
         """
         Sets the author, keywords, license, license version, password and the placeable, UI
@@ -642,7 +1629,7 @@ class LibraryCommands:
         28.
 
         Args:
-            library_parts (list[LibraryPartMetadataData]): The library parts to modify and the
+            library_parts (list[LibraryPartMetadataUpdate]): The library parts to modify and the
                 metadata to set in each.
 
         Returns:
@@ -663,6 +1650,88 @@ class LibraryCommands:
         )
         validated_response = SetLibraryPartMetadataResult.model_validate(response_dict)
         return validated_response.executionResults
+
+    def set_library_part_parameters(
+        self, library_parts: list[LibraryPartParametersUpdate]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Sets the parameter values, and optionally the parameter descriptions, of loaded library
+        parts, in the format of SetGDLParametersOfElements. Only the given parameters are
+        changed; with merge, the changed list is merged into the parameters of the part instead
+        of replacing them. A library part that is not editable, or with an invalid value given,
+        is left unchanged. Available from Archicad 28.
+
+        Args:
+            library_parts (list[LibraryPartParametersUpdate]): The library parts to modify and
+                the parameter values to set in each.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "libraryParts": library_parts,
+        }
+        validated_params = SetLibraryPartParametersParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "SetLibraryPartParameters", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = SetLibraryPartParametersResult.model_validate(response_dict)
+        return validated_response.executionResults
+
+    def set_library_part_picture_images(
+        self,
+        name: str,
+        preview_picture: None | str = None,
+        gdl_pictures: None | list[str] = None,
+        dark_preview_picture: None | str = None,
+        dark_gdl_pictures: None | list[str] = None,
+    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+        """
+        Sets the preview picture and the GDL pictures of a loaded library part from base64
+        encoded PNGs, and from Archicad 29 also their dark user interface variants. All pictures
+        are set in one step; an invalid picture changes nothing. A library part that is not
+        editable is refused and left unchanged. Available from Archicad 28.
+
+        Args:
+            name (str): The name of the loaded library part file with its extension, as returned
+                in the fileName field of GetAvailableLibraryParts (e.g. 'My Door.gsm').
+            preview_picture (None | str): Optional. The new preview picture as a base64 encoded
+                PNG.
+            gdl_pictures (None | list[str]): Optional. The new GDL pictures, each a base64
+                encoded PNG. They replace all GDL pictures of the library part.
+            dark_preview_picture (None | str): Optional. The new preview picture for the dark
+                user interface as a base64 encoded PNG. Requires Archicad 29 or newer.
+            dark_gdl_pictures (None | list[str]): Optional. The new GDL pictures for the dark
+                user interface, each a base64 encoded PNG. They replace all dark GDL pictures of
+                the library part. Requires Archicad 29 or newer.
+
+        Returns:
+            FailedExecutionResult | SuccessfulExecutionResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "name": name,
+            "previewPicture": preview_picture,
+            "gdlPictures": gdl_pictures,
+            "darkPreviewPicture": dark_preview_picture,
+            "darkGdlPictures": dark_gdl_pictures,
+        }
+        validated_params = SetLibraryPartPictureImagesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "SetLibraryPartPictureImages", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = TypeAdapter(SetLibraryPartPictureImagesResult).validate_python(response_dict)
+        return validated_response
 
     def set_library_part_pictures(
         self,
@@ -753,4 +1822,38 @@ class LibraryCommands:
             "SetLibraryPartScripts", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
         )
         validated_response = SetLibraryPartScriptsResult.model_validate(response_dict)
+        return validated_response.executionResults
+
+    def update_library_part_sections(
+        self, name: str, sections: list[LibraryPartSectionUpdate]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Replaces the text of existing sections (scripts, comment, keywords, copyright) of a
+        loaded library part, found by its name. Each section is read back after the update, and
+        the output has one execution result per section.
+
+        Args:
+            name (str): The name of the loaded library part, without the file extension (a
+                trailing '.gsm' is accepted too).
+            sections (list[LibraryPartSectionUpdate]): The sections to replace. Each section
+                must already exist in the library part; this command does not add new sections.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "name": name,
+            "sections": sections,
+        }
+        validated_params = UpdateLibraryPartSectionsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "UpdateLibraryPartSections", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+        )
+        validated_response = UpdateLibraryPartSectionsResult.model_validate(response_dict)
         return validated_response.executionResults

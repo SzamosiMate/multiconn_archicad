@@ -55,7 +55,13 @@ class MepExtendedCommands:
         from Archicad 27.
 
         Args:
-            table_id (MEPPreferenceTableId)
+            table_id (MEPPreferenceTableId): The guid of a preference table, as returned by
+                GetMEPPreferenceTables (the branch, elbow and transition tables with
+                includeFittingTables): a pipe or circular duct segment table, a branch or elbow
+                table of the Piping or Ventilation domain, or, from Archicad 29, a transition
+                table. Rectangular duct and cable carrier segment tables are found too, but
+                their rows have no key. Archicad 27: any preference table, as returned by
+                GetMEPPreferenceTableContainers.
             rows (list[MEPPreferenceRowAddition]): The rows to add, with their key and
                 optionally their values. Branch tables from Archicad 28, elbow and transition
                 tables from Archicad 29. Segment tables have a row for each reference id, so no
