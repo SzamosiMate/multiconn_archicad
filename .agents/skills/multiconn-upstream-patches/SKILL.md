@@ -11,7 +11,7 @@ Use the current downstream inventory to find useful source-schema improvements. 
 
 - `review`: investigate and recommend; do not modify Tapir source or publish/sync remote branches.
 - `prepare`: implement and validate locally when the user explicitly wants preparation only.
-- `publish`: sync the fork, implement, validate, commit and push a reviewable fork branch. This is the default for actionable requests such as “bring the temporary patches upstream” or “do a PR.” Deliver the branch contents and PR title/body for human review; upstream PR submission is a separate step after the user approves the prepared proposal.
+- `publish`: sync the fork, implement, validate, commit and push reviewable fork branches, then stop for user review. This is the default for requests such as “bring the temporary patches upstream” or “prepare PRs.” After approval, open the reviewed PRs using the prepared descriptions.
 
 Infer scope from the request and existing authorization. Preserve an explicit local-only or review-only instruction. Do not regenerate models, change the release pin, remove patches merely because source changes merged, or start this workflow automatically after codegen. Explain any incorrect client patch separately and change it only within scope.
 
@@ -38,6 +38,14 @@ Read [schema-review.md](references/schema-review.md) for sharing, descriptions a
 - Put general meaning on the shared definition or its actual field. Keep only distinct caller defaults, restrictions, effects or readback notes at referencing properties. Do not move a nested field's entire explanation onto every enclosing reference just to preserve its wording.
 - Group coherent equivalent changes; isolate acceptance changes. Use a few meaningful commits and independent branches where appropriate, making definition dependencies explicit.
 
+### Keep batches reviewable
+
+Aim for 30–50 related definitions per PR, grouped by command family or concept. Use the full structural check to support larger equivalent-refinement batches; do not impose a small command count or line limit on mechanical extractions. These are soft targets: keep small complete fixes together and include every consumer needed for a sharing decision. Split for distinct concepts, dependencies, or acceptance changes rather than solely to meet a count.
+
+Before implementing a large inventory, propose a compact batch plan. For an inventory of roughly 300–400 definitions, aim for about 5–10 coherent PRs after excluding already-covered work. Review names, intended sharing, and descriptions manually; the guard verifies contract preservation, not naming quality or conceptual equivalence.
+
+Base independent batches on upstream main and use one focused commit per batch where practical. State dependencies when a batch genuinely requires another; do not silently stack independent PRs. Keep acceptance changes separate from equivalent extractions.
+
 ## Branches, commits and publication
 
 Use version-based names without a `codex/` prefix:
@@ -50,13 +58,19 @@ Example:  schema/refinements-1.7.1
 
 The version identifies the reviewed release, not a promise about the release containing the changes. Add a short suffix only when separate proposals genuinely need it. Reuse an existing proposal's branch and keep an open PR's head intact; do not rename it just to adopt this convention.
 
-Describe upstream changes in commit subjects rather than downstream patch debt. Use an explanatory body when provenance or a compatibility decision matters. Follow requested commit/amend history. After validation, commit only intended Tapir source changes, push to the user's fork and verify its remote tip. Rebase an existing branch when requested or needed for integration; force-push only with authorization and an explicit lease on the recorded remote tip. The default endpoint is a published fork branch with contents and PR text ready for user review.
+Describe upstream changes in commit subjects rather than downstream patch debt. Use an explanatory body when provenance or a compatibility decision matters. Follow requested commit/amend history. After validation, commit only intended Tapir source changes, push to the user's fork and verify its remote tip. Rebase an existing branch when requested or needed for integration; force-push only with authorization and an explicit lease on the recorded remote tip. The first stopping point is published fork branches with contents and prepared PR text ready for user review.
 
 ### Human review before PR submission
 
-Finish implementation, validation, the run report and its staging, then present the branch/diff, material compatibility decisions, validation limits, and proposed PR title/body. Stop for the user to review this concrete proposal before opening an upstream PR, including a draft. Requests such as “do a PR,” “prepare a PR” or “bring the patches upstream” mean preparation for this review; they do not authorize immediate submission. Technical self-review and passing checks do not replace user review.
+Finish implementation, validation, the run report and its staging before opening any upstream PR, including a draft. For multiple batches, present one review table with each branch/diff, title, affected commands and definition names, validation result, and any dependencies or compatibility decisions. Prepare each full PR body in a scratch file and link it for review; do not require the user to copy descriptions between chats and GitHub.
 
-Create the PR only after the user approves the presented proposal and asks to submit/open it. Use the reviewed branch contents and title/body. If the user elects to submit it themselves, leave the prepared branch and copyable text ready. Do not merge the PR as part of this workflow.
+Stop for review. Approval such as “go ahead” in response to that concrete proposal authorizes opening the reviewed PRs, without a second confirmation. Respect approval of only selected batches. Use the prepared titles and bodies, check for existing PRs before creating them, and return their links. If scope materially changes after approval, present the affected batch again. If the user chooses manual submission, provide copyable Markdown instead. Do not merge PRs or post command comments unless separately requested.
+
+### Schema-refinement PR format
+
+Use a short aim, the exact names and consumers changed, and validation evidence. Add `<!-- tapir-schema-refinement -->` to equivalent refinement PR bodies. Do not use that marker for intentional acceptance changes; submit those separately with their justification.
+
+Inspect the workflow on upstream's default branch before describing its behavior as available. Where supported, the PR author can post `/check-schema`; `/merge-schema` requires repository write access. The marker does not itself make a check required or authorize merging. Keep any remaining merge race explicit; do not claim that the API atomically pins main.
 
 ## Validate proportionately
 
@@ -70,7 +84,7 @@ Do not use indiscriminate expansion as proof: preserve reference siblings, recur
 
 ## Deliver one run record and maintain the active queue
 
-Return the branch/commit or existing PR link and the main validation result. Provide the PR title and description inside a fenced `markdown` block so the user can copy raw Markdown. Use a short descriptive opening, a compact `Area | Changes` table or bullets, then material compatibility consequences. Explain the resulting upstream schema; keep routine test logs and investigation history out of the PR body. Do not force the title to list every affected domain.
+Return the branch/commit or existing PR link and the main validation result. For batch review, use the review table and linked prepared bodies above; after approved submission, return PR links. Provide fenced Markdown titles/descriptions when the user wants manual submission. Explain the resulting upstream schema and material compatibility consequences; keep routine test logs and investigation history out of the PR body. Do not force the title to list every affected domain.
 
 Maintain **at most one durable upstream report per logical run**, including follow-up reviews, description edits, rebases and publication on later dates. Store it at `code_generation/documentation/reports/upstream-patches/upstream-refinements-<version>-<start-date>.md` and update it in place. Read generation reports from the sibling `reports/codegen/` folder; keep relative links valid across these folders. Keep only useful decisions/rejected alternatives, source baseline/final head/PR, compatibility evidence and validation limits. When both a reference and its definition retain descriptions, list their locations and full strings. Link to active tracking instead of repeating its path inventory. Keep scratch scripts, intermediate logs and snapshots untracked; no additional report per phase, day or question. A no-new-work review may only need a tracking update.
 
