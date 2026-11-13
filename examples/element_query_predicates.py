@@ -17,7 +17,7 @@ from multiconn_archicad.utilities.queries import (
     ElementTypeTest,
     EvaluationContext,
     NumberOperator,
-    NumberTest,
+    RealTest,
     PropertyPredicate,
     Query,
     TextOperator,
@@ -38,7 +38,7 @@ def make_example_query() -> Query:
                 AnyOf(
                     items=(
                         PropertyPredicate(
-                            field_id=HEIGHT, test=NumberTest(operator=NumberOperator.GREATER_THAN, value=3)
+                            field_id=HEIGHT, test=RealTest(operator=NumberOperator.GREATER_THAN, value=3)
                         ),
                         PropertyPredicate(
                             field_id=DESCRIPTION, test=TextTest(operator=TextOperator.STARTS_WITH, value="External")

@@ -9,7 +9,7 @@ from multiconn_archicad.models.tapir import types as tapir
 from multiconn_archicad.utilities.queries import (
     AllOf,
     NumberOperator,
-    NumberTest,
+    RealTest,
     PropertyPredicate,
     Query,
     QueryValidationError,
@@ -44,7 +44,7 @@ def test_invalid_query_is_fatal_even_for_empty_or_impossible_candidates(project,
 
 @pytest.mark.parametrize("entry", ["find_elements", "find_elements_result"])
 def test_unknown_property_is_rejected_before_candidate_listing(project, entry):
-    query = Query(where=PropertyPredicate(field_id=uuid4(), test=NumberTest(operator=NumberOperator.IS, value=3)))
+    query = Query(where=PropertyPredicate(field_id=uuid4(), test=RealTest(operator=NumberOperator.IS, value=3)))
     with pytest.raises(QueryValidationError) as caught:
         invoke(project, entry, query)
     assert caught.value.result.issues[0].code == "unknown_field"
@@ -101,11 +101,11 @@ def test_execution_requires_tapir_2_before_discovery_even_for_empty_input(projec
 
 @pytest.mark.parametrize("entry", ["find_elements", "find_elements_result"])
 def test_search_does_not_swallow_unexpected_evaluator_exceptions(project, entry):
-    class BrokenNumberTest(NumberTest):
+    class BrokenRealTest(RealTest):
         def evaluate(self, raw_value):
             raise RuntimeError("Evaluator bug")
 
-    query = Query(where=PropertyPredicate(field_id=HEIGHT, test=BrokenNumberTest(operator=NumberOperator.IS, value=3)))
+    query = Query(where=PropertyPredicate(field_id=HEIGHT, test=BrokenRealTest(operator=NumberOperator.IS, value=3)))
 
     with pytest.raises(RuntimeError, match="Evaluator bug"):
         invoke(project, entry, query)

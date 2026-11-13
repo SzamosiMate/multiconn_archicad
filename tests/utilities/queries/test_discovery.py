@@ -17,7 +17,7 @@ from multiconn_archicad.utilities.api import Utilities
 from multiconn_archicad.utilities.namespaces.properties import PropertyUtilities
 from multiconn_archicad.utilities.queries import (
     AmbiguousPropertyTypeError,
-    NumberTest,
+    RealTest,
     PropertyCatalogue,
     PropertyInfo,
     PropertyTest,
@@ -213,18 +213,18 @@ def test_duplicate_guids_are_rejected_instead_of_overwriting_fields(metadata):
 
 
 def test_ambiguity_and_unexpected_family_errors_are_not_misreported_as_unsupported(metadata):
-    class OtherNumberTest(NumberTest):
+    class OtherRealTest(RealTest):
         pass
 
-    class BrokenNumberTest(NumberTest):
+    class BrokenRealTest(RealTest):
         @classmethod
         def accepts(cls, details: PropertyDetails) -> bool:
             raise RuntimeError("broken family")
 
     with pytest.raises(AmbiguousPropertyTypeError):
-        PropertyCatalogue(metadata, Registry(NumberTest, OtherNumberTest))
+        PropertyCatalogue(metadata, Registry(RealTest, OtherRealTest))
     with pytest.raises(RuntimeError, match="broken family"):
-        PropertyCatalogue(metadata, Registry(BrokenNumberTest))
+        PropertyCatalogue(metadata, Registry(BrokenRealTest))
 
 
 def test_discovery_uses_one_batch_call_without_reading_element_values(metadata):
@@ -236,7 +236,7 @@ def test_discovery_uses_one_batch_call_without_reading_element_values(metadata):
 
     assert len(catalogue) == 8
     assert api.mock_calls == [call.tapir.property.get_all_properties()]
-    assert isinstance(catalogue[HEIGHT].create_test(operator="is greater than", value=3), NumberTest)
+    assert isinstance(catalogue[HEIGHT].create_test(operator="is greater than", value=3), RealTest)
 
 
 def test_refresh_is_explicit_and_old_snapshots_do_not_change(metadata):
@@ -257,7 +257,7 @@ def test_discovery_accepts_an_explicit_registry(metadata):
     api = MagicMock()
     api.tapir.property.get_all_properties.return_value = GetAllPropertiesResult(properties=metadata)
 
-    catalogue = PropertyUtilities(api).discover_query_fields(registry=Registry(NumberTest))
+    catalogue = PropertyUtilities(api).discover_query_fields(registry=Registry(RealTest))
 
     assert len(catalogue.supported) == 2
     assert not catalogue[ELEMENT_ID].supported

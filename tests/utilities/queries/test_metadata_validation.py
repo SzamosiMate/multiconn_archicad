@@ -16,7 +16,7 @@ from multiconn_archicad.utilities.queries import (
     ElementTypePredicate,
     ElementTypeTest,
     InvalidPropertyTestError,
-    NumberTest,
+    RealTest,
     PropertyCatalogue,
     PropertyPredicate,
     PropertyTest,
@@ -83,7 +83,7 @@ def catalogue() -> PropertyCatalogue:
 def property_test(property_id=HEIGHT, test=None) -> PropertyPredicate:
     return PropertyPredicate(
         field_id=property_id,
-        test=NumberTest(operator="is greater than", value=3) if test is None else test,
+        test=RealTest(operator="is greater than", value=3) if test is None else test,
     )
 
 
@@ -150,7 +150,7 @@ def test_valid_nested_query_and_metadata_are_not_transformed(catalogue):
                 AnyOf(
                     items=(
                         property_test(ELEMENT_ID, TextTest(operator="does not contain", value="Temporary")),
-                        property_test(test=NumberTest(operator="is greater than or equal to", value=1)),
+                        property_test(test=RealTest(operator="is greater than or equal to", value=1)),
                     )
                 ),
             )
@@ -196,7 +196,7 @@ def test_collects_all_nested_issue_kinds_with_paths_and_field_context(catalogue)
     assert missing.reference == {"kind": "property", "field_id": str(MISSING)}
     assert missing.name is None and missing.group is None and missing.qualified_name is None
     assert wrong_type.qualified_name == "WallProperties / Wall Height"
-    assert "requires NumberTest, got TextTest" in wrong_type.message
+    assert "requires RealTest, got TextTest" in wrong_type.message
     assert unsupported.qualified_name == "CategoryPropertyDefinitionGroup / Position"
     assert unsupported.location == ("where", "items", 1, "items", 1, "items", 0, "test")
 
@@ -270,7 +270,7 @@ def test_result_and_exception_expose_complete_json_friendly_issues(catalogue):
     assert "where.items[1].test" in str(caught.value)
 
 
-class LimitedNumberTest(NumberTest):
+class LimitedRealTest(RealTest):
     def validate_for(self, details: PropertyDetails) -> None:
         super().validate_for(details)
         if self.value > 10:
@@ -278,12 +278,12 @@ class LimitedNumberTest(NumberTest):
 
 
 def test_family_operand_rules_are_validated_at_each_occurrence(catalogue):
-    limited_catalogue = PropertyCatalogue([catalogue[HEIGHT].details], Registry(LimitedNumberTest))
+    limited_catalogue = PropertyCatalogue([catalogue[HEIGHT].details], Registry(LimitedRealTest))
     query = Query(
         where=AllOf(
             items=(
-                property_test(test=LimitedNumberTest(operator="is", value=5)),
-                property_test(test=LimitedNumberTest(operator="is", value=11)),
+                property_test(test=LimitedRealTest(operator="is", value=5)),
+                property_test(test=LimitedRealTest(operator="is", value=11)),
             )
         )
     )
@@ -305,12 +305,12 @@ def test_family_operand_rules_are_validated_at_each_occurrence(catalogue):
     ],
 )
 def test_unexpected_or_configuration_errors_propagate(catalogue, error):
-    class BrokenNumberTest(NumberTest):
+    class BrokenRealTest(RealTest):
         def validate_for(self, details: PropertyDetails) -> None:
             raise error
 
-    broken_catalogue = PropertyCatalogue([catalogue[HEIGHT].details], Registry(BrokenNumberTest))
-    query = Query(where=property_test(test=BrokenNumberTest(operator="is", value=3)))
+    broken_catalogue = PropertyCatalogue([catalogue[HEIGHT].details], Registry(BrokenRealTest))
+    query = Query(where=property_test(test=BrokenRealTest(operator="is", value=3)))
 
     with pytest.raises(type(error)) as caught:
         validate_query(query, [broken_catalogue])

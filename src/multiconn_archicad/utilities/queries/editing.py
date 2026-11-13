@@ -125,7 +125,7 @@ class QueryBuildResult:
 def _payload_location(payload: JsonValue, location: _Location) -> _Location:
     """Remove one union tag per payload object, preserving real keys.
 
-    For example, ("property", "test", "number", "value") becomes
+    For example, ("property", "test", "real", "value") becomes
     ("predicate", "test", "value").
     """
     result: list[str | int] = []

@@ -18,7 +18,7 @@ from multiconn_archicad.utilities.queries import (
     ElementTypeTest,
     EvaluationContext,
     NumberOperator,
-    NumberTest,
+    RealTest,
     PropertyPredicate,
 )
 from multiconn_archicad.utilities.results.batch_results import BatchError, BatchGrid, BatchRow, BatchSlot
@@ -154,7 +154,7 @@ def test_nested_prepare_batches_properties_and_reuses_the_original_grid_and_slot
     api.utilities.property.get_property_values_per_element_result.return_value = grid
 
     def prop(guid):
-        return PropertyPredicate(field_id=guid, test=NumberTest(operator=NumberOperator.GREATER_THAN, value=3))
+        return PropertyPredicate(field_id=guid, test=RealTest(operator=NumberOperator.GREATER_THAN, value=3))
 
     node = AllOf(items=(prop(HEIGHT), AnyOf(items=(prop(WIDTH), prop(HEIGHT)))))
     builder = ContextBuilder()
@@ -163,7 +163,9 @@ def test_nested_prepare_batches_properties_and_reuses_the_original_grid_and_slot
     context = builder.build(api, candidates)
     data = context.data(PROPERTY_VALUES)
 
-    api.utilities.property.get_property_values_per_element_result.assert_called_once_with(candidates, (HEIGHT, WIDTH))
+    api.utilities.property.get_property_values_per_element_result.assert_called_once_with(
+        candidates, (HEIGHT, WIDTH), use_si_units=True
+    )
     assert data[HEIGHT].grid is grid
     assert data[WIDTH].grid is grid
     assert data[HEIGHT].row_indices is data[WIDTH].row_indices

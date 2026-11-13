@@ -11,7 +11,8 @@ from multiconn_archicad.models.tapir import types as tapir
 from multiconn_archicad.utilities.queries import (
     AmbiguousPropertyTypeError,
     BooleanTest,
-    NumberTest,
+    IntegerTest,
+    RealTest,
     PropertyTest,
     PropertyTestModel,
     TextTest,
@@ -26,23 +27,25 @@ pytestmark = pytest.mark.unit
 
 
 @pytest.mark.parametrize(
-    "test_union", [PropertyTest, TextTest | NumberTest | BooleanTest, Union[TextTest, NumberTest, BooleanTest]]
+    "test_union",
+    [PropertyTest, TextTest | IntegerTest | RealTest | BooleanTest, Union[TextTest, IntegerTest, RealTest, BooleanTest]],
 )
 def test_registry_reads_families_from_annotated_and_plain_unions(test_union):
     registry = Registry.from_union(test_union)
 
-    assert registry.families == (TextTest, NumberTest, BooleanTest)
-    assert registry.resolve(property_details()) is NumberTest
+    assert registry.families == (TextTest, IntegerTest, RealTest, BooleanTest)
+    assert registry.resolve(property_details(propertyValueType="Integer")) is IntegerTest
+    assert registry.resolve(property_details()) is RealTest
     assert registry.resolve(property_details(propertyValueType="String")) is TextTest
     assert registry.resolve(property_details(propertyValueType="Boolean")) is BooleanTest
 
 
-@pytest.mark.parametrize("test_union", [TextTest | NumberTest, NumberTest | TextTest])
+@pytest.mark.parametrize("test_union", [TextTest | IntegerTest | RealTest, RealTest | IntegerTest | TextTest])
 def test_family_selection_is_independent_of_union_order(test_union):
     registry = Registry.from_union(test_union)
 
-    assert registry.resolve(property_details(propertyValueType="Integer")) is NumberTest
-    assert registry.resolve(property_details(propertyMeasureType="Area")) is NumberTest
+    assert registry.resolve(property_details(propertyValueType="Integer")) is IntegerTest
+    assert registry.resolve(property_details(propertyMeasureType="Area")) is RealTest
     assert registry.resolve(property_details(propertyValueType="String")) is TextTest
 
 
@@ -61,15 +64,15 @@ def test_unsupported_types_produce_a_distinct_contextual_error(metadata):
         registry.resolve(property_details(**metadata))
 
 
-class OtherNumberTest(NumberTest):
+class OtherRealTest(RealTest):
     kind: Literal["other_number"] = "other_number"
 
 
-@pytest.mark.parametrize("test_union", [NumberTest | OtherNumberTest, OtherNumberTest | NumberTest])
+@pytest.mark.parametrize("test_union", [RealTest | OtherRealTest, OtherRealTest | RealTest])
 def test_overlapping_families_are_rejected_regardless_of_registration_order(test_union):
     registry = Registry.from_union(test_union)
 
-    with pytest.raises(AmbiguousPropertyTypeError, match="Example / Height: NumberTest, OtherNumberTest"):
+    with pytest.raises(AmbiguousPropertyTypeError, match="Example / Height: OtherRealTest, RealTest"):
         registry.resolve(property_details())
 
 
@@ -103,7 +106,7 @@ class GuidTest(PropertyTestModel):
 
 
 def test_adding_a_family_requires_only_its_class_and_the_shared_union():
-    extended_tests = Annotated[TextTest | NumberTest | BooleanTest | GuidTest, Field(discriminator="kind")]
+    extended_tests = Annotated[TextTest | IntegerTest | RealTest | BooleanTest | GuidTest, Field(discriminator="kind")]
     registry = Registry.from_union(extended_tests)
     adapter = TypeAdapter(extended_tests)
     details = property_details(propertyValueType="Guid")
@@ -130,7 +133,7 @@ def test_adding_a_family_requires_only_its_class_and_the_shared_union():
         TextTest | str,
         Annotated[TextTest | str, Field(discriminator="kind")],
         PropertyTestModel | TextTest,
-        tuple[TextTest, NumberTest],
+        tuple[TextTest, RealTest],
     ],
 )
 def test_registry_requires_a_union_of_test_models(invalid):

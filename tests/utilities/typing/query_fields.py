@@ -11,7 +11,7 @@ from multiconn_archicad.utilities.queries import (
     ClassificationPredicate,
     FieldCheck,
     FieldPredicate,
-    NumberTest,
+    RealTest,
     NumberOperator,
     PropertyCatalogue,
     PropertyInfo,
@@ -46,7 +46,7 @@ def check_validation_catalogue_types(
     context = QueryValidationContext([properties, classifications])
     assert_type(validate_query(query, [classifications, properties]), QueryValidationResult)
     property_check = FieldCheck(
-        predicate=PropertyPredicate(field_id=UUID(int=1), test=NumberTest(operator=NumberOperator.IS, value=1)),
+        predicate=PropertyPredicate(field_id=UUID(int=1), test=RealTest(operator=NumberOperator.IS, value=1)),
         location=("where",),
     )
     classification_check = FieldCheck(

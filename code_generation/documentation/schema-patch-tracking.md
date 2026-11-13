@@ -12,6 +12,20 @@ Seven Breaking source-review calls add the object type to closed records with re
 
 `FavoriteContents.properties.classifications` references the wrapped `ClassificationIdsOrErrors` union, while its description refers to element classification reads, which use direct IDs. The client follows the released reference for this new consumer. Confirm which shape is emitted before proposing a schema change.
 
+## SI property-read backport — 2026-11-13
+
+The element-query branch backports only `GetPropertyValuesOfElements.useSIUnits`
+and the `PropertyValue` description from `origin/update-to-tapir-2.0.0` at
+`e7be637`. `backport_property_si_units()` keeps the pinned 1.8 schema reproducible
+for that field. The new optional flag has no client/schema default, preserving
+omission for existing callers on older Tapir; explicit `False` is still forwarded.
+Query reads request `True`, with angle operands in degrees and other quantities in SI.
+
+Remove the helper and its call when adopting the 2.0.0 schema, which already
+defines the field. Preserve the omission behavior when resolving the generated
+parameter/client defaults. The patch deliberately raises if the upstream field
+already exists so release adoption cannot silently retain this backport.
+
 ## Classification assignment response correction — 2026-11-01
 
 **Retired in Tapir 2.0.0.** The released `ElementClassificationItemArray.properties.classificationIds.items.oneOf` now references `ClassificationId` directly, covering element and element-default reads. `GetClassificationOfAttributesInSystemResult.properties.attributeClassifications` still reaches the wrapped `ClassificationIdArrayItem` through `ClassificationIdsOrErrors`. Removing the global rewrite restores that documented wrapper for the attribute consumer.

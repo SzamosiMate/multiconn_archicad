@@ -13,7 +13,7 @@ from multiconn_archicad.utilities.queries import (
     AllOf,
     ElementTypePredicate,
     ElementTypeTest,
-    NumberTest,
+    RealTest,
     NumberOperator,
     PropertyPredicate,
     Query,
@@ -30,7 +30,7 @@ def make_example_query() -> Query:
                 ElementTypePredicate(test=ElementTypeTest(types=(ElementType.WALL,))),
                 PropertyPredicate(
                     field_id=UUID("22222222-2222-4222-8222-222222222222"),
-                    test=NumberTest(operator=NumberOperator.GREATER_THAN, value=3),
+                    test=RealTest(operator=NumberOperator.GREATER_THAN, value=3),
                 ),
                 PropertyPredicate(
                     field_id=UUID("11111111-1111-4111-8111-111111111111"),

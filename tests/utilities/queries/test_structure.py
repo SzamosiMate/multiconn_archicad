@@ -14,7 +14,8 @@ from multiconn_archicad.utilities.queries import (
     ClassificationTest,
     ElementTypePredicate,
     ElementTypeTest,
-    NumberTest,
+    IntegerTest,
+    RealTest,
     PropertyPredicate,
     Query,
     TextTest,
@@ -48,7 +49,7 @@ PROPERTY_ID = "22222222-2222-4222-8222-222222222222"
         {
             "kind": "property",
             "field_id": PROPERTY_ID,
-            "test": {"kind": "number", "operator": "contains", "value": 3},
+            "test": {"kind": "real", "operator": "contains", "value": 3},
         },
         {
             "kind": "property",
@@ -58,7 +59,7 @@ PROPERTY_ID = "22222222-2222-4222-8222-222222222222"
         {
             "kind": "property",
             "field_id": PROPERTY_ID,
-            "test": {"kind": "number", "operator": "is", "value": 3, "unit": "m"},
+            "test": {"kind": "real", "operator": "is", "value": 3, "unit": "m"},
         },
         {"kind": "property", "field_id": PROPERTY_ID, "test": {"kind": "text", "operator": "eq", "value": "x"}},
     ],
@@ -116,16 +117,31 @@ def test_query_envelope_rejects_extra_fields():
 
 
 @pytest.mark.parametrize("value", [True, False, "3", None, float("nan"), float("inf"), -float("inf")])
-def test_number_operands_reject_coercion_and_nonfinite_numbers(value):
+def test_real_operands_reject_coercion_and_nonfinite_numbers(value):
     with pytest.raises(ValidationError):
-        NumberTest(operator="is", value=value)
+        RealTest(operator="is", value=value)
     with pytest.raises(ValidationError):
-        NumberTest.model_validate_json(json.dumps({"operator": "is", "value": value}))
+        RealTest.model_validate_json(json.dumps({"operator": "is", "value": value}))
 
 
 @pytest.mark.parametrize("value", [0, -2, 3, 3.5])
-def test_number_operands_accept_finite_integers_and_reals(value):
-    assert NumberTest(operator="is", value=value).value == value
+def test_real_operands_accept_finite_integers_and_reals(value):
+    assert RealTest(operator="is", value=value).value == value
+
+
+@pytest.mark.parametrize("value", [True, False, "3", None, 3.0, 3.5, float("nan"), float("inf"), -float("inf")])
+def test_integer_operands_reject_coercion_and_floats(value):
+    with pytest.raises(ValidationError):
+        IntegerTest(operator="is", value=value)
+    with pytest.raises(ValidationError):
+        IntegerTest.model_validate_json(json.dumps({"operator": "is", "value": value}))
+
+
+@pytest.mark.parametrize("value", [0, -2, 3, 2**53 + 1])
+def test_integer_operands_preserve_exact_integers(value):
+    test = IntegerTest(operator="is", value=value)
+    assert type(test.value) is int
+    assert test.value == value
 
 
 @pytest.mark.parametrize("value", [3, True, None, b"External"])
@@ -154,11 +170,12 @@ def test_models_and_collections_preserve_validated_state():
         (AllOf(items=(ElementTypePredicate(test=ElementTypeTest(types=("Wall",))),)), "items"),
         (AnyOf(items=(ElementTypePredicate(test=ElementTypeTest(types=("Wall",))),)), "items"),
         (ElementTypePredicate(test=ElementTypeTest(types=("Wall",))), "test"),
-        (PropertyPredicate(field_id=PROPERTY_ID, test=NumberTest(operator="is", value=3)), "field_id"),
+        (PropertyPredicate(field_id=PROPERTY_ID, test=RealTest(operator="is", value=3)), "field_id"),
         (ClassificationPredicate(field_id=PROPERTY_ID, test=ClassificationTest(operator="has value")), "field_id"),
         (ElementTypeTest(types=("Wall",)), "types"),
         (TextTest(operator="is", value="external"), "value"),
-        (NumberTest(operator="is", value=3), "value"),
+        (RealTest(operator="is", value=3), "value"),
+        (IntegerTest(operator="is", value=3), "value"),
         (BooleanTest(operator="is", value=True), "value"),
         (ClassificationTest(operator="has value"), "operator"),
     ],
@@ -206,13 +223,17 @@ def test_json_schema_exposes_recursive_nodes_and_typed_operator_choices():
     assert definitions["AllOf"]["properties"]["items"]["items"]["discriminator"]["propertyName"] == "kind"
     assert set(definitions["PropertyPredicate"]["properties"]["test"]["discriminator"]["mapping"]) == {
         "text",
-        "number",
+        "integer",
+        "real",
         "boolean",
     }
     assert definitions["BooleanTest"]["properties"]["value"]["type"] == "boolean"
     assert definitions["BooleanOperator"]["enum"] == ["is", "is not"]
     assert definitions["TextTest"]["properties"]["operator"] == {"$ref": "#/$defs/TextOperator"}
-    assert definitions["NumberTest"]["properties"]["operator"] == {"$ref": "#/$defs/NumberOperator"}
+    assert definitions["RealTest"]["properties"]["operator"] == {"$ref": "#/$defs/NumberOperator"}
+    assert definitions["IntegerTest"]["properties"]["operator"] == {"$ref": "#/$defs/NumberOperator"}
+    assert definitions["IntegerTest"]["properties"]["value"]["type"] == "integer"
+    assert definitions["RealTest"]["properties"]["value"]["type"] == "number"
     assert definitions["TextOperator"]["enum"] == [
         "is",
         "is not",

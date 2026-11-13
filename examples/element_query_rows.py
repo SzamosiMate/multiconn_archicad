@@ -8,7 +8,7 @@ def main() -> None:
         predicate={
             "kind": "property",
             "field_id": "22222222-2222-4222-8222-222222222222",
-            "test": {"kind": "number", "operator": "is greater than"},
+            "test": {"kind": "real", "operator": "is greater than"},
         }
     )
     rows = QueryRows(
@@ -29,7 +29,7 @@ def main() -> None:
     for issue in build_query(rows).issues:
         print(issue.location, issue.message)
 
-    height.predicate["test"] = {"kind": "number", "operator": "is greater than", "value": 3}
+    height.predicate["test"] = {"kind": "real", "operator": "is greater than", "value": 3}
     saved = rows.model_dump_json(indent=2)
     print(saved)
     restored = QueryRows.model_validate_json(saved, context={"require_schema_version": True})

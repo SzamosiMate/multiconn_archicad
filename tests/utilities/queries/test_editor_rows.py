@@ -85,7 +85,7 @@ class TestExpressionCompilation:
             predicate={
                 "kind": "property",
                 "field_id": str(UUID(int=1)),
-                "test": {"kind": "number", "operator": "is greater than"},
+                "test": {"kind": "real", "operator": "is greater than"},
             },
         )
 
@@ -122,7 +122,7 @@ class TestDraftPersistence:
         row = QueryRow(
             open_parentheses=2,
             close_parentheses=1,
-            predicate={"kind": "property", "test": {"kind": "number"}},
+            predicate={"kind": "property", "test": {"kind": "real"}},
             join_next="or",
         )
         document = QueryRows(rows=[row])
@@ -136,8 +136,8 @@ class TestDraftPersistence:
 
         duplicate = row.duplicate()
         assert duplicate.row_id != row.row_id
-        duplicate.predicate["test"] = {"kind": "number", "value": 1}
-        assert row.predicate["test"] == {"kind": "number"}
+        duplicate.predicate["test"] = {"kind": "real", "value": 1}
+        assert row.predicate["test"] == {"kind": "real"}
 
     @pytest.mark.parametrize("value", [float("nan"), float("inf"), float("-inf")], ids=["nan", "inf", "-inf"])
     def test_rejects_nonfinite_values_on_load_and_after_in_place_edits(self, value):
@@ -196,7 +196,7 @@ class TestRowEditing:
             predicate={
                 "kind": "property",
                 "field_id": str(UUID(int=1)),
-                "test": {"kind": "number", "operator": "is", "value": 3},
+                "test": {"kind": "real", "operator": "is", "value": 3},
             }
         )
         result = build_query(QueryRows(rows=[row]))

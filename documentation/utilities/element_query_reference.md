@@ -40,7 +40,8 @@ convenience values; a query stores concrete types and has no preset identifier.
 | Test family | Operators | Operand |
 | --- | --- | --- |
 | `TextTest` | `is`, `is not`, `contains`, `does not contain`, `starts with`, `ends with` | String |
-| `NumberTest` | `is`, `is not`, `is greater than`, `is greater than or equal to`, `is less than`, `is less than or equal to` | Finite number |
+| `IntegerTest` | `is`, `is not`, `is greater than`, `is greater than or equal to`, `is less than`, `is less than or equal to` | Integer |
+| `RealTest` | Same six numeric operators | Finite number |
 | `BooleanTest` | `is`, `is not` | Boolean |
 | `ClassificationTest` | Equality, presence, branch, direct-child comparisons | Item UUID when required; see [classification operator table](classifications.md#metadata-and-field-discovery) |
 | `ElementTypeTest` | Membership through `types` | Concrete element-type tuple |
@@ -49,13 +50,49 @@ Text comparisons use Unicode `casefold()`. Whitespace is significant. For
 example, `External` equals `EXTERNAL`, but not ` External `. Serialization keeps
 the original operand; it does not save the case-folded form.
 
-Numeric operands accept finite integers/floats, excluding Booleans. Strings,
-`null`, NaN, and infinity are rejected. Comparisons use ordinary numeric equality
-and ordering without tolerance or rounding. The current value reader passes
-Tapir's string to `float()`; it performs no locale parsing or unit conversion.
-Consequently, `"3,00"` is an evaluation error. Metadata retains the measure type,
-but that does not guarantee canonical numeric values. Canonical SI reads and the
-angle operand contract are [deferred](../development/element_queries_plan.md#canonical-numeric-property-reads).
+`IntegerTest` accepts only Integer properties and integer operands, excluding
+Booleans and floats (including `3.0`). It parses returned strings with `int()`
+and uses exact equality and ordering, preserving integer precision.
+
+`RealTest` accepts only Real properties, including unitless reals and all measure
+types. Its operands accept finite integers/floats, excluding Booleans. Strings,
+`null`, NaN, and infinity are rejected. Returned values must also be finite.
+It parses returned strings with `float()` and compares using
+`math.isclose(actual, operand, rel_tol=1e-10, abs_tol=1e-10)`:
+
+| Operator | Real comparison |
+| --- | --- |
+| `is` | Close |
+| `is not` | Not close |
+| `is greater than` | Greater and not close |
+| `is greater than or equal to` | Greater or close |
+| `is less than` | Less and not close |
+| `is less than or equal to` | Less or close |
+
+Closeness means `abs(actual - operand) <= max(1e-10 * max(abs(actual), abs(operand)), 1e-10)`.
+The constants are fixed for Real tests. They were selected using property
+round trips and geometry within +/-10,000 metres on each coordinate axis;
+they are an empirical comparison policy, not a universal error bound.
+Values within the band compare as equal for all six operators. For example,
+`"29.999999999999996"` matches `is 30` and fails `is less than 30`.
+Near zero the absolute term applies; at larger magnitudes the relative term grows.
+Comparison does not round or modify the returned value or saved operand.
+
+Query reads explicitly request
+`GetPropertyValuesOfElements.useSIUnits=True` together with availability. Tapir
+returns precise locale-independent numeric strings: operands use SI units for
+quantities, **except angles use degrees**, deliberately matching architectural
+practice. The evaluator performs no further unit conversion or locale parsing.
+A malformed numeric string such as `"3,00"` remains
+an evaluation error; there is no fallback to display values.
+
+Discovery selects `IntegerTest` or `RealTest` from the property's value type.
+Serialized tests use `kind="integer"` and `kind="real"`, respectively.
+
+Existing property utility callers retain display strings. The optional keyword
+`use_si_units=True` on `get_property_values_per_element_result()` opts into these
+canonical reads and requires Tapir 2.0.0 or newer. With its default `False`, the
+new wire flag is omitted so older Tapir versions keep their existing behavior.
 
 Boolean operands must be actual Booleans. Tapir value strings are interpreted
 using its `"True"`/`"False"` representation.

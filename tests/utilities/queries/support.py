@@ -11,7 +11,7 @@ from multiconn_archicad.utilities.queries import (
     ElementTypePredicate,
     ElementTypeTest,
     NumberOperator,
-    NumberTest,
+    RealTest,
     PropertyPredicate,
     Query,
 )
@@ -39,7 +39,7 @@ def cell_error(message, available=None):
 
 
 def height_node():
-    return PropertyPredicate(field_id=HEIGHT, test=NumberTest(operator=NumberOperator.GREATER_THAN, value=3))
+    return PropertyPredicate(field_id=HEIGHT, test=RealTest(operator=NumberOperator.GREATER_THAN, value=3))
 
 
 def type_node(*types):

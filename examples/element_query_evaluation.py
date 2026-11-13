@@ -4,8 +4,9 @@ from multiconn_archicad.utilities import BatchSlot, PropertyUnavailableError, Pr
 from multiconn_archicad.utilities.queries import (
     BooleanOperator,
     BooleanTest,
+    IntegerTest,
     NumberOperator,
-    NumberTest,
+    RealTest,
     PropertyTestModel,
     TextOperator,
     TextTest,
@@ -19,9 +20,11 @@ def make_examples() -> tuple[tuple[str, PropertyTestModel, BatchSlot[str]], ...]
         ("Boolean match", BooleanTest(operator=BooleanOperator.IS, value=True), BatchSlot.success("True")),
         ("Boolean non-match", BooleanTest(operator=BooleanOperator.IS_NOT, value=False), BatchSlot.success("False")),
         ("Boolean conversion failure", BooleanTest(operator=BooleanOperator.IS, value=True), BatchSlot.success("yes")),
-        ("Numeric match", NumberTest(operator=NumberOperator.GREATER_THAN, value=3), BatchSlot.success("3.5")),
-        ("Numeric non-match", NumberTest(operator=NumberOperator.GREATER_THAN, value=3), BatchSlot.success("2.5")),
-        ("Conversion failure", NumberTest(operator=NumberOperator.IS, value=3), BatchSlot.success("not a number")),
+        ("Numeric match", RealTest(operator=NumberOperator.GREATER_THAN, value=3), BatchSlot.success("3.5")),
+        ("Numeric non-match", RealTest(operator=NumberOperator.GREATER_THAN, value=3), BatchSlot.success("2.5")),
+        ("Real roundoff match", RealTest(operator=NumberOperator.IS, value=30), BatchSlot.success("29.999999999999996")),
+        ("Exact integer match", IntegerTest(operator=NumberOperator.IS, value=3), BatchSlot.success("3")),
+        ("Conversion failure", RealTest(operator=NumberOperator.IS, value=3), BatchSlot.success("not a number")),
         (
             "Case-insensitive text",
             TextTest(operator=TextOperator.CONTAINS, value="external"),
@@ -34,7 +37,7 @@ def make_examples() -> tuple[tuple[str, PropertyTestModel, BatchSlot[str]], ...]
         ),
         (
             "Undefined value",
-            NumberTest(operator=NumberOperator.GREATER_THAN, value=3),
+            RealTest(operator=NumberOperator.GREATER_THAN, value=3),
             BatchSlot.failure(PropertyUndefinedError.from_message("Property is undefined")),
         ),
     )
