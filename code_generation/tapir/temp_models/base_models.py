@@ -15938,20 +15938,6 @@ class ElementPropertyEditabilityResult(APIModel):
     propertyEditabilities: list[ElementPropertyEditabilityStatus | ErrorItem]
 
 
-class ElementPropertyValue(APIModel):
-    """
-    A property value with the identifiers of the property and its owner element.
-    """
-
-    elementId: ElementId
-    propertyId: PropertyId
-    propertyValue: PropertyValue
-    valueStatus: ValueStatus | None = Field(
-        None,
-        description="Value (the default) sets propertyValue. Default removes the element's own value, so the property shows its default value (or its expression) again. UserUndefined sets the value to undefined. propertyValue is not needed and is ignored for Default and UserUndefined.",
-    )
-
-
 class ElementPropertyValueWithStatus(APIModel):
     """
     A property value with the identifiers of the property and its owner element.
@@ -15962,6 +15948,20 @@ class ElementPropertyValueWithStatus(APIModel):
     propertyValue: PropertyValue | None = None
     valueStatus: ValueStatus = Field(
         ...,
+        description="Value (the default) sets propertyValue. Default removes the element's own value, so the property shows its default value (or its expression) again. UserUndefined sets the value to undefined. propertyValue is not needed and is ignored for Default and UserUndefined.",
+    )
+
+
+class ElementPropertyValueWithValue(APIModel):
+    """
+    A property value with the identifiers of the property and its owner element.
+    """
+
+    elementId: ElementId
+    propertyId: PropertyId
+    propertyValue: PropertyValue
+    valueStatus: ValueStatus | None = Field(
+        None,
         description="Value (the default) sets propertyValue. Default removes the element's own value, so the property shows its default value (or its expression) again. UserUndefined sets the value to undefined. propertyValue is not needed and is ignored for Default and UserUndefined.",
     )
 
@@ -36736,7 +36736,7 @@ class SetProjectPreferencesParameters(APIModel):
 
 class SetPropertyValuesOfElementsParameters(APIModel):
     elementPropertyValues: list[
-        ElementPropertyValue | ElementPropertyValueWithStatus
+        ElementPropertyValueWithValue | ElementPropertyValueWithStatus
     ] = Field(
         ...,
         description="A single real value accepts '.' or ',' as the decimal separator, so the value strings GetPropertyValuesOfElements returns can be written back: when both appear the last one is the decimal separator, a separator that appears more than once groups thousands, and a single separator is the decimal one. Unitless real and integer lists accept semicolon-separated numbers; an empty string sets an empty list. Invalid items reject the entire property write.",
@@ -39115,7 +39115,7 @@ ElementLinksOrError: TypeAlias = ElementLinks | ErrorItem
 ElementOrGroupId: TypeAlias = ElementIdArrayItem | GroupIdArrayItem
 
 
-ElementPropertyValueInput: TypeAlias = ElementPropertyValue | ElementPropertyValueWithStatus
+ElementPropertyValue: TypeAlias = ElementPropertyValueWithValue | ElementPropertyValueWithStatus
 
 
 ElementQuantities: TypeAlias = WallQuantities | ColumnQuantities | BeamQuantities | SlabQuantities | RoofQuantities | ShellQuantities | MorphQuantities | ZoneQuantities | ColumnSegmentQuantities | BeamSegmentQuantities

@@ -54,17 +54,11 @@ class FileAssembler:
             for group_name, commands in groups.items():
                 command_deps = set()
                 type_deps = set()
-                collections_abc_deps = set()
                 for cmd in commands:
                     command_deps.update(cmd.get("command_model_dependencies", []))
                     type_deps.update(cmd.get("type_model_dependencies", []))
-                    collections_abc_deps.update(cmd.get("collections_abc_dependencies", []))
 
                 imports_block = self._create_imports_block(source, command_deps, type_deps)
-                if collections_abc_deps:
-                    imports_block = (
-                        f"from collections.abc import {', '.join(sorted(collections_abc_deps))}\n\n{imports_block}"
-                    )
 
                 clean_name = clean_group_name(group_name)
                 class_name = f"{clean_name.replace('_', ' ').title().replace(' ', '')}Commands"

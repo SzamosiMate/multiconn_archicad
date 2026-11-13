@@ -142,7 +142,7 @@ def create_element_property_values(
     for elem_idx, row in enumerate(matrix.rows):
         for prop_idx, slot in enumerate(row.slots):
             payload.append(
-                tapir.ElementPropertyValue(
+                tapir.ElementPropertyValueWithValue(
                     elementId=norm_elements[elem_idx].elementId,
                     propertyId=norm_props[prop_idx].propertyId,
                     propertyValue=_to_prop_value(slot.value),
@@ -176,7 +176,9 @@ def create_element_property_values_flat(
     pid = normalize_property_id(property_id).propertyId
     norm_elements = _validate_flat_input(elements, values)
     return [
-        tapir.ElementPropertyValue(elementId=e.elementId, propertyId=pid, propertyValue=_to_prop_value(v))
+        tapir.ElementPropertyValueWithValue(
+            elementId=e.elementId, propertyId=pid, propertyValue=_to_prop_value(v)
+        )
         for e, v in zip(norm_elements, values)
     ]
 
@@ -204,7 +206,7 @@ def create_element_property_values_sparse(
     )
 
     return [
-        tapir.ElementPropertyValue(
+        tapir.ElementPropertyValueWithValue(
             elementId=norm_elements[elem_idx].elementId,
             propertyId=norm_props[prop_idx].propertyId,
             propertyValue=_to_prop_value(value),

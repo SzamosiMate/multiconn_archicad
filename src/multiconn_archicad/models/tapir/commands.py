@@ -284,8 +284,8 @@ from .types import (
     ElementPair,
     ElementPropertyEditabilityResult,
     ElementPropertyObjects,
-    ElementPropertyValue,
     ElementPropertyValueWithStatus,
+    ElementPropertyValueWithValue,
     ElementQuantityDetails,
     ElementReservationStatus,
     ElementSetData,
@@ -10778,7 +10778,7 @@ class SetPropertyValuesOfElementDefaultsResult(APIModel):
 
 
 class SetPropertyValuesOfElementsParameters(APIModel):
-    elementPropertyValues: list[ElementPropertyValue | ElementPropertyValueWithStatus] = Field(
+    elementPropertyValues: list[ElementPropertyValueWithValue | ElementPropertyValueWithStatus] = Field(
         ...,
         description="A single real value accepts '.' or ',' as the decimal separator, so the value strings GetPropertyValuesOfElements returns can be written back: when both appear the last one is the decimal separator, a separator that appears more than once groups thousands, and a single separator is the decimal one. Unitless real and integer lists accept semicolon-separated numbers; an empty string sets an empty list. Invalid items reject the entire property write.",
     )
