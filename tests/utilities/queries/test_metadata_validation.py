@@ -1,12 +1,10 @@
 """Validate complete queries against an offline property catalogue."""
 
 import json
-from pathlib import Path
 from uuid import UUID
 
 import pytest
 
-from multiconn_archicad.models.tapir.commands import GetAllPropertiesResult
 from multiconn_archicad.models.tapir.types import ElementType, PropertyDetails
 from multiconn_archicad.utilities.queries import (
     AllOf,
@@ -31,9 +29,10 @@ from multiconn_archicad.utilities.queries import (
 )
 from multiconn_archicad.utilities.queries import TestRegistry as Registry
 
+from .support import property_details
+
 pytestmark = pytest.mark.unit
 
-FIXTURE = Path(__file__).resolve().parents[2] / "fixtures" / "query_property_discovery_19723.json"
 ELEMENT_ID = UUID("7E221F33-829B-4FBC-A670-E74DABCE6289")
 HEIGHT = UUID("02DB7087-5E1D-4AF3-AF62-4D08C1B70C3E")
 POSITION = UUID("53402BE5-29D9-44A5-B6D6-4FA90938DDC9")
@@ -63,7 +62,21 @@ def test_validation_issue_can_identify_a_classification_field():
 
 @pytest.fixture
 def catalogue() -> PropertyCatalogue:
-    metadata = GetAllPropertiesResult.model_validate_json(FIXTURE.read_text(encoding="utf-8")).properties
+    metadata = [
+        property_details(propertyId={"guid": HEIGHT}, propertyGroupName="WallProperties", propertyName="Wall Height"),
+        property_details(
+            propertyId={"guid": ELEMENT_ID},
+            propertyName="Element ID",
+            propertyValueType="String",
+            propertyMeasureType="Default",
+        ),
+        property_details(
+            propertyId={"guid": POSITION},
+            propertyGroupName="CategoryPropertyDefinitionGroup",
+            propertyName="Position",
+            propertyCollectionType="SingleChoiceEnumeration",
+        ),
+    ]
     return PropertyCatalogue(metadata, Registry.from_union(PropertyTest))
 
 
