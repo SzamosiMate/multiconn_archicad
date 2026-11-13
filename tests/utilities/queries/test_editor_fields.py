@@ -9,13 +9,14 @@ from pydantic import ValidationError
 from multiconn_archicad.models.tapir import types as tapir
 from multiconn_archicad.utilities.queries import (
     BUILTIN_QUERY_FIELDS,
-    AmbiguousPropertyTypeError,
-    ElementTypeInfo,
-    TYPES_ALL,
     TYPES_2D,
     TYPES_3D,
     TYPES_3D_COMPONENTS,
     TYPES_3D_WITH_COMPONENTS,
+    TYPES_ALL,
+    AmbiguousPropertyTypeError,
+    BooleanTest,
+    ElementTypeInfo,
     ElementTypeTest,
     FieldInfo,
     InvalidPropertyTestError,
@@ -30,25 +31,11 @@ from multiconn_archicad.utilities.queries import (
 from multiconn_archicad.utilities.queries import TestRegistry as Registry
 from multiconn_archicad.utilities.queries.editing import QueryRow, QueryRows, build_query
 
+from .support import property_details
+
 pytestmark = pytest.mark.unit
 
 PROPERTY_ID = "22222222-2222-4222-8222-222222222222"
-
-
-def property_details(**changes) -> tapir.PropertyDetails:
-    data = {
-        "propertyId": {"guid": PROPERTY_ID},
-        "propertyType": "Custom",
-        "propertyGroupName": "Example",
-        "propertyName": "Height",
-        "propertyCollectionType": "Single",
-        "propertyValueType": "Real",
-        "propertyMeasureType": "Length",
-        "propertyIsEditable": True,
-        "isExpressionBased": False,
-    }
-    data.update(changes)
-    return tapir.PropertyDetails.model_validate(data)
 
 
 def test_describes_added_scalar_inputs_from_the_registered_test_schema():
@@ -184,6 +171,11 @@ def test_uniform_names_preserve_upstream_labels_and_derive_qualified_name(group,
             {"operator": "starts with", "value": "External"},
             TextTest,
         ),
+        (
+            {"propertyValueType": "Boolean", "propertyMeasureType": "Default"},
+            {"operator": "is not", "value": False},
+            BooleanTest,
+        ),
     ],
 )
 def test_field_selection_exposes_operators_and_creates_tests_for_query_serialization(metadata, data, family):
@@ -290,3 +282,24 @@ def test_construction_preserves_unsupported_and_ambiguous_registry_errors():
         PropertyInfo(property_details(propertyValueType="Guid"), Registry.from_union(PropertyTest))
     with pytest.raises(AmbiguousPropertyTypeError):
         PropertyInfo(property_details(), Registry(NumberTest, LimitedNumberTest))
+
+
+def test_type_presets_cover_documented_categories_without_containers_or_duplicates():
+    excluded = {
+        tapir.ElementType.UNKNOWN,
+        tapir.ElementType.GROUP,
+        tapir.ElementType.HOTLINK,
+        tapir.ElementType.CAM_SET,
+    }
+
+    assert set(TYPES_ALL) == set(tapir.ElementType) - excluded
+    assert set(TYPES_ALL) == set(TYPES_2D) | set(TYPES_3D_WITH_COMPONENTS)
+    assert set(TYPES_3D_WITH_COMPONENTS) == set(TYPES_3D) | set(TYPES_3D_COMPONENTS)
+    assert set(TYPES_3D).isdisjoint(TYPES_3D_COMPONENTS)
+    assert set(TYPES_2D).isdisjoint(TYPES_3D_WITH_COMPONENTS)
+    assert tapir.ElementType.CAMERA in TYPES_2D
+    assert tapir.ElementType.WALL in TYPES_3D
+    assert tapir.ElementType.BEAM_SEGMENT in TYPES_3D_COMPONENTS
+    for preset in (TYPES_ALL, TYPES_2D, TYPES_3D, TYPES_3D_COMPONENTS, TYPES_3D_WITH_COMPONENTS):
+        assert isinstance(preset, tuple)
+        assert len(preset) == len(set(preset))

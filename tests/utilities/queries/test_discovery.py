@@ -1,4 +1,4 @@
-"""Exercise discovery with a minimal sample of the saved port-19723 probe."""
+"""Discover disconnected field snapshots and resolve identities; see query editing guide."""
 
 import json
 from pathlib import Path
@@ -7,16 +7,16 @@ from uuid import UUID, uuid4
 
 import pytest
 
-from multiconn_archicad.models.tapir.commands import GetAllPropertiesResult
-from multiconn_archicad.models.tapir.types import PropertyDetails, PropertyType, PropertyValueType
+from multiconn_archicad.errors import MulticonnArchicadError
 from multiconn_archicad.models.tapir import types as tapir
+from multiconn_archicad.models.tapir.commands import GetAllPropertiesResult
+from multiconn_archicad.models.tapir.types import PropertyDetails, PropertyType
 from multiconn_archicad.orchestration.basic_types import PendingResponse, ProductInfo, TapirInfo
 from multiconn_archicad.orchestration.header_state import HeaderMetadata
 from multiconn_archicad.utilities.api import Utilities
 from multiconn_archicad.utilities.namespaces.properties import PropertyUtilities
 from multiconn_archicad.utilities.queries import (
     AmbiguousPropertyTypeError,
-    BooleanTest,
     NumberTest,
     PropertyCatalogue,
     PropertyInfo,
@@ -135,25 +135,6 @@ def test_browse_scope_uses_all_properties_directly_from_archicad_28(metadata, ar
     api.official.basic.get_product_info.assert_not_called()
     api.official.property.get_all_property_ids.assert_not_called()
     api.tapir.property.get_properties_of_tool_defaults.assert_not_called()
-
-
-@pytest.mark.parametrize("source", ["Custom", "StaticBuiltIn", "DynamicBuiltIn"])
-def test_boolean_discovery_provides_operators_schema_and_validated_test_creation(metadata, source):
-    details = metadata[0].model_copy(
-        update={
-            "propertyType": PropertyType(source),
-            "propertyValueType": PropertyValueType.BOOLEAN,
-        }
-    )
-    catalogue = PropertyCatalogue([details], Registry.from_union(PropertyTest))
-    field = catalogue[details.propertyId.guid]
-    assert field.supported
-    assert field.operators() == ("is", "is not")
-    assert field.test_schema()["properties"]["value"]["type"] == "boolean"
-    test = field.create_test(operator="is not", value=False)
-    assert isinstance(test, BooleanTest)
-    assert test.evaluate("True").value is True
-    field.validate(test)
 
 
 def test_unsupported_metadata_keeps_identity_choices_and_an_explicit_reason(metadata):
@@ -289,3 +270,14 @@ def test_api_failures_propagate_instead_of_becoming_an_empty_catalogue():
 
     with pytest.raises(RuntimeError, match="API unavailable"):
         PropertyUtilities(api).discover_query_fields()
+
+
+@pytest.mark.parametrize("rows", [None, []], ids=["browse", "empty-draft"])
+def test_combined_discovery_checks_tapir_support_before_reading_fields(project, rows):
+    project.api.tapir.application.get_add_on_version.return_value = "1.8.0"
+
+    with pytest.raises(MulticonnArchicadError, match="require Tapir 2.0.0 or newer"):
+        project.api.utilities.element.discover_query_fields(rows)
+
+    project.api.tapir.property.get_all_properties.assert_not_called()
+    project.api.official.classification.get_all_classification_systems.assert_not_called()

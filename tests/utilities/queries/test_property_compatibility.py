@@ -12,24 +12,9 @@ from multiconn_archicad.utilities.queries import (
 )
 from multiconn_archicad.utilities.results.batch_results import BatchSlot
 
+from .support import property_details
+
 pytestmark = pytest.mark.unit
-
-
-def property_details(**changes) -> tapir.PropertyDetails:
-    """Build synthetic metadata independently of any open Archicad project."""
-    data = {
-        "propertyId": {"guid": "22222222-2222-4222-8222-222222222222"},
-        "propertyType": "Custom",
-        "propertyGroupName": "Example",
-        "propertyName": "Height",
-        "propertyCollectionType": "Single",
-        "propertyValueType": "Real",
-        "propertyMeasureType": "Length",
-        "propertyIsEditable": True,
-        "isExpressionBased": False,
-    }
-    data.update(changes)
-    return tapir.PropertyDetails.model_validate(data)
 
 
 @pytest.mark.parametrize("source", ["StaticBuiltIn", "DynamicBuiltIn", "Custom"])
@@ -49,47 +34,6 @@ def test_families_accept_and_validate_builtin_and_custom_property_types(source, 
 
     assert type(test).accepts(details)
     assert test.validate_for(details) is None
-
-
-@pytest.mark.parametrize(
-    ("test", "metadata"),
-    [
-        (TextTest(operator="is", value="3"), {}),
-        (
-            TextTest(operator="is", value="A"),
-            {"propertyValueType": "String", "propertyCollectionType": "SingleChoiceEnumeration"},
-        ),
-        (TextTest(operator="contains", value="A"), {"propertyValueType": "String", "propertyCollectionType": "List"}),
-        (NumberTest(operator="is", value=3), {"propertyValueType": "String"}),
-        (NumberTest(operator="is", value=3), {"propertyValueType": "Boolean"}),
-        (NumberTest(operator="is", value=3), {"propertyValueType": "Guid"}),
-        (NumberTest(operator="is", value=3), {"propertyCollectionType": "List"}),
-        (NumberTest(operator="is", value=3), {"propertyCollectionType": "SingleChoiceEnumeration"}),
-        (BooleanTest(operator="is", value=True), {}),
-        (BooleanTest(operator="is", value=True), {"propertyValueType": "String"}),
-    ],
-)
-def test_context_validation_rejects_incompatible_metadata_after_structure_validation(test, metadata):
-    details = property_details(**metadata)
-
-    assert not type(test).accepts(details)
-    with pytest.raises(InvalidPropertyTestError, match=f"{type(test).__name__}.*Example / Height"):
-        test.validate_for(details)
-    with pytest.raises(InvalidPropertyTestError, match="Example / Height"):
-        type(test).schema_for(details)
-
-
-def test_families_expose_readable_operators_directly():
-    assert BooleanTest.operators() == ("is", "is not")
-    assert TextTest.operators() == ("is", "is not", "contains", "does not contain", "starts with", "ends with")
-    assert NumberTest.operators() == (
-        "is",
-        "is not",
-        "is greater than",
-        "is greater than or equal to",
-        "is less than",
-        "is less than or equal to",
-    )
 
 
 @pytest.mark.parametrize(
@@ -152,18 +96,38 @@ def test_number_family_accepts_fractional_thresholds_for_integer_properties():
     test.validate_for(details)
 
 
+@pytest.mark.parametrize(
+    ("test", "value_type"),
+    [
+        pytest.param(TextTest(operator="is", value="3"), "Real", id="text-on-number"),
+        pytest.param(TextTest(operator="is", value="yes"), "Boolean", id="text-on-boolean"),
+        pytest.param(NumberTest(operator="is", value=3), "String", id="number-on-text"),
+        pytest.param(NumberTest(operator="is", value=3), "Boolean", id="number-on-boolean"),
+        pytest.param(BooleanTest(operator="is", value=True), "Real", id="boolean-on-number"),
+        pytest.param(BooleanTest(operator="is", value=True), "String", id="boolean-on-text"),
+    ],
+)
+def test_scalar_fields_reject_tests_from_another_family(test, value_type):
+    details = property_details(propertyValueType=value_type)
+
+    assert not type(test).accepts(details)
+    with pytest.raises(InvalidPropertyTestError, match="Example / Height"):
+        test.validate_for(details)
+    with pytest.raises(InvalidPropertyTestError, match="Example / Height"):
+        type(test).schema_for(details)
+
+
+@pytest.mark.parametrize(
+    ("family", "value_type", "operand"),
+    [(TextTest, "String", "A"), (NumberTest, "Real", 3), (BooleanTest, "Boolean", True)],
+    ids=["text", "number", "boolean"],
+)
 @pytest.mark.parametrize("collection", ["Undefined", "List", "SingleChoiceEnumeration", "MultipleChoiceEnumeration"])
-def test_number_family_rejects_numeric_collections_and_enum_choices(collection):
-    details = property_details(propertyCollectionType=collection)
+def test_only_scalar_single_values_are_supported(family, value_type, operand, collection):
+    details = property_details(propertyValueType=value_type, propertyCollectionType=collection)
 
-    assert not NumberTest.accepts(details)
+    assert not family.accepts(details)
+    with pytest.raises(InvalidPropertyTestError, match="Example / Height"):
+        family(operator="is", value=operand).validate_for(details)
     with pytest.raises(InvalidPropertyTestError):
-        NumberTest(operator="is", value=3).validate_for(details)
-
-
-@pytest.mark.parametrize("collection", ["Undefined", "List", "SingleChoiceEnumeration", "MultipleChoiceEnumeration"])
-def test_boolean_family_rejects_boolean_collections_and_enum_choices(collection):
-    details = property_details(propertyValueType="Boolean", propertyCollectionType=collection)
-    assert not BooleanTest.accepts(details)
-    with pytest.raises(InvalidPropertyTestError):
-        BooleanTest(operator="is", value=True).validate_for(details)
+        family.schema_for(details)

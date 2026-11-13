@@ -1,7 +1,7 @@
 """Verify family dispatch and static extension without Archicad access."""
 
-from typing import Annotated, Literal, Union
 from enum import StrEnum
+from typing import Annotated, Literal, Union
 from uuid import UUID
 
 import pytest
@@ -20,23 +20,9 @@ from multiconn_archicad.utilities.queries import (
 from multiconn_archicad.utilities.queries import TestRegistry as Registry
 from multiconn_archicad.utilities.results.batch_results import BatchSlot
 
+from .support import property_details
+
 pytestmark = pytest.mark.unit
-
-
-def property_details(**changes) -> tapir.PropertyDetails:
-    data = {
-        "propertyId": {"guid": "22222222-2222-4222-8222-222222222222"},
-        "propertyType": "Custom",
-        "propertyGroupName": "Example",
-        "propertyName": "Value",
-        "propertyCollectionType": "Single",
-        "propertyValueType": "Real",
-        "propertyMeasureType": "Default",
-        "propertyIsEditable": True,
-        "isExpressionBased": False,
-    }
-    data.update(changes)
-    return tapir.PropertyDetails.model_validate(data)
 
 
 @pytest.mark.parametrize(
@@ -71,7 +57,7 @@ def test_family_selection_is_independent_of_union_order(test_union):
 def test_unsupported_types_produce_a_distinct_contextual_error(metadata):
     registry = Registry.from_union(PropertyTest)
 
-    with pytest.raises(UnsupportedPropertyTypeError, match="Example / Value"):
+    with pytest.raises(UnsupportedPropertyTypeError, match="Example / Height"):
         registry.resolve(property_details(**metadata))
 
 
@@ -83,7 +69,7 @@ class OtherNumberTest(NumberTest):
 def test_overlapping_families_are_rejected_regardless_of_registration_order(test_union):
     registry = Registry.from_union(test_union)
 
-    with pytest.raises(AmbiguousPropertyTypeError, match="Example / Value: NumberTest, OtherNumberTest"):
+    with pytest.raises(AmbiguousPropertyTypeError, match="Example / Height: NumberTest, OtherNumberTest"):
         registry.resolve(property_details())
 
 
