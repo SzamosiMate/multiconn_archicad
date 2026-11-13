@@ -20,7 +20,8 @@ from multiconn_archicad.utilities.queries import (
     ElementTypeTest,
     FieldInfo,
     InvalidPropertyTestError,
-    NumberTest,
+    IntegerTest,
+    RealTest,
     PropertyInfo,
     PropertyPredicate,
     PropertyTest,
@@ -39,10 +40,10 @@ PROPERTY_ID = "22222222-2222-4222-8222-222222222222"
 
 
 def test_describes_added_scalar_inputs_from_the_registered_test_schema():
-    class BoundedNumberTest(NumberTest):
+    class BoundedRealTest(RealTest):
         limit: float = 10
 
-    info = PropertyInfo(property_details(), Registry(BoundedNumberTest))
+    info = PropertyInfo(property_details(), Registry(BoundedRealTest))
 
     description = info.describe_test_inputs(current_data={})
     assert description is not None
@@ -165,7 +166,8 @@ def test_uniform_names_preserve_upstream_labels_and_derive_qualified_name(group,
 @pytest.mark.parametrize(
     ("metadata", "data", "family"),
     [
-        ({}, {"operator": "is greater than", "value": 3}, NumberTest),
+        ({}, {"operator": "is greater than", "value": 3}, RealTest),
+        ({"propertyValueType": "Integer"}, {"operator": "is greater than", "value": 3}, IntegerTest),
         (
             {"propertyValueType": "String", "propertyMeasureType": "Default"},
             {"operator": "starts with", "value": "External"},
@@ -208,6 +210,23 @@ def test_describe_returns_json_friendly_uniform_discovery_information(measure):
     assert description["test_schema"]["properties"]["value"]["type"] == "number"
 
 
+def test_integer_editor_describes_integer_input_and_compiles_saved_rows():
+    info = PropertyInfo(property_details(propertyValueType="Integer"), Registry.from_union(PropertyTest))
+    description = info.describe_test_inputs(current_data={})
+    operator, value = description.fields
+    assert operator.required and value.required
+    assert value.schema["type"] == "integer"
+    test = info.create_test(operator="is", value=2**53 + 1)
+    row = QueryRow(predicate={**info.reference, "test": test.model_dump(mode="json")})
+
+    restored = QueryRows.model_validate_json(QueryRows(rows=[row]).model_dump_json())
+    result = build_query(restored)
+
+    assert result.query is not None, result.issues
+    assert result.query.where.test == test
+    assert isinstance(result.query.where.test, IntegerTest)
+
+
 def test_metadata_and_returned_values_cannot_change_the_field_snapshot():
     details = property_details()
     info = PropertyInfo(details, Registry.from_union(PropertyTest))
@@ -226,7 +245,7 @@ def test_metadata_and_returned_values_cannot_change_the_field_snapshot():
     assert info.details.propertyMeasureType == tapir.PropertyMeasureType.LENGTH
     assert info.details.propertyValueType == tapir.PropertyValueType.REAL
     assert info.test_schema()["$defs"]["NumberOperator"]["enum"]
-    assert isinstance(info.create_test(operator="is", value=3), NumberTest)
+    assert isinstance(info.create_test(operator="is", value=3), RealTest)
 
 
 def test_same_labels_do_not_merge_distinct_property_identities():
@@ -256,11 +275,11 @@ def test_create_test_runs_structure_validation(data):
 def test_validate_rejects_tests_from_another_family():
     info = PropertyInfo(property_details(), Registry.from_union(PropertyTest))
 
-    with pytest.raises(InvalidPropertyTestError, match="Example / Height requires NumberTest, got TextTest"):
+    with pytest.raises(InvalidPropertyTestError, match="Example / Height requires RealTest, got TextTest"):
         info.validate(TextTest(operator="is", value="3"))
 
 
-class LimitedNumberTest(NumberTest):
+class LimitedRealTest(RealTest):
     def validate_for(self, details: tapir.PropertyDetails) -> None:
         super().validate_for(details)
         if self.value > 10:
@@ -268,20 +287,20 @@ class LimitedNumberTest(NumberTest):
 
 
 def test_create_and_validate_both_apply_family_context_rules():
-    info = PropertyInfo(property_details(), Registry(LimitedNumberTest))
+    info = PropertyInfo(property_details(), Registry(LimitedRealTest))
 
-    assert isinstance(info.create_test(operator="is", value=10), LimitedNumberTest)
+    assert isinstance(info.create_test(operator="is", value=10), LimitedRealTest)
     with pytest.raises(InvalidPropertyTestError, match="operand limit"):
         info.create_test(operator="is", value=11)
     with pytest.raises(InvalidPropertyTestError, match="operand limit"):
-        info.validate(LimitedNumberTest(operator="is", value=11))
+        info.validate(LimitedRealTest(operator="is", value=11))
 
 
 def test_construction_preserves_unsupported_and_ambiguous_registry_errors():
     with pytest.raises(UnsupportedPropertyTypeError):
         PropertyInfo(property_details(propertyValueType="Guid"), Registry.from_union(PropertyTest))
     with pytest.raises(AmbiguousPropertyTypeError):
-        PropertyInfo(property_details(), Registry(NumberTest, LimitedNumberTest))
+        PropertyInfo(property_details(), Registry(RealTest, LimitedRealTest))
 
 
 def test_type_presets_cover_documented_categories_without_containers_or_duplicates():

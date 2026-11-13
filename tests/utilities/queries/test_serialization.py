@@ -1,5 +1,6 @@
 """Save/load query definitions and enforce documented major/minor compatibility."""
 
+import json
 from uuid import UUID
 
 import pytest
@@ -14,8 +15,9 @@ from multiconn_archicad.utilities.queries import (
     BooleanTest,
     ElementTypePredicate,
     ElementTypeTest,
+    IntegerTest,
     NumberOperator,
-    NumberTest,
+    RealTest,
     PropertyPredicate,
     Query,
     TextOperator,
@@ -92,7 +94,7 @@ def test_nested_query_round_trips_python_and_json_without_changing_the_tree():
                         {
                             "kind": "property",
                             "field_id": PROPERTY_ID,
-                            "test": {"kind": "number", "operator": "is greater than", "value": 3},
+                            "test": {"kind": "real", "operator": "is greater than", "value": 3},
                         },
                         {
                             "kind": "property",
@@ -115,7 +117,7 @@ def test_nested_query_round_trips_python_and_json_without_changing_the_tree():
     number, text = alternatives.items
     assert isinstance(number, PropertyPredicate)
     assert number.field_id == UUID(PROPERTY_ID)
-    assert isinstance(number.test, NumberTest)
+    assert isinstance(number.test, RealTest)
     assert isinstance(text, PropertyPredicate)
     assert isinstance(text.test, TextTest)
     assert text.test.operator == "does not contain"
@@ -130,7 +132,7 @@ def test_python_constructors_supply_discriminators_and_version_defaults():
                 ElementTypePredicate(test=ElementTypeTest(types=(ElementType.WALL,))),
                 PropertyPredicate(
                     field_id=UUID(PROPERTY_ID),
-                    test=NumberTest(operator="is greater than", value=3),
+                    test=RealTest(operator="is greater than", value=3),
                 ),
             )
         )
@@ -140,7 +142,7 @@ def test_python_constructors_supply_discriminators_and_version_defaults():
     assert payload["schema_version"] == "1.0"
     assert payload["where"]["kind"] == "all"
     assert payload["where"]["items"][0] == {"kind": "element_type", "test": {"kind": "element_type", "types": ["Wall"]}}
-    assert payload["where"]["items"][1]["test"] == {"kind": "number", "operator": "is greater than", "value": 3.0}
+    assert payload["where"]["items"][1]["test"] == {"kind": "real", "operator": "is greater than", "value": 3.0}
 
 
 def test_schema_version_is_preserved_as_a_plain_string():
@@ -160,7 +162,8 @@ def test_schema_version_is_preserved_as_a_plain_string():
     ("family", "operator", "value"),
     [
         (TextTest, TextOperator.CONTAINS, "External"),
-        (NumberTest, NumberOperator.GREATER_THAN, 3),
+        (RealTest, NumberOperator.GREATER_THAN, 3),
+        (IntegerTest, NumberOperator.GREATER_THAN, 3),
         (BooleanTest, BooleanOperator.IS_NOT, False),
     ],
 )
@@ -172,3 +175,15 @@ def test_operator_enums_are_stored_as_members_and_serialized_as_readable_values(
     assert test == parsed
     assert test.model_dump(mode="json")["operator"] == operator.value
     assert family.model_validate_json(test.model_dump_json()).operator is operator
+
+
+@pytest.mark.parametrize("family, kind, value", [(IntegerTest, "integer", 2**53 + 1), (RealTest, "real", 0.3)])
+def test_numeric_query_round_trip_preserves_family_and_operand(family, kind, value):
+    query = Query(where=PropertyPredicate(field_id=UUID(PROPERTY_ID), test=family(operator="is", value=value)))
+
+    payload = json.loads(query.model_dump_json())
+    assert payload["where"]["test"] == {"kind": kind, "operator": "is", "value": value}
+    parsed = Query.model_validate_json(query.model_dump_json())
+    assert parsed == query
+    assert type(parsed.where.test) is family
+    assert type(parsed.where.test.value) is type(value)

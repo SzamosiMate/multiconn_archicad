@@ -12,6 +12,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from collections.abc import Mapping
 from enum import StrEnum
+from math import isclose, isfinite
 from typing import TYPE_CHECKING, Annotated, Any, Literal, TypeAlias, assert_never, cast
 from uuid import UUID
 
@@ -26,8 +27,8 @@ from multiconn_archicad.models.tapir.types import (
 from multiconn_archicad.utilities.results.batch_results import BatchError, BatchRow, BatchSlot
 from multiconn_archicad.utilities.results.property_errors import PropertyUnavailableError, PropertyUndefinedError
 
-from .errors import InvalidPropertyTestError
 from .context import ContextBuilder, EvaluationContext
+from .errors import InvalidPropertyTestError
 from .inputs import InputAvailability
 from .operators import BooleanOperator, ClassificationOperator, NumberOperator, TextOperator
 from .sources import CLASSIFICATION_FIELDS, CLASSIFICATION_VALUES, PROPERTY_VALUES, TYPE_MEMBERSHIP
@@ -229,31 +230,29 @@ class TextTest(PropertyTestModel):
                 assert_never(self.operator)
 
 
-class NumberTest(PropertyTestModel):
-    """Compare scalar numbers without tolerance; measured operands use SI."""
+class IntegerTest(PropertyTestModel):
+    """Compare scalar Integer properties exactly, preserving integer precision."""
 
-    kind: Literal["number"] = "number"
+    kind: Literal["integer"] = "integer"
     operator: NumberOperator
-    value: float = Field(strict=True, allow_inf_nan=False, description="Numeric operand; quantities use SI units.")
+    value: int = Field(strict=True)
 
     @classmethod
     def accepts(cls, details: PropertyDetails) -> bool:
-        """Accept scalar integer and real properties regardless of measure type."""
-        return details.propertyCollectionType == PropertyCollectionType.SINGLE and details.propertyValueType in (
-            PropertyValueType.INTEGER,
-            PropertyValueType.REAL,
+        return (
+            details.propertyCollectionType == PropertyCollectionType.SINGLE
+            and details.propertyValueType == PropertyValueType.INTEGER
         )
 
     def validate_for(self, details: PropertyDetails) -> None:
-        """Require a numeric property; Pydantic already checked the finite operand."""
         self._require_compatible_property(details)
 
     def evaluate(self, raw_value: str) -> BatchSlot[bool]:
-        """Apply float() directly, without unit conversion, rounding, or tolerance."""
+        """Parse with int() and compare without float conversion or tolerance."""
         try:
-            actual = float(raw_value)
+            actual = int(raw_value)
         except ValueError:
-            return BatchSlot.failure(f"Cannot interpret {raw_value!r} as a number")
+            return BatchSlot.failure(f"Cannot interpret {raw_value!r} as an integer")
 
         match self.operator:
             case NumberOperator.IS:
@@ -268,6 +267,61 @@ class NumberTest(PropertyTestModel):
                 return BatchSlot.success(actual < self.value)
             case NumberOperator.LESS_THAN_OR_EQUAL_TO:
                 return BatchSlot.success(actual <= self.value)
+            case _:
+                assert_never(self.operator)
+
+
+class RealTest(PropertyTestModel):
+    """Compare scalar Real properties with 1e-10 relative and absolute tolerance.
+
+    Operands use SI units, except degrees for angles. Values within tolerance
+    match equality and inclusive ordering, and fail strict ordering.
+    """
+
+    kind: Literal["real"] = "real"
+    operator: NumberOperator
+    value: float = Field(
+        strict=True,
+        allow_inf_nan=False,
+        description="Numeric operand; quantities use SI units, except degrees for angles.",
+    )
+
+    @classmethod
+    def accepts(cls, details: PropertyDetails) -> bool:
+        """Accept scalar Real properties regardless of measure type."""
+        return (
+            details.propertyCollectionType == PropertyCollectionType.SINGLE
+            and details.propertyValueType == PropertyValueType.REAL
+        )
+
+    def validate_for(self, details: PropertyDetails) -> None:
+        """Require a numeric property; Pydantic already checked the finite operand."""
+        self._require_compatible_property(details)
+
+    def evaluate(self, raw_value: str) -> BatchSlot[bool]:
+        """Parse a finite float and apply tolerance without rounding the value."""
+        try:
+            actual = float(raw_value)
+        except ValueError:
+            return BatchSlot.failure(f"Cannot interpret {raw_value!r} as a number")
+
+        if not isfinite(actual):
+            return BatchSlot.failure(f"Cannot interpret {raw_value!r} as a finite number")
+        close = isclose(actual, self.value, rel_tol=1e-10, abs_tol=1e-10)
+
+        match self.operator:
+            case NumberOperator.IS:
+                return BatchSlot.success(close)
+            case NumberOperator.IS_NOT:
+                return BatchSlot.success(not close)
+            case NumberOperator.GREATER_THAN:
+                return BatchSlot.success(actual > self.value and not close)
+            case NumberOperator.GREATER_THAN_OR_EQUAL_TO:
+                return BatchSlot.success(actual > self.value or close)
+            case NumberOperator.LESS_THAN:
+                return BatchSlot.success(actual < self.value and not close)
+            case NumberOperator.LESS_THAN_OR_EQUAL_TO:
+                return BatchSlot.success(actual < self.value or close)
             case _:
                 assert_never(self.operator)
 
@@ -310,7 +364,7 @@ class BooleanTest(PropertyTestModel):
                 assert_never(self.operator)
 
 
-PropertyTest: TypeAlias = Annotated[TextTest | NumberTest | BooleanTest, Field(discriminator="kind")]
+PropertyTest: TypeAlias = Annotated[TextTest | IntegerTest | RealTest | BooleanTest, Field(discriminator="kind")]
 
 
 class PropertyPredicate(_QueryModel):

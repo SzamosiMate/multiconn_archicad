@@ -5,8 +5,9 @@ import pytest
 from multiconn_archicad.models.tapir import types as tapir
 from multiconn_archicad.utilities.queries import (
     BooleanTest,
+    IntegerTest,
     InvalidPropertyTestError,
-    NumberTest,
+    RealTest,
     PropertyTestModel,
     TextTest,
 )
@@ -25,7 +26,8 @@ pytestmark = pytest.mark.unit
             TextTest(operator="contains", value="External"),
             {"propertyValueType": "String", "propertyMeasureType": "Default"},
         ),
-        (NumberTest(operator="is greater than", value=3), {}),
+        (RealTest(operator="is greater than", value=3), {}),
+        (IntegerTest(operator="is greater than", value=3), {"propertyValueType": "Integer"}),
         (BooleanTest(operator="is", value=False), {"propertyValueType": "Boolean", "propertyMeasureType": "Default"}),
     ],
 )
@@ -40,7 +42,8 @@ def test_families_accept_and_validate_builtin_and_custom_property_types(source, 
     ("family", "metadata", "value_type"),
     [
         (TextTest, {"propertyValueType": "String", "propertyMeasureType": "Default"}, "string"),
-        (NumberTest, {}, "number"),
+        (RealTest, {}, "number"),
+        (IntegerTest, {"propertyValueType": "Integer"}, "integer"),
         (BooleanTest, {"propertyValueType": "Boolean", "propertyMeasureType": "Default"}, "boolean"),
     ],
 )
@@ -80,19 +83,19 @@ def test_new_families_must_explicitly_implement_evaluation():
 
 
 @pytest.mark.parametrize("measure", list(tapir.PropertyMeasureType))
-def test_number_family_accepts_real_properties_across_all_measure_types(measure):
+def test_real_family_accepts_real_properties_across_all_measure_types(measure):
     details = property_details(propertyMeasureType=measure)
-    test = NumberTest(operator="is greater than", value=3)
+    test = RealTest(operator="is greater than", value=3)
 
-    assert NumberTest.accepts(details)
+    assert RealTest.accepts(details)
     test.validate_for(details)
 
 
-def test_number_family_accepts_fractional_thresholds_for_integer_properties():
+def test_integer_family_accepts_integer_properties():
     details = property_details(propertyValueType="Integer", propertyMeasureType="Default")
-    test = NumberTest(operator="is greater than", value=2.5)
+    test = IntegerTest(operator="is greater than", value=2)
 
-    assert NumberTest.accepts(details)
+    assert IntegerTest.accepts(details)
     test.validate_for(details)
 
 
@@ -101,8 +104,12 @@ def test_number_family_accepts_fractional_thresholds_for_integer_properties():
     [
         pytest.param(TextTest(operator="is", value="3"), "Real", id="text-on-number"),
         pytest.param(TextTest(operator="is", value="yes"), "Boolean", id="text-on-boolean"),
-        pytest.param(NumberTest(operator="is", value=3), "String", id="number-on-text"),
-        pytest.param(NumberTest(operator="is", value=3), "Boolean", id="number-on-boolean"),
+        pytest.param(RealTest(operator="is", value=3), "String", id="number-on-text"),
+        pytest.param(RealTest(operator="is", value=3), "Boolean", id="number-on-boolean"),
+        pytest.param(RealTest(operator="is", value=3), "Integer", id="real-on-integer"),
+        pytest.param(IntegerTest(operator="is", value=3), "Real", id="integer-on-real"),
+        pytest.param(IntegerTest(operator="is", value=3), "String", id="integer-on-text"),
+        pytest.param(IntegerTest(operator="is", value=3), "Boolean", id="integer-on-boolean"),
         pytest.param(BooleanTest(operator="is", value=True), "Real", id="boolean-on-number"),
         pytest.param(BooleanTest(operator="is", value=True), "String", id="boolean-on-text"),
     ],
@@ -119,8 +126,8 @@ def test_scalar_fields_reject_tests_from_another_family(test, value_type):
 
 @pytest.mark.parametrize(
     ("family", "value_type", "operand"),
-    [(TextTest, "String", "A"), (NumberTest, "Real", 3), (BooleanTest, "Boolean", True)],
-    ids=["text", "number", "boolean"],
+    [(TextTest, "String", "A"), (IntegerTest, "Integer", 3), (RealTest, "Real", 3), (BooleanTest, "Boolean", True)],
+    ids=["text", "integer", "real", "boolean"],
 )
 @pytest.mark.parametrize("collection", ["Undefined", "List", "SingleChoiceEnumeration", "MultipleChoiceEnumeration"])
 def test_only_scalar_single_values_are_supported(family, value_type, operand, collection):

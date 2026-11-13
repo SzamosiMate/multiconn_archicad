@@ -2,7 +2,7 @@
 
 import pytest
 
-from multiconn_archicad.utilities.queries import BooleanTest, NumberTest, TextTest, evaluate_property
+from multiconn_archicad.utilities.queries import BooleanTest, IntegerTest, RealTest, TextTest, evaluate_property
 from multiconn_archicad.utilities.results.batch_results import BatchError, BatchSlot
 from multiconn_archicad.utilities.results.property_errors import PropertyUnavailableError, PropertyUndefinedError
 
@@ -35,11 +35,13 @@ TEXT_CASES = [
 
 
 def test_examples_cover_every_advertised_operator():
-    assert set(NUMBER_EXPECTATIONS) == set(NumberTest.operators())
+    assert set(NUMBER_EXPECTATIONS) == set(RealTest.operators())
+    assert set(NUMBER_EXPECTATIONS) == set(IntegerTest.operators())
     assert {operator for operator, *_ in TEXT_CASES} == set(TextTest.operators())
 
 
-class TestNumberComparisons:
+class TestNumericComparisons:
+    @pytest.mark.parametrize("family", [IntegerTest, RealTest])
     @pytest.mark.parametrize(
         ("operator", "raw_value", "expected"),
         [
@@ -48,25 +50,65 @@ class TestNumberComparisons:
             for position, raw, expected in zip(("below", "equal", "above"), ("2", "3", "4"), decisions, strict=True)
         ],
     )
-    def test_numeric_comparison_below_equal_and_above_operand(self, operator, raw_value, expected):
-        result = NumberTest(operator=operator, value=3).evaluate(raw_value)
+    def test_numeric_comparison_below_equal_and_above_operand(self, family, operator, raw_value, expected):
+        result = family(operator=operator, value=3).evaluate(raw_value)
 
         assert result.is_success
         assert result.value is expected
 
     @pytest.mark.parametrize("raw_value", ["3.5", " 3.5 ", "3.5e0", "+3.5"])
     def test_numeric_values_use_float_conversion_directly(self, raw_value):
-        assert NumberTest(operator="is", value=3.5).evaluate(raw_value).value is True
+        assert RealTest(operator="is", value=3.5).evaluate(raw_value).value is True
 
-    def test_numeric_comparisons_apply_no_rounding_or_tolerance(self):
-        raw_value = "0.30000000000000004"
+    @pytest.mark.parametrize(
+        ("operand", "raw_value", "position"),
+        [
+            pytest.param(0.3, "0.30000000000000004", 1, id="binary-roundoff"),
+            pytest.param(30, "29.999999999999996", 1, id="angle-conversion"),
+            pytest.param(0, "1e-10", 1, id="positive-absolute-boundary"),
+            pytest.param(0, "-1e-10", 1, id="negative-absolute-boundary"),
+            pytest.param(0, "1.00001e-10", 2, id="above-absolute-band"),
+            pytest.param(0, "-1.00001e-10", 0, id="below-absolute-band"),
+            pytest.param(10000, "10000.0000005", 1, id="positive-relative-band-above"),
+            pytest.param(10000, "9999.9999995", 1, id="positive-relative-band-below"),
+            pytest.param(-10000, "-10000.0000005", 1, id="negative-relative-band-below"),
+            pytest.param(-10000, "-9999.9999995", 1, id="negative-relative-band-above"),
+            pytest.param(10000, "10000.000002", 2, id="above-relative-band"),
+            pytest.param(-10000, "-10000.000002", 0, id="below-relative-band"),
+            pytest.param(0.175275, "0.17527500000151932", 1, id="recorded-geometry-volume-roundoff"),
+        ],
+    )
+    @pytest.mark.parametrize("operator", NUMBER_EXPECTATIONS)
+    def test_real_operators_treat_the_tolerance_band_as_equal(self, operand, raw_value, position, operator):
+        result = RealTest(operator=operator, value=operand).evaluate(raw_value)
 
-        assert NumberTest(operator="is", value=0.3).evaluate(raw_value).value is False
-        assert NumberTest(operator="is greater than", value=0.3).evaluate(raw_value).value is True
+        assert result.is_success
+        assert result.value is NUMBER_EXPECTATIONS[operator][position]
 
-    @pytest.mark.parametrize("raw_value", ["", "abc", "3 m", "3,5"])
+    @pytest.mark.parametrize("operand", [2**53, -(2**53), 10**12])
+    @pytest.mark.parametrize("offset, position", [(-1, 0), (0, 1), (1, 2)])
+    @pytest.mark.parametrize("operator", NUMBER_EXPECTATIONS)
+    def test_integer_operators_preserve_adjacent_large_values(self, operand, offset, position, operator):
+        result = IntegerTest(operator=operator, value=operand).evaluate(str(operand + offset))
+
+        assert result.is_success
+        assert result.value is NUMBER_EXPECTATIONS[operator][position]
+
+    @pytest.mark.parametrize("raw_value", ["3", " 3 ", "+3"])
+    def test_integer_values_use_integer_conversion(self, raw_value):
+        assert IntegerTest(operator="is", value=3).evaluate(raw_value).value is True
+
+    @pytest.mark.parametrize("raw_value", ["", "abc", "3 m", "3,0", "3.0", "3.5", "3e0", "nan", "inf"])
+    def test_integer_conversion_failures_are_error_slots(self, raw_value):
+        result = IntegerTest(operator="is", value=3).evaluate(raw_value)
+
+        assert result.is_error
+        assert repr(raw_value) in result.error.message
+        assert "integer" in result.error.message
+
+    @pytest.mark.parametrize("raw_value", ["", "abc", "3 m", "3,5", "nan", "NaN", "inf", "-inf", "1e999"])
     def test_numeric_conversion_failures_are_error_slots(self, raw_value):
-        result = NumberTest(operator="is", value=3).evaluate(raw_value)
+        result = RealTest(operator="is", value=3).evaluate(raw_value)
 
         assert result.is_error
         assert raw_value.__repr__() in result.error.message
@@ -131,8 +173,10 @@ class TestPropertyReadStates:
     @pytest.mark.parametrize(
         ("test", "raw_value", "expected"),
         [
-            (NumberTest(operator="is greater than", value=3), "3.5", True),
-            (NumberTest(operator="is greater than", value=3), "2.5", False),
+            (RealTest(operator="is greater than", value=3), "3.5", True),
+            (RealTest(operator="is greater than", value=3), "2.5", False),
+            (IntegerTest(operator="is greater than", value=3), "4", True),
+            (IntegerTest(operator="is greater than", value=3), "2", False),
             (TextTest(operator="contains", value="external"), "EXTERNAL wall", True),
             (TextTest(operator="does not contain", value="temporary"), "TEMPORARY wall", False),
         ],
@@ -143,7 +187,7 @@ class TestPropertyReadStates:
         assert result.is_success
         assert result.value is expected
 
-    @pytest.mark.parametrize("family", [TextTest, NumberTest, BooleanTest])
+    @pytest.mark.parametrize("family", [TextTest, IntegerTest, RealTest, BooleanTest])
     @pytest.mark.parametrize("condition", [PropertyUnavailableError, PropertyUndefinedError])
     def test_every_operator_returns_false_for_unavailable_or_undefined_properties(self, family, condition):
         error = condition.from_message("No comparable property value")
@@ -165,7 +209,7 @@ class TestPropertyReadStates:
         ],
     )
     def test_other_property_failures_retain_identity_without_calling_the_family(self, error):
-        class ExplodingTest(NumberTest):
+        class ExplodingTest(RealTest):
             def evaluate(self, raw_value: str) -> BatchSlot[bool]:
                 raise AssertionError("A failed read must not reach the family")
 
@@ -178,7 +222,7 @@ class TestPropertyReadStates:
 
     @pytest.mark.parametrize("error", [ValueError("Family bug"), RuntimeError("Family bug")])
     def test_unexpected_family_exceptions_propagate(self, error):
-        class BrokenTest(NumberTest):
+        class BrokenTest(RealTest):
             def evaluate(self, raw_value: str) -> BatchSlot[bool]:
                 raise error
 
@@ -190,4 +234,4 @@ class TestPropertyReadStates:
     @pytest.mark.parametrize("slot", [BatchSlot.filtered(), BatchSlot.upstream_failed()])
     def test_skipped_slots_are_not_interpreted_as_completed_reads(self, slot):
         with pytest.raises(ValueError, match="no successful value"):
-            evaluate_property(NumberTest(operator="is not", value=3), slot)
+            evaluate_property(RealTest(operator="is not", value=3), slot)

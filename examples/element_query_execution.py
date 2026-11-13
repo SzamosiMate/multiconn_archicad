@@ -11,7 +11,7 @@ from multiconn_archicad.utilities.queries import (
     ElementTypePredicate,
     ElementTypeTest,
     NumberOperator,
-    NumberTest,
+    RealTest,
     PropertyPredicate,
     Query,
 )
@@ -72,7 +72,7 @@ def make_example_query() -> Query:
             items=(
                 ElementTypePredicate(test=ElementTypeTest(types=(ElementType.WALL,))),
                 PropertyPredicate(
-                    field_id=UUID(HEIGHT), test=NumberTest(operator=NumberOperator.GREATER_THAN, value=3)
+                    field_id=UUID(HEIGHT), test=RealTest(operator=NumberOperator.GREATER_THAN, value=3)
                 ),
             )
         )

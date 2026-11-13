@@ -15,7 +15,7 @@ from multiconn_archicad.utilities.queries import (
     ElementTypeTest,
     EvaluationContext,
     NumberOperator,
-    NumberTest,
+    RealTest,
     PropertyPredicate,
     Query,
     TextOperator,
@@ -48,7 +48,7 @@ def make_context(*, property_values=None, type_matches=None):
 
 
 def height_predicate() -> PropertyPredicate:
-    return PropertyPredicate(field_id=HEIGHT, test=NumberTest(operator=NumberOperator.GREATER_THAN, value=3))
+    return PropertyPredicate(field_id=HEIGHT, test=RealTest(operator=NumberOperator.GREATER_THAN, value=3))
 
 
 def description_predicate(operator: TextOperator, value: str) -> PropertyPredicate:

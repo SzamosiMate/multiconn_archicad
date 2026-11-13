@@ -1,6 +1,6 @@
 # Element query development plan
 
-Updated 2026-11-12, Europe/Budapest.
+Updated 2026-11-14, Europe/Budapest.
 
 Current behavior belongs in the [guide](../utilities/element_queries.md),
 [reference](../utilities/element_query_reference.md), and
@@ -46,10 +46,10 @@ The agreed first-release search scope is **floor plan only**. It remains the
 default after future database predicates are added, so existing queries retain
 their meaning. No database picker or predicate is required for this release.
 
-The agreed engine implementation slice was listing/database defaults and type
-presets, followed by documentation. Canonical numeric reads wait for the separate
-Tapir 2.0.0/client-generation work below; do not describe them as completed or
-quietly add locale parsing. Release documentation must expose that limitation.
+The engine implementation includes listing/database defaults, type presets and
+the focused Tapir 2.0.0 SI property-read backport below. Angles deliberately use
+degrees. Integer comparisons are exact; Real comparisons use the documented
+`1e-10` relative and absolute tolerance. Do not add locale parsing.
 
 Before release, review the resulting documentation and package the agreed scope.
 Do not turn optional extension ideas below into release requirements. The widget
@@ -58,23 +58,51 @@ the query's floor-plan scope.
 
 ## Canonical numeric property reads
 
-Defer this integration to keep the client rebase straightforward:
+Implemented as a focused backport from `origin/update-to-tapir-2.0.0` (`e7be637`),
+without adopting the rest of that branch. Only the read command's parameter
+models, method and matching schema/tests are brought across; response shapes
+are unchanged. The optional flag defaults to omission, preserving existing
+payloads on older Tapir. This intentionally differs from the update branch's
+explicit `False` client default.
 
-1. Regenerate the multiconn client separately with
-   `GetPropertyValuesOfElements.useSIUnits` support when Tapir 2.0.0 is ready.
-2. Rebase the query branch onto that client.
-3. Implement the focused property utility/query-source integration and verify it.
+`PropertyUtilities.get_property_values_per_element_result()` and its raw helper
+accept keyword-only `use_si_units=False`. Query sources explicitly request
+`True` alongside availability; ordinary utility callers keep display strings.
+Explicit SI reads reject Tapir versions below 2.0.0 rather than falling back to
+localized strings. The evaluator never replaces decimal commas.
 
-Add an optional keyword-only `use_si_units=False` to
-`PropertyUtilities.get_property_values_per_element_result()` and its raw-read
-helper. The query source should explicitly request `True` alongside availability.
-Preserve display-string defaults for existing utility callers and the query
-minimum of Tapir 2.0.0. Do not fall back to localized strings or replace commas.
+The API supplies precise locale-independent numeric strings in SI units,
+**except degrees for angles**, confirmed as the intended operand contract on
+2026-11-13. Reads preserve row/cell errors and the original string precision.
+On 2026-11-14 the comparison policy was agreed and implemented: `IntegerTest`
+accepts only Integer properties and strict integer operands, parses with `int()`
+and compares exactly. `RealTest` accepts only Real properties and finite numeric
+operands, parses with `float()` and uses `math.isclose` with `rel_tol=1e-10` and
+`abs_tol=1e-10`. Close values match equality and inclusive ordering and fail
+strict ordering. Both use `NumberOperator`; persisted kinds are `integer` and
+`real`. This replaces the unreleased `NumberTest` without compatibility aliases
+or a schema-version change. No rounding or unit classes were introduced.
 
-The API promises precise locale-independent numeric strings in SI units,
-**except degrees for angles**. Agree and document the angle operand contract
-before integration. Test flag forwarding/default omission, preserved row/cell
-errors, and canonical parsing.
+The [13 November handoff](element_queries_chat_handoff_2026-11-13.md) preserves
+the experimental evidence and earlier discussion. Its pending-policy notes
+describe the historical state. The raw experiment files referenced there are
+absent from this checkout.
+
+Validation on 2026-11-14: utilities plus orchestration unit tests produced
+**1,055 passed and 5 failed**. All five failures concern existing SI flag omission:
+the generated client sends `useSIUnits=False` by default while the tests expect
+omission. The same five failures were reproduced using an isolated export of
+unchanged HEAD `41cc36f`. The final query suite passes **769 tests**, with only
+those five pre-existing cases deselected. Ruff, the two query typing checks,
+the offline comparison example and whitespace checks passed.
+The [local validation report](../../tmp/number-test-split-2026-11-14/report.md)
+links the saved logs; files under `tmp/` are local and must be copied separately
+if needed on another computer. No live Archicad experiments were run for this change.
+
+The temporary `backport_property_si_units()` schema patch preserves this field
+when regenerating the pinned 1.8 client. Remove it and its call when merging the
+2.0.0 schema, retaining omission for existing callers. See the
+[active backport record](../../code_generation/documentation/schema-patch-tracking.md#si-property-read-backport--2026-11-13).
 
 Diagnostic evidence: in `test_kész`, Archicad 27 / Tapir 2.0.0, each of four
 built-in Height fields returned 157 available values out of 171 candidates.
