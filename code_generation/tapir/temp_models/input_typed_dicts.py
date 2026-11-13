@@ -9504,17 +9504,6 @@ class ElementPropertyEditabilityResult(TypedDict):
     propertyEditabilities: list[ElementPropertyEditabilityStatus | ErrorItem]
 
 
-class ElementPropertyValue(TypedDict):
-    """
-    A property value with the identifiers of the property and its owner element.
-    """
-
-    elementId: ElementId
-    propertyId: PropertyId
-    propertyValue: PropertyValue
-    valueStatus: NotRequired[Literal["Value", "Default", "UserUndefined"]]
-
-
 class ElementPropertyValueWithStatus(TypedDict):
     """
     A property value with the identifiers of the property and its owner element.
@@ -9524,6 +9513,17 @@ class ElementPropertyValueWithStatus(TypedDict):
     propertyId: PropertyId
     propertyValue: NotRequired[PropertyValue]
     valueStatus: Literal["Value", "Default", "UserUndefined"]
+
+
+class ElementPropertyValueWithValue(TypedDict):
+    """
+    A property value with the identifiers of the property and its owner element.
+    """
+
+    elementId: ElementId
+    propertyId: PropertyId
+    propertyValue: PropertyValue
+    valueStatus: NotRequired[Literal["Value", "Default", "UserUndefined"]]
 
 
 ElementQuantities: TypeAlias = (
@@ -19601,12 +19601,12 @@ A list of element and/or group identifiers.
 """
 
 
-ElementPropertyValueInput: TypeAlias = (
-    ElementPropertyValue | ElementPropertyValueWithStatus
+ElementPropertyValue: TypeAlias = (
+    ElementPropertyValueWithValue | ElementPropertyValueWithStatus
 )
 
 
-ElementPropertyValues: TypeAlias = list[ElementPropertyValueInput]
+ElementPropertyValues: TypeAlias = list[ElementPropertyValue]
 """
 A list of element property values.
 """

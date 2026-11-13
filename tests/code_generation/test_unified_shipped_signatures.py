@@ -1,5 +1,4 @@
 import ast
-from collections.abc import Sequence
 from importlib import import_module
 from typing import get_type_hints
 from unittest.mock import MagicMock
@@ -11,7 +10,7 @@ from multiconn_archicad.models.tapir.types import (
     ElementId,
     ElementIdArrayItem,
     ElementPropertyValue,
-    ElementPropertyValueInput,
+    ElementPropertyValueWithValue,
     PropertyId,
     PropertyValue,
 )
@@ -59,11 +58,11 @@ def test_legacy_module_file_positional_call_binds_elements():
     )
 
 
-def test_element_property_value_remains_constructible():
+def test_property_write_keeps_execution_results_and_separate_dry_run():
     core = MagicMock()
     core.post_tapir_command.return_value = {"executionResults": [{"success": True}]}
     guid = UUID(int=1)
-    value = ElementPropertyValue(
+    value = ElementPropertyValueWithValue(
         elementId=ElementId(guid=guid), propertyId=PropertyId(guid=guid), propertyValue=PropertyValue(value="12")
     )
     commands = PropertyCommands(core)
@@ -73,7 +72,7 @@ def test_element_property_value_remains_constructible():
     core.post_tapir_command.assert_called_once_with("SetPropertyValuesOfElements", payload)
     assert (
         get_type_hints(PropertyCommands.set_property_values_of_elements)["element_property_values"]
-        == Sequence[ElementPropertyValueInput]
+        == list[ElementPropertyValue]
     )
 
     core.post_tapir_command.reset_mock()

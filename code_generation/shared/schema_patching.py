@@ -358,21 +358,6 @@ def apply_breaking_source_review_patches(master_defs: dict[str, Any]):
     require_object_type(master_defs, "IsLibraryPartSubtypeOfResult", ["results", "items"], variant=0)
 
 
-def preserve_element_property_value_constructor(defs: dict[str, Any]) -> None:
-    """Keep the shipped value model and name the released input union separately."""
-    _require_new_definition(defs, "ElementPropertyValueInput")
-    schema = defs["ElementPropertyValue"]
-    items = defs["ElementPropertyValues"]["items"]
-    if (
-        schema.get("anyOf") != [{"required": ["propertyValue"]}, {"required": ["valueStatus"]}]
-        or items.get("$ref") != "#/$defs/ElementPropertyValue"
-    ):
-        raise ValueError("The Tapir element property value union or its array reference changed. Review the patch.")
-    defs["ElementPropertyValueInput"] = defs.pop("ElementPropertyValue")
-    items["$ref"] = "#/$defs/ElementPropertyValueInput"
-    name_required_variants(defs, "ElementPropertyValueInput", [], ["ElementPropertyValue", "ElementPropertyValueWithStatus"])
-
-
 def apply_temporary_patches(master_defs: dict[str, Any]):
     """Named extractions and shared contracts pending released upstream adoption."""
     print("Applying temporary schema patches (pending upstream named definitions and sharing)...")
@@ -808,7 +793,7 @@ def apply_temporary_patches(master_defs: dict[str, Any]):
 
     # Name distinct conditional alternatives while keeping their required fields
     name_required_variants(master_defs, "ElementFromAnalyticalMemberData", [], ["ElementFromCurveMemberData", "ElementFromSurfaceMemberData", "ElementFromSegmentedSurfaceMembersData"])  # fmt: skip
-    preserve_element_property_value_constructor(master_defs)
+    name_required_variants(master_defs, "ElementPropertyValue", [], ["ElementPropertyValueWithValue", "ElementPropertyValueWithStatus"])  # fmt: skip
     replace_inline_schema_with_ref(master_defs, "GetModelViewOptionDetailsParameters", ["modelViewOptions", "items", "modelViewOptionId"], "ModelViewOptionId", preserve_description=True)  # fmt: skip
     name_required_variants(master_defs, "GetModelViewOptionDetailsParameters", ["modelViewOptions", "items"], ["ModelViewOptionDetailsById", "ModelViewOptionDetailsByName"])  # fmt: skip
     name_required_variants(master_defs, "LibraryPartIdentifier", [], ["LibraryPartIdentifierByIndex", "LibraryPartIdentifierByName", "LibraryPartIdentifierByUniqueId"])  # fmt: skip

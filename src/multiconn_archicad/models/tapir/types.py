@@ -9883,17 +9883,6 @@ class ElementPropertyEditabilityResult(APIModel):
     propertyEditabilities: list[ElementPropertyEditabilityStatus | ErrorItem]
 
 
-class ElementPropertyValue(APIModel):
-    """A property value with the identifiers of the property and its owner element."""
-    elementId: ElementId
-    propertyId: PropertyId
-    propertyValue: PropertyValue
-    valueStatus: ValueStatus | None = Field(
-        None,
-        description="Value (the default) sets propertyValue. Default removes the element's own value, so the property shows its default value (or its expression) again. UserUndefined sets the value to undefined. propertyValue is not needed and is ignored for Default and UserUndefined.",
-    )
-
-
 class ElementPropertyValueWithStatus(APIModel):
     """A property value with the identifiers of the property and its owner element."""
     elementId: ElementId
@@ -9901,6 +9890,17 @@ class ElementPropertyValueWithStatus(APIModel):
     propertyValue: PropertyValue | None = None
     valueStatus: ValueStatus = Field(
         ...,
+        description="Value (the default) sets propertyValue. Default removes the element's own value, so the property shows its default value (or its expression) again. UserUndefined sets the value to undefined. propertyValue is not needed and is ignored for Default and UserUndefined.",
+    )
+
+
+class ElementPropertyValueWithValue(APIModel):
+    """A property value with the identifiers of the property and its owner element."""
+    elementId: ElementId
+    propertyId: PropertyId
+    propertyValue: PropertyValue
+    valueStatus: ValueStatus | None = Field(
+        None,
         description="Value (the default) sets propertyValue. Default removes the element's own value, so the property shows its default value (or its expression) again. UserUndefined sets the value to undefined. propertyValue is not needed and is ignored for Default and UserUndefined.",
     )
 
@@ -23039,7 +23039,7 @@ ElementLinksOrError: TypeAlias = ElementLinks | ErrorItem
 ElementOrGroupId: TypeAlias = ElementIdArrayItem | GroupIdArrayItem
 
 
-ElementPropertyValueInput: TypeAlias = ElementPropertyValue | ElementPropertyValueWithStatus
+ElementPropertyValue: TypeAlias = ElementPropertyValueWithValue | ElementPropertyValueWithStatus
 
 
 ElementQuantities: TypeAlias = (

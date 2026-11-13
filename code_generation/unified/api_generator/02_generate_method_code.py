@@ -75,7 +75,7 @@ def generate_method_code(
     Orchestrates the generation of a single API method, handling special cases
     and falling back to a standard generation process.
     """
-    dependencies = {"commands": set(), "types": set(), "collections_abc": set()}
+    dependencies = {"commands": set(), "types": set()}
     original_cmd_name = command_details["name"]
     source = command_details["source"]
     command_name = original_cmd_name.removeprefix("API.") if source == "official" else original_cmd_name
@@ -269,8 +269,6 @@ def _generate_standard_method(
         "type_model_dependencies": sorted(list(dependencies["types"])),
         "alias_property_name": alias_property_name,
     }
-    if dependencies["collections_abc"]:
-        generated["collections_abc_dependencies"] = sorted(dependencies["collections_abc"])
     if dry_run is not None:
         generated["dry_run"] = dry_run
         generated["python_name"] = snake_name
@@ -294,15 +292,6 @@ def _order_parameters(
         + [param.replace(kind=inspect.Parameter.KEYWORD_ONLY) for param in keyword_only]
     )
     return positional, keyword_only
-
-
-def _get_parameter_type_hint(annotation: Any, dependencies: dict) -> str:
-    property_value_input = getattr(tapir_types, "ElementPropertyValueInput", None)
-    if property_value_input is not None and annotation == list[property_value_input]:
-        dependencies["collections_abc"].add("Sequence")
-        dependencies["types"].add("ElementPropertyValueInput")
-        return "Sequence[ElementPropertyValueInput]"
-    return get_clean_type_hint(annotation, dependencies)
 
 
 def _build_signature_and_docs(
@@ -348,7 +337,7 @@ def _build_signature_and_docs(
             if index == len(positional):
                 signature_parts.append("*")
             param_name_snake = camel_to_snake(param.name)
-            type_hint = _get_parameter_type_hint(param.annotation, dependencies)
+            type_hint = get_clean_type_hint(param.annotation, dependencies)
 
             if param.default is inspect.Parameter.empty:
                 signature_parts.append(f"{param_name_snake}: {type_hint}")

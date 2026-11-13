@@ -5,8 +5,6 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 from pydantic import TypeAdapter
 
-from collections.abc import Sequence
-
 from multiconn_archicad.models.tapir.commands import (
     AddPropertyToAttributesParameters,
     AddPropertyToAttributesResult,
@@ -85,7 +83,8 @@ from multiconn_archicad.models.tapir.types import (
     ElementComponentsArrayItem,
     ElementDefaultPropertyValue,
     ElementIdArrayItem,
-    ElementPropertyValueInput,
+    ElementPropertyValueWithStatus,
+    ElementPropertyValueWithValue,
     ElementType,
     ErrorItem,
     ExecutionResult,
@@ -1191,7 +1190,7 @@ class PropertyCommands:
         return validated_response.executionResults
 
     def set_property_values_of_elements(
-        self, element_property_values: Sequence[ElementPropertyValueInput]
+        self, element_property_values: list[ElementPropertyValueWithStatus | ElementPropertyValueWithValue]
     ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
         """
         Sets the property values of elements. It works for subelements of hierarchal elements
@@ -1203,13 +1202,14 @@ class PropertyCommands:
         GetPropertyValuesOfElements gives them.
 
         Args:
-            element_property_values (Sequence[ElementPropertyValueInput]): A single real value
-                accepts '.' or ',' as the decimal separator, so the value strings
-                GetPropertyValuesOfElements returns can be written back: when both appear the
-                last one is the decimal separator, a separator that appears more than once
-                groups thousands, and a single separator is the decimal one. Unitless real and
-                integer lists accept semicolon-separated numbers; an empty string sets an empty
-                list. Invalid items reject the entire property write.
+            element_property_values (list[ElementPropertyValueWithStatus |
+                ElementPropertyValueWithValue]): A single real value accepts '.' or ',' as the
+                decimal separator, so the value strings GetPropertyValuesOfElements returns can
+                be written back: when both appear the last one is the decimal separator, a
+                separator that appears more than once groups thousands, and a single separator
+                is the decimal one. Unitless real and integer lists accept semicolon-separated
+                numbers; an empty string sets an empty list. Invalid items reject the entire
+                property write.
 
         Returns:
             list[FailedExecutionResult | SuccessfulExecutionResult]: One result for each item of
@@ -1237,7 +1237,7 @@ class PropertyCommands:
         return TypeAdapter(list[ExecutionResult]).validate_python(response_dict.get("executionResults"))
 
     def set_property_values_of_elements_dry_run(
-        self, element_property_values: Sequence[ElementPropertyValueInput]
+        self, element_property_values: list[ElementPropertyValueWithStatus | ElementPropertyValueWithValue]
     ) -> SetPropertyValuesOfElementsResult:
         """
         Preview this command without applying its changes. Sets the property values of elements.
@@ -1249,13 +1249,14 @@ class PropertyCommands:
         real run would write (newValue), both as GetPropertyValuesOfElements gives them.
 
         Args:
-            element_property_values (Sequence[ElementPropertyValueInput]): A single real value
-                accepts '.' or ',' as the decimal separator, so the value strings
-                GetPropertyValuesOfElements returns can be written back: when both appear the
-                last one is the decimal separator, a separator that appears more than once
-                groups thousands, and a single separator is the decimal one. Unitless real and
-                integer lists accept semicolon-separated numbers; an empty string sets an empty
-                list. Invalid items reject the entire property write.
+            element_property_values (list[ElementPropertyValueWithStatus |
+                ElementPropertyValueWithValue]): A single real value accepts '.' or ',' as the
+                decimal separator, so the value strings GetPropertyValuesOfElements returns can
+                be written back: when both appear the last one is the decimal separator, a
+                separator that appears more than once groups thousands, and a single separator
+                is the decimal one. Unitless real and integer lists accept semicolon-separated
+                numbers; an empty string sets an empty list. Invalid items reject the entire
+                property write.
 
         Returns:
             SetPropertyValuesOfElementsResult
