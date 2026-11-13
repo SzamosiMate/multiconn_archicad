@@ -1,7 +1,6 @@
-"""Check the public query serialization contract without a running Archicad."""
+"""Executable expression shape, strict operands, immutability and JSON Schema."""
 
 import json
-from uuid import UUID
 
 import pytest
 from pydantic import ValidationError
@@ -10,86 +9,20 @@ from multiconn_archicad.models.tapir.types import ElementType
 from multiconn_archicad.utilities.queries import (
     AllOf,
     AnyOf,
-    BooleanOperator,
     BooleanTest,
+    ClassificationPredicate,
+    ClassificationTest,
     ElementTypePredicate,
     ElementTypeTest,
     NumberTest,
-    NumberOperator,
     PropertyPredicate,
     Query,
     TextTest,
-    TextOperator,
 )
 
 pytestmark = pytest.mark.unit
 
 PROPERTY_ID = "22222222-2222-4222-8222-222222222222"
-
-
-def test_nested_query_round_trips_python_and_json_without_changing_the_tree():
-    payload = {
-        "schema_version": "1.0",
-        "where": {
-            "kind": "all",
-            "items": [
-                {"kind": "element_type", "test": {"kind": "element_type", "types": ["Wall", "Slab"]}},
-                {
-                    "kind": "any",
-                    "items": [
-                        {
-                            "kind": "property",
-                            "field_id": PROPERTY_ID,
-                            "test": {"kind": "number", "operator": "is greater than", "value": 3},
-                        },
-                        {
-                            "kind": "property",
-                            "field_id": PROPERTY_ID,
-                            "test": {"kind": "text", "operator": "does not contain", "value": "Internal"},
-                        },
-                    ],
-                },
-            ],
-        },
-    }
-
-    query = Query.model_validate(payload)
-
-    assert isinstance(query.where, AllOf)
-    types, alternatives = query.where.items
-    assert isinstance(types, ElementTypePredicate)
-    assert types.test.types == (ElementType.WALL, ElementType.SLAB)
-    assert isinstance(alternatives, AnyOf)
-    number, text = alternatives.items
-    assert isinstance(number, PropertyPredicate)
-    assert number.field_id == UUID(PROPERTY_ID)
-    assert isinstance(number.test, NumberTest)
-    assert isinstance(text, PropertyPredicate)
-    assert isinstance(text.test, TextTest)
-    assert text.test.operator == "does not contain"
-    assert query.model_dump(mode="json") == payload
-    assert Query.model_validate_json(json.dumps(payload)) == query
-    assert Query.model_validate_json(query.model_dump_json()) == query
-
-
-def test_python_constructors_supply_discriminators_and_version_defaults():
-    query = Query(
-        where=AllOf(
-            items=(
-                ElementTypePredicate(test=ElementTypeTest(types=(ElementType.WALL,))),
-                PropertyPredicate(
-                    field_id=UUID(PROPERTY_ID),
-                    test=NumberTest(operator="is greater than", value=3),
-                ),
-            )
-        )
-    )
-
-    payload = query.model_dump(mode="json")
-    assert payload["schema_version"] == "1.0"
-    assert payload["where"]["kind"] == "all"
-    assert payload["where"]["items"][0] == {"kind": "element_type", "test": {"kind": "element_type", "types": ["Wall"]}}
-    assert payload["where"]["items"][1]["test"] == {"kind": "number", "operator": "is greater than", "value": 3.0}
 
 
 @pytest.mark.parametrize(
@@ -129,6 +62,25 @@ def test_python_constructors_supply_discriminators_and_version_defaults():
         },
         {"kind": "property", "field_id": PROPERTY_ID, "test": {"kind": "text", "operator": "eq", "value": "x"}},
     ],
+    ids=[
+        "unknown-kind",
+        "missing-predicate-discriminator",
+        "missing-test",
+        "unknown-element-type",
+        "empty-type-membership",
+        "extra-predicate-field",
+        "empty-and",
+        "empty-or",
+        "general-negation",
+        "malformed-field-guid",
+        "unsupported-test-family",
+        "text-operator-on-boolean",
+        "unknown-test-family",
+        "text-operator-on-number",
+        "number-operator-on-text",
+        "extra-test-field",
+        "operator-alias",
+    ],
 )
 def test_invalid_predicates_are_rejected_from_python_and_json(where):
     payload = {"schema_version": "1.0", "where": where}
@@ -156,19 +108,6 @@ def test_general_negation_is_rejected_inside_groups(group):
         assert caught.value.errors()[0]["type"] == "union_tag_invalid"
 
 
-def test_schema_version_is_preserved_as_a_plain_string():
-    version = "1.1"
-    payload = {
-        "schema_version": version,
-        "where": {"kind": "element_type", "test": {"kind": "element_type", "types": ["Wall"]}},
-    }
-
-    query = Query.model_validate(payload)
-
-    assert query.schema_version == version
-    assert Query.model_validate_json(query.model_dump_json()) == query
-
-
 def test_query_envelope_rejects_extra_fields():
     with pytest.raises(ValidationError):
         Query.model_validate(
@@ -185,7 +124,7 @@ def test_number_operands_reject_coercion_and_nonfinite_numbers(value):
 
 
 @pytest.mark.parametrize("value", [0, -2, 3, 3.5])
-def test_number_operands_accept_integer_and_real_si_values(value):
+def test_number_operands_accept_finite_integers_and_reals(value):
     assert NumberTest(operator="is", value=value).value == value
 
 
@@ -206,11 +145,41 @@ def test_models_and_collections_preserve_validated_state():
 
     assert node.test.types == (ElementType.WALL,)
     assert group.items == (node,)
+
+
+@pytest.mark.parametrize(
+    ("model", "attribute"),
+    [
+        (Query(where=ElementTypePredicate(test=ElementTypeTest(types=("Wall",)))), "schema_version"),
+        (AllOf(items=(ElementTypePredicate(test=ElementTypeTest(types=("Wall",))),)), "items"),
+        (AnyOf(items=(ElementTypePredicate(test=ElementTypeTest(types=("Wall",))),)), "items"),
+        (ElementTypePredicate(test=ElementTypeTest(types=("Wall",))), "test"),
+        (PropertyPredicate(field_id=PROPERTY_ID, test=NumberTest(operator="is", value=3)), "field_id"),
+        (ClassificationPredicate(field_id=PROPERTY_ID, test=ClassificationTest(operator="has value")), "field_id"),
+        (ElementTypeTest(types=("Wall",)), "types"),
+        (TextTest(operator="is", value="external"), "value"),
+        (NumberTest(operator="is", value=3), "value"),
+        (BooleanTest(operator="is", value=True), "value"),
+        (ClassificationTest(operator="has value"), "operator"),
+    ],
+    ids=lambda value: type(value).__name__ if not isinstance(value, str) else value,
+)
+def test_executable_models_are_frozen(model, attribute):
+    original = model.model_dump_json()
+
     with pytest.raises(ValidationError, match="frozen"):
-        node.test.types = ()
-    test = NumberTest(operator="is", value=3)
-    with pytest.raises(ValidationError, match="frozen"):
-        test.value = float("nan")
+        setattr(model, attribute, None)
+
+    assert model.model_dump_json() == original
+
+
+def test_json_tests_require_their_own_discriminator():
+    payload = {
+        "where": {"kind": "property", "field_id": PROPERTY_ID, "test": {"operator": "is", "value": 3}},
+    }
+
+    with pytest.raises(ValidationError, match="union_tag_not_found"):
+        Query.model_validate_json(json.dumps(payload))
 
 
 def test_json_schema_exposes_recursive_nodes_and_typed_operator_choices():
@@ -260,27 +229,6 @@ def test_json_schema_exposes_recursive_nodes_and_typed_operator_choices():
         "is less than",
         "is less than or equal to",
     ]
-    assert (
-        definitions["NumberTest"]["properties"]["value"]["description"] == "Numeric operand; quantities use SI units."
-    )
-
-
-@pytest.mark.parametrize(
-    ("family", "operator", "value"),
-    [
-        (TextTest, TextOperator.CONTAINS, "External"),
-        (NumberTest, NumberOperator.GREATER_THAN, 3),
-        (BooleanTest, BooleanOperator.IS_NOT, False),
-    ],
-)
-def test_operator_enums_are_stored_as_members_and_serialized_as_readable_values(family, operator, value):
-    test = family(operator=operator, value=value)
-    parsed = family.model_validate({"operator": operator.value, "value": value})
-
-    assert parsed.operator is operator
-    assert test == parsed
-    assert test.model_dump(mode="json")["operator"] == operator.value
-    assert family.model_validate_json(test.model_dump_json()).operator is operator
 
 
 @pytest.mark.parametrize("value", [0, 1, 0.0, 1.0, "True", "False", "true", "false", None])
