@@ -39,3 +39,11 @@ Pass the actual fetched upstream ref or SHA if it has a different name. `--head`
 - Exit `2` means the check could not finish, for example because the merge conflicts, the generator fails, a JSON key is duplicated, or a reference cannot resolve. Resolve the underlying problem and rerun the check.
 
 The comparison ignores prose annotations and handles the required-only object selectors used by Tapir. It follows references while comparing constraint siblings and recursive schemas. It checks the documentation generator's target Archicad version. Continue to review annotations, common-schema access and execution separately, and build or run live checks when the change warrants them.
+
+### Local check and Tapir's command workflow
+
+The proposed Tapir `schema_refinement.yml` in PR #2814 calls `tools/check_schema_refinement.py`. Its structural rules currently match this skill's check: compare current base with the proposed merge, resolve references, preserve constraints and union semantics, and reject removed commands, fields, or existing definition names. Added definitions are allowed. Both use the docs generator's newest supported Archicad version.
+
+The local script runs each revision's own documentation generator and prints structural differences. The workflow uses a trusted default-branch generator, rejects links in snapshots, runs without write credentials, and saves a JSON report that also includes annotation differences and new names. Its command controller separately checks permissions, file scope, builds, reviews, and ref freshness. Those are not part of the local script's structural check.
+
+Use the local script for reviewed source proposals. Where the upstream workflow is available, its result is the final check for that workflow; a local pass does not authorize merging or remove the API's remaining base race. Do not execute an unreviewed PR's Python through the local script.
