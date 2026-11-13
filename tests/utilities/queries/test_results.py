@@ -248,7 +248,7 @@ def test_search_result_copies_candidate_sequence_to_a_tuple():
 @pytest.mark.parametrize(
     "entry", ["find_elements", "find_elements_result", "filter_elements_by_query", "filter_elements_by_query_result"]
 )
-def test_localized_numeric_strings_follow_each_entrypoints_error_policy(project, entry):
+def test_malformed_si_response_is_an_error_without_a_locale_parsing_fallback(project, entry):
     project.types = {TALL: tapir.ElementType.WALL}
     project.values[TALL][HEIGHT] = "3,00"
     query = Query(where=height_node())

@@ -2,6 +2,20 @@
 
 Client release: **Tapir 1.8.0**. Released documentation checked: **2026-11-02**. This file contains open sharing candidates awaiting released documentation. Remove an entry only after the fetched release contains equivalent definitions and references; historical decisions remain in reports and Git.
 
+## SI property-read backport — 2026-11-13
+
+The element-query branch backports only `GetPropertyValuesOfElements.useSIUnits`
+and the `PropertyValue` description from `origin/update-to-tapir-2.0.0` at
+`e7be637`. `backport_property_si_units()` keeps the pinned 1.8 schema reproducible
+for that field. The new optional flag has no client/schema default, preserving
+omission for existing callers on older Tapir; explicit `False` is still forwarded.
+Query reads request `True`, with angle operands in degrees and other quantities in SI.
+
+Remove the helper and its call when adopting the 2.0.0 schema, which already
+defines the field. Preserve the omission behavior when resolving the generated
+parameter/client defaults. The patch deliberately raises if the upstream field
+already exists so release adoption cannot silently retain this backport.
+
 ## Classification assignment response correction — 2026-11-01
 
 One Breaking source-review correction changes `ClassificationIdOrError/oneOf/0`

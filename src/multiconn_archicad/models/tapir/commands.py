@@ -5171,6 +5171,10 @@ class GetPropertyValuesOfElementsParameters(APIModel):
         None,
         description="Adds isAvailable to each property value or error, telling whether the property is available for the element (for example by its classification). Default is false.",
     )
+    useSIUnits: bool | None = Field(
+        None,
+        description="Returns precise, locale-independent numeric strings in SI units, except degrees for angles. Default is false.",
+    )
 
 
 class GetPropertyValuesOfElementsResult(APIModel):

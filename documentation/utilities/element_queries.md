@@ -15,11 +15,11 @@ field-driven editors and unfinished drafts.
   This is the supported first-release search scope.
 - Property tests currently support scalar text, integer/real numbers, and
   Boolean values. Classification and element-type predicates are also available.
-- **Numeric reads are not yet canonicalized.** The current implementation uses
-  `float()` on Tapir's returned property string. A localized value such as
-  `"3,00"` becomes an evaluation error. Concise search omits that element;
-  diagnostic search exposes the error. Canonical SI reads are deferred, so check
-  actual API values before relying on numeric thresholds across projects or locales.
+- Numeric query reads request precise, locale-independent strings from Tapir.
+  Quantity operands use **SI units, except angles use degrees**. Comparisons
+  currently use exact floating-point equality/ordering without tolerance or
+  rounding; canonical formatting does not remove arithmetic or unit-conversion
+  roundoff. See the [numeric comparison contract](element_query_reference.md#comparisons-and-property-conditions).
 
 Searches are read-only and do not change selection. Supplied-population filters
 evaluate their input IDs without listing a new floor-plan population.

@@ -26,8 +26,8 @@ from multiconn_archicad.models.tapir.types import (
 from multiconn_archicad.utilities.results.batch_results import BatchError, BatchRow, BatchSlot
 from multiconn_archicad.utilities.results.property_errors import PropertyUnavailableError, PropertyUndefinedError
 
-from .errors import InvalidPropertyTestError
 from .context import ContextBuilder, EvaluationContext
+from .errors import InvalidPropertyTestError
 from .inputs import InputAvailability
 from .operators import BooleanOperator, ClassificationOperator, NumberOperator, TextOperator
 from .sources import CLASSIFICATION_FIELDS, CLASSIFICATION_VALUES, PROPERTY_VALUES, TYPE_MEMBERSHIP
@@ -230,11 +230,15 @@ class TextTest(PropertyTestModel):
 
 
 class NumberTest(PropertyTestModel):
-    """Compare scalar numbers without tolerance; measured operands use SI."""
+    """Compare scalar numbers without tolerance; operands use SI, except degrees for angles."""
 
     kind: Literal["number"] = "number"
     operator: NumberOperator
-    value: float = Field(strict=True, allow_inf_nan=False, description="Numeric operand; quantities use SI units.")
+    value: float = Field(
+        strict=True,
+        allow_inf_nan=False,
+        description="Numeric operand; quantities use SI units, except degrees for angles.",
+    )
 
     @classmethod
     def accepts(cls, details: PropertyDetails) -> bool:

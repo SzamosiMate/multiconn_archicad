@@ -422,6 +422,8 @@ class PropertyCommands:
         elements: list[ElementIdArrayItem],
         properties: list[PropertyIdArrayItem],
         include_availability: None | bool = None,
+        *,
+        use_si_units: None | bool = None,
     ) -> list[ErrorItem | PropertyValuesArrayItem]:
         """
         Returns the property values of the elements for the given property. It works for
@@ -434,6 +436,8 @@ class PropertyCommands:
             include_availability (None | bool): Adds isAvailable to each property value or
                 error, telling whether the property is available for the element (for example by
                 its classification). Default is false.
+            use_si_units (None | bool): Returns precise, locale-independent numeric strings in
+                SI units, except degrees for angles. Default is false.
 
         Returns:
             list[ErrorItem | PropertyValuesArrayItem]: The order of the outer list is that of
@@ -449,6 +453,7 @@ class PropertyCommands:
             "elements": elements,
             "properties": properties,
             "includeAvailability": include_availability,
+            "useSIUnits": use_si_units,
         }
         validated_params = GetPropertyValuesOfElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(

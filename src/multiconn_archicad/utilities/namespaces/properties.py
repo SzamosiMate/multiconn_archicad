@@ -7,10 +7,9 @@ from typing import TYPE_CHECKING, Any
 
 from packaging.version import Version
 
-from multiconn_archicad.errors import BatchWriteError
+from multiconn_archicad.errors import BatchWriteError, MulticonnArchicadError
 from multiconn_archicad.models.official import types as official
 from multiconn_archicad.models.tapir import types as tapir
-from multiconn_archicad.utilities.queries import PropertyCatalogue, PropertyTest, TestRegistry
 from multiconn_archicad.utilities.identifiers import (
     ElementIdLike,
     PropertyIdLike,
@@ -20,6 +19,7 @@ from multiconn_archicad.utilities.identifiers import (
     normalize_property_ids,
     to_official_property_id,
 )
+from multiconn_archicad.utilities.queries import PropertyCatalogue, PropertyTest, TestRegistry
 from multiconn_archicad.utilities.results.batch_results import (
     BatchError,
     BatchGrid,
@@ -273,14 +273,17 @@ class PropertyUtilities:
         return PropertyCatalogue(result.properties, registry)
 
     def _get_raw_property_values(
-        self, elements: Sequence[ElementIdLike], properties: Sequence[PropertyIdLike]
+        self, elements: Sequence[ElementIdLike], properties: Sequence[PropertyIdLike], *, use_si_units: bool = False
     ) -> list[tapir.ErrorItem | tapir.PropertyValuesArrayItem]:
         normalized_elements = normalize_element_ids(elements)
         normalized_properties = normalize_property_ids(properties)
         version = Version(read_tapir_version(self._api, self._api.read_header_metadata()))
+        if use_si_units and version < Version("2.0.0"):
+            raise MulticonnArchicadError("SI property reads require Tapir 2.0.0 or newer.")
+        options = {"use_si_units": True} if use_si_units else {}
         if version >= Version("1.7.3"):
             return self._api.tapir.property.get_property_values_of_elements(
-                normalized_elements, normalized_properties, include_availability=True
+                normalized_elements, normalized_properties, include_availability=True, **options
             )
         return self._api.tapir.property.get_property_values_of_elements(normalized_elements, normalized_properties)
 
@@ -320,13 +323,16 @@ class PropertyUtilities:
         return self.resolve_property_ids([property_user_id])[0]
 
     def get_property_values_per_element_result(
-        self, elements: Sequence[ElementIdLike], properties: Sequence[PropertyIdLike]
+        self, elements: Sequence[ElementIdLike], properties: Sequence[PropertyIdLike], *, use_si_units: bool = False
     ) -> BatchGrid[str]:
-        """Read a grid of property display strings, retaining API failures.
+        """Read a grid of property strings, retaining API failures.
 
         Args:
             elements: Element IDs defining result rows.
             properties: Property IDs defining result columns.
+            use_si_units: Request precise locale-independent numeric strings in SI
+                units, except degrees for angles. Requires Tapir 2.0.0 or newer.
+                False preserves the existing display-string behavior.
 
         Returns:
             A rectangular grid of returned element outcomes. Whole-row API
@@ -334,8 +340,9 @@ class PropertyUtilities:
             their cells. For nonempty element input, rows align with elements.
 
         Notes:
-            Values remain display strings; they are not parsed or converted to
-            standard units. Archicad is queried even when ``elements`` is empty.
+            Values remain strings. With ``use_si_units=True``, Tapir supplies the
+            numeric formatting and units; this utility performs no conversion or
+            rounding. Archicad is queried even when ``elements`` is empty.
             The exact ``<Undefined>`` sentinel becomes PropertyUndefinedError.
             Tapir 1.7.3+ reads request availability; confirmed unavailability
             becomes PropertyUnavailableError. Other failures are preserved,
@@ -344,9 +351,11 @@ class PropertyUtilities:
         Raises:
             ValueError: If no properties are supplied.
         """
-        items = self._get_raw_property_values(elements, properties)
+        items = self._get_raw_property_values(elements, properties, use_si_units=use_si_units)
         rows = [
-            item if isinstance(item, tapir.ErrorItem) else [_normalize_property_value(cell) for cell in item.propertyValues]
+            item
+            if isinstance(item, tapir.ErrorItem)
+            else [_normalize_property_value(cell) for cell in item.propertyValues]
             for item in items
         ]
         return BatchGrid[str].from_rows(rows, width=len(properties))

@@ -24479,6 +24479,10 @@
         "includeAvailability": {
           "type": "boolean",
           "description": "Adds isAvailable to each property value or error, telling whether the property is available for the element (for example by its classification). Default is false."
+        },
+        "useSIUnits": {
+          "type": "boolean",
+          "description": "Returns precise, locale-independent numeric strings in SI units, except degrees for angles. Default is false."
         }
       },
       "additionalProperties": false,
@@ -43284,7 +43288,7 @@
     },
     "PropertyValue": {
       "type": "object",
-      "description": "The display string value of a property.",
+      "description": "The string value of a property, formatted according to the command's options.",
       "properties": {
         "value": {
           "type": "string"

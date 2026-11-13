@@ -4351,7 +4351,7 @@ class PropertyObjectToolDefault(APIModel):
 
 
 class PropertyValue(APIModel):
-    """The display string value of a property."""
+    """The string value of a property, formatted according to the command's options."""
     value: str
 
 

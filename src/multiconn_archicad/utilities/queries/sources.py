@@ -14,6 +14,7 @@ from .context import ContextSource
 
 if TYPE_CHECKING:
     from multiconn_archicad.clients.unified_api.api import UnifiedApi
+
     from .fields import ClassificationInfo
 
 
@@ -36,7 +37,7 @@ class PropertyValuesSource(ContextSource[UUID, ColumnData[str]]):
     def load(
         self, api: UnifiedApi, elements: Sequence[tapir.ElementIdArrayItem], keys: Sequence[UUID]
     ) -> Mapping[UUID, ColumnData[str]]:
-        grid = api.utilities.property.get_property_values_per_element_result(elements, keys)
+        grid = api.utilities.property.get_property_values_per_element_result(elements, keys, use_si_units=True)
         rows = {element.elementId.guid: index for index, element in enumerate(elements)}
         return {key: ColumnData(grid, rows, column) for column, key in enumerate(keys)}
 

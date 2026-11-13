@@ -3757,6 +3757,7 @@ class GetPropertyValuesOfElementsParameters(TypedDict):
     elements: Elements
     properties: PropertyIds
     includeAvailability: NotRequired[bool]
+    useSIUnits: NotRequired[bool]
 
 
 class GetPropertyValuesOfElementsResult(TypedDict):

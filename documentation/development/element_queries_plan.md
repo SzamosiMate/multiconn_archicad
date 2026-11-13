@@ -46,10 +46,9 @@ The agreed first-release search scope is **floor plan only**. It remains the
 default after future database predicates are added, so existing queries retain
 their meaning. No database picker or predicate is required for this release.
 
-The agreed engine implementation slice was listing/database defaults and type
-presets, followed by documentation. Canonical numeric reads wait for the separate
-Tapir 2.0.0/client-generation work below; do not describe them as completed or
-quietly add locale parsing. Release documentation must expose that limitation.
+The engine implementation includes listing/database defaults, type presets and
+the focused Tapir 2.0.0 SI property-read backport below. Angles deliberately use
+degrees. Do not add locale parsing or implicit floating-point tolerances.
 
 Before release, review the resulting documentation and package the agreed scope.
 Do not turn optional extension ideas below into release requirements. The widget
@@ -58,23 +57,29 @@ the query's floor-plan scope.
 
 ## Canonical numeric property reads
 
-Defer this integration to keep the client rebase straightforward:
+Implemented as a focused backport from `origin/update-to-tapir-2.0.0` (`e7be637`),
+without adopting the rest of that branch. Only the read command's parameter
+models, method and matching schema/tests are brought across; response shapes
+are unchanged. The optional flag defaults to omission, preserving existing
+payloads on older Tapir. This intentionally differs from the update branch's
+explicit `False` client default.
 
-1. Regenerate the multiconn client separately with
-   `GetPropertyValuesOfElements.useSIUnits` support when Tapir 2.0.0 is ready.
-2. Rebase the query branch onto that client.
-3. Implement the focused property utility/query-source integration and verify it.
+`PropertyUtilities.get_property_values_per_element_result()` and its raw helper
+accept keyword-only `use_si_units=False`. Query sources explicitly request
+`True` alongside availability; ordinary utility callers keep display strings.
+Explicit SI reads reject Tapir versions below 2.0.0 rather than falling back to
+localized strings. The evaluator never replaces decimal commas.
 
-Add an optional keyword-only `use_si_units=False` to
-`PropertyUtilities.get_property_values_per_element_result()` and its raw-read
-helper. The query source should explicitly request `True` alongside availability.
-Preserve display-string defaults for existing utility callers and the query
-minimum of Tapir 2.0.0. Do not fall back to localized strings or replace commas.
+The API supplies precise locale-independent numeric strings in SI units,
+**except degrees for angles**, confirmed as the intended operand contract on
+2026-11-13. Reads preserve row/cell errors and the original string precision.
+Numeric comparisons remain exact; choosing explicit comparison tolerances is
+separate from canonical value retrieval.
 
-The API promises precise locale-independent numeric strings in SI units,
-**except degrees for angles**. Agree and document the angle operand contract
-before integration. Test flag forwarding/default omission, preserved row/cell
-errors, and canonical parsing.
+The temporary `backport_property_si_units()` schema patch preserves this field
+when regenerating the pinned 1.8 client. Remove it and its call when merging the
+2.0.0 schema, retaining omission for existing callers. See the
+[active backport record](../../code_generation/documentation/schema-patch-tracking.md#si-property-read-backport--2026-11-13).
 
 Diagnostic evidence: in `test_kész`, Archicad 27 / Tapir 2.0.0, each of four
 built-in Height fields returned 157 available values out of 171 candidates.

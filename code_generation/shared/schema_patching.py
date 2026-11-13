@@ -350,9 +350,26 @@ def apply_breaking_source_review_patches(master_defs: dict[str, Any]):
     master_defs["ClassificationIdOrError"]["oneOf"][0] = {"$ref": "#/$defs/ClassificationId"}
 
 
+def backport_property_si_units(master_defs: dict[str, Any]) -> None:
+    """Keep the focused Tapir 2.0.0 read backport when regenerating the 1.8 client."""
+    properties = master_defs["GetPropertyValuesOfElementsParameters"]["properties"]
+    if "useSIUnits" in properties:
+        raise ValueError("useSIUnits is already upstream; remove the SI backport patch when adopting Tapir 2.0.0.")
+    properties["useSIUnits"] = {
+        "type": "boolean",
+        "description": "Returns precise, locale-independent numeric strings in SI units, except degrees for angles. Default is false.",
+    }
+    # No schema default: existing clients omit the new flag, including on older Tapir.
+    master_defs["PropertyValue"]["description"] = (
+        "The string value of a property, formatted according to the command's options."
+    )
+
+
 def apply_temporary_patches(master_defs: dict[str, Any]):
     """Named extractions and shared contracts pending released upstream adoption."""
     print("Applying temporary schema patches (pending upstream named definitions and sharing)...")
+
+    backport_property_si_units(master_defs)
 
     # Preserve public names for hotlink, Teamwork and marker inline schemas.
     extract_inline_schema(master_defs, "ChangeHotlinkNodesParameters", ["hotlinkNodes", "items"], "HotlinkNodeChange")

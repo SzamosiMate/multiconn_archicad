@@ -51,11 +51,23 @@ the original operand; it does not save the case-folded form.
 
 Numeric operands accept finite integers/floats, excluding Booleans. Strings,
 `null`, NaN, and infinity are rejected. Comparisons use ordinary numeric equality
-and ordering without tolerance or rounding. The current value reader passes
-Tapir's string to `float()`; it performs no locale parsing or unit conversion.
-Consequently, `"3,00"` is an evaluation error. Metadata retains the measure type,
-but that does not guarantee canonical numeric values. Canonical SI reads and the
-angle operand contract are [deferred](../development/element_queries_plan.md#canonical-numeric-property-reads).
+and ordering without tolerance or rounding. Query reads explicitly request
+`GetPropertyValuesOfElements.useSIUnits=True` together with availability. Tapir
+returns precise locale-independent numeric strings: operands use SI units for
+quantities, **except angles use degrees**, deliberately matching architectural
+practice. The evaluator passes these strings to `float()` without further unit
+conversion or locale parsing. A malformed numeric string such as `"3,00"` remains
+an evaluation error; there is no fallback to display values.
+
+Canonical reads preserve precision but do not eliminate floating-point roundoff.
+For example, a converted angle returned as `"29.999999999999996"` does not exactly
+equal the operand `30`. Approximate comparison policy is a separate decision;
+this backport does not introduce a hidden tolerance.
+
+Existing property utility callers retain display strings. The optional keyword
+`use_si_units=True` on `get_property_values_per_element_result()` opts into these
+canonical reads and requires Tapir 2.0.0 or newer. With its default `False`, the
+new wire flag is omitted so older Tapir versions keep their existing behavior.
 
 Boolean operands must be actual Booleans. Tapir value strings are interpreted
 using its `"True"`/`"False"` representation.

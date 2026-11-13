@@ -72,7 +72,9 @@ def test_flat_read_recognizes_only_the_exact_undefined_sentinel(api, version):
     assert result.successes == ["first", "<undefined>", " <Undefined>", "", "last"]
 
 
-def test_grid_distinguishes_unavailability_from_other_failures_and_preserves_rows(api):
+@pytest.mark.parametrize("use_si_units", [False, True], ids=["display", "si"])
+def test_grid_distinguishes_unavailability_from_other_failures_and_preserves_rows(api, use_si_units):
+    api.tapir.application.get_add_on_version.return_value = "2.0.0"
     unavailable = _error("Not available or not evaluated property", False)
     not_evaluated = _error("Not available or not evaluated property", True)
     ambiguous = _error("Not available or not evaluated property")
@@ -85,7 +87,9 @@ def test_grid_distinguishes_unavailability_from_other_failures_and_preserves_row
         row_error,
     ]
 
-    result = PropertyUtilities(api).get_property_values_per_element_result([uuid4(), uuid4()], [uuid4() for _ in cells])
+    result = PropertyUtilities(api).get_property_values_per_element_result(
+        [uuid4(), uuid4()], [uuid4() for _ in cells], use_si_units=use_si_units
+    )
 
     assert result.width == len(cells)
     assert result.row_lengths == (len(cells), len(cells))
