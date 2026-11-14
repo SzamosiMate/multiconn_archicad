@@ -11,13 +11,18 @@ Properties and classifications share `TestModel`, `FieldInfo` and
 `FieldCatalogue` behavior.
 The predicate tree follows the Composite pattern: leaves implement their own
 operations and groups delegate to children. Field validation (`validate_fields`),
-requirement preparation (`prepare`), candidate type bounds (`candidate_types`)
+metadata references (`field_references`), requirement preparation (`prepare`), candidate type bounds (`candidate_types`)
 and evaluation (`evaluate`) all live on the predicates. Evaluation interprets
 the query against supplied execution data; there is no separate Visitor dispatch.
-`queries.contracts.FieldPredicate` exposes `kind`, `field_id` and a typed test
+The internal `queries.validation.FieldPredicate` exposes `kind`, `field_id` and a typed test
 without importing concrete models or catalogues. During validation the context
 resolves fields by catalogue kind and normalized UUID, so predicate models do
 not import catalogue implementations.
+Execution discovers the predicates' declared field references and validates the
+query, then passes the catalogue to `prepare(builder, fields=catalogue)`.
+Classification predicates reuse their validated tree during preparation; other
+predicates request only the data they need. The executor does not dispatch on
+property or classification families.
 See [Classification utilities](classifications.md) for metadata, assignment reads,
 query operators, validation and shared-context execution. Start with the
 [element query guide](element_queries.md) for scripts, the

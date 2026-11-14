@@ -16,7 +16,7 @@ from math import isclose, isfinite
 from typing import TYPE_CHECKING, Annotated, Any, Literal, TypeAlias, assert_never, cast
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, JsonValue, ValidationInfo, model_validator
+from pydantic import BaseModel, ConfigDict, Field, JsonValue, ValidationInfo, field_validator, model_validator
 
 from multiconn_archicad.models.tapir.types import (
     ElementType,
@@ -36,6 +36,7 @@ from .validation import FieldCheck, QueryValidationContext, QueryValidationIssue
 from .versioning import QUERY_SCHEMA_VERSION
 
 if TYPE_CHECKING:
+    from .catalogue import QueryFieldCatalogue
     from .fields import ClassificationInfo
 
 
@@ -384,7 +385,11 @@ class PropertyPredicate(_QueryModel):
         """A property comparison alone imposes no element-type restriction."""
         return None
 
-    def prepare(self, builder: ContextBuilder) -> None:
+    def field_references(self) -> tuple[Mapping[str, object], ...]:
+        """Declare the property metadata needed for validation."""
+        return ({"kind": self.kind, "field_id": self.field_id},)
+
+    def prepare(self, builder: ContextBuilder, *, fields: QueryFieldCatalogue | None = None) -> None:
         """Request this property's values for the execution's candidate population."""
         builder.require(PROPERTY_VALUES, self.field_id)
 
@@ -415,9 +420,23 @@ class ClassificationPredicate(_QueryModel):
     def candidate_types(self) -> frozenset[ElementType] | None:
         return None
 
-    def prepare(self, builder: ContextBuilder) -> None:
+    def field_references(self) -> tuple[Mapping[str, object], ...]:
+        """Declare the system/tree metadata needed for validation and evaluation."""
+        return ({"kind": self.kind, "field_id": self.field_id},)
+
+    def prepare(self, builder: ContextBuilder, *, fields: QueryFieldCatalogue | None = None) -> None:
+        """Request assignments and reuse a validated tree when supplied.
+
+        Offline prepare/build callers may omit fields to let the metadata source
+        load the tree. Bound execution passes its validated discovery snapshot.
+        """
         builder.require(CLASSIFICATION_FIELDS, self.field_id)
         builder.require(CLASSIFICATION_VALUES, self.field_id)
+        if fields is not None:
+            field = fields.resolve({"kind": self.kind, "field_id": self.field_id})
+            if field is None:
+                raise ValueError(f"Expected validated classification metadata for system {self.field_id}")
+            builder.provide(CLASSIFICATION_FIELDS, self.field_id, cast("ClassificationInfo", field))
 
     def evaluate(self, context: EvaluationContext, element_id: UUID, *, path: str = "where") -> BatchSlot[bool]:
         field = context.data(CLASSIFICATION_FIELDS)[self.field_id]
@@ -437,7 +456,16 @@ class ElementTypeTest(TestModel):
     """Specify the Archicad element types accepted by a membership test."""
 
     kind: Literal["element_type"] = "element_type"
-    types: tuple[ElementType, ...] = Field(min_length=1)
+    types: tuple[ElementType, ...] = Field(
+        min_length=1, json_schema_extra={"not": {"contains": {"const": "Unknown"}}}
+    )
+
+    @field_validator("types")
+    @classmethod
+    def reject_unknown_type(cls, types: tuple[ElementType, ...]) -> tuple[ElementType, ...]:
+        if ElementType.UNKNOWN in types:
+            raise ValueError("Unknown is a response sentinel, not a queryable element type")
+        return types
 
 
 class ElementTypePredicate(_QueryModel):
@@ -456,7 +484,11 @@ class ElementTypePredicate(_QueryModel):
         """Only the declared types can satisfy this predicate."""
         return frozenset(self.test.types)
 
-    def prepare(self, builder: ContextBuilder) -> None:
+    def field_references(self) -> tuple[Mapping[str, object], ...]:
+        """Element types need no project metadata discovery."""
+        return ()
+
+    def prepare(self, builder: ContextBuilder, *, fields: QueryFieldCatalogue | None = None) -> None:
         """Request membership for this distinct set of element types."""
         builder.require(TYPE_MEMBERSHIP, self.candidate_types())
 
@@ -490,10 +522,14 @@ class AllOf(_QueryModel):
                 result = types if result is None else result & types
         return result
 
-    def prepare(self, builder: ContextBuilder) -> None:
+    def field_references(self) -> tuple[Mapping[str, object], ...]:
+        """Collect every child's metadata references, even for impossible branches."""
+        return tuple(reference for child in self.items for reference in child.field_references())
+
+    def prepare(self, builder: ContextBuilder, *, fields: QueryFieldCatalogue | None = None) -> None:
         """Collect requirements from every child, sharing the same builder."""
         for child in self.items:
-            child.prepare(builder)
+            child.prepare(builder, fields=fields)
 
     def evaluate(self, context: EvaluationContext, element_id: UUID, *, path: str = "where") -> BatchSlot[bool]:
         """Evaluate every child and AND successful values, retaining all errors."""
@@ -529,10 +565,14 @@ class AnyOf(_QueryModel):
             result |= types
         return result
 
-    def prepare(self, builder: ContextBuilder) -> None:
+    def field_references(self) -> tuple[Mapping[str, object], ...]:
+        """Collect every child's metadata references, regardless of Boolean semantics."""
+        return tuple(reference for child in self.items for reference in child.field_references())
+
+    def prepare(self, builder: ContextBuilder, *, fields: QueryFieldCatalogue | None = None) -> None:
         """Collect requirements from every child, sharing the same builder."""
         for child in self.items:
-            child.prepare(builder)
+            child.prepare(builder, fields=fields)
 
     def evaluate(self, context: EvaluationContext, element_id: UUID, *, path: str = "where") -> BatchSlot[bool]:
         """Evaluate every child and OR successful values, retaining all errors."""

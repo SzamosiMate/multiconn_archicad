@@ -5,6 +5,25 @@ This page describes the current engine contract. Start with the
 [query editing](element_query_editing.md) for discovery and editor integration.
 Future work lives in the [development plan](../development/element_queries_plan.md).
 
+## Public API and compatibility
+
+The supported scripting and editor API consists of the query/test models,
+operators, presets, catalogues, field descriptors, input descriptions, results,
+validation functions and errors exported by `multiconn_archicad.utilities.queries`.
+The draft API (`QueryRow`, `QueryRows`, `RowIssue`, `QueryBuildResult`,
+`validate_row`, and `build_query`) is public in `queries.editing`.
+
+Supported extension interfaces are `TestModel`, `PropertyTestModel`,
+`TestRegistry`, `FieldInfo`, `ContextSource`, `ContextBuilder`, and
+`EvaluationContext`. New serialized kinds require library integration into the
+declared unions; runtime registration of arbitrary predicate kinds is not supported.
+
+Concrete source loaders and their singleton instances, `ColumnData`, execution
+orchestration, `FieldCheck`, `FieldPredicate`, `QueryValidationContext`, and
+`BUILTIN_QUERY_FIELDS` are internal implementation details. They are not exported
+from `queries` and carry no public compatibility promise. Tests and implementation
+examples may import them directly from their defining modules.
+
 ## Query structure
 
 Import executable models from `multiconn_archicad.utilities.queries`.
@@ -34,6 +53,7 @@ assert query.schema_version == "1.0"
 `ElementTypeTest` accepts valid individual types and combinations, including the
 [five presets](element_queries.md#use-element-type-presets). The presets are
 convenience values; a query stores concrete types and has no preset identifier.
+`Unknown` is an API response sentinel and is rejected as a query operand.
 
 ## Comparisons and property conditions
 

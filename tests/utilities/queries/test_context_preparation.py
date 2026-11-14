@@ -8,8 +8,6 @@ import pytest
 
 from multiconn_archicad.models.tapir import types as tapir
 from multiconn_archicad.utilities.queries import (
-    PROPERTY_VALUES,
-    TYPE_MEMBERSHIP,
     AllOf,
     AnyOf,
     ContextBuilder,
@@ -20,6 +18,10 @@ from multiconn_archicad.utilities.queries import (
     NumberOperator,
     RealTest,
     PropertyPredicate,
+)
+from multiconn_archicad.utilities.queries.sources import (
+    PROPERTY_VALUES,
+    TYPE_MEMBERSHIP,
 )
 from multiconn_archicad.utilities.results.batch_results import BatchError, BatchGrid, BatchRow, BatchSlot
 
@@ -198,7 +200,7 @@ def test_new_predicate_can_prepare_a_new_source_without_changing_the_builder_or_
     source = LengthSource()
 
     class CustomPredicate(ElementTypePredicate):
-        def prepare(self, builder: ContextBuilder) -> None:
+        def prepare(self, builder: ContextBuilder, *, fields=None) -> None:
             builder.require(source, "wall")
 
         def evaluate(self, context: EvaluationContext, element_id: UUID, *, path: str = "where") -> BatchSlot[bool]:

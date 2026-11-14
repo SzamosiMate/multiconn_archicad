@@ -21,12 +21,12 @@ from multiconn_archicad.utilities.queries import (
     PropertyPredicate,
     PropertyTest,
     Query,
-    QueryValidationContext,
     QueryValidationError,
     QueryValidationIssue,
     TextTest,
     validate_query,
 )
+from multiconn_archicad.utilities.queries.validation import QueryValidationContext
 from multiconn_archicad.utilities.queries import TestRegistry as Registry
 
 from .support import property_details

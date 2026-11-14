@@ -19,13 +19,16 @@ from multiconn_archicad.utilities.queries import (
     ClassificationOperator,
     ClassificationPredicate,
     ClassificationTest,
+    ContextBuilder,
     ElementTypePredicate,
     ElementTypeTest,
     PropertyPredicate,
     Query,
+    QueryFieldCatalogue,
     QueryValidationError,
     validate_query,
 )
+from multiconn_archicad.utilities.queries.sources import CLASSIFICATION_FIELDS
 
 from .classification_support import (
     CHILD,
@@ -224,6 +227,36 @@ def test_classification_search_batches_systems_and_reuses_validation_metadata(qu
     assert project.api.official.classification.get_all_classifications_in_system.call_count == 2
     project.api.tapir.property.get_all_properties.assert_not_called()
     project.api.tapir.property.get_property_values_of_elements.assert_not_called()
+
+
+@pytest.mark.parametrize("supply_snapshot", [False, True], ids=["load-tree", "reuse-validated-tree"])
+def test_classification_preparation_loads_or_reuses_the_tree_once(query_project, supply_snapshot):
+    api = query_project.api
+    fields = None
+    snapshot = None
+    if supply_snapshot:
+        catalogue = api.utilities.classification.discover_query_fields([SYSTEM])
+        snapshot = catalogue[SYSTEM]
+        fields = QueryFieldCatalogue([catalogue])
+        api.official.classification.get_all_classifications_in_system.side_effect = AssertionError("Tree read twice")
+
+    node = predicate()
+    builder = ContextBuilder()
+    node.prepare(builder, fields=fields)
+    context = builder.build(api, [tapir.ElementIdArrayItem(elementId=tapir.ElementId(guid=ELEMENT))])
+
+    assert node.evaluate(context, ELEMENT).value is True
+    if supply_snapshot:
+        assert context.data(CLASSIFICATION_FIELDS)[SYSTEM] is snapshot
+    api.official.classification.get_all_classifications_in_system.assert_called_once_with(
+        official.ClassificationSystemId(guid=SYSTEM)
+    )
+    api.tapir.classification.get_classifications_of_elements.assert_called_once()
+
+
+def test_classification_preparation_rejects_a_missing_field_in_a_supplied_snapshot():
+    with pytest.raises(ValueError, match="Expected validated classification metadata"):
+        predicate().prepare(ContextBuilder(), fields=QueryFieldCatalogue())
 
 
 def test_classification_filter_preserves_duplicates_and_unclassified_negative_matches(query_project):

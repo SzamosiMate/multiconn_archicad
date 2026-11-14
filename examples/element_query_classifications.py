@@ -1,21 +1,27 @@
-"""Validate and evaluate classification queries offline using one shared context."""
+"""Demonstrate internal classification evaluation with a synthetic shared context.
+
+The sources/column storage used here are implementation details, not public API.
+For consumer code, use bound search/filter methods to prepare execution data.
+"""
 
 from uuid import UUID
 
 from multiconn_archicad.models.official import types as official
 from multiconn_archicad.utilities import BatchGrid
 from multiconn_archicad.utilities.queries import (
-    CLASSIFICATION_FIELDS,
-    CLASSIFICATION_VALUES,
     ClassificationCatalogue,
     ClassificationInfo,
     ClassificationOperator,
     ClassificationPredicate,
     ClassificationTest,
-    ColumnData,
     EvaluationContext,
     Query,
     validate_query,
+)
+from multiconn_archicad.utilities.queries.sources import (
+    CLASSIFICATION_FIELDS,
+    CLASSIFICATION_VALUES,
+    ColumnData,
 )
 
 

@@ -105,7 +105,9 @@ class GuidTest(PropertyTestModel):
         return BatchSlot.success(actual == self.value)
 
 
-def test_adding_a_family_requires_only_its_class_and_the_shared_union():
+def test_custom_family_works_with_a_local_union_adapter_and_registry():
+    # This exercises the family and registry in isolation. Production query and
+    # row parsing continue to use the PropertyTest union declared in models.py.
     extended_tests = Annotated[TextTest | IntegerTest | RealTest | BooleanTest | GuidTest, Field(discriminator="kind")]
     registry = Registry.from_union(extended_tests)
     adapter = TypeAdapter(extended_tests)

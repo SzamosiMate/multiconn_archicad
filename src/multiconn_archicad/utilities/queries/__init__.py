@@ -1,9 +1,8 @@
-"""Expose query definitions, test families, and field information."""
+"""Supported query, editor, and extension API. See the query reference for scope."""
 
 from .catalogue import FieldCatalogue, QueryFieldCatalogue, QueryFieldEntry
 from .element_types import TYPES_2D, TYPES_3D, TYPES_3D_COMPONENTS, TYPES_3D_WITH_COMPONENTS, TYPES_ALL
 from .discovery import (
-    BUILTIN_QUERY_FIELDS,
     ClassificationCatalogue,
     DiscoveredProperty,
     PropertyCatalogue,
@@ -48,24 +47,11 @@ from .models import (
 )
 from .registry import TestRegistry
 from .operators import BooleanOperator, ClassificationOperator, NumberOperator, TextOperator
-from .sources import (
-    CLASSIFICATION_FIELDS,
-    CLASSIFICATION_VALUES,
-    PROPERTY_VALUES,
-    TYPE_MEMBERSHIP,
-    ClassificationFieldsSource,
-    ClassificationValuesSource,
-    ColumnData,
-    PropertyValuesSource,
-    TypeMembershipSource,
-)
 from .validation import (
-    FieldCheck,
-    QueryValidationContext,
     QueryValidationError,
     QueryValidationIssue,
     QueryValidationResult,
-    validate_query, FieldPredicate,
+    validate_query,
 )
 from .versioning import QUERY_SCHEMA_VERSION, validate_query_version
 from multiconn_archicad.utilities.results.query_results import FindElementsResult
@@ -76,17 +62,12 @@ __all__ = [
     "AnyOf",
     "BooleanTest",
     "BooleanOperator",
-    "BUILTIN_QUERY_FIELDS",
     "ClassificationCatalogue",
     "ClassificationInfo",
     "ClassificationItemInfo",
     "ClassificationOperator",
     "ClassificationTest",
     "ClassificationPredicate",
-    "CLASSIFICATION_FIELDS",
-    "CLASSIFICATION_VALUES",
-    "ClassificationFieldsSource",
-    "ClassificationValuesSource",
     "InvalidClassificationTestError",
     "ContextBuilder",
     "ContextSource",
@@ -97,8 +78,6 @@ __all__ = [
     "evaluate_property",
     "DiscoveredProperty",
     "FieldInfo",
-    "FieldPredicate",
-    "FieldCheck",
     "FieldCatalogue",
     "FindElementsResult",
     "InputAvailability",
@@ -112,16 +91,12 @@ __all__ = [
     "PropertyPredicate",
     "PropertyInfo",
     "PropertyCatalogue",
-    "PROPERTY_VALUES",
-    "ColumnData",
-    "PropertyValuesSource",
     "PropertyTest",
     "PropertyTestModel",
     "Query",
     "QueryFieldCatalogue",
     "QueryFieldEntry",
     "QUERY_SCHEMA_VERSION",
-    "QueryValidationContext",
     "QueryValidationError",
     "QueryValidationIssue",
     "QueryValidationResult",
@@ -136,8 +111,6 @@ __all__ = [
     "TYPES_3D",
     "TYPES_3D_COMPONENTS",
     "TYPES_3D_WITH_COMPONENTS",
-    "TYPE_MEMBERSHIP",
-    "TypeMembershipSource",
     "UnsupportedPropertyInfo",
     "UnsupportedPropertyTypeError",
     "UnsupportedQueryVersionError",
