@@ -6,11 +6,8 @@ import pytest
 
 from multiconn_archicad.models.tapir.types import ElementType
 from multiconn_archicad.utilities.queries import (
-    PROPERTY_VALUES,
-    TYPE_MEMBERSHIP,
     AllOf,
     AnyOf,
-    ColumnData,
     ElementTypePredicate,
     ElementTypeTest,
     EvaluationContext,
@@ -20,6 +17,11 @@ from multiconn_archicad.utilities.queries import (
     Query,
     TextOperator,
     TextTest,
+)
+from multiconn_archicad.utilities.queries.sources import (
+    PROPERTY_VALUES,
+    TYPE_MEMBERSHIP,
+    ColumnData,
 )
 from multiconn_archicad.utilities.results.batch_results import BatchError, BatchGrid, BatchRow, BatchSlot
 from multiconn_archicad.utilities.results.property_errors import PropertyUnavailableError, PropertyUndefinedError

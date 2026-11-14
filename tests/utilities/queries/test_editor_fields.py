@@ -8,7 +8,6 @@ from pydantic import ValidationError
 
 from multiconn_archicad.models.tapir import types as tapir
 from multiconn_archicad.utilities.queries import (
-    BUILTIN_QUERY_FIELDS,
     TYPES_2D,
     TYPES_3D,
     TYPES_3D_COMPONENTS,
@@ -29,6 +28,7 @@ from multiconn_archicad.utilities.queries import (
     TextTest,
     UnsupportedPropertyTypeError,
 )
+from multiconn_archicad.utilities.queries.discovery import BUILTIN_QUERY_FIELDS
 from multiconn_archicad.utilities.queries import TestRegistry as Registry
 from multiconn_archicad.utilities.queries.editing import QueryRow, QueryRows, build_query
 
@@ -76,6 +76,7 @@ def test_builtin_element_type_choices_compile_through_the_field_description():
     )
     choice = next(choice for choice in types_input.schema["oneOf"] if choice["title"] == "Wall")
     assert choice["const"] == ["Wall"]
+    assert all("Unknown" not in choice["const"] for choice in types_input.schema["oneOf"])
 
     data = {"types": choice["const"]}
     test = field.create_test(**data)
@@ -127,6 +128,8 @@ def test_element_type_editor_choices_do_not_restrict_the_test_schema():
     validator.validate(payload)
     assert field.create_test(**payload).types == (tapir.ElementType.WALL, tapir.ElementType.WINDOW)
     assert not validator.is_valid({"kind": "element_type", "types": ["NotAnElementType"]})
+    assert not validator.is_valid({"kind": "element_type", "types": ["Unknown"]})
+    assert not validator.is_valid({"kind": "element_type", "types": ["Wall", "Unknown"]})
 
 
 def test_element_type_preset_descriptions_are_independent_snapshots():

@@ -183,11 +183,26 @@ the authoritative union. Matching no family produces an unsupported descriptor;
 matching multiple families raises `AmbiguousPropertyTypeError`. Adding a family
 requires its typed model/operator/metadata rules and registry/union integration,
 not only another dropdown option.
+The executable `PropertyTest` union in `models.py` is fixed by the library.
+Passing a custom registry to property discovery changes its descriptors; it does
+not register a new kind with `Query` or the row compiler. A new production family
+must be included in that shared union so both parsing paths support it.
+
+Predicates declare metadata references through `field_references()`. Groups
+collect references from all children; shared discovery deduplicates them before
+reading fields. Execution validates that catalogue before calling
+`prepare(builder, fields=catalogue)`. A predicate can reuse metadata it also
+needs for evaluation: classification predicates supply their validated system
+tree to the builder, while property predicates need only their value columns.
+Standalone `prepare(builder)` remains supported and loads missing metadata when
+the context is built. Predicate overrides must accept and forward the optional
+`fields` keyword when delegating preparation.
 
 `ContextBuilder` prepares deduplicated source requests before evaluation.
-`PROPERTY_VALUES`, `TYPE_MEMBERSHIP`, `CLASSIFICATION_FIELDS`, and
-`CLASSIFICATION_VALUES` provide shared execution data. A prepared context can
-also be supplied completed synthetic data for offline evaluation. Missing
+Its typed source interface is public; the built-in source instances and column
+storage in `queries.sources` are internal. The offline classification example
+uses those internals to demonstrate evaluation and is not a consumer API recipe.
+A prepared context can also be supplied completed synthetic data. Missing
 prepared keys are execution-input errors, not unavailable property values.
 Keep reads in bound utilities/context sources and evaluation in predicates.
 

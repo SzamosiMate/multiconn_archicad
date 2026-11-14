@@ -6,13 +6,15 @@ from uuid import UUID
 
 from multiconn_archicad.models.tapir.types import ElementType
 from multiconn_archicad.utilities.queries import (
+    ClassificationInfo,
+    ContextBuilder,
+    EvaluationContext,
+)
+from multiconn_archicad.utilities.queries.sources import (
     PROPERTY_VALUES,
     CLASSIFICATION_FIELDS,
     CLASSIFICATION_VALUES,
-    ClassificationInfo,
     TYPE_MEMBERSHIP,
-    ContextBuilder,
-    EvaluationContext,
     ColumnData,
 )
 

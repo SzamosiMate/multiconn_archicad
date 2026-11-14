@@ -17,6 +17,9 @@ from the consumer plan.
 
 - Strict executable query/test models, schema versioning, metadata validation,
   shared field discovery, batched context preparation, and predicate evaluation.
+- Predicates declare metadata references and own reuse of validated metadata.
+  Execution coordinates discovery/validation/preparation without dispatching on
+  property or classification families; draft refresh shares referenced discovery.
 - Serializable incomplete row drafts, compilation with AND precedence and
   parentheses, expression-to-row source maps, and framework-neutral input descriptions.
 - Concise and diagnostic search, plus strict and aligned supplied-ID filtering.

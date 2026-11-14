@@ -121,12 +121,21 @@ def discover_row_catalogue(api: UnifiedApi, references: Iterable[Mapping[str, ob
         return discover_query_catalogue(
             api, property_ids=None, classification_ids=None, browse_ids_by_kind=browse_ids_by_kind
         )
-    ids_by_kind: dict[str, list[UUID]] = {}
+    return discover_referenced_catalogue(api, references)
+
+
+def discover_referenced_catalogue(
+    api: UnifiedApi, references: Iterable[Mapping[str, object]]
+) -> QueryFieldCatalogue:
+    """Discover each distinct referenced field once, for drafts or execution."""
+    ids_by_kind: dict[str, dict[UUID, None]] = {}
     for reference in references:
         key = _reference_key(reference)
         if key is not None and key[1] is not None:
             kind, field_id = key
-            ids_by_kind.setdefault(kind, []).append(field_id)
+            ids_by_kind.setdefault(kind, {}).setdefault(field_id, None)
     return discover_query_catalogue(
-        api, property_ids=ids_by_kind.get("property", ()), classification_ids=ids_by_kind.get("classification", ())
+        api,
+        property_ids=tuple(ids_by_kind.get("property", ())),
+        classification_ids=tuple(ids_by_kind.get("classification", ())),
     )

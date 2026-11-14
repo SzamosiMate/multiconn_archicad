@@ -11,10 +11,9 @@ from multiconn_archicad.utilities.results.batch_results import BatchResult, Batc
 from multiconn_archicad.utilities.results.query_results import FindElementsResult
 
 from .context import ContextBuilder, EvaluationContext
-from .discovery import discover_query_catalogue
-from .fields import ClassificationInfo
+from .discovery import discover_referenced_catalogue
 from .models import Predicate, Query
-from .sources import CLASSIFICATION_FIELDS, PROPERTY_VALUES, TYPE_MEMBERSHIP
+from .sources import TYPE_MEMBERSHIP
 from .validation import validate_query
 from .versioning import require_query_tapir_version, validate_query_version
 
@@ -30,25 +29,16 @@ _DEFAULT_LISTING_FILTERS = (
 )
 
 
-def validate_execution_query(api: UnifiedApi, query: Query) -> ContextBuilder:
-    """Check the complete query before narrowing candidates or skipping reads."""
+def prepare_query_execution(api: UnifiedApi, query: Query) -> ContextBuilder:
+    """Validate the query, read field metadata, and prepare batched source requests."""
     if not isinstance(query, Query):
         raise TypeError("Expected a Query instance; parse query JSON with Query.model_validate_json() first")
     validate_query_version(query.schema_version)
     require_query_tapir_version(api, api.read_header_metadata())
-    # Discover only the field families requested by prepare(). Keep the same
-    # builder so execution reuses validated classification metadata.
-    builder = ContextBuilder()
-    query.where.prepare(builder)
-    system_ids = builder.requested_keys(CLASSIFICATION_FIELDS)
-    catalogue = discover_query_catalogue(
-        api, property_ids=builder.requested_keys(PROPERTY_VALUES), classification_ids=system_ids
-    )
+    catalogue = discover_referenced_catalogue(api, query.where.field_references())
     validate_query(query, catalogue).raise_for_errors()
-    for system_id in system_ids:
-        field = catalogue.resolve({"kind": "classification", "field_id": system_id})
-        if isinstance(field, ClassificationInfo):
-            builder.provide(CLASSIFICATION_FIELDS, system_id, field)
+    builder = ContextBuilder()
+    query.where.prepare(builder, fields=catalogue)
     return builder
 
 
@@ -97,13 +87,13 @@ def list_query_candidates(
     return elements
 
 
-def evaluate_query_candidates(
+def execute_query_candidates(
     api: UnifiedApi,
     query: Query,
     elements: Sequence[tapir.ElementIdArrayItem],
     builder: ContextBuilder,
 ) -> FindElementsResult:
-    """Evaluate candidates using the builder carrying validated field metadata."""
+    """Narrow candidates, load source data, and evaluate with validated field metadata."""
     if not elements:
         return FindElementsResult((), BatchResult(()))
 

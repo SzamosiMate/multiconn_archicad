@@ -26,6 +26,15 @@ pytestmark = pytest.mark.unit
 PROPERTY_ID = "22222222-2222-4222-8222-222222222222"
 
 
+@pytest.mark.parametrize("types", [["Unknown"], ["Wall", "Unknown"], [ElementType.UNKNOWN]])
+def test_unknown_response_sentinel_is_rejected_as_a_query_type(types):
+    with pytest.raises(ValidationError, match="not a queryable element type"):
+        ElementTypeTest(types=types)
+    payload = {"where": {"kind": "element_type", "test": {"kind": "element_type", "types": types}}}
+    with pytest.raises(ValidationError, match="not a queryable element type"):
+        Query.model_validate_json(json.dumps(payload, default=lambda value: value.value))
+
+
 @pytest.mark.parametrize(
     "where",
     [

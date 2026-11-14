@@ -173,7 +173,9 @@ class ElementTypeInfo(FieldInfo[ElementTypeTest]):
             )
         ]
         choices.extend(
-            {"const": [element_type.value], "title": element_type.value} for element_type in ElementType
+            {"const": [element_type.value], "title": element_type.value}
+            for element_type in ElementType
+            if element_type is not ElementType.UNKNOWN
         )
         return replace(
             description,

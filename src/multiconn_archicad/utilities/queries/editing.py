@@ -236,6 +236,12 @@ def _compile_expression(rows: list[QueryRow], leaves: list[Predicate]) -> Predic
 
 
 def _source_locations(root: Predicate, rows: list[QueryRow], leaves: list[Predicate]) -> dict[_Location, UUID]:
+    """Map compiled leaves to rows by identity, distinguishing equal conditions.
+
+    Group and Query construction must preserve the original leaf instances until
+    this traversal completes. Copying or normalizing leaves requires carrying
+    their row provenance through that transformation as well.
+    """
     row_ids = {id(leaf): row.row_id for row, leaf in zip(rows, leaves, strict=True)}
     pending: list[tuple[_Location, Predicate]] = [(("where",), root)]
     locations: dict[_Location, UUID] = {}

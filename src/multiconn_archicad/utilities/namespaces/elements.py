@@ -27,9 +27,9 @@ from multiconn_archicad.utilities.queries.catalogue import QueryFieldCatalogue
 from multiconn_archicad.utilities.queries.discovery import discover_row_catalogue
 from multiconn_archicad.utilities.queries.editing import QueryRow
 from multiconn_archicad.utilities.queries.execution import (
-    evaluate_query_candidates,
+    execute_query_candidates,
     list_query_candidates,
-    validate_execution_query,
+    prepare_query_execution,
 )
 
 if TYPE_CHECKING:
@@ -60,7 +60,7 @@ class ElementUtilities:
         """Search Archicad, returning unique proven matches in listing order.
 
         Safe type restrictions narrow listing without rewriting the query.
-        Scope follows Tapir's current database unless databases are supplied.
+        Scope defaults to the main/floor-plan database unless databases are supplied.
         Ordinary per-element evaluation failures are omitted. Invalid queries
         (including unsupported versions or absent property references), listing/
         command failures, and unexpected bugs raise. Use find_elements_result()
@@ -83,9 +83,9 @@ class ElementUtilities:
         Query-wide failures raise, even when no candidates can match. Neither
         search method changes selection or reports elements outside listing scope.
         """
-        builder = validate_execution_query(self._api, query)
+        builder = prepare_query_execution(self._api, query)
         candidates = list_query_candidates(self._api, query, databases=databases, filters=filters)
-        return evaluate_query_candidates(self._api, query, candidates, builder)
+        return execute_query_candidates(self._api, query, candidates, builder)
 
     def filter_elements_by_query_result(
         self, elements: Sequence[ElementIdLike], query: Query
@@ -97,8 +97,8 @@ class ElementUtilities:
         populations validate the query without reading element values.
         """
         candidates = normalize_element_ids(elements)
-        builder = validate_execution_query(self._api, query)
-        result = evaluate_query_candidates(self._api, query, candidates, builder)
+        builder = prepare_query_execution(self._api, query)
+        result = execute_query_candidates(self._api, query, candidates, builder)
         slots_by_guid = {
             element.elementId.guid: slot for element, slot in zip(result.candidates, result.outcomes.slots)
         }

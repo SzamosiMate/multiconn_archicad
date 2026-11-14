@@ -9,8 +9,6 @@ from multiconn_archicad.utilities.queries import (
     ClassificationOperator,
     ClassificationTest,
     ClassificationPredicate,
-    FieldCheck,
-    FieldPredicate,
     RealTest,
     NumberOperator,
     PropertyCatalogue,
@@ -18,12 +16,16 @@ from multiconn_archicad.utilities.queries import (
     PropertyTestModel,
     PropertyTest,
     PropertyPredicate,
-    QueryValidationContext,
     QueryValidationResult,
     QueryValidationIssue,
     Query,
     UnsupportedPropertyInfo,
     validate_query,
+)
+from multiconn_archicad.utilities.queries.validation import (
+    FieldCheck,
+    FieldPredicate,
+    QueryValidationContext,
 )
 
 

@@ -26,6 +26,29 @@ def _type_row(element_type: str, **syntax) -> QueryRow:
 
 
 class TestExpressionCompilation:
+    def test_equal_conditions_keep_distinct_source_rows_through_nested_query_construction(self):
+        first = _type_row("Wall", open_parentheses=1, join_next="or")
+        second = _type_row("Wall", close_parentheses=1)
+        third = _type_row("Wall")
+
+        result = build_query(QueryRows(rows=[first, second, third]))
+
+        assert result.query is not None, result.issues
+        root = result.query.where
+        assert isinstance(root, AllOf)
+        nested = root.items[0]
+        assert isinstance(nested, AnyOf)
+        # Equal values belong to different rows. Construction must neither copy
+        # away the compiler's leaf identities nor merge equal predicates.
+        leaves = (*nested.items, root.items[1])
+        assert leaves[0] == leaves[1] == leaves[2]
+        assert len({id(leaf) for leaf in leaves}) == 3
+        assert dict(result.row_ids_by_location) == {
+            ("where", "items", 0, "items", 0): first.row_id,
+            ("where", "items", 0, "items", 1): second.row_id,
+            ("where", "items", 1): third.row_id,
+        }
+
     def test_compiles_and_before_or_and_ignores_the_last_connector(self):
         wall = _type_row("Wall", join_next="or")
         slab = _type_row("Slab")

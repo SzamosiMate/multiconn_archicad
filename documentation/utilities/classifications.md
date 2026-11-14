@@ -145,7 +145,8 @@ systems produce `unknown_field`; missing item operands produce `invalid_test`.
 Command/discovery failures raise. Each execution discovers trees only for the
 classification systems referenced by the query.
 
-The prepared ContextBuilder retains this metadata for execution through
+The classification predicate's `prepare()` retains the validated metadata in the
+ContextBuilder through
 `CLASSIFICATION_FIELDS`, avoiding a second discovery. `CLASSIFICATION_VALUES`
 reads all distinct requested system GUIDs in one assignment batch. Both property
 and classification reads use typed `ColumnData[T]` views over their original
