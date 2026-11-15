@@ -251,7 +251,8 @@ class AttributeCommands:
         }
         validated_params = ActivateLayerCombinationParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "ActivateLayerCombination", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "ActivateLayerCombination",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = TypeAdapter(ActivateLayerCombinationResult).validate_python(response_dict)
         return validated_response
@@ -317,7 +318,8 @@ class AttributeCommands:
         }
         validated_params = CreateAttributeFoldersParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateAttributeFolders", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateAttributeFolders",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateAttributeFoldersResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -348,7 +350,8 @@ class AttributeCommands:
         }
         validated_params = CreateBuildingMaterialsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateBuildingMaterials", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateBuildingMaterials",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateBuildingMaterialsResult.model_validate(response_dict)
         return validated_response.attributeIds
@@ -378,7 +381,8 @@ class AttributeCommands:
         }
         validated_params = CreateCompositesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateComposites", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateComposites",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateCompositesResult.model_validate(response_dict)
         return validated_response.attributeIds
@@ -408,7 +412,8 @@ class AttributeCommands:
         }
         validated_params = CreateFillsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateFills", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateFills",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateFillsResult.model_validate(response_dict)
         return validated_response.attributeIds
@@ -438,7 +443,7 @@ class AttributeCommands:
         validated_params = CreateGraphicOverrideCombinationsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
             "CreateGraphicOverrideCombinations",
-            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateGraphicOverrideCombinationsResult.model_validate(response_dict)
         return validated_response.graphicOverrideCombinationIds
@@ -468,7 +473,7 @@ class AttributeCommands:
         validated_params = CreateGraphicOverrideRuleGroupsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
             "CreateGraphicOverrideRuleGroups",
-            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateGraphicOverrideRuleGroupsResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -499,7 +504,8 @@ class AttributeCommands:
         }
         validated_params = CreateGraphicOverrideRulesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateGraphicOverrideRules", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateGraphicOverrideRules",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateGraphicOverrideRulesResult.model_validate(response_dict)
         return validated_response.graphicOverrideRuleIds
@@ -530,7 +536,8 @@ class AttributeCommands:
         }
         validated_params = CreateLayerCombinationsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateLayerCombinations", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateLayerCombinations",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateLayerCombinationsResult.model_validate(response_dict)
         return validated_response.attributeIds
@@ -560,7 +567,8 @@ class AttributeCommands:
         }
         validated_params = CreateLayersParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateLayers", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateLayers",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateLayersResult.model_validate(response_dict)
         return validated_response.attributeIds
@@ -590,7 +598,8 @@ class AttributeCommands:
         }
         validated_params = CreateLinesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateLines", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateLines",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateLinesResult.model_validate(response_dict)
         return validated_response.attributeIds
@@ -622,7 +631,8 @@ class AttributeCommands:
         }
         validated_params = CreateMEPSystemsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateMEPSystems", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateMEPSystems",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateMEPSystemsResult.model_validate(response_dict)
         return validated_response.attributeIds
@@ -652,7 +662,8 @@ class AttributeCommands:
         }
         validated_params = CreatePenTablesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreatePenTables", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreatePenTables",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreatePenTablesResult.model_validate(response_dict)
         return validated_response.attributeIds
@@ -683,7 +694,8 @@ class AttributeCommands:
         }
         validated_params = CreateProfilesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateProfiles", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateProfiles",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateProfilesResult.model_validate(response_dict)
         return validated_response.attributeIds
@@ -713,7 +725,8 @@ class AttributeCommands:
         }
         validated_params = CreateSurfacesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateSurfaces", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateSurfaces",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateSurfacesResult.model_validate(response_dict)
         return validated_response.attributeIds
@@ -744,7 +757,8 @@ class AttributeCommands:
         }
         validated_params = CreateZoneCategoriesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateZoneCategories", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateZoneCategories",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateZoneCategoriesResult.model_validate(response_dict)
         return validated_response.attributeIds
@@ -803,7 +817,8 @@ class AttributeCommands:
         }
         validated_params = DeleteAndReplaceAttributesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "DeleteAndReplaceAttributes", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "DeleteAndReplaceAttributes",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = DeleteAndReplaceAttributesResult.model_validate(response_dict)
         return validated_response
@@ -837,7 +852,8 @@ class AttributeCommands:
         }
         validated_params = DeleteAttributeFoldersParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "DeleteAttributeFolders", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "DeleteAttributeFolders",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         return TypeAdapter(list[ExecutionResult]).validate_python(response_dict.get("executionResults"))
 
@@ -869,7 +885,8 @@ class AttributeCommands:
         }
         validated_params = DeleteAttributeFoldersParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "DeleteAttributeFolders", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "DeleteAttributeFolders",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = DeleteAttributeFoldersResult.model_validate(response_dict)
         return validated_response
@@ -902,7 +919,8 @@ class AttributeCommands:
         }
         validated_params = DeleteAttributesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "DeleteAttributes", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "DeleteAttributes",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         return TypeAdapter(list[ExecutionResult]).validate_python(response_dict.get("executionResults"))
 
@@ -930,7 +948,8 @@ class AttributeCommands:
         }
         validated_params = DeleteAttributesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "DeleteAttributes", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "DeleteAttributes",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = DeleteAttributesResult.model_validate(response_dict)
         return validated_response
@@ -960,7 +979,7 @@ class AttributeCommands:
         validated_params = DeleteGraphicOverrideCombinationsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
             "DeleteGraphicOverrideCombinations",
-            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = DeleteGraphicOverrideCombinationsResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -998,7 +1017,7 @@ class AttributeCommands:
         validated_params = DeleteGraphicOverrideRuleGroupsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
             "DeleteGraphicOverrideRuleGroups",
-            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = DeleteGraphicOverrideRuleGroupsResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -1028,7 +1047,8 @@ class AttributeCommands:
         }
         validated_params = DeleteGraphicOverrideRulesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "DeleteGraphicOverrideRules", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "DeleteGraphicOverrideRules",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = DeleteGraphicOverrideRulesResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -1058,7 +1078,8 @@ class AttributeCommands:
         }
         validated_params = DeleteUserDataOfAttributesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "DeleteUserDataOfAttributes", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "DeleteUserDataOfAttributes",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         return TypeAdapter(list[ExecutionResult]).validate_python(response_dict.get("executionResults"))
 
@@ -1088,7 +1109,8 @@ class AttributeCommands:
         }
         validated_params = DeleteUserDataOfAttributesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "DeleteUserDataOfAttributes", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "DeleteUserDataOfAttributes",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = DeleteUserDataOfAttributesResult.model_validate(response_dict)
         return validated_response
@@ -1115,7 +1137,8 @@ class AttributeCommands:
         }
         validated_params = GetAttributeIndexesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetAttributeIndexes", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetAttributeIndexes",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = TypeAdapter(GetAttributeIndexesResult).validate_python(response_dict)
         return validated_response
@@ -1143,7 +1166,8 @@ class AttributeCommands:
         }
         validated_params = GetAttributesByTypeParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetAttributesByType", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetAttributesByType",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = TypeAdapter(GetAttributesByTypeResult).validate_python(response_dict)
         return validated_response
@@ -1180,7 +1204,8 @@ class AttributeCommands:
         }
         validated_params = GetAttributesFromProjectParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetAttributesFromProject", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetAttributesFromProject",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = TypeAdapter(GetAttributesFromProjectResult).validate_python(response_dict)
         return validated_response
@@ -1209,7 +1234,7 @@ class AttributeCommands:
         validated_params = GetBuildingMaterialPhysicalPropertiesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
             "GetBuildingMaterialPhysicalProperties",
-            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetBuildingMaterialPhysicalPropertiesResult.model_validate(response_dict)
         return validated_response.properties
@@ -1239,7 +1264,8 @@ class AttributeCommands:
         }
         validated_params = GetBuildingMaterialsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetBuildingMaterials", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetBuildingMaterials",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetBuildingMaterialsResult.model_validate(response_dict)
         return validated_response.buildingMaterials
@@ -1269,7 +1295,8 @@ class AttributeCommands:
         }
         validated_params = GetCompositesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetComposites", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetComposites",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetCompositesResult.model_validate(response_dict)
         return validated_response.composites
@@ -1335,7 +1362,8 @@ class AttributeCommands:
         }
         validated_params = GetFillsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetFills", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetFills",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetFillsResult.model_validate(response_dict)
         return validated_response.fills
@@ -1364,7 +1392,8 @@ class AttributeCommands:
         }
         validated_params = GetFontsByNameParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetFontsByName", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetFontsByName",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetFontsByNameResult.model_validate(response_dict)
         return validated_response.fonts
@@ -1430,7 +1459,8 @@ class AttributeCommands:
         }
         validated_params = GetGraphicOverrideRulesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetGraphicOverrideRules", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetGraphicOverrideRules",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetGraphicOverrideRulesResult.model_validate(response_dict)
         return validated_response.graphicOverrideRules
@@ -1466,7 +1496,8 @@ class AttributeCommands:
         }
         validated_params = GetGraphicOverrideRulesByNameParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetGraphicOverrideRulesByName", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetGraphicOverrideRulesByName",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetGraphicOverrideRulesByNameResult.model_validate(response_dict)
         return validated_response.graphicOverrideRules
@@ -1493,7 +1524,8 @@ class AttributeCommands:
         }
         validated_params = GetLayerCombinationsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetLayerCombinations", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetLayerCombinations",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetLayerCombinationsResult.model_validate(response_dict)
         return validated_response.layerCombinations
@@ -1523,7 +1555,8 @@ class AttributeCommands:
         }
         validated_params = GetLayerOfElementDefaultsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetLayerOfElementDefaults", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetLayerOfElementDefaults",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetLayerOfElementDefaultsResult.model_validate(response_dict)
         return validated_response.layersOfElementDefaults
@@ -1553,7 +1586,8 @@ class AttributeCommands:
         }
         validated_params = GetLayersParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetLayers", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetLayers",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetLayersResult.model_validate(response_dict)
         return validated_response.layers
@@ -1584,7 +1618,8 @@ class AttributeCommands:
         }
         validated_params = GetLinesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetLines", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetLines",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetLinesResult.model_validate(response_dict)
         return validated_response.lines
@@ -1615,7 +1650,8 @@ class AttributeCommands:
         }
         validated_params = GetMEPSystemsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetMEPSystems", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetMEPSystems",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetMEPSystemsResult.model_validate(response_dict)
         return validated_response.mepSystems
@@ -1676,7 +1712,8 @@ class AttributeCommands:
         }
         validated_params = GetMissingAttributesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetMissingAttributes", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetMissingAttributes",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetMissingAttributesResult.model_validate(response_dict)
         return validated_response
@@ -1707,7 +1744,8 @@ class AttributeCommands:
         }
         validated_params = GetPenTablesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetPenTables", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetPenTables",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetPenTablesResult.model_validate(response_dict)
         return validated_response.penTables
@@ -1737,7 +1775,7 @@ class AttributeCommands:
         }
         validated_params = GetPensParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetPens", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetPens", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True)
         )
         validated_response = GetPensResult.model_validate(response_dict)
         return validated_response.pens
@@ -1771,7 +1809,8 @@ class AttributeCommands:
         }
         validated_params = GetProfilesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetProfiles", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetProfiles",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetProfilesResult.model_validate(response_dict)
         return validated_response.profiles
@@ -1801,7 +1840,8 @@ class AttributeCommands:
         }
         validated_params = GetSurfacesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetSurfaces", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetSurfaces",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetSurfacesResult.model_validate(response_dict)
         return validated_response.surfaces
@@ -1841,7 +1881,8 @@ class AttributeCommands:
         }
         validated_params = GetUnusedAttributesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetUnusedAttributes", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetUnusedAttributes",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetUnusedAttributesResult.model_validate(response_dict)
         return validated_response
@@ -1890,7 +1931,8 @@ class AttributeCommands:
         }
         validated_params = GetUserDataOfAttributesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetUserDataOfAttributes", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetUserDataOfAttributes",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetUserDataOfAttributesResult.model_validate(response_dict)
         return validated_response.userDataOfAttributes
@@ -1920,7 +1962,8 @@ class AttributeCommands:
         }
         validated_params = GetZoneCategoriesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetZoneCategories", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetZoneCategories",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetZoneCategoriesResult.model_validate(response_dict)
         return validated_response.zoneCategories
@@ -1994,7 +2037,8 @@ class AttributeCommands:
         }
         validated_params = ImportAttributesFromProjectParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "ImportAttributesFromProject", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "ImportAttributesFromProject",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = TypeAdapter(ImportAttributesFromProjectResult).validate_python(response_dict)
         return validated_response
@@ -2025,7 +2069,7 @@ class AttributeCommands:
         validated_params = ModifyGraphicOverrideCombinationsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
             "ModifyGraphicOverrideCombinations",
-            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = ModifyGraphicOverrideCombinationsResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -2056,7 +2100,8 @@ class AttributeCommands:
         }
         validated_params = ModifyGraphicOverrideRulesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "ModifyGraphicOverrideRules", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "ModifyGraphicOverrideRules",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = ModifyGraphicOverrideRulesResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -2091,7 +2136,8 @@ class AttributeCommands:
         }
         validated_params = ModifyPensParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "ModifyPens", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "ModifyPens",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = ModifyPensResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -2131,7 +2177,8 @@ class AttributeCommands:
         }
         validated_params = MoveAttributesAndFoldersParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "MoveAttributesAndFolders", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "MoveAttributesAndFolders",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = MoveAttributesAndFoldersResult.model_validate(response_dict)
         return validated_response
@@ -2161,7 +2208,8 @@ class AttributeCommands:
         }
         validated_params = MoveGraphicOverrideRulesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "MoveGraphicOverrideRules", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "MoveGraphicOverrideRules",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = MoveGraphicOverrideRulesResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -2228,7 +2276,8 @@ class AttributeCommands:
         }
         validated_params = ReindexAttributesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "ReindexAttributes", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "ReindexAttributes",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = ReindexAttributesResult.model_validate(response_dict)
         return validated_response.attributes
@@ -2279,7 +2328,8 @@ class AttributeCommands:
         }
         validated_params = ReindexLayersParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "ReindexLayers", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "ReindexLayers",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = ReindexLayersResult.model_validate(response_dict)
         return validated_response.layers
@@ -2309,7 +2359,8 @@ class AttributeCommands:
         }
         validated_params = RenameAttributeFoldersParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "RenameAttributeFolders", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "RenameAttributeFolders",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = RenameAttributeFoldersResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -2341,7 +2392,8 @@ class AttributeCommands:
         }
         validated_params = RenameAttributesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "RenameAttributes", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "RenameAttributes",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = RenameAttributesResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -2372,7 +2424,7 @@ class AttributeCommands:
         validated_params = RenameGraphicOverrideRuleGroupsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
             "RenameGraphicOverrideRuleGroups",
-            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = RenameGraphicOverrideRuleGroupsResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -2402,7 +2454,7 @@ class AttributeCommands:
         validated_params = SetGraphicOverrideRuleGroupOrderParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
             "SetGraphicOverrideRuleGroupOrder",
-            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = TypeAdapter(SetGraphicOverrideRuleGroupOrderResult).validate_python(response_dict)
         return validated_response
@@ -2433,7 +2485,8 @@ class AttributeCommands:
         }
         validated_params = SetGraphicOverrideRuleOrderParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "SetGraphicOverrideRuleOrder", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "SetGraphicOverrideRuleOrder",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = SetGraphicOverrideRuleOrderResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -2463,7 +2516,8 @@ class AttributeCommands:
         }
         validated_params = SetLayerOfElementDefaultsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "SetLayerOfElementDefaults", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "SetLayerOfElementDefaults",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = SetLayerOfElementDefaultsResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -2495,7 +2549,7 @@ class AttributeCommands:
         }
         validated_params = SetPensParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "SetPens", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "SetPens", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True)
         )
         validated_response = SetPensResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -2539,7 +2593,8 @@ class AttributeCommands:
         }
         validated_params = SetUserDataOfAttributesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "SetUserDataOfAttributes", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "SetUserDataOfAttributes",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = SetUserDataOfAttributesResult.model_validate(response_dict)
         return validated_response.executionResults

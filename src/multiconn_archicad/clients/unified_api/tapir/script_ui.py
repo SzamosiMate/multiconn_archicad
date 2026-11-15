@@ -83,7 +83,8 @@ class ScriptUiCommands:
         }
         validated_params = GetScriptUIResultParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetScriptUIResult", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetScriptUIResult",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetScriptUIResultResult.model_validate(response_dict)
         return validated_response
@@ -113,7 +114,8 @@ class ScriptUiCommands:
         }
         validated_params = OpenSettingsDialogParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "OpenSettingsDialog", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "OpenSettingsDialog",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = OpenSettingsDialogResult.model_validate(response_dict)
         return validated_response.cancelled
@@ -150,7 +152,8 @@ class ScriptUiCommands:
         }
         validated_params = PickAttributeParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "PickAttribute", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "PickAttribute",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = PickAttributeResult.model_validate(response_dict)
         return validated_response
@@ -181,7 +184,8 @@ class ScriptUiCommands:
         }
         validated_params = PickAttributeFolderParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "PickAttributeFolder", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "PickAttributeFolder",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = PickAttributeFolderResult.model_validate(response_dict)
         return validated_response
@@ -209,7 +213,8 @@ class ScriptUiCommands:
         }
         validated_params = PickLibraryFolderParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "PickLibraryFolder", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "PickLibraryFolder",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = PickLibraryFolderResult.model_validate(response_dict)
         return validated_response
@@ -243,7 +248,8 @@ class ScriptUiCommands:
         }
         validated_params = PickLibraryPartParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "PickLibraryPart", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "PickLibraryPart",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = PickLibraryPartResult.model_validate(response_dict)
         return validated_response
@@ -270,7 +276,8 @@ class ScriptUiCommands:
         }
         validated_params = PickLibraryPartFileParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "PickLibraryPartFile", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "PickLibraryPartFile",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = PickLibraryPartFileResult.model_validate(response_dict)
         return validated_response
@@ -312,7 +319,8 @@ class ScriptUiCommands:
         }
         validated_params = PickLibraryPartSaveLocationParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "PickLibraryPartSaveLocation", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "PickLibraryPartSaveLocation",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = PickLibraryPartSaveLocationResult.model_validate(response_dict)
         return validated_response
@@ -357,7 +365,8 @@ class ScriptUiCommands:
         }
         validated_params = PickZoneStampOrLabelFileParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "PickZoneStampOrLabelFile", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "PickZoneStampOrLabelFile",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = PickZoneStampOrLabelFileResult.model_validate(response_dict)
         return validated_response
@@ -390,7 +399,8 @@ class ScriptUiCommands:
         }
         validated_params = ShowIFCExportSettingsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "ShowIFCExportSettings", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "ShowIFCExportSettings",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = ShowIFCExportSettingsResult.model_validate(response_dict)
         return validated_response
@@ -481,7 +491,8 @@ class ScriptUiCommands:
         }
         validated_params = ShowScriptUIParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "ShowScriptUI", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "ShowScriptUI",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = TypeAdapter(ShowScriptUIResult).validate_python(response_dict)
         return validated_response

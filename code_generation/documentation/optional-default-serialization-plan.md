@@ -1,6 +1,6 @@
 # Optional default serialization: implementation plan
 
-Date: 2026-11-15, Europe/Budapest. Status: **implementation pending**.
+Date: 2026-11-15, Europe/Budapest. Status: **implemented; see validation notes below**.
 
 Work branch: `codex/optional-default-compatibility`, created from the element-query
 tip `9e4de6f`. General compatibility checks have been moved from the SI query
@@ -401,5 +401,10 @@ Retain the live experiment's results without changing their meaning.
 - Live older-Tapir default calls succeed because the actual request omits the flag.
 - The generated diff, documentation and saved validation results match this scope.
 
-This document plans the implementation; creating it does not implement the
-serializer, change the generator or regenerate clients.
+The sections above record the implementation plan and its original completion criteria.
+
+## Validation notes — 2026-11-15
+
+The generated clients omit `useSIUnits` for omitted, None and false values; true is forwarded. SI query helpers continue to require a supported Tapir version and explicitly request SI values. On the discovered Archicad 27 / Tapir 1.7.3 instance, generated empty property reads with the option omitted and explicitly false both sent no SI key and succeeded; a raw true flag returned error 4002 at `#/useSIUnits`. No Tapir 2.0 instance was available for a live SI true check.
+
+Validation in the project environment: provider audits and Ruff passed; focused smoke, serializer and code-generation checks passed (100 tests); serializer/audit checks also passed under Pydantic 2.12.0. Repeating unified generation produced identical file hashes. Seven targeted deep generated method tests covering property reads, writes, dry runs and navigator rename passed. The full routine run reported 6,380 passed, 2,446 deselected and 17 orchestration integration failures where local mock servers could not be discovered under the sandbox's socket restrictions. The full deep run was stopped at 3% due to its runtime; it was not completed. `git diff --check` passed.

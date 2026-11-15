@@ -69,7 +69,7 @@ class ElementListingCommands:
         validated_params = GetElementsByClassificationParameters(**params_dict)
         response_dict = self._core.post_command(
             "API.GetElementsByClassification",
-            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetElementsByClassificationResult.model_validate(response_dict)
         return validated_response.elements
@@ -94,7 +94,8 @@ class ElementListingCommands:
         }
         validated_params = GetElementsByTypeParameters(**params_dict)
         response_dict = self._core.post_command(
-            "API.GetElementsByType", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "API.GetElementsByType",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetElementsByTypeResult.model_validate(response_dict)
         return validated_response.elements
@@ -127,7 +128,8 @@ class ElementListingCommands:
         }
         validated_params = GetSelectedElementsParameters(**params_dict)
         response_dict = self._core.post_command(
-            "API.GetSelectedElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "API.GetSelectedElements",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetSelectedElementsResult.model_validate(response_dict)
         return validated_response.elements
@@ -152,7 +154,8 @@ class ElementListingCommands:
         }
         validated_params = GetTypesOfElementsParameters(**params_dict)
         response_dict = self._core.post_command(
-            "API.GetTypesOfElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "API.GetTypesOfElements",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetTypesOfElementsResult.model_validate(response_dict)
         return validated_response.typesOfElements

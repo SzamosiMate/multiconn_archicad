@@ -165,7 +165,8 @@ class MepCommands:
         }
         validated_params = CheckMEPPortConnectabilityParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CheckMEPPortConnectability", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CheckMEPPortConnectability",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CheckMEPPortConnectabilityResult.model_validate(response_dict)
         return validated_response.results
@@ -195,7 +196,8 @@ class MepCommands:
         }
         validated_params = ConnectMEPElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "ConnectMEPElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "ConnectMEPElements",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = ConnectMEPElementsResult.model_validate(response_dict)
         return validated_response.connectionResults
@@ -226,7 +228,8 @@ class MepCommands:
         }
         validated_params = ConnectToElectricalCircuitsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "ConnectToElectricalCircuits", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "ConnectToElectricalCircuits",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = ConnectToElectricalCircuitsResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -255,7 +258,8 @@ class MepCommands:
         }
         validated_params = CreateElectricalCircuitsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateElectricalCircuits", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateElectricalCircuits",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateElectricalCircuitsResult.model_validate(response_dict)
         return validated_response.elements
@@ -286,7 +290,8 @@ class MepCommands:
         }
         validated_params = CreateElectricalDevicesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateElectricalDevices", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateElectricalDevices",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateElectricalDevicesResult.model_validate(response_dict)
         return validated_response.elements
@@ -317,7 +322,8 @@ class MepCommands:
         }
         validated_params = CreateElectricalPanelsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateElectricalPanels", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateElectricalPanels",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateElectricalPanelsResult.model_validate(response_dict)
         return validated_response.elements
@@ -345,7 +351,8 @@ class MepCommands:
         }
         validated_params = CreateMEPElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateMEPElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateMEPElements",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateMEPElementsResult.model_validate(response_dict)
         return validated_response.elements
@@ -377,7 +384,8 @@ class MepCommands:
         }
         validated_params = CreateMEPFlexibleSegmentsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateMEPFlexibleSegments", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateMEPFlexibleSegments",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateMEPFlexibleSegmentsResult.model_validate(response_dict)
         return validated_response.elements
@@ -406,7 +414,8 @@ class MepCommands:
         }
         validated_params = CreateMEPPhysicalSystemsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateMEPPhysicalSystems", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateMEPPhysicalSystems",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateMEPPhysicalSystemsResult.model_validate(response_dict)
         return validated_response.physicalSystems
@@ -438,7 +447,8 @@ class MepCommands:
         }
         validated_params = CreateMEPRoutingElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateMEPRoutingElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateMEPRoutingElements",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateMEPRoutingElementsResult.model_validate(response_dict)
         return validated_response.elements
@@ -466,7 +476,8 @@ class MepCommands:
         }
         validated_params = CreateMEPSystemGroupsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateMEPSystemGroups", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateMEPSystemGroups",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateMEPSystemGroupsResult.model_validate(response_dict)
         return validated_response.systemGroups
@@ -500,7 +511,8 @@ class MepCommands:
         }
         validated_params = CreateMEPTakeOffsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateMEPTakeOffs", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateMEPTakeOffs",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateMEPTakeOffsResult.model_validate(response_dict)
         return validated_response.elements
@@ -529,7 +541,8 @@ class MepCommands:
         }
         validated_params = DeleteElectricalCircuitsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "DeleteElectricalCircuits", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "DeleteElectricalCircuits",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = DeleteElectricalCircuitsResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -559,7 +572,8 @@ class MepCommands:
         }
         validated_params = DeleteMEPPhysicalSystemsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "DeleteMEPPhysicalSystems", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "DeleteMEPPhysicalSystems",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = DeleteMEPPhysicalSystemsResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -596,7 +610,8 @@ class MepCommands:
         }
         validated_params = GetElectricalCircuitsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetElectricalCircuits", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetElectricalCircuits",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetElectricalCircuitsResult.model_validate(response_dict)
         return validated_response.electricalCircuits
@@ -627,7 +642,8 @@ class MepCommands:
         }
         validated_params = GetElectricalDevicesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetElectricalDevices", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetElectricalDevices",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetElectricalDevicesResult.model_validate(response_dict)
         return validated_response.electricalDevices
@@ -658,7 +674,8 @@ class MepCommands:
         }
         validated_params = GetElectricalPanelsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetElectricalPanels", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetElectricalPanels",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetElectricalPanelsResult.model_validate(response_dict)
         return validated_response.electricalPanels
@@ -706,7 +723,8 @@ class MepCommands:
         }
         validated_params = GetMEPDistributionSystemsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetMEPDistributionSystems", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetMEPDistributionSystems",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetMEPDistributionSystemsResult.model_validate(response_dict)
         return validated_response
@@ -738,7 +756,8 @@ class MepCommands:
         }
         validated_params = GetMEPElementDetailsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetMEPElementDetails", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetMEPElementDetails",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetMEPElementDetailsResult.model_validate(response_dict)
         return validated_response.elementDetails
@@ -772,7 +791,8 @@ class MepCommands:
         }
         validated_params = GetMEPElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetMEPElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetMEPElements",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetMEPElementsResult.model_validate(response_dict)
         return validated_response.elements
@@ -802,7 +822,7 @@ class MepCommands:
         validated_params = GetMEPPhysicalSystemsOfElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
             "GetMEPPhysicalSystemsOfElements",
-            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetMEPPhysicalSystemsOfElementsResult.model_validate(response_dict)
         return validated_response.physicalSystemsOfElements
@@ -832,7 +852,8 @@ class MepCommands:
         }
         validated_params = GetMEPPortsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetMEPPorts", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetMEPPorts",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetMEPPortsResult.model_validate(response_dict)
         return validated_response.elementPorts
@@ -871,7 +892,8 @@ class MepCommands:
         }
         validated_params = GetMEPPreferenceTablesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetMEPPreferenceTables", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetMEPPreferenceTables",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetMEPPreferenceTablesResult.model_validate(response_dict)
         return validated_response
@@ -907,7 +929,8 @@ class MepCommands:
         }
         validated_params = GetMEPRoutingElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetMEPRoutingElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetMEPRoutingElements",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetMEPRoutingElementsResult.model_validate(response_dict)
         return validated_response.routingElements
@@ -939,7 +962,8 @@ class MepCommands:
         }
         validated_params = GetMEPRoutingParametersParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetMEPRoutingParameters", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetMEPRoutingParameters",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetMEPRoutingParametersResult.model_validate(response_dict)
         return validated_response.routingParameters
@@ -990,7 +1014,8 @@ class MepCommands:
         }
         validated_params = GetMEPToolDefaultsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetMEPToolDefaults", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetMEPToolDefaults",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetMEPToolDefaultsResult.model_validate(response_dict)
         return validated_response
@@ -1020,7 +1045,8 @@ class MepCommands:
         }
         validated_params = ModifyElectricalCircuitsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "ModifyElectricalCircuits", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "ModifyElectricalCircuits",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = ModifyElectricalCircuitsResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -1051,7 +1077,8 @@ class MepCommands:
         }
         validated_params = ModifyElectricalDevicesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "ModifyElectricalDevices", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "ModifyElectricalDevices",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = ModifyElectricalDevicesResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -1081,7 +1108,8 @@ class MepCommands:
         }
         validated_params = ModifyElectricalPanelsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "ModifyElectricalPanels", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "ModifyElectricalPanels",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = ModifyElectricalPanelsResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -1134,7 +1162,7 @@ class MepCommands:
         validated_params = ModifyElectricalProjectSettingsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
             "ModifyElectricalProjectSettings",
-            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = TypeAdapter(ModifyElectricalProjectSettingsResult).validate_python(response_dict)
         return validated_response
@@ -1169,7 +1197,8 @@ class MepCommands:
         }
         validated_params = ModifyMEPElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "ModifyMEPElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "ModifyMEPElements",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = ModifyMEPElementsResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -1199,7 +1228,8 @@ class MepCommands:
         }
         validated_params = ModifyMEPPhysicalSystemsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "ModifyMEPPhysicalSystems", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "ModifyMEPPhysicalSystems",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = ModifyMEPPhysicalSystemsResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -1231,7 +1261,8 @@ class MepCommands:
         }
         validated_params = ModifyMEPPortsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "ModifyMEPPorts", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "ModifyMEPPorts",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = ModifyMEPPortsResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -1293,7 +1324,8 @@ class MepCommands:
         }
         validated_params = ModifyMEPPreferenceTablesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "ModifyMEPPreferenceTables", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "ModifyMEPPreferenceTables",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = ModifyMEPPreferenceTablesResult.model_validate(response_dict)
         return validated_response
@@ -1328,7 +1360,8 @@ class MepCommands:
         }
         validated_params = ModifyMEPRoutingElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "ModifyMEPRoutingElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "ModifyMEPRoutingElements",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = ModifyMEPRoutingElementsResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -1357,7 +1390,8 @@ class MepCommands:
         }
         validated_params = ModifyMEPSystemGroupsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "ModifyMEPSystemGroups", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "ModifyMEPSystemGroups",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = ModifyMEPSystemGroupsResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -1395,7 +1429,8 @@ class MepCommands:
         }
         validated_params = SetMEPRoutingParametersParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "SetMEPRoutingParameters", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "SetMEPRoutingParameters",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = SetMEPRoutingParametersResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -1432,7 +1467,8 @@ class MepCommands:
         }
         validated_params = TransferMEPSettingsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "TransferMEPSettings", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "TransferMEPSettings",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = TransferMEPSettingsResult.model_validate(response_dict)
         return validated_response.executionResults

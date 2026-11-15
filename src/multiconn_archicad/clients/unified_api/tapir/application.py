@@ -136,7 +136,8 @@ class ApplicationCommands:
         """
         validated_params = TypeAdapter(ChangeWindowParameters).validate_python(parameters)
         response_dict = self._core.post_tapir_command(
-            "ChangeWindow", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "ChangeWindow",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = TypeAdapter(ChangeWindowResult).validate_python(response_dict)
         return validated_response
@@ -164,7 +165,8 @@ class ApplicationCommands:
         }
         validated_params = CloseWindowsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CloseWindows", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CloseWindows",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CloseWindowsResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -193,7 +195,8 @@ class ApplicationCommands:
         }
         validated_params = ConvertImagesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "ConvertImages", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "ConvertImages",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = ConvertImagesResult.model_validate(response_dict)
         return validated_response.images
@@ -225,7 +228,8 @@ class ApplicationCommands:
         }
         validated_params = DeleteGhostRecordsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "DeleteGhostRecords", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "DeleteGhostRecords",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = DeleteGhostRecordsResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -318,7 +322,8 @@ class ApplicationCommands:
         }
         validated_params = GetArcFromUserParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetArcFromUser", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetArcFromUser",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetArcFromUserResult.model_validate(response_dict)
         return validated_response
@@ -436,7 +441,8 @@ class ApplicationCommands:
         }
         validated_params = GetContainingDatabasesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetContainingDatabases", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetContainingDatabases",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetContainingDatabasesResult.model_validate(response_dict)
         return validated_response.databases
@@ -586,7 +592,8 @@ class ApplicationCommands:
         }
         validated_params = GetElementFromUserParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetElementFromUser", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetElementFromUser",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetElementFromUserResult.model_validate(response_dict)
         return validated_response
@@ -632,7 +639,8 @@ class ApplicationCommands:
         }
         validated_params = GetLineFromUserParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetLineFromUser", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetLineFromUser",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetLineFromUserResult.model_validate(response_dict)
         return validated_response
@@ -693,7 +701,8 @@ class ApplicationCommands:
         }
         validated_params = GetPointFromUserParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetPointFromUser", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetPointFromUser",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetPointFromUserResult.model_validate(response_dict)
         return validated_response.position
@@ -739,7 +748,8 @@ class ApplicationCommands:
         }
         validated_params = GetPolygonFromUserParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetPolygonFromUser", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetPolygonFromUser",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetPolygonFromUserResult.model_validate(response_dict)
         return validated_response
@@ -820,7 +830,8 @@ class ApplicationCommands:
         }
         validated_params = GetSpecialFoldersParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetSpecialFolders", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetSpecialFolders",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetSpecialFoldersResult.model_validate(response_dict)
         return validated_response.folderPaths
@@ -848,7 +859,8 @@ class ApplicationCommands:
         }
         validated_params = GetToolboxItemsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetToolboxItems", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetToolboxItems",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetToolboxItemsResult.model_validate(response_dict)
         return validated_response
@@ -896,7 +908,8 @@ class ApplicationCommands:
         }
         validated_params = ModelToScreenParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "ModelToScreen", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "ModelToScreen",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = ModelToScreenResult.model_validate(response_dict)
         return validated_response.screenPoints
@@ -979,7 +992,8 @@ class ApplicationCommands:
         }
         validated_params = RunActionCenterChecksParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "RunActionCenterChecks", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "RunActionCenterChecks",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = RunActionCenterChecksResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -1011,7 +1025,8 @@ class ApplicationCommands:
         }
         validated_params = ScreenToModelParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "ScreenToModel", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "ScreenToModel",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = ScreenToModelResult.model_validate(response_dict)
         return validated_response.coordinates
@@ -1043,7 +1058,8 @@ class ApplicationCommands:
         }
         validated_params = Set3DCutawayStatusParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "Set3DCutawayStatus", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "Set3DCutawayStatus",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = TypeAdapter(Set3DCutawayStatusResult).validate_python(response_dict)
         return validated_response
@@ -1070,7 +1086,8 @@ class ApplicationCommands:
         }
         validated_params = SetArchicadVisibilityParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "SetArchicadVisibility", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "SetArchicadVisibility",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = TypeAdapter(SetArchicadVisibilityResult).validate_python(response_dict)
         return validated_response
@@ -1107,7 +1124,8 @@ class ApplicationCommands:
         }
         validated_params = SetCurrentToolParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "SetCurrentTool", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "SetCurrentTool",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = TypeAdapter(SetCurrentToolResult).validate_python(response_dict)
         return validated_response
@@ -1142,7 +1160,8 @@ class ApplicationCommands:
         }
         validated_params = SetCurrentWindowDrawingScaleParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "SetCurrentWindowDrawingScale", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "SetCurrentWindowDrawingScale",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = TypeAdapter(SetCurrentWindowDrawingScaleResult).validate_python(response_dict)
         return validated_response
@@ -1173,7 +1192,8 @@ class ApplicationCommands:
         }
         validated_params = SetDialogAutoCloseParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "SetDialogAutoClose", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "SetDialogAutoClose",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = TypeAdapter(SetDialogAutoCloseResult).validate_python(response_dict)
         return validated_response
@@ -1219,7 +1239,8 @@ class ApplicationCommands:
         }
         validated_params = ShowAlertParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "ShowAlert", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "ShowAlert",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = ShowAlertResult.model_validate(response_dict)
         return validated_response.clickedButton
@@ -1289,7 +1310,8 @@ class ApplicationCommands:
         }
         validated_params = ShowNotificationBubbleParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "ShowNotificationBubble", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "ShowNotificationBubble",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = ShowNotificationBubbleResult.model_validate(response_dict)
         return validated_response

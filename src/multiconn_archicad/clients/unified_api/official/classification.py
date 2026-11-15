@@ -85,7 +85,7 @@ class ClassificationCommands:
         validated_params = GetAllClassificationsInSystemParameters(**params_dict)
         response_dict = self._core.post_command(
             "API.GetAllClassificationsInSystem",
-            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetAllClassificationsInSystemResult.model_validate(response_dict)
         return validated_response.classificationItems
@@ -115,7 +115,7 @@ class ClassificationCommands:
         validated_params = GetClassificationItemAvailabilityParameters(**params_dict)
         response_dict = self._core.post_command(
             "API.GetClassificationItemAvailability",
-            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetClassificationItemAvailabilityResult.model_validate(response_dict)
         return validated_response.classificationItemAvailabilityList
@@ -160,7 +160,8 @@ class ClassificationCommands:
         }
         validated_params = GetClassificationSystemsParameters(**params_dict)
         response_dict = self._core.post_command(
-            "API.GetClassificationSystems", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "API.GetClassificationSystems",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetClassificationSystemsResult.model_validate(response_dict)
         return validated_response.classificationSystems
@@ -194,7 +195,7 @@ class ClassificationCommands:
         validated_params = GetClassificationsOfElementsParameters(**params_dict)
         response_dict = self._core.post_command(
             "API.GetClassificationsOfElements",
-            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetClassificationsOfElementsResult.model_validate(response_dict)
         return validated_response.elementClassifications
@@ -224,7 +225,7 @@ class ClassificationCommands:
         validated_params = GetDetailsOfClassificationItemsParameters(**params_dict)
         response_dict = self._core.post_command(
             "API.GetDetailsOfClassificationItems",
-            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetDetailsOfClassificationItemsResult.model_validate(response_dict)
         return validated_response.classificationItems
@@ -255,7 +256,7 @@ class ClassificationCommands:
         validated_params = SetClassificationsOfElementsParameters(**params_dict)
         response_dict = self._core.post_command(
             "API.SetClassificationsOfElements",
-            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = SetClassificationsOfElementsResult.model_validate(response_dict)
         return validated_response.executionResults

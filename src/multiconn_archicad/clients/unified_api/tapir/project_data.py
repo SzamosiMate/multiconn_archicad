@@ -70,7 +70,8 @@ class ProjectDataCommands:
         }
         validated_params = DeleteModulDataParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "DeleteModulData", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "DeleteModulData",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = DeleteModulDataResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -96,7 +97,8 @@ class ProjectDataCommands:
         }
         validated_params = DeleteProjectDataParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "DeleteProjectData", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "DeleteProjectData",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = DeleteProjectDataResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -133,7 +135,8 @@ class ProjectDataCommands:
         }
         validated_params = GetModulDataParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetModulData", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetModulData",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetModulDataResult.model_validate(response_dict)
         return validated_response.modulData
@@ -159,7 +162,8 @@ class ProjectDataCommands:
         }
         validated_params = GetProjectDataParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetProjectData", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetProjectData",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetProjectDataResult.model_validate(response_dict)
         return validated_response.values
@@ -212,7 +216,8 @@ class ProjectDataCommands:
         }
         validated_params = GrantProjectDataParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GrantProjectData", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GrantProjectData",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = TypeAdapter(GrantProjectDataResult).validate_python(response_dict)
         return validated_response
@@ -237,7 +242,8 @@ class ProjectDataCommands:
         }
         validated_params = ReleaseProjectDataParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "ReleaseProjectData", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "ReleaseProjectData",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = TypeAdapter(ReleaseProjectDataResult).validate_python(response_dict)
         return validated_response
@@ -268,7 +274,8 @@ class ProjectDataCommands:
         }
         validated_params = RequestProjectDataParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "RequestProjectData", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "RequestProjectData",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = TypeAdapter(RequestProjectDataResult).validate_python(response_dict)
         return validated_response
@@ -294,7 +301,8 @@ class ProjectDataCommands:
         }
         validated_params = ReserveProjectDataParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "ReserveProjectData", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "ReserveProjectData",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = ReserveProjectDataResult.model_validate(response_dict)
         return validated_response
@@ -327,7 +335,8 @@ class ProjectDataCommands:
         }
         validated_params = SetProjectDataParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "SetProjectData", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "SetProjectData",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = SetProjectDataResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -360,7 +369,8 @@ class ProjectDataCommands:
         }
         validated_params = StoreModulDataParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "StoreModulData", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "StoreModulData",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = StoreModulDataResult.model_validate(response_dict)
         return validated_response.executionResults

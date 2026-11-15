@@ -200,7 +200,8 @@ class LibraryCommands:
         }
         validated_params = AddFilesToEmbeddedLibraryParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "AddFilesToEmbeddedLibrary", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "AddFilesToEmbeddedLibrary",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = AddFilesToEmbeddedLibraryResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -226,7 +227,8 @@ class LibraryCommands:
         }
         validated_params = AddLibrariesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "AddLibraries", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "AddLibraries",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = TypeAdapter(AddLibrariesResult).validate_python(response_dict)
         return validated_response
@@ -272,7 +274,8 @@ class LibraryCommands:
         }
         validated_params = CompareLibraryPartUnIdsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CompareLibraryPartUnIds", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CompareLibraryPartUnIds",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CompareLibraryPartUnIdsResult.model_validate(response_dict)
         return validated_response
@@ -312,7 +315,8 @@ class LibraryCommands:
         }
         validated_params = CopyFilesIntoEmbeddedLibraryParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CopyFilesIntoEmbeddedLibrary", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CopyFilesIntoEmbeddedLibrary",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = TypeAdapter(CopyFilesIntoEmbeddedLibraryResult).validate_python(response_dict)
         return validated_response
@@ -342,7 +346,8 @@ class LibraryCommands:
         }
         validated_params = CopyLibraryPartsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CopyLibraryParts", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CopyLibraryParts",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CopyLibraryPartsResult.model_validate(response_dict)
         return validated_response
@@ -371,7 +376,8 @@ class LibraryCommands:
         }
         validated_params = CreateFolderInEmbeddedLibraryParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateFolderInEmbeddedLibrary", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateFolderInEmbeddedLibrary",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = TypeAdapter(CreateFolderInEmbeddedLibraryResult).validate_python(response_dict)
         return validated_response
@@ -403,7 +409,8 @@ class LibraryCommands:
         }
         validated_params = CreateLibraryPartParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateLibraryPart", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateLibraryPart",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateLibraryPartResult.model_validate(response_dict)
         return validated_response
@@ -481,7 +488,8 @@ class LibraryCommands:
         }
         validated_params = CreateLibraryPartFromElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateLibraryPartFromElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateLibraryPartFromElements",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateLibraryPartFromElementsResult.model_validate(response_dict)
         return validated_response
@@ -519,7 +527,8 @@ class LibraryCommands:
         }
         validated_params = CreateLibraryPartsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateLibraryParts", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateLibraryParts",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateLibraryPartsResult.model_validate(response_dict)
         return validated_response.libraryParts
@@ -550,7 +559,8 @@ class LibraryCommands:
         }
         validated_params = DeleteEmbeddedLibraryItemsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "DeleteEmbeddedLibraryItems", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "DeleteEmbeddedLibraryItems",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = DeleteEmbeddedLibraryItemsResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -585,7 +595,8 @@ class LibraryCommands:
         }
         validated_params = FindLibraryPartsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "FindLibraryParts", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "FindLibraryParts",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = FindLibraryPartsResult.model_validate(response_dict)
         return validated_response.libraryParts
@@ -614,7 +625,8 @@ class LibraryCommands:
         }
         validated_params = GetAvailableLibraryPartsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetAvailableLibraryParts", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetAvailableLibraryParts",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetAvailableLibraryPartsResult.model_validate(response_dict)
         return validated_response
@@ -664,7 +676,8 @@ class LibraryCommands:
         }
         validated_params = GetGDLParametersOfLibraryPartsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetGDLParametersOfLibraryParts", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetGDLParametersOfLibraryParts",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetGDLParametersOfLibraryPartsResult.model_validate(response_dict)
         return validated_response.gdlParametersOfLibraryParts
@@ -744,7 +757,8 @@ class LibraryCommands:
         }
         validated_params = GetLibrariesOfLibPartsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetLibrariesOfLibParts", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetLibrariesOfLibParts",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetLibrariesOfLibPartsResult.model_validate(response_dict)
         return validated_response.libraries
@@ -783,7 +797,8 @@ class LibraryCommands:
         }
         validated_params = GetLibraryPart2DPrimitivesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetLibraryPart2DPrimitives", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetLibraryPart2DPrimitives",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetLibraryPart2DPrimitivesResult.model_validate(response_dict)
         return validated_response.primitives
@@ -820,7 +835,8 @@ class LibraryCommands:
         }
         validated_params = GetLibraryPartCustomSectionParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetLibraryPartCustomSection", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetLibraryPartCustomSection",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetLibraryPartCustomSectionResult.model_validate(response_dict)
         return validated_response
@@ -864,7 +880,8 @@ class LibraryCommands:
         }
         validated_params = GetLibraryPartDetailsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetLibraryPartDetails", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetLibraryPartDetails",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetLibraryPartDetailsResult.model_validate(response_dict)
         return validated_response.libraryParts
@@ -902,7 +919,8 @@ class LibraryCommands:
         }
         validated_params = GetLibraryPartFileInfoParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetLibraryPartFileInfo", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetLibraryPartFileInfo",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetLibraryPartFileInfoResult.model_validate(response_dict)
         return validated_response.files
@@ -933,7 +951,8 @@ class LibraryCommands:
         }
         validated_params = GetLibraryPartIdentitiesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetLibraryPartIdentities", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetLibraryPartIdentities",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetLibraryPartIdentitiesResult.model_validate(response_dict)
         return validated_response.identities
@@ -964,7 +983,8 @@ class LibraryCommands:
         }
         validated_params = GetLibraryPartMetadataParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetLibraryPartMetadata", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetLibraryPartMetadata",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetLibraryPartMetadataResult.model_validate(response_dict)
         return validated_response.libraryParts
@@ -995,7 +1015,7 @@ class LibraryCommands:
         validated_params = GetLibraryPartOriginalLocationsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
             "GetLibraryPartOriginalLocations",
-            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetLibraryPartOriginalLocationsResult.model_validate(response_dict)
         return validated_response.locations
@@ -1029,7 +1049,8 @@ class LibraryCommands:
         }
         validated_params = GetLibraryPartParameterValuesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetLibraryPartParameterValues", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetLibraryPartParameterValues",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetLibraryPartParameterValuesResult.model_validate(response_dict)
         return validated_response.libraryParts
@@ -1057,7 +1078,8 @@ class LibraryCommands:
         }
         validated_params = GetLibraryPartPicturesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetLibraryPartPictures", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetLibraryPartPictures",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetLibraryPartPicturesResult.model_validate(response_dict)
         return validated_response
@@ -1099,7 +1121,8 @@ class LibraryCommands:
         }
         validated_params = GetLibraryPartScriptsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetLibraryPartScripts", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetLibraryPartScripts",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetLibraryPartScriptsResult.model_validate(response_dict)
         return validated_response.libraryParts
@@ -1137,7 +1160,8 @@ class LibraryCommands:
         }
         validated_params = GetLibraryPartSectionParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetLibraryPartSection", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetLibraryPartSection",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetLibraryPartSectionResult.model_validate(response_dict)
         return validated_response.content
@@ -1167,7 +1191,8 @@ class LibraryCommands:
         }
         validated_params = GetLibraryPartSectionsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetLibraryPartSections", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetLibraryPartSections",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetLibraryPartSectionsResult.model_validate(response_dict)
         return validated_response.libraryParts
@@ -1203,7 +1228,8 @@ class LibraryCommands:
         }
         validated_params = GetLibraryPartTypeDetailsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetLibraryPartTypeDetails", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetLibraryPartTypeDetails",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetLibraryPartTypeDetailsResult.model_validate(response_dict)
         return validated_response.libraryParts
@@ -1233,7 +1259,8 @@ class LibraryCommands:
         }
         validated_params = GetMissingLibPartNamesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetMissingLibPartNames", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetMissingLibPartNames",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetMissingLibPartNamesResult.model_validate(response_dict)
         return validated_response.libPartNames
@@ -1273,7 +1300,8 @@ class LibraryCommands:
         }
         validated_params = GetUnusedLibraryPartsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetUnusedLibraryParts", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetUnusedLibraryParts",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetUnusedLibraryPartsResult.model_validate(response_dict)
         return validated_response
@@ -1309,7 +1337,8 @@ class LibraryCommands:
         }
         validated_params = InterpretGDLScript3DParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "InterpretGDLScript3D", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "InterpretGDLScript3D",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = InterpretGDLScript3DResult.model_validate(response_dict)
         return validated_response
@@ -1354,7 +1383,8 @@ class LibraryCommands:
         }
         validated_params = IsLibraryPartSubtypeOfParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "IsLibraryPartSubtypeOf", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "IsLibraryPartSubtypeOf",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = IsLibraryPartSubtypeOfResult.model_validate(response_dict)
         return validated_response
@@ -1381,7 +1411,8 @@ class LibraryCommands:
         }
         validated_params = IsUsableGDLStringParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "IsUsableGDLString", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "IsUsableGDLString",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = IsUsableGDLStringResult.model_validate(response_dict)
         return validated_response.results
@@ -1416,7 +1447,8 @@ class LibraryCommands:
         }
         validated_params = ModifyLibraryListParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "ModifyLibraryList", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "ModifyLibraryList",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = ModifyLibraryListResult.model_validate(response_dict)
         return validated_response
@@ -1444,7 +1476,8 @@ class LibraryCommands:
         }
         validated_params = OpenLibraryPartInEditorParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "OpenLibraryPartInEditor", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "OpenLibraryPartInEditor",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = TypeAdapter(OpenLibraryPartInEditorResult).validate_python(response_dict)
         return validated_response
@@ -1507,7 +1540,8 @@ class LibraryCommands:
         }
         validated_params = SearchLibraryPartsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "SearchLibraryParts", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "SearchLibraryParts",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = SearchLibraryPartsResult.model_validate(response_dict)
         return validated_response.libraryParts
@@ -1534,7 +1568,8 @@ class LibraryCommands:
         }
         validated_params = SetGDLDateParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "SetGDLDate", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "SetGDLDate",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = TypeAdapter(SetGDLDateResult).validate_python(response_dict)
         return validated_response
@@ -1562,7 +1597,8 @@ class LibraryCommands:
         }
         validated_params = SetLibrariesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "SetLibraries", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "SetLibraries",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = TypeAdapter(SetLibrariesResult).validate_python(response_dict)
         return validated_response
@@ -1613,7 +1649,8 @@ class LibraryCommands:
         }
         validated_params = SetLibraryPartCustomSectionParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "SetLibraryPartCustomSection", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "SetLibraryPartCustomSection",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = TypeAdapter(SetLibraryPartCustomSectionResult).validate_python(response_dict)
         return validated_response
@@ -1646,7 +1683,8 @@ class LibraryCommands:
         }
         validated_params = SetLibraryPartMetadataParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "SetLibraryPartMetadata", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "SetLibraryPartMetadata",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = SetLibraryPartMetadataResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -1679,7 +1717,8 @@ class LibraryCommands:
         }
         validated_params = SetLibraryPartParametersParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "SetLibraryPartParameters", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "SetLibraryPartParameters",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = SetLibraryPartParametersResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -1728,7 +1767,8 @@ class LibraryCommands:
         }
         validated_params = SetLibraryPartPictureImagesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "SetLibraryPartPictureImages", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "SetLibraryPartPictureImages",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = TypeAdapter(SetLibraryPartPictureImagesResult).validate_python(response_dict)
         return validated_response
@@ -1785,7 +1825,8 @@ class LibraryCommands:
         }
         validated_params = SetLibraryPartPicturesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "SetLibraryPartPictures", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "SetLibraryPartPictures",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = TypeAdapter(SetLibraryPartPicturesResult).validate_python(response_dict)
         return validated_response
@@ -1819,7 +1860,8 @@ class LibraryCommands:
         }
         validated_params = SetLibraryPartScriptsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "SetLibraryPartScripts", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "SetLibraryPartScripts",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = SetLibraryPartScriptsResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -1853,7 +1895,8 @@ class LibraryCommands:
         }
         validated_params = UpdateLibraryPartSectionsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "UpdateLibraryPartSections", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "UpdateLibraryPartSections",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = UpdateLibraryPartSectionsResult.model_validate(response_dict)
         return validated_response.executionResults

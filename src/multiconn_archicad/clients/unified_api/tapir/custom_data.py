@@ -57,7 +57,8 @@ class CustomDataCommands:
         }
         validated_params = GetElementUserDataParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetElementUserData", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetElementUserData",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetElementUserDataResult.model_validate(response_dict)
         return validated_response.elementUserData
@@ -93,7 +94,8 @@ class CustomDataCommands:
         }
         validated_params = SetElementUserDataParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "SetElementUserData", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "SetElementUserData",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = SetElementUserDataResult.model_validate(response_dict)
         return validated_response.executionResults

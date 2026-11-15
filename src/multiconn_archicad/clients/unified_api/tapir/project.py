@@ -222,7 +222,8 @@ class ProjectCommands:
         }
         validated_params = BreakHotlinkNodesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "BreakHotlinkNodes", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "BreakHotlinkNodes",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = BreakHotlinkNodesResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -254,7 +255,8 @@ class ProjectCommands:
         }
         validated_params = CalculateSunPositionParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CalculateSunPosition", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CalculateSunPosition",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CalculateSunPositionResult.model_validate(response_dict)
         return validated_response
@@ -285,7 +287,8 @@ class ProjectCommands:
         }
         validated_params = ChangeHotlinkInstancesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "ChangeHotlinkInstances", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "ChangeHotlinkInstances",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = ChangeHotlinkInstancesResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -317,7 +320,8 @@ class ProjectCommands:
         }
         validated_params = ChangeHotlinkNodesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "ChangeHotlinkNodes", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "ChangeHotlinkNodes",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = ChangeHotlinkNodesResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -362,7 +366,8 @@ class ProjectCommands:
         }
         validated_params = ConvertUnitValuesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "ConvertUnitValues", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "ConvertUnitValues",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = ConvertUnitValuesResult.model_validate(response_dict)
         return validated_response.convertedValues
@@ -389,7 +394,8 @@ class ProjectCommands:
         }
         validated_params = CreateHotlinkInstancesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateHotlinkInstances", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateHotlinkInstances",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateHotlinkInstancesResult.model_validate(response_dict)
         return validated_response.elements
@@ -421,7 +427,8 @@ class ProjectCommands:
         }
         validated_params = CreateHotlinkNodesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateHotlinkNodes", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateHotlinkNodes",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateHotlinkNodesResult.model_validate(response_dict)
         return validated_response.hotlinkNodes
@@ -451,7 +458,8 @@ class ProjectCommands:
         }
         validated_params = CreateProjectInfoFieldsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateProjectInfoFields", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateProjectInfoFields",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateProjectInfoFieldsResult.model_validate(response_dict)
         return validated_response.fields
@@ -481,7 +489,8 @@ class ProjectCommands:
         }
         validated_params = CreateProjectInfoGroupsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateProjectInfoGroups", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateProjectInfoGroups",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateProjectInfoGroupsResult.model_validate(response_dict)
         return validated_response.projectInfoGroupIdsOrErrors
@@ -514,7 +523,8 @@ class ProjectCommands:
         }
         validated_params = DeleteHotlinkNodesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "DeleteHotlinkNodes", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "DeleteHotlinkNodes",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = DeleteHotlinkNodesResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -555,7 +565,8 @@ class ProjectCommands:
         }
         validated_params = DeleteProjectInfoFieldsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "DeleteProjectInfoFields", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "DeleteProjectInfoFields",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = DeleteProjectInfoFieldsResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -585,7 +596,8 @@ class ProjectCommands:
         }
         validated_params = DeleteProjectInfoGroupsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "DeleteProjectInfoGroups", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "DeleteProjectInfoGroups",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = DeleteProjectInfoGroupsResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -612,7 +624,8 @@ class ProjectCommands:
         }
         validated_params = FindDimensionStandardParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "FindDimensionStandard", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "FindDimensionStandard",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = FindDimensionStandardResult.model_validate(response_dict)
         return validated_response
@@ -679,7 +692,8 @@ class ProjectCommands:
         }
         validated_params = GetAutoTextKeysParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetAutoTextKeys", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetAutoTextKeys",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetAutoTextKeysResult.model_validate(response_dict)
         return validated_response.autoTextKeys
@@ -708,7 +722,8 @@ class ProjectCommands:
         }
         validated_params = GetAutoTextNameParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetAutoTextName", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetAutoTextName",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetAutoTextNameResult.model_validate(response_dict)
         return validated_response.autoTextNames
@@ -773,7 +788,8 @@ class ProjectCommands:
         }
         validated_params = GetCurrentViewImageParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetCurrentViewImage", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetCurrentViewImage",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetCurrentViewImageResult.model_validate(response_dict)
         return validated_response
@@ -801,7 +817,8 @@ class ProjectCommands:
         }
         validated_params = GetDimensionStandardsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetDimensionStandards", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetDimensionStandards",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetDimensionStandardsResult.model_validate(response_dict)
         return validated_response.dimensionStandards
@@ -869,7 +886,8 @@ class ProjectCommands:
         }
         validated_params = GetHotlinkOwnersOfElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetHotlinkOwnersOfElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetHotlinkOwnersOfElements",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetHotlinkOwnersOfElementsResult.model_validate(response_dict)
         return validated_response.hotlinkOwners
@@ -902,7 +920,8 @@ class ProjectCommands:
         }
         validated_params = GetHotlinkProxyElementTableParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetHotlinkProxyElementTable", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetHotlinkProxyElementTable",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetHotlinkProxyElementTableResult.model_validate(response_dict)
         return validated_response.proxyElementTables
@@ -932,7 +951,8 @@ class ProjectCommands:
         }
         validated_params = GetHotlinkSourceStatusParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetHotlinkSourceStatus", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetHotlinkSourceStatus",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetHotlinkSourceStatusResult.model_validate(response_dict)
         return validated_response.hotlinkSourceStatuses
@@ -976,7 +996,8 @@ class ProjectCommands:
         }
         validated_params = GetLast3DDefaultLevelsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetLast3DDefaultLevels", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetLast3DDefaultLevels",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetLast3DDefaultLevelsResult.model_validate(response_dict)
         return validated_response.levels
@@ -1003,7 +1024,8 @@ class ProjectCommands:
         }
         validated_params = GetNoteAutoTextKeywordsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetNoteAutoTextKeywords", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetNoteAutoTextKeywords",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetNoteAutoTextKeywordsResult.model_validate(response_dict)
         return validated_response.keywords
@@ -1040,7 +1062,8 @@ class ProjectCommands:
         }
         validated_params = GetNoteAutotextsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetNoteAutotexts", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetNoteAutotexts",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetNoteAutotextsResult.model_validate(response_dict)
         return validated_response.noteAutotexts
@@ -1139,7 +1162,8 @@ class ProjectCommands:
         }
         validated_params = GetProjectPreferencesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetProjectPreferences", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetProjectPreferences",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetProjectPreferencesResult.model_validate(response_dict)
         return validated_response
@@ -1264,7 +1288,8 @@ class ProjectCommands:
         }
         validated_params = InterpretAutoTextsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "InterpretAutoTexts", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "InterpretAutoTexts",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = InterpretAutoTextsResult.model_validate(response_dict)
         return validated_response.values
@@ -1296,7 +1321,8 @@ class ProjectCommands:
         }
         validated_params = MoveProjectInfoFieldsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "MoveProjectInfoFields", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "MoveProjectInfoFields",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = MoveProjectInfoFieldsResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -1326,7 +1352,8 @@ class ProjectCommands:
         }
         validated_params = MoveProjectInfoGroupsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "MoveProjectInfoGroups", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "MoveProjectInfoGroups",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = MoveProjectInfoGroupsResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -1356,7 +1383,8 @@ class ProjectCommands:
         }
         validated_params = NewProjectParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "NewProject", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "NewProject",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = TypeAdapter(NewProjectResult).validate_python(response_dict)
         return validated_response
@@ -1383,7 +1411,8 @@ class ProjectCommands:
         }
         validated_params = OpenProjectParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "OpenProject", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "OpenProject",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = TypeAdapter(OpenProjectResult).validate_python(response_dict)
         return validated_response
@@ -1448,7 +1477,8 @@ class ProjectCommands:
         }
         validated_params = PhotoRenderParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "PhotoRender", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "PhotoRender",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = TypeAdapter(PhotoRenderResult).validate_python(response_dict)
         return validated_response
@@ -1485,7 +1515,8 @@ class ProjectCommands:
         }
         validated_params = PrintViewParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "PrintView", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "PrintView",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = TypeAdapter(PrintViewResult).validate_python(response_dict)
         return validated_response
@@ -1511,7 +1542,8 @@ class ProjectCommands:
         }
         validated_params = RebuildViewParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "RebuildView", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "RebuildView",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = TypeAdapter(RebuildViewResult).validate_python(response_dict)
         return validated_response
@@ -1542,7 +1574,8 @@ class ProjectCommands:
         }
         validated_params = RenameProjectInfoFieldsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "RenameProjectInfoFields", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "RenameProjectInfoFields",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = RenameProjectInfoFieldsResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -1571,7 +1604,8 @@ class ProjectCommands:
         }
         validated_params = RenameProjectInfoGroupsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "RenameProjectInfoGroups", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "RenameProjectInfoGroups",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = RenameProjectInfoGroupsResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -1614,7 +1648,8 @@ class ProjectCommands:
         }
         validated_params = ResolveNamesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "ResolveNames", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "ResolveNames",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = ResolveNamesResult.model_validate(response_dict)
         return validated_response.results
@@ -1652,7 +1687,8 @@ class ProjectCommands:
         }
         validated_params = SaveAsModuleFileParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "SaveAsModuleFile", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "SaveAsModuleFile",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = TypeAdapter(SaveAsModuleFileResult).validate_python(response_dict)
         return validated_response
@@ -1704,7 +1740,8 @@ class ProjectCommands:
         }
         validated_params = SaveCurrentWindowAsImageParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "SaveCurrentWindowAsImage", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "SaveCurrentWindowAsImage",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = SaveCurrentWindowAsImageResult.model_validate(response_dict)
         return validated_response
@@ -1742,7 +1779,8 @@ class ProjectCommands:
         }
         validated_params = SaveProjectParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "SaveProject", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "SaveProject",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = TypeAdapter(SaveProjectResult).validate_python(response_dict)
         return validated_response
@@ -1795,7 +1833,8 @@ class ProjectCommands:
         }
         validated_params = SaveProjectAsArchiveParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "SaveProjectAsArchive", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "SaveProjectAsArchive",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = TypeAdapter(SaveProjectAsArchiveResult).validate_python(response_dict)
         return validated_response
@@ -1821,7 +1860,8 @@ class ProjectCommands:
         }
         validated_params = SetAutoIntersectParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "SetAutoIntersect", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "SetAutoIntersect",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = TypeAdapter(SetAutoIntersectResult).validate_python(response_dict)
         return validated_response
@@ -1848,7 +1888,8 @@ class ProjectCommands:
         }
         validated_params = SetCurrentRenderingSceneParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "SetCurrentRenderingScene", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "SetCurrentRenderingScene",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = TypeAdapter(SetCurrentRenderingSceneResult).validate_python(response_dict)
         return validated_response
@@ -1879,7 +1920,8 @@ class ProjectCommands:
         }
         validated_params = SetGeoLocationParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "SetGeoLocation", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "SetGeoLocation",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = TypeAdapter(SetGeoLocationResult).validate_python(response_dict)
         return validated_response
@@ -1910,7 +1952,8 @@ class ProjectCommands:
         }
         validated_params = SetLast3DDefaultLevelsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "SetLast3DDefaultLevels", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "SetLast3DDefaultLevels",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = TypeAdapter(SetLast3DDefaultLevelsResult).validate_python(response_dict)
         return validated_response
@@ -1938,7 +1981,8 @@ class ProjectCommands:
         }
         validated_params = SetPlaceSettingsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "SetPlaceSettings", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "SetPlaceSettings",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = SetPlaceSettingsResult.model_validate(response_dict)
         return validated_response.placeInfo
@@ -1963,7 +2007,8 @@ class ProjectCommands:
         }
         validated_params = SetProjectInfoFieldParameters(**params_dict)
         self._core.post_tapir_command(
-            "SetProjectInfoField", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "SetProjectInfoField",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         return None
 
@@ -2035,7 +2080,8 @@ class ProjectCommands:
         }
         validated_params = SetProjectNotesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "SetProjectNotes", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "SetProjectNotes",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = TypeAdapter(SetProjectNotesResult).validate_python(response_dict)
         return validated_response
@@ -2083,7 +2129,8 @@ class ProjectCommands:
         }
         validated_params = SetProjectPreferencesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "SetProjectPreferences", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "SetProjectPreferences",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = SetProjectPreferencesResult.model_validate(response_dict)
         return validated_response
@@ -2109,7 +2156,8 @@ class ProjectCommands:
         }
         validated_params = SetStoriesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "SetStories", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "SetStories",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = TypeAdapter(SetStoriesResult).validate_python(response_dict)
         return validated_response
@@ -2140,7 +2188,8 @@ class ProjectCommands:
         }
         validated_params = UpdateHotlinksParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "UpdateHotlinks", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "UpdateHotlinks",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = UpdateHotlinksResult.model_validate(response_dict)
         return validated_response.executionResults

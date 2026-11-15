@@ -109,7 +109,8 @@ class ClassificationCommands:
         }
         validated_params = CreateClassificationItemsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateClassificationItems", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateClassificationItems",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateClassificationItemsResult.model_validate(response_dict)
         return validated_response
@@ -138,7 +139,8 @@ class ClassificationCommands:
         }
         validated_params = CreateClassificationSystemsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateClassificationSystems", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateClassificationSystems",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateClassificationSystemsResult.model_validate(response_dict)
         return validated_response
@@ -171,7 +173,8 @@ class ClassificationCommands:
         }
         validated_params = DeleteClassificationItemsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "DeleteClassificationItems", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "DeleteClassificationItems",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         return TypeAdapter(list[ExecutionResult]).validate_python(response_dict.get("executionResults"))
 
@@ -201,7 +204,8 @@ class ClassificationCommands:
         }
         validated_params = DeleteClassificationItemsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "DeleteClassificationItems", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "DeleteClassificationItems",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = DeleteClassificationItemsResult.model_validate(response_dict)
         return validated_response
@@ -234,7 +238,8 @@ class ClassificationCommands:
         }
         validated_params = DeleteClassificationSystemsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "DeleteClassificationSystems", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "DeleteClassificationSystems",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         return TypeAdapter(list[ExecutionResult]).validate_python(response_dict.get("executionResults"))
 
@@ -264,7 +269,8 @@ class ClassificationCommands:
         }
         validated_params = DeleteClassificationSystemsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "DeleteClassificationSystems", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "DeleteClassificationSystems",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = DeleteClassificationSystemsResult.model_validate(response_dict)
         return validated_response
@@ -312,7 +318,8 @@ class ClassificationCommands:
         }
         validated_params = GetClassificationItemParentsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetClassificationItemParents", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetClassificationItemParents",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetClassificationItemParentsResult.model_validate(response_dict)
         return validated_response.classificationItemParents
@@ -355,7 +362,7 @@ class ClassificationCommands:
         validated_params = GetClassificationItemVisibilityParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
             "GetClassificationItemVisibility",
-            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetClassificationItemVisibilityResult.model_validate(response_dict)
         return validated_response.classificationItemVisibilities
@@ -390,7 +397,7 @@ class ClassificationCommands:
         validated_params = GetClassificationOfAttributesInSystemParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
             "GetClassificationOfAttributesInSystem",
-            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetClassificationOfAttributesInSystemResult.model_validate(response_dict)
         return validated_response.attributeClassifications
@@ -420,7 +427,8 @@ class ClassificationCommands:
         }
         validated_params = GetClassificationsOfAttributesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetClassificationsOfAttributes", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetClassificationsOfAttributes",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetClassificationsOfAttributesResult.model_validate(response_dict)
         return validated_response.attributeClassifications
@@ -456,7 +464,7 @@ class ClassificationCommands:
         validated_params = GetClassificationsOfElementDefaultsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
             "GetClassificationsOfElementDefaults",
-            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetClassificationsOfElementDefaultsResult.model_validate(response_dict)
         return validated_response.elementDefaultClassifications
@@ -489,7 +497,8 @@ class ClassificationCommands:
         }
         validated_params = GetClassificationsOfElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetClassificationsOfElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetClassificationsOfElements",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetClassificationsOfElementsResult.model_validate(response_dict)
         return validated_response.elementClassifications
@@ -523,7 +532,7 @@ class ClassificationCommands:
         validated_params = GetClassificationsOfToolDefaultsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
             "GetClassificationsOfToolDefaults",
-            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetClassificationsOfToolDefaultsResult.model_validate(response_dict)
         return validated_response.classificationsOfToolDefaults
@@ -554,7 +563,8 @@ class ClassificationCommands:
         }
         validated_params = GetElementsByClassificationParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetElementsByClassification", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetElementsByClassification",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetElementsByClassificationResult.model_validate(response_dict)
         return validated_response.elementsOfClassificationItems
@@ -589,7 +599,8 @@ class ClassificationCommands:
         }
         validated_params = ImportClassificationsXmlParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "ImportClassificationsXml", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "ImportClassificationsXml",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = ImportClassificationsXmlResult.model_validate(response_dict)
         return validated_response
@@ -621,7 +632,8 @@ class ClassificationCommands:
         }
         validated_params = SetClassificationsOfAttributesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "SetClassificationsOfAttributes", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "SetClassificationsOfAttributes",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = SetClassificationsOfAttributesResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -653,7 +665,7 @@ class ClassificationCommands:
         validated_params = SetClassificationsOfElementDefaultsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
             "SetClassificationsOfElementDefaults",
-            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = SetClassificationsOfElementDefaultsResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -693,7 +705,8 @@ class ClassificationCommands:
         }
         validated_params = SetClassificationsOfElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "SetClassificationsOfElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "SetClassificationsOfElements",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         return TypeAdapter(list[ExecutionResult]).validate_python(response_dict.get("executionResults"))
 
@@ -727,7 +740,8 @@ class ClassificationCommands:
         }
         validated_params = SetClassificationsOfElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "SetClassificationsOfElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "SetClassificationsOfElements",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = SetClassificationsOfElementsResult.model_validate(response_dict)
         return validated_response
@@ -758,7 +772,8 @@ class ClassificationCommands:
         }
         validated_params = UpdateClassificationItemsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "UpdateClassificationItems", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "UpdateClassificationItems",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = UpdateClassificationItemsResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -788,7 +803,8 @@ class ClassificationCommands:
         }
         validated_params = UpdateClassificationSystemsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "UpdateClassificationSystems", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "UpdateClassificationSystems",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = UpdateClassificationSystemsResult.model_validate(response_dict)
         return validated_response.executionResults

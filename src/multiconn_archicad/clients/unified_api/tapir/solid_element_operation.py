@@ -77,7 +77,8 @@ class SolidElementOperationCommands:
         }
         validated_params = CreateSolidElementLinksParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateSolidElementLinks", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateSolidElementLinks",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateSolidElementLinksResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -107,7 +108,8 @@ class SolidElementOperationCommands:
         }
         validated_params = CreateSolidOperationsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateSolidOperations", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateSolidOperations",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateSolidOperationsResult.model_validate(response_dict)
         return validated_response.results
@@ -135,7 +137,8 @@ class SolidElementOperationCommands:
         }
         validated_params = GetElementTrimsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetElementTrims", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetElementTrims",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetElementTrimsResult.model_validate(response_dict)
         return validated_response.elementTrims
@@ -163,7 +166,8 @@ class SolidElementOperationCommands:
         }
         validated_params = GetMergedElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetMergedElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetMergedElements",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetMergedElementsResult.model_validate(response_dict)
         return validated_response.elementMerges
@@ -191,7 +195,8 @@ class SolidElementOperationCommands:
         }
         validated_params = GetSolidElementLinksParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetSolidElementLinks", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetSolidElementLinks",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetSolidElementLinksResult.model_validate(response_dict)
         return validated_response.solidLinks
@@ -221,7 +226,8 @@ class SolidElementOperationCommands:
         }
         validated_params = MergeElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "MergeElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "MergeElements",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = TypeAdapter(MergeElementsResult).validate_python(response_dict)
         return validated_response
@@ -257,7 +263,8 @@ class SolidElementOperationCommands:
         }
         validated_params = RemoveElementTrimsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "RemoveElementTrims", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "RemoveElementTrims",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         return TypeAdapter(list[ExecutionResult]).validate_python(response_dict.get("executionResults"))
 
@@ -290,7 +297,8 @@ class SolidElementOperationCommands:
         }
         validated_params = RemoveElementTrimsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "RemoveElementTrims", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "RemoveElementTrims",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = RemoveElementTrimsResult.model_validate(response_dict)
         return validated_response
@@ -322,7 +330,8 @@ class SolidElementOperationCommands:
         }
         validated_params = RemoveSolidElementLinksParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "RemoveSolidElementLinks", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "RemoveSolidElementLinks",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         return TypeAdapter(list[ExecutionResult]).validate_python(response_dict.get("executionResults"))
 
@@ -353,7 +362,8 @@ class SolidElementOperationCommands:
         }
         validated_params = RemoveSolidElementLinksParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "RemoveSolidElementLinks", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "RemoveSolidElementLinks",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = RemoveSolidElementLinksResult.model_validate(response_dict)
         return validated_response
@@ -399,7 +409,8 @@ class SolidElementOperationCommands:
         }
         validated_params = TrimElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "TrimElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "TrimElements",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = TypeAdapter(TrimElementsResult).validate_python(response_dict)
         return validated_response
@@ -429,7 +440,8 @@ class SolidElementOperationCommands:
         }
         validated_params = UnmergeElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "UnmergeElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "UnmergeElements",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = UnmergeElementsResult.model_validate(response_dict)
         return validated_response.executionResults

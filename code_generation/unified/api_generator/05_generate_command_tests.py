@@ -221,11 +221,11 @@ class TestGenerator:
             if snake_name != "rename_navigator_item":
                 if is_params_union:
                     body_lines.append(
-                        f"expected_payload = TypeAdapter(commands.{params_model_name}).validate_python(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)"
+                        f"expected_payload = TypeAdapter(commands.{params_model_name}).validate_python(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)"
                     )
                 else:
                     body_lines.append(
-                        f"expected_payload = commands.{params_model_name}.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)"
+                        f"expected_payload = commands.{params_model_name}.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)"
                     )
                 body_lines.append("assert args[1] == expected_payload")
 

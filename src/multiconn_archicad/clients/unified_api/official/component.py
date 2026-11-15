@@ -51,7 +51,8 @@ class ComponentCommands:
         }
         validated_params = GetComponentsOfElementsParameters(**params_dict)
         response_dict = self._core.post_command(
-            "API.GetComponentsOfElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "API.GetComponentsOfElements",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetComponentsOfElementsResult.model_validate(response_dict)
         return validated_response.componentsOfElements
@@ -84,7 +85,7 @@ class ComponentCommands:
         validated_params = GetPropertyValuesOfElementComponentsParameters(**params_dict)
         response_dict = self._core.post_command(
             "API.GetPropertyValuesOfElementComponents",
-            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetPropertyValuesOfElementComponentsResult.model_validate(response_dict)
         return validated_response.propertyValuesForElementComponents

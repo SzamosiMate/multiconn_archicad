@@ -133,7 +133,7 @@ class DesignOptionsCommands:
         validated_params = ActivateDesignOptionsInCombinationsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
             "ActivateDesignOptionsInCombinations",
-            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = ActivateDesignOptionsInCombinationsResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -162,7 +162,8 @@ class DesignOptionsCommands:
         }
         validated_params = CanMoveElementsToDesignOptionsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CanMoveElementsToDesignOptions", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CanMoveElementsToDesignOptions",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CanMoveElementsToDesignOptionsResult.model_validate(response_dict)
         return validated_response.canMoveElements
@@ -191,7 +192,8 @@ class DesignOptionsCommands:
         }
         validated_params = CreateDesignOptionCombinationsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateDesignOptionCombinations", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateDesignOptionCombinations",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateDesignOptionCombinationsResult.model_validate(response_dict)
         return validated_response.designOptionCombinationIdsOrErrors
@@ -219,7 +221,8 @@ class DesignOptionsCommands:
         }
         validated_params = CreateDesignOptionSetsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateDesignOptionSets", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateDesignOptionSets",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateDesignOptionSetsResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -247,7 +250,8 @@ class DesignOptionsCommands:
         }
         validated_params = CreateDesignOptionsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateDesignOptions", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateDesignOptions",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateDesignOptionsResult.model_validate(response_dict)
         return validated_response.designOptionIdsOrErrors
@@ -277,7 +281,7 @@ class DesignOptionsCommands:
         validated_params = DeactivateDesignOptionsInCombinationsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
             "DeactivateDesignOptionsInCombinations",
-            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = DeactivateDesignOptionsInCombinationsResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -306,7 +310,8 @@ class DesignOptionsCommands:
         }
         validated_params = DeleteDesignOptionCombinationsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "DeleteDesignOptionCombinations", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "DeleteDesignOptionCombinations",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = DeleteDesignOptionCombinationsResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -335,7 +340,8 @@ class DesignOptionsCommands:
         }
         validated_params = DeleteDesignOptionSetsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "DeleteDesignOptionSets", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "DeleteDesignOptionSets",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = DeleteDesignOptionSetsResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -363,7 +369,8 @@ class DesignOptionsCommands:
         }
         validated_params = DeleteDesignOptionsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "DeleteDesignOptions", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "DeleteDesignOptions",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = DeleteDesignOptionsResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -395,7 +402,7 @@ class DesignOptionsCommands:
         validated_params = DuplicateDesignOptionCombinationsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
             "DuplicateDesignOptionCombinations",
-            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = DuplicateDesignOptionCombinationsResult.model_validate(response_dict)
         return validated_response.designOptionCombinationIdsOrErrors
@@ -426,7 +433,7 @@ class DesignOptionsCommands:
         validated_params = GetDesignOptionCombinationOfViewsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
             "GetDesignOptionCombinationOfViews",
-            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetDesignOptionCombinationOfViewsResult.model_validate(response_dict)
         return validated_response.designOptionCombinationOfViews
@@ -468,7 +475,8 @@ class DesignOptionsCommands:
         }
         validated_params = GetDesignOptionForElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetDesignOptionForElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetDesignOptionForElements",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetDesignOptionForElementsResult.model_validate(response_dict)
         return validated_response.designOptionForElements
@@ -529,7 +537,8 @@ class DesignOptionsCommands:
         }
         validated_params = GetElementsOfDesignOptionsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetElementsOfDesignOptions", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetElementsOfDesignOptions",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetElementsOfDesignOptionsResult.model_validate(response_dict)
         return validated_response.elementsOfDesignOptions
@@ -562,7 +571,7 @@ class DesignOptionsCommands:
         validated_params = GetHotlinkDesignOptionTableDetailsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
             "GetHotlinkDesignOptionTableDetails",
-            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetHotlinkDesignOptionTableDetailsResult.model_validate(response_dict)
         return validated_response.hotlinkDesignOptionTables
@@ -595,7 +604,8 @@ class DesignOptionsCommands:
         }
         validated_params = GetHotlinkDesignOptionTablesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetHotlinkDesignOptionTables", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetHotlinkDesignOptionTables",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetHotlinkDesignOptionTablesResult.model_validate(response_dict)
         return validated_response.hotlinkDesignOptionTables
@@ -623,7 +633,8 @@ class DesignOptionsCommands:
         }
         validated_params = MoveDesignOptionsToAnotherSetParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "MoveDesignOptionsToAnotherSet", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "MoveDesignOptionsToAnotherSet",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = MoveDesignOptionsToAnotherSetResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -653,7 +664,8 @@ class DesignOptionsCommands:
         }
         validated_params = MoveElementsToDesignOptionsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "MoveElementsToDesignOptions", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "MoveElementsToDesignOptions",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = MoveElementsToDesignOptionsResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -682,7 +694,8 @@ class DesignOptionsCommands:
         }
         validated_params = RenameDesignOptionCombinationsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "RenameDesignOptionCombinations", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "RenameDesignOptionCombinations",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = RenameDesignOptionCombinationsResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -711,7 +724,8 @@ class DesignOptionsCommands:
         }
         validated_params = RenameDesignOptionSetsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "RenameDesignOptionSets", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "RenameDesignOptionSets",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = RenameDesignOptionSetsResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -741,7 +755,8 @@ class DesignOptionsCommands:
         }
         validated_params = RenameDesignOptionsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "RenameDesignOptions", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "RenameDesignOptions",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = RenameDesignOptionsResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -771,7 +786,8 @@ class DesignOptionsCommands:
         }
         validated_params = ReorderDesignOptionSetsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "ReorderDesignOptionSets", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "ReorderDesignOptionSets",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = ReorderDesignOptionSetsResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -801,7 +817,8 @@ class DesignOptionsCommands:
         }
         validated_params = ReorderDesignOptionsInSetParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "ReorderDesignOptionsInSet", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "ReorderDesignOptionsInSet",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = ReorderDesignOptionsInSetResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -830,7 +847,7 @@ class DesignOptionsCommands:
         validated_params = SetActiveDesignOptionsInCombinationsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
             "SetActiveDesignOptionsInCombinations",
-            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = SetActiveDesignOptionsInCombinationsResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -859,7 +876,8 @@ class DesignOptionsCommands:
         }
         validated_params = SetDefaultDesignOptionParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "SetDefaultDesignOption", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "SetDefaultDesignOption",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = TypeAdapter(SetDefaultDesignOptionResult).validate_python(response_dict)
         return validated_response
@@ -891,7 +909,7 @@ class DesignOptionsCommands:
         validated_params = SetDesignOptionCombinationOfViewsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
             "SetDesignOptionCombinationOfViews",
-            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = SetDesignOptionCombinationOfViewsResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -923,7 +941,8 @@ class DesignOptionsCommands:
         }
         validated_params = SetHotlinkDesignOptionTablesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "SetHotlinkDesignOptionTables", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "SetHotlinkDesignOptionTables",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = SetHotlinkDesignOptionTablesResult.model_validate(response_dict)
         return validated_response.executionResults

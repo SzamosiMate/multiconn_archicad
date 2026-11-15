@@ -149,7 +149,8 @@ class PropertyCommands:
         }
         validated_params = AddPropertyToAttributesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "AddPropertyToAttributes", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "AddPropertyToAttributes",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = TypeAdapter(AddPropertyToAttributesResult).validate_python(response_dict)
         return validated_response
@@ -179,7 +180,8 @@ class PropertyCommands:
         }
         validated_params = CheckPropertyValuesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CheckPropertyValues", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CheckPropertyValues",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CheckPropertyValuesResult.model_validate(response_dict)
         return validated_response.results
@@ -207,7 +209,8 @@ class PropertyCommands:
         }
         validated_params = CreatePropertyDefinitionsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreatePropertyDefinitions", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreatePropertyDefinitions",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreatePropertyDefinitionsResult.model_validate(response_dict)
         return validated_response.propertyIds
@@ -233,7 +236,8 @@ class PropertyCommands:
         }
         validated_params = CreatePropertyGroupsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreatePropertyGroups", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreatePropertyGroups",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreatePropertyGroupsResult.model_validate(response_dict)
         return validated_response.propertyGroupIds
@@ -265,7 +269,8 @@ class PropertyCommands:
         }
         validated_params = DeletePropertyDefinitionsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "DeletePropertyDefinitions", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "DeletePropertyDefinitions",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         return TypeAdapter(list[ExecutionResult]).validate_python(response_dict.get("executionResults"))
 
@@ -294,7 +299,8 @@ class PropertyCommands:
         }
         validated_params = DeletePropertyDefinitionsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "DeletePropertyDefinitions", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "DeletePropertyDefinitions",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = DeletePropertyDefinitionsResult.model_validate(response_dict)
         return validated_response
@@ -327,7 +333,8 @@ class PropertyCommands:
         }
         validated_params = DeletePropertyGroupsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "DeletePropertyGroups", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "DeletePropertyGroups",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         return TypeAdapter(list[ExecutionResult]).validate_python(response_dict.get("executionResults"))
 
@@ -357,7 +364,8 @@ class PropertyCommands:
         }
         validated_params = DeletePropertyGroupsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "DeletePropertyGroups", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "DeletePropertyGroups",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = DeletePropertyGroupsResult.model_validate(response_dict)
         return validated_response
@@ -397,7 +405,8 @@ class PropertyCommands:
         }
         validated_params = GetAllPropertiesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetAllProperties", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetAllProperties",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetAllPropertiesResult.model_validate(response_dict)
         return validated_response
@@ -430,7 +439,8 @@ class PropertyCommands:
         }
         validated_params = GetComponentsOfElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetComponentsOfElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetComponentsOfElements",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetComponentsOfElementsResult.model_validate(response_dict)
         return validated_response.componentsOfElements
@@ -470,7 +480,8 @@ class PropertyCommands:
         }
         validated_params = GetPropertiesOfToolDefaultsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetPropertiesOfToolDefaults", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetPropertiesOfToolDefaults",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetPropertiesOfToolDefaultsResult.model_validate(response_dict)
         return validated_response.propertiesOfToolDefaults
@@ -505,7 +516,7 @@ class PropertyCommands:
         validated_params = GetPropertyAvailabilityOfDefaultsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
             "GetPropertyAvailabilityOfDefaults",
-            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetPropertyAvailabilityOfDefaultsResult.model_validate(response_dict)
         return validated_response.propertyAvailabilities
@@ -537,7 +548,7 @@ class PropertyCommands:
         validated_params = GetPropertyDefinitionsOfAttributesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
             "GetPropertyDefinitionsOfAttributes",
-            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetPropertyDefinitionsOfAttributesResult.model_validate(response_dict)
         return validated_response.propertyDefinitionsOfAttributes
@@ -572,7 +583,7 @@ class PropertyCommands:
         validated_params = GetPropertyDefinitionsOfElementComponentsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
             "GetPropertyDefinitionsOfElementComponents",
-            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetPropertyDefinitionsOfElementComponentsResult.model_validate(response_dict)
         return validated_response.propertyDefinitionsOfElementComponents
@@ -618,7 +629,8 @@ class PropertyCommands:
         }
         validated_params = GetPropertyEditabilityParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetPropertyEditability", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetPropertyEditability",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetPropertyEditabilityResult.model_validate(response_dict)
         return validated_response
@@ -647,7 +659,7 @@ class PropertyCommands:
         validated_params = GetPropertyExpressionReferencesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
             "GetPropertyExpressionReferences",
-            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetPropertyExpressionReferencesResult.model_validate(response_dict)
         return validated_response.references
@@ -688,7 +700,8 @@ class PropertyCommands:
         }
         validated_params = GetPropertyValuesOfAttributesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetPropertyValuesOfAttributes", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetPropertyValuesOfAttributes",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetPropertyValuesOfAttributesResult.model_validate(response_dict)
         return validated_response.propertyValuesForAttributes
@@ -723,7 +736,7 @@ class PropertyCommands:
         validated_params = GetPropertyValuesOfElementComponentsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
             "GetPropertyValuesOfElementComponents",
-            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetPropertyValuesOfElementComponentsResult.model_validate(response_dict)
         return validated_response.propertyValuesForElementComponents
@@ -760,7 +773,7 @@ class PropertyCommands:
         validated_params = GetPropertyValuesOfElementDefaultsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
             "GetPropertyValuesOfElementDefaults",
-            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetPropertyValuesOfElementDefaultsResult.model_validate(response_dict)
         return validated_response.propertyValues
@@ -805,7 +818,8 @@ class PropertyCommands:
         }
         validated_params = GetPropertyValuesOfElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetPropertyValuesOfElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetPropertyValuesOfElements",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetPropertyValuesOfElementsResult.model_validate(response_dict)
         return validated_response.propertyValuesForElements
@@ -835,7 +849,8 @@ class PropertyCommands:
         }
         validated_params = ImportPropertiesXmlParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "ImportPropertiesXml", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "ImportPropertiesXml",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = ImportPropertiesXmlResult.model_validate(response_dict)
         return validated_response
@@ -867,7 +882,7 @@ class PropertyCommands:
         validated_params = MakePropertyAvailableForElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
             "MakePropertyAvailableForElements",
-            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = TypeAdapter(MakePropertyAvailableForElementsResult).validate_python(response_dict)
         return validated_response
@@ -899,7 +914,7 @@ class PropertyCommands:
         validated_params = MakePropertyUnavailableForElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
             "MakePropertyUnavailableForElements",
-            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = TypeAdapter(MakePropertyUnavailableForElementsResult).validate_python(response_dict)
         return validated_response
@@ -932,7 +947,8 @@ class PropertyCommands:
         }
         validated_params = ModifyPropertyValueOfElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "ModifyPropertyValueOfElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "ModifyPropertyValueOfElements",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = TypeAdapter(ModifyPropertyValueOfElementsResult).validate_python(response_dict)
         return validated_response
@@ -965,7 +981,8 @@ class PropertyCommands:
         }
         validated_params = RemovePropertyFromAttributesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "RemovePropertyFromAttributes", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "RemovePropertyFromAttributes",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         return TypeAdapter(ExecutionResult).validate_python(response_dict)
 
@@ -999,7 +1016,8 @@ class PropertyCommands:
         }
         validated_params = RemovePropertyFromAttributesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "RemovePropertyFromAttributes", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "RemovePropertyFromAttributes",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = RemovePropertyFromAttributesResult.model_validate(response_dict)
         return validated_response
@@ -1054,7 +1072,8 @@ class PropertyCommands:
         }
         validated_params = SearchPropertiesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "SearchProperties", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "SearchProperties",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = SearchPropertiesResult.model_validate(response_dict)
         return validated_response.properties
@@ -1088,7 +1107,7 @@ class PropertyCommands:
         validated_params = SetBuiltInPropertyValuesOfAttributesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
             "SetBuiltInPropertyValuesOfAttributes",
-            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = SetBuiltInPropertyValuesOfAttributesResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -1122,7 +1141,8 @@ class PropertyCommands:
         }
         validated_params = SetPropertyValueOfAttributesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "SetPropertyValueOfAttributes", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "SetPropertyValueOfAttributes",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = TypeAdapter(SetPropertyValueOfAttributesResult).validate_python(response_dict)
         return validated_response
@@ -1151,7 +1171,8 @@ class PropertyCommands:
         }
         validated_params = SetPropertyValuesOfAttributesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "SetPropertyValuesOfAttributes", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "SetPropertyValuesOfAttributes",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = SetPropertyValuesOfAttributesResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -1184,7 +1205,7 @@ class PropertyCommands:
         validated_params = SetPropertyValuesOfElementDefaultsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
             "SetPropertyValuesOfElementDefaults",
-            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = SetPropertyValuesOfElementDefaultsResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -1232,7 +1253,8 @@ class PropertyCommands:
         }
         validated_params = SetPropertyValuesOfElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "SetPropertyValuesOfElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "SetPropertyValuesOfElements",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         return TypeAdapter(list[ExecutionResult]).validate_python(response_dict.get("executionResults"))
 
@@ -1272,7 +1294,8 @@ class PropertyCommands:
         }
         validated_params = SetPropertyValuesOfElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "SetPropertyValuesOfElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "SetPropertyValuesOfElements",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = SetPropertyValuesOfElementsResult.model_validate(response_dict)
         return validated_response
@@ -1304,7 +1327,8 @@ class PropertyCommands:
         }
         validated_params = UpdatePropertyDefinitionsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "UpdatePropertyDefinitions", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "UpdatePropertyDefinitions",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = UpdatePropertyDefinitionsResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -1334,7 +1358,8 @@ class PropertyCommands:
         }
         validated_params = UpdatePropertyGroupsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "UpdatePropertyGroups", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "UpdatePropertyGroups",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = UpdatePropertyGroupsResult.model_validate(response_dict)
         return validated_response.executionResults

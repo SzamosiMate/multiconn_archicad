@@ -3,6 +3,8 @@ import ast
 import json
 import keyword
 import re
+import subprocess
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Iterable
@@ -175,6 +177,12 @@ def run_audit() -> list[Finding]:
     python_findings, trees = audit_python_files(GENERATED_PYTHON_FILES)
     findings.extend(python_findings)
     findings.extend(audit_generated_names(trees))
+    result = subprocess.run(
+        [sys.executable, "-m", "code_generation.shared.default_policy_audit", "--provider", "tapir"],
+        capture_output=True, text=True, encoding="utf-8", check=False,
+    )
+    if result.returncode:
+        findings.append(Finding("default-policy", "tapir", result.stdout + result.stderr))
     return findings
 
 

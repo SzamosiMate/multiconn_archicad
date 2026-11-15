@@ -86,7 +86,8 @@ class TeamworkCommands:
         }
         validated_params = GetLockableObjectSetStatusParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetLockableObjectSetStatus", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetLockableObjectSetStatus",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetLockableObjectSetStatusResult.model_validate(response_dict)
         return validated_response
@@ -117,7 +118,8 @@ class TeamworkCommands:
         }
         validated_params = GetReservationStatusOfElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetReservationStatusOfElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetReservationStatusOfElements",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetReservationStatusOfElementsResult.model_validate(response_dict)
         return validated_response.reservationStatuses
@@ -147,7 +149,8 @@ class TeamworkCommands:
         }
         validated_params = GetTeamworkAccessRightsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetTeamworkAccessRights", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetTeamworkAccessRights",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetTeamworkAccessRightsResult.model_validate(response_dict)
         return validated_response.accessRights
@@ -174,7 +177,8 @@ class TeamworkCommands:
         }
         validated_params = GetTeamworkOwnersOfDatabasesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetTeamworkOwnersOfDatabases", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetTeamworkOwnersOfDatabases",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetTeamworkOwnersOfDatabasesResult.model_validate(response_dict)
         return validated_response.owners
@@ -217,7 +221,8 @@ class TeamworkCommands:
         }
         validated_params = GetTeamworkRightsOfObjectsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetTeamworkRightsOfObjects", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetTeamworkRightsOfObjects",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetTeamworkRightsOfObjectsResult.model_validate(response_dict)
         return validated_response.rights
@@ -267,7 +272,8 @@ class TeamworkCommands:
         }
         validated_params = GrantElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GrantElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GrantElements",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = TypeAdapter(GrantElementsResult).validate_python(response_dict)
         return validated_response
@@ -293,7 +299,8 @@ class TeamworkCommands:
         }
         validated_params = ReleaseElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "ReleaseElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "ReleaseElements",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = TypeAdapter(ReleaseElementsResult).validate_python(response_dict)
         return validated_response
@@ -342,7 +349,8 @@ class TeamworkCommands:
         }
         validated_params = ReleaseLockableObjectSetParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "ReleaseLockableObjectSet", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "ReleaseLockableObjectSet",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = TypeAdapter(ReleaseLockableObjectSetResult).validate_python(response_dict)
         return validated_response
@@ -377,7 +385,8 @@ class TeamworkCommands:
         }
         validated_params = RemoveLibrariesFromBIMcloudParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "RemoveLibrariesFromBIMcloud", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "RemoveLibrariesFromBIMcloud",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = RemoveLibrariesFromBIMcloudResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -404,7 +413,8 @@ class TeamworkCommands:
         }
         validated_params = ReserveElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "ReserveElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "ReserveElements",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = ReserveElementsResult.model_validate(response_dict)
         return validated_response
@@ -455,7 +465,8 @@ class TeamworkCommands:
         }
         validated_params = ReserveLockableObjectSetParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "ReserveLockableObjectSet", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "ReserveLockableObjectSet",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = ReserveLockableObjectSetResult.model_validate(response_dict)
         return validated_response
@@ -524,7 +535,8 @@ class TeamworkCommands:
         }
         validated_params = UploadLibrariesToBIMcloudParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "UploadLibrariesToBIMcloud", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "UploadLibrariesToBIMcloud",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = UploadLibrariesToBIMcloudResult.model_validate(response_dict)
         return validated_response.executionResults
