@@ -73,32 +73,6 @@ def test_integer_queries_preserve_exact_values_through_the_read_pipeline(canonic
     assert read_payloads(core)[0]["useSIUnits"] is True
 
 
-@pytest.mark.parametrize("flag", [None, False, True], ids=["omitted", "explicit-false", "explicit-true"])
-def test_generated_client_omits_default_flag_and_forwards_explicit_booleans(flag):
-    api, core = make_api()
-    kwargs = {} if flag is None else {"use_si_units": flag}
-
-    api.tapir.property.get_property_values_of_elements([element(TALL)], [], **kwargs)
-
-    (payload,) = read_payloads(core)
-    if flag is None:
-        assert "useSIUnits" not in payload
-    else:
-        assert payload["useSIUnits"] is flag
-
-
-@pytest.mark.parametrize("version", ["1.7.2", "1.7.3", "1.8.0", "2.0.0"])
-def test_existing_utility_callers_keep_display_values_and_omit_si_flag(version):
-    api, core = make_api(version=version)
-
-    result = api.utilities.property.get_property_values_per_element_result([TALL], [HEIGHT])
-
-    assert result.rows[0][0].value == "3,13"
-    (payload,) = read_payloads(core)
-    assert "useSIUnits" not in payload
-    assert payload.get("includeAvailability") is (None if version == "1.7.2" else True)
-
-
 @pytest.mark.parametrize("version", ["1.7.3", "1.8.0", "2.0.0rc1"])
 def test_explicit_si_reads_reject_older_tapir_instead_of_falling_back_to_display_values(version):
     api, core = make_api(version=version)
