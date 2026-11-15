@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json-schema.org/draft/2019-09/schema",
+  "$comment": "Tapir 1.7.3 GetPropertyValuesOfElements input, from local release tag e91613009dd9b884ac317c8141e710719374541d. Only local reference paths were normalized and their reachable common definitions embedded. Independent older-server compatibility fixture; no runtime Git or Archicad dependency.",
+  "type": "object",
+  "properties": {
+    "elements": {
+      "$ref": "#/$defs/Elements"
+    },
+    "properties": {
+      "$ref": "#/$defs/PropertyIds"
+    },
+    "includeAvailability": {
+      "type": "boolean",
+      "description": "Adds isAvailable to each property value or error, telling whether the property is available for the element (for example by its classification). Default is false."
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "elements",
+    "properties"
+  ],
+  "$defs": {
+    "ElementId": {
+      "type": "object",
+      "description": "The identifier of an element.",
+      "properties": {
+        "guid": {
+          "$ref": "#/$defs/Guid"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "guid"
+      ]
+    },
+    "ElementIdArrayItem": {
+      "type": "object",
+      "properties": {
+        "elementId": {
+          "$ref": "#/$defs/ElementId"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "elementId"
+      ]
+    },
+    "Elements": {
+      "type": "array",
+      "description": "A list of elements.",
+      "items": {
+        "$ref": "#/$defs/ElementIdArrayItem"
+      }
+    },
+    "Guid": {
+      "type": "string",
+      "description": "A Globally Unique Identifier (or Universally Unique Identifier) in its string representation as defined in RFC 4122.",
+      "format": "uuid",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+    },
+    "PropertyId": {
+      "type": "object",
+      "description": "The identifier of a property.",
+      "properties": {
+        "guid": {
+          "$ref": "#/$defs/Guid"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "guid"
+      ]
+    },
+    "PropertyIdArrayItem": {
+      "type": "object",
+      "description": "A wrapper containing the property identifier.",
+      "properties": {
+        "propertyId": {
+          "$ref": "#/$defs/PropertyId"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "propertyId"
+      ]
+    },
+    "PropertyIds": {
+      "type": "array",
+      "description": "A list of property identifiers.",
+      "items": {
+        "$ref": "#/$defs/PropertyIdArrayItem"
+      }
+    }
+  }
+}
