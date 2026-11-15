@@ -26,29 +26,6 @@ def _type_row(element_type: str, **syntax) -> QueryRow:
 
 
 class TestExpressionCompilation:
-    def test_equal_conditions_keep_distinct_source_rows_through_nested_query_construction(self):
-        first = _type_row("Wall", open_parentheses=1, join_next="or")
-        second = _type_row("Wall", close_parentheses=1)
-        third = _type_row("Wall")
-
-        result = build_query(QueryRows(rows=[first, second, third]))
-
-        assert result.query is not None, result.issues
-        root = result.query.where
-        assert isinstance(root, AllOf)
-        nested = root.items[0]
-        assert isinstance(nested, AnyOf)
-        # Equal values belong to different rows. Construction must neither copy
-        # away the compiler's leaf identities nor merge equal predicates.
-        leaves = (*nested.items, root.items[1])
-        assert leaves[0] == leaves[1] == leaves[2]
-        assert len({id(leaf) for leaf in leaves}) == 3
-        assert dict(result.row_ids_by_location) == {
-            ("where", "items", 0, "items", 0): first.row_id,
-            ("where", "items", 0, "items", 1): second.row_id,
-            ("where", "items", 1): third.row_id,
-        }
-
     def test_compiles_and_before_or_and_ignores_the_last_connector(self):
         wall = _type_row("Wall", join_next="or")
         slab = _type_row("Slab")
@@ -70,8 +47,6 @@ class TestExpressionCompilation:
                 ),
             )
         )
-        assert result.row_id_at(("where", "items", 1, "items", 0, "test", "types", 0)) == slab.row_id
-        assert result.row_id_at(("where",)) is None
         assert beam.join_next == "or"
 
     def test_parentheses_close_before_the_outgoing_connector_and_preserve_nested_groups(self):
@@ -99,7 +74,6 @@ class TestExpressionCompilation:
                 ElementTypePredicate(test=ElementTypeTest(types=(ElementType.COLUMN,))),
             )
         )
-        assert result.row_id_at(("where", "items", 0, "items", 0, "items", 1)) == slab.row_id
 
     def test_collects_expression_and_predicate_errors_without_returning_a_query(self):
         extra_close = _type_row("Wall", close_parentheses=1)
@@ -115,7 +89,6 @@ class TestExpressionCompilation:
         result = build_query(QueryRows(rows=[extra_close, incomplete]))
 
         assert result.query is None
-        assert not result.row_ids_by_location
         assert [(issue.row_id, issue.location, issue.code) for issue in result.issues] == [
             (extra_close.row_id, ("close_parentheses",), "unmatched_close"),
             (incomplete.row_id, ("open_parentheses",), "unmatched_open"),
@@ -198,7 +171,7 @@ class TestRowEditing:
             setattr(row, field, value)
         assert getattr(row, field) == 0
 
-    def test_valid_row_edits_preserve_identity_and_compile_the_current_payload(self):
+    def test_valid_row_edits_preserve_row_id_and_compile_the_current_payload(self):
         row = QueryRow(predicate={})
         row_id = row.row_id
         row.predicate = _type_row("Door").predicate
@@ -210,24 +183,4 @@ class TestRowEditing:
 
         assert result.query is not None, result.issues
         assert result.query.where == ElementTypePredicate(test=ElementTypeTest(types=(ElementType.DOOR,)))
-        assert result.row_id_at(("where",)) == row_id == row.row_id
-
-    def test_metadata_issues_resolve_to_their_source_row_through_a_readonly_map(self):
-        from multiconn_archicad.utilities.queries import validate_query
-
-        row = QueryRow(
-            predicate={
-                "kind": "property",
-                "field_id": str(UUID(int=1)),
-                "test": {"kind": "real", "operator": "is", "value": 3},
-            }
-        )
-        result = build_query(QueryRows(rows=[row]))
-
-        assert result.query is not None, result.issues
-        (issue,) = validate_query(result.query, []).issues
-        assert issue.code == "unknown_field"
-        assert result.row_id_at(issue.location) == row.row_id
-        assert result.row_id_at(("where", "test", "value")) == row.row_id
-        with pytest.raises(TypeError):
-            result.row_ids_by_location[("where",)] = UUID(int=2)
+        assert row.row_id == row_id

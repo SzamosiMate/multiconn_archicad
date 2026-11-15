@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from dataclasses import dataclass, field
-from types import MappingProxyType
 from typing import Annotated, Any, Literal
 from uuid import UUID, uuid4
 
@@ -100,26 +99,16 @@ class RowIssue:
 
 @dataclass(frozen=True, slots=True)
 class QueryBuildResult:
-    """Carry either a complete query with source locations or its input issues."""
+    """Carry either a complete query or its row-local input issues."""
 
     query: Query | None
     issues: tuple[RowIssue, ...] = ()
-    row_ids_by_location: Mapping[_Location, UUID] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
         has_query = self.query is not None
         has_issues = bool(self.issues)
-        if has_query == has_issues or (has_issues and self.row_ids_by_location):
-            raise ValueError("Expected a complete query or build issues without source locations")
-        object.__setattr__(self, "row_ids_by_location", MappingProxyType(dict(self.row_ids_by_location)))
-
-    def row_id_at(self, location: _Location) -> UUID | None:
-        """Resolve a predicate path or a location inside that predicate."""
-        while location:
-            if location in self.row_ids_by_location:
-                return self.row_ids_by_location[location]
-            location = location[:-1]
-        return None
+        if has_query == has_issues:
+            raise ValueError("Expected a complete query or build issues")
 
 
 def _payload_location(payload: JsonValue, location: _Location) -> _Location:
@@ -147,9 +136,15 @@ def _payload_location(payload: JsonValue, location: _Location) -> _Location:
 
 def _validate_row(row: QueryRow) -> tuple[Predicate | None, tuple[RowIssue, ...]]:
     if row.predicate.get("kind") in ("all", "any"):
-        return None, (RowIssue(row.row_id, ("predicate", "kind"),
-                        "group_in_row", "A row must contain a single condition, not an AND/OR group. "
-                                        "Use parentheses and connectors to group rows."),)
+        return None, (
+            RowIssue(
+                row.row_id,
+                ("predicate", "kind"),
+                "group_in_row",
+                "A row must contain a single condition, not an AND/OR group. "
+                "Use parentheses and connectors to group rows.",
+            ),
+        )
 
     try:
         predicate = _predicate_adapter.validate_python(row.predicate)
@@ -235,29 +230,12 @@ def _compile_expression(rows: list[QueryRow], leaves: list[Predicate]) -> Predic
     return groups[0].finish()
 
 
-def _source_locations(root: Predicate, rows: list[QueryRow], leaves: list[Predicate]) -> dict[_Location, UUID]:
-    """Map compiled leaves to rows by identity, distinguishing equal conditions.
-
-    Group and Query construction must preserve the original leaf instances until
-    this traversal completes. Copying or normalizing leaves requires carrying
-    their row provenance through that transformation as well.
-    """
-    row_ids = {id(leaf): row.row_id for row, leaf in zip(rows, leaves, strict=True)}
-    pending: list[tuple[_Location, Predicate]] = [(("where",), root)]
-    locations: dict[_Location, UUID] = {}
-    while pending:
-        location, node = pending.pop()
-        if isinstance(node, (AllOf, AnyOf)):
-            pending.extend(
-                ((*location, "items", index), child) for index, child in reversed(tuple(enumerate(node.items)))
-            )
-        else:
-            locations[location] = row_ids[id(node)]
-    return locations
-
-
 def build_query(document: QueryRows) -> QueryBuildResult:
-    """Compile a draft offline, collecting expression and predicate issues."""
+    """Compile a draft offline, collecting expression and predicate issues.
+
+    Validate the resulting query against metadata separately with validate_query;
+    its issues describe the query and are not mapped back to editor rows.
+    """
     issues = _expression_issues(document.rows)
     leaves: list[Predicate] = []
     for row in document.rows:
@@ -271,4 +249,4 @@ def build_query(document: QueryRows) -> QueryBuildResult:
 
     root = _compile_expression(document.rows, leaves)
     query = Query(schema_version=document.schema_version, where=root)
-    return QueryBuildResult(query=query, row_ids_by_location=_source_locations(query.where, document.rows, leaves))
+    return QueryBuildResult(query=query)

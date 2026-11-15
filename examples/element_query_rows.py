@@ -1,5 +1,6 @@
 """Edit, save and compile query rows without connecting to Archicad."""
 
+from multiconn_archicad.utilities.queries import validate_query
 from multiconn_archicad.utilities.queries.editing import QueryRow, QueryRows, build_query
 
 
@@ -27,7 +28,7 @@ def main() -> None:
     )
 
     for issue in build_query(rows).issues:
-        print(issue.location, issue.message)
+        print(issue.row_id, issue.location, issue.message)
 
     height.predicate["test"] = {"kind": "real", "operator": "is greater than", "value": 3}
     saved = rows.model_dump_json(indent=2)
@@ -37,6 +38,11 @@ def main() -> None:
     result = build_query(restored)
     assert result.query is not None, result.issues
     print(result.query.model_dump_json(indent=2))
+
+    # No captured property metadata is supplied in this offline example, so the
+    # height reference is unknown. Present this separately at query level.
+    for issue in validate_query(result.query, []).issues:
+        print(issue.qualified_name or dict(issue.reference), issue.message)
 
 
 if __name__ == "__main__":

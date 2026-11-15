@@ -161,8 +161,8 @@ print(built.query.model_dump_json(indent=2))
 
 Compilation applies AND before OR; parentheses override precedence. Closing
 parentheses are applied before the outgoing connector. `build_query()` returns
-either a complete query with a read-only expression-location-to-row-ID map, or
-`query=None` and issues. It does not return a partially executable expression.
+either a complete query with no build issues, or `query=None` and issues. It does
+not return a partially executable expression.
 
 Build issue codes are `empty_expression`, `unmatched_open`, `unmatched_close`,
 `group_in_row`, and `invalid_predicate`. Issues include a row ID when applicable,
@@ -171,10 +171,21 @@ structural validity; it cannot validate parentheses against neighboring rows or
 project metadata.
 
 Compilation is offline and structural. Follow it with metadata validation, or
-let bound execution discover and validate current references. For a metadata
-issue, use `built.row_id_at(issue.location)` to locate the responsible row;
-deeper test-field locations resolve to their containing leaf row. Query-wide
-issues need a document-level display.
+let bound execution discover and validate current references. Display metadata
+issues at query level, using their field reference, name when available, and
+message. Their `location`/`path` describes the executable query, not an editor
+row. The compiled query carries no mapping back to draft rows; row IDs remain
+useful for local build diagnostics and editor bindings only.
+
+```python
+validation = validate_query(built.query, [])  # Supply captured catalogues in a real editor.
+for issue in validation.issues:
+    print(issue.qualified_name or dict(issue.reference), issue.message)
+```
+
+Keep metadata validation separate from compilation: a structurally valid draft
+can still reference a missing field or use a test incompatible with its metadata.
+Rebuild and revalidate after edits; refresh captured metadata when it changes.
 
 ## Extension boundaries
 
