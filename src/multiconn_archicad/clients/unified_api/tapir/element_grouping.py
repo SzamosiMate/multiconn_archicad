@@ -82,7 +82,8 @@ class ElementGroupingCommands:
         }
         validated_params = CreateElementSetsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateElementSets", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateElementSets",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateElementSetsResult.model_validate(response_dict)
         return validated_response.elementSets
@@ -107,7 +108,8 @@ class ElementGroupingCommands:
         }
         validated_params = CreateGroupsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateGroups", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateGroups",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateGroupsResult.model_validate(response_dict)
         return validated_response.groupGuids
@@ -142,7 +144,8 @@ class ElementGroupingCommands:
         }
         validated_params = DeleteElementSetsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "DeleteElementSets", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "DeleteElementSets",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         return TypeAdapter(list[ExecutionResult]).validate_python(response_dict.get("executionResults"))
 
@@ -173,7 +176,8 @@ class ElementGroupingCommands:
         }
         validated_params = DeleteElementSetsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "DeleteElementSets", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "DeleteElementSets",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = DeleteElementSetsResult.model_validate(response_dict)
         return validated_response
@@ -199,7 +203,8 @@ class ElementGroupingCommands:
         }
         validated_params = GetAllElementsOfGroupsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetAllElementsOfGroups", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetAllElementsOfGroups",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetAllElementsOfGroupsResult.model_validate(response_dict)
         return validated_response.elementsOfGroups
@@ -243,7 +248,8 @@ class ElementGroupingCommands:
         }
         validated_params = GetElementSetDataParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetElementSetData", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetElementSetData",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetElementSetDataResult.model_validate(response_dict)
         return validated_response.elementSets
@@ -273,7 +279,8 @@ class ElementGroupingCommands:
         }
         validated_params = GetElementSetsOfElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetElementSetsOfElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetElementSetsOfElements",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetElementSetsOfElementsResult.model_validate(response_dict)
         return validated_response.elementSetsOfElements
@@ -299,7 +306,8 @@ class ElementGroupingCommands:
         }
         validated_params = GetElementsOfGroupsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetElementsOfGroups", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetElementsOfGroups",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetElementsOfGroupsResult.model_validate(response_dict)
         return validated_response.elementsOfGroups
@@ -327,7 +335,8 @@ class ElementGroupingCommands:
         }
         validated_params = GetGroupsOfElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetGroupsOfElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetGroupsOfElements",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetGroupsOfElementsResult.model_validate(response_dict)
         return validated_response.groupGuids
@@ -354,7 +363,8 @@ class ElementGroupingCommands:
         }
         validated_params = GetMainGroupsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetMainGroups", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetMainGroups",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetMainGroupsResult.model_validate(response_dict)
         return validated_response.mainGroups
@@ -399,7 +409,8 @@ class ElementGroupingCommands:
         }
         validated_params = GetUserDataOfGroupsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetUserDataOfGroups", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetUserDataOfGroups",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetUserDataOfGroupsResult.model_validate(response_dict)
         return validated_response.userDataOfGroups
@@ -425,7 +436,8 @@ class ElementGroupingCommands:
         }
         validated_params = SetSuspendGroupsModeParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "SetSuspendGroupsMode", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "SetSuspendGroupsMode",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = SetSuspendGroupsModeResult.model_validate(response_dict)
         return validated_response.executionResult
@@ -467,7 +479,8 @@ class ElementGroupingCommands:
         }
         validated_params = SetUserDataOfGroupsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "SetUserDataOfGroups", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "SetUserDataOfGroups",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = SetUserDataOfGroupsResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -500,7 +513,8 @@ class ElementGroupingCommands:
         }
         validated_params = UngroupElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "UngroupElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "UngroupElements",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = UngroupElementsResult.model_validate(response_dict)
         return validated_response.executionResults

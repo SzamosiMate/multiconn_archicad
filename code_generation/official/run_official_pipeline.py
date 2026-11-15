@@ -1,6 +1,7 @@
 import sys
 import time
 import importlib
+import subprocess
 
 
 STEPS = [
@@ -48,6 +49,10 @@ def main():
             print(f"   Details: {e}")
             sys.exit(1)
 
+    subprocess.run(
+        [sys.executable, "-m", "code_generation.shared.default_policy_audit", "--provider", "official"],
+        check=True,
+    )
     total_elapsed = time.time() - pipeline_start
     print("\n==================================================")
     print(f"🎉 Official Pipeline complete! Total time: {total_elapsed:.2f} seconds.")

@@ -56,7 +56,8 @@ class LayoutBookCommands:
         }
         validated_params = CreateLayoutParameters(**params_dict)
         response_dict = self._core.post_command(
-            "API.CreateLayout", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "API.CreateLayout",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateLayoutResult.model_validate(response_dict)
         return validated_response.createdNavigatorItemId
@@ -85,7 +86,8 @@ class LayoutBookCommands:
         }
         validated_params = CreateLayoutSubsetParameters(**params_dict)
         response_dict = self._core.post_command(
-            "API.CreateLayoutSubset", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "API.CreateLayoutSubset",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateLayoutSubsetResult.model_validate(response_dict)
         return validated_response.createdSubsetId
@@ -110,7 +112,8 @@ class LayoutBookCommands:
         }
         validated_params = GetLayoutSettingsParameters(**params_dict)
         response_dict = self._core.post_command(
-            "API.GetLayoutSettings", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "API.GetLayoutSettings",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetLayoutSettingsResult.model_validate(response_dict)
         return validated_response.layoutParameters
@@ -136,6 +139,7 @@ class LayoutBookCommands:
         }
         validated_params = SetLayoutSettingsParameters(**params_dict)
         self._core.post_command(
-            "API.SetLayoutSettings", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "API.SetLayoutSettings",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         return None

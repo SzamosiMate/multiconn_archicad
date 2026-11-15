@@ -120,7 +120,8 @@ class FavoritesCommands:
         }
         validated_params = ApplyFavoriteToToolDefaultParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "ApplyFavoriteToToolDefault", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "ApplyFavoriteToToolDefault",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = ApplyFavoriteToToolDefaultResult.model_validate(response_dict)
         return validated_response.elementType
@@ -149,7 +150,7 @@ class FavoritesCommands:
         validated_params = ApplyFavoritesToElementDefaultsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
             "ApplyFavoritesToElementDefaults",
-            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = ApplyFavoritesToElementDefaultsResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -245,7 +246,8 @@ class FavoritesCommands:
         }
         validated_params = ApplyFavoritesToElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "ApplyFavoritesToElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "ApplyFavoritesToElements",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = ApplyFavoritesToElementsResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -276,7 +278,8 @@ class FavoritesCommands:
         }
         validated_params = ChangeFavoriteParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "ChangeFavorite", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "ChangeFavorite",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = TypeAdapter(ChangeFavoriteResult).validate_python(response_dict)
         return validated_response
@@ -318,7 +321,8 @@ class FavoritesCommands:
         }
         validated_params = CreateFavoriteParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateFavorite", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateFavorite",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateFavoriteResult.model_validate(response_dict)
         return validated_response
@@ -348,7 +352,8 @@ class FavoritesCommands:
         }
         validated_params = CreateFavoriteFolderParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateFavoriteFolder", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateFavoriteFolder",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateFavoriteFolderResult.model_validate(response_dict)
         return validated_response.folder
@@ -376,7 +381,8 @@ class FavoritesCommands:
         }
         validated_params = CreateFavoritesFromElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateFavoritesFromElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateFavoritesFromElements",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateFavoritesFromElementsResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -409,7 +415,8 @@ class FavoritesCommands:
         }
         validated_params = DeleteFavoriteFolderParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "DeleteFavoriteFolder", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "DeleteFavoriteFolder",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = DeleteFavoriteFolderResult.model_validate(response_dict)
         return validated_response.deletedFolder
@@ -435,7 +442,8 @@ class FavoritesCommands:
         }
         validated_params = DeleteFavoritesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "DeleteFavorites", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "DeleteFavorites",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = DeleteFavoritesResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -464,7 +472,8 @@ class FavoritesCommands:
         }
         validated_params = DeleteFavoritesWithManagerParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "DeleteFavoritesWithManager", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "DeleteFavoritesWithManager",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = DeleteFavoritesWithManagerResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -516,7 +525,8 @@ class FavoritesCommands:
         }
         validated_params = ExportFavoritesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "ExportFavorites", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "ExportFavorites",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = TypeAdapter(ExportFavoritesResult).validate_python(response_dict)
         return validated_response
@@ -543,7 +553,8 @@ class FavoritesCommands:
         }
         validated_params = GetAllFavoritesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetAllFavorites", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetAllFavorites",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetAllFavoritesResult.model_validate(response_dict)
         return validated_response.favorites
@@ -574,7 +585,8 @@ class FavoritesCommands:
         }
         validated_params = GetFavoriteContentsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetFavoriteContents", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetFavoriteContents",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetFavoriteContentsResult.model_validate(response_dict)
         return validated_response.favorites
@@ -605,7 +617,8 @@ class FavoritesCommands:
         }
         validated_params = GetFavoriteDefaultsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetFavoriteDefaults", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetFavoriteDefaults",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetFavoriteDefaultsResult.model_validate(response_dict)
         return validated_response.favoriteDefaults
@@ -634,7 +647,8 @@ class FavoritesCommands:
         }
         validated_params = GetFavoriteDetailsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetFavoriteDetails", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetFavoriteDetails",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetFavoriteDetailsResult.model_validate(response_dict)
         return validated_response.favoriteDetails
@@ -691,7 +705,8 @@ class FavoritesCommands:
         }
         validated_params = GetFavoritePreviewImageParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetFavoritePreviewImage", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetFavoritePreviewImage",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetFavoritePreviewImageResult.model_validate(response_dict)
         return validated_response.previewImage
@@ -721,7 +736,8 @@ class FavoritesCommands:
         }
         validated_params = GetFavoriteSettingsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetFavoriteSettings", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetFavoriteSettings",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetFavoriteSettingsResult.model_validate(response_dict)
         return validated_response.favoriteSettings
@@ -746,7 +762,8 @@ class FavoritesCommands:
         }
         validated_params = GetFavoritesByTypeParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetFavoritesByType", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetFavoritesByType",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = TypeAdapter(GetFavoritesByTypeResult).validate_python(response_dict)
         return validated_response
@@ -799,7 +816,8 @@ class FavoritesCommands:
         }
         validated_params = ImportFavoritesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "ImportFavorites", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "ImportFavorites",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = ImportFavoritesResult.model_validate(response_dict)
         return validated_response.firstConflictName
@@ -830,7 +848,8 @@ class FavoritesCommands:
         }
         validated_params = MoveFavoriteFolderParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "MoveFavoriteFolder", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "MoveFavoriteFolder",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = MoveFavoriteFolderResult.model_validate(response_dict)
         return validated_response.folder
@@ -863,7 +882,8 @@ class FavoritesCommands:
         }
         validated_params = MoveFavoritesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "MoveFavorites", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "MoveFavorites",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = MoveFavoritesResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -890,7 +910,8 @@ class FavoritesCommands:
         }
         validated_params = ReadFavoritesFileParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "ReadFavoritesFile", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "ReadFavoritesFile",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = ReadFavoritesFileResult.model_validate(response_dict)
         return validated_response.favorites
@@ -919,7 +940,8 @@ class FavoritesCommands:
         }
         validated_params = RenameFavoriteFolderParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "RenameFavoriteFolder", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "RenameFavoriteFolder",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = RenameFavoriteFolderResult.model_validate(response_dict)
         return validated_response.folder
@@ -947,7 +969,8 @@ class FavoritesCommands:
         }
         validated_params = RenameFavoritesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "RenameFavorites", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "RenameFavorites",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = RenameFavoritesResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -982,7 +1005,8 @@ class FavoritesCommands:
         }
         validated_params = SearchFavoritesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "SearchFavorites", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "SearchFavorites",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = SearchFavoritesResult.model_validate(response_dict)
         return validated_response.favorites
@@ -1010,7 +1034,8 @@ class FavoritesCommands:
         }
         validated_params = UpdateFavoritesFromElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "UpdateFavoritesFromElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "UpdateFavoritesFromElements",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = UpdateFavoritesFromElementsResult.model_validate(response_dict)
         return validated_response.executionResults

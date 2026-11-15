@@ -151,7 +151,8 @@ class ElementCreationCommands:
         }
         validated_params = CreateArcsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateArcs", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateArcs",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateArcsResult.model_validate(response_dict)
         return validated_response.elements
@@ -180,7 +181,8 @@ class ElementCreationCommands:
         }
         validated_params = CreateAssociativeDimensionsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateAssociativeDimensions", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateAssociativeDimensions",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateAssociativeDimensionsResult.model_validate(response_dict)
         return validated_response.elements
@@ -213,7 +215,7 @@ class ElementCreationCommands:
         validated_params = CreateAssociativeDimensionsOnSectionParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
             "CreateAssociativeDimensionsOnSection",
-            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateAssociativeDimensionsOnSectionResult.model_validate(response_dict)
         return validated_response.elements
@@ -242,7 +244,8 @@ class ElementCreationCommands:
         }
         validated_params = CreateBeamsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateBeams", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateBeams",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateBeamsResult.model_validate(response_dict)
         return validated_response.elements
@@ -277,7 +280,8 @@ class ElementCreationCommands:
         }
         validated_params = CreateCirclesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateCircles", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateCircles",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateCirclesResult.model_validate(response_dict)
         return validated_response.elements
@@ -306,7 +310,8 @@ class ElementCreationCommands:
         }
         validated_params = CreateColumnsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateColumns", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateColumns",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateColumnsResult.model_validate(response_dict)
         return validated_response.elements
@@ -333,7 +338,8 @@ class ElementCreationCommands:
         }
         validated_params = CreateCurtainWallsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateCurtainWalls", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateCurtainWalls",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateCurtainWallsResult.model_validate(response_dict)
         return validated_response.elements
@@ -358,7 +364,8 @@ class ElementCreationCommands:
         }
         validated_params = CreateDoorsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateDoors", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateDoors",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateDoorsResult.model_validate(response_dict)
         return validated_response.elements
@@ -384,7 +391,8 @@ class ElementCreationCommands:
         }
         validated_params = CreateGridElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateGridElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateGridElements",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateGridElementsResult.model_validate(response_dict)
         return validated_response
@@ -420,7 +428,8 @@ class ElementCreationCommands:
         }
         validated_params = CreateHatchesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateHatches", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateHatches",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateHatchesResult.model_validate(response_dict)
         return validated_response.elements
@@ -455,7 +464,8 @@ class ElementCreationCommands:
         }
         validated_params = CreateHotspotsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateHotspots", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateHotspots",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateHotspotsResult.model_validate(response_dict)
         return validated_response.elements
@@ -490,7 +500,8 @@ class ElementCreationCommands:
         }
         validated_params = CreateLabelsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateLabels", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateLabels",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateLabelsResult.model_validate(response_dict)
         return validated_response.elements
@@ -529,7 +540,8 @@ class ElementCreationCommands:
         }
         validated_params = CreateLampsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateLamps", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateLamps",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateLampsResult.model_validate(response_dict)
         return validated_response.elements
@@ -560,7 +572,8 @@ class ElementCreationCommands:
         }
         validated_params = CreateLevelDimensionsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateLevelDimensions", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateLevelDimensions",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateLevelDimensionsResult.model_validate(response_dict)
         return validated_response.elements
@@ -595,7 +608,8 @@ class ElementCreationCommands:
         }
         validated_params = CreateLineElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateLineElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateLineElements",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateLineElementsResult.model_validate(response_dict)
         return validated_response.elements
@@ -620,7 +634,8 @@ class ElementCreationCommands:
         }
         validated_params = CreateMeshesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateMeshes", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateMeshes",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateMeshesResult.model_validate(response_dict)
         return validated_response.elements
@@ -647,7 +662,8 @@ class ElementCreationCommands:
         }
         validated_params = CreateMorphsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateMorphs", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateMorphs",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateMorphsResult.model_validate(response_dict)
         return validated_response.elements
@@ -686,7 +702,8 @@ class ElementCreationCommands:
         }
         validated_params = CreateObjectsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateObjects", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateObjects",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateObjectsResult.model_validate(response_dict)
         return validated_response.elements
@@ -711,7 +728,8 @@ class ElementCreationCommands:
         }
         validated_params = CreateOpeningsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateOpenings", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateOpenings",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateOpeningsResult.model_validate(response_dict)
         return validated_response.elements
@@ -746,7 +764,8 @@ class ElementCreationCommands:
         }
         validated_params = CreatePolylinesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreatePolylines", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreatePolylines",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreatePolylinesResult.model_validate(response_dict)
         return validated_response.elements
@@ -774,7 +793,8 @@ class ElementCreationCommands:
         }
         validated_params = CreateRailingsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateRailings", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateRailings",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateRailingsResult.model_validate(response_dict)
         return validated_response.elements
@@ -803,7 +823,8 @@ class ElementCreationCommands:
         }
         validated_params = CreateRailingsFromPolylineParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateRailingsFromPolyline", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateRailingsFromPolyline",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateRailingsFromPolylineResult.model_validate(response_dict)
         return validated_response.elements
@@ -830,7 +851,8 @@ class ElementCreationCommands:
         }
         validated_params = CreateRoofsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateRoofs", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateRoofs",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateRoofsResult.model_validate(response_dict)
         return validated_response.elements
@@ -856,7 +878,8 @@ class ElementCreationCommands:
         }
         validated_params = CreateShellsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateShells", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateShells",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateShellsResult.model_validate(response_dict)
         return validated_response.elements
@@ -886,7 +909,8 @@ class ElementCreationCommands:
         }
         validated_params = CreateSkylightsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateSkylights", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateSkylights",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateSkylightsResult.model_validate(response_dict)
         return validated_response.elements
@@ -916,7 +940,8 @@ class ElementCreationCommands:
         }
         validated_params = CreateSlabsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateSlabs", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateSlabs",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateSlabsResult.model_validate(response_dict)
         return validated_response.elements
@@ -953,7 +978,8 @@ class ElementCreationCommands:
         }
         validated_params = CreateSplinesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateSplines", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateSplines",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateSplinesResult.model_validate(response_dict)
         return validated_response.elements
@@ -983,7 +1009,8 @@ class ElementCreationCommands:
         }
         validated_params = CreateStairsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateStairs", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateStairs",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateStairsResult.model_validate(response_dict)
         return validated_response.elements
@@ -1019,7 +1046,8 @@ class ElementCreationCommands:
         }
         validated_params = CreateTextsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateTexts", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateTexts",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateTextsResult.model_validate(response_dict)
         return validated_response.elements
@@ -1046,7 +1074,8 @@ class ElementCreationCommands:
         }
         validated_params = CreateWallThicknessDimensionsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateWallThicknessDimensions", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateWallThicknessDimensions",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateWallThicknessDimensionsResult.model_validate(response_dict)
         return validated_response.elements
@@ -1078,7 +1107,8 @@ class ElementCreationCommands:
         }
         validated_params = CreateWallsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateWalls", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateWalls",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateWallsResult.model_validate(response_dict)
         return validated_response.elements
@@ -1103,7 +1133,8 @@ class ElementCreationCommands:
         }
         validated_params = CreateWindowsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateWindows", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateWindows",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateWindowsResult.model_validate(response_dict)
         return validated_response.elements
@@ -1133,7 +1164,8 @@ class ElementCreationCommands:
         }
         validated_params = CreateZonesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateZones", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateZones",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateZonesResult.model_validate(response_dict)
         return validated_response.elements

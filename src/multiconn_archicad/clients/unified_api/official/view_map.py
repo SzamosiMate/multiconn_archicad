@@ -49,7 +49,7 @@ class ViewMapCommands:
         validated_params = CloneProjectMapItemToViewMapParameters(**params_dict)
         response_dict = self._core.post_command(
             "API.CloneProjectMapItemToViewMap",
-            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CloneProjectMapItemToViewMapResult.model_validate(response_dict)
         return validated_response.createdNavigatorItemId
@@ -87,7 +87,8 @@ class ViewMapCommands:
         }
         validated_params = CreateViewMapFolderParameters(**params_dict)
         response_dict = self._core.post_command(
-            "API.CreateViewMapFolder", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "API.CreateViewMapFolder",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateViewMapFolderResult.model_validate(response_dict)
         return validated_response.createdFolderNavigatorItemId

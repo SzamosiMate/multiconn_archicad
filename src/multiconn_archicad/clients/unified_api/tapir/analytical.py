@@ -155,7 +155,8 @@ class AnalyticalCommands:
         }
         validated_params = AddLoadCasesToLoadCombinationParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "AddLoadCasesToLoadCombination", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "AddLoadCasesToLoadCombination",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = AddLoadCasesToLoadCombinationResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -191,7 +192,7 @@ class AnalyticalCommands:
         validated_params = ConvertAnalyticalLinksToNonShortestParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
             "ConvertAnalyticalLinksToNonShortest",
-            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = ConvertAnalyticalLinksToNonShortestResult.model_validate(response_dict)
         return validated_response.links
@@ -218,7 +219,8 @@ class AnalyticalCommands:
         }
         validated_params = CreateAnalyticalLinksParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateAnalyticalLinks", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateAnalyticalLinks",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateAnalyticalLinksResult.model_validate(response_dict)
         return validated_response.elements
@@ -248,7 +250,8 @@ class AnalyticalCommands:
         }
         validated_params = CreateAnalyticalLoadCasesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateAnalyticalLoadCases", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateAnalyticalLoadCases",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateAnalyticalLoadCasesResult.model_validate(response_dict)
         return validated_response.loadCaseIds
@@ -281,7 +284,7 @@ class AnalyticalCommands:
         validated_params = CreateAnalyticalLoadCombinationsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
             "CreateAnalyticalLoadCombinations",
-            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateAnalyticalLoadCombinationsResult.model_validate(response_dict)
         return validated_response.loadCombinationIds
@@ -310,7 +313,8 @@ class AnalyticalCommands:
         }
         validated_params = CreateAnalyticalLoadGroupsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateAnalyticalLoadGroups", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateAnalyticalLoadGroups",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateAnalyticalLoadGroupsResult.model_validate(response_dict)
         return validated_response.loadGroupIds
@@ -343,7 +347,8 @@ class AnalyticalCommands:
         }
         validated_params = CreateAnalyticalLoadsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateAnalyticalLoads", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateAnalyticalLoads",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateAnalyticalLoadsResult.model_validate(response_dict)
         return validated_response.elements
@@ -370,7 +375,8 @@ class AnalyticalCommands:
         }
         validated_params = CreateAnalyticalSupportsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateAnalyticalSupports", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateAnalyticalSupports",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateAnalyticalSupportsResult.model_validate(response_dict)
         return validated_response.elements
@@ -411,7 +417,7 @@ class AnalyticalCommands:
         validated_params = CreateElementsFromAnalyticalMembersParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
             "CreateElementsFromAnalyticalMembers",
-            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateElementsFromAnalyticalMembersResult.model_validate(response_dict)
         return validated_response.elements
@@ -439,7 +445,8 @@ class AnalyticalCommands:
         }
         validated_params = DeleteAnalyticalLoadCasesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "DeleteAnalyticalLoadCases", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "DeleteAnalyticalLoadCases",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = DeleteAnalyticalLoadCasesResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -469,7 +476,7 @@ class AnalyticalCommands:
         validated_params = DeleteAnalyticalLoadCombinationsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
             "DeleteAnalyticalLoadCombinations",
-            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = DeleteAnalyticalLoadCombinationsResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -497,7 +504,8 @@ class AnalyticalCommands:
         }
         validated_params = DeleteAnalyticalLoadGroupsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "DeleteAnalyticalLoadGroups", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "DeleteAnalyticalLoadGroups",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = DeleteAnalyticalLoadGroupsResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -531,7 +539,8 @@ class AnalyticalCommands:
         }
         validated_params = GetAnalyticalLinksParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetAnalyticalLinks", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetAnalyticalLinks",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetAnalyticalLinksResult.model_validate(response_dict)
         return validated_response.links
@@ -559,7 +568,8 @@ class AnalyticalCommands:
         }
         validated_params = GetAnalyticalLoadCasesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetAnalyticalLoadCases", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetAnalyticalLoadCases",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetAnalyticalLoadCasesResult.model_validate(response_dict)
         return validated_response.loadCases
@@ -632,7 +642,8 @@ class AnalyticalCommands:
         }
         validated_params = GetAnalyticalLoadsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetAnalyticalLoads", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetAnalyticalLoads",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetAnalyticalLoadsResult.model_validate(response_dict)
         return validated_response.loads
@@ -680,7 +691,8 @@ class AnalyticalCommands:
         }
         validated_params = GetAnalyticalMemberDetailsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetAnalyticalMemberDetails", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetAnalyticalMemberDetails",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetAnalyticalMemberDetailsResult.model_validate(response_dict)
         return validated_response.analyticalMembers
@@ -717,7 +729,7 @@ class AnalyticalCommands:
         validated_params = GetAnalyticalMemberPartGeometriesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
             "GetAnalyticalMemberPartGeometries",
-            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetAnalyticalMemberPartGeometriesResult.model_validate(response_dict)
         return validated_response.geometries
@@ -748,7 +760,7 @@ class AnalyticalCommands:
         validated_params = GetAnalyticalMemberTypesOfElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
             "GetAnalyticalMemberTypesOfElements",
-            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetAnalyticalMemberTypesOfElementsResult.model_validate(response_dict)
         return validated_response.memberTypesOfElements
@@ -777,7 +789,8 @@ class AnalyticalCommands:
         }
         validated_params = GetAnalyticalMembersParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetAnalyticalMembers", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetAnalyticalMembers",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetAnalyticalMembersResult.model_validate(response_dict)
         return validated_response
@@ -803,7 +816,8 @@ class AnalyticalCommands:
         }
         validated_params = GetAnalyticalModelParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetAnalyticalModel", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetAnalyticalModel",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetAnalyticalModelResult.model_validate(response_dict)
         return validated_response.analyticalModelId
@@ -849,7 +863,8 @@ class AnalyticalCommands:
         }
         validated_params = GetAnalyticalModelVariationParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetAnalyticalModelVariation", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetAnalyticalModelVariation",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetAnalyticalModelVariationResult.model_validate(response_dict)
         return validated_response.variation
@@ -882,7 +897,8 @@ class AnalyticalCommands:
         }
         validated_params = GetAnalyticalReleasesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetAnalyticalReleases", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetAnalyticalReleases",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetAnalyticalReleasesResult.model_validate(response_dict)
         return validated_response.releases
@@ -916,7 +932,8 @@ class AnalyticalCommands:
         }
         validated_params = GetAnalyticalSupportsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetAnalyticalSupports", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetAnalyticalSupports",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetAnalyticalSupportsResult.model_validate(response_dict)
         return validated_response.supports
@@ -981,7 +998,8 @@ class AnalyticalCommands:
         }
         validated_params = GetCustomCurveMemberStretchParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetCustomCurveMemberStretch", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetCustomCurveMemberStretch",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetCustomCurveMemberStretchResult.model_validate(response_dict)
         return validated_response.stretches
@@ -1012,7 +1030,8 @@ class AnalyticalCommands:
         }
         validated_params = GetLCSOfAnalyticalMembersParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetLCSOfAnalyticalMembers", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetLCSOfAnalyticalMembers",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetLCSOfAnalyticalMembersResult.model_validate(response_dict)
         return validated_response.localCoordinateSystems
@@ -1060,7 +1079,8 @@ class AnalyticalCommands:
         }
         validated_params = SetAnalyticalReleasesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "SetAnalyticalReleases", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "SetAnalyticalReleases",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = SetAnalyticalReleasesResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -1090,7 +1110,7 @@ class AnalyticalCommands:
         validated_params = SetAnalyticalVisibilitySettingsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
             "SetAnalyticalVisibilitySettings",
-            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = TypeAdapter(SetAnalyticalVisibilitySettingsResult).validate_python(response_dict)
         return validated_response
@@ -1120,7 +1140,8 @@ class AnalyticalCommands:
         }
         validated_params = SetCustomCurveMemberStretchParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "SetCustomCurveMemberStretch", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "SetCustomCurveMemberStretch",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = SetCustomCurveMemberStretchResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -1149,7 +1170,8 @@ class AnalyticalCommands:
         }
         validated_params = UpdateAnalyticalModelParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "UpdateAnalyticalModel", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "UpdateAnalyticalModel",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = TypeAdapter(UpdateAnalyticalModelResult).validate_python(response_dict)
         return validated_response

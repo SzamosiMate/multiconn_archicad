@@ -100,7 +100,7 @@ def test_set_project_preferences_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SetProjectPreferences'
-    expected_payload = commands.SetProjectPreferencesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SetProjectPreferencesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = commands.SetProjectPreferencesResult.model_validate(mock_response)
     assert result == expected
@@ -120,7 +120,7 @@ def test_run_action_center_checks_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'RunActionCenterChecks'
-    expected_payload = commands.RunActionCenterChecksParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.RunActionCenterChecksParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -139,7 +139,7 @@ def test_activate_design_options_in_combinations_logic(input_data: dict, mock_re
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ActivateDesignOptionsInCombinations'
-    expected_payload = commands.ActivateDesignOptionsInCombinationsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ActivateDesignOptionsInCombinationsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -158,7 +158,7 @@ def test_activate_layer_combination_logic(input_data: dict, mock_response: dict)
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ActivateLayerCombination'
-    expected_payload = commands.ActivateLayerCombinationParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ActivateLayerCombinationParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.ActivateLayerCombinationResult).validate_python(mock_response)
     assert result == expected
@@ -177,7 +177,7 @@ def test_set_active_graphical_override_combination_logic(input_data: dict, mock_
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SetActiveGraphicalOverrideCombination'
-    expected_payload = TypeAdapter(commands.SetActiveGraphicalOverrideCombinationParameters).validate_python(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = TypeAdapter(commands.SetActiveGraphicalOverrideCombinationParameters).validate_python(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.SetActiveGraphicalOverrideCombinationResult).validate_python(mock_response)
     assert result == expected
@@ -196,7 +196,7 @@ def test_set_active_renovation_filter_logic(input_data: dict, mock_response: dic
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SetActiveRenovationFilter'
-    expected_payload = TypeAdapter(commands.SetActiveRenovationFilterParameters).validate_python(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = TypeAdapter(commands.SetActiveRenovationFilterParameters).validate_python(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.SetActiveRenovationFilterResult).validate_python(mock_response)
     assert result == expected
@@ -216,7 +216,7 @@ def test_add_comment_to_issue_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'AddCommentToIssue'
-    expected_payload = commands.AddCommentToIssueParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.AddCommentToIssueParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.AddCommentToIssueResult).validate_python(mock_response)
     assert result == expected
@@ -236,7 +236,7 @@ def test_add_files_to_embedded_library_logic(input_data: dict, mock_response: di
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'AddFilesToEmbeddedLibrary'
-    expected_payload = commands.AddFilesToEmbeddedLibraryParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.AddFilesToEmbeddedLibraryParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -255,7 +255,7 @@ def test_add_libraries_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'AddLibraries'
-    expected_payload = commands.AddLibrariesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.AddLibrariesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.AddLibrariesResult).validate_python(mock_response)
     assert result == expected
@@ -275,7 +275,7 @@ def test_add_load_cases_to_load_combination_logic(input_data: dict, mock_respons
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'AddLoadCasesToLoadCombination'
-    expected_payload = commands.AddLoadCasesToLoadCombinationParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.AddLoadCasesToLoadCombinationParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -294,7 +294,7 @@ def test_add_mep_preference_table_rows_logic(input_data: dict, mock_response: di
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'AddMEPPreferenceTableRows'
-    expected_payload = commands.AddMEPPreferenceTableRowsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.AddMEPPreferenceTableRowsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -313,7 +313,7 @@ def test_create_add_on_viewpoints_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateAddOnViewpoints'
-    expected_payload = commands.CreateAddOnViewpointsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateAddOnViewpointsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('viewpoints'))
 
@@ -332,7 +332,7 @@ def test_get_add_on_viewpoints_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetAddOnViewpoints'
-    expected_payload = commands.GetAddOnViewpointsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetAddOnViewpointsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('viewpoints'))
 
@@ -351,7 +351,7 @@ def test_change_add_on_viewpoints_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ChangeAddOnViewpoints'
-    expected_payload = commands.ChangeAddOnViewpointsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ChangeAddOnViewpointsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -370,7 +370,7 @@ def test_get_add_on_viewpoint_children_logic(input_data: dict, mock_response: di
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetAddOnViewpointChildren'
-    expected_payload = commands.GetAddOnViewpointChildrenParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetAddOnViewpointChildrenParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('viewpointIds'))
 
@@ -389,7 +389,7 @@ def test_add_property_to_attributes_logic(input_data: dict, mock_response: dict)
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'AddPropertyToAttributes'
-    expected_payload = commands.AddPropertyToAttributesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.AddPropertyToAttributesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.AddPropertyToAttributesResult).validate_python(mock_response)
     assert result == expected
@@ -409,7 +409,7 @@ def test_align_elements_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'AlignElements'
-    expected_payload = commands.AlignElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.AlignElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -428,7 +428,7 @@ def test_create_analytical_loads_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateAnalyticalLoads'
-    expected_payload = commands.CreateAnalyticalLoadsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateAnalyticalLoadsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('elements'))
 
@@ -447,7 +447,7 @@ def test_create_analytical_links_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateAnalyticalLinks'
-    expected_payload = commands.CreateAnalyticalLinksParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateAnalyticalLinksParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('elements'))
 
@@ -466,7 +466,7 @@ def test_create_analytical_supports_logic(input_data: dict, mock_response: dict)
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateAnalyticalSupports'
-    expected_payload = commands.CreateAnalyticalSupportsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateAnalyticalSupportsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('elements'))
 
@@ -485,7 +485,7 @@ def test_create_elements_from_analytical_members_logic(input_data: dict, mock_re
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateElementsFromAnalyticalMembers'
-    expected_payload = commands.CreateElementsFromAnalyticalMembersParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateElementsFromAnalyticalMembersParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('elements'))
 
@@ -504,7 +504,7 @@ def test_set_custom_curve_member_stretch_logic(input_data: dict, mock_response: 
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SetCustomCurveMemberStretch'
-    expected_payload = commands.SetCustomCurveMemberStretchParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SetCustomCurveMemberStretchParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -523,7 +523,7 @@ def test_get_lcs_of_analytical_members_logic(input_data: dict, mock_response: di
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetLCSOfAnalyticalMembers'
-    expected_payload = commands.GetLCSOfAnalyticalMembersParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetLCSOfAnalyticalMembersParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('localCoordinateSystems'))
 
@@ -542,7 +542,7 @@ def test_set_analytical_releases_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SetAnalyticalReleases'
-    expected_payload = commands.SetAnalyticalReleasesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SetAnalyticalReleasesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -561,7 +561,7 @@ def test_get_analytical_member_part_geometries_logic(input_data: dict, mock_resp
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetAnalyticalMemberPartGeometries'
-    expected_payload = commands.GetAnalyticalMemberPartGeometriesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetAnalyticalMemberPartGeometriesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('geometries'))
 
@@ -580,7 +580,7 @@ def test_get_analytical_model_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetAnalyticalModel'
-    expected_payload = commands.GetAnalyticalModelParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetAnalyticalModelParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('analyticalModelId'))
 
@@ -599,7 +599,7 @@ def test_create_analytical_load_cases_logic(input_data: dict, mock_response: dic
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateAnalyticalLoadCases'
-    expected_payload = commands.CreateAnalyticalLoadCasesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateAnalyticalLoadCasesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('loadCaseIds'))
 
@@ -618,7 +618,7 @@ def test_delete_analytical_load_cases_logic(input_data: dict, mock_response: dic
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'DeleteAnalyticalLoadCases'
-    expected_payload = commands.DeleteAnalyticalLoadCasesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.DeleteAnalyticalLoadCasesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -637,7 +637,7 @@ def test_create_analytical_load_combinations_logic(input_data: dict, mock_respon
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateAnalyticalLoadCombinations'
-    expected_payload = commands.CreateAnalyticalLoadCombinationsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateAnalyticalLoadCombinationsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('loadCombinationIds'))
 
@@ -656,7 +656,7 @@ def test_delete_analytical_load_combinations_logic(input_data: dict, mock_respon
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'DeleteAnalyticalLoadCombinations'
-    expected_payload = commands.DeleteAnalyticalLoadCombinationsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.DeleteAnalyticalLoadCombinationsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -675,7 +675,7 @@ def test_create_analytical_load_groups_logic(input_data: dict, mock_response: di
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateAnalyticalLoadGroups'
-    expected_payload = commands.CreateAnalyticalLoadGroupsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateAnalyticalLoadGroupsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('loadGroupIds'))
 
@@ -694,7 +694,7 @@ def test_delete_analytical_load_groups_logic(input_data: dict, mock_response: di
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'DeleteAnalyticalLoadGroups'
-    expected_payload = commands.DeleteAnalyticalLoadGroupsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.DeleteAnalyticalLoadGroupsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -713,7 +713,7 @@ def test_set_analytical_visibility_settings_logic(input_data: dict, mock_respons
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SetAnalyticalVisibilitySettings'
-    expected_payload = commands.SetAnalyticalVisibilitySettingsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SetAnalyticalVisibilitySettingsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.SetAnalyticalVisibilitySettingsResult).validate_python(mock_response)
     assert result == expected
@@ -733,7 +733,7 @@ def test_apply_favorite_to_tool_default_logic(input_data: dict, mock_response: d
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ApplyFavoriteToToolDefault'
-    expected_payload = commands.ApplyFavoriteToToolDefaultParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ApplyFavoriteToToolDefaultParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('elementType'))
 
@@ -752,7 +752,7 @@ def test_apply_favorites_to_element_defaults_logic(input_data: dict, mock_respon
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ApplyFavoritesToElementDefaults'
-    expected_payload = commands.ApplyFavoritesToElementDefaultsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ApplyFavoritesToElementDefaultsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -771,7 +771,7 @@ def test_apply_favorites_to_elements_logic(input_data: dict, mock_response: dict
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ApplyFavoritesToElements'
-    expected_payload = commands.ApplyFavoritesToElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ApplyFavoritesToElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -790,7 +790,7 @@ def test_create_arcs_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateArcs'
-    expected_payload = commands.CreateArcsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateArcsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('elements'))
 
@@ -809,7 +809,7 @@ def test_set_details_of_elements_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SetDetailsOfElements'
-    expected_payload = commands.SetDetailsOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SetDetailsOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -828,7 +828,7 @@ def test_create_associative_dimensions_logic(input_data: dict, mock_response: di
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateAssociativeDimensions'
-    expected_payload = commands.CreateAssociativeDimensionsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateAssociativeDimensionsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('elements'))
 
@@ -847,7 +847,7 @@ def test_create_associative_dimensions_on_section_logic(input_data: dict, mock_r
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateAssociativeDimensionsOnSection'
-    expected_payload = commands.CreateAssociativeDimensionsOnSectionParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateAssociativeDimensionsOnSectionParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('elements'))
 
@@ -866,7 +866,7 @@ def test_modify_associative_dimensions_logic(input_data: dict, mock_response: di
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ModifyAssociativeDimensions'
-    expected_payload = commands.ModifyAssociativeDimensionsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ModifyAssociativeDimensionsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -885,7 +885,7 @@ def test_attach_elements_to_issue_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'AttachElementsToIssue'
-    expected_payload = commands.AttachElementsToIssueParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.AttachElementsToIssueParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.AttachElementsToIssueResult).validate_python(mock_response)
     assert result == expected
@@ -905,7 +905,7 @@ def test_set_built_in_property_values_of_attributes_logic(input_data: dict, mock
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SetBuiltInPropertyValuesOfAttributes'
-    expected_payload = commands.SetBuiltInPropertyValuesOfAttributesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SetBuiltInPropertyValuesOfAttributesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -924,7 +924,7 @@ def test_set_classifications_of_attributes_logic(input_data: dict, mock_response
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SetClassificationsOfAttributes'
-    expected_payload = commands.SetClassificationsOfAttributesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SetClassificationsOfAttributesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -943,7 +943,7 @@ def test_move_attributes_and_folders_logic(input_data: dict, mock_response: dict
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'MoveAttributesAndFolders'
-    expected_payload = commands.MoveAttributesAndFoldersParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.MoveAttributesAndFoldersParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = commands.MoveAttributesAndFoldersResult.model_validate(mock_response)
     assert result == expected
@@ -963,7 +963,7 @@ def test_create_attribute_folders_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateAttributeFolders'
-    expected_payload = commands.CreateAttributeFoldersParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateAttributeFoldersParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -985,7 +985,7 @@ def test_delete_attribute_folders_dry_run_logic(input_data: dict, mock_response:
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'DeleteAttributeFolders'
-    expected_payload = commands.DeleteAttributeFoldersParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.DeleteAttributeFoldersParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = commands.DeleteAttributeFoldersResult.model_validate(mock_response)
     assert result == expected
@@ -1006,7 +1006,7 @@ def test_delete_attribute_folders_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'DeleteAttributeFolders'
-    expected_payload = commands.DeleteAttributeFoldersParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.DeleteAttributeFoldersParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -1025,7 +1025,7 @@ def test_rename_attribute_folders_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'RenameAttributeFolders'
-    expected_payload = commands.RenameAttributeFoldersParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.RenameAttributeFoldersParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -1044,7 +1044,7 @@ def test_get_property_definitions_of_attributes_logic(input_data: dict, mock_res
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetPropertyDefinitionsOfAttributes'
-    expected_payload = commands.GetPropertyDefinitionsOfAttributesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetPropertyDefinitionsOfAttributesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('propertyDefinitionsOfAttributes'))
 
@@ -1063,7 +1063,7 @@ def test_get_building_materials_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetBuildingMaterials'
-    expected_payload = commands.GetBuildingMaterialsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetBuildingMaterialsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('buildingMaterials'))
 
@@ -1082,7 +1082,7 @@ def test_get_classification_of_attributes_in_system_logic(input_data: dict, mock
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetClassificationOfAttributesInSystem'
-    expected_payload = commands.GetClassificationOfAttributesInSystemParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetClassificationOfAttributesInSystemParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('attributeClassifications'))
 
@@ -1101,7 +1101,7 @@ def test_get_composites_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetComposites'
-    expected_payload = commands.GetCompositesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetCompositesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('composites'))
 
@@ -1123,7 +1123,7 @@ def test_delete_user_data_of_attributes_dry_run_logic(input_data: dict, mock_res
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'DeleteUserDataOfAttributes'
-    expected_payload = commands.DeleteUserDataOfAttributesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.DeleteUserDataOfAttributesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = commands.DeleteUserDataOfAttributesResult.model_validate(mock_response)
     assert result == expected
@@ -1144,7 +1144,7 @@ def test_delete_user_data_of_attributes_logic(input_data: dict, mock_response: d
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'DeleteUserDataOfAttributes'
-    expected_payload = commands.DeleteUserDataOfAttributesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.DeleteUserDataOfAttributesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -1166,7 +1166,7 @@ def test_remove_property_from_attributes_dry_run_logic(input_data: dict, mock_re
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'RemovePropertyFromAttributes'
-    expected_payload = commands.RemovePropertyFromAttributesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.RemovePropertyFromAttributesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = commands.RemovePropertyFromAttributesResult.model_validate(mock_response)
     assert result == expected
@@ -1187,7 +1187,7 @@ def test_remove_property_from_attributes_logic(input_data: dict, mock_response: 
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'RemovePropertyFromAttributes'
-    expected_payload = commands.RemovePropertyFromAttributesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.RemovePropertyFromAttributesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert result == TypeAdapter(types.ExecutionResult).validate_python(mock_response)
 
@@ -1206,7 +1206,7 @@ def test_get_fills_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetFills'
-    expected_payload = commands.GetFillsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetFillsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('fills'))
 
@@ -1225,7 +1225,7 @@ def test_get_building_material_physical_properties_logic(input_data: dict, mock_
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetBuildingMaterialPhysicalProperties'
-    expected_payload = commands.GetBuildingMaterialPhysicalPropertiesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetBuildingMaterialPhysicalPropertiesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('properties'))
 
@@ -1244,7 +1244,7 @@ def test_get_classifications_of_attributes_logic(input_data: dict, mock_response
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetClassificationsOfAttributes'
-    expected_payload = commands.GetClassificationsOfAttributesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetClassificationsOfAttributesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('attributeClassifications'))
 
@@ -1263,7 +1263,7 @@ def test_get_layer_combinations_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetLayerCombinations'
-    expected_payload = commands.GetLayerCombinationsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetLayerCombinationsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('layerCombinations'))
 
@@ -1282,7 +1282,7 @@ def test_get_layers_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetLayers'
-    expected_payload = commands.GetLayersParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetLayersParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('layers'))
 
@@ -1301,7 +1301,7 @@ def test_get_lines_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetLines'
-    expected_payload = commands.GetLinesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetLinesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('lines'))
 
@@ -1320,7 +1320,7 @@ def test_get_mep_systems_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetMEPSystems'
-    expected_payload = commands.GetMEPSystemsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetMEPSystemsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('mepSystems'))
 
@@ -1339,7 +1339,7 @@ def test_get_pen_tables_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetPenTables'
-    expected_payload = commands.GetPenTablesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetPenTablesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('penTables'))
 
@@ -1358,7 +1358,7 @@ def test_get_profiles_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetProfiles'
-    expected_payload = commands.GetProfilesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetProfilesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('profiles'))
 
@@ -1377,7 +1377,7 @@ def test_get_property_values_of_attributes_logic(input_data: dict, mock_response
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetPropertyValuesOfAttributes'
-    expected_payload = commands.GetPropertyValuesOfAttributesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetPropertyValuesOfAttributesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('propertyValuesForAttributes'))
 
@@ -1396,7 +1396,7 @@ def test_get_surfaces_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetSurfaces'
-    expected_payload = commands.GetSurfacesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetSurfacesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('surfaces'))
 
@@ -1415,7 +1415,7 @@ def test_get_user_data_of_attributes_logic(input_data: dict, mock_response: dict
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetUserDataOfAttributes'
-    expected_payload = commands.GetUserDataOfAttributesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetUserDataOfAttributesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('userDataOfAttributes'))
 
@@ -1434,7 +1434,7 @@ def test_get_zone_categories_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetZoneCategories'
-    expected_payload = commands.GetZoneCategoriesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetZoneCategoriesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('zoneCategories'))
 
@@ -1453,7 +1453,7 @@ def test_set_property_value_of_attributes_logic(input_data: dict, mock_response:
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SetPropertyValueOfAttributes'
-    expected_payload = commands.SetPropertyValueOfAttributesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SetPropertyValueOfAttributesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.SetPropertyValueOfAttributesResult).validate_python(mock_response)
     assert result == expected
@@ -1473,7 +1473,7 @@ def test_set_user_data_of_attributes_logic(input_data: dict, mock_response: dict
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SetUserDataOfAttributes'
-    expected_payload = commands.SetUserDataOfAttributesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SetUserDataOfAttributesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -1495,7 +1495,7 @@ def test_delete_attributes_dry_run_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'DeleteAttributes'
-    expected_payload = commands.DeleteAttributesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.DeleteAttributesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = commands.DeleteAttributesResult.model_validate(mock_response)
     assert result == expected
@@ -1516,7 +1516,7 @@ def test_delete_attributes_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'DeleteAttributes'
-    expected_payload = commands.DeleteAttributesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.DeleteAttributesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -1535,7 +1535,7 @@ def test_create_pen_tables_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreatePenTables'
-    expected_payload = commands.CreatePenTablesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreatePenTablesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('attributeIds'))
 
@@ -1554,7 +1554,7 @@ def test_create_surfaces_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateSurfaces'
-    expected_payload = commands.CreateSurfacesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateSurfacesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('attributeIds'))
 
@@ -1573,7 +1573,7 @@ def test_create_composites_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateComposites'
-    expected_payload = commands.CreateCompositesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateCompositesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('attributeIds'))
 
@@ -1592,7 +1592,7 @@ def test_create_profiles_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateProfiles'
-    expected_payload = commands.CreateProfilesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateProfilesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('attributeIds'))
 
@@ -1611,7 +1611,7 @@ def test_set_3d_document_settings_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'Set3DDocumentSettings'
-    expected_payload = commands.Set3DDocumentSettingsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.Set3DDocumentSettingsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('settings'))
 
@@ -1630,7 +1630,7 @@ def test_create_mep_systems_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateMEPSystems'
-    expected_payload = commands.CreateMEPSystemsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateMEPSystemsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('attributeIds'))
 
@@ -1649,7 +1649,7 @@ def test_set_property_values_of_attributes_logic(input_data: dict, mock_response
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SetPropertyValuesOfAttributes'
-    expected_payload = commands.SetPropertyValuesOfAttributesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SetPropertyValuesOfAttributesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -1668,7 +1668,7 @@ def test_reindex_attributes_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ReindexAttributes'
-    expected_payload = commands.ReindexAttributesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ReindexAttributesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('attributes'))
 
@@ -1687,7 +1687,7 @@ def test_rename_attributes_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'RenameAttributes'
-    expected_payload = commands.RenameAttributesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.RenameAttributesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -1706,7 +1706,7 @@ def test_create_zones_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateZones'
-    expected_payload = commands.CreateZonesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateZonesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('elements'))
 
@@ -1725,7 +1725,7 @@ def test_create_beams_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateBeams'
-    expected_payload = commands.CreateBeamsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateBeamsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('elements'))
 
@@ -1744,7 +1744,7 @@ def test_modify_beams_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ModifyBeams'
-    expected_payload = commands.ModifyBeamsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ModifyBeamsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -1763,7 +1763,7 @@ def test_create_building_materials_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateBuildingMaterials'
-    expected_payload = commands.CreateBuildingMaterialsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateBuildingMaterialsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('attributeIds'))
 
@@ -1782,7 +1782,7 @@ def test_create_circles_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateCircles'
-    expected_payload = commands.CreateCirclesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateCirclesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('elements'))
 
@@ -1801,7 +1801,7 @@ def test_get_classification_item_visibility_logic(input_data: dict, mock_respons
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetClassificationItemVisibility'
-    expected_payload = commands.GetClassificationItemVisibilityParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetClassificationItemVisibilityParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('classificationItemVisibilities'))
 
@@ -1820,7 +1820,7 @@ def test_create_lamps_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateLamps'
-    expected_payload = commands.CreateLampsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateLampsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('elements'))
 
@@ -1839,7 +1839,7 @@ def test_modify_lamps_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ModifyLamps'
-    expected_payload = commands.ModifyLampsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ModifyLampsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -1858,7 +1858,7 @@ def test_create_hatches_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateHatches'
-    expected_payload = commands.CreateHatchesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateHatchesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('elements'))
 
@@ -1877,7 +1877,7 @@ def test_create_graphic_override_rules_logic(input_data: dict, mock_response: di
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateGraphicOverrideRules'
-    expected_payload = commands.CreateGraphicOverrideRulesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateGraphicOverrideRulesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('graphicOverrideRuleIds'))
 
@@ -1896,7 +1896,7 @@ def test_create_zone_categories_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateZoneCategories'
-    expected_payload = commands.CreateZoneCategoriesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateZoneCategoriesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('attributeIds'))
 
@@ -1915,7 +1915,7 @@ def test_modify_graphic_override_rules_logic(input_data: dict, mock_response: di
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ModifyGraphicOverrideRules'
-    expected_payload = commands.ModifyGraphicOverrideRulesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ModifyGraphicOverrideRulesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -1934,7 +1934,7 @@ def test_create_columns_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateColumns'
-    expected_payload = commands.CreateColumnsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateColumnsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('elements'))
 
@@ -1953,7 +1953,7 @@ def test_modify_columns_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ModifyColumns'
-    expected_payload = commands.ModifyColumnsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ModifyColumnsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -1972,7 +1972,7 @@ def test_create_shells_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateShells'
-    expected_payload = commands.CreateShellsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateShellsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('elements'))
 
@@ -1991,7 +1991,7 @@ def test_create_morphs_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateMorphs'
-    expected_payload = commands.CreateMorphsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateMorphsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('elements'))
 
@@ -2010,7 +2010,7 @@ def test_modify_morphs_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ModifyMorphs'
-    expected_payload = commands.ModifyMorphsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ModifyMorphsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -2029,7 +2029,7 @@ def test_place_openings_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'PlaceOpenings'
-    expected_payload = commands.PlaceOpeningsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.PlaceOpeningsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('elements'))
 
@@ -2048,7 +2048,7 @@ def test_create_objects_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateObjects'
-    expected_payload = commands.CreateObjectsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateObjectsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('elements'))
 
@@ -2067,7 +2067,7 @@ def test_modify_objects_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ModifyObjects'
-    expected_payload = commands.ModifyObjectsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ModifyObjectsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -2086,7 +2086,7 @@ def test_set_opening_floor_plan_parameters_logic(input_data: dict, mock_response
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SetOpeningFloorPlanParameters'
-    expected_payload = commands.SetOpeningFloorPlanParametersParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SetOpeningFloorPlanParametersParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -2105,7 +2105,7 @@ def test_set_opening_default_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SetOpeningDefault'
-    expected_payload = commands.SetOpeningDefaultParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SetOpeningDefaultParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('elementType'))
 
@@ -2124,7 +2124,7 @@ def test_create_elevations_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateElevations'
-    expected_payload = commands.CreateElevationsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateElevationsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('elements'))
 
@@ -2143,7 +2143,7 @@ def test_create_fills_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateFills'
-    expected_payload = commands.CreateFillsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateFillsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('attributeIds'))
 
@@ -2162,7 +2162,7 @@ def test_create_labels_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateLabels'
-    expected_payload = commands.CreateLabelsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateLabelsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('elements'))
 
@@ -2181,7 +2181,7 @@ def test_create_line_elements_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateLineElements'
-    expected_payload = commands.CreateLineElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateLineElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('elements'))
 
@@ -2200,7 +2200,7 @@ def test_create_lines_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateLines'
-    expected_payload = commands.CreateLinesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateLinesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('attributeIds'))
 
@@ -2219,7 +2219,7 @@ def test_create_roofs_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateRoofs'
-    expected_payload = commands.CreateRoofsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateRoofsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('elements'))
 
@@ -2238,7 +2238,7 @@ def test_create_sections_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateSections'
-    expected_payload = commands.CreateSectionsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateSectionsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('elements'))
 
@@ -2257,7 +2257,7 @@ def test_create_skylights_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateSkylights'
-    expected_payload = commands.CreateSkylightsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateSkylightsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('elements'))
 
@@ -2276,7 +2276,7 @@ def test_create_slabs_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateSlabs'
-    expected_payload = commands.CreateSlabsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateSlabsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('elements'))
 
@@ -2295,7 +2295,7 @@ def test_create_splines_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateSplines'
-    expected_payload = commands.CreateSplinesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateSplinesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('elements'))
 
@@ -2314,7 +2314,7 @@ def test_create_walls_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateWalls'
-    expected_payload = commands.CreateWallsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateWallsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('elements'))
 
@@ -2333,7 +2333,7 @@ def test_modify_walls_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ModifyWalls'
-    expected_payload = commands.ModifyWallsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ModifyWallsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -2352,7 +2352,7 @@ def test_modify_skylights_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ModifySkylights'
-    expected_payload = commands.ModifySkylightsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ModifySkylightsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -2371,7 +2371,7 @@ def test_modify_roofs_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ModifyRoofs'
-    expected_payload = commands.ModifyRoofsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ModifyRoofsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -2390,7 +2390,7 @@ def test_set_opening_details_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SetOpeningDetails'
-    expected_payload = commands.SetOpeningDetailsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SetOpeningDetailsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -2409,7 +2409,7 @@ def test_modify_slabs_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ModifySlabs'
-    expected_payload = commands.ModifySlabsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ModifySlabsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -2428,7 +2428,7 @@ def test_modify_zones_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ModifyZones'
-    expected_payload = commands.ModifyZonesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ModifyZonesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -2447,7 +2447,7 @@ def test_create_mep_elements_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateMEPElements'
-    expected_payload = commands.CreateMEPElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateMEPElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('elements'))
 
@@ -2466,7 +2466,7 @@ def test_create_mep_routing_elements_logic(input_data: dict, mock_response: dict
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateMEPRoutingElements'
-    expected_payload = commands.CreateMEPRoutingElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateMEPRoutingElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('elements'))
 
@@ -2485,7 +2485,7 @@ def test_create_meshes_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateMeshes'
-    expected_payload = commands.CreateMeshesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateMeshesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('elements'))
 
@@ -2504,7 +2504,7 @@ def test_modify_mep_routing_elements_logic(input_data: dict, mock_response: dict
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ModifyMEPRoutingElements'
-    expected_payload = commands.ModifyMEPRoutingElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ModifyMEPRoutingElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -2523,7 +2523,7 @@ def test_create_doors_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateDoors'
-    expected_payload = commands.CreateDoorsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateDoorsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('elements'))
 
@@ -2542,7 +2542,7 @@ def test_create_layer_combinations_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateLayerCombinations'
-    expected_payload = commands.CreateLayerCombinationsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateLayerCombinationsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('attributeIds'))
 
@@ -2561,7 +2561,7 @@ def test_create_layers_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateLayers'
-    expected_payload = commands.CreateLayersParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateLayersParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('attributeIds'))
 
@@ -2580,7 +2580,7 @@ def test_create_mep_physical_systems_logic(input_data: dict, mock_response: dict
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateMEPPhysicalSystems'
-    expected_payload = commands.CreateMEPPhysicalSystemsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateMEPPhysicalSystemsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('physicalSystems'))
 
@@ -2599,7 +2599,7 @@ def test_create_windows_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateWindows'
-    expected_payload = commands.CreateWindowsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateWindowsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('elements'))
 
@@ -2618,7 +2618,7 @@ def test_delete_and_replace_attributes_logic(input_data: dict, mock_response: di
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'DeleteAndReplaceAttributes'
-    expected_payload = commands.DeleteAndReplaceAttributesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.DeleteAndReplaceAttributesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = commands.DeleteAndReplaceAttributesResult.model_validate(mock_response)
     assert result == expected
@@ -2638,7 +2638,7 @@ def test_modify_doors_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ModifyDoors'
-    expected_payload = commands.ModifyDoorsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ModifyDoorsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -2657,7 +2657,7 @@ def test_modify_windows_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ModifyWindows'
-    expected_payload = commands.ModifyWindowsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ModifyWindowsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -2676,7 +2676,7 @@ def test_modify_labels_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ModifyLabels'
-    expected_payload = commands.ModifyLabelsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ModifyLabelsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -2695,7 +2695,7 @@ def test_modify_mep_physical_systems_logic(input_data: dict, mock_response: dict
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ModifyMEPPhysicalSystems'
-    expected_payload = commands.ModifyMEPPhysicalSystemsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ModifyMEPPhysicalSystemsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -2714,7 +2714,7 @@ def test_modify_shells_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ModifyShells'
-    expected_payload = commands.ModifyShellsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ModifyShellsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -2733,7 +2733,7 @@ def test_set_sections_and_elevations_details_logic(input_data: dict, mock_respon
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SetSectionsAndElevationsDetails'
-    expected_payload = commands.SetSectionsAndElevationsDetailsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SetSectionsAndElevationsDetailsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -2752,7 +2752,7 @@ def test_set_layer_of_element_defaults_logic(input_data: dict, mock_response: di
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SetLayerOfElementDefaults'
-    expected_payload = commands.SetLayerOfElementDefaultsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SetLayerOfElementDefaultsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -2771,7 +2771,7 @@ def test_pick_attribute_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'PickAttribute'
-    expected_payload = commands.PickAttributeParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.PickAttributeParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = commands.PickAttributeResult.model_validate(mock_response)
     assert result == expected
@@ -2791,7 +2791,7 @@ def test_reindex_layers_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ReindexLayers'
-    expected_payload = commands.ReindexLayersParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ReindexLayersParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('layers'))
 
@@ -2810,7 +2810,7 @@ def test_get_attribute_indexes_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetAttributeIndexes'
-    expected_payload = commands.GetAttributeIndexesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetAttributeIndexesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.GetAttributeIndexesResult).validate_python(mock_response)
     assert result == expected
@@ -2830,7 +2830,7 @@ def test_get_attributes_by_type_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetAttributesByType'
-    expected_payload = commands.GetAttributesByTypeParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetAttributesByTypeParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.GetAttributesByTypeResult).validate_python(mock_response)
     assert result == expected
@@ -2850,7 +2850,7 @@ def test_get_attributes_from_project_logic(input_data: dict, mock_response: dict
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetAttributesFromProject'
-    expected_payload = commands.GetAttributesFromProjectParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetAttributesFromProjectParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.GetAttributesFromProjectResult).validate_python(mock_response)
     assert result == expected
@@ -2870,7 +2870,7 @@ def test_import_attributes_from_project_logic(input_data: dict, mock_response: d
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ImportAttributesFromProject'
-    expected_payload = commands.ImportAttributesFromProjectParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ImportAttributesFromProjectParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.ImportAttributesFromProjectResult).validate_python(mock_response)
     assert result == expected
@@ -2890,7 +2890,7 @@ def test_get_missing_attributes_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetMissingAttributes'
-    expected_payload = commands.GetMissingAttributesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetMissingAttributesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = commands.GetMissingAttributesResult.model_validate(mock_response)
     assert result == expected
@@ -2910,7 +2910,7 @@ def test_get_unused_attributes_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetUnusedAttributes'
-    expected_payload = commands.GetUnusedAttributesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetUnusedAttributesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = commands.GetUnusedAttributesResult.model_validate(mock_response)
     assert result == expected
@@ -2930,7 +2930,7 @@ def test_interpret_auto_texts_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'InterpretAutoTexts'
-    expected_payload = commands.InterpretAutoTextsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.InterpretAutoTextsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('values'))
 
@@ -2949,7 +2949,7 @@ def test_get_auto_text_name_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetAutoTextName'
-    expected_payload = commands.GetAutoTextNameParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetAutoTextNameParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('autoTextNames'))
 
@@ -2967,7 +2967,7 @@ def test_set_3d_projection_settings_logic(input_data: dict, mock_response: dict)
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'Set3DProjectionSettings'
-    expected_payload = TypeAdapter(commands.Set3DProjectionSettingsParameters).validate_python(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = TypeAdapter(commands.Set3DProjectionSettingsParameters).validate_python(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.Set3DProjectionSettingsResult).validate_python(mock_response)
     assert result == expected
@@ -2987,7 +2987,7 @@ def test_create_property_definitions_logic(input_data: dict, mock_response: dict
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreatePropertyDefinitions'
-    expected_payload = commands.CreatePropertyDefinitionsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreatePropertyDefinitionsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('propertyIds'))
 
@@ -3006,7 +3006,7 @@ def test_update_property_definitions_logic(input_data: dict, mock_response: dict
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'UpdatePropertyDefinitions'
-    expected_payload = commands.UpdatePropertyDefinitionsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.UpdatePropertyDefinitionsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -3025,7 +3025,7 @@ def test_set_marquee_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SetMarquee'
-    expected_payload = commands.SetMarqueeParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SetMarqueeParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.SetMarqueeResult).validate_python(mock_response)
     assert result == expected
@@ -3045,7 +3045,7 @@ def test_break_hotlink_nodes_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'BreakHotlinkNodes'
-    expected_payload = commands.BreakHotlinkNodesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.BreakHotlinkNodesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -3064,7 +3064,7 @@ def test_calculate_sun_position_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CalculateSunPosition'
-    expected_payload = commands.CalculateSunPositionParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CalculateSunPositionParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = commands.CalculateSunPositionResult.model_validate(mock_response)
     assert result == expected
@@ -3084,7 +3084,7 @@ def test_can_move_elements_to_design_options_logic(input_data: dict, mock_respon
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CanMoveElementsToDesignOptions'
-    expected_payload = commands.CanMoveElementsToDesignOptionsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CanMoveElementsToDesignOptionsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('canMoveElements'))
 
@@ -3103,7 +3103,7 @@ def test_capture_element_state_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CaptureElementState'
-    expected_payload = commands.CaptureElementStateParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CaptureElementStateParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = commands.CaptureElementStateResult.model_validate(mock_response)
     assert result == expected
@@ -3123,7 +3123,7 @@ def test_change_3d_styles_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'Change3DStyles'
-    expected_payload = commands.Change3DStylesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.Change3DStylesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -3142,7 +3142,7 @@ def test_change_drawing_link_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ChangeDrawingLink'
-    expected_payload = commands.ChangeDrawingLinkParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ChangeDrawingLinkParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('elements'))
 
@@ -3161,7 +3161,7 @@ def test_change_favorite_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ChangeFavorite'
-    expected_payload = commands.ChangeFavoriteParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ChangeFavoriteParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.ChangeFavoriteResult).validate_python(mock_response)
     assert result == expected
@@ -3181,7 +3181,7 @@ def test_change_hotlink_instances_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ChangeHotlinkInstances'
-    expected_payload = commands.ChangeHotlinkInstancesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ChangeHotlinkInstancesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -3200,7 +3200,7 @@ def test_change_hotlink_nodes_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ChangeHotlinkNodes'
-    expected_payload = commands.ChangeHotlinkNodesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ChangeHotlinkNodesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -3219,7 +3219,7 @@ def test_change_library_part_of_elements_logic(input_data: dict, mock_response: 
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ChangeLibraryPartOfElements'
-    expected_payload = commands.ChangeLibraryPartOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ChangeLibraryPartOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -3238,7 +3238,7 @@ def test_change_selection_of_elements_logic(input_data: dict, mock_response: dic
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ChangeSelectionOfElements'
-    expected_payload = commands.ChangeSelectionOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ChangeSelectionOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = commands.ChangeSelectionOfElementsResult.model_validate(mock_response)
     assert result == expected
@@ -3258,7 +3258,7 @@ def test_change_text_content_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ChangeTextContent'
-    expected_payload = commands.ChangeTextContentParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ChangeTextContentParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -3276,7 +3276,7 @@ def test_change_window_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ChangeWindow'
-    expected_payload = TypeAdapter(commands.ChangeWindowParameters).validate_python(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = TypeAdapter(commands.ChangeWindowParameters).validate_python(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.ChangeWindowResult).validate_python(mock_response)
     assert result == expected
@@ -3296,7 +3296,7 @@ def test_check_mep_port_connectability_logic(input_data: dict, mock_response: di
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CheckMEPPortConnectability'
-    expected_payload = commands.CheckMEPPortConnectabilityParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CheckMEPPortConnectabilityParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('results'))
 
@@ -3315,7 +3315,7 @@ def test_check_property_values_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CheckPropertyValues'
-    expected_payload = commands.CheckPropertyValuesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CheckPropertyValuesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('results'))
 
@@ -3337,7 +3337,7 @@ def test_set_classifications_of_elements_dry_run_logic(input_data: dict, mock_re
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SetClassificationsOfElements'
-    expected_payload = commands.SetClassificationsOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SetClassificationsOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = commands.SetClassificationsOfElementsResult.model_validate(mock_response)
     assert result == expected
@@ -3358,7 +3358,7 @@ def test_set_classifications_of_elements_logic(input_data: dict, mock_response: 
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SetClassificationsOfElements'
-    expected_payload = commands.SetClassificationsOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SetClassificationsOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -3377,7 +3377,7 @@ def test_set_classifications_of_element_defaults_logic(input_data: dict, mock_re
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SetClassificationsOfElementDefaults'
-    expected_payload = commands.SetClassificationsOfElementDefaultsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SetClassificationsOfElementDefaultsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -3396,7 +3396,7 @@ def test_import_classifications_xml_logic(input_data: dict, mock_response: dict)
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ImportClassificationsXml'
-    expected_payload = commands.ImportClassificationsXmlParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ImportClassificationsXmlParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = commands.ImportClassificationsXmlResult.model_validate(mock_response)
     assert result == expected
@@ -3416,7 +3416,7 @@ def test_create_classification_items_logic(input_data: dict, mock_response: dict
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateClassificationItems'
-    expected_payload = commands.CreateClassificationItemsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateClassificationItemsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = commands.CreateClassificationItemsResult.model_validate(mock_response)
     assert result == expected
@@ -3436,7 +3436,7 @@ def test_create_classification_systems_logic(input_data: dict, mock_response: di
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateClassificationSystems'
-    expected_payload = commands.CreateClassificationSystemsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateClassificationSystemsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = commands.CreateClassificationSystemsResult.model_validate(mock_response)
     assert result == expected
@@ -3459,7 +3459,7 @@ def test_delete_classification_items_dry_run_logic(input_data: dict, mock_respon
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'DeleteClassificationItems'
-    expected_payload = commands.DeleteClassificationItemsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.DeleteClassificationItemsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = commands.DeleteClassificationItemsResult.model_validate(mock_response)
     assert result == expected
@@ -3480,7 +3480,7 @@ def test_delete_classification_items_logic(input_data: dict, mock_response: dict
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'DeleteClassificationItems'
-    expected_payload = commands.DeleteClassificationItemsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.DeleteClassificationItemsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -3499,7 +3499,7 @@ def test_get_classification_item_parents_logic(input_data: dict, mock_response: 
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetClassificationItemParents'
-    expected_payload = commands.GetClassificationItemParentsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetClassificationItemParentsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('classificationItemParents'))
 
@@ -3518,7 +3518,7 @@ def test_get_elements_by_classification_logic(input_data: dict, mock_response: d
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetElementsByClassification'
-    expected_payload = commands.GetElementsByClassificationParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetElementsByClassificationParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('elementsOfClassificationItems'))
 
@@ -3537,7 +3537,7 @@ def test_update_classification_items_logic(input_data: dict, mock_response: dict
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'UpdateClassificationItems'
-    expected_payload = commands.UpdateClassificationItemsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.UpdateClassificationItemsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -3559,7 +3559,7 @@ def test_delete_classification_systems_dry_run_logic(input_data: dict, mock_resp
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'DeleteClassificationSystems'
-    expected_payload = commands.DeleteClassificationSystemsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.DeleteClassificationSystemsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = commands.DeleteClassificationSystemsResult.model_validate(mock_response)
     assert result == expected
@@ -3580,7 +3580,7 @@ def test_delete_classification_systems_logic(input_data: dict, mock_response: di
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'DeleteClassificationSystems'
-    expected_payload = commands.DeleteClassificationSystemsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.DeleteClassificationSystemsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -3599,7 +3599,7 @@ def test_get_classifications_of_elements_logic(input_data: dict, mock_response: 
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetClassificationsOfElements'
-    expected_payload = commands.GetClassificationsOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetClassificationsOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('elementClassifications'))
 
@@ -3618,7 +3618,7 @@ def test_get_classifications_of_element_defaults_logic(input_data: dict, mock_re
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetClassificationsOfElementDefaults'
-    expected_payload = commands.GetClassificationsOfElementDefaultsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetClassificationsOfElementDefaultsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('elementDefaultClassifications'))
 
@@ -3637,7 +3637,7 @@ def test_update_classification_systems_logic(input_data: dict, mock_response: di
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'UpdateClassificationSystems'
-    expected_payload = commands.UpdateClassificationSystemsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.UpdateClassificationSystemsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -3656,7 +3656,7 @@ def test_clone_project_map_item_to_view_map_logic(input_data: dict, mock_respons
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CloneProjectMapItemToViewMap'
-    expected_payload = commands.CloneProjectMapItemToViewMapParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CloneProjectMapItemToViewMapParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('navigatorItems'))
 
@@ -3675,7 +3675,7 @@ def test_close_windows_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CloseWindows'
-    expected_payload = commands.CloseWindowsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CloseWindowsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -3694,7 +3694,7 @@ def test_get_collisions_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetCollisions'
-    expected_payload = commands.GetCollisionsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetCollisionsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('collisions'))
 
@@ -3713,7 +3713,7 @@ def test_create_3d_styles_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'Create3DStyles'
-    expected_payload = commands.Create3DStylesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.Create3DStylesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -3732,7 +3732,7 @@ def test_create_graphical_override_rule_logic(input_data: dict, mock_response: d
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateGraphicalOverrideRule'
-    expected_payload = commands.CreateGraphicalOverrideRuleParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateGraphicalOverrideRuleParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('ruleId'))
 
@@ -3751,7 +3751,7 @@ def test_get_room_image_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetRoomImage'
-    expected_payload = commands.GetRoomImageParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetRoomImageParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('roomImage'))
 
@@ -3770,7 +3770,7 @@ def test_set_ghost_story_settings_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SetGhostStorySettings'
-    expected_payload = commands.SetGhostStorySettingsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SetGhostStorySettingsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.SetGhostStorySettingsResult).validate_python(mock_response)
     assert result == expected
@@ -3790,7 +3790,7 @@ def test_modify_pens_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ModifyPens'
-    expected_payload = commands.ModifyPensParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ModifyPensParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -3809,7 +3809,7 @@ def test_set_pens_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SetPens'
-    expected_payload = commands.SetPensParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SetPensParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -3828,7 +3828,7 @@ def test_compare_library_part_un_ids_logic(input_data: dict, mock_response: dict
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CompareLibraryPartUnIds'
-    expected_payload = commands.CompareLibraryPartUnIdsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CompareLibraryPartUnIdsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = commands.CompareLibraryPartUnIdsResult.model_validate(mock_response)
     assert result == expected
@@ -3848,7 +3848,7 @@ def test_get_property_definitions_of_element_components_logic(input_data: dict, 
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetPropertyDefinitionsOfElementComponents'
-    expected_payload = commands.GetPropertyDefinitionsOfElementComponentsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetPropertyDefinitionsOfElementComponentsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('propertyDefinitionsOfElementComponents'))
 
@@ -3867,7 +3867,7 @@ def test_get_property_values_of_element_components_logic(input_data: dict, mock_
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetPropertyValuesOfElementComponents'
-    expected_payload = commands.GetPropertyValuesOfElementComponentsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetPropertyValuesOfElementComponentsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('propertyValuesForElementComponents'))
 
@@ -3886,7 +3886,7 @@ def test_connect_mep_elements_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ConnectMEPElements'
-    expected_payload = commands.ConnectMEPElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ConnectMEPElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('connectionResults'))
 
@@ -3905,7 +3905,7 @@ def test_connect_to_electrical_circuits_logic(input_data: dict, mock_response: d
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ConnectToElectricalCircuits'
-    expected_payload = commands.ConnectToElectricalCircuitsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ConnectToElectricalCircuitsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -3924,7 +3924,7 @@ def test_convert_analytical_links_to_non_shortest_logic(input_data: dict, mock_r
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ConvertAnalyticalLinksToNonShortest'
-    expected_payload = commands.ConvertAnalyticalLinksToNonShortestParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ConvertAnalyticalLinksToNonShortestParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('links'))
 
@@ -3943,7 +3943,7 @@ def test_convert_images_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ConvertImages'
-    expected_payload = commands.ConvertImagesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ConvertImagesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('images'))
 
@@ -3962,7 +3962,7 @@ def test_convert_reveal_offsets_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ConvertRevealOffsets'
-    expected_payload = commands.ConvertRevealOffsetsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ConvertRevealOffsetsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('revealOffsets'))
 
@@ -3981,7 +3981,7 @@ def test_convert_unit_values_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ConvertUnitValues'
-    expected_payload = commands.ConvertUnitValuesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ConvertUnitValuesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('convertedValues'))
 
@@ -4000,7 +4000,7 @@ def test_copy_elements_to_database_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CopyElementsToDatabase'
-    expected_payload = commands.CopyElementsToDatabaseParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CopyElementsToDatabaseParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('elements'))
 
@@ -4019,7 +4019,7 @@ def test_create_curtain_walls_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateCurtainWalls'
-    expected_payload = commands.CreateCurtainWallsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateCurtainWallsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('elements'))
 
@@ -4038,7 +4038,7 @@ def test_create_detail_markers_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateDetailMarkers'
-    expected_payload = commands.CreateDetailMarkersParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateDetailMarkersParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('elements'))
 
@@ -4057,7 +4057,7 @@ def test_create_drawings_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateDrawings'
-    expected_payload = commands.CreateDrawingsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateDrawingsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('elements'))
 
@@ -4076,7 +4076,7 @@ def test_create_grid_elements_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateGridElements'
-    expected_payload = commands.CreateGridElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateGridElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = commands.CreateGridElementsResult.model_validate(mock_response)
     assert result == expected
@@ -4096,7 +4096,7 @@ def test_create_hotspots_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateHotspots'
-    expected_payload = commands.CreateHotspotsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateHotspotsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('elements'))
 
@@ -4115,7 +4115,7 @@ def test_create_interior_elevations_logic(input_data: dict, mock_response: dict)
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateInteriorElevations'
-    expected_payload = commands.CreateInteriorElevationsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateInteriorElevationsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('elements'))
 
@@ -4134,7 +4134,7 @@ def test_create_keynote_labels_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateKeynoteLabels'
-    expected_payload = commands.CreateKeynoteLabelsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateKeynoteLabelsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('elements'))
 
@@ -4153,7 +4153,7 @@ def test_create_level_dimensions_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateLevelDimensions'
-    expected_payload = commands.CreateLevelDimensionsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateLevelDimensionsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('elements'))
 
@@ -4172,7 +4172,7 @@ def test_create_polylines_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreatePolylines'
-    expected_payload = commands.CreatePolylinesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreatePolylinesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('elements'))
 
@@ -4191,7 +4191,7 @@ def test_create_railings_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateRailings'
-    expected_payload = commands.CreateRailingsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateRailingsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('elements'))
 
@@ -4210,7 +4210,7 @@ def test_create_stairs_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateStairs'
-    expected_payload = commands.CreateStairsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateStairsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('elements'))
 
@@ -4229,7 +4229,7 @@ def test_create_wall_thickness_dimensions_logic(input_data: dict, mock_response:
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateWallThicknessDimensions'
-    expected_payload = commands.CreateWallThicknessDimensionsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateWallThicknessDimensionsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('elements'))
 
@@ -4248,7 +4248,7 @@ def test_create_worksheet_markers_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateWorksheetMarkers'
-    expected_payload = commands.CreateWorksheetMarkersParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateWorksheetMarkersParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('elements'))
 
@@ -4267,7 +4267,7 @@ def test_modify_curtain_walls_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ModifyCurtainWalls'
-    expected_payload = commands.ModifyCurtainWallsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ModifyCurtainWallsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -4286,7 +4286,7 @@ def test_modify_level_dimensions_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ModifyLevelDimensions'
-    expected_payload = commands.ModifyLevelDimensionsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ModifyLevelDimensionsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -4305,7 +4305,7 @@ def test_get_element_at_coordinate_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetElementAtCoordinate'
-    expected_payload = commands.GetElementAtCoordinateParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetElementAtCoordinateParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = commands.GetElementAtCoordinateResult.model_validate(mock_response)
     assert result == expected
@@ -4325,7 +4325,7 @@ def test_rotate_copy_elements_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'RotateCopyElements'
-    expected_payload = commands.RotateCopyElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.RotateCopyElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('copies'))
 
@@ -4344,7 +4344,7 @@ def test_scale_elements_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ScaleElements'
-    expected_payload = commands.ScaleElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ScaleElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -4363,7 +4363,7 @@ def test_split_elements_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SplitElements'
-    expected_payload = commands.SplitElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SplitElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('results'))
 
@@ -4382,7 +4382,7 @@ def test_mirror_elements_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'MirrorElements'
-    expected_payload = commands.MirrorElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.MirrorElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -4401,7 +4401,7 @@ def test_get_spline_max_distances_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetSplineMaxDistances'
-    expected_payload = commands.GetSplineMaxDistancesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetSplineMaxDistancesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('results'))
 
@@ -4420,7 +4420,7 @@ def test_modify_detail_markers_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ModifyDetailMarkers'
-    expected_payload = commands.ModifyDetailMarkersParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ModifyDetailMarkersParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -4439,7 +4439,7 @@ def test_rotate_elements_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'RotateElements'
-    expected_payload = commands.RotateElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.RotateElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -4458,7 +4458,7 @@ def test_regularize_polygons_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'RegularizePolygons'
-    expected_payload = commands.RegularizePolygonsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.RegularizePolygonsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('results'))
 
@@ -4477,7 +4477,7 @@ def test_regularize_polylines_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'RegularizePolylines'
-    expected_payload = commands.RegularizePolylinesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.RegularizePolylinesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('results'))
 
@@ -4496,7 +4496,7 @@ def test_solve_stair_baseline_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SolveStairBaseline'
-    expected_payload = commands.SolveStairBaselineParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SolveStairBaselineParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('solutions'))
 
@@ -4515,7 +4515,7 @@ def test_copy_elements_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CopyElements'
-    expected_payload = commands.CopyElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CopyElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('copies'))
 
@@ -4534,7 +4534,7 @@ def test_create_electrical_devices_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateElectricalDevices'
-    expected_payload = commands.CreateElectricalDevicesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateElectricalDevicesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('elements'))
 
@@ -4553,7 +4553,7 @@ def test_create_electrical_panels_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateElectricalPanels'
-    expected_payload = commands.CreateElectricalPanelsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateElectricalPanelsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('elements'))
 
@@ -4572,7 +4572,7 @@ def test_create_mep_flexible_segments_logic(input_data: dict, mock_response: dic
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateMEPFlexibleSegments'
-    expected_payload = commands.CreateMEPFlexibleSegmentsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateMEPFlexibleSegmentsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('elements'))
 
@@ -4591,7 +4591,7 @@ def test_create_openings_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateOpenings'
-    expected_payload = commands.CreateOpeningsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateOpeningsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('elements'))
 
@@ -4610,7 +4610,7 @@ def test_create_railings_from_polyline_logic(input_data: dict, mock_response: di
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateRailingsFromPolyline'
-    expected_payload = commands.CreateRailingsFromPolylineParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateRailingsFromPolylineParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('elements'))
 
@@ -4629,7 +4629,7 @@ def test_create_texts_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateTexts'
-    expected_payload = commands.CreateTextsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateTextsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('elements'))
 
@@ -4648,7 +4648,7 @@ def test_modify_electrical_devices_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ModifyElectricalDevices'
-    expected_payload = commands.ModifyElectricalDevicesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ModifyElectricalDevicesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -4667,7 +4667,7 @@ def test_modify_electrical_panels_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ModifyElectricalPanels'
-    expected_payload = commands.ModifyElectricalPanelsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ModifyElectricalPanelsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -4686,7 +4686,7 @@ def test_get_cut_polygons_of_elements_logic(input_data: dict, mock_response: dic
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetCutPolygonsOfElements'
-    expected_payload = commands.GetCutPolygonsOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetCutPolygonsOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('cutPolygons'))
 
@@ -4705,7 +4705,7 @@ def test_modify_meshes_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ModifyMeshes'
-    expected_payload = commands.ModifyMeshesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ModifyMeshesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -4724,7 +4724,7 @@ def test_modify_texts_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ModifyTexts'
-    expected_payload = commands.ModifyTextsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ModifyTextsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -4743,7 +4743,7 @@ def test_modify_mep_elements_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ModifyMEPElements'
-    expected_payload = commands.ModifyMEPElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ModifyMEPElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -4762,7 +4762,7 @@ def test_modify_openings_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ModifyOpenings'
-    expected_payload = commands.ModifyOpeningsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ModifyOpeningsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -4781,7 +4781,7 @@ def test_set_geo_location_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SetGeoLocation'
-    expected_payload = commands.SetGeoLocationParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SetGeoLocationParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.SetGeoLocationResult).validate_python(mock_response)
     assert result == expected
@@ -4801,7 +4801,7 @@ def test_model_to_screen_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ModelToScreen'
-    expected_payload = commands.ModelToScreenParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ModelToScreenParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('screenPoints'))
 
@@ -4820,7 +4820,7 @@ def test_show_notification_bubble_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ShowNotificationBubble'
-    expected_payload = commands.ShowNotificationBubbleParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ShowNotificationBubbleParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = commands.ShowNotificationBubbleResult.model_validate(mock_response)
     assert result == expected
@@ -4840,7 +4840,7 @@ def test_copy_files_into_embedded_library_logic(input_data: dict, mock_response:
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CopyFilesIntoEmbeddedLibrary'
-    expected_payload = commands.CopyFilesIntoEmbeddedLibraryParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CopyFilesIntoEmbeddedLibraryParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.CopyFilesIntoEmbeddedLibraryResult).validate_python(mock_response)
     assert result == expected
@@ -4860,7 +4860,7 @@ def test_copy_library_parts_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CopyLibraryParts'
-    expected_payload = commands.CopyLibraryPartsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CopyLibraryPartsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = commands.CopyLibraryPartsResult.model_validate(mock_response)
     assert result == expected
@@ -4880,7 +4880,7 @@ def test_create_design_option_combinations_logic(input_data: dict, mock_response
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateDesignOptionCombinations'
-    expected_payload = commands.CreateDesignOptionCombinationsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateDesignOptionCombinationsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('designOptionCombinationIdsOrErrors'))
 
@@ -4899,7 +4899,7 @@ def test_create_design_option_sets_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateDesignOptionSets'
-    expected_payload = commands.CreateDesignOptionSetsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateDesignOptionSetsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -4918,7 +4918,7 @@ def test_create_design_options_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateDesignOptions'
-    expected_payload = commands.CreateDesignOptionsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateDesignOptionsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('designOptionIdsOrErrors'))
 
@@ -4937,7 +4937,7 @@ def test_create_details_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateDetails'
-    expected_payload = commands.CreateDetailsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateDetailsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('databases'))
 
@@ -4956,7 +4956,7 @@ def test_create_electrical_circuits_logic(input_data: dict, mock_response: dict)
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateElectricalCircuits'
-    expected_payload = commands.CreateElectricalCircuitsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateElectricalCircuitsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('elements'))
 
@@ -4975,7 +4975,7 @@ def test_create_element_sets_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateElementSets'
-    expected_payload = commands.CreateElementSetsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateElementSetsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('elementSets'))
 
@@ -4994,7 +4994,7 @@ def test_create_favorite_folder_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateFavoriteFolder'
-    expected_payload = commands.CreateFavoriteFolderParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateFavoriteFolderParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('folder'))
 
@@ -5013,7 +5013,7 @@ def test_create_favorite_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateFavorite'
-    expected_payload = commands.CreateFavoriteParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateFavoriteParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = commands.CreateFavoriteResult.model_validate(mock_response)
     assert result == expected
@@ -5033,7 +5033,7 @@ def test_create_favorites_from_elements_logic(input_data: dict, mock_response: d
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateFavoritesFromElements'
-    expected_payload = commands.CreateFavoritesFromElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateFavoritesFromElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -5052,7 +5052,7 @@ def test_create_folder_in_embedded_library_logic(input_data: dict, mock_response
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateFolderInEmbeddedLibrary'
-    expected_payload = commands.CreateFolderInEmbeddedLibraryParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateFolderInEmbeddedLibraryParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.CreateFolderInEmbeddedLibraryResult).validate_python(mock_response)
     assert result == expected
@@ -5072,7 +5072,7 @@ def test_create_graphic_override_combinations_logic(input_data: dict, mock_respo
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateGraphicOverrideCombinations'
-    expected_payload = commands.CreateGraphicOverrideCombinationsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateGraphicOverrideCombinationsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('graphicOverrideCombinationIds'))
 
@@ -5091,7 +5091,7 @@ def test_create_graphic_override_rule_groups_logic(input_data: dict, mock_respon
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateGraphicOverrideRuleGroups'
-    expected_payload = commands.CreateGraphicOverrideRuleGroupsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateGraphicOverrideRuleGroupsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -5110,7 +5110,7 @@ def test_create_graphical_override_combination_logic(input_data: dict, mock_resp
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateGraphicalOverrideCombination'
-    expected_payload = commands.CreateGraphicalOverrideCombinationParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateGraphicalOverrideCombinationParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('combinationId'))
 
@@ -5129,7 +5129,7 @@ def test_create_groups_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateGroups'
-    expected_payload = commands.CreateGroupsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateGroupsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('groupGuids'))
 
@@ -5148,7 +5148,7 @@ def test_create_hotlink_instances_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateHotlinkInstances'
-    expected_payload = commands.CreateHotlinkInstancesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateHotlinkInstancesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('elements'))
 
@@ -5167,7 +5167,7 @@ def test_create_hotlink_nodes_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateHotlinkNodes'
-    expected_payload = commands.CreateHotlinkNodesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateHotlinkNodesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('hotlinkNodes'))
 
@@ -5186,7 +5186,7 @@ def test_create_issue_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateIssue'
-    expected_payload = commands.CreateIssueParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateIssueParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('issueId'))
 
@@ -5205,7 +5205,7 @@ def test_create_keynote_folders_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateKeynoteFolders'
-    expected_payload = commands.CreateKeynoteFoldersParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateKeynoteFoldersParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('keynoteFolderIdsOrErrors'))
 
@@ -5224,7 +5224,7 @@ def test_create_keynote_items_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateKeynoteItems'
-    expected_payload = commands.CreateKeynoteItemsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateKeynoteItemsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('keynoteItemIdsOrErrors'))
 
@@ -5243,7 +5243,7 @@ def test_create_layout_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateLayout'
-    expected_payload = commands.CreateLayoutParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateLayoutParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('databases'))
 
@@ -5262,7 +5262,7 @@ def test_create_layout_subset_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateLayoutSubset'
-    expected_payload = commands.CreateLayoutSubsetParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateLayoutSubsetParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('navigatorItems'))
 
@@ -5281,7 +5281,7 @@ def test_create_library_part_from_elements_logic(input_data: dict, mock_response
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateLibraryPartFromElements'
-    expected_payload = commands.CreateLibraryPartFromElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateLibraryPartFromElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = commands.CreateLibraryPartFromElementsResult.model_validate(mock_response)
     assert result == expected
@@ -5301,7 +5301,7 @@ def test_create_library_part_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateLibraryPart'
-    expected_payload = commands.CreateLibraryPartParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateLibraryPartParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = commands.CreateLibraryPartResult.model_validate(mock_response)
     assert result == expected
@@ -5321,7 +5321,7 @@ def test_create_library_parts_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateLibraryParts'
-    expected_payload = commands.CreateLibraryPartsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateLibraryPartsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('libraryParts'))
 
@@ -5340,7 +5340,7 @@ def test_create_mep_preference_tables_logic(input_data: dict, mock_response: dic
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateMEPPreferenceTables'
-    expected_payload = commands.CreateMEPPreferenceTablesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateMEPPreferenceTablesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -5359,7 +5359,7 @@ def test_create_mep_system_groups_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateMEPSystemGroups'
-    expected_payload = commands.CreateMEPSystemGroupsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateMEPSystemGroupsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('systemGroups'))
 
@@ -5378,7 +5378,7 @@ def test_create_mep_take_offs_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateMEPTakeOffs'
-    expected_payload = commands.CreateMEPTakeOffsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateMEPTakeOffsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('elements'))
 
@@ -5397,7 +5397,7 @@ def test_create_project_info_fields_logic(input_data: dict, mock_response: dict)
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateProjectInfoFields'
-    expected_payload = commands.CreateProjectInfoFieldsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateProjectInfoFieldsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('fields'))
 
@@ -5416,7 +5416,7 @@ def test_create_project_info_groups_logic(input_data: dict, mock_response: dict)
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateProjectInfoGroups'
-    expected_payload = commands.CreateProjectInfoGroupsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateProjectInfoGroupsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('projectInfoGroupIdsOrErrors'))
 
@@ -5435,7 +5435,7 @@ def test_create_property_groups_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreatePropertyGroups'
-    expected_payload = commands.CreatePropertyGroupsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreatePropertyGroupsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('propertyGroupIds'))
 
@@ -5454,7 +5454,7 @@ def test_create_solid_element_links_logic(input_data: dict, mock_response: dict)
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateSolidElementLinks'
-    expected_payload = commands.CreateSolidElementLinksParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateSolidElementLinksParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -5473,7 +5473,7 @@ def test_create_solid_operations_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateSolidOperations'
-    expected_payload = commands.CreateSolidOperationsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateSolidOperationsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('results'))
 
@@ -5492,7 +5492,7 @@ def test_create_view_map_folder_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateViewMapFolder'
-    expected_payload = commands.CreateViewMapFolderParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateViewMapFolderParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('navigatorItemId'))
 
@@ -5511,7 +5511,7 @@ def test_create_views_in_view_map_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateViewsInViewMap'
-    expected_payload = commands.CreateViewsInViewMapParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateViewsInViewMapParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('navigatorItems'))
 
@@ -5530,7 +5530,7 @@ def test_create_worksheets_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'CreateWorksheets'
-    expected_payload = commands.CreateWorksheetsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateWorksheetsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('databases'))
 
@@ -5549,7 +5549,7 @@ def test_modify_curtain_wall_frames_logic(input_data: dict, mock_response: dict)
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ModifyCurtainWallFrames'
-    expected_payload = commands.ModifyCurtainWallFramesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ModifyCurtainWallFramesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -5568,7 +5568,7 @@ def test_set_3d_cut_planes_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'Set3DCutPlanes'
-    expected_payload = commands.Set3DCutPlanesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.Set3DCutPlanesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.Set3DCutPlanesResult).validate_python(mock_response)
     assert result == expected
@@ -5588,7 +5588,7 @@ def test_delete_ghost_records_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'DeleteGhostRecords'
-    expected_payload = commands.DeleteGhostRecordsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.DeleteGhostRecordsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -5607,7 +5607,7 @@ def test_get_elements_by_type_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetElementsByType'
-    expected_payload = commands.GetElementsByTypeParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetElementsByTypeParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.GetElementsByTypeResult).validate_python(mock_response)
     assert result == expected
@@ -5627,7 +5627,7 @@ def test_get_elements_in_draw_order_logic(input_data: dict, mock_response: dict)
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetElementsInDrawOrder'
-    expected_payload = commands.GetElementsInDrawOrderParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetElementsInDrawOrderParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.GetElementsInDrawOrderResult).validate_python(mock_response)
     assert result == expected
@@ -5647,7 +5647,7 @@ def test_get_all_elements_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetAllElements'
-    expected_payload = commands.GetAllElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetAllElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.GetAllElementsResult).validate_python(mock_response)
     assert result == expected
@@ -5667,7 +5667,7 @@ def test_get_current_revision_changes_of_layouts_logic(input_data: dict, mock_re
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetCurrentRevisionChangesOfLayouts'
-    expected_payload = commands.GetCurrentRevisionChangesOfLayoutsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetCurrentRevisionChangesOfLayoutsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('currentRevisionChangesOfLayouts'))
 
@@ -5686,7 +5686,7 @@ def test_get_elements_in_creation_order_logic(input_data: dict, mock_response: d
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetElementsInCreationOrder'
-    expected_payload = commands.GetElementsInCreationOrderParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetElementsInCreationOrderParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.GetElementsInCreationOrderResult).validate_python(mock_response)
     assert result == expected
@@ -5706,7 +5706,7 @@ def test_get_section_elements_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetSectionElements'
-    expected_payload = commands.GetSectionElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetSectionElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = commands.GetSectionElementsResult.model_validate(mock_response)
     assert result == expected
@@ -5726,7 +5726,7 @@ def test_get_teamwork_owners_of_databases_logic(input_data: dict, mock_response:
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetTeamworkOwnersOfDatabases'
-    expected_payload = commands.GetTeamworkOwnersOfDatabasesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetTeamworkOwnersOfDatabasesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('owners'))
 
@@ -5745,7 +5745,7 @@ def test_get_view_2d_transformations_logic(input_data: dict, mock_response: dict
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetView2DTransformations'
-    expected_payload = commands.GetView2DTransformationsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetView2DTransformationsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('transformations'))
 
@@ -5764,7 +5764,7 @@ def test_get_layout_settings_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetLayoutSettings'
-    expected_payload = commands.GetLayoutSettingsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetLayoutSettingsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('layoutSettings'))
 
@@ -5783,7 +5783,7 @@ def test_get_story_control_primitives_logic(input_data: dict, mock_response: dic
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetStoryControlPrimitives'
-    expected_payload = commands.GetStoryControlPrimitivesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetStoryControlPrimitivesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('primitives'))
 
@@ -5802,7 +5802,7 @@ def test_set_layout_settings_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SetLayoutSettings'
-    expected_payload = commands.SetLayoutSettingsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SetLayoutSettingsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -5821,7 +5821,7 @@ def test_set_master_layout_context_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SetMasterLayoutContext'
-    expected_payload = commands.SetMasterLayoutContextParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SetMasterLayoutContextParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.SetMasterLayoutContextResult).validate_python(mock_response)
     assert result == expected
@@ -5841,7 +5841,7 @@ def test_get_databases_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetDatabases'
-    expected_payload = commands.GetDatabasesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetDatabasesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('databases'))
 
@@ -5860,7 +5860,7 @@ def test_deactivate_design_options_in_combinations_logic(input_data: dict, mock_
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'DeactivateDesignOptionsInCombinations'
-    expected_payload = commands.DeactivateDesignOptionsInCombinationsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.DeactivateDesignOptionsInCombinationsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -5879,7 +5879,7 @@ def test_delete_design_option_combinations_logic(input_data: dict, mock_response
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'DeleteDesignOptionCombinations'
-    expected_payload = commands.DeleteDesignOptionCombinationsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.DeleteDesignOptionCombinationsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -5898,7 +5898,7 @@ def test_delete_design_option_sets_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'DeleteDesignOptionSets'
-    expected_payload = commands.DeleteDesignOptionSetsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.DeleteDesignOptionSetsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -5917,7 +5917,7 @@ def test_delete_design_options_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'DeleteDesignOptions'
-    expected_payload = commands.DeleteDesignOptionsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.DeleteDesignOptionsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -5936,7 +5936,7 @@ def test_delete_electrical_circuits_logic(input_data: dict, mock_response: dict)
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'DeleteElectricalCircuits'
-    expected_payload = commands.DeleteElectricalCircuitsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.DeleteElectricalCircuitsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -5958,7 +5958,7 @@ def test_delete_element_sets_dry_run_logic(input_data: dict, mock_response: dict
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'DeleteElementSets'
-    expected_payload = commands.DeleteElementSetsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.DeleteElementSetsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = commands.DeleteElementSetsResult.model_validate(mock_response)
     assert result == expected
@@ -5979,7 +5979,7 @@ def test_delete_element_sets_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'DeleteElementSets'
-    expected_payload = commands.DeleteElementSetsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.DeleteElementSetsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -6001,7 +6001,7 @@ def test_delete_elements_dry_run_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'DeleteElements'
-    expected_payload = commands.DeleteElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.DeleteElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = commands.DeleteElementsResult.model_validate(mock_response)
     assert result == expected
@@ -6022,7 +6022,7 @@ def test_delete_elements_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'DeleteElements'
-    expected_payload = commands.DeleteElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.DeleteElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -6041,7 +6041,7 @@ def test_delete_embedded_library_items_logic(input_data: dict, mock_response: di
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'DeleteEmbeddedLibraryItems'
-    expected_payload = commands.DeleteEmbeddedLibraryItemsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.DeleteEmbeddedLibraryItemsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -6060,7 +6060,7 @@ def test_delete_favorite_folder_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'DeleteFavoriteFolder'
-    expected_payload = commands.DeleteFavoriteFolderParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.DeleteFavoriteFolderParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('deletedFolder'))
 
@@ -6079,7 +6079,7 @@ def test_delete_favorites_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'DeleteFavorites'
-    expected_payload = commands.DeleteFavoritesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.DeleteFavoritesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -6098,7 +6098,7 @@ def test_delete_favorites_with_manager_logic(input_data: dict, mock_response: di
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'DeleteFavoritesWithManager'
-    expected_payload = commands.DeleteFavoritesWithManagerParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.DeleteFavoritesWithManagerParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -6117,7 +6117,7 @@ def test_delete_graphic_override_combinations_logic(input_data: dict, mock_respo
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'DeleteGraphicOverrideCombinations'
-    expected_payload = commands.DeleteGraphicOverrideCombinationsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.DeleteGraphicOverrideCombinationsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -6136,7 +6136,7 @@ def test_delete_graphic_override_rule_groups_logic(input_data: dict, mock_respon
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'DeleteGraphicOverrideRuleGroups'
-    expected_payload = commands.DeleteGraphicOverrideRuleGroupsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.DeleteGraphicOverrideRuleGroupsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -6155,7 +6155,7 @@ def test_delete_graphic_override_rules_logic(input_data: dict, mock_response: di
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'DeleteGraphicOverrideRules'
-    expected_payload = commands.DeleteGraphicOverrideRulesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.DeleteGraphicOverrideRulesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -6174,7 +6174,7 @@ def test_delete_hotlink_nodes_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'DeleteHotlinkNodes'
-    expected_payload = commands.DeleteHotlinkNodesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.DeleteHotlinkNodesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -6194,7 +6194,7 @@ def test_delete_issue_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'DeleteIssue'
-    expected_payload = commands.DeleteIssueParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.DeleteIssueParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert result == TypeAdapter(types.ExecutionResult).validate_python(mock_response)
 
@@ -6216,7 +6216,7 @@ def test_delete_issue_dry_run_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'DeleteIssue'
-    expected_payload = commands.DeleteIssueParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.DeleteIssueParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = commands.DeleteIssueResult.model_validate(mock_response)
     assert result == expected
@@ -6236,7 +6236,7 @@ def test_delete_keynote_folders_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'DeleteKeynoteFolders'
-    expected_payload = commands.DeleteKeynoteFoldersParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.DeleteKeynoteFoldersParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -6255,7 +6255,7 @@ def test_delete_keynote_items_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'DeleteKeynoteItems'
-    expected_payload = commands.DeleteKeynoteItemsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.DeleteKeynoteItemsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -6274,7 +6274,7 @@ def test_delete_mep_physical_systems_logic(input_data: dict, mock_response: dict
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'DeleteMEPPhysicalSystems'
-    expected_payload = commands.DeleteMEPPhysicalSystemsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.DeleteMEPPhysicalSystemsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -6293,7 +6293,7 @@ def test_delete_mep_preference_table_rows_logic(input_data: dict, mock_response:
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'DeleteMEPPreferenceTableRows'
-    expected_payload = commands.DeleteMEPPreferenceTableRowsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.DeleteMEPPreferenceTableRowsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -6312,7 +6312,7 @@ def test_delete_modul_data_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'DeleteModulData'
-    expected_payload = commands.DeleteModulDataParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.DeleteModulDataParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -6331,7 +6331,7 @@ def test_delete_navigator_items_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'DeleteNavigatorItems'
-    expected_payload = commands.DeleteNavigatorItemsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.DeleteNavigatorItemsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -6350,7 +6350,7 @@ def test_delete_project_data_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'DeleteProjectData'
-    expected_payload = commands.DeleteProjectDataParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.DeleteProjectDataParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -6369,7 +6369,7 @@ def test_delete_project_info_fields_logic(input_data: dict, mock_response: dict)
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'DeleteProjectInfoFields'
-    expected_payload = commands.DeleteProjectInfoFieldsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.DeleteProjectInfoFieldsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -6388,7 +6388,7 @@ def test_delete_project_info_groups_logic(input_data: dict, mock_response: dict)
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'DeleteProjectInfoGroups'
-    expected_payload = commands.DeleteProjectInfoGroupsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.DeleteProjectInfoGroupsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -6410,7 +6410,7 @@ def test_delete_property_definitions_dry_run_logic(input_data: dict, mock_respon
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'DeletePropertyDefinitions'
-    expected_payload = commands.DeletePropertyDefinitionsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.DeletePropertyDefinitionsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = commands.DeletePropertyDefinitionsResult.model_validate(mock_response)
     assert result == expected
@@ -6431,7 +6431,7 @@ def test_delete_property_definitions_logic(input_data: dict, mock_response: dict
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'DeletePropertyDefinitions'
-    expected_payload = commands.DeletePropertyDefinitionsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.DeletePropertyDefinitionsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -6453,7 +6453,7 @@ def test_delete_property_groups_dry_run_logic(input_data: dict, mock_response: d
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'DeletePropertyGroups'
-    expected_payload = commands.DeletePropertyGroupsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.DeletePropertyGroupsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = commands.DeletePropertyGroupsResult.model_validate(mock_response)
     assert result == expected
@@ -6474,7 +6474,7 @@ def test_delete_property_groups_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'DeletePropertyGroups'
-    expected_payload = commands.DeletePropertyGroupsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.DeletePropertyGroupsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -6494,7 +6494,7 @@ def test_delete_selected_elements_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'DeleteSelectedElements'
-    expected_payload = commands.DeleteSelectedElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.DeleteSelectedElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert result == TypeAdapter(types.ExecutionResult).validate_python(mock_response)
 
@@ -6516,7 +6516,7 @@ def test_delete_selected_elements_dry_run_logic(input_data: dict, mock_response:
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'DeleteSelectedElements'
-    expected_payload = commands.DeleteSelectedElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.DeleteSelectedElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = commands.DeleteSelectedElementsResult.model_validate(mock_response)
     assert result == expected
@@ -6536,7 +6536,7 @@ def test_delete_user_data_of_elements_logic(input_data: dict, mock_response: dic
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'DeleteUserDataOfElements'
-    expected_payload = commands.DeleteUserDataOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.DeleteUserDataOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = commands.DeleteUserDataOfElementsResult.model_validate(mock_response)
     assert result == expected
@@ -6556,7 +6556,7 @@ def test_duplicate_design_option_combinations_logic(input_data: dict, mock_respo
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'DuplicateDesignOptionCombinations'
-    expected_payload = commands.DuplicateDesignOptionCombinationsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.DuplicateDesignOptionCombinationsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('designOptionCombinationIdsOrErrors'))
 
@@ -6575,7 +6575,7 @@ def test_rename_design_option_combinations_logic(input_data: dict, mock_response
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'RenameDesignOptionCombinations'
-    expected_payload = commands.RenameDesignOptionCombinationsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.RenameDesignOptionCombinationsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -6594,7 +6594,7 @@ def test_set_active_design_options_in_combinations_logic(input_data: dict, mock_
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SetActiveDesignOptionsInCombinations'
-    expected_payload = commands.SetActiveDesignOptionsInCombinationsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SetActiveDesignOptionsInCombinationsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -6613,7 +6613,7 @@ def test_set_design_option_combination_of_views_logic(input_data: dict, mock_res
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SetDesignOptionCombinationOfViews'
-    expected_payload = commands.SetDesignOptionCombinationOfViewsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SetDesignOptionCombinationOfViewsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -6632,7 +6632,7 @@ def test_get_elements_of_design_options_logic(input_data: dict, mock_response: d
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetElementsOfDesignOptions'
-    expected_payload = commands.GetElementsOfDesignOptionsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetElementsOfDesignOptionsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('elementsOfDesignOptions'))
 
@@ -6651,7 +6651,7 @@ def test_reorder_design_options_in_set_logic(input_data: dict, mock_response: di
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ReorderDesignOptionsInSet'
-    expected_payload = commands.ReorderDesignOptionsInSetParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ReorderDesignOptionsInSetParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -6670,7 +6670,7 @@ def test_rename_design_options_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'RenameDesignOptions'
-    expected_payload = commands.RenameDesignOptionsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.RenameDesignOptionsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -6689,7 +6689,7 @@ def test_move_elements_to_design_options_logic(input_data: dict, mock_response: 
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'MoveElementsToDesignOptions'
-    expected_payload = commands.MoveElementsToDesignOptionsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.MoveElementsToDesignOptionsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -6708,7 +6708,7 @@ def test_move_design_options_to_another_set_logic(input_data: dict, mock_respons
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'MoveDesignOptionsToAnotherSet'
-    expected_payload = commands.MoveDesignOptionsToAnotherSetParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.MoveDesignOptionsToAnotherSetParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -6727,7 +6727,7 @@ def test_set_default_design_option_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SetDefaultDesignOption'
-    expected_payload = commands.SetDefaultDesignOptionParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SetDefaultDesignOptionParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.SetDefaultDesignOptionResult).validate_python(mock_response)
     assert result == expected
@@ -6747,7 +6747,7 @@ def test_reorder_design_option_sets_logic(input_data: dict, mock_response: dict)
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ReorderDesignOptionSets'
-    expected_payload = commands.ReorderDesignOptionSetsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ReorderDesignOptionSetsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -6766,7 +6766,7 @@ def test_rename_design_option_sets_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'RenameDesignOptionSets'
-    expected_payload = commands.RenameDesignOptionSetsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.RenameDesignOptionSetsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -6785,7 +6785,7 @@ def test_detach_elements_from_issue_logic(input_data: dict, mock_response: dict)
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'DetachElementsFromIssue'
-    expected_payload = commands.DetachElementsFromIssueParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.DetachElementsFromIssueParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.DetachElementsFromIssueResult).validate_python(mock_response)
     assert result == expected
@@ -6805,7 +6805,7 @@ def test_get_note_autotexts_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetNoteAutotexts'
-    expected_payload = commands.GetNoteAutotextsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetNoteAutotextsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('noteAutotexts'))
 
@@ -6824,7 +6824,7 @@ def test_distribute_elements_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'DistributeElements'
-    expected_payload = commands.DistributeElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.DistributeElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -6843,7 +6843,7 @@ def test_set_document_from_3d_defaults_logic(input_data: dict, mock_response: di
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SetDocumentFrom3DDefaults'
-    expected_payload = commands.SetDocumentFrom3DDefaultsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SetDocumentFrom3DDefaultsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.SetDocumentFrom3DDefaultsResult).validate_python(mock_response)
     assert result == expected
@@ -6866,7 +6866,7 @@ def test_set_category_values_of_elements_dry_run_logic(input_data: dict, mock_re
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SetCategoryValuesOfElements'
-    expected_payload = commands.SetCategoryValuesOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SetCategoryValuesOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = commands.SetCategoryValuesOfElementsResult.model_validate(mock_response)
     assert result == expected
@@ -6887,7 +6887,7 @@ def test_set_category_values_of_elements_logic(input_data: dict, mock_response: 
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SetCategoryValuesOfElements'
-    expected_payload = commands.SetCategoryValuesOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SetCategoryValuesOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -6909,7 +6909,7 @@ def test_remove_ifc_classification_references_of_elements_dry_run_logic(input_da
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'RemoveIFCClassificationReferencesOfElements'
-    expected_payload = commands.RemoveIFCClassificationReferencesOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.RemoveIFCClassificationReferencesOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = commands.RemoveIFCClassificationReferencesOfElementsResult.model_validate(mock_response)
     assert result == expected
@@ -6930,7 +6930,7 @@ def test_remove_ifc_classification_references_of_elements_logic(input_data: dict
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'RemoveIFCClassificationReferencesOfElements'
-    expected_payload = commands.RemoveIFCClassificationReferencesOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.RemoveIFCClassificationReferencesOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -6952,7 +6952,7 @@ def test_remove_ifc_properties_of_elements_dry_run_logic(input_data: dict, mock_
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'RemoveIFCPropertiesOfElements'
-    expected_payload = commands.RemoveIFCPropertiesOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.RemoveIFCPropertiesOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = commands.RemoveIFCPropertiesOfElementsResult.model_validate(mock_response)
     assert result == expected
@@ -6973,7 +6973,7 @@ def test_remove_ifc_properties_of_elements_logic(input_data: dict, mock_response
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'RemoveIFCPropertiesOfElements'
-    expected_payload = commands.RemoveIFCPropertiesOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.RemoveIFCPropertiesOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -6995,7 +6995,7 @@ def test_set_property_values_of_elements_dry_run_logic(input_data: dict, mock_re
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SetPropertyValuesOfElements'
-    expected_payload = commands.SetPropertyValuesOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SetPropertyValuesOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = commands.SetPropertyValuesOfElementsResult.model_validate(mock_response)
     assert result == expected
@@ -7016,7 +7016,7 @@ def test_set_property_values_of_elements_logic(input_data: dict, mock_response: 
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SetPropertyValuesOfElements'
-    expected_payload = commands.SetPropertyValuesOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SetPropertyValuesOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -7038,7 +7038,7 @@ def test_remove_element_trims_dry_run_logic(input_data: dict, mock_response: dic
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'RemoveElementTrims'
-    expected_payload = commands.RemoveElementTrimsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.RemoveElementTrimsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = commands.RemoveElementTrimsResult.model_validate(mock_response)
     assert result == expected
@@ -7059,7 +7059,7 @@ def test_remove_element_trims_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'RemoveElementTrims'
-    expected_payload = commands.RemoveElementTrimsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.RemoveElementTrimsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -7081,7 +7081,7 @@ def test_remove_solid_element_links_dry_run_logic(input_data: dict, mock_respons
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'RemoveSolidElementLinks'
-    expected_payload = commands.RemoveSolidElementLinksParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.RemoveSolidElementLinksParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = commands.RemoveSolidElementLinksResult.model_validate(mock_response)
     assert result == expected
@@ -7102,7 +7102,7 @@ def test_remove_solid_element_links_logic(input_data: dict, mock_response: dict)
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'RemoveSolidElementLinks'
-    expected_payload = commands.RemoveSolidElementLinksParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.RemoveSolidElementLinksParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -7124,7 +7124,7 @@ def test_set_gdl_parameters_of_elements_dry_run_logic(input_data: dict, mock_res
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SetGDLParametersOfElements'
-    expected_payload = commands.SetGDLParametersOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SetGDLParametersOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = commands.SetGDLParametersOfElementsResult.model_validate(mock_response)
     assert result == expected
@@ -7145,7 +7145,7 @@ def test_set_gdl_parameters_of_elements_logic(input_data: dict, mock_response: d
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SetGDLParametersOfElements'
-    expected_payload = commands.SetGDLParametersOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SetGDLParametersOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -7164,7 +7164,7 @@ def test_edit_hierarchical_element_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'EditHierarchicalElement'
-    expected_payload = commands.EditHierarchicalElementParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.EditHierarchicalElementParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.EditHierarchicalElementResult).validate_python(mock_response)
     assert result == expected
@@ -7184,7 +7184,7 @@ def test_modify_electrical_circuits_logic(input_data: dict, mock_response: dict)
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ModifyElectricalCircuits'
-    expected_payload = commands.ModifyElectricalCircuitsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ModifyElectricalCircuitsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -7203,7 +7203,7 @@ def test_modify_electrical_project_settings_logic(input_data: dict, mock_respons
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ModifyElectricalProjectSettings'
-    expected_payload = commands.ModifyElectricalProjectSettingsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ModifyElectricalProjectSettingsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.ModifyElectricalProjectSettingsResult).validate_python(mock_response)
     assert result == expected
@@ -7223,7 +7223,7 @@ def test_get_category_values_of_elements_logic(input_data: dict, mock_response: 
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetCategoryValuesOfElements'
-    expected_payload = commands.GetCategoryValuesOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetCategoryValuesOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('categoryValuesOfElements'))
 
@@ -7242,7 +7242,7 @@ def test_get_category_values_of_defaults_logic(input_data: dict, mock_response: 
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetCategoryValuesOfDefaults'
-    expected_payload = commands.GetCategoryValuesOfDefaultsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetCategoryValuesOfDefaultsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('categoryValuesOfDefaults'))
 
@@ -7261,7 +7261,7 @@ def test_get_details_of_elements_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetDetailsOfElements'
-    expected_payload = commands.GetDetailsOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetDetailsOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('detailsOfElements'))
 
@@ -7280,7 +7280,7 @@ def test_filter_elements_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'FilterElements'
-    expected_payload = commands.FilterElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.FilterElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('elements'))
 
@@ -7299,7 +7299,7 @@ def test_get_elements_by_criteria_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetElementsByCriteria'
-    expected_payload = commands.GetElementsByCriteriaParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetElementsByCriteriaParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = commands.GetElementsByCriteriaResult.model_validate(mock_response)
     assert result == expected
@@ -7319,7 +7319,7 @@ def test_set_ifc_attributes_of_elements_logic(input_data: dict, mock_response: d
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SetIFCAttributesOfElements'
-    expected_payload = commands.SetIFCAttributesOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SetIFCAttributesOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -7338,7 +7338,7 @@ def test_set_ifc_classification_references_of_elements_logic(input_data: dict, m
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SetIFCClassificationReferencesOfElements'
-    expected_payload = commands.SetIFCClassificationReferencesOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SetIFCClassificationReferencesOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -7357,7 +7357,7 @@ def test_set_ifc_properties_of_elements_logic(input_data: dict, mock_response: d
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SetIFCPropertiesOfElements'
-    expected_payload = commands.SetIFCPropertiesOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SetIFCPropertiesOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -7376,7 +7376,7 @@ def test_get_connected_elements_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetConnectedElements'
-    expected_payload = commands.GetConnectedElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetConnectedElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.GetConnectedElementsResult).validate_python(mock_response)
     assert result == expected
@@ -7396,7 +7396,7 @@ def test_get_property_editability_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetPropertyEditability'
-    expected_payload = commands.GetPropertyEditabilityParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetPropertyEditabilityParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = commands.GetPropertyEditabilityResult.model_validate(mock_response)
     assert result == expected
@@ -7416,7 +7416,7 @@ def test_get_relations_of_elements_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetRelationsOfElements'
-    expected_payload = commands.GetRelationsOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetRelationsOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('relations'))
 
@@ -7435,7 +7435,7 @@ def test_get_linked_property_objects_of_elements_logic(input_data: dict, mock_re
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetLinkedPropertyObjectsOfElements'
-    expected_payload = commands.GetLinkedPropertyObjectsOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetLinkedPropertyObjectsOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('linkedPropertyObjectsOfElements'))
 
@@ -7454,7 +7454,7 @@ def test_fit_in_window_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'FitInWindow'
-    expected_payload = commands.FitInWindowParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.FitInWindowParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.FitInWindowResult).validate_python(mock_response)
     assert result == expected
@@ -7474,7 +7474,7 @@ def test_get_2d_bounding_boxes_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'Get2DBoundingBoxes'
-    expected_payload = commands.Get2DBoundingBoxesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.Get2DBoundingBoxesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('boundingBoxes2D'))
 
@@ -7493,7 +7493,7 @@ def test_get_3d_bounding_boxes_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'Get3DBoundingBoxes'
-    expected_payload = commands.Get3DBoundingBoxesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.Get3DBoundingBoxesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('boundingBoxes3D'))
 
@@ -7512,7 +7512,7 @@ def test_get_3d_geometry_of_elements_logic(input_data: dict, mock_response: dict
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'Get3DGeometryOfElements'
-    expected_payload = commands.Get3DGeometryOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.Get3DGeometryOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('geometries3D'))
 
@@ -7531,7 +7531,7 @@ def test_get_analytical_links_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetAnalyticalLinks'
-    expected_payload = commands.GetAnalyticalLinksParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetAnalyticalLinksParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('links'))
 
@@ -7550,7 +7550,7 @@ def test_get_analytical_loads_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetAnalyticalLoads'
-    expected_payload = commands.GetAnalyticalLoadsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetAnalyticalLoadsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('loads'))
 
@@ -7569,7 +7569,7 @@ def test_get_analytical_member_details_logic(input_data: dict, mock_response: di
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetAnalyticalMemberDetails'
-    expected_payload = commands.GetAnalyticalMemberDetailsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetAnalyticalMemberDetailsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('analyticalMembers'))
 
@@ -7588,7 +7588,7 @@ def test_get_analytical_member_types_of_elements_logic(input_data: dict, mock_re
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetAnalyticalMemberTypesOfElements'
-    expected_payload = commands.GetAnalyticalMemberTypesOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetAnalyticalMemberTypesOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('memberTypesOfElements'))
 
@@ -7607,7 +7607,7 @@ def test_get_analytical_releases_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetAnalyticalReleases'
-    expected_payload = commands.GetAnalyticalReleasesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetAnalyticalReleasesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('releases'))
 
@@ -7626,7 +7626,7 @@ def test_get_analytical_supports_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetAnalyticalSupports'
-    expected_payload = commands.GetAnalyticalSupportsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetAnalyticalSupportsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('supports'))
 
@@ -7645,7 +7645,7 @@ def test_get_body_materials_of_elements_logic(input_data: dict, mock_response: d
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetBodyMaterialsOfElements'
-    expected_payload = commands.GetBodyMaterialsOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetBodyMaterialsOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('bodyMaterials'))
 
@@ -7664,7 +7664,7 @@ def test_get_calculated_parameters_of_curtain_wall_sub_elements_logic(input_data
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetCalculatedParametersOfCurtainWallSubElements'
-    expected_payload = commands.GetCalculatedParametersOfCurtainWallSubElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetCalculatedParametersOfCurtainWallSubElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('calculatedParametersOfElements'))
 
@@ -7683,7 +7683,7 @@ def test_get_components_of_elements_logic(input_data: dict, mock_response: dict)
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetComponentsOfElements'
-    expected_payload = commands.GetComponentsOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetComponentsOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('componentsOfElements'))
 
@@ -7702,7 +7702,7 @@ def test_get_containing_databases_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetContainingDatabases'
-    expected_payload = commands.GetContainingDatabasesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetContainingDatabasesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('databases'))
 
@@ -7721,7 +7721,7 @@ def test_get_curtain_wall_absolute_bottoms_logic(input_data: dict, mock_response
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetCurtainWallAbsoluteBottoms'
-    expected_payload = commands.GetCurtainWallAbsoluteBottomsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetCurtainWallAbsoluteBottomsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('absoluteBottoms'))
 
@@ -7740,7 +7740,7 @@ def test_get_custom_curve_member_stretch_logic(input_data: dict, mock_response: 
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetCustomCurveMemberStretch'
-    expected_payload = commands.GetCustomCurveMemberStretchParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetCustomCurveMemberStretchParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('stretches'))
 
@@ -7759,7 +7759,7 @@ def test_get_descriptors_of_elements_logic(input_data: dict, mock_response: dict
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetDescriptorsOfElements'
-    expected_payload = commands.GetDescriptorsOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetDescriptorsOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('descriptorsOfElements'))
 
@@ -7778,7 +7778,7 @@ def test_get_design_option_for_elements_logic(input_data: dict, mock_response: d
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetDesignOptionForElements'
-    expected_payload = commands.GetDesignOptionForElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetDesignOptionForElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('designOptionForElements'))
 
@@ -7797,7 +7797,7 @@ def test_get_drawing_content_boxes_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetDrawingContentBoxes'
-    expected_payload = commands.GetDrawingContentBoxesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetDrawingContentBoxesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('contentBoxes'))
 
@@ -7816,7 +7816,7 @@ def test_get_drawing_primitives_of_elements_logic(input_data: dict, mock_respons
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetDrawingPrimitivesOfElements'
-    expected_payload = commands.GetDrawingPrimitivesOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetDrawingPrimitivesOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('drawingPrimitivesOfElements'))
 
@@ -7835,7 +7835,7 @@ def test_get_electrical_circuits_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetElectricalCircuits'
-    expected_payload = commands.GetElectricalCircuitsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetElectricalCircuitsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('electricalCircuits'))
 
@@ -7854,7 +7854,7 @@ def test_get_electrical_devices_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetElectricalDevices'
-    expected_payload = commands.GetElectricalDevicesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetElectricalDevicesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('electricalDevices'))
 
@@ -7873,7 +7873,7 @@ def test_get_electrical_panels_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetElectricalPanels'
-    expected_payload = commands.GetElectricalPanelsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetElectricalPanelsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('electricalPanels'))
 
@@ -7892,7 +7892,7 @@ def test_get_element_connections_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetElementConnections'
-    expected_payload = commands.GetElementConnectionsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetElementConnectionsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = commands.GetElementConnectionsResult.model_validate(mock_response)
     assert result == expected
@@ -7912,7 +7912,7 @@ def test_get_element_sets_of_elements_logic(input_data: dict, mock_response: dic
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetElementSetsOfElements'
-    expected_payload = commands.GetElementSetsOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetElementSetsOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('elementSetsOfElements'))
 
@@ -7931,7 +7931,7 @@ def test_get_element_trims_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetElementTrims'
-    expected_payload = commands.GetElementTrimsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetElementTrimsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('elementTrims'))
 
@@ -7950,7 +7950,7 @@ def test_get_element_user_data_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetElementUserData'
-    expected_payload = commands.GetElementUserDataParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetElementUserDataParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('elementUserData'))
 
@@ -7969,7 +7969,7 @@ def test_get_gdl_parameters_of_elements_logic(input_data: dict, mock_response: d
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetGDLParametersOfElements'
-    expected_payload = commands.GetGDLParametersOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetGDLParametersOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('gdlParametersOfElements'))
 
@@ -7988,7 +7988,7 @@ def test_get_graphical_override_style_of_elements_logic(input_data: dict, mock_r
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetGraphicalOverrideStyleOfElements'
-    expected_payload = commands.GetGraphicalOverrideStyleOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetGraphicalOverrideStyleOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('styles'))
 
@@ -8007,7 +8007,7 @@ def test_get_groups_of_elements_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetGroupsOfElements'
-    expected_payload = commands.GetGroupsOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetGroupsOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('groupGuids'))
 
@@ -8026,7 +8026,7 @@ def test_get_hierarchical_element_owners_logic(input_data: dict, mock_response: 
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetHierarchicalElementOwners'
-    expected_payload = commands.GetHierarchicalElementOwnersParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetHierarchicalElementOwnersParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('owners'))
 
@@ -8045,7 +8045,7 @@ def test_get_hotlink_owners_of_elements_logic(input_data: dict, mock_response: d
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetHotlinkOwnersOfElements'
-    expected_payload = commands.GetHotlinkOwnersOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetHotlinkOwnersOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('hotlinkOwners'))
 
@@ -8064,7 +8064,7 @@ def test_get_hotspots_of_elements_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetHotspotsOfElements'
-    expected_payload = commands.GetHotspotsOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetHotspotsOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('hotspotsOfElements'))
 
@@ -8083,7 +8083,7 @@ def test_get_ifc_attributes_of_elements_logic(input_data: dict, mock_response: d
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetIFCAttributesOfElements'
-    expected_payload = commands.GetIFCAttributesOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetIFCAttributesOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('elementIFCAttributes'))
 
@@ -8102,7 +8102,7 @@ def test_get_ifc_classification_references_of_elements_logic(input_data: dict, m
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetIFCClassificationReferencesOfElements'
-    expected_payload = commands.GetIFCClassificationReferencesOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetIFCClassificationReferencesOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('elementIFCClassificationReferences'))
 
@@ -8121,7 +8121,7 @@ def test_get_ifc_ids_of_elements_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetIFCIdsOfElements'
-    expected_payload = commands.GetIFCIdsOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetIFCIdsOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('elementIFCIds'))
 
@@ -8140,7 +8140,7 @@ def test_get_ifc_properties_of_elements_logic(input_data: dict, mock_response: d
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetIFCPropertiesOfElements'
-    expected_payload = commands.GetIFCPropertiesOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetIFCPropertiesOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('elementIFCProperties'))
 
@@ -8159,7 +8159,7 @@ def test_get_ifc_spatial_structure_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetIFCSpatialStructure'
-    expected_payload = commands.GetIFCSpatialStructureParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetIFCSpatialStructureParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = commands.GetIFCSpatialStructureResult.model_validate(mock_response)
     assert result == expected
@@ -8179,7 +8179,7 @@ def test_get_ifc_type_of_elements_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetIFCTypeOfElements'
-    expected_payload = commands.GetIFCTypeOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetIFCTypeOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('elementIFCTypes'))
 
@@ -8198,7 +8198,7 @@ def test_get_lib_part_transformations_logic(input_data: dict, mock_response: dic
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetLibPartTransformations'
-    expected_payload = commands.GetLibPartTransformationsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetLibPartTransformationsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('transformations'))
 
@@ -8217,7 +8217,7 @@ def test_get_links_of_elements_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetLinksOfElements'
-    expected_payload = commands.GetLinksOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetLinksOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('linksOfElements'))
 
@@ -8236,7 +8236,7 @@ def test_get_mep_element_details_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetMEPElementDetails'
-    expected_payload = commands.GetMEPElementDetailsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetMEPElementDetailsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('elementDetails'))
 
@@ -8255,7 +8255,7 @@ def test_get_mep_physical_systems_of_elements_logic(input_data: dict, mock_respo
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetMEPPhysicalSystemsOfElements'
-    expected_payload = commands.GetMEPPhysicalSystemsOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetMEPPhysicalSystemsOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('physicalSystemsOfElements'))
 
@@ -8274,7 +8274,7 @@ def test_get_mep_ports_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetMEPPorts'
-    expected_payload = commands.GetMEPPortsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetMEPPortsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('elementPorts'))
 
@@ -8293,7 +8293,7 @@ def test_get_mep_routing_elements_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetMEPRoutingElements'
-    expected_payload = commands.GetMEPRoutingElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetMEPRoutingElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('routingElements'))
 
@@ -8312,7 +8312,7 @@ def test_get_mep_routing_parameters_logic(input_data: dict, mock_response: dict)
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetMEPRoutingParameters'
-    expected_payload = commands.GetMEPRoutingParametersParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetMEPRoutingParametersParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('routingParameters'))
 
@@ -8331,7 +8331,7 @@ def test_get_marker_parameters_of_elements_logic(input_data: dict, mock_response
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetMarkerParametersOfElements'
-    expected_payload = commands.GetMarkerParametersOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetMarkerParametersOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('markerParametersOfElements'))
 
@@ -8350,7 +8350,7 @@ def test_get_merged_elements_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetMergedElements'
-    expected_payload = commands.GetMergedElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetMergedElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('elementMerges'))
 
@@ -8369,7 +8369,7 @@ def test_get_missing_lib_part_names_logic(input_data: dict, mock_response: dict)
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetMissingLibPartNames'
-    expected_payload = commands.GetMissingLibPartNamesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetMissingLibPartNamesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('libPartNames'))
 
@@ -8388,7 +8388,7 @@ def test_get_opening_details_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetOpeningDetails'
-    expected_payload = commands.GetOpeningDetailsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetOpeningDetailsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('openings'))
 
@@ -8407,7 +8407,7 @@ def test_get_opening_floor_plan_parameters_logic(input_data: dict, mock_response
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetOpeningFloorPlanParameters'
-    expected_payload = commands.GetOpeningFloorPlanParametersParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetOpeningFloorPlanParametersParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('openings'))
 
@@ -8426,7 +8426,7 @@ def test_get_opening_symbol_parameters_logic(input_data: dict, mock_response: di
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetOpeningSymbolParameters'
-    expected_payload = commands.GetOpeningSymbolParametersParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetOpeningSymbolParametersParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('openings'))
 
@@ -8445,7 +8445,7 @@ def test_get_opening_transformations_logic(input_data: dict, mock_response: dict
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetOpeningTransformations'
-    expected_payload = commands.GetOpeningTransformationsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetOpeningTransformationsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('openingTransformations'))
 
@@ -8464,7 +8464,7 @@ def test_get_property_objects_of_elements_logic(input_data: dict, mock_response:
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetPropertyObjectsOfElements'
-    expected_payload = commands.GetPropertyObjectsOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetPropertyObjectsOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('propertyObjectsOfElements'))
 
@@ -8483,7 +8483,7 @@ def test_get_property_values_of_elements_logic(input_data: dict, mock_response: 
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetPropertyValuesOfElements'
-    expected_payload = commands.GetPropertyValuesOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetPropertyValuesOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('propertyValuesForElements'))
 
@@ -8502,7 +8502,7 @@ def test_get_quantities_of_elements_logic(input_data: dict, mock_response: dict)
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetQuantitiesOfElements'
-    expected_payload = commands.GetQuantitiesOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetQuantitiesOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('quantitiesOfElements'))
 
@@ -8521,7 +8521,7 @@ def test_get_reservation_status_of_elements_logic(input_data: dict, mock_respons
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetReservationStatusOfElements'
-    expected_payload = commands.GetReservationStatusOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetReservationStatusOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('reservationStatuses'))
 
@@ -8540,7 +8540,7 @@ def test_get_revision_changes_of_elements_logic(input_data: dict, mock_response:
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetRevisionChangesOfElements'
-    expected_payload = commands.GetRevisionChangesOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetRevisionChangesOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('revisionChangesOfElements'))
 
@@ -8559,7 +8559,7 @@ def test_get_roof_planes_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetRoofPlanes'
-    expected_payload = commands.GetRoofPlanesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetRoofPlanesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('roofPlanesOfElements'))
 
@@ -8578,7 +8578,7 @@ def test_get_sections_and_elevations_details_logic(input_data: dict, mock_respon
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetSectionsAndElevationsDetails'
-    expected_payload = commands.GetSectionsAndElevationsDetailsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetSectionsAndElevationsDetailsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('detailsOfElements'))
 
@@ -8597,7 +8597,7 @@ def test_get_shape_primitives_of_elements_logic(input_data: dict, mock_response:
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetShapePrimitivesOfElements'
-    expected_payload = commands.GetShapePrimitivesOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetShapePrimitivesOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('shapePrimitivesOfElements'))
 
@@ -8616,7 +8616,7 @@ def test_get_skylight_hole_polygons_logic(input_data: dict, mock_response: dict)
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetSkylightHolePolygons'
-    expected_payload = commands.GetSkylightHolePolygonsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetSkylightHolePolygonsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('skylightHolePolygons'))
 
@@ -8635,7 +8635,7 @@ def test_get_snap_points_of_elements_logic(input_data: dict, mock_response: dict
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetSnapPointsOfElements'
-    expected_payload = commands.GetSnapPointsOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetSnapPointsOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('snapPointsOfElements'))
 
@@ -8654,7 +8654,7 @@ def test_get_solid_element_links_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetSolidElementLinks'
-    expected_payload = commands.GetSolidElementLinksParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetSolidElementLinksParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('solidLinks'))
 
@@ -8673,7 +8673,7 @@ def test_get_subelements_of_hierarchical_elements_logic(input_data: dict, mock_r
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetSubelementsOfHierarchicalElements'
-    expected_payload = commands.GetSubelementsOfHierarchicalElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetSubelementsOfHierarchicalElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('subelements'))
 
@@ -8692,7 +8692,7 @@ def test_get_surface_quantities_of_elements_logic(input_data: dict, mock_respons
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetSurfaceQuantitiesOfElements'
-    expected_payload = commands.GetSurfaceQuantitiesOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetSurfaceQuantitiesOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('surfaceQuantitiesOfElements'))
 
@@ -8711,7 +8711,7 @@ def test_get_surface_types_of_elements_logic(input_data: dict, mock_response: di
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetSurfaceTypesOfElements'
-    expected_payload = commands.GetSurfaceTypesOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetSurfaceTypesOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('surfaceTypes'))
 
@@ -8730,7 +8730,7 @@ def test_get_texture_coordinates_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetTextureCoordinates'
-    expected_payload = commands.GetTextureCoordinatesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetTextureCoordinatesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('textureCoordinates'))
 
@@ -8749,7 +8749,7 @@ def test_get_url_references_of_elements_logic(input_data: dict, mock_response: d
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetURLReferencesOfElements'
-    expected_payload = commands.GetURLReferencesOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetURLReferencesOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('urlReferences'))
 
@@ -8768,7 +8768,7 @@ def test_get_visible_skin_status_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetVisibleSkinStatus'
-    expected_payload = commands.GetVisibleSkinStatusParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetVisibleSkinStatusParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('visibleSkinStatuses'))
 
@@ -8787,7 +8787,7 @@ def test_get_zone_boundaries_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetZoneBoundaries'
-    expected_payload = commands.GetZoneBoundariesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetZoneBoundariesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.GetZoneBoundariesResult).validate_python(mock_response)
     assert result == expected
@@ -8807,7 +8807,7 @@ def test_get_zone_reductions_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetZoneReductions'
-    expected_payload = commands.GetZoneReductionsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetZoneReductionsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('reductionsOfZones'))
 
@@ -8826,7 +8826,7 @@ def test_grant_elements_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GrantElements'
-    expected_payload = commands.GrantElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GrantElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.GrantElementsResult).validate_python(mock_response)
     assert result == expected
@@ -8846,7 +8846,7 @@ def test_highlight_elements_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'HighlightElements'
-    expected_payload = commands.HighlightElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.HighlightElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.HighlightElementsResult).validate_python(mock_response)
     assert result == expected
@@ -8866,7 +8866,7 @@ def test_lock_elements_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'LockElements'
-    expected_payload = commands.LockElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.LockElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.LockElementsResult).validate_python(mock_response)
     assert result == expected
@@ -8886,7 +8886,7 @@ def test_make_property_available_for_elements_logic(input_data: dict, mock_respo
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'MakePropertyAvailableForElements'
-    expected_payload = commands.MakePropertyAvailableForElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.MakePropertyAvailableForElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.MakePropertyAvailableForElementsResult).validate_python(mock_response)
     assert result == expected
@@ -8906,7 +8906,7 @@ def test_make_property_unavailable_for_elements_logic(input_data: dict, mock_res
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'MakePropertyUnavailableForElements'
-    expected_payload = commands.MakePropertyUnavailableForElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.MakePropertyUnavailableForElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.MakePropertyUnavailableForElementsResult).validate_python(mock_response)
     assert result == expected
@@ -8926,7 +8926,7 @@ def test_merge_elements_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'MergeElements'
-    expected_payload = commands.MergeElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.MergeElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.MergeElementsResult).validate_python(mock_response)
     assert result == expected
@@ -8946,7 +8946,7 @@ def test_modify_property_value_of_elements_logic(input_data: dict, mock_response
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ModifyPropertyValueOfElements'
-    expected_payload = commands.ModifyPropertyValueOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ModifyPropertyValueOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.ModifyPropertyValueOfElementsResult).validate_python(mock_response)
     assert result == expected
@@ -8966,7 +8966,7 @@ def test_refresh_elements_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'RefreshElements'
-    expected_payload = commands.RefreshElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.RefreshElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -8985,7 +8985,7 @@ def test_release_elements_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ReleaseElements'
-    expected_payload = commands.ReleaseElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ReleaseElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.ReleaseElementsResult).validate_python(mock_response)
     assert result == expected
@@ -9005,7 +9005,7 @@ def test_reserve_elements_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ReserveElements'
-    expected_payload = commands.ReserveElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ReserveElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = commands.ReserveElementsResult.model_validate(mock_response)
     assert result == expected
@@ -9025,7 +9025,7 @@ def test_run_parameter_script_of_elements_logic(input_data: dict, mock_response:
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'RunParameterScriptOfElements'
-    expected_payload = commands.RunParameterScriptOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.RunParameterScriptOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -9044,7 +9044,7 @@ def test_save_as_module_file_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SaveAsModuleFile'
-    expected_payload = commands.SaveAsModuleFileParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SaveAsModuleFileParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.SaveAsModuleFileResult).validate_python(mock_response)
     assert result == expected
@@ -9064,7 +9064,7 @@ def test_show_elements_in_3d_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ShowElementsIn3D'
-    expected_payload = commands.ShowElementsIn3DParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ShowElementsIn3DParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.ShowElementsIn3DResult).validate_python(mock_response)
     assert result == expected
@@ -9084,7 +9084,7 @@ def test_transfer_mep_settings_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'TransferMEPSettings'
-    expected_payload = commands.TransferMEPSettingsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.TransferMEPSettingsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -9103,7 +9103,7 @@ def test_triangulate_polygons_of_elements_logic(input_data: dict, mock_response:
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'TriangulatePolygonsOfElements'
-    expected_payload = commands.TriangulatePolygonsOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.TriangulatePolygonsOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('triangulations'))
 
@@ -9122,7 +9122,7 @@ def test_trim_elements_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'TrimElements'
-    expected_payload = commands.TrimElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.TrimElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.TrimElementsResult).validate_python(mock_response)
     assert result == expected
@@ -9142,7 +9142,7 @@ def test_unlock_elements_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'UnlockElements'
-    expected_payload = commands.UnlockElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.UnlockElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.UnlockElementsResult).validate_python(mock_response)
     assert result == expected
@@ -9162,7 +9162,7 @@ def test_update_drawings_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'UpdateDrawings'
-    expected_payload = commands.UpdateDrawingsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.UpdateDrawingsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.UpdateDrawingsResult).validate_python(mock_response)
     assert result == expected
@@ -9182,7 +9182,7 @@ def test_update_zones_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'UpdateZones'
-    expected_payload = commands.UpdateZonesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.UpdateZonesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.UpdateZonesResult).validate_python(mock_response)
     assert result == expected
@@ -9202,7 +9202,7 @@ def test_zoom_to_elements_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ZoomToElements'
-    expected_payload = commands.ZoomToElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ZoomToElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.ZoomToElementsResult).validate_python(mock_response)
     assert result == expected
@@ -9222,7 +9222,7 @@ def test_get_hotlink_proxy_element_table_logic(input_data: dict, mock_response: 
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetHotlinkProxyElementTable'
-    expected_payload = commands.GetHotlinkProxyElementTableParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetHotlinkProxyElementTableParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('proxyElementTables'))
 
@@ -9241,7 +9241,7 @@ def test_set_element_info_strings_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SetElementInfoStrings'
-    expected_payload = commands.SetElementInfoStringsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SetElementInfoStringsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -9260,7 +9260,7 @@ def test_link_elements_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'LinkElements'
-    expected_payload = commands.LinkElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.LinkElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -9279,7 +9279,7 @@ def test_unlink_elements_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'UnlinkElements'
-    expected_payload = commands.UnlinkElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.UnlinkElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -9298,7 +9298,7 @@ def test_set_mep_routing_parameters_logic(input_data: dict, mock_response: dict)
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SetMEPRoutingParameters'
-    expected_payload = commands.SetMEPRoutingParametersParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SetMEPRoutingParametersParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -9317,7 +9317,7 @@ def test_set_linked_property_objects_of_elements_logic(input_data: dict, mock_re
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SetLinkedPropertyObjectsOfElements'
-    expected_payload = commands.SetLinkedPropertyObjectsOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SetLinkedPropertyObjectsOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -9336,7 +9336,7 @@ def test_set_url_references_of_elements_logic(input_data: dict, mock_response: d
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SetURLReferencesOfElements'
-    expected_payload = commands.SetURLReferencesOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SetURLReferencesOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -9355,7 +9355,7 @@ def test_unmerge_elements_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'UnmergeElements'
-    expected_payload = commands.UnmergeElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.UnmergeElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -9374,7 +9374,7 @@ def test_set_element_user_data_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SetElementUserData'
-    expected_payload = commands.SetElementUserDataParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SetElementUserDataParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -9393,7 +9393,7 @@ def test_set_marker_parameters_of_elements_logic(input_data: dict, mock_response
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SetMarkerParametersOfElements'
-    expected_payload = commands.SetMarkerParametersOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SetMarkerParametersOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -9412,7 +9412,7 @@ def test_elevate_elements_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ElevateElements'
-    expected_payload = commands.ElevateElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ElevateElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -9431,7 +9431,7 @@ def test_update_favorites_from_elements_logic(input_data: dict, mock_response: d
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'UpdateFavoritesFromElements'
-    expected_payload = commands.UpdateFavoritesFromElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.UpdateFavoritesFromElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -9450,7 +9450,7 @@ def test_get_auto_text_keys_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetAutoTextKeys'
-    expected_payload = commands.GetAutoTextKeysParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetAutoTextKeysParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('autoTextKeys'))
 
@@ -9469,7 +9469,7 @@ def test_get_dimension_data_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetDimensionData'
-    expected_payload = commands.GetDimensionDataParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetDimensionDataParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('dimensionsData'))
 
@@ -9488,7 +9488,7 @@ def test_get_element_preview_image_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetElementPreviewImage'
-    expected_payload = commands.GetElementPreviewImageParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetElementPreviewImageParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('previewImage'))
 
@@ -9507,7 +9507,7 @@ def test_get_hotlink_design_option_tables_logic(input_data: dict, mock_response:
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetHotlinkDesignOptionTables'
-    expected_payload = commands.GetHotlinkDesignOptionTablesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetHotlinkDesignOptionTablesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('hotlinkDesignOptionTables'))
 
@@ -9526,7 +9526,7 @@ def test_get_library_part_2d_primitives_logic(input_data: dict, mock_response: d
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetLibraryPart2DPrimitives'
-    expected_payload = commands.GetLibraryPart2DPrimitivesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetLibraryPart2DPrimitivesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('primitives'))
 
@@ -9545,7 +9545,7 @@ def test_get_library_part_scripts_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetLibraryPartScripts'
-    expected_payload = commands.GetLibraryPartScriptsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetLibraryPartScriptsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('libraryParts'))
 
@@ -9564,7 +9564,7 @@ def test_set_hotlink_design_option_tables_logic(input_data: dict, mock_response:
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SetHotlinkDesignOptionTables'
-    expected_payload = commands.SetHotlinkDesignOptionTablesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SetHotlinkDesignOptionTablesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -9583,7 +9583,7 @@ def test_modify_railings_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ModifyRailings'
-    expected_payload = commands.ModifyRailingsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ModifyRailingsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -9602,7 +9602,7 @@ def test_modify_sections_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ModifySections'
-    expected_payload = commands.ModifySectionsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ModifySectionsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -9621,7 +9621,7 @@ def test_modify_stairs_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ModifyStairs'
-    expected_payload = commands.ModifyStairsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ModifyStairsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -9640,7 +9640,7 @@ def test_move_elements_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'MoveElements'
-    expected_payload = commands.MoveElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.MoveElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -9659,7 +9659,7 @@ def test_set_opening_symbol_parameters_logic(input_data: dict, mock_response: di
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SetOpeningSymbolParameters'
-    expected_payload = commands.SetOpeningSymbolParametersParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SetOpeningSymbolParametersParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -9678,7 +9678,7 @@ def test_set_marker_library_part_of_elements_logic(input_data: dict, mock_respon
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SetMarkerLibraryPartOfElements'
-    expected_payload = commands.SetMarkerLibraryPartOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SetMarkerLibraryPartOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -9697,7 +9697,7 @@ def test_get_element_set_data_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetElementSetData'
-    expected_payload = commands.GetElementSetDataParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetElementSetDataParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('elementSets'))
 
@@ -9716,7 +9716,7 @@ def test_get_element_changes_since_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetElementChangesSince'
-    expected_payload = commands.GetElementChangesSinceParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetElementChangesSinceParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = commands.GetElementChangesSinceResult.model_validate(mock_response)
     assert result == expected
@@ -9736,7 +9736,7 @@ def test_release_element_state_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ReleaseElementState'
-    expected_payload = commands.ReleaseElementStateParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ReleaseElementStateParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.ReleaseElementStateResult).validate_python(mock_response)
     assert result == expected
@@ -9756,7 +9756,7 @@ def test_set_3d_filter_and_cut_settings_logic(input_data: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'Set3DFilterAndCutSettings'
-    expected_payload = commands.Set3DFilterAndCutSettingsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.Set3DFilterAndCutSettingsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert result is None
 
@@ -9775,7 +9775,7 @@ def test_get_all_favorites_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetAllFavorites'
-    expected_payload = commands.GetAllFavoritesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetAllFavoritesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('favorites'))
 
@@ -9794,7 +9794,7 @@ def test_get_classifications_of_tool_defaults_logic(input_data: dict, mock_respo
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetClassificationsOfToolDefaults'
-    expected_payload = commands.GetClassificationsOfToolDefaultsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetClassificationsOfToolDefaultsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('classificationsOfToolDefaults'))
 
@@ -9813,7 +9813,7 @@ def test_get_element_from_user_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetElementFromUser'
-    expected_payload = commands.GetElementFromUserParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetElementFromUserParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = commands.GetElementFromUserResult.model_validate(mock_response)
     assert result == expected
@@ -9833,7 +9833,7 @@ def test_get_element_type_names_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetElementTypeNames'
-    expected_payload = commands.GetElementTypeNamesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetElementTypeNamesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('names'))
 
@@ -9852,7 +9852,7 @@ def test_get_favorites_by_type_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetFavoritesByType'
-    expected_payload = commands.GetFavoritesByTypeParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetFavoritesByTypeParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.GetFavoritesByTypeResult).validate_python(mock_response)
     assert result == expected
@@ -9872,7 +9872,7 @@ def test_get_last_3d_default_levels_logic(input_data: dict, mock_response: dict)
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetLast3DDefaultLevels'
-    expected_payload = commands.GetLast3DDefaultLevelsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetLast3DDefaultLevelsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('levels'))
 
@@ -9891,7 +9891,7 @@ def test_get_layer_of_element_defaults_logic(input_data: dict, mock_response: di
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetLayerOfElementDefaults'
-    expected_payload = commands.GetLayerOfElementDefaultsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetLayerOfElementDefaultsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('layersOfElementDefaults'))
 
@@ -9910,7 +9910,7 @@ def test_get_properties_of_tool_defaults_logic(input_data: dict, mock_response: 
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetPropertiesOfToolDefaults'
-    expected_payload = commands.GetPropertiesOfToolDefaultsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetPropertiesOfToolDefaultsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('propertiesOfToolDefaults'))
 
@@ -9929,7 +9929,7 @@ def test_get_property_availability_of_defaults_logic(input_data: dict, mock_resp
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetPropertyAvailabilityOfDefaults'
-    expected_payload = commands.GetPropertyAvailabilityOfDefaultsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetPropertyAvailabilityOfDefaultsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('propertyAvailabilities'))
 
@@ -9948,7 +9948,7 @@ def test_get_property_values_of_element_defaults_logic(input_data: dict, mock_re
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetPropertyValuesOfElementDefaults'
-    expected_payload = commands.GetPropertyValuesOfElementDefaultsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetPropertyValuesOfElementDefaultsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('propertyValues'))
 
@@ -9967,7 +9967,7 @@ def test_set_property_values_of_element_defaults_logic(input_data: dict, mock_re
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SetPropertyValuesOfElementDefaults'
-    expected_payload = commands.SetPropertyValuesOfElementDefaultsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SetPropertyValuesOfElementDefaultsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -9986,7 +9986,7 @@ def test_open_settings_dialog_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'OpenSettingsDialog'
-    expected_payload = commands.OpenSettingsDialogParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.OpenSettingsDialogParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('cancelled'))
 
@@ -10005,7 +10005,7 @@ def test_search_favorites_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SearchFavorites'
-    expected_payload = commands.SearchFavoritesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SearchFavoritesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('favorites'))
 
@@ -10024,7 +10024,7 @@ def test_set_current_tool_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SetCurrentTool'
-    expected_payload = commands.SetCurrentToolParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SetCurrentToolParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.SetCurrentToolResult).validate_python(mock_response)
     assert result == expected
@@ -10044,7 +10044,7 @@ def test_set_element_notification_client_logic(input_data: dict, mock_response: 
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SetElementNotificationClient'
-    expected_payload = commands.SetElementNotificationClientParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SetElementNotificationClientParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.SetElementNotificationClientResult).validate_python(mock_response)
     assert result == expected
@@ -10064,7 +10064,7 @@ def test_set_last_3d_default_levels_logic(input_data: dict, mock_response: dict)
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SetLast3DDefaultLevels'
-    expected_payload = commands.SetLast3DDefaultLevelsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SetLast3DDefaultLevelsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.SetLast3DDefaultLevelsResult).validate_python(mock_response)
     assert result == expected
@@ -10084,7 +10084,7 @@ def test_export_favorites_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ExportFavorites'
-    expected_payload = commands.ExportFavoritesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ExportFavoritesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.ExportFavoritesResult).validate_python(mock_response)
     assert result == expected
@@ -10104,7 +10104,7 @@ def test_export_issues_to_bcf_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ExportIssuesToBCF'
-    expected_payload = commands.ExportIssuesToBCFParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ExportIssuesToBCFParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.ExportIssuesToBCFResult).validate_python(mock_response)
     assert result == expected
@@ -10124,7 +10124,7 @@ def test_import_favorites_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ImportFavorites'
-    expected_payload = commands.ImportFavoritesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ImportFavoritesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('firstConflictName'))
 
@@ -10143,7 +10143,7 @@ def test_rename_favorites_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'RenameFavorites'
-    expected_payload = commands.RenameFavoritesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.RenameFavoritesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -10162,7 +10162,7 @@ def test_get_favorite_defaults_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetFavoriteDefaults'
-    expected_payload = commands.GetFavoriteDefaultsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetFavoriteDefaultsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('favoriteDefaults'))
 
@@ -10181,7 +10181,7 @@ def test_get_favorite_details_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetFavoriteDetails'
-    expected_payload = commands.GetFavoriteDetailsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetFavoriteDetailsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('favoriteDetails'))
 
@@ -10200,7 +10200,7 @@ def test_get_favorite_settings_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetFavoriteSettings'
-    expected_payload = commands.GetFavoriteSettingsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetFavoriteSettingsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('favoriteSettings'))
 
@@ -10219,7 +10219,7 @@ def test_move_favorites_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'MoveFavorites'
-    expected_payload = commands.MoveFavoritesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.MoveFavoritesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -10238,7 +10238,7 @@ def test_find_dimension_standard_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'FindDimensionStandard'
-    expected_payload = commands.FindDimensionStandardParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.FindDimensionStandardParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = commands.FindDimensionStandardResult.model_validate(mock_response)
     assert result == expected
@@ -10258,7 +10258,7 @@ def test_find_library_parts_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'FindLibraryParts'
-    expected_payload = commands.FindLibraryPartsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.FindLibraryPartsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('libraryParts'))
 
@@ -10276,7 +10276,7 @@ def test_find_model_view_option_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'FindModelViewOption'
-    expected_payload = TypeAdapter(commands.FindModelViewOptionParameters).validate_python(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = TypeAdapter(commands.FindModelViewOptionParameters).validate_python(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = commands.FindModelViewOptionResult.model_validate(mock_response)
     assert result == expected
@@ -10296,7 +10296,7 @@ def test_finish_hierarchical_editing_logic(input_data: dict, mock_response: dict
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'FinishHierarchicalEditing'
-    expected_payload = commands.FinishHierarchicalEditingParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.FinishHierarchicalEditingParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.FinishHierarchicalEditingResult).validate_python(mock_response)
     assert result == expected
@@ -10316,7 +10316,7 @@ def test_set_gdl_date_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SetGDLDate'
-    expected_payload = commands.SetGDLDateParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SetGDLDateParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.SetGDLDateResult).validate_python(mock_response)
     assert result == expected
@@ -10336,7 +10336,7 @@ def test_get_3d_document_settings_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'Get3DDocumentSettings'
-    expected_payload = commands.Get3DDocumentSettingsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.Get3DDocumentSettingsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('settings'))
 
@@ -10355,7 +10355,7 @@ def test_get_3d_style_details_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'Get3DStyleDetails'
-    expected_payload = commands.Get3DStyleDetailsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.Get3DStyleDetailsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('styles'))
 
@@ -10374,7 +10374,7 @@ def test_get_all_elements_of_groups_logic(input_data: dict, mock_response: dict)
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetAllElementsOfGroups'
-    expected_payload = commands.GetAllElementsOfGroupsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetAllElementsOfGroupsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('elementsOfGroups'))
 
@@ -10393,7 +10393,7 @@ def test_get_all_properties_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetAllProperties'
-    expected_payload = commands.GetAllPropertiesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetAllPropertiesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = commands.GetAllPropertiesResult.model_validate(mock_response)
     assert result == expected
@@ -10413,7 +10413,7 @@ def test_get_analytical_load_cases_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetAnalyticalLoadCases'
-    expected_payload = commands.GetAnalyticalLoadCasesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetAnalyticalLoadCasesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('loadCases'))
 
@@ -10432,7 +10432,7 @@ def test_get_analytical_members_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetAnalyticalMembers'
-    expected_payload = commands.GetAnalyticalMembersParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetAnalyticalMembersParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = commands.GetAnalyticalMembersResult.model_validate(mock_response)
     assert result == expected
@@ -10452,7 +10452,7 @@ def test_get_analytical_model_variation_logic(input_data: dict, mock_response: d
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetAnalyticalModelVariation'
-    expected_payload = commands.GetAnalyticalModelVariationParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetAnalyticalModelVariationParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('variation'))
 
@@ -10471,7 +10471,7 @@ def test_get_arc_from_user_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetArcFromUser'
-    expected_payload = commands.GetArcFromUserParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetArcFromUserParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = commands.GetArcFromUserResult.model_validate(mock_response)
     assert result == expected
@@ -10491,7 +10491,7 @@ def test_get_available_library_parts_logic(input_data: dict, mock_response: dict
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetAvailableLibraryParts'
-    expected_payload = commands.GetAvailableLibraryPartsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetAvailableLibraryPartsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = commands.GetAvailableLibraryPartsResult.model_validate(mock_response)
     assert result == expected
@@ -10511,7 +10511,7 @@ def test_get_comments_from_issue_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetCommentsFromIssue'
-    expected_payload = commands.GetCommentsFromIssueParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetCommentsFromIssueParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('comments'))
 
@@ -10530,7 +10530,7 @@ def test_get_current_view_image_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetCurrentViewImage'
-    expected_payload = commands.GetCurrentViewImageParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetCurrentViewImageParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = commands.GetCurrentViewImageResult.model_validate(mock_response)
     assert result == expected
@@ -10550,7 +10550,7 @@ def test_get_database_id_from_navigator_item_id_logic(input_data: dict, mock_res
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetDatabaseIdFromNavigatorItemId'
-    expected_payload = commands.GetDatabaseIdFromNavigatorItemIdParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetDatabaseIdFromNavigatorItemIdParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('databases'))
 
@@ -10569,7 +10569,7 @@ def test_get_design_option_combination_of_views_logic(input_data: dict, mock_res
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetDesignOptionCombinationOfViews'
-    expected_payload = commands.GetDesignOptionCombinationOfViewsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetDesignOptionCombinationOfViewsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('designOptionCombinationOfViews'))
 
@@ -10588,7 +10588,7 @@ def test_get_dimension_standards_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetDimensionStandards'
-    expected_payload = commands.GetDimensionStandardsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetDimensionStandardsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('dimensionStandards'))
 
@@ -10607,7 +10607,7 @@ def test_get_elements_attached_to_issue_logic(input_data: dict, mock_response: d
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetElementsAttachedToIssue'
-    expected_payload = commands.GetElementsAttachedToIssueParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetElementsAttachedToIssueParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('elements'))
 
@@ -10626,7 +10626,7 @@ def test_get_elements_by_ifc_ids_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetElementsByIFCIds'
-    expected_payload = commands.GetElementsByIFCIdsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetElementsByIFCIdsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('elementsByIFCIds'))
 
@@ -10645,7 +10645,7 @@ def test_get_elements_of_groups_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetElementsOfGroups'
-    expected_payload = commands.GetElementsOfGroupsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetElementsOfGroupsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('elementsOfGroups'))
 
@@ -10664,7 +10664,7 @@ def test_get_favorite_contents_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetFavoriteContents'
-    expected_payload = commands.GetFavoriteContentsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetFavoriteContentsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('favorites'))
 
@@ -10683,7 +10683,7 @@ def test_get_favorite_preview_image_logic(input_data: dict, mock_response: dict)
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetFavoritePreviewImage'
-    expected_payload = commands.GetFavoritePreviewImageParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetFavoritePreviewImageParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('previewImage'))
 
@@ -10702,7 +10702,7 @@ def test_get_fonts_by_name_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetFontsByName'
-    expected_payload = commands.GetFontsByNameParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetFontsByNameParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('fonts'))
 
@@ -10721,7 +10721,7 @@ def test_get_gdl_parameters_of_library_parts_logic(input_data: dict, mock_respon
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetGDLParametersOfLibraryParts'
-    expected_payload = commands.GetGDLParametersOfLibraryPartsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetGDLParametersOfLibraryPartsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('gdlParametersOfLibraryParts'))
 
@@ -10740,7 +10740,7 @@ def test_get_graphic_override_rules_by_name_logic(input_data: dict, mock_respons
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetGraphicOverrideRulesByName'
-    expected_payload = commands.GetGraphicOverrideRulesByNameParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetGraphicOverrideRulesByNameParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('graphicOverrideRules'))
 
@@ -10759,7 +10759,7 @@ def test_get_graphic_override_rules_logic(input_data: dict, mock_response: dict)
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetGraphicOverrideRules'
-    expected_payload = commands.GetGraphicOverrideRulesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetGraphicOverrideRulesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('graphicOverrideRules'))
 
@@ -10778,7 +10778,7 @@ def test_get_grid_element_defaults_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetGridElementDefaults'
-    expected_payload = commands.GetGridElementDefaultsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetGridElementDefaultsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = commands.GetGridElementDefaultsResult.model_validate(mock_response)
     assert result == expected
@@ -10798,7 +10798,7 @@ def test_get_grid_elements_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetGridElements'
-    expected_payload = commands.GetGridElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetGridElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('gridElements'))
 
@@ -10817,7 +10817,7 @@ def test_get_hotlink_design_option_table_details_logic(input_data: dict, mock_re
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetHotlinkDesignOptionTableDetails'
-    expected_payload = commands.GetHotlinkDesignOptionTableDetailsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetHotlinkDesignOptionTableDetailsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('hotlinkDesignOptionTables'))
 
@@ -10836,7 +10836,7 @@ def test_get_hotlink_source_status_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetHotlinkSourceStatus'
-    expected_payload = commands.GetHotlinkSourceStatusParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetHotlinkSourceStatusParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('hotlinkSourceStatuses'))
 
@@ -10855,7 +10855,7 @@ def test_get_keynote_auto_texts_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetKeynoteAutoTexts'
-    expected_payload = commands.GetKeynoteAutoTextsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetKeynoteAutoTextsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('autoTexts'))
 
@@ -10874,7 +10874,7 @@ def test_get_layout_subset_settings_logic(input_data: dict, mock_response: dict)
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetLayoutSubsetSettings'
-    expected_payload = commands.GetLayoutSubsetSettingsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetLayoutSubsetSettingsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('subsetSettings'))
 
@@ -10893,7 +10893,7 @@ def test_get_libraries_of_lib_parts_logic(input_data: dict, mock_response: dict)
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetLibrariesOfLibParts'
-    expected_payload = commands.GetLibrariesOfLibPartsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetLibrariesOfLibPartsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('libraries'))
 
@@ -10912,7 +10912,7 @@ def test_get_library_part_custom_section_logic(input_data: dict, mock_response: 
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetLibraryPartCustomSection'
-    expected_payload = commands.GetLibraryPartCustomSectionParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetLibraryPartCustomSectionParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = commands.GetLibraryPartCustomSectionResult.model_validate(mock_response)
     assert result == expected
@@ -10932,7 +10932,7 @@ def test_get_library_part_details_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetLibraryPartDetails'
-    expected_payload = commands.GetLibraryPartDetailsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetLibraryPartDetailsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('libraryParts'))
 
@@ -10951,7 +10951,7 @@ def test_get_library_part_file_info_logic(input_data: dict, mock_response: dict)
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetLibraryPartFileInfo'
-    expected_payload = commands.GetLibraryPartFileInfoParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetLibraryPartFileInfoParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('files'))
 
@@ -10970,7 +10970,7 @@ def test_get_library_part_identities_logic(input_data: dict, mock_response: dict
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetLibraryPartIdentities'
-    expected_payload = commands.GetLibraryPartIdentitiesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetLibraryPartIdentitiesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('identities'))
 
@@ -10989,7 +10989,7 @@ def test_get_library_part_metadata_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetLibraryPartMetadata'
-    expected_payload = commands.GetLibraryPartMetadataParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetLibraryPartMetadataParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('libraryParts'))
 
@@ -11008,7 +11008,7 @@ def test_get_library_part_original_locations_logic(input_data: dict, mock_respon
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetLibraryPartOriginalLocations'
-    expected_payload = commands.GetLibraryPartOriginalLocationsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetLibraryPartOriginalLocationsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('locations'))
 
@@ -11027,7 +11027,7 @@ def test_get_library_part_parameter_values_logic(input_data: dict, mock_response
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetLibraryPartParameterValues'
-    expected_payload = commands.GetLibraryPartParameterValuesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetLibraryPartParameterValuesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('libraryParts'))
 
@@ -11046,7 +11046,7 @@ def test_get_library_part_pictures_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetLibraryPartPictures'
-    expected_payload = commands.GetLibraryPartPicturesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetLibraryPartPicturesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = commands.GetLibraryPartPicturesResult.model_validate(mock_response)
     assert result == expected
@@ -11066,7 +11066,7 @@ def test_get_library_part_section_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetLibraryPartSection'
-    expected_payload = commands.GetLibraryPartSectionParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetLibraryPartSectionParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('content'))
 
@@ -11085,7 +11085,7 @@ def test_get_library_part_sections_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetLibraryPartSections'
-    expected_payload = commands.GetLibraryPartSectionsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetLibraryPartSectionsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('libraryParts'))
 
@@ -11104,7 +11104,7 @@ def test_get_library_part_type_details_logic(input_data: dict, mock_response: di
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetLibraryPartTypeDetails'
-    expected_payload = commands.GetLibraryPartTypeDetailsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetLibraryPartTypeDetailsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('libraryParts'))
 
@@ -11123,7 +11123,7 @@ def test_get_line_from_user_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetLineFromUser'
-    expected_payload = commands.GetLineFromUserParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetLineFromUserParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = commands.GetLineFromUserResult.model_validate(mock_response)
     assert result == expected
@@ -11143,7 +11143,7 @@ def test_get_lockable_object_set_status_logic(input_data: dict, mock_response: d
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetLockableObjectSetStatus'
-    expected_payload = commands.GetLockableObjectSetStatusParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetLockableObjectSetStatusParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = commands.GetLockableObjectSetStatusResult.model_validate(mock_response)
     assert result == expected
@@ -11163,7 +11163,7 @@ def test_get_mep_distribution_systems_logic(input_data: dict, mock_response: dic
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetMEPDistributionSystems'
-    expected_payload = commands.GetMEPDistributionSystemsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetMEPDistributionSystemsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = commands.GetMEPDistributionSystemsResult.model_validate(mock_response)
     assert result == expected
@@ -11183,7 +11183,7 @@ def test_get_mep_elements_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetMEPElements'
-    expected_payload = commands.GetMEPElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetMEPElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('elements'))
 
@@ -11202,7 +11202,7 @@ def test_get_mep_preference_table_containers_logic(input_data: dict, mock_respon
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetMEPPreferenceTableContainers'
-    expected_payload = commands.GetMEPPreferenceTableContainersParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetMEPPreferenceTableContainersParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('containers'))
 
@@ -11221,7 +11221,7 @@ def test_get_mep_preference_table_rows_logic(input_data: dict, mock_response: di
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetMEPPreferenceTableRows'
-    expected_payload = commands.GetMEPPreferenceTableRowsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetMEPPreferenceTableRowsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = commands.GetMEPPreferenceTableRowsResult.model_validate(mock_response)
     assert result == expected
@@ -11241,7 +11241,7 @@ def test_get_mep_preference_tables_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetMEPPreferenceTables'
-    expected_payload = commands.GetMEPPreferenceTablesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetMEPPreferenceTablesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = commands.GetMEPPreferenceTablesResult.model_validate(mock_response)
     assert result == expected
@@ -11261,7 +11261,7 @@ def test_get_mep_tool_defaults_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetMEPToolDefaults'
-    expected_payload = commands.GetMEPToolDefaultsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetMEPToolDefaultsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = commands.GetMEPToolDefaultsResult.model_validate(mock_response)
     assert result == expected
@@ -11281,7 +11281,7 @@ def test_get_main_groups_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetMainGroups'
-    expected_payload = commands.GetMainGroupsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetMainGroupsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('mainGroups'))
 
@@ -11300,7 +11300,7 @@ def test_get_model_view_option_details_logic(input_data: dict, mock_response: di
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetModelViewOptionDetails'
-    expected_payload = commands.GetModelViewOptionDetailsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetModelViewOptionDetailsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('modelViewOptionDetails'))
 
@@ -11319,7 +11319,7 @@ def test_get_modul_data_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetModulData'
-    expected_payload = commands.GetModulDataParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetModulDataParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('modulData'))
 
@@ -11338,7 +11338,7 @@ def test_get_navigator_item_tree_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetNavigatorItemTree'
-    expected_payload = commands.GetNavigatorItemTreeParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetNavigatorItemTreeParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('navigatorItemTree'))
 
@@ -11357,7 +11357,7 @@ def test_get_navigator_parent_items_logic(input_data: dict, mock_response: dict)
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetNavigatorParentItems'
-    expected_payload = commands.GetNavigatorParentItemsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetNavigatorParentItemsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('parentItems'))
 
@@ -11376,7 +11376,7 @@ def test_get_note_auto_text_keywords_logic(input_data: dict, mock_response: dict
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetNoteAutoTextKeywords'
-    expected_payload = commands.GetNoteAutoTextKeywordsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetNoteAutoTextKeywordsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('keywords'))
 
@@ -11395,7 +11395,7 @@ def test_get_opening_default_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetOpeningDefault'
-    expected_payload = commands.GetOpeningDefaultParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetOpeningDefaultParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = commands.GetOpeningDefaultResult.model_validate(mock_response)
     assert result == expected
@@ -11415,7 +11415,7 @@ def test_get_pens_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetPens'
-    expected_payload = commands.GetPensParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetPensParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('pens'))
 
@@ -11434,7 +11434,7 @@ def test_get_point_from_user_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetPointFromUser'
-    expected_payload = commands.GetPointFromUserParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetPointFromUserParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('position'))
 
@@ -11453,7 +11453,7 @@ def test_get_polygon_from_user_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetPolygonFromUser'
-    expected_payload = commands.GetPolygonFromUserParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetPolygonFromUserParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = commands.GetPolygonFromUserResult.model_validate(mock_response)
     assert result == expected
@@ -11473,7 +11473,7 @@ def test_get_project_data_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetProjectData'
-    expected_payload = commands.GetProjectDataParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetProjectDataParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('values'))
 
@@ -11492,7 +11492,7 @@ def test_get_project_preferences_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetProjectPreferences'
-    expected_payload = commands.GetProjectPreferencesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetProjectPreferencesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = commands.GetProjectPreferencesResult.model_validate(mock_response)
     assert result == expected
@@ -11512,7 +11512,7 @@ def test_get_property_expression_references_logic(input_data: dict, mock_respons
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetPropertyExpressionReferences'
-    expected_payload = commands.GetPropertyExpressionReferencesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetPropertyExpressionReferencesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('references'))
 
@@ -11531,7 +11531,7 @@ def test_get_script_ui_result_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetScriptUIResult'
-    expected_payload = commands.GetScriptUIResultParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetScriptUIResultParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = commands.GetScriptUIResultResult.model_validate(mock_response)
     assert result == expected
@@ -11551,7 +11551,7 @@ def test_get_special_folders_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetSpecialFolders'
-    expected_payload = commands.GetSpecialFoldersParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetSpecialFoldersParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('folderPaths'))
 
@@ -11570,7 +11570,7 @@ def test_get_teamwork_access_rights_logic(input_data: dict, mock_response: dict)
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetTeamworkAccessRights'
-    expected_payload = commands.GetTeamworkAccessRightsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetTeamworkAccessRightsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('accessRights'))
 
@@ -11589,7 +11589,7 @@ def test_get_teamwork_rights_of_objects_logic(input_data: dict, mock_response: d
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetTeamworkRightsOfObjects'
-    expected_payload = commands.GetTeamworkRightsOfObjectsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetTeamworkRightsOfObjectsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('rights'))
 
@@ -11608,7 +11608,7 @@ def test_get_toolbox_items_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetToolboxItems'
-    expected_payload = commands.GetToolboxItemsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetToolboxItemsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = commands.GetToolboxItemsResult.model_validate(mock_response)
     assert result == expected
@@ -11628,7 +11628,7 @@ def test_get_unused_library_parts_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetUnusedLibraryParts'
-    expected_payload = commands.GetUnusedLibraryPartsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetUnusedLibraryPartsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = commands.GetUnusedLibraryPartsResult.model_validate(mock_response)
     assert result == expected
@@ -11648,7 +11648,7 @@ def test_get_user_data_of_groups_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetUserDataOfGroups'
-    expected_payload = commands.GetUserDataOfGroupsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetUserDataOfGroupsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('userDataOfGroups'))
 
@@ -11667,7 +11667,7 @@ def test_get_view_settings_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GetViewSettings'
-    expected_payload = commands.GetViewSettingsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetViewSettingsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('viewSettings'))
 
@@ -11686,7 +11686,7 @@ def test_grant_project_data_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'GrantProjectData'
-    expected_payload = commands.GrantProjectDataParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GrantProjectDataParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.GrantProjectDataResult).validate_python(mock_response)
     assert result == expected
@@ -11706,7 +11706,7 @@ def test_modify_graphic_override_combinations_logic(input_data: dict, mock_respo
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ModifyGraphicOverrideCombinations'
-    expected_payload = commands.ModifyGraphicOverrideCombinationsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ModifyGraphicOverrideCombinationsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -11725,7 +11725,7 @@ def test_rename_graphic_override_rule_groups_logic(input_data: dict, mock_respon
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'RenameGraphicOverrideRuleGroups'
-    expected_payload = commands.RenameGraphicOverrideRuleGroupsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.RenameGraphicOverrideRuleGroupsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -11744,7 +11744,7 @@ def test_set_graphic_override_rule_order_logic(input_data: dict, mock_response: 
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SetGraphicOverrideRuleOrder'
-    expected_payload = commands.SetGraphicOverrideRuleOrderParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SetGraphicOverrideRuleOrderParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -11763,7 +11763,7 @@ def test_move_graphic_override_rules_logic(input_data: dict, mock_response: dict
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'MoveGraphicOverrideRules'
-    expected_payload = commands.MoveGraphicOverrideRulesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.MoveGraphicOverrideRulesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -11782,7 +11782,7 @@ def test_set_grid_settings_logic(input_data: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SetGridSettings'
-    expected_payload = commands.SetGridSettingsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SetGridSettingsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert result is None
 
@@ -11801,7 +11801,7 @@ def test_set_user_data_of_groups_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SetUserDataOfGroups'
-    expected_payload = commands.SetUserDataOfGroupsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SetUserDataOfGroupsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -11820,7 +11820,7 @@ def test_ungroup_elements_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'UngroupElements'
-    expected_payload = commands.UngroupElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.UngroupElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -11839,7 +11839,7 @@ def test_set_view_settings_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SetViewSettings'
-    expected_payload = commands.SetViewSettingsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SetViewSettingsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -11858,7 +11858,7 @@ def test_update_analytical_model_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'UpdateAnalyticalModel'
-    expected_payload = commands.UpdateAnalyticalModelParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.UpdateAnalyticalModelParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.UpdateAnalyticalModelResult).validate_python(mock_response)
     assert result == expected
@@ -11878,7 +11878,7 @@ def test_update_hotlinks_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'UpdateHotlinks'
-    expected_payload = commands.UpdateHotlinksParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.UpdateHotlinksParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -11897,7 +11897,7 @@ def test_modify_keynote_folders_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ModifyKeynoteFolders'
-    expected_payload = commands.ModifyKeynoteFoldersParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ModifyKeynoteFoldersParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -11916,7 +11916,7 @@ def test_modify_keynote_items_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ModifyKeynoteItems'
-    expected_payload = commands.ModifyKeynoteItemsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ModifyKeynoteItemsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -11935,7 +11935,7 @@ def test_modify_mep_ports_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ModifyMEPPorts'
-    expected_payload = commands.ModifyMEPPortsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ModifyMEPPortsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -11954,7 +11954,7 @@ def test_set_mep_preference_table_rows_logic(input_data: dict, mock_response: di
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SetMEPPreferenceTableRows'
-    expected_payload = commands.SetMEPPreferenceTableRowsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SetMEPPreferenceTableRowsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -11973,7 +11973,7 @@ def test_modify_mep_system_groups_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ModifyMEPSystemGroups'
-    expected_payload = commands.ModifyMEPSystemGroupsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ModifyMEPSystemGroupsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -11992,7 +11992,7 @@ def test_modify_revision_issues_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ModifyRevisionIssues'
-    expected_payload = commands.ModifyRevisionIssuesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ModifyRevisionIssuesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -12011,7 +12011,7 @@ def test_move_navigator_item_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'MoveNavigatorItem'
-    expected_payload = commands.MoveNavigatorItemParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.MoveNavigatorItemParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.MoveNavigatorItemResult).validate_python(mock_response)
     assert result == expected
@@ -12031,7 +12031,7 @@ def test_move_project_info_fields_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'MoveProjectInfoFields'
-    expected_payload = commands.MoveProjectInfoFieldsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.MoveProjectInfoFieldsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -12050,7 +12050,7 @@ def test_move_project_info_groups_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'MoveProjectInfoGroups'
-    expected_payload = commands.MoveProjectInfoGroupsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.MoveProjectInfoGroupsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -12069,7 +12069,7 @@ def test_publish_publisher_set_logic(input_data: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'PublishPublisherSet'
-    expected_payload = commands.PublishPublisherSetParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.PublishPublisherSetParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert result is None
 
@@ -12088,7 +12088,7 @@ def test_reorder_navigator_items_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ReorderNavigatorItems'
-    expected_payload = commands.ReorderNavigatorItemsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ReorderNavigatorItemsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -12126,7 +12126,7 @@ def test_set_view_rotation_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SetViewRotation'
-    expected_payload = commands.SetViewRotationParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SetViewRotationParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -12145,7 +12145,7 @@ def test_show_ifc_export_settings_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ShowIFCExportSettings'
-    expected_payload = commands.ShowIFCExportSettingsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ShowIFCExportSettingsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = commands.ShowIFCExportSettingsResult.model_validate(mock_response)
     assert result == expected
@@ -12165,7 +12165,7 @@ def test_rename_project_info_fields_logic(input_data: dict, mock_response: dict)
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'RenameProjectInfoFields'
-    expected_payload = commands.RenameProjectInfoFieldsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.RenameProjectInfoFieldsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -12184,7 +12184,7 @@ def test_rename_project_info_groups_logic(input_data: dict, mock_response: dict)
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'RenameProjectInfoGroups'
-    expected_payload = commands.RenameProjectInfoGroupsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.RenameProjectInfoGroupsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -12203,7 +12203,7 @@ def test_update_property_groups_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'UpdatePropertyGroups'
-    expected_payload = commands.UpdatePropertyGroupsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.UpdatePropertyGroupsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -12222,7 +12222,7 @@ def test_ifc_file_operation_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'IFCFileOperation'
-    expected_payload = commands.IFCFileOperationParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.IFCFileOperationParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.IFCFileOperationResult).validate_python(mock_response)
     assert result == expected
@@ -12242,7 +12242,7 @@ def test_save_current_window_as_image_logic(input_data: dict, mock_response: dic
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SaveCurrentWindowAsImage'
-    expected_payload = commands.SaveCurrentWindowAsImageParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SaveCurrentWindowAsImageParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = commands.SaveCurrentWindowAsImageResult.model_validate(mock_response)
     assert result == expected
@@ -12262,7 +12262,7 @@ def test_import_issues_from_bcf_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ImportIssuesFromBCF'
-    expected_payload = commands.ImportIssuesFromBCFParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ImportIssuesFromBCFParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.ImportIssuesFromBCFResult).validate_python(mock_response)
     assert result == expected
@@ -12282,7 +12282,7 @@ def test_import_markups_from_pdf_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ImportMarkupsFromPDF'
-    expected_payload = commands.ImportMarkupsFromPDFParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ImportMarkupsFromPDFParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = commands.ImportMarkupsFromPDFResult.model_validate(mock_response)
     assert result == expected
@@ -12302,7 +12302,7 @@ def test_import_properties_xml_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ImportPropertiesXml'
-    expected_payload = commands.ImportPropertiesXmlParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ImportPropertiesXmlParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = commands.ImportPropertiesXmlResult.model_validate(mock_response)
     assert result == expected
@@ -12322,7 +12322,7 @@ def test_interpret_gdl_script_3d_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'InterpretGDLScript3D'
-    expected_payload = commands.InterpretGDLScript3DParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.InterpretGDLScript3DParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = commands.InterpretGDLScript3DResult.model_validate(mock_response)
     assert result == expected
@@ -12342,7 +12342,7 @@ def test_is_library_part_subtype_of_logic(input_data: dict, mock_response: dict)
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'IsLibraryPartSubtypeOf'
-    expected_payload = commands.IsLibraryPartSubtypeOfParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.IsLibraryPartSubtypeOfParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = commands.IsLibraryPartSubtypeOfResult.model_validate(mock_response)
     assert result == expected
@@ -12362,7 +12362,7 @@ def test_is_usable_gdl_string_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'IsUsableGDLString'
-    expected_payload = commands.IsUsableGDLStringParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.IsUsableGDLStringParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('results'))
 
@@ -12381,7 +12381,7 @@ def test_modify_library_list_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ModifyLibraryList'
-    expected_payload = commands.ModifyLibraryListParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ModifyLibraryListParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = commands.ModifyLibraryListResult.model_validate(mock_response)
     assert result == expected
@@ -12401,7 +12401,7 @@ def test_set_libraries_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SetLibraries'
-    expected_payload = commands.SetLibrariesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SetLibrariesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.SetLibrariesResult).validate_python(mock_response)
     assert result == expected
@@ -12421,7 +12421,7 @@ def test_set_library_part_metadata_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SetLibraryPartMetadata'
-    expected_payload = commands.SetLibraryPartMetadataParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SetLibraryPartMetadataParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -12440,7 +12440,7 @@ def test_set_library_part_parameters_logic(input_data: dict, mock_response: dict
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SetLibraryPartParameters'
-    expected_payload = commands.SetLibraryPartParametersParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SetLibraryPartParametersParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -12459,7 +12459,7 @@ def test_pick_library_part_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'PickLibraryPart'
-    expected_payload = commands.PickLibraryPartParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.PickLibraryPartParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = commands.PickLibraryPartResult.model_validate(mock_response)
     assert result == expected
@@ -12479,7 +12479,7 @@ def test_pick_library_part_save_location_logic(input_data: dict, mock_response: 
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'PickLibraryPartSaveLocation'
-    expected_payload = commands.PickLibraryPartSaveLocationParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.PickLibraryPartSaveLocationParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = commands.PickLibraryPartSaveLocationResult.model_validate(mock_response)
     assert result == expected
@@ -12499,7 +12499,7 @@ def test_set_library_part_scripts_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SetLibraryPartScripts'
-    expected_payload = commands.SetLibraryPartScriptsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SetLibraryPartScriptsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -12518,7 +12518,7 @@ def test_update_library_part_sections_logic(input_data: dict, mock_response: dic
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'UpdateLibraryPartSections'
-    expected_payload = commands.UpdateLibraryPartSectionsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.UpdateLibraryPartSectionsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -12537,7 +12537,7 @@ def test_modify_mep_preference_tables_logic(input_data: dict, mock_response: dic
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ModifyMEPPreferenceTables'
-    expected_payload = commands.ModifyMEPPreferenceTablesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ModifyMEPPreferenceTablesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = commands.ModifyMEPPreferenceTablesResult.model_validate(mock_response)
     assert result == expected
@@ -12557,7 +12557,7 @@ def test_measure_texts_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'MeasureTexts'
-    expected_payload = commands.MeasureTextsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.MeasureTextsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('measurements'))
 
@@ -12576,7 +12576,7 @@ def test_store_modul_data_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'StoreModulData'
-    expected_payload = commands.StoreModulDataParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.StoreModulDataParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -12595,7 +12595,7 @@ def test_move_favorite_folder_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'MoveFavoriteFolder'
-    expected_payload = commands.MoveFavoriteFolderParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.MoveFavoriteFolderParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('folder'))
 
@@ -12614,7 +12614,7 @@ def test_resolve_names_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ResolveNames'
-    expected_payload = commands.ResolveNamesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ResolveNamesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('results'))
 
@@ -12633,7 +12633,7 @@ def test_new_project_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'NewProject'
-    expected_payload = commands.NewProjectParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.NewProjectParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.NewProjectResult).validate_python(mock_response)
     assert result == expected
@@ -12653,7 +12653,7 @@ def test_open_library_part_in_editor_logic(input_data: dict, mock_response: dict
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'OpenLibraryPartInEditor'
-    expected_payload = commands.OpenLibraryPartInEditorParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.OpenLibraryPartInEditorParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.OpenLibraryPartInEditorResult).validate_python(mock_response)
     assert result == expected
@@ -12673,7 +12673,7 @@ def test_open_project_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'OpenProject'
-    expected_payload = commands.OpenProjectParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.OpenProjectParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.OpenProjectResult).validate_python(mock_response)
     assert result == expected
@@ -12693,7 +12693,7 @@ def test_set_structure_display_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SetStructureDisplay'
-    expected_payload = commands.SetStructureDisplayParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SetStructureDisplayParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.SetStructureDisplayResult).validate_python(mock_response)
     assert result == expected
@@ -12713,7 +12713,7 @@ def test_photo_render_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'PhotoRender'
-    expected_payload = commands.PhotoRenderParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.PhotoRenderParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.PhotoRenderResult).validate_python(mock_response)
     assert result == expected
@@ -12733,7 +12733,7 @@ def test_pick_attribute_folder_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'PickAttributeFolder'
-    expected_payload = commands.PickAttributeFolderParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.PickAttributeFolderParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = commands.PickAttributeFolderResult.model_validate(mock_response)
     assert result == expected
@@ -12753,7 +12753,7 @@ def test_pick_library_folder_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'PickLibraryFolder'
-    expected_payload = commands.PickLibraryFolderParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.PickLibraryFolderParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = commands.PickLibraryFolderResult.model_validate(mock_response)
     assert result == expected
@@ -12773,7 +12773,7 @@ def test_pick_library_part_file_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'PickLibraryPartFile'
-    expected_payload = commands.PickLibraryPartFileParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.PickLibraryPartFileParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = commands.PickLibraryPartFileResult.model_validate(mock_response)
     assert result == expected
@@ -12793,7 +12793,7 @@ def test_pick_zone_stamp_or_label_file_logic(input_data: dict, mock_response: di
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'PickZoneStampOrLabelFile'
-    expected_payload = commands.PickZoneStampOrLabelFileParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.PickZoneStampOrLabelFileParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = commands.PickZoneStampOrLabelFileResult.model_validate(mock_response)
     assert result == expected
@@ -12813,7 +12813,7 @@ def test_set_place_settings_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SetPlaceSettings'
-    expected_payload = commands.SetPlaceSettingsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SetPlaceSettingsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('placeInfo'))
 
@@ -12832,7 +12832,7 @@ def test_print_view_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'PrintView'
-    expected_payload = commands.PrintViewParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.PrintViewParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.PrintViewResult).validate_python(mock_response)
     assert result == expected
@@ -12852,7 +12852,7 @@ def test_release_project_data_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ReleaseProjectData'
-    expected_payload = commands.ReleaseProjectDataParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ReleaseProjectDataParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.ReleaseProjectDataResult).validate_python(mock_response)
     assert result == expected
@@ -12872,7 +12872,7 @@ def test_request_project_data_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'RequestProjectData'
-    expected_payload = commands.RequestProjectDataParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.RequestProjectDataParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.RequestProjectDataResult).validate_python(mock_response)
     assert result == expected
@@ -12892,7 +12892,7 @@ def test_reserve_project_data_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ReserveProjectData'
-    expected_payload = commands.ReserveProjectDataParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ReserveProjectDataParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = commands.ReserveProjectDataResult.model_validate(mock_response)
     assert result == expected
@@ -12912,7 +12912,7 @@ def test_set_project_data_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SetProjectData'
-    expected_payload = commands.SetProjectDataParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SetProjectDataParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -12931,7 +12931,7 @@ def test_search_properties_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SearchProperties'
-    expected_payload = commands.SearchPropertiesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SearchPropertiesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('properties'))
 
@@ -12950,7 +12950,7 @@ def test_read_favorites_file_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ReadFavoritesFile'
-    expected_payload = commands.ReadFavoritesFileParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ReadFavoritesFileParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('favorites'))
 
@@ -12969,7 +12969,7 @@ def test_rebuild_view_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'RebuildView'
-    expected_payload = commands.RebuildViewParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.RebuildViewParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.RebuildViewResult).validate_python(mock_response)
     assert result == expected
@@ -12989,7 +12989,7 @@ def test_release_lockable_object_set_logic(input_data: dict, mock_response: dict
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ReleaseLockableObjectSet'
-    expected_payload = commands.ReleaseLockableObjectSetParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ReleaseLockableObjectSetParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.ReleaseLockableObjectSetResult).validate_python(mock_response)
     assert result == expected
@@ -13009,7 +13009,7 @@ def test_remove_element_notification_client_logic(input_data: dict, mock_respons
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'RemoveElementNotificationClient'
-    expected_payload = commands.RemoveElementNotificationClientParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.RemoveElementNotificationClientParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.RemoveElementNotificationClientResult).validate_python(mock_response)
     assert result == expected
@@ -13029,7 +13029,7 @@ def test_remove_libraries_from_bi_mcloud_logic(input_data: dict, mock_response: 
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'RemoveLibrariesFromBIMcloud'
-    expected_payload = commands.RemoveLibrariesFromBIMcloudParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.RemoveLibrariesFromBIMcloudParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -13048,7 +13048,7 @@ def test_rename_favorite_folder_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'RenameFavoriteFolder'
-    expected_payload = commands.RenameFavoriteFolderParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.RenameFavoriteFolderParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('folder'))
 
@@ -13067,7 +13067,7 @@ def test_reserve_lockable_object_set_logic(input_data: dict, mock_response: dict
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ReserveLockableObjectSet'
-    expected_payload = commands.ReserveLockableObjectSetParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ReserveLockableObjectSetParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = commands.ReserveLockableObjectSetResult.model_validate(mock_response)
     assert result == expected
@@ -13087,7 +13087,7 @@ def test_reset_zoom_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ResetZoom'
-    expected_payload = commands.ResetZoomParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ResetZoomParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.ResetZoomResult).validate_python(mock_response)
     assert result == expected
@@ -13107,7 +13107,7 @@ def test_save_project_as_archive_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SaveProjectAsArchive'
-    expected_payload = commands.SaveProjectAsArchiveParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SaveProjectAsArchiveParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.SaveProjectAsArchiveResult).validate_python(mock_response)
     assert result == expected
@@ -13127,7 +13127,7 @@ def test_save_project_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SaveProject'
-    expected_payload = commands.SaveProjectParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SaveProjectParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.SaveProjectResult).validate_python(mock_response)
     assert result == expected
@@ -13147,7 +13147,7 @@ def test_screen_to_model_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ScreenToModel'
-    expected_payload = commands.ScreenToModelParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ScreenToModelParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('coordinates'))
 
@@ -13166,7 +13166,7 @@ def test_search_library_parts_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SearchLibraryParts'
-    expected_payload = commands.SearchLibraryPartsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SearchLibraryPartsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('libraryParts'))
 
@@ -13185,7 +13185,7 @@ def test_set_3d_cutaway_status_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'Set3DCutawayStatus'
-    expected_payload = commands.Set3DCutawayStatusParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.Set3DCutawayStatusParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.Set3DCutawayStatusResult).validate_python(mock_response)
     assert result == expected
@@ -13205,7 +13205,7 @@ def test_set_3d_window_settings_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'Set3DWindowSettings'
-    expected_payload = commands.Set3DWindowSettingsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.Set3DWindowSettingsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = commands.Set3DWindowSettingsResult.model_validate(mock_response)
     assert result == expected
@@ -13225,7 +13225,7 @@ def test_set_archicad_visibility_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SetArchicadVisibility'
-    expected_payload = commands.SetArchicadVisibilityParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SetArchicadVisibilityParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.SetArchicadVisibilityResult).validate_python(mock_response)
     assert result == expected
@@ -13245,7 +13245,7 @@ def test_set_auto_intersect_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SetAutoIntersect'
-    expected_payload = commands.SetAutoIntersectParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SetAutoIntersectParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.SetAutoIntersectResult).validate_python(mock_response)
     assert result == expected
@@ -13265,7 +13265,7 @@ def test_set_current_3d_style_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SetCurrent3DStyle'
-    expected_payload = commands.SetCurrent3DStyleParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SetCurrent3DStyleParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.SetCurrent3DStyleResult).validate_python(mock_response)
     assert result == expected
@@ -13285,7 +13285,7 @@ def test_set_current_rendering_scene_logic(input_data: dict, mock_response: dict
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SetCurrentRenderingScene'
-    expected_payload = commands.SetCurrentRenderingSceneParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SetCurrentRenderingSceneParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.SetCurrentRenderingSceneResult).validate_python(mock_response)
     assert result == expected
@@ -13305,7 +13305,7 @@ def test_set_current_window_drawing_scale_logic(input_data: dict, mock_response:
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SetCurrentWindowDrawingScale'
-    expected_payload = commands.SetCurrentWindowDrawingScaleParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SetCurrentWindowDrawingScaleParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.SetCurrentWindowDrawingScaleResult).validate_python(mock_response)
     assert result == expected
@@ -13325,7 +13325,7 @@ def test_set_dialog_auto_close_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SetDialogAutoClose'
-    expected_payload = commands.SetDialogAutoCloseParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SetDialogAutoCloseParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.SetDialogAutoCloseResult).validate_python(mock_response)
     assert result == expected
@@ -13345,7 +13345,7 @@ def test_set_graphic_override_rule_group_order_logic(input_data: dict, mock_resp
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SetGraphicOverrideRuleGroupOrder'
-    expected_payload = commands.SetGraphicOverrideRuleGroupOrderParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SetGraphicOverrideRuleGroupOrderParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.SetGraphicOverrideRuleGroupOrderResult).validate_python(mock_response)
     assert result == expected
@@ -13365,7 +13365,7 @@ def test_set_library_part_custom_section_logic(input_data: dict, mock_response: 
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SetLibraryPartCustomSection'
-    expected_payload = commands.SetLibraryPartCustomSectionParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SetLibraryPartCustomSectionParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.SetLibraryPartCustomSectionResult).validate_python(mock_response)
     assert result == expected
@@ -13385,7 +13385,7 @@ def test_set_library_part_picture_images_logic(input_data: dict, mock_response: 
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SetLibraryPartPictureImages'
-    expected_payload = commands.SetLibraryPartPictureImagesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SetLibraryPartPictureImagesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.SetLibraryPartPictureImagesResult).validate_python(mock_response)
     assert result == expected
@@ -13405,7 +13405,7 @@ def test_set_library_part_pictures_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SetLibraryPartPictures'
-    expected_payload = commands.SetLibraryPartPicturesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SetLibraryPartPicturesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.SetLibraryPartPicturesResult).validate_python(mock_response)
     assert result == expected
@@ -13425,7 +13425,7 @@ def test_set_project_info_field_logic(input_data: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SetProjectInfoField'
-    expected_payload = commands.SetProjectInfoFieldParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SetProjectInfoFieldParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert result is None
 
@@ -13444,7 +13444,7 @@ def test_set_project_notes_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SetProjectNotes'
-    expected_payload = commands.SetProjectNotesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SetProjectNotesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.SetProjectNotesResult).validate_python(mock_response)
     assert result == expected
@@ -13464,7 +13464,7 @@ def test_set_stories_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SetStories'
-    expected_payload = commands.SetStoriesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SetStoriesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.SetStoriesResult).validate_python(mock_response)
     assert result == expected
@@ -13484,7 +13484,7 @@ def test_set_suspend_groups_mode_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SetSuspendGroupsMode'
-    expected_payload = commands.SetSuspendGroupsModeParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SetSuspendGroupsModeParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResult'))
 
@@ -13503,7 +13503,7 @@ def test_set_view_options_logic(input_data: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SetViewOptions'
-    expected_payload = commands.SetViewOptionsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SetViewOptionsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert result is None
 
@@ -13522,7 +13522,7 @@ def test_set_zone_labeling_settings_logic(input_data: dict, mock_response: dict)
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SetZoneLabelingSettings'
-    expected_payload = commands.SetZoneLabelingSettingsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SetZoneLabelingSettingsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.SetZoneLabelingSettingsResult).validate_python(mock_response)
     assert result == expected
@@ -13542,7 +13542,7 @@ def test_set_zoom_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'SetZoom'
-    expected_payload = commands.SetZoomParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SetZoomParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.SetZoomResult).validate_python(mock_response)
     assert result == expected
@@ -13562,7 +13562,7 @@ def test_show_alert_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ShowAlert'
-    expected_payload = commands.ShowAlertParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ShowAlertParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('clickedButton'))
 
@@ -13581,7 +13581,7 @@ def test_show_script_ui_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'ShowScriptUI'
-    expected_payload = commands.ShowScriptUIParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ShowScriptUIParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.ShowScriptUIResult).validate_python(mock_response)
     assert result == expected
@@ -13601,7 +13601,7 @@ def test_store_view_settings_logic(input_data: dict, mock_response: dict):
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'StoreViewSettings'
-    expected_payload = commands.StoreViewSettingsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.StoreViewSettingsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     expected = TypeAdapter(commands.StoreViewSettingsResult).validate_python(mock_response)
     assert result == expected
@@ -13621,7 +13621,7 @@ def test_upload_libraries_to_bi_mcloud_logic(input_data: dict, mock_response: di
     command_group._core.post_tapir_command.assert_called_once()
     args, _ = command_group._core.post_tapir_command.call_args
     assert args[0] == 'UploadLibrariesToBIMcloud'
-    expected_payload = commands.UploadLibrariesToBIMcloudParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.UploadLibrariesToBIMcloudParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 

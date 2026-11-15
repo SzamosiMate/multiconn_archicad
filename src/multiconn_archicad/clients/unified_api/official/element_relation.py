@@ -46,7 +46,8 @@ class ElementRelationCommands:
         }
         validated_params = GetElementsRelatedToZonesParameters(**params_dict)
         response_dict = self._core.post_command(
-            "API.GetElementsRelatedToZones", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "API.GetElementsRelatedToZones",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetElementsRelatedToZonesResult.model_validate(response_dict)
         return validated_response.elementsRelatedToZones

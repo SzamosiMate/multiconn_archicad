@@ -58,7 +58,7 @@ class GraphicOverrideCommands:
         validated_params = CreateGraphicalOverrideCombinationParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
             "CreateGraphicalOverrideCombination",
-            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateGraphicalOverrideCombinationResult.model_validate(response_dict)
         return validated_response.combinationId
@@ -110,7 +110,8 @@ class GraphicOverrideCommands:
         }
         validated_params = CreateGraphicalOverrideRuleParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateGraphicalOverrideRule", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateGraphicalOverrideRule",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateGraphicalOverrideRuleResult.model_validate(response_dict)
         return validated_response.ruleId
@@ -157,7 +158,7 @@ class GraphicOverrideCommands:
         validated_params = GetGraphicalOverrideStyleOfElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
             "GetGraphicalOverrideStyleOfElements",
-            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetGraphicalOverrideStyleOfElementsResult.model_validate(response_dict)
         return validated_response.styles

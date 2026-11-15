@@ -83,7 +83,8 @@ class MepExtendedCommands:
         }
         validated_params = AddMEPPreferenceTableRowsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "AddMEPPreferenceTableRows", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "AddMEPPreferenceTableRows",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = AddMEPPreferenceTableRowsResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -115,7 +116,8 @@ class MepExtendedCommands:
         }
         validated_params = CreateMEPPreferenceTablesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateMEPPreferenceTables", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateMEPPreferenceTables",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateMEPPreferenceTablesResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -158,7 +160,8 @@ class MepExtendedCommands:
         }
         validated_params = DeleteMEPPreferenceTableRowsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "DeleteMEPPreferenceTableRows", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "DeleteMEPPreferenceTableRows",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = DeleteMEPPreferenceTableRowsResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -191,7 +194,7 @@ class MepExtendedCommands:
         validated_params = GetMEPPreferenceTableContainersParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
             "GetMEPPreferenceTableContainers",
-            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetMEPPreferenceTableContainersResult.model_validate(response_dict)
         return validated_response.containers
@@ -233,7 +236,8 @@ class MepExtendedCommands:
         }
         validated_params = GetMEPPreferenceTableRowsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetMEPPreferenceTableRows", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetMEPPreferenceTableRows",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetMEPPreferenceTableRowsResult.model_validate(response_dict)
         return validated_response
@@ -275,7 +279,8 @@ class MepExtendedCommands:
         }
         validated_params = SetMEPPreferenceTableRowsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "SetMEPPreferenceTableRows", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "SetMEPPreferenceTableRows",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = SetMEPPreferenceTableRowsResult.model_validate(response_dict)
         return validated_response.executionResults

@@ -122,7 +122,8 @@ class ElementModificationCommands:
         }
         validated_params = ModifyAssociativeDimensionsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "ModifyAssociativeDimensions", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "ModifyAssociativeDimensions",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = ModifyAssociativeDimensionsResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -153,7 +154,8 @@ class ElementModificationCommands:
         }
         validated_params = ModifyBeamsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "ModifyBeams", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "ModifyBeams",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = ModifyBeamsResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -183,7 +185,8 @@ class ElementModificationCommands:
         }
         validated_params = ModifyColumnsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "ModifyColumns", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "ModifyColumns",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = ModifyColumnsResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -216,7 +219,8 @@ class ElementModificationCommands:
         }
         validated_params = ModifyCurtainWallFramesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "ModifyCurtainWallFrames", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "ModifyCurtainWallFrames",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = ModifyCurtainWallFramesResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -252,7 +256,8 @@ class ElementModificationCommands:
         }
         validated_params = ModifyCurtainWallsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "ModifyCurtainWalls", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "ModifyCurtainWalls",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = ModifyCurtainWallsResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -280,7 +285,8 @@ class ElementModificationCommands:
         }
         validated_params = ModifyDoorsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "ModifyDoors", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "ModifyDoors",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = ModifyDoorsResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -315,7 +321,8 @@ class ElementModificationCommands:
         }
         validated_params = ModifyLabelsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "ModifyLabels", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "ModifyLabels",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = ModifyLabelsResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -345,7 +352,8 @@ class ElementModificationCommands:
         }
         validated_params = ModifyLampsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "ModifyLamps", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "ModifyLamps",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = ModifyLampsResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -379,7 +387,8 @@ class ElementModificationCommands:
         }
         validated_params = ModifyLevelDimensionsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "ModifyLevelDimensions", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "ModifyLevelDimensions",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = ModifyLevelDimensionsResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -407,7 +416,8 @@ class ElementModificationCommands:
         }
         validated_params = ModifyMeshesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "ModifyMeshes", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "ModifyMeshes",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = ModifyMeshesResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -435,7 +445,8 @@ class ElementModificationCommands:
         }
         validated_params = ModifyMorphsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "ModifyMorphs", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "ModifyMorphs",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = ModifyMorphsResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -465,7 +476,8 @@ class ElementModificationCommands:
         }
         validated_params = ModifyObjectsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "ModifyObjects", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "ModifyObjects",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = ModifyObjectsResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -496,7 +508,8 @@ class ElementModificationCommands:
         }
         validated_params = ModifyOpeningsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "ModifyOpenings", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "ModifyOpenings",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = ModifyOpeningsResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -527,7 +540,8 @@ class ElementModificationCommands:
         }
         validated_params = ModifyRailingsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "ModifyRailings", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "ModifyRailings",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = ModifyRailingsResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -558,7 +572,8 @@ class ElementModificationCommands:
         }
         validated_params = ModifyRoofsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "ModifyRoofs", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "ModifyRoofs",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = ModifyRoofsResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -587,7 +602,8 @@ class ElementModificationCommands:
         }
         validated_params = ModifyShellsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "ModifyShells", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "ModifyShells",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = ModifyShellsResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -624,7 +640,8 @@ class ElementModificationCommands:
         }
         validated_params = ModifySkylightsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "ModifySkylights", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "ModifySkylights",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = ModifySkylightsResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -656,7 +673,8 @@ class ElementModificationCommands:
         }
         validated_params = ModifySlabsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "ModifySlabs", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "ModifySlabs",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = ModifySlabsResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -698,7 +716,8 @@ class ElementModificationCommands:
         }
         validated_params = ModifyStairsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "ModifyStairs", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "ModifyStairs",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = ModifyStairsResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -733,7 +752,8 @@ class ElementModificationCommands:
         }
         validated_params = ModifyTextsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "ModifyTexts", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "ModifyTexts",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = ModifyTextsResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -767,7 +787,8 @@ class ElementModificationCommands:
         }
         validated_params = ModifyWallsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "ModifyWalls", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "ModifyWalls",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = ModifyWallsResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -795,7 +816,8 @@ class ElementModificationCommands:
         }
         validated_params = ModifyWindowsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "ModifyWindows", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "ModifyWindows",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = ModifyWindowsResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -830,7 +852,8 @@ class ElementModificationCommands:
         }
         validated_params = ModifyZonesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "ModifyZones", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "ModifyZones",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = ModifyZonesResult.model_validate(response_dict)
         return validated_response.executionResults

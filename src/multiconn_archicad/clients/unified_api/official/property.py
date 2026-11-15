@@ -74,7 +74,8 @@ class PropertyCommands:
         }
         validated_params = GetAllPropertyGroupIdsParameters(**params_dict)
         response_dict = self._core.post_command(
-            "API.GetAllPropertyGroupIds", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "API.GetAllPropertyGroupIds",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetAllPropertyGroupIdsResult.model_validate(response_dict)
         return validated_response.propertyGroupIds
@@ -101,7 +102,8 @@ class PropertyCommands:
         }
         validated_params = GetAllPropertyIdsParameters(**params_dict)
         response_dict = self._core.post_command(
-            "API.GetAllPropertyIds", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "API.GetAllPropertyIds",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetAllPropertyIdsResult.model_validate(response_dict)
         return validated_response.propertyIds
@@ -134,7 +136,7 @@ class PropertyCommands:
         validated_params = GetAllPropertyIdsOfElementsParameters(**params_dict)
         response_dict = self._core.post_command(
             "API.GetAllPropertyIdsOfElements",
-            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetAllPropertyIdsOfElementsResult.model_validate(response_dict)
         return validated_response.propertyIdsOfElements
@@ -180,7 +182,8 @@ class PropertyCommands:
         }
         validated_params = GetDetailsOfPropertiesParameters(**params_dict)
         response_dict = self._core.post_command(
-            "API.GetDetailsOfProperties", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "API.GetDetailsOfProperties",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetDetailsOfPropertiesResult.model_validate(response_dict)
         return validated_response.propertyDefinitions
@@ -209,7 +212,7 @@ class PropertyCommands:
         validated_params = GetPropertyDefinitionAvailabilityParameters(**params_dict)
         response_dict = self._core.post_command(
             "API.GetPropertyDefinitionAvailability",
-            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetPropertyDefinitionAvailabilityResult.model_validate(response_dict)
         return validated_response.propertyDefinitionAvailabilityList
@@ -237,7 +240,8 @@ class PropertyCommands:
         }
         validated_params = GetPropertyGroupsParameters(**params_dict)
         response_dict = self._core.post_command(
-            "API.GetPropertyGroups", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "API.GetPropertyGroups",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetPropertyGroupsResult.model_validate(response_dict)
         return validated_response.propertyGroups
@@ -268,7 +272,8 @@ class PropertyCommands:
         }
         validated_params = GetPropertyIdsParameters(**params_dict)
         response_dict = self._core.post_command(
-            "API.GetPropertyIds", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "API.GetPropertyIds",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetPropertyIdsResult.model_validate(response_dict)
         return validated_response.properties
@@ -300,7 +305,7 @@ class PropertyCommands:
         validated_params = GetPropertyValuesOfElementsParameters(**params_dict)
         response_dict = self._core.post_command(
             "API.GetPropertyValuesOfElements",
-            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetPropertyValuesOfElementsResult.model_validate(response_dict)
         return validated_response.propertyValuesForElements
@@ -330,7 +335,7 @@ class PropertyCommands:
         validated_params = SetPropertyValuesOfElementsParameters(**params_dict)
         response_dict = self._core.post_command(
             "API.SetPropertyValuesOfElements",
-            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = SetPropertyValuesOfElementsResult.model_validate(response_dict)
         return validated_response.executionResults

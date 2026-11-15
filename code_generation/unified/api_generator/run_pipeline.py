@@ -40,6 +40,12 @@ def main():
     """Runs the full API generation pipeline step-by-step."""
     print("--- Starting Unified API Generation Pipeline ---")
 
+    subprocess.run(
+        [sys.executable, "-m", "code_generation.shared.default_policy_audit", "--provider", "both"],
+        cwd=PROJECT_ROOT,
+        check=True,
+    )
+
     # Ensure the build directory exists and is clean
     BUILD_DIR.mkdir(exist_ok=True)
     if ORGANIZED_COMMANDS_PATH.exists():

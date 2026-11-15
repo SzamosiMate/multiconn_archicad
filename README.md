@@ -211,6 +211,8 @@ The library includes several common mixins out-of-the-box:
 | **`StripWhitespaceMixin`** | Automatically strips leading and trailing whitespace from all string fields. | Cleaning up messy user-entered BIM data. |
 | **`OmitDefaultsMixin`** | Excludes fields with default/None values from `.model_dump()` and `.model_dump_json()`. | Minimizing HTTP payload sizes. |
 
+Generated requests omit values equal to their Python defaults, including explicitly supplied values. Required direct Literal defaults remain in payloads under a generation audit. Use the raw core interface for exact payloads; omission can differ from setting a default or clearing a collection, and installed server defaults may differ. This does not negotiate server capabilities. Ordinary model dumps retain their existing defaults; `OmitDefaultsMixin` opts into default exclusion while preserving those Literals. Default factories use Pydantic's normal comparison semantics.
+
 #### Creating Custom Mixins
 
 The built-in mixins are just examples—**you can freely define and combine your own custom mixins**. Any class inheriting from Pydantic's `BaseModel` can be injected to add custom methods, validators, or attributes across the entire model catalog:

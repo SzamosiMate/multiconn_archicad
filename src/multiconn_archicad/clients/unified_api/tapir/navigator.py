@@ -263,7 +263,8 @@ class NavigatorCommands:
         }
         validated_params = Change3DStylesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "Change3DStyles", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "Change3DStyles",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = Change3DStylesResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -294,7 +295,8 @@ class NavigatorCommands:
         }
         validated_params = ChangeAddOnViewpointsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "ChangeAddOnViewpoints", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "ChangeAddOnViewpoints",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = ChangeAddOnViewpointsResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -329,7 +331,8 @@ class NavigatorCommands:
         }
         validated_params = ChangeDrawingLinkParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "ChangeDrawingLink", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "ChangeDrawingLink",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = ChangeDrawingLinkResult.model_validate(response_dict)
         return validated_response.elements
@@ -357,7 +360,8 @@ class NavigatorCommands:
         }
         validated_params = CloneProjectMapItemToViewMapParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CloneProjectMapItemToViewMap", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CloneProjectMapItemToViewMap",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CloneProjectMapItemToViewMapResult.model_validate(response_dict)
         return validated_response.navigatorItems
@@ -385,7 +389,8 @@ class NavigatorCommands:
         }
         validated_params = Create3DStylesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "Create3DStyles", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "Create3DStyles",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = Create3DStylesResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -419,7 +424,8 @@ class NavigatorCommands:
         }
         validated_params = CreateAddOnViewpointsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateAddOnViewpoints", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateAddOnViewpoints",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateAddOnViewpointsResult.model_validate(response_dict)
         return validated_response.viewpoints
@@ -448,7 +454,8 @@ class NavigatorCommands:
         }
         validated_params = CreateDetailMarkersParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateDetailMarkers", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateDetailMarkers",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateDetailMarkersResult.model_validate(response_dict)
         return validated_response.elements
@@ -474,7 +481,8 @@ class NavigatorCommands:
         }
         validated_params = CreateDetailsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateDetails", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateDetails",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateDetailsResult.model_validate(response_dict)
         return validated_response.databases
@@ -499,7 +507,8 @@ class NavigatorCommands:
         }
         validated_params = CreateDrawingsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateDrawings", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateDrawings",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateDrawingsResult.model_validate(response_dict)
         return validated_response.elements
@@ -525,7 +534,8 @@ class NavigatorCommands:
         }
         validated_params = CreateElevationsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateElevations", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateElevations",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateElevationsResult.model_validate(response_dict)
         return validated_response.elements
@@ -555,7 +565,8 @@ class NavigatorCommands:
         }
         validated_params = CreateInteriorElevationsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateInteriorElevations", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateInteriorElevations",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateInteriorElevationsResult.model_validate(response_dict)
         return validated_response.elements
@@ -587,7 +598,8 @@ class NavigatorCommands:
         }
         validated_params = CreateLayoutParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateLayout", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateLayout",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateLayoutResult.model_validate(response_dict)
         return validated_response.databases
@@ -612,7 +624,8 @@ class NavigatorCommands:
         }
         validated_params = CreateLayoutSubsetParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateLayoutSubset", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateLayoutSubset",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateLayoutSubsetResult.model_validate(response_dict)
         return validated_response.navigatorItems
@@ -640,7 +653,8 @@ class NavigatorCommands:
         }
         validated_params = CreateSectionsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateSections", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateSections",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateSectionsResult.model_validate(response_dict)
         return validated_response.elements
@@ -670,7 +684,8 @@ class NavigatorCommands:
         }
         validated_params = CreateViewMapFolderParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateViewMapFolder", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateViewMapFolder",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateViewMapFolderResult.model_validate(response_dict)
         return validated_response.navigatorItemId
@@ -697,7 +712,8 @@ class NavigatorCommands:
         }
         validated_params = CreateViewsInViewMapParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateViewsInViewMap", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateViewsInViewMap",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateViewsInViewMapResult.model_validate(response_dict)
         return validated_response.navigatorItems
@@ -726,7 +742,8 @@ class NavigatorCommands:
         }
         validated_params = CreateWorksheetMarkersParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateWorksheetMarkers", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateWorksheetMarkers",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateWorksheetMarkersResult.model_validate(response_dict)
         return validated_response.elements
@@ -752,7 +769,8 @@ class NavigatorCommands:
         }
         validated_params = CreateWorksheetsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateWorksheets", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateWorksheets",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateWorksheetsResult.model_validate(response_dict)
         return validated_response.databases
@@ -797,7 +815,8 @@ class NavigatorCommands:
         }
         validated_params = DeleteNavigatorItemsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "DeleteNavigatorItems", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "DeleteNavigatorItems",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = DeleteNavigatorItemsResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -824,7 +843,8 @@ class NavigatorCommands:
         """
         validated_params = TypeAdapter(FindModelViewOptionParameters).validate_python(parameters)
         response_dict = self._core.post_tapir_command(
-            "FindModelViewOption", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "FindModelViewOption",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = FindModelViewOptionResult.model_validate(response_dict)
         return validated_response
@@ -851,7 +871,8 @@ class NavigatorCommands:
         }
         validated_params = FitInWindowParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "FitInWindow", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "FitInWindow",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = TypeAdapter(FitInWindowResult).validate_python(response_dict)
         return validated_response
@@ -897,7 +918,8 @@ class NavigatorCommands:
         }
         validated_params = Get3DDocumentSettingsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "Get3DDocumentSettings", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "Get3DDocumentSettings",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = Get3DDocumentSettingsResult.model_validate(response_dict)
         return validated_response.settings
@@ -958,7 +980,8 @@ class NavigatorCommands:
         }
         validated_params = Get3DStyleDetailsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "Get3DStyleDetails", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "Get3DStyleDetails",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = Get3DStyleDetailsResult.model_validate(response_dict)
         return validated_response.styles
@@ -1038,7 +1061,8 @@ class NavigatorCommands:
         }
         validated_params = GetAddOnViewpointChildrenParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetAddOnViewpointChildren", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetAddOnViewpointChildren",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetAddOnViewpointChildrenResult.model_validate(response_dict)
         return validated_response.viewpointIds
@@ -1086,7 +1110,8 @@ class NavigatorCommands:
         }
         validated_params = GetAddOnViewpointsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetAddOnViewpoints", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetAddOnViewpoints",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetAddOnViewpointsResult.model_validate(response_dict)
         return validated_response.viewpoints
@@ -1138,7 +1163,7 @@ class NavigatorCommands:
         validated_params = GetDatabaseIdFromNavigatorItemIdParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
             "GetDatabaseIdFromNavigatorItemId",
-            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetDatabaseIdFromNavigatorItemIdResult.model_validate(response_dict)
         return validated_response.databases
@@ -1166,7 +1191,8 @@ class NavigatorCommands:
         }
         validated_params = GetDatabasesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetDatabases", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetDatabases",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetDatabasesResult.model_validate(response_dict)
         return validated_response.databases
@@ -1211,7 +1237,8 @@ class NavigatorCommands:
         }
         validated_params = GetDrawingContentBoxesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetDrawingContentBoxes", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetDrawingContentBoxes",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetDrawingContentBoxesResult.model_validate(response_dict)
         return validated_response.contentBoxes
@@ -1305,7 +1332,8 @@ class NavigatorCommands:
         }
         validated_params = GetLayoutSettingsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetLayoutSettings", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetLayoutSettings",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetLayoutSettingsResult.model_validate(response_dict)
         return validated_response.layoutSettings
@@ -1336,7 +1364,8 @@ class NavigatorCommands:
         }
         validated_params = GetLayoutSubsetSettingsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetLayoutSubsetSettings", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetLayoutSubsetSettings",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetLayoutSubsetSettingsResult.model_validate(response_dict)
         return validated_response.subsetSettings
@@ -1373,7 +1402,8 @@ class NavigatorCommands:
         }
         validated_params = GetModelViewOptionDetailsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetModelViewOptionDetails", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetModelViewOptionDetails",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetModelViewOptionDetailsResult.model_validate(response_dict)
         return validated_response.modelViewOptionDetails
@@ -1427,7 +1457,8 @@ class NavigatorCommands:
         }
         validated_params = GetNavigatorItemTreeParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetNavigatorItemTree", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetNavigatorItemTree",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetNavigatorItemTreeResult.model_validate(response_dict)
         return validated_response.navigatorItemTree
@@ -1457,7 +1488,8 @@ class NavigatorCommands:
         }
         validated_params = GetNavigatorParentItemsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetNavigatorParentItems", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetNavigatorParentItems",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetNavigatorParentItemsResult.model_validate(response_dict)
         return validated_response.parentItems
@@ -1543,7 +1575,7 @@ class NavigatorCommands:
         validated_params = GetSectionsAndElevationsDetailsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
             "GetSectionsAndElevationsDetails",
-            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetSectionsAndElevationsDetailsResult.model_validate(response_dict)
         return validated_response.detailsOfElements
@@ -1594,7 +1626,8 @@ class NavigatorCommands:
         }
         validated_params = GetView2DTransformationsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetView2DTransformations", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetView2DTransformations",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetView2DTransformationsResult.model_validate(response_dict)
         return validated_response.transformations
@@ -1637,7 +1670,8 @@ class NavigatorCommands:
         }
         validated_params = GetViewSettingsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetViewSettings", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetViewSettings",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetViewSettingsResult.model_validate(response_dict)
         return validated_response.viewSettings
@@ -1671,7 +1705,8 @@ class NavigatorCommands:
         }
         validated_params = ModifyDetailMarkersParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "ModifyDetailMarkers", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "ModifyDetailMarkers",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = ModifyDetailMarkersResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -1701,7 +1736,8 @@ class NavigatorCommands:
         }
         validated_params = ModifySectionsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "ModifySections", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "ModifySections",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = ModifySectionsResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -1740,7 +1776,8 @@ class NavigatorCommands:
         }
         validated_params = MoveNavigatorItemParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "MoveNavigatorItem", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "MoveNavigatorItem",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = TypeAdapter(MoveNavigatorItemResult).validate_python(response_dict)
         return validated_response
@@ -1774,7 +1811,8 @@ class NavigatorCommands:
         }
         validated_params = PublishPublisherSetParameters(**params_dict)
         self._core.post_tapir_command(
-            "PublishPublisherSet", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "PublishPublisherSet",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         return None
 
@@ -1825,7 +1863,8 @@ class NavigatorCommands:
         }
         validated_params = RenameNavigatorItemParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "RenameNavigatorItem", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "RenameNavigatorItem",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = TypeAdapter(RenameNavigatorItemResult).validate_python(response_dict)
         return validated_response
@@ -1860,7 +1899,8 @@ class NavigatorCommands:
         }
         validated_params = ReorderNavigatorItemsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "ReorderNavigatorItems", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "ReorderNavigatorItems",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = ReorderNavigatorItemsResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -1886,7 +1926,8 @@ class NavigatorCommands:
         }
         validated_params = ResetZoomParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "ResetZoom", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "ResetZoom",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = TypeAdapter(ResetZoomResult).validate_python(response_dict)
         return validated_response
@@ -1915,7 +1956,8 @@ class NavigatorCommands:
         }
         validated_params = Set3DCutPlanesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "Set3DCutPlanes", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "Set3DCutPlanes",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = TypeAdapter(Set3DCutPlanesResult).validate_python(response_dict)
         return validated_response
@@ -1950,7 +1992,8 @@ class NavigatorCommands:
         }
         validated_params = Set3DDocumentSettingsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "Set3DDocumentSettings", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "Set3DDocumentSettings",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = Set3DDocumentSettingsResult.model_validate(response_dict)
         return validated_response.settings
@@ -1977,7 +2020,8 @@ class NavigatorCommands:
         }
         validated_params = Set3DFilterAndCutSettingsParameters(**params_dict)
         self._core.post_tapir_command(
-            "Set3DFilterAndCutSettings", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "Set3DFilterAndCutSettings",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         return None
 
@@ -2007,7 +2051,8 @@ class NavigatorCommands:
         """
         validated_params = TypeAdapter(Set3DProjectionSettingsParameters).validate_python(parameters)
         response_dict = self._core.post_tapir_command(
-            "Set3DProjectionSettings", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "Set3DProjectionSettings",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = TypeAdapter(Set3DProjectionSettingsResult).validate_python(response_dict)
         return validated_response
@@ -2053,7 +2098,8 @@ class NavigatorCommands:
         }
         validated_params = Set3DWindowSettingsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "Set3DWindowSettings", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "Set3DWindowSettings",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = Set3DWindowSettingsResult.model_validate(response_dict)
         return validated_response
@@ -2082,7 +2128,7 @@ class NavigatorCommands:
         validated_params = TypeAdapter(SetActiveGraphicalOverrideCombinationParameters).validate_python(parameters)
         response_dict = self._core.post_tapir_command(
             "SetActiveGraphicalOverrideCombination",
-            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = TypeAdapter(SetActiveGraphicalOverrideCombinationResult).validate_python(response_dict)
         return validated_response
@@ -2109,7 +2155,8 @@ class NavigatorCommands:
         """
         validated_params = TypeAdapter(SetActiveRenovationFilterParameters).validate_python(parameters)
         response_dict = self._core.post_tapir_command(
-            "SetActiveRenovationFilter", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "SetActiveRenovationFilter",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = TypeAdapter(SetActiveRenovationFilterResult).validate_python(response_dict)
         return validated_response
@@ -2136,7 +2183,8 @@ class NavigatorCommands:
         }
         validated_params = SetCurrent3DStyleParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "SetCurrent3DStyle", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "SetCurrent3DStyle",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = TypeAdapter(SetCurrent3DStyleResult).validate_python(response_dict)
         return validated_response
@@ -2206,7 +2254,8 @@ class NavigatorCommands:
         }
         validated_params = SetDocumentFrom3DDefaultsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "SetDocumentFrom3DDefaults", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "SetDocumentFrom3DDefaults",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = TypeAdapter(SetDocumentFrom3DDefaultsResult).validate_python(response_dict)
         return validated_response
@@ -2256,7 +2305,8 @@ class NavigatorCommands:
         }
         validated_params = SetGhostStorySettingsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "SetGhostStorySettings", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "SetGhostStorySettings",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = TypeAdapter(SetGhostStorySettingsResult).validate_python(response_dict)
         return validated_response
@@ -2280,7 +2330,8 @@ class NavigatorCommands:
         }
         validated_params = SetGridSettingsParameters(**params_dict)
         self._core.post_tapir_command(
-            "SetGridSettings", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "SetGridSettings",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         return None
 
@@ -2310,7 +2361,8 @@ class NavigatorCommands:
         }
         validated_params = SetLayoutSettingsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "SetLayoutSettings", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "SetLayoutSettings",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = SetLayoutSettingsResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -2340,7 +2392,8 @@ class NavigatorCommands:
         }
         validated_params = SetMasterLayoutContextParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "SetMasterLayoutContext", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "SetMasterLayoutContext",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = TypeAdapter(SetMasterLayoutContextResult).validate_python(response_dict)
         return validated_response
@@ -2371,7 +2424,7 @@ class NavigatorCommands:
         validated_params = SetSectionsAndElevationsDetailsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
             "SetSectionsAndElevationsDetails",
-            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = SetSectionsAndElevationsDetailsResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -2401,7 +2454,8 @@ class NavigatorCommands:
         }
         validated_params = SetStructureDisplayParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "SetStructureDisplay", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "SetStructureDisplay",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = TypeAdapter(SetStructureDisplayResult).validate_python(response_dict)
         return validated_response
@@ -2435,7 +2489,8 @@ class NavigatorCommands:
         }
         validated_params = SetViewOptionsParameters(**params_dict)
         self._core.post_tapir_command(
-            "SetViewOptions", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "SetViewOptions",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         return None
 
@@ -2462,7 +2517,8 @@ class NavigatorCommands:
         }
         validated_params = SetViewRotationParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "SetViewRotation", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "SetViewRotation",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = SetViewRotationResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -2490,7 +2546,8 @@ class NavigatorCommands:
         }
         validated_params = SetViewSettingsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "SetViewSettings", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "SetViewSettings",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = SetViewSettingsResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -2517,7 +2574,7 @@ class NavigatorCommands:
         }
         validated_params = SetZoomParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "SetZoom", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "SetZoom", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True)
         )
         validated_response = TypeAdapter(SetZoomResult).validate_python(response_dict)
         return validated_response
@@ -2548,7 +2605,8 @@ class NavigatorCommands:
         }
         validated_params = ShowElementsIn3DParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "ShowElementsIn3D", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "ShowElementsIn3D",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = TypeAdapter(ShowElementsIn3DResult).validate_python(response_dict)
         return validated_response
@@ -2576,7 +2634,8 @@ class NavigatorCommands:
         }
         validated_params = StoreViewSettingsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "StoreViewSettings", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "StoreViewSettings",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = TypeAdapter(StoreViewSettingsResult).validate_python(response_dict)
         return validated_response
@@ -2601,7 +2660,8 @@ class NavigatorCommands:
         }
         validated_params = UpdateDrawingsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "UpdateDrawings", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "UpdateDrawings",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = TypeAdapter(UpdateDrawingsResult).validate_python(response_dict)
         return validated_response
@@ -2634,7 +2694,8 @@ class NavigatorCommands:
         }
         validated_params = ZoomToElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "ZoomToElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "ZoomToElements",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = TypeAdapter(ZoomToElementsResult).validate_python(response_dict)
         return validated_response

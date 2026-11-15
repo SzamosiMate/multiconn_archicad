@@ -58,7 +58,7 @@ def test_execute_add_on_command_logic(input_data: dict, mock_response: dict):
     command_group._core.post_command.assert_called_once()
     args, _ = command_group._core.post_command.call_args
     assert args[0] == 'API.ExecuteAddOnCommand'
-    expected_payload = commands.ExecuteAddOnCommandParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.ExecuteAddOnCommandParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('addOnCommandResponse'))
 
@@ -77,7 +77,7 @@ def test_is_add_on_command_available_logic(input_data: dict, mock_response: dict
     command_group._core.post_command.assert_called_once()
     args, _ = command_group._core.post_command.call_args
     assert args[0] == 'API.IsAddOnCommandAvailable'
-    expected_payload = commands.IsAddOnCommandAvailableParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.IsAddOnCommandAvailableParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('available'))
 
@@ -96,7 +96,7 @@ def test_create_attribute_folders_logic(input_data: dict, mock_response: dict):
     command_group._core.post_command.assert_called_once()
     args, _ = command_group._core.post_command.call_args
     assert args[0] == 'API.CreateAttributeFolders'
-    expected_payload = commands.CreateAttributeFoldersParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateAttributeFoldersParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -115,7 +115,7 @@ def test_move_attributes_and_folders_logic(input_data: dict):
     command_group._core.post_command.assert_called_once()
     args, _ = command_group._core.post_command.call_args
     assert args[0] == 'API.MoveAttributesAndFolders'
-    expected_payload = commands.MoveAttributesAndFoldersParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.MoveAttributesAndFoldersParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert result is None
 
@@ -134,7 +134,7 @@ def test_delete_attribute_folders_logic(input_data: dict, mock_response: dict):
     command_group._core.post_command.assert_called_once()
     args, _ = command_group._core.post_command.call_args
     assert args[0] == 'API.DeleteAttributeFolders'
-    expected_payload = commands.DeleteAttributeFoldersParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.DeleteAttributeFoldersParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -153,7 +153,7 @@ def test_get_attribute_folders_logic(input_data: dict, mock_response: dict):
     command_group._core.post_command.assert_called_once()
     args, _ = command_group._core.post_command.call_args
     assert args[0] == 'API.GetAttributeFolders'
-    expected_payload = commands.GetAttributeFoldersParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetAttributeFoldersParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('attributeFolders'))
 
@@ -172,7 +172,7 @@ def test_rename_attribute_folders_logic(input_data: dict, mock_response: dict):
     command_group._core.post_command.assert_called_once()
     args, _ = command_group._core.post_command.call_args
     assert args[0] == 'API.RenameAttributeFolders'
-    expected_payload = commands.RenameAttributeFoldersParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.RenameAttributeFoldersParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -191,7 +191,7 @@ def test_get_attribute_folder_structure_logic(input_data: dict, mock_response: d
     command_group._core.post_command.assert_called_once()
     args, _ = command_group._core.post_command.call_args
     assert args[0] == 'API.GetAttributeFolderStructure'
-    expected_payload = commands.GetAttributeFolderStructureParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetAttributeFolderStructureParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('attributeFolder'))
 
@@ -210,7 +210,7 @@ def test_delete_attributes_logic(input_data: dict, mock_response: dict):
     command_group._core.post_command.assert_called_once()
     args, _ = command_group._core.post_command.call_args
     assert args[0] == 'API.DeleteAttributes'
-    expected_payload = commands.DeleteAttributesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.DeleteAttributesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -229,7 +229,7 @@ def test_get_attributes_indices_logic(input_data: dict, mock_response: dict):
     command_group._core.post_command.assert_called_once()
     args, _ = command_group._core.post_command.call_args
     assert args[0] == 'API.GetAttributesIndices'
-    expected_payload = commands.GetAttributesIndicesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetAttributesIndicesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('attributeIndicesAndGuids'))
 
@@ -248,7 +248,7 @@ def test_get_building_material_attributes_logic(input_data: dict, mock_response:
     command_group._core.post_command.assert_called_once()
     args, _ = command_group._core.post_command.call_args
     assert args[0] == 'API.GetBuildingMaterialAttributes'
-    expected_payload = commands.GetBuildingMaterialAttributesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetBuildingMaterialAttributesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('attributes'))
 
@@ -267,7 +267,7 @@ def test_get_composite_attributes_logic(input_data: dict, mock_response: dict):
     command_group._core.post_command.assert_called_once()
     args, _ = command_group._core.post_command.call_args
     assert args[0] == 'API.GetCompositeAttributes'
-    expected_payload = commands.GetCompositeAttributesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetCompositeAttributesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('attributes'))
 
@@ -286,7 +286,7 @@ def test_get_fill_attributes_logic(input_data: dict, mock_response: dict):
     command_group._core.post_command.assert_called_once()
     args, _ = command_group._core.post_command.call_args
     assert args[0] == 'API.GetFillAttributes'
-    expected_payload = commands.GetFillAttributesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetFillAttributesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('attributes'))
 
@@ -305,7 +305,7 @@ def test_get_layer_attributes_logic(input_data: dict, mock_response: dict):
     command_group._core.post_command.assert_called_once()
     args, _ = command_group._core.post_command.call_args
     assert args[0] == 'API.GetLayerAttributes'
-    expected_payload = commands.GetLayerAttributesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetLayerAttributesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('attributes'))
 
@@ -324,7 +324,7 @@ def test_get_layer_combination_attributes_logic(input_data: dict, mock_response:
     command_group._core.post_command.assert_called_once()
     args, _ = command_group._core.post_command.call_args
     assert args[0] == 'API.GetLayerCombinationAttributes'
-    expected_payload = commands.GetLayerCombinationAttributesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetLayerCombinationAttributesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('attributes'))
 
@@ -343,7 +343,7 @@ def test_get_line_attributes_logic(input_data: dict, mock_response: dict):
     command_group._core.post_command.assert_called_once()
     args, _ = command_group._core.post_command.call_args
     assert args[0] == 'API.GetLineAttributes'
-    expected_payload = commands.GetLineAttributesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetLineAttributesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('attributes'))
 
@@ -362,7 +362,7 @@ def test_get_pen_table_attributes_logic(input_data: dict, mock_response: dict):
     command_group._core.post_command.assert_called_once()
     args, _ = command_group._core.post_command.call_args
     assert args[0] == 'API.GetPenTableAttributes'
-    expected_payload = commands.GetPenTableAttributesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetPenTableAttributesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('attributes'))
 
@@ -381,7 +381,7 @@ def test_get_profile_attribute_preview_logic(input_data: dict, mock_response: di
     command_group._core.post_command.assert_called_once()
     args, _ = command_group._core.post_command.call_args
     assert args[0] == 'API.GetProfileAttributePreview'
-    expected_payload = commands.GetProfileAttributePreviewParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetProfileAttributePreviewParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('previewImages'))
 
@@ -400,7 +400,7 @@ def test_get_profile_attributes_logic(input_data: dict, mock_response: dict):
     command_group._core.post_command.assert_called_once()
     args, _ = command_group._core.post_command.call_args
     assert args[0] == 'API.GetProfileAttributes'
-    expected_payload = commands.GetProfileAttributesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetProfileAttributesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('attributes'))
 
@@ -419,7 +419,7 @@ def test_get_surface_attributes_logic(input_data: dict, mock_response: dict):
     command_group._core.post_command.assert_called_once()
     args, _ = command_group._core.post_command.call_args
     assert args[0] == 'API.GetSurfaceAttributes'
-    expected_payload = commands.GetSurfaceAttributesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetSurfaceAttributesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('attributes'))
 
@@ -438,7 +438,7 @@ def test_get_zone_category_attributes_logic(input_data: dict, mock_response: dic
     command_group._core.post_command.assert_called_once()
     args, _ = command_group._core.post_command.call_args
     assert args[0] == 'API.GetZoneCategoryAttributes'
-    expected_payload = commands.GetZoneCategoryAttributesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetZoneCategoryAttributesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('attributes'))
 
@@ -457,7 +457,7 @@ def test_get_attributes_by_type_logic(input_data: dict, mock_response: dict):
     command_group._core.post_command.assert_called_once()
     args, _ = command_group._core.post_command.call_args
     assert args[0] == 'API.GetAttributesByType'
-    expected_payload = commands.GetAttributesByTypeParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetAttributesByTypeParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('attributeIds'))
 
@@ -476,7 +476,7 @@ def test_get_property_ids_logic(input_data: dict, mock_response: dict):
     command_group._core.post_command.assert_called_once()
     args, _ = command_group._core.post_command.call_args
     assert args[0] == 'API.GetPropertyIds'
-    expected_payload = commands.GetPropertyIdsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetPropertyIdsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('properties'))
 
@@ -495,7 +495,7 @@ def test_set_classifications_of_elements_logic(input_data: dict, mock_response: 
     command_group._core.post_command.assert_called_once()
     args, _ = command_group._core.post_command.call_args
     assert args[0] == 'API.SetClassificationsOfElements'
-    expected_payload = commands.SetClassificationsOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SetClassificationsOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -514,7 +514,7 @@ def test_get_classification_item_availability_logic(input_data: dict, mock_respo
     command_group._core.post_command.assert_called_once()
     args, _ = command_group._core.post_command.call_args
     assert args[0] == 'API.GetClassificationItemAvailability'
-    expected_payload = commands.GetClassificationItemAvailabilityParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetClassificationItemAvailabilityParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('classificationItemAvailabilityList'))
 
@@ -533,7 +533,7 @@ def test_get_details_of_classification_items_logic(input_data: dict, mock_respon
     command_group._core.post_command.assert_called_once()
     args, _ = command_group._core.post_command.call_args
     assert args[0] == 'API.GetDetailsOfClassificationItems'
-    expected_payload = commands.GetDetailsOfClassificationItemsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetDetailsOfClassificationItemsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('classificationItems'))
 
@@ -552,7 +552,7 @@ def test_get_elements_by_classification_logic(input_data: dict, mock_response: d
     command_group._core.post_command.assert_called_once()
     args, _ = command_group._core.post_command.call_args
     assert args[0] == 'API.GetElementsByClassification'
-    expected_payload = commands.GetElementsByClassificationParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetElementsByClassificationParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('elements'))
 
@@ -571,7 +571,7 @@ def test_get_classifications_of_elements_logic(input_data: dict, mock_response: 
     command_group._core.post_command.assert_called_once()
     args, _ = command_group._core.post_command.call_args
     assert args[0] == 'API.GetClassificationsOfElements'
-    expected_payload = commands.GetClassificationsOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetClassificationsOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('elementClassifications'))
 
@@ -590,7 +590,7 @@ def test_get_classification_systems_logic(input_data: dict, mock_response: dict)
     command_group._core.post_command.assert_called_once()
     args, _ = command_group._core.post_command.call_args
     assert args[0] == 'API.GetClassificationSystems'
-    expected_payload = commands.GetClassificationSystemsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetClassificationSystemsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('classificationSystems'))
 
@@ -609,7 +609,7 @@ def test_get_all_classifications_in_system_logic(input_data: dict, mock_response
     command_group._core.post_command.assert_called_once()
     args, _ = command_group._core.post_command.call_args
     assert args[0] == 'API.GetAllClassificationsInSystem'
-    expected_payload = commands.GetAllClassificationsInSystemParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetAllClassificationsInSystemParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('classificationItems'))
 
@@ -628,7 +628,7 @@ def test_clone_project_map_item_to_view_map_logic(input_data: dict, mock_respons
     command_group._core.post_command.assert_called_once()
     args, _ = command_group._core.post_command.call_args
     assert args[0] == 'API.CloneProjectMapItemToViewMap'
-    expected_payload = commands.CloneProjectMapItemToViewMapParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CloneProjectMapItemToViewMapParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('createdNavigatorItemId'))
 
@@ -647,7 +647,7 @@ def test_get_property_values_of_element_components_logic(input_data: dict, mock_
     command_group._core.post_command.assert_called_once()
     args, _ = command_group._core.post_command.call_args
     assert args[0] == 'API.GetPropertyValuesOfElementComponents'
-    expected_payload = commands.GetPropertyValuesOfElementComponentsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetPropertyValuesOfElementComponentsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('propertyValuesForElementComponents'))
 
@@ -666,7 +666,7 @@ def test_create_layout_logic(input_data: dict, mock_response: dict):
     command_group._core.post_command.assert_called_once()
     args, _ = command_group._core.post_command.call_args
     assert args[0] == 'API.CreateLayout'
-    expected_payload = commands.CreateLayoutParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateLayoutParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('createdNavigatorItemId'))
 
@@ -685,7 +685,7 @@ def test_create_layout_subset_logic(input_data: dict, mock_response: dict):
     command_group._core.post_command.assert_called_once()
     args, _ = command_group._core.post_command.call_args
     assert args[0] == 'API.CreateLayoutSubset'
-    expected_payload = commands.CreateLayoutSubsetParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateLayoutSubsetParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('createdSubsetId'))
 
@@ -704,7 +704,7 @@ def test_create_view_map_folder_logic(input_data: dict, mock_response: dict):
     command_group._core.post_command.assert_called_once()
     args, _ = command_group._core.post_command.call_args
     assert args[0] == 'API.CreateViewMapFolder'
-    expected_payload = commands.CreateViewMapFolderParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.CreateViewMapFolderParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('createdFolderNavigatorItemId'))
 
@@ -723,7 +723,7 @@ def test_delete_navigator_items_logic(input_data: dict, mock_response: dict):
     command_group._core.post_command.assert_called_once()
     args, _ = command_group._core.post_command.call_args
     assert args[0] == 'API.DeleteNavigatorItems'
-    expected_payload = commands.DeleteNavigatorItemsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.DeleteNavigatorItemsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -742,7 +742,7 @@ def test_set_property_values_of_elements_logic(input_data: dict, mock_response: 
     command_group._core.post_command.assert_called_once()
     args, _ = command_group._core.post_command.call_args
     assert args[0] == 'API.SetPropertyValuesOfElements'
-    expected_payload = commands.SetPropertyValuesOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SetPropertyValuesOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('executionResults'))
 
@@ -761,7 +761,7 @@ def test_get_elements_related_to_zones_logic(input_data: dict, mock_response: di
     command_group._core.post_command.assert_called_once()
     args, _ = command_group._core.post_command.call_args
     assert args[0] == 'API.GetElementsRelatedToZones'
-    expected_payload = commands.GetElementsRelatedToZonesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetElementsRelatedToZonesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('elementsRelatedToZones'))
 
@@ -780,7 +780,7 @@ def test_get_2d_bounding_boxes_logic(input_data: dict, mock_response: dict):
     command_group._core.post_command.assert_called_once()
     args, _ = command_group._core.post_command.call_args
     assert args[0] == 'API.Get2DBoundingBoxes'
-    expected_payload = commands.Get2DBoundingBoxesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.Get2DBoundingBoxesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('boundingBoxes2D'))
 
@@ -799,7 +799,7 @@ def test_get_3d_bounding_boxes_logic(input_data: dict, mock_response: dict):
     command_group._core.post_command.assert_called_once()
     args, _ = command_group._core.post_command.call_args
     assert args[0] == 'API.Get3DBoundingBoxes'
-    expected_payload = commands.Get3DBoundingBoxesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.Get3DBoundingBoxesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('boundingBoxes3D'))
 
@@ -818,7 +818,7 @@ def test_get_all_property_ids_of_elements_logic(input_data: dict, mock_response:
     command_group._core.post_command.assert_called_once()
     args, _ = command_group._core.post_command.call_args
     assert args[0] == 'API.GetAllPropertyIdsOfElements'
-    expected_payload = commands.GetAllPropertyIdsOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetAllPropertyIdsOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('propertyIdsOfElements'))
 
@@ -837,7 +837,7 @@ def test_get_components_of_elements_logic(input_data: dict, mock_response: dict)
     command_group._core.post_command.assert_called_once()
     args, _ = command_group._core.post_command.call_args
     assert args[0] == 'API.GetComponentsOfElements'
-    expected_payload = commands.GetComponentsOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetComponentsOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('componentsOfElements'))
 
@@ -856,7 +856,7 @@ def test_get_property_values_of_elements_logic(input_data: dict, mock_response: 
     command_group._core.post_command.assert_called_once()
     args, _ = command_group._core.post_command.call_args
     assert args[0] == 'API.GetPropertyValuesOfElements'
-    expected_payload = commands.GetPropertyValuesOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetPropertyValuesOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('propertyValuesForElements'))
 
@@ -875,7 +875,7 @@ def test_get_types_of_elements_logic(input_data: dict, mock_response: dict):
     command_group._core.post_command.assert_called_once()
     args, _ = command_group._core.post_command.call_args
     assert args[0] == 'API.GetTypesOfElements'
-    expected_payload = commands.GetTypesOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetTypesOfElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('typesOfElements'))
 
@@ -894,7 +894,7 @@ def test_get_elements_by_type_logic(input_data: dict, mock_response: dict):
     command_group._core.post_command.assert_called_once()
     args, _ = command_group._core.post_command.call_args
     assert args[0] == 'API.GetElementsByType'
-    expected_payload = commands.GetElementsByTypeParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetElementsByTypeParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('elements'))
 
@@ -913,7 +913,7 @@ def test_get_all_property_group_ids_logic(input_data: dict, mock_response: dict)
     command_group._core.post_command.assert_called_once()
     args, _ = command_group._core.post_command.call_args
     assert args[0] == 'API.GetAllPropertyGroupIds'
-    expected_payload = commands.GetAllPropertyGroupIdsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetAllPropertyGroupIdsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('propertyGroupIds'))
 
@@ -932,7 +932,7 @@ def test_get_all_property_ids_logic(input_data: dict, mock_response: dict):
     command_group._core.post_command.assert_called_once()
     args, _ = command_group._core.post_command.call_args
     assert args[0] == 'API.GetAllPropertyIds'
-    expected_payload = commands.GetAllPropertyIdsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetAllPropertyIdsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('propertyIds'))
 
@@ -951,7 +951,7 @@ def test_get_built_in_container_navigator_items_logic(input_data: dict, mock_res
     command_group._core.post_command.assert_called_once()
     args, _ = command_group._core.post_command.call_args
     assert args[0] == 'API.GetBuiltInContainerNavigatorItems'
-    expected_payload = commands.GetBuiltInContainerNavigatorItemsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetBuiltInContainerNavigatorItemsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('navigatorItems'))
 
@@ -970,7 +970,7 @@ def test_get_detail_navigator_items_logic(input_data: dict, mock_response: dict)
     command_group._core.post_command.assert_called_once()
     args, _ = command_group._core.post_command.call_args
     assert args[0] == 'API.GetDetailNavigatorItems'
-    expected_payload = commands.GetDetailNavigatorItemsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetDetailNavigatorItemsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('navigatorItems'))
 
@@ -989,7 +989,7 @@ def test_get_details_of_properties_logic(input_data: dict, mock_response: dict):
     command_group._core.post_command.assert_called_once()
     args, _ = command_group._core.post_command.call_args
     assert args[0] == 'API.GetDetailsOfProperties'
-    expected_payload = commands.GetDetailsOfPropertiesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetDetailsOfPropertiesParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('propertyDefinitions'))
 
@@ -1008,7 +1008,7 @@ def test_get_document_3d_navigator_items_logic(input_data: dict, mock_response: 
     command_group._core.post_command.assert_called_once()
     args, _ = command_group._core.post_command.call_args
     assert args[0] == 'API.GetDocument3DNavigatorItems'
-    expected_payload = commands.GetDocument3DNavigatorItemsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetDocument3DNavigatorItemsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('navigatorItems'))
 
@@ -1027,7 +1027,7 @@ def test_get_elevation_navigator_items_logic(input_data: dict, mock_response: di
     command_group._core.post_command.assert_called_once()
     args, _ = command_group._core.post_command.call_args
     assert args[0] == 'API.GetElevationNavigatorItems'
-    expected_payload = commands.GetElevationNavigatorItemsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetElevationNavigatorItemsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('navigatorItems'))
 
@@ -1046,7 +1046,7 @@ def test_get_interior_elevation_navigator_items_logic(input_data: dict, mock_res
     command_group._core.post_command.assert_called_once()
     args, _ = command_group._core.post_command.call_args
     assert args[0] == 'API.GetInteriorElevationNavigatorItems'
-    expected_payload = commands.GetInteriorElevationNavigatorItemsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetInteriorElevationNavigatorItemsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('navigatorItems'))
 
@@ -1065,7 +1065,7 @@ def test_get_layout_settings_logic(input_data: dict, mock_response: dict):
     command_group._core.post_command.assert_called_once()
     args, _ = command_group._core.post_command.call_args
     assert args[0] == 'API.GetLayoutSettings'
-    expected_payload = commands.GetLayoutSettingsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetLayoutSettingsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('layoutParameters'))
 
@@ -1084,7 +1084,7 @@ def test_get_navigator_item_tree_logic(input_data: dict, mock_response: dict):
     command_group._core.post_command.assert_called_once()
     args, _ = command_group._core.post_command.call_args
     assert args[0] == 'API.GetNavigatorItemTree'
-    expected_payload = commands.GetNavigatorItemTreeParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetNavigatorItemTreeParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('navigatorTree'))
 
@@ -1103,7 +1103,7 @@ def test_get_navigator_items_type_logic(input_data: dict, mock_response: dict):
     command_group._core.post_command.assert_called_once()
     args, _ = command_group._core.post_command.call_args
     assert args[0] == 'API.GetNavigatorItemsType'
-    expected_payload = commands.GetNavigatorItemsTypeParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetNavigatorItemsTypeParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('navigatorItemIdAndTypeList'))
 
@@ -1122,7 +1122,7 @@ def test_get_property_definition_availability_logic(input_data: dict, mock_respo
     command_group._core.post_command.assert_called_once()
     args, _ = command_group._core.post_command.call_args
     assert args[0] == 'API.GetPropertyDefinitionAvailability'
-    expected_payload = commands.GetPropertyDefinitionAvailabilityParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetPropertyDefinitionAvailabilityParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('propertyDefinitionAvailabilityList'))
 
@@ -1141,7 +1141,7 @@ def test_get_property_groups_logic(input_data: dict, mock_response: dict):
     command_group._core.post_command.assert_called_once()
     args, _ = command_group._core.post_command.call_args
     assert args[0] == 'API.GetPropertyGroups'
-    expected_payload = commands.GetPropertyGroupsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetPropertyGroupsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('propertyGroups'))
 
@@ -1160,7 +1160,7 @@ def test_get_section_navigator_items_logic(input_data: dict, mock_response: dict
     command_group._core.post_command.assert_called_once()
     args, _ = command_group._core.post_command.call_args
     assert args[0] == 'API.GetSectionNavigatorItems'
-    expected_payload = commands.GetSectionNavigatorItemsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetSectionNavigatorItemsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('navigatorItems'))
 
@@ -1179,7 +1179,7 @@ def test_get_selected_elements_logic(input_data: dict, mock_response: dict):
     command_group._core.post_command.assert_called_once()
     args, _ = command_group._core.post_command.call_args
     assert args[0] == 'API.GetSelectedElements'
-    expected_payload = commands.GetSelectedElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetSelectedElementsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('elements'))
 
@@ -1198,7 +1198,7 @@ def test_get_story_navigator_items_logic(input_data: dict, mock_response: dict):
     command_group._core.post_command.assert_called_once()
     args, _ = command_group._core.post_command.call_args
     assert args[0] == 'API.GetStoryNavigatorItems'
-    expected_payload = commands.GetStoryNavigatorItemsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetStoryNavigatorItemsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('navigatorItems'))
 
@@ -1217,7 +1217,7 @@ def test_get_worksheet_navigator_items_logic(input_data: dict, mock_response: di
     command_group._core.post_command.assert_called_once()
     args, _ = command_group._core.post_command.call_args
     assert args[0] == 'API.GetWorksheetNavigatorItems'
-    expected_payload = commands.GetWorksheetNavigatorItemsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.GetWorksheetNavigatorItemsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert normalize_for_comparison(result) == normalize_for_comparison(mock_response.get('navigatorItems'))
 
@@ -1236,7 +1236,7 @@ def test_set_layout_settings_logic(input_data: dict):
     command_group._core.post_command.assert_called_once()
     args, _ = command_group._core.post_command.call_args
     assert args[0] == 'API.SetLayoutSettings'
-    expected_payload = commands.SetLayoutSettingsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.SetLayoutSettingsParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert result is None
 
@@ -1255,7 +1255,7 @@ def test_move_navigator_item_logic(input_data: dict):
     command_group._core.post_command.assert_called_once()
     args, _ = command_group._core.post_command.call_args
     assert args[0] == 'API.MoveNavigatorItem'
-    expected_payload = commands.MoveNavigatorItemParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True)
+    expected_payload = commands.MoveNavigatorItemParameters.model_validate(input_data).model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)
     assert args[1] == expected_payload
     assert result is None
 

@@ -106,7 +106,8 @@ class AttributeCommands:
         }
         validated_params = CreateAttributeFoldersParameters(**params_dict)
         response_dict = self._core.post_command(
-            "API.CreateAttributeFolders", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "API.CreateAttributeFolders",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateAttributeFoldersResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -136,7 +137,8 @@ class AttributeCommands:
         }
         validated_params = DeleteAttributeFoldersParameters(**params_dict)
         response_dict = self._core.post_command(
-            "API.DeleteAttributeFolders", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "API.DeleteAttributeFolders",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = DeleteAttributeFoldersResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -164,7 +166,8 @@ class AttributeCommands:
         }
         validated_params = DeleteAttributesParameters(**params_dict)
         response_dict = self._core.post_command(
-            "API.DeleteAttributes", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "API.DeleteAttributes",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = DeleteAttributesResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -211,7 +214,7 @@ class AttributeCommands:
         validated_params = GetAttributeFolderStructureParameters(**params_dict)
         response_dict = self._core.post_command(
             "API.GetAttributeFolderStructure",
-            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetAttributeFolderStructureResult.model_validate(response_dict)
         return validated_response.attributeFolder
@@ -239,7 +242,8 @@ class AttributeCommands:
         }
         validated_params = GetAttributeFoldersParameters(**params_dict)
         response_dict = self._core.post_command(
-            "API.GetAttributeFolders", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "API.GetAttributeFolders",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetAttributeFoldersResult.model_validate(response_dict)
         return validated_response.attributeFolders
@@ -264,7 +268,8 @@ class AttributeCommands:
         }
         validated_params = GetAttributesByTypeParameters(**params_dict)
         response_dict = self._core.post_command(
-            "API.GetAttributesByType", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "API.GetAttributesByType",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetAttributesByTypeResult.model_validate(response_dict)
         return validated_response.attributeIds
@@ -292,7 +297,8 @@ class AttributeCommands:
         }
         validated_params = GetAttributesIndicesParameters(**params_dict)
         response_dict = self._core.post_command(
-            "API.GetAttributesIndices", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "API.GetAttributesIndices",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetAttributesIndicesResult.model_validate(response_dict)
         return validated_response.attributeIndicesAndGuids
@@ -321,7 +327,7 @@ class AttributeCommands:
         validated_params = GetBuildingMaterialAttributesParameters(**params_dict)
         response_dict = self._core.post_command(
             "API.GetBuildingMaterialAttributes",
-            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetBuildingMaterialAttributesResult.model_validate(response_dict)
         return validated_response.attributes
@@ -349,7 +355,8 @@ class AttributeCommands:
         }
         validated_params = GetCompositeAttributesParameters(**params_dict)
         response_dict = self._core.post_command(
-            "API.GetCompositeAttributes", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "API.GetCompositeAttributes",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetCompositeAttributesResult.model_validate(response_dict)
         return validated_response.attributes
@@ -377,7 +384,8 @@ class AttributeCommands:
         }
         validated_params = GetFillAttributesParameters(**params_dict)
         response_dict = self._core.post_command(
-            "API.GetFillAttributes", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "API.GetFillAttributes",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetFillAttributesResult.model_validate(response_dict)
         return validated_response.attributes
@@ -405,7 +413,8 @@ class AttributeCommands:
         }
         validated_params = GetLayerAttributesParameters(**params_dict)
         response_dict = self._core.post_command(
-            "API.GetLayerAttributes", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "API.GetLayerAttributes",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetLayerAttributesResult.model_validate(response_dict)
         return validated_response.attributes
@@ -434,7 +443,7 @@ class AttributeCommands:
         validated_params = GetLayerCombinationAttributesParameters(**params_dict)
         response_dict = self._core.post_command(
             "API.GetLayerCombinationAttributes",
-            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetLayerCombinationAttributesResult.model_validate(response_dict)
         return validated_response.attributes
@@ -462,7 +471,8 @@ class AttributeCommands:
         }
         validated_params = GetLineAttributesParameters(**params_dict)
         response_dict = self._core.post_command(
-            "API.GetLineAttributes", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "API.GetLineAttributes",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetLineAttributesResult.model_validate(response_dict)
         return validated_response.attributes
@@ -491,7 +501,8 @@ class AttributeCommands:
         }
         validated_params = GetPenTableAttributesParameters(**params_dict)
         response_dict = self._core.post_command(
-            "API.GetPenTableAttributes", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "API.GetPenTableAttributes",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetPenTableAttributesResult.model_validate(response_dict)
         return validated_response.attributes
@@ -528,7 +539,8 @@ class AttributeCommands:
         }
         validated_params = GetProfileAttributePreviewParameters(**params_dict)
         response_dict = self._core.post_command(
-            "API.GetProfileAttributePreview", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "API.GetProfileAttributePreview",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetProfileAttributePreviewResult.model_validate(response_dict)
         return validated_response.previewImages
@@ -556,7 +568,8 @@ class AttributeCommands:
         }
         validated_params = GetProfileAttributesParameters(**params_dict)
         response_dict = self._core.post_command(
-            "API.GetProfileAttributes", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "API.GetProfileAttributes",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetProfileAttributesResult.model_validate(response_dict)
         return validated_response.attributes
@@ -584,7 +597,8 @@ class AttributeCommands:
         }
         validated_params = GetSurfaceAttributesParameters(**params_dict)
         response_dict = self._core.post_command(
-            "API.GetSurfaceAttributes", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "API.GetSurfaceAttributes",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetSurfaceAttributesResult.model_validate(response_dict)
         return validated_response.attributes
@@ -612,7 +626,8 @@ class AttributeCommands:
         }
         validated_params = GetZoneCategoryAttributesParameters(**params_dict)
         response_dict = self._core.post_command(
-            "API.GetZoneCategoryAttributes", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "API.GetZoneCategoryAttributes",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetZoneCategoryAttributesResult.model_validate(response_dict)
         return validated_response.attributes
@@ -644,7 +659,8 @@ class AttributeCommands:
         }
         validated_params = MoveAttributesAndFoldersParameters(**params_dict)
         self._core.post_command(
-            "API.MoveAttributesAndFolders", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "API.MoveAttributesAndFolders",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         return None
 
@@ -671,7 +687,8 @@ class AttributeCommands:
         }
         validated_params = RenameAttributeFoldersParameters(**params_dict)
         response_dict = self._core.post_command(
-            "API.RenameAttributeFolders", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "API.RenameAttributeFolders",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = RenameAttributeFoldersResult.model_validate(response_dict)
         return validated_response.executionResults

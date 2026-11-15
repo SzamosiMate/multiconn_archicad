@@ -90,7 +90,8 @@ class IfcCommands:
         }
         validated_params = GetElementsByIFCIdsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetElementsByIFCIds", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetElementsByIFCIds",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetElementsByIFCIdsResult.model_validate(response_dict)
         return validated_response.elementsByIFCIds
@@ -144,7 +145,8 @@ class IfcCommands:
         }
         validated_params = GetIFCAttributesOfElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetIFCAttributesOfElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetIFCAttributesOfElements",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetIFCAttributesOfElementsResult.model_validate(response_dict)
         return validated_response.elementIFCAttributes
@@ -182,7 +184,7 @@ class IfcCommands:
         validated_params = GetIFCClassificationReferencesOfElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
             "GetIFCClassificationReferencesOfElements",
-            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetIFCClassificationReferencesOfElementsResult.model_validate(response_dict)
         return validated_response.elementIFCClassificationReferences
@@ -231,7 +233,8 @@ class IfcCommands:
         }
         validated_params = GetIFCIdsOfElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetIFCIdsOfElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetIFCIdsOfElements",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetIFCIdsOfElementsResult.model_validate(response_dict)
         return validated_response.elementIFCIds
@@ -259,7 +262,8 @@ class IfcCommands:
         }
         validated_params = GetIFCPropertiesOfElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetIFCPropertiesOfElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetIFCPropertiesOfElements",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetIFCPropertiesOfElementsResult.model_validate(response_dict)
         return validated_response.elementIFCProperties
@@ -289,7 +293,8 @@ class IfcCommands:
         }
         validated_params = GetIFCSpatialStructureParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetIFCSpatialStructure", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetIFCSpatialStructure",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetIFCSpatialStructureResult.model_validate(response_dict)
         return validated_response
@@ -314,7 +319,8 @@ class IfcCommands:
         }
         validated_params = GetIFCTypeOfElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetIFCTypeOfElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetIFCTypeOfElements",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetIFCTypeOfElementsResult.model_validate(response_dict)
         return validated_response.elementIFCTypes
@@ -374,7 +380,8 @@ class IfcCommands:
         }
         validated_params = IFCFileOperationParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "IFCFileOperation", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "IFCFileOperation",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = TypeAdapter(IFCFileOperationResult).validate_python(response_dict)
         return validated_response
@@ -414,7 +421,7 @@ class IfcCommands:
         validated_params = RemoveIFCClassificationReferencesOfElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
             "RemoveIFCClassificationReferencesOfElements",
-            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         return TypeAdapter(list[ExecutionResult]).validate_python(response_dict.get("executionResults"))
 
@@ -451,7 +458,7 @@ class IfcCommands:
         validated_params = RemoveIFCClassificationReferencesOfElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
             "RemoveIFCClassificationReferencesOfElements",
-            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = RemoveIFCClassificationReferencesOfElementsResult.model_validate(response_dict)
         return validated_response
@@ -484,7 +491,8 @@ class IfcCommands:
         }
         validated_params = RemoveIFCPropertiesOfElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "RemoveIFCPropertiesOfElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "RemoveIFCPropertiesOfElements",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         return TypeAdapter(list[ExecutionResult]).validate_python(response_dict.get("executionResults"))
 
@@ -516,7 +524,8 @@ class IfcCommands:
         }
         validated_params = RemoveIFCPropertiesOfElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "RemoveIFCPropertiesOfElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "RemoveIFCPropertiesOfElements",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = RemoveIFCPropertiesOfElementsResult.model_validate(response_dict)
         return validated_response
@@ -547,7 +556,8 @@ class IfcCommands:
         }
         validated_params = SetIFCAttributesOfElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "SetIFCAttributesOfElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "SetIFCAttributesOfElements",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = SetIFCAttributesOfElementsResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -580,7 +590,7 @@ class IfcCommands:
         validated_params = SetIFCClassificationReferencesOfElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
             "SetIFCClassificationReferencesOfElements",
-            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True),
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = SetIFCClassificationReferencesOfElementsResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -611,7 +621,8 @@ class IfcCommands:
         }
         validated_params = SetIFCPropertiesOfElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "SetIFCPropertiesOfElements", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "SetIFCPropertiesOfElements",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = SetIFCPropertiesOfElementsResult.model_validate(response_dict)
         return validated_response.executionResults

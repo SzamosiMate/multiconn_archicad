@@ -3,7 +3,7 @@
 **Selected continuation:** the [2026-11-15 Literal-based implementation plan](../../optional-default-serialization-plan.md)
 supersedes this investigation's initial presence-aware repair proposal. It keeps
 method/model defaults, excludes optional default values from generated requests,
-and preserves required Literals under a generator audit. Implementation is pending.
+and preserves required Literals under a generator audit. The selected policy is implemented in generated requests.
 
 Analysis baseline: `82070c1`, branch `extensible-elmement-query`, generated Tapir
 2.0.0. Shipped-signature baseline: MultiConn `v0.9.7`, commit

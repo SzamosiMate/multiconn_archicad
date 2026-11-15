@@ -71,7 +71,8 @@ class KeynoteCommands:
         }
         validated_params = CreateKeynoteFoldersParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateKeynoteFolders", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateKeynoteFolders",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateKeynoteFoldersResult.model_validate(response_dict)
         return validated_response.keynoteFolderIdsOrErrors
@@ -98,7 +99,8 @@ class KeynoteCommands:
         }
         validated_params = CreateKeynoteItemsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateKeynoteItems", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateKeynoteItems",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateKeynoteItemsResult.model_validate(response_dict)
         return validated_response.keynoteItemIdsOrErrors
@@ -124,7 +126,8 @@ class KeynoteCommands:
         }
         validated_params = CreateKeynoteLabelsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "CreateKeynoteLabels", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "CreateKeynoteLabels",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreateKeynoteLabelsResult.model_validate(response_dict)
         return validated_response.elements
@@ -152,7 +155,8 @@ class KeynoteCommands:
         }
         validated_params = DeleteKeynoteFoldersParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "DeleteKeynoteFolders", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "DeleteKeynoteFolders",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = DeleteKeynoteFoldersResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -180,7 +184,8 @@ class KeynoteCommands:
         }
         validated_params = DeleteKeynoteItemsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "DeleteKeynoteItems", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "DeleteKeynoteItems",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = DeleteKeynoteItemsResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -211,7 +216,8 @@ class KeynoteCommands:
         }
         validated_params = GetKeynoteAutoTextsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "GetKeynoteAutoTexts", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "GetKeynoteAutoTexts",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = GetKeynoteAutoTextsResult.model_validate(response_dict)
         return validated_response.autoTexts
@@ -259,7 +265,8 @@ class KeynoteCommands:
         }
         validated_params = ModifyKeynoteFoldersParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "ModifyKeynoteFolders", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "ModifyKeynoteFolders",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = ModifyKeynoteFoldersResult.model_validate(response_dict)
         return validated_response.executionResults
@@ -289,7 +296,8 @@ class KeynoteCommands:
         }
         validated_params = ModifyKeynoteItemsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
-            "ModifyKeynoteItems", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True)
+            "ModifyKeynoteItems",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = ModifyKeynoteItemsResult.model_validate(response_dict)
         return validated_response.executionResults

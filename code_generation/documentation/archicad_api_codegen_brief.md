@@ -83,13 +83,9 @@ The Official runner does not currently include the Tapir strict-audit or complet
 4. **Format outputs.** Run Ruff formatting on the generated unified package.
 5. **Generate method tests.** Generate Official/Tapir tests using schema-derived input/response data and mocked core command methods.
 
-Parameters serialize in JSON mode with wire aliases and omitted `None` values. Official calls route through `post_command`; Tapir calls use `post_tapir_command`. Responses are validated through models or `TypeAdapter`, including aliases and unions.
+Parameters serialize in JSON mode with wire aliases, omitted `None` values, and default-valued fields excluded. Signatures and models retain their documented defaults. Direct defaulted Literal fields are preserved by the shared serializer, under a schema/model audit run for both providers before unified generation and after model generation. See the [serialization plan](optional-default-serialization-plan.md).
 
-The selected, not-yet-implemented change to optional-default handling is recorded
-in the [Literal-based serialization implementation plan](optional-default-serialization-plan.md).
-It preserves visible defaults and proposes request default exclusion with audited
-preservation of required Literal fields. Until implemented, the behavior above
-remains the current behavior.
+This policy is value-based: even an explicitly supplied default is omitted. Use the raw core interface when an exact payload is needed. Server defaults can differ from client defaults, and omission in a modification can mean “leave unchanged” instead of assigning a default or clearing a collection. Review changed defaults on regeneration. Default factories retain Pydantic semantics; there is no automatic server capability negotiation.
 
 The method generator reads a checked-in snapshot keyed by provider, wire command, and Python method name. Existing positional arguments keep their published order, and shipped keyword-only arguments retain that kind. New fields on an existing method are keyword-only. Commands absent from the snapshot use the normal required-first order. Model changes that replace the call shape, such as a new top-level parameter union, still require compatibility review. Refresh the snapshot from a shipped MultiConn tag when adopting a new baseline. [Shipped signatures](../unified/api_generator/shipped_signatures.json)
 
