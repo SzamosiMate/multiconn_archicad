@@ -7,32 +7,25 @@ from pydantic import TypeAdapter
 
 from multiconn_archicad.models.tapir.commands import (
     AddCommentToIssueParameters,
-    AddCommentToIssueResult,
     AttachElementsToIssueParameters,
-    AttachElementsToIssueResult,
     CreateIssueParameters,
     CreateIssueResult,
     DeleteIssueParameters,
     DeleteIssueResult,
     DetachElementsFromIssueParameters,
-    DetachElementsFromIssueResult,
     ExportIssuesToBCFParameters,
-    ExportIssuesToBCFResult,
     GetCommentsFromIssueParameters,
     GetCommentsFromIssueResult,
     GetElementsAttachedToIssueParameters,
     GetElementsAttachedToIssueResult,
     GetIssuesResult,
     ImportIssuesFromBCFParameters,
-    ImportIssuesFromBCFResult,
     ImportMarkupsFromPDFParameters,
     ImportMarkupsFromPDFResult,
 )
 from multiconn_archicad.models.tapir.types import (
     Comment,
     ElementIdArrayItem,
-    ExecutionResult,
-    FailedExecutionResult,
     Issue,
     IssueCommentStatus,
     IssueElementType,
@@ -51,7 +44,7 @@ class IssueManagementCommands:
 
     def add_comment_to_issue(
         self, issue_id: IssueId, text: str, author: None | str = None, status: IssueCommentStatus | None = None
-    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+    ) -> SuccessfulExecutionResult:
         """
         Adds a new comment to the specified issue.
 
@@ -62,7 +55,7 @@ class IssueManagementCommands:
             status (IssueCommentStatus | None)
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -80,12 +73,12 @@ class IssueManagementCommands:
             "AddCommentToIssue",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(AddCommentToIssueResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
     def attach_elements_to_issue(
         self, issue_id: IssueId, elements: list[ElementIdArrayItem], type: IssueElementType
-    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+    ) -> SuccessfulExecutionResult:
         """
         Attaches elements to the specified issue.
 
@@ -95,7 +88,7 @@ class IssueManagementCommands:
             type (IssueElementType)
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -112,7 +105,7 @@ class IssueManagementCommands:
             "AttachElementsToIssue",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(AttachElementsToIssueResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
     def create_issue(self, name: str, parent_issue_id: IssueId | None = None, tag_text: None | str = None) -> IssueId:
@@ -145,9 +138,7 @@ class IssueManagementCommands:
         validated_response = CreateIssueResult.model_validate(response_dict)
         return validated_response.issueId
 
-    def delete_issue(
-        self, issue_id: IssueId, accept_all_elements: None | bool = None
-    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+    def delete_issue(self, issue_id: IssueId, accept_all_elements: None | bool = None) -> SuccessfulExecutionResult:
         """
         Deletes the specified issue. With dryRun true nothing is deleted and no undo step is
         created: the response has dryRun set to true, and wouldDelete when the issue exists.
@@ -158,7 +149,7 @@ class IssueManagementCommands:
                 deleted issue. By default false.
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -174,7 +165,7 @@ class IssueManagementCommands:
             "DeleteIssue",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        return TypeAdapter(ExecutionResult).validate_python(response_dict)
+        return TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
 
     def delete_issue_dry_run(self, issue_id: IssueId, accept_all_elements: None | bool = None) -> DeleteIssueResult:
         """
@@ -210,7 +201,7 @@ class IssueManagementCommands:
 
     def detach_elements_from_issue(
         self, issue_id: IssueId, elements: list[ElementIdArrayItem]
-    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+    ) -> SuccessfulExecutionResult:
         """
         Detaches elements from the specified issue.
 
@@ -219,7 +210,7 @@ class IssueManagementCommands:
             elements (list[ElementIdArrayItem]): A list of elements.
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -235,7 +226,7 @@ class IssueManagementCommands:
             "DetachElementsFromIssue",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(DetachElementsFromIssueResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
     def export_issues_to_bcf(
@@ -246,7 +237,7 @@ class IssueManagementCommands:
         issues: None | list[IssueIdArrayItem] = None,
         *,
         overwrite: None | bool = None,
-    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+    ) -> SuccessfulExecutionResult:
         """
         Exports specified issues to a BCF file. With overwrite false it refuses to replace an
         existing file.
@@ -263,7 +254,7 @@ class IssueManagementCommands:
                 file already exists at exportPath, and writes nothing.
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -282,7 +273,7 @@ class IssueManagementCommands:
             "ExportIssuesToBCF",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(ExportIssuesToBCFResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
     def get_comments_from_issue(self, issue_id: IssueId) -> list[Comment]:
@@ -355,9 +346,7 @@ class IssueManagementCommands:
         validated_response = GetIssuesResult.model_validate(response_dict)
         return validated_response.issues
 
-    def import_issues_from_bcf(
-        self, import_path: str, align_by_survey_point: bool
-    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+    def import_issues_from_bcf(self, import_path: str, align_by_survey_point: bool) -> SuccessfulExecutionResult:
         """
         Imports issues from the specified BCF file.
 
@@ -367,7 +356,7 @@ class IssueManagementCommands:
                 Project Origin.
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -383,7 +372,7 @@ class IssueManagementCommands:
             "ImportIssuesFromBCF",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(ImportIssuesFromBCFResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
     def import_markups_from_pdf(self, pdf_file_path: str) -> ImportMarkupsFromPDFResult:

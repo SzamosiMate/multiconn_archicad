@@ -14,7 +14,6 @@ from multiconn_archicad.models.tapir.commands import (
     ChangeHotlinkInstancesResult,
     ChangeHotlinkNodesParameters,
     ChangeHotlinkNodesResult,
-    CloseProjectResult,
     ConvertUnitValuesParameters,
     ConvertUnitValuesResult,
     CreateHotlinkInstancesParameters,
@@ -78,15 +77,10 @@ from multiconn_archicad.models.tapir.commands import (
     MoveProjectInfoGroupsParameters,
     MoveProjectInfoGroupsResult,
     NewProjectParameters,
-    NewProjectResult,
     OpenProjectParameters,
-    OpenProjectResult,
     PhotoRenderParameters,
-    PhotoRenderResult,
     PrintViewParameters,
-    PrintViewResult,
     RebuildViewParameters,
-    RebuildViewResult,
     RenameProjectInfoFieldsParameters,
     RenameProjectInfoFieldsResult,
     RenameProjectInfoGroupsParameters,
@@ -94,30 +88,21 @@ from multiconn_archicad.models.tapir.commands import (
     ResolveNamesParameters,
     ResolveNamesResult,
     SaveAsModuleFileParameters,
-    SaveAsModuleFileResult,
     SaveCurrentWindowAsImageParameters,
     SaveCurrentWindowAsImageResult,
     SaveProjectAsArchiveParameters,
-    SaveProjectAsArchiveResult,
     SaveProjectParameters,
-    SaveProjectResult,
     SetAutoIntersectParameters,
-    SetAutoIntersectResult,
     SetCurrentRenderingSceneParameters,
-    SetCurrentRenderingSceneResult,
     SetGeoLocationParameters,
-    SetGeoLocationResult,
     SetLast3DDefaultLevelsParameters,
-    SetLast3DDefaultLevelsResult,
     SetPlaceSettingsParameters,
     SetPlaceSettingsResult,
     SetProjectInfoFieldParameters,
     SetProjectNotesParameters,
-    SetProjectNotesResult,
     SetProjectPreferencesParameters,
     SetProjectPreferencesResult,
     SetStoriesParameters,
-    SetStoriesResult,
     UpdateHotlinksParameters,
     UpdateHotlinksResult,
 )
@@ -326,12 +311,12 @@ class ProjectCommands:
         validated_response = ChangeHotlinkNodesResult.model_validate(response_dict)
         return validated_response.executionResults
 
-    def close_project(self) -> FailedExecutionResult | SuccessfulExecutionResult:
+    def close_project(self) -> SuccessfulExecutionResult:
         """
         Closes the currently opened project.
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -339,7 +324,7 @@ class ProjectCommands:
             pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         response_dict = self._core.post_tapir_command("CloseProject")
-        validated_response = TypeAdapter(CloseProjectResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
     def convert_unit_values(self, values: list[UnitValueConversionData]) -> list[ConvertedUnitValue | ErrorItem]:
@@ -1358,7 +1343,7 @@ class ProjectCommands:
         validated_response = MoveProjectInfoGroupsResult.model_validate(response_dict)
         return validated_response.executionResults
 
-    def new_project(self, new_and_reset: None | bool = None) -> FailedExecutionResult | SuccessfulExecutionResult:
+    def new_project(self, new_and_reset: None | bool = None) -> SuccessfulExecutionResult:
         """
         Starts a new, untitled project from the template set in Archicad's New Project settings,
         as File > New does; with newAndReset also the working environment is reset, as New and
@@ -1371,7 +1356,7 @@ class ProjectCommands:
                 current one as File > New does. Defaults to false.
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -1386,10 +1371,10 @@ class ProjectCommands:
             "NewProject",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(NewProjectResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
-    def open_project(self, project_file_path: str) -> FailedExecutionResult | SuccessfulExecutionResult:
+    def open_project(self, project_file_path: str) -> SuccessfulExecutionResult:
         """
         Opens the given project. The unsaved changes of the open project are discarded without
         asking: Archicad has no query for them, so call SaveProject first when they must be
@@ -1399,7 +1384,7 @@ class ProjectCommands:
             project_file_path (str): The target project file to open.
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -1414,7 +1399,7 @@ class ProjectCommands:
             "OpenProject",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(OpenProjectResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
     def photo_render(
@@ -1427,7 +1412,7 @@ class ProjectCommands:
         width: None | int = None,
         height: None | int = None,
         resolution: None | int = None,
-    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+    ) -> SuccessfulExecutionResult:
         """
         Renders the 3D model with the current rendering scene, or with the given one, as
         Document > Creative Imaging > PhotoRender Projection does, and saves the image to a file
@@ -1459,7 +1444,7 @@ class ProjectCommands:
                 this render only and restored afterwards.
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -1480,7 +1465,7 @@ class ProjectCommands:
             "PhotoRender",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(PhotoRenderResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
     def print_view(
@@ -1489,7 +1474,7 @@ class ProjectCommands:
         fix_text: None | bool = None,
         scale: None | int = None,
         print_area: None | PrintArea = None,
-    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+    ) -> SuccessfulExecutionResult:
         """
         Prints from the current view.
 
@@ -1500,7 +1485,7 @@ class ProjectCommands:
             print_area (None | PrintArea): The area to print. The default is 'currentView'.
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -1518,10 +1503,10 @@ class ProjectCommands:
             "PrintView",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(PrintViewResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
-    def rebuild_view(self, regenerate: None | bool = None) -> FailedExecutionResult | SuccessfulExecutionResult:
+    def rebuild_view(self, regenerate: None | bool = None) -> SuccessfulExecutionResult:
         """
         Rebuilds the current view.
 
@@ -1530,7 +1515,7 @@ class ProjectCommands:
                 view will not be regenerated, but rebuilt.
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -1545,7 +1530,7 @@ class ProjectCommands:
             "RebuildView",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(RebuildViewResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
     def rename_project_info_fields(
@@ -1656,7 +1641,7 @@ class ProjectCommands:
 
     def save_as_module_file(
         self, module_file_path: str, elements: None | list[ElementIdArrayItem] = None, *, overwrite: None | bool = None
-    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+    ) -> SuccessfulExecutionResult:
         """
         Saves the given elements, or the current selection, as a hotlink module (.mod) file.
         With overwrite false it refuses to replace an existing file.
@@ -1673,7 +1658,7 @@ class ProjectCommands:
                 file already exists at moduleFilePath, and writes nothing.
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -1690,7 +1675,7 @@ class ProjectCommands:
             "SaveAsModuleFile",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(SaveAsModuleFileResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
     def save_current_window_as_image(
@@ -1748,7 +1733,7 @@ class ProjectCommands:
 
     def save_project(
         self, project_path: None | str = None, *, overwrite: None | bool = None
-    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+    ) -> SuccessfulExecutionResult:
         """
         Saves the currently opened project, in place or to a given path. With overwrite false it
         refuses to replace an existing file at the path.
@@ -1766,7 +1751,7 @@ class ProjectCommands:
                 own file included, and writes nothing.
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -1782,7 +1767,7 @@ class ProjectCommands:
             "SaveProject",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(SaveProjectResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
     def save_project_as_archive(
@@ -1794,7 +1779,7 @@ class ProjectCommands:
         include_background_picture: None | bool = None,
         *,
         overwrite: None | bool = None,
-    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+    ) -> SuccessfulExecutionResult:
         """
         Saves the open project as an archive (.pla) file, with the library parts it uses inside.
         With overwrite false it refuses to replace an existing file.
@@ -1816,7 +1801,7 @@ class ProjectCommands:
                 file already exists at archiveFilePath, and writes nothing.
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -1836,10 +1821,10 @@ class ProjectCommands:
             "SaveProjectAsArchive",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(SaveProjectAsArchiveResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
-    def set_auto_intersect(self, is_on: bool) -> FailedExecutionResult | SuccessfulExecutionResult:
+    def set_auto_intersect(self, is_on: bool) -> SuccessfulExecutionResult:
         """
         Turns Auto-Intersection on or off. It is a setting of the running Archicad, not of the
         project; remember to restore the previous state afterwards.
@@ -1848,7 +1833,7 @@ class ProjectCommands:
             is_on (bool): Turn Auto-Intersection on or off.
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -1863,10 +1848,10 @@ class ProjectCommands:
             "SetAutoIntersect",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(SetAutoIntersectResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
-    def set_current_rendering_scene(self, scene_name: str) -> FailedExecutionResult | SuccessfulExecutionResult:
+    def set_current_rendering_scene(self, scene_name: str) -> SuccessfulExecutionResult:
         """
         Makes the given rendering scene the current one, as selecting it in the PhotoRendering
         Settings palette does.
@@ -1876,7 +1861,7 @@ class ProjectCommands:
                 GetRenderingScenes returns.
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -1891,12 +1876,12 @@ class ProjectCommands:
             "SetCurrentRenderingScene",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(SetCurrentRenderingSceneResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
     def set_geo_location(
         self, project_location: None | ProjectLocationUpdate = None, survey_point: None | SurveyPointUpdate = None
-    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+    ) -> SuccessfulExecutionResult:
         """
         Sets the project location details: the project location, and the survey point's
         position, geo-referencing parameters, visibility and lock state (the lock from Archicad
@@ -1907,7 +1892,7 @@ class ProjectCommands:
             survey_point (None | SurveyPointUpdate)
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -1923,12 +1908,12 @@ class ProjectCommands:
             "SetGeoLocation",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(SetGeoLocationResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
     def set_last_3d_default_levels(
         self, element_types: list[ElementType], levels: list[float]
-    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+    ) -> SuccessfulExecutionResult:
         """
         Sets the last 3D default levels of the given element types' defaults.
 
@@ -1939,7 +1924,7 @@ class ProjectCommands:
                 order of elementTypes, in meters.
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -1955,7 +1940,7 @@ class ProjectCommands:
             "SetLast3DDefaultLevels",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(SetLast3DDefaultLevelsResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
     def set_place_settings(self, place_info: PlaceSettingsUpdate) -> PlaceInfo:
@@ -2027,7 +2012,7 @@ class ProjectCommands:
         date_of_issue: None | str = None,
         keywords: None | str = None,
         notes: None | str = None,
-    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+    ) -> SuccessfulExecutionResult:
         """
         Changes the Project Notes of the project (File > Info > Project Notes). Only the given
         fields are changed; texts longer than the field Archicad stores are truncated. architect
@@ -2056,7 +2041,7 @@ class ProjectCommands:
             notes (None | str): Notes.
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -2083,7 +2068,7 @@ class ProjectCommands:
             "SetProjectNotes",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(SetProjectNotesResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
     def set_project_preferences(
@@ -2135,7 +2120,7 @@ class ProjectCommands:
         validated_response = SetProjectPreferencesResult.model_validate(response_dict)
         return validated_response
 
-    def set_stories(self, stories: list[StorySettings]) -> FailedExecutionResult | SuccessfulExecutionResult:
+    def set_stories(self, stories: list[StorySettings]) -> SuccessfulExecutionResult:
         """
         Sets the story sructure of the currently loaded project.
 
@@ -2144,7 +2129,7 @@ class ProjectCommands:
                 or modifying multiple stories.
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -2159,7 +2144,7 @@ class ProjectCommands:
             "SetStories",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(SetStoriesResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
     def update_hotlinks(

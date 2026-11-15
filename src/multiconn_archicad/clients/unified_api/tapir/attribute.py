@@ -7,7 +7,6 @@ from pydantic import TypeAdapter
 
 from multiconn_archicad.models.tapir.commands import (
     ActivateLayerCombinationParameters,
-    ActivateLayerCombinationResult,
     ConsolidateFillsResult,
     ConsolidateLinesResult,
     CreateAttributeFoldersParameters,
@@ -55,11 +54,8 @@ from multiconn_archicad.models.tapir.commands import (
     DeleteUserDataOfAttributesParameters,
     DeleteUserDataOfAttributesResult,
     GetAttributeIndexesParameters,
-    GetAttributeIndexesResult,
     GetAttributesByTypeParameters,
-    GetAttributesByTypeResult,
     GetAttributesFromProjectParameters,
-    GetAttributesFromProjectResult,
     GetBuildingMaterialPhysicalPropertiesParameters,
     GetBuildingMaterialPhysicalPropertiesResult,
     GetBuildingMaterialsParameters,
@@ -106,7 +102,6 @@ from multiconn_archicad.models.tapir.commands import (
     GetZoneCategoriesParameters,
     GetZoneCategoriesResult,
     ImportAttributesFromProjectParameters,
-    ImportAttributesFromProjectResult,
     ModifyGraphicOverrideCombinationsParameters,
     ModifyGraphicOverrideCombinationsResult,
     ModifyGraphicOverrideRulesParameters,
@@ -128,7 +123,6 @@ from multiconn_archicad.models.tapir.commands import (
     RenameGraphicOverrideRuleGroupsParameters,
     RenameGraphicOverrideRuleGroupsResult,
     SetGraphicOverrideRuleGroupOrderParameters,
-    SetGraphicOverrideRuleGroupOrderResult,
     SetGraphicOverrideRuleOrderParameters,
     SetGraphicOverrideRuleOrderResult,
     SetLayerOfElementDefaultsParameters,
@@ -228,9 +222,7 @@ class AttributeCommands:
     def __init__(self, core: CoreCommands):
         self._core = core
 
-    def activate_layer_combination(
-        self, attribute_id: AttributeId
-    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+    def activate_layer_combination(self, attribute_id: AttributeId) -> SuccessfulExecutionResult:
         """
         Activates the given layer combination in the current window, like choosing it in the
         Quick Layers palette. Saved views are not changed.
@@ -239,7 +231,7 @@ class AttributeCommands:
             attribute_id (AttributeId)
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -254,7 +246,7 @@ class AttributeCommands:
             "ActivateLayerCombination",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(ActivateLayerCombinationResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
     def consolidate_fills(self) -> ConsolidateFillsResult:
@@ -1115,7 +1107,7 @@ class AttributeCommands:
         validated_response = DeleteUserDataOfAttributesResult.model_validate(response_dict)
         return validated_response
 
-    def get_attribute_indexes(self, attribute_types: list[AttributeType]) -> AttributeIndexSummary | ErrorItem:
+    def get_attribute_indexes(self, attribute_types: list[AttributeType]) -> AttributeIndexSummary:
         """
         Reports for each given attribute type how many attributes there are, the first valid and
         the highest index in use, and the free indexes between them (for example those of
@@ -1125,7 +1117,7 @@ class AttributeCommands:
             attribute_types (list[AttributeType]): The attribute types to report the indexes of.
 
         Returns:
-            AttributeIndexSummary | ErrorItem
+            AttributeIndexSummary
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -1140,10 +1132,10 @@ class AttributeCommands:
             "GetAttributeIndexes",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(GetAttributeIndexesResult).validate_python(response_dict)
+        validated_response = TypeAdapter(AttributeIndexSummary).validate_python(response_dict)
         return validated_response
 
-    def get_attributes_by_type(self, attribute_type: AttributeType) -> AttributeHeadersWrapper | ErrorItem:
+    def get_attributes_by_type(self, attribute_type: AttributeType) -> AttributeHeadersWrapper:
         """
         Returns the details of every attribute of the given type, including the path of the
         attribute folder holding it (Archicad 26 and newer). From Archicad 30 an attribute that
@@ -1154,7 +1146,7 @@ class AttributeCommands:
             attribute_type (AttributeType)
 
         Returns:
-            AttributeHeadersWrapper | ErrorItem
+            AttributeHeadersWrapper
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -1169,12 +1161,12 @@ class AttributeCommands:
             "GetAttributesByType",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(GetAttributesByTypeResult).validate_python(response_dict)
+        validated_response = TypeAdapter(AttributeHeadersWrapper).validate_python(response_dict)
         return validated_response
 
     def get_attributes_from_project(
         self, project_file_path: str, attribute_types: list[AttributeType]
-    ) -> ErrorItem | ProjectAttributes:
+    ) -> ProjectAttributes:
         """
         Reads the attributes of the given types from another project or template file without
         opening it, for example to compare them with the attributes of the open project. Nothing
@@ -1191,7 +1183,7 @@ class AttributeCommands:
                 get an error item.
 
         Returns:
-            ErrorItem | ProjectAttributes
+            ProjectAttributes
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -1207,7 +1199,7 @@ class AttributeCommands:
             "GetAttributesFromProject",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(GetAttributesFromProjectResult).validate_python(response_dict)
+        validated_response = TypeAdapter(ProjectAttributes).validate_python(response_dict)
         return validated_response
 
     def get_building_material_physical_properties(
@@ -1976,7 +1968,7 @@ class AttributeCommands:
         overwrite_existing: None | bool = None,
         dry_run: None | bool = None,
         references_by_index: None | bool = None,
-    ) -> ErrorItem | ImportedAttributesByType:
+    ) -> ImportedAttributesByType:
         """
         Imports Line, Fill, ZoneCategory, PenTable, OperationProfile, Composite, Profile and
         LayerCombination attributes from another project or template file into the open project,
@@ -2020,7 +2012,7 @@ class AttributeCommands:
                 always matched by name.
 
         Returns:
-            ErrorItem | ImportedAttributesByType
+            ImportedAttributesByType
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -2040,7 +2032,7 @@ class AttributeCommands:
             "ImportAttributesFromProject",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(ImportAttributesFromProjectResult).validate_python(response_dict)
+        validated_response = TypeAdapter(ImportedAttributesByType).validate_python(response_dict)
         return validated_response
 
     def modify_graphic_override_combinations(
@@ -2429,9 +2421,7 @@ class AttributeCommands:
         validated_response = RenameGraphicOverrideRuleGroupsResult.model_validate(response_dict)
         return validated_response.executionResults
 
-    def set_graphic_override_rule_group_order(
-        self, rule_group_names: list[str]
-    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+    def set_graphic_override_rule_group_order(self, rule_group_names: list[str]) -> SuccessfulExecutionResult:
         """
         Sets the order of the graphic override rule groups, found by name. The groups not listed
         keep their order and follow the listed ones. Available from Archicad 27.
@@ -2441,7 +2431,7 @@ class AttributeCommands:
                 groups not listed keep their order and follow the listed ones.
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -2456,7 +2446,7 @@ class AttributeCommands:
             "SetGraphicOverrideRuleGroupOrder",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(SetGraphicOverrideRuleGroupOrderResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
     def set_graphic_override_rule_order(

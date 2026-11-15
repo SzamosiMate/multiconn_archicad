@@ -13,7 +13,6 @@ from multiconn_archicad.models.tapir.commands import (
     ApplyFavoritesToElementsParameters,
     ApplyFavoritesToElementsResult,
     ChangeFavoriteParameters,
-    ChangeFavoriteResult,
     CreateFavoriteFolderParameters,
     CreateFavoriteFolderResult,
     CreateFavoriteParameters,
@@ -27,7 +26,6 @@ from multiconn_archicad.models.tapir.commands import (
     DeleteFavoritesWithManagerParameters,
     DeleteFavoritesWithManagerResult,
     ExportFavoritesParameters,
-    ExportFavoritesResult,
     GetAllFavoritesParameters,
     GetAllFavoritesResult,
     GetFavoriteContentsParameters,
@@ -42,7 +40,6 @@ from multiconn_archicad.models.tapir.commands import (
     GetFavoriteSettingsParameters,
     GetFavoriteSettingsResult,
     GetFavoritesByTypeParameters,
-    GetFavoritesByTypeResult,
     ImportFavoritesParameters,
     ImportFavoritesResult,
     MoveFavoriteFolderParameters,
@@ -252,9 +249,7 @@ class FavoritesCommands:
         validated_response = ApplyFavoritesToElementsResult.model_validate(response_dict)
         return validated_response.executionResults
 
-    def change_favorite(
-        self, favorite_name: str, source: FavoriteSettingsSource
-    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+    def change_favorite(self, favorite_name: str, source: FavoriteSettingsSource) -> SuccessfulExecutionResult:
         """
         Gives an existing Favorite the settings of another Favorite or of the current Opening
         tool default. Available from Archicad 29.
@@ -265,7 +260,7 @@ class FavoritesCommands:
                 exactly one of favoriteName and toolDefault.
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -281,7 +276,7 @@ class FavoritesCommands:
             "ChangeFavorite",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(ChangeFavoriteResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
     def create_favorite(
@@ -485,7 +480,7 @@ class FavoritesCommands:
         format: FavoriteExportFormat | None = None,
         *,
         overwrite: None | bool = None,
-    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+    ) -> SuccessfulExecutionResult:
         """
         Export the project's Favorites to a .prefs file or folder. From Archicad 29 they can
         also be exported to a folder of Favorite files (xml format) or to a legacy .prf file
@@ -510,7 +505,7 @@ class FavoritesCommands:
                 the files written there are Archicad's.
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -528,7 +523,7 @@ class FavoritesCommands:
             "ExportFavorites",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(ExportFavoritesResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
     def get_all_favorites(self, element_type: ElementType | None = None) -> list[FavoriteSummary]:
@@ -742,7 +737,7 @@ class FavoritesCommands:
         validated_response = GetFavoriteSettingsResult.model_validate(response_dict)
         return validated_response.favoriteSettings
 
-    def get_favorites_by_type(self, element_type: ElementType) -> ErrorItem | FavoritesWrapper:
+    def get_favorites_by_type(self, element_type: ElementType) -> FavoritesWrapper:
         """
         Returns a list of the names of all favorites with the given element type
 
@@ -750,7 +745,7 @@ class FavoritesCommands:
             element_type (ElementType)
 
         Returns:
-            ErrorItem | FavoritesWrapper
+            FavoritesWrapper
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -765,7 +760,7 @@ class FavoritesCommands:
             "GetFavoritesByType",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(GetFavoritesByTypeResult).validate_python(response_dict)
+        validated_response = TypeAdapter(FavoritesWrapper).validate_python(response_dict)
         return validated_response
 
     def import_favorites(

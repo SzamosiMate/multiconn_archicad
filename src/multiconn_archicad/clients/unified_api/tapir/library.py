@@ -9,16 +9,12 @@ from multiconn_archicad.models.tapir.commands import (
     AddFilesToEmbeddedLibraryParameters,
     AddFilesToEmbeddedLibraryResult,
     AddLibrariesParameters,
-    AddLibrariesResult,
-    CheckLibrariesResult,
     CompareLibraryPartUnIdsParameters,
     CompareLibraryPartUnIdsResult,
     CopyFilesIntoEmbeddedLibraryParameters,
-    CopyFilesIntoEmbeddedLibraryResult,
     CopyLibraryPartsParameters,
     CopyLibraryPartsResult,
     CreateFolderInEmbeddedLibraryParameters,
-    CreateFolderInEmbeddedLibraryResult,
     CreateLibraryPartFromElementsParameters,
     CreateLibraryPartFromElementsResult,
     CreateLibraryPartParameters,
@@ -78,25 +74,17 @@ from multiconn_archicad.models.tapir.commands import (
     ModifyLibraryListParameters,
     ModifyLibraryListResult,
     OpenLibraryPartInEditorParameters,
-    OpenLibraryPartInEditorResult,
-    ReloadLibrariesResult,
-    ResetLibrariesResult,
     SearchLibraryPartsParameters,
     SearchLibraryPartsResult,
     SetGDLDateParameters,
-    SetGDLDateResult,
     SetLibrariesParameters,
-    SetLibrariesResult,
     SetLibraryPartCustomSectionParameters,
-    SetLibraryPartCustomSectionResult,
     SetLibraryPartMetadataParameters,
     SetLibraryPartMetadataResult,
     SetLibraryPartParametersParameters,
     SetLibraryPartParametersResult,
     SetLibraryPartPictureImagesParameters,
-    SetLibraryPartPictureImagesResult,
     SetLibraryPartPicturesParameters,
-    SetLibraryPartPicturesResult,
     SetLibraryPartScriptsParameters,
     SetLibraryPartScriptsResult,
     UpdateLibraryPartSectionsParameters,
@@ -206,7 +194,7 @@ class LibraryCommands:
         validated_response = AddFilesToEmbeddedLibraryResult.model_validate(response_dict)
         return validated_response.executionResults
 
-    def add_libraries(self, libraries: list[LibraryLocation]) -> FailedExecutionResult | SuccessfulExecutionResult:
+    def add_libraries(self, libraries: list[LibraryLocation]) -> SuccessfulExecutionResult:
         """
         Adds the given folders to the project's local libraries, skipping any already loaded.
 
@@ -215,7 +203,7 @@ class LibraryCommands:
                 absolute path.
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -230,16 +218,16 @@ class LibraryCommands:
             "AddLibraries",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(AddLibrariesResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
-    def check_libraries(self) -> FailedExecutionResult | SuccessfulExecutionResult:
+    def check_libraries(self) -> SuccessfulExecutionResult:
         """
         Checks the loaded libraries with the Archicad API's library check. Returns the error the
         API reports, if any.
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -247,7 +235,7 @@ class LibraryCommands:
             pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         response_dict = self._core.post_tapir_command("CheckLibraries")
-        validated_response = TypeAdapter(CheckLibrariesResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
     def compare_library_part_un_ids(self, un_id_1: str, un_id_2: str) -> CompareLibraryPartUnIdsResult:
@@ -285,7 +273,7 @@ class LibraryCommands:
         files: list[EmbeddedLibraryFile],
         target_folder: None | str = None,
         overwrite_if_exists: None | bool = None,
-    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+    ) -> SuccessfulExecutionResult:
         """
         Copies the given files, keeping their names, into a folder of the embedded library with
         one library operation. The target folder is created when it is missing. With
@@ -301,7 +289,7 @@ class LibraryCommands:
                 in the target folder is replaced. By default false.
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -318,7 +306,7 @@ class LibraryCommands:
             "CopyFilesIntoEmbeddedLibrary",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(CopyFilesIntoEmbeddedLibraryResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
     def copy_library_parts(self, library_parts: list[LibraryPartCopyData]) -> CopyLibraryPartsResult:
@@ -352,7 +340,7 @@ class LibraryCommands:
         validated_response = CopyLibraryPartsResult.model_validate(response_dict)
         return validated_response
 
-    def create_folder_in_embedded_library(self, folder_path: str) -> FailedExecutionResult | SuccessfulExecutionResult:
+    def create_folder_in_embedded_library(self, folder_path: str) -> SuccessfulExecutionResult:
         """
         Creates a folder, with any missing parent folders, inside the embedded library. The
         folderPath is relative to the embedded library, like the outputPath of
@@ -364,7 +352,7 @@ class LibraryCommands:
                 already exist are kept.
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -379,7 +367,7 @@ class LibraryCommands:
             "CreateFolderInEmbeddedLibrary",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(CreateFolderInEmbeddedLibraryResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
     def create_library_part(self, path: str, ancestor_subtype: str) -> CreateLibraryPartResult:
@@ -1453,7 +1441,7 @@ class LibraryCommands:
         validated_response = ModifyLibraryListResult.model_validate(response_dict)
         return validated_response
 
-    def open_library_part_in_editor(self, name: str) -> FailedExecutionResult | SuccessfulExecutionResult:
+    def open_library_part_in_editor(self, name: str) -> SuccessfulExecutionResult:
         """
         Opens a loaded library part, given by its fileName or documentName as returned by
         GetAvailableLibraryParts, in Archicad's library part editor. Available from Archicad 27.
@@ -1464,7 +1452,7 @@ class LibraryCommands:
                 GetAvailableLibraryParts.
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -1479,15 +1467,15 @@ class LibraryCommands:
             "OpenLibraryPartInEditor",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(OpenLibraryPartInEditorResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
-    def reload_libraries(self) -> FailedExecutionResult | SuccessfulExecutionResult:
+    def reload_libraries(self) -> SuccessfulExecutionResult:
         """
         Executes the reload libraries command.
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -1495,15 +1483,15 @@ class LibraryCommands:
             pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         response_dict = self._core.post_tapir_command("ReloadLibraries")
-        validated_response = TypeAdapter(ReloadLibrariesResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
-    def reset_libraries(self) -> FailedExecutionResult | SuccessfulExecutionResult:
+    def reset_libraries(self) -> SuccessfulExecutionResult:
         """
         Resets the loaded libraries with the Archicad API's library reset.
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -1511,7 +1499,7 @@ class LibraryCommands:
             pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         response_dict = self._core.post_tapir_command("ResetLibraries")
-        validated_response = TypeAdapter(ResetLibrariesResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
     def search_library_parts(self, ancestor_un_id: str, pattern: str) -> list[LibraryPartSearchResult]:
@@ -1546,7 +1534,7 @@ class LibraryCommands:
         validated_response = SearchLibraryPartsResult.model_validate(response_dict)
         return validated_response.libraryParts
 
-    def set_gdl_date(self, date: GDLDate) -> FailedExecutionResult | SuccessfulExecutionResult:
+    def set_gdl_date(self, date: GDLDate) -> SuccessfulExecutionResult:
         """
         Sets the date GDL scripts see: year, month, day, hour, minute and second, as GetGDLDate
         returns them. Useful to test date-dependent library parts; set the value read with
@@ -1556,7 +1544,7 @@ class LibraryCommands:
             date (GDLDate): The date GDL scripts should see, in the format GetGDLDate returns.
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -1571,10 +1559,10 @@ class LibraryCommands:
             "SetGDLDate",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(SetGDLDateResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
-    def set_libraries(self, libraries: list[LibraryLocation]) -> FailedExecutionResult | SuccessfulExecutionResult:
+    def set_libraries(self, libraries: list[LibraryLocation]) -> SuccessfulExecutionResult:
         """
         Makes the given folders the project's local libraries; built-in, embedded, server and
         web libraries are kept. Set the libraries before opening a file that needs them and the
@@ -1585,7 +1573,7 @@ class LibraryCommands:
                 absolute path.
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -1600,7 +1588,7 @@ class LibraryCommands:
             "SetLibraries",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(SetLibrariesResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
     def set_library_part_custom_section(
@@ -1611,7 +1599,7 @@ class LibraryCommands:
         data_version: None | int = None,
         data: None | str = None,
         delete: None | bool = None,
-    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+    ) -> SuccessfulExecutionResult:
         """
         Creates, replaces or deletes a custom section of a loaded library part. The content is
         given as base64. A library part that is not editable is refused and left unchanged.
@@ -1632,7 +1620,7 @@ class LibraryCommands:
             delete (None | bool): When true, the section is deleted. Give either data or delete.
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -1652,7 +1640,7 @@ class LibraryCommands:
             "SetLibraryPartCustomSection",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(SetLibraryPartCustomSectionResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
     def set_library_part_metadata(
@@ -1730,7 +1718,7 @@ class LibraryCommands:
         gdl_pictures: None | list[str] = None,
         dark_preview_picture: None | str = None,
         dark_gdl_pictures: None | list[str] = None,
-    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+    ) -> SuccessfulExecutionResult:
         """
         Sets the preview picture and the GDL pictures of a loaded library part from base64
         encoded PNGs, and from Archicad 29 also their dark user interface variants. All pictures
@@ -1751,7 +1739,7 @@ class LibraryCommands:
                 the library part. Requires Archicad 29 or newer.
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -1770,7 +1758,7 @@ class LibraryCommands:
             "SetLibraryPartPictureImages",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(SetLibraryPartPictureImagesResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
     def set_library_part_pictures(
@@ -1782,7 +1770,7 @@ class LibraryCommands:
         delete_dark_gdl_pictures: None | bool = None,
         copy_2d_symbol_from: None | str = None,
         delete_2d_symbol: None | bool = None,
-    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+    ) -> SuccessfulExecutionResult:
         """
         Deletes the preview picture, the GDL pictures (and from Archicad 29 their dark variants)
         or the 2D symbol of a loaded library part, or copies the 2D symbol from another library
@@ -1807,7 +1795,7 @@ class LibraryCommands:
                 vector image) is deleted. Cannot be combined with copy2DSymbolFrom.
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -1828,7 +1816,7 @@ class LibraryCommands:
             "SetLibraryPartPictures",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(SetLibraryPartPicturesResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
     def set_library_part_scripts(

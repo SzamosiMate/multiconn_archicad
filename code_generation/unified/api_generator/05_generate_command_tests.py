@@ -15,6 +15,7 @@ from multiconn_archicad.models.official import commands as official_commands, ty
 from code_generation.shared.utils import bound_graphic_override_criteria, camel_to_snake, serialize_test_schema
 from code_generation.tapir.paths import tapir_paths
 from code_generation.official.paths import official_paths
+from code_generation.unified.api_generator.response_contract import reachable_response_schema
 
 MODEL_MAP = {
     "tapir": {"commands": tapir_commands, "types": tapir_types},
@@ -114,13 +115,19 @@ class TestGenerator:
         except AttributeError:
             return getattr(MODEL_MAP[source]["types"], name)
 
-    def _get_minimal_schema_for_model(self, model_name: str, source: str, response_override: dict | None = None) -> str:
+    def _get_minimal_schema_for_model(
+        self, model_name: str, source: str, response_override: dict | None = None, *, core_response: bool = False
+    ) -> str:
         master_schema = self._master_schemas[source]
         all_definitions = master_schema.get("$defs", {})
 
         all_definitions = patch_recursive_schemas(all_definitions, model_name, source)
         if response_override is not None:
             all_definitions[model_name] = response_override
+        if core_response:
+            all_definitions[model_name] = reachable_response_schema(
+                all_definitions[model_name], all_definitions, source
+            )
 
         minimal_definitions = {}
         collect_dependencies_recursively(model_name, all_definitions, minimal_definitions, set())
@@ -138,7 +145,7 @@ class TestGenerator:
         cmd_name = command_details["name"]
         deps = command_details.get("command_model_dependencies", [])
         params_model_name = next((d for d in deps if d.endswith("Parameters")), None)
-        result_model_name = next((d for d in deps if d.endswith("Result")), None)
+        result_model_name = command_details.get("result_model_name")
         snake_name = command_details.get("python_name") or camel_to_snake(
             cmd_name.removeprefix("API.") if source == "official" else cmd_name
         )
@@ -163,7 +170,9 @@ class TestGenerator:
                         "required": [alias_prop],
                         "additionalProperties": False,
                     }
-            result_schema_str = self._get_minimal_schema_for_model(result_model_name, source, response_override)
+            result_schema_str = self._get_minimal_schema_for_model(
+                result_model_name, source, response_override, core_response=True
+            )
             if result_schema_str != "None":
                 given_params.append(f"mock_response=schema_strategy({result_schema_str})")
                 given_args.append("mock_response: dict")

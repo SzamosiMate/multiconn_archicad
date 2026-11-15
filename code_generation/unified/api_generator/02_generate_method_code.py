@@ -7,6 +7,7 @@ from types import UnionType
 from typing import Any, get_args, get_origin, Union, Annotated
 
 from code_generation.shared.utils import camel_to_snake
+from code_generation.unified.api_generator.response_contract import reachable_response_type
 from code_generation.unified.api_generator.shipped_signatures import ShippedMethod, load_shipped_signatures
 
 from multiconn_archicad.models.official import commands as official_commands
@@ -21,6 +22,7 @@ MODEL_MODULES = {
 }
 EXECUTION_RESULT_RETURN = "FailedExecutionResult | SuccessfulExecutionResult"
 EXECUTION_RESULTS_RETURN = f"list[{EXECUTION_RESULT_RETURN}]"
+SUCCESSFUL_EXECUTION_RESULT_RETURN = "SuccessfulExecutionResult"
 
 
 def main():
@@ -95,7 +97,8 @@ def generate_method_code(
     if (
         source == "tapir"
         and shipped is not None
-        and shipped["returns"] in (EXECUTION_RESULT_RETURN, EXECUTION_RESULTS_RETURN)
+        and shipped["returns"]
+        in (EXECUTION_RESULT_RETURN, EXECUTION_RESULTS_RETURN, SUCCESSFUL_EXECUTION_RESULT_RETURN)
         and "dry_run" not in shipped["parameters"]
         and "dryRun" in getattr(params_model, "model_fields", {})
         and "dryRun" in getattr(result_model, "model_fields", {})
@@ -216,16 +219,26 @@ def _generate_standard_method(
     )
     params_model_name = f"{command_name}Parameters" if params_model else None
     result_model_name = f"{command_name}Result" if result_model else None
+    response_model = reachable_response_type(result_model, command_details["source"])
+    response_type_hint = None
+    if response_model is not result_model:
+        # Keep the original wire model for return-shape decisions, but validate
+        # only branches which the core can actually return.
+        dependencies["commands"].discard(result_model_name)
+        dependencies["types"].discard(result_model_name)
+        response_type_hint = get_clean_type_hint(response_model, dependencies)
 
     if legacy_return:
-        final_return_type_hint = legacy_return
-        dependencies["types"].update({"ExecutionResult", "FailedExecutionResult", "SuccessfulExecutionResult"})
         if legacy_return == EXECUTION_RESULTS_RETURN:
+            final_return_type_hint = legacy_return
+            dependencies["types"].update({"ExecutionResult", "FailedExecutionResult", "SuccessfulExecutionResult"})
             alias_property_name = "executionResults"
             field_info = result_model.model_fields[alias_property_name]
-            return_doc_info = (legacy_return, field_info.description)
+            return_doc_info = (final_return_type_hint, field_info.description)
         else:
-            return_doc_info = (legacy_return, None)
+            final_return_type_hint = SUCCESSFUL_EXECUTION_RESULT_RETURN
+            dependencies["types"].add(final_return_type_hint)
+            return_doc_info = (final_return_type_hint, None)
     elif result_model:
         # Check if the result model is just a wrapper for a single field (alias)
         if inspect.isclass(result_model) and hasattr(result_model, "model_fields") and not result_model.model_fields:
@@ -240,7 +253,7 @@ def _generate_standard_method(
             final_return_type_hint = get_clean_type_hint(field_info.annotation, dependencies)
             return_doc_info = (final_return_type_hint, field_info.description)
         else:
-            final_return_type_hint = get_clean_type_hint(result_model, dependencies)
+            final_return_type_hint = get_clean_type_hint(response_model, dependencies)
             return_doc_info = (final_return_type_hint, None)
 
     signature, param_docs = _build_signature_and_docs(
@@ -261,6 +274,7 @@ def _generate_standard_method(
         alias_property_name,
         dry_run=dry_run,
         legacy_return=legacy_return,
+        response_type_hint=response_type_hint,
     )
 
     generated = {
@@ -268,6 +282,7 @@ def _generate_standard_method(
         "command_model_dependencies": sorted(list(dependencies["commands"])),
         "type_model_dependencies": sorted(list(dependencies["types"])),
         "alias_property_name": alias_property_name,
+        "result_model_name": result_model_name,
     }
     if dry_run is not None:
         generated["dry_run"] = dry_run
@@ -400,6 +415,7 @@ def _build_body(
     *,
     dry_run: bool | None = None,
     legacy_return: str | None = None,
+    response_type_hint: str | None = None,
 ) -> str:
     """Constructs the method body, creating the params dict and handling alias returns."""
     core_call_method = "post_tapir_command" if source == "tapir" else "post_command"
@@ -427,7 +443,9 @@ def _build_body(
 
     call_args = [f'"{original_command_name}"']
     if params_model:
-        call_args.append("validated_params.model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)")
+        call_args.append(
+            "validated_params.model_dump(mode='json', by_alias=True, exclude_none=True, exclude_defaults=True)"
+        )
     call_expression = f"self._core.{core_call_method}(\n    {',\n    '.join(call_args)}\n)"
 
     if not validation_model:
@@ -442,12 +460,12 @@ def _build_body(
                     f"return TypeAdapter(list[ExecutionResult]).validate_python(response_dict.get({alias_property_name!r}))"
                 )
             else:
-                body_lines.append("return TypeAdapter(ExecutionResult).validate_python(response_dict)")
+                body_lines.append("return TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)")
             return "\n".join(body_lines)
 
         if is_union(validation_model):
             body_lines.append(
-                f"validated_response = TypeAdapter({validation_model_name}).validate_python(response_dict)"
+                f"validated_response = TypeAdapter({response_type_hint or validation_model_name}).validate_python(response_dict)"
             )
         else:
             body_lines.append(f"validated_response = {validation_model_name}.model_validate(response_dict)")

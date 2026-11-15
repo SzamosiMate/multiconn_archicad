@@ -28,12 +28,10 @@ from multiconn_archicad.models.tapir.commands import (
     ShowIFCExportSettingsParameters,
     ShowIFCExportSettingsResult,
     ShowScriptUIParameters,
-    ShowScriptUIResult,
 )
 from multiconn_archicad.models.tapir.types import (
     AttributeId,
     ElementType,
-    FailedExecutionResult,
     LibraryPartPickerElementType,
     LibraryPartSaveLocationType,
     NavigatorItemId,
@@ -423,7 +421,7 @@ class ScriptUiCommands:
         *,
         ui_id: None | int = None,
         script_id: None | str = None,
-    ) -> FailedExecutionResult | ScriptUIShown:
+    ) -> ScriptUIShown:
         """
         Shows the given HTML content in a native Archicad palette (a tkinter alternative for
         Python scripts) and returns the uiId of its window. Each script can have its own window,
@@ -465,7 +463,7 @@ class ScriptUiCommands:
                 uiId and scriptId the first window is used.
 
         Returns:
-            FailedExecutionResult | ScriptUIShown
+            ScriptUIShown
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -494,5 +492,5 @@ class ScriptUiCommands:
             "ShowScriptUI",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(ShowScriptUIResult).validate_python(response_dict)
+        validated_response = TypeAdapter(ScriptUIShown).validate_python(response_dict)
         return validated_response

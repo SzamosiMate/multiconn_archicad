@@ -61,15 +61,12 @@ from multiconn_archicad.models.tapir.commands import (
     GetCustomCurveMemberStretchResult,
     GetLCSOfAnalyticalMembersParameters,
     GetLCSOfAnalyticalMembersResult,
-    SetAnalyticalGenerationSettingsToNoRuleResult,
     SetAnalyticalReleasesParameters,
     SetAnalyticalReleasesResult,
     SetAnalyticalVisibilitySettingsParameters,
-    SetAnalyticalVisibilitySettingsResult,
     SetCustomCurveMemberStretchParameters,
     SetCustomCurveMemberStretchResult,
     UpdateAnalyticalModelParameters,
-    UpdateAnalyticalModelResult,
 )
 from multiconn_archicad.models.tapir.types import (
     AnalyticalCurveMemberDetails,
@@ -1036,13 +1033,13 @@ class AnalyticalCommands:
         validated_response = GetLCSOfAnalyticalMembersResult.model_validate(response_dict)
         return validated_response.localCoordinateSystems
 
-    def set_analytical_generation_settings_to_no_rule(self) -> FailedExecutionResult | SuccessfulExecutionResult:
+    def set_analytical_generation_settings_to_no_rule(self) -> SuccessfulExecutionResult:
         """
         Sets the generation settings of the current Structural Analytical Model to no rules.
         Available from Archicad 27.
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -1050,7 +1047,7 @@ class AnalyticalCommands:
             pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         response_dict = self._core.post_tapir_command("SetAnalyticalGenerationSettingsToNoRule")
-        validated_response = TypeAdapter(SetAnalyticalGenerationSettingsToNoRuleResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
     def set_analytical_releases(
@@ -1087,7 +1084,7 @@ class AnalyticalCommands:
 
     def set_analytical_visibility_settings(
         self, visibility_settings: AnalyticalVisibilitySettings
-    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+    ) -> SuccessfulExecutionResult:
         """
         Changes the given fields of the Structural Analytical Model visibility settings; the
         others keep their value. Available from Archicad 26.
@@ -1097,7 +1094,7 @@ class AnalyticalCommands:
                 left out keep their current value.
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -1112,7 +1109,7 @@ class AnalyticalCommands:
             "SetAnalyticalVisibilitySettings",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(SetAnalyticalVisibilitySettingsResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
     def set_custom_curve_member_stretch(
@@ -1146,9 +1143,7 @@ class AnalyticalCommands:
         validated_response = SetCustomCurveMemberStretchResult.model_validate(response_dict)
         return validated_response.executionResults
 
-    def update_analytical_model(
-        self, analytical_model_id: GuidId | None = None
-    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+    def update_analytical_model(self, analytical_model_id: GuidId | None = None) -> SuccessfulExecutionResult:
         """
         Triggers an update of the given Structural Analytical Model, or of the model of the
         current view when no model is given. Available from Archicad 27.
@@ -1158,7 +1153,7 @@ class AnalyticalCommands:
                 Model to update. The model of the current view is updated when it is omitted.
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -1173,5 +1168,5 @@ class AnalyticalCommands:
             "UpdateAnalyticalModel",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(UpdateAnalyticalModelResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response

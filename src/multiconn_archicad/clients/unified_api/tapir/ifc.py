@@ -23,7 +23,6 @@ from multiconn_archicad.models.tapir.commands import (
     GetIFCTypeOfElementsParameters,
     GetIFCTypeOfElementsResult,
     IFCFileOperationParameters,
-    IFCFileOperationResult,
     RemoveIFCClassificationReferencesOfElementsParameters,
     RemoveIFCClassificationReferencesOfElementsResult,
     RemoveIFCPropertiesOfElementsParameters,
@@ -335,7 +334,7 @@ class IfcCommands:
         *,
         overwrite: None | bool = None,
         story_index: None | int = None,
-    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+    ) -> SuccessfulExecutionResult:
         """
         Executes an IFC file operation: opens or merges an IFC file, or saves the project as an
         IFC file. A save can name the export translator to use, a merge the story the IFC file's
@@ -362,7 +361,7 @@ class IfcCommands:
                 the valid story indices.
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -383,7 +382,7 @@ class IfcCommands:
             "IFCFileOperation",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(IFCFileOperationResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
     def remove_ifc_classification_references_of_elements(
