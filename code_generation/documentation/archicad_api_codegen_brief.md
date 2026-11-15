@@ -85,6 +85,12 @@ The Official runner does not currently include the Tapir strict-audit or complet
 
 Parameters serialize in JSON mode with wire aliases and omitted `None` values. Official calls route through `post_command`; Tapir calls use `post_tapir_command`. Responses are validated through models or `TypeAdapter`, including aliases and unions.
 
+The selected, not-yet-implemented change to optional-default handling is recorded
+in the [Literal-based serialization implementation plan](optional-default-serialization-plan.md).
+It preserves visible defaults and proposes request default exclusion with audited
+preservation of required Literal fields. Until implemented, the behavior above
+remains the current behavior.
+
 The method generator reads a checked-in snapshot keyed by provider, wire command, and Python method name. Existing positional arguments keep their published order, and shipped keyword-only arguments retain that kind. New fields on an existing method are keyword-only. Commands absent from the snapshot use the normal required-first order. Model changes that replace the call shape, such as a new top-level parameter union, still require compatibility review. Refresh the snapshot from a shipped MultiConn tag when adopting a new baseline. [Shipped signatures](../unified/api_generator/shipped_signatures.json)
 
 When a Tapir command adds dry-run input and response fields to a shipped execution-result method, the generator preserves its ordinary call and return type. A companion `_dry_run` method sends `dryRun=True` to the same wire command and returns its full preview response. The snapshot records both Python methods when they share the command.
