@@ -1,6 +1,6 @@
 # Element query development plan
 
-Updated 2026-11-14, Europe/Budapest.
+Updated 2026-11-15, Europe/Budapest.
 
 Current behavior belongs in the [guide](../utilities/element_queries.md),
 [reference](../utilities/element_query_reference.md), and
@@ -21,7 +21,10 @@ from the consumer plan.
   Execution coordinates discovery/validation/preparation without dispatching on
   property or classification families; draft refresh shares referenced discovery.
 - Serializable incomplete row drafts, compilation with AND precedence and
-  parentheses, expression-to-row source maps, and framework-neutral input descriptions.
+  parentheses, local row diagnostics, and framework-neutral input descriptions.
+- Metadata issues are displayed at query level with field context and executable
+  query paths. Row IDs serve local diagnostics and editor bindings; compiled
+  queries carry no expression-to-row source map.
 - Concise and diagnostic search, plus strict and aligned supplied-ID filtering.
   Core already raises whole-command Tapir errors; no duplicate handling is needed.
 - Query listing defaults to the explicit main/floor-plan database and both
@@ -42,6 +45,23 @@ from the consumer plan.
 The earlier listing-return concern was withdrawn: core already raises a
 top-level Tapir command error before generated response parsing. Broad generator
 annotation changes were reverted and remain outside this branch.
+
+## Editor validation boundary
+
+The [editor integration guide](../utilities/element_query_editing.md) separates
+local draft validation from metadata validation. Compilation returns either a
+complete query or row-local input/parentheses issues. Metadata validation checks
+the executable query and reports query-level issues with field references,
+resolved names when available, and query paths.
+
+Predicate object identity is not a compilation contract. Query construction can
+copy or reconstruct predicates without maintaining editor provenance. Consumers
+rebuild and revalidate after edits, and refresh captured metadata when project
+definitions change. Live row IDs remain useful for local diagnostics and bindings.
+
+This boundary does not make every Boolean rewrite safe: metadata validation
+checks all branches and reports each occurrence, and evaluation retains child
+errors. Transformations must preserve those contracts as well as Boolean results.
 
 ## Release boundary
 
