@@ -7,7 +7,6 @@ from pydantic import TypeAdapter
 
 from multiconn_archicad.models.tapir.commands import (
     ChangeWindowParameters,
-    ChangeWindowResult,
     CloseWindowsParameters,
     CloseWindowsResult,
     ConvertImagesParameters,
@@ -49,23 +48,15 @@ from multiconn_archicad.models.tapir.commands import (
     GetUserGSIDResult,
     ModelToScreenParameters,
     ModelToScreenResult,
-    QuitArchicadResult,
-    RebuildCurrentDatabaseResult,
-    RedrawCurrentDatabaseResult,
     RunActionCenterChecksParameters,
     RunActionCenterChecksResult,
     ScreenToModelParameters,
     ScreenToModelResult,
     Set3DCutawayStatusParameters,
-    Set3DCutawayStatusResult,
     SetArchicadVisibilityParameters,
-    SetArchicadVisibilityResult,
     SetCurrentToolParameters,
-    SetCurrentToolResult,
     SetCurrentWindowDrawingScaleParameters,
-    SetCurrentWindowDrawingScaleResult,
     SetDialogAutoCloseParameters,
-    SetDialogAutoCloseResult,
     ShowAlertParameters,
     ShowAlertResult,
     ShowNotificationBubbleParameters,
@@ -113,7 +104,7 @@ class ApplicationCommands:
 
     def change_window(
         self, parameters: NavigatorItemIdArrayItem | DatabaseByWindowType | DatabaseById
-    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+    ) -> SuccessfulExecutionResult:
         """
         Changes the current (active) window to the given window. A databaseId on its own is
         enough; the window type is taken from the database. The databaseId of a worksheet or
@@ -127,7 +118,7 @@ class ApplicationCommands:
                 model configuration parameters.
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -139,7 +130,7 @@ class ApplicationCommands:
             "ChangeWindow",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(ChangeWindowResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
     def close_windows(self, windows: list[WindowToClose]) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
@@ -914,12 +905,12 @@ class ApplicationCommands:
         validated_response = ModelToScreenResult.model_validate(response_dict)
         return validated_response.screenPoints
 
-    def quit_archicad(self) -> FailedExecutionResult | SuccessfulExecutionResult:
+    def quit_archicad(self) -> SuccessfulExecutionResult:
         """
         Performs a quit operation on the currently running Archicad instance.
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -927,16 +918,16 @@ class ApplicationCommands:
             pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         response_dict = self._core.post_tapir_command("QuitArchicad")
-        validated_response = TypeAdapter(QuitArchicadResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
-    def rebuild_current_database(self) -> FailedExecutionResult | SuccessfulExecutionResult:
+    def rebuild_current_database(self) -> SuccessfulExecutionResult:
         """
         Rebuilds the current database, the one the API works on (see ChangeWindow). Requires
         Archicad 27 or later.
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -944,16 +935,16 @@ class ApplicationCommands:
             pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         response_dict = self._core.post_tapir_command("RebuildCurrentDatabase")
-        validated_response = TypeAdapter(RebuildCurrentDatabaseResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
-    def redraw_current_database(self) -> FailedExecutionResult | SuccessfulExecutionResult:
+    def redraw_current_database(self) -> SuccessfulExecutionResult:
         """
         Redraws the current database, even when its window is in the background. Only the
         visible region of its window is updated.
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -961,7 +952,7 @@ class ApplicationCommands:
             pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         response_dict = self._core.post_tapir_command("RedrawCurrentDatabase")
-        validated_response = TypeAdapter(RedrawCurrentDatabaseResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
     def run_action_center_checks(
@@ -1033,7 +1024,7 @@ class ApplicationCommands:
 
     def set_3d_cutaway_status(
         self, cutaway_enabled: None | bool = None, cutting_planes_visible: None | bool = None
-    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+    ) -> SuccessfulExecutionResult:
         """
         Turns 3D Cutaway on or off and shows or hides the cutting planes in the 3D window. In
         Archicad 25-27 the 3D window may need to be open.
@@ -1045,7 +1036,7 @@ class ApplicationCommands:
                 unchanged when omitted.
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -1061,10 +1052,10 @@ class ApplicationCommands:
             "Set3DCutawayStatus",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(Set3DCutawayStatusResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
-    def set_archicad_visibility(self, is_visible: bool) -> FailedExecutionResult | SuccessfulExecutionResult:
+    def set_archicad_visibility(self, is_visible: bool) -> SuccessfulExecutionResult:
         """
         Hides or shows the Archicad application, e.g. to keep it out of the way while a batch
         runs. A script that hides Archicad must show it again, also when the script fails (e.g.
@@ -1074,7 +1065,7 @@ class ApplicationCommands:
             is_visible (bool): True shows the Archicad application, false hides it.
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -1089,12 +1080,12 @@ class ApplicationCommands:
             "SetArchicadVisibility",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(SetArchicadVisibilityResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
     def set_current_tool(
         self, element_type: ElementType | None = None, variation: None | str = None, class_id: None | UUID = None
-    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+    ) -> SuccessfulExecutionResult:
         """
         Activates a tool in the Toolbox, given as GetCurrentTool or GetToolboxItems returns it;
         an empty input activates the Arrow. Archicad switches the tool once it processes its
@@ -1110,7 +1101,7 @@ class ApplicationCommands:
                 elementType is Unknown. Archicad 26 and later.
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -1127,12 +1118,10 @@ class ApplicationCommands:
             "SetCurrentTool",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(SetCurrentToolResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
-    def set_current_window_drawing_scale(
-        self, scale: float, rebuild: None | bool = False
-    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+    def set_current_window_drawing_scale(self, scale: float, rebuild: None | bool = False) -> SuccessfulExecutionResult:
         """
         Changes the drawing scale of the current (active) window, the scale shown in the bottom
         bar, to the given denominator: 100 for 1:100. It changes the scale of the current
@@ -1147,7 +1136,7 @@ class ApplicationCommands:
                 flag). Default: false.
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -1163,10 +1152,10 @@ class ApplicationCommands:
             "SetCurrentWindowDrawingScale",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(SetCurrentWindowDrawingScaleResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
-    def set_dialog_auto_close(self, enabled: bool) -> FailedExecutionResult | SuccessfulExecutionResult:
+    def set_dialog_auto_close(self, enabled: bool) -> SuccessfulExecutionResult:
         """
         Turns the dialog auto close on or off. While it is on, Archicad closes the dialogs it
         would show with their default button instead of waiting for the user, so automation is
@@ -1180,7 +1169,7 @@ class ApplicationCommands:
                 turns it off.
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -1195,7 +1184,7 @@ class ApplicationCommands:
             "SetDialogAutoClose",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(SetDialogAutoCloseResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
     def show_alert(

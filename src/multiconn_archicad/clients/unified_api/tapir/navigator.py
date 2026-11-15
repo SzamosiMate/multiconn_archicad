@@ -47,7 +47,6 @@ from multiconn_archicad.models.tapir.commands import (
     FindModelViewOptionParameters,
     FindModelViewOptionResult,
     FitInWindowParameters,
-    FitInWindowResult,
     Get3DCutPlanesResult,
     Get3DDocumentSettingsParameters,
     Get3DDocumentSettingsResult,
@@ -100,57 +99,40 @@ from multiconn_archicad.models.tapir.commands import (
     ModifySectionsParameters,
     ModifySectionsResult,
     MoveNavigatorItemParameters,
-    MoveNavigatorItemResult,
     PublishPublisherSetParameters,
     RenameNavigatorItemParameters,
-    RenameNavigatorItemResult,
     ReorderNavigatorItemsParameters,
     ReorderNavigatorItemsResult,
     ResetZoomParameters,
-    ResetZoomResult,
     Set3DCutPlanesParameters,
-    Set3DCutPlanesResult,
     Set3DDocumentSettingsParameters,
     Set3DDocumentSettingsResult,
     Set3DFilterAndCutSettingsParameters,
     Set3DProjectionSettingsParameters,
-    Set3DProjectionSettingsResult,
     Set3DWindowSettingsParameters,
     Set3DWindowSettingsResult,
     SetActiveGraphicalOverrideCombinationParameters,
-    SetActiveGraphicalOverrideCombinationResult,
     SetActiveRenovationFilterParameters,
-    SetActiveRenovationFilterResult,
     SetCurrent3DStyleParameters,
-    SetCurrent3DStyleResult,
     SetDocumentFrom3DDefaultsParameters,
-    SetDocumentFrom3DDefaultsResult,
     SetGhostStorySettingsParameters,
-    SetGhostStorySettingsResult,
     SetGridSettingsParameters,
     SetLayoutSettingsParameters,
     SetLayoutSettingsResult,
     SetMasterLayoutContextParameters,
-    SetMasterLayoutContextResult,
     SetSectionsAndElevationsDetailsParameters,
     SetSectionsAndElevationsDetailsResult,
     SetStructureDisplayParameters,
-    SetStructureDisplayResult,
     SetViewOptionsParameters,
     SetViewRotationParameters,
     SetViewRotationResult,
     SetViewSettingsParameters,
     SetViewSettingsResult,
     SetZoomParameters,
-    SetZoomResult,
     ShowElementsIn3DParameters,
-    ShowElementsIn3DResult,
     StoreViewSettingsParameters,
-    StoreViewSettingsResult,
     UpdateDrawingsParameters,
-    UpdateDrawingsResult,
     ZoomToElementsParameters,
-    ZoomToElementsResult,
 )
 from multiconn_archicad.models.tapir.types import (
     Action,
@@ -849,9 +831,7 @@ class NavigatorCommands:
         validated_response = FindModelViewOptionResult.model_validate(response_dict)
         return validated_response
 
-    def fit_in_window(
-        self, elements: None | list[ElementIdArrayItem] = None
-    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+    def fit_in_window(self, elements: None | list[ElementIdArrayItem] = None) -> SuccessfulExecutionResult:
         """
         Zooms to the given elements or fits everything in the window.
 
@@ -859,7 +839,7 @@ class NavigatorCommands:
             elements (None | list[ElementIdArrayItem]): A list of elements.
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -874,7 +854,7 @@ class NavigatorCommands:
             "FitInWindow",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(FitInWindowResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
     def get_3d_cut_planes(self) -> Get3DCutPlanesResult:
@@ -1747,7 +1727,7 @@ class NavigatorCommands:
         navigator_item_id_to_move: NavigatorItemId,
         parent_navigator_item_id: NavigatorItemId,
         previous_navigator_item_id: NavigatorItemId | None = None,
-    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+    ) -> SuccessfulExecutionResult:
         """
         Moves a navigator item to a new parent in the navigator tree, or to a new position
         within its current parent. Fails when Archicad does not put the item where it was asked
@@ -1762,7 +1742,7 @@ class NavigatorCommands:
                 moved within its own parent goes to the end of it.
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -1779,7 +1759,7 @@ class NavigatorCommands:
             "MoveNavigatorItem",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(MoveNavigatorItemResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
     def publish_publisher_set(
@@ -1822,7 +1802,7 @@ class NavigatorCommands:
         new_name: None | str = None,
         new_id: None | str = None,
         custom_name: None | bool = None,
-    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+    ) -> SuccessfulExecutionResult:
         """
         Renames a navigator item or changes its ID. Renaming the Layout Book item of a placed
         Drawing also sets the custom name of the Drawing. newId sets the custom layout number of
@@ -1848,7 +1828,7 @@ class NavigatorCommands:
                 newName.
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -1866,7 +1846,7 @@ class NavigatorCommands:
             "RenameNavigatorItem",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(RenameNavigatorItemResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
     def reorder_navigator_items(
@@ -1905,7 +1885,7 @@ class NavigatorCommands:
         validated_response = ReorderNavigatorItemsResult.model_validate(response_dict)
         return validated_response.executionResults
 
-    def reset_zoom(self, number_of_steps_back: None | int = None) -> FailedExecutionResult | SuccessfulExecutionResult:
+    def reset_zoom(self, number_of_steps_back: None | int = None) -> SuccessfulExecutionResult:
         """
         Steps back in the zoom history of the current window, like Archicad's Zoom Back.
 
@@ -1914,7 +1894,7 @@ class NavigatorCommands:
                 history of the current window, like Archicad's Zoom Back. The default is 1.
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -1929,12 +1909,10 @@ class NavigatorCommands:
             "ResetZoom",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(ResetZoomResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
-    def set_3d_cut_planes(
-        self, cut_planes: None | list[CutPlane] = None
-    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+    def set_3d_cut_planes(self, cut_planes: None | list[CutPlane] = None) -> SuccessfulExecutionResult:
         """
         Sets the 3D cut planes. An empty cutPlanes array switches the 3D cut off.
 
@@ -1944,7 +1922,7 @@ class NavigatorCommands:
                 other side is kept (to be confirmed in Archicad). pd is in meters.
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -1959,7 +1937,7 @@ class NavigatorCommands:
             "Set3DCutPlanes",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(Set3DCutPlanesResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
     def set_3d_document_settings(
@@ -2027,7 +2005,7 @@ class NavigatorCommands:
 
     def set_3d_projection_settings(
         self, parameters: PerspectiveProjectionSettings | AxonometricProjectionSettings
-    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+    ) -> SuccessfulExecutionResult:
         """
         Sets a perspective or an axonometric projection for the 3D window. Every perspective
         parameter but sun is required: read a known good set with Get3DProjectionSettings and
@@ -2042,7 +2020,7 @@ class NavigatorCommands:
                 model configuration parameters.
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -2054,7 +2032,7 @@ class NavigatorCommands:
             "Set3DProjectionSettings",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(Set3DProjectionSettingsResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
     def set_3d_window_settings(
@@ -2106,7 +2084,7 @@ class NavigatorCommands:
 
     def set_active_graphical_override_combination(
         self, parameters: ActiveGraphicalOverrideCombinationById | ActiveGraphicalOverrideCombinationByName
-    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+    ) -> SuccessfulExecutionResult:
         """
         Applies a graphic override combination, given by id or by name, to the current window.
         The current window must be a model window (floor plan, section, elevation, 3D, ...). To
@@ -2118,7 +2096,7 @@ class NavigatorCommands:
                 ActiveGraphicalOverrideCombinationByName): Union model configuration parameters.
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -2130,12 +2108,12 @@ class NavigatorCommands:
             "SetActiveGraphicalOverrideCombination",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(SetActiveGraphicalOverrideCombinationResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
     def set_active_renovation_filter(
         self, parameters: ActiveRenovationFilterById | ActiveRenovationFilterByName
-    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+    ) -> SuccessfulExecutionResult:
         """
         Sets the renovation filter of the current window (Document > Renovation > Renovation
         Filter), given by its renovationFilterId from GetRenovationFilters or by its name. Saved
@@ -2146,7 +2124,7 @@ class NavigatorCommands:
                 configuration parameters.
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -2158,10 +2136,10 @@ class NavigatorCommands:
             "SetActiveRenovationFilter",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(SetActiveRenovationFilterResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
-    def set_current_3d_style(self, style_name: str) -> FailedExecutionResult | SuccessfulExecutionResult:
+    def set_current_3d_style(self, style_name: str) -> SuccessfulExecutionResult:
         """
         Meant to make the given 3D style, one of the names Get3DStyles returns, the current one.
         Not available yet: it checks the name, then refuses, because Archicad's API function for
@@ -2171,7 +2149,7 @@ class NavigatorCommands:
             style_name (str): The name of an existing 3D style, as Get3DStyles returns it.
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -2186,7 +2164,7 @@ class NavigatorCommands:
             "SetCurrent3DStyle",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(SetCurrent3DStyleResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
     def set_document_from_3d_defaults(
@@ -2204,7 +2182,7 @@ class NavigatorCommands:
         boundary_pen: None | int = None,
         boundary_line_type: None | int = None,
         attribute_options: Document3DAttributeOptions | None = None,
-    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+    ) -> SuccessfulExecutionResult:
         """
         Sets the defaults a newly created 3D Document starts with. Only the given fields are
         changed; existing 3D Documents are not affected. The fields are the ones returned by
@@ -2230,7 +2208,7 @@ class NavigatorCommands:
             attribute_options (Document3DAttributeOptions | None)
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -2257,7 +2235,7 @@ class NavigatorCommands:
             "SetDocumentFrom3DDefaults",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(SetDocumentFrom3DDefaultsResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
     def set_ghost_story_settings(
@@ -2269,7 +2247,7 @@ class NavigatorCommands:
         story_index: None | int = None,
         ghost_color: ColorRGB | None = None,
         filter: None | list[ElementType] = None,
-    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+    ) -> SuccessfulExecutionResult:
         """
         Sets the Trace & Reference ghost story settings of the floor plan through its ghost
         record, which is created when the floor plan has none. Every field is optional; the ones
@@ -2287,7 +2265,7 @@ class NavigatorCommands:
                 others are hidden.
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -2308,7 +2286,7 @@ class NavigatorCommands:
             "SetGhostStorySettings",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(SetGhostStorySettingsResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
     def set_grid_settings(self, settings: GridSettingsUpdate) -> None:
@@ -2367,9 +2345,7 @@ class NavigatorCommands:
         validated_response = SetLayoutSettingsResult.model_validate(response_dict)
         return validated_response.executionResults
 
-    def set_master_layout_context(
-        self, layout_database_id: DatabaseId
-    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+    def set_master_layout_context(self, layout_database_id: DatabaseId) -> SuccessfulExecutionResult:
         """
         Sets which layout's context the master layout of the current window is drawn in: its
         autotexts then show the values of the given layout. The current window must be a master
@@ -2380,7 +2356,7 @@ class NavigatorCommands:
             layout_database_id (DatabaseId)
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -2395,7 +2371,7 @@ class NavigatorCommands:
             "SetMasterLayoutContext",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(SetMasterLayoutContextResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
     def set_sections_and_elevations_details(
@@ -2429,9 +2405,7 @@ class NavigatorCommands:
         validated_response = SetSectionsAndElevationsDetailsResult.model_validate(response_dict)
         return validated_response.executionResults
 
-    def set_structure_display(
-        self, structure_display: PartialStructureDisplay
-    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+    def set_structure_display(self, structure_display: PartialStructureDisplay) -> SuccessfulExecutionResult:
         """
         Sets the Partial Structure Display (EntireStructure, CoreOnly, WithoutFinishes or
         StructureOnly) of the current window, e.g. the floor plan, a section or the 3D window.
@@ -2442,7 +2416,7 @@ class NavigatorCommands:
             structure_display (PartialStructureDisplay)
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -2457,7 +2431,7 @@ class NavigatorCommands:
             "SetStructureDisplay",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(SetStructureDisplayResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
     def set_view_options(
@@ -2552,7 +2526,7 @@ class NavigatorCommands:
         validated_response = SetViewSettingsResult.model_validate(response_dict)
         return validated_response.executionResults
 
-    def set_zoom(self, zoom_box: Zoom) -> FailedExecutionResult | SuccessfulExecutionResult:
+    def set_zoom(self, zoom_box: Zoom) -> SuccessfulExecutionResult:
         """
         Zooms the current 2D window to the given box in model coordinates.
 
@@ -2562,7 +2536,7 @@ class NavigatorCommands:
                 than the box. The rotation of the window is kept as it is.
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -2576,12 +2550,10 @@ class NavigatorCommands:
         response_dict = self._core.post_tapir_command(
             "SetZoom", validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True)
         )
-        validated_response = TypeAdapter(SetZoomResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
-    def show_elements_in_3d(
-        self, elements: None | list[ElementIdArrayItem] = None
-    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+    def show_elements_in_3d(self, elements: None | list[ElementIdArrayItem] = None) -> SuccessfulExecutionResult:
         """
         Opens the 3D window on the given elements, as Show Selection in 3D does: they become the
         selection and only they are shown. Without elements it shows every element, as Show All
@@ -2593,7 +2565,7 @@ class NavigatorCommands:
                 shown, as Show All in 3D does.
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -2608,10 +2580,10 @@ class NavigatorCommands:
             "ShowElementsIn3D",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(ShowElementsIn3DResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
-    def store_view_settings(self, action: Action) -> FailedExecutionResult | SuccessfulExecutionResult:
+    def store_view_settings(self, action: Action) -> SuccessfulExecutionResult:
         """
         Stores the current view settings (action Store) and puts them back later (action
         Restore), for example before and after a script that changes the view. The two must be
@@ -2622,7 +2594,7 @@ class NavigatorCommands:
                 back. Call them in pairs: a second Store before a Restore is refused.
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -2637,10 +2609,10 @@ class NavigatorCommands:
             "StoreViewSettings",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(StoreViewSettingsResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
-    def update_drawings(self, elements: list[ElementIdArrayItem]) -> FailedExecutionResult | SuccessfulExecutionResult:
+    def update_drawings(self, elements: list[ElementIdArrayItem]) -> SuccessfulExecutionResult:
         """
         Performs a drawing update on the given elements.
 
@@ -2648,7 +2620,7 @@ class NavigatorCommands:
             elements (list[ElementIdArrayItem]): A list of elements.
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -2663,12 +2635,12 @@ class NavigatorCommands:
             "UpdateDrawings",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(UpdateDrawingsResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
     def zoom_to_elements(
         self, elements: list[ElementIdArrayItem], keep_selection: None | bool = None
-    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+    ) -> SuccessfulExecutionResult:
         """
         Zooms the current window, 2D or 3D, to the given elements: selects them, zooms to the
         selection and restores the previous selection unless keepSelection is false. Fails when
@@ -2681,7 +2653,7 @@ class NavigatorCommands:
                 command (default). With false the given elements stay selected.
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -2697,5 +2669,5 @@ class NavigatorCommands:
             "ZoomToElements",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(ZoomToElementsResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response

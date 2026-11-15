@@ -17,13 +17,11 @@ from multiconn_archicad.models.tapir.commands import (
     GetSolidElementLinksParameters,
     GetSolidElementLinksResult,
     MergeElementsParameters,
-    MergeElementsResult,
     RemoveElementTrimsParameters,
     RemoveElementTrimsResult,
     RemoveSolidElementLinksParameters,
     RemoveSolidElementLinksResult,
     TrimElementsParameters,
-    TrimElementsResult,
     UnmergeElementsParameters,
     UnmergeElementsResult,
 )
@@ -201,7 +199,7 @@ class SolidElementOperationCommands:
         validated_response = GetSolidElementLinksResult.model_validate(response_dict)
         return validated_response.solidLinks
 
-    def merge_elements(self, elements: list[ElementIdArrayItem]) -> FailedExecutionResult | SuccessfulExecutionResult:
+    def merge_elements(self, elements: list[ElementIdArrayItem]) -> SuccessfulExecutionResult:
         """
         Merges the given construction elements (the Merge command of Archicad, which cleans up
         the junctions of slabs, beams, walls and similar elements). Undoable. The element types
@@ -214,7 +212,7 @@ class SolidElementOperationCommands:
                 least two.
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -229,7 +227,7 @@ class SolidElementOperationCommands:
             "MergeElements",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(MergeElementsResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
     def remove_element_trims(
@@ -373,7 +371,7 @@ class SolidElementOperationCommands:
         elements: list[ElementIdArrayItem],
         trimming_element: ElementId | None = None,
         trim_type: None | TrimType = None,
-    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+    ) -> SuccessfulExecutionResult:
         """
         Trims construction elements with a roof or shell: the roofs and shells in the list, or
         one given trimming element with a trim type. With several roofs or shells in the list
@@ -395,7 +393,7 @@ class SolidElementOperationCommands:
             trim_type (None | TrimType): Used with trimmingElement; defaults to KeepInside.
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -412,7 +410,7 @@ class SolidElementOperationCommands:
             "TrimElements",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(TrimElementsResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
     def unmerge_elements(

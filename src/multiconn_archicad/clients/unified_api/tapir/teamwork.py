@@ -19,12 +19,8 @@ from multiconn_archicad.models.tapir.commands import (
     GetTeamworkRightsOfObjectsResult,
     GetTeamworkStatusResult,
     GrantElementsParameters,
-    GrantElementsResult,
     ReleaseElementsParameters,
-    ReleaseElementsResult,
-    ReleaseHotlinkCacheManagementResult,
     ReleaseLockableObjectSetParameters,
-    ReleaseLockableObjectSetResult,
     RemoveLibrariesFromBIMcloudParameters,
     RemoveLibrariesFromBIMcloudResult,
     ReserveElementsParameters,
@@ -32,8 +28,6 @@ from multiconn_archicad.models.tapir.commands import (
     ReserveHotlinkCacheManagementResult,
     ReserveLockableObjectSetParameters,
     ReserveLockableObjectSetResult,
-    TeamworkReceiveResult,
-    TeamworkSendResult,
     UploadLibrariesToBIMcloudParameters,
     UploadLibrariesToBIMcloudResult,
 )
@@ -245,9 +239,7 @@ class TeamworkCommands:
         validated_response = GetTeamworkStatusResult.model_validate(response_dict)
         return validated_response
 
-    def grant_elements(
-        self, elements: list[ElementIdArrayItem], user_id: float
-    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+    def grant_elements(self, elements: list[ElementIdArrayItem], user_id: float) -> SuccessfulExecutionResult:
         """
         Hands over the reservation of elements to another Teamwork user, given by user id,
         without a dialog. Available from Archicad 27.
@@ -259,7 +251,7 @@ class TeamworkCommands:
                 ReserveElements report users.
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -275,10 +267,10 @@ class TeamworkCommands:
             "GrantElements",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(GrantElementsResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
-    def release_elements(self, elements: list[ElementIdArrayItem]) -> FailedExecutionResult | SuccessfulExecutionResult:
+    def release_elements(self, elements: list[ElementIdArrayItem]) -> SuccessfulExecutionResult:
         """
         Releases elements in Teamwork mode. Fails, naming them, when any of the given GUIDs is
         not an element; the other elements are released.
@@ -287,7 +279,7 @@ class TeamworkCommands:
             elements (list[ElementIdArrayItem]): A list of elements.
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -302,15 +294,15 @@ class TeamworkCommands:
             "ReleaseElements",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(ReleaseElementsResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
-    def release_hotlink_cache_management(self) -> FailedExecutionResult | SuccessfulExecutionResult:
+    def release_hotlink_cache_management(self) -> SuccessfulExecutionResult:
         """
         Releases the Hotlink and XRef management in Teamwork mode.
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -318,10 +310,10 @@ class TeamworkCommands:
             pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         response_dict = self._core.post_tapir_command("ReleaseHotlinkCacheManagement")
-        validated_response = TypeAdapter(ReleaseHotlinkCacheManagementResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
-    def release_lockable_object_set(self, object_set_name: str) -> FailedExecutionResult | SuccessfulExecutionResult:
+    def release_lockable_object_set(self, object_set_name: str) -> SuccessfulExecutionResult:
         """
         Releases a non-element lockable object set reserved with ReserveLockableObjectSet in
         Teamwork mode.
@@ -337,7 +329,7 @@ class TeamworkCommands:
                 too.
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -352,7 +344,7 @@ class TeamworkCommands:
             "ReleaseLockableObjectSet",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(ReleaseLockableObjectSetResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
     def remove_libraries_from_bi_mcloud(
@@ -471,12 +463,12 @@ class TeamworkCommands:
         validated_response = ReserveLockableObjectSetResult.model_validate(response_dict)
         return validated_response
 
-    def teamwork_receive(self) -> FailedExecutionResult | SuccessfulExecutionResult:
+    def teamwork_receive(self) -> SuccessfulExecutionResult:
         """
         Performs a receive operation on the currently opened Teamwork project.
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -484,15 +476,15 @@ class TeamworkCommands:
             pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         response_dict = self._core.post_tapir_command("TeamworkReceive")
-        validated_response = TypeAdapter(TeamworkReceiveResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
-    def teamwork_send(self) -> FailedExecutionResult | SuccessfulExecutionResult:
+    def teamwork_send(self) -> SuccessfulExecutionResult:
         """
         Performs a send operation on the currently opened Teamwork project.
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -500,7 +492,7 @@ class TeamworkCommands:
             pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         response_dict = self._core.post_tapir_command("TeamworkSend")
-        validated_response = TypeAdapter(TeamworkSendResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
     def upload_libraries_to_bi_mcloud(

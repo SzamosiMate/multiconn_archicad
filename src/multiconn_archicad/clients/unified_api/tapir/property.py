@@ -7,7 +7,6 @@ from pydantic import TypeAdapter
 
 from multiconn_archicad.models.tapir.commands import (
     AddPropertyToAttributesParameters,
-    AddPropertyToAttributesResult,
     CheckPropertyValuesParameters,
     CheckPropertyValuesResult,
     CreatePropertyDefinitionsParameters,
@@ -45,11 +44,8 @@ from multiconn_archicad.models.tapir.commands import (
     ImportPropertiesXmlParameters,
     ImportPropertiesXmlResult,
     MakePropertyAvailableForElementsParameters,
-    MakePropertyAvailableForElementsResult,
     MakePropertyUnavailableForElementsParameters,
-    MakePropertyUnavailableForElementsResult,
     ModifyPropertyValueOfElementsParameters,
-    ModifyPropertyValueOfElementsResult,
     RemovePropertyFromAttributesParameters,
     RemovePropertyFromAttributesResult,
     SearchPropertiesParameters,
@@ -57,7 +53,6 @@ from multiconn_archicad.models.tapir.commands import (
     SetBuiltInPropertyValuesOfAttributesParameters,
     SetBuiltInPropertyValuesOfAttributesResult,
     SetPropertyValueOfAttributesParameters,
-    SetPropertyValueOfAttributesResult,
     SetPropertyValuesOfAttributesParameters,
     SetPropertyValuesOfAttributesResult,
     SetPropertyValuesOfElementDefaultsParameters,
@@ -124,7 +119,7 @@ class PropertyCommands:
 
     def add_property_to_attributes(
         self, property_id: PropertyId, attribute_ids: list[AttributeIdArrayItem]
-    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+    ) -> SuccessfulExecutionResult:
         """
         Makes an existing custom property available for the given attributes (for example
         Building Materials), in one undo step. Available in Archicad 25, 26 and 27 only.
@@ -136,7 +131,7 @@ class PropertyCommands:
                 Materials) to make the property available for.
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -152,7 +147,7 @@ class PropertyCommands:
             "AddPropertyToAttributes",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(AddPropertyToAttributesResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
     def check_property_values(
@@ -857,7 +852,7 @@ class PropertyCommands:
 
     def make_property_available_for_elements(
         self, elements: list[ElementIdArrayItem], property_id: PropertyId
-    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+    ) -> SuccessfulExecutionResult:
         """
         Makes a property definition available for all the given elements. Available in Archicad
         25, 26 and 27.
@@ -868,7 +863,7 @@ class PropertyCommands:
             property_id (PropertyId)
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -884,12 +879,12 @@ class PropertyCommands:
             "MakePropertyAvailableForElements",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(MakePropertyAvailableForElementsResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
     def make_property_unavailable_for_elements(
         self, elements: list[ElementIdArrayItem], property_id: PropertyId
-    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+    ) -> SuccessfulExecutionResult:
         """
         Makes a property definition unavailable for all the given elements. Available in
         Archicad 25, 26 and 27.
@@ -900,7 +895,7 @@ class PropertyCommands:
             property_id (PropertyId)
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -916,12 +911,12 @@ class PropertyCommands:
             "MakePropertyUnavailableForElements",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(MakePropertyUnavailableForElementsResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
     def modify_property_value_of_elements(
         self, elements: list[ElementIdArrayItem], property_id: PropertyId, property_value: PropertyValue
-    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+    ) -> SuccessfulExecutionResult:
         """
         Sets one property value on all the given elements in a single step. If the property is
         not available for any of the elements, none of them is changed.
@@ -933,7 +928,7 @@ class PropertyCommands:
             property_value (PropertyValue)
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -950,12 +945,12 @@ class PropertyCommands:
             "ModifyPropertyValueOfElements",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(ModifyPropertyValueOfElementsResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
     def remove_property_from_attributes(
         self, property_id: PropertyId, attribute_ids: list[AttributeIdArrayItem]
-    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+    ) -> SuccessfulExecutionResult:
         """
         Makes a custom property unavailable for the given attributes (for example Building
         Materials), in one undo step. Available in Archicad 25, 26 and 27 only. With dryRun true
@@ -968,7 +963,7 @@ class PropertyCommands:
                 Materials) to make the property unavailable for.
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -984,7 +979,7 @@ class PropertyCommands:
             "RemovePropertyFromAttributes",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        return TypeAdapter(ExecutionResult).validate_python(response_dict)
+        return TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
 
     def remove_property_from_attributes_dry_run(
         self, property_id: PropertyId, attribute_ids: list[AttributeIdArrayItem]
@@ -1114,7 +1109,7 @@ class PropertyCommands:
 
     def set_property_value_of_attributes(
         self, property_id: PropertyId, property_value: PropertyValue, attribute_ids: list[AttributeIdArrayItem]
-    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+    ) -> SuccessfulExecutionResult:
         """
         Sets one property value on several attributes (for example Building Materials) in one
         undo step. If the property is not available for any of the given attributes, no
@@ -1127,7 +1122,7 @@ class PropertyCommands:
                 property must be available for every one of them.
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -1144,7 +1139,7 @@ class PropertyCommands:
             "SetPropertyValueOfAttributes",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(SetPropertyValueOfAttributesResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
     def set_property_values_of_attributes(

@@ -28,17 +28,14 @@ from multiconn_archicad.models.tapir.commands import (
     DeleteSelectedElementsResult,
     DeleteUserDataOfElementsParameters,
     DeleteUserDataOfElementsResult,
-    DeselectAllResult,
     DistributeElementsParameters,
     DistributeElementsResult,
     EditHierarchicalElementParameters,
-    EditHierarchicalElementResult,
     ElevateElementsParameters,
     ElevateElementsResult,
     FilterElementsParameters,
     FilterElementsResult,
     FinishHierarchicalEditingParameters,
-    FinishHierarchicalEditingResult,
     Get2DBoundingBoxesParameters,
     Get2DBoundingBoxesResult,
     Get3DBoundingBoxesParameters,
@@ -47,7 +44,6 @@ from multiconn_archicad.models.tapir.commands import (
     Get3DGeometryOfElementsResult,
     Get3DModelCountsResult,
     GetAllElementsParameters,
-    GetAllElementsResult,
     GetBodyMaterialsOfElementsParameters,
     GetBodyMaterialsOfElementsResult,
     GetCalculatedParametersOfCurtainWallSubElementsParameters,
@@ -59,7 +55,6 @@ from multiconn_archicad.models.tapir.commands import (
     GetCollisionsParameters,
     GetCollisionsResult,
     GetConnectedElementsParameters,
-    GetConnectedElementsResult,
     GetCurtainWallAbsoluteBottomsParameters,
     GetCurtainWallAbsoluteBottomsResult,
     GetCutPolygonsOfElementsParameters,
@@ -86,11 +81,8 @@ from multiconn_archicad.models.tapir.commands import (
     GetElementsByCriteriaParameters,
     GetElementsByCriteriaResult,
     GetElementsByTypeParameters,
-    GetElementsByTypeResult,
     GetElementsInCreationOrderParameters,
-    GetElementsInCreationOrderResult,
     GetElementsInDrawOrderParameters,
-    GetElementsInDrawOrderResult,
     GetGDLParametersOfElementsParameters,
     GetGDLParametersOfElementsResult,
     GetGridElementDefaultsParameters,
@@ -157,16 +149,13 @@ from multiconn_archicad.models.tapir.commands import (
     GetVisibleSkinStatusParameters,
     GetVisibleSkinStatusResult,
     GetZoneBoundariesParameters,
-    GetZoneBoundariesResult,
     GetZoneLabelingSettingsResult,
     GetZoneReductionsParameters,
     GetZoneReductionsResult,
     HighlightElementsParameters,
-    HighlightElementsResult,
     LinkElementsParameters,
     LinkElementsResult,
     LockElementsParameters,
-    LockElementsResult,
     MeasureTextsParameters,
     MeasureTextsResult,
     MirrorElementsParameters,
@@ -182,9 +171,7 @@ from multiconn_archicad.models.tapir.commands import (
     RegularizePolylinesParameters,
     RegularizePolylinesResult,
     ReleaseElementStateParameters,
-    ReleaseElementStateResult,
     RemoveElementNotificationClientParameters,
-    RemoveElementNotificationClientResult,
     RotateCopyElementsParameters,
     RotateCopyElementsResult,
     RotateElementsParameters,
@@ -200,7 +187,6 @@ from multiconn_archicad.models.tapir.commands import (
     SetElementInfoStringsParameters,
     SetElementInfoStringsResult,
     SetElementNotificationClientParameters,
-    SetElementNotificationClientResult,
     SetGDLParametersOfElementsParameters,
     SetGDLParametersOfElementsResult,
     SetLinkedPropertyObjectsOfElementsParameters,
@@ -210,7 +196,6 @@ from multiconn_archicad.models.tapir.commands import (
     SetMarkerParametersOfElementsParameters,
     SetMarkerParametersOfElementsResult,
     SetMarqueeParameters,
-    SetMarqueeResult,
     SetOpeningDefaultParameters,
     SetOpeningDefaultResult,
     SetOpeningDetailsParameters,
@@ -222,7 +207,6 @@ from multiconn_archicad.models.tapir.commands import (
     SetURLReferencesOfElementsParameters,
     SetURLReferencesOfElementsResult,
     SetZoneLabelingSettingsParameters,
-    SetZoneLabelingSettingsResult,
     SolveStairBaselineParameters,
     SolveStairBaselineResult,
     SplitElementsParameters,
@@ -232,9 +216,7 @@ from multiconn_archicad.models.tapir.commands import (
     UnlinkElementsParameters,
     UnlinkElementsResult,
     UnlockElementsParameters,
-    UnlockElementsResult,
     UpdateZonesParameters,
-    UpdateZonesResult,
 )
 from multiconn_archicad.models.tapir.types import (
     AlignTo,
@@ -765,7 +747,7 @@ class ElementCommands:
         validated_response = DeleteElementsResult.model_validate(response_dict)
         return validated_response
 
-    def delete_selected_elements(self) -> FailedExecutionResult | SuccessfulExecutionResult:
+    def delete_selected_elements(self) -> SuccessfulExecutionResult:
         """
         Deletes the currently selected elements in one undo step, the same as pressing the
         Delete key. With dryRun true nothing is deleted and no undo step is created: the
@@ -774,7 +756,7 @@ class ElementCommands:
         none of them).
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -787,7 +769,7 @@ class ElementCommands:
             "DeleteSelectedElements",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        return TypeAdapter(ExecutionResult).validate_python(response_dict)
+        return TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
 
     def delete_selected_elements_dry_run(self) -> DeleteSelectedElementsResult:
         """
@@ -855,12 +837,12 @@ class ElementCommands:
         validated_response = DeleteUserDataOfElementsResult.model_validate(response_dict)
         return validated_response
 
-    def deselect_all(self) -> FailedExecutionResult | SuccessfulExecutionResult:
+    def deselect_all(self) -> SuccessfulExecutionResult:
         """
         Clears the selection in the current window.
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -868,7 +850,7 @@ class ElementCommands:
             pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
         response_dict = self._core.post_tapir_command("DeselectAll")
-        validated_response = TypeAdapter(DeselectAllResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
     def distribute_elements(
@@ -923,7 +905,7 @@ class ElementCommands:
         validated_response = DistributeElementsResult.model_validate(response_dict)
         return validated_response.executionResults
 
-    def edit_hierarchical_element(self, element_id: ElementId) -> FailedExecutionResult | SuccessfulExecutionResult:
+    def edit_hierarchical_element(self, element_id: ElementId) -> SuccessfulExecutionResult:
         """
         Opens the given hierarchical element (Curtain Wall, Stair, Railing, Beam or Column) in
         its hierarchical 3D editing mode, as the Edit button of the element does. Fails when
@@ -938,7 +920,7 @@ class ElementCommands:
                 or Column) to open in hierarchical editing mode.
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -953,7 +935,7 @@ class ElementCommands:
             "EditHierarchicalElement",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(EditHierarchicalElementResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
     def elevate_elements(
@@ -1048,7 +1030,7 @@ class ElementCommands:
         validated_response = FilterElementsResult.model_validate(response_dict)
         return validated_response.elements
 
-    def finish_hierarchical_editing(self, accept: bool) -> FailedExecutionResult | SuccessfulExecutionResult:
+    def finish_hierarchical_editing(self, accept: bool) -> SuccessfulExecutionResult:
         """
         Finishes the current hierarchical editing mode (Curtain Wall, Stair, Railing, Beam or
         Column): accept true keeps the changes (OK), accept false discards them (Cancel). The
@@ -1063,7 +1045,7 @@ class ElementCommands:
                 (OK), false to discard them (Cancel).
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -1078,7 +1060,7 @@ class ElementCommands:
             "FinishHierarchicalEditing",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(FinishHierarchicalEditingResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
     def get_2d_bounding_boxes(self, elements: list[ElementIdArrayItem]) -> list[BoundingBox2DArrayItem | ErrorItem]:
@@ -1202,7 +1184,7 @@ class ElementCommands:
 
     def get_all_elements(
         self, filters: None | list[ElementFilter] = None, databases: None | list[DatabaseIdArrayItem] = None
-    ) -> ElementsWithExecutionResults | ErrorItem:
+    ) -> ElementsWithExecutionResults:
         """
         Returns the identifier of all elements on the plan. Use the optional filter parameter
         for filtering. Objects that belong to another element (zone stamps, the parts of stairs
@@ -1213,7 +1195,7 @@ class ElementCommands:
             databases (None | list[DatabaseIdArrayItem]): A list of Archicad databases.
 
         Returns:
-            ElementsWithExecutionResults | ErrorItem
+            ElementsWithExecutionResults
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -1229,7 +1211,7 @@ class ElementCommands:
             "GetAllElements",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(GetAllElementsResult).validate_python(response_dict)
+        validated_response = TypeAdapter(ElementsWithExecutionResults).validate_python(response_dict)
         return validated_response
 
     def get_body_materials_of_elements(
@@ -1411,7 +1393,7 @@ class ElementCommands:
 
     def get_connected_elements(
         self, elements: list[ElementIdArrayItem], connected_element_type: ElementType
-    ) -> ConnectedElementsWrapper | ErrorItem:
+    ) -> ConnectedElementsWrapper:
         """
         Gets the elements hosted by (connected to) the given owner elements, filtered to the
         given element type: for example the Windows or Doors of a Wall, the frames, panels,
@@ -1426,7 +1408,7 @@ class ElementCommands:
                 Stair or Railing owner.
 
         Returns:
-            ConnectedElementsWrapper | ErrorItem
+            ConnectedElementsWrapper
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -1442,7 +1424,7 @@ class ElementCommands:
             "GetConnectedElements",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(GetConnectedElementsResult).validate_python(response_dict)
+        validated_response = TypeAdapter(ConnectedElementsWrapper).validate_python(response_dict)
         return validated_response
 
     def get_curtain_wall_absolute_bottoms(
@@ -1946,7 +1928,7 @@ class ElementCommands:
         element_type: ElementType,
         filters: None | list[ElementFilter] = None,
         databases: None | list[DatabaseIdArrayItem] = None,
-    ) -> ElementsWithExecutionResults | ErrorItem:
+    ) -> ElementsWithExecutionResults:
         """
         Returns the identifier of every element of the given type on the plan. It works for any
         type. Use the optional filter parameter for filtering. Objects that belong to another
@@ -1959,7 +1941,7 @@ class ElementCommands:
             databases (None | list[DatabaseIdArrayItem]): A list of Archicad databases.
 
         Returns:
-            ElementsWithExecutionResults | ErrorItem
+            ElementsWithExecutionResults
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -1976,12 +1958,12 @@ class ElementCommands:
             "GetElementsByType",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(GetElementsByTypeResult).validate_python(response_dict)
+        validated_response = TypeAdapter(ElementsWithExecutionResults).validate_python(response_dict)
         return validated_response
 
     def get_elements_in_creation_order(
         self, databases: None | list[DatabaseIdArrayItem] = None
-    ) -> ElementsWithExecutionResults | ErrorItem:
+    ) -> ElementsWithExecutionResults:
         """
         Returns the identifier of every element of the current database, or of the given
         databases, in the order the elements were created.
@@ -1990,7 +1972,7 @@ class ElementCommands:
             databases (None | list[DatabaseIdArrayItem]): A list of Archicad databases.
 
         Returns:
-            ElementsWithExecutionResults | ErrorItem
+            ElementsWithExecutionResults
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -2005,7 +1987,7 @@ class ElementCommands:
             "GetElementsInCreationOrder",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(GetElementsInCreationOrderResult).validate_python(response_dict)
+        validated_response = TypeAdapter(ElementsWithExecutionResults).validate_python(response_dict)
         return validated_response
 
     def get_elements_in_draw_order(
@@ -2013,7 +1995,7 @@ class ElementCommands:
         element_type: ElementType | None = None,
         filters: None | list[ElementFilter] = None,
         databases: None | list[DatabaseIdArrayItem] = None,
-    ) -> ElementsWithExecutionResults | ErrorItem:
+    ) -> ElementsWithExecutionResults:
         """
         Returns the identifier of every element of the current database, or of the given
         databases, in Archicad's drawing order (the order set by Bring to Front and Send to
@@ -2031,7 +2013,7 @@ class ElementCommands:
                 each in its own drawing order. If omitted, the current database is used.
 
         Returns:
-            ElementsWithExecutionResults | ErrorItem
+            ElementsWithExecutionResults
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -2048,7 +2030,7 @@ class ElementCommands:
             "GetElementsInDrawOrder",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(GetElementsInDrawOrderResult).validate_python(response_dict)
+        validated_response = TypeAdapter(ElementsWithExecutionResults).validate_python(response_dict)
         return validated_response
 
     def get_gdl_parameters_of_elements(self, elements: list[ElementIdArrayItem]) -> list[GDLParameterList]:
@@ -3133,7 +3115,7 @@ class ElementCommands:
 
     def get_zone_boundaries(
         self, zone_element_id: ElementId | None = None, zones: None | list[ElementIdArrayItem] = None
-    ) -> ErrorItem | ZoneBoundariesOfZonesWrapper | ZoneBoundariesWrapper:
+    ) -> ZoneBoundariesOfZonesWrapper | ZoneBoundariesWrapper:
         """
         Gets the boundaries of the given Zones (connected elements, neighbour zones, etc.).
         Accepts either a single zoneElementId or a list of zones. Prefer the list: the expensive
@@ -3148,7 +3130,7 @@ class ElementCommands:
                 and zones can be given.
 
         Returns:
-            ErrorItem | ZoneBoundariesOfZonesWrapper | ZoneBoundariesWrapper
+            ZoneBoundariesOfZonesWrapper | ZoneBoundariesWrapper
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -3164,7 +3146,9 @@ class ElementCommands:
             "GetZoneBoundaries",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(GetZoneBoundariesResult).validate_python(response_dict)
+        validated_response = TypeAdapter(ZoneBoundariesOfZonesWrapper | ZoneBoundariesWrapper).validate_python(
+            response_dict
+        )
         return validated_response
 
     def get_zone_labeling_settings(self) -> GetZoneLabelingSettingsResult:
@@ -3222,7 +3206,7 @@ class ElementCommands:
         highlighted_colors: list[list[int]],
         wireframe_3d: None | bool = None,
         non_highlighted_color: None | list[int] = None,
-    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+    ) -> SuccessfulExecutionResult:
         """
         Highlights the elements given in the elements array. In case of empty elements array
         removes all previously set highlights. On Archicad 25 nonHighlightedColor is ignored.
@@ -3237,7 +3221,7 @@ class ElementCommands:
                 0-255 range. Ignored on Archicad 25.
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -3255,7 +3239,7 @@ class ElementCommands:
             "HighlightElements",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(HighlightElementsResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
     def link_elements(self, links: list[ElementLinkData]) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
@@ -3292,7 +3276,7 @@ class ElementCommands:
         validated_response = LinkElementsResult.model_validate(response_dict)
         return validated_response.executionResults
 
-    def lock_elements(self, elements: list[ElementIdArrayItem]) -> FailedExecutionResult | SuccessfulExecutionResult:
+    def lock_elements(self, elements: list[ElementIdArrayItem]) -> SuccessfulExecutionResult:
         """
         Locks the given elements. Manual lock, not teamwork!
 
@@ -3300,7 +3284,7 @@ class ElementCommands:
             elements (list[ElementIdArrayItem]): A list of elements.
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -3315,7 +3299,7 @@ class ElementCommands:
             "LockElements",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(LockElementsResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
     def measure_texts(
@@ -3554,7 +3538,7 @@ class ElementCommands:
         validated_response = RegularizePolylinesResult.model_validate(response_dict)
         return validated_response.results
 
-    def release_element_state(self, state_id: ElementStateId) -> FailedExecutionResult | SuccessfulExecutionResult:
+    def release_element_state(self, state_id: ElementStateId) -> SuccessfulExecutionResult:
         """
         Frees a state captured by CaptureElementState. Every state is freed anyway when the
         project is closed or Archicad quits.
@@ -3563,7 +3547,7 @@ class ElementCommands:
             state_id (ElementStateId): The state to free, as returned by CaptureElementState.
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -3578,12 +3562,10 @@ class ElementCommands:
             "ReleaseElementState",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(ReleaseElementStateResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
-    def remove_element_notification_client(
-        self, port: int, host: None | str = None
-    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+    def remove_element_notification_client(self, port: int, host: None | str = None) -> SuccessfulExecutionResult:
         """
         Removes an element notification client.
 
@@ -3593,7 +3575,7 @@ class ElementCommands:
                 localhost is used.
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -3609,7 +3591,7 @@ class ElementCommands:
             "RemoveElementNotificationClient",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(RemoveElementNotificationClientResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
     def rotate_copy_elements(
@@ -3949,7 +3931,7 @@ class ElementCommands:
         notify_on_property_definition_changes: None | bool = None,
         notify_on_marquee_change: None | bool = None,
         notify_on_3d_settings_changes: None | bool = None,
-    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+    ) -> SuccessfulExecutionResult:
         """
         Sets up a new notification client to receive element events.
 
@@ -4123,7 +4105,7 @@ class ElementCommands:
                 fails. Optional parameter, by default false.
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -4156,7 +4138,7 @@ class ElementCommands:
             "SetElementNotificationClient",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(SetElementNotificationClientResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
     def set_gdl_parameters_of_elements(
@@ -4364,7 +4346,7 @@ class ElementCommands:
         box: BoundingBox2D | None = None,
         rotation_angle: None | float = None,
         multi_story: None | bool = None,
-    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+    ) -> SuccessfulExecutionResult:
         """
         Draws a marquee in the current window from a polygon or a box (optionally rotated),
         single- or multi-story. Called without polygon and box it removes the marquee.
@@ -4384,7 +4366,7 @@ class ElementCommands:
                 single-story (thin) one. The default is false.
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -4402,7 +4384,7 @@ class ElementCommands:
             "SetMarquee",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(SetMarqueeResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
     def set_opening_default(
@@ -4572,7 +4554,7 @@ class ElementCommands:
 
     def set_zone_labeling_settings(
         self, automatic_labeling: None | bool = None, favorite_name: None | str = None
-    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+    ) -> SuccessfulExecutionResult:
         """
         Turns the automatic labeling of Zones on or off and selects the Label Favorite it
         places. Only the given settings are changed. Available from Archicad 28.
@@ -4584,7 +4566,7 @@ class ElementCommands:
                 new Zone by the automatic labeling.
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -4600,7 +4582,7 @@ class ElementCommands:
             "SetZoneLabelingSettings",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(SetZoneLabelingSettingsResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
     def solve_stair_baseline(self, stairs_data: list[StairBaselineData]) -> list[ErrorItem | StairBaselineSolution]:
@@ -4754,7 +4736,7 @@ class ElementCommands:
         validated_response = UnlinkElementsResult.model_validate(response_dict)
         return validated_response.executionResults
 
-    def unlock_elements(self, elements: list[ElementIdArrayItem]) -> FailedExecutionResult | SuccessfulExecutionResult:
+    def unlock_elements(self, elements: list[ElementIdArrayItem]) -> SuccessfulExecutionResult:
         """
         Unlocks the given elements. Manual lock, not teamwork!
 
@@ -4762,7 +4744,7 @@ class ElementCommands:
             elements (list[ElementIdArrayItem]): A list of elements.
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -4777,7 +4759,7 @@ class ElementCommands:
             "UnlockElements",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(UnlockElementsResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
     def update_zones(
@@ -4787,7 +4769,7 @@ class ElementCommands:
         undo_bottom_trim: None | bool = None,
         *,
         zones: None | list[ElementIdArrayItem] = None,
-    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+    ) -> SuccessfulExecutionResult:
         """
         Updates Zones (recalculates their geometry, updates their Zone Stamps and the connected
         elements): the selected Zones, every Zone when nothing is selected, or the Zones given
@@ -4812,7 +4794,7 @@ class ElementCommands:
                 Zone when nothing is selected.
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -4830,5 +4812,5 @@ class ElementCommands:
             "UpdateZones",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(UpdateZonesResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response

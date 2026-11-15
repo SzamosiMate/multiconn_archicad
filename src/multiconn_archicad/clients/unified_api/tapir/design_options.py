@@ -56,7 +56,6 @@ from multiconn_archicad.models.tapir.commands import (
     SetActiveDesignOptionsInCombinationsParameters,
     SetActiveDesignOptionsInCombinationsResult,
     SetDefaultDesignOptionParameters,
-    SetDefaultDesignOptionResult,
     SetDesignOptionCombinationOfViewsParameters,
     SetDesignOptionCombinationOfViewsResult,
     SetHotlinkDesignOptionTablesParameters,
@@ -852,9 +851,7 @@ class DesignOptionsCommands:
         validated_response = SetActiveDesignOptionsInCombinationsResult.model_validate(response_dict)
         return validated_response.executionResults
 
-    def set_default_design_option(
-        self, design_option_id: DesignOptionId | None = None
-    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+    def set_default_design_option(self, design_option_id: DesignOptionId | None = None) -> SuccessfulExecutionResult:
         """
         Sets the given design option as the default, or the Main Model when no design option is
         given. Available from Archicad 29.
@@ -864,7 +861,7 @@ class DesignOptionsCommands:
                 When it is not given, the Main Model becomes the default.
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -879,7 +876,7 @@ class DesignOptionsCommands:
             "SetDefaultDesignOption",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(SetDefaultDesignOptionResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
     def set_design_option_combination_of_views(

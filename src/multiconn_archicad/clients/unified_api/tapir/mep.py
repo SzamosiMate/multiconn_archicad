@@ -67,7 +67,6 @@ from multiconn_archicad.models.tapir.commands import (
     ModifyElectricalPanelsParameters,
     ModifyElectricalPanelsResult,
     ModifyElectricalProjectSettingsParameters,
-    ModifyElectricalProjectSettingsResult,
     ModifyMEPElementsParameters,
     ModifyMEPElementsResult,
     ModifyMEPPhysicalSystemsParameters,
@@ -1123,7 +1122,7 @@ class MepCommands:
         wiring_types_to_remove: None | list[str] = None,
         load_classifications_to_add: None | list[ElectricalLoadClassification] = None,
         load_classifications_to_remove: None | list[str] = None,
-    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+    ) -> SuccessfulExecutionResult:
         """
         Modifies the electrical project settings: sets the default voltage and clears, adds or
         removes wiring types and load classifications. Available from Archicad 30.
@@ -1143,7 +1142,7 @@ class MepCommands:
                 classifications to remove.
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -1164,7 +1163,7 @@ class MepCommands:
             "ModifyElectricalProjectSettings",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(ModifyElectricalProjectSettingsResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
     def modify_mep_elements(

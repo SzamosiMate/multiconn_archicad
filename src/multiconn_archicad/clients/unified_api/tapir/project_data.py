@@ -16,11 +16,8 @@ from multiconn_archicad.models.tapir.commands import (
     GetProjectDataParameters,
     GetProjectDataResult,
     GrantProjectDataParameters,
-    GrantProjectDataResult,
     ReleaseProjectDataParameters,
-    ReleaseProjectDataResult,
     RequestProjectDataParameters,
-    RequestProjectDataResult,
     ReserveProjectDataParameters,
     ReserveProjectDataResult,
     SetProjectDataParameters,
@@ -188,9 +185,7 @@ class ProjectDataCommands:
         validated_response = GetProjectDataKeysResult.model_validate(response_dict)
         return validated_response.keys
 
-    def grant_project_data(
-        self, names: list[str], to_user_id: int
-    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+    def grant_project_data(self, names: list[str], to_user_id: int) -> SuccessfulExecutionResult:
         """
         Grants the project data with the given names, reserved by the current user, to another
         Teamwork user.
@@ -203,7 +198,7 @@ class ProjectDataCommands:
                 ReserveProjectData.
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -219,10 +214,10 @@ class ProjectDataCommands:
             "GrantProjectData",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(GrantProjectDataResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
-    def release_project_data(self, names: list[str]) -> FailedExecutionResult | SuccessfulExecutionResult:
+    def release_project_data(self, names: list[str]) -> SuccessfulExecutionResult:
         """
         Releases the project data with the given names in Teamwork.
 
@@ -230,7 +225,7 @@ class ProjectDataCommands:
             names (list[str]): The names of the project data to release.
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -245,12 +240,10 @@ class ProjectDataCommands:
             "ReleaseProjectData",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(ReleaseProjectDataResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
-    def request_project_data(
-        self, names: list[str], mail_text: None | str = None
-    ) -> FailedExecutionResult | SuccessfulExecutionResult:
+    def request_project_data(self, names: list[str], mail_text: None | str = None) -> SuccessfulExecutionResult:
         """
         Requests the project data with the given names in Teamwork from the users who have
         reserved it, with an optional message.
@@ -261,7 +254,7 @@ class ProjectDataCommands:
             mail_text (None | str): The message sent with the request. The default is empty.
 
         Returns:
-            FailedExecutionResult | SuccessfulExecutionResult
+            SuccessfulExecutionResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -277,7 +270,7 @@ class ProjectDataCommands:
             "RequestProjectData",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(RequestProjectDataResult).validate_python(response_dict)
+        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
     def reserve_project_data(self, names: list[str]) -> ReserveProjectDataResult:
