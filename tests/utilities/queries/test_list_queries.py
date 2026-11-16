@@ -149,6 +149,57 @@ def test_real_lists_support_every_measure_without_new_test_types(measure):
     RealListTest(operator="contains", value=2).validate_for(details)
 
 
+@pytest.mark.parametrize(
+    "measure, unit, guidance",
+    [
+        ("Length", "m", "Enter a value in metres (m)."),
+        ("Area", "m²", "Enter a value in square metres (m²)."),
+        ("Volume", "m³", "Enter a value in cubic metres (m³)."),
+        ("Angle", "°", "Enter a value in degrees (°)."),
+        ("Default", None, None),
+        ("Undefined", None, None),
+    ],
+)
+@pytest.mark.parametrize("operator", list(CollectionOperator))
+def test_real_list_inputs_preserve_units_in_both_operand_shapes(measure, unit, guidance, operator):
+    info = PropertyInfo(
+        property_details(propertyCollectionType="List", propertyMeasureType=measure), Registry.from_union(PropertyTest)
+    )
+    schema = info.test_schema()
+    for branch in schema["properties"]["value"]["anyOf"]:
+        item_schema = branch["items"] if branch["type"] == "array" else branch
+        assert item_schema.get("x-unit") == unit
+        assert item_schema.get("description") == guidance
+        if unit is None:
+            assert "x-unit" not in item_schema and "description" not in item_schema
+
+    inputs = info.describe_test_inputs({"operator": operator.value})
+    value_schema = next(item.schema for item in inputs.fields if item.name == "value")
+    operand_schema = value_schema["items"] if operator.requires_collection else value_schema
+    assert operand_schema.get("x-unit") == unit
+    assert operand_schema.get("description") == guidance
+    value = (1.25, 2.5) if operator.requires_collection else 1.25
+    assert info.create_test(operator=operator, value=value).model_dump(mode="json") == {
+        "kind": "real_list",
+        "operator": operator.value,
+        "value": [1.25, 2.5] if operator.requires_collection else 1.25,
+    }
+
+
+def test_real_list_unit_annotations_do_not_leak_between_fields_or_into_model_schema():
+    registry = Registry.from_union(PropertyTest)
+    length = PropertyInfo(property_details(propertyCollectionType="List", propertyMeasureType="Length"), registry)
+    angle = PropertyInfo(property_details(propertyCollectionType="List", propertyMeasureType="Angle"), registry)
+    length_inputs = length.describe_test_inputs({"operator": "is"})
+    length_inputs.fields[1].schema["items"]["x-unit"] = "changed"
+
+    assert length.test_schema()["properties"]["value"]["anyOf"][1]["items"]["x-unit"] == "m"
+    assert angle.describe_test_inputs({"operator": "contains"}).fields[1].schema["x-unit"] == "°"
+    for branch in RealListTest.model_json_schema()["properties"]["value"]["anyOf"]:
+        item_schema = branch["items"] if branch["type"] == "array" else branch
+        assert "x-unit" not in item_schema and "description" not in item_schema
+
+
 @pytest.mark.parametrize("family, value_type, item", FAMILIES)
 def test_list_families_reject_scalar_and_other_item_types(family, value_type, item):
     test = family(operator="contains", value=item)
