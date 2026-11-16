@@ -130,7 +130,7 @@ def test_scalar_fields_reject_tests_from_another_family(test, value_type):
     ids=["text", "integer", "real", "boolean"],
 )
 @pytest.mark.parametrize("collection", ["Undefined", "List", "SingleChoiceEnumeration", "MultipleChoiceEnumeration"])
-def test_only_scalar_single_values_are_supported(family, value_type, operand, collection):
+def test_scalar_families_reject_collections_and_enumerations(family, value_type, operand, collection):
     details = property_details(propertyValueType=value_type, propertyCollectionType=collection)
 
     assert not family.accepts(details)

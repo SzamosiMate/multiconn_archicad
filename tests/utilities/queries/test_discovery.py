@@ -52,8 +52,8 @@ def test_catalogue_preserves_order_names_and_distinct_builtin_identities(metadat
     assert catalogue[ELEMENT_ID].qualified_name == "General Parameters / Element ID"
     assert catalogue[SDK_ELEMENT_ID].qualified_name == "GeneralElemProperties / ElementID"
     assert catalogue[ELEMENT_ID].reference != catalogue[SDK_ELEMENT_ID].reference
-    assert len(catalogue.supported) == 7
-    assert len(catalogue.unsupported) == 1
+    assert len(catalogue.supported) == 8
+    assert len(catalogue.unsupported) == 0
     assert all(isinstance(field, PropertyInfo) for field in catalogue.supported)
     assert all(isinstance(field, UnsupportedPropertyInfo) for field in catalogue.unsupported)
 
@@ -138,7 +138,9 @@ def test_browse_scope_uses_all_properties_directly_from_archicad_28(metadata, ar
 
 
 def test_unsupported_list_metadata_keeps_identity_and_an_explicit_reason(metadata):
-    catalogue = PropertyCatalogue(metadata, Registry.from_union(PropertyTest))
+    # Boolean lists are outside the observed list types supported by the engine.
+    unsupported = metadata[-1].model_copy(update={"propertyValueType": tapir.PropertyValueType.BOOLEAN})
+    catalogue = PropertyCatalogue([unsupported], Registry.from_union(PropertyTest))
     field = catalogue[metadata[-1].propertyId]
 
     assert not field.supported
@@ -153,16 +155,21 @@ def test_unsupported_list_metadata_keeps_identity_and_an_explicit_reason(metadat
 
 
 def test_supported_and_unsupported_descriptions_are_json_friendly(metadata):
+    metadata = [*metadata, metadata[-1].model_copy(update={
+        "propertyId": tapir.PropertyId(guid=MISSING),
+        "propertyName": "Unsupported list",
+        "propertyValueType": tapir.PropertyValueType.BOOLEAN,
+    })]
     catalogue = PropertyCatalogue(metadata, Registry.from_union(PropertyTest))
 
     description = json.loads(json.dumps(catalogue.describe()))
 
-    assert len(description["fields"]) == 8
+    assert len(description["fields"]) == 9
     assert [field["measure_type"] for field in description["fields"]] == [
         details.propertyMeasureType.value for details in metadata
     ]
     enabled = description["fields"][0]
-    disabled = next(row for row in description["fields"] if row["name"] == "General_Opening_IDs")
+    disabled = next(row for row in description["fields"] if row["name"] == "Unsupported list")
     assert enabled["supported"] is True
     assert enabled["unsupported_reason"] is None
     assert enabled["test_schema"]

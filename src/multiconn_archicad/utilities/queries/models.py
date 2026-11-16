@@ -13,7 +13,7 @@ from abc import ABC, abstractmethod
 from collections.abc import Mapping
 from enum import StrEnum
 from math import isclose, isfinite
-from typing import TYPE_CHECKING, Annotated, Any, Literal, TypeAlias, assert_never, cast
+from typing import TYPE_CHECKING, Annotated, Any, ClassVar, Literal, Self, TypeAlias, assert_never, cast
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, JsonValue, ValidationInfo, field_validator, model_validator
@@ -286,6 +286,10 @@ class IntegerTest(PropertyTestModel):
                 assert_never(self.operator)
 
 
+def _real_equal(actual: float, expected: float) -> bool:
+    return isclose(actual, expected, rel_tol=1e-10, abs_tol=1e-10)
+
+
 class RealTest(PropertyTestModel):
     """Compare scalar Real properties with 1e-10 relative and absolute tolerance.
 
@@ -335,7 +339,7 @@ class RealTest(PropertyTestModel):
 
         if not isfinite(actual):
             return BatchSlot.failure(f"Cannot interpret {raw_value!r} as a finite number")
-        close = isclose(actual, self.value, rel_tol=1e-10, abs_tol=1e-10)
+        close = _real_equal(actual, self.value)
 
         match self.operator:
             case NumberOperator.IS:
@@ -449,19 +453,144 @@ class EnumTest(PropertyTestModel):
                 assert_never(self.operator)
 
 
-def _multi_enum_schema(schema: dict[str, Any]) -> None:
+def _collection_schema(schema: dict[str, Any]) -> None:
+    item_schema = next(branch for branch in schema["properties"]["value"]["anyOf"] if branch["type"] != "array")
     schema["oneOf"] = [
         {
             "properties": {
                 "operator": {"const": operator.value},
-                "value": {"type": "array" if operator.requires_collection else "string"},
+                "value": {"type": "array" if operator.requires_collection else item_schema["type"]},
             }
         }
         for operator in CollectionOperator
     ]
 
 
-class MultiEnumTest(PropertyTestModel):
+class _CollectionTest[ItemT](PropertyTestModel):
+    """Share collection operand shapes, complete parsing, and item comparisons."""
+
+    operator: CollectionOperator
+    value: ItemT | tuple[ItemT, ...]
+    model_config = ConfigDict(json_schema_extra=_collection_schema)
+    _value_type: ClassVar[PropertyValueType]
+
+    @model_validator(mode="after")
+    def validate_operand(self) -> Self:
+        if self.operator.requires_collection:
+            if not isinstance(self.value, tuple):
+                raise ValueError(f"{self.operator.value!r} requires a collection of items")
+        elif isinstance(self.value, tuple):
+            raise ValueError(f"{self.operator.value!r} requires one item")
+        return self
+
+    @classmethod
+    def accepts(cls, details: PropertyDetails) -> bool:
+        return (
+            details.propertyCollectionType == PropertyCollectionType.LIST
+            and details.propertyValueType == cls._value_type
+        )
+
+    def validate_for(self, details: PropertyDetails) -> None:
+        self._require_compatible_property(details)
+
+    @classmethod
+    def resolve_input_schema(cls, schema: dict[str, Any], current_data: Mapping[str, JsonValue]) -> dict[str, Any]:
+        operator = current_data.get("operator")
+        if isinstance(operator, str) and operator in cls.operators():
+            requires_collection = CollectionOperator(operator).requires_collection
+            value_schema = schema["properties"]["value"]
+            schema["properties"]["value"] = next(
+                branch for branch in value_schema["anyOf"] if (branch["type"] == "array") == requires_collection
+            )
+        return schema
+
+    @abstractmethod
+    def _parse_item(self, raw_value: str) -> ItemT:
+        """Convert one item, raising ValueError for an invalid returned value."""
+        ...
+
+    def _items_equal(self, actual: ItemT, expected: ItemT) -> bool:
+        return actual == expected
+
+    def _collections_equal(self, actual: tuple[ItemT, ...], expected: tuple[ItemT, ...]) -> bool:
+        return len(actual) == len(expected) and all(
+            self._items_equal(left, right) for left, right in zip(actual, expected, strict=True)
+        )
+
+    def evaluate(self, raw_value: str) -> BatchSlot[bool]:
+        try:
+            # Parse every item before comparing, including items after a match.
+            actual = tuple(self._parse_item(item) for item in raw_value.split("; ")) if raw_value else ()
+        except ValueError as error:
+            return BatchSlot.failure(
+                f"Cannot interpret {raw_value!r} as a {self._value_type.value.lower()} collection: {error}"
+            )
+
+        match self.operator:
+            case CollectionOperator.IS:
+                assert isinstance(self.value, tuple)
+                return BatchSlot.success(self._collections_equal(actual, self.value))
+            case CollectionOperator.CONTAINS | CollectionOperator.DOES_NOT_CONTAIN:
+                expected = self.value
+                assert not isinstance(expected, tuple)
+                matched = any(self._items_equal(item, expected) for item in actual)
+                return BatchSlot.success(not matched if self.operator is CollectionOperator.DOES_NOT_CONTAIN else matched)
+            case _:
+                assert_never(self.operator)
+
+
+_StringItem = Annotated[str, Field(strict=True)]
+_IntegerItem = Annotated[int, Field(strict=True)]
+_RealItem = Annotated[float, Field(strict=True, allow_inf_nan=False)]
+
+
+class StringListTest(_CollectionTest[_StringItem]):
+    """Compare ordered string lists, using casefold for whole-item equality.
+
+    Items must not contain semicolons. An empty read means an empty list; a
+    single empty-string item cannot be distinguished by this read path.
+    """
+
+    kind: Literal["string_list"] = "string_list"
+    _value_type = PropertyValueType.STRING
+
+    def _parse_item(self, raw_value: str) -> str:
+        return raw_value
+
+    def _items_equal(self, actual: str, expected: str) -> bool:
+        return actual.casefold() == expected.casefold()
+
+
+class IntegerListTest(_CollectionTest[_IntegerItem]):
+    """Compare ordered Integer lists exactly, without float conversion."""
+
+    kind: Literal["integer_list"] = "integer_list"
+    _value_type = PropertyValueType.INTEGER
+
+    def _parse_item(self, raw_value: str) -> int:
+        return int(raw_value)
+
+
+class RealListTest(_CollectionTest[_RealItem]):
+    """Compare ordered finite Real lists using the scalar Real tolerance policy.
+
+    Operands use SI units, except degrees for angles, for every measure type.
+    """
+
+    kind: Literal["real_list"] = "real_list"
+    _value_type = PropertyValueType.REAL
+
+    def _parse_item(self, raw_value: str) -> float:
+        value = float(raw_value)
+        if not isfinite(value):
+            raise ValueError("Expected a finite number")
+        return value
+
+    def _items_equal(self, actual: float, expected: float) -> bool:
+        return _real_equal(actual, expected)
+
+
+class MultiEnumTest(_CollectionTest[_StringItem]):
     """Compare a selection as a set, or test exact choice-label membership.
 
     Reads split Tapir's '; ' separator. Labels containing semicolons are outside
@@ -469,21 +598,15 @@ class MultiEnumTest(PropertyTestModel):
     """
 
     kind: Literal["multi_enum"] = "multi_enum"
-    operator: CollectionOperator
+    _value_type = PropertyValueType.STRING
     value: Annotated[str, Field(strict=True)] | Annotated[
         tuple[Annotated[str, Field(strict=True)], ...], Field(json_schema_extra={"uniqueItems": True})
     ]
-    model_config = ConfigDict(json_schema_extra=_multi_enum_schema)
 
     @model_validator(mode="after")
-    def validate_operand(self) -> MultiEnumTest:
-        if self.operator.requires_collection:
-            if not isinstance(self.value, tuple):
-                raise ValueError(f"{self.operator.value!r} requires a collection of choice labels")
-            if len(set(self.value)) != len(self.value):
-                raise ValueError("Multiple-choice enumeration operands must not repeat choices")
-        elif not isinstance(self.value, str):
-            raise ValueError(f"{self.operator.value!r} requires one choice label")
+    def validate_unique_choices(self) -> Self:
+        if isinstance(self.value, tuple) and len(set(self.value)) != len(self.value):
+            raise ValueError("Multiple-choice enumeration operands must not repeat choices")
         return self
 
     @classmethod
@@ -502,28 +625,11 @@ class MultiEnumTest(PropertyTestModel):
             operand["enum"] = list(_enum_labels(details))
         return schema
 
-    @classmethod
-    def resolve_input_schema(cls, schema: dict[str, Any], current_data: Mapping[str, JsonValue]) -> dict[str, Any]:
-        operator = current_data.get("operator")
-        if isinstance(operator, str) and operator in cls.operators():
-            operand_type = "array" if CollectionOperator(operator).requires_collection else "string"
-            value_schema = schema["properties"]["value"]
-            schema["properties"]["value"] = next(
-                branch for branch in value_schema["anyOf"] if branch["type"] == operand_type
-            )
-        return schema
+    def _parse_item(self, raw_value: str) -> str:
+        return raw_value
 
-    def evaluate(self, raw_value: str) -> BatchSlot[bool]:
-        actual = set(raw_value.split("; ")) if raw_value else set()
-        match self.operator:
-            case CollectionOperator.IS:
-                return BatchSlot.success(actual == set(self.value))
-            case CollectionOperator.CONTAINS:
-                return BatchSlot.success(self.value in actual)
-            case CollectionOperator.DOES_NOT_CONTAIN:
-                return BatchSlot.success(self.value not in actual)
-            case _:
-                assert_never(self.operator)
+    def _collections_equal(self, actual: tuple[str, ...], expected: tuple[str, ...]) -> bool:
+        return set(actual) == set(expected)
 
 
 class GuidTest(PropertyTestModel):
@@ -558,7 +664,17 @@ class GuidTest(PropertyTestModel):
 
 
 PropertyTest: TypeAlias = Annotated[
-    TextTest | IntegerTest | RealTest | BooleanTest | EnumTest | GuidTest | MultiEnumTest, Field(discriminator="kind")
+    TextTest
+    | IntegerTest
+    | RealTest
+    | BooleanTest
+    | EnumTest
+    | GuidTest
+    | MultiEnumTest
+    | StringListTest
+    | IntegerListTest
+    | RealListTest,
+    Field(discriminator="kind"),
 ]
 
 

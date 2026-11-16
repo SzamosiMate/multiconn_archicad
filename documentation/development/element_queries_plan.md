@@ -29,7 +29,13 @@ from the consumer plan.
   use exact metadata labels; multi-enum equality compares complete selections
   as sets, and membership compares whole labels. The initial multi-enum parser
   assumes labels contain no semicolons, explicitly accepted by the user.
-  Ordinary lists and structured collection reads remain future work.
+  StringListTest, IntegerListTest, and RealListTest now support ordinary lists,
+  with ordered equality, duplicates, and whole-item membership. Collection
+  parsing, operand shape validation, schemas, and evaluation are shared with
+  MultiEnumTest; item comparison and set/sequence equality remain family-specific.
+  String lists assume no semicolons and interpret an empty read as an empty list.
+  Numeric items retain scalar comparison policy and SI reads. Structured reads
+  for ambiguous string values remain future work.
 - Predicates declare metadata references and own reuse of validated metadata.
   Execution coordinates discovery/validation/preparation without dispatching on
   property or classification families; draft refresh shares referenced discovery.
