@@ -31,7 +31,15 @@ from multiconn_archicad.utilities.results.property_errors import PropertyUnavail
 from .context import ContextBuilder, EvaluationContext
 from .errors import InvalidPropertyTestError
 from .inputs import InputAvailability
-from .operators import BooleanOperator, ClassificationOperator, NumberOperator, TextOperator
+from .operators import (
+    BooleanOperator,
+    ClassificationOperator,
+    CollectionOperator,
+    EnumOperator,
+    GuidOperator,
+    NumberOperator,
+    TextOperator,
+)
 from .sources import CLASSIFICATION_FIELDS, CLASSIFICATION_VALUES, PROPERTY_VALUES, TYPE_MEMBERSHIP
 from .validation import FieldCheck, QueryValidationContext, QueryValidationIssue
 from .versioning import QUERY_SCHEMA_VERSION
@@ -65,6 +73,11 @@ class TestModel(_QueryModel, ABC):
         schema = cls.model_json_schema()
         visible = tuple(name for name in schema["properties"] if name != "kind")
         return InputAvailability(visible, frozenset(schema.get("required", ())).intersection(visible))
+
+    @classmethod
+    def resolve_input_schema(cls, schema: dict[str, Any], current_data: Mapping[str, JsonValue]) -> dict[str, Any]:
+        """Resolve operator-dependent input shapes in a copied, metadata-aware schema."""
+        return schema
 
 
 class ClassificationTest(TestModel):
@@ -379,7 +392,174 @@ class BooleanTest(PropertyTestModel):
                 assert_never(self.operator)
 
 
-PropertyTest: TypeAlias = Annotated[TextTest | IntegerTest | RealTest | BooleanTest, Field(discriminator="kind")]
+def _enum_labels(details: PropertyDetails) -> tuple[str, ...]:
+    return tuple(choice.enumValue.displayValue for choice in details.possibleEnumValues or ())
+
+
+def _accepts_enumeration(details: PropertyDetails, collection: PropertyCollectionType) -> bool:
+    labels = _enum_labels(details)
+    return (
+        details.propertyCollectionType == collection
+        and details.propertyValueType == PropertyValueType.STRING
+        and bool(labels)
+        and len(set(labels)) == len(labels)
+        # A flattened empty multi-enum read cannot distinguish an empty choice
+        # from an empty selection. Scalar enum reads have no such ambiguity.
+        and (collection != PropertyCollectionType.MULTIPLE_CHOICE_ENUMERATION or "" not in labels)
+    )
+
+
+def _validate_enum_values(details: PropertyDetails, values: tuple[str, ...]) -> None:
+    labels = _enum_labels(details)
+    for value in values:
+        if value not in labels:
+            raise InvalidPropertyTestError(
+                f"{value!r} is not a choice of property {details.propertyGroupName} / {details.propertyName}"
+            )
+
+
+class EnumTest(PropertyTestModel):
+    """Compare a single enum's exact display label, validated against metadata."""
+
+    kind: Literal["enum"] = "enum"
+    operator: EnumOperator
+    value: str = Field(strict=True)
+
+    @classmethod
+    def accepts(cls, details: PropertyDetails) -> bool:
+        return _accepts_enumeration(details, PropertyCollectionType.SINGLE_CHOICE_ENUMERATION)
+
+    def validate_for(self, details: PropertyDetails) -> None:
+        self._require_compatible_property(details)
+        _validate_enum_values(details, (self.value,))
+
+    @classmethod
+    def schema_for(cls, details: PropertyDetails) -> dict:
+        schema = super().schema_for(details)
+        schema["properties"]["value"]["enum"] = list(_enum_labels(details))
+        return schema
+
+    def evaluate(self, raw_value: str) -> BatchSlot[bool]:
+        match self.operator:
+            case EnumOperator.IS:
+                return BatchSlot.success(raw_value == self.value)
+            case EnumOperator.IS_NOT:
+                return BatchSlot.success(raw_value != self.value)
+            case _:
+                assert_never(self.operator)
+
+
+def _multi_enum_schema(schema: dict[str, Any]) -> None:
+    schema["oneOf"] = [
+        {
+            "properties": {
+                "operator": {"const": operator.value},
+                "value": {"type": "array" if operator.requires_collection else "string"},
+            }
+        }
+        for operator in CollectionOperator
+    ]
+
+
+class MultiEnumTest(PropertyTestModel):
+    """Compare a selection as a set, or test exact choice-label membership.
+
+    Reads split Tapir's '; ' separator. Labels containing semicolons are outside
+    this initial implementation's supported assumptions.
+    """
+
+    kind: Literal["multi_enum"] = "multi_enum"
+    operator: CollectionOperator
+    value: Annotated[str, Field(strict=True)] | Annotated[
+        tuple[Annotated[str, Field(strict=True)], ...], Field(json_schema_extra={"uniqueItems": True})
+    ]
+    model_config = ConfigDict(json_schema_extra=_multi_enum_schema)
+
+    @model_validator(mode="after")
+    def validate_operand(self) -> MultiEnumTest:
+        if self.operator.requires_collection:
+            if not isinstance(self.value, tuple):
+                raise ValueError(f"{self.operator.value!r} requires a collection of choice labels")
+            if len(set(self.value)) != len(self.value):
+                raise ValueError("Multiple-choice enumeration operands must not repeat choices")
+        elif not isinstance(self.value, str):
+            raise ValueError(f"{self.operator.value!r} requires one choice label")
+        return self
+
+    @classmethod
+    def accepts(cls, details: PropertyDetails) -> bool:
+        return _accepts_enumeration(details, PropertyCollectionType.MULTIPLE_CHOICE_ENUMERATION)
+
+    def validate_for(self, details: PropertyDetails) -> None:
+        self._require_compatible_property(details)
+        _validate_enum_values(details, (self.value,) if isinstance(self.value, str) else self.value)
+
+    @classmethod
+    def schema_for(cls, details: PropertyDetails) -> dict:
+        schema = super().schema_for(details)
+        for branch in schema["properties"]["value"]["anyOf"]:
+            operand = branch["items"] if branch["type"] == "array" else branch
+            operand["enum"] = list(_enum_labels(details))
+        return schema
+
+    @classmethod
+    def resolve_input_schema(cls, schema: dict[str, Any], current_data: Mapping[str, JsonValue]) -> dict[str, Any]:
+        operator = current_data.get("operator")
+        if isinstance(operator, str) and operator in cls.operators():
+            operand_type = "array" if CollectionOperator(operator).requires_collection else "string"
+            value_schema = schema["properties"]["value"]
+            schema["properties"]["value"] = next(
+                branch for branch in value_schema["anyOf"] if branch["type"] == operand_type
+            )
+        return schema
+
+    def evaluate(self, raw_value: str) -> BatchSlot[bool]:
+        actual = set(raw_value.split("; ")) if raw_value else set()
+        match self.operator:
+            case CollectionOperator.IS:
+                return BatchSlot.success(actual == set(self.value))
+            case CollectionOperator.CONTAINS:
+                return BatchSlot.success(self.value in actual)
+            case CollectionOperator.DOES_NOT_CONTAIN:
+                return BatchSlot.success(self.value not in actual)
+            case _:
+                assert_never(self.operator)
+
+
+class GuidTest(PropertyTestModel):
+    """Compare UUID identity independently of the returned string's spelling."""
+
+    kind: Literal["guid"] = "guid"
+    operator: GuidOperator
+    value: UUID
+
+    @classmethod
+    def accepts(cls, details: PropertyDetails) -> bool:
+        return (
+            details.propertyCollectionType == PropertyCollectionType.SINGLE
+            and details.propertyValueType == PropertyValueType.GUID
+        )
+
+    def validate_for(self, details: PropertyDetails) -> None:
+        self._require_compatible_property(details)
+
+    def evaluate(self, raw_value: str) -> BatchSlot[bool]:
+        try:
+            actual = UUID(raw_value)
+        except ValueError:
+            return BatchSlot.failure(f"Cannot interpret {raw_value!r} as a GUID")
+        match self.operator:
+            case GuidOperator.IS:
+                return BatchSlot.success(actual == self.value)
+            case GuidOperator.IS_NOT:
+                return BatchSlot.success(actual != self.value)
+            case _:
+                assert_never(self.operator)
+
+
+PropertyTest: TypeAlias = Annotated[
+    TextTest | IntegerTest | RealTest | BooleanTest | EnumTest | GuidTest | MultiEnumTest, Field(discriminator="kind")
+]
 
 
 class PropertyPredicate(_QueryModel):

@@ -1,12 +1,20 @@
 # Element query development plan
 
-Updated 2026-11-15, Europe/Budapest.
+Updated 2026-11-16, Europe/Budapest.
 
 Current behavior belongs in the [guide](../utilities/element_queries.md),
 [reference](../utilities/element_query_reference.md), and
 [editor integration guide](../utilities/element_query_editing.md). This page
 records remaining work, agreed constraints, and evidence behind decisions.
 Backlog entries do not authorize implementing the entire backlog.
+
+Enumeration, GUID, and list evidence, plus the operator menus supplied on
+2026-11-16, are recorded in the
+[property-type research](element_query_property_types_research.md).
+The [implementation plan](element_query_property_types_implementation_plan.md)
+describes the proposed families, collection semantics, and required read support.
+Property-state operators remain out of scope because the API does not reliably
+expose the required states.
 
 The consumer owns NiceGUI controls, bindings, previews, and selection behavior.
 Its [widget plan](../../../TSPC-python-scripts/ai%20prompt/ELEMENT_QUERY_UI_PLAN.md)
@@ -17,6 +25,11 @@ from the consumer plan.
 
 - Strict executable query/test models, schema versioning, metadata validation,
   shared field discovery, batched context preparation, and predicate evaluation.
+- EnumTest, GuidTest, and MultiEnumTest extend PropertyPredicate. Enum operands
+  use exact metadata labels; multi-enum equality compares complete selections
+  as sets, and membership compares whole labels. The initial multi-enum parser
+  assumes labels contain no semicolons, explicitly accepted by the user.
+  Ordinary lists and structured collection reads remain future work.
 - Predicates declare metadata references and own reuse of validated metadata.
   Execution coordinates discovery/validation/preparation without dispatching on
   property or classification families; draft refresh shares referenced discovery.

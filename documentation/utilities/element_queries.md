@@ -84,6 +84,21 @@ Negative comparisons belong to individual tests, such as `is not` and
 `does not contain`. Their behavior for unavailable properties is described in
 the [comparison reference](element_query_reference.md#comparisons-and-property-conditions).
 
+Enumeration and GUID fields use `EnumTest`, `MultiEnumTest`, and `GuidTest` inside
+the same `PropertyPredicate`. For example, after discovering the appropriate field:
+
+```python
+from multiconn_archicad.utilities.queries import MultiEnumTest
+
+# Compare the complete multi-choice selection, ignoring order:
+selection = MultiEnumTest(operator="is", value=("Red", "Blue"))
+# Test one selected choice, using whole-label membership:
+membership = MultiEnumTest(operator="contains", value="Red")
+```
+
+Use the exact labels offered by the field's metadata. This initial implementation
+assumes enum labels contain no semicolons; see the comparison reference for limits.
+
 ## Discover properties and classifications
 
 Property labels are project-dependent. Discover the fields and retain their

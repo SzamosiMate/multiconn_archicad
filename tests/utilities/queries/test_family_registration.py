@@ -11,6 +11,9 @@ from multiconn_archicad.models.tapir import types as tapir
 from multiconn_archicad.utilities.queries import (
     AmbiguousPropertyTypeError,
     BooleanTest,
+    EnumTest,
+    GuidTest,
+    MultiEnumTest,
     IntegerTest,
     RealTest,
     PropertyTest,
@@ -28,12 +31,16 @@ pytestmark = pytest.mark.unit
 
 @pytest.mark.parametrize(
     "test_union",
-    [PropertyTest, TextTest | IntegerTest | RealTest | BooleanTest, Union[TextTest, IntegerTest, RealTest, BooleanTest]],
+    [
+        PropertyTest,
+        TextTest | IntegerTest | RealTest | BooleanTest | EnumTest | GuidTest | MultiEnumTest,
+        Union[TextTest, IntegerTest, RealTest, BooleanTest, EnumTest, GuidTest, MultiEnumTest],
+    ],
 )
 def test_registry_reads_families_from_annotated_and_plain_unions(test_union):
     registry = Registry.from_union(test_union)
 
-    assert registry.families == (TextTest, IntegerTest, RealTest, BooleanTest)
+    assert registry.families == (TextTest, IntegerTest, RealTest, BooleanTest, EnumTest, GuidTest, MultiEnumTest)
     assert registry.resolve(property_details(propertyValueType="Integer")) is IntegerTest
     assert registry.resolve(property_details()) is RealTest
     assert registry.resolve(property_details(propertyValueType="String")) is TextTest
@@ -52,7 +59,7 @@ def test_family_selection_is_independent_of_union_order(test_union):
 @pytest.mark.parametrize(
     "metadata",
     [
-        {"propertyValueType": "Guid"},
+        {"propertyValueType": "Undefined"},
         {"propertyCollectionType": "List"},
         {"propertyCollectionType": "SingleChoiceEnumeration", "propertyValueType": "String"},
     ],
@@ -76,15 +83,15 @@ def test_overlapping_families_are_rejected_regardless_of_registration_order(test
         registry.resolve(property_details())
 
 
-class GuidOperator(StrEnum):
+class DemoGuidOperator(StrEnum):
     IS = "is"
 
 
-class GuidTest(PropertyTestModel):
+class DemoGuidTest(PropertyTestModel):
     """An additional family used only to demonstrate extension in this test."""
 
-    kind: Literal["guid"] = "guid"
-    operator: GuidOperator
+    kind: Literal["demo_guid"] = "demo_guid"
+    operator: DemoGuidOperator
     value: UUID
 
     @classmethod
@@ -108,23 +115,24 @@ class GuidTest(PropertyTestModel):
 def test_custom_family_works_with_a_local_union_adapter_and_registry():
     # This exercises the family and registry in isolation. Production query and
     # row parsing continue to use the PropertyTest union declared in models.py.
-    extended_tests = Annotated[TextTest | IntegerTest | RealTest | BooleanTest | GuidTest, Field(discriminator="kind")]
+    extended_tests = Annotated[TextTest | IntegerTest | RealTest | BooleanTest | DemoGuidTest, Field(discriminator="kind")]
     registry = Registry.from_union(extended_tests)
     adapter = TypeAdapter(extended_tests)
     details = property_details(propertyValueType="Guid")
 
-    test = adapter.validate_json('{"kind": "guid", "operator": "is", "value": "22222222-2222-4222-8222-222222222222"}')
+    test = adapter.validate_json(
+        '{"kind": "demo_guid", "operator": "is", "value": "22222222-2222-4222-8222-222222222222"}'
+    )
 
-    assert registry.resolve(details) is GuidTest
-    assert isinstance(test, GuidTest)
-    assert test.operator is GuidOperator.IS
-    assert GuidTest.operators() == ("is",)
+    assert registry.resolve(details) is DemoGuidTest
+    assert isinstance(test, DemoGuidTest)
+    assert test.operator is DemoGuidOperator.IS
+    assert DemoGuidTest.operators() == ("is",)
     test.validate_for(details)
     assert test.evaluate("22222222-2222-4222-8222-222222222222").value is True
     assert test.evaluate("00000000-0000-0000-0000-000000000000").value is False
-    assert "guid" in adapter.json_schema()["discriminator"]["mapping"]
-    with pytest.raises(UnsupportedPropertyTypeError):
-        Registry.from_union(PropertyTest).resolve(details)
+    assert "demo_guid" in adapter.json_schema()["discriminator"]["mapping"]
+    assert Registry.from_union(PropertyTest).resolve(details) is GuidTest
 
 
 @pytest.mark.parametrize(

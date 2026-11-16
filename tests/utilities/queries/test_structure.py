@@ -48,7 +48,7 @@ def test_unknown_response_sentinel_is_rejected_as_a_query_type(types):
         {"kind": "any", "items": []},
         {"kind": "not", "item": {"kind": "element_type", "test": {"kind": "element_type", "types": ["Wall"]}}},
         {"kind": "property", "field_id": "not-a-guid", "test": {"kind": "text", "operator": "is", "value": "x"}},
-        {"kind": "property", "field_id": PROPERTY_ID, "test": {"kind": "enum", "operator": "is", "value": "A"}},
+        {"kind": "property", "field_id": PROPERTY_ID, "test": {"kind": "unknown", "operator": "is", "value": "A"}},
         {
             "kind": "property",
             "field_id": PROPERTY_ID,
@@ -235,6 +235,9 @@ def test_json_schema_exposes_recursive_nodes_and_typed_operator_choices():
         "integer",
         "real",
         "boolean",
+        "enum",
+        "guid",
+        "multi_enum",
     }
     assert definitions["BooleanTest"]["properties"]["value"]["type"] == "boolean"
     assert definitions["BooleanOperator"]["enum"] == ["is", "is not"]

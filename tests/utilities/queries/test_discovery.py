@@ -52,8 +52,8 @@ def test_catalogue_preserves_order_names_and_distinct_builtin_identities(metadat
     assert catalogue[ELEMENT_ID].qualified_name == "General Parameters / Element ID"
     assert catalogue[SDK_ELEMENT_ID].qualified_name == "GeneralElemProperties / ElementID"
     assert catalogue[ELEMENT_ID].reference != catalogue[SDK_ELEMENT_ID].reference
-    assert len(catalogue.supported) == 5
-    assert len(catalogue.unsupported) == 3
+    assert len(catalogue.supported) == 7
+    assert len(catalogue.unsupported) == 1
     assert all(isinstance(field, PropertyInfo) for field in catalogue.supported)
     assert all(isinstance(field, UnsupportedPropertyInfo) for field in catalogue.unsupported)
 
@@ -137,19 +137,18 @@ def test_browse_scope_uses_all_properties_directly_from_archicad_28(metadata, ar
     api.tapir.property.get_properties_of_tool_defaults.assert_not_called()
 
 
-def test_unsupported_metadata_keeps_identity_choices_and_an_explicit_reason(metadata):
+def test_unsupported_list_metadata_keeps_identity_and_an_explicit_reason(metadata):
     catalogue = PropertyCatalogue(metadata, Registry.from_union(PropertyTest))
-    field = catalogue[POSITION]
+    field = catalogue[metadata[-1].propertyId]
 
     assert not field.supported
-    assert field.qualified_name == "CategoryPropertyDefinitionGroup / Position"
-    assert field.unsupported_reason and "SingleChoiceEnumeration" in field.unsupported_reason
-    assert field.details.possibleEnumValues
+    assert field.qualified_name == "GeneralElemProperties / General_Opening_IDs"
+    assert field.unsupported_reason and "List" in field.unsupported_reason
     assert field.operators() == ()
     assert field.test_schema() is None
-    with pytest.raises(UnsupportedPropertyTypeError, match="Position"):
+    with pytest.raises(UnsupportedPropertyTypeError, match="General_Opening_IDs"):
         field.create_test(operator="is", value="Interior")
-    with pytest.raises(UnsupportedPropertyTypeError, match="Position"):
+    with pytest.raises(UnsupportedPropertyTypeError, match="General_Opening_IDs"):
         field.validate(TextTest(operator="is", value="Interior"))
 
 
@@ -163,7 +162,7 @@ def test_supported_and_unsupported_descriptions_are_json_friendly(metadata):
         details.propertyMeasureType.value for details in metadata
     ]
     enabled = description["fields"][0]
-    disabled = next(row for row in description["fields"] if row["name"] == "Position")
+    disabled = next(row for row in description["fields"] if row["name"] == "General_Opening_IDs")
     assert enabled["supported"] is True
     assert enabled["unsupported_reason"] is None
     assert enabled["test_schema"]
@@ -194,7 +193,7 @@ def test_search_matches_labels_case_insensitively_with_explicit_group_and_suppor
     assert catalogue.search("wallproperties / wall height") == (catalogue[HEIGHT],)
     assert catalogue.search("", supported_only=True) == catalogue.supported
     assert catalogue.search("POSITION") == (catalogue[POSITION],)
-    assert catalogue.search("POSITION", supported_only=True) == ()
+    assert catalogue.search("POSITION", supported_only=True) == (catalogue[POSITION],)
     assert catalogue.search("missing") == ()
     assert catalogue.search("general_opening_ids")[0].name == "General_Opening_IDs"
 
