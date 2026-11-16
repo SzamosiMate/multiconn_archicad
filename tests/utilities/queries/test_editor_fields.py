@@ -213,6 +213,49 @@ def test_describe_returns_json_friendly_uniform_discovery_information(measure):
     assert description["test_schema"]["properties"]["value"]["type"] == "number"
 
 
+@pytest.mark.parametrize(
+    ("measure", "unit", "description"),
+    [
+        ("Length", "m", "Enter a value in metres (m)."),
+        ("Area", "m²", "Enter a value in square metres (m²)."),
+        ("Volume", "m³", "Enter a value in cubic metres (m³)."),
+        ("Angle", "°", "Enter a value in degrees (°)."),
+        ("Default", None, None),
+        ("Undefined", None, None),
+    ],
+)
+def test_real_editor_exposes_query_units_from_property_metadata(measure, unit, description):
+    info = PropertyInfo(property_details(propertyMeasureType=measure), Registry.from_union(PropertyTest))
+    value_schema = info.test_schema()["properties"]["value"]
+    inputs = info.describe_test_inputs(current_data={})
+    value_input = next(item for item in inputs.fields if item.name == "value")
+
+    assert value_input.schema == value_schema
+    assert value_schema.get("x-unit") == unit
+    assert value_schema.get("description") == description
+    if unit is None:
+        assert "x-unit" not in value_schema
+        assert "description" not in value_schema
+    assert json.loads(json.dumps(value_schema)) == value_schema
+
+    test = info.create_test(operator="is", value=1.25)
+    row = QueryRow(predicate={**info.reference, "test": test.model_dump(mode="json")})
+    built = build_query(QueryRows(rows=[row]))
+    assert built.query is not None, built.issues
+    assert built.query.model_dump(mode="json")["where"]["test"] == {"kind": "real", "operator": "is", "value": 1.25}
+
+
+def test_real_unit_annotations_do_not_leak_between_properties_or_into_the_model_schema():
+    registry = Registry.from_union(PropertyTest)
+    length = PropertyInfo(property_details(propertyMeasureType="Length"), registry)
+    angle = PropertyInfo(property_details(propertyMeasureType="Angle"), registry)
+    length.test_schema()["properties"]["value"]["x-unit"] = "changed"
+
+    assert length.test_schema()["properties"]["value"]["x-unit"] == "m"
+    assert angle.test_schema()["properties"]["value"]["x-unit"] == "°"
+    assert "x-unit" not in RealTest.model_json_schema()["properties"]["value"]
+
+
 def test_integer_editor_describes_integer_input_and_compiles_saved_rows():
     info = PropertyInfo(property_details(propertyValueType="Integer"), Registry.from_union(PropertyTest))
     description = info.describe_test_inputs(current_data={})
