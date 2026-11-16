@@ -58,6 +58,14 @@ UUID choices. `describe_test_inputs()` derives editable fields from that schema
 and the test model's `input_availability()` rules for the current partial data.
 This lets the UI change required/forbidden operands when the operator changes.
 
+The `resolve_input_schema()` hook resolves operator-dependent operand shapes
+against a copy of the metadata-aware schema. For `MultiEnumTest`, `is` describes
+an array of choice labels, while `contains` and `does not contain` describe one
+choice label. Both retain metadata-defined choices. With no recognized operator,
+the operand description retains both possible shapes; strict construction reports
+incomplete or invalid input. Inspection does not convert or discard a restored
+operand when the operator changes.
+
 `TestInputs` contains:
 
 | Member | Meaning |

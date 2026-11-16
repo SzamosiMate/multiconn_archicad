@@ -35,6 +35,9 @@ from .models import (
     ClassificationPredicate,
     ElementTypePredicate,
     ElementTypeTest,
+    EnumTest,
+    GuidTest,
+    MultiEnumTest,
     IntegerTest,
     RealTest,
     Predicate,
@@ -46,7 +49,15 @@ from .models import (
     TestModel, evaluate_property,
 )
 from .registry import TestRegistry
-from .operators import BooleanOperator, ClassificationOperator, NumberOperator, TextOperator
+from .operators import (
+    BooleanOperator,
+    ClassificationOperator,
+    CollectionOperator,
+    EnumOperator,
+    GuidOperator,
+    NumberOperator,
+    TextOperator,
+)
 from .validation import (
     QueryValidationError,
     QueryValidationIssue,
@@ -68,6 +79,12 @@ __all__ = [
     "ClassificationOperator",
     "ClassificationTest",
     "ClassificationPredicate",
+    "CollectionOperator",
+    "EnumOperator",
+    "EnumTest",
+    "GuidOperator",
+    "GuidTest",
+    "MultiEnumTest",
     "InvalidClassificationTestError",
     "ContextBuilder",
     "ContextSource",

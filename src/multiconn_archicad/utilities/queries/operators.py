@@ -23,6 +23,26 @@ class BooleanOperator(StrEnum):
     IS_NOT = "is not"
 
 
+class EnumOperator(StrEnum):
+    IS = "is"
+    IS_NOT = "is not"
+
+
+class GuidOperator(StrEnum):
+    IS = "is"
+    IS_NOT = "is not"
+
+
+class CollectionOperator(StrEnum):
+    IS = "is"
+    CONTAINS = "contains"
+    DOES_NOT_CONTAIN = "does not contain"
+
+    @property
+    def requires_collection(self) -> bool:
+        return self is self.IS
+
+
 class TextOperator(StrEnum):
     IS = "is"
     IS_NOT = "is not"

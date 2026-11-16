@@ -107,6 +107,7 @@ class FieldInfo(ABC, Generic[TestT]):
 
         availability = self.test_model.input_availability(current_data)
         snapshot = deepcopy(schema)
+        snapshot = self.test_model.resolve_input_schema(snapshot, current_data)
         properties = snapshot["properties"]
         return TestInputs(
             fields=tuple(

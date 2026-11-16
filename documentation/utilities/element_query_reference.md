@@ -63,6 +63,9 @@ convenience values; a query stores concrete types and has no preset identifier.
 | `IntegerTest` | `is`, `is not`, `is greater than`, `is greater than or equal to`, `is less than`, `is less than or equal to` | Integer |
 | `RealTest` | Same six numeric operators | Finite number |
 | `BooleanTest` | `is`, `is not` | Boolean |
+| `EnumTest` | `is`, `is not` | Single-choice enumeration label |
+| `GuidTest` | `is`, `is not` | UUID |
+| `MultiEnumTest` | `is`, `contains`, `does not contain` | Choice-label tuple for `is`; one label for membership |
 | `ClassificationTest` | Equality, presence, branch, direct-child comparisons | Item UUID when required; see [classification operator table](classifications.md#metadata-and-field-discovery) |
 | `ElementTypeTest` | Membership through `types` | Concrete element-type tuple |
 
@@ -117,10 +120,31 @@ new wire flag is omitted so older Tapir versions keep their existing behavior.
 Boolean operands must be actual Booleans. Tapir value strings are interpreted
 using its `"True"`/`"False"` representation.
 
-Property discovery supports scalar single-string, integer/real, and Boolean
-properties. Enumeration, GUID, and list-valued properties remain discoverable
-as unsupported metadata, with an explanation. They cannot be executed using
-these tests.
+`EnumTest` and `MultiEnumTest` use exact, case-sensitive display labels, including
+whitespace. Operands must occur in the property's current `possibleEnumValues`.
+Discovery publishes these labels as choices; option GUIDs are not operands.
+Definitions with missing choices or duplicate labels remain unsupported because
+the read path cannot identify those choices reliably. A multi-enum definition
+with an empty label is also unsupported: an empty read represents no selection.
+
+`MultiEnumTest(operator="is", value=("Red", "Blue"))` compares the entire selected
+set, ignoring order. Repeated operand choices are rejected. An empty tuple matches
+an empty selection. `contains` and `does not contain` take one label and compare
+whole items: `Blue` does not match `Light Blue`. Python uses tuples for selection
+operands; JSON uses arrays. Membership operands are strings in both formats.
+The test parses the returned `; ` separator. **This initial implementation assumes
+choice labels do not contain semicolons.** Such labels are accepted but queries
+against them may give incorrect results; no escaping or structured-read fallback
+is implemented.
+
+`GuidTest` compares parsed UUID identity, so letter case and UUID spelling do not
+change equality. An invalid returned UUID is an evaluation error. The all-zero
+UUID is compared as an ordinary UUID, without an inferred unassigned state.
+
+Property discovery supports scalar single-string, integer/real, Boolean and GUID
+properties, plus single-choice and multiple-choice String enumerations with the
+metadata described above. Ordinary list-valued properties remain discoverable
+as unsupported metadata and cannot be executed using these tests.
 
 **Unavailable and undefined property values make every currently supported
 property comparison false, including negative comparisons.** They do not mean

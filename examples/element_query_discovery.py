@@ -62,7 +62,8 @@ if __name__ == "__main__":
     result.raise_for_errors()
     print(json.dumps(result.describe(), indent=2))
 
-    # A valid sibling does not skip validation of this unsupported property.
+    # This enum has no possibleEnumValues metadata, so it remains unsupported.
+    # A valid sibling does not skip its validation.
     fire_rating = catalogue.unsupported[0]
     invalid_query = Query(
         where=AnyOf(
