@@ -14,6 +14,9 @@ from multiconn_archicad.utilities.queries import (
     EnumTest,
     GuidTest,
     MultiEnumTest,
+    StringListTest,
+    IntegerListTest,
+    RealListTest,
     IntegerTest,
     RealTest,
     PropertyTest,
@@ -33,14 +36,19 @@ pytestmark = pytest.mark.unit
     "test_union",
     [
         PropertyTest,
-        TextTest | IntegerTest | RealTest | BooleanTest | EnumTest | GuidTest | MultiEnumTest,
-        Union[TextTest, IntegerTest, RealTest, BooleanTest, EnumTest, GuidTest, MultiEnumTest],
+        TextTest | IntegerTest | RealTest | BooleanTest | EnumTest | GuidTest | MultiEnumTest
+        | StringListTest | IntegerListTest | RealListTest,
+        Union[TextTest, IntegerTest, RealTest, BooleanTest, EnumTest, GuidTest, MultiEnumTest,
+              StringListTest, IntegerListTest, RealListTest],
     ],
 )
 def test_registry_reads_families_from_annotated_and_plain_unions(test_union):
     registry = Registry.from_union(test_union)
 
-    assert registry.families == (TextTest, IntegerTest, RealTest, BooleanTest, EnumTest, GuidTest, MultiEnumTest)
+    assert registry.families == (
+        TextTest, IntegerTest, RealTest, BooleanTest, EnumTest, GuidTest, MultiEnumTest,
+        StringListTest, IntegerListTest, RealListTest,
+    )
     assert registry.resolve(property_details(propertyValueType="Integer")) is IntegerTest
     assert registry.resolve(property_details()) is RealTest
     assert registry.resolve(property_details(propertyValueType="String")) is TextTest
@@ -60,7 +68,7 @@ def test_family_selection_is_independent_of_union_order(test_union):
     "metadata",
     [
         {"propertyValueType": "Undefined"},
-        {"propertyCollectionType": "List"},
+        {"propertyCollectionType": "List", "propertyValueType": "Boolean"},
         {"propertyCollectionType": "SingleChoiceEnumeration", "propertyValueType": "String"},
     ],
 )

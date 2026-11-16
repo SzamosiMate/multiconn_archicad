@@ -9,6 +9,11 @@ from multiconn_archicad.utilities.queries import (
     ClassificationOperator,
     ClassificationTest,
     ClassificationPredicate,
+    CollectionOperator,
+    IntegerListTest,
+    MultiEnumTest,
+    RealListTest,
+    StringListTest,
     RealTest,
     NumberOperator,
     PropertyCatalogue,
@@ -40,6 +45,13 @@ def check_field_types(properties: PropertyCatalogue, classifications: Classifica
     assert_type(classifications.supported, tuple[ClassificationInfo, ...])
     assert_type(classifications[guid].create_test(operator="is", value=guid), ClassificationTest)
     assert_type(properties[guid].create_test(operator="is", value=1), PropertyTestModel)
+
+
+def check_collection_operand_types() -> None:
+    assert_type(StringListTest(operator=CollectionOperator.IS, value=("A",)).value, str | tuple[str, ...])
+    assert_type(IntegerListTest(operator=CollectionOperator.CONTAINS, value=1).value, int | tuple[int, ...])
+    assert_type(RealListTest(operator=CollectionOperator.CONTAINS, value=1.0).value, float | tuple[float, ...])
+    assert_type(MultiEnumTest(operator=CollectionOperator.IS, value=("A",)).value, str | tuple[str, ...])
 
 
 def check_validation_catalogue_types(

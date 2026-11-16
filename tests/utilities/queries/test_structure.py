@@ -238,6 +238,9 @@ def test_json_schema_exposes_recursive_nodes_and_typed_operator_choices():
         "enum",
         "guid",
         "multi_enum",
+        "string_list",
+        "integer_list",
+        "real_list",
     }
     assert definitions["BooleanTest"]["properties"]["value"]["type"] == "boolean"
     assert definitions["BooleanOperator"]["enum"] == ["is", "is not"]

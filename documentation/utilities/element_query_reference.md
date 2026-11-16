@@ -66,6 +66,9 @@ convenience values; a query stores concrete types and has no preset identifier.
 | `EnumTest` | `is`, `is not` | Single-choice enumeration label |
 | `GuidTest` | `is`, `is not` | UUID |
 | `MultiEnumTest` | `is`, `contains`, `does not contain` | Choice-label tuple for `is`; one label for membership |
+| `StringListTest` | `is`, `contains`, `does not contain` | String tuple for `is`; one string for membership |
+| `IntegerListTest` | Same collection operators | Strict integer tuple for `is`; one integer for membership |
+| `RealListTest` | Same collection operators | Finite-number tuple for `is`; one number for membership |
 | `ClassificationTest` | Equality, presence, branch, direct-child comparisons | Item UUID when required; see [classification operator table](classifications.md#metadata-and-field-discovery) |
 | `ElementTypeTest` | Membership through `types` | Concrete element-type tuple |
 
@@ -141,10 +144,31 @@ is implemented.
 change equality. An invalid returned UUID is an evaluation error. The all-zero
 UUID is compared as an ordinary UUID, without an inferred unassigned state.
 
+`StringListTest`, `IntegerListTest`, and `RealListTest` compare ordered lists.
+`is` requires the same length, order, and repeated items; `(1, 2)` differs from
+`(2, 1)` and `(1, 1, 2)`. Membership compares any whole item, with these item rules:
+
+- Strings use Unicode casefold, preserving whitespace, like TextTest.
+- Integers compare exactly, preserving precision above the float integer range.
+- Reals use the same `1e-10` relative and absolute tolerance as RealTest.
+  All measures use SI units, except degrees for angles.
+
+`is` takes a tuple (JSON array), including an empty tuple. Membership takes one
+typed item. Repeated list operands are allowed. All returned numeric items are
+parsed before comparison: a malformed or non-finite item is an evaluation error
+even if another item matches. Numeric reads use the existing canonical SI path.
+
+List reads split the `; ` separator. String-list items follow the same
+**no-semicolon assumption** as multi-enum labels. An empty returned string means
+an empty list. It cannot distinguish `[]` from `[""]`; queries involving that
+ambiguity may give incorrect results. Empty items alongside other items are
+preserved when their separator is present. There is no structured-read fallback.
+
 Property discovery supports scalar single-string, integer/real, Boolean and GUID
-properties, plus single-choice and multiple-choice String enumerations with the
-metadata described above. Ordinary list-valued properties remain discoverable
-as unsupported metadata and cannot be executed using these tests.
+properties, single-choice and multiple-choice String enumerations with the
+metadata described above, and String/Integer/Real lists. Boolean lists, GUID
+lists, undefined metadata, and unsupported enumeration metadata remain visible
+as unsupported fields.
 
 **Unavailable and undefined property values make every currently supported
 property comparison false, including negative comparisons.** They do not mean

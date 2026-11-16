@@ -99,6 +99,21 @@ membership = MultiEnumTest(operator="contains", value="Red")
 Use the exact labels offered by the field's metadata. This initial implementation
 assumes enum labels contain no semicolons; see the comparison reference for limits.
 
+List fields use `StringListTest`, `IntegerListTest`, or `RealListTest`, selected
+from property metadata. They use the same collection operators:
+
+```python
+from multiconn_archicad.utilities.queries import IntegerListTest, RealListTest, StringListTest
+
+ordered_values = IntegerListTest(operator="is", value=(1, 2, 1))
+has_material = StringListTest(operator="contains", value="GENERIC - STRUCTURAL")
+has_pitch = RealListTest(operator="contains", value=30)  # Degrees for angle properties.
+```
+
+List equality preserves order and duplicates. String items use casefold matching;
+numeric items retain the scalar Integer/Real comparison policies. String-list
+items also assume no semicolons; an empty read is interpreted as an empty list.
+
 ## Discover properties and classifications
 
 Property labels are project-dependent. Discover the fields and retain their

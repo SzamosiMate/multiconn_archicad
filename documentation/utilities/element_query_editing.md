@@ -59,9 +59,11 @@ and the test model's `input_availability()` rules for the current partial data.
 This lets the UI change required/forbidden operands when the operator changes.
 
 The `resolve_input_schema()` hook resolves operator-dependent operand shapes
-against a copy of the metadata-aware schema. For `MultiEnumTest`, `is` describes
-an array of choice labels, while `contains` and `does not contain` describe one
-choice label. Both retain metadata-defined choices. With no recognized operator,
+against a copy of the metadata-aware schema. For all collection tests, `is`
+describes an array of items, while `contains` and `does not contain` describe one
+item of the family's type. MultiEnumTest retains metadata-defined choices in
+both forms. List equality allows duplicates; multi-enum equality rejects repeated
+choices. With no recognized operator,
 the operand description retains both possible shapes; strict construction reports
 incomplete or invalid input. Inspection does not convert or discard a restored
 operand when the operator changes.
