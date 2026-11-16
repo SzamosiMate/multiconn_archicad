@@ -22,6 +22,7 @@ from multiconn_archicad.models.tapir.types import (
     ElementType,
     PropertyCollectionType,
     PropertyDetails,
+    PropertyMeasureType,
     PropertyValueType,
 )
 from multiconn_archicad.utilities.results.batch_results import BatchError, BatchRow, BatchSlot
@@ -281,11 +282,24 @@ class RealTest(PropertyTestModel):
 
     kind: Literal["real"] = "real"
     operator: NumberOperator
-    value: float = Field(
-        strict=True,
-        allow_inf_nan=False,
-        description="Numeric operand; quantities use SI units, except degrees for angles.",
-    )
+    value: float = Field(strict=True, allow_inf_nan=False)
+
+    @classmethod
+    def schema_for(cls, details: PropertyDetails) -> dict:
+        """Annotate the operand with the query unit from its property metadata."""
+        schema = super().schema_for(details)
+        unit = {
+            PropertyMeasureType.LENGTH: ("m", "metres"),
+            PropertyMeasureType.AREA: ("m²", "square metres"),
+            PropertyMeasureType.VOLUME: ("m³", "cubic metres"),
+            PropertyMeasureType.ANGLE: ("°", "degrees"),
+        }.get(details.propertyMeasureType)
+        if unit is not None:
+            symbol, name = unit
+            schema["properties"]["value"].update(
+                {"x-unit": symbol, "description": f"Enter a value in {name} ({symbol})."}
+            )
+        return schema
 
     @classmethod
     def accepts(cls, details: PropertyDetails) -> bool:

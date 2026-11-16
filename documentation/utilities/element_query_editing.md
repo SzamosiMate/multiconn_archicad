@@ -70,6 +70,15 @@ Each `TestInput` has `name`, `schema`, and `required`. These are framework-neutr
 descriptions; the consumer decides which controls to render. An editor must
 remove forbidden fields instead of saving stale operands as `null`.
 
+For real properties, `RealTest.schema_for(details)` adds an `x-unit` annotation
+to the `value` schema: `m` for Length, `m²` for Area, `m³` for Volume, and `°` for
+Angle. The same annotation reaches `describe_test_inputs()` and can be shown as
+a suffix beside the numeric input. Its `description` provides unit-specific
+guidance. Default and Undefined measures have no unit annotation or generated
+unit description. These are query input units, independent of project display
+preferences. Both annotations are display metadata; save only the numeric
+operand in the query, without a unit field or conversion.
+
 ### Element-type choices and executable schema
 
 The element-type descriptor lists five named presets first (All Types, 3D Types,
