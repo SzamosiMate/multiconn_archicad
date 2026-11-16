@@ -89,6 +89,12 @@ unit description. These are query input units, independent of project display
 preferences. Both annotations are display metadata; save only the numeric
 operand in the query, without a unit field or conversion.
 
+`RealListTest.schema_for(details)` uses the same unit annotations on the numeric
+membership operand and on each item of the whole-list operand. Resolving the
+operator's input shape preserves these annotations: membership controls read
+`x-unit` from the value schema, and list editors read it from the array's `items`
+schema. Unitless lists have no unit annotation or generated unit description.
+
 ### Element-type choices and executable schema
 
 The element-type descriptor lists five named presets first (All Types, 3D Types,

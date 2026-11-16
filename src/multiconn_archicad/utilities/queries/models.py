@@ -290,6 +290,18 @@ def _real_equal(actual: float, expected: float) -> bool:
     return isclose(actual, expected, rel_tol=1e-10, abs_tol=1e-10)
 
 
+def _annotate_real_unit(schema: dict[str, Any], measure: PropertyMeasureType) -> None:
+    unit = {
+        PropertyMeasureType.LENGTH: ("m", "metres"),
+        PropertyMeasureType.AREA: ("m²", "square metres"),
+        PropertyMeasureType.VOLUME: ("m³", "cubic metres"),
+        PropertyMeasureType.ANGLE: ("°", "degrees"),
+    }.get(measure)
+    if unit is not None:
+        symbol, name = unit
+        schema.update({"x-unit": symbol, "description": f"Enter a value in {name} ({symbol})."})
+
+
 class RealTest(PropertyTestModel):
     """Compare scalar Real properties with 1e-10 relative and absolute tolerance.
 
@@ -305,17 +317,7 @@ class RealTest(PropertyTestModel):
     def schema_for(cls, details: PropertyDetails) -> dict:
         """Annotate the operand with the query unit from its property metadata."""
         schema = super().schema_for(details)
-        unit = {
-            PropertyMeasureType.LENGTH: ("m", "metres"),
-            PropertyMeasureType.AREA: ("m²", "square metres"),
-            PropertyMeasureType.VOLUME: ("m³", "cubic metres"),
-            PropertyMeasureType.ANGLE: ("°", "degrees"),
-        }.get(details.propertyMeasureType)
-        if unit is not None:
-            symbol, name = unit
-            schema["properties"]["value"].update(
-                {"x-unit": symbol, "description": f"Enter a value in {name} ({symbol})."}
-            )
+        _annotate_real_unit(schema["properties"]["value"], details.propertyMeasureType)
         return schema
 
     @classmethod
@@ -579,6 +581,15 @@ class RealListTest(_CollectionTest[_RealItem]):
 
     kind: Literal["real_list"] = "real_list"
     _value_type = PropertyValueType.REAL
+
+    @classmethod
+    def schema_for(cls, details: PropertyDetails) -> dict:
+        """Annotate both membership operands and whole-list operand items."""
+        schema = super().schema_for(details)
+        for branch in schema["properties"]["value"]["anyOf"]:
+            operand = branch["items"] if branch["type"] == "array" else branch
+            _annotate_real_unit(operand, details.propertyMeasureType)
+        return schema
 
     def _parse_item(self, raw_value: str) -> float:
         value = float(raw_value)
