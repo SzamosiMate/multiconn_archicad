@@ -81,14 +81,21 @@ def test_malformed_guid_reads_remain_errors(raw, operator):
         ("is", (), "", True),
         ("is", ("Red",), "", False),
         ("is", (), "Red", False),
-        ("contains", "Blue", "Red; Blue", True),
-        ("contains", "Blue", "Light Blue", False),
-        ("contains", "Red", "red", False),
-        ("contains", "Red", "", False),
-        ("contains", " Red ", "Blue;  Red ", True),
-        ("does not contain", "Blue", "Light Blue", True),
-        ("does not contain", "Blue", "Red; Blue", False),
-        ("does not contain", "Red", "", True),
+        ("contains", ("Blue",), "Red; Blue", True),
+        ("contains", ("Blue",), "Light Blue", False),
+        ("contains", ("Red",), "red", False),
+        ("contains", ("Red",), "", False),
+        ("contains", (" Red ",), "Blue;  Red ", True),
+        ("does not contain", ("Blue",), "Light Blue", True),
+        ("does not contain", ("Blue",), "Red; Blue", False),
+        ("does not contain", ("Red",), "", True),
+        ("contains", ("Blue", "Red"), "Red; Blue; Light Blue", True),
+        ("contains", ("Blue", "Red"), "Red", False),
+        ("contains", ("Red", "Light Blue"), "Red; Blue", False),
+        ("does not contain", ("Red", "Light Blue"), "Red; Blue", False),
+        ("does not contain", ("Red", "Light Blue"), "Blue", True),
+        ("contains", (), "", True),
+        ("does not contain", (), "Red; Blue", True),
     ],
 )
 def test_multi_enum_uses_whole_selection_equality_and_item_membership(operator, operand, raw, matched):
@@ -111,8 +118,7 @@ def test_enum_fields_offer_metadata_labels_even_with_zero_option_guids(family, c
     schema = info.test_schema()
     operand = schema["properties"]["value"]
     if family is MultiEnumTest:
-        assert operand["anyOf"][0]["enum"] == ["Red", "Blue", "Light Blue"]
-        operand = operand["anyOf"][1]["items"]
+        operand = operand["items"]
     assert operand["enum"] == ["Red", "Blue", "Light Blue"]
 
 
@@ -122,7 +128,8 @@ def test_enum_fields_offer_metadata_labels_even_with_zero_option_guids(family, c
         (EnumTest(operator="is", value="red"), "SingleChoiceEnumeration"),
         (EnumTest(operator="is not", value="Old choice"), "SingleChoiceEnumeration"),
         (MultiEnumTest(operator="is", value=("Red", "Old choice")), "MultipleChoiceEnumeration"),
-        (MultiEnumTest(operator="contains", value="Old choice"), "MultipleChoiceEnumeration"),
+        (MultiEnumTest(operator="contains", value=("Red", "Old choice")), "MultipleChoiceEnumeration"),
+        (MultiEnumTest(operator="does not contain", value=("Old choice",)), "MultipleChoiceEnumeration"),
     ],
 )
 def test_enum_operands_must_exist_in_current_metadata(test, collection):
@@ -145,7 +152,7 @@ def test_guid_family_accepts_all_property_origins(source):
     [
         (EnumTest(operator="is", value="Red"), {"propertyCollectionType": "Single"}),
         (EnumTest(operator="is", value="Red"), {"propertyCollectionType": "MultipleChoiceEnumeration"}),
-        (MultiEnumTest(operator="contains", value="Red"), {"propertyCollectionType": "SingleChoiceEnumeration"}),
+        (MultiEnumTest(operator="contains", value=("Red",)), {"propertyCollectionType": "SingleChoiceEnumeration"}),
         (GuidTest(operator="is", value=TARGET), {"propertyCollectionType": "List", "propertyValueType": "Guid"}),
         (GuidTest(operator="is", value=TARGET), {"propertyValueType": "String"}),
     ],
@@ -200,10 +207,12 @@ def test_semicolon_labels_are_accepted_under_the_initial_parsing_assumption(fami
         (MultiEnumTest, "is", "Red"),
         (MultiEnumTest, "is", ("Red", "Red")),
         (MultiEnumTest, "is", ("Red", 1)),
-        (MultiEnumTest, "contains", ("Red",)),
-        (MultiEnumTest, "does not contain", []),
+        (MultiEnumTest, "contains", ("Red", "Red")),
+        (MultiEnumTest, "does not contain", ("Red", "Red")),
         (MultiEnumTest, "contains", b"Red"),
         (MultiEnumTest, "contains", None),
+        (MultiEnumTest, "contains", "Red"),
+        (MultiEnumTest, "does not contain", "Red"),
     ],
 )
 def test_new_operands_are_strict_and_operator_specific(family, operator, value):
@@ -223,10 +232,7 @@ def test_property_state_operators_are_not_advertised_or_accepted(family, operato
     "test",
     [EnumTest(operator=operator, value="Red") for operator in EnumOperator]
     + [GuidTest(operator=operator, value=TARGET) for operator in GuidOperator]
-    + [
-        MultiEnumTest(operator=operator, value=("Blue", "Red") if operator.requires_collection else "Red")
-        for operator in CollectionOperator
-    ],
+    + [MultiEnumTest(operator=operator, value=("Blue", "Red")) for operator in CollectionOperator],
 )
 def test_every_new_operator_round_trips_through_queries_and_frozen_models(test):
     query = Query(where=PropertyPredicate(field_id=ENUM, test=test))
@@ -248,14 +254,18 @@ def test_every_new_operator_round_trips_through_queries_and_frozen_models(test):
         ("is", ["Red", "Red"], False),
         ("is", "Red", False),
         ("is", ["Unknown"], False),
-        ("contains", "Red", True),
-        ("contains", ["Red"], False),
+        ("contains", "Red", False),
+        ("contains", ["Red"], True),
+        ("contains", ["Red", "Blue"], True),
+        ("contains", ["Red", "Unknown"], False),
+        ("contains", ["Red", "Red"], False),
         ("contains", "Unknown", False),
-        ("does not contain", "Blue", True),
-        ("does not contain", [], False),
+        ("does not contain", "Blue", False),
+        ("does not contain", [], True),
+        ("does not contain", ["Red", "Blue"], True),
     ],
 )
-def test_metadata_schema_enforces_choice_labels_and_conditional_operand_shapes(operator, value, valid):
+def test_metadata_schema_enforces_choice_labels_and_collection_operands(operator, value, valid):
     schema = MultiEnumTest.schema_for(enum_details("MultipleChoiceEnumeration"))
     assert Draft202012Validator(schema).is_valid({"operator": operator, "value": value}) is valid
 
@@ -264,8 +274,8 @@ def test_metadata_schema_enforces_choice_labels_and_conditional_operand_shapes(o
     "operator, value, operand_type",
     [
         ("is", ["Blue", "Red"], "array"),
-        ("contains", "Red", "string"),
-        ("does not contain", "Blue", "string"),
+        ("contains", ["Red", "Blue"], "array"),
+        ("does not contain", ["Blue"], "array"),
     ],
 )
 def test_operator_specific_inputs_keep_metadata_choices_and_compile_drafts(operator, value, operand_type):
@@ -287,10 +297,11 @@ def test_operator_specific_inputs_keep_metadata_choices_and_compile_drafts(opera
 
 
 @pytest.mark.parametrize("data", [{}, {"operator": "unknown"}, {"operator": None}])
-def test_incomplete_multi_enum_input_does_not_guess_an_operand_shape(data):
+def test_incomplete_multi_enum_input_always_describes_a_collection(data):
     info = PropertyInfo(enum_details("MultipleChoiceEnumeration"), Registry.from_union(PropertyTest))
     description = info.describe_test_inputs(data)
-    assert "anyOf" in description.fields[1].schema
+    assert description.fields[1].schema["type"] == "array"
+    assert description.fields[1].schema["items"]["enum"] == ["Red", "Blue", "Light Blue"]
     assert data.get("operator") in (None, "unknown")
 
 
@@ -299,7 +310,7 @@ def test_incomplete_multi_enum_input_does_not_guess_an_operand_shape(data):
     [
         EnumTest(operator="is not", value="Red"),
         GuidTest(operator="is not", value=TARGET),
-        MultiEnumTest(operator="does not contain", value="Red"),
+        MultiEnumTest(operator="does not contain", value=("Red",)),
     ],
 )
 @pytest.mark.parametrize("error", [PropertyUnavailableError("unavailable"), PropertyUndefinedError("undefined")])
@@ -331,7 +342,7 @@ def test_mixed_enum_guid_query_uses_one_property_batch_and_preserves_results(pro
                 PropertyPredicate(field_id=ENUM, test=EnumTest(operator="is", value="Red")),
                 PropertyPredicate(field_id=GUID, test=GuidTest(operator="is", value=TARGET)),
                 PropertyPredicate(field_id=MULTI, test=MultiEnumTest(operator="is", value=("Red", "Blue"))),
-                PropertyPredicate(field_id=MULTI, test=MultiEnumTest(operator="contains", value="Red")),
+                PropertyPredicate(field_id=MULTI, test=MultiEnumTest(operator="contains", value=("Red", "Blue"))),
             )
         )
     )

@@ -48,10 +48,10 @@ def check_field_types(properties: PropertyCatalogue, classifications: Classifica
 
 
 def check_collection_operand_types() -> None:
-    assert_type(StringListTest(operator=CollectionOperator.IS, value=("A",)).value, str | tuple[str, ...])
-    assert_type(IntegerListTest(operator=CollectionOperator.CONTAINS, value=1).value, int | tuple[int, ...])
-    assert_type(RealListTest(operator=CollectionOperator.CONTAINS, value=1.0).value, float | tuple[float, ...])
-    assert_type(MultiEnumTest(operator=CollectionOperator.IS, value=("A",)).value, str | tuple[str, ...])
+    assert_type(StringListTest(operator=CollectionOperator.IS, value=("A",)).value, tuple[str, ...])
+    assert_type(IntegerListTest(operator=CollectionOperator.CONTAINS, value=(1,)).value, tuple[int, ...])
+    assert_type(RealListTest(operator=CollectionOperator.CONTAINS, value=(1.0,)).value, tuple[float, ...])
+    assert_type(MultiEnumTest(operator=CollectionOperator.IS, value=("A",)).value, tuple[str, ...])
 
 
 def check_validation_catalogue_types(

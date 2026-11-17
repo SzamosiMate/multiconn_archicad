@@ -455,35 +455,12 @@ class EnumTest(PropertyTestModel):
                 assert_never(self.operator)
 
 
-def _collection_schema(schema: dict[str, Any]) -> None:
-    item_schema = next(branch for branch in schema["properties"]["value"]["anyOf"] if branch["type"] != "array")
-    schema["oneOf"] = [
-        {
-            "properties": {
-                "operator": {"const": operator.value},
-                "value": {"type": "array" if operator.requires_collection else item_schema["type"]},
-            }
-        }
-        for operator in CollectionOperator
-    ]
-
-
 class _CollectionTest[ItemT](PropertyTestModel):
     """Share collection operand shapes, complete parsing, and item comparisons."""
 
     operator: CollectionOperator
-    value: ItemT | tuple[ItemT, ...]
-    model_config = ConfigDict(json_schema_extra=_collection_schema)
+    value: tuple[ItemT, ...]
     _value_type: ClassVar[PropertyValueType]
-
-    @model_validator(mode="after")
-    def validate_operand(self) -> Self:
-        if self.operator.requires_collection:
-            if not isinstance(self.value, tuple):
-                raise ValueError(f"{self.operator.value!r} requires a collection of items")
-        elif isinstance(self.value, tuple):
-            raise ValueError(f"{self.operator.value!r} requires one item")
-        return self
 
     @classmethod
     def accepts(cls, details: PropertyDetails) -> bool:
@@ -494,17 +471,6 @@ class _CollectionTest[ItemT](PropertyTestModel):
 
     def validate_for(self, details: PropertyDetails) -> None:
         self._require_compatible_property(details)
-
-    @classmethod
-    def resolve_input_schema(cls, schema: dict[str, Any], current_data: Mapping[str, JsonValue]) -> dict[str, Any]:
-        operator = current_data.get("operator")
-        if isinstance(operator, str) and operator in cls.operators():
-            requires_collection = CollectionOperator(operator).requires_collection
-            value_schema = schema["properties"]["value"]
-            schema["properties"]["value"] = next(
-                branch for branch in value_schema["anyOf"] if (branch["type"] == "array") == requires_collection
-            )
-        return schema
 
     @abstractmethod
     def _parse_item(self, raw_value: str) -> ItemT:
@@ -530,13 +496,13 @@ class _CollectionTest[ItemT](PropertyTestModel):
 
         match self.operator:
             case CollectionOperator.IS:
-                assert isinstance(self.value, tuple)
                 return BatchSlot.success(self._collections_equal(actual, self.value))
             case CollectionOperator.CONTAINS | CollectionOperator.DOES_NOT_CONTAIN:
-                expected = self.value
-                assert not isinstance(expected, tuple)
-                matched = any(self._items_equal(item, expected) for item in actual)
-                return BatchSlot.success(not matched if self.operator is CollectionOperator.DOES_NOT_CONTAIN else matched)
+                matches = (any(self._items_equal(item, wanted) for item in actual) for wanted in self.value)
+                # Positive membership requires every requested item; negative
+                # membership excludes every requested item, even on partial overlap.
+                matched = not any(matches) if self.operator is CollectionOperator.DOES_NOT_CONTAIN else all(matches)
+                return BatchSlot.success(matched)
             case _:
                 assert_never(self.operator)
 
@@ -584,11 +550,9 @@ class RealListTest(_CollectionTest[_RealItem]):
 
     @classmethod
     def schema_for(cls, details: PropertyDetails) -> dict:
-        """Annotate both membership operands and whole-list operand items."""
+        """Annotate numeric items with the query unit for every operator."""
         schema = super().schema_for(details)
-        for branch in schema["properties"]["value"]["anyOf"]:
-            operand = branch["items"] if branch["type"] == "array" else branch
-            _annotate_real_unit(operand, details.propertyMeasureType)
+        _annotate_real_unit(schema["properties"]["value"]["items"], details.propertyMeasureType)
         return schema
 
     def _parse_item(self, raw_value: str) -> float:
@@ -602,7 +566,7 @@ class RealListTest(_CollectionTest[_RealItem]):
 
 
 class MultiEnumTest(_CollectionTest[_StringItem]):
-    """Compare a selection as a set, or test exact choice-label membership.
+    """Compare sets, require all requested labels, or exclude all requested labels.
 
     Reads split Tapir's '; ' separator. Labels containing semicolons are outside
     this initial implementation's supported assumptions.
@@ -610,13 +574,11 @@ class MultiEnumTest(_CollectionTest[_StringItem]):
 
     kind: Literal["multi_enum"] = "multi_enum"
     _value_type = PropertyValueType.STRING
-    value: Annotated[str, Field(strict=True)] | Annotated[
-        tuple[Annotated[str, Field(strict=True)], ...], Field(json_schema_extra={"uniqueItems": True})
-    ]
+    value: tuple[_StringItem, ...] = Field(json_schema_extra={"uniqueItems": True})
 
     @model_validator(mode="after")
     def validate_unique_choices(self) -> Self:
-        if isinstance(self.value, tuple) and len(set(self.value)) != len(self.value):
+        if len(set(self.value)) != len(self.value):
             raise ValueError("Multiple-choice enumeration operands must not repeat choices")
         return self
 
@@ -626,14 +588,12 @@ class MultiEnumTest(_CollectionTest[_StringItem]):
 
     def validate_for(self, details: PropertyDetails) -> None:
         self._require_compatible_property(details)
-        _validate_enum_values(details, (self.value,) if isinstance(self.value, str) else self.value)
+        _validate_enum_values(details, self.value)
 
     @classmethod
     def schema_for(cls, details: PropertyDetails) -> dict:
         schema = super().schema_for(details)
-        for branch in schema["properties"]["value"]["anyOf"]:
-            operand = branch["items"] if branch["type"] == "array" else branch
-            operand["enum"] = list(_enum_labels(details))
+        schema["properties"]["value"]["items"]["enum"] = list(_enum_labels(details))
         return schema
 
     def _parse_item(self, raw_value: str) -> str:
@@ -777,9 +737,7 @@ class ElementTypeTest(TestModel):
     """Specify the Archicad element types accepted by a membership test."""
 
     kind: Literal["element_type"] = "element_type"
-    types: tuple[ElementType, ...] = Field(
-        min_length=1, json_schema_extra={"not": {"contains": {"const": "Unknown"}}}
-    )
+    types: tuple[ElementType, ...] = Field(min_length=1, json_schema_extra={"not": {"contains": {"const": "Unknown"}}})
 
     @field_validator("types")
     @classmethod

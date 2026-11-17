@@ -65,10 +65,10 @@ convenience values; a query stores concrete types and has no preset identifier.
 | `BooleanTest` | `is`, `is not` | Boolean |
 | `EnumTest` | `is`, `is not` | Single-choice enumeration label |
 | `GuidTest` | `is`, `is not` | UUID |
-| `MultiEnumTest` | `is`, `contains`, `does not contain` | Choice-label tuple for `is`; one label for membership |
-| `StringListTest` | `is`, `contains`, `does not contain` | String tuple for `is`; one string for membership |
-| `IntegerListTest` | Same collection operators | Strict integer tuple for `is`; one integer for membership |
-| `RealListTest` | Same collection operators | Finite-number tuple for `is`; one number for membership |
+| `MultiEnumTest` | `is`, `contains`, `does not contain` | Choice-label tuple |
+| `StringListTest` | `is`, `contains`, `does not contain` | String tuple |
+| `IntegerListTest` | Same collection operators | Strict integer tuple |
+| `RealListTest` | Same collection operators | Finite-number tuple |
 | `ClassificationTest` | Equality, presence, branch, direct-child comparisons | Item UUID when required; see [classification operator table](classifications.md#metadata-and-field-discovery) |
 | `ElementTypeTest` | Membership through `types` | Concrete element-type tuple |
 
@@ -132,9 +132,12 @@ with an empty label is also unsupported: an empty read represents no selection.
 
 `MultiEnumTest(operator="is", value=("Red", "Blue"))` compares the entire selected
 set, ignoring order. Repeated operand choices are rejected. An empty tuple matches
-an empty selection. `contains` and `does not contain` take one label and compare
-whole items: `Blue` does not match `Light Blue`. Python uses tuples for selection
-operands; JSON uses arrays. Membership operands are strings in both formats.
+an empty selection. `contains` requires every requested label to be present;
+`does not contain` requires none of the requested labels to be present. Partial
+overlap therefore matches neither operator. They compare whole items: `Blue`
+does not match `Light Blue`. Python uses tuples for selection operands; JSON uses
+arrays. All three operators require collection operands, including for one label.
+An empty operand collection matches both membership operators.
 The test parses the returned `; ` separator. **This initial implementation assumes
 choice labels do not contain semicolons.** Such labels are accepted but queries
 against them may give incorrect results; no escaping or structured-read fallback
@@ -146,15 +149,18 @@ UUID is compared as an ordinary UUID, without an inferred unassigned state.
 
 `StringListTest`, `IntegerListTest`, and `RealListTest` compare ordered lists.
 `is` requires the same length, order, and repeated items; `(1, 2)` differs from
-`(2, 1)` and `(1, 1, 2)`. Membership compares any whole item, with these item rules:
+`(2, 1)` and `(1, 1, 2)`. `contains` requires every requested item to occur;
+`does not contain` requires none of them to occur. Membership ignores operand
+order and multiplicity: requesting `(1, 1)` only requires one occurrence of `1`.
+Item comparisons use these rules:
 
 - Strings use Unicode casefold, preserving whitespace, like TextTest.
 - Integers compare exactly, preserving precision above the float integer range.
 - Reals use the same `1e-10` relative and absolute tolerance as RealTest.
   All measures use SI units, except degrees for angles.
 
-`is` takes a tuple (JSON array), including an empty tuple. Membership takes one
-typed item. Repeated list operands are allowed. All returned numeric items are
+All three operators take a tuple (JSON array), including for one item. An empty operand tuple
+matches both membership operators. Repeated list operands are allowed. All returned numeric items are
 parsed before comparison: a malformed or non-finite item is an evaluation error
 even if another item matches. Numeric reads use the existing canonical SI path.
 
