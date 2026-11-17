@@ -220,6 +220,10 @@ def test_json_schema_exposes_recursive_nodes_and_typed_operator_choices():
         "element_type",
         "property",
         "classification",
+        "layer",
+        "layer_name",
+        "layer_combination",
+        "layer_combination_name",
     }
     assert "Negate" not in definitions
     for name in ("PropertyPredicate", "ClassificationPredicate"):

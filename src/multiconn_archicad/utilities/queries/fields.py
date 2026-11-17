@@ -23,10 +23,20 @@ from .errors import (
 )
 from .element_types import TYPES_2D, TYPES_3D, TYPES_3D_COMPONENTS, TYPES_3D_WITH_COMPONENTS, TYPES_ALL
 from .inputs import TestInput, TestInputs
-from .models import ClassificationTest, ElementTypeTest, PropertyTestModel, TestModel
+from .models import (
+    ClassificationTest,
+    ElementTypeTest,
+    LayerTest,
+    LayerCombinationTest,
+    TextTest,
+    PropertyTestModel,
+    TestModel,
+)
+from .layer_data import LayerAttribute, attribute_choices
 from .registry import TestRegistry
 
 TestT = TypeVar("TestT", bound=TestModel)
+LayerChoiceTestT = TypeVar("LayerChoiceTestT", bound=LayerTest | LayerCombinationTest)
 
 
 class FieldInfo(ABC, Generic[TestT]):
@@ -182,6 +192,94 @@ class ElementTypeInfo(FieldInfo[ElementTypeTest]):
             description,
             fields=(replace(types_input, schema={**types_input.schema, "oneOf": choices}),),
         )
+
+
+class _LayerFieldInfo(FieldInfo[TestT]):
+    """Describe a fixed layer field against captured project attribute choices."""
+
+    _kind: str
+    _name: str
+
+    def __init__(self, attributes: Sequence[LayerAttribute]):
+        self._attributes = attribute_choices(attributes)
+
+    @property
+    def attributes(self) -> tuple[LayerAttribute, ...]:
+        return self._attributes
+
+    @property
+    def name(self) -> str:
+        return self._name
+
+    @property
+    def group(self) -> str:
+        return "Layer"
+
+    @property
+    def reference(self) -> dict[str, str]:
+        return {"kind": self._kind}
+
+    def validate(self, test: TestT) -> None:
+        if not isinstance(test, self.test_model):
+            raise InvalidFieldTestError(f"{self.qualified_name} requires {self.test_model.__name__}")
+
+
+class _LayerChoiceInfo(_LayerFieldInfo[LayerChoiceTestT]):
+    """Validate selected GUIDs and describe named dropdown choices."""
+
+    def validate(self, test: LayerChoiceTestT) -> None:
+        super().validate(test)
+        if not any(item.guid == test.value for item in self.attributes):
+            raise InvalidFieldTestError(f"Selected {self.name.lower()} {test.value} is not present in the project")
+
+    def test_schema(self) -> dict[str, Any]:
+        schema = self.test_model.model_json_schema()
+        operand = schema["properties"]["value"]
+        if self.attributes:
+            operand["oneOf"] = [{"const": str(item.guid), "title": item.name} for item in self.attributes]
+        else:
+            operand["enum"] = []
+        return schema
+
+
+class LayerInfo(_LayerChoiceInfo[LayerTest]):
+    """Offer project layers as GUID-valued, name-labelled choices."""
+
+    _kind, _name = "layer", "Layer"
+
+    @property
+    def test_model(self) -> type[LayerTest]:
+        return LayerTest
+
+
+class LayerNameInfo(_LayerFieldInfo[TextTest]):
+    """Describe text matching against project layer names."""
+
+    _kind, _name = "layer_name", "Layer Name"
+
+    @property
+    def test_model(self) -> type[TextTest]:
+        return TextTest
+
+
+class LayerCombinationInfo(_LayerChoiceInfo[LayerCombinationTest]):
+    """Offer saved combinations as GUID-valued, name-labelled choices."""
+
+    _kind, _name = "layer_combination", "Layer Combination"
+
+    @property
+    def test_model(self) -> type[LayerCombinationTest]:
+        return LayerCombinationTest
+
+
+class LayerCombinationNameInfo(_LayerFieldInfo[TextTest]):
+    """Describe text matching against saved layer combination names."""
+
+    _kind, _name = "layer_combination_name", "Layer Combination Name"
+
+    @property
+    def test_model(self) -> type[TextTest]:
+        return TextTest
 
 
 class _PropertyMetadata(FieldInfo[PropertyTestModel]):

@@ -14,7 +14,8 @@ field-driven editors and unfinished drafts.
   active window. It covers all stories and adds no visibility/editability filter.
   This is the supported first-release search scope.
 - Property tests currently support scalar text, integer/real numbers, and
-  Boolean values. Classification and element-type predicates are also available.
+  Boolean values. Classification, element-type, layer and saved layer-combination
+  predicates are also available.
 - Numeric query reads request precise, locale-independent strings from Tapir.
   Quantity operands use **SI units, except angles use degrees**. `IntegerTest`
   compares integers exactly. `RealTest` uses relative and absolute tolerances of
@@ -113,6 +114,51 @@ has_pitch = RealListTest(operator="contains", value=(30,))  # Degrees for angle 
 List equality preserves order and duplicates. String items use casefold matching;
 numeric items retain the scalar Integer/Real comparison policies. String-list
 items also assume no semicolons; an empty read is interpreted as an empty list.
+
+## Query layers and saved layer combinations
+
+Discover the Layer fields to obtain project-specific dropdown choices:
+
+```python
+from multiconn_archicad.utilities.queries import (
+    LayerPredicate, LayerInfo, LayerNamePredicate,
+    LayerCombinationNamePredicate, TextTest,
+)
+from multiconn_archicad.utilities.queries.editing import QueryRow
+
+fields = api.utilities.element.discover_query_fields([
+    QueryRow(predicate={"kind": "layer"}),
+])
+layer_field = fields.resolve({"kind": "layer"})
+assert isinstance(layer_field, LayerInfo)
+for attribute in layer_field.attributes:
+    print(attribute.guid, attribute.index, attribute.name)
+
+# Select the intended attribute from the choices above:
+chosen_layer = next(item for item in layer_field.attributes if item.name == "A-Walls")
+query = Query(where=LayerPredicate(
+    test=layer_field.create_test(operator="is", value=chosen_layer.guid),
+))
+matches = api.utilities.element.find_elements(query)
+
+# Match current layer names with ordinary text operators:
+query = Query(where=LayerNamePredicate(
+    test=TextTest(operator="starts with", value="A-"),
+))
+
+# Visible in at least one saved combination whose name contains Documentation:
+query = Query(where=LayerCombinationNamePredicate(
+    test=TextTest(operator="contains", value="Documentation"),
+))
+```
+
+`LayerCombinationPredicate(test=LayerCombinationTest(operator="is", value=guid))`
+selects one combination by GUID, using the same discovery pattern with
+`kind="layer_combination"`. Both dropdown tests offer `is` and `is not`.
+The name variants use all `TextTest` operators. Combination tests inspect saved
+layer visibility without activating a combination. See the
+[layer contract](element_query_reference.md#layers-and-saved-layer-combinations)
+for negative-name semantics, missing references, and batched reads.
 
 ## Discover properties and classifications
 

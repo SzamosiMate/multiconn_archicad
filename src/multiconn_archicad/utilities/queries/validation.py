@@ -175,6 +175,34 @@ class QueryValidationContext:
             return (_unknown_field_issue(check),)
         return _check_known_field(field, check)
 
+    def check_builtin(self, kind: str, test: TestModel, location: _Location) -> tuple[QueryValidationIssue, ...]:
+        """Validate a fixed field whose project attribute is the test operand."""
+        reference = {"kind": kind}
+        field = self.catalogue.resolve(reference)
+        if field is None:
+            return (
+                QueryValidationIssue(
+                    location=(*location, "kind"),
+                    code="unknown_field",
+                    message=f"Field {reference} is not present in the catalogue",
+                    reference=reference,
+                ),
+            )
+        try:
+            field.validate(test)
+        except InvalidFieldTestError as error:
+            return (
+                QueryValidationIssue(
+                    location=(*location, "test"),
+                    code="invalid_test",
+                    message=str(error),
+                    reference=reference,
+                    name=field.name,
+                    group=field.group,
+                ),
+            )
+        return ()
+
 
 def validate_query(
     query: Query,

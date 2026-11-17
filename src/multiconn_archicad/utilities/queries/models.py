@@ -10,7 +10,7 @@ Neither performs API reads.
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from enum import StrEnum
 from math import isclose, isfinite
 from typing import TYPE_CHECKING, Annotated, Any, ClassVar, Literal, Self, TypeAlias, assert_never, cast
@@ -19,6 +19,7 @@ from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field, JsonValue, ValidationInfo, field_validator, model_validator
 
 from multiconn_archicad.models.tapir.types import (
+    AttributeType,
     ElementType,
     PropertyCollectionType,
     PropertyDetails,
@@ -29,7 +30,7 @@ from multiconn_archicad.utilities.results.batch_results import BatchError, Batch
 from multiconn_archicad.utilities.results.property_errors import PropertyUnavailableError, PropertyUndefinedError
 
 from .context import ContextBuilder, EvaluationContext
-from .errors import InvalidPropertyTestError
+from .errors import InvalidFieldTestError, InvalidPropertyTestError
 from .inputs import InputAvailability
 from .operators import (
     BooleanOperator,
@@ -40,13 +41,14 @@ from .operators import (
     NumberOperator,
     TextOperator,
 )
-from .sources import CLASSIFICATION_FIELDS, CLASSIFICATION_VALUES, PROPERTY_VALUES, TYPE_MEMBERSHIP
+from .sources import CLASSIFICATION_FIELDS, CLASSIFICATION_VALUES, LAYER_MEMBERSHIP, PROPERTY_VALUES, TYPE_MEMBERSHIP
+from .layer_data import LayerAttribute, LayerRequest
 from .validation import FieldCheck, QueryValidationContext, QueryValidationIssue
 from .versioning import QUERY_SCHEMA_VERSION
 
 if TYPE_CHECKING:
     from .catalogue import QueryFieldCatalogue
-    from .fields import ClassificationInfo
+    from .fields import ClassificationInfo, _LayerFieldInfo
 
 
 class _QueryModel(BaseModel):
@@ -747,6 +749,126 @@ class ElementTypeTest(TestModel):
         return types
 
 
+class _AttributeIdentityTest(TestModel):
+    """Select one attribute by GUID and compare its resulting membership."""
+
+    operator: GuidOperator
+    value: UUID
+
+    def select_attributes(self, attributes: Sequence[LayerAttribute]) -> tuple[LayerAttribute, ...]:
+        selected = tuple(item for item in attributes if item.guid == self.value)
+        if not selected:
+            raise InvalidFieldTestError(f"Selected attribute {self.value} is not present in the project")
+        return selected
+
+    def evaluate_membership(self, matched: bool) -> BatchSlot[bool]:
+        return BatchSlot.success(matched if self.operator is GuidOperator.IS else not matched)
+
+
+class LayerTest(_AttributeIdentityTest):
+    """Select one project layer by attribute GUID."""
+
+    kind: Literal["layer"] = "layer"
+
+
+class LayerCombinationTest(_AttributeIdentityTest):
+    """Select the visible layers of one saved combination by attribute GUID."""
+
+    kind: Literal["layer_combination"] = "layer_combination"
+
+
+class _LayerPredicate(_QueryModel, ABC):
+    """Share field validation and source preparation, without dispatch by kind."""
+
+    kind: str
+    test: TestModel
+    _attribute_type: ClassVar[AttributeType]
+
+    def validate_fields(
+        self, context: QueryValidationContext, location: tuple[str | int, ...] = ("where",)
+    ) -> tuple[QueryValidationIssue, ...]:
+        return context.check_builtin(self.kind, self.test, location)
+
+    def candidate_types(self) -> frozenset[ElementType] | None:
+        return None
+
+    def field_references(self) -> tuple[Mapping[str, object], ...]:
+        return ({"kind": self.kind},)
+
+    @abstractmethod
+    def _select_attributes(self, attributes: Sequence[LayerAttribute]) -> tuple[LayerAttribute, ...]: ...
+
+    def _request(self, attributes: tuple[LayerAttribute, ...] | None = None) -> LayerRequest:
+        return LayerRequest(self._attribute_type, self.test, self._select_attributes, attributes)
+
+    def prepare(self, builder: ContextBuilder, *, fields: QueryFieldCatalogue | None = None) -> None:
+        attributes = None
+        if fields is not None:
+            field = fields.resolve({"kind": self.kind})
+            if field is None:
+                raise ValueError(f"Expected validated metadata for {self.kind}")
+            attributes = cast("_LayerFieldInfo[Any]", field).attributes
+        builder.require(LAYER_MEMBERSHIP, self._request(attributes))
+
+    def _matches(self, context: EvaluationContext, element_id: UUID) -> bool:
+        return element_id in context.data(LAYER_MEMBERSHIP)[self._request()]
+
+
+class _LayerIdentityPredicate(_LayerPredicate):
+    test: _AttributeIdentityTest
+
+    def _select_attributes(self, attributes: Sequence[LayerAttribute]) -> tuple[LayerAttribute, ...]:
+        return self.test.select_attributes(attributes)
+
+    def evaluate(self, context: EvaluationContext, element_id: UUID, *, path: str = "where") -> BatchSlot[bool]:
+        return self.test.evaluate_membership(self._matches(context, element_id))
+
+
+class _LayerNamePredicate(_LayerPredicate):
+    test: TextTest
+
+    def _select_attributes(self, attributes: Sequence[LayerAttribute]) -> tuple[LayerAttribute, ...]:
+        return tuple(item for item in attributes if self.test.evaluate(item.name).value)
+
+    def evaluate(self, context: EvaluationContext, element_id: UUID, *, path: str = "where") -> BatchSlot[bool]:
+        # The text test has already selected attribute names, including negatives.
+        return BatchSlot.success(self._matches(context, element_id))
+
+
+class LayerPredicate(_LayerIdentityPredicate):
+    """Match elements assigned to the selected layer."""
+
+    kind: Literal["layer"] = "layer"
+    test: LayerTest
+
+    _attribute_type = AttributeType.LAYER
+
+
+class LayerNamePredicate(_LayerNamePredicate):
+    """Match elements whose layer name passes a text comparison."""
+
+    kind: Literal["layer_name"] = "layer_name"
+
+    _attribute_type = AttributeType.LAYER
+
+
+class LayerCombinationPredicate(_LayerIdentityPredicate):
+    """Match elements on layers visible in the selected saved combination."""
+
+    kind: Literal["layer_combination"] = "layer_combination"
+    test: LayerCombinationTest
+
+    _attribute_type = AttributeType.LAYER_COMBINATION
+
+
+class LayerCombinationNamePredicate(_LayerNamePredicate):
+    """Match visibility in any combination whose name passes the text test."""
+
+    kind: Literal["layer_combination_name"] = "layer_combination_name"
+
+    _attribute_type = AttributeType.LAYER_COMBINATION
+
+
 class ElementTypePredicate(_QueryModel):
     """Match one or more Archicad element types."""
 
@@ -862,7 +984,15 @@ class AnyOf(_QueryModel):
 
 
 Predicate: TypeAlias = Annotated[
-    PropertyPredicate | ClassificationPredicate | ElementTypePredicate | AllOf | AnyOf,
+    PropertyPredicate
+    | ClassificationPredicate
+    | ElementTypePredicate
+    | LayerPredicate
+    | LayerNamePredicate
+    | LayerCombinationPredicate
+    | LayerCombinationNamePredicate
+    | AllOf
+    | AnyOf,
     Field(discriminator="kind"),
 ]
 

@@ -19,9 +19,16 @@ for entry in fields.browse_fields():
 ```
 
 The combined `QueryFieldCatalogue` contains built-in element types, properties,
-and classification systems. `resolve(reference)` returns a descriptor or `None`.
+classification systems, and the four fields in the Layer group.
+`resolve(reference)` returns a descriptor or `None`.
 Use the descriptor's JSON-friendly `reference`, not its label, for identity.
 Display grouping is separate from resolution.
+
+Layer and Layer Combination descriptors provide `oneOf` choices on `value`,
+with an attribute GUID as `const` and its name as `title`. Save the GUID operand;
+the fixed field reference contains only `kind`. Their name variants use the
+ordinary text inputs and operators. Refreshing rows discovers only the required
+attribute types, once each, and retains missing saved operands for validation.
 
 To refresh fields already referenced by a saved or incomplete draft, pass its
 rows to `api.utilities.element.discover_query_fields(draft.rows)`. This discovers
