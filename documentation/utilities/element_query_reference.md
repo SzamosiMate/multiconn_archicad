@@ -34,6 +34,10 @@ Import executable models from `multiconn_archicad.utilities.queries`.
 | `PropertyPredicate` | `field_id`, `test` | Property GUID and a compatible property test |
 | `ClassificationPredicate` | `field_id`, `test` | Classification system GUID and classification test |
 | `ElementTypePredicate` | `test` | Membership in the test's concrete type tuple |
+| `LayerPredicate` | `test` | Assignment to a selected layer GUID |
+| `LayerNamePredicate` | `test` | Assignment to a layer whose name passes a text test |
+| `LayerCombinationPredicate` | `test` | Layer visibility in a selected combination GUID |
+| `LayerCombinationNamePredicate` | `test` | Layer visibility in any combination whose name passes a text test |
 | `AllOf` | Nonempty `items` | All children must match |
 | `AnyOf` | Nonempty `items` | At least one child must match |
 
@@ -65,6 +69,8 @@ convenience values; a query stores concrete types and has no preset identifier.
 | `BooleanTest` | `is`, `is not` | Boolean |
 | `EnumTest` | `is`, `is not` | Single-choice enumeration label |
 | `GuidTest` | `is`, `is not` | UUID |
+| `LayerTest` | `is`, `is not` | Layer attribute UUID |
+| `LayerCombinationTest` | `is`, `is not` | Layer combination attribute UUID |
 | `MultiEnumTest` | `is`, `contains`, `does not contain` | Choice-label tuple |
 | `StringListTest` | `is`, `contains`, `does not contain` | String tuple |
 | `IntegerListTest` | Same collection operators | Strict integer tuple |
@@ -185,6 +191,63 @@ A successfully unclassified assignment has different semantics: it matches
 negative classification comparisons and `has no value`. An assignment read
 error remains an error. Branch matching includes the chosen item; direct-child
 matching excludes it. See [classification semantics](classifications.md).
+
+## Layers and saved layer combinations
+
+The combined field catalogue offers four fixed fields under **Layer**: Layer,
+Layer Name, Layer Combination, and Layer Combination Name. Their references are
+`{"kind": "layer"}`, `{"kind": "layer_name"}`,
+`{"kind": "layer_combination"}`, and `{"kind": "layer_combination_name"}`.
+They have no `field_id`: the selected attribute GUID belongs in `test.value`.
+
+`LayerTest` and `LayerCombinationTest` store one UUID, with `is` or `is not`.
+Their descriptors offer GUID-valued choices labelled with current attribute
+names. A missing selected GUID is an invalid test, including for negative tests
+and empty candidate populations. Names and indices are not saved alongside it.
+Renaming an attribute preserves the selection; deleting/recreating it requires
+repairing the query. Tapir's layer reindex operation also recreates the attribute.
+
+Both name predicates use `TextTest`, including Unicode casefold matching and
+significant whitespace. Layer Name applies that test to each layer name.
+Layer Combination Name first selects matching combination names, then matches
+elements on the union of their visible layers. Thus `does not contain Structural`
+means visibility in any combination whose name does not contain that text; an
+element can also be visible in a Structural combination. No matching names means
+no matching elements, including with negative text operators.
+
+Layer Combination `is not` instead matches elements outside the selected
+combination's visible-layer set. Visibility means `isHidden == false` in that
+saved combination; current layer visibility, locking, wireframe, intersection
+groups, and other view settings do not affect the test. Execution never activates
+a combination or changes project settings.
+
+Discovery captures `GetAttributesByType` headers once per required attribute
+type. Execution reuses these snapshots, batches all selected combinations into
+one `GetLayerCombinations` call, and resolves the union of their visible layer
+GUIDs with one Tapir `GetLayers(fields=[])` call, returning only GUID/index/name
+headers. This works on Archicad 27, where the
+official `API.GetAttributesIndices` command may be unavailable. `FilterElements.layerIndices`
+provides element membership once per distinct nonempty layer-index set. Empty
+sets skip filtering. Layer metadata and visibility/index read failures are
+query-wide failures; they are never interpreted as negative matches.
+
+The public `LayerAttribute(guid, index, name)` snapshot record and `LayerInfo`,
+`LayerNameInfo`, `LayerCombinationInfo`, `LayerCombinationNameInfo` descriptors
+also support offline catalogues through `QueryFieldCatalogue(fields=[...])`.
+
+Internally, selection and comparison belong to the query models. GUID tests
+select an attribute by identity and apply `is`/`is not` to the resulting element
+membership. Name predicates adapt `TextTest` to attribute names before membership
+is loaded; their final evaluation is just membership, with no second negation.
+
+Predicates supply an attribute type and a selection function. A small immutable
+request record keeps these together with a stable selection key and any supplied
+metadata snapshot, allowing the batch builder to share equivalent requests.
+There is no request hierarchy or selector protocol. The source invokes the
+selection function and resolves either layer indices or combination visibility,
+according to the Archicad attribute type. It does not inspect predicate kinds,
+operators, or concrete test classes. Supplied snapshots avoid duplicate reads;
+direct prepare/build callers can let the source load the missing headers.
 
 ## Validation
 

@@ -26,6 +26,14 @@ from multiconn_archicad.utilities.queries import (
     Query,
     UnsupportedPropertyInfo,
     validate_query,
+    LayerAttribute,
+    LayerInfo,
+    LayerNameInfo,
+    LayerCombinationInfo,
+    LayerCombinationNameInfo,
+    LayerTest,
+    LayerCombinationTest,
+    TextTest,
 )
 from multiconn_archicad.utilities.queries.validation import (
     FieldCheck,
@@ -52,6 +60,13 @@ def check_collection_operand_types() -> None:
     assert_type(IntegerListTest(operator=CollectionOperator.CONTAINS, value=(1,)).value, tuple[int, ...])
     assert_type(RealListTest(operator=CollectionOperator.CONTAINS, value=(1.0,)).value, tuple[float, ...])
     assert_type(MultiEnumTest(operator=CollectionOperator.IS, value=("A",)).value, tuple[str, ...])
+
+
+def check_layer_field_types(attribute: LayerAttribute) -> None:
+    assert_type(LayerInfo([attribute]).create_test(operator="is", value=attribute.guid), LayerTest)
+    assert_type(LayerCombinationInfo([attribute]).create_test(operator="is", value=attribute.guid), LayerCombinationTest)
+    assert_type(LayerNameInfo([attribute]).create_test(operator="contains", value="A-"), TextTest)
+    assert_type(LayerCombinationNameInfo([attribute]).create_test(operator="contains", value="A-"), TextTest)
 
 
 def check_validation_catalogue_types(
