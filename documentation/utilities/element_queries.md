@@ -92,8 +92,8 @@ from multiconn_archicad.utilities.queries import MultiEnumTest
 
 # Compare the complete multi-choice selection, ignoring order:
 selection = MultiEnumTest(operator="is", value=("Red", "Blue"))
-# Test one selected choice, using whole-label membership:
-membership = MultiEnumTest(operator="contains", value="Red")
+# Require every selected choice, using whole-label membership:
+membership = MultiEnumTest(operator="contains", value=("Red", "Blue"))  # Requires both choices.
 ```
 
 Use the exact labels offered by the field's metadata. This initial implementation
@@ -106,8 +106,8 @@ from property metadata. They use the same collection operators:
 from multiconn_archicad.utilities.queries import IntegerListTest, RealListTest, StringListTest
 
 ordered_values = IntegerListTest(operator="is", value=(1, 2, 1))
-has_material = StringListTest(operator="contains", value="GENERIC - STRUCTURAL")
-has_pitch = RealListTest(operator="contains", value=30)  # Degrees for angle properties.
+has_material = StringListTest(operator="contains", value=("GENERIC - STRUCTURAL", "CONCRETE"))  # Requires both.
+has_pitch = RealListTest(operator="contains", value=(30,))  # Degrees for angle properties.
 ```
 
 List equality preserves order and duplicates. String items use casefold matching;

@@ -38,10 +38,6 @@ class CollectionOperator(StrEnum):
     CONTAINS = "contains"
     DOES_NOT_CONTAIN = "does not contain"
 
-    @property
-    def requires_collection(self) -> bool:
-        return self is self.IS
-
 
 class TextOperator(StrEnum):
     IS = "is"

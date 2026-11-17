@@ -58,15 +58,14 @@ UUID choices. `describe_test_inputs()` derives editable fields from that schema
 and the test model's `input_availability()` rules for the current partial data.
 This lets the UI change required/forbidden operands when the operator changes.
 
-The `resolve_input_schema()` hook resolves operator-dependent operand shapes
-against a copy of the metadata-aware schema. For all collection tests, `is`
-describes an array of items, while `contains` and `does not contain` describe one
-item of the family's type. MultiEnumTest retains metadata-defined choices in
-both forms. List equality allows duplicates; multi-enum equality rejects repeated
-choices. With no recognized operator,
-the operand description retains both possible shapes; strict construction reports
-incomplete or invalid input. Inspection does not convert or discard a restored
-operand when the operator changes.
+The `resolve_input_schema()` hook can resolve input schemas against a copy of the
+metadata-aware schema. Collection tests need no operator-dependent resolution:
+`is`, `contains`, and `does not contain` all require an array of items, allowing an
+editor to retain the selection when the operator changes.
+MultiEnumTest retains metadata-defined choices on array items. List operands allow
+duplicates; multi-enum operands reject repeated choices. An incomplete or invalid
+operator does not change the array description; strict construction reports
+incomplete or invalid input. Inspection does not convert or discard a restored operand.
 
 `TestInputs` contains:
 
@@ -89,11 +88,10 @@ unit description. These are query input units, independent of project display
 preferences. Both annotations are display metadata; save only the numeric
 operand in the query, without a unit field or conversion.
 
-`RealListTest.schema_for(details)` uses the same unit annotations on the numeric
-membership operand and on each item of the whole-list operand. Resolving the
-operator's input shape preserves these annotations: membership controls read
-`x-unit` from the value schema, and list editors read it from the array's `items`
-schema. Unitless lists have no unit annotation or generated unit description.
+`RealListTest.schema_for(details)` uses the same unit annotations on each numeric
+array item. List editors read `x-unit` from the
+array's `items` schema for every operator. Unitless lists have no unit annotation
+or generated unit description.
 
 ### Element-type choices and executable schema
 

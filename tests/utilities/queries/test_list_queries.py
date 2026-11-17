@@ -48,10 +48,41 @@ def test_whole_list_equality_preserves_order_and_duplicates(family, raw, first, 
         assert family(operator="is", value=operand).evaluate(raw).value is False
 
 
+@pytest.mark.parametrize(
+    "family, raw, first, second, missing",
+    [
+        (StringListTest, "A; B", "a", "b", "C"),
+        (IntegerListTest, "9007199254740993; 2", 9007199254740993, 2, 9007199254740992),
+        (RealListTest, "29.999999999999996; 2", 30.0, 2.0, 1.0),
+    ],
+)
+def test_collection_membership_requires_all_or_excludes_all_requested_items(family, raw, first, second, missing):
+    for values, contains, excludes in [
+        ((first, second), True, False),
+        ((first, missing), False, False),
+        ((missing,), False, True),
+        ((first, first), True, False),
+        ((), True, True),
+    ]:
+        for operator, expected in (("contains", contains), ("does not contain", excludes)):
+            test = family(operator=operator, value=values)
+            assert test.evaluate(raw).value is expected
+            payload = test.model_dump(mode="json")
+            assert Draft202012Validator(family.model_json_schema()).is_valid(payload)
+            assert family.model_validate_json(test.model_dump_json()) == test
+
+
+@pytest.mark.parametrize("family, value_type, item", FAMILIES)
+@pytest.mark.parametrize("operator", ["contains", "does not contain"])
+def test_empty_actual_collection_with_multiple_membership_operands(family, value_type, item, operator):
+    assert family(operator=operator, value=(item, item)).evaluate("").value is (operator == "does not contain")
+    assert family(operator=operator, value=()).evaluate("").value is True
+
+
 @pytest.mark.parametrize("family, value_type, item", FAMILIES)
 @pytest.mark.parametrize("operator", list(CollectionOperator))
 def test_empty_lists_are_empty_collections(family, value_type, item, operator):
-    operand = () if operator.requires_collection else item
+    operand = () if operator is CollectionOperator.IS else (item,)
     expected = operator is not CollectionOperator.CONTAINS
     result = family(operator=operator, value=operand).evaluate("")
     assert result.is_success and result.value is expected
@@ -62,16 +93,16 @@ def test_empty_lists_are_empty_collections(family, value_type, item, operator):
     [
         ("is", "Straße; BLUE", ("STRASSE", "blue"), True),
         ("is", " A ; B", ("A", "B"), False),
-        ("contains", "AB; C", "A", False),
-        ("contains", "A; B", "a", True),
-        ("does not contain", "AB; C", "A", True),
-        ("does not contain", "A; B", "a", False),
-        ("contains", "; A", "", True),
+        ("contains", "AB; C", ("A",), False),
+        ("contains", "A; B", ("a",), True),
+        ("does not contain", "AB; C", ("A",), True),
+        ("does not contain", "A; B", ("a",), False),
+        ("contains", "; A", ("",), True),
         ("is", "; A", ("", "A"), True),
         ("is", "A; ", ("A", ""), True),
         # A flattened empty read is interpreted as []; [""] cannot be recovered.
         ("is", "", ("",), False),
-        ("contains", "", "", False),
+        ("contains", "", ("",), False),
     ],
 )
 def test_string_list_items_use_text_casefold_and_significant_whitespace(operator, raw, operand, expected):
@@ -81,7 +112,7 @@ def test_string_list_items_use_text_casefold_and_significant_whitespace(operator
 @pytest.mark.parametrize("operator", ["is", "contains", "does not contain"])
 def test_integer_lists_preserve_adjacent_values_above_float_precision(operator):
     large = 2**53 + 1
-    operand = (large,) if operator == "is" else large
+    operand = (large,)
     test = IntegerListTest(operator=operator, value=operand)
     assert test.evaluate(str(large)).value is (operator != "does not contain")
     assert test.evaluate(str(large - 1)).value is (operator == "does not contain")
@@ -100,7 +131,7 @@ def test_integer_lists_preserve_adjacent_values_above_float_precision(operator):
     ],
 )
 def test_real_list_comparisons_share_scalar_tolerance(operator, raw, operand, equal):
-    value = (operand,) if operator.requires_collection else operand
+    value = (operand,)
     result = RealListTest(operator=operator, value=value).evaluate(raw)
     assert result.is_success
     assert result.value is (not equal if operator is CollectionOperator.DOES_NOT_CONTAIN else equal)
@@ -124,11 +155,12 @@ def test_real_list_comparisons_share_scalar_tolerance(operator, raw, operand, eq
 )
 @pytest.mark.parametrize("operator", list(CollectionOperator))
 def test_every_numeric_item_is_parsed_even_after_a_matching_item(family, bad, operator):
-    test = family(operator=operator, value=(2,) if operator.requires_collection else 2)
+    test = family(operator=operator, value=(2,))
     raw = f"2; {bad}"
     result = test.evaluate(raw)
     assert result.is_error
     assert repr(raw) in result.error.message
+    assert family(operator=operator, value=()).evaluate(raw).is_error
 
 
 @pytest.mark.parametrize("family, value_type, item", FAMILIES)
@@ -146,7 +178,7 @@ def test_list_discovery_resolves_one_typed_family(family, value_type, item, sour
 def test_real_lists_support_every_measure_without_new_test_types(measure):
     details = property_details(propertyCollectionType="List", propertyMeasureType=measure)
     assert RealListTest.accepts(details)
-    RealListTest(operator="contains", value=2).validate_for(details)
+    RealListTest(operator="contains", value=(2,)).validate_for(details)
 
 
 @pytest.mark.parametrize(
@@ -161,28 +193,27 @@ def test_real_lists_support_every_measure_without_new_test_types(measure):
     ],
 )
 @pytest.mark.parametrize("operator", list(CollectionOperator))
-def test_real_list_inputs_preserve_units_in_both_operand_shapes(measure, unit, guidance, operator):
+def test_real_list_inputs_preserve_item_units_for_every_operator(measure, unit, guidance, operator):
     info = PropertyInfo(
         property_details(propertyCollectionType="List", propertyMeasureType=measure), Registry.from_union(PropertyTest)
     )
     schema = info.test_schema()
-    for branch in schema["properties"]["value"]["anyOf"]:
-        item_schema = branch["items"] if branch["type"] == "array" else branch
-        assert item_schema.get("x-unit") == unit
-        assert item_schema.get("description") == guidance
-        if unit is None:
-            assert "x-unit" not in item_schema and "description" not in item_schema
+    item_schema = schema["properties"]["value"]["items"]
+    assert item_schema.get("x-unit") == unit
+    assert item_schema.get("description") == guidance
+    if unit is None:
+        assert "x-unit" not in item_schema and "description" not in item_schema
 
     inputs = info.describe_test_inputs({"operator": operator.value})
     value_schema = next(item.schema for item in inputs.fields if item.name == "value")
-    operand_schema = value_schema["items"] if operator.requires_collection else value_schema
+    operand_schema = value_schema["items"]
     assert operand_schema.get("x-unit") == unit
     assert operand_schema.get("description") == guidance
-    value = (1.25, 2.5) if operator.requires_collection else 1.25
+    value = (1.25, 2.5)
     assert info.create_test(operator=operator, value=value).model_dump(mode="json") == {
         "kind": "real_list",
         "operator": operator.value,
-        "value": [1.25, 2.5] if operator.requires_collection else 1.25,
+        "value": [1.25, 2.5],
     }
 
 
@@ -193,16 +224,15 @@ def test_real_list_unit_annotations_do_not_leak_between_fields_or_into_model_sch
     length_inputs = length.describe_test_inputs({"operator": "is"})
     length_inputs.fields[1].schema["items"]["x-unit"] = "changed"
 
-    assert length.test_schema()["properties"]["value"]["anyOf"][1]["items"]["x-unit"] == "m"
-    assert angle.describe_test_inputs({"operator": "contains"}).fields[1].schema["x-unit"] == "°"
-    for branch in RealListTest.model_json_schema()["properties"]["value"]["anyOf"]:
-        item_schema = branch["items"] if branch["type"] == "array" else branch
-        assert "x-unit" not in item_schema and "description" not in item_schema
+    assert length.test_schema()["properties"]["value"]["items"]["x-unit"] == "m"
+    assert angle.describe_test_inputs({"operator": "contains"}).fields[1].schema["items"]["x-unit"] == "°"
+    item_schema = RealListTest.model_json_schema()["properties"]["value"]["items"]
+    assert "x-unit" not in item_schema and "description" not in item_schema
 
 
 @pytest.mark.parametrize("family, value_type, item", FAMILIES)
 def test_list_families_reject_scalar_and_other_item_types(family, value_type, item):
-    test = family(operator="contains", value=item)
+    test = family(operator="contains", value=(item,))
     scalar = property_details(propertyValueType=value_type)
     assert not family.accepts(scalar)
     with pytest.raises(InvalidPropertyTestError):
@@ -230,21 +260,22 @@ def test_list_families_reject_scalar_and_other_item_types(family, value_type, it
         (RealListTest, -float("inf")),
     ],
 )
-def test_list_item_types_are_strict_in_scalar_and_collection_operands(family, value):
-    for operator, operand in (("contains", value), ("is", (value,))):
+def test_list_item_types_are_strict_for_every_operator(family, value):
+    for operator in CollectionOperator:
         with pytest.raises(ValidationError):
-            family(operator=operator, value=operand)
+            family(operator=operator, value=(value,))
 
 
 @pytest.mark.parametrize("family, value_type, item", FAMILIES)
-def test_list_operand_shape_is_operator_specific_in_models_and_json_schema(family, value_type, item):
+def test_list_operators_require_collections_in_models_and_json_schema(family, value_type, item):
     schema = family.model_json_schema()
     validator = Draft202012Validator(schema)
-    for operator, value in (("is", item), ("contains", [item]), ("does not contain", [])):
-        data = {"operator": operator, "value": value}
-        assert not validator.is_valid(data)
-        with pytest.raises(ValidationError):
-            family.model_validate(data)
+    for operator in CollectionOperator:
+        for value in (item, [[item]], {}):
+            data = {"operator": operator.value, "value": value}
+            assert not validator.is_valid(data)
+            with pytest.raises(ValidationError):
+                family.model_validate(data)
     for operator in ("is not", "available", "is undefined"):
         assert operator not in family.operators()
         with pytest.raises(ValidationError):
@@ -257,16 +288,15 @@ def test_typed_list_schemas_drafts_and_queries_agree(family, value_type, item, o
     info = PropertyInfo(
         property_details(propertyCollectionType="List", propertyValueType=value_type), Registry.from_union(PropertyTest)
     )
-    value = [item, item] if operator.requires_collection else item
+    value = [item, item]
     data = {"operator": operator.value, "value": value}
     schema_before = json.dumps(info.test_schema(), sort_keys=True)
     description = info.describe_test_inputs(data)
     operand = description.fields[1].schema
     item_type = {"String": "string", "Integer": "integer", "Real": "number"}[value_type]
-    assert operand["type"] == ("array" if operator.requires_collection else item_type)
-    if operator.requires_collection:
-        assert operand["items"]["type"] == item_type
-        assert not operand.get("uniqueItems", False)
+    assert operand["type"] == "array"
+    assert operand["items"]["type"] == item_type
+    assert not operand.get("uniqueItems", False)
     test = info.create_test(**data)
     query = Query(where=PropertyPredicate(field_id=info.property_id, test=test))
     payload = query.model_dump(mode="json")
@@ -284,7 +314,7 @@ def test_typed_list_schemas_drafts_and_queries_agree(family, value_type, item, o
 @pytest.mark.parametrize("family, value_type, item", FAMILIES)
 @pytest.mark.parametrize("error", [PropertyUnavailableError("unavailable"), PropertyUndefinedError("undefined")])
 def test_missing_property_states_remain_false_for_negative_membership(family, value_type, item, error):
-    test = family(operator="does not contain", value=item)
+    test = family(operator="does not contain", value=(item,))
     result = evaluate_property(test, BatchSlot.failure(error))
     assert result.is_success and result.value is False
 
@@ -306,10 +336,10 @@ def test_mixed_list_queries_share_one_si_read_and_preserve_errors_and_alignment(
     query = Query(
         where=AllOf(
             items=(
-                PropertyPredicate(field_id=STRINGS, test=StringListTest(operator="contains", value="a")),
+                PropertyPredicate(field_id=STRINGS, test=StringListTest(operator="contains", value=("a", "b"))),
                 PropertyPredicate(field_id=INTEGERS, test=IntegerListTest(operator="is", value=(1, 2, 1))),
-                PropertyPredicate(field_id=REALS, test=RealListTest(operator="contains", value=30)),
-                PropertyPredicate(field_id=REALS, test=RealListTest(operator="does not contain", value=1)),
+                PropertyPredicate(field_id=REALS, test=RealListTest(operator="contains", value=(30, 0))),
+                PropertyPredicate(field_id=REALS, test=RealListTest(operator="does not contain", value=(1, 2))),
             )
         )
     )
