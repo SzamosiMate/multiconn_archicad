@@ -221,33 +221,38 @@ saved combination; current layer visibility, locking, wireframe, intersection
 groups, and other view settings do not affect the test. Execution never activates
 a combination or changes project settings.
 
-Discovery captures `GetAttributesByType` headers once per required attribute
-type. Execution reuses these snapshots, batches all selected combinations into
-one `GetLayerCombinations` call, and resolves the union of their visible layer
-GUIDs with one Tapir `GetLayers(fields=[])` call, returning only GUID/index/name
-headers. This works on Archicad 27, where the
-official `API.GetAttributesIndices` command may be unavailable. `FilterElements.layerIndices`
-provides element membership once per distinct nonempty layer-index set. Empty
-sets skip filtering. Layer metadata and visibility/index read failures are
-query-wide failures; they are never interpreted as negative matches.
+Discovery captures `GetAttributesByType` headers for reference validation and
+editor choices. Execution reuses discovered layer headers when available and
+reads the built-in `GeneralElemProperties / LayerIndex` Integer property in one
+batch through the normal property-reading utility. Its SDK property GUID is
+`a74b66a1-629a-4807-83ac-5fff0553a3ac`; the official property-name lookup does not
+expose this technical definition on the verified Archicad 27 instances.
+Canonical reads return integer strings, which are parsed exactly with `int()`.
+Per-element API errors, unavailable/undefined values, malformed integer strings,
+and indices missing from the layer catalogue remain evaluation errors, including
+for negative tests. No element-details projection or custom response adapter is
+needed.
+
+Combination predicates load all saved combinations and their visible layer
+GUIDs in one batch, shared by every combination predicate in the query. Loading
+all combinations keeps this first implementation independent of query operators;
+combination-name text tests run during evaluation. Layer metadata and whole
+command failures remain query-wide errors. Empty populations validate references
+without reading element properties or combination visibility. Execution uses neither
+`FilterElements.layerIndices` nor `API.GetAttributesIndices` for layer criteria.
 
 The public `LayerAttribute(guid, index, name)` snapshot record and `LayerInfo`,
 `LayerNameInfo`, `LayerCombinationInfo`, `LayerCombinationNameInfo` descriptors
 also support offline catalogues through `QueryFieldCatalogue(fields=[...])`.
 
-Internally, selection and comparison belong to the query models. GUID tests
-select an attribute by identity and apply `is`/`is not` to the resulting element
-membership. Name predicates adapt `TextTest` to attribute names before membership
-is loaded; their final evaluation is just membership, with no second negation.
+Sources load raw data only: element layer indices, layer names and GUIDs, and
+saved combination visibility. Each predicate reads the actual element layer from
+that context and applies its test in `evaluate()`. Layer Name calls
+`TextTest.evaluate(layer.name)` directly. Layer Combination Name applies its text
+test to the names of combinations in which the element's layer is visible and
+requires any match. No query comparison runs during preparation or loading, and
+there are no selection callbacks, request models, or cached predicate answers.
 
-Predicates supply an attribute type and a selection function. A small immutable
-request record keeps these together with a stable selection key and any supplied
-metadata snapshot, allowing the batch builder to share equivalent requests.
-There is no request hierarchy or selector protocol. The source invokes the
-selection function and resolves either layer indices or combination visibility,
-according to the Archicad attribute type. It does not inspect predicate kinds,
-operators, or concrete test classes. Supplied snapshots avoid duplicate reads;
-direct prepare/build callers can let the source load the missing headers.
 
 ## Validation
 
