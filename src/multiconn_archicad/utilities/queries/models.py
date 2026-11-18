@@ -10,7 +10,7 @@ Neither performs API reads.
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from collections.abc import Mapping, Sequence
+from collections.abc import Mapping
 from enum import StrEnum
 from math import isclose, isfinite
 from typing import TYPE_CHECKING, Annotated, Any, ClassVar, Literal, Self, TypeAlias, assert_never, cast
@@ -30,7 +30,7 @@ from multiconn_archicad.utilities.results.batch_results import BatchError, Batch
 from multiconn_archicad.utilities.results.property_errors import PropertyUnavailableError, PropertyUndefinedError
 
 from .context import ContextBuilder, EvaluationContext
-from .errors import InvalidFieldTestError, InvalidPropertyTestError
+from .errors import InvalidPropertyTestError
 from .inputs import InputAvailability
 from .operators import (
     BooleanOperator,
@@ -41,8 +41,8 @@ from .operators import (
     NumberOperator,
     TextOperator,
 )
-from .sources import CLASSIFICATION_FIELDS, CLASSIFICATION_VALUES, LAYER_MEMBERSHIP, PROPERTY_VALUES, TYPE_MEMBERSHIP
-from .layer_data import LayerAttribute, LayerRequest
+from .sources import (CLASSIFICATION_FIELDS, CLASSIFICATION_VALUES, ATTRIBUTE_CHOICES, ELEMENT_LAYER_INDICES, LAYER_COMBINATIONS, PROPERTY_VALUES, TYPE_MEMBERSHIP)
+from .layer_data import LayerAttribute
 from .validation import FieldCheck, QueryValidationContext, QueryValidationIssue
 from .versioning import QUERY_SCHEMA_VERSION
 
@@ -750,35 +750,35 @@ class ElementTypeTest(TestModel):
 
 
 class _AttributeIdentityTest(TestModel):
-    """Select one attribute by GUID and compare its resulting membership."""
+    """Compare a GUID choice using equality or inequality."""
 
     operator: GuidOperator
     value: UUID
-
-    def select_attributes(self, attributes: Sequence[LayerAttribute]) -> tuple[LayerAttribute, ...]:
-        selected = tuple(item for item in attributes if item.guid == self.value)
-        if not selected:
-            raise InvalidFieldTestError(f"Selected attribute {self.value} is not present in the project")
-        return selected
 
     def evaluate_membership(self, matched: bool) -> BatchSlot[bool]:
         return BatchSlot.success(matched if self.operator is GuidOperator.IS else not matched)
 
 
 class LayerTest(_AttributeIdentityTest):
-    """Select one project layer by attribute GUID."""
+    """Compare the actual layer GUID with the selected layer."""
 
     kind: Literal["layer"] = "layer"
 
+    def evaluate(self, layer_guid: UUID) -> BatchSlot[bool]:
+        return self.evaluate_membership(layer_guid == self.value)
+
 
 class LayerCombinationTest(_AttributeIdentityTest):
-    """Select the visible layers of one saved combination by attribute GUID."""
+    """Compare an element's layer with saved combination visibility."""
 
     kind: Literal["layer_combination"] = "layer_combination"
 
+    def evaluate(self, layer_guid: UUID, visible_layers: frozenset[UUID]) -> BatchSlot[bool]:
+        return self.evaluate_membership(layer_guid in visible_layers)
 
-class _LayerPredicate(_QueryModel, ABC):
-    """Share field validation and source preparation, without dispatch by kind."""
+
+class _LayerPredicate(_QueryModel):
+    """Load raw layer data; concrete predicates apply comparisons in evaluate()."""
 
     kind: str
     test: TestModel
@@ -795,78 +795,89 @@ class _LayerPredicate(_QueryModel, ABC):
     def field_references(self) -> tuple[Mapping[str, object], ...]:
         return ({"kind": self.kind},)
 
-    @abstractmethod
-    def _select_attributes(self, attributes: Sequence[LayerAttribute]) -> tuple[LayerAttribute, ...]: ...
-
-    def _request(self, attributes: tuple[LayerAttribute, ...] | None = None) -> LayerRequest:
-        return LayerRequest(self._attribute_type, self.test, self._select_attributes, attributes)
-
     def prepare(self, builder: ContextBuilder, *, fields: QueryFieldCatalogue | None = None) -> None:
-        attributes = None
-        if fields is not None:
+        builder.require(ELEMENT_LAYER_INDICES, None)
+        builder.require(ATTRIBUTE_CHOICES, AttributeType.LAYER)
+        if self._attribute_type is AttributeType.LAYER_COMBINATION:
+            builder.require(LAYER_COMBINATIONS, None)
+        elif fields is not None:
             field = fields.resolve({"kind": self.kind})
-            if field is None:
-                raise ValueError(f"Expected validated metadata for {self.kind}")
-            attributes = cast("_LayerFieldInfo[Any]", field).attributes
-        builder.require(LAYER_MEMBERSHIP, self._request(attributes))
+            if field is not None:
+                attributes = cast("_LayerFieldInfo[Any]", field).attributes
+                builder.provide(ATTRIBUTE_CHOICES, AttributeType.LAYER, {item.index: item for item in attributes})
 
-    def _matches(self, context: EvaluationContext, element_id: UUID) -> bool:
-        return element_id in context.data(LAYER_MEMBERSHIP)[self._request()]
-
-
-class _LayerIdentityPredicate(_LayerPredicate):
-    test: _AttributeIdentityTest
-
-    def _select_attributes(self, attributes: Sequence[LayerAttribute]) -> tuple[LayerAttribute, ...]:
-        return self.test.select_attributes(attributes)
-
-    def evaluate(self, context: EvaluationContext, element_id: UUID, *, path: str = "where") -> BatchSlot[bool]:
-        return self.test.evaluate_membership(self._matches(context, element_id))
+    def _layer(self, context: EvaluationContext, element_id: UUID, path: str) -> BatchSlot[LayerAttribute]:
+        index = context.data(ELEMENT_LAYER_INDICES)[None][element_id]
+        if index.is_error:
+            return BatchSlot.failure(BatchError.aggregate((index.error,), context=f"{path}.test (element layer)"))
+        layer = context.data(ATTRIBUTE_CHOICES)[AttributeType.LAYER].get(index.value)
+        if layer is None:
+            return BatchSlot.failure(f"{path}.test: Layer index {index.value} is absent from project metadata")
+        return BatchSlot.success(layer)
 
 
-class _LayerNamePredicate(_LayerPredicate):
-    test: TextTest
-
-    def _select_attributes(self, attributes: Sequence[LayerAttribute]) -> tuple[LayerAttribute, ...]:
-        return tuple(item for item in attributes if self.test.evaluate(item.name).value)
-
-    def evaluate(self, context: EvaluationContext, element_id: UUID, *, path: str = "where") -> BatchSlot[bool]:
-        # The text test has already selected attribute names, including negatives.
-        return BatchSlot.success(self._matches(context, element_id))
-
-
-class LayerPredicate(_LayerIdentityPredicate):
-    """Match elements assigned to the selected layer."""
+class LayerPredicate(_LayerPredicate):
+    """Compare each element's actual layer with a selected layer GUID."""
 
     kind: Literal["layer"] = "layer"
     test: LayerTest
-
     _attribute_type = AttributeType.LAYER
 
+    def evaluate(self, context: EvaluationContext, element_id: UUID, *, path: str = "where") -> BatchSlot[bool]:
+        layer = self._layer(context, element_id, path)
+        if layer.is_error:
+            return BatchSlot.failure(layer.error)
+        return self.test.evaluate(layer.value.guid)
 
-class LayerNamePredicate(_LayerNamePredicate):
-    """Match elements whose layer name passes a text comparison."""
+
+class LayerNamePredicate(_LayerPredicate):
+    """Apply a text test directly to each element's layer name."""
 
     kind: Literal["layer_name"] = "layer_name"
-
+    test: TextTest
     _attribute_type = AttributeType.LAYER
 
+    def evaluate(self, context: EvaluationContext, element_id: UUID, *, path: str = "where") -> BatchSlot[bool]:
+        layer = self._layer(context, element_id, path)
+        if layer.is_error:
+            return BatchSlot.failure(layer.error)
+        return self.test.evaluate(layer.value.name)
 
-class LayerCombinationPredicate(_LayerIdentityPredicate):
-    """Match elements on layers visible in the selected saved combination."""
+
+class LayerCombinationPredicate(_LayerPredicate):
+    """Compare each element's layer with one saved combination's visibility."""
 
     kind: Literal["layer_combination"] = "layer_combination"
     test: LayerCombinationTest
-
     _attribute_type = AttributeType.LAYER_COMBINATION
 
+    def evaluate(self, context: EvaluationContext, element_id: UUID, *, path: str = "where") -> BatchSlot[bool]:
+        layer = self._layer(context, element_id, path)
+        if layer.is_error:
+            return BatchSlot.failure(layer.error)
+        combination = context.data(LAYER_COMBINATIONS)[None][self.test.value]
+        return self.test.evaluate(layer.value.guid, combination.visible_layers)
 
-class LayerCombinationNamePredicate(_LayerNamePredicate):
-    """Match visibility in any combination whose name passes the text test."""
+
+class LayerCombinationNamePredicate(_LayerPredicate):
+    """Test names of combinations in which the element's layer is visible."""
 
     kind: Literal["layer_combination_name"] = "layer_combination_name"
-
+    test: TextTest
     _attribute_type = AttributeType.LAYER_COMBINATION
+
+    def evaluate(self, context: EvaluationContext, element_id: UUID, *, path: str = "where") -> BatchSlot[bool]:
+        layer = self._layer(context, element_id, path)
+        if layer.is_error:
+            return BatchSlot.failure(layer.error)
+        combinations = context.data(LAYER_COMBINATIONS)[None]
+        return BatchSlot.success(
+            any(
+                self.test.evaluate(combination.name).value
+                for combination in combinations.values()
+                if layer.value.guid in combination.visible_layers
+            )
+        )
 
 
 class ElementTypePredicate(_QueryModel):

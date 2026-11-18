@@ -34,7 +34,7 @@ from .fields import (
     LayerCombinationInfo,
     LayerCombinationNameInfo,
 )
-from .sources import ATTRIBUTE_CHOICES
+from .sources import read_attribute_choices
 from .registry import TestRegistry
 from .errors import UnsupportedPropertyTypeError
 from .versioning import require_query_tapir_version
@@ -129,7 +129,7 @@ def discover_query_catalogue(
     ):
         selected = [model for model in field_models if model._kind in layer_kinds]
         if selected:
-            attributes = ATTRIBUTE_CHOICES.load(api, (), (attribute_type,))[attribute_type]
+            attributes = read_attribute_choices(api, attribute_type)
             fields.extend(model(attributes) for model in selected)
     return QueryFieldCatalogue(catalogues, fields=fields, browse_ids_by_kind=browse_ids_by_kind)
 
@@ -159,12 +159,13 @@ def discover_referenced_catalogue(
     layer_kinds: set[str] = set()
     for reference in references:
         key = _reference_key(reference)
-        if key is not None and key[0] in LAYER_FIELD_KINDS:
-            layer_kinds.add(key[0])
-        if key is not None:
-            kind, field_id = key
-            if field_id is not None:
-                ids_by_kind.setdefault(kind, {}).setdefault(field_id, None)
+        if key is None:
+            continue
+        kind, field_id = key
+        if kind in LAYER_FIELD_KINDS:
+            layer_kinds.add(kind)
+        if field_id is not None:
+            ids_by_kind.setdefault(kind, {}).setdefault(field_id, None)
     return discover_query_catalogue(
         api,
         property_ids=tuple(ids_by_kind.get("property", ())),

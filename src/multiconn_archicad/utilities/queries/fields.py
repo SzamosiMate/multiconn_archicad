@@ -32,7 +32,7 @@ from .models import (
     PropertyTestModel,
     TestModel,
 )
-from .layer_data import LayerAttribute, attribute_choices
+from .layer_data import LayerAttribute
 from .registry import TestRegistry
 
 TestT = TypeVar("TestT", bound=TestModel)
@@ -201,7 +201,7 @@ class _LayerFieldInfo(FieldInfo[TestT]):
     _name: str
 
     def __init__(self, attributes: Sequence[LayerAttribute]):
-        self._attributes = attribute_choices(attributes)
+        self._attributes = tuple(attributes)
 
     @property
     def attributes(self) -> tuple[LayerAttribute, ...]:
