@@ -827,7 +827,7 @@ wheels = [
 
 [[package]]
 name = "multiconn-archicad"
-version = "0.9.8"
+version = "0.10.0"
 source = { editable = "." }
 dependencies = [
     { name = "archicad" },
