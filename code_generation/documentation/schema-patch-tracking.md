@@ -1,6 +1,47 @@
 # Active Tapir schema refinements
 
-Client target: **Tapir 2.0.0**. Released documentation checked: **2026-11-10**. The active operations live in [the patch source](../shared/schema_patching.py). The dated sections below preserve the candidate batches at their stated baselines. See the [2.0.0 adoption record](reports/codegen/tapir-2.0.0.md) for released definitions, compatibility aliases and follow-up.
+Client target: **Tapir 2.0.1**. Released documentation checked: **2026-11-24**. The active operations live in [the patch source](../shared/schema_patching.py). The dated sections below preserve the candidate batches at their stated baselines. See the [2.0.1 adoption record](reports/codegen/tapir-2.0.1.md) for released definitions, compatibility aliases and follow-up.
+
+## Tapir 2.0.1 adoption — 2026-11-23
+
+The released documentation supplies `DimensionMarker`, `RoofPivotEdgeChange`,
+`CurtainWallFrameObjectType`, `StairBaseLineEdge`, `StairBaseLineVertex`,
+`LibraryPartParameterValueList`, `ElementTrimPair` and `LabelTextDirection` at
+their reviewed consumers. Retire 12 Temporary operations, including the obsolete
+SI backport helper; retarget three existing Temporary extractions to the released
+marker enum, roof edge level item and library parameter list item. The checked-in
+2.0.0 outputs already contain the SI option and default, despite the stale helper.
+Preserve seven old Python names through [compatibility aliases](../shared/model_aliases.py).
+The marker adopts optional fields, positive size and pen bounds; roof edge updates
+gain optional surface/fill overrides. These are released contract changes, not
+claims that all retired contracts were identical.
+
+Add 24 Permanent item-naming operations in the existing creation/modification
+lists and 168 Temporary naming/sharing operations. Expanded active inventory:
+112 Permanent, 721 Temporary and seven Breaking source-review operations; no
+existing operation changes category. Conditional-variant and backport helper
+calls each count as one operation. Unchanged inventory is 88 Permanent, 550
+Temporary and seven Breaking source-review operations.
+
+The new Temporary candidates name inline success/input records, distinguish
+read/write enums with different accepted values, preserve existing public enum
+identities, and share equivalent field-readback, Model View Options, railing,
+dimension and stair contracts. `RoofLevel` keeps both complete coordinate pairs
+through named `anyOf` branches. Exact source paths and consumers are in the final
+reason groups in [the patch source](../shared/schema_patching.py). Retire these
+calls only when released documentation supplies equivalent named definitions
+and references, preserving requiredness, constraints, enum values, additional
+properties and union alternatives; keep aliases if released names differ.
+The 24 Permanent operations extend the established item-naming policy and are
+not part of this new upstream recommendation batch.
+
+Retain the seven object-type source-review corrections below: the released
+2.0.1 input still omits those types. The `FavoriteContents.classifications`
+wrapped/direct-ID question remains unresolved. The shared released linear
+`DimensionMarker` also leaves read fields optional although its description
+says reads return all fields; follow the released contract pending a separate
+source review. No implementation source was inspected and no upstream proposal
+was submitted in this update.
 
 ## Tapir 2.0.0 adoption — 2026-11-10
 
@@ -14,6 +55,9 @@ Seven Breaking source-review calls add the object type to closed records with re
 
 ## SI property-read backport — 2026-11-13
 
+**Retired in the Tapir 2.0.1 update.** The checked-in 2.0.0 schemas and models
+already had the released option; only the obsolete patch helper survived.
+
 The element-query branch backports only `GetPropertyValuesOfElements.useSIUnits`
 and the `PropertyValue` description from `origin/update-to-tapir-2.0.0` at
 `e7be637`. `backport_property_si_units()` keeps the pinned 1.8 schema reproducible
@@ -21,10 +65,9 @@ for that field. The new optional flag has no client/schema default, preserving
 omission for existing callers on older Tapir; explicit `False` is still forwarded.
 Query reads request `True`, with angle operands in degrees and other quantities in SI.
 
-Remove the helper and its call when adopting the 2.0.0 schema, which already
-defines the field. Preserve the omission behavior when resolving the generated
-parameter/client defaults. The patch deliberately raises if the upstream field
-already exists so release adoption cannot silently retain this backport.
+The helper and its call were removed after checking the released field and its
+consumers. The shipped default-valued-field serializer preserves omission for
+ordinary calls; this retirement introduces no new default-policy migration.
 
 ## Classification assignment response correction — 2026-11-01
 

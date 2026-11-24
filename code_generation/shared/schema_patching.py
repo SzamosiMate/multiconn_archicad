@@ -214,6 +214,13 @@ def apply_permanent_patches(master_defs: dict[str, Any]):
 
     # --- 1. Fix array element names (e.g., ZonesDatum -> ZoneData) ---
     creation_data_types = {
+        "Create3DDocumentsParameters": ("documentsData", "Document3DData"),
+        "CreateAngleDimensionsParameters": ("angleDimensionsData", "AngleDimensionData"),
+        "CreateCameraSetsParameters": ("cameraSets", "CameraSetData"),
+        "CreateCamerasParameters": ("cameras", "CameraData"),
+        "CreateChangeMarkersParameters": ("changeMarkersData", "ChangeMarkerData"),
+        "CreatePicturesParameters": ("picturesData", "PictureData"),
+        "CreateRadialDimensionsParameters": ("radialDimensionsData", "RadialDimensionData"),
         "CreateColumnsParameters": ("columnsData", "ColumnData"),
         "CreateSlabsParameters": ("slabsData", "SlabData"),
         "CreatePolylinesParameters": ("polylinesData", "PolylineData"),
@@ -289,6 +296,23 @@ def apply_permanent_patches(master_defs: dict[str, Any]):
         extract_inline_schema(master_defs, parent_model, [field_name, "items"], new_model_name)
 
     element_modification_datatypes = {
+        "ModifyAngleDimensionsParameters": ("angleDimensionsWithDetails", "AngleDimensionWithDetails"),
+        "ModifyCameraSetsParameters": ("cameraSets", "CameraSetModificationData"),
+        "ModifyCamerasParameters": ("cameras", "CameraModificationData"),
+        "ModifyChangeMarkersParameters": ("changeMarkersWithDetails", "ChangeMarkerWithDetails"),
+        "ModifyCurtainWallPanelsParameters": ("panelsWithDetails", "CurtainWallPanelWithDetails"),
+        "ModifyHatchesParameters": ("hatchesWithDetails", "HatchWithDetails"),
+        "ModifyLayersParameters": ("layers", "LayerModificationData"),
+        "ModifyPicturesParameters": ("picturesWithDetails", "PictureWithDetails"),
+        "ModifyPolylinesParameters": ("polylinesWithDetails", "PolylineWithDetails"),
+        "RecreateAngleDimensionsParameters": ("angleDimensions", "AngleDimensionRecreationData"),
+        "RecreateCurtainWallsParameters": ("curtainWalls", "CurtainWallRecreationData"),
+        "RecreateDoorsParameters": ("doors", "DoorRecreationData"),
+        "RecreateRailingsParameters": ("railings", "RailingRecreationData"),
+        "RecreateSkylightsParameters": ("skylights", "SkylightRecreationData"),
+        "RecreateStairsParameters": ("stairs", "StairRecreationData"),
+        "RecreateWindowsParameters": ("windows", "WindowRecreationData"),
+        "RecreateZonesParameters": ("zones", "ZoneRecreationData"),
         "ModifyWallsParameters": ("wallsWithDetails", "WallWithDetails"),
         "ModifyBeamsParameters": ("beamsWithDetails", "BeamWithDetails"),
         "ModifySlabsParameters": ("slabsWithDetails", "SlabWithDetails"),
@@ -358,26 +382,9 @@ def apply_breaking_source_review_patches(master_defs: dict[str, Any]):
     require_object_type(master_defs, "IsLibraryPartSubtypeOfResult", ["results", "items"], variant=0)
 
 
-def backport_property_si_units(master_defs: dict[str, Any]) -> None:
-    """Keep the focused Tapir 2.0.0 read backport when regenerating the 1.8 client."""
-    properties = master_defs["GetPropertyValuesOfElementsParameters"]["properties"]
-    if "useSIUnits" in properties:
-        raise ValueError("useSIUnits is already upstream; remove the SI backport patch when adopting Tapir 2.0.0.")
-    properties["useSIUnits"] = {
-        "type": "boolean",
-        "description": "Returns precise, locale-independent numeric strings in SI units, except degrees for angles. Default is false.",
-    }
-    # No schema default: existing clients omit the new flag, including on older Tapir.
-    master_defs["PropertyValue"]["description"] = (
-        "The string value of a property, formatted according to the command's options."
-    )
-
-
 def apply_temporary_patches(master_defs: dict[str, Any]):
     """Named extractions and shared contracts pending released upstream adoption."""
     print("Applying temporary schema patches (pending upstream named definitions and sharing)...")
-
-    backport_property_si_units(master_defs)
 
     # Preserve public names for hotlink, Teamwork and marker inline schemas.
     extract_inline_schema(master_defs, "ChangeHotlinkNodesParameters", ["hotlinkNodes", "items"], "HotlinkNodeChange")
@@ -831,21 +838,13 @@ def apply_temporary_patches(master_defs: dict[str, Any]):
     replace_inline_schema_with_ref(master_defs, "AssociativeDimensionWithDetails", ["defaultWitnessForm"], "DimensionWitnessForm", preserve_description=True)  # fmt: skip
     extract_inline_enum(master_defs, "DimensionData", ["defaultWitnessForm"], "DimensionWitnessFormOrUnknown")
     replace_inline_schema_with_ref(master_defs, "DimensionDetails", ["defaultWitnessForm"], "DimensionWitnessFormOrUnknown", preserve_description=True)  # fmt: skip
-    extract_inline_schema(master_defs, "AssociativeDimensionData", ["marker"], "DimensionMarkerUpdate")
-    extract_inline_enum(master_defs, "DimensionMarkerUpdate", ["type"], "DimensionMarkerType")
-    replace_inline_schema_with_ref(master_defs, "AssociativeDimensionOnSectionData", ["marker"], "DimensionMarkerUpdate", preserve_description=True)  # fmt: skip
-    replace_inline_schema_with_ref(master_defs, "AssociativeDimensionWithDetails", ["marker"], "DimensionMarkerUpdate", preserve_description=True)  # fmt: skip
-    replace_inline_schema_with_ref(master_defs, "WallThicknessDimensionData", ["marker"], "DimensionMarkerUpdate", preserve_description=True)  # fmt: skip
-    extract_inline_schema(master_defs, "DimensionData", ["marker"], "DimensionMarker")
-    replace_inline_schema_with_ref(master_defs, "DimensionMarker", ["type"], "DimensionMarkerType", preserve_description=True)  # fmt: skip
-    replace_inline_schema_with_ref(master_defs, "DimensionDetails", ["marker"], "DimensionMarker", preserve_description=True)  # fmt: skip
+    extract_inline_enum(master_defs, "DimensionMarker", ["type"], "DimensionMarkerType")
     extract_inline_schema(master_defs, "FavoriteDefaults", ["marker"], "FavoriteDefaultMarker")
     extract_inline_schema(master_defs, "RoofDetails", ["pivotEdges", "items"], "RoofPivotEdge")
     extract_inline_schema(master_defs, "RoofPivotEdge", ["levels", "items"], "RoofPivotEdgeLevel")
     extract_inline_enum(master_defs, "RoofPivotEdgeLevel", ["angleType"], "RoofPivotEdgeAngleType")
     extract_inline_enum(master_defs, "RoofDetails", ["cutBodyType"], "RoofCutBodyType")
-    extract_inline_schema(master_defs, "RoofWithDetails", ["pivotEdges", "items"], "RoofPivotEdgeUpdate")
-    extract_inline_schema(master_defs, "RoofPivotEdgeUpdate", ["levels", "items"], "RoofPivotEdgeLevelUpdate")
+    extract_inline_schema(master_defs, "RoofPivotEdgeChange", ["levels", "items"], "RoofPivotEdgeLevelUpdate")
     replace_inline_schema_with_ref(master_defs, "RoofPivotEdgeLevelUpdate", ["angleType"], "RoofPivotEdgeAngleType", preserve_description=True)  # fmt: skip
     extract_inline_schema(master_defs, "RoofWithDetails", ["pivotLine"], "RoofPivotLineUpdate")
     extract_inline_enum(master_defs, "RoofEdgeTrim", ["trimType"], "RoofEdgeTrimType")
@@ -857,11 +856,8 @@ def apply_temporary_patches(master_defs: dict[str, Any]):
     extract_inline_enum(master_defs, "SkylightData", ["fixMode"], "SkylightFixMode")
     replace_inline_schema_with_ref(master_defs, "SkylightDetails", ["fixMode"], "SkylightFixMode", preserve_description=True)  # fmt: skip
     extract_inline_schema(master_defs, "CurtainWallFrameWithDetails", ["frameContour"], "CurtainWallFrameContourUpdate")
-    extract_inline_enum(master_defs, "CurtainWallFrameWithDetails", ["type"], "CurtainWallFrameTypeUpdate")
-    extract_inline_schema(master_defs, "StairData", ["baseLineEdges", "items"], "StairBaselineEdgeData")
     extract_inline_schema(master_defs, "StairDetails", ["baseLineEdges", "items"], "StairBaselineEdgeDetails")
     extract_inline_enum(master_defs, "StairBaselineEdgeDetails", ["segmentType"], "StairBaselineSegmentTypeOrUnknown")
-    extract_inline_schema(master_defs, "StairData", ["baseLineVertices", "items"], "StairBaselineVertexData")
     extract_inline_schema(master_defs, "StairDetails", ["baseLineVertices", "items"], "StairBaselineVertexDetails")
     extract_inline_enum(master_defs, "StairBaselineVertexDetails", ["turnType"], "StairBaselineTurnTypeOrUnknown")
     extract_inline_schema(master_defs, "StairWithDetails", ["treads", "items"], "StairTreadUpdate")
@@ -980,7 +976,7 @@ def apply_temporary_patches(master_defs: dict[str, Any]):
     extract_inline_schema(master_defs, "LibraryOfLibraryPart", ["library"], "LibraryPartLocation")
     extract_inline_schema(master_defs, "LibraryPartDetails", ["library"], "LibraryPartLibraryDetails")
     extract_inline_schema(master_defs, "LibraryPartDetails", ["gsmObject", "scripts"], "LibraryPartObjectScriptAvailability")  # fmt: skip
-    extract_inline_schema(master_defs, "LibraryPartParameterValues", ["parameters", "items"], "LibraryPartParameterValue")  # fmt: skip
+    extract_inline_schema(master_defs, "LibraryPartParameterValueList", ["items"], "LibraryPartParameterValue")
     extract_inline_enum(master_defs, "LibraryPartParameterValue", ["type"], "LibraryPartParameterValueType")
     extract_inline_schema(master_defs, "MEPFlexibleSegmentPolyline", ["items"], "MEPFlexibleSegmentPolylinePart")
     extract_inline_enum(master_defs, "MEPFlexibleSegmentPolylinePart", ["type"], "MEPFlexibleSegmentPolylinePartType")
@@ -1012,3 +1008,188 @@ def apply_temporary_patches(master_defs: dict[str, Any]):
     extract_union_variant(master_defs, "InterpretAutoTextsResult", ["values", "items"], 0, "InterpretedAutoText")
     extract_inline_schema(master_defs, "LibraryPartSections", ["sections", "items"], "LibraryPartSection")
     extract_inline_schema(master_defs, "ResolveNamesParameters", ["names", "items"], "NameToResolve")
+
+    # Give inline records their domain and role.
+    extract_inline_schema(master_defs, 'ChangeLayoutSubsetSettingsParameters', ['subsets', 'items'], 'LayoutSubsetSettingsChange')  # fmt: skip
+    extract_union_variant(master_defs, 'ChangeLayoutSubsetSettingsResult', ['subsets', 'items'], 0, 'ChangedLayoutSubset')  # fmt: skip
+    extract_inline_schema(master_defs, 'GetElementFieldDefinitionsResult', ['fields', 'items'], 'ElementFieldDefinition')  # fmt: skip
+    extract_union_variant(master_defs, 'GetElementFieldsResult', ['elementFields', 'items'], 0, 'ElementFieldValues')  # fmt: skip
+    replace_union_variant_with_ref(master_defs, 'GetFieldsOfElementDefaultsResult', ['fieldsOfElementDefaults', 'items'], 0, 'ElementFieldValues')  # fmt: skip
+    extract_inline_schema(master_defs, 'SetFieldsOfElementDefaultsParameters', ['fieldsOfElementDefaults', 'items'], 'ToolDefaultFieldsUpdate')  # fmt: skip
+    extract_inline_schema(master_defs, 'SetElementFieldsParameters', ['elementsWithFields', 'items'], 'ElementFieldsUpdate')  # fmt: skip
+    extract_inline_schema(master_defs, 'SetCategoryValuesOfDefaultsParameters', ['categoryValues', 'items'], 'DefaultCategoryValueData')  # fmt: skip
+    extract_inline_schema(master_defs, 'RebuildMEPRoutingElementsParameters', ['routingElements', 'items'], 'MEPRoutingElementRebuildData')  # fmt: skip
+    extract_union_variant(master_defs, 'RebuildMEPRoutingElementsResult', ['elements', 'items'], 0, 'RebuiltMEPRoutingElement')  # fmt: skip
+    extract_inline_schema(master_defs, 'RebuiltMEPRoutingElement', ['guidMap', 'items'], 'MEPRoutingRebuildGuidMapItem')  # fmt: skip
+    extract_inline_schema(master_defs, "ProfileData", ["renameProfileModifiers", "items"], "ProfileModifierRename")
+    extract_inline_schema(master_defs, 'ProfileData', ['newProfileModifiers', 'items'], 'ProfileModifierCreationData')  # fmt: skip
+    extract_inline_schema(master_defs, "ProfileData", ["stretchZones"], "ProfileStretchZonesData")
+    extract_inline_schema(master_defs, "RoofWithDetails", ["contourPolygon"], "RoofContourPolygonUpdate")
+    extract_inline_schema(master_defs, 'SetInteriorElevationsDetailsParameters', ['interiorElevationsWithDetails', 'items'], 'InteriorElevationWithDetails')  # fmt: skip
+    extract_union_variant(master_defs, 'GetTypedPropertyValuesOfElementsResult', ['propertyValuesForElements', 'items'], 0, 'TypedPropertyValuesForElement')  # fmt: skip
+    extract_inline_schema(master_defs, "StairBoundary", ["edges", "items"], "StairBoundaryEdge")
+    extract_inline_schema(master_defs, 'StairStructureVisibilitySettings', ['stories', 'items'], 'StairStoryVisibilitySettings')  # fmt: skip
+    extract_inline_schema(master_defs, 'StairStoryVisibilitySettings', ['structures', 'items'], 'StairStructureLineVisibility')  # fmt: skip
+    extract_inline_schema(master_defs, 'StairStoryVisibilitySettings', ['fills', 'items'], 'StairStructureFillVisibility')  # fmt: skip
+    extract_inline_schema(master_defs, 'StairStoryVisibilitySettings', ['monolithParts', 'items'], 'StairMonolithPartVisibility')  # fmt: skip
+    extract_inline_schema(master_defs, "ViewOptions", ["modelViewOptions"], "ModelViewOptions")
+    replace_inline_schema_with_ref(master_defs, 'ViewOptionsUpdate', ['modelViewOptions'], 'ModelViewOptions', preserve_description=True)  # fmt: skip
+    extract_union_variant(master_defs, 'GetRailingSegmentPatternsResult', ['railings', 'items'], 0, 'RailingSegmentPatternsResult')  # fmt: skip
+    extract_inline_schema(master_defs, 'RailingSegmentPatternsResult', ['segments', 'items'], 'RailingSegmentPattern')  # fmt: skip
+    extract_inline_schema(master_defs, "RailingSegmentPattern", ["instances"], "RailingPatternInstances")
+    extract_inline_schema(master_defs, 'ModifyRailingsParameters', ['railingsWithDetails', 'items', 'segments', 'items'], 'RailingSegmentUpdate')  # fmt: skip
+    extract_inline_schema(master_defs, "RailingSegmentUpdate", ["toprail"], "RailingToprailUpdate")
+    extract_inline_schema(master_defs, "RailingSegmentUpdate", ["rails", "items"], "RailingRailUpdate")
+    extract_inline_schema(master_defs, "RailingSegmentUpdate", ["handrails", "items"], "RailingHandrailUpdate")
+    extract_inline_schema(master_defs, "RailingSegmentUpdate", ["innerPosts", "items"], "RailingInnerPostUpdate")
+    extract_inline_schema(master_defs, "RailingSegmentUpdate", ["panels", "items"], "RailingPanelUpdate")
+    extract_inline_schema(master_defs, 'RailingSegmentUpdate', ['balusterSets', 'items'], 'RailingBalusterSetUpdate')  # fmt: skip
+    extract_inline_schema(master_defs, "RailingSegmentUpdate", ["pattern"], "RailingPatternUpdate")
+    extract_inline_schema(master_defs, "RailingPatternUpdate", ["panel"], "RailingPatternPanelUpdate")
+    extract_inline_schema(master_defs, "RailingPatternUpdate", ["balusterSet"], "RailingPatternBalusterSetUpdate")
+    extract_inline_schema(master_defs, "RailingPatternUpdate", ["innerPost"], "RailingPatternInnerPostUpdate")
+    extract_inline_schema(master_defs, 'ModifyRailingsParameters', ['railingsWithDetails', 'items', 'nodes', 'items'], 'RailingNodeUpdate')  # fmt: skip
+    extract_inline_schema(master_defs, "RailingNodeUpdate", ["posts", "items"], "RailingPostUpdate")
+    extract_inline_schema(master_defs, "RailingNodeUpdate", ["post"], "RailingNodePostUpdate")
+
+    # Keep distinct enums from displacing existing public names.
+    extract_inline_enum(master_defs, "AssemblySegmentLength", ["lengthType"], "AssemblySegmentLengthType")
+    extract_inline_enum(master_defs, "ChangeMarkerDetails", ["linkType"], "ChangeMarkerLinkType")
+    extract_inline_enum(master_defs, "CurtainWallAccessoryDetails", ["category"], "CurtainWallAccessoryCategory")
+    extract_inline_enum(master_defs, "CurtainWallJunctionDetails", ["category"], "CurtainWallJunctionCategory")
+    extract_inline_enum(master_defs, "DimensionWitnessPointText", ["content"], "DimensionWitnessTextContent")
+    extract_inline_enum(master_defs, "CoordinateWitnessPoint", ["content"], "DimensionWitnessPointContent")
+    extract_inline_enum(master_defs, "DimensionElevationMarker", ["arrowAngle"], "DimensionElevationArrowAngle")
+    extract_inline_enum(master_defs, "ElementFieldDefinition", ["kind"], "ElementFieldKind")
+    extract_inline_enum(master_defs, "SubsetData", ["numberingStyle"], "NumberingStyle")
+    extract_inline_enum(master_defs, "LevelDimensionData", ["textContent"], "LevelDimensionTextContent")
+    extract_inline_enum(master_defs, "LineArrowhead", ["type"], "LineArrowheadType")
+    extract_inline_enum(master_defs, "ProfileAreaMethod", ["type"], "ProfileAreaMethodType")
+    extract_inline_enum(master_defs, "ProfileModifierAnchor", ["type"], "ProfileModifierAnchorType")
+    extract_inline_enum(master_defs, "ProfileModifierEdge", ["direction"], "ProfileModifierEdgeDirection")
+    extract_inline_enum(master_defs, "RadialDimensionData", ["textPosition"], "RadialDimensionTextPosition")
+    extract_inline_enum(master_defs, "RadialDimensionData", ["textDirection"], "RadialDimensionTextDirection")
+    extract_inline_enum(master_defs, 'RadialDimensionDetails', ['textPosition'], 'RadialDimensionTextPositionOrUnknown')  # fmt: skip
+    extract_inline_enum(master_defs, 'RadialDimensionDetails', ['textDirection'], 'RadialDimensionTextDirectionOrUnknown')  # fmt: skip
+    extract_inline_enum(master_defs, "RadialDimensionDetails", ["textContent"], "RadialDimensionTextContent")
+    extract_inline_enum(master_defs, "RailingDistribution", ["type"], "RailingDistributionType")
+    extract_inline_enum(master_defs, "RailingDistribution", ["alignment"], "RailingDistributionAlignment")
+    extract_inline_enum(master_defs, 'RailingRailConnectionDetails', ['connectionType'], 'RailingRailConnectionType')  # fmt: skip
+    extract_inline_enum(master_defs, 'RailingRailConnectionDetails', ['baseConnection'], 'RailingRailConnectionBase')  # fmt: skip
+    extract_inline_enum(master_defs, "RailingRailEndDetails", ["endType"], "RailingRailEndType")
+    extract_inline_enum(master_defs, 'RailingRailEndDetails', ['fixtureConnection'], 'RailingRailEndFixtureConnection')  # fmt: skip
+    extract_inline_enum(master_defs, "RailingRailEndDetails", ["arcAngleMode"], "RailingRailEndArcAngleMode")
+    extract_inline_enum(master_defs, 'RailingRailEndDetails', ['secondExtrusionMode'], 'RailingRailEndSecondExtrusionMode')  # fmt: skip
+    extract_inline_enum(master_defs, "MEPRoutingRebuildGuidMapItem", ["kind"], "MEPRoutingRebuildGuidKind")
+    extract_inline_enum(master_defs, "RecreateNotCarriedOver", ["relation"], "RecreatedElementLostRelation")
+    extract_inline_enum(master_defs, "RoofDetails", ["overhangType"], "RoofOverhangType")
+    extract_inline_enum(master_defs, "RoofWithDetails", ["segmentType"], "RoofSegmentType")
+    replace_inline_schema_with_ref(master_defs, 'RoofDetails', ['segmentType'], 'RoofSegmentType', preserve_description=True)  # fmt: skip
+    extract_inline_enum(master_defs, "RoofWithDetails", ["cutBodyType"], "RoofCutBodyTypeUpdate")
+    extract_inline_enum(master_defs, "ShellDetails", ["segmentType"], "ShellSegmentType")
+    extract_inline_enum(master_defs, "SlabEdgeTrim", ["trimType"], "SlabEdgeTrimType")
+    extract_inline_enum(master_defs, "StairBaseLineEdge", ["segmentType"], "SegmentType")
+    extract_inline_enum(master_defs, "StairDetails", ["baselinePosition"], "StairBaselinePositionOrUnknown")
+    extract_inline_enum(master_defs, "StairDetails", ["stairDisplayType"], "StairDisplayType")
+    extract_inline_enum(master_defs, "StairHeadroom", ["method"], "StairHeadroomMethod")
+    extract_inline_enum(master_defs, "StairRiserDetails", ["riserPosition"], "StairRiserPosition")
+    extract_inline_enum(master_defs, "StairStructureDetails", ["role"], "StairStructureRoleOrUnknown")
+    extract_inline_enum(master_defs, "StairStructureDetails", ["side"], "StairStructureSideOrUnknown")
+    extract_inline_enum(master_defs, "StairStructureDetails", ["structureType"], "StairStructureTypeOrUnknown")
+    extract_inline_enum(master_defs, "StairStructureDetails", ["bottomType"], "StairStructureBottomTypeOrUnknown")
+    extract_inline_enum(master_defs, "StairStructureDraining", ["side"], "StairDrainingSide")
+    extract_inline_enum(master_defs, "StairStructureSymbolSettings", ["structureType"], "StairSymbolStructureType")
+    extract_inline_enum(master_defs, 'StairDetails', ['walkingLineSymbolPosition'], 'StairWalkingLineSymbolPosition')  # fmt: skip
+    extract_inline_schema(master_defs, "StairDetails", ["uniformLeftRightSideSupports"], "StairUniformSideSupports")
+    extract_inline_enum(master_defs, "StairSideStructure", ["heightMeasure"], "StairSideStructureHeightMeasure")
+    extract_inline_enum(master_defs, 'StairStoryVisibilitySettings', ['relevantStories'], 'StairVisibilityStoryRange')  # fmt: skip
+    extract_inline_enum(master_defs, "StairStructureLineVisibility", ["structure"], "StairLineStructureType")
+    extract_inline_enum(master_defs, "ZoneDetails", ["boundaryMethod"], "ZoneBoundaryMethod")
+    extract_inline_enum(master_defs, 'ApplyFavoritesToElementsParameters', ['settingGroups', 'items'], 'FavoriteSettingGroup')  # fmt: skip
+    extract_inline_enum(master_defs, "StairRiserData", ["role"], "Role")
+    extract_inline_enum(master_defs, "StairRiserData", ["position"], "Position")
+    extract_inline_enum(master_defs, "StairRiserData", ["crossSection"], "CrossSection")
+    extract_inline_enum(master_defs, "StairTreadData", ["nosingType"], "NosingType")
+    extract_inline_enum(master_defs, "StairStructureData", ["side"], "Side")
+    extract_inline_enum(master_defs, "StairStructureData", ["bottomType"], "BottomType")
+    extract_inline_enum(master_defs, "StairData", ["walkingLinePosition"], "WalkingLinePosition")
+    extract_inline_enum(master_defs, "StairData", ["numberingType"], "NumberingType")
+    extract_inline_enum(master_defs, "StairData", ["inputDirection"], "InputDirection")
+    extract_inline_enum(master_defs, "StairData", ["stairDisplayType"], "StairDisplayTypeInput")
+    extract_inline_enum(master_defs, "StairLayout", ["breakLineAngleType"], "BreakLineAngleType")
+    extract_inline_enum(master_defs, "StairLayout", ["breakLinePositionType"], "BreakLinePositionType")
+    extract_inline_enum(master_defs, "ShellData", ["morphingRule"], "MorphingRule")
+    extract_inline_enum(master_defs, "ShellWithDetails", ["cutBodyType"], "ShellCutBodyTypeUpdate")
+
+    # Keep write enums narrower than readback enums, preserving readback Unknown states.
+    extract_inline_enum(master_defs, 'AssemblySegmentLengthModification', ['lengthType'], 'AssemblySegmentLengthTypeInput')  # fmt: skip
+    extract_inline_enum(master_defs, "ChangeMarkerWithDetails", ["linkType"], "ChangeMarkerLinkTypeInput")
+
+    # Share equivalent contracts after their named producers.
+    replace_inline_schema_with_ref(master_defs, 'LayoutSubsetSettingsData', ['numberingStyle'], 'NumberingStyle', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'LevelDimensionData', ['secondTextContent'], 'LevelDimensionTextContent', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'LevelDimensionDetails', ['textContent'], 'LevelDimensionTextContent', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'LevelDimensionDetails', ['secondTextContent'], 'LevelDimensionTextContent', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'RailingDistributionChange', ['type'], 'RailingDistributionType', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'RailingDistributionChange', ['alignment'], 'RailingDistributionAlignment', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'RailingRailEndDetails', ['baseConnection'], 'RailingRailConnectionBase', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'ShellWithDetails', ['segmentType'], 'ShellSegmentType', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'ShellWithDetails', ['morphingRule'], 'MorphingRule', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'ShellDetails', ['morphingRule'], 'MorphingRule', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'StairDetails', ['walkingLinePosition'], 'WalkingLinePosition', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'StairDetails', ['numberingType'], 'NumberingType', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'StairDetails', ['inputDirection'], 'InputDirection', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'StairData', ['walkingLineSymbolPosition'], 'StairWalkingLineSymbolPosition', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'StairWithDetails', ['walkingLineSymbolPosition'], 'StairWalkingLineSymbolPosition', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'StairWithDetails', ['walkingLinePosition'], 'WalkingLinePosition', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'StairWithDetails', ['numberingType'], 'NumberingType', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'StairWithDetails', ['inputDirection'], 'InputDirection', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'StairWithDetails', ['stairDisplayType'], 'StairDisplayTypeInput', preserve_description=True)  # fmt: skip
+    extract_inline_enum(master_defs, "StairLayoutSettings", ["storyVisibility"], "StairStoryVisibilityInput")
+    extract_inline_enum(master_defs, "StairLayoutSettings", ["breakLineAngleType"], "StairBreakLineAngleTypeInput")
+    extract_inline_enum(master_defs, 'StairLayoutSettings', ['breakLinePositionType'], 'StairBreakLinePositionTypeInput')  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'StairRiserPartSettings', ['role'], 'Role', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, "StairRiserUpdate", ["role"], "Role", preserve_description=True)
+    replace_inline_schema_with_ref(master_defs, "StairTreadData", ["role"], "Role", preserve_description=True)
+    replace_inline_schema_with_ref(master_defs, 'StairTreadPartSettings', ['role'], 'Role', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, "StairTreadUpdate", ["role"], "Role", preserve_description=True)
+    replace_inline_schema_with_ref(master_defs, "StairStructureData", ["role"], "Role", preserve_description=True)
+    replace_inline_schema_with_ref(master_defs, "StairStructureUpdate", ["role"], "Role", preserve_description=True)
+    replace_inline_schema_with_ref(master_defs, 'StairRiserPartSettings', ['crossSection'], 'CrossSection', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'StairRiserUpdate', ['crossSection'], 'CrossSection', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'StairRiserPartSettings', ['position'], 'Position', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'StairRiserUpdate', ['position'], 'Position', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'StairTreadPartSettings', ['nosingType'], 'NosingType', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'StairTreadUpdate', ['nosingType'], 'NosingType', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, "StairStructureUpdate", ["side"], "Side", preserve_description=True)
+    replace_inline_schema_with_ref(master_defs, 'StairStructureUpdate', ['bottomType'], 'BottomType', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'StairStructureDrainingSettings', ['side'], 'StairDrainingSide', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'StairStructureFillVisibility', ['structureType'], 'StairSymbolStructureType', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'StairSideStructureSettings', ['heightMeasure'], 'StairSideStructureHeightMeasure', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'ModifyLevelDimensionsParameters', ['levelDimensionsWithDetails', 'items', 'textContent'], 'LevelDimensionTextContent', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'ModifyLevelDimensionsParameters', ['levelDimensionsWithDetails', 'items', 'secondTextContent'], 'LevelDimensionTextContent', preserve_description=True)  # fmt: skip
+
+    replace_inline_schema_with_ref(master_defs, "StairRiserDetails", ["role"], "Role", preserve_description=True)
+    replace_inline_schema_with_ref(master_defs, "StairTreadDetails", ["role"], "Role", preserve_description=True)
+    replace_inline_schema_with_ref(master_defs, 'StairRiserDetails', ['crossSection'], 'CrossSection', preserve_description=True)  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'StairTreadDetails', ['nosingType'], 'NosingType', preserve_description=True)  # fmt: skip
+
+    # Name new scalar roles without displacing existing enum contracts.
+    extract_inline_enum(master_defs, "DimensionTextPlacement", ["method"], "DimensionTextPlacementMethod")
+    extract_inline_enum(master_defs, "InsertStoryParameters", ["position"], "StoryInsertionPosition")
+    extract_inline_enum(master_defs, "ElementFieldDefinition", ["type"], "ElementFieldJsonType")
+    extract_inline_enum(master_defs, "StairStructureDraining", ["surfaceType"], "StairDrainingSurfaceType")
+    replace_inline_schema_with_ref(master_defs, 'StairStructureDrainingSettings', ['surfaceType'], 'StairDrainingSurfaceType', preserve_description=True)  # fmt: skip
+    extract_inline_enum(master_defs, 'InteriorElevationDetails', ['showOnStories'], 'InteriorElevationStoryVisibility')  # fmt: skip
+    replace_inline_schema_with_ref(master_defs, 'InteriorElevationSettableDetails', ['showOnStories'], 'InteriorElevationStoryVisibility', preserve_description=True)  # fmt: skip
+    extract_inline_schema(master_defs, "RadialDimensionDetails", ["marker"], "RadialDimensionMarker")
+    replace_inline_schema_with_ref(master_defs, 'RadialDimensionMarker', ['type'], 'DimensionMarkerType', preserve_description=True)  # fmt: skip
+
+    # Name conditional alternatives without losing required fields.
+    name_required_variants(master_defs, "RoofLevel", [], ["RoofLevelWithLevelHeight", "RoofLevelWithHeight"])
+
+    # Model View Options reads and updates expose the same extensible settings contract.
+    replace_inline_schema_with_ref(master_defs, "ModelViewOptionDetails", ["modelViewOptions"], "ModelViewOptions", preserve_description=True)  # fmt: skip
+
+    # Layout subset reads and writes use the existing public numbering enum.
+    replace_inline_schema_with_ref(master_defs, "LayoutSubsetSettings", ["numberingStyle"], "NumberingStyle", preserve_description=True)  # fmt: skip

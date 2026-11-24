@@ -1,5 +1,6 @@
 import inspect
-from typing import get_type_hints, is_typeddict
+from typing import get_type_hints
+from typing_extensions import is_typeddict
 import pytest
 from pydantic import BaseModel
 

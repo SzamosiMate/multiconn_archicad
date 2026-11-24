@@ -24,7 +24,9 @@ class APIModel(*_bases):
     model_config = ConfigDict(**_merged_config)
 
     @model_serializer(mode="wrap")
-    def _preserve_defaulted_literals(self, handler: Any, info: Any) -> Any:
+    # A return annotation replaces the model's serialization JSON Schema with
+    # that return type. Leave it inferred so Pydantic retains the field schemas.
+    def _preserve_defaulted_literals(self, handler: Any, info: Any):
         data = handler(self)
         if not info.exclude_defaults or not isinstance(data, dict):
             return data

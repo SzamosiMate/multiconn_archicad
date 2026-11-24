@@ -2,6 +2,7 @@ import ast
 import json
 import re
 from code_generation.tapir.paths import tapir_paths
+from code_generation.shared.conditional_models import CONDITIONAL_OBJECT_MODELS, conditional_object_variants
 
 
 def main():
@@ -15,6 +16,8 @@ def main():
     # Apply the necessary cleaning steps.
     content = fix_root_model_unions_to_type_alias(content)
     content = restore_collapsed_named_unions(content)
+    content = restore_open_object_configs(content)
+    content = configure_conditional_objects(content)
     content = remove_guid_pattern(content)
     content = remove_redundant_model_configs(content)
     content = assemble_final_file(content)
@@ -79,6 +82,19 @@ def restore_collapsed_named_unions(content: str) -> str:
             return is_object_variant(variant["$ref"], seen | {name})
         return False
 
+    def variant_types(variant: dict) -> list[str]:
+        if set(variant) == {"$ref"}:
+            ref = variant["$ref"]
+            return [ref.rsplit("/", 1)[-1]] if isinstance(ref, str) and ref.startswith("#/$defs/") else []
+        # Only unconstrained primitive branches can be rendered directly. Leave
+        # constrained or inline object branches to datamodel-codegen.
+        if set(variant) - {"type", "description", "title"}:
+            return []
+        types = variant.get("type")
+        types = types if isinstance(types, list) else [types]
+        primitives = {"number": "float", "integer": "int", "boolean": "bool", "string": "str", "null": "None"}
+        return [primitives[t] for t in types] if types and all(t in primitives for t in types) else []
+
     for name, definition in definitions.items():
         if name in existing_names or not isinstance(definition, dict):
             continue
@@ -89,11 +105,17 @@ def restore_collapsed_named_unions(content: str) -> str:
         if not isinstance(variants, list) or not variants:
             continue
         refs = [variant.get("$ref") for variant in variants if isinstance(variant, dict) and set(variant) == {"$ref"}]
-        if len(refs) != len(variants) or not all(isinstance(ref, str) and ref.startswith("#/$defs/") for ref in refs):
+        rendered = [variant_types(variant) if isinstance(variant, dict) else [] for variant in variants]
+        if not all(rendered):
             continue
-        if "type" in definition and (definition["type"] != "object" or not all(is_object_variant(ref) for ref in refs)):
+        if "type" in definition and (
+            definition["type"] != "object"
+            or len(refs) != len(variants)
+            or not all(is_object_variant(ref) for ref in refs)
+        ):
             continue
-        aliases.append(f"{name}: TypeAlias = {' | '.join(ref.rsplit('/', 1)[-1] for ref in refs)}")
+        members = list(dict.fromkeys(member for branch in rendered for member in branch))
+        aliases.append(f"{name}: TypeAlias = {' | '.join(members)}")
 
     if aliases:
         print(f"    - Restored {len(aliases)} collapsed named union aliases.")
@@ -101,6 +123,102 @@ def restore_collapsed_named_unions(content: str) -> str:
     else:
         print("    - No collapsed named union aliases needed restoring.")
     return content
+
+
+def restore_open_object_configs(content: str) -> str:
+    """Preserve unconstrained object data instead of inheriting APIModel's extra-ignore policy."""
+    definitions = json.loads(tapir_paths.MASTER_SCHEMA_OUTPUT.read_text(encoding="utf-8"))["$defs"]
+    open_names = {
+        name
+        for name, schema in definitions.items()
+        if schema.get("type") == "object"
+        and not schema.get("properties")
+        and schema.get("additionalProperties", True) is True
+        and not any(key in schema for key in ("oneOf", "anyOf", "allOf", "$ref"))
+    }
+    lines = content.splitlines(keepends=True)
+    edits = []
+    for node in ast.parse(content).body:
+        if not isinstance(node, ast.ClassDef) or node.name not in open_names:
+            continue
+        if not any(isinstance(base, ast.Name) and base.id == "APIModel" for base in node.bases):
+            continue
+        configs = [
+            field
+            for field in node.body
+            if isinstance(field, ast.Assign)
+            and any(isinstance(target, ast.Name) and target.id == "model_config" for target in field.targets)
+        ]
+        if configs:
+            if ast.unparse(configs[0].value) != "ConfigDict(extra='allow')":
+                raise ValueError(f"Review unexpected model_config on open object {node.name}")
+            continue
+        edits.append((node.end_lineno, '    model_config = ConfigDict(extra="allow")\n'))
+    for line, addition in reversed(edits):
+        lines.insert(line, addition)
+    return "".join(lines)
+
+
+def configure_conditional_objects(content: str) -> str:
+    """Emit common types, native required-field subclasses and adapter bindings."""
+    definitions = json.loads(tapir_paths.MASTER_SCHEMA_OUTPUT.read_text(encoding="utf-8"))["$defs"]
+    classes = {node.name: node for node in ast.parse(content).body if isinstance(node, ast.ClassDef)}
+    lines = content.splitlines(keepends=True)
+    edits = []
+    for parent, helpers in CONDITIONAL_OBJECT_MODELS.items():
+        variants = conditional_object_variants(definitions, parent, helpers)
+        names = [parent, *variants]
+        missing = set(names) - classes.keys()
+        if missing:
+            raise ValueError(f"Missing concrete conditional models: {sorted(missing)}")
+        for name in names:
+            node = classes[name]
+            if len(node.bases) != 1 or ast.unparse(node.bases[0]) != "APIModel":
+                raise ValueError(f"Expected generated APIModel class for {name}")
+            for item in list(node.body):
+                if isinstance(item, ast.Assign) and any(
+                    isinstance(target, ast.Name) and target.id == "model_config" for target in item.targets
+                ):
+                    if ast.unparse(item.value) != "ConfigDict(extra='forbid')":
+                        raise ValueError(f"Unexpected model_config on conditional model {name}")
+                    node.body.remove(item)
+                if isinstance(item, ast.AnnAssign) and isinstance(item.value, ast.Call):
+                    call = item.value
+                    # Keyword defaults preserve Pydantic constructor inference in type checkers.
+                    if isinstance(call.func, ast.Name) and call.func.id == "Field" and call.args:
+                        default = call.args.pop(0)
+                        if not (isinstance(default, ast.Constant) and default.value is Ellipsis):
+                            call.keywords.insert(0, ast.keyword(arg="default", value=default))
+        base = classes[parent]
+        base.bases = [ast.Name(id="UnionModel")]
+        base_fields = {
+            field.target.id: ast.dump(field, include_attributes=False)
+            for field in base.body
+            if isinstance(field, ast.AnnAssign) and isinstance(field.target, ast.Name)
+        }
+        blocks = [ast.unparse(base)]
+        for name, fields in variants.items():
+            node = classes[name]
+            node.bases = [ast.Name(id=parent)]
+            differences = [
+                field
+                for field in node.body
+                if isinstance(field, ast.AnnAssign)
+                and isinstance(field.target, ast.Name)
+                and ast.dump(field, include_attributes=False) != base_fields.get(field.target.id)
+            ]
+            node.body = [ast.Expr(value=ast.Constant("Requires " + ", ".join(fields) + ".")), *differences]
+            blocks.append(ast.unparse(node))
+        blocks.append(f"bind_variants({parent}, {' | '.join(variants)})")
+        # Bind before any consumer captures the parent's placeholder core schema.
+        first = min(classes[name].lineno for name in names)
+        for name in names:
+            node = classes[name]
+            replacement = "\n\n\n".join(blocks) + "\n" if node.lineno == first else ""
+            edits.append((node.lineno - 1, node.end_lineno, replacement))
+    for start, end, replacement in sorted(edits, reverse=True):
+        lines[start:end] = [replacement]
+    return "".join(lines)
 
 
 def remove_guid_pattern(code: str) -> str:
@@ -215,6 +333,8 @@ def assemble_final_file(content: str) -> str:
     body = re.sub(r"^(from|import).*\n", "", body, flags=re.MULTILINE)
 
     pydantic_import = "from pydantic import Field"
+    if re.search(r"\bConfigDict\b", body):
+        pydantic_import += ", ConfigDict"
     if re.search(r"\bRootModel\b", body):
         pydantic_import += ", RootModel"
 
@@ -222,10 +342,11 @@ def assemble_final_file(content: str) -> str:
         "from __future__ import annotations",
         "from typing import Any, Literal, Annotated, TypeAlias",
         "from uuid import UUID",
-        "from enum import Enum",
+        "from enum import Enum, IntEnum",
         pydantic_import,
         "",
         "from multiconn_archicad.models.base import APIModel",
+        "from multiconn_archicad.models.union import UnionModel, bind_variants",
         "",
         "### This file is automatically generated and surgically cleaned. Do not edit directly. ###",
     ]

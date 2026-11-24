@@ -1,15 +1,18 @@
 from datamodel_code_generator import DataModelType, InputFileType, LiteralType, TargetPydanticVersion, generate
 from datamodel_code_generator.format import Formatter
+import json
 
+from code_generation.shared.conditional_models import prepare_model_schema
 from code_generation.tapir.paths import tapir_paths
 
 CUSTOM_BASE_CLASS = "multiconn_archicad.models.base.APIModel"
 
 
 def main() -> None:
+    schema = json.loads(tapir_paths.MASTER_SCHEMA_OUTPUT.read_text(encoding="utf-8"))
     print("Generating Pydantic models")
     generate(
-        tapir_paths.MASTER_SCHEMA_OUTPUT,
+        json.dumps(prepare_model_schema(schema, pydantic=True)),
         input_file_type=InputFileType.JsonSchema,
         schema_version="2019-09",
         output=tapir_paths.RAW_PYDANTIC_MODELS,
@@ -34,7 +37,7 @@ def main() -> None:
 
     print("Generating Typed Dicts")
     generate(
-        tapir_paths.MASTER_SCHEMA_OUTPUT,
+        json.dumps(prepare_model_schema(schema, pydantic=False)),
         input_file_type=InputFileType.JsonSchema,
         schema_version="2019-09",
         output=tapir_paths.RAW_TYPED_DICTS,
